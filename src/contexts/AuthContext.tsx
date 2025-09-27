@@ -24,7 +24,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.warn('Auth check timeout - setting loading to false');
             setLoading(false);
           }
-        }, 5000); // 5 second timeout
+        }, 3000); // 3 second timeout - more aggressive
 
         const { user: currentUser, error } = await authService.getCurrentUser();
         

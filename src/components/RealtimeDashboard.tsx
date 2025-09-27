@@ -38,16 +38,10 @@ interface LiveJob {
   assignedWorker: string;
   startedAt: Date;
   estimatedCompletion: Date;
-}
-
+};
   const [stats, setStats] = useState<RealtimeStats>({
   const [liveJobs, setLiveJobs] = useState<LiveJob[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
-  const [lastPing, setLastPing] = useState<Date>(new Date());
-  useEffect(() => {
-  useEffect(() => {
-  useEffect(() => {
-const RealtimeDashboard: React.FC = () => {
+const Component: React.FC = () => {
     activeJobs: 0,
     completedJobs: 0,
     totalWorkers: 0,

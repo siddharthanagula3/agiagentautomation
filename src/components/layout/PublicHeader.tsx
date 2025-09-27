@@ -4,9 +4,7 @@ import { Button } from '../ui/button';
 import { ThemeToggle } from '../ui/theme-toggle';
 import { Bot, Menu, X } from 'lucide-react';
 import { useState } from 'react';
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-const PublicHeader: React.FC = () => {
+const Component: React.FC = () => {
 
   return (
     <header className="bg-background border-b">

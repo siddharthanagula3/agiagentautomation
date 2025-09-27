@@ -28,18 +28,9 @@ import type { Database } from '../../integrations/supabase/types';
 
 type Job = Database['public']['Tables']['jobs']['Row'];
 type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
-
-
-  const [loading, setLoading] = useState(true);
+const Component: React.FC = () => {
   const [error, setError] = useState('');
-  const [stats, setStats] = useState({
-  const [recentJobs, setRecentJobs] = useState<Job[]>([]);
-  const [aiEmployees, setAiEmployees] = useState<AIAgent[]>([]);
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  const loadDashboardData = useCallback(async () => {
-  useEffect(() => {
-  useEffect(() => {
-const Dashboard: React.FC = () => {
+const Component: React.FC = () => {
   const { user } = useAuth();
     aiEmployees: 0,
     activeJobs: 0,

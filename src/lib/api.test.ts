@@ -49,8 +49,8 @@ describe('APIClient', () => {
     })
 
     it('makes successful POST request with data', async () => {
-      const requestData = { name: 'New Item' }
-      const responseData = { id: 2, ...requestData }
+      const requestData = { name: 'New Item' };
+  const responseData = { id: 2, ...requestData }
       mockFetch.mockResolvedValue(mockApiResponse(responseData))
 
       const result = await;

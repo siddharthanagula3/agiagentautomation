@@ -5,8 +5,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
 import LoadingSpinner from '../ui/loading-spinner';
-
-  const [formData, setFormData] = useState({
+const Component: React.FC = () => {
   const [error, setError] = useState('');
 const LoginForm: React.FC = () => {
     email: '',
@@ -15,15 +14,13 @@ const LoginForm: React.FC = () => {
   });
 
   const { login, loading } = useAuth();
-  const navigate = useNavigat;
-  e();
+  const navigate = useNavigate();
   const location = useLocatio;
   n();
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
 
-  const handleSubmit = asyn;
-  c (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     console.log('🚀 LoginForm: Starting login attempt');

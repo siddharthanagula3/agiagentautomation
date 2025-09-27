@@ -20,8 +20,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/auth-hooks';
-
-  const [loading, setLoading] = useState(true);
+const Component: React.FC = () => {
   const [error, setError] = useState('');
   useEffect(() => {
 const SimpleDashboard: React.FC = () => {

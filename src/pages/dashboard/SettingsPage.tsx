@@ -5,7 +5,6 @@ import { Button } from '../../components/ui/button';
 import { Loader2 } from 'lucide-react';
 
 const SettingsPage: React.FC = () => {
-  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<unknown[]>([]);

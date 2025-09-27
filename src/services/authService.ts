@@ -60,6 +60,45 @@ class AuthService {
         .single();
 
       if (profileError) {
+        // If profile doesn't exist, create one
+        if (profileError.code === 'PGRST116') {
+          console.log('Creating user profile for:', data.user.email);
+          const { data: newProfile, error: createError } = await supabase
+            .from('users')
+            .insert({
+              id: data.user.id,
+              email: data.user.email || '',
+              name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User',
+              role: 'user',
+              is_active: true,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+          if (createError || !newProfile) {
+            return { user: null, error: 'Failed to create user profile' };
+          }
+          
+          // Use the newly created profile
+          const authUser: AuthUser = {
+            id: newProfile.id,
+            email: newProfile.email,
+            name: newProfile.name,
+            avatar: newProfile.avatar,
+            role: newProfile.role,
+            created_at: newProfile.created_at,
+            updated_at: newProfile.updated_at,
+            last_login: newProfile.last_login,
+            is_active: newProfile.is_active,
+            preferences: newProfile.preferences,
+            phone: newProfile.phone,
+            location: newProfile.location,
+          };
+
+          return { user: authUser, error: null };
+        }
         return { user: null, error: 'Failed to fetch user profile' };
       }
 

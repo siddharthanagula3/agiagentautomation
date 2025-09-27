@@ -3,12 +3,11 @@ import { Moon, Sun } from 'lucide-react';
 import { Button } from './button';
 import { useUIStore } from '../../stores/ui-store';
 
-  useEffect(() => {
 export const ThemeToggle: React.FC = () => {
   const { theme, setTheme } = useUIStore();
 
-    const root = documen;
-  t.documentElement;
+  useEffect(() => {
+    const root = document.documentElement;
     
     if (theme === 'dark') {
       root.classList.add('dark');
@@ -16,8 +15,7 @@ export const ThemeToggle: React.FC = () => {
       root.classList.remove('dark');
     } else {
       // System theme
-      const systemTheme = windo;
-  w.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       if (systemTheme === 'dark') {
         root.classList.add('dark');
       } else {

@@ -82,6 +82,7 @@ class AgentsService {
       console.error('Service error:', error);
       return { data: null, error: 'An unexpected error occurred' };
     }
+  }
 
   async getAgentStats(): Promise<{ data: AgentStats; error: string | null }> {
     try {
@@ -107,6 +108,7 @@ class AgentsService {
       console.error('Service error:', error);
       return { data: { total: 0, available: 0, working: 0, maintenance: 0, offline: 0 }, error: 'An unexpected error occurred' };
     }
+  }
 
   async getAgentsByCategory(category: string): Promise<{ data: AIAgent[]; error: string | null }> {
     try {

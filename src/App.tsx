@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { PublicLayout } from './layouts/PublicLayout';
@@ -8,293 +8,304 @@ import { AdminLayout } from './layouts/AdminLayout';
 import ErrorBoundary from './components/ErrorBoundary';
 import RealtimeNotification from './components/RealtimeNotification';
 
-// Public Pages
-import LandingPage from './pages/LandingPage';
-import AboutPage from './pages/AboutPage';
-import ContactPage from './pages/ContactPage';
-import FeaturesPage from './pages/FeaturesPage';
-import LegalPage from './pages/LegalPage';
-import BlogPage from './pages/BlogPage';
-import BlogPostPage from './pages/BlogPostPage';
-import CareersPage from './pages/CareersPage';
-
-// Auth Pages
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-
-// Dashboard Pages
-import Dashboard from './pages/dashboard/Dashboard';
-import EmployeesPage from './pages/dashboard/EmployeesPage';
-import WorkforcePage from './pages/dashboard/WorkforcePage';
-import AIEmployees from './pages/ai-employees/AIEmployees';
-import AIEmployeeChatPage from './pages/ai-employees/AIEmployeeChatPage';
-import JobsPage from './pages/dashboard/JobsPage';
-import AnalyticsPage from './pages/dashboard/AnalyticsPage';
-import ProfilePage from './pages/dashboard/ProfilePage';
-import BillingPage from './pages/dashboard/BillingPage';
-import NotificationsPage from './pages/dashboard/NotificationsPage';
-import TeamPage from './pages/dashboard/TeamPage';
-import SettingsPage from './pages/dashboard/SettingsPage';
-import SupportPage from './pages/dashboard/SupportPage';
-import IntegrationsPage from './pages/dashboard/IntegrationsPage';
-import ReportsPage from './pages/dashboard/ReportsPage';
-import WorkflowsPage from './pages/dashboard/WorkflowsPage';
-import APIKeysPage from './pages/dashboard/APIKeysPage';
-import WebhooksPage from './pages/dashboard/WebhooksPage';
-import LogsPage from './pages/dashboard/LogsPage';
-import MonitoringPage from './pages/dashboard/MonitoringPage';
-import BackupsPage from './pages/dashboard/BackupsPage';
-import SecurityPage from './pages/dashboard/SecurityPage';
-import CompliancePage from './pages/dashboard/CompliancePage';
-import AuditPage from './pages/dashboard/AuditPage';
-import PerformancePage from './pages/dashboard/PerformancePage';
-import ScalingPage from './pages/dashboard/ScalingPage';
-import HealthPage from './pages/dashboard/HealthPage';
-import IncidentsPage from './pages/dashboard/IncidentsPage';
-import MaintenancePage from './pages/dashboard/MaintenancePage';
-import UpdatesPage from './pages/dashboard/UpdatesPage';
-import VersionControlPage from './pages/dashboard/VersionControlPage';
-import DeploymentsPage from './pages/dashboard/DeploymentsPage';
-import TestingPage from './pages/dashboard/TestingPage';
-import QualityPage from './pages/dashboard/QualityPage';
-import ValidationPage from './pages/dashboard/ValidationPage';
-import StandardsPage from './pages/dashboard/StandardsPage';
-import BestPracticesPage from './pages/dashboard/BestPracticesPage';
-import GuidelinesPage from './pages/dashboard/GuidelinesPage';
-import ProceduresPage from './pages/dashboard/ProceduresPage';
-import ChecklistsPage from './pages/dashboard/ChecklistsPage';
-import TemplatesPage from './pages/dashboard/TemplatesPage';
-import ExamplesPage from './pages/dashboard/ExamplesPage';
-import UseCasesPage from './pages/dashboard/UseCasesPage';
-import PatternsPage from './pages/dashboard/PatternsPage';
-import ArchitecturePage from './pages/dashboard/ArchitecturePage';
-import DesignPage from './pages/dashboard/DesignPage';
-import ThemesPage from './pages/dashboard/ThemesPage';
-import LayoutsPage from './pages/dashboard/LayoutsPage';
-import ComponentsPage from './pages/dashboard/ComponentsPage';
-import WidgetsPage from './pages/dashboard/WidgetsPage';
-import DashboardPage from './pages/dashboard/DashboardPage';
-import ViewsPage from './pages/dashboard/ViewsPage';
-import ChartsPage from './pages/dashboard/ChartsPage';
-import GraphsPage from './pages/dashboard/GraphsPage';
-import VisualizationsPage from './pages/dashboard/VisualizationsPage';
-import DataPage from './pages/dashboard/DataPage';
-import ImportPage from './pages/dashboard/ImportPage';
-import ExportPage from './pages/dashboard/ExportPage';
-import ProcessingPage from './pages/dashboard/ProcessingPage';
-import AnalysisPage from './pages/dashboard/AnalysisPage';
-import InsightsPage from './pages/dashboard/InsightsPage';
-import RecommendationsPage from './pages/dashboard/RecommendationsPage';
-import OptimizationPage from './pages/dashboard/OptimizationPage';
-import TuningPage from './pages/dashboard/TuningPage';
-import ConfigurationPage from './pages/dashboard/ConfigurationPage';
-import ParametersPage from './pages/dashboard/ParametersPage';
-import PreferencesPage from './pages/dashboard/PreferencesPage';
-import PersonalizationPage from './pages/dashboard/PersonalizationPage';
-import CustomizationPage from './pages/dashboard/CustomizationPage';
-import AdvancedPage from './pages/dashboard/AdvancedPage';
-import ExpertPage from './pages/dashboard/ExpertPage';
-import ProfessionalPage from './pages/dashboard/ProfessionalPage';
-import EnterprisePage from './pages/dashboard/EnterprisePage';
-import BusinessPage from './pages/dashboard/BusinessPage';
-import StrategyPage from './pages/dashboard/StrategyPage';
-import PlanningPage from './pages/dashboard/PlanningPage';
-import SchedulingPage from './pages/dashboard/SchedulingPage';
-import TasksPage from './pages/dashboard/TasksPage';
-import AssignmentsPage from './pages/dashboard/AssignmentsPage';
-import ResponsibilitiesPage from './pages/dashboard/ResponsibilitiesPage';
-import RolesPage from './pages/dashboard/RolesPage';
-import PermissionsPage from './pages/dashboard/PermissionsPage';
-import AccessPage from './pages/dashboard/AccessPage';
-import ControlPage from './pages/dashboard/ControlPage';
-import ManagementPage from './pages/dashboard/ManagementPage';
-import AdministrationPage from './pages/dashboard/AdministrationPage';
-import SystemPage from './pages/dashboard/SystemPage';
-import PlatformPage from './pages/dashboard/PlatformPage';
-import InfrastructurePage from './pages/dashboard/InfrastructurePage';
-import ResourcesPage from './pages/dashboard/ResourcesPage';
-import AssetsPage from './pages/dashboard/AssetsPage';
-import CapabilitiesPage from './pages/dashboard/CapabilitiesPage';
-import DashboardFeaturesPage from './pages/dashboard/FeaturesPage';
-import FunctionalityPage from './pages/dashboard/FunctionalityPage';
-import OperationsPage from './pages/dashboard/OperationsPage';
-import ProcessesPage from './pages/dashboard/ProcessesPage';
-import OrchestrationPage from './pages/dashboard/OrchestrationPage';
-import CoordinationPage from './pages/dashboard/CoordinationPage';
-import SynchronizationPage from './pages/dashboard/SynchronizationPage';
-import AlignmentPage from './pages/dashboard/AlignmentPage';
-
-// Chat Interface (ChatGPT-like)
-import ChatInterface from './pages/ChatInterface';
-
-// Error Pages
-import NotFoundPage from './pages/NotFoundPage';
-
 // Auth Components
 import { AdminRoute } from './components/auth/AdminRoute';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  </div>
+);
+
+// Lazy load public pages
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const FeaturesPage = lazy(() => import('./pages/FeaturesPage'));
+const LegalPage = lazy(() => import('./pages/LegalPage'));
+const BlogPage = lazy(() => import('./pages/BlogPage'));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
+const CareersPage = lazy(() => import('./pages/CareersPage'));
+
+// Lazy load auth pages
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
+
+// Lazy load core dashboard pages
+const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
+const EmployeesPage = lazy(() => import('./pages/dashboard/EmployeesPage'));
+const WorkforcePage = lazy(() => import('./pages/dashboard/WorkforcePage'));
+const AIEmployees = lazy(() => import('./pages/ai-employees/AIEmployees'));
+const AIEmployeeChatPage = lazy(() => import('./pages/ai-employees/AIEmployeeChatPage'));
+const JobsPage = lazy(() => import('./pages/dashboard/JobsPage'));
+const AnalyticsPage = lazy(() => import('./pages/dashboard/AnalyticsPage'));
+const ProfilePage = lazy(() => import('./pages/dashboard/ProfilePage'));
+const BillingPage = lazy(() => import('./pages/dashboard/BillingPage'));
+const NotificationsPage = lazy(() => import('./pages/dashboard/NotificationsPage'));
+const TeamPage = lazy(() => import('./pages/dashboard/TeamPage'));
+const SettingsPage = lazy(() => import('./pages/dashboard/SettingsPage'));
+const SupportPage = lazy(() => import('./pages/dashboard/SupportPage'));
+const IntegrationsPage = lazy(() => import('./pages/dashboard/IntegrationsPage'));
+
+// Lazy load additional dashboard pages
+const ReportsPage = lazy(() => import('./pages/dashboard/ReportsPage'));
+const WorkflowsPage = lazy(() => import('./pages/dashboard/WorkflowsPage'));
+const APIKeysPage = lazy(() => import('./pages/dashboard/APIKeysPage'));
+const WebhooksPage = lazy(() => import('./pages/dashboard/WebhooksPage'));
+const LogsPage = lazy(() => import('./pages/dashboard/LogsPage'));
+const MonitoringPage = lazy(() => import('./pages/dashboard/MonitoringPage'));
+const BackupsPage = lazy(() => import('./pages/dashboard/BackupsPage'));
+const SecurityPage = lazy(() => import('./pages/dashboard/SecurityPage'));
+const CompliancePage = lazy(() => import('./pages/dashboard/CompliancePage'));
+const AuditPage = lazy(() => import('./pages/dashboard/AuditPage'));
+const PerformancePage = lazy(() => import('./pages/dashboard/PerformancePage'));
+const ScalingPage = lazy(() => import('./pages/dashboard/ScalingPage'));
+const HealthPage = lazy(() => import('./pages/dashboard/HealthPage'));
+const IncidentsPage = lazy(() => import('./pages/dashboard/IncidentsPage'));
+const MaintenancePage = lazy(() => import('./pages/dashboard/MaintenancePage'));
+const UpdatesPage = lazy(() => import('./pages/dashboard/UpdatesPage'));
+const VersionControlPage = lazy(() => import('./pages/dashboard/VersionControlPage'));
+const DeploymentsPage = lazy(() => import('./pages/dashboard/DeploymentsPage'));
+const TestingPage = lazy(() => import('./pages/dashboard/TestingPage'));
+const QualityPage = lazy(() => import('./pages/dashboard/QualityPage'));
+const ValidationPage = lazy(() => import('./pages/dashboard/ValidationPage'));
+const StandardsPage = lazy(() => import('./pages/dashboard/StandardsPage'));
+const BestPracticesPage = lazy(() => import('./pages/dashboard/BestPracticesPage'));
+const GuidelinesPage = lazy(() => import('./pages/dashboard/GuidelinesPage'));
+const ProceduresPage = lazy(() => import('./pages/dashboard/ProceduresPage'));
+const ChecklistsPage = lazy(() => import('./pages/dashboard/ChecklistsPage'));
+const TemplatesPage = lazy(() => import('./pages/dashboard/TemplatesPage'));
+const ExamplesPage = lazy(() => import('./pages/dashboard/ExamplesPage'));
+const UseCasesPage = lazy(() => import('./pages/dashboard/UseCasesPage'));
+const PatternsPage = lazy(() => import('./pages/dashboard/PatternsPage'));
+const ArchitecturePage = lazy(() => import('./pages/dashboard/ArchitecturePage'));
+const DesignPage = lazy(() => import('./pages/dashboard/DesignPage'));
+const ThemesPage = lazy(() => import('./pages/dashboard/ThemesPage'));
+const LayoutsPage = lazy(() => import('./pages/dashboard/LayoutsPage'));
+const ComponentsPage = lazy(() => import('./pages/dashboard/ComponentsPage'));
+const WidgetsPage = lazy(() => import('./pages/dashboard/WidgetsPage'));
+const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
+const ViewsPage = lazy(() => import('./pages/dashboard/ViewsPage'));
+const ChartsPage = lazy(() => import('./pages/dashboard/ChartsPage'));
+const GraphsPage = lazy(() => import('./pages/dashboard/GraphsPage'));
+const VisualizationsPage = lazy(() => import('./pages/dashboard/VisualizationsPage'));
+const DataPage = lazy(() => import('./pages/dashboard/DataPage'));
+const ImportPage = lazy(() => import('./pages/dashboard/ImportPage'));
+const ExportPage = lazy(() => import('./pages/dashboard/ExportPage'));
+const ProcessingPage = lazy(() => import('./pages/dashboard/ProcessingPage'));
+const AnalysisPage = lazy(() => import('./pages/dashboard/AnalysisPage'));
+const InsightsPage = lazy(() => import('./pages/dashboard/InsightsPage'));
+const RecommendationsPage = lazy(() => import('./pages/dashboard/RecommendationsPage'));
+const OptimizationPage = lazy(() => import('./pages/dashboard/OptimizationPage'));
+const TuningPage = lazy(() => import('./pages/dashboard/TuningPage'));
+const ConfigurationPage = lazy(() => import('./pages/dashboard/ConfigurationPage'));
+const ParametersPage = lazy(() => import('./pages/dashboard/ParametersPage'));
+const PreferencesPage = lazy(() => import('./pages/dashboard/PreferencesPage'));
+const PersonalizationPage = lazy(() => import('./pages/dashboard/PersonalizationPage'));
+const CustomizationPage = lazy(() => import('./pages/dashboard/CustomizationPage'));
+const AdvancedPage = lazy(() => import('./pages/dashboard/AdvancedPage'));
+const ExpertPage = lazy(() => import('./pages/dashboard/ExpertPage'));
+const ProfessionalPage = lazy(() => import('./pages/dashboard/ProfessionalPage'));
+const EnterprisePage = lazy(() => import('./pages/dashboard/EnterprisePage'));
+const BusinessPage = lazy(() => import('./pages/dashboard/BusinessPage'));
+const StrategyPage = lazy(() => import('./pages/dashboard/StrategyPage'));
+const PlanningPage = lazy(() => import('./pages/dashboard/PlanningPage'));
+const SchedulingPage = lazy(() => import('./pages/dashboard/SchedulingPage'));
+const TasksPage = lazy(() => import('./pages/dashboard/TasksPage'));
+const AssignmentsPage = lazy(() => import('./pages/dashboard/AssignmentsPage'));
+const ResponsibilitiesPage = lazy(() => import('./pages/dashboard/ResponsibilitiesPage'));
+const RolesPage = lazy(() => import('./pages/dashboard/RolesPage'));
+const PermissionsPage = lazy(() => import('./pages/dashboard/PermissionsPage'));
+const AccessPage = lazy(() => import('./pages/dashboard/AccessPage'));
+const ControlPage = lazy(() => import('./pages/dashboard/ControlPage'));
+const ManagementPage = lazy(() => import('./pages/dashboard/ManagementPage'));
+const AdministrationPage = lazy(() => import('./pages/dashboard/AdministrationPage'));
+const SystemPage = lazy(() => import('./pages/dashboard/SystemPage'));
+const PlatformPage = lazy(() => import('./pages/dashboard/PlatformPage'));
+const InfrastructurePage = lazy(() => import('./pages/dashboard/InfrastructurePage'));
+const ResourcesPage = lazy(() => import('./pages/dashboard/ResourcesPage'));
+const AssetsPage = lazy(() => import('./pages/dashboard/AssetsPage'));
+const CapabilitiesPage = lazy(() => import('./pages/dashboard/CapabilitiesPage'));
+const DashboardFeaturesPage = lazy(() => import('./pages/dashboard/FeaturesPage'));
+const FunctionalityPage = lazy(() => import('./pages/dashboard/FunctionalityPage'));
+const OperationsPage = lazy(() => import('./pages/dashboard/OperationsPage'));
+const ProcessesPage = lazy(() => import('./pages/dashboard/ProcessesPage'));
+const OrchestrationPage = lazy(() => import('./pages/dashboard/OrchestrationPage'));
+const CoordinationPage = lazy(() => import('./pages/dashboard/CoordinationPage'));
+const SynchronizationPage = lazy(() => import('./pages/dashboard/SynchronizationPage'));
+const AlignmentPage = lazy(() => import('./pages/dashboard/AlignmentPage'));
+
+// Chat Interface
+const ChatInterface = lazy(() => import('./pages/ChatInterface'));
+
+// Error Pages
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<PublicLayout />}>
-          <Route index element={<LandingPage />} />
-          <Route path="about" element={<AboutPage />} />
-          <Route path="contact" element={<ContactPage />} />
-          <Route path="features" element={<FeaturesPage />} />
-          <Route path="legal" element={<LegalPage />} />
-          <Route path="blog" element={<BlogPage />} />
-          <Route path="blog/:id" element={<BlogPostPage />} />
-          <Route path="careers" element={<CareersPage />} />
-        </Route>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<PublicLayout />}>
+            <Route index element={<LandingPage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="features" element={<FeaturesPage />} />
+            <Route path="legal" element={<LegalPage />} />
+            <Route path="blog" element={<BlogPage />} />
+            <Route path="blog/:id" element={<BlogPostPage />} />
+            <Route path="careers" element={<CareersPage />} />
+          </Route>
 
-        {/* Auth Routes */}
-        <Route path="/auth" element={<AuthLayout />}>
-          <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
-        </Route>
+          {/* Auth Routes */}
+          <Route path="/auth" element={<AuthLayout />}>
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
+          </Route>
 
-        {/* Chat Interface (ChatGPT-like) */}
-        <Route path="/chat" element={<ChatInterface />} />
+          {/* Chat Interface */}
+          <Route path="/chat" element={<ChatInterface />} />
 
-        {/* Dashboard Routes */}
-        <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-          <Route index element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
-          
-          {/* Core Dashboard Pages */}
-          <Route path="employees" element={<EmployeesPage />} />
-          <Route path="ai-employees" element={<AIEmployees />} />
-          <Route path="ai-employees/chat/:employeeId" element={<AIEmployeeChatPage />} />
-          <Route path="workforce" element={<WorkforcePage />} />
-          <Route path="jobs" element={<JobsPage />} />
-          <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="billing" element={<BillingPage />} />
-          <Route path="notifications" element={<NotificationsPage />} />
-          <Route path="team" element={<TeamPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="support" element={<SupportPage />} />
-          
-          {/* Integration & API Pages */}
-          <Route path="integrations" element={<IntegrationsPage />} />
-          <Route path="reports" element={<ReportsPage />} />
-          <Route path="workflows" element={<WorkflowsPage />} />
-          <Route path="api-keys" element={<APIKeysPage />} />
-          <Route path="webhooks" element={<WebhooksPage />} />
-          <Route path="logs" element={<LogsPage />} />
-          
-          {/* Monitoring & Operations */}
-          <Route path="monitoring" element={<MonitoringPage />} />
-          <Route path="backups" element={<BackupsPage />} />
-          <Route path="security" element={<SecurityPage />} />
-          <Route path="compliance" element={<CompliancePage />} />
-          <Route path="audit" element={<AuditPage />} />
-          <Route path="performance" element={<PerformancePage />} />
-          <Route path="scaling" element={<ScalingPage />} />
-          <Route path="health" element={<HealthPage />} />
-          <Route path="incidents" element={<IncidentsPage />} />
-          <Route path="maintenance" element={<MaintenancePage />} />
-          <Route path="updates" element={<UpdatesPage />} />
-          
-          {/* Development & Deployment */}
-          <Route path="version-control" element={<VersionControlPage />} />
-          <Route path="deployments" element={<DeploymentsPage />} />
-          <Route path="testing" element={<TestingPage />} />
-          <Route path="quality" element={<QualityPage />} />
-          <Route path="validation" element={<ValidationPage />} />
-          
-          {/* Standards & Best Practices */}
-          <Route path="standards" element={<StandardsPage />} />
-          <Route path="best-practices" element={<BestPracticesPage />} />
-          <Route path="guidelines" element={<GuidelinesPage />} />
-          <Route path="procedures" element={<ProceduresPage />} />
-          <Route path="checklists" element={<ChecklistsPage />} />
-          <Route path="templates" element={<TemplatesPage />} />
-          <Route path="examples" element={<ExamplesPage />} />
-          <Route path="use-cases" element={<UseCasesPage />} />
-          <Route path="patterns" element={<PatternsPage />} />
-          
-          {/* Design & Architecture */}
-          <Route path="architecture" element={<ArchitecturePage />} />
-          <Route path="design" element={<DesignPage />} />
-          <Route path="themes" element={<ThemesPage />} />
-          <Route path="layouts" element={<LayoutsPage />} />
-          <Route path="components" element={<ComponentsPage />} />
-          <Route path="widgets" element={<WidgetsPage />} />
-          <Route path="dashboard-builder" element={<DashboardPage />} />
-          <Route path="views" element={<ViewsPage />} />
-          
-          {/* Data & Analytics */}
-          <Route path="charts" element={<ChartsPage />} />
-          <Route path="graphs" element={<GraphsPage />} />
-          <Route path="visualizations" element={<VisualizationsPage />} />
-          <Route path="data" element={<DataPage />} />
-          <Route path="import" element={<ImportPage />} />
-          <Route path="export" element={<ExportPage />} />
-          <Route path="processing" element={<ProcessingPage />} />
-          <Route path="analysis" element={<AnalysisPage />} />
-          <Route path="insights" element={<InsightsPage />} />
-          <Route path="recommendations" element={<RecommendationsPage />} />
-          <Route path="optimization" element={<OptimizationPage />} />
-          <Route path="tuning" element={<TuningPage />} />
-          
-          {/* Configuration & Settings */}
-          <Route path="configuration" element={<ConfigurationPage />} />
-          <Route path="parameters" element={<ParametersPage />} />
-          <Route path="preferences" element={<PreferencesPage />} />
-          <Route path="personalization" element={<PersonalizationPage />} />
-          <Route path="customization" element={<CustomizationPage />} />
-          <Route path="advanced" element={<AdvancedPage />} />
-          <Route path="expert" element={<ExpertPage />} />
-          <Route path="professional" element={<ProfessionalPage />} />
-          <Route path="enterprise" element={<EnterprisePage />} />
-          
-          {/* Business & Strategy */}
-          <Route path="business" element={<BusinessPage />} />
-          <Route path="strategy" element={<StrategyPage />} />
-          <Route path="planning" element={<PlanningPage />} />
-          <Route path="scheduling" element={<SchedulingPage />} />
-          <Route path="tasks" element={<TasksPage />} />
-          <Route path="assignments" element={<AssignmentsPage />} />
-          <Route path="responsibilities" element={<ResponsibilitiesPage />} />
-          <Route path="roles" element={<RolesPage />} />
-          <Route path="permissions" element={<PermissionsPage />} />
-          <Route path="access" element={<AccessPage />} />
-          
-          {/* System & Platform */}
-          <Route path="control" element={<ControlPage />} />
-          <Route path="management" element={<ManagementPage />} />
-          <Route path="administration" element={<AdministrationPage />} />
-          <Route path="system" element={<SystemPage />} />
-          <Route path="platform" element={<PlatformPage />} />
-          <Route path="infrastructure" element={<InfrastructurePage />} />
-          <Route path="resources" element={<ResourcesPage />} />
-          <Route path="assets" element={<AssetsPage />} />
-          <Route path="capabilities" element={<CapabilitiesPage />} />
-          <Route path="features" element={<DashboardFeaturesPage />} />
-          <Route path="functionality" element={<FunctionalityPage />} />
-          <Route path="operations" element={<OperationsPage />} />
-          <Route path="processes" element={<ProcessesPage />} />
-          <Route path="orchestration" element={<OrchestrationPage />} />
-          <Route path="coordination" element={<CoordinationPage />} />
-          <Route path="synchronization" element={<SynchronizationPage />} />
-          <Route path="alignment" element={<AlignmentPage />} />
-        </Route>
+          {/* Dashboard Routes */}
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+            <Route index element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
+            
+            {/* Core Dashboard Pages */}
+            <Route path="employees" element={<EmployeesPage />} />
+            <Route path="ai-employees" element={<AIEmployees />} />
+            <Route path="ai-employees/chat/:employeeId" element={<AIEmployeeChatPage />} />
+            <Route path="workforce" element={<WorkforcePage />} />
+            <Route path="jobs" element={<JobsPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="billing" element={<BillingPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="team" element={<TeamPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="support" element={<SupportPage />} />
+            
+            {/* Integration & API Pages */}
+            <Route path="integrations" element={<IntegrationsPage />} />
+            <Route path="reports" element={<ReportsPage />} />
+            <Route path="workflows" element={<WorkflowsPage />} />
+            <Route path="api-keys" element={<APIKeysPage />} />
+            <Route path="webhooks" element={<WebhooksPage />} />
+            <Route path="logs" element={<LogsPage />} />
+            
+            {/* Monitoring & Operations */}
+            <Route path="monitoring" element={<MonitoringPage />} />
+            <Route path="backups" element={<BackupsPage />} />
+            <Route path="security" element={<SecurityPage />} />
+            <Route path="compliance" element={<CompliancePage />} />
+            <Route path="audit" element={<AuditPage />} />
+            <Route path="performance" element={<PerformancePage />} />
+            <Route path="scaling" element={<ScalingPage />} />
+            <Route path="health" element={<HealthPage />} />
+            <Route path="incidents" element={<IncidentsPage />} />
+            <Route path="maintenance" element={<MaintenancePage />} />
+            <Route path="updates" element={<UpdatesPage />} />
+            
+            {/* Development & Deployment */}
+            <Route path="version-control" element={<VersionControlPage />} />
+            <Route path="deployments" element={<DeploymentsPage />} />
+            <Route path="testing" element={<TestingPage />} />
+            <Route path="quality" element={<QualityPage />} />
+            <Route path="validation" element={<ValidationPage />} />
+            
+            {/* Standards & Best Practices */}
+            <Route path="standards" element={<StandardsPage />} />
+            <Route path="best-practices" element={<BestPracticesPage />} />
+            <Route path="guidelines" element={<GuidelinesPage />} />
+            <Route path="procedures" element={<ProceduresPage />} />
+            <Route path="checklists" element={<ChecklistsPage />} />
+            <Route path="templates" element={<TemplatesPage />} />
+            <Route path="examples" element={<ExamplesPage />} />
+            <Route path="use-cases" element={<UseCasesPage />} />
+            <Route path="patterns" element={<PatternsPage />} />
+            
+            {/* Design & Architecture */}
+            <Route path="architecture" element={<ArchitecturePage />} />
+            <Route path="design" element={<DesignPage />} />
+            <Route path="themes" element={<ThemesPage />} />
+            <Route path="layouts" element={<LayoutsPage />} />
+            <Route path="components" element={<ComponentsPage />} />
+            <Route path="widgets" element={<WidgetsPage />} />
+            <Route path="dashboard-builder" element={<DashboardPage />} />
+            <Route path="views" element={<ViewsPage />} />
+            
+            {/* Data & Analytics */}
+            <Route path="charts" element={<ChartsPage />} />
+            <Route path="graphs" element={<GraphsPage />} />
+            <Route path="visualizations" element={<VisualizationsPage />} />
+            <Route path="data" element={<DataPage />} />
+            <Route path="import" element={<ImportPage />} />
+            <Route path="export" element={<ExportPage />} />
+            <Route path="processing" element={<ProcessingPage />} />
+            <Route path="analysis" element={<AnalysisPage />} />
+            <Route path="insights" element={<InsightsPage />} />
+            <Route path="recommendations" element={<RecommendationsPage />} />
+            <Route path="optimization" element={<OptimizationPage />} />
+            <Route path="tuning" element={<TuningPage />} />
+            
+            {/* Configuration & Settings */}
+            <Route path="configuration" element={<ConfigurationPage />} />
+            <Route path="parameters" element={<ParametersPage />} />
+            <Route path="preferences" element={<PreferencesPage />} />
+            <Route path="personalization" element={<PersonalizationPage />} />
+            <Route path="customization" element={<CustomizationPage />} />
+            <Route path="advanced" element={<AdvancedPage />} />
+            <Route path="expert" element={<ExpertPage />} />
+            <Route path="professional" element={<ProfessionalPage />} />
+            <Route path="enterprise" element={<EnterprisePage />} />
+            
+            {/* Business & Strategy */}
+            <Route path="business" element={<BusinessPage />} />
+            <Route path="strategy" element={<StrategyPage />} />
+            <Route path="planning" element={<PlanningPage />} />
+            <Route path="scheduling" element={<SchedulingPage />} />
+            <Route path="tasks" element={<TasksPage />} />
+            <Route path="assignments" element={<AssignmentsPage />} />
+            <Route path="responsibilities" element={<ResponsibilitiesPage />} />
+            <Route path="roles" element={<RolesPage />} />
+            <Route path="permissions" element={<PermissionsPage />} />
+            <Route path="access" element={<AccessPage />} />
+            
+            {/* System & Platform */}
+            <Route path="control" element={<ControlPage />} />
+            <Route path="management" element={<ManagementPage />} />
+            <Route path="administration" element={<AdministrationPage />} />
+            <Route path="system" element={<SystemPage />} />
+            <Route path="platform" element={<PlatformPage />} />
+            <Route path="infrastructure" element={<InfrastructurePage />} />
+            <Route path="resources" element={<ResourcesPage />} />
+            <Route path="assets" element={<AssetsPage />} />
+            <Route path="capabilities" element={<CapabilitiesPage />} />
+            <Route path="features" element={<DashboardFeaturesPage />} />
+            <Route path="functionality" element={<FunctionalityPage />} />
+            <Route path="operations" element={<OperationsPage />} />
+            <Route path="processes" element={<ProcessesPage />} />
+            <Route path="orchestration" element={<OrchestrationPage />} />
+            <Route path="coordination" element={<CoordinationPage />} />
+            <Route path="synchronization" element={<SynchronizationPage />} />
+            <Route path="alignment" element={<AlignmentPage />} />
+          </Route>
 
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="users" element={<TeamPage />} />
-          <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-        </Route>
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="users" element={<TeamPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Route>
 
-        {/* 404 Route */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+          {/* 404 Route */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
       
       {/* Real-time Notifications */}
       <RealtimeNotification />

@@ -56,7 +56,7 @@ const WorkforcePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState('');
-  const [newJob, setNewJob] = useState({
+  const [stats, setStats] = useState({
     totalJobs: 0,
     activeJobs: 0,
     completedJobs: 0,
@@ -141,20 +141,16 @@ const WorkforcePage: React.FC = () => {
       let result;
       switch (action) {
         case 'start':
-          result = await;
-  jobsService.resumeJob(jobId);
+          result = await jobsService.resumeJob(jobId);
           break;
         case 'pause':
-          result = await;
-  jobsService.pauseJob(jobId);
+          result = await jobsService.pauseJob(jobId);
           break;
         case 'cancel':
-          result = await;
-  jobsService.cancelJob(jobId);
+          result = await jobsService.cancelJob(jobId);
           break;
         case 'delete':
-          result = await;
-  jobsService.deleteJob(jobId);
+          result = await jobsService.deleteJob(jobId);
           break;
       }
 

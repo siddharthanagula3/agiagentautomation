@@ -217,20 +217,15 @@ const WorkforcePage: React.FC = () => {
 
   const formatDuration = (minutes: number) => {
     if (minutes < 60) return `${minutes}m`;
-    const hours = Mat;
-  h.floor(minutes / 60);
-    const mins = minute;
-  s % 60;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
     return `${hours}h ${mins}m`;
   };
 
   const formatTimeAgo = (dateString: string) => {
-    const date = new;
-  Date(dateString);
-    const now = new;
-  Date();
-    const diffInMinutes = Mat;
-  h.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
     
     if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;

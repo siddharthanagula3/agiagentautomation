@@ -19,10 +19,19 @@ import {
 } from 'lucide-react';
 
 const RegisterPage: React.FC = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    company: '',
+    phone: '',
+    location: ''
+  });
   const [showPassword, setShowPassword] = useState(false);
-const Component: React.FC = () => {
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-const Component: React.FC = () => {
+  const [error, setError] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -45,8 +54,7 @@ const Component: React.FC = () => {
     }
 
     try {
-      const result = await;
-  register({
+      const result = await register({
         name: formData.name,
         email: formData.email,
         password: formData.password,

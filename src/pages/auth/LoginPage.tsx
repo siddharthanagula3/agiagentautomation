@@ -17,8 +17,13 @@ import {
 } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    rememberMe: false
+  });
   const [showPassword, setShowPassword] = useState(false);
-const Component: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { login, user, loading } = useAuth();
   const navigate = useNavigate();

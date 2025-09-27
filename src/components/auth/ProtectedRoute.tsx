@@ -9,13 +9,32 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole = 'user' }) => {
   const { user, loading } = useAuth();
+  const [timeoutReached, setTimeoutReached] = React.useState(false);
 
-  if (loading) {
+  React.useEffect(() => {
+    // Set a timeout to prevent infinite loading
+    const timer = setTimeout(() => {
+      if (loading) {
+        console.warn('ProtectedRoute: Loading timeout reached');
+        setTimeoutReached(true);
+      }
+    }, 3000); // 3 seconds timeout
+
+    return () => clearTimeout(timer);
+  }, [loading]);
+
+  if (loading && !timeoutReached) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
+  }
+
+  // If timeout reached and still loading, redirect to login
+  if (timeoutReached && loading) {
+    console.error('ProtectedRoute: Auth loading timed out, redirecting to login');
+    return <Navigate to="/auth/login" replace />;
   }
 
   if (!user) {

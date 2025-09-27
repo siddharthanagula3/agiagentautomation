@@ -15,6 +15,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let isMounted = true;
     let timeoutId: NodeJS.Timeout;
 
+    // Check if Supabase is configured
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
+    const hasValidCredentials = supabaseUrl && 
+                                supabaseKey && 
+                                !supabaseUrl.includes('your_supabase_url_here') && 
+                                !supabaseKey.includes('your_supabase_anon_key_here');
+
+    // If no valid credentials, immediately set loading to false for demo mode
+    if (!hasValidCredentials) {
+      console.log('No valid Supabase credentials - running in demo mode');
+      setLoading(false);
+      return;
+    }
+
     // Check for existing session with timeout
     const checkSession = async () => {
       try {
@@ -24,7 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.warn('Auth check timeout - setting loading to false');
             setLoading(false);
           }
-        }, 1000); // 1 second timeout - very fast
+        }, 1500); // 1.5 second timeout
 
         const { user: currentUser, error } = await authService.getCurrentUser();
         
@@ -48,34 +64,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     checkSession();
 
-    // Listen to auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!isMounted) return;
+    // Only set up auth listener if we have valid credentials
+    let subscription: any = null;
+    
+    if (hasValidCredentials && typeof supabase?.auth?.onAuthStateChange === 'function') {
+      try {
+        const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+          if (!isMounted) return;
 
-      if (session?.user) {
-        try {
-          const { user: authUser, error } = await authService.getCurrentUser();
-          if (authUser && !error && isMounted) {
-            setUser(authUser);
+          if (session?.user) {
+            try {
+              const { user: authUser, error } = await authService.getCurrentUser();
+              if (authUser && !error && isMounted) {
+                setUser(authUser);
+              }
+            } catch (error) {
+              console.error('Error getting user:', error);
+            }
+          } else {
+            setUser(null);
           }
-        } catch (error) {
-          console.error('Error getting user:', error);
+          
+          if (isMounted) {
+            setLoading(false);
+          }
+        });
+        subscription = data?.subscription;
+      } catch (error) {
+        console.error('Error setting up auth listener:', error);
+        if (isMounted) {
+          setLoading(false);
         }
-      } else {
-        setUser(null);
       }
-      
-      if (isMounted) {
-        setLoading(false);
-      }
-    });
+    }
 
     return () => {
       isMounted = false;
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
-      subscription?.unsubscribe();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
   }, []);
 

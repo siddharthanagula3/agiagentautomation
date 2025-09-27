@@ -37,9 +37,43 @@ export interface AuthResponse {
 }
 
 class AuthService {
+  private isDemoMode(): boolean {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
+    return !supabaseUrl || 
+           !supabaseKey || 
+           supabaseUrl.includes('your_supabase_url_here') || 
+           supabaseKey.includes('your_supabase_anon_key_here');
+  }
+
   async login(loginData: LoginData): Promise<AuthResponse> {
     try {
       console.log('AuthService: Starting login for', loginData.email);
+      
+      // Check if we're in demo mode
+      if (this.isDemoMode()) {
+        console.log('AuthService: Running in demo mode');
+        // Only allow demo credentials in demo mode
+        if (loginData.email === 'demo@example.com' && loginData.password === 'demo123') {
+          const demoUser: AuthUser = {
+            id: 'demo-user-123',
+            email: loginData.email,
+            name: 'Demo User',
+            avatar: '',
+            role: 'user',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            last_login: new Date().toISOString(),
+            is_active: true,
+            preferences: {},
+            phone: '',
+            location: ''
+          };
+          return { user: demoUser, error: null };
+        }
+        return { user: null, error: 'Invalid demo credentials. Use demo@example.com / demo123' };
+      }
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password,
@@ -133,6 +167,12 @@ class AuthService {
 
   async register(userData: RegisterData): Promise<AuthResponse> {
     try {
+      // Check if we're in demo mode
+      if (this.isDemoMode()) {
+        console.log('AuthService: Registration in demo mode');
+        return { user: null, error: 'Registration is disabled in demo mode. Please configure Supabase for full functionality.' };
+      }
+      
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
@@ -191,6 +231,12 @@ class AuthService {
 
   async logout(): Promise<{ error: string | null }> {
     try {
+      // Check if we're in demo mode
+      if (this.isDemoMode()) {
+        console.log('AuthService: Logout in demo mode');
+        return { error: null };
+      }
+      
       const { error } = await supabase.auth.signOut();
       return { error: error?.message || null };
     } catch (error) {
@@ -201,6 +247,12 @@ class AuthService {
 
   async getCurrentUser(): Promise<AuthResponse> {
     try {
+      // Check if we're in demo mode
+      if (this.isDemoMode()) {
+        console.log('AuthService: getCurrentUser - Demo mode, no user session');
+        return { user: null, error: 'No session in demo mode' };
+      }
+      
       const { data: { user }, error } = await supabase.auth.getUser();
 
       if (error) {

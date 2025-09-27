@@ -9,45 +9,19 @@ import ErrorBoundary from './components/ErrorBoundary';
 import RealtimeNotification from './components/RealtimeNotification';
 import DemoModeBanner from './components/DemoModeBanner';
 import HideLoader from './components/HideLoader';
+import AuthDebugger from './components/AuthDebugger';
 
 // Auth Components
 import { AdminRoute } from './components/auth/AdminRoute';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
-// Simple loading fallback component with timeout
+// Simple loading fallback component
 const LoadingFallback = () => {
-  const [showError, setShowError] = React.useState(false);
-  
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowError(true);
-    }, 2000); // Show error after 2 seconds
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  if (showError) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <h2 className="text-xl font-semibold mb-2">Loading is taking longer than expected</h2>
-          <p className="text-gray-600 mb-4">This might be due to network issues.</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Refresh Page
-          </button>
-        </div>
-      </div>
-    );
-  }
-  
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-gray-600">Loading component...</p>
       </div>
     </div>
   );
@@ -345,6 +319,9 @@ const App: React.FC = () => {
       
       {/* Real-time Notifications */}
       <RealtimeNotification />
+      
+      {/* Auth Debugger (Development Only) */}
+      {import.meta.env.DEV && <AuthDebugger />}
     </AuthProvider>
   );
 };

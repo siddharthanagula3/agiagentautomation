@@ -79,8 +79,45 @@ const createSupabaseClient = () => {
   return client;
 };
 
-// Create Supabase client with lazy initialization
-export const supabase = createSupabaseClient();
+// Lazy initialization of Supabase client
+let supabaseInstance: any = null;
+
+export const supabase = (() => {
+  if (!supabaseInstance) {
+    try {
+      supabaseInstance = createSupabaseClient();
+    } catch (error) {
+      console.error('Failed to initialize Supabase client:', error);
+      // Return a mock client to prevent crashes
+      supabaseInstance = {
+        auth: {
+          getSession: async () => ({ data: { session: null }, error: null }),
+          getUser: async () => ({ data: { user: null }, error: null }),
+          signInWithPassword: async () => ({ data: { user: null, session: null }, error: { message: 'Demo mode - no backend' } }),
+          signUp: async () => ({ data: { user: null, session: null }, error: { message: 'Demo mode - no backend' } }),
+          signOut: async () => ({ error: null }),
+          onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
+        },
+        from: () => ({
+          select: () => ({
+            eq: () => ({
+              single: async () => ({ data: null, error: { message: 'Demo mode - no backend' } })
+            }),
+            single: async () => ({ data: null, error: { message: 'Demo mode - no backend' } })
+          }),
+          insert: async () => ({ data: null, error: { message: 'Demo mode - no backend' } }),
+          update: async () => ({ data: null, error: { message: 'Demo mode - no backend' } }),
+          delete: async () => ({ data: null, error: { message: 'Demo mode - no backend' } })
+        }),
+        channel: () => ({
+          on: () => ({ subscribe: () => {} })
+        }),
+        removeAllChannels: async () => {}
+      };
+    }
+  }
+  return supabaseInstance;
+})();
 
 // Export for easy importing
 export default supabase;

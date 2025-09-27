@@ -101,6 +101,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (currentUser && !error) {
             console.log('✅ User session found:', currentUser.email);
             setUser(currentUser);
+          } else if (error) {
+            console.log('⚠️  Auth error (this is normal for new users):', error);
+            // Don't treat auth errors as critical - user just needs to login
           } else {
             console.log('ℹ️  No active session - user needs to login');
           }

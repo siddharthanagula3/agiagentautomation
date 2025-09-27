@@ -291,16 +291,23 @@ class AuthService {
       
       const userPromise = supabase.auth.getUser();
       const { data: { user }, error } = await Promise.race([userPromise, timeoutPromise]);
+      
+      console.log('AuthService: Supabase getUser completed');
 
       if (error) {
+        console.error('AuthService: Supabase getUser error:', error);
         return { user: null, error: error.message };
       }
 
       if (!user) {
+        console.log('AuthService: No user found in session');
         return { user: null, error: 'No user found' };
       }
 
-      // Get user profile
+      console.log('AuthService: User found:', user.email);
+
+      // Get user profile with proper headers
+      console.log('AuthService: Fetching user profile for ID:', user.id);
       const { data: profile, error: profileError } = await supabase
         .from('users')
         .select('*')
@@ -308,7 +315,66 @@ class AuthService {
         .single();
 
       if (profileError) {
-        return { user: null, error: 'Failed to fetch user profile' };
+        console.error('Profile fetch error:', profileError);
+        if (profileError.code === 'PGRST116') {
+          // Profile doesn't exist, create it
+          console.log('AuthService: Creating user profile for:', user.email);
+          const { data: newProfile, error: createError } = await supabase
+            .from('users')
+            .insert({
+              id: user.id,
+              email: user.email || '',
+              name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+              avatar: user.user_metadata?.avatar_url || null,
+              role: 'user',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              is_active: true,
+              phone: user.user_metadata?.phone || null,
+              location: user.user_metadata?.location || null,
+            })
+            .select()
+            .single();
+
+          if (createError || !newProfile) {
+            console.error('Profile creation error:', createError);
+            console.log('AuthService: Falling back to basic user object');
+            // Fallback to basic user object if profile creation fails
+            const fallbackUser: AuthUser = {
+              id: user.id,
+              email: user.email || '',
+              name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+              avatar: user.user_metadata?.avatar_url || null,
+              role: 'user',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              last_login: null,
+              is_active: true,
+              preferences: null,
+              phone: user.user_metadata?.phone || null,
+              location: user.user_metadata?.location || null,
+            };
+            return { user: fallbackUser, error: null };
+          }
+          
+          const authUser: AuthUser = {
+            id: newProfile.id,
+            email: newProfile.email,
+            name: newProfile.name,
+            avatar: newProfile.avatar,
+            role: newProfile.role,
+            created_at: newProfile.created_at,
+            updated_at: newProfile.updated_at,
+            last_login: newProfile.last_login,
+            is_active: newProfile.is_active,
+            preferences: newProfile.preferences,
+            phone: newProfile.phone,
+            location: newProfile.location,
+          };
+
+          return { user: authUser, error: null };
+        }
+        return { user: null, error: 'Failed to fetch user profile: ' + profileError.message };
       }
 
       const authUser: AuthUser = {

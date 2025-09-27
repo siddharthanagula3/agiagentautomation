@@ -63,6 +63,16 @@ interface OperationLog {
   details?: string;
 }
 
+  const [operations, setOperations] = useState<Operation[]>([]);
+  const [filteredOperations, setFilteredOperations] = useState<Operation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
+  useEffect(() => {
+  useEffect(() => {
 const OperationsPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -77,22 +87,12 @@ const OperationsPage: React.FC = () => {
     );
   }
   
-  const [operations, setOperations] = useState<Operation[]>([]);
-  const [filteredOperations, setFilteredOperations] = useState<Operation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
 
-  useEffect(() => {
     if (user) {
       loadOperations();
     }
   }, [user]);
 
-  useEffect(() => {
     filterOperations();
   }, [operations, searchTerm, typeFilter, statusFilter]);
 

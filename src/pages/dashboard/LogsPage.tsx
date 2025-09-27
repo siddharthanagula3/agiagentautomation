@@ -58,7 +58,7 @@ interface LogEntry {
   level: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
   service: string;
   message: string;
-  details?: any;
+  details?: unknown;
   userId?: string;
   sessionId?: string;
   requestId?: string;
@@ -78,6 +78,20 @@ interface LogFilter {
   searchTerm: string;
 }
 
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [levelFilter, setLevelFilter] = useState('');
+  const [serviceFilter, setServiceFilter] = useState('');
+  const [environmentFilter, setEnvironmentFilter] = useState('');
+  const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  useEffect(() => {
+  useEffect(() => {
+  useEffect(() => {
 const LogsPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -92,29 +106,15 @@ const LogsPage: React.FC = () => {
     );
   }
   
-  const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [levelFilter, setLevelFilter] = useState('');
-  const [serviceFilter, setServiceFilter] = useState('');
-  const [environmentFilter, setEnvironmentFilter] = useState('');
-  const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
-  const [isExporting, setIsExporting] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(false);
 
-  useEffect(() => {
     if (user) {
       loadLogs();
     }
   }, [user]);
 
-  useEffect(() => {
     filterLogs();
   }, [logs, searchTerm, levelFilter, serviceFilter, environmentFilter]);
 
-  useEffect(() => {
     if (autoRefresh) {
       const interval = setInterval(() => {
         loadLogs(true);

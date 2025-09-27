@@ -144,7 +144,7 @@ describe('ProtectedRoute', () => {
     expect(MockedNavigate).not.toHaveBeenCalled()
   })
 
-  it('redirects when user lacks any of multiple required permissions', () => {
+  it('redirects when user lacks unknown of multiple required permissions', () => {
     renderWithProviders(
       <ProtectedRoute
         requiredPermissions={[

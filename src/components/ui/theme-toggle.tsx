@@ -3,10 +3,10 @@ import { Moon, Sun } from 'lucide-react';
 import { Button } from './button';
 import { useUIStore } from '../../stores/ui-store';
 
+  useEffect(() => {
 export const ThemeToggle: React.FC = () => {
   const { theme, setTheme } = useUIStore();
 
-  useEffect(() => {
     const root = document.documentElement;
     
     if (theme === 'dark') {

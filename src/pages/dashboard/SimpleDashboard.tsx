@@ -21,6 +21,9 @@ import {
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/auth-hooks';
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  useEffect(() => {
 const SimpleDashboard: React.FC = () => {
   const { user } = useAuth();
   
@@ -35,10 +38,7 @@ const SimpleDashboard: React.FC = () => {
     );
   }
   
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  useEffect(() => {
     // Simple loading simulation
     const timer = setTimeout(() => {
       setLoading(false);

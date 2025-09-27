@@ -81,6 +81,19 @@ interface APIKeyTemplate {
   isOfficial: boolean;
 }
 
+  const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
+  const [filteredApiKeys, setFilteredApiKeys] = useState<APIKey[]>([]);
+  const [templates, setTemplates] = useState<APIKeyTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [environmentFilter, setEnvironmentFilter] = useState('');
+  const [showApiKeys, setShowApiKeys] = useState<Record<string, boolean>>({});
+  const [isCreatingKey, setIsCreatingKey] = useState(false);
+  const [selectedKey, setSelectedKey] = useState<APIKey | null>(null);
+  useEffect(() => {
+  useEffect(() => {
 const APIKeysPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -95,25 +108,12 @@ const APIKeysPage: React.FC = () => {
     );
   }
   
-  const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
-  const [filteredApiKeys, setFilteredApiKeys] = useState<APIKey[]>([]);
-  const [templates, setTemplates] = useState<APIKeyTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [environmentFilter, setEnvironmentFilter] = useState('');
-  const [showApiKeys, setShowApiKeys] = useState<Record<string, boolean>>({});
-  const [isCreatingKey, setIsCreatingKey] = useState(false);
-  const [selectedKey, setSelectedKey] = useState<APIKey | null>(null);
 
-  useEffect(() => {
     if (user) {
       loadAPIKeys();
     }
   }, [user]);
 
-  useEffect(() => {
     filterAPIKeys();
   }, [apiKeys, searchTerm, statusFilter, environmentFilter]);
 

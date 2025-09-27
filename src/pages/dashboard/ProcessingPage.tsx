@@ -94,12 +94,12 @@ interface ProcessingStep {
   name: string;
   type: 'input' | 'transform' | 'filter' | 'aggregate' | 'output' | 'ai-model';
   status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   dependencies: string[];
   estimatedDuration: number;
   actualDuration?: number;
-  inputData?: any;
-  outputData?: any;
+  inputData?: unknown;
+  outputData?: unknown;
   error?: string;
 }
 
@@ -129,10 +129,20 @@ interface ProcessingPipeline {
 interface PipelineTrigger {
   id: string;
   type: 'manual' | 'schedule' | 'webhook' | 'file-upload' | 'api-call';
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   enabled: boolean;
 }
 
+  const [jobs, setJobs] = useState<ProcessingJob[]>([]);
+  const [pipelines, setPipelines] = useState<ProcessingPipeline[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [selectedJob, setSelectedJob] = useState<ProcessingJob | null>(null);
+  const [isCreatingJob, setIsCreatingJob] = useState(false);
+  useEffect(() => {
 const ProcessingPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -147,17 +157,7 @@ const ProcessingPage: React.FC = () => {
     );
   }
   
-  const [jobs, setJobs] = useState<ProcessingJob[]>([]);
-  const [pipelines, setPipelines] = useState<ProcessingPipeline[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [selectedJob, setSelectedJob] = useState<ProcessingJob | null>(null);
-  const [isCreatingJob, setIsCreatingJob] = useState(false);
 
-  useEffect(() => {
     if (user) {
       loadData();
     }

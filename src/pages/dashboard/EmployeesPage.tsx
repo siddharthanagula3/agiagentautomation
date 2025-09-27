@@ -34,6 +34,17 @@ import type { Database } from '../../integrations/supabase/types';
 
 type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [agents, setAgents] = useState<AIAgent[]>([]);
+  const [filteredAgents, setFilteredAgents] = useState<AIAgent[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [agentStats, setAgentStats] = useState({
+  const [categories, setCategories] = useState<string[]>([]);
+  useEffect(() => {
+  useEffect(() => {
 const EmployeesPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -48,23 +59,13 @@ const EmployeesPage: React.FC = () => {
     );
   }
   
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [agents, setAgents] = useState<AIAgent[]>([]);
-  const [filteredAgents, setFilteredAgents] = useState<AIAgent[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [agentStats, setAgentStats] = useState({
     total: 0,
     available: 0,
     working: 0,
     maintenance: 0,
     offline: 0
   });
-  const [categories, setCategories] = useState<string[]>([]);
 
-  useEffect(() => {
     if (user) {
       loadAgents();
       const timeout = setTimeout(() => setLoading(false), 8000);
@@ -72,7 +73,6 @@ const EmployeesPage: React.FC = () => {
     }
   }, [user]);
 
-  useEffect(() => {
     filterAgents();
   }, [agents, searchTerm, selectedCategory, selectedStatus, filterAgents]);
 
@@ -199,7 +199,7 @@ const EmployeesPage: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-foreground">AI Employees</h1>
           <p className="text-muted-foreground mt-2">
-            Browse and manage your AI workforce. Hire specialized agents for any task.
+            Browse and manage your AI workforce. Hire specialized agents for unknown task.
           </p>
         </div>
         <div className="flex items-center space-x-4">

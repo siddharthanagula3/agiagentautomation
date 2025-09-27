@@ -263,7 +263,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
             const { data: job, error } = await jobsService.createJob(userId, {
               title: jobData.title,
               description: jobData.description,
-              priority: jobData.priority as any,
+              priority: jobData.priority as unknown,
               assigned_agent_id: jobData.assignedWorkers[0]?.id,
               estimated_duration: jobData.estimatedCompletion ? 
                 Math.floor((new Date(jobData.estimatedCompletion).getTime() - Date.now()) / 1000 / 60) : undefined,
@@ -285,8 +285,8 @@ export const useWorkforceStore = create<WorkforceStore>()(
                 id: job.id,
                 title: job.title,
                 description: job.description || '',
-                status: job.status as any,
-                priority: job.priority as any,
+                status: job.status as unknown,
+                priority: job.priority as unknown,
                 progress: job.progress || 0,
                 assignedWorkers: job.assigned_agent_id ? [{
                   id: job.assigned_agent_id,
@@ -655,8 +655,8 @@ export const useWorkforceStore = create<WorkforceStore>()(
                 id: job.id,
                 title: job.title,
                 description: job.description || '',
-                status: job.status as any,
-                priority: job.priority as any,
+                status: job.status as unknown,
+                priority: job.priority as unknown,
                 progress: job.progress || 0,
                 assignedWorkers: job.assigned_agent_id ? [{
                   id: job.assigned_agent_id,
@@ -828,8 +828,8 @@ export const useWorkforceStore = create<WorkforceStore>()(
                   id: job.id,
                   title: job.title,
                   description: job.description || '',
-                  status: job.status as any,
-                  priority: job.priority as any,
+                  status: job.status as unknown,
+                  priority: job.priority as unknown,
                   progress: job.progress || 0,
                   assignedWorkers: job.assigned_agent_id ? [{
                     id: job.assigned_agent_id,
@@ -856,7 +856,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
                     const oldStatus = state.jobs[job.id].status;
                     state.jobs[job.id] = {
                       ...state.jobs[job.id],
-                      status: job.status as any,
+                      status: job.status as unknown,
                       progress: job.progress || 0,
                       cost: job.cost || 0
                     };

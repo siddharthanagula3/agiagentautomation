@@ -13,7 +13,7 @@ export interface AuthUser {
   updated_at: string;
   last_login?: string;
   is_active: boolean;
-  preferences?: any;
+  preferences?: unknown;
   phone?: string;
   location?: string;
 }

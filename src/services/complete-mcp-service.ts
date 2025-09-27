@@ -8,7 +8,7 @@ export interface MCPTool {
   description: string;
   inputSchema: {
     type: string;
-    properties: Record<string, any>;
+    properties: Record<string, unknown>;
     required: string[];
   };
 }
@@ -17,24 +17,24 @@ export interface MCPRequest {
   jsonrpc: '2.0';
   id: string;
   method: string;
-  params?: any;
+  params?: unknown;
 }
 
 export interface MCPResponse {
   jsonrpc: '2.0';
   id: string;
-  result?: any;
+  result?: unknown;
   error?: {
     code: number;
     message: string;
-    data?: any;
+    data?: unknown;
   };
 }
 
 export interface MCPToolCall {
   tool: string;
-  parameters: Record<string, any>;
-  result?: any;
+  parameters: Record<string, unknown>;
+  result?: unknown;
   error?: string;
   status: 'pending' | 'executing' | 'completed' | 'failed';
   executionTime?: number;
@@ -42,15 +42,15 @@ export interface MCPToolCall {
 
 export interface MCPToolResult {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
   executionTime: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 class CompleteMCPService {
   private tools: Map<string, MCPTool> = new Map();
-  private handlers: Map<string, Function> = new Map();
+  private handlers: Map<string, (...args: unknown[]) => unknown> = new Map();
   private executionHistory: MCPToolCall[] = [];
   private isInitialized = false;
 
@@ -149,7 +149,7 @@ class CompleteMCPService {
   }
 
   // Register a new tool
-  async registerTool(tool: MCPTool, handler: Function) {
+  async registerTool(tool: MCPTool, handler: (...args: unknown[]) => unknown) {
     this.tools.set(tool.name, tool);
     this.handlers.set(tool.name, handler);
     
@@ -179,7 +179,7 @@ class CompleteMCPService {
   }
 
   // Execute a tool
-  async executeTool(toolName: string, parameters: Record<string, any>, context?: any): Promise<MCPToolResult> {
+  async executeTool(toolName: string, parameters: Record<string, unknown>, context?: unknown): Promise<MCPToolResult> {
     const startTime = Date.now();
     
     try {
@@ -213,7 +213,7 @@ class CompleteMCPService {
           timestamp: new Date().toISOString()
         }
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const executionTime = Date.now() - startTime;
       
       // Log failed execution
@@ -233,7 +233,7 @@ class CompleteMCPService {
   }
 
   // Validate tool parameters
-  private validateParameters(tool: MCPTool, parameters: Record<string, any>) {
+  private validateParameters(tool: MCPTool, parameters: Record<string, unknown>) {
     const { required, properties } = tool.inputSchema;
     
     // Check required parameters
@@ -253,7 +253,7 @@ class CompleteMCPService {
   }
 
   // Validate parameter type
-  private validateParameterType(name: string, value: any, schema: any) {
+  private validateParameterType(name: string, value: unknown, schema: unknown) {
     const { type } = schema;
     
     switch (type) {
@@ -288,11 +288,11 @@ class CompleteMCPService {
   // Log tool execution
   private async logToolExecution(
     toolName: string, 
-    parameters: Record<string, any>, 
-    result: any, 
+    parameters: Record<string, unknown>, 
+    result: unknown, 
     success: boolean, 
     executionTime: number,
-    context?: any,
+    context?: unknown,
     errorMessage?: string
   ) {
     try {
@@ -339,8 +339,7 @@ class CompleteMCPService {
             }
           };
 
-        case 'tools/call':
-          const { name, arguments: args } = request.params;
+        case 'tools/call': { const { name, arguments: args } = request.params;
           const result = await this.executeTool(name, args);
           
           return {
@@ -357,8 +356,7 @@ class CompleteMCPService {
             }
           };
 
-        case 'tools/get':
-          const tool = this.getTool(request.params.name);
+        case 'tools/get': { const tool = this.getTool(request.params.name);
           return {
             jsonrpc: '2.0',
             id: request.id,
@@ -375,7 +373,7 @@ class CompleteMCPService {
             }
           };
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         jsonrpc: '2.0',
         id: request.id,
@@ -392,7 +390,7 @@ class CompleteMCPService {
   // ========================================
 
   // Code Generation Tools
-  private async generateReactComponent(parameters: any, context?: any) {
+  private async generateReactComponent(parameters: unknown, context?: unknown) {
     const { componentName, props = [], features = [], styling = 'tailwind' } = parameters;
     
     // Simulate React component generation
@@ -400,10 +398,10 @@ class CompleteMCPService {
 import React${features.includes('hooks') ? ', { useState, useEffect }' : ''} from 'react';
 
 interface ${componentName}Props {
-${props.map((prop: any) => `  ${prop.name}: ${prop.type};`).join('\n')}
+${props.map((prop: unknown) => `  ${prop.name}: ${prop.type};`).join('\n')}
 }
 
-const ${componentName}: React.FC<${componentName}Props> = ({ ${props.map((p: any) => p.name).join(', ')} }) => {
+const ${componentName}: React.FC<${componentName}Props> = ({ ${props.map((p: unknown) => p.name).join(', ')} }) => {
 ${features.includes('hooks') ? '  const [state, setState] = useState(null);' : ''}
   
   return (
@@ -430,7 +428,7 @@ export default ${componentName};
     };
   }
 
-  private async generateApiEndpoint(parameters: any, context?: any) {
+  private async generateApiEndpoint(parameters: unknown, context?: unknown) {
     const { endpointPath, httpMethod, framework = 'express', database = 'postgresql' } = parameters;
     
     const endpoint = `
@@ -455,13 +453,13 @@ app.${httpMethod.toLowerCase()}('${endpointPath}', async (req, res) => {
     };
   }
 
-  private async generateDatabaseSchema(parameters: any, context?: any) {
+  private async generateDatabaseSchema(parameters: unknown, context?: unknown) {
     const { tableName, columns, database = 'postgresql' } = parameters;
     
     const schema = `
 CREATE TABLE ${tableName} (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-${columns.map((col: any) => `  ${col.name} ${col.type}${col.constraints ? ' ' + col.constraints.join(' ') : ''},`).join('\n')}
+${columns.map((col: unknown) => `  ${col.name} ${col.type}${col.constraints ? ' ' + col.constraints.join(' ') : ''},`).join('\n')}
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -475,7 +473,7 @@ ${columns.map((col: any) => `  ${col.name} ${col.type}${col.constraints ? ' ' + 
     };
   }
 
-  private async generateTestCases(parameters: any, context?: any) {
+  private async generateTestCases(parameters: unknown, context?: unknown) {
     const { code, testFramework = 'jest', testType = 'unit' } = parameters;
     
     const tests = `
@@ -498,7 +496,7 @@ describe('Code Tests', () => {
   }
 
   // Data Analysis Tools
-  private async analyzeData(parameters: any, context?: any) {
+  private async analyzeData(parameters: unknown, context?: unknown) {
     const { data, analysisType = 'descriptive', outputFormat = 'json' } = parameters;
     
     // Simulate data analysis
@@ -527,7 +525,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async generateReport(parameters: any, context?: any) {
+  private async generateReport(parameters: unknown, context?: unknown) {
     const { data, reportType = 'summary', format = 'pdf' } = parameters;
     
     const report = {
@@ -546,7 +544,7 @@ describe('Code Tests', () => {
   }
 
   // Design Tools
-  private async generateUIDesign(parameters: any, context?: any) {
+  private async generateUIDesign(parameters: unknown, context?: unknown) {
     const { componentType, style = 'modern', colorScheme = 'light' } = parameters;
     
     const design = {
@@ -564,7 +562,7 @@ describe('Code Tests', () => {
   }
 
   // Marketing Tools
-  private async generateContent(parameters: any, context?: any) {
+  private async generateContent(parameters: unknown, context?: unknown) {
     const { contentType, topic, tone = 'professional', length = 'medium' } = parameters;
     
     const content = {
@@ -581,7 +579,7 @@ describe('Code Tests', () => {
   }
 
   // Business Tools
-  private async createBusinessPlan(parameters: any, context?: any) {
+  private async createBusinessPlan(parameters: unknown, context?: unknown) {
     const { industry, businessType, targetMarket } = parameters;
     
     const businessPlan = {
@@ -604,7 +602,7 @@ describe('Code Tests', () => {
   }
 
   // AI/ML Tools
-  private async trainModel(parameters: any, context?: any) {
+  private async trainModel(parameters: unknown, context?: unknown) {
     const { algorithm, dataset, targetVariable } = parameters;
     
     const model = {
@@ -625,7 +623,7 @@ describe('Code Tests', () => {
   }
 
   // Integration Tools
-  private async executeN8NWorkflow(parameters: any, context?: any) {
+  private async executeN8NWorkflow(parameters: unknown, context?: unknown) {
     const { workflowId, data } = parameters;
     
     // Simulate N8N workflow execution
@@ -642,7 +640,7 @@ describe('Code Tests', () => {
     return result;
   }
 
-  private async executeOpenAIAPI(parameters: any, context?: any) {
+  private async executeOpenAIAPI(parameters: unknown, context?: unknown) {
     const { prompt, model = 'gpt-4', temperature = 0.7 } = parameters;
     
     // Simulate OpenAI API call
@@ -660,7 +658,7 @@ describe('Code Tests', () => {
     return response;
   }
 
-  private async executeAnthropicAPI(parameters: any, context?: any) {
+  private async executeAnthropicAPI(parameters: unknown, context?: unknown) {
     const { prompt, model = 'claude-3-sonnet' } = parameters;
     
     // Simulate Anthropic API call
@@ -677,7 +675,7 @@ describe('Code Tests', () => {
     return response;
   }
 
-  private async executeCursorAgent(parameters: any, context?: any) {
+  private async executeCursorAgent(parameters: unknown, context?: unknown) {
     const { task, context: taskContext } = parameters;
     
     // Simulate Cursor Agent execution
@@ -696,7 +694,7 @@ describe('Code Tests', () => {
     return result;
   }
 
-  private async executeReplitAgent(parameters: any, context?: any) {
+  private async executeReplitAgent(parameters: unknown, context?: unknown) {
     const { project, action } = parameters;
     
     // Simulate Replit Agent execution
@@ -710,7 +708,7 @@ describe('Code Tests', () => {
     return result;
   }
 
-  private async executeClaudeCode(parameters: any, context?: any) {
+  private async executeClaudeCode(parameters: unknown, context?: unknown) {
     const { code, operation } = parameters;
     
     // Simulate Claude Code execution
@@ -729,7 +727,7 @@ describe('Code Tests', () => {
   }
 
   // Additional tool handlers
-  private async generateDocumentation(parameters: any, context?: any) {
+  private async generateDocumentation(parameters: unknown, context?: unknown) {
     const { code, format = 'markdown' } = parameters;
     
     return {
@@ -739,7 +737,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async refactorCode(parameters: any, context?: any) {
+  private async refactorCode(parameters: unknown, context?: unknown) {
     const { code, refactorType } = parameters;
     
     return {
@@ -749,7 +747,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async optimizeCode(parameters: any, context?: any) {
+  private async optimizeCode(parameters: unknown, context?: unknown) {
     const { code, optimizationType } = parameters;
     
     return {
@@ -759,7 +757,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async createDashboard(parameters: any, context?: any) {
+  private async createDashboard(parameters: unknown, context?: unknown) {
     const { data, chartTypes } = parameters;
     
     return {
@@ -774,7 +772,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async forecastData(parameters: any, context?: any) {
+  private async forecastData(parameters: unknown, context?: unknown) {
     const { data, forecastPeriod } = parameters;
     
     return {
@@ -786,7 +784,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async generateWireframe(parameters: any, context?: any) {
+  private async generateWireframe(parameters: unknown, context?: unknown) {
     const { pageType, layout } = parameters;
     
     return {
@@ -798,7 +796,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async createStyleGuide(parameters: any, context?: any) {
+  private async createStyleGuide(parameters: unknown, context?: unknown) {
     const { brand, colors, typography } = parameters;
     
     return {
@@ -811,7 +809,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async generateIcons(parameters: any, context?: any) {
+  private async generateIcons(parameters: unknown, context?: unknown) {
     const { style, size, count } = parameters;
     
     return {
@@ -824,7 +822,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async generateSEOStrategy(parameters: any, context?: any) {
+  private async generateSEOStrategy(parameters: unknown, context?: unknown) {
     const { website, keywords, industry } = parameters;
     
     return {
@@ -841,7 +839,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async createSocialMediaPost(parameters: any, context?: any) {
+  private async createSocialMediaPost(parameters: unknown, context?: unknown) {
     const { platform, topic, tone } = parameters;
     
     return {
@@ -854,7 +852,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async analyzeCompetitors(parameters: any, context?: any) {
+  private async analyzeCompetitors(parameters: unknown, context?: unknown) {
     const { industry, competitors } = parameters;
     
     return {
@@ -870,7 +868,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async analyzeFinancials(parameters: any, context?: any) {
+  private async analyzeFinancials(parameters: unknown, context?: unknown) {
     const { data, period } = parameters;
     
     return {
@@ -884,7 +882,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async createPresentation(parameters: any, context?: any) {
+  private async createPresentation(parameters: unknown, context?: unknown) {
     const { topic, audience, slides } = parameters;
     
     return {
@@ -897,7 +895,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async generateContract(parameters: any, context?: any) {
+  private async generateContract(parameters: unknown, context?: unknown) {
     const { type, parties, terms } = parameters;
     
     return {
@@ -911,7 +909,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async evaluateModel(parameters: any, context?: any) {
+  private async evaluateModel(parameters: unknown, context?: unknown) {
     const { model, dataset, metrics } = parameters;
     
     return {
@@ -928,7 +926,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async optimizeModel(parameters: any, context?: any) {
+  private async optimizeModel(parameters: unknown, context?: unknown) {
     const { model, optimizationType } = parameters;
     
     return {
@@ -944,7 +942,7 @@ describe('Code Tests', () => {
     };
   }
 
-  private async deployModel(parameters: any, context?: any) {
+  private async deployModel(parameters: unknown, context?: unknown) {
     const { model, environment, config } = parameters;
     
     return {

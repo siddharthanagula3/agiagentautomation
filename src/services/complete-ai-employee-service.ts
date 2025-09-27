@@ -38,7 +38,7 @@ import type {
 } from '../types/complete-ai-employee';
 
 class CompleteAIEmployeeService {
-  private realtimeSubscriptions: Map<string, any> = new Map();
+  private realtimeSubscriptions: Map<string, unknown> = new Map();
 
   // ========================================
   // EMPLOYEE CRUD OPERATIONS
@@ -104,7 +104,7 @@ class CompleteAIEmployeeService {
         },
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -129,7 +129,7 @@ class CompleteAIEmployeeService {
         data: data as AIEmployee,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -182,7 +182,7 @@ class CompleteAIEmployeeService {
         data: data as AIEmployee,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -211,7 +211,7 @@ class CompleteAIEmployeeService {
         data: data as AIEmployee,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -235,7 +235,7 @@ class CompleteAIEmployeeService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -297,7 +297,7 @@ class CompleteAIEmployeeService {
         data: data as EmployeeHire,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -327,7 +327,7 @@ class CompleteAIEmployeeService {
         data: employees,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -360,7 +360,7 @@ class CompleteAIEmployeeService {
         };
       }
 
-      // End any existing active session
+      // End unknown existing active session
       await supabase
         .from('employee_sessions')
         .update({ is_active: false, session_end: new Date().toISOString() })
@@ -385,7 +385,7 @@ class CompleteAIEmployeeService {
         data: data as EmployeeSession,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -400,7 +400,7 @@ class CompleteAIEmployeeService {
     userId: string,
     content: string,
     messageType: MessageType = 'text',
-    metadata: any = {}
+    metadata: unknown = {}
   ): Promise<APIResponse<ChatMessage>> {
     try {
       const { data, error } = await supabase
@@ -422,7 +422,7 @@ class CompleteAIEmployeeService {
         data: data as ChatMessage,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -449,7 +449,7 @@ class CompleteAIEmployeeService {
         data: data as ChatMessage[],
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -466,10 +466,10 @@ class CompleteAIEmployeeService {
   async executeTool(
     employeeId: string,
     toolName: string,
-    parameters: Record<string, any>,
+    parameters: Record<string, unknown>,
     userId?: string,
     jobId?: string
-  ): Promise<APIResponse<any>> {
+  ): Promise<APIResponse<unknown>> {
     try {
       // Execute tool via MCP service
       const result = await completeMCPService.executeTool(toolName, parameters, {
@@ -497,7 +497,7 @@ class CompleteAIEmployeeService {
         error: result.error,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -577,7 +577,7 @@ class CompleteAIEmployeeService {
         data: data as JobAssignment,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -593,7 +593,7 @@ class CompleteAIEmployeeService {
     feedback?: string
   ): Promise<APIResponse<JobAssignment>> {
     try {
-      const updates: any = { status };
+      const updates: unknown = { status };
       if (feedback) updates.feedback = feedback;
       if (status === 'completed') updates.completed_at = new Date().toISOString();
       if (status === 'in_progress') updates.started_at = new Date().toISOString();
@@ -612,7 +612,7 @@ class CompleteAIEmployeeService {
         data: data as JobAssignment,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -646,7 +646,7 @@ class CompleteAIEmployeeService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -667,7 +667,7 @@ class CompleteAIEmployeeService {
         data: data as EmployeeAnalytics,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -681,7 +681,7 @@ class CompleteAIEmployeeService {
   // ========================================
 
   // Subscribe to employee updates
-  subscribeToEmployeeUpdates(employeeId: string, callback: (data: any) => void): string {
+  subscribeToEmployeeUpdates(employeeId: string, callback: (data: unknown) => void): string {
     const subscriptionId = `employee_${employeeId}_${Date.now()}`;
     
     const subscription = supabase
@@ -700,7 +700,7 @@ class CompleteAIEmployeeService {
   }
 
   // Subscribe to chat messages
-  subscribeToChatMessages(employeeId: string, userId: string, callback: (data: any) => void): string {
+  subscribeToChatMessages(employeeId: string, userId: string, callback: (data: unknown) => void): string {
     const subscriptionId = `chat_${employeeId}_${userId}_${Date.now()}`;
     
     const subscription = supabase
@@ -832,7 +832,7 @@ class CompleteAIEmployeeService {
         data: data.tools || [],
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -850,7 +850,7 @@ class CompleteAIEmployeeService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -875,7 +875,7 @@ class CompleteAIEmployeeService {
         data: data.workflows || [],
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -893,7 +893,7 @@ class CompleteAIEmployeeService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,

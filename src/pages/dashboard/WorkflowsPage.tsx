@@ -40,7 +40,7 @@ interface WorkflowNode {
   id: string;
   name: string;
   type: 'trigger' | 'action' | 'condition' | 'loop' | 'output';
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   nextNodes: string[];
 }
 
@@ -61,7 +61,7 @@ interface WorkflowType {
   status: 'active' | 'paused' | 'completed' | 'failed' | 'draft';
   trigger: {
     type: 'manual' | 'scheduled' | 'event' | 'webhook' | 'condition';
-    config: Record<string, any>;
+    config: Record<string, unknown>;
   };
   nodes: WorkflowNode[];
   executionCount: number;
@@ -85,10 +85,23 @@ interface WorkflowExecution {
   duration?: number;
   progress: number;
   currentNode?: string;
-  output?: any;
+  output?: unknown;
   error?: string;
 }
 
+  const [workflows, setWorkflows] = useState<WorkflowType[]>([]);
+  const [filteredWorkflows, setFilteredWorkflows] = useState<WorkflowType[]>([]);
+  const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
+  const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowType | null>(null);
+  const [isCreatingWorkflow, setIsCreatingWorkflow] = useState(false);
+  useEffect(() => {
+  useEffect(() => {
 const WorkflowsPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -103,25 +116,12 @@ const WorkflowsPage: React.FC = () => {
     );
   }
   
-  const [workflows, setWorkflows] = useState<WorkflowType[]>([]);
-  const [filteredWorkflows, setFilteredWorkflows] = useState<WorkflowType[]>([]);
-  const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
-  const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowType | null>(null);
-  const [isCreatingWorkflow, setIsCreatingWorkflow] = useState(false);
 
-  useEffect(() => {
     if (user) {
       loadWorkflows();
     }
   }, [user]);
 
-  useEffect(() => {
     filterWorkflows();
   }, [workflows, searchTerm, categoryFilter, statusFilter]);
 

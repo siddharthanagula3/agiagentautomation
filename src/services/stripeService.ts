@@ -75,7 +75,7 @@ class StripeService {
     }
   }
 
-  async confirmPayment(clientSecret: string, paymentMethodId: string): Promise<{ data: any; error: string | null }> {
+  async confirmPayment(clientSecret: string, paymentMethodId: string): Promise<{ data: unknown; error: string | null }> {
     try {
       if (!this.stripe) {
         await this.initialize();
@@ -148,7 +148,7 @@ class StripeService {
     }
   }
 
-  async createCustomer(email: string, name: string): Promise<{ data: any; error: string | null }> {
+  async createCustomer(email: string, name: string): Promise<{ data: unknown; error: string | null }> {
     try {
       const response = await fetch('/api/create-customer', {
         method: 'POST',
@@ -189,7 +189,7 @@ class StripeService {
     }
   }
 
-  async setupPaymentMethod(customerId: string): Promise<{ data: any; error: string | null }> {
+  async setupPaymentMethod(customerId: string): Promise<{ data: unknown; error: string | null }> {
     try {
       if (!this.stripe) {
         await this.initialize();

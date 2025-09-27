@@ -78,11 +78,11 @@ export const AccessibilityProvider: React.FC<AccessibilityProviderProps> = ({ ch
     setSettings(prev => ({ ...prev, ...updates }));
   };
 
+  const getFontSizeClass = useCallback(() => {
   const resetSettings = () => {
     setSettings(DEFAULT_SETTINGS);
   };
 
-  const getFontSizeClass = useCallback(() => {
     switch (settings.fontSize) {
       case 'small': return 'text-sm';
       case 'large': return 'text-lg';

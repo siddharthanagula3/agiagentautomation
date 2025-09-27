@@ -478,11 +478,11 @@ import { useEffect, useState } from 'react';
 import { useStripe, useElements } from '@stripe/react-stripe-js';
 
 // Hook for payment processing
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 export const usePayment = () => {
   const stripe = useStripe();
   const elements = useElements();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const processPayment = async (params: {
     clientSecret: string;
@@ -563,10 +563,10 @@ export const usePayment = () => {
 };
 
 // Hook for subscription management
-export const useSubscription = () => {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+export const useSubscription = () => {
 
   const fetchSubscription = async () => {
     try {
@@ -646,10 +646,10 @@ export const useSubscription = () => {
 };
 
 // Hook for payment methods
-export const usePaymentMethods = () => {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+export const usePaymentMethods = () => {
 
   const fetchPaymentMethods = async () => {
     try {

@@ -17,7 +17,7 @@ export interface RealtimeSubscription {
   id: string;
   channel: RealtimeChannel;
   event: string;
-  callback: (data: any) => void;
+  callback: (data: unknown) => void;
   isActive: boolean;
   createdAt: string;
 }
@@ -444,13 +444,13 @@ class CompleteRealtimeService {
     type: string,
     title: string,
     message: string,
-    data?: Record<string, any>
+    data?: Record<string, unknown>
   ): Promise<APIResponse<EmployeeNotification>> {
     try {
       const notification: EmployeeNotification = {
         id: `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId,
-        type: type as any,
+        type: type as unknown,
         title,
         message,
         data,
@@ -469,7 +469,7 @@ class CompleteRealtimeService {
         data: notification,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -485,7 +485,7 @@ class CompleteRealtimeService {
   // Subscribe to custom events
   subscribeToCustomEvents(
     eventName: string,
-    callback: (data: any) => void
+    callback: (data: unknown) => void
   ): string {
     const subscriptionId = `custom_${eventName}_${Date.now()}`;
     
@@ -517,7 +517,7 @@ class CompleteRealtimeService {
   // Broadcast custom event
   async broadcastEvent(
     eventName: string,
-    data: any
+    data: unknown
   ): Promise<APIResponse<boolean>> {
     try {
       const channel = supabase.channel(`broadcast_${eventName}`);
@@ -533,7 +533,7 @@ class CompleteRealtimeService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -694,7 +694,7 @@ class CompleteRealtimeService {
   // ========================================
 
   // Handle subscription errors
-  private handleSubscriptionError(subscriptionId: string, error: any): void {
+  private handleSubscriptionError(subscriptionId: string, error: unknown): void {
     console.error(`Subscription error for ${subscriptionId}:`, error);
     
     // Attempt to reconnect

@@ -169,7 +169,7 @@ class RealtimeService {
   // Update job progress in real-time
   async updateJobProgress(jobId: string, progress: number, status?: Job['status']): Promise<void> {
     try {
-      const updates: any = { progress };
+      const updates: unknown = { progress };
       
       if (status) {
         updates.status = status;

@@ -55,6 +55,16 @@ interface PlatformMetrics {
   deployments: number; // deployment count
 }
 
+  const [platforms, setPlatforms] = useState<Platform[]>([]);
+  const [filteredPlatforms, setFilteredPlatforms] = useState<Platform[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
+  useEffect(() => {
+  useEffect(() => {
 const PlatformPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -69,22 +79,12 @@ const PlatformPage: React.FC = () => {
     );
   }
   
-  const [platforms, setPlatforms] = useState<Platform[]>([]);
-  const [filteredPlatforms, setFilteredPlatforms] = useState<Platform[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
 
-  useEffect(() => {
     if (user) {
       loadPlatforms();
     }
   }, [user]);
 
-  useEffect(() => {
     filterPlatforms();
   }, [platforms, searchTerm, typeFilter, statusFilter]);
 

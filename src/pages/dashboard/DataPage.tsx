@@ -51,6 +51,16 @@ interface DataSchema {
   description: string;
 }
 
+  const [dataSources, setDataSources] = useState<DataSource[]>([]);
+  const [filteredSources, setFilteredSources] = useState<DataSource[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedSource, setSelectedSource] = useState<DataSource | null>(null);
+  useEffect(() => {
+  useEffect(() => {
 const DataPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -65,22 +75,12 @@ const DataPage: React.FC = () => {
     );
   }
   
-  const [dataSources, setDataSources] = useState<DataSource[]>([]);
-  const [filteredSources, setFilteredSources] = useState<DataSource[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [selectedSource, setSelectedSource] = useState<DataSource | null>(null);
 
-  useEffect(() => {
     if (user) {
       loadDataSources();
     }
   }, [user]);
 
-  useEffect(() => {
     filterDataSources();
   }, [dataSources, searchTerm, typeFilter, statusFilter]);
 

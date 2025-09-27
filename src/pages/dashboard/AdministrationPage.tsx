@@ -4,13 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Button } from '../../components/ui/button';
 import { Loader2 } from 'lucide-react';
 
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<unknown[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
 const AdministrationPage: React.FC = () => {
   const { user } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
     // TODO: Replace with real data fetching
     setLoading(false);
   }, []);

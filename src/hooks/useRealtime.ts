@@ -3,11 +3,11 @@ import { realtimeService } from '../services/realtimeService';
 import { useAuth } from '../contexts/auth-hooks';
 
 export interface RealtimeCallbacks {
-  onJobUpdate?: (job: any) => void;
-  onJobCreated?: (job: any) => void;
+  onJobUpdate?: (job: unknown) => void;
+  onJobCreated?: (job: unknown) => void;
   onJobDeleted?: (jobId: string) => void;
-  onAgentUpdate?: (agent: any) => void;
-  onNotification?: (notification: any) => void;
+  onAgentUpdate?: (agent: unknown) => void;
+  onNotification?: (notification: unknown) => void;
   onError?: (error: string) => void;
 }
 

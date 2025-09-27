@@ -20,7 +20,7 @@ export interface PerformanceData {
   metric: string;
   value: number;
   timestamp: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 export interface PerformanceTrend {
@@ -80,7 +80,7 @@ export interface KPI {
 
 class CompletePerformanceTrackingService {
   private performanceCache: Map<string, PerformanceMetrics> = new Map();
-  private analyticsCache: Map<string, any> = new Map();
+  private analyticsCache: Map<string, unknown> = new Map();
   private isInitialized = false;
 
   constructor() {
@@ -109,7 +109,7 @@ class CompletePerformanceTrackingService {
     employeeId: string,
     metric: string,
     value: number,
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): Promise<APIResponse<boolean>> {
     try {
       const performanceData: PerformanceData = {
@@ -135,7 +135,7 @@ class CompletePerformanceTrackingService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -180,7 +180,7 @@ class CompletePerformanceTrackingService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -218,7 +218,7 @@ class CompletePerformanceTrackingService {
         data: performance,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -247,7 +247,7 @@ class CompletePerformanceTrackingService {
         data: data as EmployeePerformanceHistory[],
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -272,7 +272,7 @@ class CompletePerformanceTrackingService {
         data: data as EmployeeAnalytics,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -314,7 +314,7 @@ class CompletePerformanceTrackingService {
         data: dashboard,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -359,7 +359,7 @@ class CompletePerformanceTrackingService {
         },
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -404,7 +404,7 @@ class CompletePerformanceTrackingService {
         data: report,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -487,7 +487,7 @@ class CompletePerformanceTrackingService {
         data: kpis,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -588,7 +588,7 @@ class CompletePerformanceTrackingService {
         data: { insights, recommendations },
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -615,7 +615,7 @@ class CompletePerformanceTrackingService {
         },
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -639,7 +639,7 @@ class CompletePerformanceTrackingService {
         data: { total: data.length },
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -665,7 +665,7 @@ class CompletePerformanceTrackingService {
         data: { total },
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -675,7 +675,7 @@ class CompletePerformanceTrackingService {
   }
 
   // Get performance stats
-  private async getPerformanceStats(): Promise<APIResponse<{ average: number; topPerformers: any[]; distribution: any[] }>> {
+  private async getPerformanceStats(): Promise<APIResponse<{ average: number; topPerformers: unknown[]; distribution: unknown[] }>> {
     try {
       const { data, error } = await supabase
         .from('ai_employees')
@@ -709,7 +709,7 @@ class CompletePerformanceTrackingService {
         data: { average, topPerformers, distribution },
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -719,7 +719,7 @@ class CompletePerformanceTrackingService {
   }
 
   // Get recent activity
-  private async getRecentActivity(): Promise<APIResponse<any[]>> {
+  private async getRecentActivity(): Promise<APIResponse<unknown[]>> {
     try {
       const { data, error } = await supabase
         .from('recent_activity')
@@ -734,7 +734,7 @@ class CompletePerformanceTrackingService {
         data: data || [],
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -758,7 +758,7 @@ class CompletePerformanceTrackingService {
         data: count || 0,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -783,7 +783,7 @@ class CompletePerformanceTrackingService {
         data: count || 0,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -807,7 +807,7 @@ class CompletePerformanceTrackingService {
         data: count || 0,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -833,7 +833,7 @@ class CompletePerformanceTrackingService {
         data: total,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -860,7 +860,7 @@ class CompletePerformanceTrackingService {
         data: average,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,

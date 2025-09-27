@@ -20,7 +20,7 @@ export interface N8NWorkflowExecution {
   executionId: string;
   workflowId: string;
   status: 'running' | 'success' | 'error' | 'waiting';
-  data: any;
+  data: unknown;
   startedAt: string;
   finishedAt?: string;
   error?: string;
@@ -35,7 +35,7 @@ class N8NIntegration {
 
   async executeWorkflow(
     workflowId: string,
-    inputData: any,
+    inputData: unknown,
     options: {
       waitForCompletion?: boolean;
       timeout?: number;
@@ -73,7 +73,7 @@ class N8NIntegration {
         data: execution,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -109,7 +109,7 @@ class N8NIntegration {
 
         // Wait before next check
         await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (error: any) {
+      } catch (error: unknown) {
         return {
           success: false,
           error: error.message,
@@ -144,7 +144,7 @@ class N8NIntegration {
         data: execution,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -229,7 +229,7 @@ class OpenAIIntegration {
         data,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -276,7 +276,7 @@ class OpenAIIntegration {
           timestamp: new Date().toISOString()
         };
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -301,7 +301,7 @@ class OpenAIIntegration {
         temperature: options.temperature || 0.3,
         maxTokens: 2000
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -381,7 +381,7 @@ class AnthropicIntegration {
         data,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -428,7 +428,7 @@ class AnthropicIntegration {
           timestamp: new Date().toISOString()
         };
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -507,7 +507,7 @@ class CursorAgentIntegration {
         data,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -533,7 +533,7 @@ class CursorAgentIntegration {
           framework: 'react'
         }
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -561,7 +561,7 @@ class CursorAgentIntegration {
         data,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -631,7 +631,7 @@ class ReplitAgentIntegration {
         data,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -655,7 +655,7 @@ class ReplitAgentIntegration {
         language,
         context
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -727,7 +727,7 @@ class ClaudeCodeIntegration {
         data,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -750,7 +750,7 @@ class ClaudeCodeIntegration {
         operation: 'analyze',
         context
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -773,7 +773,7 @@ class ClaudeCodeIntegration {
         operation: 'refactor',
         context
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -796,7 +796,7 @@ class ClaudeCodeIntegration {
         operation: 'optimize',
         context
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -870,7 +870,7 @@ export class ToolIntegrationManager {
   }
 
   // N8N Methods
-  async executeN8NWorkflow(workflowId: string, inputData: any): Promise<APIResponse<N8NWorkflowExecution>> {
+  async executeN8NWorkflow(workflowId: string, inputData: unknown): Promise<APIResponse<N8NWorkflowExecution>> {
     if (!this.n8n) {
       return {
         success: false,
@@ -882,7 +882,7 @@ export class ToolIntegrationManager {
   }
 
   // OpenAI Methods
-  async generateTextWithOpenAI(prompt: string, options?: any): Promise<APIResponse<string>> {
+  async generateTextWithOpenAI(prompt: string, options?: unknown): Promise<APIResponse<string>> {
     if (!this.openai) {
       return {
         success: false,
@@ -905,7 +905,7 @@ export class ToolIntegrationManager {
   }
 
   // Anthropic Methods
-  async generateTextWithAnthropic(prompt: string, options?: any): Promise<APIResponse<string>> {
+  async generateTextWithAnthropic(prompt: string, options?: unknown): Promise<APIResponse<string>> {
     if (!this.anthropic) {
       return {
         success: false,
@@ -917,7 +917,7 @@ export class ToolIntegrationManager {
   }
 
   // Cursor Agent Methods
-  async executeCursorTask(task: string, context?: any): Promise<APIResponse<CursorAgentResponse>> {
+  async executeCursorTask(task: string, context?: unknown): Promise<APIResponse<CursorAgentResponse>> {
     if (!this.cursorAgent) {
       return {
         success: false,
@@ -929,7 +929,7 @@ export class ToolIntegrationManager {
   }
 
   // Replit Agent Methods
-  async executeReplitCode(code: string, language?: string, context?: any): Promise<APIResponse<ReplitAgentResponse>> {
+  async executeReplitCode(code: string, language?: string, context?: unknown): Promise<APIResponse<ReplitAgentResponse>> {
     if (!this.replitAgent) {
       return {
         success: false,
@@ -941,7 +941,7 @@ export class ToolIntegrationManager {
   }
 
   // Claude Code Methods
-  async processCodeWithClaude(code: string, operation: string, context?: any): Promise<APIResponse<ClaudeCodeResponse>> {
+  async processCodeWithClaude(code: string, operation: string, context?: unknown): Promise<APIResponse<ClaudeCodeResponse>> {
     if (!this.claudeCode) {
       return {
         success: false,
@@ -949,7 +949,7 @@ export class ToolIntegrationManager {
         timestamp: new Date().toISOString()
       };
     }
-    return await this.claudeCode.processCode({ code, operation: operation as any, context });
+    return await this.claudeCode.processCode({ code, operation: operation as unknown, context });
   }
 
   // Get available integrations

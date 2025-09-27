@@ -12,9 +12,9 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
+  const [showUserMenu, setShowUserMenu] = useState(false);
 const DashboardHeader: React.FC = () => {
   const { user, logout } = useAuth();
-  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleLogout = () => {
     logout();

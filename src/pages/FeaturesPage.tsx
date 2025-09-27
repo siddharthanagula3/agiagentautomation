@@ -27,7 +27,7 @@ const FeaturesPage: React.FC = () => {
     {
       icon: <Users className="h-8 w-8" />,
       title: "250+ AI Employees",
-      description: "Hire specialized AI agents for any task - from data analysis to content creation, customer service to software development.",
+      description: "Hire specialized AI agents for unknown task - from data analysis to content creation, customer service to software development.",
       benefits: [
         "Specialized expertise in 50+ domains",
         "24/7 availability and reliability", 

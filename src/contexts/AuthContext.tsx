@@ -85,24 +85,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Check for existing session with timeout
     const checkSession = async () => {
       try {
-        // Set a timeout to prevent infinite loading
+        // Set a longer timeout for Supabase connection
         timeoutId = setTimeout(() => {
           if (isMounted) {
-            console.warn('Auth check timeout - setting loading to false');
+            console.warn('Auth check timeout - Supabase connection may be slow');
+            console.log('Setting loading to false to allow user interaction');
             setLoading(false);
           }
-        }, 5000); // 5 second timeout for initial auth check
+        }, 10000); // 10 second timeout for Supabase connection
 
+        console.log('Attempting to connect to Supabase...');
         const { user: currentUser, error } = await authService.getCurrentUser();
         
         if (isMounted) {
           if (currentUser && !error) {
+            console.log('✅ User session found:', currentUser.email);
             setUser(currentUser);
+          } else {
+            console.log('ℹ️  No active session - user needs to login');
           }
           setLoading(false);
         }
       } catch (error) {
-        console.error('Error checking session:', error);
+        console.error('Supabase connection error:', error);
+        console.log('This may be a network or Supabase service issue');
         if (isMounted) {
           setLoading(false);
         }

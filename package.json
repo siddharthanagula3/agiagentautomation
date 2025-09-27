@@ -18,6 +18,7 @@
     "test:run": "vitest run",
     "test:supabase": "node test-supabase-connection.js",
     "verify": "node test-supabase-connection.js && echo 'Configuration verified!'",
+    "verify:login": "node verify-login.js",
     "clean": "rm -rf dist node_modules/.vite",
     "clean:all": "rm -rf dist node_modules package-lock.json",
     "reinstall": "npm run clean:all && npm install"

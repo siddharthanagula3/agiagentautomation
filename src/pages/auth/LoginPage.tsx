@@ -20,9 +20,17 @@ const LoginPage: React.FC = () => {
   const { login, user, loading } = useAuth();
   const navigate = useNavigate();
   
+  // Check if we're in demo mode
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const isDemoMode = !supabaseUrl || 
+                     !supabaseKey || 
+                     supabaseUrl.includes('your_supabase_url_here') || 
+                     supabaseKey.includes('your_supabase_anon_key_here');
+  
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: isDemoMode ? 'demo@example.com' : '',
+    password: isDemoMode ? 'demo123' : ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -52,20 +60,42 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
     setError('');
 
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      setIsLoading(false);
+      setError('Login timeout. Please try again.');
+    }, 10000); // 10 second timeout
+
     try {
       const result = await login(formData.email, formData.password);
+      clearTimeout(timeoutId);
+      
       if (result.success) {
         navigate('/dashboard');
       } else {
         setError(result.error || 'Login failed. Please try again.');
         setIsLoading(false);
-        return;
       }
     } catch (err) {
+      clearTimeout(timeoutId);
+      console.error('Login error:', err);
       setError('An unexpected error occurred. Please try again.');
-    } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDemoLogin = async () => {
+    setFormData({
+      email: 'demo@example.com',
+      password: 'demo123'
+    });
+    // Trigger login after setting demo credentials
+    setTimeout(() => {
+      const form = document.getElementById('login-form') as HTMLFormElement;
+      if (form) {
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }, 100);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +128,26 @@ const LoginPage: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Demo Mode Alert */}
+            {isDemoMode && (
+              <div className="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-start space-x-2">
+                  <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-yellow-800">Demo Mode Active</p>
+                    <p className="text-yellow-700 mt-1">
+                      Use the pre-filled credentials to login:
+                    </p>
+                    <div className="mt-2 font-mono text-xs text-yellow-800">
+                      Email: demo@example.com<br/>
+                      Password: demo123
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <form id="login-form" onSubmit={handleSubmit} className="space-y-6">
               {error && (
                 <div className="flex items-center space-x-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
                   <AlertCircle className="h-4 w-4" />
@@ -205,6 +254,21 @@ const LoginPage: React.FC = () => {
                   Twitter
                 </Button>
               </div>
+              
+              {/* Quick Demo Login */}
+              {isDemoMode && (
+                <div className="mt-4">
+                  <Button 
+                    type="button" 
+                    variant="secondary" 
+                    className="w-full"
+                    onClick={handleDemoLogin}
+                  >
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Quick Demo Login
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="mt-6 text-center">

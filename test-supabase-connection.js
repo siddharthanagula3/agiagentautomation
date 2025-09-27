@@ -1,11 +1,9 @@
-require('dotenv').config();
-
 console.log('🔍 Testing Supabase Connection Configuration\n');
 console.log('='.repeat(50));
 
 // Check environment variables
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 console.log('\n📋 Environment Variable Status:');
 console.log('--------------------------------');

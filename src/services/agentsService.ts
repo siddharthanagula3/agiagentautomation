@@ -58,12 +58,10 @@ class AgentsService {
 
       return { data: data || [], error: null };
     } catch (error) {
+      console.error('Service error:', error);
       return { data: [], error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async getAgentById(id: string): Promise<{ data: AIAgent | null; error: string | null }> {
     try {
@@ -125,12 +123,10 @@ class AgentsService {
 
       return { data: data || [], error: null };
     } catch (error) {
+      console.error('Service error:', error);
       return { data: [], error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async getTopRatedAgents(limit: number = 10): Promise<{ data: AIAgent[]; error: string | null }> {
     try {
@@ -147,12 +143,10 @@ class AgentsService {
 
       return { data: data || [], error: null };
     } catch (error) {
+      console.error('Service error:', error);
       return { data: [], error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async updateAgentStatus(id: string, status: AIAgent['status']): Promise<{ error: string | null }> {
     try {
@@ -163,12 +157,10 @@ class AgentsService {
 
       return { error: error?.message || null };
     } catch (error) {
+      console.error('Service error:', error);
       return { error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async updateAgentRating(id: string, rating: number): Promise<{ error: string | null }> {
     try {
@@ -179,24 +171,20 @@ class AgentsService {
 
       return { error: error?.message || null };
     } catch (error) {
+      console.error('Service error:', error);
       return { error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async incrementTasksCompleted(id: string): Promise<{ error: string | null }> {
     try {
       const { error } = await supabase.rpc('increment_tasks_completed', { agent_id: id });
       return { error: error?.message || null };
     } catch (error) {
+      console.error('Service error:', error);
       return { error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async getAgentCategories(): Promise<{ data: string[]; error: string | null }> {
     try {

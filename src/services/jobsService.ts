@@ -95,12 +95,10 @@ class JobsService {
 
       return { data: data || [], error: null };
     } catch (error) {
+      console.error('Service error:', error);
       return { data: [], error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async getJobById(id: string): Promise<{ data: Job | null; error: string | null }> {
     try {
@@ -125,12 +123,10 @@ class JobsService {
 
       return { data, error: null };
     } catch (error) {
+      console.error('Service error:', error);
       return { data: null, error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async createJob(userId: string, jobData: CreateJobData): Promise<{ data: Job | null; error: string | null }> {
     try {
@@ -156,12 +152,10 @@ class JobsService {
 
       return { data, error: null };
     } catch (error) {
+      console.error('Service error:', error);
       return { data: null, error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async updateJob(id: string, updates: JobUpdate): Promise<{ data: Job | null; error: string | null }> {
     try {
@@ -178,12 +172,10 @@ class JobsService {
 
       return { data, error: null };
     } catch (error) {
+      console.error('Service error:', error);
       return { data: null, error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async deleteJob(id: string): Promise<{ error: string | null }> {
     try {
@@ -194,12 +186,10 @@ class JobsService {
 
       return { error: error?.message || null };
     } catch (error) {
+      console.error('Service error:', error);
       return { error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async getJobStats(userId: string): Promise<{ data: JobStats; error: string | null }> {
     try {
@@ -227,15 +217,13 @@ class JobsService {
 
       return { data: stats, error: null };
     } catch (error) {
+      console.error('Service error:', error);
       return { 
         data: { total: 0, queued: 0, running: 0, completed: 0, failed: 0, totalCost: 0, avgDuration: 0 }, 
         error: 'An unexpected error occurred' 
       };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async assignJob(jobId: string, agentId: string): Promise<{ error: string | null }> {
     try {
@@ -250,12 +238,10 @@ class JobsService {
 
       return { error: error?.message || null };
     } catch (error) {
+      console.error('Service error:', error);
       return { error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async updateJobProgress(jobId: string, progress: number): Promise<{ error: string | null }> {
     try {
@@ -273,12 +259,10 @@ class JobsService {
 
       return { error: error?.message || null };
     } catch (error) {
+      console.error('Service error:', error);
       return { error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async pauseJob(jobId: string): Promise<{ error: string | null }> {
     try {
@@ -289,12 +273,10 @@ class JobsService {
 
       return { error: error?.message || null };
     } catch (error) {
+      console.error('Service error:', error);
       return { error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async resumeJob(jobId: string): Promise<{ error: string | null }> {
     try {
@@ -305,12 +287,10 @@ class JobsService {
 
       return { error: error?.message || null };
     } catch (error) {
+      console.error('Service error:', error);
       return { error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async cancelJob(jobId: string): Promise<{ error: string | null }> {
     try {

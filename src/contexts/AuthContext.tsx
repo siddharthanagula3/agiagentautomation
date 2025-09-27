@@ -110,29 +110,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { success: true };
       }
       
-      // Add aggressive timeout to prevent infinite loading
+      // Simple timeout to prevent infinite loading
       const loginTimeout = setTimeout(() => {
         console.warn('Login timeout - forcing loading to false');
         setLoading(false);
-      }, 5000); // 5 second timeout for login
+      }, 10000); // 10 second timeout for login
       
-      // Use Promise.race to ensure timeout works
-      const loginPromise = authService.login({ email, password });
-      const timeoutPromise = new Promise<{ success: boolean; error: string }>((resolve) => {
-        setTimeout(() => resolve({ success: false, error: 'Login timeout - please try again' }), 5000);
-      });
-      
-      const result = await Promise.race([loginPromise, timeoutPromise]);
+      const { user: authUser, error } = await authService.login({ email, password });
       
       clearTimeout(loginTimeout);
-      console.log('Login result:', result);
+      console.log('Login result:', { authUser: !!authUser, error });
       
-      if (result.error || !result.user) {
+      if (error || !authUser) {
         setLoading(false);
-        return { success: false, error: result.error || 'Login failed' };
+        return { success: false, error: error || 'Login failed' };
       }
 
-      setUser(result.user);
+      setUser(authUser);
       setLoading(false);
       console.log('Login successful');
       return { success: true };

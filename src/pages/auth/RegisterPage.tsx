@@ -74,8 +74,12 @@ const RegisterPage: React.FC = () => {
       if (result.success) {
         navigate('/dashboard');
       } else {
-        // If email confirmation is required, show guidance and stop loading
-        setError(result.error || 'Registration failed. Please try again.');
+        // Check if it's an email confirmation message
+        if (result.error && result.error.includes('confirmation')) {
+          setError('✅ Registration successful! Please check your email and click the confirmation link to complete your account setup.');
+        } else {
+          setError(result.error || 'Registration failed. Please try again.');
+        }
         setIsLoading(false);
         return;
       }

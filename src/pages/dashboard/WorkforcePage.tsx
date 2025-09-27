@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../../contexts/auth-hooks';
+import { jobsService } from '../../services/jobsService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -48,15 +50,13 @@ interface JobFile {
   size?: number;
 }
 
-  const [selectedStatus, setSelectedStatus] = useState('');
-
-  const [newJob, setNewJob] = useState({
-  useEffect(() => {
-  useEffect(() => {
-  const loadData = useCallback(async () => {
-  const filterJobs = useCallback(() => {
 const WorkforcePage: React.FC = () => {
   const { user } = useAuth();
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [newJob, setNewJob] = useState({
     totalJobs: 0,
     activeJobs: 0,
     completedJobs: 0,
@@ -65,6 +65,7 @@ const WorkforcePage: React.FC = () => {
     avgCompletionTime: 0
   });
 
+  const [newJob, setNewJob] = useState({
     title: '',
     description: '',
     priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent' | 'critical',
@@ -74,16 +75,35 @@ const WorkforcePage: React.FC = () => {
     tags: [] as string[]
   });
 
+  useEffect(() => {
     if (user) {
       loadData();
-      const timeout = setTimeou;
-  t(() => setLoading(false), 8000);
-      return (
-    <div>Component content</div>
-  );
-};
+      const timeout = setTimeout(() => setLoading(false), 8000);
+      return () => clearTimeout(timeout);
+    }
+  }, [user]);
 
-const handleCreateJob = async (e: React.FormEvent) => {
+  const loadData = useCallback(async () => {
+    // TODO: Replace with real data fetching
+    setLoading(false);
+  }, []);
+
+  const filterJobs = useCallback(() => {
+    // TODO: Implement filtering logic
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Loading...</h3>
+          <p className="text-muted-foreground">Please wait while we load your workforce data.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
@@ -607,10 +627,7 @@ const handleCreateJob = async (e: React.FormEvent) => {
         </div>
       )}
     </div>
-  )
-  };
-
-;
+  );
 };
 
 export default WorkforcePage;

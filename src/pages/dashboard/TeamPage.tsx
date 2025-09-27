@@ -1,19 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, 
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // TODO: Replace with actual data fetching
+      setData([]);
+      
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setError('Failed to load data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);useEffect } from 'react';
 import { useAuth } from '../../contexts/auth-hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Loader2 } from 'lucide-react';
 
 const TeamPage: React.FC = () => {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<unknown[]>([]);
 
   useEffect(() => {
-    // TODO: Replace with real data fetching
-    setLoading(false);
-  }, []);
+    if (user) {
+      loadData();
+    }
+  }, [user, loadData]);
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">

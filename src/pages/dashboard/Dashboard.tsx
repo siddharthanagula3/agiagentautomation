@@ -262,15 +262,29 @@ const Dashboard: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Empty state for new users */}
-      {data.length === 0 && !loading && (
+      {recentJobs.length === 0 && aiEmployees.length === 0 && !loading && (
         <div className="text-center py-12">
           <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
             <span className="text-2xl">📊</span>
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">No data yet</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-2">Welcome to AGI Agent Automation</h3>
           <p className="text-muted-foreground mb-4">
-            This page will show your data once you start using the system.
+            Get started by creating your first AI employee or job.
           </p>
+          <div className="flex gap-4 justify-center">
+            <Button asChild>
+              <Link to="/dashboard/ai-employees">
+                <Plus className="mr-2 h-4 w-4" />
+                Create AI Employee
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/dashboard/jobs">
+                <Workflow className="mr-2 h-4 w-4" />
+                Create Job
+              </Link>
+            </Button>
+          </div>
         </div>
       )}
       {/* Header */}

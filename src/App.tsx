@@ -12,8 +12,35 @@ import RealtimeNotification from './components/RealtimeNotification';
 import { AdminRoute } from './components/auth/AdminRoute';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
-// Simple loading fallback component
+// Simple loading fallback component with timeout
 const LoadingFallback = () => {
+  const [showError, setShowError] = React.useState(false);
+  
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowError(true);
+    }, 2000); // Show error after 2 seconds
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (showError) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <h2 className="text-xl font-semibold mb-2">Loading is taking longer than expected</h2>
+          <p className="text-gray-600 mb-4">This might be due to network issues.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="text-center">

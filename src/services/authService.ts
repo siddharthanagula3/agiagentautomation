@@ -193,6 +193,15 @@ class AuthService {
         return { user: null, error: 'No user data returned' };
       }
 
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        console.log('AuthService: Email confirmation required for:', data.user.email);
+        return { 
+          user: null, 
+          error: 'Please check your email and click the confirmation link to complete registration.' 
+        };
+      }
+
       // Create user profile
       const { data: profile, error: profileError } = await supabase
         .from('users')

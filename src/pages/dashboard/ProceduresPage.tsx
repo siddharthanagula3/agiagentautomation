@@ -101,7 +101,4 @@ const ProceduresPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ProceduresPage;

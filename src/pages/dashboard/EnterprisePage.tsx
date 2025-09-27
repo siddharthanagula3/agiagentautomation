@@ -101,7 +101,4 @@ const EnterprisePage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default EnterprisePage;

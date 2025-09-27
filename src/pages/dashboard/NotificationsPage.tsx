@@ -54,7 +54,6 @@ const NotificationsPage: React.FC = () => {
     return (
     <div>Component content</div>
   );
-};
 
 const loadNotifications = async () => {
     try {
@@ -102,7 +101,6 @@ const loadNotifications = async () => {
         ? { ...notification, status: 'read', readAt: new Date().toISOString() }
         : notification
     ));
-  };
 
   const markAllAsRead = async () => {
     setNotifications(prev => prev.map(notification => 
@@ -110,7 +108,6 @@ const loadNotifications = async () => {
         ? { ...notification, status: 'read', readAt: new Date().toISOString() }
         : notification
     ));
-  };
 
   const archiveNotification = async (notificationId: string) => {
     setNotifications(prev => prev.map(notification => 
@@ -118,7 +115,6 @@ const loadNotifications = async () => {
         ? { ...notification, status: 'archived' }
         : notification
     ));
-  };
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -428,10 +424,7 @@ const loadNotifications = async () => {
         </Card>
       )}
     </div>
-  )
-  };
-
-;
+  );
 };
 
 export default NotificationsPage;

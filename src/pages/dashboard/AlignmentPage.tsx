@@ -101,7 +101,4 @@ const AlignmentPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default AlignmentPage;

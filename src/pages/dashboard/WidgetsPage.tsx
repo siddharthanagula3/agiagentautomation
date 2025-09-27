@@ -101,7 +101,4 @@ const WidgetsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default WidgetsPage;

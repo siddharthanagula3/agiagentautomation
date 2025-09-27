@@ -101,7 +101,4 @@ const ExportPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ExportPage;

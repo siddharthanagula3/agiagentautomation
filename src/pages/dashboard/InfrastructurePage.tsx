@@ -101,7 +101,4 @@ const InfrastructurePage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default InfrastructurePage;

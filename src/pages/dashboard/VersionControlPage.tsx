@@ -101,7 +101,4 @@ const VersionControlPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default VersionControlPage;

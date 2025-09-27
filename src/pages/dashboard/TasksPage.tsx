@@ -101,7 +101,4 @@ const TasksPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default TasksPage;

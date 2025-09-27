@@ -101,7 +101,4 @@ const ResponsibilitiesPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ResponsibilitiesPage;

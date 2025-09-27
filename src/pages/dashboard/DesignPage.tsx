@@ -101,7 +101,4 @@ const DesignPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default DesignPage;

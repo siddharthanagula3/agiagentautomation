@@ -101,7 +101,4 @@ const QualityPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default QualityPage;

@@ -101,7 +101,4 @@ const BackupsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default BackupsPage;

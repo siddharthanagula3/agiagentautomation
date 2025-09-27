@@ -101,7 +101,4 @@ const ViewsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ViewsPage;

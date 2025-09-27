@@ -27,7 +27,6 @@ const Component: React.FC = () => {
     return (
     <div>Component content</div>
   );
-};
 
 const dashboardStats = [
     {
@@ -217,8 +216,5 @@ const dashboardStats = [
     </div>
   )
   };
-
-;
-};
 
 export default SimpleDashboard;

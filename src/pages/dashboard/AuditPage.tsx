@@ -101,7 +101,4 @@ const AuditPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default AuditPage;

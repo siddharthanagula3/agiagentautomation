@@ -101,7 +101,4 @@ const ProfessionalPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ProfessionalPage;

@@ -101,7 +101,4 @@ const ParametersPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ParametersPage;

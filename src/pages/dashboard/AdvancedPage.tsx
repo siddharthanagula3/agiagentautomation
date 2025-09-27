@@ -101,7 +101,4 @@ const AdvancedPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default AdvancedPage;

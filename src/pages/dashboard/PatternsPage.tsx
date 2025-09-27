@@ -101,7 +101,4 @@ const PatternsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default PatternsPage;

@@ -101,7 +101,4 @@ const RecommendationsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default RecommendationsPage;

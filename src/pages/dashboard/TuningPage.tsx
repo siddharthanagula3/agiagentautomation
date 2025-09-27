@@ -101,7 +101,4 @@ const TuningPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default TuningPage;

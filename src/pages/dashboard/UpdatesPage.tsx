@@ -101,7 +101,4 @@ const UpdatesPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default UpdatesPage;

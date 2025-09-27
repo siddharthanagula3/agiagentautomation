@@ -101,7 +101,4 @@ const PlanningPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default PlanningPage;

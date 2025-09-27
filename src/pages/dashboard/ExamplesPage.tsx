@@ -101,7 +101,4 @@ const ExamplesPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ExamplesPage;

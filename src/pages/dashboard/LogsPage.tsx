@@ -74,7 +74,6 @@ interface LogFilter {
   dateRange: {
     start: string;
     end: string;
-  };
   searchTerm: string;
 }
 
@@ -99,7 +98,6 @@ const LogsPage: React.FC = () => {
     return (
     <div>Component content</div>
   );
-};
 
 const loadLogs = async (silent = false) => {
     try {
@@ -201,7 +199,6 @@ const loadLogs = async (silent = false) => {
     if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
     return `${Math.floor(diffInMinutes / 1440)} days ago`;
-  };
 
   const handleExportLogs = async () => {
     setIsExporting(true);
@@ -229,7 +226,6 @@ const loadLogs = async (silent = false) => {
       title: "Copied",
       description: "Log entry copied to clipboard",
     });
-  };
 
   const logStats = {
     total: logs.length,
@@ -522,8 +518,5 @@ const loadLogs = async (silent = false) => {
     </div>
   )
   };
-
-;
-};
 
 export default LogsPage;

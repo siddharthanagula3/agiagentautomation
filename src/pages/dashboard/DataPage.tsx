@@ -68,7 +68,6 @@ const DataPage: React.FC = () => {
     return (
     <div>Component content</div>
   );
-};
 
 const loadDataSources = async () => {
     try {
@@ -411,8 +410,5 @@ const loadDataSources = async () => {
     </div>
   )
   };
-
-;
-};
 
 export default DataPage;

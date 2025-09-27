@@ -101,7 +101,4 @@ const ScalingPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ScalingPage;

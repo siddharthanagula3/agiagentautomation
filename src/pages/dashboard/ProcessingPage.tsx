@@ -79,7 +79,6 @@ interface ProcessingJob {
     cpu: number;
     memory: number;
     gpu?: number;
-  };
   pipeline: ProcessingStep[];
   createdBy: string;
   tags: string[];
@@ -115,7 +114,6 @@ interface ProcessingPipeline {
     frequency: 'once' | 'hourly' | 'daily' | 'weekly' | 'monthly';
     nextRun: string;
     enabled: boolean;
-  };
   createdAt: string;
   updatedAt: string;
   createdBy: string;
@@ -150,7 +148,6 @@ const ProcessingPage: React.FC = () => {
     return (
     <div>Component content</div>
   );
-};
 
 const loadData = async () => {
     try {
@@ -585,8 +582,5 @@ const loadData = async () => {
     </div>
   )
   };
-
-;
-};
 
 export default ProcessingPage;

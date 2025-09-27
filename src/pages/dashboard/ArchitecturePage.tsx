@@ -101,7 +101,4 @@ const ArchitecturePage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ArchitecturePage;

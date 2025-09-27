@@ -101,7 +101,4 @@ const DeploymentsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default DeploymentsPage;

@@ -101,7 +101,4 @@ const GraphsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default GraphsPage;

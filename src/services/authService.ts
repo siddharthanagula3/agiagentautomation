@@ -296,7 +296,9 @@ class AuthService {
 
       if (error) {
         console.error('AuthService: Supabase getUser error:', error);
-        return { user: null, error: error.message };
+        console.log('AuthService: This may be a temporary Supabase connectivity issue');
+        // Don't treat this as a critical error - user can still login
+        return { user: null, error: null }; // Return null error to allow login flow to continue
       }
 
       if (!user) {

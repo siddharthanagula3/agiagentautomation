@@ -19,24 +19,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
     
-    // Comprehensive debugging for live site
-    console.log('🔍 LIVE SITE DEBUGGING');
-    console.log('======================');
+    // Comprehensive diagnostic for live site
+    console.log('🔍 COMPREHENSIVE DIAGNOSTIC FOR LIVE SITE');
+    console.log('==========================================');
+    
     console.log('VITE_SUPABASE_URL:', supabaseUrl ? '✅ Set' : '❌ Not set');
     console.log('VITE_SUPABASE_ANON_KEY:', supabaseKey ? '✅ Set' : '❌ Not set');
     
     if (supabaseUrl) {
       console.log('URL Value:', supabaseUrl);
       console.log('URL Valid:', !supabaseUrl.includes('your_supabase_url_here'));
+      console.log('URL Format:', supabaseUrl.startsWith('https://') ? '✅ Correct' : '❌ Incorrect');
     } else {
-      console.log('❌ URL is missing - this will cause demo mode');
+      console.log('❌ CRITICAL: VITE_SUPABASE_URL is missing');
     }
     
     if (supabaseKey) {
       console.log('Key Value:', supabaseKey.substring(0, 20) + '...');
       console.log('Key Valid:', !supabaseKey.includes('your_supabase_anon_key_here'));
+      console.log('Key Format:', supabaseKey.startsWith('eyJ') ? '✅ Correct' : '❌ Incorrect');
     } else {
-      console.log('❌ Key is missing - this will cause demo mode');
+      console.log('❌ CRITICAL: VITE_SUPABASE_ANON_KEY is missing');
     }
     
     const hasValidCredentials = supabaseUrl && 
@@ -47,14 +50,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log('Valid Credentials:', hasValidCredentials ? '✅ Yes' : '❌ No');
     
     if (!hasValidCredentials) {
-      console.log('⚠️  ISSUE: App will fall back to demo mode');
-      console.log('🔧 SOLUTION: Add environment variables to Netlify');
-      console.log('   1. Go to https://app.netlify.com');
-      console.log('   2. Select your site');
-      console.log('   3. Go to Site Settings → Environment Variables');
-      console.log('   4. Add VITE_SUPABASE_URL = https://lywdzvfibhzbljrgovwr.supabase.co');
-      console.log('   5. Add VITE_SUPABASE_ANON_KEY = eyJ...');
-      console.log('   6. Redeploy the site');
+      console.log('⚠️  MODE: Demo Mode (No Backend)');
+      console.log('🎯 CAUSE: Missing or invalid environment variables');
+      console.log('🔧 SOLUTION: Configure Netlify environment variables');
+      console.log('');
+      console.log('📋 NETLIFY SETUP INSTRUCTIONS:');
+      console.log('1. Go to https://app.netlify.com');
+      console.log('2. Select your site: agiagentautomation');
+      console.log('3. Go to Site Settings → Environment Variables');
+      console.log('4. Click "Add variable"');
+      console.log('5. Add Variable 1:');
+      console.log('   Name: VITE_SUPABASE_URL');
+      console.log('   Value: https://lywdzvfibhzbljrgovwr.supabase.co');
+      console.log('6. Add Variable 2:');
+      console.log('   Name: VITE_SUPABASE_ANON_KEY');
+      console.log('   Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5d2R6dmZpYmh6YmxqcmdvdndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3ODI2MDgsImV4cCI6MjA3NDM1ODYwOH0.pt991fDh770PYQRNx3L9va1D_qupbb_j-JynYo2XcTw');
+      console.log('7. Click "Save" for each variable');
+      console.log('8. Go to Deploys tab');
+      console.log('9. Click "Trigger deploy" → "Deploy site"');
+      console.log('10. Wait 2-3 minutes for deployment');
+    } else {
+      console.log('✅ MODE: Production Mode (Real Backend)');
+      console.log('🎯 CAUSE: Environment variables are correctly configured');
+      console.log('🔧 NEXT: Check for other issues (network, Supabase status, etc.)');
     }
 
     // If no valid credentials, immediately set loading to false for demo mode

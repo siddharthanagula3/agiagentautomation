@@ -5,6 +5,7 @@
 [build.environment]
   NODE_VERSION = "20"
   NODE_OPTIONS = "--max_old_space_size=4096"
+  SECRETS_SCAN_OMIT_KEYS = "VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY,VITE_STRIPE_PUBLISHABLE_KEY,VITE_JWT_SECRET"
 
 [[redirects]]
   from = "/*"

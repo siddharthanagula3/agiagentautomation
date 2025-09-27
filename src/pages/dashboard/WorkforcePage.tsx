@@ -85,7 +85,7 @@ const WorkforcePage: React.FC = () => {
 
   const loadData = useCallback(async () => {
     // TODO: Replace with real data fetching
-    setLoading(false);
+      setLoading(false);
   }, []);
 
   const filterJobs = useCallback(() => {
@@ -270,11 +270,11 @@ const WorkforcePage: React.FC = () => {
       )}
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
+      <div>
           <h1 className="text-3xl font-bold text-foreground">AI Workforce</h1>
-          <p className="text-muted-foreground mt-2">
+        <p className="text-muted-foreground mt-2">
             Manage and monitor your AI workforce jobs and tasks.
-          </p>
+        </p>
         </div>
         <Button onClick={() => setShowCreateJob(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -610,11 +610,11 @@ const WorkforcePage: React.FC = () => {
                   </Button>
                   <Button type="submit">
                     Create Job
-                  </Button>
-                </div>
+              </Button>
+            </div>
               </form>
-            </CardContent>
-          </Card>
+        </CardContent>
+      </Card>
         </div>
       )}
     </div>

@@ -103,7 +103,8 @@ const ProfilePage: React.FC = () => {
         location: user.location || '',
         bio: ''
       });
-      const timeout = setTimeout(() => setLoading(false), 500);
+      const timeout = setTimeou;
+  t(() => setLoading(false), 500);
       return () => clearTimeout(timeout);
     } else {
       setLoading(false);
@@ -115,7 +116,8 @@ const ProfilePage: React.FC = () => {
 
     try {
       setSaving(true);
-      const result = await updateProfile(profileData);
+      const result = await;
+  updateProfile(profileData);
       
       if (result.success) {
         // Profile updated successfully

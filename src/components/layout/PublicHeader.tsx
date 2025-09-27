@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { ThemeToggle } from '../ui/theme-toggle';
 import { Bot, Menu, X } from 'lucide-react';
-import { useState } from 'react';
-const Component: React.FC = () => {
+
+const PublicHeader: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <header className="bg-background border-b">

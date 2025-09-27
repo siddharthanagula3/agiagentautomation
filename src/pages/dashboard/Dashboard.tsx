@@ -29,14 +29,22 @@ import type { Database } from '../../integrations/supabase/types';
 type Job = Database['public']['Tables']['jobs']['Row'];
 type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
 
+
+const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [stats, setStats] = useState({
     aiEmployees: 0,
     activeJobs: 0,
     tokensUsed: 0,
     totalCost: 0
   });
+  const [recentJobs, setRecentJobs] = useState<Job[]>([]);
+  const [aiEmployees, setAiEmployees] = useState<AIAgent[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
 
+  const loadDashboardData = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -83,7 +91,7 @@ type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
       setAiEmployees(topAgents);
       setAnalytics(analyticsData);
 
-      // Log unknown service errors for debugging (but don't show to user)
+      // Log any service errors for debugging (but don't show to user)
       [agentStatsResult, jobStatsResult, recentJobsResult, topAgentsResult, analyticsResult, billingStatsResult]
         .forEach((result, index) => {
           if (result.status === 'rejected') {
@@ -108,6 +116,7 @@ type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
   }, [user, loadDashboardData]);
 
   // Initialize real-time updates when user is available
+  useEffect(() => {
     if (user?.id) {
       // Initialize real-time subscriptions
       const initializeRealtime = async () => {
@@ -213,6 +222,7 @@ type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours}h ${mins}m`;
+  };
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -222,6 +232,7 @@ type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
     if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
     return `${Math.floor(diffInMinutes / 1440)} days ago`;
+  };
 
   if (loading) {
     return (
@@ -465,7 +476,7 @@ type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
         </CardContent>
       </Card>
     </div>
-  )
-  };
+  );
+};
 
 export default Dashboard;

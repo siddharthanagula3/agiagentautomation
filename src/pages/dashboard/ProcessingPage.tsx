@@ -79,6 +79,7 @@ interface ProcessingJob {
     cpu: number;
     memory: number;
     gpu?: number;
+  };
   pipeline: ProcessingStep[];
   createdBy: string;
   tags: string[];
@@ -93,12 +94,12 @@ interface ProcessingStep {
   name: string;
   type: 'input' | 'transform' | 'filter' | 'aggregate' | 'output' | 'ai-model';
   status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
-  config: Record<string, unknown>;
+  config: Record<string, any>;
   dependencies: string[];
   estimatedDuration: number;
   actualDuration?: number;
-  inputData?: unknown;
-  outputData?: unknown;
+  inputData?: any;
+  outputData?: any;
   error?: string;
 }
 
@@ -114,6 +115,7 @@ interface ProcessingPipeline {
     frequency: 'once' | 'hourly' | 'daily' | 'weekly' | 'monthly';
     nextRun: string;
     enabled: boolean;
+  };
   createdAt: string;
   updatedAt: string;
   createdBy: string;
@@ -127,10 +129,24 @@ interface ProcessingPipeline {
 interface PipelineTrigger {
   id: string;
   type: 'manual' | 'schedule' | 'webhook' | 'file-upload' | 'api-call';
-  config: Record<string, unknown>;
+  config: Record<string, any>;
   enabled: boolean;
 }
 
+const ProcessingPage: React.FC = () => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
+          <p className="text-muted-foreground">Please log in to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+  
   const [jobs, setJobs] = useState<ProcessingJob[]>([]);
   const [pipelines, setPipelines] = useState<ProcessingPipeline[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,16 +156,14 @@ interface PipelineTrigger {
   const [typeFilter, setTypeFilter] = useState('');
   const [selectedJob, setSelectedJob] = useState<ProcessingJob | null>(null);
   const [isCreatingJob, setIsCreatingJob] = useState(false);
-  useEffect(() => {
-const ProcessingPage: React.FC = () => {
-  const { user } = useAuth();
-  
-  if (!user) {
-    return (
-    <div>Component content</div>
-  );
 
-const loadData = async () => {
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [user]);
+
+  const loadData = async () => {
     try {
       setLoading(true);
       setError('');
@@ -580,7 +594,7 @@ const loadData = async () => {
       </Card>
       )}
     </div>
-  )
-  };
+  );
+};
 
 export default ProcessingPage;

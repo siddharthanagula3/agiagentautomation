@@ -98,6 +98,10 @@ const AnalyticsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
+};
 
 export default AnalyticsPage;

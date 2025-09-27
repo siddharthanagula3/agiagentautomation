@@ -52,10 +52,35 @@ const NotificationsPage: React.FC = () => {
   
   if (!user) {
     return (
-    <div>Component content</div>
-  );
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
+          <p className="text-muted-foreground">Please log in to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
 
-const loadNotifications = async () => {
+  useEffect(() => {
+    if (user) {
+      loadNotifications();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    filterNotifications();
+  }, [notifications, searchTerm, typeFilter, statusFilter]);
+
+  const loadNotifications = async () => {
     try {
       setLoading(true);
       setError('');
@@ -101,6 +126,7 @@ const loadNotifications = async () => {
         ? { ...notification, status: 'read', readAt: new Date().toISOString() }
         : notification
     ));
+  };
 
   const markAllAsRead = async () => {
     setNotifications(prev => prev.map(notification => 
@@ -108,6 +134,7 @@ const loadNotifications = async () => {
         ? { ...notification, status: 'read', readAt: new Date().toISOString() }
         : notification
     ));
+  };
 
   const archiveNotification = async (notificationId: string) => {
     setNotifications(prev => prev.map(notification => 
@@ -115,6 +142,7 @@ const loadNotifications = async () => {
         ? { ...notification, status: 'archived' }
         : notification
     ));
+  };
 
   const getTypeColor = (type: string) => {
     switch (type) {

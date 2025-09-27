@@ -51,6 +51,20 @@ interface DataSchema {
   description: string;
 }
 
+const DataPage: React.FC = () => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
+          <p className="text-muted-foreground">Please log in to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+  
   const [dataSources, setDataSources] = useState<DataSource[]>([]);
   const [filteredSources, setFilteredSources] = useState<DataSource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,17 +73,18 @@ interface DataSchema {
   const [typeFilter, setTypeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedSource, setSelectedSource] = useState<DataSource | null>(null);
-  useEffect(() => {
-  useEffect(() => {
-const DataPage: React.FC = () => {
-  const { user } = useAuth();
-  
-  if (!user) {
-    return (
-    <div>Component content</div>
-  );
 
-const loadDataSources = async () => {
+  useEffect(() => {
+    if (user) {
+      loadDataSources();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    filterDataSources();
+  }, [dataSources, searchTerm, typeFilter, statusFilter]);
+
+  const loadDataSources = async () => {
     try {
       setLoading(true);
       setError('');
@@ -408,7 +423,7 @@ const loadDataSources = async () => {
         </Card>
       )}
     </div>
-  )
-  };
+  );
+};
 
 export default DataPage;

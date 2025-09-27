@@ -58,10 +58,12 @@ interface APIKey {
     rateLimit: number;
     rateLimitRemaining: number;
     lastRequest?: string;
+  };
   restrictions: {
     ipWhitelist?: string[];
     userAgentWhitelist?: string[];
     allowedOrigins?: string[];
+  };
   createdBy: string;
   tags: string[];
   environment: 'development' | 'staging' | 'production';
@@ -79,6 +81,20 @@ interface APIKeyTemplate {
   isOfficial: boolean;
 }
 
+const APIKeysPage: React.FC = () => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
+          <p className="text-muted-foreground">Please log in to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+  
   const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
   const [filteredApiKeys, setFilteredApiKeys] = useState<APIKey[]>([]);
   const [templates, setTemplates] = useState<APIKeyTemplate[]>([]);
@@ -90,17 +106,18 @@ interface APIKeyTemplate {
   const [showApiKeys, setShowApiKeys] = useState<Record<string, boolean>>({});
   const [isCreatingKey, setIsCreatingKey] = useState(false);
   const [selectedKey, setSelectedKey] = useState<APIKey | null>(null);
-  useEffect(() => {
-  useEffect(() => {
-const APIKeysPage: React.FC = () => {
-  const { user } = useAuth();
-  
-  if (!user) {
-    return (
-    <div>Component content</div>
-  );
 
-const loadAPIKeys = async () => {
+  useEffect(() => {
+    if (user) {
+      loadAPIKeys();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    filterAPIKeys();
+  }, [apiKeys, searchTerm, statusFilter, environmentFilter]);
+
+  const loadAPIKeys = async () => {
     try {
       setLoading(true);
       setError('');
@@ -194,12 +211,14 @@ const loadAPIKeys = async () => {
     if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
     return `${Math.floor(diffInMinutes / 1440)} days ago`;
+  };
 
   const toggleApiKeyVisibility = (keyId: string) => {
     setShowApiKeys(prev => ({
       ...prev,
       [keyId]: !prev[keyId]
     }));
+  };
 
   const handleCopyApiKey = (apiKey: string) => {
     navigator.clipboard.writeText(apiKey);
@@ -207,6 +226,7 @@ const loadAPIKeys = async () => {
       title: "Copied",
       description: "API key copied to clipboard",
     });
+  };
 
   const handleCreateAPIKey = async () => {
     setIsCreatingKey(true);
@@ -660,7 +680,7 @@ const loadAPIKeys = async () => {
       </Card>
       )}
     </div>
-  )
-  };
+  );
+};
 
 export default APIKeysPage;

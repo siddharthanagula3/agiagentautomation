@@ -60,6 +60,7 @@ interface Webhook {
     maxRetries: number;
     retryDelay: number;
     backoffMultiplier: number;
+  };
   createdAt: string;
   lastTriggered?: string;
   deliveryStats: {
@@ -67,6 +68,7 @@ interface Webhook {
     successful: number;
     failed: number;
     pending: number;
+  };
   recentDeliveries: WebhookDelivery[];
   createdBy: string;
   tags: string[];
@@ -89,7 +91,7 @@ interface WebhookDelivery {
   createdAt: string;
   deliveredAt?: string;
   error?: string;
-  payload: unknown;
+  payload: any;
 }
 
 interface WebhookEvent {
@@ -98,9 +100,22 @@ interface WebhookEvent {
   description: string;
   category: string;
   isEnabled: boolean;
-  payload: unknown;
+  payload: any;
 }
 
+const WebhooksPage: React.FC = () => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
+          <p className="text-muted-foreground">Please log in to access this page.</p>
+        </div>
+      </div>
+    );
+  }
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [filteredWebhooks, setFilteredWebhooks] = useState<Webhook[]>([]);
   const [events, setEvents] = useState<WebhookEvent[]>([]);
@@ -112,17 +127,18 @@ interface WebhookEvent {
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
   const [isCreatingWebhook, setIsCreatingWebhook] = useState(false);
   const [selectedWebhook, setSelectedWebhook] = useState<Webhook | null>(null);
-  useEffect(() => {
-  useEffect(() => {
-const WebhooksPage: React.FC = () => {
-  const { user } = useAuth();
-  
-  if (!user) {
-    return (
-    <div>Component content</div>
-  );
 
-const loadWebhooks = async () => {
+  useEffect(() => {
+    if (user) {
+      loadWebhooks();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    filterWebhooks();
+  }, [webhooks, searchTerm, statusFilter, environmentFilter]);
+
+  const loadWebhooks = async () => {
     try {
       setLoading(true);
       setError('');
@@ -218,12 +234,14 @@ const loadWebhooks = async () => {
     if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
     return `${Math.floor(diffInMinutes / 1440)} days ago`;
+  };
 
   const toggleSecretVisibility = (webhookId: string) => {
     setShowSecrets(prev => ({
       ...prev,
       [webhookId]: !prev[webhookId]
     }));
+  };
 
   const handleCopySecret = (secret: string) => {
     navigator.clipboard.writeText(secret);
@@ -231,6 +249,7 @@ const loadWebhooks = async () => {
       title: "Copied",
       description: "Webhook secret copied to clipboard",
     });
+  };
 
   const handleCreateWebhook = async () => {
     setIsCreatingWebhook(true);
@@ -671,7 +690,7 @@ const loadWebhooks = async () => {
         </Card>
       )}
     </div>
-  )
-  };
+  );
+};
 
 export default WebhooksPage;

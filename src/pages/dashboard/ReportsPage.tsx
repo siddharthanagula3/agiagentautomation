@@ -49,6 +49,7 @@ interface Report {
   dateRange: {
     start: string;
     end: string;
+  };
   format: 'pdf' | 'excel' | 'csv' | 'json';
   size?: number;
   createdAt: string;
@@ -62,6 +63,7 @@ interface Report {
     frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
     nextRun: string;
     enabled: boolean;
+  };
 }
 
 interface ReportTemplate {
@@ -87,6 +89,20 @@ interface ReportMetric {
   chartData: number[];
 }
 
+const ReportsPage: React.FC = () => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
+          <p className="text-muted-foreground">Please log in to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+  
   const [reports, setReports] = useState<Report[]>([]);
   const [filteredReports, setFilteredReports] = useState<Report[]>([]);
   const [templates, setTemplates] = useState<ReportTemplate[]>([]);
@@ -98,17 +114,18 @@ interface ReportMetric {
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  useEffect(() => {
-  useEffect(() => {
-const ReportsPage: React.FC = () => {
-  const { user } = useAuth();
-  
-  if (!user) {
-    return (
-    <div>Component content</div>
-  );
 
-const loadReports = async () => {
+  useEffect(() => {
+    if (user) {
+      loadReports();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    filterReports();
+  }, [reports, searchTerm, typeFilter, statusFilter]);
+
+  const loadReports = async () => {
     try {
       setLoading(true);
       setError('');
@@ -190,6 +207,7 @@ const loadReports = async () => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -199,6 +217,7 @@ const loadReports = async () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
 
   if (loading) {
     return (
@@ -303,7 +322,7 @@ const loadReports = async () => {
             <h3 className="text-lg font-semibold text-foreground mb-2">No Reports Found</h3>
             <p className="text-muted-foreground mb-6">
               {reports.length === 0 
-                ? "You haven't created unknown reports yet. Start by creating your first report."
+                ? "You haven't created any reports yet. Start by creating your first report."
                 : "No reports match your current filters. Try adjusting your search criteria."
               }
             </p>
@@ -393,7 +412,7 @@ const loadReports = async () => {
         </div>
       )}
     </div>
-  )
-  };
+  );
+};
 
 export default ReportsPage;

@@ -58,7 +58,7 @@ interface LogEntry {
   level: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
   service: string;
   message: string;
-  details?: unknown;
+  details?: any;
   userId?: string;
   sessionId?: string;
   requestId?: string;
@@ -74,9 +74,24 @@ interface LogFilter {
   dateRange: {
     start: string;
     end: string;
+  };
   searchTerm: string;
 }
 
+const LogsPage: React.FC = () => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
+          <p className="text-muted-foreground">Please log in to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+  
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,18 +103,27 @@ interface LogFilter {
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
-  useEffect(() => {
-  useEffect(() => {
-  useEffect(() => {
-const LogsPage: React.FC = () => {
-  const { user } = useAuth();
-  
-  if (!user) {
-    return (
-    <div>Component content</div>
-  );
 
-const loadLogs = async (silent = false) => {
+  useEffect(() => {
+    if (user) {
+      loadLogs();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    filterLogs();
+  }, [logs, searchTerm, levelFilter, serviceFilter, environmentFilter]);
+
+  useEffect(() => {
+    if (autoRefresh) {
+      const interval = setInterval(() => {
+        loadLogs(true);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [autoRefresh]);
+
+  const loadLogs = async (silent = false) => {
     try {
       if (!silent) setLoading(true);
       setError('');
@@ -199,6 +223,7 @@ const loadLogs = async (silent = false) => {
     if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
     return `${Math.floor(diffInMinutes / 1440)} days ago`;
+  };
 
   const handleExportLogs = async () => {
     setIsExporting(true);
@@ -226,6 +251,7 @@ const loadLogs = async (silent = false) => {
       title: "Copied",
       description: "Log entry copied to clipboard",
     });
+  };
 
   const logStats = {
     total: logs.length,
@@ -516,7 +542,7 @@ const loadLogs = async (silent = false) => {
         </Card>
       )}
     </div>
-  )
-  };
+  );
+};
 
 export default LogsPage;

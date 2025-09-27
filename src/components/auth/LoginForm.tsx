@@ -14,7 +14,7 @@ const LoginForm: React.FC = () => {
   });
   const [error, setError] = useState('');
 
-  const { login, isLoading } = useAuth();
+  const { login, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,8 +25,12 @@ const LoginForm: React.FC = () => {
     setError('');
 
     try {
-      await login(formData);
-      navigate(from, { replace: true });
+      const result = await login(formData.email, formData.password);
+      if (result.success) {
+        navigate(from, { replace: true });
+      } else {
+        setError(result.error || 'Login failed');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     }
@@ -127,10 +131,10 @@ const LoginForm: React.FC = () => {
           <div>
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
+              {loading ? (
                 <LoadingSpinner size="sm" />
               ) : (
                 'Sign in'

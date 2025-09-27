@@ -1,8 +1,8 @@
 name: CI/CD Pipeline (DISABLED)
 
-# This workflow is temporarily disabled
+# This workflow is completely disabled
 on:
-  workflow_dispatch:  # Only run manually
+  # No triggers - workflow is disabled
 
 env:
   NODE_VERSION: '18'

@@ -16,19 +16,18 @@ import {
   CheckCircle
 } from 'lucide-react';
 
-const LoginPage: React.FC = () => {
-  const { login, user, loading } = useAuth();
-  const navigate = useNavigate();
-  
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
   useEffect(() => {
+const LoginPage: React.FC = () => {
+  const { login, user, loading } = useAuth();
+  const navigate = useNavigat;
+  e();
+    email: '',
+    password: ''
+  });
 
   // If already authenticated, redirect away from login
     if (!loading && user) {
@@ -42,7 +41,8 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      const result = await login(formData.email, formData.password);
+      const result = await;
+  login(formData.email, formData.password);
       if (result.success) {
         navigate('/dashboard');
       } else {

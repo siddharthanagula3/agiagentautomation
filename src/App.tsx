@@ -7,6 +7,7 @@ import { AuthLayout } from './layouts/AuthLayout';
 import { AdminLayout } from './layouts/AdminLayout';
 import ErrorBoundary from './components/ErrorBoundary';
 import RealtimeNotification from './components/RealtimeNotification';
+import DemoModeBanner from './components/DemoModeBanner';
 
 // Auth Components
 import { AdminRoute } from './components/auth/AdminRoute';
@@ -178,6 +179,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const App: React.FC = () => {
   return (
     <AuthProvider>
+      <DemoModeBanner />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Public Routes */}

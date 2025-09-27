@@ -84,30 +84,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Login attempt started for:', email);
       setLoading(true);
       
-      // Check if Supabase is configured
+      // Check if Supabase is configured properly
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
       
-      if (!supabaseUrl || !supabaseKey) {
-        console.error('Supabase not configured - using demo mode');
+      const hasValidCredentials = supabaseUrl && 
+                                  supabaseKey && 
+                                  !supabaseUrl.includes('your_supabase_url_here') && 
+                                  !supabaseKey.includes('your_supabase_anon_key_here');
+      
+      if (!hasValidCredentials) {
+        console.warn('Supabase not configured - using demo mode');
         setLoading(false);
-        // Create a demo user for testing
-        const demoUser = {
-          id: 'demo-user-123',
-          email: email,
-          name: email.split('@')[0],
-          avatar: '',
-          role: 'user',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          last_login: new Date().toISOString(),
-          is_active: true,
-          preferences: {},
-          phone: '',
-          location: ''
-        };
-        setUser(demoUser);
-        return { success: true };
+        
+        // Check for demo credentials
+        if (email === 'demo@example.com' && password === 'demo123') {
+          // Create a demo user for testing
+          const demoUser = {
+            id: 'demo-user-123',
+            email: email,
+            name: 'Demo User',
+            avatar: '',
+            role: 'user',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            last_login: new Date().toISOString(),
+            is_active: true,
+            preferences: {},
+            phone: '',
+            location: ''
+          };
+          setUser(demoUser);
+          return { success: true };
+        } else {
+          return { 
+            success: false, 
+            error: 'Demo mode active. Use demo@example.com / demo123 to login, or configure Supabase for full functionality.' 
+          };
+        }
       }
       
       // Simple timeout to prevent infinite loading

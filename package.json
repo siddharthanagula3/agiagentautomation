@@ -16,6 +16,7 @@
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "test:run": "vitest run",
+    "test:supabase": "node test-supabase-connection.js",
     "clean": "rm -rf dist node_modules/.vite",
     "clean:all": "rm -rf dist node_modules package-lock.json",
     "reinstall": "npm run clean:all && npm install"

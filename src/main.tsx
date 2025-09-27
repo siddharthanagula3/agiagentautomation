@@ -48,6 +48,24 @@ try {
   
   // Clear timeout once app is rendered
   clearTimeout(renderTimeout);
+  
+  // Hide the initial loader immediately after render is called
+  // The MutationObserver in index.html will also catch this, but this is faster
+  setTimeout(() => {
+    const loader = document.getElementById('initial-loader');
+    const errorContainer = document.querySelector('.error-container');
+    
+    if (loader) {
+      loader.style.display = 'none';
+    }
+    if (errorContainer) {
+      errorContainer.style.display = 'none';
+    }
+    
+    // Remove loading class and add app-loaded class
+    document.body.classList.remove('loading');
+    document.body.classList.add('app-loaded');
+  }, 100); // Small delay to ensure React has started mounting
 } catch (error) {
   console.error("Failed to initialize application:", error);
   // Display error in the DOM

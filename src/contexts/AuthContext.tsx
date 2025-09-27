@@ -81,17 +81,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
+      console.log('Login attempt started for:', email);
       setLoading(true);
       
       // Add timeout to prevent infinite loading
       const loginTimeout = setTimeout(() => {
         console.warn('Login timeout - stopping loading');
         setLoading(false);
-      }, 10000); // 10 second timeout for login
+      }, 5000); // 5 second timeout for login
       
       const { user: authUser, error } = await authService.login({ email, password });
       
       clearTimeout(loginTimeout);
+      console.log('Login result:', { authUser: !!authUser, error });
       
       if (error || !authUser) {
         setLoading(false);
@@ -100,8 +102,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       setUser(authUser);
       setLoading(false);
+      console.log('Login successful');
       return { success: true };
     } catch (error) {
+      console.error('Login error:', error);
       setLoading(false);
       return { success: false, error: 'Login failed. Please try again.' };
     }

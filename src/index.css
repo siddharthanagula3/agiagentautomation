@@ -1,0 +1,209 @@
+@import './styles/accessibility.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AGI Agent Automation Design System
+All colors MUST be HSL for consistency and theming support.
+*/
+
+@layer base {
+  :root {
+    /* Light theme (default) */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --surface: 0 0% 98%;
+    --surface-elevated: 0 0% 96%;
+    
+    /* AI Brand Colors */
+    --primary: 200 98% 39%; /* Cyan blue for AI theme */
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 200 100% 80%;
+    --primary-muted: 200 50% 20%;
+    
+    /* Agent/Employee colors */
+    --agent: 280 60% 50%; /* Purple for AI agents */
+    --agent-foreground: 0 0% 98%;
+    --agent-glow: 280 100% 85%;
+    
+    /* Workforce colors */
+    --workforce: 45 93% 47%; /* Gold for workforce/premium */
+    --workforce-foreground: 30 10% 9%;
+    --workforce-glow: 45 100% 85%;
+    
+    /* Success/Error states */
+    --success: 120 60% 50%;
+    --success-foreground: 0 0% 98%;
+    --error: 0 84% 60%;
+    --error-foreground: 0 0% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 98%;
+
+    /* UI Components */
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 200 98% 39%;
+    --radius: 0.75rem;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 10% 3.9%;
+    --sidebar-primary: 200 98% 39%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 240 5.9% 90%;
+    --sidebar-ring: 200 98% 39%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(200 98% 39%), hsl(200 100% 50%));
+    --gradient-agent: linear-gradient(135deg, hsl(280 60% 50%), hsl(280 70% 60%));
+    --gradient-workforce: linear-gradient(135deg, hsl(45 93% 47%), hsl(45 100% 60%));
+    --gradient-surface: linear-gradient(135deg, hsl(240 8% 9%), hsl(240 6% 12%));
+    
+    /* Shadows with glow effects */
+    --shadow-primary: 0 4px 20px hsl(200 98% 39% / 0.25);
+    --shadow-agent: 0 4px 20px hsl(280 60% 50% / 0.25);
+    --shadow-workforce: 0 4px 20px hsl(45 93% 47% / 0.25);
+    --shadow-elevated: 0 8px 32px hsl(240 10% 3.9% / 0.8);
+    
+    /* Animation curves */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .dark {
+    /* Dark theme */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --surface: 240 9% 6%;
+    --surface-elevated: 240 8% 9%;
+    
+    /* UI Components */
+    --card: 240 8% 9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 8% 9%;
+    --popover-foreground: 0 0% 98%;
+    --secondary: 240 6% 12%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 6% 15%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 6% 12%;
+    --accent-foreground: 0 0% 98%;
+    --border: 240 6% 15%;
+    --input: 240 6% 15%;
+    
+    /* Sidebar */
+    --sidebar-background: 240 9% 6%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-accent: 240 6% 12%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 6% 15%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+    font-variation-settings: "opsz" 32;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--surface));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary));
+  }
+
+  /* Custom animations */
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 5px hsl(var(--primary) / 0.5); }
+    50% { box-shadow: 0 0 20px hsl(var(--primary) / 0.8), 0 0 30px hsl(var(--primary) / 0.4); }
+  }
+
+  @keyframes typing {
+    0% { width: 0; }
+    100% { width: 100%; }
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-typing {
+    animation: typing 2s steps(40, end), blink 0.75s step-end infinite;
+  }
+}
+
+@layer components {
+  /* Chat bubble variants */
+  .chat-bubble-user {
+    @apply bg-primary text-primary-foreground ml-auto max-w-[85%] rounded-2xl rounded-br-md px-4 py-3;
+    box-shadow: var(--shadow-primary);
+  }
+
+  .chat-bubble-assistant {
+    @apply bg-surface-elevated text-foreground mr-auto max-w-[85%] rounded-2xl rounded-bl-md px-4 py-3 border border-border;
+  }
+
+  .chat-bubble-system {
+    @apply bg-muted text-muted-foreground mx-auto max-w-[70%] rounded-xl px-3 py-2 text-sm text-center;
+  }
+
+  /* Glow effects */
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  }
+
+  .glow-agent {
+    box-shadow: 0 0 20px hsl(var(--agent) / 0.5);
+  }
+
+  .glow-workforce {
+    box-shadow: 0 0 20px hsl(var(--workforce) / 0.5);
+  }
+
+  /* Loading states */
+  .loading-dots {
+    @apply inline-flex space-x-1;
+  }
+
+  .loading-dots span {
+    @apply h-2 w-2 bg-muted-foreground rounded-full animate-pulse;
+    animation-delay: calc(var(--i) * 0.2s);
+  }
+}

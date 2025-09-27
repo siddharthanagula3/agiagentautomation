@@ -148,15 +148,13 @@ class AnalyticsService {
 
       return { data: analytics, error: null };
     } catch (error) {
+      console.error('Service error:', error);
       return { 
         data: this.getEmptyAnalytics(), 
         error: 'An unexpected error occurred' 
       };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async getPerformanceMetrics(agentId: string): Promise<{ data: PerformanceMetrics; error: string | null }> {
     try {
@@ -187,15 +185,13 @@ class AnalyticsService {
         error: null 
       };
     } catch (error) {
+      console.error('Service error:', error);
       return { 
         data: { efficiency: 0, accuracy: 0, speed: 0, reliability: 0 }, 
         error: 'An unexpected error occurred' 
       };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async getUsageStats(userId: string, period: 'week' | 'month' | 'year' = 'month'): Promise<{ data: UsageStats | null; error: string | null }> {
     try {
@@ -232,12 +228,10 @@ class AnalyticsService {
         error: null 
       };
     } catch (error) {
+      console.error('Service error:', error);
       return { data: null, error: 'An unexpected error occurred' };
     }
-  } catch (error) {
-      console.error('Service error:', error);
-      return { data: [], error: null };
-    }
+  }
 
   async getCostAnalysis(userId: string): Promise<{ data: CostAnalysis | null; error: string | null }> {
     try {

@@ -32,8 +32,7 @@ const ContactPage: React.FC = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // TODO: Replace with actual form submission to Supabase
     
     setIsSubmitting(false);
     setIsSubmitted(true);

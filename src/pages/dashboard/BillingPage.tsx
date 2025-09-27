@@ -46,6 +46,7 @@ const BillingPage: React.FC = () => {
     }
   }, [user, loadBillingData]);
 
+  const loadBillingData = async () => {
     if (!user) return;
 
     try {

@@ -74,11 +74,13 @@ interface AnalyticsData {
 const AnalyticsPage: React.FC = () => {
   const { user } = useAuth();
 
+  useEffect(() => {
     if (user) {
       loadAnalytics();
     }
   }, [user, timeRange, loadAnalytics]);
 
+  const loadAnalytics = async () => {
     if (!user) return;
 
     try {

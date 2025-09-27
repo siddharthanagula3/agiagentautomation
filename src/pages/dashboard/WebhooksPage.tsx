@@ -135,6 +135,7 @@ const WebhooksPage: React.FC = () => {
     }
   }, [user]);
 
+  useEffect(() => {
     filterWebhooks();
   }, [webhooks, searchTerm, statusFilter, environmentFilter]);
 

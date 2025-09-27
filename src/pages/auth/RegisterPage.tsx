@@ -36,8 +36,7 @@ const RegisterPage: React.FC = () => {
     role: ''
   });
 
-  const handleSubmit = asyn;
-  c (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');

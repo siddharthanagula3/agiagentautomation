@@ -158,7 +158,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const loginTimeout = setTimeout(() => {
         console.warn('Login timeout - forcing loading to false');
         setLoading(false);
-      }, 10000); // 10 second timeout for login
+        clearTimeout(loginTimeout);
+      }, 8000); // 8 second timeout for login
       
       const { user: authUser, error } = await authService.login({ email, password });
       

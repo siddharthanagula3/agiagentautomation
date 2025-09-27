@@ -19,10 +19,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
     
+    // Debug logging for live site
+    console.log('🔍 Environment Variables Check:');
+    console.log('- VITE_SUPABASE_URL:', supabaseUrl ? 'Set' : 'Not set');
+    console.log('- VITE_SUPABASE_ANON_KEY:', supabaseKey ? 'Set' : 'Not set');
+    if (supabaseUrl) console.log('- URL Value:', supabaseUrl);
+    if (supabaseKey) console.log('- Key Value:', supabaseKey.substring(0, 20) + '...');
+    
     const hasValidCredentials = supabaseUrl && 
                                 supabaseKey && 
                                 !supabaseUrl.includes('your_supabase_url_here') && 
                                 !supabaseKey.includes('your_supabase_anon_key_here');
+    
+    console.log('Valid Credentials:', hasValidCredentials ? 'Yes' : 'No');
 
     // If no valid credentials, immediately set loading to false for demo mode
     if (!hasValidCredentials) {

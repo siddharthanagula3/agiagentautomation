@@ -3,61 +3,35 @@ import { Moon, Sun } from 'lucide-react';
 import { Button } from './button';
 import { useUIStore } from '../../stores/ui-store';
 
-  useEffect(() => {
 export const ThemeToggle: React.FC = () => {
   const { theme, setTheme } = useUIStore();
 
-    const root = documen;
-  t.documentElement;
+  useEffect(() => {
+    const root = document.documentElement;
     
     if (theme === 'dark') {
       root.classList.add('dark');
     } else if (theme === 'light') {
       root.classList.remove('dark');
-    } else {
-      // System theme
-      const systemTheme = windo;
-  w.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      if (systemTheme === 'dark') {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
     }
   }, [theme]);
 
   const toggleTheme = () => {
-    if (theme === 'light') {
-      setTheme('dark');
-    } else if (theme === 'dark') {
-      setTheme('system');
-    } else {
-      setTheme('light');
-    }
-  };
-
-  const getIcon = () => {
-    if (theme === 'light') return <Sun className="h-4 w-4" />;
-    if (theme === 'dark') return <Moon className="h-4 w-4" />;
-    return <Sun className="h-4 w-4" />; // System
-  };
-
-  const getLabel = () => {
-    if (theme === 'light') return 'Light';
-    if (theme === 'dark') return 'Dark';
-    return 'System';
+    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   return (
     <Button
       variant="outline"
-      size="sm"
+      size="icon"
       onClick={toggleTheme}
-      className="gap-2"
-      title={`Current theme: ${getLabel()}. Click to cycle through themes.`}
+      className="h-9 w-9"
     >
-      {getIcon()}
-      <span className="hidden sm:inline">{getLabel()}</span>
+      {theme === 'light' ? (
+        <Moon className="h-4 w-4" />
+      ) : (
+        <Sun className="h-4 w-4" />
+      )}
     </Button>
   );
 };

@@ -28,62 +28,44 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Build optimization - using more compatible settings
-    target: 'es2015', // More compatible target
-    minify: 'terser', // Use terser instead of esbuild for better compatibility
+    // Build optimization for Netlify
+    target: 'es2020', // More modern target for better performance
+    minify: 'esbuild', // Use esbuild for faster builds on Netlify
     cssMinify: true,
     
     // Source maps for debugging
-    sourcemap: mode === 'development',
+    sourcemap: false, // Disable source maps for production to reduce size
     
-    // Disable code splitting temporarily to avoid initialization issues
+    // Optimized rollup options for Netlify
     rollupOptions: {
       output: {
-        // Disable manual chunks - let Vite handle it automatically
-        // This prevents initialization order issues
-        manualChunks: undefined,
+        // Simplified chunking strategy
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          utils: ['clsx', 'tailwind-merge', 'date-fns']
+        },
         
-        // Use simpler file naming
+        // Optimized file naming
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
-        
-        // Ensure proper module format
-        format: 'es',
-        
-        // Prevent code splitting for vendor chunks
-        inlineDynamicImports: false,
       },
     },
     
-    // Increase chunk size warning limit
-    chunkSizeWarningLimit: 2000,
+    // Increase chunk size warning limit for large apps
+    chunkSizeWarningLimit: 1000,
     
-    // Module preload polyfill
+    // Module preload optimization
     modulePreload: {
-      polyfill: true,
+      polyfill: false, // Disable polyfill for better performance
     },
     
     // CommonJS handling
     commonjsOptions: {
       transformMixedEsModules: true,
       strictRequires: false,
-      esmExternals: true,
-    },
-    
-    // Terser options for better compatibility
-    terserOptions: {
-      compress: {
-        drop_console: mode === 'production',
-        drop_debugger: mode === 'production',
-        pure_funcs: mode === 'production' ? ['console.log'] : [],
-      },
-      mangle: {
-        safari10: true, // Work around Safari 10 bugs
-      },
-      format: {
-        comments: false,
-      },
     },
   },
   

@@ -540,10 +540,7 @@ const handleSendMessage = (e: React.FormEvent) => {
         </DialogContent>
       </Dialog>
     </div>
-  )
-  };
-
-;
+  );
 };
 
 export default ChatInterface;

@@ -319,10 +319,11 @@ class AuthService {
         if (profileError.code === 'PGRST116') {
           // Profile doesn't exist, create it
           console.log('AuthService: Creating user profile for:', user.email);
+          console.log('AuthService: Creating user profile with RLS-compliant data');
           const { data: newProfile, error: createError } = await supabase
             .from('users')
             .insert({
-              id: user.id,
+              id: user.id, // This must match auth.uid() for RLS to work
               email: user.email || '',
               name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
               avatar: user.user_metadata?.avatar_url || null,

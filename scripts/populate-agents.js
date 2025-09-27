@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import AI_AGENTS_DATA from '../src/data/aiAgents.ts';
 
-const SUPABASE_URL = "https://spmkzfgswjbilimxtfob.supabase.co";
-const SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwbWt6Zmdzd2piaWxpbXh0Zm9iIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODY5OTkwOSwiZXhwIjoyMDc0Mjc1OTA5fQ.YourServiceKeyHere";
+const SUPABASE_URL = process.env.SUPABASE_URL || "https://spmkzfgswjbilimxtfob.supabase.co";
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || "YOUR_SERVICE_KEY_HERE";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 

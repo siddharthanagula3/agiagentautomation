@@ -14,11 +14,19 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             min-height: 100vh;
+        }
+        
+        body.loading {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+        }
+        
+        body.app-loaded {
+            background: white;
+            display: block;
         }
         
         .loader-container {
@@ -95,6 +103,39 @@
         }
     </style>
     <script>
+        // Hide loader when React app loads
+        window.addEventListener('DOMContentLoaded', function() {
+            // Set up observer to watch for React app mounting
+            const observer = new MutationObserver(function(mutations) {
+                const root = document.getElementById('root');
+                if (root && root.children.length > 0) {
+                    // React app has mounted
+                    const loader = document.getElementById('initial-loader');
+                    const errorContainer = document.querySelector('.error-container');
+                    
+                    if (loader) {
+                        loader.style.display = 'none';
+                    }
+                    if (errorContainer) {
+                        errorContainer.style.display = 'none';
+                    }
+                    
+                    // Remove loading class and add app-loaded class
+                    document.body.classList.remove('loading');
+                    document.body.classList.add('app-loaded');
+                    
+                    // Stop observing
+                    observer.disconnect();
+                }
+            });
+            
+            // Start observing the root element
+            const root = document.getElementById('root');
+            if (root) {
+                observer.observe(root, { childList: true, subtree: true });
+            }
+        });
+        
         // Error handler
         window.addEventListener('error', function(event) {
             console.error('Global error caught:', event);
@@ -156,9 +197,9 @@
         }, 10000);
     </script>
 </head>
-<body>
+<body class="loading">
     <!-- Loading indicator -->
-    <div class="loader-container">
+    <div id="initial-loader" class="loader-container">
         <div class="loader"></div>
         <h1>Loading AGI Agent Automation</h1>
         <p>Preparing your AI workforce management platform...</p>

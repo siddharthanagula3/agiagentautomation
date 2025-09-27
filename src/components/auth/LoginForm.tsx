@@ -5,40 +5,33 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
 import LoadingSpinner from '../ui/loading-spinner';
-const Component: React.FC = () => {
+
+const LoginForm: React.FC = () => {
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false
   });
+  const [error, setError] = useState('');
 
   const { login, loading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocatio;
-  n();
+  const location = useLocation();
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    console.log('🚀 LoginForm: Starting login attempt');
 
     try {
       const result = await login(formData.email, formData.password);
-      console.log('📋 LoginForm: Login,
-  result:', result);
-      
       if (result.success) {
-        console.log('✅ LoginForm: Login successful, navigating to:', from);
         navigate(from, { replace: true });
       } else {
-        console.log('❌ LoginForm: Login,
-  failed:', result.error);
         setError(result.error || 'Login failed');
       }
     } catch (err) {
-      console.log('❌ LoginForm: Login,
-  exception:', err);
       setError(err instanceof Error ? err.message : 'Login failed');
     }
   };
@@ -151,10 +144,7 @@ const Component: React.FC = () => {
         </form>
       </div>
     </div>
-  )
-  };
-
-;
+  );
 };
 
 export default LoginForm;

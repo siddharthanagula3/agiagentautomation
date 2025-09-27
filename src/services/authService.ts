@@ -13,7 +13,7 @@ export interface AuthUser {
   updated_at: string;
   last_login?: string;
   is_active: boolean;
-  preferences?: unknown;
+  preferences?: any;
   phone?: string;
   location?: string;
 }
@@ -39,24 +39,18 @@ export interface AuthResponse {
 class AuthService {
   async login(loginData: LoginData): Promise<AuthResponse> {
     try {
-      console.log('🔐 AuthService: Starting login for:', loginData.email);
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password,
       });
 
       if (error) {
-        console.log('❌ AuthService: Supabase auth error:', error.message);
         return { user: null, error: error.message };
       }
 
       if (!data.user) {
-        console.log('❌ AuthService: No user data returned from Supabase');
         return { user: null, error: 'No user data returned' };
       }
-
-      console.log('✅ AuthService: Supabase auth successful, fetching profile for:', data.user.id);
 
       // Get user profile
       const { data: profile, error: profileError } = await supabase
@@ -66,11 +60,9 @@ class AuthService {
         .single();
 
       if (profileError) {
-        console.log('⚠️ AuthService: Profile error:', profileError.message, 'Code:', profileError.code);
-        
         // If profile doesn't exist, create one
         if (profileError.code === 'PGRST116') {
-          console.log('🔧 AuthService: Creating user profile for:', data.user.email);
+          console.log('Creating user profile for:', data.user.email);
           const { data: newProfile, error: createError } = await supabase
             .from('users')
             .insert({
@@ -85,17 +77,9 @@ class AuthService {
             .select()
             .single();
 
-          if (createError) {
-            console.log('❌ AuthService: Profile creation failed:', createError.message);
-            return { user: null, error: `Failed to create user profile: ${createError.message}` };
+          if (createError || !newProfile) {
+            return { user: null, error: 'Failed to create user profile' };
           }
-          
-          if (!newProfile) {
-            console.log('❌ AuthService: No profile data returned after creation');
-            return { user: null, error: 'Failed to create user profile - no data returned' };
-          }
-          
-          console.log('✅ AuthService: Profile created successfully');
           
           // Use the newly created profile
           const authUser: AuthUser = {
@@ -115,13 +99,9 @@ class AuthService {
 
           return { user: authUser, error: null };
         }
-        
-        console.log('❌ AuthService: Failed to fetch user profile:', profileError.message);
-        return { user: null, error: `Failed to fetch user profile: ${profileError.message}` };
+        return { user: null, error: 'Failed to fetch user profile' };
       }
 
-      console.log('✅ AuthService: Profile found:', profile.name);
-      
       const authUser: AuthUser = {
         id: profile.id,
         email: profile.email,
@@ -137,11 +117,10 @@ class AuthService {
         location: profile.location,
       };
 
-      console.log('✅ AuthService: Login completed successfully');
       return { user: authUser, error: null };
     } catch (error) {
-      console.error('❌ AuthService: Unexpected error:', error);
-      return { user: null, error: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}` };
+      console.error('Service error:', error);
+      return { user: null, error: 'An unexpected error occurred' };
     }
   }
 

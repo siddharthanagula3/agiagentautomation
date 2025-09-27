@@ -97,6 +97,10 @@ const EmployeesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
+};
 
 export default EmployeesPage;

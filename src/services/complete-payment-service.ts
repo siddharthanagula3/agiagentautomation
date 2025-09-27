@@ -27,7 +27,7 @@ export interface PaymentIntent {
   status: 'pending' | 'processing' | 'succeeded' | 'failed' | 'cancelled';
   paymentMethod: string;
   clientSecret?: string;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, any>;
   createdAt: string;
   updatedAt: string;
 }
@@ -66,7 +66,7 @@ export interface Subscription {
   currentPeriodStart: string;
   currentPeriodEnd: string;
   cancelAtPeriodEnd: boolean;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, any>;
 }
 
 export interface Invoice {
@@ -90,12 +90,12 @@ export interface InvoiceItem {
   quantity: number;
   unitPrice: number;
   total: number;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, any>;
 }
 
 class CompletePaymentService {
-  private stripe: unknown = null;
-  private paypal: unknown = null;
+  private stripe: any = null;
+  private paypal: any = null;
   private isInitialized = false;
 
   constructor() {
@@ -142,7 +142,7 @@ class CompletePaymentService {
         data: data as PaymentMethod[],
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -180,7 +180,7 @@ class CompletePaymentService {
         data: data as PaymentMethod,
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -212,7 +212,7 @@ class CompletePaymentService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -296,7 +296,7 @@ class CompletePaymentService {
           timestamp: new Date().toISOString()
         };
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -309,7 +309,7 @@ class CompletePaymentService {
   private async createPaymentIntent(intentData: {
     amount: number;
     currency: string;
-    metadata: Record<string, unknown>;
+    metadata: Record<string, any>;
   }): Promise<APIResponse<PaymentIntent>> {
     try {
       // In a real implementation, this would call Stripe API
@@ -330,7 +330,7 @@ class CompletePaymentService {
         data: paymentIntent,
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -371,7 +371,7 @@ class CompletePaymentService {
           timestamp: new Date().toISOString()
         };
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -411,7 +411,7 @@ class CompletePaymentService {
         data: data as EmployeeHire,
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -440,7 +440,7 @@ class CompletePaymentService {
         data: data as BillingInfo,
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -469,7 +469,7 @@ class CompletePaymentService {
         data: data as BillingInfo,
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -495,7 +495,7 @@ class CompletePaymentService {
         data: data as Invoice[],
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -520,7 +520,7 @@ class CompletePaymentService {
         data: data as Invoice,
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -561,7 +561,7 @@ class CompletePaymentService {
         data: data as Subscription,
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -589,7 +589,7 @@ class CompletePaymentService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -624,7 +624,7 @@ class CompletePaymentService {
         },
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -638,7 +638,7 @@ class CompletePaymentService {
   // ========================================
 
   // Get payment analytics
-  async getPaymentAnalytics(userId: string, period: string = '30d'): Promise<APIResponse<unknown>> {
+  async getPaymentAnalytics(userId: string, period: string = '30d'): Promise<APIResponse<any>> {
     try {
       const { data, error } = await supabase
         .from('payment_analytics')
@@ -654,7 +654,7 @@ class CompletePaymentService {
         data: data,
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -668,7 +668,7 @@ class CompletePaymentService {
   // ========================================
 
   // Handle webhook
-  async handleWebhook(payload: unknown, signature: string): Promise<APIResponse<boolean>> {
+  async handleWebhook(payload: any, signature: string): Promise<APIResponse<boolean>> {
     try {
       // Verify webhook signature
       const isValid = await this.verifyWebhookSignature(payload, signature);
@@ -689,7 +689,7 @@ class CompletePaymentService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       return {
         success: false,
         error: error.message,
@@ -699,13 +699,13 @@ class CompletePaymentService {
   }
 
   // Verify webhook signature
-  private async verifyWebhookSignature(payload: unknown, signature: string): Promise<boolean> {
+  private async verifyWebhookSignature(payload: any, signature: string): Promise<boolean> {
     // In a real implementation, this would verify the webhook signature
     return true;
   }
 
   // Process webhook event
-  private async processWebhookEvent(payload: unknown): Promise<void> {
+  private async processWebhookEvent(payload: any): Promise<void> {
     // Process different webhook events
     switch (payload.type) {
       case 'payment_intent.succeeded':
@@ -726,7 +726,7 @@ class CompletePaymentService {
   }
 
   // Handle payment success
-  private async handlePaymentSuccess(data: unknown): Promise<void> {
+  private async handlePaymentSuccess(data: any): Promise<void> {
     // Update payment status in database
     await supabase
       .from('employee_hires')
@@ -735,7 +735,7 @@ class CompletePaymentService {
   }
 
   // Handle payment failure
-  private async handlePaymentFailure(data: unknown): Promise<void> {
+  private async handlePaymentFailure(data: any): Promise<void> {
     // Update payment status in database
     await supabase
       .from('employee_hires')
@@ -744,7 +744,7 @@ class CompletePaymentService {
   }
 
   // Handle invoice payment success
-  private async handleInvoicePaymentSuccess(data: unknown): Promise<void> {
+  private async handleInvoicePaymentSuccess(data: any): Promise<void> {
     // Update invoice status
     await supabase
       .from('invoices')
@@ -753,7 +753,7 @@ class CompletePaymentService {
   }
 
   // Handle subscription update
-  private async handleSubscriptionUpdate(data: unknown): Promise<void> {
+  private async handleSubscriptionUpdate(data: any): Promise<void> {
     // Update subscription status
     await supabase
       .from('subscriptions')

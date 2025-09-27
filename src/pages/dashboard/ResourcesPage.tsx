@@ -2,35 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/auth-hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Database, Plus } from 'lucide-react';
 
-const ResourcesPage: React.FC = () => {
-  const { user } = useAuth();
+  const [data, setData] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<unknown[]>([]);
-
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        // TODO: Replace with actual Supabase data fetching
-        setData([]);
-      } catch (err) {
-        setError("Failed to load data.");
-        console.error("Error fetching data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+const ResourcesPage: React.FC = () => {
+  const { user } = useAuth();
 
-    if (user) {
-      fetchData();
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
+    // TODO: Replace with real data fetching
+    setLoading(false);
+  }, []);
 
   if (!user) {
     return (
@@ -46,8 +29,7 @@ const ResourcesPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="ml-2 text-muted-foreground">Loading...</p>
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -68,31 +50,44 @@ const ResourcesPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
+      {/* Empty state for new users */}
+      {data.length === 0 && !loading && (
+        <div className="text-center py-12">
+          <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+            <span className="text-2xl">📊</span>
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">No data yet</h3>
+          <p className="text-muted-foreground mb-4">
+            This page will show your data once you start using the system.
+          </p>
+        </div>
+      )}
       <div>
         <h1 className="text-3xl font-bold text-foreground">Resources</h1>
         <p className="text-muted-foreground mt-2">
-          Manage your resources settings and configurations.
+          Manage resources and assets for your AI workforce platform.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Resources Overview</CardTitle>
+          <CardTitle>Resource Management</CardTitle>
           <CardDescription>
-            View and manage your resources data.
+            Manage platform resources, assets, and operational capabilities.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-12">
-            <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-              <span className="text-2xl">📊</span>
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">No data yet</h3>
+            <Database className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Resource Center
+            </h3>
             <p className="text-muted-foreground mb-6">
-              This page will show your data once you start using the system.
+              This page will contain resource management with asset control, resource allocation, and operational monitoring.
             </p>
             <Button>
-              Get Started
+              <Plus className="mr-2 h-4 w-4" />
+              Add Resource
             </Button>
           </div>
         </CardContent>

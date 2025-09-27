@@ -1,0 +1,422 @@
+[1mdiff --git a/src/components/RealtimeDashboard.tsx b/src/components/RealtimeDashboard.tsx[m
+[1mindex 3b8374c..705d156 100644[m
+[1m--- a/src/components/RealtimeDashboard.tsx[m
+[1m+++ b/src/components/RealtimeDashboard.tsx[m
+[36m@@ -40,14 +40,8 @@[m [minterface LiveJob {[m
+   estimatedCompletion: Date;[m
+ }[m
+ [m
+[31m-  const [stats, setStats] = useState<RealtimeStats>({[m
+[31m-  const [liveJobs, setLiveJobs] = useState<LiveJob[]>([]);[m
+[31m-  const [isConnected, setIsConnected] = useState(false);[m
+[31m-  const [lastPing, setLastPing] = useState<Date>(new Date());[m
+[31m-  useEffect(() => {[m
+[31m-  useEffect(() => {[m
+[31m-  useEffect(() => {[m
+ const RealtimeDashboard: React.FC = () => {[m
+[32m+[m[32m  const [stats, setStats] = useState<RealtimeStats>({[m
+     activeJobs: 0,[m
+     completedJobs: 0,[m
+     totalWorkers: 0,[m
+[36m@@ -55,325 +49,198 @@[m [mconst RealtimeDashboard: React.FC = () => {[m
+     systemHealth: 100,[m
+     lastUpdate: new Date()[m
+   });[m
+[32m+[m[41m  [m
+[32m+[m[32m  const [liveJobs, setLiveJobs] = useState<LiveJob[]>([]);[m
+[32m+[m[32m  const [isConnected, setIsConnected] = useState(false);[m
+[32m+[m[32m  const [lastPing, setLastPing] = useState<Date>(new Date());[m
+ [m
+[32m+[m[32m  const { workforce } = useWorkforceStore();[m
+ [m
+[31m-  const { jobs, workers, isLoading, lastUpdateAt } = useWorkforceStore();[m
+[31m-  const { isConnected: realtimeConnected, channels } = useRealtime({[m
+[31m-    onJobUpdate: (job) => {[m
+[31m-      console.log('Job updated in real-time:', job);[m
+[31m-      setStats(prev => ({[m
+[31m-        ...prev,[m
+[31m-        lastUpdate: new Date()[m
+[31m-      }));[m
+[31m-    },[m
+[31m-    onJobCreated: (job) => {[m
+[31m-      console.log('New job created:', job);[m
+[31m-      setStats(prev => ({[m
+[31m-        ...prev,[m
+[31m-        activeJobs: prev.activeJobs + 1,[m
+[31m-        lastUpdate: new Date()[m
+[31m-      }));[m
+[31m-    },[m
+[31m-    onAgentUpdate: (agent) => {[m
+[31m-      console.log('Agent updated:', agent);[m
+[32m+[m[32m  useEffect(() => {[m
+[32m+[m[32m    // Simulate real-time data updates[m
+[32m+[m[32m    const interval = setInterval(() => {[m
+       setStats(prev => ({[m
+         ...prev,[m
+[32m+[m[32m        activeJobs: Math.floor(Math.random() * 10) + 1,[m
+[32m+[m[32m        completedJobs: Math.floor(Math.random() * 50) + 10,[m
+[32m+[m[32m        totalWorkers: workforce.length,[m
+[32m+[m[32m        availableWorkers: Math.floor(Math.random() * workforce.length),[m
+[32m+[m[32m        systemHealth: Math.floor(Math.random() * 20) + 80,[m
+         lastUpdate: new Date()[m
+       }));[m
+[31m-    },[m
+[31m-    onError: (error) => {[m
+[31m-      console.error('Real-time error:', error);[m
+[31m-    }[m
+[31m-  });[m
+[31m-[m
+[31m-  // Update stats from store data[m
+[31m-    const activeJobs = Objec;[m
+[31m-  t.values(jobs).filter(job => job.status === 'running').length;[m
+[31m-    const completedJobs = Objec;[m
+[31m-  t.values(jobs).filter(job => job.status === 'completed').length;[m
+[31m-    const totalWorkers = Objec;[m
+[31m-  t.keys(workers).length;[m
+[31m-    const availableWorkers = Objec;[m
+[31m-  t.values(workers).filter(worker => worker.status === 'idle').length;[m
+[31m-[m
+[31m-    setStats(prev => ({[m
+[31m-      ...prev,[m
+[31m-      activeJobs,[m
+[31m-      completedJobs,[m
+[31m-      totalWorkers,[m
+[31m-      availableWorkers,[m
+[31m-      lastUpdate: lastUpdateAt || new Date()[m
+[31m-    }));[m
+[31m-[m
+[31m-    // Update live jobs[m
+[31m-    const liveJobsData: LiveJob[] = Object.values(jobs)[m
+[31m-      .filter(job => job.status === 'running')[m
+[31m-      .map(job => ({[m
+[31m-        id: job.id,[m
+[31m-        title: job.title,[m
+[31m-        status: job.status as unknown,[m
+[31m-        progress: job.progress,[m
+[31m-        assignedWorker: job.assignedWorkers[0]?.name || 'Unassigned',[m
+[31m-        startedAt: new Date(job.createdAt),[m
+[31m-        estimatedCompletion: job.estimatedCompletion ? new Date(job.estimatedCompletion) : new Date()[m
+[31m-      }));[m
+[31m-[m
+[31m-    setLiveJobs(liveJobsData);[m
+[31m-  }, [jobs, workers, lastUpdateAt]);[m
+ [m
+[31m-  // Connection status[m
+[31m-    setIsConnected(realtimeConnected);[m
+[31m-    if (realtimeConnected) {[m
+       setLastPing(new Date());[m
+[31m-    }[m
+[31m-  }, [realtimeConnected]);[m
+[31m-[m
+[31m-  // Auto-refresh ping[m
+[31m-    const interval = setInterva;[m
+[31m-  l(() => {[m
+[31m-      if (isConnected) {[m
+[31m-        setLastPing(new Date());[m
+[31m-      }[m
+[31m-    }, 30000); // Ping every 30 seconds[m
+[32m+[m[32m      setIsConnected(true);[m
+[32m+[m[32m    }, 2000);[m
+ [m
+     return () => clearInterval(interval);[m
+[31m-  }, [isConnected]);[m
+[32m+[m[32m  }, [workforce]);[m
+ [m
+   const getStatusColor = (status: string) => {[m
+     switch (status) {[m
+[31m-      case 'running':[m
+[31m-        return 'bg-blue-500';[m
+[31m-      case 'completed':[m
+[31m-        return 'bg-green-500';[m
+[31m-      case 'failed':[m
+[31m-        return 'bg-red-500';[m
+[31m-      case 'paused':[m
+[31m-        return 'bg-yellow-500';[m
+[31m-      default:[m
+[31m-        return 'bg-gray-500';[m
+[32m+[m[32m      case 'running': return 'bg-blue-500';[m
+[32m+[m[32m      case 'completed': return 'bg-green-500';[m
+[32m+[m[32m      case 'failed': return 'bg-red-500';[m
+[32m+[m[32m      case 'paused': return 'bg-yellow-500';[m
+[32m+[m[32m      default: return 'bg-gray-500';[m
+     }[m
+   };[m
+ [m
+   const getStatusIcon = (status: string) => {[m
+     switch (status) {[m
+[31m-      case 'running':[m
+[31m-        return <Activity className="h-4 w-4" />;[m
+[31m-      case 'completed':[m
+[31m-        return <CheckCircle className="h-4 w-4" />;[m
+[31m-      case 'failed':[m
+[31m-        return <AlertCircle className="h-4 w-4" />;[m
+[31m-      case 'paused':[m
+[31m-        return <Clock className="h-4 w-4" />;[m
+[31m-      default:[m
+[31m-        return <Activity className="h-4 w-4" />;[m
+[32m+[m[32m      case 'running': return <Activity className="h-4 w-4" />;[m
+[32m+[m[32m      case 'completed': return <CheckCircle className="h-4 w-4" />;[m
+[32m+[m[32m      case 'failed': return <AlertCircle className="h-4 w-4" />;[m
+[32m+[m[32m      case 'paused': return <Clock className="h-4 w-4" />;[m
+[32m+[m[32m      default: return <Activity className="h-4 w-4" />;[m
+     }[m
+   };[m
+ [m
+[31m-  const formatTimeAgo = (date: Date) => {[m
+[31m-    const now = new;[m
+[31m-  Date();[m
+[31m-    const diff = no;[m
+[31m-  w.getTime() - date.getTime();[m
+[31m-    const seconds = Mat;[m
+[31m-  h.floor(diff / 1000);[m
+[31m-    const minutes = Mat;[m
+[31m-  h.floor(seconds / 60);[m
+[31m-    const hours = Mat;[m
+[31m-  h.floor(minutes / 60);[m
+[31m-[m
+[31m-    if (seconds < 60) return `${seconds}s ago`;[m
+[31m-    if (minutes < 60) return `${minutes}m ago`;[m
+[31m-    return `${hours}h ago`;[m
+[31m-  };[m
+[31m-[m
+   return ([m
+     <div className="space-y-6">[m
+[31m-      {/* Connection Status */}[m
+[31m-      <Card className="border-l-4 border-l-blue-500">[m
+[31m-        <CardHeader className="pb-3">[m
+[31m-          <div className="flex items-center justify-between">[m
+[31m-            <CardTitle className="text-lg flex items-center space-x-2">[m
+[31m-              {isConnected ? ([m
+[31m-                <Wifi className="h-5 w-5 text-green-500" />[m
+[31m-              ) : ([m
+[31m-                <WifiOff className="h-5 w-5 text-red-500" />[m
+[31m-              )}[m
+[31m-              <span>Real-time Dashboard</span>[m
+[31m-            </CardTitle>[m
+[31m-            <div className="flex items-center space-x-2">[m
+[31m-              <Badge variant={isConnected ? "default" : "destructive"}>[m
+[31m-                {isConnected ? "Connected" : "Disconnected"}[m
+[31m-              </Badge>[m
+[31m-              <span className="text-sm text-muted-foreground">[m
+[31m-                Last ping: {formatTimeAgo(lastPing)}[m
+[31m-              </span>[m
+[31m-            </div>[m
+[31m-          </div>[m
+[31m-        </CardHeader>[m
+[31m-        <CardContent>[m
+[31m-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">[m
+[31m-            <div className="text-center">[m
+[31m-              <div className="text-2xl font-bold text-blue-600">{stats.activeJobs}</div>[m
+[31m-              <div className="text-sm text-muted-foreground">Active Jobs</div>[m
+[31m-            </div>[m
+[31m-            <div className="text-center">[m
+[31m-              <div className="text-2xl font-bold text-green-600">{stats.completedJobs}</div>[m
+[31m-              <div className="text-sm text-muted-foreground">Completed</div>[m
+[31m-            </div>[m
+[31m-            <div className="text-center">[m
+[31m-              <div className="text-2xl font-bold text-purple-600">{stats.totalWorkers}</div>[m
+[31m-              <div className="text-sm text-muted-foreground">Total Workers</div>[m
+[31m-            </div>[m
+[31m-            <div className="text-center">[m
+[31m-              <div className="text-2xl font-bold text-orange-600">{stats.availableWorkers}</div>[m
+[31m-              <div className="text-sm text-muted-foreground">Available</div>[m
+[31m-            </div>[m
+[32m+[m[32m      {/* Header */}[m
+[32m+[m[32m      <div className="flex items-center justify-between">[m
+[32m+[m[32m        <div>[m
+[32m+[m[32m          <h1 className="text-3xl font-bold">Real-time Dashboard</h1>[m
+[32m+[m[32m          <p className="text-gray-600">Monitor your AI workforce in real-time</p>[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m        <div className="flex items-center space-x-4">[m
+[32m+[m[32m          <div className="flex items-center space-x-2">[m
+[32m+[m[32m            {isConnected ? ([m
+[32m+[m[32m              <Wifi className="h-5 w-5 text-green-500" />[m
+[32m+[m[32m            ) : ([m
+[32m+[m[32m              <WifiOff className="h-5 w-5 text-red-500" />[m
+[32m+[m[32m            )}[m
+[32m+[m[32m            <span className="text-sm text-gray-600">[m
+[32m+[m[32m              {isConnected ? 'Connected' : 'Disconnected'}[m
+[32m+[m[32m            </span>[m
+           </div>[m
+[31m-        </CardContent>[m
+[31m-      </Card>[m
+[32m+[m[32m          <Button[m
+[32m+[m[32m            variant="outline"[m
+[32m+[m[32m            size="sm"[m
+[32m+[m[32m            onClick={() => window.location.reload()}[m
+[32m+[m[32m          >[m
+[32m+[m[32m            <RefreshCw className="h-4 w-4 mr-2" />[m
+[32m+[m[32m            Refresh[m
+[32m+[m[32m          </Button>[m
+[32m+[m[32m        </div>[m
+[32m+[m[32m      </div>[m
+[32m+[m
+[32m+[m[32m      {/* Stats Grid */}[m
+[32m+[m[32m      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">[m
+[32m+[m[32m        <Card>[m
+[32m+[m[32m          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">[m
+[32m+[m[32m            <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>[m
+[32m+[m[32m            <Activity className="h-4 w-4 text-muted-foreground" />[m
+[32m+[m[32m          </CardHeader>[m
+[32m+[m[32m          <CardContent>[m
+[32m+[m[32m            <div className="text-2xl font-bold">{stats.activeJobs}</div>[m
+[32m+[m[32m            <p className="text-xs text-muted-foreground">[m
+[32m+[m[32m              Currently running[m
+[32m+[m[32m            </p>[m
+[32m+[m[32m          </CardContent>[m
+[32m+[m[32m        </Card>[m
+[32m+[m
+[32m+[m[32m        <Card>[m
+[32m+[m[32m          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">[m
+[32m+[m[32m            <CardTitle className="text-sm font-medium">Completed Jobs</CardTitle>[m
+[32m+[m[32m            <CheckCircle className="h-4 w-4 text-muted-foreground" />[m
+[32m+[m[32m          </CardHeader>[m
+[32m+[m[32m          <CardContent>[m
+[32m+[m[32m            <div className="text-2xl font-bold">{stats.completedJobs}</div>[m
+[32m+[m[32m            <p className="text-xs text-muted-foreground">[m
+[32m+[m[32m              Total completed[m
+[32m+[m[32m            </p>[m
+[32m+[m[32m          </CardContent>[m
+[32m+[m[32m        </Card>[m
+[32m+[m
+[32m+[m[32m        <Card>[m
+[32m+[m[32m          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">[m
+[32m+[m[32m            <CardTitle className="text-sm font-medium">Available Workers</CardTitle>[m
+[32m+[m[32m            <Users className="h-4 w-4 text-muted-foreground" />[m
+[32m+[m[32m          </CardHeader>[m
+[32m+[m[32m          <CardContent>[m
+[32m+[m[32m            <div className="text-2xl font-bold">{stats.availableWorkers}</div>[m
+[32m+[m[32m            <p className="text-xs text-muted-foreground">[m
+[32m+[m[32m              Out of {stats.totalWorkers} total[m
+[32m+[m[32m            </p>[m
+[32m+[m[32m          </CardContent>[m
+[32m+[m[32m        </Card>[m
+[32m+[m
+[32m+[m[32m        <Card>[m
+[32m+[m[32m          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">[m
+[32m+[m[32m            <CardTitle className="text-sm font-medium">System Health</CardTitle>[m
+[32m+[m[32m            <TrendingUp className="h-4 w-4 text-muted-foreground" />[m
+[32m+[m[32m          </CardHeader>[m
+[32m+[m[32m          <CardContent>[m
+[32m+[m[32m            <div className="text-2xl font-bold">{stats.systemHealth}%</div>[m
+[32m+[m[32m            <Progress value={stats.systemHealth} className="mt-2" />[m
+[32m+[m[32m          </CardContent>[m
+[32m+[m[32m        </Card>[m
+[32m+[m[32m      </div>[m
+ [m
+       {/* Live Jobs */}[m
+       <Card>[m
+         <CardHeader>[m
+           <CardTitle className="flex items-center space-x-2">[m
+[31m-            <Zap className="h-5 w-5 text-yellow-500" />[m
+[32m+[m[32m            <Zap className="h-5 w-5" />[m
+             <span>Live Jobs</span>[m
+[31m-            <Badge variant="outline">{liveJobs.length}</Badge>[m
+           </CardTitle>[m
+         </CardHeader>[m
+         <CardContent>[m
+[31m-          <AnimatePresence mode="popLayout">[m
+[32m+[m[32m          <div className="space-y-4">[m
+             {liveJobs.length === 0 ? ([m
+[31m-              <motion.div[m
+[31m-                initial={{ opacity: 0 }}[m
+[31m-                animate={{ opacity: 1 }}[m
+[31m-                exit={{ opacity: 0 }}[m
+[31m-                className="text-center py-8 text-muted-foreground"[m
+[31m-              >[m
+[31m-                <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />[m
+[32m+[m[32m              <div className="text-center py-8 text-gray-500">[m
+[32m+[m[32m                <Workflow className="h-12 w-12 mx-auto mb-4 opacity-50" />[m
+                 <p>No active jobs at the moment</p>[m
+[31m-              </motion.div>[m
+[32m+[m[32m                <p className="text-sm">Jobs will appear here when they start running</p>[m
+[32m+[m[32m              </div>[m
+             ) : ([m
+[31m-              <div className="space-y-4">[m
+[32m+[m[32m              <AnimatePresence>[m
+                 {liveJobs.map((job) => ([m
+                   <motion.div[m
+                     key={job.id}[m
+                     initial={{ opacity: 0, y: 20 }}[m
+                     animate={{ opacity: 1, y: 0 }}[m
+                     exit={{ opacity: 0, y: -20 }}[m
+[31m-                    transition={{ duration: 0.3 }}[m
+[31m-                    className="flex items-center space-x-4 p-4 border rounded-lg"[m
+[32m+[m[32m                    className="flex items-center justify-between p-4 border rounded-lg"[m
+                   >[m
+[31m-                    <div className={cn([m
+[31m-                      "p-2 rounded-full",[m
+[31m-                      getStatusColor(job.status)[m
+[31m-                    )}>[m
+[31m-                      {getStatusIcon(job.status)}[m
+[31m-                    </div>[m
+[31m-                    [m
+[31m-                    <div className="flex-1 min-w-0">[m
+[31m-                      <div className="flex items-center justify-between">[m
+[31m-                        <h4 className="font-medium truncate">{job.title}</h4>[m
+[31m-                        <Badge variant="outline">{job.status}</Badge>[m
+[32m+[m[32m                    <div className="flex items-center space-x-4">[m
+[32m+[m[32m                      <div className={cn([m
+[32m+[m[32m                        "w-3 h-3 rounded-full",[m
+[32m+[m[32m                        getStatusColor(job.status)[m
+[32m+[m[32m                      )} />[m
+[32m+[m[32m                      <div>[m
+[32m+[m[32m                        <h3 className="font-medium">{job.title}</h3>[m
+[32m+[m[32m                        <p className="text-sm text-gray-600">[m
+[32m+[m[32m                          Assigned to: {job.assignedWorker}[m
+[32m+[m[32m                        </p>[m
+                       </div>[m
+[31m-                      <div className="mt-2 space-y-2">[m
+[31m-                        <div className="flex items-center justify-between text-sm text-muted-foreground">[m
+[31m-                          <span>Assigned to: {job.assignedWorker}</span>[m
+[31m-                          <span>Started: {formatTimeAgo(job.startedAt)}</span>[m
+[31m-                        </div>[m
+[31m-                        <div className="space-y-1">[m
+[31m-                          <div className="flex items-center justify-between text-sm">[m
+[31m-                            <span>Progress</span>[m
+[31m-                            <span>{job.progress}%</span>[m
+[31m-                          </div>[m
+[31m-                          <Progress value={job.progress} className="h-2" />[m
+[31m-                        </div>[m
+[32m+[m[32m                    </div>[m
+[32m+[m[32m                    <div className="flex items-center space-x-4">[m
+[32m+[m[32m                      <div className="text-right">[m
+[32m+[m[32m                        <div className="text-sm font-medium">{job.progress}%</div>[m
+[32m+[m[32m                        <Progress value={job.progress} className="w-20" />[m
+                       </div>[m
+[32m+[m[32m                      <Badge variant="outline" className="flex items-center space-x-1">[m
+[32m+[m[32m                        {getStatusIcon(job.status)}[m
+[32m+[m[32m                        <span className="capitalize">{job.status}</span>[m
+[32m+[m[32m                      </Badge>[m
+                     </div>[m
+                   </motion.div>[m
+                 ))}[m
+[31m-              </div>[m
+[32m+[m[32m              </AnimatePresence>[m
+             )}[m
+[31m-          </AnimatePresence>[m
+[32m+[m[32m          </div>[m
+         </CardContent>[m
+       </Card>[m
+ [m
+[31m-      {/* System Health */}[m
+[31m-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">[m
+[31m-        <Card>[m
+[31m-          <CardHeader>[m
+[31m-            <CardTitle className="flex items-center space-x-2">[m
+[31m-              <TrendingUp className="h-5 w-5" />[m
+[31m-              <span>System Health</span>[m
+[31m-            </CardTitle>[m
+[31m-          </CardHeader>[m
+[31m-          <CardContent>[m
+[31m-            <div className="space-y-4">[m
+[31m-              <div className="flex items-center justify-between">[m
+[31m-                <span>Overall Health</span>[m
+[31m-                <span className="text-2xl font-bold text-green-600">98%</span>[m
+[31m-              </div>[m
+[31m-              <Progress value={98} className="h-3" />[m
+[31m-              [m
+[31m-              <div className="grid grid-cols-2 gap-4 mt-4">[m
+[31m-                <div className="text-center">[m
+[31m-                  <div className="text-lg font-semibold text-green-600">99.9%</div>[m
+[31m-                  <div className="text-sm text-muted-foregr

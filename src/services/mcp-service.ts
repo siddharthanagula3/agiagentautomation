@@ -140,8 +140,7 @@ class MCPService {
             }
           };
 
-        case 'tools/call': {
-          const { name, arguments: args } = request.params;
+        case 'tools/call': { const { name, arguments: args } = request.params;
           const result = await this.callTool(name, args);
           return {
             jsonrpc: '2.0',
@@ -155,7 +154,6 @@ class MCPService {
               ]
             }
           };
-        }
 
         default:
           return {

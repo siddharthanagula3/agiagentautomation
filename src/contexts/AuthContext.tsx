@@ -12,17 +12,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
+
+    // Check for existing session with timeout
     const checkSession = async () => {
       try {
+        // Set a timeout to prevent infinite loading
+        timeoutId = setTimeout(() => {
+          if (isMounted) {
+            console.warn('Auth check timeout - setting loading to false');
+            setLoading(false);
+          }
+        }, 5000); // 5 second timeout
+
         const { user: currentUser, error } = await authService.getCurrentUser();
-        if (currentUser && !error) {
-          setUser(currentUser);
+        
+        if (isMounted) {
+          if (currentUser && !error) {
+            setUser(currentUser);
+          }
+          setLoading(false);
         }
       } catch (error) {
         console.error('Error checking session:', error);
+        if (isMounted) {
+          setLoading(false);
+        }
       } finally {
-        setLoading(false);
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
       }
     };
 
@@ -30,10 +50,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Listen to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+
       if (session?.user) {
         try {
           const { user: authUser, error } = await authService.getCurrentUser();
-          if (authUser && !error) {
+          if (authUser && !error && isMounted) {
             setUser(authUser);
           }
         } catch (error) {
@@ -42,10 +64,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         setUser(null);
       }
-      setLoading(false);
+      
+      if (isMounted) {
+        setLoading(false);
+      }
     });
 
     return () => {
+      isMounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       subscription?.unsubscribe();
     };
   }, []);
@@ -54,18 +83,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setLoading(true);
       
+      // Add timeout to prevent infinite loading
+      const loginTimeout = setTimeout(() => {
+        console.warn('Login timeout - stopping loading');
+        setLoading(false);
+      }, 10000); // 10 second timeout for login
+      
       const { user: authUser, error } = await authService.login({ email, password });
       
+      clearTimeout(loginTimeout);
+      
       if (error || !authUser) {
+        setLoading(false);
         return { success: false, error: error || 'Login failed' };
       }
 
       setUser(authUser);
+      setLoading(false);
       return { success: true };
     } catch (error) {
-      return { success: false, error: 'Login failed. Please try again.' };
-    } finally {
       setLoading(false);
+      return { success: false, error: 'Login failed. Please try again.' };
     }
   };
 

@@ -1,92 +1,51 @@
-import React, { useState, 
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // TODO: Replace with actual data fetching
-      setData([]);
-      
-    } catch (err) {
-      console.error('Error loading data:', err);
-      setError('Failed to load data. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../../contexts/auth-hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
-import { Input } from '../../components/ui/input';
 import { 
   Bell, 
-  Plus, 
-  Search, 
-  Filter, 
-  Settings,
   CheckCircle,
   AlertTriangle,
   Info,
-  X,
-  Loader2,
-  Mail,
-  MessageSquare,
-  Zap,
+  Star,
   Users,
-  Activity,
   Target,
-  Clock,
-  Eye,
-  Trash2
+  DollarSign,
+  Calendar,
+  Loader2,
+  Filter,
+  MarkAsRead,
+  Trash2,
+  Settings,
+  RefreshCw
 } from 'lucide-react';
-import { useAuth } from '../../contexts/auth-hooks';
 
 interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error' | 'system';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: 'unread' | 'read' | 'archived';
-  category: 'system' | 'user' | 'ai_employee' | 'job' | 'billing' | 'security';
-  createdAt: string;
-  readAt?: string;
-  actions?: NotificationAction[];
-  tags: string[];
-}
-
-interface NotificationAction {
-  id: string;
-  label: string;
-  action: string;
-  type: 'primary' | 'secondary' | 'danger';
+  type: 'info' | 'warning' | 'error' | 'success' | 'assignment' | 'system';
+  read: boolean;
+  created_at: string;
+  action_url?: string;
+  data?: any;
 }
 
 const NotificationsPage: React.FC = () => {
-  const [data, setData] = useState<any[]>([]);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
-  
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
-          <p className="text-muted-foreground">Please log in to access this page.</p>
-        </div>
-      </div>
-    );
-  }
-  
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [readFilter, setReadFilter] = useState('');
+  const [stats, setStats] = useState({
+    total: 0,
+    unread: 0,
+    today: 0,
+    thisWeek: 0
+  });
 
   useEffect(() => {
     if (user) {
@@ -94,128 +53,169 @@ const NotificationsPage: React.FC = () => {
     }
   }, [user]);
 
+  const loadNotifications = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Simulate API call - in real implementation, this would fetch from Supabase
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // For new users, return welcome notification
+      const welcomeNotifications: Notification[] = [
+        {
+          id: '1',
+          title: 'Welcome to AGI Agent Automation!',
+          message: 'Get started by creating your first AI employee or job.',
+          type: 'success',
+          read: false,
+          created_at: new Date().toISOString(),
+          action_url: '/dashboard/ai-employees'
+        },
+        {
+          id: '2',
+          title: 'System Update Available',
+          message: 'A new system update is available with enhanced features.',
+          type: 'info',
+          read: true,
+          created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          action_url: '/dashboard/settings'
+        }
+      ];
+      
+      setNotifications(welcomeNotifications);
+      setFilteredNotifications(welcomeNotifications);
+      
+      // Calculate stats
+      const total = welcomeNotifications.length;
+      const unread = welcomeNotifications.filter(n => !n.read).length;
+      const today = welcomeNotifications.filter(n => {
+        const notificationDate = new Date(n.created_at);
+        const today = new Date();
+        return notificationDate.toDateString() === today.toDateString();
+      }).length;
+      const thisWeek = welcomeNotifications.filter(n => {
+        const notificationDate = new Date(n.created_at);
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        return notificationDate >= weekAgo;
+      }).length;
+      
+      setStats({ total, unread, today, thisWeek });
+      
+    } catch (err) {
+      console.error('Error loading notifications:', err);
+      setError('Failed to load notifications. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const filterNotifications = useCallback(() => {
+    let filtered = notifications;
+    
+    if (typeFilter) {
+      filtered = filtered.filter(notification => notification.type === typeFilter);
+    }
+    
+    if (readFilter === 'read') {
+      filtered = filtered.filter(notification => notification.read);
+    } else if (readFilter === 'unread') {
+      filtered = filtered.filter(notification => !notification.read);
+    }
+    
+    setFilteredNotifications(filtered);
+  }, [notifications, typeFilter, readFilter]);
+
   useEffect(() => {
     filterNotifications();
   }, [filterNotifications]);
 
-  const loadNotifications = async () => {
+  const handleMarkAsRead = async (notificationId: string) => {
     try {
-      setLoading(true);
-      setError('');
-      
-      
-      
-      
-      
-      setNotifications(mockNotifications);
-    } catch (error) {
-      console.error('Error loading notifications:', error);
-      setError('Failed to load notifications.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterNotifications = useCallback(() => {
-    let filtered = notifications;
-
-    if (searchTerm) {
-      filtered = filtered.filter(notification =>
-        notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        notification.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        notification.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      setNotifications(prev => 
+        prev.map(notification => 
+          notification.id === notificationId 
+            ? { ...notification, read: true }
+            : notification
+        )
       );
+      
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        unread: Math.max(0, prev.unread - 1)
+      }));
+      
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
     }
-
-    if (typeFilter) {
-      filtered = filtered.filter(notification => notification.type === typeFilter);
-    }
-
-    if (statusFilter) {
-      filtered = filtered.filter(notification => notification.status === statusFilter);
-    }
-
-    setFilteredNotifications(filtered);
-  }, [notifications, searchTerm, typeFilter, statusFilter]);
-
-  const markAsRead = async (notificationId: string) => {
-    setNotifications(prev => prev.map(notification => 
-      notification.id === notificationId 
-        ? { ...notification, status: 'read', readAt: new Date().toISOString() }
-        : notification
-    ));
   };
 
-  const markAllAsRead = async () => {
-    setNotifications(prev => prev.map(notification => 
-      notification.status === 'unread'
-        ? { ...notification, status: 'read', readAt: new Date().toISOString() }
-        : notification
-    ));
+  const handleMarkAllAsRead = async () => {
+    try {
+      setNotifications(prev => 
+        prev.map(notification => ({ ...notification, read: true }))
+      );
+      
+      setStats(prev => ({
+        ...prev,
+        unread: 0
+      }));
+      
+    } catch (err) {
+      console.error('Error marking all notifications as read:', err);
+    }
   };
 
-  const archiveNotification = async (notificationId: string) => {
-    setNotifications(prev => prev.map(notification => 
-      notification.id === notificationId 
-        ? { ...notification, status: 'archived' }
-        : notification
-    ));
+  const handleDeleteNotification = async (notificationId: string) => {
+    try {
+      setNotifications(prev => prev.filter(notification => notification.id !== notificationId));
+      
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        total: prev.total - 1,
+        unread: Math.max(0, prev.unread - 1)
+      }));
+      
+    } catch (err) {
+      console.error('Error deleting notification:', err);
+    }
   };
 
-  const getTypeColor = (type: string) => {
+  const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'success':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-      case 'warning':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case 'error':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
-      case 'info':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
-      case 'system':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+      case 'success': return <CheckCircle className="h-5 w-5 text-green-600" />;
+      case 'warning': return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
+      case 'error': return <AlertTriangle className="h-5 w-5 text-red-600" />;
+      case 'info': return <Info className="h-5 w-5 text-blue-600" />;
+      case 'assignment': return <Target className="h-5 w-5 text-purple-600" />;
+      case 'system': return <Settings className="h-5 w-5 text-gray-600" />;
+      default: return <Bell className="h-5 w-5 text-gray-600" />;
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
-      case 'high':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case 'low':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
+  const getNotificationColor = (type: string) => {
     switch (type) {
-      case 'success':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case 'error':
-        return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      case 'info':
-        return <Info className="h-4 w-4 text-blue-500" />;
-      case 'system':
-        return <Settings className="h-4 w-4 text-gray-500" />;
-      default:
-        return <Bell className="h-4 w-4 text-gray-500" />;
+      case 'success': return 'border-green-200 bg-green-50';
+      case 'warning': return 'border-yellow-200 bg-yellow-50';
+      case 'error': return 'border-red-200 bg-red-50';
+      case 'info': return 'border-blue-200 bg-blue-50';
+      case 'assignment': return 'border-purple-200 bg-purple-50';
+      case 'system': return 'border-gray-200 bg-gray-50';
+      default: return 'border-gray-200 bg-gray-50';
     }
   };
 
-  const notificationStats = {
-    total: notifications.length,
-    unread: notifications.filter(n => n.status === 'unread').length,
-    urgent: notifications.filter(n => n.priority === 'urgent').length,
-    today: notifications.filter(n => new Date(n.createdAt).toDateString() === new Date().toDateString()).length
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
+    if (diffInMinutes < 10080) return `${Math.floor(diffInMinutes / 1440)} days ago`;
+    return date.toLocaleDateString();
   };
 
   if (loading) {
@@ -229,245 +229,204 @@ const NotificationsPage: React.FC = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground mb-2">{error}</p>
+          <Button variant="outline" onClick={loadNotifications}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
-      {/* Empty state for new users */}
-      {data.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-            <span className="text-2xl">📊</span>
-          </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">No data yet</h3>
-          <p className="text-muted-foreground mb-4">
-            This page will show your data once you start using the system.
-          </p>
-        </div>
-      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Notifications</h1>
           <p className="text-muted-foreground mt-2">
-            Manage your notification preferences and view recent alerts.
+            Stay updated with your AI workforce activities.
           </p>
         </div>
-        <div className="flex space-x-2">
-          <Button variant="outline" onClick={markAllAsRead}>
-            <CheckCircle className="mr-2 h-4 w-4" />
-            Mark All Read
+        <div className="flex items-center space-x-4">
+          <Button variant="outline" onClick={loadNotifications}>
+            <RefreshCw className="h-4 w-4" />
           </Button>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Notification
-          </Button>
+          {stats.unread > 0 && (
+            <Button onClick={handleMarkAllAsRead}>
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Mark All Read
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total</p>
-                <p className="text-2xl font-bold text-foreground">{notificationStats.total}</p>
-              </div>
-              <Bell className="h-8 w-8 text-primary" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total</CardTitle>
+            <Bell className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
+        
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Unread</p>
-                <p className="text-2xl font-bold text-blue-600">{notificationStats.unread}</p>
-              </div>
-              <Mail className="h-8 w-8 text-blue-600" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Unread</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">{stats.unread}</div>
           </CardContent>
         </Card>
+        
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Urgent</p>
-                <p className="text-2xl font-bold text-red-600">{notificationStats.urgent}</p>
-              </div>
-              <AlertTriangle className="h-8 w-8 text-red-600" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Today</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.today}</div>
           </CardContent>
         </Card>
+        
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Today</p>
-                <p className="text-2xl font-bold text-green-600">{notificationStats.today}</p>
-              </div>
-              <Clock className="h-8 w-8 text-green-600" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">This Week</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.thisWeek}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search notifications..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">All Types</option>
-                <option value="info">Info</option>
-                <option value="success">Success</option>
-                <option value="warning">Warning</option>
-                <option value="error">Error</option>
-                <option value="system">System</option>
-              </select>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">All Status</option>
-                <option value="unread">Unread</option>
-                <option value="read">Read</option>
-                <option value="archived">Archived</option>
-              </select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Notifications List */}
-      <div className="space-y-4">
-        {filteredNotifications.map((notification) => (
-          <Card key={notification.id} className={`hover:shadow-lg transition-shadow ${
-            notification.status === 'unread' ? 'border-l-4 border-l-blue-500' : ''
-          }`}>
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    {getTypeIcon(notification.type)}
-                    <h3 className="font-semibold text-foreground">{notification.title}</h3>
-                    <Badge className={getTypeColor(notification.type)}>
-                      {notification.type}
-                    </Badge>
-                    <Badge className={getPriorityColor(notification.priority)}>
-                      {notification.priority}
-                    </Badge>
-                    {notification.status === 'unread' && (
-                      <Badge variant="default" className="bg-blue-500">
-                        New
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">{notification.message}</p>
-                  
-                  <div className="flex items-center space-x-4 text-sm mb-4">
-                    <div className="flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Created:</span>
-                      <span className="font-medium">{new Date(notification.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    {notification.readAt && (
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">Read:</span>
-                        <span className="font-medium">{new Date(notification.readAt).toLocaleDateString()}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center space-x-2">
-                      <Target className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Category:</span>
-                      <span className="font-medium">{notification.category.replace('_', ' ')}</span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  {notification.actions && notification.actions.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-foreground mb-2">Actions</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {notification.actions.map((action) => (
-                          <Button key={action.id} size="sm" variant={action.type === 'primary' ? 'default' : 'outline'}>
-                            {action.label}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Tags */}
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-muted-foreground">Tags:</span>
-                    <div className="flex space-x-1">
-                      {notification.tags.map((tag, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-4 border-t border-border">
-                <div className="text-sm text-muted-foreground">
-                  {notification.status === 'unread' ? 'Unread' : notification.status === 'read' ? 'Read' : 'Archived'}
-                </div>
-                <div className="flex space-x-2">
-                  {notification.status === 'unread' && (
-                    <Button size="sm" variant="outline" onClick={() => markAsRead(notification.id)}>
-                      <CheckCircle className="h-4 w-4" />
-                    </Button>
-                  )}
-                  <Button size="sm" variant="outline" onClick={() => setSelectedNotification(notification)}>
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="outline" className="text-destructive hover:text-destructive/80" onClick={() => archiveNotification(notification.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex gap-2">
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="px-3 py-2 border border-input rounded-md bg-background text-foreground"
+          >
+            <option value="">All Types</option>
+            <option value="info">Info</option>
+            <option value="success">Success</option>
+            <option value="warning">Warning</option>
+            <option value="error">Error</option>
+            <option value="assignment">Assignment</option>
+            <option value="system">System</option>
+          </select>
+          
+          <select
+            value={readFilter}
+            onChange={(e) => setReadFilter(e.target.value)}
+            className="px-3 py-2 border border-input rounded-md bg-background text-foreground"
+          >
+            <option value="">All Status</option>
+            <option value="unread">Unread</option>
+            <option value="read">Read</option>
+          </select>
+        </div>
       </div>
 
-      {/* Empty State */}
-      {filteredNotifications.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Bell className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">No notifications found</h3>
-            <p className="text-muted-foreground mb-6">
-              {searchTerm || typeFilter || statusFilter
-                ? 'Try adjusting your search criteria.'
-                : 'You have no notifications at the moment.'}
-            </p>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Notification
-            </Button>
-          </CardContent>
-        </Card>
+      {/* Notifications List */}
+      {filteredNotifications.length > 0 ? (
+        <div className="space-y-4">
+          {filteredNotifications.map((notification) => (
+            <Card 
+              key={notification.id} 
+              className={`transition-all hover:shadow-md ${
+                !notification.read ? 'border-l-4 border-l-primary' : ''
+              } ${getNotificationColor(notification.type)}`}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h3 className={`text-lg font-semibold ${!notification.read ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        {notification.title}
+                      </h3>
+                      <div className="flex items-center space-x-2">
+                        {!notification.read && (
+                          <Badge variant="default" className="text-xs">
+                            New
+                          </Badge>
+                        )}
+                        <span className="text-sm text-muted-foreground">
+                          {formatDate(notification.created_at)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <p className="mt-2 text-muted-foreground">
+                      {notification.message}
+                    </p>
+                    
+                    {notification.action_url && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-3"
+                        onClick={() => window.location.href = notification.action_url!}
+                      >
+                        View Details
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    {!notification.read && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleMarkAsRead(notification.id)}
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteNotification(notification.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : notifications.length > 0 ? (
+        <div className="text-center py-12">
+          <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+            <Filter className="h-12 w-12 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">No notifications found</h3>
+          <p className="text-muted-foreground">
+            Try adjusting your filter criteria.
+          </p>
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+            <Bell className="h-12 w-12 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">No Notifications Yet</h3>
+          <p className="text-muted-foreground">
+            You'll receive notifications about your AI workforce activities here.
+          </p>
+        </div>
       )}
     </div>
   );

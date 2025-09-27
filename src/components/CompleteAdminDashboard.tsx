@@ -656,8 +656,7 @@ const loadInitialData = async () => {
         </div>
       </div>
     </div>
-  )
-  };
+  );
 };
 
 export default CompleteAdminDashboard;

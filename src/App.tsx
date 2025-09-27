@@ -12,12 +12,45 @@ import RealtimeNotification from './components/RealtimeNotification';
 import { AdminRoute } from './components/auth/AdminRoute';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
-// Loading fallback component
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-  </div>
-);
+// Loading fallback component with timeout
+const LoadingFallback = () => {
+  const [showError, setShowError] = React.useState(false);
+  
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowError(true);
+    }, 10000); // Show error after 10 seconds
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (showError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Loading is taking longer than expected</h2>
+          <p className="text-muted-foreground mb-4">Please refresh the page or check your connection.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Loading AGI Agent Automation...</p>
+        <p className="text-sm text-muted-foreground mt-2">Preparing your AI workforce management platform...</p>
+      </div>
+    </div>
+  );
+};
 
 // Lazy load public pages
 const LandingPage = lazy(() => import('./pages/LandingPage'));

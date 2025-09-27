@@ -39,12 +39,16 @@ export interface AuthResponse {
 class AuthService {
   async login(loginData: LoginData): Promise<AuthResponse> {
     try {
+      console.log('AuthService: Starting login for', loginData.email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password,
       });
 
+      console.log('AuthService: Supabase auth result', { hasData: !!data, hasError: !!error, error: error?.message });
+
       if (error) {
+        console.log('AuthService: Login error', error.message);
         return { user: null, error: error.message };
       }
 
@@ -53,16 +57,19 @@ class AuthService {
       }
 
       // Get user profile
+      console.log('AuthService: Fetching user profile for', data.user.id);
       const { data: profile, error: profileError } = await supabase
         .from('users')
         .select('*')
         .eq('id', data.user.id)
         .single();
 
+      console.log('AuthService: Profile fetch result', { hasProfile: !!profile, hasError: !!profileError, error: profileError?.message });
+
       if (profileError) {
         // If profile doesn't exist, create one
         if (profileError.code === 'PGRST116') {
-          console.log('Creating user profile for:', data.user.email);
+          console.log('AuthService: Creating user profile for:', data.user.email);
           const { data: newProfile, error: createError } = await supabase
             .from('users')
             .insert({

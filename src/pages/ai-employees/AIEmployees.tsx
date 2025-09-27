@@ -3,8 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CompleteAIEmployeeMarketplace from '@/components/CompleteAIEmployeeMarketplace';
 import CompleteAdminDashboard from '@/components/CompleteAdminDashboard';
 
-  const [activeTab, setActiveTab] = useState('marketplace');
 const AIEmployees: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('marketplace');
 
   return (
     <div className="h-full">

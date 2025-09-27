@@ -78,7 +78,7 @@ const NotificationsPage: React.FC = () => {
 
   useEffect(() => {
     filterNotifications();
-  }, [notifications, searchTerm, typeFilter, statusFilter]);
+  }, [filterNotifications]);
 
   const loadNotifications = async () => {
     try {

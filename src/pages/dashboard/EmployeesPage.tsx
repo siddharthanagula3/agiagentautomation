@@ -29,7 +29,7 @@ const EmployeesPage: React.FC = () => {
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   if (!user) {
     return (

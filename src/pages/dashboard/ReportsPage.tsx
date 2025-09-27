@@ -123,7 +123,7 @@ const ReportsPage: React.FC = () => {
 
   useEffect(() => {
     filterReports();
-  }, [reports, searchTerm, typeFilter, statusFilter]);
+  }, [filterReports]);
 
   const loadReports = async () => {
     try {

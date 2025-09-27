@@ -82,7 +82,7 @@ const DataPage: React.FC = () => {
 
   useEffect(() => {
     filterDataSources();
-  }, [dataSources, searchTerm, typeFilter, statusFilter]);
+  }, [filterDataSources]);
 
   const loadDataSources = async () => {
     try {

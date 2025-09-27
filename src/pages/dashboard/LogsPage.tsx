@@ -112,7 +112,7 @@ const LogsPage: React.FC = () => {
 
   useEffect(() => {
     filterLogs();
-  }, [logs, searchTerm, levelFilter, serviceFilter, environmentFilter]);
+  }, [filterLogs]);
 
   useEffect(() => {
     if (autoRefresh) {

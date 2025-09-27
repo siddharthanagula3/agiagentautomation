@@ -93,7 +93,10 @@ const ResourcesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ResourcesPage;

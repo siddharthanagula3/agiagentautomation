@@ -98,7 +98,10 @@ const ExpertPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ExpertPage;

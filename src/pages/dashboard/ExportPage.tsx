@@ -98,7 +98,10 @@ const ExportPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ExportPage;

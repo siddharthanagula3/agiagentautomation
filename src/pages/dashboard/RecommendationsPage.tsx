@@ -98,7 +98,10 @@ const RecommendationsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default RecommendationsPage;

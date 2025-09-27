@@ -98,7 +98,10 @@ const ScalingPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ScalingPage;

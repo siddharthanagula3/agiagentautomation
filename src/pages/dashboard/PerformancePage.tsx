@@ -98,7 +98,10 @@ const PerformancePage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default PerformancePage;

@@ -98,7 +98,10 @@ const AccessPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default AccessPage;

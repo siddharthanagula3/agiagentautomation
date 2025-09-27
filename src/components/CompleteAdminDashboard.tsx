@@ -160,10 +160,12 @@ const CompleteAdminDashboard: React.FC<CompleteAdminDashboardProps> = ({
       setRealtimeStats(completeRealtimeService.getStats());
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, []);
+    return (
+    <div>Component content</div>
+  );
+};
 
-  const loadInitialData = async () => {
+const loadInitialData = async () => {
     setIsLoading(true);
     try {
       await Promise.all([
@@ -656,7 +658,10 @@ const CompleteAdminDashboard: React.FC<CompleteAdminDashboardProps> = ({
         </div>
       </div>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default CompleteAdminDashboard;

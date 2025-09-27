@@ -98,7 +98,10 @@ const FunctionalityPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default FunctionalityPage;

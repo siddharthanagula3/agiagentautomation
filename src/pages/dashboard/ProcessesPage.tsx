@@ -98,7 +98,10 @@ const ProcessesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ProcessesPage;

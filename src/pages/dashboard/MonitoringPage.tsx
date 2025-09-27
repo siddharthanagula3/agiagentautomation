@@ -98,7 +98,10 @@ const MonitoringPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default MonitoringPage;

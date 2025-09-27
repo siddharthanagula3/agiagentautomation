@@ -98,7 +98,10 @@ const TestingPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default TestingPage;

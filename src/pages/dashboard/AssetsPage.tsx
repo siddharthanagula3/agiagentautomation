@@ -98,7 +98,10 @@ const AssetsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default AssetsPage;

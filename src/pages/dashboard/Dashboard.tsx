@@ -28,10 +28,9 @@ import type { Database } from '../../integrations/supabase/types';
 
 type Job = Database['public']['Tables']['jobs']['Row'];
 type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
-const Component: React.FC = () => {
-  const [error, setError] = useState('');
-const Component: React.FC = () => {
+
   const { user } = useAuth();
+  const [stats, setStats] = useState({
     aiEmployees: 0,
     activeJobs: 0,
     tokensUsed: 0,
@@ -467,7 +466,10 @@ const Component: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default Dashboard;

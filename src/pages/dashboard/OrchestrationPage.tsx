@@ -98,7 +98,10 @@ const OrchestrationPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default OrchestrationPage;

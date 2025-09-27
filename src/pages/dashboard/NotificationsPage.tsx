@@ -52,35 +52,11 @@ const NotificationsPage: React.FC = () => {
   
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
-          <p className="text-muted-foreground">Please log in to access this page.</p>
-        </div>
-      </div>
-    );
-  }
-  
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+    <div>Component content</div>
+  );
+};
 
-  useEffect(() => {
-    if (user) {
-      loadNotifications();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    filterNotifications();
-  }, [notifications, searchTerm, typeFilter, statusFilter]);
-
-  const loadNotifications = async () => {
+const loadNotifications = async () => {
     try {
       setLoading(true);
       setError('');
@@ -452,7 +428,10 @@ const NotificationsPage: React.FC = () => {
         </Card>
       )}
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default NotificationsPage;

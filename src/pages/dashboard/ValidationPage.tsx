@@ -98,7 +98,10 @@ const ValidationPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ValidationPage;

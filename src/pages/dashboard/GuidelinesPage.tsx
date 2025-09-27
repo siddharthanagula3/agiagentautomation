@@ -98,7 +98,10 @@ const GuidelinesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default GuidelinesPage;

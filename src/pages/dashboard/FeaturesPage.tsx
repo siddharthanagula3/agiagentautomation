@@ -98,7 +98,10 @@ const FeaturesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default FeaturesPage;

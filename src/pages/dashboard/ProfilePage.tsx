@@ -97,7 +97,10 @@ const ProfilePage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ProfilePage;

@@ -6,8 +6,6 @@ import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
 import LoadingSpinner from '../ui/loading-spinner';
 const Component: React.FC = () => {
-  const [error, setError] = useState('');
-const LoginForm: React.FC = () => {
     email: '',
     password: '',
     rememberMe: false
@@ -26,8 +24,7 @@ const LoginForm: React.FC = () => {
     console.log('🚀 LoginForm: Starting login attempt');
 
     try {
-      const result = await;
-  login(formData.email, formData.password);
+      const result = await login(formData.email, formData.password);
       console.log('📋 LoginForm: Login,
   result:', result);
       
@@ -154,7 +151,10 @@ const LoginForm: React.FC = () => {
         </form>
       </div>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default LoginForm;

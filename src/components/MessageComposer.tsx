@@ -239,86 +239,12 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
 
   // Clean up voice recording on unmount
   useEffect(() => {
-    return () => {
-      if (mediaRecorderRef.current && voiceRecording.isRecording) {
-        mediaRecorderRef.current.stop();
-      }
-      if (waveformIntervalRef.current) {
-        clearInterval(waveformIntervalRef.current);
-      }
-    };
-  }, [voiceRecording.isRecording]);
+    return (
+    <div>Component content</div>
+  );
+};
 
-  // Handle send message
-  const handleSend = useCallback(async () => {
-    if (disabled || (!message.trim() && attachments.length === 0 && !voiceRecording.blob)) {
-      return;
-    }
-
-    // Clear unknown existing errors
-    setErrors([]);
-
-    // Validate inputs
-    const validationErrors: string[] = [];
-
-    if (estimatedTokens > maxTokens) {
-      validationErrors.push(`Message too long: ${estimatedTokens} tokens (max: ${maxTokens})`);
-    }
-
-    if (attachments.some(a => a.status === 'error')) {
-      validationErrors.push('Please fix file upload errors before sending');
-    }
-
-    if (validationErrors.length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    const options: MessageOptions = {
-      temperature: temperature[0],
-      priority,
-      tools: tools.filter(t => t.enabled).map(t => t.id),
-      model: selectedModel,
-      attachments: attachments.filter(a => a.status === 'completed').map(a => a.file),
-      maxTokens: maxTokens,
-      stream: streamResponse
-    };
-
-    try {
-      onSendMessage(message.trim(), options);
-
-      // Reset form
-      setMessage('');
-      setAttachments([]);
-      setVoiceRecording({ duration: 0, waveformData: [], isRecording: false });
-      setErrors([]);
-    } catch (error) {
-      setErrors(['Failed to send message. Please try again.']);
-    }
-  }, [
-    message,
-    attachments,
-    voiceRecording.blob,
-    temperature,
-    priority,
-    tools,
-    selectedModel,
-    maxTokens,
-    streamResponse,
-    disabled,
-    estimatedTokens,
-    onSendMessage
-  ]);
-
-  // File handling
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    handleFiles(files);
-    // Reset input
-    if (e.target) e.target.value = '';
-  }, [handleFiles]);
-
-  const handleFiles = useCallback(async (files: File[]) => {
+const handleFiles = useCallback(async (files: File[]) => {
     const maxSize = 10 * 1024 * 1024; // 10MB
     const allowedTypes = [
       'image/*',
@@ -982,7 +908,10 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
         </div>
       </div>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default MessageComposer;

@@ -98,7 +98,10 @@ const ThemesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ThemesPage;

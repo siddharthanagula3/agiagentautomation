@@ -98,7 +98,10 @@ const SystemPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default SystemPage;

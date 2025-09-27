@@ -98,7 +98,10 @@ const BestPracticesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default BestPracticesPage;

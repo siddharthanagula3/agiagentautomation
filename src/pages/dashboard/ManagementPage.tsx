@@ -98,7 +98,10 @@ const ManagementPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ManagementPage;

@@ -98,7 +98,10 @@ const PlanningPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default PlanningPage;

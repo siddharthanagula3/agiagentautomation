@@ -98,7 +98,10 @@ const TasksPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default TasksPage;

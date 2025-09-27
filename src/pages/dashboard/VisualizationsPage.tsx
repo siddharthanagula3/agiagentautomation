@@ -98,7 +98,10 @@ const VisualizationsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default VisualizationsPage;

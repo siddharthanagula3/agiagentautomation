@@ -479,7 +479,10 @@ const CompleteAIEmployeeChat: React.FC<CompleteAIEmployeeChatProps> = ({ employe
         )}
       </div>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default CompleteAIEmployeeChat;

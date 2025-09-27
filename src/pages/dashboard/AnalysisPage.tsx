@@ -98,7 +98,10 @@ const AnalysisPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default AnalysisPage;

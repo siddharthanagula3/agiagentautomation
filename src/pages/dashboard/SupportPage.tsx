@@ -98,7 +98,10 @@ const SupportPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default SupportPage;

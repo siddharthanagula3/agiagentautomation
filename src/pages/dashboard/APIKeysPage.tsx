@@ -99,25 +99,11 @@ const APIKeysPage: React.FC = () => {
   
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
-          <p className="text-muted-foreground">Please log in to access this page.</p>
-        </div>
-      </div>
-    );
-  }
-  
+    <div>Component content</div>
+  );
+};
 
-    if (user) {
-      loadAPIKeys();
-    }
-  }, [user]);
-
-    filterAPIKeys();
-  }, [apiKeys, searchTerm, statusFilter, environmentFilter]);
-
-  const loadAPIKeys = async () => {
+const loadAPIKeys = async () => {
     try {
       setLoading(true);
       setError('');
@@ -680,7 +666,10 @@ const APIKeysPage: React.FC = () => {
       </Card>
       )}
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default APIKeysPage;

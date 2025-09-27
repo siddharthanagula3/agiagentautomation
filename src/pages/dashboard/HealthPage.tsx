@@ -98,7 +98,10 @@ const HealthPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default HealthPage;

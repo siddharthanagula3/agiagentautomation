@@ -98,7 +98,10 @@ const UpdatesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default UpdatesPage;

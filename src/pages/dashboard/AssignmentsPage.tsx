@@ -98,7 +98,10 @@ const AssignmentsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default AssignmentsPage;

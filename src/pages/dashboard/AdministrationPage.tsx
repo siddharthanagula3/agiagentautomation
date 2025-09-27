@@ -98,7 +98,10 @@ const AdministrationPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default AdministrationPage;

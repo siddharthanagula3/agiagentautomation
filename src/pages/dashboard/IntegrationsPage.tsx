@@ -98,7 +98,10 @@ const IntegrationsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default IntegrationsPage;

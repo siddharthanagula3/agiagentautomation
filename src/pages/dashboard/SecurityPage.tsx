@@ -98,7 +98,10 @@ const SecurityPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default SecurityPage;

@@ -98,7 +98,10 @@ const CapabilitiesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default CapabilitiesPage;

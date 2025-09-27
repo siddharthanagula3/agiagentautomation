@@ -98,7 +98,10 @@ const IncidentsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default IncidentsPage;

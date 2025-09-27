@@ -1,6 +1,7 @@
 import React, { useState, useEffect, ReactNode } from 'react';
 import { authService, type AuthUser } from '../services/authService';
 import { AuthContext, type AuthContextType } from './auth-context';
+import { supabase } from '../integrations/supabase/client';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -28,8 +29,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkSession();
 
     // Listen to auth state changes
-    const { data: { subscription } } = authService.onAuthStateChange((user) => {
-      setUser(user);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        try {
+          const { user: authUser, error } = await authService.getCurrentUser();
+          if (authUser && !error) {
+            setUser(authUser);
+          }
+        } catch (error) {
+          console.error('Error getting user:', error);
+        }
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 

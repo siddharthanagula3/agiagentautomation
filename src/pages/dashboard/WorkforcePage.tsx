@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/auth-hooks';
 import { jobsService } from '../../services/jobsService';
+import { agentsService } from '../../services/agentsService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -33,15 +34,10 @@ import {
   Download,
   Loader2
 } from 'lucide-react';
-import { useAuth } from '../../contexts/auth-hooks';
-import { jobsService } from '../../services/jobsService';
-import { agentsService } from '../../services/agentsService';
 import type { Database } from '../../integrations/supabase/types';
 
-type Job = Databas;
-  e['public']['Tables']['jobs']['Row'];
-type AIAgent = Databas;
-  e['public']['Tables']['ai_agents']['Row'];
+type Job = Database['public']['Tables']['jobs']['Row'];
+type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
 
 interface JobFile {
   name: string;
@@ -56,6 +52,9 @@ const WorkforcePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [agents, setAgents] = useState<AIAgent[]>([]);
+  const [showCreateJob, setShowCreateJob] = useState(false);
   const [stats, setStats] = useState({
     totalJobs: 0,
     activeJobs: 0,
@@ -84,8 +83,39 @@ const WorkforcePage: React.FC = () => {
   }, [user]);
 
   const loadData = useCallback(async () => {
-    // TODO: Replace with real data fetching
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Load jobs data
+      const jobsData = await jobsService.getJobs();
+      setJobs(jobsData || []);
+      
+      // Load agents data
+      const agentsData = await agentsService.getAgents();
+      setAgents(agentsData || []);
+      
+      // Calculate stats
+      const totalJobs = jobsData?.length || 0;
+      const activeJobs = jobsData?.filter(job => job.status === 'in_progress').length || 0;
+      const completedJobs = jobsData?.filter(job => job.status === 'completed').length || 0;
+      const failedJobs = jobsData?.filter(job => job.status === 'failed').length || 0;
+      
+      setStats({
+        totalJobs,
+        activeJobs,
+        completedJobs,
+        failedJobs,
+        totalCost: 0, // TODO: Calculate from job costs
+        avgCompletionTime: 0 // TODO: Calculate from job completion times
+      });
+      
+    } catch (err) {
+      console.error('Error loading workforce data:', err);
+      setError('Failed to load workforce data. Please try again.');
+    } finally {
       setLoading(false);
+    }
   }, []);
 
   const filterJobs = useCallback(() => {
@@ -257,15 +287,19 @@ const WorkforcePage: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Empty state for new users */}
-      {data.length === 0 && !loading && (
+      {jobs.length === 0 && !loading && (
         <div className="text-center py-12">
           <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
             <span className="text-2xl">📊</span>
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">No data yet</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-2">No jobs yet</h3>
           <p className="text-muted-foreground mb-4">
-            This page will show your data once you start using the system.
+            Create your first AI workforce job to get started.
           </p>
+          <Button onClick={() => setShowCreateJob(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Your First Job
+          </Button>
         </div>
       )}
       {/* Header */}

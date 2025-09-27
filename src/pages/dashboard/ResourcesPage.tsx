@@ -5,6 +5,9 @@ import { Button } from '../../components/ui/button';
 import { Loader2 } from 'lucide-react';
 
 const ResourcesPage: React.FC = () => {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   if (!user) {
 

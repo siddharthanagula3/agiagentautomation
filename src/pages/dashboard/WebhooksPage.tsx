@@ -1,4 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, 
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // TODO: Replace with actual data fetching
+      setData([]);
+      
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setError('Failed to load data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -104,6 +119,9 @@ interface WebhookEvent {
 }
 
 const WebhooksPage: React.FC = () => {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   
   if (!user) {

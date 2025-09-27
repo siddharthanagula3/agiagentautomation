@@ -1,4 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, 
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // TODO: Replace with actual data fetching
+      setData([]);
+      
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setError('Failed to load data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -22,6 +37,9 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/auth-hooks';
 
 const SimpleDashboard: React.FC = () => {
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   
   if (!user) {
@@ -39,13 +57,10 @@ const SimpleDashboard: React.FC = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Simple loading simulation
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
+    if (user) {
+      loadData();
+    }
+  }, [user, loadData]);
 
   const dashboardStats = [
     {

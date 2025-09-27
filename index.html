@@ -1,25 +1,182 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AGI Agent Automation - Hire AI Employees & Deploy AI Workforce</title>
-    <meta name="description" content="Revolutionary AI platform that lets you hire specialized AI employees and deploy a 250+ agent workforce for complex automated tasks. ChatGPT-inspired interface with enterprise capabilities." />
-    <meta name="author" content="AGI Agent Automation" />
-    <meta name="keywords" content="AI employees, AI workforce, automation, artificial intelligence, ChatGPT, AI agents, task automation, AI marketplace" />
-
-    <meta property="og:title" content="AGI Agent Automation - Hire AI Employees & Deploy AI Workforce" />
-    <meta property="og:description" content="Revolutionary AI platform that lets you hire specialized AI employees and deploy a 250+ agent workforce for complex automated tasks." />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="/og-image.png" />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@agiautomation" />
-    <meta name="twitter:image" content="/og-image.png" />
-  </head>
-
-  <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGI Agent Automation - Loading...</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .loader-container {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto 1.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        .error-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 2rem;
+            max-width: 500px;
+            margin: 0 auto;
+            display: none;
+        }
+        
+        .error-title {
+            color: #ff6b6b;
+            margin-bottom: 1rem;
+        }
+        
+        .error-details {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            margin-bottom: 1rem;
+        }
+        
+        .retry-button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .retry-button:hover {
+            transform: scale(1.05);
+        }
+        
+        #root {
+            width: 100%;
+        }
+    </style>
+    <script>
+        // Error handler
+        window.addEventListener('error', function(event) {
+            console.error('Global error caught:', event);
+            
+            // Hide loader
+            const loader = document.querySelector('.loader-container');
+            if (loader) loader.style.display = 'none';
+            
+            // Show error
+            const errorContainer = document.querySelector('.error-container');
+            if (errorContainer) {
+                errorContainer.style.display = 'block';
+                
+                const errorDetails = document.querySelector('.error-details');
+                if (errorDetails) {
+                    errorDetails.innerHTML = `
+                        <strong>Error:</strong> ${event.message}<br>
+                        <strong>File:</strong> ${event.filename}<br>
+                        <strong>Line:</strong> ${event.lineno}:${event.colno}<br>
+                        ${event.error && event.error.stack ? '<strong>Stack:</strong><br>' + event.error.stack.replace(/\n/g, '<br>') : ''}
+                    `;
+                }
+            }
+            
+            // Log to console for debugging
+            console.log('Error details:', {
+                message: event.message,
+                source: event.filename,
+                line: event.lineno,
+                column: event.colno,
+                error: event.error
+            });
+        });
+        
+        // Unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+        });
+        
+        // Retry function
+        function retryLoad() {
+            window.location.reload();
+        }
+        
+        // Timeout fallback
+        setTimeout(function() {
+            const loader = document.querySelector('.loader-container');
+            const root = document.getElementById('root');
+            
+            // If app hasn't loaded after 10 seconds, show message
+            if (loader && loader.style.display !== 'none' && (!root || !root.children.length)) {
+                loader.innerHTML = `
+                    <div class="loader"></div>
+                    <h1>Loading is taking longer than expected...</h1>
+                    <p>Please check your connection and try refreshing the page.</p>
+                    <button onclick="retryLoad()" class="retry-button" style="margin-top: 1rem;">Refresh Page</button>
+                `;
+            }
+        }, 10000);
+    </script>
+</head>
+<body>
+    <!-- Loading indicator -->
+    <div class="loader-container">
+        <div class="loader"></div>
+        <h1>Loading AGI Agent Automation</h1>
+        <p>Preparing your AI workforce management platform...</p>
+    </div>
+    
+    <!-- Error container (hidden by default) -->
+    <div class="error-container">
+        <h2 class="error-title">⚠️ Initialization Error</h2>
+        <div class="error-details">
+            <!-- Error details will be inserted here -->
+        </div>
+        <button onclick="retryLoad()" class="retry-button">Retry Loading</button>
+    </div>
+    
+    <!-- React root -->
     <div id="root"></div>
+    
+    <!-- Module scripts -->
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+</body>
 </html>

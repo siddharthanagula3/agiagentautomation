@@ -277,10 +277,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async (): Promise<void> => {
     try {
+      console.log('AuthContext: Starting logout process...');
       await authService.logout();
+      console.log('AuthContext: Logout successful, clearing user state');
       setUser(null);
+      console.log('AuthContext: User state cleared');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('AuthContext: Logout error:', error);
+      // Even if logout fails, clear the user state
+      setUser(null);
     }
   };
 

@@ -50,21 +50,10 @@ interface JobFile {
 
   const [selectedStatus, setSelectedStatus] = useState('');
 
-  const [newJob, setNewJob] = useState({
-  useEffect(() => {
-  useEffect(() => {
-  const loadData = useCallback(async () => {
-  const filterJobs = useCallback(() => {
 const WorkforcePage: React.FC = () => {
   const { user } = useAuth();
-    totalJobs: 0,
-    activeJobs: 0,
-    completedJobs: 0,
-    failedJobs: 0,
-    totalCost: 0,
-    avgCompletionTime: 0
-  });
-
+  
+  const [newJob, setNewJob] = useState({
     title: '',
     description: '',
     priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent' | 'critical',
@@ -74,10 +63,8 @@ const WorkforcePage: React.FC = () => {
     tags: [] as string[]
   });
 
-    if (user) {
-      loadData();
-      const timeout = setTimeou;
-  t(() => setLoading(false), 8000);
+    if (user) {loadData();
+      const timeout = setTimeout(() => setLoading(false), 8000);
       return (
     <div>Component content</div>
   );
@@ -90,8 +77,7 @@ const handleCreateJob = async (e: React.FormEvent) => {
     try {
       const { data, error } = await jobsService.createJob(user.id, newJob);
       
-      if (error) {
-        console.error('Error creating job:', error);
+      if (error) {console.error('Error creating job:', error);
         return;
       }
 
@@ -121,25 +107,20 @@ const handleCreateJob = async (e: React.FormEvent) => {
       let result;
       switch (action) {
         case 'start':
-          result = await;
-  jobsService.resumeJob(jobId);
+            result = await jobsService.resumeJob(jobId);
           break;
         case 'pause':
-          result = await;
-  jobsService.pauseJob(jobId);
+          result = await jobsService.pauseJob(jobId);
           break;
         case 'cancel':
-          result = await;
-  jobsService.cancelJob(jobId);
+          result = await jobsService.cancelJob(jobId);
           break;
         case 'delete':
-          result = await;
-  jobsService.deleteJob(jobId);
+          result = await jobsService.deleteJob(jobId);
           break;
       }
 
-      if (result?.error) {
-        console.error(`Error ${action} job:`, result.error);
+      if (result?.error) {console.error(`Error ${action} job:`, result.error);
         return;
       }
 
@@ -209,20 +190,16 @@ const handleCreateJob = async (e: React.FormEvent) => {
   };
 
   const formatTimeAgo = (dateString: string) => {
-    const date = new;
-  Date(dateString);
-    const now = new;
-  Date();
-    const diffInMinutes = Mat;
-  h.floor((now.getTime() - date.getTime()) / (1000 * 60));
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
     
     if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
     return `${Math.floor(diffInMinutes / 1440)} days ago`;
   };
 
-  if (loading) {
-    return (
+  if (loading) {return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -232,8 +209,7 @@ const handleCreateJob = async (e: React.FormEvent) => {
     );
   }
 
-  if (error) {
-    return (
+  if (error) {return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <p className="text-sm text-muted-foreground mb-2">{error}</p>
@@ -607,10 +583,7 @@ const handleCreateJob = async (e: React.FormEvent) => {
         </div>
       )}
     </div>
-  )
-  };
-
-;
+  );
 };
 
 export default WorkforcePage;

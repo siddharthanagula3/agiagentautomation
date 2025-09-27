@@ -99,9 +99,6 @@ const JobsPage: React.FC = () => {
       </Card>
     </div>
   )
-  };
-
-;
-};
+  };;
 
 export default JobsPage;

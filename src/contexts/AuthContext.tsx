@@ -53,18 +53,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       setLoading(true);
+      console.log('🔐 Starting login process for:', email);
       
-      const { user: authUser, error } = await authService.login({ email, password });
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise<{ success: boolean; error: string }>((_, reject) => {
+        setTimeout(() => reject(new Error('Login timeout - please try again')), 10000);
+      });
       
-      if (error || !authUser) {
-        return { success: false, error: error || 'Login failed' };
+      const loginPromise = authService.login({ email, password });
+      
+      const { user: authUser, error } = await Promise.race([loginPromise, timeoutPromise]);
+      
+      if (error) {
+        console.log('❌ Login error:', error);
+        return { success: false, error: error };
       }
 
+      if (!authUser) {
+        console.log('❌ No user returned from login');
+        return { success: false, error: 'Login failed - no user data' };
+      }
+
+      console.log('✅ Login successful, setting user:', authUser.email);
       setUser(authUser);
       return { success: true };
     } catch (error) {
-      return { success: false, error: 'Login failed. Please try again.' };
+      console.log('❌ Login exception:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Login failed. Please try again.' };
     } finally {
+      console.log('🔚 Login process completed, setting loading to false');
       setLoading(false);
     }
   };

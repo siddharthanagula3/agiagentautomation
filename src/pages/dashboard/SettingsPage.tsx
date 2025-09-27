@@ -23,6 +23,8 @@ import { useAuth } from '../../contexts/auth-hooks';
 
 const SettingsPage: React.FC = () => {
   const { user } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<any[]>([]);
   
   if (!user) {
     return (

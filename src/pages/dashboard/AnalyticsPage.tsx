@@ -66,6 +66,8 @@ interface AnalyticsData {
 
 const AnalyticsPage: React.FC = () => {
   const { user } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [timeRange, setTimeRange] = useState('month');

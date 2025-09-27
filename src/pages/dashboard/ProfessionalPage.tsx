@@ -6,6 +6,22 @@ import { Loader2 } from 'lucide-react';
 
 const ProfessionalPage: React.FC = () => {
   const { user } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // TODO: Replace with real data fetching
+    setLoading(false);
+  }, []);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   if (!user) {
 
     return (

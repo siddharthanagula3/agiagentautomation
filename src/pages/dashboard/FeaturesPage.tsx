@@ -24,6 +24,14 @@ import {
 
 const DashboardFeaturesPage: React.FC = () => {
   const { user } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // TODO: Replace with real data fetching
+    setLoading(false);
+  }, []);
   const features = [
     {
       icon: <Users className="h-6 w-6" />,
@@ -68,6 +76,14 @@ const DashboardFeaturesPage: React.FC = () => {
       usage: "Global deployment"
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   if (!user) {
 

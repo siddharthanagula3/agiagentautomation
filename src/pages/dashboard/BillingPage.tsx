@@ -27,6 +27,8 @@ type Billing = Database['public']['Tables']['billing']['Row'];
 
 const BillingPage: React.FC = () => {
   const { user } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [billingStats, setBillingStats] = useState<BillingStats | null>(null);
   const [billingHistory, setBillingHistory] = useState<Billing[]>([]);

@@ -101,7 +101,4 @@ const ChecklistsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ChecklistsPage;

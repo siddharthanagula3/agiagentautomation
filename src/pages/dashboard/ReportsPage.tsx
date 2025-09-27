@@ -49,7 +49,6 @@ interface Report {
   dateRange: {
     start: string;
     end: string;
-  };
   format: 'pdf' | 'excel' | 'csv' | 'json';
   size?: number;
   createdAt: string;
@@ -63,7 +62,6 @@ interface Report {
     frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly';
     nextRun: string;
     enabled: boolean;
-  };
 }
 
 interface ReportTemplate {
@@ -109,7 +107,6 @@ const ReportsPage: React.FC = () => {
     return (
     <div>Component content</div>
   );
-};
 
 const loadReports = async () => {
     try {
@@ -193,7 +190,6 @@ const loadReports = async () => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -203,7 +199,6 @@ const loadReports = async () => {
       hour: '2-digit',
       minute: '2-digit'
     });
-  };
 
   if (loading) {
     return (
@@ -400,8 +395,5 @@ const loadReports = async () => {
     </div>
   )
   };
-
-;
-};
 
 export default ReportsPage;

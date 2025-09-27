@@ -101,7 +101,4 @@ const VisualizationsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default VisualizationsPage;

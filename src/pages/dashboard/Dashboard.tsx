@@ -99,6 +99,7 @@ type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
     }
   }, [user]);
 
+  useEffect(() => {
     if (user) {
       loadDashboardData();
     } else {
@@ -212,7 +213,6 @@ type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours}h ${mins}m`;
-  };
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -222,7 +222,6 @@ type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
     if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
     return `${Math.floor(diffInMinutes / 1440)} days ago`;
-  };
 
   if (loading) {
     return (
@@ -468,8 +467,5 @@ type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
     </div>
   )
   };
-
-;
-};
 
 export default Dashboard;

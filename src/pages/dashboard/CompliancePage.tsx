@@ -101,7 +101,4 @@ const CompliancePage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default CompliancePage;

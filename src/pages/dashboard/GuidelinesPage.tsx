@@ -101,7 +101,4 @@ const GuidelinesPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default GuidelinesPage;

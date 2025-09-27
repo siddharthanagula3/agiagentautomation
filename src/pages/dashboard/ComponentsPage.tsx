@@ -101,7 +101,4 @@ const ComponentsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ComponentsPage;

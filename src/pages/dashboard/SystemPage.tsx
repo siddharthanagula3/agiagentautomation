@@ -101,7 +101,4 @@ const SystemPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default SystemPage;

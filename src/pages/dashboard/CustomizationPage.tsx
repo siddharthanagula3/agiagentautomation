@@ -101,7 +101,4 @@ const CustomizationPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default CustomizationPage;

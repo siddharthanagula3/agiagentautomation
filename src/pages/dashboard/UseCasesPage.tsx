@@ -101,7 +101,4 @@ const UseCasesPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default UseCasesPage;

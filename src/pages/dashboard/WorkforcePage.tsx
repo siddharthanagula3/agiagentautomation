@@ -212,6 +212,5 @@ const WorkforcePage: React.FC = () => {
       </Card>
     </div>
   );
-};
 
 export default WorkforcePage;

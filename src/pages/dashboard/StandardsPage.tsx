@@ -101,7 +101,4 @@ const StandardsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default StandardsPage;

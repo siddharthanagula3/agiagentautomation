@@ -101,7 +101,4 @@ const StrategyPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default StrategyPage;

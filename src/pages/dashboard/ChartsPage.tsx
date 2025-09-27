@@ -101,7 +101,4 @@ const ChartsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ChartsPage;

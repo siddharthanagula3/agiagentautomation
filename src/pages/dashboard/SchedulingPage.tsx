@@ -101,7 +101,4 @@ const SchedulingPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default SchedulingPage;

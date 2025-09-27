@@ -101,7 +101,4 @@ const CoordinationPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default CoordinationPage;

@@ -101,7 +101,4 @@ const WorkflowsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default WorkflowsPage;

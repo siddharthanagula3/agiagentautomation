@@ -101,7 +101,4 @@ const OptimizationPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default OptimizationPage;

@@ -58,12 +58,10 @@ interface APIKey {
     rateLimit: number;
     rateLimitRemaining: number;
     lastRequest?: string;
-  };
   restrictions: {
     ipWhitelist?: string[];
     userAgentWhitelist?: string[];
     allowedOrigins?: string[];
-  };
   createdBy: string;
   tags: string[];
   environment: 'development' | 'staging' | 'production';
@@ -101,7 +99,6 @@ const APIKeysPage: React.FC = () => {
     return (
     <div>Component content</div>
   );
-};
 
 const loadAPIKeys = async () => {
     try {
@@ -197,14 +194,12 @@ const loadAPIKeys = async () => {
     if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
     return `${Math.floor(diffInMinutes / 1440)} days ago`;
-  };
 
   const toggleApiKeyVisibility = (keyId: string) => {
     setShowApiKeys(prev => ({
       ...prev,
       [keyId]: !prev[keyId]
     }));
-  };
 
   const handleCopyApiKey = (apiKey: string) => {
     navigator.clipboard.writeText(apiKey);
@@ -212,7 +207,6 @@ const loadAPIKeys = async () => {
       title: "Copied",
       description: "API key copied to clipboard",
     });
-  };
 
   const handleCreateAPIKey = async () => {
     setIsCreatingKey(true);
@@ -668,8 +662,5 @@ const loadAPIKeys = async () => {
     </div>
   )
   };
-
-;
-};
 
 export default APIKeysPage;

@@ -101,7 +101,4 @@ const BestPracticesPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default BestPracticesPage;

@@ -101,7 +101,4 @@ const FunctionalityPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default FunctionalityPage;

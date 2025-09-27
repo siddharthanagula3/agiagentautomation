@@ -160,7 +160,4 @@ const Component: React.FC = () => {
   )
   };
 
-;
-};
-
 export default TeamPage;

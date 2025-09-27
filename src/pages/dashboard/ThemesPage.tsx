@@ -101,7 +101,4 @@ const ThemesPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ThemesPage;

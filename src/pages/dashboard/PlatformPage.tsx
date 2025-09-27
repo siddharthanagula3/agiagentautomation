@@ -101,7 +101,4 @@ const PlatformPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default PlatformPage;

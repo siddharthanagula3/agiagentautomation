@@ -101,7 +101,4 @@ const OrchestrationPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default OrchestrationPage;

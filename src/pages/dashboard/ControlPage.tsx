@@ -101,7 +101,4 @@ const ControlPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ControlPage;

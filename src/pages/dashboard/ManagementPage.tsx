@@ -101,7 +101,4 @@ const ManagementPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ManagementPage;

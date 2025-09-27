@@ -101,7 +101,4 @@ const IncidentsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default IncidentsPage;

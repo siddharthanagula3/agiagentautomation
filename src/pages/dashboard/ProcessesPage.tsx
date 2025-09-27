@@ -101,7 +101,4 @@ const ProcessesPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ProcessesPage;

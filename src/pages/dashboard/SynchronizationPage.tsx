@@ -101,7 +101,4 @@ const SynchronizationPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default SynchronizationPage;

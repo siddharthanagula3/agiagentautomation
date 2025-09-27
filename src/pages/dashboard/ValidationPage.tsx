@@ -101,7 +101,4 @@ const ValidationPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ValidationPage;

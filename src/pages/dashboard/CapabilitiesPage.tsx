@@ -101,7 +101,4 @@ const CapabilitiesPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default CapabilitiesPage;

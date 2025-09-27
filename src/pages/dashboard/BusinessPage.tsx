@@ -101,7 +101,4 @@ const BusinessPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default BusinessPage;

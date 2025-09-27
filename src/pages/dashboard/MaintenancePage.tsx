@@ -101,7 +101,4 @@ const MaintenancePage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default MaintenancePage;

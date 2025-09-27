@@ -96,7 +96,4 @@ const ResourcesPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ResourcesPage;

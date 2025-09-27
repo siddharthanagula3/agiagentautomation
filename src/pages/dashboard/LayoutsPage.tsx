@@ -101,7 +101,4 @@ const LayoutsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default LayoutsPage;

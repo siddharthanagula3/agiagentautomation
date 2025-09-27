@@ -101,7 +101,4 @@ const AssignmentsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default AssignmentsPage;

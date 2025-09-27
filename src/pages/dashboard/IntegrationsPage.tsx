@@ -101,7 +101,4 @@ const IntegrationsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default IntegrationsPage;

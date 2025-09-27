@@ -101,7 +101,4 @@ const ExpertPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default ExpertPage;

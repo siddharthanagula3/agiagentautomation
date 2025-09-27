@@ -101,7 +101,4 @@ const OperationsPage: React.FC = () => {
   )
   };
 
-;
-};
-
 export default OperationsPage;

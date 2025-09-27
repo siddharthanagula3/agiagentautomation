@@ -655,10 +655,7 @@ const CompleteAIEmployeeMarketplace: React.FC<CompleteAIEmployeeMarketplaceProps
         )}
       </div>
     </div>
-  )
-  };
-
-;
+  );
 };
 
 export default CompleteAIEmployeeMarketplace;

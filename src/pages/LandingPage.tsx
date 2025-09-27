@@ -30,7 +30,7 @@ const LandingPage: React.FC = () => {
     {
       icon: <Bot className="h-6 w-6" />,
       title: "250+ AI Employees",
-      description: "Hire specialized AI agents for unknown task - from data analysis to content creation."
+      description: "Hire specialized AI agents for any task - from data analysis to content creation."
     },
     {
       icon: <Workflow className="h-6 w-6" />,
@@ -152,7 +152,7 @@ const LandingPage: React.FC = () => {
               <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent"> AI Employees</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-              Hire 250+ specialized AI agents to handle unknown task. From data analysis to content creation, 
+              Hire 250+ specialized AI agents to handle any task. From data analysis to content creation, 
               our AI workforce works 24/7 to grow your business.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

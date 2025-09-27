@@ -339,7 +339,8 @@ class CompleteMCPService {
             }
           };
 
-        case 'tools/call': { const { name, arguments: args } = request.params;
+        case 'tools/call': {
+          const { name, arguments: args } = request.params;
           const result = await this.executeTool(name, args);
           
           return {
@@ -355,6 +356,7 @@ class CompleteMCPService {
               isError: !result.success
             }
           };
+        }
 
         case 'tools/get': {
           const tool = this.getTool(request.params.name);

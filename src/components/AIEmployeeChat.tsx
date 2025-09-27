@@ -133,7 +133,7 @@ const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({ employeeId }) => {
     setMessages(prev => [...prev, thinkingMessage]);
 
     // Simulate reasoning and tool selection
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // TODO: Replace with actual AI response
 
     // Determine which tools to use based on the message
     const toolCalls = await determineToolCalls(userMessage);
@@ -259,7 +259,7 @@ const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({ employeeId }) => {
   // Generate final response
   const generateFinalResponse = async (userMessage: string, toolResults: MCPToolCall[]): Promise<string> => {
     // Simulate AI processing the tool results
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // TODO: Replace with actual AI response
     
     let response = `I've analyzed your request and used ${toolResults.length} tool(s) to help you:\n\n`;
     
@@ -282,7 +282,7 @@ const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({ employeeId }) => {
   // Generate direct response
   const generateDirectResponse = async (message: string): Promise<string> => {
     // Simulate AI processing
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // TODO: Replace with actual AI response
     
     return `I understand your request. As your ${employee?.role}, I can help you with this. Let me know if you'd like me to use unknown specific tools or if you need more details about how I can assist you.`;
   };

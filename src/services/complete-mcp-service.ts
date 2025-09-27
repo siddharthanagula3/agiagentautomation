@@ -356,12 +356,14 @@ class CompleteMCPService {
             }
           };
 
-        case 'tools/get': { const tool = this.getTool(request.params.name);
+        case 'tools/get': {
+          const tool = this.getTool(request.params.name);
           return {
             jsonrpc: '2.0',
             id: request.id,
             result: tool || null
           };
+        }
 
         default:
           return {

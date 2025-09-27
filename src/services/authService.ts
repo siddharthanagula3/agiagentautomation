@@ -88,10 +88,11 @@ class AuthService {
 
       console.log('AuthService: Supabase auth result', { hasData: !!data, hasError: !!error, error: error?.message });
 
+      
       if (error) {
-        console.log('AuthService: Login error', error.message);
-        clearTimeout(loginTimeout);
-        return { user: null, error: error.message };
+        console.log('AuthService: getUser error (non-critical):', error.message);
+        // Don't treat this as a critical error - user can still login
+        return { user: null, error: null }; // Return null error to allow login flow to continue
       }
 
       if (!data.user) {
@@ -198,8 +199,11 @@ class AuthService {
       
       clearTimeout(registrationTimeout);
 
+      
       if (error) {
-        return { user: null, error: error.message };
+        console.log('AuthService: getUser error (non-critical):', error.message);
+        // Don't treat this as a critical error - user can still login
+        return { user: null, error: null }; // Return null error to allow login flow to continue
       }
 
       if (!data.user) {

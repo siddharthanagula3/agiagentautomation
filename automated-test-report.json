@@ -1,0 +1,40 @@
+{
+  "timestamp": "2025-09-27T23:15:39.579Z",
+  "totalIssues": 4,
+  "testResults": {
+    "login": "success",
+    "signOut": "error",
+    "navigation": "success"
+  },
+  "issues": [
+    {
+      "type": "console_error",
+      "message": "AuthService: Supabase getUser error: JSHandle@error",
+      "severity": "high",
+      "category": "javascript"
+    },
+    {
+      "type": "console_error",
+      "message": "AuthService: Supabase getUser error: JSHandle@error",
+      "severity": "high",
+      "category": "javascript"
+    },
+    {
+      "type": "missing_user_menu",
+      "message": "User menu not found on dashboard",
+      "severity": "medium",
+      "category": "ui"
+    },
+    {
+      "type": "signout_error",
+      "message": "SyntaxError: Failed to execute 'querySelector' on 'Document': 'button:has-text(\"Sign out\"), button:has-text(\"Log out\"), [data-testid*=\"logout\"]' is not a valid selector.",
+      "severity": "high",
+      "category": "authentication"
+    }
+  ],
+  "summary": {
+    "critical": 3,
+    "warnings": 1,
+    "info": 0
+  }
+}

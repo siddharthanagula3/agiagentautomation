@@ -15,14 +15,54 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 // Loading fallback component with timeout
 const LoadingFallback = () => {
   const [showError, setShowError] = React.useState(false);
+  const [showSkip, setShowSkip] = React.useState(false);
   
   React.useEffect(() => {
-    const timer = setTimeout(() => {
+    const errorTimer = setTimeout(() => {
       setShowError(true);
-    }, 10000); // Show error after 10 seconds
+    }, 8000); // Show error after 8 seconds
     
-    return () => clearTimeout(timer);
+    const skipTimer = setTimeout(() => {
+      setShowSkip(true);
+    }, 15000); // Show skip option after 15 seconds
+    
+    return () => {
+      clearTimeout(errorTimer);
+      clearTimeout(skipTimer);
+    };
   }, []);
+  
+  if (showSkip) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="text-center max-w-md mx-auto p-6">
+          <h2 className="text-xl font-semibold mb-2">Loading is taking longer than expected</h2>
+          <p className="text-muted-foreground mb-4">This might be due to network issues or server problems.</p>
+          <div className="space-y-3">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            >
+              Refresh Page
+            </button>
+            <button 
+              onClick={() => {
+                // Skip loading and show the app anyway
+                const root = document.getElementById('root');
+                if (root) {
+                  root.innerHTML = '<div style="padding: 20px; text-align: center;">Loading app without authentication...</div>';
+                  setTimeout(() => window.location.reload(), 2000);
+                }
+              }}
+              className="w-full px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90"
+            >
+              Skip Loading
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   if (showError) {
     return (

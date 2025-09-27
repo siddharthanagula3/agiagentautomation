@@ -53,14 +53,25 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-    try {      const result = await register({
+    // Add timeout protection for registration
+    const timeoutId = setTimeout(() => {
+      setIsLoading(false);
+      setError('Registration timeout. Please try again.');
+    }, 15000); // 15 second timeout
+
+    try {
+      const result = await register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
         company: formData.company,
         phone: '',
         location: ''
-      });if (result.success) {
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (result.success) {
         navigate('/dashboard');
       } else {
         // If email confirmation is required, show guidance and stop loading
@@ -69,6 +80,7 @@ const RegisterPage: React.FC = () => {
         return;
       }
     } catch (err) {
+      clearTimeout(timeoutId);
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);

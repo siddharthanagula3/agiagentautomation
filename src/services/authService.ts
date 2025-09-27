@@ -173,10 +173,17 @@ class AuthService {
         return { user: null, error: 'Registration is disabled in demo mode. Please configure Supabase for full functionality.' };
       }
       
+      // Add timeout protection for registration
+      const registrationTimeout = setTimeout(() => {
+        console.warn('Registration timeout - this should not happen');
+      }, 10000); // 10 second timeout
+      
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
       });
+      
+      clearTimeout(registrationTimeout);
 
       if (error) {
         return { user: null, error: error.message };

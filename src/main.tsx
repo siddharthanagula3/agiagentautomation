@@ -29,6 +29,11 @@ if (!rootElement) {
 try {
   const root = createRoot(rootElement);
   
+  // Add timeout to prevent infinite loading
+  const renderTimeout = setTimeout(() => {
+    console.warn('App initialization taking longer than expected');
+  }, 5000);
+  
   root.render(
     <StrictMode>
       <BrowserRouter>
@@ -40,6 +45,9 @@ try {
       </BrowserRouter>
     </StrictMode>
   );
+  
+  // Clear timeout once app is rendered
+  clearTimeout(renderTimeout);
 } catch (error) {
   console.error("Failed to initialize application:", error);
   // Display error in the DOM

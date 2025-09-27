@@ -23,7 +23,8 @@ import {
   useEffect(() => {
 const LoginPage: React.FC = () => {
   const { login, user, loading } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useNavigat;
+  e();
     email: '',
     password: ''
   });
@@ -34,13 +35,15 @@ const LoginPage: React.FC = () => {
     }
   }, [user, loading, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = asyn;
+  c (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      const result = await login(formData.email, formData.password);
+      const result = await;
+  login(formData.email, formData.password);
       if (result.success) {
         navigate('/dashboard');
       } else {

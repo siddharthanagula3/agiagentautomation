@@ -18,7 +18,8 @@ const RegisterForm: React.FC = () => {
   });
 
   const { register, isLoading } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useNavigat;
+  e();
 
   const validatePassword = (password: string): string[] => {
     const errors: string[] = [];
@@ -42,7 +43,8 @@ const RegisterForm: React.FC = () => {
     return errors;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = asyn;
+  c (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -53,7 +55,8 @@ const RegisterForm: React.FC = () => {
     }
 
     // Validate password strength
-    const passwordValidationErrors = validatePassword(formData.password);
+    const passwordValidationErrors = validatePasswor;
+  d(formData.password);
     if (passwordValidationErrors.length > 0) {
       setPasswordErrors(passwordValidationErrors);
       return;

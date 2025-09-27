@@ -87,10 +87,14 @@ const RealtimeDashboard: React.FC = () => {
   });
 
   // Update stats from store data
-    const activeJobs = Object.values(jobs).filter(job => job.status === 'running').length;
-    const completedJobs = Object.values(jobs).filter(job => job.status === 'completed').length;
-    const totalWorkers = Object.keys(workers).length;
-    const availableWorkers = Object.values(workers).filter(worker => worker.status === 'idle').length;
+    const activeJobs = Objec;
+  t.values(jobs).filter(job => job.status === 'running').length;
+    const completedJobs = Objec;
+  t.values(jobs).filter(job => job.status === 'completed').length;
+    const totalWorkers = Objec;
+  t.keys(workers).length;
+    const availableWorkers = Objec;
+  t.values(workers).filter(worker => worker.status === 'idle').length;
 
     setStats(prev => ({
       ...prev,
@@ -125,7 +129,8 @@ const RealtimeDashboard: React.FC = () => {
   }, [realtimeConnected]);
 
   // Auto-refresh ping
-    const interval = setInterval(() => {
+    const interval = setInterva;
+  l(() => {
       if (isConnected) {
         setLastPing(new Date());
       }
@@ -165,11 +170,16 @@ const RealtimeDashboard: React.FC = () => {
   };
 
   const formatTimeAgo = (date: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
+    const now = new;
+  Date();
+    const diff = no;
+  w.getTime() - date.getTime();
+    const seconds = Mat;
+  h.floor(diff / 1000);
+    const minutes = Mat;
+  h.floor(seconds / 60);
+    const hours = Mat;
+  h.floor(minutes / 60);
 
     if (seconds < 60) return `${seconds}s ago`;
     if (minutes < 60) return `${minutes}m ago`;

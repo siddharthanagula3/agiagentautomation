@@ -26,7 +26,8 @@ import {
   const [acceptTerms, setAcceptTerms] = useState(false);
 const RegisterPage: React.FC = () => {
   const { register } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useNavigat;
+  e();
     name: '',
     email: '',
     password: '',
@@ -35,7 +36,8 @@ const RegisterPage: React.FC = () => {
     role: ''
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = asyn;
+  c (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
@@ -53,7 +55,8 @@ const RegisterPage: React.FC = () => {
     }
 
     try {
-      const result = await register({
+      const result = await;
+  register({
         name: formData.name,
         email: formData.email,
         password: formData.password,

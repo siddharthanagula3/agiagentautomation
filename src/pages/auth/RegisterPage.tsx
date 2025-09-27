@@ -18,23 +18,14 @@ import {
   Building
 } from 'lucide-react';
 
-  const [formData, setFormData] = useState({
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [acceptTerms, setAcceptTerms] = useState(false);
 const RegisterPage: React.FC = () => {
+  const [showPassword, setShowPassword] = useState(false);
+const Component: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
+const Component: React.FC = () => {
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const { register } = useAuth();
-  const navigate = useNavigat;
-  e();
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    company: '',
-    role: ''
-  });
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

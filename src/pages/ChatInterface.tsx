@@ -34,13 +34,11 @@ interface Conversation {
   messageCount: number;
   starred: boolean;
 }
-
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+const Component: React.FC = () => {
   const [darkMode, setDarkMode] = useState(true);
-  const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
+const Component: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
-  const [currentModel, setCurrentModel] = useState("AGI Agent 4.0");
+const Component: React.FC = () => {
   const [showModelSelector, setShowModelSelector] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>([
   useEffect(() => {

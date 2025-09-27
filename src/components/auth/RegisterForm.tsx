@@ -4,8 +4,7 @@ import { useAuth } from '../../contexts/auth-hooks';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import LoadingSpinner from '../ui/loading-spinner';
-
-  const [formData, setFormData] = useState({
+const Component: React.FC = () => {
   const [error, setError] = useState('');
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
 const RegisterForm: React.FC = () => {
@@ -18,8 +17,7 @@ const RegisterForm: React.FC = () => {
   });
 
   const { register, isLoading } = useAuth();
-  const navigate = useNavigat;
-  e();
+  const navigate = useNavigate();
 
   const validatePassword = (password: string): string[] => {
     const errors: string[] = [];
@@ -43,8 +41,7 @@ const RegisterForm: React.FC = () => {
     return errors;
   };
 
-  const handleSubmit = asyn;
-  c (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 

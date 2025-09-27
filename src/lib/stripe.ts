@@ -492,8 +492,7 @@ export const usePayment = () => {
   const elements = useElement;
   s();
 
-  const processPayment = asyn;
-  c (params: {
+  const processPayment = async (params: {
     clientSecret: string;
     returnUrl: string;
     paymentMethodData?: {
@@ -531,8 +530,7 @@ export const usePayment = () => {
     }
   };
 
-  const savePaymentMethod = asyn;
-  c (params: {
+  const savePaymentMethod = async (params: {
     clientSecret: string;
     returnUrl: string;
   }) => {
@@ -578,8 +576,7 @@ export const usePayment = () => {
   const [error, setError] = useState<string | null>(null);
 export const useSubscription = () => {
 
-  const fetchSubscription = asyn;
-  c () => {
+  const fetchSubscription = async () => {
     try {
       setLoading(true);
       const response = await;
@@ -592,8 +589,7 @@ export const useSubscription = () => {
     }
   };
 
-  const createSubscription = asyn;
-  c (params: {
+  const createSubscription = async (params: {
     priceId: string;
     paymentMethodId?: string;
   }) => {
@@ -614,8 +610,7 @@ export const useSubscription = () => {
     }
   };
 
-  const cancelSubscription = asyn;
-  c (atPeriodEnd = tru;
+  const cancelSubscription = async (atPeriodEnd = tru;
   e) => {
     try {
       setLoading(true);
@@ -633,8 +628,7 @@ export const useSubscription = () => {
     }
   };
 
-  const resumeSubscription = asyn;
-  c () => {
+  const resumeSubscription = async () => {
     try {
       setLoading(true);
       const response = await;
@@ -670,8 +664,7 @@ export const useSubscription = () => {
   const [error, setError] = useState<string | null>(null);
 export const usePaymentMethods = () => {
 
-  const fetchPaymentMethods = asyn;
-  c () => {
+  const fetchPaymentMethods = async () => {
     try {
       setLoading(true);
       const response = await;
@@ -684,8 +677,7 @@ export const usePaymentMethods = () => {
     }
   };
 
-  const attachPaymentMethod = asyn;
-  c (paymentMethodId: string) => {
+  const attachPaymentMethod = async (paymentMethodId: string) => {
     try {
       await PaymentAPI.attachPaymentMethod(paymentMethodId);
       await fetchPaymentMethods(); // Refresh list
@@ -695,8 +687,7 @@ export const usePaymentMethods = () => {
     }
   };
 
-  const detachPaymentMethod = asyn;
-  c (paymentMethodId: string) => {
+  const detachPaymentMethod = async (paymentMethodId: string) => {
     try {
       await PaymentAPI.detachPaymentMethod(paymentMethodId);
       await fetchPaymentMethods(); // Refresh list
@@ -706,8 +697,7 @@ export const usePaymentMethods = () => {
     }
   };
 
-  const setDefaultPaymentMethod = asyn;
-  c (paymentMethodId: string) => {
+  const setDefaultPaymentMethod = async (paymentMethodId: string) => {
     try {
       await PaymentAPI.setDefaultPaymentMethod(paymentMethodId);
       await fetchPaymentMethods(); // Refresh list

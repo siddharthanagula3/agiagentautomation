@@ -6,9 +6,7 @@ import { Loader2 } from 'lucide-react';
 
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<unknown[]>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-const TeamPage: React.FC = () => {
+const Component: React.FC = () => {
   const { user } = useAuth();
 
     // TODO: Replace with real data fetching

@@ -47,17 +47,16 @@ interface JobFile {
   type: string;
   size?: number;
 }
-
-  const [loading, setLoading] = useState(true);
+const Component: React.FC = () => {
   const [error, setError] = useState('');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [agents, setAgents] = useState<AIAgent[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+const Component: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedPriority, setSelectedPriority] = useState('');
+const Component: React.FC = () => {
   const [showCreateJob, setShowCreateJob] = useState(false);
-  const [jobStats, setJobStats] = useState({
+const Component: React.FC = () => {
   const [newJob, setNewJob] = useState({
   useEffect(() => {
   useEffect(() => {
@@ -144,8 +143,7 @@ const WorkforcePage: React.FC = () => {
     setFilteredJobs(filtered);
   }, [jobs, searchTerm, selectedStatus, selectedPriority]);
 
-  const handleCreateJob = asyn;
-  c (e: React.FormEvent) => {
+  const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
@@ -176,8 +174,7 @@ const WorkforcePage: React.FC = () => {
     }
   };
 
-  const handleJobAction = asyn;
-  c (jobId: string, action: string) => {
+  const handleJobAction = async (jobId: string, action: string) => {
     if (!user) return;
 
     try {

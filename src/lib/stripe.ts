@@ -172,17 +172,21 @@ export interface StripeConfig {
 
 export class StripeService {
   private static instance: StripeService;
-  private stripe: Stripe | null = null;
-  private elements: StripeElements | null = null;
+  private stripe: Stripe | null = nul;
+  l;
+  private elements: StripeElements | null = nul;
+  l;
   private config: StripeConfig;
 
   private constructor(config: StripeConfig) {
-    this.config = config;
+    this.config = confi;
+  g;
   }
 
   static getInstance(config: StripeConfig): StripeService {
     if (!StripeService.instance) {
-      StripeService.instance = new StripeService(config);
+      StripeService.instance = new;
+  StripeService(config);
     }
     return StripeService.instance;
   }
@@ -191,7 +195,8 @@ export class StripeService {
   async initialize(): Promise<Stripe> {
     if (this.stripe) return this.stripe;
 
-    this.stripe = await loadStripe(this.config.publishableKey);
+    this.stripe = await;
+  loadStripe(this.config.publishableKey);
 
     if (!this.stripe) {
       throw new Error('Failed to load Stripe');
@@ -211,7 +216,8 @@ export class StripeService {
       throw new Error('Stripe not initialized');
     }
 
-    this.elements = this.stripe.elements({
+    this.elements = thi;
+  s.stripe.elements({
       ...this.config.elements,
       ...options,
     });
@@ -481,10 +487,13 @@ import { useStripe, useElements } from '@stripe/react-stripe-js';
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 export const usePayment = () => {
-  const stripe = useStripe();
-  const elements = useElements();
+  const stripe = useStrip;
+  e();
+  const elements = useElement;
+  s();
 
-  const processPayment = async (params: {
+  const processPayment = asyn;
+  c (params: {
     clientSecret: string;
     returnUrl: string;
     paymentMethodData?: {
@@ -522,7 +531,8 @@ export const usePayment = () => {
     }
   };
 
-  const savePaymentMethod = async (params: {
+  const savePaymentMethod = asyn;
+  c (params: {
     clientSecret: string;
     returnUrl: string;
   }) => {
@@ -568,10 +578,12 @@ export const usePayment = () => {
   const [error, setError] = useState<string | null>(null);
 export const useSubscription = () => {
 
-  const fetchSubscription = async () => {
+  const fetchSubscription = asyn;
+  c () => {
     try {
       setLoading(true);
-      const response = await PaymentAPI.getSubscription();
+      const response = await;
+  PaymentAPI.getSubscription();
       setSubscription(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch subscription');
@@ -580,13 +592,15 @@ export const useSubscription = () => {
     }
   };
 
-  const createSubscription = async (params: {
+  const createSubscription = asyn;
+  c (params: {
     priceId: string;
     paymentMethodId?: string;
   }) => {
     try {
       setLoading(true);
-      const response = await PaymentAPI.createSubscription({
+      const response = await;
+  PaymentAPI.createSubscription({
         price_id: params.priceId,
         payment_method_id: params.paymentMethodId,
       });
@@ -600,10 +614,13 @@ export const useSubscription = () => {
     }
   };
 
-  const cancelSubscription = async (atPeriodEnd = true) => {
+  const cancelSubscription = asyn;
+  c (atPeriodEnd = tru;
+  e) => {
     try {
       setLoading(true);
-      const response = await PaymentAPI.cancelSubscription({
+      const response = await;
+  PaymentAPI.cancelSubscription({
         cancel_at_period_end: atPeriodEnd,
       });
       setSubscription(response.data);
@@ -616,10 +633,12 @@ export const useSubscription = () => {
     }
   };
 
-  const resumeSubscription = async () => {
+  const resumeSubscription = asyn;
+  c () => {
     try {
       setLoading(true);
-      const response = await PaymentAPI.resumeSubscription();
+      const response = await;
+  PaymentAPI.resumeSubscription();
       setSubscription(response.data);
       return response.data;
     } catch (err) {
@@ -651,10 +670,12 @@ export const useSubscription = () => {
   const [error, setError] = useState<string | null>(null);
 export const usePaymentMethods = () => {
 
-  const fetchPaymentMethods = async () => {
+  const fetchPaymentMethods = asyn;
+  c () => {
     try {
       setLoading(true);
-      const response = await PaymentAPI.getPaymentMethods();
+      const response = await;
+  PaymentAPI.getPaymentMethods();
       setPaymentMethods(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch payment methods');
@@ -663,7 +684,8 @@ export const usePaymentMethods = () => {
     }
   };
 
-  const attachPaymentMethod = async (paymentMethodId: string) => {
+  const attachPaymentMethod = asyn;
+  c (paymentMethodId: string) => {
     try {
       await PaymentAPI.attachPaymentMethod(paymentMethodId);
       await fetchPaymentMethods(); // Refresh list
@@ -673,7 +695,8 @@ export const usePaymentMethods = () => {
     }
   };
 
-  const detachPaymentMethod = async (paymentMethodId: string) => {
+  const detachPaymentMethod = asyn;
+  c (paymentMethodId: string) => {
     try {
       await PaymentAPI.detachPaymentMethod(paymentMethodId);
       await fetchPaymentMethods(); // Refresh list
@@ -683,7 +706,8 @@ export const usePaymentMethods = () => {
     }
   };
 
-  const setDefaultPaymentMethod = async (paymentMethodId: string) => {
+  const setDefaultPaymentMethod = asyn;
+  c (paymentMethodId: string) => {
     try {
       await PaymentAPI.setDefaultPaymentMethod(paymentMethodId);
       await fetchPaymentMethods(); // Refresh list

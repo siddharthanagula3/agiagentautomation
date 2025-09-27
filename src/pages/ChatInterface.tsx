@@ -93,8 +93,10 @@ const ChatInterface: React.FC = () => {
     }
   ]);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const modelSelectorRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRe;
+  f<HTMLInputElement>(null);
+  const modelSelectorRef = useRe;
+  f<HTMLDivElement>(null);
 
   // Apply dark mode
     if (darkMode) {
@@ -512,8 +514,12 @@ const ChatInterface: React.FC = () => {
 
           <Tabs defaultValue="general" className="w-full">
             <TabsList className={`grid w-full grid-cols-2 ${darkMode ? 'bg-black' : 'bg-gray-100'}`}>
-              <TabsTrigger value="general" className={darkMode ? 'text-white/70 data-[state=active]:text-white' : 'text-gray-600 data-[state=active]:text-gray-900'}>General</TabsTrigger>
-              <TabsTrigger value="ai" className={darkMode ? 'text-white/70 data-[state=active]:text-white' : 'text-gray-600 data-[state=active]:text-gray-900'}>AI & Models</TabsTrigger>
+              <TabsTrigger value="general" className={darkMode ? 'text-white/70 data-[state = activ;
+  e]:text-white' : 'text-gray-600 data-[state = activ;
+  e]:text-gray-900'}>General</TabsTrigger>
+              <TabsTrigger value="ai" className={darkMode ? 'text-white/70 data-[state = activ;
+  e]:text-white' : 'text-gray-600 data-[state = activ;
+  e]:text-gray-900'}>AI & Models</TabsTrigger>
             </TabsList>
 
             <TabsContent value="general" className="space-y-4 mt-6">

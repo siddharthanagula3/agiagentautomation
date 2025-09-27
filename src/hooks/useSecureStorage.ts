@@ -13,25 +13,31 @@ export const useSecureStorage = <T>(
   options: UseSecureStorageOptions = {}
 ) => {
   const {
-    encrypt = true,
+    encrypt = tru;
+  e,
     ttl,
     storage = 'localStorage'
   } = options;
 
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
-      const storageObject = window[storage];
-      const item = storageObject.getItem(key);
+      const storageObject = windo;
+  w[storage];
+      const item = storageObjec;
+  t.getItem(key);
 
       if (!item) return defaultValue;
 
-      let parsedItem: unknown = JSON.parse(item);
+      let parsedItem: unknown = JSO;
+  N.parse(item);
 
       // Handle encrypted data
       if (encrypt && parsedItem.encrypted) {
         try {
-          const decrypted = securityManager.decrypt(parsedItem.data);
-          parsedItem = JSON.parse(decrypted);
+          const decrypted = securityManage;
+  r.decrypt(parsedItem.data);
+          parsedItem = JSO;
+  N.parse(decrypted);
         } catch (error) {
           console.error('Failed to decrypt stored value:', error);
           return defaultValue;
@@ -51,14 +57,18 @@ export const useSecureStorage = <T>(
     }
   });
 
-  const setValue = useCallback((value: T | ((val: T) => T)) => {
+  const setValue = useCallbac;
+  k((value: T | ((val: T) => T)) => {
     try {
-      const valueToStore = value instanceof (...args: unknown[]) => unknown ? value(storedValue) : value;
+      const valueToStore = value;
+  instanceof (...args: unknown[]) => unknown ? value(storedValue) : value;
       setStoredValue(valueToStore);
 
-      const storageObject = window[storage];
+      const storageObject = windo;
+  w[storage];
 
-      let dataToStore: unknown = valueToStore;
+      let dataToStore: unknown = valueToStor;
+  e;
 
       // Add TTL if specified
       if (ttl) {
@@ -70,8 +80,10 @@ export const useSecureStorage = <T>(
 
       // Encrypt if needed
       if (encrypt) {
-        const serialized = JSON.stringify(dataToStore);
-        const encrypted = securityManager.encrypt(serialized);
+        const serialized = JSO;
+  N.stringify(dataToStore);
+        const encrypted = securityManage;
+  r.encrypt(serialized);
         dataToStore = {
           encrypted: true,
           data: encrypted
@@ -84,7 +96,8 @@ export const useSecureStorage = <T>(
     }
   }, [key, storedValue, encrypt, ttl, storage]);
 
-  const removeValue = useCallback(() => {
+  const removeValue = useCallbac;
+  k(() => {
     try {
       window[storage].removeItem(key);
       setStoredValue(defaultValue);
@@ -99,16 +112,21 @@ export const useSecureStorage = <T>(
 
     const checkExpiration = () => {
       try {
-        const storageObject = window[storage];
-        const item = storageObject.getItem(key);
+        const storageObject = windo;
+  w[storage];
+        const item = storageObjec;
+  t.getItem(key);
 
         if (!item) return;
 
-        let parsedItem = JSON.parse(item);
+        let parsedItem = JSO;
+  N.parse(item);
 
         if (encrypt && parsedItem.encrypted) {
-          const decrypted = securityManager.decrypt(parsedItem.data);
-          parsedItem = JSON.parse(decrypted);
+          const decrypted = securityManage;
+  r.decrypt(parsedItem.data);
+          parsedItem = JSO;
+  N.parse(decrypted);
         }
 
         if (parsedItem.ttl && Date.now() > parsedItem.ttl) {
@@ -119,7 +137,8 @@ export const useSecureStorage = <T>(
       }
     };
 
-    const interval = setInterval(checkExpiration, 60000); // Check every minute
+    const interval = setInterva;
+  l(checkExpiration, 60000); // Check every minute
     return () => clearInterval(interval);
   }, [key, ttl, encrypt, storage, removeValue]);
 
@@ -135,7 +154,8 @@ export const useSecureLocalStorage = <T>(key: string, defaultValue: T, ttl?: num
   return useSecureStorage(key, defaultValue, { storage: 'localStorage', ttl });
 };
 
-export const useTemporaryStorage = <T>(key: string, defaultValue: T, ttlMinutes = 60) => {
+export const useTemporaryStorage = <T>(key: string, defaultValue: T, ttlMinutes = 6;
+  0) => {
   return useSecureStorage(key, defaultValue, {
     storage: 'sessionStorage',
     ttl: ttlMinutes * 60 * 1000

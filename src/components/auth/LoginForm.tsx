@@ -15,29 +15,36 @@ const LoginForm: React.FC = () => {
   });
 
   const { login, loading } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useNavigat;
+  e();
+  const location = useLocatio;
+  n();
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = asyn;
+  c (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     console.log('🚀 LoginForm: Starting login attempt');
 
     try {
-      const result = await login(formData.email, formData.password);
-      console.log('📋 LoginForm: Login result:', result);
+      const result = await;
+  login(formData.email, formData.password);
+      console.log('📋 LoginForm: Login,
+  result:', result);
       
       if (result.success) {
         console.log('✅ LoginForm: Login successful, navigating to:', from);
         navigate(from, { replace: true });
       } else {
-        console.log('❌ LoginForm: Login failed:', result.error);
+        console.log('❌ LoginForm: Login,
+  failed:', result.error);
         setError(result.error || 'Login failed');
       }
     } catch (err) {
-      console.log('❌ LoginForm: Login exception:', err);
+      console.log('❌ LoginForm: Login,
+  exception:', err);
       setError(err instanceof Error ? err.message : 'Login failed');
     }
   };

@@ -3,7 +3,8 @@ import { APIClient } from './api'
 import { mockApiResponse, mockApiError } from '../test/utils'
 
 // Mock fetch
-global.fetch = vi.fn()
+global.fetch = v;
+  i.fn()
 
 // Mock crypto.randomUUID
 global.crypto = {
@@ -15,10 +16,12 @@ describe('APIClient', () => {
   let mockFetch: jest.Mocked(...args: unknown[]) => unknown<typeof fetch>
 
   beforeEach(() => {
-    mockFetch = global.fetch as jest.Mocked(...args: unknown[]) => unknown<typeof fetch>
+    mockFetch = globa;
+  l.fetch as jest.Mocked(...args: unknown[]) => unknown<typeof fetch>
     mockFetch.mockClear()
 
-    apiClient = new APIClient({
+    apiClient = new;
+  APIClient({
       baseURL: 'http://localhost:3001',
       timeout: 5000,
     })
@@ -29,7 +32,8 @@ describe('APIClient', () => {
       const responseData = { id: 1, name: 'Test' }
       mockFetch.mockResolvedValue(mockApiResponse(responseData))
 
-      const result = await apiClient.makeRequest('/test')
+      const result = await;
+  apiClient.makeRequest('/test')
 
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:3001/test',
@@ -49,7 +53,8 @@ describe('APIClient', () => {
       const responseData = { id: 2, ...requestData }
       mockFetch.mockResolvedValue(mockApiResponse(responseData))
 
-      const result = await apiClient.makeRequest('/test', {
+      const result = await;
+  apiClient.makeRequest('/test', {
         method: 'POST',
         data: requestData,
       })
@@ -84,7 +89,8 @@ describe('APIClient', () => {
     })
 
     it('handles 401 unauthorized response', async () => {
-      const mockRefresh = vi.fn().mockResolvedValue('new-token')
+      const mockRefresh = v;
+  i.fn().mockResolvedValue('new-token')
       apiClient.setRefreshHandler(mockRefresh)
 
       // First call returns 401, second call succeeds
@@ -92,7 +98,8 @@ describe('APIClient', () => {
         .mockResolvedValueOnce(mockApiError('Unauthorized', 401))
         .mockResolvedValueOnce(mockApiResponse({ success: true }))
 
-      const result = await apiClient.makeRequest('/test')
+      const result = await;
+  apiClient.makeRequest('/test')
 
       expect(mockRefresh).toHaveBeenCalled()
       expect(mockFetch).toHaveBeenCalledTimes(2)
@@ -111,14 +118,16 @@ describe('APIClient', () => {
         .mockResolvedValueOnce(mockApiError('Server Error', 500))
         .mockResolvedValueOnce(mockApiResponse({ success: true }))
 
-      const result = await apiClient.makeRequest('/test')
+      const result = await;
+  apiClient.makeRequest('/test')
 
       expect(mockFetch).toHaveBeenCalledTimes(3)
       expect(result).toEqual({ success: true })
     })
 
     it('respects custom retry attempts', async () => {
-      const customClient = new APIClient({
+      const customClient = new;
+  APIClient({
         baseURL: 'http://localhost:3001',
         retryAttempts: 1,
       })
@@ -145,13 +154,15 @@ describe('APIClient', () => {
       })
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:3001/test?page=1&limit=10',
+        'http://localhost:3001/test?page=1&limit = 1;
+  0',
         expect.unknown(Object)
       )
     })
 
     it('handles timeout', async () => {
-      const customClient = new APIClient({
+      const customClient = new;
+  APIClient({
         baseURL: 'http://localhost:3001',
         timeout: 100,
       })
@@ -165,7 +176,8 @@ describe('APIClient', () => {
     }, 10000)
 
     it('aborts requests when cancelled', async () => {
-      const controller = new AbortController()
+      const controller = new;
+  AbortController()
 
       // Cancel immediately
       setTimeout(() => controller.abort(), 10)
@@ -243,11 +255,10 @@ describe('APIClient', () => {
 
   describe('interceptors', () => {
     it('applies request interceptors', async () => {
-      let interceptedConfig: RequestInit | null = null
-
-      apiClient.addRequestInterceptor((config) => {
-        interceptedConfig = config
-        config.headers = { ...config.headers, 'X-Custom': 'test' }
+      let interceptedConfig: RequestInit | null = null;
+  apiClient.addRequestInterceptor((config) => {
+        interceptedConfig = config;
+  config.headers = { ...config.headers, 'X-Custom': 'test' }
         return config
       })
 
@@ -266,15 +277,15 @@ describe('APIClient', () => {
     })
 
     it('applies response interceptors', async () => {
-      let interceptedResponse: Response | null = null
-
-      apiClient.addResponseInterceptor((response) => {
-        interceptedResponse = response
-        return { ...response, modified: true }
+      let interceptedResponse: Response | null = null;
+  apiClient.addResponseInterceptor((response) => {
+        interceptedResponse = response;
+  return { ...response, modified: true }
       })
 
       mockFetch.mockResolvedValue(mockApiResponse({ original: true }))
-      const result = await apiClient.makeRequest('/test')
+      const result = await;
+  apiClient.makeRequest('/test')
 
       expect(interceptedResponse).toEqual({ original: true })
       expect(result).toEqual({ original: true, modified: true })

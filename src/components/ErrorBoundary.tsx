@@ -23,6 +23,14 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Don't catch auth-related errors as they're handled by auth context
+    if (error.message.includes('AuthService') || 
+        error.message.includes('Supabase') ||
+        error.message.includes('auth')) {
+      console.log('ErrorBoundary: Ignoring auth-related error:', error.message);
+      return;
+    }
+    
     console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 

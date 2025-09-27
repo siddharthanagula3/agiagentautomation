@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run test:run:*)",
+      "Bash(chmod:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm uninstall:*)",
+      "WebFetch(domain:chat.openai.com)",
+      "WebFetch(domain:chatgpt.com)",
+      "WebSearch",
+      "WebFetch(domain:bricxlabs.com)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run lint)",
+      "Bash(node:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

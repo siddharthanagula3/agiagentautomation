@@ -55,7 +55,7 @@ export const useRealtime = (callbacks: RealtimeCallbacks = {}) => {
 
       reconnect();
     }
-  }, [user?.id]);
+  }, [user?.id, callbacks]);
 
   return {
     isConnected: realtimeService.getConnectionStatus().connected,

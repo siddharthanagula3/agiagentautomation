@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../contexts/auth-hooks';
 import { Button } from '../ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -10,10 +10,9 @@ import {
   LogOut,
   Menu
 } from 'lucide-react';
-import { useState } from 'react';
 
-  const [showUserMenu, setShowUserMenu] = useState(false);
 const DashboardHeader: React.FC = () => {
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const { user, logout } = useAuth();
 
   const handleLogout = () => {

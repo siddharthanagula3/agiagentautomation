@@ -29,7 +29,7 @@ const SettingsPage: React.FC = () => {
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   if (!user) {
     return (

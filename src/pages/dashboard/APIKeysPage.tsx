@@ -84,17 +84,6 @@ interface APIKeyTemplate {
 const APIKeysPage: React.FC = () => {
   const { user } = useAuth();
   
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
-          <p className="text-muted-foreground">Please log in to access this page.</p>
-        </div>
-      </div>
-    );
-  }
-  
   const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
   const [filteredApiKeys, setFilteredApiKeys] = useState<APIKey[]>([]);
   const [templates, setTemplates] = useState<APIKeyTemplate[]>([]);
@@ -106,6 +95,17 @@ const APIKeysPage: React.FC = () => {
   const [showApiKeys, setShowApiKeys] = useState<Record<string, boolean>>({});
   const [isCreatingKey, setIsCreatingKey] = useState(false);
   const [selectedKey, setSelectedKey] = useState<APIKey | null>(null);
+  
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
+          <p className="text-muted-foreground">Please log in to access this page.</p>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (user) {
@@ -115,7 +115,7 @@ const APIKeysPage: React.FC = () => {
 
   useEffect(() => {
     filterAPIKeys();
-  }, [apiKeys, searchTerm, statusFilter, environmentFilter]);
+  }, [filterAPIKeys]);
 
   const loadAPIKeys = async () => {
     try {

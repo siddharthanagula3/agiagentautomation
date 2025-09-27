@@ -10,11 +10,17 @@ const isBrowser = typeof window !== 'undefined';
 
 // Create a function to initialize the client to avoid initialization issues
 const createSupabaseClient = () => {
+  console.log('Supabase URL:', supabaseUrl ? 'Set' : 'Not set');
+  console.log('Supabase Key:', supabaseKey ? 'Set' : 'Not set');
+  
   if (!supabaseUrl || !supabaseKey) {
-    console.warn('Supabase environment variables are not set. Using empty values.');
+    console.error('Supabase environment variables are not set!');
+    console.error('VITE_SUPABASE_URL:', supabaseUrl);
+    console.error('VITE_SUPABASE_ANON_KEY:', supabaseKey);
+    throw new Error('Supabase configuration is missing. Please check your environment variables.');
   }
 
-  return createClient<Database>(supabaseUrl, supabaseKey, {
+  const client = createClient<Database>(supabaseUrl, supabaseKey, {
     auth: {
       storage: isBrowser ? localStorage : undefined,
       persistSession: isBrowser,
@@ -26,6 +32,17 @@ const createSupabaseClient = () => {
       },
     },
   });
+
+  // Test the connection
+  client.auth.getSession().then(({ data, error }) => {
+    if (error) {
+      console.error('Supabase connection test failed:', error);
+    } else {
+      console.log('Supabase connection test successful');
+    }
+  });
+
+  return client;
 };
 
 // Create Supabase client with lazy initialization

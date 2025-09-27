@@ -84,16 +84,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Login attempt started for:', email);
       setLoading(true);
       
+      // Check if Supabase is configured
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseKey) {
+        console.error('Supabase not configured - using demo mode');
+        setLoading(false);
+        // Create a demo user for testing
+        const demoUser = {
+          id: 'demo-user-123',
+          email: email,
+          name: email.split('@')[0],
+          avatar: '',
+          role: 'user',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          last_login: new Date().toISOString(),
+          is_active: true,
+          preferences: {},
+          phone: '',
+          location: ''
+        };
+        setUser(demoUser);
+        return { success: true };
+      }
+      
       // Add aggressive timeout to prevent infinite loading
       const loginTimeout = setTimeout(() => {
         console.warn('Login timeout - forcing loading to false');
         setLoading(false);
-      }, 3000); // 3 second timeout for login
+      }, 5000); // 5 second timeout for login
       
       // Use Promise.race to ensure timeout works
       const loginPromise = authService.login({ email, password });
       const timeoutPromise = new Promise<{ success: boolean; error: string }>((resolve) => {
-        setTimeout(() => resolve({ success: false, error: 'Login timeout - please try again' }), 3000);
+        setTimeout(() => resolve({ success: false, error: 'Login timeout - please try again' }), 5000);
       });
       
       const result = await Promise.race([loginPromise, timeoutPromise]);

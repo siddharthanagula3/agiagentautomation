@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/auth-hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -157,7 +157,10 @@ const Component: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default TeamPage;

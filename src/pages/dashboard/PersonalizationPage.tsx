@@ -98,7 +98,10 @@ const PersonalizationPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default PersonalizationPage;

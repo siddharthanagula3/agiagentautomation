@@ -98,7 +98,10 @@ const StandardsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default StandardsPage;

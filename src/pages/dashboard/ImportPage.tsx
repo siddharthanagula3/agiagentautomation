@@ -93,7 +93,10 @@ const ImportPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ImportPage;

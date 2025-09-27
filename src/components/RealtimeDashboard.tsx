@@ -130,10 +130,12 @@ const Component: React.FC = () => {
       }
     }, 30000); // Ping every 30 seconds
 
-    return () => clearInterval(interval);
-  }, [isConnected]);
+    return (
+    <div>Component content</div>
+  );
+};
 
-  const getStatusColor = (status: string) => {
+const getStatusColor = (status: string) => {
     switch (status) {
       case 'running':
         return 'bg-blue-500';
@@ -367,7 +369,10 @@ const Component: React.FC = () => {
         </Card>
       </div>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default RealtimeDashboard;

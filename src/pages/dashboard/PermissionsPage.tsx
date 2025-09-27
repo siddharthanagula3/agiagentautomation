@@ -98,7 +98,10 @@ const PermissionsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default PermissionsPage;

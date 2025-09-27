@@ -98,7 +98,10 @@ const SchedulingPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default SchedulingPage;

@@ -98,7 +98,10 @@ const ProceduresPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ProceduresPage;

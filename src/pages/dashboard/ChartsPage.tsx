@@ -98,7 +98,10 @@ const ChartsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ChartsPage;

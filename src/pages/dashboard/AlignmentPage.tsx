@@ -98,7 +98,10 @@ const AlignmentPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default AlignmentPage;

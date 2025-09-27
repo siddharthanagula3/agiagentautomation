@@ -98,7 +98,10 @@ const BillingPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default BillingPage;

@@ -98,7 +98,10 @@ const RolesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default RolesPage;

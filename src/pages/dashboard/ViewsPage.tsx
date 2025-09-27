@@ -98,7 +98,10 @@ const ViewsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ViewsPage;

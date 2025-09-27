@@ -98,7 +98,10 @@ const StrategyPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default StrategyPage;

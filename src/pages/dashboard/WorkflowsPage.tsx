@@ -98,7 +98,10 @@ const WorkflowsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default WorkflowsPage;

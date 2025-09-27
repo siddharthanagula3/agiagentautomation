@@ -98,7 +98,10 @@ const UseCasesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default UseCasesPage;

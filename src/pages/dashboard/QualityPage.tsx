@@ -98,7 +98,10 @@ const QualityPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default QualityPage;

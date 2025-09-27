@@ -32,8 +32,7 @@ describe('APIClient', () => {
       const responseData = { id: 1, name: 'Test' }
       mockFetch.mockResolvedValue(mockApiResponse(responseData))
 
-      const result = await;
-  apiClient.makeRequest('/test')
+      const result = await apiClient.makeRequest('/test')
 
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:3001/test',
@@ -53,8 +52,7 @@ describe('APIClient', () => {
   const responseData = { id: 2, ...requestData }
       mockFetch.mockResolvedValue(mockApiResponse(responseData))
 
-      const result = await;
-  apiClient.makeRequest('/test', {
+      const result = await apiClient.makeRequest('/test', {
         method: 'POST',
         data: requestData,
       })
@@ -98,8 +96,7 @@ describe('APIClient', () => {
         .mockResolvedValueOnce(mockApiError('Unauthorized', 401))
         .mockResolvedValueOnce(mockApiResponse({ success: true }))
 
-      const result = await;
-  apiClient.makeRequest('/test')
+      const result = await apiClient.makeRequest('/test')
 
       expect(mockRefresh).toHaveBeenCalled()
       expect(mockFetch).toHaveBeenCalledTimes(2)
@@ -118,8 +115,7 @@ describe('APIClient', () => {
         .mockResolvedValueOnce(mockApiError('Server Error', 500))
         .mockResolvedValueOnce(mockApiResponse({ success: true }))
 
-      const result = await;
-  apiClient.makeRequest('/test')
+      const result = await apiClient.makeRequest('/test')
 
       expect(mockFetch).toHaveBeenCalledTimes(3)
       expect(result).toEqual({ success: true })
@@ -284,8 +280,7 @@ describe('APIClient', () => {
       })
 
       mockFetch.mockResolvedValue(mockApiResponse({ original: true }))
-      const result = await;
-  apiClient.makeRequest('/test')
+      const result = await apiClient.makeRequest('/test')
 
       expect(interceptedResponse).toEqual({ original: true })
       expect(result).toEqual({ original: true, modified: true })

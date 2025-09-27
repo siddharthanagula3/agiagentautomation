@@ -98,7 +98,10 @@ const LayoutsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default LayoutsPage;

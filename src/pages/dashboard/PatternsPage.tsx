@@ -98,7 +98,10 @@ const PatternsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default PatternsPage;

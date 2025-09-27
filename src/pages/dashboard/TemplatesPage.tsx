@@ -98,7 +98,10 @@ const TemplatesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default TemplatesPage;

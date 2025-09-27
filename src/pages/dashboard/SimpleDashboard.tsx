@@ -21,32 +21,15 @@ import {
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/auth-hooks';
 const Component: React.FC = () => {
-  const [error, setError] = useState('');
-  useEffect(() => {
-const SimpleDashboard: React.FC = () => {
   const { user } = useAuth();
   
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
-          <p className="text-muted-foreground">Please log in to access this page.</p>
-        </div>
-      </div>
-    );
-  }
-  
+    <div>Component content</div>
+  );
+};
 
-    // Simple loading simulation
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const dashboardStats = [
+const dashboardStats = [
     {
       title: 'AI Employees',
       value: '0',
@@ -232,7 +215,10 @@ const SimpleDashboard: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default SimpleDashboard;

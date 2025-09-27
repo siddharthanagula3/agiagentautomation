@@ -98,7 +98,10 @@ const BackupsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default BackupsPage;

@@ -98,7 +98,10 @@ const OperationsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default OperationsPage;

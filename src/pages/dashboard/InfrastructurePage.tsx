@@ -98,7 +98,10 @@ const InfrastructurePage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default InfrastructurePage;

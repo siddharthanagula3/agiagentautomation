@@ -633,7 +633,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         </div>
       </div>
     </motion.div>
-  );
+  )
+  };
+
+;
 };
 
 export default MessageBubble;

@@ -98,7 +98,10 @@ const CoordinationPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default CoordinationPage;

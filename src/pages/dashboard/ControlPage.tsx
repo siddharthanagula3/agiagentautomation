@@ -98,7 +98,10 @@ const ControlPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ControlPage;

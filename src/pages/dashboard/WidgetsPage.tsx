@@ -98,7 +98,10 @@ const WidgetsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default WidgetsPage;

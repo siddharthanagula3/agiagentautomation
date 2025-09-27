@@ -98,7 +98,10 @@ const ArchitecturePage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ArchitecturePage;

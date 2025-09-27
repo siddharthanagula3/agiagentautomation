@@ -98,7 +98,10 @@ const VersionControlPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default VersionControlPage;

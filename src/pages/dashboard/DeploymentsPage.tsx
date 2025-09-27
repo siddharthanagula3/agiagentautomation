@@ -98,7 +98,10 @@ const DeploymentsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default DeploymentsPage;

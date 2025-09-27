@@ -98,7 +98,10 @@ const BusinessPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default BusinessPage;

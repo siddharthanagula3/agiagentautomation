@@ -98,7 +98,10 @@ const GraphsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default GraphsPage;

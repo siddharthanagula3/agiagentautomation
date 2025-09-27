@@ -98,7 +98,10 @@ const SynchronizationPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default SynchronizationPage;

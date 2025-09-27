@@ -98,7 +98,10 @@ const TuningPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default TuningPage;

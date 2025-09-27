@@ -98,7 +98,10 @@ const EnterprisePage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default EnterprisePage;

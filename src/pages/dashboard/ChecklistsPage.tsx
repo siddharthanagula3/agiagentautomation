@@ -98,7 +98,10 @@ const ChecklistsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ChecklistsPage;

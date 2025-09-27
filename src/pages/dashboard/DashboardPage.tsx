@@ -98,7 +98,10 @@ const DashboardPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default DashboardPage;

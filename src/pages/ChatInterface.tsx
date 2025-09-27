@@ -34,16 +34,9 @@ interface Conversation {
   messageCount: number;
   starred: boolean;
 }
-const Component: React.FC = () => {
-  const [darkMode, setDarkMode] = useState(true);
-const Component: React.FC = () => {
+
   const [showSettings, setShowSettings] = useState(false);
 const Component: React.FC = () => {
-  const [showModelSelector, setShowModelSelector] = useState(false);
-  const [conversations, setConversations] = useState<Conversation[]>([
-  useEffect(() => {
-  useEffect(() => {
-const ChatInterface: React.FC = () => {
   // Core state
 
   // Settings and dialogs
@@ -113,32 +106,12 @@ const ChatInterface: React.FC = () => {
 
     if (showModelSelector) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }
-  }, [showModelSelector]);
+      return (
+    <div>Component content</div>
+  );
+};
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeydown = (e: KeyboardEvent) => {
-      // Cmd/Ctrl + K to toggle sidebar
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setSidebarOpen(!sidebarOpen);
-      }
-      // Cmd/Ctrl + Shift + O to open settings
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'O') {
-        e.preventDefault();
-        setShowSettings(true);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeydown);
-    return () => document.removeEventListener('keydown', handleKeydown);
-  }, [sidebarOpen]);
-
-  const handleSendMessage = (e: React.FormEvent) => {
+const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
@@ -574,7 +547,10 @@ const ChatInterface: React.FC = () => {
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ChatInterface;

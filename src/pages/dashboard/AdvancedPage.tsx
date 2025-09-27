@@ -98,7 +98,10 @@ const AdvancedPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default AdvancedPage;

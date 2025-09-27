@@ -98,7 +98,10 @@ const ComponentsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ComponentsPage;

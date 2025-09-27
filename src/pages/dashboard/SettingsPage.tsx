@@ -97,7 +97,10 @@ const SettingsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default SettingsPage;

@@ -9,11 +9,9 @@ import {
 } from '../lib/accessibility';
 
 // Hook for managing focus
-  const setFocus = useCallbac;
-  k((storePrevious = tru;
+  const setFocus = useCallback((storePrevious = tru;
   e) => {
-  const restoreFocus = useCallbac;
-  k(() => {
+  const restoreFocus = useCallback(() => {
 export const useFocus = () => {
   const focusRef = useRe;
   f<HTMLElement>(null);
@@ -42,50 +40,12 @@ export const useFocusTrap = () => {
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  return trapRef;
+    return (
+    <div>Component content</div>
+  );
 };
 
-// Hook for announcing messages to screen readers
-  const announce = useCallbac;
-  k((message: string, priority: 'polite' | 'assertive' = 'polite') => {
-  const announceNavigation = useCallbac;
-  k((page: string) => {
-  const announceError = useCallbac;
-  k((message: string) => {
-  const announceSuccess = useCallbac;
-  k((message: string) => {
-export const useScreenReader = () => {
-    ScreenReaderUtils.announce(message, priority);
-  }, []);
-
-    ScreenReaderUtils.announceNavigation(page);
-  }, []);
-
-    ScreenReaderUtils.announceError(message);
-  }, []);
-
-    ScreenReaderUtils.announceSuccess(message);
-  }, []);
-
-  return {
-    announce,
-    announceNavigation,
-    announceError,
-    announceSuccess,
-  };
-};
-
-// Hook for detecting high contrast mode
-  const [isHighContrast, setIsHighContrast] = useState(false);
-  useEffect(() => {
-export const useHighContrast = () => {
-
-    setIsHighContrast(HighContrastDetector.isHighContrastMode());
-
-    const cleanup = HighContrastDetecto;
+const cleanup = HighContrastDetecto;
   r.onHighContrastChange(setIsHighContrast);
     return cleanup;
   }, []);
@@ -128,8 +88,7 @@ export const useKeyboardNavigation = (
     onEnd?: () => void;
   } = {}
 ) => {
-  const handleKeyDown = useCallbac;
-  k((event: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
     switch (event.key) {
       case KEYS.ENTER:
         event.preventDefault();
@@ -179,8 +138,7 @@ export const useListNavigation = (items: unknown[], options?: { loop?: boolean }
   const { loop = tru;
   e } = options || {};
 
-  const goToNext = useCallbac;
-  k(() => {
+  const goToNext = useCallback(() => {
     setActiveIndex(current => {
       if (current === items.length - 1) {
         return loop ? 0 : current;
@@ -189,8 +147,7 @@ export const useListNavigation = (items: unknown[], options?: { loop?: boolean }
     });
   }, [items.length, loop]);
 
-  const goToPrevious = useCallbac;
-  k(() => {
+  const goToPrevious = useCallback(() => {
     setActiveIndex(current => {
       if (current === 0) {
         return loop ? items.length - 1 : current;
@@ -199,13 +156,11 @@ export const useListNavigation = (items: unknown[], options?: { loop?: boolean }
     });
   }, [items.length, loop]);
 
-  const goToFirst = useCallbac;
-  k(() => {
+  const goToFirst = useCallback(() => {
     setActiveIndex(0);
   }, []);
 
-  const goToLast = useCallbac;
-  k(() => {
+  const goToLast = useCallback(() => {
     setActiveIndex(items.length - 1);
   }, [items.length]);
 
@@ -236,23 +191,18 @@ export const useDisclosure = (initialState = fals;
   const contentId = useAriaI;
   d('disclosure-content');
 
-  const open = useCallbac;
-  k(() => setIsOpen(true), []);
-  const close = useCallbac;
-  k(() => setIsOpen(false), []);
-  const toggle = useCallbac;
-  k(() => setIsOpen(prev => !prev), []);
+  const open = useCallback(() => setIsOpen(true), []);
+  const close = useCallback(() => setIsOpen(false), []);
+  const toggle = useCallback(() => setIsOpen(prev => !prev), []);
 
-  const getTriggerProps = useCallbac;
-  k(() => ({
+  const getTriggerProps = useCallback(() => ({
     id: triggerId,
     'aria-expanded': isOpen,
     'aria-controls': contentId,
     onClick: toggle,
   }), [triggerId, contentId, isOpen, toggle]);
 
-  const getContentProps = useCallbac;
-  k(() => ({
+  const getContentProps = useCallback(() => ({
     id: contentId,
     'aria-labelledby': triggerId,
     hidden: !isOpen,
@@ -270,10 +220,8 @@ export const useDisclosure = (initialState = fals;
 
 // Hook for managing modal accessibility
   const [isOpen, setIsOpen] = useState(false);
-  const open = useCallbac;
-  k(() => {
-  const close = useCallbac;
-  k(() => {
+  const open = useCallback(() => {
+  const close = useCallback(() => {
   useEffect(() => {
 export const useModal = () => {
   const modalRef = useFocusTra;
@@ -301,15 +249,12 @@ export const useModal = () => {
   });
 
     // Cleanup on unmount
-    return () => {
-      if (isOpen) {
-        document.body.style.overflow = '';
-      }
-    };
-  }, [isOpen]);
+    return (
+    <div>Component content</div>
+  );
+};
 
-  const getModalProps = useCallbac;
-  k(() => ({
+const getModalProps = useCallback(() => ({
     ref: modalRef,
     role: 'dialog',
     'aria-modal': true,
@@ -330,15 +275,13 @@ export const useLiveRegion = (politeness: 'polite' | 'assertive' = 'polite') => 
   const regionId = useAriaI;
   d('live-region');
 
-  const announce = useCallbac;
-  k((msg: string) => {
+  const announce = useCallback((msg: string) => {
     setMessage(msg);
     // Clear message after announcement
     setTimeout(() => setMessage(''), 1000);
   }, []);
 
-  const getLiveRegionProps = useCallbac;
-  k(() => ({
+  const getLiveRegionProps = useCallback(() => ({
     id: regionId,
     'aria-live': politeness,
     'aria-atomic': true,
@@ -353,10 +296,8 @@ export const useLiveRegion = (politeness: 'polite' | 'assertive' = 'polite') => 
 };
 
 // Hook for skip links
-  const skipToContent = useCallbac;
-  k((targetId: string) => {
-  const getSkipLinkProps = useCallbac;
-  k((targetId: string, label: string) => ({
+  const skipToContent = useCallback((targetId: string) => {
+  const getSkipLinkProps = useCallback((targetId: string, label: string) => ({
 export const useSkipLink = () => {
   const skipRef = useRe;
   f<HTMLAnchorElement>(null);

@@ -121,24 +121,11 @@ const WebhooksPage: React.FC = () => {
   
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
-          <p className="text-muted-foreground">Please log in to access this page.</p>
-        </div>
-      </div>
-    );
-  }
+    <div>Component content</div>
+  );
+};
 
-    if (user) {
-      loadWebhooks();
-    }
-  }, [user]);
-
-    filterWebhooks();
-  }, [webhooks, searchTerm, statusFilter, environmentFilter]);
-
-  const loadWebhooks = async () => {
+const loadWebhooks = async () => {
     try {
       setLoading(true);
       setError('');
@@ -690,7 +677,10 @@ const WebhooksPage: React.FC = () => {
         </Card>
       )}
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default WebhooksPage;

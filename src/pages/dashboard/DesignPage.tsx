@@ -98,7 +98,10 @@ const DesignPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default DesignPage;

@@ -98,7 +98,10 @@ const MaintenancePage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default MaintenancePage;

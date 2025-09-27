@@ -98,7 +98,10 @@ const OptimizationPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default OptimizationPage;

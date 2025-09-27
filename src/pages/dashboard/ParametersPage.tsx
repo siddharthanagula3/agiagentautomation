@@ -98,7 +98,10 @@ const ParametersPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ParametersPage;

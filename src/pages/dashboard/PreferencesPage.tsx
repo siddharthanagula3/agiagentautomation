@@ -98,7 +98,10 @@ const PreferencesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default PreferencesPage;

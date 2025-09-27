@@ -98,7 +98,10 @@ const InsightsPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default InsightsPage;

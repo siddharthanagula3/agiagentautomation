@@ -98,7 +98,10 @@ const CompliancePage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default CompliancePage;

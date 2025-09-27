@@ -148,22 +148,11 @@ const ProcessingPage: React.FC = () => {
   
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
-          <p className="text-muted-foreground">Please log in to access this page.</p>
-        </div>
-      </div>
-    );
-  }
-  
+    <div>Component content</div>
+  );
+};
 
-    if (user) {
-      loadData();
-    }
-  }, [user]);
-
-  const loadData = async () => {
+const loadData = async () => {
     try {
       setLoading(true);
       setError('');
@@ -594,7 +583,10 @@ const ProcessingPage: React.FC = () => {
       </Card>
       )}
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ProcessingPage;

@@ -557,7 +557,10 @@ const Sidebar = ({
         </div>
       </motion.div>
     </TooltipProvider>
-  );
+  )
+  };
+
+;
 };
 
 export default Sidebar;

@@ -98,7 +98,10 @@ const AuditPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default AuditPage;

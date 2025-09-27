@@ -5,9 +5,6 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import LoadingSpinner from '../ui/loading-spinner';
 const Component: React.FC = () => {
-  const [error, setError] = useState('');
-  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
-const RegisterForm: React.FC = () => {
     email: '',
     password: '',
     confirmPassword: '',
@@ -248,7 +245,10 @@ const RegisterForm: React.FC = () => {
         </form>
       </div>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default RegisterForm;

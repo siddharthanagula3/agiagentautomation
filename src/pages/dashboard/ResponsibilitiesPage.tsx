@@ -98,7 +98,10 @@ const ResponsibilitiesPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
+  )
+  };
+
+;
 };
 
 export default ResponsibilitiesPage;

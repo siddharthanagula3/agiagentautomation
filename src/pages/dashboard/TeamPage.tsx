@@ -4,11 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Button } from '../../components/ui/button';
 import { Loader2 } from 'lucide-react';
 
+const TeamPage: React.FC = () => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<unknown[]>([]);
-const Component: React.FC = () => {
-  const { user } = useAuth();
 
+  useEffect(() => {
     // TODO: Replace with real data fetching
     setLoading(false);
   }, []);
@@ -21,87 +23,28 @@ const Component: React.FC = () => {
   }
 
   if (!user) {
-
     return (
-
       <div className="flex items-center justify-center min-h-[400px]">
-
         <div className="text-center">
-
           <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
-
           <p className="text-muted-foreground">Please log in to access this page.</p>
-
         </div>
-
       </div>
-
     );
-
   }
 
-  
-
   if (error) {
-
-
-  
-
     return (
-
-
-  
-
       <div className="flex items-center justify-center min-h-[400px]">
-
-
-  
-
         <div className="text-center">
-
-
-  
-
           <h3 className="text-lg font-semibold text-foreground mb-2">Error</h3>
-
-
-  
-
           <p className="text-muted-foreground mb-4">{error}</p>
-
-
-  
-
           <Button onClick={() => window.location.reload()}>
-
-
-  
-
             Try Again
-
-
-  
-
           </Button>
-
-
-  
-
         </div>
-
-
-  
-
       </div>
-
-
-  
-
     );
-
-
-  
-
   }
 
 

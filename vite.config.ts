@@ -40,27 +40,34 @@ export default defineConfig(({ mode }) => ({
     // Rollup options for better code splitting
     rollupOptions: {
       output: {
-        manualChunks: {
-          // React ecosystem
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-
-          // UI libraries
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-toast'],
-
-          // Data fetching and state
-          'data-vendor': ['@tanstack/react-query', 'zustand'],
-
-          // Payment and external services
-          'external-vendor': ['@stripe/stripe-js', '@stripe/react-stripe-js'],
-
-          // Charts and visualization
-          'viz-vendor': ['recharts'],
-
-          // Utilities
-          'utils-vendor': ['date-fns', 'clsx', 'tailwind-merge', 'framer-motion'],
-
-          // Security
-          'security-vendor': ['dompurify'],
+        manualChunks(id) {
+          // Vendor chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('@tanstack') || id.includes('zustand')) {
+              return 'data-vendor';
+            }
+            if (id.includes('@stripe')) {
+              return 'stripe-vendor';
+            }
+            if (id.includes('recharts') || id.includes('framer-motion')) {
+              return 'viz-vendor';
+            }
+            return 'vendor';
+          }
+          
+          // Split dashboard pages into separate chunks
+          if (id.includes('/pages/dashboard/')) {
+            return 'dashboard-pages';
+          }
+          if (id.includes('/pages/ai-employees/')) {
+            return 'ai-employees';
+          }
         },
         // Asset naming
         chunkFileNames: 'assets/js/[name].[hash].js',

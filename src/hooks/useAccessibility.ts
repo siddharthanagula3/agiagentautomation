@@ -9,16 +9,16 @@ import {
 } from '../lib/accessibility';
 
 // Hook for managing focus
+  const setFocus = useCallback((storePrevious = true) => {
+  const restoreFocus = useCallback(() => {
 export const useFocus = () => {
   const focusRef = useRef<HTMLElement>(null);
 
-  const setFocus = useCallback((storePrevious = true) => {
     if (focusRef.current) {
       FocusManager.setFocus(focusRef.current, storePrevious);
     }
   }, []);
 
-  const restoreFocus = useCallback(() => {
     FocusManager.restoreFocus();
   }, []);
 
@@ -26,10 +26,10 @@ export const useFocus = () => {
 };
 
 // Hook for focus trap (useful in modals)
+  useEffect(() => {
 export const useFocusTrap = () => {
   const trapRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (trapRef.current) {
         FocusManager.trapFocus(trapRef.current, event);
@@ -44,20 +44,20 @@ export const useFocusTrap = () => {
 };
 
 // Hook for announcing messages to screen readers
-export const useScreenReader = () => {
   const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
+  const announceNavigation = useCallback((page: string) => {
+  const announceError = useCallback((message: string) => {
+  const announceSuccess = useCallback((message: string) => {
+export const useScreenReader = () => {
     ScreenReaderUtils.announce(message, priority);
   }, []);
 
-  const announceNavigation = useCallback((page: string) => {
     ScreenReaderUtils.announceNavigation(page);
   }, []);
 
-  const announceError = useCallback((message: string) => {
     ScreenReaderUtils.announceError(message);
   }, []);
 
-  const announceSuccess = useCallback((message: string) => {
     ScreenReaderUtils.announceSuccess(message);
   }, []);
 
@@ -70,10 +70,10 @@ export const useScreenReader = () => {
 };
 
 // Hook for detecting high contrast mode
-export const useHighContrast = () => {
   const [isHighContrast, setIsHighContrast] = useState(false);
-
   useEffect(() => {
+export const useHighContrast = () => {
+
     setIsHighContrast(HighContrastDetector.isHighContrastMode());
 
     const cleanup = HighContrastDetector.onHighContrastChange(setIsHighContrast);
@@ -84,10 +84,10 @@ export const useHighContrast = () => {
 };
 
 // Hook for motion preferences
-export const useMotionPreferences = () => {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
   useEffect(() => {
+export const useMotionPreferences = () => {
+
     setPrefersReducedMotion(MotionPreferences.prefersReducedMotion());
 
     const cleanup = MotionPreferences.onMotionPreferenceChange(setPrefersReducedMotion);
@@ -244,13 +244,15 @@ export const useDisclosure = (initialState = false) => {
 };
 
 // Hook for managing modal accessibility
+  const [isOpen, setIsOpen] = useState(false);
+  const open = useCallback(() => {
+  const close = useCallback(() => {
+  useEffect(() => {
 export const useModal = () => {
   const modalRef = useFocusTrap();
-  const [isOpen, setIsOpen] = useState(false);
   const { restoreFocus } = useFocus();
   const { announce } = useScreenReader();
 
-  const open = useCallback(() => {
     setIsOpen(true);
     announce('Modal opened');
 
@@ -258,7 +260,6 @@ export const useModal = () => {
     document.body.style.overflow = 'hidden';
   }, [announce]);
 
-  const close = useCallback(() => {
     setIsOpen(false);
     announce('Modal closed');
     restoreFocus();
@@ -271,7 +272,6 @@ export const useModal = () => {
     onEscape: close,
   });
 
-  useEffect(() => {
     // Cleanup on unmount
     return () => {
       if (isOpen) {
@@ -321,10 +321,11 @@ export const useLiveRegion = (politeness: 'polite' | 'assertive' = 'polite') => 
 };
 
 // Hook for skip links
+  const skipToContent = useCallback((targetId: string) => {
+  const getSkipLinkProps = useCallback((targetId: string, label: string) => ({
 export const useSkipLink = () => {
   const skipRef = useRef<HTMLAnchorElement>(null);
 
-  const skipToContent = useCallback((targetId: string) => {
     const target = document.getElementById(targetId);
     if (target) {
       target.focus();
@@ -332,7 +333,6 @@ export const useSkipLink = () => {
     }
   }, []);
 
-  const getSkipLinkProps = useCallback((targetId: string, label: string) => ({
     ref: skipRef,
     href: `#${targetId}`,
     onClick: (e: React.MouseEvent) => {

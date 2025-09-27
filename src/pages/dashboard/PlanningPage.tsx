@@ -60,6 +60,18 @@ interface Milestone {
   dependencies: string[];
 }
 
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [filteredPlans, setFilteredPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('');
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [newPlan, setNewPlan] = useState({
+  useEffect(() => {
+  useEffect(() => {
 const PlanningPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -74,17 +86,7 @@ const PlanningPage: React.FC = () => {
     );
   }
   
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [filteredPlans, setFilteredPlans] = useState<Plan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [priorityFilter, setPriorityFilter] = useState('');
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   
-  const [newPlan, setNewPlan] = useState({
     title: '',
     description: '',
     priority: 'medium' as const,
@@ -94,13 +96,11 @@ const PlanningPage: React.FC = () => {
     tags: ''
   });
 
-  useEffect(() => {
     if (user) {
       loadPlans();
     }
   }, [user]);
 
-  useEffect(() => {
     filterPlans();
   }, [plans, searchTerm, statusFilter, priorityFilter]);
 
@@ -565,7 +565,7 @@ const PlanningPage: React.FC = () => {
                   <select
                     id="priority"
                     value={newPlan.priority}
-                    onChange={(e) => setNewPlan({...newPlan, priority: e.target.value as any})}
+                    onChange={(e) => setNewPlan({...newPlan, priority: e.target.value as unknown})}
                     className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="low">Low</option>

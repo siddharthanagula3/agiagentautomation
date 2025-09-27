@@ -53,7 +53,7 @@ export const useSecureStorage = <T>(
 
   const setValue = useCallback((value: T | ((val: T) => T)) => {
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      const valueToStore = value instanceof (...args: unknown[]) => unknown ? value(storedValue) : value;
       setStoredValue(valueToStore);
 
       const storageObject = window[storage];

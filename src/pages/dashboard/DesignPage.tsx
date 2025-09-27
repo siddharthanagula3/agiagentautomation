@@ -53,6 +53,16 @@ interface DesignVariant {
   usage: number;
 }
 
+  const [designSystems, setDesignSystems] = useState<DesignSystem[]>([]);
+  const [filteredSystems, setFilteredSystems] = useState<DesignSystem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedSystem, setSelectedSystem] = useState<DesignSystem | null>(null);
+  useEffect(() => {
+  useEffect(() => {
 const DesignPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -67,22 +77,12 @@ const DesignPage: React.FC = () => {
     );
   }
   
-  const [designSystems, setDesignSystems] = useState<DesignSystem[]>([]);
-  const [filteredSystems, setFilteredSystems] = useState<DesignSystem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [selectedSystem, setSelectedSystem] = useState<DesignSystem | null>(null);
 
-  useEffect(() => {
     if (user) {
       loadDesignSystems();
     }
   }, [user]);
 
-  useEffect(() => {
     filterDesignSystems();
   }, [designSystems, searchTerm, typeFilter, statusFilter]);
 

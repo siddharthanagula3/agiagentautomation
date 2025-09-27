@@ -64,21 +64,21 @@ interface AnalyticsData {
   monthlyTrends?: MonthlyTrend[];
 }
 
-const AnalyticsPage: React.FC = () => {
-  const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [timeRange, setTimeRange] = useState('month');
-
   useEffect(() => {
+  const loadAnalytics = useCallback(async () => {
+const AnalyticsPage: React.FC = () => {
+  const { user } = useAuth();
+
     if (user) {
       loadAnalytics();
     }
   }, [user, timeRange, loadAnalytics]);
 
-  const loadAnalytics = useCallback(async () => {
     if (!user) return;
 
     try {

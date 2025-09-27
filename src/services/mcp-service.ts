@@ -6,7 +6,7 @@ export interface MCPTool {
   description: string;
   inputSchema: {
     type: string;
-    properties: Record<string, any>;
+    properties: Record<string, unknown>;
     required: string[];
   };
 }
@@ -15,33 +15,33 @@ export interface MCPRequest {
   jsonrpc: '2.0';
   id: string;
   method: string;
-  params?: any;
+  params?: unknown;
 }
 
 export interface MCPResponse {
   jsonrpc: '2.0';
   id: string;
-  result?: any;
+  result?: unknown;
   error?: {
     code: number;
     message: string;
-    data?: any;
+    data?: unknown;
   };
 }
 
 export interface MCPToolCall {
   tool: string;
-  parameters: Record<string, any>;
-  result?: any;
+  parameters: Record<string, unknown>;
+  result?: unknown;
   error?: string;
 }
 
 class MCPService {
   private tools: Map<string, MCPTool> = new Map();
-  private callbacks: Map<string, Function> = new Map();
+  private callbacks: Map<string, (...args: unknown[]) => unknown> = new Map();
 
   // Register a tool with MCP
-  registerTool(tool: MCPTool, handler: Function) {
+  registerTool(tool: MCPTool, handler: (...args: unknown[]) => unknown) {
     this.tools.set(tool.name, tool);
     this.callbacks.set(tool.name, handler);
   }
@@ -52,7 +52,7 @@ class MCPService {
   }
 
   // Call a tool via MCP
-  async callTool(toolName: string, parameters: Record<string, any>): Promise<any> {
+  async callTool(toolName: string, parameters: Record<string, unknown>): Promise<unknown> {
     const tool = this.tools.get(toolName);
     if (!tool) {
       throw new Error(`Tool ${toolName} not found`);
@@ -69,13 +69,13 @@ class MCPService {
     try {
       const result = await handler(parameters);
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new Error(`Tool execution failed: ${error.message}`);
     }
   }
 
   // Validate parameters against tool schema
-  private validateParameters(tool: MCPTool, parameters: Record<string, any>) {
+  private validateParameters(tool: MCPTool, parameters: Record<string, unknown>) {
     const { required, properties } = tool.inputSchema;
     
     // Check required parameters
@@ -95,7 +95,7 @@ class MCPService {
   }
 
   // Validate parameter type
-  private validateParameterType(name: string, value: any, schema: any) {
+  private validateParameterType(name: string, value: unknown, schema: unknown) {
     const { type } = schema;
     
     switch (type) {
@@ -140,8 +140,7 @@ class MCPService {
             }
           };
 
-        case 'tools/call':
-          const { name, arguments: args } = request.params;
+        case 'tools/call': { const { name, arguments: args } = request.params;
           const result = await this.callTool(name, args);
           return {
             jsonrpc: '2.0',
@@ -166,7 +165,7 @@ class MCPService {
             }
           };
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         jsonrpc: '2.0',
         id: request.id,

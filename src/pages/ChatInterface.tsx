@@ -35,20 +35,22 @@ interface Conversation {
   starred: boolean;
 }
 
-const ChatInterface: React.FC = () => {
-  // Core state
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-
-  // Settings and dialogs
   const [showSettings, setShowSettings] = useState(false);
   const [currentModel, setCurrentModel] = useState("AGI Agent 4.0");
   const [showModelSelector, setShowModelSelector] = useState(false);
+  const [conversations, setConversations] = useState<Conversation[]>([
+  useEffect(() => {
+  useEffect(() => {
+const ChatInterface: React.FC = () => {
+  // Core state
+
+  // Settings and dialogs
 
   // Mock conversations
-  const [conversations, setConversations] = useState<Conversation[]>([
     {
       id: "1",
       title: "AGI Agent Automation Planning",
@@ -95,7 +97,6 @@ const ChatInterface: React.FC = () => {
   const modelSelectorRef = useRef<HTMLDivElement>(null);
 
   // Apply dark mode
-  useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {
@@ -104,7 +105,6 @@ const ChatInterface: React.FC = () => {
   }, [darkMode]);
 
   // Close model selector when clicking outside
-  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modelSelectorRef.current && !modelSelectorRef.current.contains(event.target as Node)) {
         setShowModelSelector(false);

@@ -16,8 +16,10 @@ import {
   Headphones
 } from 'lucide-react';
 
-const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+const ContactPage: React.FC = () => {
     name: '',
     email: '',
     company: '',
@@ -25,8 +27,6 @@ const ContactPage: React.FC = () => {
     message: '',
     inquiryType: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

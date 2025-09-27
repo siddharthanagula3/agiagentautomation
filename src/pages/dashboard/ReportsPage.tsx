@@ -89,6 +89,19 @@ interface ReportMetric {
   chartData: number[];
 }
 
+  const [reports, setReports] = useState<Report[]>([]);
+  const [filteredReports, setFilteredReports] = useState<Report[]>([]);
+  const [templates, setTemplates] = useState<ReportTemplate[]>([]);
+  const [metrics, setMetrics] = useState<ReportMetric[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  useEffect(() => {
+  useEffect(() => {
 const ReportsPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -103,25 +116,12 @@ const ReportsPage: React.FC = () => {
     );
   }
   
-  const [reports, setReports] = useState<Report[]>([]);
-  const [filteredReports, setFilteredReports] = useState<Report[]>([]);
-  const [templates, setTemplates] = useState<ReportTemplate[]>([]);
-  const [metrics, setMetrics] = useState<ReportMetric[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
 
-  useEffect(() => {
     if (user) {
       loadReports();
     }
   }, [user]);
 
-  useEffect(() => {
     filterReports();
   }, [reports, searchTerm, typeFilter, statusFilter]);
 
@@ -322,7 +322,7 @@ const ReportsPage: React.FC = () => {
             <h3 className="text-lg font-semibold text-foreground mb-2">No Reports Found</h3>
             <p className="text-muted-foreground mb-6">
               {reports.length === 0 
-                ? "You haven't created any reports yet. Start by creating your first report."
+                ? "You haven't created unknown reports yet. Start by creating your first report."
                 : "No reports match your current filters. Try adjusting your search criteria."
               }
             </p>

@@ -185,7 +185,7 @@ const CompleteAdminDashboard: React.FC<CompleteAdminDashboardProps> = ({
     const matchesCategory = filterCategory === 'all' || employee.category === filterCategory;
     return matchesSearch && matchesCategory;
   }).sort((a, b) => {
-    let aValue: any, bValue: any;
+    let aValue: unknown, bValue: unknown;
     
     switch (sortBy) {
       case 'name':

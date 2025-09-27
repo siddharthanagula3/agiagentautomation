@@ -55,7 +55,7 @@ interface SecurityEvent {
   location?: string;
   timestamp: string;
   resolved: boolean;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 interface AccessRule {
@@ -64,7 +64,7 @@ interface AccessRule {
   description: string;
   type: 'role' | 'ip' | 'time' | 'location' | 'device';
   enabled: boolean;
-  conditions: Record<string, any>;
+  conditions: Record<string, unknown>;
   affectedUsers: number;
   createdAt: string;
   lastModified: string;
@@ -107,20 +107,6 @@ interface ComplianceStandard {
   nextAssessment: string;
 }
 
-const SecurityPage: React.FC = () => {
-  const { user } = useAuth();
-  
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
-          <p className="text-muted-foreground">Please log in to access this page.</p>
-        </div>
-      </div>
-    );
-  }
-  
   const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
   const [accessRules, setAccessRules] = useState<AccessRule[]>([]);
   const [policies, setPolicies] = useState<SecurityPolicy[]>([]);
@@ -135,8 +121,22 @@ const SecurityPage: React.FC = () => {
   const [apiAccessEnabled, setApiAccessEnabled] = useState(true);
   const [auditLogEnabled, setAuditLogEnabled] = useState(true);
   const [encryptionEnabled, setEncryptionEnabled] = useState(true);
-
   useEffect(() => {
+const SecurityPage: React.FC = () => {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
+          <p className="text-muted-foreground">Please log in to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+  
+
     if (user) {
       loadSecurityData();
     }

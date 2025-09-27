@@ -54,6 +54,16 @@ interface TestResult {
   coverage: number;
 }
 
+  const [tests, setTests] = useState<Test[]>([]);
+  const [filteredTests, setFilteredTests] = useState<Test[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedTest, setSelectedTest] = useState<Test | null>(null);
+  useEffect(() => {
+  useEffect(() => {
 const TestingPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -68,22 +78,12 @@ const TestingPage: React.FC = () => {
     );
   }
   
-  const [tests, setTests] = useState<Test[]>([]);
-  const [filteredTests, setFilteredTests] = useState<Test[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [selectedTest, setSelectedTest] = useState<Test | null>(null);
 
-  useEffect(() => {
     if (user) {
       loadTests();
     }
   }, [user]);
 
-  useEffect(() => {
     filterTests();
   }, [tests, searchTerm, typeFilter, statusFilter]);
 

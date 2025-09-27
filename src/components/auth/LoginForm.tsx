@@ -6,13 +6,13 @@ import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
 import LoadingSpinner from '../ui/loading-spinner';
 
-const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState({
+  const [error, setError] = useState('');
+const LoginForm: React.FC = () => {
     email: '',
     password: '',
     rememberMe: false
   });
-  const [error, setError] = useState('');
 
   const { login, loading } = useAuth();
   const navigate = useNavigate();

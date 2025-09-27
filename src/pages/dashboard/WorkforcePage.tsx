@@ -46,8 +46,6 @@ interface JobFile {
   size?: number;
 }
 
-const WorkforcePage: React.FC = () => {
-  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -58,6 +56,13 @@ const WorkforcePage: React.FC = () => {
   const [selectedPriority, setSelectedPriority] = useState('');
   const [showCreateJob, setShowCreateJob] = useState(false);
   const [jobStats, setJobStats] = useState({
+  const [newJob, setNewJob] = useState({
+  useEffect(() => {
+  useEffect(() => {
+  const loadData = useCallback(async () => {
+  const filterJobs = useCallback(() => {
+const WorkforcePage: React.FC = () => {
+  const { user } = useAuth();
     totalJobs: 0,
     activeJobs: 0,
     completedJobs: 0,
@@ -66,7 +71,6 @@ const WorkforcePage: React.FC = () => {
     avgCompletionTime: 0
   });
 
-  const [newJob, setNewJob] = useState({
     title: '',
     description: '',
     priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent' | 'critical',
@@ -76,7 +80,6 @@ const WorkforcePage: React.FC = () => {
     tags: [] as string[]
   });
 
-  useEffect(() => {
     if (user) {
       loadData();
       const timeout = setTimeout(() => setLoading(false), 8000);
@@ -84,11 +87,9 @@ const WorkforcePage: React.FC = () => {
     }
   }, [user, loadData]);
 
-  useEffect(() => {
     filterJobs();
   }, [jobs, searchTerm, selectedStatus, selectedPriority, filterJobs]);
 
-  const loadData = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -114,7 +115,6 @@ const WorkforcePage: React.FC = () => {
     }
   }, [user]);
 
-  const filterJobs = useCallback(() => {
     let filtered = jobs;
 
     if (searchTerm) {

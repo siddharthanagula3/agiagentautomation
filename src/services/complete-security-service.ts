@@ -34,7 +34,7 @@ export interface AuditLog {
   action: string;
   resource: string;
   resourceId: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   ipAddress: string;
   userAgent: string;
   timestamp: string;
@@ -57,7 +57,7 @@ export interface SecurityViolation {
   type: 'rate_limit' | 'unauthorized_access' | 'invalid_input' | 'suspicious_activity';
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   timestamp: string;
   resolved: boolean;
 }
@@ -144,7 +144,7 @@ class CompleteSecurityService {
         data: hasPermission,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -169,7 +169,7 @@ class CompleteSecurityService {
         data: data as AccessControl,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -213,7 +213,7 @@ class CompleteSecurityService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -307,7 +307,7 @@ class CompleteSecurityService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -334,8 +334,8 @@ class CompleteSecurityService {
 
   // Validate input
   validateInput(
-    data: any,
-    schema: Record<string, any>
+    data: unknown,
+    schema: Record<string, unknown>
   ): ValidationResult {
     const errors: ValidationError[] = [];
 
@@ -424,7 +424,7 @@ class CompleteSecurityService {
   }
 
   // Sanitize input
-  sanitizeInput(data: any): any {
+  sanitizeInput(data: unknown): unknown {
     if (typeof data === 'string') {
       // Remove potentially dangerous characters
       return data
@@ -438,7 +438,7 @@ class CompleteSecurityService {
     }
 
     if (typeof data === 'object' && data !== null) {
-      const sanitized: any = {};
+      const sanitized: unknown = {};
       for (const [key, value] of Object.entries(data)) {
         sanitized[key] = this.sanitizeInput(value);
       }
@@ -524,7 +524,7 @@ class CompleteSecurityService {
         data: true,
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -619,7 +619,7 @@ class CompleteSecurityService {
         data: data as AuditLog[],
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,
@@ -693,7 +693,7 @@ class CompleteSecurityService {
         data: data as SecurityViolation[],
         timestamp: new Date().toISOString()
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         error: error.message,

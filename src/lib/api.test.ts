@@ -12,10 +12,10 @@ global.crypto = {
 
 describe('APIClient', () => {
   let apiClient: APIClient
-  let mockFetch: jest.MockedFunction<typeof fetch>
+  let mockFetch: jest.Mocked(...args: unknown[]) => unknown<typeof fetch>
 
   beforeEach(() => {
-    mockFetch = global.fetch as jest.MockedFunction<typeof fetch>
+    mockFetch = global.fetch as jest.Mocked(...args: unknown[]) => unknown<typeof fetch>
     mockFetch.mockClear()
 
     apiClient = new APIClient({
@@ -146,7 +146,7 @@ describe('APIClient', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:3001/test?page=1&limit=10',
-        expect.any(Object)
+        expect.unknown(Object)
       )
     })
 
@@ -256,7 +256,7 @@ describe('APIClient', () => {
 
       expect(interceptedConfig).not.toBeNull()
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.any(String),
+        expect.unknown(String),
         expect.objectContaining({
           headers: expect.objectContaining({
             'X-Custom': 'test',

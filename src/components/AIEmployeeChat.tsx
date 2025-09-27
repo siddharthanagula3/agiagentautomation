@@ -43,8 +43,8 @@ interface ChatMessage {
 
 interface MCPToolCall {
   tool: string;
-  parameters: Record<string, any>;
-  result?: any;
+  parameters: Record<string, unknown>;
+  result?: unknown;
   error?: string;
   status: 'pending' | 'executing' | 'completed' | 'failed';
 }
@@ -59,7 +59,7 @@ const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({ employeeId }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [availableTools, setAvailableTools] = useState<any[]>([]);
+  const [availableTools, setAvailableTools] = useState<unknown[]>([]);
   const [showTools, setShowTools] = useState(false);
   const [currentToolCalls, setCurrentToolCalls] = useState<MCPToolCall[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -244,7 +244,7 @@ const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({ employeeId }) => {
         results.push(toolCall);
         
         setCurrentToolCalls(prev => prev.filter(tc => tc.tool !== toolCall.tool));
-      } catch (error: any) {
+      } catch (error: unknown) {
         toolCall.error = error.message;
         toolCall.status = 'failed';
         results.push(toolCall);
@@ -274,7 +274,7 @@ const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({ employeeId }) => {
       }
     });
     
-    response += `Based on the results, I can help you implement this solution. Would you like me to explain any specific part or help you with the next steps?`;
+    response += `Based on the results, I can help you implement this solution. Would you like me to explain unknown specific part or help you with the next steps?`;
     
     return response;
   };
@@ -284,11 +284,11 @@ const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({ employeeId }) => {
     // Simulate AI processing
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    return `I understand your request. As your ${employee?.role}, I can help you with this. Let me know if you'd like me to use any specific tools or if you need more details about how I can assist you.`;
+    return `I understand your request. As your ${employee?.role}, I can help you with this. Let me know if you'd like me to use unknown specific tools or if you need more details about how I can assist you.`;
   };
 
   // Handle tool selection
-  const handleToolSelect = (tool: any) => {
+  const handleToolSelect = (tool: unknown) => {
     setInputMessage(prev => prev + `\n\nPlease use the ${tool.name} tool with appropriate parameters.`);
     setShowTools(false);
   };

@@ -5,8 +5,10 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import LoadingSpinner from '../ui/loading-spinner';
 
-const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState({
+  const [error, setError] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+const RegisterForm: React.FC = () => {
     email: '',
     password: '',
     confirmPassword: '',
@@ -14,8 +16,6 @@ const RegisterForm: React.FC = () => {
     lastName: '',
     company: ''
   });
-  const [error, setError] = useState('');
-  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
 
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();

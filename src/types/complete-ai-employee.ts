@@ -154,7 +154,7 @@ export interface ToolParameter {
   type: 'string' | 'number' | 'boolean' | 'array' | 'object';
   description: string;
   required: boolean;
-  defaultValue?: any;
+  defaultValue?: unknown;
   validation?: ParameterValidation;
 }
 
@@ -163,7 +163,7 @@ export interface ParameterValidation {
   max?: number;
   pattern?: string;
   enum?: string[];
-  custom?: (value: any) => boolean;
+  custom?: (value: unknown) => boolean;
 }
 
 export interface ToolConfig {
@@ -220,14 +220,14 @@ export interface WorkflowConfig {
 
 export interface WorkflowTrigger {
   type: 'manual' | 'scheduled' | 'event' | 'webhook';
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 export interface WorkflowStep {
   id: string;
   name: string;
   type: 'tool' | 'condition' | 'loop' | 'delay';
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   nextSteps: string[];
 }
 
@@ -267,7 +267,7 @@ export interface CostMetrics {
 export interface DiscountConfig {
   type: 'volume' | 'loyalty' | 'promotional';
   percentage: number;
-  conditions: Record<string, any>;
+  conditions: Record<string, unknown>;
 }
 
 export interface TaxConfig {
@@ -398,9 +398,9 @@ export interface ToolExecution {
   mcpToolId?: string;
   employeeId: string;
   jobId?: string;
-  parameters: Record<string, any>;
-  result?: any;
-  context?: Record<string, any>;
+  parameters: Record<string, unknown>;
+  result?: unknown;
+  context?: Record<string, unknown>;
   executedAt: string;
   success: boolean;
   errorMessage?: string;
@@ -429,8 +429,8 @@ export interface MessageMetadata {
 
 export interface ToolCall {
   tool: string;
-  parameters: Record<string, any>;
-  result?: any;
+  parameters: Record<string, unknown>;
+  result?: unknown;
   error?: string;
   status: 'pending' | 'executing' | 'completed' | 'failed';
   executionTime?: number;
@@ -469,7 +469,7 @@ export interface EmployeeTrainingRecord {
   startedAt: string;
   completedAt?: string;
   status: TrainingStatus;
-  performanceImprovement: Record<string, any>;
+  performanceImprovement: Record<string, unknown>;
 }
 
 export interface TrainingData {
@@ -523,7 +523,7 @@ export interface MCPTool {
   description: string;
   inputSchema: {
     type: string;
-    properties: Record<string, any>;
+    properties: Record<string, unknown>;
     required: string[];
   };
 }
@@ -532,26 +532,26 @@ export interface MCPRequest {
   jsonrpc: '2.0';
   id: string;
   method: string;
-  params?: any;
+  params?: unknown;
 }
 
 export interface MCPResponse {
   jsonrpc: '2.0';
   id: string;
-  result?: any;
+  result?: unknown;
   error?: {
     code: number;
     message: string;
-    data?: any;
+    data?: unknown;
   };
 }
 
 export interface MCPToolResult {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
   executionTime: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // System Prompt
@@ -612,7 +612,7 @@ export interface EmployeeReport {
   id: string;
   employeeId: string;
   reportType: 'performance' | 'usage' | 'financial' | 'custom';
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   generatedAt: string;
   period: {
     start: string;
@@ -628,7 +628,7 @@ export interface EmployeeNotification {
   type: 'assignment' | 'completion' | 'error' | 'maintenance' | 'payment';
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   isRead: boolean;
   createdAt: string;
 }
@@ -637,7 +637,7 @@ export interface EmployeeNotification {
 export interface EmployeeError {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   timestamp: string;
   employeeId?: string;
   userId?: string;
@@ -664,14 +664,14 @@ export interface PaginatedResponse<T> {
 export interface EmployeeEvent {
   type: 'employee_updated' | 'assignment_created' | 'tool_executed' | 'message_sent' | 'performance_updated';
   employeeId: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   timestamp: string;
 }
 
 export interface RealtimeSubscription {
   id: string;
   event: string;
-  callback: (data: any) => void;
+  callback: (data: unknown) => void;
   isActive: boolean;
 }
 
@@ -698,7 +698,7 @@ export interface EmployeeSystemConfig {
 // Validation Schemas
 export interface ValidationSchema {
   type: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   required: string[];
   additionalProperties: boolean;
 }

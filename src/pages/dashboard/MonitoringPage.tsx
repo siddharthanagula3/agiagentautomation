@@ -81,6 +81,18 @@ interface Alert {
   resolvedAt?: string;
 }
 
+  const [metrics, setMetrics] = useState<SystemMetric[]>([]);
+  const [services, setServices] = useState<ServiceHealth[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [severityFilter, setSeverityFilter] = useState('');
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [refreshInterval, setRefreshInterval] = useState(5000); // 5 seconds
+  useEffect(() => {
+  useEffect(() => {
 const MonitoringPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -95,24 +107,12 @@ const MonitoringPage: React.FC = () => {
     );
   }
   
-  const [metrics, setMetrics] = useState<SystemMetric[]>([]);
-  const [services, setServices] = useState<ServiceHealth[]>([]);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [severityFilter, setSeverityFilter] = useState('');
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState(5000); // 5 seconds
 
-  useEffect(() => {
     if (user) {
       loadMonitoringData();
     }
   }, [user]);
 
-  useEffect(() => {
     if (autoRefresh && user) {
       const interval = setInterval(() => {
         loadMonitoringData(true); // silent refresh

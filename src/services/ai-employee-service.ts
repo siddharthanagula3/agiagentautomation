@@ -54,7 +54,7 @@ class AIEmployeeService {
       
       if (error) throw error;
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -70,7 +70,7 @@ class AIEmployeeService {
       
       if (error) throw error;
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -90,7 +90,7 @@ class AIEmployeeService {
       
       if (error) throw error;
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -110,7 +110,7 @@ class AIEmployeeService {
       
       if (error) throw error;
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -125,7 +125,7 @@ class AIEmployeeService {
       
       if (error) throw error;
       return { data: true, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -180,7 +180,7 @@ class AIEmployeeService {
       }
 
       return { data: filteredEmployees, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -219,7 +219,7 @@ class AIEmployeeService {
       await this.updateEmployee(employeeId, { status: 'working' });
 
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -235,13 +235,13 @@ class AIEmployeeService {
       
       if (error) throw error;
       return { data: data?.performance, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
 
   // Update employee performance
-  async updateEmployeePerformance(employeeId: string, performance: any) {
+  async updateEmployeePerformance(employeeId: string, performance: unknown) {
     try {
       const { data, error } = await supabase
         .from('ai_employees')
@@ -255,7 +255,7 @@ class AIEmployeeService {
       
       if (error) throw error;
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -282,7 +282,7 @@ class AIEmployeeService {
       
       if (error) throw error;
       return { data: data?.tools || [], error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -302,7 +302,7 @@ class AIEmployeeService {
       
       if (error) throw error;
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -318,7 +318,7 @@ class AIEmployeeService {
       
       if (error) throw error;
       return { data: data?.workflows || [], error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -338,7 +338,7 @@ class AIEmployeeService {
       
       if (error) throw error;
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -370,7 +370,7 @@ class AIEmployeeService {
       });
 
       return { data: matchedEmployees, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -386,7 +386,7 @@ class AIEmployeeService {
       
       if (error) throw error;
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -417,19 +417,19 @@ class AIEmployeeService {
       };
 
       return { data: stats, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
 
-  private groupByCategory(employees: any[]) {
+  private groupByCategory(employees: unknown[]) {
     return employees.reduce((acc, emp) => {
       acc[emp.category] = (acc[emp.category] || 0) + 1;
       return acc;
     }, {});
   }
 
-  private groupByLevel(employees: any[]) {
+  private groupByLevel(employees: unknown[]) {
     return employees.reduce((acc, emp) => {
       acc[emp.level] = (acc[emp.level] || 0) + 1;
       return acc;

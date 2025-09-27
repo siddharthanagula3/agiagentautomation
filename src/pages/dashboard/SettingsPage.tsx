@@ -21,10 +21,15 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/auth-hooks';
 
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<unknown[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [settings, setSettings] = useState({
+  const [apiKeys, setApiKeys] = useState([
+  const [webhooks, setWebhooks] = useState([
 const SettingsPage: React.FC = () => {
   const { user } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<any[]>([]);
   
   if (!user) {
     return (
@@ -37,9 +42,6 @@ const SettingsPage: React.FC = () => {
     );
   }
   
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState({
     general: {
       theme: 'system',
       language: 'en',
@@ -65,7 +67,6 @@ const SettingsPage: React.FC = () => {
     }
   });
 
-  const [apiKeys, setApiKeys] = useState([
     {
       id: '1',
       name: 'Production API Key',
@@ -84,7 +85,6 @@ const SettingsPage: React.FC = () => {
     }
   ]);
 
-  const [webhooks, setWebhooks] = useState([
     {
       id: '1',
       url: 'https://api.example.com/webhook',

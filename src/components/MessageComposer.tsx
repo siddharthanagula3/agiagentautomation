@@ -255,7 +255,7 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
       return;
     }
 
-    // Clear any existing errors
+    // Clear unknown existing errors
     setErrors([]);
 
     // Validate inputs

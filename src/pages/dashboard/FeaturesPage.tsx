@@ -22,13 +22,13 @@ import {
   Headphones
 } from 'lucide-react';
 
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<unknown[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
 const DashboardFeaturesPage: React.FC = () => {
   const { user } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
     // TODO: Replace with real data fetching
     setLoading(false);
   }, []);
@@ -36,7 +36,7 @@ const DashboardFeaturesPage: React.FC = () => {
     {
       icon: <Users className="h-6 w-6" />,
       title: "AI Employee Management",
-      description: "Hire, manage, and scale your AI workforce with specialized agents for any task.",
+      description: "Hire, manage, and scale your AI workforce with specialized agents for unknown task.",
       status: "Active",
       usage: "12 employees hired"
     },

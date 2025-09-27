@@ -28,12 +28,17 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/auth-hooks';
 
-const ProfilePage: React.FC = () => {
-  const { user, updateProfile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [profileData, setProfileData] = useState({
+  const [stats, setStats] = useState({
+  const [recentActivity, setRecentActivity] = useState([
+  const [notificationSettings, setNotificationSettings] = useState({
+  const [securitySettings, setSecuritySettings] = useState({
+  useEffect(() => {
+const ProfilePage: React.FC = () => {
+  const { user, updateProfile } = useAuth();
     name: user?.name || '',
     email: user?.email || '',
     company: user?.company || '',
@@ -42,14 +47,12 @@ const ProfilePage: React.FC = () => {
     bio: ''
   });
 
-  const [stats, setStats] = useState({
     totalJobs: 0,
     completedJobs: 0,
     activeEmployees: 0,
     totalSpent: 0
   });
 
-  const [recentActivity, setRecentActivity] = useState([
     {
       id: '1',
       action: 'Created new job',
@@ -80,20 +83,17 @@ const ProfilePage: React.FC = () => {
     }
   ]);
 
-  const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: true,
     pushNotifications: true,
     smsNotifications: false,
     marketingEmails: true
   });
 
-  const [securitySettings, setSecuritySettings] = useState({
     twoFactorAuth: false,
     loginAlerts: true,
     sessionTimeout: 30
   });
 
-  useEffect(() => {
     if (user) {
       setProfileData({
         name: user.name || '',

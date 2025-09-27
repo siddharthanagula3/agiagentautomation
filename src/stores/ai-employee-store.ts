@@ -30,19 +30,19 @@ interface AIEmployeeState {
   };
 
   // Actions
-  loadEmployees: (filters?: any) => Promise<void>;
+  loadEmployees: (filters?: unknown) => Promise<void>;
   loadEmployee: (id: string) => Promise<void>;
   createEmployee: (employee: Omit<AIEmployee, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateEmployee: (id: string, updates: Partial<AIEmployee>) => Promise<void>;
   deleteEmployee: (id: string) => Promise<void>;
   assignEmployeeToJob: (employeeId: string, jobId: string, priority?: number) => Promise<void>;
   updateEmployeeStatus: (employeeId: string, status: EmployeeStatus) => Promise<void>;
-  updateEmployeePerformance: (employeeId: string, performance: any) => Promise<void>;
+  updateEmployeePerformance: (employeeId: string, performance: unknown) => Promise<void>;
   loadEmployeeTools: (employeeId: string) => Promise<void>;
   loadEmployeeWorkflows: (employeeId: string) => Promise<void>;
-  executeTool: (toolId: string, parameters: Record<string, any>, context?: any) => Promise<void>;
+  executeTool: (toolId: string, parameters: Record<string, unknown>, context?: unknown) => Promise<void>;
   searchEmployees: (query: string) => Promise<void>;
-  setFilters: (filters: any) => void;
+  setFilters: (filters: unknown) => void;
   clearFilters: () => void;
   setSelectedEmployee: (employee: AIEmployee | null) => void;
   refreshData: () => Promise<void>;
@@ -83,7 +83,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
         isLoading: false, 
         lastUpdateAt: new Date() 
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ error: error.message, isLoading: false });
     }
   },
@@ -108,7 +108,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
           lastUpdateAt: new Date()
         }));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ error: error.message, isLoading: false });
     }
   },
@@ -132,7 +132,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
           lastUpdateAt: new Date()
         }));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ error: error.message, isLoading: false });
     }
   },
@@ -157,7 +157,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
           lastUpdateAt: new Date()
         }));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ error: error.message, isLoading: false });
     }
   },
@@ -185,7 +185,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
           lastUpdateAt: new Date()
         };
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ error: error.message, isLoading: false });
     }
   },
@@ -209,7 +209,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
           lastUpdateAt: new Date()
         }));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ error: error.message, isLoading: false });
     }
   },
@@ -218,16 +218,16 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   updateEmployeeStatus: async (employeeId: string, status: EmployeeStatus) => {
     try {
       await get().updateEmployee(employeeId, { status });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ error: error.message });
     }
   },
 
   // Update employee performance
-  updateEmployeePerformance: async (employeeId: string, performance: any) => {
+  updateEmployeePerformance: async (employeeId: string, performance: unknown) => {
     try {
       await get().updateEmployee(employeeId, { performance });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ error: error.message });
     }
   },
@@ -253,7 +253,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
           lastUpdateAt: new Date()
         }));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ error: error.message });
     }
   },
@@ -279,13 +279,13 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
           lastUpdateAt: new Date()
         }));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ error: error.message });
     }
   },
 
   // Execute tool
-  executeTool: async (toolId: string, parameters: Record<string, any>, context?: any) => {
+  executeTool: async (toolId: string, parameters: Record<string, unknown>, context?: unknown) => {
     set({ isLoading: true, error: null });
     
     try {
@@ -301,7 +301,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
       // You might want to update the employee's performance based on tool execution
       // This would depend on your specific requirements
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ error: error.message, isLoading: false });
     }
   },
@@ -328,7 +328,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
         isLoading: false, 
         lastUpdateAt: new Date() 
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ error: error.message, isLoading: false });
     }
   },

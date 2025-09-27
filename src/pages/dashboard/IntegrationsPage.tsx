@@ -51,7 +51,7 @@ interface Integration {
   icon: string;
   apiKey?: string;
   webhookUrl?: string;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   permissions: string[];
   lastSync?: string;
   syncFrequency?: 'realtime' | 'hourly' | 'daily' | 'weekly' | 'manual';
@@ -81,6 +81,18 @@ interface IntegrationTemplate {
   features: string[];
 }
 
+  const [integrations, setIntegrations] = useState<Integration[]>([]);
+  const [filteredIntegrations, setFilteredIntegrations] = useState<Integration[]>([]);
+  const [templates, setTemplates] = useState<IntegrationTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [showApiKeys, setShowApiKeys] = useState<Record<string, boolean>>({});
+  const [isAddingIntegration, setIsAddingIntegration] = useState(false);
+  useEffect(() => {
+  useEffect(() => {
 const IntegrationsPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -95,24 +107,12 @@ const IntegrationsPage: React.FC = () => {
     );
   }
   
-  const [integrations, setIntegrations] = useState<Integration[]>([]);
-  const [filteredIntegrations, setFilteredIntegrations] = useState<Integration[]>([]);
-  const [templates, setTemplates] = useState<IntegrationTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [showApiKeys, setShowApiKeys] = useState<Record<string, boolean>>({});
-  const [isAddingIntegration, setIsAddingIntegration] = useState(false);
 
-  useEffect(() => {
     if (user) {
       loadIntegrations();
     }
   }, [user]);
 
-  useEffect(() => {
     filterIntegrations();
   }, [integrations, searchTerm, categoryFilter, statusFilter]);
 

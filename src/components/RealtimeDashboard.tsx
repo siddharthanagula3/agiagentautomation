@@ -40,8 +40,14 @@ interface LiveJob {
   estimatedCompletion: Date;
 }
 
-const RealtimeDashboard: React.FC = () => {
   const [stats, setStats] = useState<RealtimeStats>({
+  const [liveJobs, setLiveJobs] = useState<LiveJob[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [lastPing, setLastPing] = useState<Date>(new Date());
+  useEffect(() => {
+  useEffect(() => {
+  useEffect(() => {
+const RealtimeDashboard: React.FC = () => {
     activeJobs: 0,
     completedJobs: 0,
     totalWorkers: 0,
@@ -50,9 +56,6 @@ const RealtimeDashboard: React.FC = () => {
     lastUpdate: new Date()
   });
 
-  const [liveJobs, setLiveJobs] = useState<LiveJob[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
-  const [lastPing, setLastPing] = useState<Date>(new Date());
 
   const { jobs, workers, isLoading, lastUpdateAt } = useWorkforceStore();
   const { isConnected: realtimeConnected, channels } = useRealtime({
@@ -84,7 +87,6 @@ const RealtimeDashboard: React.FC = () => {
   });
 
   // Update stats from store data
-  useEffect(() => {
     const activeJobs = Object.values(jobs).filter(job => job.status === 'running').length;
     const completedJobs = Object.values(jobs).filter(job => job.status === 'completed').length;
     const totalWorkers = Object.keys(workers).length;
@@ -105,7 +107,7 @@ const RealtimeDashboard: React.FC = () => {
       .map(job => ({
         id: job.id,
         title: job.title,
-        status: job.status as any,
+        status: job.status as unknown,
         progress: job.progress,
         assignedWorker: job.assignedWorkers[0]?.name || 'Unassigned',
         startedAt: new Date(job.createdAt),
@@ -116,7 +118,6 @@ const RealtimeDashboard: React.FC = () => {
   }, [jobs, workers, lastUpdateAt]);
 
   // Connection status
-  useEffect(() => {
     setIsConnected(realtimeConnected);
     if (realtimeConnected) {
       setLastPing(new Date());
@@ -124,7 +125,6 @@ const RealtimeDashboard: React.FC = () => {
   }, [realtimeConnected]);
 
   // Auto-refresh ping
-  useEffect(() => {
     const interval = setInterval(() => {
       if (isConnected) {
         setLastPing(new Date());

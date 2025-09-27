@@ -25,17 +25,18 @@ import type { Database } from '../../integrations/supabase/types';
 type Subscription = Database['public']['Tables']['subscriptions']['Row'];
 type Billing = Database['public']['Tables']['billing']['Row'];
 
-const BillingPage: React.FC = () => {
-  const { user } = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [billingStats, setBillingStats] = useState<BillingStats | null>(null);
   const [billingHistory, setBillingHistory] = useState<Billing[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [availablePlans, setAvailablePlans] = useState<SubscriptionPlan[]>([]);
-
   useEffect(() => {
+  const loadBillingData = useCallback(async () => {
+const BillingPage: React.FC = () => {
+  const { user } = useAuth();
+
     if (user) {
       loadBillingData();
       const timeout = setTimeout(() => setLoading(false), 8000);
@@ -45,7 +46,6 @@ const BillingPage: React.FC = () => {
     }
   }, [user, loadBillingData]);
 
-  const loadBillingData = useCallback(async () => {
     if (!user) return;
 
     try {

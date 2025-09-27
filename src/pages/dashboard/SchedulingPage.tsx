@@ -65,6 +65,19 @@ interface Reminder {
   sent: boolean;
 }
 
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
+  const [newSchedule, setNewSchedule] = useState({
+  useEffect(() => {
+  useEffect(() => {
 const SchedulingPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -79,18 +92,7 @@ const SchedulingPage: React.FC = () => {
     );
   }
   
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
   
-  const [newSchedule, setNewSchedule] = useState({
     title: '',
     description: '',
     type: 'meeting' as const,
@@ -104,13 +106,11 @@ const SchedulingPage: React.FC = () => {
     tags: ''
   });
 
-  useEffect(() => {
     if (user) {
       loadSchedules();
     }
   }, [user]);
 
-  useEffect(() => {
     filterSchedules();
   }, [schedules, searchTerm, typeFilter, statusFilter, dateFilter]);
 
@@ -615,7 +615,7 @@ const SchedulingPage: React.FC = () => {
                   <select
                     id="type"
                     value={newSchedule.type}
-                    onChange={(e) => setNewSchedule({...newSchedule, type: e.target.value as any})}
+                    onChange={(e) => setNewSchedule({...newSchedule, type: e.target.value as unknown})}
                     className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="meeting">Meeting</option>
@@ -630,7 +630,7 @@ const SchedulingPage: React.FC = () => {
                   <select
                     id="priority"
                     value={newSchedule.priority}
-                    onChange={(e) => setNewSchedule({...newSchedule, priority: e.target.value as any})}
+                    onChange={(e) => setNewSchedule({...newSchedule, priority: e.target.value as unknown})}
                     className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="low">Low</option>

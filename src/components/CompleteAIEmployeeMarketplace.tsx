@@ -195,7 +195,7 @@ const CompleteAIEmployeeMarketplace: React.FC<CompleteAIEmployeeMarketplaceProps
 
     // Sort employees
     filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
+      let aValue: unknown, bValue: unknown;
       
       switch (sortBy) {
         case 'name':
@@ -477,7 +477,7 @@ const CompleteAIEmployeeMarketplace: React.FC<CompleteAIEmployeeMarketplaceProps
               />
             </div>
           </div>
-          <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+          <Select value={sortBy} onValueChange={(value: unknown) => setSortBy(value)}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
@@ -511,7 +511,7 @@ const CompleteAIEmployeeMarketplace: React.FC<CompleteAIEmployeeMarketplaceProps
               {/* Category Filter */}
               <div>
                 <label className="text-sm font-medium mb-2 block">Category</label>
-                <Select value={selectedCategory} onValueChange={(value: any) => setSelectedCategory(value)}>
+                <Select value={selectedCategory} onValueChange={(value: unknown) => setSelectedCategory(value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>

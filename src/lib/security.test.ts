@@ -25,7 +25,7 @@ describe('SecurityManager', () => {
       const maliciousHtml = '<script>alert("xss")</script><p>Safe content</p>'
       const result = securityManager.sanitizeHtml(maliciousHtml)
 
-      expect(mockSanitize).toHaveBeenCalledWith(maliciousHtml, expect.any(Object))
+      expect(mockSanitize).toHaveBeenCalledWith(maliciousHtml, expect.unknown(Object))
       expect(result).not.toContain('<script>')
       expect(result).toContain('<p>Safe content</p>')
     })

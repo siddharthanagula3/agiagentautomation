@@ -41,13 +41,13 @@ const ChatGPTInput: React.FC<ChatGPTInputProps> = ({
     }
   };
 
+  useEffect(() => {
   const handleVoiceRecord = () => {
     setIsRecording(!isRecording);
     // Voice recording logic would go here
   };
 
   // Auto-resize textarea
-  useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;

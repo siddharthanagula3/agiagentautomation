@@ -32,6 +32,15 @@ import type { Database } from '../../integrations/supabase/types';
 
 type Job = Database['public']['Tables']['jobs']['Row'];
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [jobStats, setJobStats] = useState({
+  useEffect(() => {
+  useEffect(() => {
 const JobsPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -46,13 +55,6 @@ const JobsPage: React.FC = () => {
     );
   }
   
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [jobStats, setJobStats] = useState({
     total: 0,
     completed: 0,
     running: 0,
@@ -60,13 +62,11 @@ const JobsPage: React.FC = () => {
     queued: 0
   });
 
-  useEffect(() => {
     if (user) {
       loadJobs();
     }
   }, [user]);
 
-  useEffect(() => {
     filterJobs();
   }, [jobs, searchTerm, selectedStatus, filterJobs]);
 

@@ -30,21 +30,23 @@ type Job = Database['public']['Tables']['jobs']['Row'];
 type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
 
 
-const Dashboard: React.FC = () => {
-  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [stats, setStats] = useState({
+  const [recentJobs, setRecentJobs] = useState<Job[]>([]);
+  const [aiEmployees, setAiEmployees] = useState<AIAgent[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const loadDashboardData = useCallback(async () => {
+  useEffect(() => {
+  useEffect(() => {
+const Dashboard: React.FC = () => {
+  const { user } = useAuth();
     aiEmployees: 0,
     activeJobs: 0,
     tokensUsed: 0,
     totalCost: 0
   });
-  const [recentJobs, setRecentJobs] = useState<Job[]>([]);
-  const [aiEmployees, setAiEmployees] = useState<AIAgent[]>([]);
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
 
-  const loadDashboardData = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -91,7 +93,7 @@ const Dashboard: React.FC = () => {
       setAiEmployees(topAgents);
       setAnalytics(analyticsData);
 
-      // Log any service errors for debugging (but don't show to user)
+      // Log unknown service errors for debugging (but don't show to user)
       [agentStatsResult, jobStatsResult, recentJobsResult, topAgentsResult, analyticsResult, billingStatsResult]
         .forEach((result, index) => {
           if (result.status === 'rejected') {
@@ -107,7 +109,6 @@ const Dashboard: React.FC = () => {
     }
   }, [user]);
 
-  useEffect(() => {
     if (user) {
       loadDashboardData();
     } else {
@@ -116,7 +117,6 @@ const Dashboard: React.FC = () => {
   }, [user, loadDashboardData]);
 
   // Initialize real-time updates when user is available
-  useEffect(() => {
     if (user?.id) {
       // Initialize real-time subscriptions
       const initializeRealtime = async () => {

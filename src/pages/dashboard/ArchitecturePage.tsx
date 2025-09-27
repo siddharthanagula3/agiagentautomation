@@ -52,6 +52,16 @@ interface ComponentMetrics {
   memoryUsage: number; // percentage
 }
 
+  const [components, setComponents] = useState<Component[]>([]);
+  const [filteredComponents, setFilteredComponents] = useState<Component[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedComponent, setSelectedComponent] = useState<Component | null>(null);
+  useEffect(() => {
+  useEffect(() => {
 const ArchitecturePage: React.FC = () => {
   const { user } = useAuth();
   
@@ -66,22 +76,12 @@ const ArchitecturePage: React.FC = () => {
     );
   }
   
-  const [components, setComponents] = useState<Component[]>([]);
-  const [filteredComponents, setFilteredComponents] = useState<Component[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [selectedComponent, setSelectedComponent] = useState<Component | null>(null);
 
-  useEffect(() => {
     if (user) {
       loadComponents();
     }
   }, [user]);
 
-  useEffect(() => {
     filterComponents();
   }, [components, searchTerm, typeFilter, statusFilter]);
 

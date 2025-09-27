@@ -72,7 +72,7 @@ export interface ToolDefinition {
   parameters: ToolParameter[];
   invocationPattern: string;
   integrationType: IntegrationType;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   isActive: boolean;
 }
 
@@ -106,7 +106,7 @@ export interface ToolParameter {
   type: 'string' | 'number' | 'boolean' | 'object' | 'array';
   required: boolean;
   description: string;
-  defaultValue?: any;
+  defaultValue?: unknown;
 }
 
 export interface WorkflowDefinition {
@@ -122,7 +122,7 @@ export interface WorkflowDefinition {
 export interface WorkflowTrigger {
   type: 'manual' | 'scheduled' | 'event' | 'webhook';
   condition: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 export interface WorkflowStep {
@@ -130,7 +130,7 @@ export interface WorkflowStep {
   name: string;
   type: string;
   toolId: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   nextSteps: string[];
 }
 

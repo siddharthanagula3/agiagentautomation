@@ -60,6 +60,18 @@ interface BackupSchedule {
   lastRun: string | null;
 }
 
+  const [backups, setBackups] = useState<Backup[]>([]);
+  const [filteredBackups, setFilteredBackups] = useState<Backup[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedBackup, setSelectedBackup] = useState<Backup | null>(null);
+  const [isCreatingBackup, setIsCreatingBackup] = useState(false);
+  const [activeSchedules, setActiveSchedules] = useState(3);
+  useEffect(() => {
+  useEffect(() => {
 const BackupsPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -74,24 +86,12 @@ const BackupsPage: React.FC = () => {
     );
   }
   
-  const [backups, setBackups] = useState<Backup[]>([]);
-  const [filteredBackups, setFilteredBackups] = useState<Backup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [selectedBackup, setSelectedBackup] = useState<Backup | null>(null);
-  const [isCreatingBackup, setIsCreatingBackup] = useState(false);
-  const [activeSchedules, setActiveSchedules] = useState(3);
 
-  useEffect(() => {
     if (user) {
       loadBackups();
     }
   }, [user]);
 
-  useEffect(() => {
     filterBackups();
   }, [backups, searchTerm, typeFilter, statusFilter]);
 

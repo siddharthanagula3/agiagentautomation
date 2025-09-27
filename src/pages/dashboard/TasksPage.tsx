@@ -45,6 +45,18 @@ interface Task {
   tags: string[];
 }
 
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('');
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [newTask, setNewTask] = useState({
+  useEffect(() => {
+  useEffect(() => {
 const TasksPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -59,17 +71,7 @@ const TasksPage: React.FC = () => {
     );
   }
   
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [priorityFilter, setPriorityFilter] = useState('');
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
   
-  const [newTask, setNewTask] = useState({
     title: '',
     description: '',
     priority: 'medium' as const,
@@ -78,13 +80,11 @@ const TasksPage: React.FC = () => {
     tags: ''
   });
 
-  useEffect(() => {
     if (user) {
       loadTasks();
     }
   }, [user]);
 
-  useEffect(() => {
     filterTasks();
   }, [tasks, searchTerm, statusFilter, priorityFilter]);
 
@@ -493,7 +493,7 @@ const TasksPage: React.FC = () => {
                   <select
                     id="priority"
                     value={newTask.priority}
-                    onChange={(e) => setNewTask({...newTask, priority: e.target.value as any})}
+                    onChange={(e) => setNewTask({...newTask, priority: e.target.value as unknown})}
                     className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="low">Low</option>

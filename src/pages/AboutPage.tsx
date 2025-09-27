@@ -127,7 +127,7 @@ const AboutPage: React.FC = () => {
               </h2>
               <p className="text-lg text-gray-600 mb-6">
                 We believe that every business should have access to world-class AI capabilities. 
-                Our platform makes it possible for companies of any size to hire, manage, and 
+                Our platform makes it possible for companies of unknown size to hire, manage, and 
                 scale AI employees that work 24/7 to grow their business.
               </p>
               <p className="text-lg text-gray-600 mb-8">

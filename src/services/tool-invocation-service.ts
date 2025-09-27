@@ -5,7 +5,7 @@ import type { ToolDefinition, ToolType, IntegrationType } from '../types/ai-empl
 // Handles the execution of tools by AI employees
 class ToolInvocationService {
   private toolRegistry: Map<string, ToolDefinition> = new Map();
-  private integrationHandlers: Map<IntegrationType, Function> = new Map();
+  private integrationHandlers: Map<IntegrationType, (...args: unknown[]) => unknown> = new Map();
 
   constructor() {
     this.initializeIntegrationHandlers();
@@ -68,13 +68,13 @@ class ToolInvocationService {
       
       if (error) throw error;
       return { success: true, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { success: false, error: error.message };
     }
   }
 
   // Execute a tool
-  async executeTool(toolId: string, parameters: Record<string, any>, context?: any) {
+  async executeTool(toolId: string, parameters: Record<string, unknown>, context?: unknown) {
     const tool = this.toolRegistry.get(toolId);
     if (!tool) {
       return { success: false, error: 'Tool not found', result: null };
@@ -104,13 +104,13 @@ class ToolInvocationService {
       await this.logToolExecution(toolId, parameters, result, context);
       
       return { success: true, error: null, result };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { success: false, error: error.message, result: null };
     }
   }
 
   // Validate tool parameters
-  private validateParameters(tool: ToolDefinition, parameters: Record<string, any>) {
+  private validateParameters(tool: ToolDefinition, parameters: Record<string, unknown>) {
     for (const param of tool.parameters) {
       if (param.required && !(param.name in parameters)) {
         return { valid: false, error: `Required parameter '${param.name}' is missing` };
@@ -146,7 +146,7 @@ class ToolInvocationService {
   }
 
   // N8N Workflow Execution
-  private async executeN8NWorkflow(tool: ToolDefinition, parameters: Record<string, any>, context?: any) {
+  private async executeN8NWorkflow(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
     const { n8nWorkflowId, n8nApiKey, n8nBaseUrl } = tool.config;
     
     if (!n8nWorkflowId || !n8nApiKey || !n8nBaseUrl) {
@@ -173,7 +173,7 @@ class ToolInvocationService {
   }
 
   // OpenAI API Execution
-  private async executeOpenAIAPI(tool: ToolDefinition, parameters: Record<string, any>, context?: any) {
+  private async executeOpenAIAPI(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
     const { apiKey, model, temperature, maxTokens } = tool.config;
     
     if (!apiKey) {
@@ -203,7 +203,7 @@ class ToolInvocationService {
   }
 
   // Anthropic API Execution
-  private async executeAnthropicAPI(tool: ToolDefinition, parameters: Record<string, any>, context?: any) {
+  private async executeAnthropicAPI(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
     const { apiKey, model, maxTokens } = tool.config;
     
     if (!apiKey) {
@@ -232,7 +232,7 @@ class ToolInvocationService {
   }
 
   // Cursor Agent Execution
-  private async executeCursorAgent(tool: ToolDefinition, parameters: Record<string, any>, context?: any) {
+  private async executeCursorAgent(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
     // Cursor Agent integration - this would typically involve
     // sending requests to Cursor's API or using their SDK
     const { cursorApiKey, cursorEndpoint } = tool.config;
@@ -261,7 +261,7 @@ class ToolInvocationService {
   }
 
   // Replit Agent Execution
-  private async executeReplitAgent(tool: ToolDefinition, parameters: Record<string, any>, context?: any) {
+  private async executeReplitAgent(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
     // Replit Agent integration
     const { replitApiKey, replitEndpoint } = tool.config;
     
@@ -289,13 +289,13 @@ class ToolInvocationService {
   }
 
   // Claude Code Execution
-  private async executeClaudeCode(tool: ToolDefinition, parameters: Record<string, any>, context?: any) {
+  private async executeClaudeCode(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
     // Claude Code integration - similar to Anthropic but for code-specific tasks
     return this.executeAnthropicAPI(tool, parameters, context);
   }
 
   // Custom API Execution
-  private async executeCustomAPI(tool: ToolDefinition, parameters: Record<string, any>, context?: any) {
+  private async executeCustomAPI(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
     const { apiUrl, apiKey, method = 'POST' } = tool.config;
     
     if (!apiUrl) {
@@ -327,7 +327,7 @@ class ToolInvocationService {
   }
 
   // Webhook Execution
-  private async executeWebhook(tool: ToolDefinition, parameters: Record<string, any>, context?: any) {
+  private async executeWebhook(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
     const { webhookUrl, method = 'POST' } = tool.config;
     
     if (!webhookUrl) {
@@ -353,7 +353,7 @@ class ToolInvocationService {
   }
 
   // Database Operation Execution
-  private async executeDatabaseOperation(tool: ToolDefinition, parameters: Record<string, any>, context?: any) {
+  private async executeDatabaseOperation(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
     const { operation, table, query } = tool.config;
     
     if (!operation) {
@@ -389,7 +389,7 @@ class ToolInvocationService {
   }
 
   // File System Operation Execution
-  private async executeFileSystemOperation(tool: ToolDefinition, parameters: Record<string, any>, context?: any) {
+  private async executeFileSystemOperation(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
     const { operation, path } = tool.config;
     
     if (!operation || !path) {
@@ -402,7 +402,7 @@ class ToolInvocationService {
   }
 
   // Log tool execution
-  private async logToolExecution(toolId: string, parameters: Record<string, any>, result: any, context?: any) {
+  private async logToolExecution(toolId: string, parameters: Record<string, unknown>, result: unknown, context?: unknown) {
     try {
       await supabase.from('tool_executions').insert({
         tool_id: toolId,
@@ -433,7 +433,7 @@ class ToolInvocationService {
       
       if (error) throw error;
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -449,7 +449,7 @@ class ToolInvocationService {
       
       if (error) throw error;
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -466,7 +466,7 @@ class ToolInvocationService {
       
       if (error) throw error;
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -483,7 +483,7 @@ class ToolInvocationService {
       
       if (error) throw error;
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }

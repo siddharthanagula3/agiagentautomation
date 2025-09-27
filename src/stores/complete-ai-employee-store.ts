@@ -58,7 +58,7 @@ interface AIEmployeeState {
   // Tool Execution
   toolExecutions: ToolExecution[];
   availableTools: MCPTool[];
-  currentToolCalls: Record<string, any[]>;
+  currentToolCalls: Record<string, unknown[]>;
   executionHistory: Record<string, ToolExecution[]>;
   
   // Performance and Analytics
@@ -101,7 +101,7 @@ interface AIEmployeeState {
   clearChatMessages: (employeeId: string) => void;
   
   // Tool Execution
-  executeTool: (employeeId: string, toolName: string, parameters: Record<string, any>, userId?: string) => Promise<MCPToolResult>;
+  executeTool: (employeeId: string, toolName: string, parameters: Record<string, unknown>, userId?: string) => Promise<MCPToolResult>;
   loadToolExecutions: (employeeId: string) => Promise<void>;
   clearToolExecutions: (employeeId: string) => void;
   
@@ -111,8 +111,8 @@ interface AIEmployeeState {
   loadAnalytics: () => Promise<void>;
   
   // Training
-  startTraining: (employeeId: string, trainingType: string, trainingData: any) => Promise<void>;
-  completeTraining: (trainingId: string, performance: Record<string, any>) => Promise<void>;
+  startTraining: (employeeId: string, trainingType: string, trainingData: unknown) => Promise<void>;
+  completeTraining: (trainingId: string, performance: Record<string, unknown>) => Promise<void>;
   loadTrainingRecords: (employeeId: string) => Promise<void>;
   
   // Job Assignments
@@ -129,9 +129,9 @@ interface AIEmployeeState {
   setViewMode: (mode: 'grid' | 'list') => void;
   
   // Real-time Subscriptions
-  subscribeToEmployeeUpdates: (employeeId: string, callback: (data: any) => void) => string;
-  subscribeToChatMessages: (employeeId: string, userId: string, callback: (data: any) => void) => string;
-  subscribeToToolExecutions: (employeeId: string, callback: (data: any) => void) => string;
+  subscribeToEmployeeUpdates: (employeeId: string, callback: (data: unknown) => void) => string;
+  subscribeToChatMessages: (employeeId: string, userId: string, callback: (data: unknown) => void) => string;
+  subscribeToToolExecutions: (employeeId: string, callback: (data: unknown) => void) => string;
   unsubscribe: (subscriptionId: string) => void;
   
   // Notifications
@@ -210,7 +210,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to load employees', searchLoading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, searchLoading: false });
           }
         },
@@ -230,7 +230,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to load employee', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -249,7 +249,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to create employee', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -269,7 +269,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to update employee', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -290,7 +290,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to delete employee', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -317,7 +317,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to hire employee', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -336,7 +336,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to load hired employees', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -356,7 +356,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to start chat session', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -380,7 +380,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to end chat session', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -405,7 +405,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
                 }
               });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message });
           }
         },
@@ -424,7 +424,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to load chat messages', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -472,7 +472,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
               error: response.error,
               executionTime: 0
             };
-          } catch (error: any) {
+          } catch (error: unknown) {
             return {
               success: false,
               error: error.message,
@@ -487,7 +487,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           try {
             // This would be implemented in the service
             set({ loading: false });
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -526,7 +526,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to update performance', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -537,7 +537,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           try {
             // This would be implemented in the service
             set({ loading: false });
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -556,7 +556,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to load analytics', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -568,7 +568,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           try {
             // This would be implemented in the service
             set({ loading: false });
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -579,7 +579,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           try {
             // This would be implemented in the service
             set({ loading: false });
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -590,7 +590,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           try {
             // This would be implemented in the service
             set({ loading: false });
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -612,7 +612,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to assign job', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -632,7 +632,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
             } else {
               set({ error: response.error || 'Failed to update assignment', loading: false });
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },
@@ -643,7 +643,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           try {
             // This would be implemented in the service
             set({ loading: false });
-          } catch (error: any) {
+          } catch (error: unknown) {
             set({ error: error.message, loading: false });
           }
         },

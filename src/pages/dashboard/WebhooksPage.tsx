@@ -91,7 +91,7 @@ interface WebhookDelivery {
   createdAt: string;
   deliveredAt?: string;
   error?: string;
-  payload: any;
+  payload: unknown;
 }
 
 interface WebhookEvent {
@@ -100,9 +100,22 @@ interface WebhookEvent {
   description: string;
   category: string;
   isEnabled: boolean;
-  payload: any;
+  payload: unknown;
 }
 
+  const [webhooks, setWebhooks] = useState<Webhook[]>([]);
+  const [filteredWebhooks, setFilteredWebhooks] = useState<Webhook[]>([]);
+  const [events, setEvents] = useState<WebhookEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [environmentFilter, setEnvironmentFilter] = useState('');
+  const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
+  const [isCreatingWebhook, setIsCreatingWebhook] = useState(false);
+  const [selectedWebhook, setSelectedWebhook] = useState<Webhook | null>(null);
+  useEffect(() => {
+  useEffect(() => {
 const WebhooksPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -116,25 +129,12 @@ const WebhooksPage: React.FC = () => {
       </div>
     );
   }
-  const [webhooks, setWebhooks] = useState<Webhook[]>([]);
-  const [filteredWebhooks, setFilteredWebhooks] = useState<Webhook[]>([]);
-  const [events, setEvents] = useState<WebhookEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [environmentFilter, setEnvironmentFilter] = useState('');
-  const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
-  const [isCreatingWebhook, setIsCreatingWebhook] = useState(false);
-  const [selectedWebhook, setSelectedWebhook] = useState<Webhook | null>(null);
 
-  useEffect(() => {
     if (user) {
       loadWebhooks();
     }
   }, [user]);
 
-  useEffect(() => {
     filterWebhooks();
   }, [webhooks, searchTerm, statusFilter, environmentFilter]);
 

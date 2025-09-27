@@ -67,6 +67,20 @@ interface KnowledgeBase {
   updatedAt: string;
 }
 
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase[]>([]);
+  const [filteredTickets, setFilteredTickets] = useState<SupportTicket[]>([]);
+  const [filteredKB, setFilteredKB] = useState<KnowledgeBase[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [activeTab, setActiveTab] = useState('tickets');
+  const [showCreateTicket, setShowCreateTicket] = useState(false);
+  const [newTicket, setNewTicket] = useState({
+  useEffect(() => {
+  useEffect(() => {
 const SupportPage: React.FC = () => {
   const { user } = useAuth();
   
@@ -81,31 +95,17 @@ const SupportPage: React.FC = () => {
     );
   }
   
-  const [tickets, setTickets] = useState<SupportTicket[]>([]);
-  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase[]>([]);
-  const [filteredTickets, setFilteredTickets] = useState<SupportTicket[]>([]);
-  const [filteredKB, setFilteredKB] = useState<KnowledgeBase[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [activeTab, setActiveTab] = useState('tickets');
-  const [showCreateTicket, setShowCreateTicket] = useState(false);
-  const [newTicket, setNewTicket] = useState({
     title: '',
     description: '',
     category: 'general' as const,
     priority: 'medium' as const
   });
 
-  useEffect(() => {
     if (user) {
       loadSupportData();
     }
   }, [user]);
 
-  useEffect(() => {
     filterTickets();
     filterKnowledgeBase();
   }, [tickets, knowledgeBase, searchTerm, statusFilter, categoryFilter]);
@@ -673,7 +673,7 @@ const SupportPage: React.FC = () => {
                   <label className="text-sm font-medium">Category</label>
                   <select
                     value={newTicket.category}
-                    onChange={(e) => setNewTicket({...newTicket, category: e.target.value as any})}
+                    onChange={(e) => setNewTicket({...newTicket, category: e.target.value as unknown})}
                     className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="technical">Technical</option>
@@ -687,7 +687,7 @@ const SupportPage: React.FC = () => {
                   <label className="text-sm font-medium">Priority</label>
                   <select
                     value={newTicket.priority}
-                    onChange={(e) => setNewTicket({...newTicket, priority: e.target.value as any})}
+                    onChange={(e) => setNewTicket({...newTicket, priority: e.target.value as unknown})}
                     className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="low">Low</option>

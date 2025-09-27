@@ -9,7 +9,6 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     cors: true,
     proxy: {
-      // Proxy API calls to backend during development
       '/api': {
         target: process.env.VITE_API_URL || 'http://localhost:8000',
         changeOrigin: true,
@@ -29,79 +28,79 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Build optimization
-    target: 'es2020', // Changed from 'esnext' to 'es2020' for better compatibility
-    minify: 'esbuild',
+    // Build optimization - using more compatible settings
+    target: 'es2015', // More compatible target
+    minify: 'terser', // Use terser instead of esbuild for better compatibility
     cssMinify: true,
-
+    
     // Source maps for debugging
-    sourcemap: mode !== 'production',
-
-    // Rollup options for better code splitting
+    sourcemap: mode === 'development',
+    
+    // Disable code splitting temporarily to avoid initialization issues
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          // Simplified chunking strategy to avoid circular dependencies
-          if (id.includes('node_modules')) {
-            // Keep React ecosystem together
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router') || id.includes('@remix-run')) {
-              return 'react-vendor';
-            }
-            // Keep UI libraries together
-            if (id.includes('@radix-ui') || id.includes('class-variance-authority') || id.includes('clsx') || id.includes('@floating-ui')) {
-              return 'ui-vendor';
-            }
-            // Keep data/state libraries together
-            if (id.includes('@tanstack') || id.includes('zustand') || id.includes('immer')) {
-              return 'state-vendor';
-            }
-            // Separate heavy visualization libraries
-            if (id.includes('recharts') || id.includes('d3') || id.includes('framer-motion')) {
-              return 'viz-vendor';
-            }
-            // Stripe separate
-            if (id.includes('@stripe')) {
-              return 'stripe-vendor';
-            }
-            // Supabase separate
-            if (id.includes('@supabase')) {
-              return 'supabase-vendor';
-            }
-            // Everything else in a general vendor chunk
-            return 'vendor';
-          }
-        },
-        // Asset naming
-        chunkFileNames: 'assets/js/[name].[hash].js',
-        entryFileNames: 'assets/js/[name].[hash].js',
-        assetFileNames: 'assets/[ext]/[name].[hash].[ext]',
+        // Disable manual chunks - let Vite handle it automatically
+        // This prevents initialization order issues
+        manualChunks: undefined,
+        
+        // Use simpler file naming
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        
+        // Ensure proper module format
+        format: 'es',
+        
+        // Prevent code splitting for vendor chunks
+        inlineDynamicImports: false,
       },
     },
-
-    // Performance warnings
-    chunkSizeWarningLimit: 1500,
     
-    // CommonJS optimization
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 2000,
+    
+    // Module preload polyfill
+    modulePreload: {
+      polyfill: true,
+    },
+    
+    // CommonJS handling
     commonjsOptions: {
       transformMixedEsModules: true,
       strictRequires: false,
+      esmExternals: true,
+    },
+    
+    // Terser options for better compatibility
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+        drop_debugger: mode === 'production',
+        pure_funcs: mode === 'production' ? ['console.log'] : [],
+      },
+      mangle: {
+        safari10: true, // Work around Safari 10 bugs
+      },
+      format: {
+        comments: false,
+      },
     },
   },
-
+  
   // Preview server configuration
   preview: {
     port: 8080,
     host: "::",
     cors: true,
   },
-
-  // Environment variables
+  
+  // Define global constants
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
     __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
   },
-
-  // Performance optimizations - expanded list
+  
+  // Optimize dependencies - comprehensive list
   optimizeDeps: {
     include: [
       'react',
@@ -112,6 +111,11 @@ export default defineConfig(({ mode }) => ({
       '@stripe/stripe-js',
       '@stripe/react-stripe-js',
       '@supabase/supabase-js',
+      '@supabase/realtime-js',
+      '@supabase/storage-js',
+      '@supabase/functions-js',
+      '@supabase/postgrest-js',
+      '@supabase/auth-helpers-react',
       'date-fns',
       'framer-motion',
       'recharts',
@@ -125,15 +129,28 @@ export default defineConfig(({ mode }) => ({
       'react-hook-form',
       '@hookform/resolvers',
       'zod',
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-dropdown-menu',
-      '@radix-ui/react-slot',
-      '@radix-ui/react-toast',
-      '@radix-ui/react-tooltip',
+      'react-day-picker',
+      'cmdk',
+      'vaul',
+      'embla-carousel-react',
+      'input-otp',
+      'react-resizable-panels',
+      'next-themes'
     ],
-    exclude: ['@sentry/react'], // Exclude Sentry to prevent bundling issues
+    exclude: [
+      '@sentry/react' // Exclude Sentry to prevent issues
+    ],
     esbuildOptions: {
-      target: 'es2020',
+      target: 'es2015', // Match build target
+      keepNames: true, // Preserve function names
     },
+    force: true, // Force re-optimization
+  },
+  
+  // ESBuild specific options
+  esbuild: {
+    legalComments: 'none',
+    target: 'es2015',
+    keepNames: true, // Important for debugging
   },
 }));

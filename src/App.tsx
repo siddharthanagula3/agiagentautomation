@@ -12,81 +12,13 @@ import RealtimeNotification from './components/RealtimeNotification';
 import { AdminRoute } from './components/auth/AdminRoute';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
-// Loading fallback component with timeout
+// Simple loading fallback component
 const LoadingFallback = () => {
-  const [showError, setShowError] = React.useState(false);
-  const [showSkip, setShowSkip] = React.useState(false);
-  
-  React.useEffect(() => {
-    const errorTimer = setTimeout(() => {
-      setShowError(true);
-    }, 8000); // Show error after 8 seconds
-    
-    const skipTimer = setTimeout(() => {
-      setShowSkip(true);
-    }, 15000); // Show skip option after 15 seconds
-    
-    return () => {
-      clearTimeout(errorTimer);
-      clearTimeout(skipTimer);
-    };
-  }, []);
-  
-  if (showSkip) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="text-center max-w-md mx-auto p-6">
-          <h2 className="text-xl font-semibold mb-2">Loading is taking longer than expected</h2>
-          <p className="text-muted-foreground mb-4">This might be due to network issues or server problems.</p>
-          <div className="space-y-3">
-            <button 
-              onClick={() => window.location.reload()} 
-              className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-            >
-              Refresh Page
-            </button>
-            <button 
-              onClick={() => {
-                // Skip loading and show the app anyway
-                const root = document.getElementById('root');
-                if (root) {
-                  root.innerHTML = '<div style="padding: 20px; text-align: center;">Loading app without authentication...</div>';
-                  setTimeout(() => window.location.reload(), 2000);
-                }
-              }}
-              className="w-full px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90"
-            >
-              Skip Loading
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
-  if (showError) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">Loading is taking longer than expected</h2>
-          <p className="text-muted-foreground mb-4">Please refresh the page or check your connection.</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            Refresh Page
-          </button>
-        </div>
-      </div>
-    );
-  }
-  
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-muted-foreground">Loading AGI Agent Automation...</p>
-        <p className="text-sm text-muted-foreground mt-2">Preparing your AI workforce management platform...</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading...</p>
       </div>
     </div>
   );

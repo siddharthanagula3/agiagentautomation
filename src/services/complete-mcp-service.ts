@@ -339,8 +339,7 @@ class CompleteMCPService {
             }
           };
 
-        case 'tools/call': {
-          const { name, arguments: args } = request.params;
+        case 'tools/call': { const { name, arguments: args } = request.params;
           const result = await this.executeTool(name, args);
           
           return {
@@ -356,16 +355,13 @@ class CompleteMCPService {
               isError: !result.success
             }
           };
-        }
 
-        case 'tools/get': {
-          const tool = this.getTool(request.params.name);
+        case 'tools/get': { const tool = this.getTool(request.params.name);
           return {
             jsonrpc: '2.0',
             id: request.id,
             result: tool || null
           };
-        }
 
         default:
           return {
@@ -397,19 +393,38 @@ class CompleteMCPService {
   private async generateReactComponent(parameters: unknown, context?: unknown) {
     const { componentName, props = [], features = [], styling = 'tailwind' } = parameters;
     
-    // Return component metadata without generating actual React code
+    // Simulate React component generation
+    const component = `
+import React${features.includes('hooks') ? ', { useState, useEffect }' : ''} from 'react';
+
+interface ${componentName}Props {
+${props.map((prop: unknown) => `  ${prop.name}: ${prop.type};`).join('\n')}
+}
+
+const ${componentName}: React.FC<${componentName}Props> = ({ ${props.map((p: unknown) => p.name).join(', ')} }) => {
+${features.includes('hooks') ? '  const [state, setState] = useState(null);' : ''}
+  
+  return (
+    <div className="${styling === 'tailwind' ? 'p-4 bg-white rounded-lg shadow-md' : 'component-container'}">
+      <h2 className="text-xl font-bold">${componentName}</h2>
+      {/* Component content */}
+    </div>
+  );
+};
+
+export default ${componentName};
+    `;
+
     return {
-      success: true,
-      data: {
-        componentName,
-        metadata: {
-          componentName,
-          props: props.length,
-          features: features.length,
-          styling,
-          note: 'Component generation disabled for production'
+      component,
+      files: [
+        {
+          name: `${componentName}.tsx`,
+          content: component
         }
-      }
+      ],
+      dependencies: ['react', 'typescript'],
+      instructions: 'Install dependencies and use the component in your app'
     };
   }
 

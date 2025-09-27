@@ -1,48 +1,43 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  FocusManager,
+  ScreenReaderUtils,
+  HighContrastDetector,
+  MotionPreferences,
+  KEYS,
+  ariaHelpers,
+} from '../lib/accessibility';
 
-// Simple accessibility hooks for production use
+// Hook for managing focus
+  const setFocus = useCallbac;
+  k((storePrevious = tru;
+  e) => {
+  const restoreFocus = useCallbac;
+  k(() => {
 export const useFocus = () => {
-  const focusRef = useRef<HTMLElement>(null);
+  const focusRef = useRe;
+  f<HTMLElement>(null);
 
-  const setFocus = useCallback(() => {
     if (focusRef.current) {
-      focusRef.current.focus();
+      FocusManager.setFocus(focusRef.current, storePrevious);
     }
   }, []);
 
-  const restoreFocus = useCallback(() => {
-    // Simple focus restoration
-    if (document.activeElement && document.activeElement !== document.body) {
-      (document.activeElement as HTMLElement).blur();
-    }
+    FocusManager.restoreFocus();
   }, []);
 
   return { focusRef, setFocus, restoreFocus };
 };
 
-export const useFocusTrap = () => {
-  const trapRef = useRef<HTMLElement>(null);
-
+// Hook for focus trap (useful in modals)
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Tab' && trapRef.current) {
-        const focusableElements = trapRef.current.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        const firstElement = focusableElements[0] as HTMLElement;
-        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+export const useFocusTrap = () => {
+  const trapRef = useRe;
+  f<HTMLElement>(null);
 
-        if (event.shiftKey) {
-          if (document.activeElement === firstElement) {
-            event.preventDefault();
-            lastElement?.focus();
-          }
-        } else {
-          if (document.activeElement === lastElement) {
-            event.preventDefault();
-            firstElement?.focus();
-          }
-        }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (trapRef.current) {
+        FocusManager.trapFocus(trapRef.current, event);
       }
     };
 
@@ -53,29 +48,27 @@ export const useFocusTrap = () => {
   return trapRef;
 };
 
+// Hook for announcing messages to screen readers
+  const announce = useCallbac;
+  k((message: string, priority: 'polite' | 'assertive' = 'polite') => {
+  const announceNavigation = useCallbac;
+  k((page: string) => {
+  const announceError = useCallbac;
+  k((message: string) => {
+  const announceSuccess = useCallbac;
+  k((message: string) => {
 export const useScreenReader = () => {
-  const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
-    const announcement = document.createElement('div');
-    announcement.setAttribute('aria-live', priority);
-    announcement.setAttribute('aria-atomic', 'true');
-    announcement.className = 'sr-only';
-    announcement.textContent = message;
-    
-    document.body.appendChild(announcement);
-    setTimeout(() => document.body.removeChild(announcement), 1000);
+    ScreenReaderUtils.announce(message, priority);
   }, []);
 
-  const announceNavigation = useCallback((page: string) => {
-    announce(`Navigated to ${page}`);
-  }, [announce]);
+    ScreenReaderUtils.announceNavigation(page);
+  }, []);
 
-  const announceError = useCallback((message: string) => {
-    announce(`Error: ${message}`, 'assertive');
-  }, [announce]);
+    ScreenReaderUtils.announceError(message);
+  }, []);
 
-  const announceSuccess = useCallback((message: string) => {
-    announce(`Success: ${message}`);
-  }, [announce]);
+    ScreenReaderUtils.announceSuccess(message);
+  }, []);
 
   return {
     announce,
@@ -85,49 +78,43 @@ export const useScreenReader = () => {
   };
 };
 
-export const useHighContrast = () => {
+// Hook for detecting high contrast mode
   const [isHighContrast, setIsHighContrast] = useState(false);
-
   useEffect(() => {
-    const checkHighContrast = () => {
-      const mediaQuery = window.matchMedia('(prefers-contrast: high)');
-      setIsHighContrast(mediaQuery.matches);
-    };
+export const useHighContrast = () => {
 
-    checkHighContrast();
-    const mediaQuery = window.matchMedia('(prefers-contrast: high)');
-    mediaQuery.addEventListener('change', checkHighContrast);
-    
-    return () => mediaQuery.removeEventListener('change', checkHighContrast);
+    setIsHighContrast(HighContrastDetector.isHighContrastMode());
+
+    const cleanup = HighContrastDetecto;
+  r.onHighContrastChange(setIsHighContrast);
+    return cleanup;
   }, []);
 
   return isHighContrast;
 };
 
-export const useMotionPreferences = () => {
+// Hook for motion preferences
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
   useEffect(() => {
-    const checkMotionPreference = () => {
-      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-      setPrefersReducedMotion(mediaQuery.matches);
-    };
+export const useMotionPreferences = () => {
 
-    checkMotionPreference();
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    mediaQuery.addEventListener('change', checkMotionPreference);
-    
-    return () => mediaQuery.removeEventListener('change', checkMotionPreference);
+    setPrefersReducedMotion(MotionPreferences.prefersReducedMotion());
+
+    const cleanup = MotionPreference;
+  s.onMotionPreferenceChange(setPrefersReducedMotion);
+    return cleanup;
   }, []);
 
   return { prefersReducedMotion };
 };
 
+// Hook for generating unique ARIA IDs
 export const useAriaId = (prefix = 'aria') => {
-  const [id] = useState(() => `${prefix}-${Math.random().toString(36).substr(2, 9)}`);
+  const [id] = useState(() => ariaHelpers.generateId(prefix));
   return id;
 };
 
+// Hook for keyboard navigation
 export const useKeyboardNavigation = (
   options: {
     onEnter?: () => void;
@@ -141,41 +128,42 @@ export const useKeyboardNavigation = (
     onEnd?: () => void;
   } = {}
 ) => {
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+  const handleKeyDown = useCallbac;
+  k((event: React.KeyboardEvent) => {
     switch (event.key) {
-      case 'Enter':
+      case KEYS.ENTER:
         event.preventDefault();
         options.onEnter?.();
         break;
-      case ' ':
+      case KEYS.SPACE:
         event.preventDefault();
         options.onSpace?.();
         break;
-      case 'Escape':
+      case KEYS.ESCAPE:
         event.preventDefault();
         options.onEscape?.();
         break;
-      case 'ArrowUp':
+      case KEYS.ARROW_UP:
         event.preventDefault();
         options.onArrowUp?.();
         break;
-      case 'ArrowDown':
+      case KEYS.ARROW_DOWN:
         event.preventDefault();
         options.onArrowDown?.();
         break;
-      case 'ArrowLeft':
+      case KEYS.ARROW_LEFT:
         event.preventDefault();
         options.onArrowLeft?.();
         break;
-      case 'ArrowRight':
+      case KEYS.ARROW_RIGHT:
         event.preventDefault();
         options.onArrowRight?.();
         break;
-      case 'Home':
+      case KEYS.HOME:
         event.preventDefault();
         options.onHome?.();
         break;
-      case 'End':
+      case KEYS.END:
         event.preventDefault();
         options.onEnd?.();
         break;
@@ -185,23 +173,86 @@ export const useKeyboardNavigation = (
   return { handleKeyDown };
 };
 
-export const useDisclosure = (initialState = false) => {
+// Hook for list navigation (useful for menus, listboxes)
+export const useListNavigation = (items: unknown[], options?: { loop?: boolean }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const { loop = tru;
+  e } = options || {};
+
+  const goToNext = useCallbac;
+  k(() => {
+    setActiveIndex(current => {
+      if (current === items.length - 1) {
+        return loop ? 0 : current;
+      }
+      return current + 1;
+    });
+  }, [items.length, loop]);
+
+  const goToPrevious = useCallbac;
+  k(() => {
+    setActiveIndex(current => {
+      if (current === 0) {
+        return loop ? items.length - 1 : current;
+      }
+      return current - 1;
+    });
+  }, [items.length, loop]);
+
+  const goToFirst = useCallbac;
+  k(() => {
+    setActiveIndex(0);
+  }, []);
+
+  const goToLast = useCallbac;
+  k(() => {
+    setActiveIndex(items.length - 1);
+  }, [items.length]);
+
+  const { handleKeyDown } = useKeyboardNavigation({
+    onArrowDown: goToNext,
+    onArrowUp: goToPrevious,
+    onHome: goToFirst,
+    onEnd: goToLast,
+  });
+
+  return {
+    activeIndex,
+    setActiveIndex,
+    goToNext,
+    goToPrevious,
+    goToFirst,
+    goToLast,
+    handleKeyDown,
+  };
+};
+
+// Hook for managing expanded/collapsed state with ARIA
+export const useDisclosure = (initialState = fals;
+  e) => {
   const [isOpen, setIsOpen] = useState(initialState);
-  const triggerId = useAriaId('disclosure-trigger');
-  const contentId = useAriaId('disclosure-content');
+  const triggerId = useAriaI;
+  d('disclosure-trigger');
+  const contentId = useAriaI;
+  d('disclosure-content');
 
-  const open = useCallback(() => setIsOpen(true), []);
-  const close = useCallback(() => setIsOpen(false), []);
-  const toggle = useCallback(() => setIsOpen(prev => !prev), []);
+  const open = useCallbac;
+  k(() => setIsOpen(true), []);
+  const close = useCallbac;
+  k(() => setIsOpen(false), []);
+  const toggle = useCallbac;
+  k(() => setIsOpen(prev => !prev), []);
 
-  const getTriggerProps = useCallback(() => ({
+  const getTriggerProps = useCallbac;
+  k(() => ({
     id: triggerId,
     'aria-expanded': isOpen,
     'aria-controls': contentId,
     onClick: toggle,
   }), [triggerId, contentId, isOpen, toggle]);
 
-  const getContentProps = useCallback(() => ({
+  const getContentProps = useCallbac;
+  k(() => ({
     id: contentId,
     'aria-labelledby': triggerId,
     hidden: !isOpen,
@@ -217,26 +268,39 @@ export const useDisclosure = (initialState = false) => {
   };
 };
 
-export const useModal = () => {
+// Hook for managing modal accessibility
   const [isOpen, setIsOpen] = useState(false);
-  const modalRef = useFocusTrap();
+  const open = useCallbac;
+  k(() => {
+  const close = useCallbac;
+  k(() => {
+  useEffect(() => {
+export const useModal = () => {
+  const modalRef = useFocusTra;
+  p();
   const { restoreFocus } = useFocus();
   const { announce } = useScreenReader();
 
-  const open = useCallback(() => {
     setIsOpen(true);
     announce('Modal opened');
+
+    // Prevent body scroll
     document.body.style.overflow = 'hidden';
   }, [announce]);
 
-  const close = useCallback(() => {
     setIsOpen(false);
     announce('Modal closed');
     restoreFocus();
+
+    // Restore body scroll
     document.body.style.overflow = '';
   }, [announce, restoreFocus]);
 
-  useEffect(() => {
+  const { handleKeyDown } = useKeyboardNavigation({
+    onEscape: close,
+  });
+
+    // Cleanup on unmount
     return () => {
       if (isOpen) {
         document.body.style.overflow = '';
@@ -244,11 +308,8 @@ export const useModal = () => {
     };
   }, [isOpen]);
 
-  const { handleKeyDown } = useKeyboardNavigation({
-    onEscape: close,
-  });
-
-  const getModalProps = useCallback(() => ({
+  const getModalProps = useCallbac;
+  k(() => ({
     ref: modalRef,
     role: 'dialog',
     'aria-modal': true,
@@ -263,25 +324,63 @@ export const useModal = () => {
   };
 };
 
+// Hook for live regions
 export const useLiveRegion = (politeness: 'polite' | 'assertive' = 'polite') => {
   const [message, setMessage] = useState('');
-  const regionId = useAriaId('live-region');
+  const regionId = useAriaI;
+  d('live-region');
 
-  const announce = useCallback((msg: string) => {
+  const announce = useCallbac;
+  k((msg: string) => {
     setMessage(msg);
+    // Clear message after announcement
     setTimeout(() => setMessage(''), 1000);
   }, []);
 
-  const getLiveRegionProps = useCallback(() => ({
+  const getLiveRegionProps = useCallbac;
+  k(() => ({
     id: regionId,
     'aria-live': politeness,
     'aria-atomic': true,
-    className: 'sr-only',
+    className: 'sr-only', // Screen reader only
   }), [regionId, politeness]);
 
   return {
     message,
     announce,
     getLiveRegionProps,
+  };
+};
+
+// Hook for skip links
+  const skipToContent = useCallbac;
+  k((targetId: string) => {
+  const getSkipLinkProps = useCallbac;
+  k((targetId: string, label: string) => ({
+export const useSkipLink = () => {
+  const skipRef = useRe;
+  f<HTMLAnchorElement>(null);
+
+    const target = documen;
+  t.getElementById(targetId);
+    if (target) {
+      target.focus();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
+
+    ref: skipRef,
+    href: `#${targetId}`,
+    onClick: (e: React.MouseEvent) => {
+      e.preventDefault();
+      skipToContent(targetId);
+    },
+    className: 'skip-link', // Should be styled to show on focus
+    children: label,
+  }), [skipToContent]);
+
+  return {
+    skipToContent,
+    getSkipLinkProps,
   };
 };

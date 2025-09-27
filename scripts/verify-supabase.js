@@ -7,7 +7,7 @@
  * Run this locally to test your configuration before deploying to Netlify.
  */
 
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 // Get environment variables
 const supabaseUrl = process.env.VITE_SUPABASE_URL || '';

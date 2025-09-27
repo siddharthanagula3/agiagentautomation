@@ -24,7 +24,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.warn('Auth check timeout - setting loading to false');
             setLoading(false);
           }
-        }, 3000); // 3 second timeout - more aggressive
+        }, 2000); // 2 second timeout - very aggressive
 
         const { user: currentUser, error } = await authService.getCurrentUser();
         
@@ -84,23 +84,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Login attempt started for:', email);
       setLoading(true);
       
-      // Add timeout to prevent infinite loading
+      // Add aggressive timeout to prevent infinite loading
       const loginTimeout = setTimeout(() => {
-        console.warn('Login timeout - stopping loading');
+        console.warn('Login timeout - forcing loading to false');
         setLoading(false);
-      }, 5000); // 5 second timeout for login
+      }, 3000); // 3 second timeout for login
       
-      const { user: authUser, error } = await authService.login({ email, password });
+      // Use Promise.race to ensure timeout works
+      const loginPromise = authService.login({ email, password });
+      const timeoutPromise = new Promise<{ success: boolean; error: string }>((resolve) => {
+        setTimeout(() => resolve({ success: false, error: 'Login timeout - please try again' }), 3000);
+      });
+      
+      const result = await Promise.race([loginPromise, timeoutPromise]);
       
       clearTimeout(loginTimeout);
-      console.log('Login result:', { authUser: !!authUser, error });
+      console.log('Login result:', result);
       
-      if (error || !authUser) {
+      if (result.error || !result.user) {
         setLoading(false);
-        return { success: false, error: error || 'Login failed' };
+        return { success: false, error: result.error || 'Login failed' };
       }
 
-      setUser(authUser);
+      setUser(result.user);
       setLoading(false);
       console.log('Login successful');
       return { success: true };

@@ -35,13 +35,11 @@ interface Conversation {
   starred: boolean;
 }
 
+const ChatInterface: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
-const Component: React.FC = () => {
+  
   // Core state
-
-  // Settings and dialogs
-
-  // Mock conversations
+  const [conversations, setConversations] = useState([
     {
       id: "1",
       title: "AGI Agent Automation Planning",
@@ -84,12 +82,11 @@ const Component: React.FC = () => {
     }
   ]);
 
-  const fileInputRef = useRe;
-  f<HTMLInputElement>(null);
-  const modelSelectorRef = useRe;
-  f<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const modelSelectorRef = useRef<HTMLDivElement>(null);
 
   // Apply dark mode
+  useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {
@@ -98,7 +95,7 @@ const Component: React.FC = () => {
   }, [darkMode]);
 
   // Close model selector when clicking outside
-    const handleClickOutside = (event: MouseEvent) => {
+  const handleClickOutside = (event: MouseEvent) => {
       if (modelSelectorRef.current && !modelSelectorRef.current.contains(event.target as Node)) {
         setShowModelSelector(false);
       }

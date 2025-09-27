@@ -282,7 +282,15 @@ class AuthService {
         return { user: null, error: 'No session in demo mode' };
       }
       
-      const { data: { user }, error } = await supabase.auth.getUser();
+      console.log('AuthService: Attempting to get current user from Supabase...');
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Supabase connection timeout')), 8000);
+      });
+      
+      const userPromise = supabase.auth.getUser();
+      const { data: { user }, error } = await Promise.race([userPromise, timeoutPromise]);
 
       if (error) {
         return { user: null, error: error.message };
@@ -320,7 +328,11 @@ class AuthService {
 
       return { user: authUser, error: null };
     } catch (error) {
-      console.error('Service error:', error);
+      console.error('AuthService getCurrentUser error:', error);
+      if (error instanceof Error && error.message === 'Supabase connection timeout') {
+        console.log('Supabase connection timed out - this may be a network issue');
+        return { user: null, error: 'Connection timeout - please try again' };
+      }
       return { user: null, error: 'An unexpected error occurred' };
     }
   }

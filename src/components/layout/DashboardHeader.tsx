@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/auth-hooks';
 import { Button } from '../ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -14,9 +15,20 @@ import {
 const DashboardHeader: React.FC = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    console.log('DashboardHeader: Logout button clicked');
+    setShowUserMenu(false); // Close the user menu
+    try {
+      await logout();
+      console.log('DashboardHeader: Logout completed, navigating to login');
+      navigate('/auth/login');
+    } catch (error) {
+      console.error('DashboardHeader: Logout error:', error);
+      // Even if logout fails, redirect to login
+      navigate('/auth/login');
+    }
   };
 
   return (

@@ -1,51 +1,31 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
 import LoadingSpinner from '../ui/loading-spinner';
 
-  const [formData, setFormData] = useState({
-  const [error, setError] = useState('');
 const LoginForm: React.FC = () => {
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false
   });
 
   const { login, loading } = useAuth();
-  const navigate = useNavigat;
-  e();
-  const location = useLocatio;
-  n();
+  const navigate = useNavigate();
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
-
-  const handleSubmit = asyn;
-  c (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    console.log('🚀 LoginForm: Starting login attempt');
-
+    
     try {
-      const result = await;
-  login(formData.email, formData.password);
-      console.log('📋 LoginForm: Login,
-  result:', result);
-      
+      const result = await login(formData.email, formData.password);
       if (result.success) {
-        console.log('✅ LoginForm: Login successful, navigating to:', from);
-        navigate(from, { replace: true });
-      } else {
-        console.log('❌ LoginForm: Login,
-  failed:', result.error);
-        setError(result.error || 'Login failed');
+        navigate('/dashboard');
       }
-    } catch (err) {
-      console.log('❌ LoginForm: Login,
-  exception:', err);
-      setError(err instanceof Error ? err.message : 'Login failed');
+    } catch (error) {
+      console.error('Login error:', error);
     }
   };
 
@@ -58,105 +38,66 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link
-              to="/register"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              create a new account
-            </Link>
-          </p>
-        </div>
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                placeholder="Email address"
-                value={formData.email}
-                onChange={handleChange}
-                className="relative block w-full"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                className="relative block w-full"
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Checkbox
-                  id="rememberMe"
-                  name="rememberMe"
-                  checked={formData.rememberMe}
-                  onChange={handleChange}
-                />
-                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-900">
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <Link
-                  to="/forgot-password"
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  Forgot your password?
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <LoadingSpinner size="sm" />
-              ) : (
-                'Sign in'
-              )}
-            </Button>
-          </div>
-        </form>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          Email
+        </label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          className="w-full"
+          placeholder="Enter your email"
+        />
       </div>
-    </div>
+
+      <div>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          Password
+        </label>
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+          className="w-full"
+          placeholder="Enter your password"
+        />
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="rememberMe"
+          name="rememberMe"
+          checked={formData.rememberMe}
+          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, rememberMe: !!checked }))}
+        />
+        <label htmlFor="rememberMe" className="text-sm text-gray-600">
+          Remember me
+        </label>
+      </div>
+
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={loading}
+      >
+        {loading ? (
+          <>
+            <LoadingSpinner size="sm" className="mr-2" />
+            Signing in...
+          </>
+        ) : (
+          'Sign In'
+        )}
+      </Button>
+    </form>
   );
 };
 

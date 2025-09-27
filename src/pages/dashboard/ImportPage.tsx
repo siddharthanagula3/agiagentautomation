@@ -1,102 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/auth-hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload, FileUp } from 'lucide-react';
 
 const ImportPage: React.FC = () => {
   const { user } = useAuth();
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // TODO: Replace with real data fetching
+    setLoading(false);
+  }, []);
+
   if (!user) {
-
     return (
-
       <div className="flex items-center justify-center min-h-[400px]">
-
         <div className="text-center">
-
           <h3 className="text-lg font-semibold text-foreground mb-2">Authentication Required</h3>
-
           <p className="text-muted-foreground">Please log in to access this page.</p>
-
         </div>
-
       </div>
-
     );
-
   }
 
-  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   if (error) {
-
-
-  
-
     return (
-
-
-  
-
       <div className="flex items-center justify-center min-h-[400px]">
-
-
-  
-
         <div className="text-center">
-
-
-  
-
           <h3 className="text-lg font-semibold text-foreground mb-2">Error</h3>
-
-
-  
-
           <p className="text-muted-foreground mb-4">{error}</p>
-
-
-  
-
           <Button onClick={() => window.location.reload()}>
-
-
-  
-
             Try Again
-
-
-  
-
           </Button>
-
-
-  
-
         </div>
-
-
-  
-
       </div>
-
-
-  
-
     );
-
-
-  
-
   }
-
-
-  
-
-  
-
-
-  
 
   return (
     <div className="space-y-8">

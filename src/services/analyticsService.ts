@@ -337,7 +337,6 @@ class AnalyticsService {
       default:
         return 30;
     }
-  } catch (error) {
     console.error('Service error:', error);
     return { data: [], error: null };
   }

@@ -1,10 +1,8 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline (DISABLED)
 
+# This workflow is temporarily disabled
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+  workflow_dispatch:  # Only run manually
 
 env:
   NODE_VERSION: '18'

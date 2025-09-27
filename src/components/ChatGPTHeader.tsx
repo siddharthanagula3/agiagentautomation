@@ -14,13 +14,15 @@ interface ChatGPTHeaderProps {
   darkMode?: boolean;
   onToggleDarkMode?: () => void;
   userEmail?: string;
+  onLogout?: () => void;
 }
 
 const ChatGPTHeader: React.FC<ChatGPTHeaderProps> = ({
   onNewChat,
   darkMode = true,
   onToggleDarkMode,
-  userEmail = "user@example.com"
+  userEmail = "user@example.com",
+  onLogout
 }) => {
   return (
     <header className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
@@ -98,7 +100,10 @@ const ChatGPTHeader: React.FC<ChatGPTHeaderProps> = ({
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem className="flex items-center gap-2 text-red-600">
+          <DropdownMenuItem 
+            className="flex items-center gap-2 text-red-600"
+            onClick={onLogout}
+          >
             <LogOut className="h-4 w-4" />
             Sign out
           </DropdownMenuItem>

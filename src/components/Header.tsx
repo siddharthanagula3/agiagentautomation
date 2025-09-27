@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Bot, Menu, Plus, Settings, User, Bell, Zap, Command, Search } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/auth-hooks';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -84,7 +85,18 @@ const Header = ({
   className,
   'data-testid': dataTestId = 'header'
 }: HeaderProps) => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/auth/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const location = useLocation();
 
@@ -404,7 +416,10 @@ const Header = ({
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-error focus:text-error">
+              <DropdownMenuItem 
+                className="text-error focus:text-error"
+                onClick={handleLogout}
+              >
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>

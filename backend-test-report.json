@@ -1,0 +1,74 @@
+{
+  "timestamp": "2025-09-27T23:20:14.319Z",
+  "databaseIssues": [
+    {
+      "table": "jobs",
+      "issue": "Could not find the table 'public.jobs' in the schema cache",
+      "severity": "medium"
+    },
+    {
+      "table": "employees",
+      "issue": "Could not find the table 'public.employees' in the schema cache",
+      "severity": "medium"
+    },
+    {
+      "table": "notifications",
+      "issue": "Could not find the table 'public.notifications' in the schema cache",
+      "severity": "medium"
+    },
+    {
+      "table": "analytics",
+      "issue": "Could not find the table 'public.analytics' in the schema cache",
+      "severity": "medium"
+    },
+    {
+      "table": "settings",
+      "issue": "Could not find the table 'public.settings' in the schema cache",
+      "severity": "medium"
+    },
+    {
+      "table": "billing",
+      "issue": "Could not find the table 'public.billing' in the schema cache",
+      "severity": "medium"
+    },
+    {
+      "table": "workforce",
+      "issue": "Could not find the table 'public.workforce' in the schema cache",
+      "severity": "medium"
+    },
+    {
+      "table": "ai_employees",
+      "issue": "Could not find the table 'public.ai_employees' in the schema cache",
+      "severity": "medium"
+    },
+    {
+      "table": "chat_messages",
+      "issue": "Could not find the table 'public.chat_messages' in the schema cache",
+      "severity": "medium"
+    },
+    {
+      "table": "reports",
+      "issue": "Could not find the table 'public.reports' in the schema cache",
+      "severity": "medium"
+    }
+  ],
+  "missingTables": [],
+  "testResults": {
+    "/dashboard": "failed",
+    "/dashboard/jobs": "failed",
+    "/dashboard/employees": "failed",
+    "/dashboard/analytics": "failed",
+    "/dashboard/notifications": "failed",
+    "/dashboard/settings": "failed",
+    "/dashboard/ai-employees": "failed",
+    "/dashboard/reports": "failed",
+    "/dashboard/team": "failed",
+    "/dashboard/profile": "failed"
+  },
+  "summary": {
+    "totalPages": 10,
+    "successfulPages": 0,
+    "failedPages": 10,
+    "errorPages": 0
+  }
+}

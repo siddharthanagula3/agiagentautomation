@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-09-27T23:25:02.101Z",
+  "testResults": {
+    "/dashboard": {
+      "status": "success",
+      "elementsFound": 0,
+      "totalElements": 3
+    },
+    "/dashboard/jobs": {
+      "status": "success",
+      "elementsFound": 0,
+      "totalElements": 2
+    },
+    "/dashboard/employees": {
+      "status": "success",
+      "elementsFound": 0,
+      "totalElements": 2
+    },
+    "/dashboard/analytics": {
+      "status": "success",
+      "elementsFound": 0,
+      "totalElements": 3
+    },
+    "/dashboard/notifications": {
+      "status": "success",
+      "elementsFound": 0,
+      "totalElements": 2
+    },
+    "/dashboard/settings": {
+      "status": "success",
+      "elementsFound": 0,
+      "totalElements": 2
+    },
+    "/dashboard/ai-employees": {
+      "status": "success",
+      "elementsFound": 0,
+      "totalElements": 2
+    },
+    "/dashboard/reports": {
+      "status": "success",
+      "elementsFound": 0,
+      "totalElements": 2
+    },
+    "/dashboard/team": {
+      "status": "success",
+      "elementsFound": 0,
+      "totalElements": 2
+    },
+    "/dashboard/profile": {
+      "status": "success",
+      "elementsFound": 0,
+      "totalElements": 3
+    }
+  },
+  "summary": {
+    "totalPages": 10,
+    "successfulPages": 10,
+    "failedPages": 0,
+    "errorPages": 0
+  }
+}

@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     // Build optimization
-    target: 'esnext',
+    target: 'es2020', // Changed from 'esnext' to 'es2020' for better compatibility
     minify: 'esbuild',
     cssMinify: true,
 
@@ -41,32 +41,34 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Vendor chunks
+          // Simplified chunking strategy to avoid circular dependencies
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            // Keep React ecosystem together
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router') || id.includes('@remix-run')) {
               return 'react-vendor';
             }
-            if (id.includes('@radix-ui')) {
+            // Keep UI libraries together
+            if (id.includes('@radix-ui') || id.includes('class-variance-authority') || id.includes('clsx') || id.includes('@floating-ui')) {
               return 'ui-vendor';
             }
-            if (id.includes('@tanstack') || id.includes('zustand')) {
-              return 'data-vendor';
+            // Keep data/state libraries together
+            if (id.includes('@tanstack') || id.includes('zustand') || id.includes('immer')) {
+              return 'state-vendor';
             }
+            // Separate heavy visualization libraries
+            if (id.includes('recharts') || id.includes('d3') || id.includes('framer-motion')) {
+              return 'viz-vendor';
+            }
+            // Stripe separate
             if (id.includes('@stripe')) {
               return 'stripe-vendor';
             }
-            if (id.includes('recharts') || id.includes('framer-motion')) {
-              return 'viz-vendor';
+            // Supabase separate
+            if (id.includes('@supabase')) {
+              return 'supabase-vendor';
             }
+            // Everything else in a general vendor chunk
             return 'vendor';
-          }
-          
-          // Split dashboard pages into separate chunks
-          if (id.includes('/pages/dashboard/')) {
-            return 'dashboard-pages';
-          }
-          if (id.includes('/pages/ai-employees/')) {
-            return 'ai-employees';
           }
         },
         // Asset naming
@@ -77,7 +79,13 @@ export default defineConfig(({ mode }) => ({
     },
 
     // Performance warnings
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1500,
+    
+    // CommonJS optimization
+    commonjsOptions: {
+      transformMixedEsModules: true,
+      strictRequires: false,
+    },
   },
 
   // Preview server configuration
@@ -93,17 +101,39 @@ export default defineConfig(({ mode }) => ({
     __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
   },
 
-  // Performance optimizations
+  // Performance optimizations - expanded list
   optimizeDeps: {
     include: [
       'react',
       'react-dom',
       'react-router-dom',
       '@tanstack/react-query',
+      '@tanstack/react-table',
       '@stripe/stripe-js',
+      '@stripe/react-stripe-js',
+      '@supabase/supabase-js',
       'date-fns',
       'framer-motion',
       'recharts',
+      'zustand',
+      'immer',
+      'clsx',
+      'tailwind-merge',
+      'class-variance-authority',
+      'lucide-react',
+      'sonner',
+      'react-hook-form',
+      '@hookform/resolvers',
+      'zod',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-slot',
+      '@radix-ui/react-toast',
+      '@radix-ui/react-tooltip',
     ],
+    exclude: ['@sentry/react'], // Exclude Sentry to prevent bundling issues
+    esbuildOptions: {
+      target: 'es2020',
+    },
   },
 }));

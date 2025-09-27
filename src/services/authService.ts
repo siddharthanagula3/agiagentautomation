@@ -51,6 +51,11 @@ class AuthService {
     try {
       console.log('AuthService: Starting login for', loginData.email);
       
+      // Add timeout protection for login
+      const loginTimeout = setTimeout(() => {
+        console.warn('AuthService: Login timeout - this should not happen');
+      }, 10000); // 10 second timeout
+      
       // Check if we're in demo mode
       if (this.isDemoMode()) {
         console.log('AuthService: Running in demo mode');
@@ -70,8 +75,10 @@ class AuthService {
             phone: '',
             location: ''
           };
+          clearTimeout(loginTimeout);
           return { user: demoUser, error: null };
         }
+        clearTimeout(loginTimeout);
         return { user: null, error: 'Invalid demo credentials. Use demo@example.com / demo123' };
       }
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -83,10 +90,12 @@ class AuthService {
 
       if (error) {
         console.log('AuthService: Login error', error.message);
+        clearTimeout(loginTimeout);
         return { user: null, error: error.message };
       }
 
       if (!data.user) {
+        clearTimeout(loginTimeout);
         return { user: null, error: 'No user data returned' };
       }
 
@@ -101,6 +110,7 @@ class AuthService {
       console.log('AuthService: Profile fetch result', { hasProfile: !!profile, hasError: !!profileError, error: profileError?.message });
 
       if (profileError) {
+        console.log('AuthService: Profile error details:', profileError);
         // If profile doesn't exist, create one
         if (profileError.code === 'PGRST116') {
           console.log('AuthService: Creating user profile for:', data.user.email);
@@ -119,7 +129,8 @@ class AuthService {
             .single();
 
           if (createError || !newProfile) {
-            return { user: null, error: 'Failed to create user profile' };
+            console.log('AuthService: Profile creation failed:', createError);
+            return { user: null, error: 'Failed to create user profile: ' + (createError?.message || 'Unknown error') };
           }
           
           // Use the newly created profile
@@ -138,8 +149,10 @@ class AuthService {
             location: newProfile.location,
           };
 
+          clearTimeout(loginTimeout);
           return { user: authUser, error: null };
         }
+        clearTimeout(loginTimeout);
         return { user: null, error: 'Failed to fetch user profile' };
       }
 

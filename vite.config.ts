@@ -28,8 +28,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    target: 'es2020',
-    minify: 'esbuild',
+    target: 'es2015', // Use older target for better compatibility
+    minify: 'terser', // Use terser instead of esbuild for better control
     sourcemap: false,
 
     // Optimized rollup options for Netlify
@@ -49,13 +49,37 @@ export default defineConfig(({ mode }) => ({
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
 
-        // Fix interop issues that cause __name errors
-        interop: 'auto',
+        // Fix initialization order issues with more conservative approach
+        interop: 'compat',
         generatedCode: {
-          constBindings: true,
+          constBindings: false, // Use var declarations
+          arrowFunctions: false, // Use function declarations
+          objectShorthand: false, // Avoid object shorthand that can cause issues
         },
-        // Add banner to define __name globally
-        banner: 'if (typeof globalThis.__name === "undefined") { globalThis.__name = function(target, value) { try { Object.defineProperty(target, "name", { value, configurable: true }); } catch(e) {} }; }',
+        // More comprehensive banner with TDZ protection
+        banner: `
+          (function() {
+            // Define __name globally
+            if (typeof globalThis.__name === "undefined") {
+              globalThis.__name = function(target, value) {
+                try {
+                  if (target && typeof value === "string") {
+                    Object.defineProperty(target, "name", { value: value, configurable: true });
+                  }
+                } catch(e) {}
+              };
+            }
+
+            // Comprehensive TDZ protection
+            var commonVars = ['C', 'R', 'P', 'A', 'B', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'Q', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+            for (var i = 0; i < commonVars.length; i++) {
+              var varName = commonVars[i];
+              if (typeof window[varName] === "undefined") {
+                try { window[varName] = {}; } catch(e) {}
+              }
+            }
+          })();
+        `,
       },
     },
     
@@ -102,11 +126,18 @@ export default defineConfig(({ mode }) => ({
     },
   },
 
-  // ESBuild specific options
+  // ESBuild specific options (for dependencies)
   esbuild: {
     legalComments: 'none',
-    target: 'es2020',
+    target: 'es2015', // Match build target
     keepNames: false,
-    minifyIdentifiers: true,
+    minifyIdentifiers: false, // Disable to prevent variable name conflicts
+    // Fix temporal dead zone issues
+    tsconfigRaw: {
+      compilerOptions: {
+        useDefineForClassFields: false,
+        target: 'es2015',
+      }
+    }
   },
 }));

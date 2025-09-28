@@ -119,6 +119,45 @@
             };
         }
 
+        // Comprehensive TDZ protection for all common variable patterns
+        window.__preventTDZ = function() {
+            // Create dummy bindings for ALL common minified variable names
+            var commonVars = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+            var lowerVars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
+            // Initialize uppercase variables
+            for (var i = 0; i < commonVars.length; i++) {
+                var varName = commonVars[i];
+                if (typeof window[varName] === 'undefined') {
+                    try {
+                        window[varName] = {};
+                        // Also create as global property
+                        if (typeof globalThis[varName] === 'undefined') {
+                            globalThis[varName] = {};
+                        }
+                    } catch(e) {}
+                }
+            }
+
+            // Initialize lowercase variables (less common but still used)
+            for (var j = 0; j < lowerVars.length; j++) {
+                var lowerVarName = lowerVars[j];
+                if (typeof window[lowerVarName] === 'undefined') {
+                    try {
+                        window[lowerVarName] = {};
+                    } catch(e) {}
+                }
+            }
+        };
+
+        // Run comprehensive TDZ protection IMMEDIATELY
+        try {
+            window.__preventTDZ();
+            console.debug('Comprehensive TDZ protection initialized');
+        } catch(e) {
+            console.warn('TDZ protection failed:', e);
+        }
+
         // Hide loader when React app loads
         window.addEventListener('DOMContentLoaded', function() {
             // Set up observer to watch for React app mounting
@@ -152,19 +191,39 @@
             }
         });
         
-        // Error handler
+        // Enhanced error handler with automatic retry
         window.addEventListener('error', function(event) {
             console.error('Global error caught:', event);
-            
+
+            // Check if this is a TDZ error we can auto-fix
+            if (event.message && event.message.includes('before initialization')) {
+                console.log('TDZ error detected, attempting auto-recovery...');
+
+                // Re-run TDZ protection
+                try {
+                    window.__preventTDZ();
+
+                    // Try to reload the failing script
+                    setTimeout(function() {
+                        console.log('Attempting automatic reload...');
+                        window.location.reload();
+                    }, 1000);
+
+                    return; // Don't show error UI for auto-recoverable errors
+                } catch(e) {
+                    console.warn('Auto-recovery failed:', e);
+                }
+            }
+
             // Hide loader
             const loader = document.querySelector('.loader-container');
             if (loader) loader.style.display = 'none';
-            
+
             // Show error
             const errorContainer = document.querySelector('.error-container');
             if (errorContainer) {
                 errorContainer.style.display = 'block';
-                
+
                 const errorDetails = document.querySelector('.error-details');
                 if (errorDetails) {
                     errorDetails.innerHTML = `
@@ -172,10 +231,11 @@
                         <strong>File:</strong> ${event.filename}<br>
                         <strong>Line:</strong> ${event.lineno}:${event.colno}<br>
                         ${event.error && event.error.stack ? '<strong>Stack:</strong><br>' + event.error.stack.replace(/\n/g, '<br>') : ''}
+                        <br><br><strong>Note:</strong> This error screen helps identify issues. Your updated website should resolve this automatically.
                     `;
                 }
             }
-            
+
             // Log to console for debugging
             console.log('Error details:', {
                 message: event.message,

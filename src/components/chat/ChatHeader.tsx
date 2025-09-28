@@ -1,46 +1,57 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Bot, Wrench, Settings } from 'lucide-react';
-import type { AIEmployee } from '@/types/ai-employee';
+import { User, Settings, MoreVertical } from 'lucide-react';
 
 interface ChatHeaderProps {
-  employee: AIEmployee;
-  availableToolsCount: number;
-  showTools: boolean;
-  onToggleTools: () => void;
+  employeeName: string;
+  employeeRole: string;
+  status: 'online' | 'busy' | 'offline';
+  onSettingsClick?: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
-  employee,
-  availableToolsCount,
-  showTools,
-  onToggleTools,
+  employeeName,
+  employeeRole,
+  status,
+  onSettingsClick,
 }) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'online': return 'bg-green-500';
+      case 'busy': return 'bg-yellow-500';
+      case 'offline': return 'bg-gray-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
   return (
-    <div className="border-b bg-card p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-primary to-purple-600 rounded-lg flex items-center justify-center">
-            <Bot className="h-6 w-6 text-white" />
+    <div className="flex items-center justify-between p-4 border-b border-border bg-card">
+      <div className="flex items-center space-x-3">
+        <div className="relative">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <User className="w-5 h-5 text-primary" />
           </div>
-          <div>
-            <h2 className="text-lg font-semibold">{employee.name}</h2>
-            <p className="text-sm text-muted-foreground">{employee.role}</p>
-          </div>
+          <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full ${getStatusColor(status)}`} />
         </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onToggleTools}
-          >
-            <Wrench className="h-4 w-4 mr-2" />
-            Tools ({availableToolsCount})
-          </Button>
-          <Button variant="outline" size="sm">
-            <Settings className="h-4 w-4" />
-          </Button>
+        <div>
+          <h3 className="font-semibold text-foreground">{employeeName}</h3>
+          <p className="text-sm text-muted-foreground">{employeeRole}</p>
         </div>
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <button
+          onClick={onSettingsClick}
+          className="p-2 hover:bg-muted rounded-md transition-colors"
+          title="Settings"
+        >
+          <Settings className="w-4 h-4 text-muted-foreground" />
+        </button>
+        <button
+          className="p-2 hover:bg-muted rounded-md transition-colors"
+          title="More options"
+        >
+          <MoreVertical className="w-4 h-4 text-muted-foreground" />
+        </button>
       </div>
     </div>
   );

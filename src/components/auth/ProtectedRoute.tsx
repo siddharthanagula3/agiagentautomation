@@ -15,9 +15,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
   useEffect(() => {
     if (loading) {
       const timeout = setTimeout(() => {
-        console.log('⚠️ ProtectedRoute: Loading timeout reached');
+        console.error('ProtectedRoute: Auth loading timed out, redirecting to login');
         setTimeoutReached(true);
-      }, 10000); // 10 second timeout
+      }, 5000); // Reduce to 5 seconds
 
       return () => clearTimeout(timeout);
     } else {
@@ -55,13 +55,21 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     );
   }
 
-  // If we've timed out or are not loading and no user, redirect to login
-  if (timeoutReached) {
-    console.log('⚠️ Loading timeout reached, redirecting to login');
-  } else {
-    console.log('🚪 No user found, redirecting to login');
+  // Immediately redirect if timeout reached
+  if (timeoutReached || (!loading && !user)) {
+    return <Navigate to="/auth/login" replace />;
   }
-  return <Navigate to="/auth/login" replace />;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Role checking logic...
+  return <>{children}</>;
 };
 
 export { ProtectedRoute };

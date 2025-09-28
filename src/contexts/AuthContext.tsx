@@ -36,6 +36,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // IMMEDIATELY set loading to false to prevent timeout issues
     console.log('AuthContext: Setting loading to false immediately');
     setLoading(false);
+    
+    // Also check if user is already authenticated
+    const checkExistingUser = async () => {
+      try {
+        const { data: { user: existingUser } } = await supabase.auth.getUser();
+        if (existingUser && isMounted) {
+          console.log('🚀 EXISTING USER: User found, setting user state');
+          setUser(existingUser);
+          setLoading(false);
+          return true;
+        }
+      } catch (error) {
+        console.log('Existing user check failed:', error);
+      }
+      return false;
+    };
+    
+    // Run existing user check
+    checkExistingUser();
 
     // Check for existing session in background
     const checkSession = async () => {

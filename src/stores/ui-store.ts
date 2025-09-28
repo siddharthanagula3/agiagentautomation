@@ -1,198 +1,115 @@
 /**
- * UI store using Zustand
- * Handles UI-specific state like modals, sidebars, themes, etc.
+ * UI State Management Store using Zustand
+ * Handles all UI-related state (modals, sidebar, theme, etc.)
  */
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-export interface Modal {
-  id: string;
-  type: string;
-  props?: Record<string, unknown>;
-  persistent?: boolean;
-  onClose?: () => void;
-}
-
-export interface Drawer {
-  id: string;
-  type: string;
-  side: 'left' | 'right' | 'top' | 'bottom';
-  props?: Record<string, unknown>;
-  persistent?: boolean;
-  onClose?: () => void;
-}
-
 export interface UIState {
-  // Layout
+  // Sidebar state
   sidebarOpen: boolean;
   sidebarCollapsed: boolean;
-  headerVisible: boolean;
-  footerVisible: boolean;
-
-  // Theme and appearance
+  
+  // Modal states
+  modals: {
+    createEmployee: boolean;
+    createProject: boolean;
+    settings: boolean;
+    billing: boolean;
+    help: boolean;
+  };
+  
+  // Theme
   theme: 'light' | 'dark' | 'system';
-  primaryColor: string;
-  fontSize: 'sm' | 'base' | 'lg';
-  density: 'compact' | 'comfortable' | 'spacious';
-  reducedMotion: boolean;
-
-  // Modals
-  modals: Record<string, Modal>;
-  modalStack: string[]; // Track modal order for z-index
-
-  // Drawers
-  drawers: Record<string, Drawer>;
-  activeDrawers: string[];
-
-  // Loading states
-  globalLoading: boolean;
-  loadingMessage: string;
-
-  // Focus management
-  focusedElement: string | null;
-  focusTrap: boolean;
-
-  // Responsive breakpoints
-  breakpoint: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
-  isMobile: boolean;
-  isTablet: boolean;
-  isDesktop: boolean;
-
-  // Command palette
-  commandPaletteOpen: boolean;
-  commandQuery: string;
-
-  // Quick actions
-  quickActionsOpen: boolean;
-
-  // Preferences
-  animations: boolean;
-  soundEffects: boolean;
-  keyboardShortcuts: boolean;
-  tooltips: boolean;
-  confirmDestructive: boolean;
-
-  // Developer tools
-  devToolsOpen: boolean;
-  debugMode: boolean;
+  
+  // Chat interface
+  chatInterface: {
+    showTools: boolean;
+    selectedTools: string[];
+    currentConversation: string | null;
+  };
+  
+  // Dashboard layout
+  dashboard: {
+    viewMode: 'grid' | 'list';
+    filters: Record<string, unknown>;
+    sortBy: string;
+    sortOrder: 'asc' | 'desc';
+  };
+  
+  // Notifications
+  notifications: {
+    enabled: boolean;
+    sound: boolean;
+    desktop: boolean;
+  };
 }
 
 export interface UIActions {
-  // Layout
+  // Sidebar actions
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
-  toggleSidebarCollapsed: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
-  setHeaderVisible: (visible: boolean) => void;
-  setFooterVisible: (visible: boolean) => void;
-
-  // Theme and appearance
-  setTheme: (theme: UIState['theme']) => void;
-  setPrimaryColor: (color: string) => void;
-  setFontSize: (size: UIState['fontSize']) => void;
-  setDensity: (density: UIState['density']) => void;
-  setReducedMotion: (reduced: boolean) => void;
-
-  // Modals
-  openModal: (modal: Omit<Modal, 'id'>) => string;
-  closeModal: (id: string) => void;
+  
+  // Modal actions
+  openModal: (modal: keyof UIState['modals']) => void;
+  closeModal: (modal: keyof UIState['modals']) => void;
   closeAllModals: () => void;
-  closeTopModal: () => void;
-
-  // Drawers
-  openDrawer: (drawer: Omit<Drawer, 'id'>) => string;
-  closeDrawer: (id: string) => void;
-  closeAllDrawers: () => void;
-
-  // Loading states
-  setGlobalLoading: (loading: boolean, message?: string) => void;
-
-  // Focus management
-  setFocusedElement: (element: string | null) => void;
-  setFocusTrap: (trapped: boolean) => void;
-
-  // Responsive
-  setBreakpoint: (breakpoint: UIState['breakpoint']) => void;
-  updateResponsiveFlags: () => void;
-
-  // Command palette
-  openCommandPalette: () => void;
-  closeCommandPalette: () => void;
-  setCommandQuery: (query: string) => void;
-
-  // Quick actions
-  toggleQuickActions: () => void;
-
-  // Preferences
-  updatePreferences: (preferences: Partial<Pick<UIState, 'animations' | 'soundEffects' | 'keyboardShortcuts' | 'tooltips' | 'confirmDestructive'>>) => void;
-
-  // Developer tools
-  toggleDevTools: () => void;
-  setDebugMode: (enabled: boolean) => void;
-
-  // Utility
+  
+  // Theme actions
+  setTheme: (theme: UIState['theme']) => void;
+  
+  // Chat interface actions
+  toggleChatTools: () => void;
+  setSelectedTools: (tools: string[]) => void;
+  setCurrentConversation: (conversationId: string | null) => void;
+  
+  // Dashboard actions
+  setViewMode: (mode: UIState['dashboard']['viewMode']) => void;
+  setFilters: (filters: Record<string, unknown>) => void;
+  setSortBy: (sortBy: string) => void;
+  setSortOrder: (order: 'asc' | 'desc') => void;
+  
+  // Notification actions
+  setNotificationEnabled: (enabled: boolean) => void;
+  setNotificationSound: (sound: boolean) => void;
+  setDesktopNotifications: (desktop: boolean) => void;
+  
+  // Utility actions
   reset: () => void;
-  exportSettings: () => string;
-  importSettings: (settings: string) => void;
 }
 
 export interface UIStore extends UIState, UIActions {}
 
 const INITIAL_STATE: UIState = {
-  // Layout
   sidebarOpen: true,
   sidebarCollapsed: false,
-  headerVisible: true,
-  footerVisible: true,
-
-  // Theme and appearance
+  modals: {
+    createEmployee: false,
+    createProject: false,
+    settings: false,
+    billing: false,
+    help: false,
+  },
   theme: 'system',
-  primaryColor: '#0ea5e9', // sky-500
-  fontSize: 'base',
-  density: 'comfortable',
-  reducedMotion: false,
-
-  // Modals
-  modals: {},
-  modalStack: [],
-
-  // Drawers
-  drawers: {},
-  activeDrawers: [],
-
-  // Loading states
-  globalLoading: false,
-  loadingMessage: '',
-
-  // Focus management
-  focusedElement: null,
-  focusTrap: false,
-
-  // Responsive breakpoints
-  breakpoint: 'lg',
-  isMobile: false,
-  isTablet: false,
-  isDesktop: true,
-
-  // Command palette
-  commandPaletteOpen: false,
-  commandQuery: '',
-
-  // Quick actions
-  quickActionsOpen: false,
-
-  // Preferences
-  animations: true,
-  soundEffects: true,
-  keyboardShortcuts: true,
-  tooltips: true,
-  confirmDestructive: true,
-
-  // Developer tools
-  devToolsOpen: false,
-  debugMode: false,
+  chatInterface: {
+    showTools: false,
+    selectedTools: [],
+    currentConversation: null,
+  },
+  dashboard: {
+    viewMode: 'grid',
+    filters: {},
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  },
+  notifications: {
+    enabled: true,
+    sound: true,
+    desktop: true,
+  },
 };
 
 export const useUIStore = create<UIStore>()(
@@ -201,7 +118,7 @@ export const useUIStore = create<UIStore>()(
       immer((set, get) => ({
         ...INITIAL_STATE,
 
-        // Layout
+        // Sidebar actions
         toggleSidebar: () =>
           set((state) => {
             state.sidebarOpen = !state.sidebarOpen;
@@ -212,257 +129,103 @@ export const useUIStore = create<UIStore>()(
             state.sidebarOpen = open;
           }),
 
-        toggleSidebarCollapsed: () =>
-          set((state) => {
-            state.sidebarCollapsed = !state.sidebarCollapsed;
-          }),
-
         setSidebarCollapsed: (collapsed: boolean) =>
           set((state) => {
             state.sidebarCollapsed = collapsed;
           }),
 
-        setHeaderVisible: (visible: boolean) =>
+        // Modal actions
+        openModal: (modal: keyof UIState['modals']) =>
           set((state) => {
-            state.headerVisible = visible;
+            state.modals[modal] = true;
           }),
 
-        setFooterVisible: (visible: boolean) =>
+        closeModal: (modal: keyof UIState['modals']) =>
           set((state) => {
-            state.footerVisible = visible;
+            state.modals[modal] = false;
           }),
 
-        // Theme and appearance
+        closeAllModals: () =>
+          set((state) => {
+            Object.keys(state.modals).forEach((key) => {
+              state.modals[key as keyof UIState['modals']] = false;
+            });
+          }),
+
+        // Theme actions
         setTheme: (theme: UIState['theme']) =>
           set((state) => {
             state.theme = theme;
           }),
 
-        setPrimaryColor: (color: string) =>
+        // Chat interface actions
+        toggleChatTools: () =>
           set((state) => {
-            state.primaryColor = color;
+            state.chatInterface.showTools = !state.chatInterface.showTools;
           }),
 
-        setFontSize: (size: UIState['fontSize']) =>
+        setSelectedTools: (tools: string[]) =>
           set((state) => {
-            state.fontSize = size;
+            state.chatInterface.selectedTools = tools;
           }),
 
-        setDensity: (density: UIState['density']) =>
+        setCurrentConversation: (conversationId: string | null) =>
           set((state) => {
-            state.density = density;
+            state.chatInterface.currentConversation = conversationId;
           }),
 
-        setReducedMotion: (reduced: boolean) =>
+        // Dashboard actions
+        setViewMode: (mode: UIState['dashboard']['viewMode']) =>
           set((state) => {
-            state.reducedMotion = reduced;
+            state.dashboard.viewMode = mode;
           }),
 
-        // Modals
-        openModal: (modalData: Omit<Modal, 'id'>) => {
-          const id = crypto.randomUUID();
-
+        setFilters: (filters: Record<string, unknown>) =>
           set((state) => {
-            const modal: Modal = {
-              ...modalData,
-              id,
-            };
-
-            state.modals[id] = modal;
-            state.modalStack.push(id);
-          });
-
-          return id;
-        },
-
-        closeModal: (id: string) =>
-          set((state) => {
-            const modal = state.modals[id];
-            if (modal) {
-              if (modal.onClose) {
-                modal.onClose();
-              }
-              delete state.modals[id];
-              state.modalStack = state.modalStack.filter((modalId) => modalId !== id);
-            }
+            state.dashboard.filters = filters;
           }),
 
-        closeAllModals: () =>
+        setSortBy: (sortBy: string) =>
           set((state) => {
-            Object.values(state.modals).forEach((modal) => {
-              if (modal.onClose) modal.onClose();
-            });
-            state.modals = {};
-            state.modalStack = [];
+            state.dashboard.sortBy = sortBy;
           }),
 
-        closeTopModal: () => {
-          const { modalStack } = get();
-          if (modalStack.length > 0) {
-            const topModalId = modalStack[modalStack.length - 1];
-            get().closeModal(topModalId);
-          }
-        },
-
-        // Drawers
-        openDrawer: (drawerData: Omit<Drawer, 'id'>) => {
-          const id = crypto.randomUUID();
-
+        setSortOrder: (order: 'asc' | 'desc') =>
           set((state) => {
-            const drawer: Drawer = {
-              ...drawerData,
-              id,
-            };
-
-            state.drawers[id] = drawer;
-            state.activeDrawers.push(id);
-          });
-
-          return id;
-        },
-
-        closeDrawer: (id: string) =>
-          set((state) => {
-            const drawer = state.drawers[id];
-            if (drawer) {
-              if (drawer.onClose) {
-                drawer.onClose();
-              }
-              delete state.drawers[id];
-              state.activeDrawers = state.activeDrawers.filter((drawerId) => drawerId !== id);
-            }
+            state.dashboard.sortOrder = order;
           }),
 
-        closeAllDrawers: () =>
+        // Notification actions
+        setNotificationEnabled: (enabled: boolean) =>
           set((state) => {
-            Object.values(state.drawers).forEach((drawer) => {
-              if (drawer.onClose) drawer.onClose();
-            });
-            state.drawers = {};
-            state.activeDrawers = [];
+            state.notifications.enabled = enabled;
           }),
 
-        // Loading states
-        setGlobalLoading: (loading: boolean, message = '') =>
+        setNotificationSound: (sound: boolean) =>
           set((state) => {
-            state.globalLoading = loading;
-            state.loadingMessage = message;
+            state.notifications.sound = sound;
           }),
 
-        // Focus management
-        setFocusedElement: (element: string | null) =>
+        setDesktopNotifications: (desktop: boolean) =>
           set((state) => {
-            state.focusedElement = element;
+            state.notifications.desktop = desktop;
           }),
 
-        setFocusTrap: (trapped: boolean) =>
-          set((state) => {
-            state.focusTrap = trapped;
-          }),
-
-        // Responsive
-        setBreakpoint: (breakpoint: UIState['breakpoint']) =>
-          set((state) => {
-            state.breakpoint = breakpoint;
-            get().updateResponsiveFlags();
-          }),
-
-        updateResponsiveFlags: () =>
-          set((state) => {
-            const { breakpoint } = state;
-            state.isMobile = breakpoint === 'xs' || breakpoint === 'sm';
-            state.isTablet = breakpoint === 'md';
-            state.isDesktop = breakpoint === 'lg' || breakpoint === 'xl' || breakpoint === '2xl';
-          }),
-
-        // Command palette
-        openCommandPalette: () =>
-          set((state) => {
-            state.commandPaletteOpen = true;
-            state.commandQuery = '';
-          }),
-
-        closeCommandPalette: () =>
-          set((state) => {
-            state.commandPaletteOpen = false;
-            state.commandQuery = '';
-          }),
-
-        setCommandQuery: (query: string) =>
-          set((state) => {
-            state.commandQuery = query;
-          }),
-
-        // Quick actions
-        toggleQuickActions: () =>
-          set((state) => {
-            state.quickActionsOpen = !state.quickActionsOpen;
-          }),
-
-        // Preferences
-        updatePreferences: (preferences) =>
-          set((state) => {
-            Object.assign(state, preferences);
-          }),
-
-        // Developer tools
-        toggleDevTools: () =>
-          set((state) => {
-            state.devToolsOpen = !state.devToolsOpen;
-          }),
-
-        setDebugMode: (enabled: boolean) =>
-          set((state) => {
-            state.debugMode = enabled;
-          }),
-
-        // Utility
+        // Utility actions
         reset: () =>
           set((state) => {
             Object.assign(state, INITIAL_STATE);
           }),
-
-        exportSettings: () => {
-          const { theme, primaryColor, fontSize, density, animations, soundEffects, keyboardShortcuts, tooltips, confirmDestructive } = get();
-          return JSON.stringify({
-            theme,
-            primaryColor,
-            fontSize,
-            density,
-            animations,
-            soundEffects,
-            keyboardShortcuts,
-            tooltips,
-            confirmDestructive,
-          });
-        },
-
-        importSettings: (settingsJson: string) => {
-          try {
-            const settings = JSON.parse(settingsJson);
-            set((state) => {
-              Object.assign(state, settings);
-            });
-          } catch (error) {
-            console.error('Failed to import settings:', error);
-          }
-        },
       })),
       {
         name: 'agi-ui-store',
         version: 1,
         partialize: (state) => ({
+          sidebarOpen: state.sidebarOpen,
           sidebarCollapsed: state.sidebarCollapsed,
           theme: state.theme,
-          primaryColor: state.primaryColor,
-          fontSize: state.fontSize,
-          density: state.density,
-          reducedMotion: state.reducedMotion,
-          animations: state.animations,
-          soundEffects: state.soundEffects,
-          keyboardShortcuts: state.keyboardShortcuts,
-          tooltips: state.tooltips,
-          confirmDestructive: state.confirmDestructive,
+          dashboard: state.dashboard,
+          notifications: state.notifications,
         }),
       }
     ),
@@ -474,51 +237,12 @@ export const useUIStore = create<UIStore>()(
 
 // Selectors for optimized re-renders
 export const useSidebar = () => useUIStore((state) => ({
-  isOpen: state.sidebarOpen,
-  isCollapsed: state.sidebarCollapsed,
+  sidebarOpen: state.sidebarOpen,
+  sidebarCollapsed: state.sidebarCollapsed,
 }));
 
-export const useTheme = () => useUIStore((state) => ({
-  theme: state.theme,
-  primaryColor: state.primaryColor,
-  fontSize: state.fontSize,
-  density: state.density,
-  reducedMotion: state.reducedMotion,
-}));
-
-export const useModals = () => useUIStore((state) => ({
-  modals: Object.values(state.modals),
-  modalStack: state.modalStack,
-  hasModals: state.modalStack.length > 0,
-}));
-
-export const useDrawers = () => useUIStore((state) => ({
-  drawers: Object.values(state.drawers),
-  activeDrawers: state.activeDrawers,
-  hasDrawers: state.activeDrawers.length > 0,
-}));
-
-export const useResponsive = () => useUIStore((state) => ({
-  breakpoint: state.breakpoint,
-  isMobile: state.isMobile,
-  isTablet: state.isTablet,
-  isDesktop: state.isDesktop,
-}));
-
-export const useCommandPalette = () => useUIStore((state) => ({
-  isOpen: state.commandPaletteOpen,
-  query: state.commandQuery,
-}));
-
-export const useGlobalLoading = () => useUIStore((state) => ({
-  isLoading: state.globalLoading,
-  message: state.loadingMessage,
-}));
-
-export const usePreferences = () => useUIStore((state) => ({
-  animations: state.animations,
-  soundEffects: state.soundEffects,
-  keyboardShortcuts: state.keyboardShortcuts,
-  tooltips: state.tooltips,
-  confirmDestructive: state.confirmDestructive,
-}));
+export const useModals = () => useUIStore((state) => state.modals);
+export const useTheme = () => useUIStore((state) => state.theme);
+export const useChatInterface = () => useUIStore((state) => state.chatInterface);
+export const useDashboard = () => useUIStore((state) => state.dashboard);
+export const useNotifications = () => useUIStore((state) => state.notifications);

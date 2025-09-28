@@ -5,10 +5,10 @@ import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
 import { 
-  Key, 
-  Plus, 
-  Search, 
-  Filter, 
+  Key,
+  Plus,
+  Search,
+  Filter,
   Copy,
   Eye,
   EyeOff,
@@ -104,26 +104,30 @@ const APIKeysPage: React.FC = () => {
       } catch (serviceError) {
         console.warn('Service failed, using default values:', serviceError);
         // Keep the default values we set above
+      } finally {
+        setLoading(false);
       }
-      
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setError('Failed to load data');
       setLoading(false);
     }
   }, []);
 
   const filterData = useCallback(() => {
     let filtered = data;
-    
+
     if (searchTerm) {
-      filtered = filtered.filter(key => 
+      filtered = filtered.filter(key =>
         key.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         key.key.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     if (statusFilter) {
       filtered = filtered.filter(key => key.status === statusFilter);
     }
-    
+
     setFilteredData(filtered);
   }, [data, searchTerm, statusFilter]);
 
@@ -206,9 +210,9 @@ const APIKeysPage: React.FC = () => {
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">API Keys</h1>
-          <p className="text-muted-foreground mt-2">
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">API Keys</h1>
+        <p className="text-muted-foreground mt-2">
             Manage your API keys for secure access to our services.
           </p>
         </div>
@@ -217,7 +221,7 @@ const APIKeysPage: React.FC = () => {
             <RefreshCw className="h-4 w-4" />
           </Button>
           <Button onClick={() => setShowCreateKey(true)}>
-            <Plus className="mr-2 h-4 w-4" />
+              <Plus className="mr-2 h-4 w-4" />
             Create API Key
           </Button>
         </div>
@@ -278,34 +282,34 @@ const APIKeysPage: React.FC = () => {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search API keys..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search API keys..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
         <div className="flex gap-2">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 border border-input rounded-md bg-background text-foreground"
-          >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-            <option value="expired">Expired</option>
-          </select>
-        </div>
-      </div>
+              >
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="expired">Expired</option>
+              </select>
+            </div>
+          </div>
 
       {/* API Keys List */}
       {filteredData.length > 0 ? (
-        <div className="space-y-4">
+      <div className="space-y-4">
           {filteredData.map((apiKey) => (
             <Card key={apiKey.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
@@ -326,7 +330,7 @@ const APIKeysPage: React.FC = () => {
                       {apiKey.status}
                     </Badge>
                   </div>
-                </div>
+                      </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -336,28 +340,28 @@ const APIKeysPage: React.FC = () => {
                       <div className="font-semibold">{formatDate(apiKey.created_at)}</div>
                     </div>
                     {apiKey.last_used && (
-                      <div>
+                    <div>
                         <span className="text-muted-foreground">Last Used</span>
                         <div className="font-semibold">{formatDate(apiKey.last_used)}</div>
-                      </div>
+                    </div>
                     )}
                     <div>
                       <span className="text-muted-foreground">Usage Count</span>
                       <div className="font-semibold">{apiKey.usage_count.toLocaleString()}</div>
                     </div>
                   </div>
-                  
+
                   {apiKey.permissions.length > 0 && (
                     <div>
                       <span className="text-sm text-muted-foreground">Permissions</span>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {apiKey.permissions.map((permission, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {permission}
-                          </Badge>
-                        ))}
-                      </div>
+                      {apiKey.permissions.map((permission, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {permission}
+                        </Badge>
+                      ))}
                     </div>
+                  </div>
                   )}
                   
                   <div className="flex justify-end space-x-2">
@@ -414,7 +418,7 @@ const APIKeysPage: React.FC = () => {
                 <div>
                   <label className="text-sm font-medium">Key Name</label>
                   <Input placeholder="Enter key name" />
-                </div>
+                        </div>
                 
                 <div>
                   <label className="text-sm font-medium">Permissions</label>
@@ -422,12 +426,12 @@ const APIKeysPage: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       <input type="checkbox" id="read" />
                       <label htmlFor="read" className="text-sm">Read Access</label>
-                    </div>
+                        </div>
                     <div className="flex items-center space-x-2">
                       <input type="checkbox" id="write" />
                       <label htmlFor="write" className="text-sm">Write Access</label>
                     </div>
-                    <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2">
                       <input type="checkbox" id="admin" />
                       <label htmlFor="admin" className="text-sm">Admin Access</label>
                     </div>
@@ -437,8 +441,8 @@ const APIKeysPage: React.FC = () => {
                 <div>
                   <label className="text-sm font-medium">Expiration (Optional)</label>
                   <Input type="date" />
-                </div>
-                
+              </div>
+
                 <div className="flex justify-end space-x-4">
                   <Button variant="outline" onClick={() => setShowCreateKey(false)}>
                     Cancel
@@ -450,7 +454,7 @@ const APIKeysPage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+            </div>
       )}
     </div>
   );

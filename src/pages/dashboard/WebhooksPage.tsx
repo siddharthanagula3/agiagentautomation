@@ -104,26 +104,30 @@ const WebhooksPage: React.FC = () => {
       } catch (serviceError) {
         console.warn('Service failed, using default values:', serviceError);
         // Keep the default values we set above
+      } finally {
+        setLoading(false);
       }
-      
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setError('Failed to load data');
       setLoading(false);
     }
   }, []);
 
   const filterData = useCallback(() => {
     let filtered = data;
-    
+
     if (searchTerm) {
-      filtered = filtered.filter(webhook => 
+      filtered = filtered.filter(webhook =>
         webhook.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         webhook.url.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     if (statusFilter) {
       filtered = filtered.filter(webhook => webhook.status === statusFilter);
     }
-    
+
     setFilteredData(filtered);
   }, [data, searchTerm, statusFilter]);
 
@@ -203,9 +207,9 @@ const WebhooksPage: React.FC = () => {
           </p>
         </div>
         <Button onClick={() => setShowCreateWebhook(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Webhook
-        </Button>
+              <Plus className="mr-2 h-4 w-4" />
+            Create Webhook
+          </Button>
       </div>
 
       {/* Stats */}
@@ -263,42 +267,42 @@ const WebhooksPage: React.FC = () => {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search webhooks..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search webhooks..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
         <div className="flex gap-2">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 border border-input rounded-md bg-background text-foreground"
-          >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+              >
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
             <option value="error">Error</option>
-          </select>
-        </div>
-      </div>
+              </select>
+            </div>
+          </div>
 
       {/* Webhooks List */}
       {filteredData.length > 0 ? (
-        <div className="space-y-4">
+      <div className="space-y-4">
           {filteredData.map((webhook) => (
             <Card key={webhook.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                       <Webhook className="h-5 w-5 text-primary-foreground" />
-                    </div>
+                      </div>
                     <div>
                       <CardTitle className="text-lg">{webhook.name}</CardTitle>
                       <CardDescription className="font-mono text-sm">{webhook.url}</CardDescription>
@@ -311,8 +315,8 @@ const WebhooksPage: React.FC = () => {
                         <span className="capitalize">{webhook.status}</span>
                       </div>
                     </Badge>
-                  </div>
-                </div>
+                      </div>
+                    </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -333,19 +337,19 @@ const WebhooksPage: React.FC = () => {
                       <span className="text-muted-foreground">Last Triggered</span>
                       <div className="font-semibold">
                         {webhook.last_triggered ? formatDate(webhook.last_triggered) : 'Never'}
-                      </div>
+                    </div>
                     </div>
                   </div>
-                  
+
                   {webhook.events.length > 0 && (
                     <div>
                       <span className="text-sm text-muted-foreground">Events</span>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {webhook.events.map((event, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {event}
-                          </Badge>
-                        ))}
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {event}
+                        </Badge>
+                      ))}
                       </div>
                     </div>
                   )}
@@ -375,7 +379,7 @@ const WebhooksPage: React.FC = () => {
           <p className="text-muted-foreground">
             Try adjusting your search or filter criteria.
           </p>
-        </div>
+                      </div>
       ) : null}
 
       {/* Create Webhook Modal */}
@@ -390,17 +394,17 @@ const WebhooksPage: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div>
+                      <div>
                   <label className="text-sm font-medium">Name</label>
                   <Input placeholder="Enter webhook name" />
-                </div>
+                      </div>
                 
-                <div>
+                      <div>
                   <label className="text-sm font-medium">URL</label>
                   <Input placeholder="https://example.com/webhook" />
-                </div>
+                      </div>
                 
-                <div>
+                      <div>
                   <label className="text-sm font-medium">Events</label>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
@@ -410,8 +414,8 @@ const WebhooksPage: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       <input type="checkbox" id="job-completed" />
                       <label htmlFor="job-completed" className="text-sm">Job Completed</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
+                  </div>
+                  <div className="flex items-center space-x-2">
                       <input type="checkbox" id="employee-added" />
                       <label htmlFor="employee-added" className="text-sm">Employee Added</label>
                     </div>
@@ -429,7 +433,7 @@ const WebhooksPage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+      </div>
       )}
     </div>
   );

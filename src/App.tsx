@@ -9,6 +9,7 @@ import { DashboardLayout } from './layouts/DashboardLayout';
 import Dashboard from './pages/dashboard/Dashboard';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';
+import { AIEmployeeDemo } from './pages/demo/AIEmployeeDemo';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       {/* Public Routes */}
       <Route path="/" element={<PublicLayout />}>
         <Route index element={<LandingPage />} />
+        <Route path="demo" element={<AIEmployeeDemo />} />
       </Route>
 
       {/* Auth Routes */}

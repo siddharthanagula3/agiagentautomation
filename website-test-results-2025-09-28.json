@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-09-28T07:14:29.705Z",
+  "timestamp": "2025-09-28T07:42:08.507Z",
   "tests": [
     {
       "name": "Homepage Load",
       "status": "FAILED",
-      "loadTime": 1566,
+      "loadTime": 1511,
       "title": "AGI Agent Automation - Loading...",
       "url": "https://agiagentautomation.com/",
       "reactMounted": false,
@@ -12,13 +12,13 @@
         {
           "type": "console_error",
           "message": "Global error caught: JSHandle@object",
-          "timestamp": "2025-09-28T07:14:32.067Z"
+          "timestamp": "2025-09-28T07:42:11.914Z"
         },
         {
           "type": "page_error",
           "message": "__name is not a function",
-          "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-PwsPGCK9.js:1:3293)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase-S4aGxRoX.js:1:8603)",
-          "timestamp": "2025-09-28T07:14:32.069Z"
+          "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-Un3k6SLT.js:1:3293)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase--Dfc5QwF.js:1:8603)",
+          "timestamp": "2025-09-28T07:42:11.916Z"
         }
       ]
     }
@@ -27,27 +27,27 @@
     {
       "type": "console_error",
       "message": "Global error caught: JSHandle@object",
-      "timestamp": "2025-09-28T07:14:32.067Z"
+      "timestamp": "2025-09-28T07:42:11.914Z"
     },
     {
       "type": "page_error",
       "message": "__name is not a function",
-      "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-PwsPGCK9.js:1:3293)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase-S4aGxRoX.js:1:8603)",
-      "timestamp": "2025-09-28T07:14:32.069Z"
+      "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-Un3k6SLT.js:1:3293)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase--Dfc5QwF.js:1:8603)",
+      "timestamp": "2025-09-28T07:42:11.916Z"
     }
   ],
   "performance": {
-    "timestamp": 37891.528333,
+    "timestamp": 39551.344889,
     "documents": 3,
     "frames": 1,
     "jsEventListeners": 4,
     "layoutCount": 3,
     "recalcStyleCount": 3,
-    "layoutDuration": 0.073361,
-    "recalcStyleDuration": 0.003928,
-    "scriptDuration": 0.013219,
-    "taskDuration": 0.144906,
-    "jsHeapUsedSize": 2075592,
+    "layoutDuration": 0.077699,
+    "recalcStyleDuration": 0.004073,
+    "scriptDuration": 0.017147,
+    "taskDuration": 0.18208,
+    "jsHeapUsedSize": 2083152,
     "jsHeapTotalSize": 3145728
   },
   "summary": {
@@ -57,6 +57,6 @@
     "loadingIssues": 0,
     "successRate": "0%",
     "criticalErrors": 2,
-    "timestamp": "2025-09-28T07:14:32.771Z"
+    "timestamp": "2025-09-28T07:42:12.647Z"
   }
 }

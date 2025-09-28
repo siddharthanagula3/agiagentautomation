@@ -31,11 +31,7 @@ const LoginPage: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
+  // Authentication redirect logic is now handled by ProtectedRoute
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

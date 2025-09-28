@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useAuthStore } from '../../stores/unified-auth-store';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,12 +8,12 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole = 'user' }) => {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuthStore();
   const [timeoutReached, setTimeoutReached] = useState(false);
 
   // Set up timeout to prevent infinite loading
   useEffect(() => {
-    if (loading) {
+    if (isLoading) {
       const timeout = setTimeout(() => {
         console.error('ProtectedRoute: Auth loading timed out, redirecting to login');
         setTimeoutReached(true);
@@ -23,9 +23,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     } else {
       setTimeoutReached(false);
     }
-  }, [loading]);
+  }, [isLoading]);
 
-  console.log('🛡️ ProtectedRoute render:', { hasUser: !!user, loading, timeoutReached, userEmail: user?.email });
+  console.log('🛡️ ProtectedRoute render:', { hasUser: !!user, isLoading, timeoutReached, userEmail: user?.email });
 
   // If we have a user, allow access (check role if needed)
   if (user) {
@@ -46,7 +46,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
   }
 
   // If we're still loading and haven't timed out, show loading spinner
-  if (loading && !timeoutReached) {
+  if (isLoading && !timeoutReached) {
     console.log('⏳ Still loading, showing spinner');
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -56,11 +56,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
   }
 
   // Immediately redirect if timeout reached
-  if (timeoutReached || (!loading && !user)) {
+  if (timeoutReached || (!isLoading && !user)) {
     return <Navigate to="/auth/login" replace />;
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

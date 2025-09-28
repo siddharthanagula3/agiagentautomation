@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useAuth } from '../../stores/unified-auth-store';
 import { jobsService } from '../../services/jobsService';
 import { agentsService } from '../../services/agentsService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
@@ -47,9 +47,9 @@ interface JobFile {
 }
 
 const WorkforcePage: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setisLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -77,14 +77,14 @@ const WorkforcePage: React.FC = () => {
   useEffect(() => {
     if (user) {
       loadData();
-      const timeout = setTimeout(() => setLoading(false), 8000);
+      const timeout = setTimeout(() => setisLoading(false), 8000);
       return () => clearTimeout(timeout);
     }
   }, [user]);
 
   const loadData = useCallback(async () => {
     try {
-      setLoading(true);
+      setisLoading(true);
       setError(null);
       
       // Set default values immediately for new users
@@ -128,12 +128,12 @@ const WorkforcePage: React.FC = () => {
         console.warn('Service failed, using default values:', serviceError);
         // Keep the default values we set above
       } finally {
-        setLoading(false);
+        setisLoading(false);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error isLoading data:', error);
       setError('Failed to load data');
-      setLoading(false);
+      setisLoading(false);
     }
   }, []);
 
@@ -141,11 +141,11 @@ const WorkforcePage: React.FC = () => {
     // TODO: Implement filtering logic
   }, []);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Loading...</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-2">isLoading...</h3>
           <p className="text-muted-foreground">Please wait while we load your workforce data.</p>
         </div>
       </div>
@@ -281,12 +281,12 @@ const WorkforcePage: React.FC = () => {
     return `${Math.floor(diffInMinutes / 1440)} days ago`;
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <span className="text-muted-foreground">Loading workforce...</span>
+          <span className="text-muted-foreground">isLoading workforce...</span>
         </div>
       </div>
     );
@@ -306,7 +306,7 @@ const WorkforcePage: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Empty state for new users */}
-      {jobs.length === 0 && !loading && (
+      {jobs.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
             <span className="text-2xl">📊</span>

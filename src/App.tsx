@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+// AuthProvider removed - using Zustand store directly
 import { PublicLayout } from './layouts/PublicLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { AuthLayout } from './layouts/AuthLayout';
@@ -69,7 +69,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
+    <>
       <HideLoader />
       <DemoModeBanner />
       <Suspense fallback={<LoadingFallback />}>
@@ -131,7 +131,7 @@ const App: React.FC = () => {
       </Suspense>
       <RealtimeNotification />
       <AuthDebugger />
-    </AuthProvider>
+    </>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useAuthStore } from '../../stores/unified-auth-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -35,7 +35,7 @@ interface AnalyticsData {
 }
 
 const AnalyticsPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
 

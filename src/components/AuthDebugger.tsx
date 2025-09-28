@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '../contexts/auth-hooks';
+import { useAuthStore } from '../stores/unified-auth-store';
 
 const AuthDebugger = () => {
-  const { loading, user } = useAuth();
+  const { isLoading, user } = useAuthStore();
   const [debugInfo, setDebugInfo] = useState({
     authLoading: true,
     hasUser: false,
@@ -22,7 +22,7 @@ const AuthDebugger = () => {
                        supabaseKey.includes('your_supabase_anon_key_here');
 
     setDebugInfo({
-      authLoading: loading,
+      authLoading: isLoading,
       hasUser: !!user,
       supabaseUrl: supabaseUrl ? 'Set' : 'Not set',
       supabaseKey: supabaseKey ? 'Set' : 'Not set',

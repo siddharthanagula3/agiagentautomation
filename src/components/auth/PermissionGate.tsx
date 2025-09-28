@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useAuth } from '../../stores/unified-auth-store';
 
 interface PermissionGateProps {
   permissions?: string[];
@@ -16,7 +16,7 @@ const PermissionGate: React.FC<PermissionGateProps> = ({
   fallback = null,
   children
 }) => {
-  const { checkPermission, hasRole, isAuthenticated } = useAuth();
+  const { checkPermission, hasRole, isAuthenticated } = useAuthStore();
 
   if (!isAuthenticated) {
     return <>{fallback}</>;

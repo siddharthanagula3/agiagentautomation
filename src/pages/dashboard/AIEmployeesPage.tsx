@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useAuth } from '../../stores/unified-auth-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -26,8 +26,8 @@ interface AIAgent {
 }
 
 const AIEmployeesPage: React.FC = () => {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuthStore();
+  const [isLoading, setisLoading] = useState(false);
   const [agents, setAgents] = useState<AIAgent[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState({
@@ -40,7 +40,7 @@ const AIEmployeesPage: React.FC = () => {
   });
 
   useEffect(() => {
-    setLoading(true);
+    setisLoading(true);
     
     // Set default values immediately
     setAgents([]);
@@ -55,7 +55,7 @@ const AIEmployeesPage: React.FC = () => {
     
     // Simulate API call
     setTimeout(() => {
-      setLoading(false);
+      setisLoading(false);
     }, 1000);
   }, []);
 
@@ -64,7 +64,7 @@ const AIEmployeesPage: React.FC = () => {
     agent.role.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

@@ -5,7 +5,7 @@
 
 import { apiClient } from './api';
 import { APIResponse } from '@/stores/query-client';
-import { User } from '@/stores/auth-store';
+import { AuthUser } from '@/stores/unified-auth-store';
 
 // ========================================
 // Types and Interfaces
@@ -499,7 +499,7 @@ export class AuthService {
 // ========================================
 
 import React, { useEffect, useState } from 'react';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAuthStore } from '@/stores/unified-auth-store';
 
 interface AuthGuardProps {
   children: React.ReactNode;

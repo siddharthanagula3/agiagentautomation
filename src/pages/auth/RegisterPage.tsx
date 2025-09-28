@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useAuth } from '../../stores/unified-auth-store';
 import { 
   Bot, 
   Mail, 
@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 const RegisterPage: React.FC = () => {
-  const { register } = useAuth();
+  const { register } = useAuthStore();
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -32,30 +32,30 @@ const RegisterPage: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isisLoading, setIsisLoading] = useState(false);
   const [error, setError] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsisLoading(true);
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
-      setIsLoading(false);
+      setIsisLoading(false);
       return;
     }
 
     if (!acceptTerms) {
       setError('Please accept the terms and conditions');
-      setIsLoading(false);
+      setIsisLoading(false);
       return;
     }
 
     // Add timeout protection for registration
     const timeoutId = setTimeout(() => {
-      setIsLoading(false);
+      setIsisLoading(false);
       setError('Registration timeout. Please try again.');
     }, 15000); // 15 second timeout
 
@@ -80,14 +80,14 @@ const RegisterPage: React.FC = () => {
         } else {
           setError(result.error || 'Registration failed. Please try again.');
         }
-        setIsLoading(false);
+        setIsisLoading(false);
         return;
       }
     } catch (err) {
       clearTimeout(timeoutId);
       setError('An unexpected error occurred. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsisLoading(false);
     }
   };
 
@@ -276,8 +276,8 @@ const RegisterPage: React.FC = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
+              <Button type="submit" className="w-full" disabled={isisLoading}>
+                {isisLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>Creating account...</span>

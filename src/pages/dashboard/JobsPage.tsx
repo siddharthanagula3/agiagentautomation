@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useAuth } from '../../stores/unified-auth-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -29,8 +29,8 @@ interface Job {
 }
 
 const JobsPage: React.FC = () => {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuthStore();
+  const [isLoading, setisLoading] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState({
@@ -43,7 +43,7 @@ const JobsPage: React.FC = () => {
   });
 
   useEffect(() => {
-    setLoading(true);
+    setisLoading(true);
     
     // Set default values immediately
     setJobs([]);
@@ -58,7 +58,7 @@ const JobsPage: React.FC = () => {
     
     // Simulate API call
     setTimeout(() => {
-      setLoading(false);
+      setisLoading(false);
     }, 1000);
   }, []);
 
@@ -93,7 +93,7 @@ const JobsPage: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useAuth } from '../../stores/unified-auth-store';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
-import LoadingSpinner from '../ui/loading-spinner';
+import isLoadingSpinner from '../ui/isLoading-spinner';
 
 const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +14,7 @@ const LoginForm: React.FC = () => {
   });
   const [error, setError] = useState('');
 
-  const { login, loading } = useAuth();
+  const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -131,11 +131,11 @@ const LoginForm: React.FC = () => {
           <div>
             <Button
               type="submit"
-              disabled={loading}
+              disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (
-                <LoadingSpinner size="sm" />
+              {isLoading ? (
+                <isLoadingSpinner size="sm" />
               ) : (
                 'Sign in'
               )}

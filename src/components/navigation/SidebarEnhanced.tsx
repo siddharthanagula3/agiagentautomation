@@ -7,7 +7,7 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/stores/ui-store';
-import { useAuth } from '@/stores/auth-store-v2';
+import { useAuthStore } from '@/stores/unified-auth-store';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -133,7 +133,7 @@ const quickActions = [
 
 export const SidebarEnhanced: React.FC = () => {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const { sidebarOpen, sidebarCollapsed, setSidebarOpen, setSidebarCollapsed } = useSidebar();
 
   const handleLogout = () => {

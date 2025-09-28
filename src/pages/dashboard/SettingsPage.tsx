@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useAuth } from '../../stores/unified-auth-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
@@ -22,8 +22,8 @@ interface UserSettings {
 }
 
 const SettingsPage: React.FC = () => {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuthStore();
+  const [isLoading, setisLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -37,7 +37,7 @@ const SettingsPage: React.FC = () => {
 
   const loadSettings = useCallback(async () => {
     try {
-      setLoading(true);
+      setisLoading(true);
       setError(null);
       
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -52,10 +52,10 @@ const SettingsPage: React.FC = () => {
       setSettings(defaultSettings);
       
     } catch (err) {
-      console.error('Error loading settings:', err);
+      console.error('Error isLoading settings:', err);
       setError('Failed to load settings. Please try again.');
     } finally {
-      setLoading(false);
+      setisLoading(false);
     }
   }, []);
 
@@ -78,12 +78,12 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <span className="text-muted-foreground">Loading...</span>
+          <span className="text-muted-foreground">isLoading...</span>
         </div>
       </div>
     );

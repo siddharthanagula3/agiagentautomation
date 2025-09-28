@@ -144,7 +144,7 @@ interface CompleteAIEmployeeChatProps {
 }
 
 const CompleteAIEmployeeChat: React.FC<CompleteAIEmployeeChatProps> = ({ employeeId }) => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const { 
     employees, 
     getEmployeeById, 
@@ -157,7 +157,7 @@ const CompleteAIEmployeeChat: React.FC<CompleteAIEmployeeChatProps> = ({ employe
   const [employee, setEmployee] = useState<AIEmployee | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isisLoading, setIsisLoading] = useState(false);
   const [availableTools, setAvailableTools] = useState<ToolDefinition[]>([]);
   const [executionHistory, setExecutionHistory] = useState<ExecutionHistory[]>([]);
   const [selectedTool, setSelectedTool] = useState<string>('');
@@ -177,7 +177,7 @@ const CompleteAIEmployeeChat: React.FC<CompleteAIEmployeeChatProps> = ({ employe
           setAvailableTools(emp.tools || []);
         }
       } catch (error) {
-        console.error('Error loading employee:', error);
+        console.error('Error isLoading employee:', error);
         toast.error('Failed to load employee data');
       }
     };
@@ -194,7 +194,7 @@ const CompleteAIEmployeeChat: React.FC<CompleteAIEmployeeChatProps> = ({ employe
         const history = await getChatHistory(user.id, employeeId);
         setMessages(history);
       } catch (error) {
-        console.error('Error loading chat history:', error);
+        console.error('Error isLoading chat history:', error);
       }
     };
 
@@ -210,7 +210,7 @@ const CompleteAIEmployeeChat: React.FC<CompleteAIEmployeeChatProps> = ({ employe
         const history = await getExecutionHistory(user.id, employeeId);
         setExecutionHistory(history);
       } catch (error) {
-        console.error('Error loading execution history:', error);
+        console.error('Error isLoading execution history:', error);
       }
     };
 
@@ -236,7 +236,7 @@ const CompleteAIEmployeeChat: React.FC<CompleteAIEmployeeChatProps> = ({ employe
 
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
-    setIsLoading(true);
+    setIsisLoading(true);
 
     try {
       const response = await sendMessage(user.id, employeeId, inputMessage);
@@ -282,7 +282,7 @@ const CompleteAIEmployeeChat: React.FC<CompleteAIEmployeeChatProps> = ({ employe
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
     } finally {
-      setIsLoading(false);
+      setIsisLoading(false);
     }
   };
 
@@ -315,7 +315,7 @@ const CompleteAIEmployeeChat: React.FC<CompleteAIEmployeeChatProps> = ({ employe
       <div className="flex items-center justify-center h-96">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading employee...</span>
+          <span>isLoading employee...</span>
         </div>
       </div>
     );
@@ -409,7 +409,7 @@ const CompleteAIEmployeeChat: React.FC<CompleteAIEmployeeChatProps> = ({ employe
                 </motion.div>
               ))}
               
-              {isLoading && (
+              {isisLoading && (
                 <div className="flex justify-start">
                   <div className="flex items-start space-x-2">
                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
@@ -438,12 +438,12 @@ const CompleteAIEmployeeChat: React.FC<CompleteAIEmployeeChatProps> = ({ employe
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your message..."
-                disabled={isLoading || isExecuting}
+                disabled={isisLoading || isExecuting}
                 className="flex-1"
               />
               <Button
                 onClick={handleSendMessage}
-                disabled={!inputMessage.trim() || isLoading || isExecuting}
+                disabled={!inputMessage.trim() || isisLoading || isExecuting}
                 size="sm"
               >
                 <Send className="h-4 w-4" />

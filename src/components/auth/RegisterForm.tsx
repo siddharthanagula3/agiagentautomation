@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useAuth } from '../../stores/unified-auth-store';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import LoadingSpinner from '../ui/loading-spinner';
+import isLoadingSpinner from '../ui/isLoading-spinner';
 const Component: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -14,7 +14,7 @@ const Component: React.FC = () => {
     company: ''
   });
 
-  const { register, isLoading } = useAuth();
+  const { register, isisLoading } = useAuthStore();
   const navigate = useNavigate();
 
   const validatePassword = (password: string): string[] => {
@@ -222,11 +222,11 @@ const Component: React.FC = () => {
           <div>
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isisLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
-                <LoadingSpinner size="sm" />
+              {isisLoading ? (
+                <isLoadingSpinner size="sm" />
               ) : (
                 'Create Account'
               )}

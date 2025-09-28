@@ -46,7 +46,7 @@ import {
   StarOff,
   StarHalf
 } from 'lucide-react';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAuthStore } from '@/stores/unified-auth-store';
 import { completeAIEmployeeService } from '@/services/complete-ai-employee-service';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';

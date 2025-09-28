@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Bot, Menu, Plus, Settings, User, Bell, Zap, Command, Search } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/auth-hooks';
+import { useAuth } from '../stores/unified-auth-store';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -85,7 +85,7 @@ const Header = ({
   className,
   'data-testid': dataTestId = 'header'
 }: HeaderProps) => {
-  const { logout } = useAuth();
+  const { logout } = useAuthStore();
   const navigate = useNavigate();
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   

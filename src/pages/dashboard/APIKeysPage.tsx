@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useAuth } from '../../stores/unified-auth-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -36,8 +36,8 @@ interface APIKey {
 }
 
 const APIKeysPage: React.FC = () => {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuthStore();
+  const [isLoading, setisLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<APIKey[]>([]);
   const [filteredData, setFilteredData] = useState<APIKey[]>([]);
@@ -61,7 +61,7 @@ const APIKeysPage: React.FC = () => {
 
   const loadData = useCallback(async () => {
     try {
-      setLoading(true);
+      setisLoading(true);
       setError(null);
       
       // Set default values immediately for new users
@@ -105,12 +105,12 @@ const APIKeysPage: React.FC = () => {
         console.warn('Service failed, using default values:', serviceError);
         // Keep the default values we set above
       } finally {
-        setLoading(false);
+        setisLoading(false);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error isLoading data:', error);
       setError('Failed to load data');
-      setLoading(false);
+      setisLoading(false);
     }
   }, []);
 
@@ -167,12 +167,12 @@ const APIKeysPage: React.FC = () => {
     setShowKeys(newShowKeys);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <span className="text-muted-foreground">Loading API keys...</span>
+          <span className="text-muted-foreground">isLoading API keys...</span>
         </div>
       </div>
     );
@@ -192,7 +192,7 @@ const APIKeysPage: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Empty state for new users */}
-      {data.length === 0 && !loading && (
+      {data.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
             <Key className="h-12 w-12 text-muted-foreground" />

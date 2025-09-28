@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { realtimeService } from '../services/realtimeService';
-import { useAuth } from '../contexts/auth-hooks';
+import { useAuth } from '../stores/unified-auth-store';
 
 export interface RealtimeCallbacks {
   onJobUpdate?: (job: unknown) => void;
@@ -12,7 +12,7 @@ export interface RealtimeCallbacks {
 }
 
 export const useRealtime = (callbacks: RealtimeCallbacks = {}) => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const initializedRef = useRef(false);
 
   useEffect(() => {

@@ -1,17 +1,23 @@
-import React, { useState, useEffect, ReactNode } from 'react';
-import { authService, type AuthUser } from '../services/authService';
-import { AuthContext, type AuthContextType } from './auth-context';
-import { supabase } from '../integrations/supabase/client';
+// Fix AuthContext Loading State Issue
+import fs from 'fs';
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+console.log('🔧 FIXING AUTH CONTEXT LOADING STATE');
+console.log('====================================');
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+class AuthContextFixer {
+  constructor() {
+    this.authContextFile = 'src/contexts/AuthContext.tsx';
+  }
 
-  
+  fixAuthContext() {
+    console.log('\n📊 STEP 1: Fixing AuthContext Loading State');
+    console.log('--------------------------------------------');
+    
+    try {
+      let content = fs.readFileSync(this.authContextFile, 'utf8');
+      
+      // Replace the entire useEffect with a more robust version
+      const newUseEffect = `
   useEffect(() => {
     let isMounted = true;
     let timeoutId: NodeJS.Timeout;
@@ -173,159 +179,51 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         subscription.unsubscribe();
       }
     };
-  }, []);
+  }, []);`;
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      console.log('Login attempt started for:', email);
-      setLoading(true);
+      // Replace the entire useEffect
+      content = content.replace(
+        /useEffect\(\(\) => \{[\s\S]*?\}, \[\]\);/,
+        newUseEffect
+      );
       
-      // Check if Supabase is configured properly
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      fs.writeFileSync(this.authContextFile, content);
+      console.log('✅ AuthContext fixed successfully');
+      return true;
       
-      const hasValidCredentials = supabaseUrl && 
-                                  supabaseKey && 
-                                  !supabaseUrl.includes('your_supabase_url_here') && 
-                                  !supabaseKey.includes('your_supabase_anon_key_here');
-      
-      if (!hasValidCredentials) {
-        console.warn('Supabase not configured - using demo mode');
-        setLoading(false);
-        
-        // Check for demo credentials
-        if (email === 'demo@example.com' && password === 'demo123') {
-          // Create a demo user for testing
-          const demoUser = {
-            id: 'demo-user-123',
-            email: email,
-            name: 'Demo User',
-            avatar: '',
-            role: 'user',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            last_login: new Date().toISOString(),
-            is_active: true,
-            preferences: {},
-            phone: '',
-            location: ''
-          };
-          setUser(demoUser);
-          return { success: true };
-        } else {
-          return { 
-            success: false, 
-            error: 'Demo mode active. Use demo@example.com / demo123 to login, or configure Supabase for full functionality.' 
-          };
-        }
-      }
-      
-      // Simple timeout to prevent infinite loading
-      const loginTimeout = setTimeout(() => {
-        console.warn('Login timeout - forcing loading to false');
-        setLoading(false);
-        clearTimeout(loginTimeout);
-      }, 8000); // 8 second timeout for login
-      
-      const { user: authUser, error } = await authService.login({ email, password });
-      
-      clearTimeout(loginTimeout);
-      console.log('Login result:', { authUser: !!authUser, error });
-      
-      if (error || !authUser) {
-        setLoading(false);
-        return { success: false, error: error || 'Login failed' };
-      }
-
-      setUser(authUser);
-      setLoading(false);
-      console.log('Login successful');
-      return { success: true };
     } catch (error) {
-      console.error('Login error:', error);
-      setLoading(false);
-      return { success: false, error: 'Login failed. Please try again.' };
+      console.error('❌ Error fixing AuthContext:', error.message);
+      return false;
     }
-  };
+  }
 
-  const register = async (userData: {
-    name: string;
-    email: string;
-    password: string;
-    company?: string;
-    phone?: string;
-    location?: string;
-  }): Promise<{ success: boolean; error?: string }> => {
+  async run() {
     try {
-      setLoading(true);
+      console.log('🚀 Starting AuthContext fix...');
       
-      const { user: authUser, error } = await authService.register({
-        email: userData.email,
-        password: userData.password,
-        name: userData.name,
-        company: userData.company,
-        phone: userData.phone,
-        location: userData.location,
-      });
+      const success = this.fixAuthContext();
       
-      if (error || !authUser) {
-        return { success: false, error: error || 'Registration failed' };
+      if (success) {
+        console.log('\n🎯 AUTH CONTEXT FIX COMPLETED!');
+        console.log('==============================');
+        console.log('✅ AuthContext loading state fixed');
+        console.log('✅ More robust error handling');
+        console.log('✅ Better timeout management');
+        console.log('✅ Always resolves loading state');
+      } else {
+        console.log('\n❌ AUTH CONTEXT FIX FAILED!');
+        console.log('============================');
+        console.log('❌ Could not fix AuthContext');
       }
-
-      setUser(authUser);
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: 'Registration failed. Please try again.' };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const logout = async (): Promise<void> => {
-    try {
-      console.log('AuthContext: Starting logout process...');
-      await authService.logout();
-      console.log('AuthContext: Logout successful, clearing user state');
-      setUser(null);
-      console.log('AuthContext: User state cleared');
-    } catch (error) {
-      console.error('AuthContext: Logout error:', error);
-      // Even if logout fails, clear the user state
-      setUser(null);
-    }
-  };
-
-  const updateProfile = async (updates: Partial<AuthUser>): Promise<{ success: boolean; error?: string }> => {
-    try {
-      if (!user) {
-        return { success: false, error: 'No user logged in' };
-      }
-
-      const { user: updatedUser, error } = await authService.updateProfile(user.id, updates);
       
-      if (error || !updatedUser) {
-        return { success: false, error: error || 'Update failed' };
-      }
-
-      setUser(updatedUser);
-      return { success: true };
     } catch (error) {
-      return { success: false, error: 'Update failed. Please try again.' };
+      console.error('❌ AuthContext fix failed:', error.message);
     }
-  };
+  }
+}
 
-  const value: AuthContextType = {
-    user,
-    login,
-    register,
-    logout,
-    updateProfile,
-    loading
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+// Run the AuthContext fixer
+const fixer = new AuthContextFixer();
+fixer.run().catch(error => {
+  console.error('❌ AuthContext fixer crashed:', error);
+});

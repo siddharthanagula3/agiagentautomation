@@ -46,7 +46,7 @@ interface BillingInfo {
 
 const BillingPage: React.FC = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [billing, setBilling] = useState<BillingInfo | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);

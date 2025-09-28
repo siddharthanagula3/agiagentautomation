@@ -25,7 +25,7 @@ import {
 
 const AnalyticsPage: React.FC = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [timeRange, setTimeRange] = useState('7d');

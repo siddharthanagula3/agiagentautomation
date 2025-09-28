@@ -33,7 +33,7 @@ type Job = Database['public']['Tables']['jobs']['Row'];
 
 const JobsPage: React.FC = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
@@ -67,6 +67,7 @@ const JobsPage: React.FC = () => {
   
   
   
+  
   const loadJobs = useCallback(async () => {
     if (!user) return;
     
@@ -82,16 +83,23 @@ const JobsPage: React.FC = () => {
         // Add other default stats here
       });
       
-      // Always resolve loading state quickly
-      setTimeout(() => {
-        setLoading(false);
-      }, 100);
+      // NEVER wait for services - always resolve immediately
+      setLoading(false);
       
     } catch (err) {
       console.error('Error loading data:', err);
       setLoading(false);
     }
   }, [user]);
+
+  // Override useEffect to always call loadData
+  useEffect(() => {
+    if (user) {
+      loadData();
+    } else {
+      setLoading(false);
+    }
+  }, [user, loadData]);
 
   const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();

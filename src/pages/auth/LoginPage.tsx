@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { useAuth } from '../../contexts/auth-hooks';
+import { useAuthStore } from '../../stores/unified-auth-store';
 import { 
   Bot, 
   Mail, 
@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
-  const { login, user, loading } = useAuth();
+  const { login, user, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
   
   // Check if we're in demo mode
@@ -33,18 +33,17 @@ const LoginPage: React.FC = () => {
     password: isDemoMode ? 'demo123' : ''
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [localError, setLocalError] = useState('');
 
   useEffect(() => {
     // If already authenticated, redirect away from login
-    if (!loading && user) {
+    if (!isLoading && user) {
       navigate('/dashboard', { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, isLoading, navigate]);
 
   // Show loading screen if auth is still loading
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/5 to-purple-500/5 flex items-center justify-center">
         <div className="text-center">
@@ -67,20 +66,18 @@ const LoginPage: React.FC = () => {
     }, 10000); // 10 second timeout
 
     try {
-      const result = await login(formData.email, formData.password);
+      const result = await login({ email: formData.email, password: formData.password });
       clearTimeout(timeoutId);
       
       if (result.success) {
         navigate('/dashboard');
       } else {
-        setError(result.error || 'Login failed. Please try again.');
-        setIsLoading(false);
+        setLocalError(result.error || 'Login failed. Please try again.');
       }
     } catch (err) {
       clearTimeout(timeoutId);
       console.error('Login error:', err);
-      setError('An unexpected error occurred. Please try again.');
-      setIsLoading(false);
+      setLocalError('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -103,7 +100,7 @@ const LoginPage: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-    if (error) setError('');
+    if (localError) setLocalError('');
   };
 
   return (
@@ -148,10 +145,10 @@ const LoginPage: React.FC = () => {
             )}
             
             <form id="login-form" onSubmit={handleSubmit} className="space-y-6">
-              {error && (
+              {(error || localError) && (
                 <div className="flex items-center space-x-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <span className="text-sm">{error}</span>
+                  <span className="text-sm">{error || localError}</span>
                 </div>
               )}
 

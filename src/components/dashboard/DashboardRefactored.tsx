@@ -1,249 +1,216 @@
-/**
- * Refactored Dashboard Component
- * Uses smaller, focused components for better maintainability
- */
-
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { 
-  DollarSign, 
-  Users, 
-  Bot, 
-  Activity, 
-  TrendingUp,
-  Clock,
-  CheckCircle,
-  AlertCircle
-} from 'lucide-react';
+import { useDashboardStats } from '../../hooks/useDashboardStats';
 import { StatCard } from './StatCard';
 import { RecentActivity } from './RecentActivity';
-import { QuickActions } from './QuickActions';
-import { useAuth } from '@/stores/auth-store-v2';
-import { useUIStore } from '@/stores/ui-store';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { 
+  Briefcase, 
+  Users, 
+  DollarSign, 
+  TrendingUp,
+  Plus,
+  Activity
+} from 'lucide-react';
 
-interface DashboardStats {
-  totalRevenue: number;
-  totalJobs: number;
-  activeJobs: number;
-  completedJobs: number;
-  totalEmployees: number;
-  activeEmployees: number;
-  totalProjects: number;
-  completedProjects: number;
+interface DashboardRefactoredProps {
+  onCreateJob?: () => void;
+  onCreateEmployee?: () => void;
+  onViewJobs?: () => void;
+  onViewEmployees?: () => void;
 }
 
-interface DashboardActivity {
-  id: string;
-  type: 'job' | 'employee' | 'system' | 'workforce';
-  title: string;
-  description: string;
-  status: 'completed' | 'running' | 'failed' | 'pending';
-  timestamp: Date;
-  user?: string;
-}
+export const DashboardRefactored: React.FC<DashboardRefactoredProps> = ({
+  onCreateJob,
+  onCreateEmployee,
+  onViewJobs,
+  onViewEmployees
+}) => {
+  const { stats, isLoading, error } = useDashboardStats();
 
-const DashboardRefactored: React.FC = () => {
-  const { user } = useAuth();
-  const { dashboard } = useUIStore();
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-32 bg-gray-200 rounded-lg animate-pulse" />
+          ))}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="h-64 bg-gray-200 rounded-lg animate-pulse" />
+          <div className="h-64 bg-gray-200 rounded-lg animate-pulse" />
+        </div>
+      </div>
+    );
+  }
 
-  // Fetch dashboard data
-  const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
-    queryKey: ['dashboard-stats'],
-    queryFn: async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return {
-        totalRevenue: 12500.75,
-        totalJobs: 45,
-        activeJobs: 8,
-        completedJobs: 37,
-        totalEmployees: 12,
-        activeEmployees: 10,
-        totalProjects: 15,
-        completedProjects: 12,
-      };
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <Activity className="h-12 w-12 mx-auto text-red-500 mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Error Loading Dashboard</h3>
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const statCards = [
+    {
+      title: 'Total Jobs',
+      value: stats.totalJobs,
+      change: stats.totalJobs > 0 ? 12 : 0,
+      changeType: 'increase' as const,
+      icon: <Briefcase className="h-4 w-4 text-muted-foreground" />,
+      description: `${stats.activeJobs} active, ${stats.completedJobs} completed`
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  const { data: activities, isLoading: activitiesLoading } = useQuery<DashboardActivity[]>({
-    queryKey: ['dashboard-activities'],
-    queryFn: async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      return [
-        {
-          id: '1',
-          type: 'job',
-          title: 'Data Processing Job',
-          description: 'Processed customer onboarding data',
-          status: 'completed',
-          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-          user: 'Data Processor AI',
-        },
-        {
-          id: '2',
-          type: 'workforce',
-          title: 'Marketing Campaign',
-          description: 'Created social media content strategy',
-          status: 'running',
-          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
-          user: 'Marketing Team AI',
-        },
-        {
-          id: '3',
-          type: 'employee',
-          title: 'New Employee Hired',
-          description: 'Added Python Developer AI to workforce',
-          status: 'completed',
-          timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
-        },
-        {
-          id: '4',
-          type: 'system',
-          title: 'System Update',
-          description: 'Updated AI models to latest version',
-          status: 'completed',
-          timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-        },
-        {
-          id: '5',
-          type: 'job',
-          title: 'Code Review',
-          description: 'Failed to complete code analysis',
-          status: 'failed',
-          timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-          user: 'Code Reviewer AI',
-        },
-      ];
+    {
+      title: 'AI Employees',
+      value: stats.totalEmployees,
+      change: stats.totalEmployees > 0 ? 8 : 0,
+      changeType: 'increase' as const,
+      icon: <Users className="h-4 w-4 text-muted-foreground" />,
+      description: `${stats.activeEmployees} active employees`
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
-  });
+    {
+      title: 'Monthly Revenue',
+      value: `$${stats.monthlyRevenue.toLocaleString()}`,
+      change: Math.abs(stats.revenueGrowth),
+      changeType: stats.revenueGrowth >= 0 ? 'increase' as const : 'decrease' as const,
+      icon: <DollarSign className="h-4 w-4 text-muted-foreground" />,
+      description: `Total: $${stats.totalRevenue.toLocaleString()}`
+    },
+    {
+      title: 'Growth Rate',
+      value: `${stats.revenueGrowth.toFixed(1)}%`,
+      change: Math.abs(stats.revenueGrowth),
+      changeType: stats.revenueGrowth >= 0 ? 'increase' as const : 'decrease' as const,
+      icon: <TrendingUp className="h-4 w-4 text-muted-foreground" />,
+      description: 'Revenue growth this month'
+    }
+  ];
 
-  const handleQuickAction = (actionId: string) => {
-    console.log('Quick action triggered:', actionId);
-    // Handle quick actions here
-  };
+  const recentActivities = [
+    {
+      id: '1',
+      type: 'job' as const,
+      title: 'Content Creation Job',
+      description: 'AI employee completed content creation task',
+      timestamp: new Date().toISOString(),
+      status: 'completed' as const,
+      user: 'AI Writer'
+    },
+    {
+      id: '2',
+      type: 'employee' as const,
+      title: 'New AI Employee Hired',
+      description: 'Marketing specialist added to workforce',
+      timestamp: new Date(Date.now() - 3600000).toISOString(),
+      status: 'completed' as const,
+      user: 'System'
+    },
+    {
+      id: '3',
+      type: 'job' as const,
+      title: 'Data Analysis Task',
+      description: 'Processing customer feedback data',
+      timestamp: new Date(Date.now() - 7200000).toISOString(),
+      status: 'pending' as const,
+      user: 'AI Analyst'
+    }
+  ];
 
   return (
-    <div className="flex-1 space-y-6 p-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">
-            Welcome back, {user?.name || 'User'}! Here's what's happening with your AI workforce.
+            Welcome back! Here's what's happening with your AI workforce.
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-muted-foreground">
-            Last updated: {new Date().toLocaleTimeString()}
-          </span>
+        <div className="flex space-x-2">
+          <Button onClick={onCreateJob} className="flex items-center space-x-2">
+            <Plus className="h-4 w-4" />
+            <span>New Job</span>
+          </Button>
+          <Button onClick={onCreateEmployee} variant="outline" className="flex items-center space-x-2">
+            <Plus className="h-4 w-4" />
+            <span>Hire AI</span>
+          </Button>
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Revenue"
-          value={`$${stats?.totalRevenue.toFixed(2) || '0.00'}`}
-          description="Generated this month"
-          icon={DollarSign}
-          trend={{
-            value: 12.5,
-            label: "from last month",
-            isPositive: true,
-          }}
-          loading={statsLoading}
-        />
-        
-        <StatCard
-          title="Total Jobs"
-          value={stats?.totalJobs || 0}
-          description="All automation tasks"
-          icon={Activity}
-          trend={{
-            value: 8.2,
-            label: "from last week",
-            isPositive: true,
-          }}
-          loading={statsLoading}
-        />
-        
-        <StatCard
-          title="Active Employees"
-          value={stats?.activeEmployees || 0}
-          description="Currently working"
-          icon={Bot}
-          trend={{
-            value: 2.1,
-            label: "from yesterday",
-            isPositive: true,
-          }}
-          loading={statsLoading}
-        />
-        
-        <StatCard
-          title="Completed Jobs"
-          value={stats?.completedJobs || 0}
-          description="Successfully finished"
-          icon={CheckCircle}
-          trend={{
-            value: 15.3,
-            label: "from last week",
-            isPositive: true,
-          }}
-          loading={statsLoading}
-        />
+        {statCards.map((stat, index) => (
+          <StatCard
+            key={index}
+            title={stat.title}
+            value={stat.value}
+            change={stat.change}
+            changeType={stat.changeType}
+            icon={stat.icon}
+            description={stat.description}
+          />
+        ))}
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         {/* Recent Activity */}
-        <div className="lg:col-span-2">
-          <RecentActivity
-            activities={activities || []}
-            loading={activitiesLoading}
-            maxItems={5}
-          />
-        </div>
+        <RecentActivity activities={recentActivities} />
 
         {/* Quick Actions */}
-        <div>
-          <QuickActions
-            onAction={handleQuickAction}
-          />
-        </div>
-      </div>
-
-      {/* Additional Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <StatCard
-          title="Active Jobs"
-          value={stats?.activeJobs || 0}
-          description="Currently running"
-          icon={Clock}
-          loading={statsLoading}
-        />
-        
-        <StatCard
-          title="Total Projects"
-          value={stats?.totalProjects || 0}
-          description="Workforce projects"
-          icon={TrendingUp}
-          loading={statsLoading}
-        />
-        
-        <StatCard
-          title="Success Rate"
-          value={`${stats ? Math.round((stats.completedJobs / stats.totalJobs) * 100) : 0}%`}
-          description="Job completion rate"
-          icon={CheckCircle}
-          loading={statsLoading}
-        />
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={onViewJobs} 
+              className="w-full justify-start"
+              variant="outline"
+            >
+              <Briefcase className="h-4 w-4 mr-2" />
+              View All Jobs
+            </Button>
+            <Button 
+              onClick={onViewEmployees} 
+              className="w-full justify-start"
+              variant="outline"
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Manage AI Employees
+            </Button>
+            <Button 
+              onClick={onCreateJob} 
+              className="w-full justify-start"
+              variant="outline"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create New Job
+            </Button>
+            <Button 
+              onClick={onCreateEmployee} 
+              className="w-full justify-start"
+              variant="outline"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Hire New AI Employee
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 };
-
-export default DashboardRefactored;

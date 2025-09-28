@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'es2015', // Use older target for better compatibility
-    minify: 'esbuild', // Use esbuild for better compatibility
+    minify: false, // DISABLE MINIFICATION COMPLETELY to prevent __name issues
     sourcemap: false,
 
     // Optimized rollup options for Netlify

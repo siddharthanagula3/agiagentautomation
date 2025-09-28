@@ -1,56 +1,26 @@
 {
-  "timestamp": "2025-09-28T06:33:36.711Z",
+  "timestamp": "2025-09-28T06:41:28.131Z",
   "tests": [
     {
       "name": "Homepage Load",
       "status": "FAILED",
-      "loadTime": 1364,
-      "title": "AGI Agent Automation - Loading...",
-      "url": "https://agiagentautomation.com/",
-      "reactMounted": false,
-      "errors": [
-        {
-          "type": "page_error",
-          "message": "global is not defined",
-          "stack": "ReferenceError: global is not defined\n    at <anonymous> (https://agiagentautomation.com/:131:13)\n    at <anonymous> (https://agiagentautomation.com/:147:11)",
-          "timestamp": "2025-09-28T06:33:39.449Z"
-        },
-        {
-          "type": "page_error",
-          "message": "__name is not a function",
-          "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-biVVZaAG.js:1:3376)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase-DXJGCeoN.js:1:8600)",
-          "timestamp": "2025-09-28T06:33:39.729Z"
-        }
-      ]
+      "error": "net::ERR_ABORTED at https://agiagentautomation.com"
     }
   ],
-  "errors": [
-    {
-      "type": "page_error",
-      "message": "global is not defined",
-      "stack": "ReferenceError: global is not defined\n    at <anonymous> (https://agiagentautomation.com/:131:13)\n    at <anonymous> (https://agiagentautomation.com/:147:11)",
-      "timestamp": "2025-09-28T06:33:39.449Z"
-    },
-    {
-      "type": "page_error",
-      "message": "__name is not a function",
-      "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-biVVZaAG.js:1:3376)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase-DXJGCeoN.js:1:8600)",
-      "timestamp": "2025-09-28T06:33:39.729Z"
-    }
-  ],
+  "errors": [],
   "performance": {
-    "timestamp": 35439.349444,
-    "documents": 3,
+    "timestamp": 35909.76842,
+    "documents": 2,
     "frames": 1,
-    "jsEventListeners": 1,
-    "layoutCount": 2,
+    "jsEventListeners": 0,
+    "layoutCount": 1,
     "recalcStyleCount": 2,
-    "layoutDuration": 0.001715,
-    "recalcStyleDuration": 0.007873,
-    "scriptDuration": 0.019095,
-    "taskDuration": 0.126348,
-    "jsHeapUsedSize": 2052052,
-    "jsHeapTotalSize": 2883584
+    "layoutDuration": 0.000256,
+    "recalcStyleDuration": 0.000256,
+    "scriptDuration": 0,
+    "taskDuration": 0.025713,
+    "jsHeapUsedSize": 654028,
+    "jsHeapTotalSize": 1310720
   },
   "summary": {
     "totalTests": 1,
@@ -58,7 +28,7 @@
     "failedTests": 1,
     "loadingIssues": 0,
     "successRate": "0%",
-    "criticalErrors": 2,
-    "timestamp": "2025-09-28T06:33:40.445Z"
+    "criticalErrors": 0,
+    "timestamp": "2025-09-28T06:41:30.921Z"
   }
 }

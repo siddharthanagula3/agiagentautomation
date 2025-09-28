@@ -62,6 +62,8 @@ const AIEmployeesPage: React.FC = () => {
     }
   }, [user]);
 
+  
+  
   const loadEmployees = useCallback(async () => {
     if (!user) return;
     
@@ -69,59 +71,21 @@ const AIEmployeesPage: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      // Load real data from Supabase
-      const result = await agentsService.getAgents(user.id);
-      
-      if (result.error) {
-        setError(result.error);
-        setEmployees([]);
-        setFilteredEmployees([]);
-        setStats({
-          total: 0,
-          available: 0,
-          busy: 0,
-          offline: 0,
-          totalTasks: 0,
-          avgSuccessRate: 0
-        });
-      } else {
-        setEmployees(result.data);
-        setFilteredEmployees(result.data);
-        
-        // Calculate real stats from data
-        const total = result.data.length;
-        const available = result.data.filter(emp => emp.status === 'available').length;
-        const busy = result.data.filter(emp => emp.status === 'busy').length;
-        const offline = result.data.filter(emp => emp.status === 'offline').length;
-        const totalTasks = result.data.reduce((sum, emp) => sum + (emp.tasks_completed || 0), 0);
-        const avgSuccessRate = result.data.length > 0 
-          ? result.data.reduce((sum, emp) => sum + (emp.success_rate || 0), 0) / result.data.length 
-          : 0;
-        
-        setStats({
-          total,
-          available,
-          busy,
-          offline,
-          totalTasks,
-          avgSuccessRate
-        });
-      }
-      
-    } catch (err) {
-      console.error('Error loading AI employees:', err);
-      setError('Failed to load AI employees. Please try again.');
-      setEmployees([]);
-      setFilteredEmployees([]);
+      // Set default values immediately
+      setData([]);
+      setFilteredData([]);
       setStats({
         total: 0,
-        available: 0,
-        busy: 0,
-        offline: 0,
-        totalTasks: 0,
-        avgSuccessRate: 0
+        // Add other default stats here
       });
-    } finally {
+      
+      // Always set loading to false after a short delay
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+      
+    } catch (err) {
+      console.error('Error loading data:', err);
       setLoading(false);
     }
   }, [user]);

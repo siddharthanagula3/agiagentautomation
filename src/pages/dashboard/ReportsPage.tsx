@@ -62,26 +62,48 @@ const ReportsPage: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      // Simulate API call - in real implementation, this would fetch from Supabase
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For new users, return empty array to show proper empty state
+      // Set default values immediately for new users
       setData([]);
       setFilteredData([]);
-      
-      // Calculate stats for new users (all zeros)
       setStats({
         total: 0,
-        completed: 0,
-        generating: 0,
-        failed: 0,
-        totalSize: 0
+        // Add other default stats here
       });
       
-    } catch (err) {
-      console.error('Error loading reports:', err);
-      setError('Failed to load reports. Please try again.');
-    } finally {
+      // Try to load real data with timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Service timeout')), 5000)
+      );
+      
+      try {
+        const result = await Promise.race([
+          // Replace with actual service call
+          Promise.resolve({ data: [], error: null }),
+          timeoutPromise
+        ]);
+        
+        if (result.error) {
+          console.warn('Service error:', result.error);
+          // Keep default values
+        } else {
+          setData(result.data);
+          setFilteredData(result.data);
+          
+          // Calculate real stats from data
+          const total = result.data.length;
+          // Add other stat calculations here
+          
+          setStats({
+            total,
+            // Add other stats here
+          });
+        }
+        
+      } catch (serviceError) {
+        console.warn('Service failed, using default values:', serviceError);
+        // Keep the default values we set above
+      }
+      
       setLoading(false);
     }
   }, []);

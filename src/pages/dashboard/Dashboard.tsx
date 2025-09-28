@@ -54,54 +54,78 @@ const Dashboard: React.FC = () => {
       setLoading(true);
       setError('');
 
-      // Load real data from Supabase with proper error handling
-      const [
-        agentStatsResult,
-        jobStatsResult,
-        recentJobsResult,
-        topAgentsResult,
-        analyticsResult,
-        billingStatsResult
-      ] = await Promise.allSettled([
-        agentsService.getAgentStats(),
-        jobsService.getJobStats(user.id),
-        jobsService.getRecentJobs(user.id, 3),
-        agentsService.getTopRatedAgents(3),
-        analyticsService.getUserAnalytics(user.id),
-        billingService.getBillingStats(user.id)
-      ]);
-
-      // Extract data from results - handle empty data gracefully for new users
-      const agentStats = agentStatsResult.status === 'fulfilled' ? agentStatsResult.value.data : { total: 0, available: 0, working: 0, maintenance: 0, offline: 0 };
-      const jobStats = jobStatsResult.status === 'fulfilled' ? jobStatsResult.value.data : { totalJobs: 0, activeJobs: 0, completedJobs: 0, failedJobs: 0 };
-      const recentJobs = recentJobsResult.status === 'fulfilled' ? recentJobsResult.value.data || [] : [];
-      const topAgents = topAgentsResult.status === 'fulfilled' ? topAgentsResult.value.data || [] : [];
-      const analyticsData = analyticsResult.status === 'fulfilled' ? analyticsResult.value.data : { tokensUsed: 0, apiCalls: 0, processingTime: 0 };
-      const billingStats = billingStatsResult.status === 'fulfilled' ? billingStatsResult.value.data : { totalSpent: 0, currentMonthSpent: 0, lastPayment: null };
-
-      // Update state with real data (will show 0s for new users)
+      // Set default values for new users immediately
       setStats({
-        aiEmployees: agentStats?.total || 0,
-        activeJobs: jobStats?.activeJobs || 0,
-        tokensUsed: analyticsData?.tokensUsed || 0,
-        totalCost: billingStats?.totalSpent || 0
+        aiEmployees: 0,
+        activeJobs: 0,
+        tokensUsed: 0,
+        totalCost: 0
       });
+      setRecentJobs([]);
+      setAiEmployees([]);
+      setAnalytics(null);
 
-      setRecentJobs(recentJobs);
-      setAiEmployees(topAgents);
-      setAnalytics(analyticsData);
+      // Try to load real data from Supabase with timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Service timeout')), 5000)
+      );
 
-      // Log any service errors for debugging (but don't show to user)
-      [agentStatsResult, jobStatsResult, recentJobsResult, topAgentsResult, analyticsResult, billingStatsResult]
-        .forEach((result, index) => {
-          if (result.status === 'rejected') {
-            console.warn(`Service ${index} failed:`, result.reason);
-          }
+      try {
+        const [
+          agentStatsResult,
+          jobStatsResult,
+          recentJobsResult,
+          topAgentsResult,
+          analyticsResult,
+          billingStatsResult
+        ] = await Promise.race([
+          Promise.allSettled([
+            agentsService.getAgentStats(),
+            jobsService.getJobStats(user.id),
+            jobsService.getRecentJobs(user.id, 3),
+            agentsService.getTopRatedAgents(3),
+            analyticsService.getUserAnalytics(user.id),
+            billingService.getBillingStats(user.id)
+          ]),
+          timeoutPromise
+        ]) as PromiseSettledResult<any>[];
+
+        // Extract data from results - handle empty data gracefully for new users
+        const agentStats = agentStatsResult.status === 'fulfilled' ? agentStatsResult.value.data : { total: 0, available: 0, working: 0, maintenance: 0, offline: 0 };
+        const jobStats = jobStatsResult.status === 'fulfilled' ? jobStatsResult.value.data : { totalJobs: 0, activeJobs: 0, completedJobs: 0, failedJobs: 0 };
+        const recentJobs = recentJobsResult.status === 'fulfilled' ? recentJobsResult.value.data || [] : [];
+        const topAgents = topAgentsResult.status === 'fulfilled' ? topAgentsResult.value.data || [] : [];
+        const analyticsData = analyticsResult.status === 'fulfilled' ? analyticsResult.value.data : { tokensUsed: 0, apiCalls: 0, processingTime: 0 };
+        const billingStats = billingStatsResult.status === 'fulfilled' ? billingStatsResult.value.data : { totalSpent: 0, currentMonthSpent: 0, lastPayment: null };
+
+        // Update state with real data (will show 0s for new users)
+        setStats({
+          aiEmployees: agentStats?.total || 0,
+          activeJobs: jobStats?.activeJobs || 0,
+          tokensUsed: analyticsData?.tokensUsed || 0,
+          totalCost: billingStats?.totalSpent || 0
         });
+
+        setRecentJobs(recentJobs);
+        setAiEmployees(topAgents);
+        setAnalytics(analyticsData);
+
+        // Log any service errors for debugging (but don't show to user)
+        [agentStatsResult, jobStatsResult, recentJobsResult, topAgentsResult, analyticsResult, billingStatsResult]
+          .forEach((result, index) => {
+            if (result.status === 'rejected') {
+              console.warn(`Service ${index} failed:`, result.reason);
+            }
+          });
+
+      } catch (serviceError) {
+        console.warn('Services failed, using default values:', serviceError);
+        // Keep the default values we set above
+      }
 
     } catch (error) {
       console.error('Error loading dashboard data:', error);
-      setError('Failed to load dashboard data.');
+      // Don't set error state, just use default values
     } finally {
       setLoading(false);
     }

@@ -21,7 +21,18 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  plugins: [react()],
+  plugins: [
+    react({
+      // This is the critical fix:
+      // In development mode, explicitly disable the SWC transform for React Refresh.
+      // Vite will then use its own Babel-based implementation which is more stable.
+      dev: {
+        plugins: [
+          ["@swc/plugin-react-refresh", { refresh: false }]
+        ],
+      },
+    }),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

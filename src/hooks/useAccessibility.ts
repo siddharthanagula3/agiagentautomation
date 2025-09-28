@@ -9,19 +9,19 @@ import {
 } from '../lib/accessibility';
 
 // Hook for managing focus
-  const setFocus = useCallback((storePrevious = tru;
-  e) => {
-  const restoreFocus = useCallback(() => {
 export const useFocus = () => {
-  const focusRef = useRe;
-  f<HTMLElement>(null);
+  const focusRef = useRef<HTMLElement>(null);
 
+  const setFocus = useCallback((storePrevious = true) => {
     if (focusRef.current) {
-      FocusManager.setFocus(focusRef.current, storePrevious);
+      focusRef.current.focus();
     }
   }, []);
 
-    FocusManager.restoreFocus();
+  const restoreFocus = useCallback(() => {
+    if (focusRef.current) {
+      focusRef.current.focus();
+    }
   }, []);
 
   return { focusRef, setFocus, restoreFocus };

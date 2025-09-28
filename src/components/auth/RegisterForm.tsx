@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import LoadingSpinner from '../ui/loading-spinner';
 const Component: React.FC = () => {
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
@@ -245,10 +246,7 @@ const Component: React.FC = () => {
         </form>
       </div>
     </div>
-  )
-  };
-
-;
+  );
 };
 
 export default RegisterForm;

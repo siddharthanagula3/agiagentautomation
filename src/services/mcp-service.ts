@@ -154,6 +154,7 @@ class MCPService {
               ]
             }
           };
+        }
 
         default:
           return {

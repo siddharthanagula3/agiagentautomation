@@ -239,10 +239,12 @@ const MessageComposer: React.FC<MessageComposerProps> = ({
 
   // Clean up voice recording on unmount
   useEffect(() => {
-    return (
-    <div>Component content</div>
-  );
-};
+    return () => {
+      if (mediaRecorderRef.current && isRecording) {
+        mediaRecorderRef.current.stop();
+      }
+    };
+  }, [isRecording]);
 
 const handleFiles = useCallback(async (files: File[]) => {
     const maxSize = 10 * 1024 * 1024; // 10MB
@@ -908,10 +910,7 @@ const handleFiles = useCallback(async (files: File[]) => {
         </div>
       </div>
     </div>
-  )
-  };
-
-;
+  );
 };
 
 export default MessageComposer;

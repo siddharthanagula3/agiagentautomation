@@ -164,8 +164,6 @@ export default defineConfig(({ mode }) => ({
     keepNames: true, // Keep names for React compatibility
     minifyIdentifiers: false, // Disable to prevent variable name conflicts
     format: 'esm', // Use ESM format for better React compatibility
-    // Prevent function name mangling that causes 's is not a function' errors
-    mangleProps: /^_/, // Only mangle properties starting with underscore
     // Fix temporal dead zone issues
     tsconfigRaw: {
       compilerOptions: {

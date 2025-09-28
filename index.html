@@ -162,6 +162,20 @@
                     } catch(e) {}
                 }
             }
+
+            // CRITICAL: Pre-initialize underscore variables to prevent declaration conflicts
+            var underscoreVars = ['_a', '_b', '_c', '_d', '_e', '_f', '_g', '_h', '_i', '_j', '_k', '_l', '_m', '_n', '_o', '_p', '_q', '_r', '_s', '_t', '_u', '_v', '_w', '_x', '_y', '_z'];
+            for (var k = 0; k < underscoreVars.length; k++) {
+                var underscoreVarName = underscoreVars[k];
+                if (typeof window[underscoreVarName] === 'undefined') {
+                    try {
+                        window[underscoreVarName] = {};
+                        if (typeof globalThis[underscoreVarName] === 'undefined') {
+                            globalThis[underscoreVarName] = {};
+                        }
+                    } catch(e) {}
+                }
+            }
         };
 
         // Run comprehensive TDZ protection IMMEDIATELY

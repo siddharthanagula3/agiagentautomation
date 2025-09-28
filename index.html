@@ -106,6 +106,69 @@
         // ULTRA-CRITICAL: Define __name function globally to prevent build errors
         // This must be defined before any modules load
         // Immediate execution to ensure availability
+        
+        // CRITICAL: Define __name function with maximum compatibility
+        (function() {
+            // Define __name function with multiple fallback mechanisms
+            const defineNameFunction = function() {
+                return function(target, value) {
+                    try {
+                        if (target && typeof value === 'string') {
+                            Object.defineProperty(target, 'name', {
+                                value: value,
+                                configurable: true,
+                                enumerable: false,
+                                writable: true
+                            });
+                        }
+                    } catch(e) {
+                        // Silently ignore errors
+                    }
+                };
+            };
+            
+            // Define on all possible global objects
+            const nameFunc = defineNameFunction();
+            
+            // Define on globalThis
+            if (typeof globalThis !== 'undefined') {
+                globalThis.__name = nameFunc;
+            }
+            
+            // Define on window
+            if (typeof window !== 'undefined') {
+                window.__name = nameFunc;
+            }
+            
+            // Define on global
+            if (typeof global !== 'undefined') {
+                global.__name = nameFunc;
+            }
+            
+            // Define on self
+            if (typeof self !== 'undefined') {
+                self.__name = nameFunc;
+            }
+            
+            // Define on this (in case we're in a module context)
+            if (typeof this !== 'undefined') {
+                this.__name = nameFunc;
+            }
+            
+            // Also define as a direct property on globalThis
+            try {
+                Object.defineProperty(globalThis, '__name', {
+                    value: nameFunc,
+                    writable: true,
+                    configurable: true,
+                    enumerable: false
+                });
+            } catch(e) {
+                // Fallback if defineProperty fails
+            }
+        })();
+        
+        // Additional protection layer with immediate execution
         (function() {
             // Define __name function immediately and aggressively
             if (typeof globalThis.__name === 'undefined') {

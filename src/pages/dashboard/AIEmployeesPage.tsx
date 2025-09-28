@@ -64,6 +64,7 @@ const AIEmployeesPage: React.FC = () => {
 
   
   
+  
   const loadEmployees = useCallback(async () => {
     if (!user) return;
     
@@ -79,10 +80,10 @@ const AIEmployeesPage: React.FC = () => {
         // Add other default stats here
       });
       
-      // Always set loading to false after a short delay
+      // Always resolve loading state quickly
       setTimeout(() => {
         setLoading(false);
-      }, 500);
+      }, 100);
       
     } catch (err) {
       console.error('Error loading data:', err);

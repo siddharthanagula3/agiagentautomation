@@ -103,6 +103,22 @@
         }
     </style>
     <script>
+        // Define __name function globally to prevent build errors
+        if (typeof globalThis.__name === 'undefined') {
+            globalThis.__name = function(target, value) {
+                try {
+                    if (target && typeof value === 'string') {
+                        Object.defineProperty(target, 'name', {
+                            value: value,
+                            configurable: true
+                        });
+                    }
+                } catch(e) {
+                    // Silently ignore errors
+                }
+            };
+        }
+
         // Hide loader when React app loads
         window.addEventListener('DOMContentLoaded', function() {
             // Set up observer to watch for React app mounting

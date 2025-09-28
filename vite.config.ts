@@ -29,9 +29,9 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'es2020',
-    minify: 'esbuild', // Use esbuild for better compatibility with React
+    minify: 'esbuild',
     sourcemap: false,
-    
+
     // Optimized rollup options for Netlify
     rollupOptions: {
       output: {
@@ -43,11 +43,19 @@ export default defineConfig(({ mode }) => ({
             return 'vendor';
           }
         },
-        
+
         // Optimized file naming
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
+
+        // Fix interop issues that cause __name errors
+        interop: 'auto',
+        generatedCode: {
+          constBindings: true,
+        },
+        // Add banner to define __name globally
+        banner: 'if (typeof globalThis.__name === "undefined") { globalThis.__name = function(target, value) { try { Object.defineProperty(target, "name", { value, configurable: true }); } catch(e) {} }; }',
       },
     },
     
@@ -89,16 +97,16 @@ export default defineConfig(({ mode }) => ({
     ],
     exclude: [], // Remove Sentry from exclude
     esbuildOptions: {
-      target: 'es2015', // Match build target
-      keepNames: true, // Preserve function names
+      target: 'es2020',
+      keepNames: false, // Disable keepNames to prevent __name conflicts
     },
   },
-  
+
   // ESBuild specific options
   esbuild: {
     legalComments: 'none',
     target: 'es2020',
-    keepNames: true, // Important for debugging
-    minifyIdentifiers: false, // Prevent function name mangling
+    keepNames: false,
+    minifyIdentifiers: true,
   },
 }));

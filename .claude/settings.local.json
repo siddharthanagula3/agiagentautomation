@@ -14,7 +14,8 @@
       "Bash(npx tsc:*)",
       "Bash(npm run lint)",
       "Bash(node:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(npm run preview:*)"
     ],
     "deny": [],
     "ask": []

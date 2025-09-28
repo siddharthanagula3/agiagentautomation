@@ -40,7 +40,7 @@ const AnalyticsPage: React.FC = () => {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
 
   useEffect(() => {
-    setLoading(true);
+      setLoading(true);
     
     // Set default values immediately
     setAnalytics({
@@ -66,7 +66,7 @@ const AnalyticsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -76,7 +76,7 @@ const AnalyticsPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h3 className="mt-2 text-sm font-semibold text-gray-900">No analytics data</h3>
+          <h3 className="mt-2 text-sm font-semibold text-foreground">No analytics data</h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Analytics will appear once you start using the platform.
           </p>
@@ -89,17 +89,17 @@ const AnalyticsPage: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
+      <div>
           <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
           <p className="text-muted-foreground">
             Insights into your AI automation performance.
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline">
+          <Button variant="outline" className="border-border hover:bg-accent hover:text-accent-foreground">
             Export Report
           </Button>
-          <Button>
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
             Generate Report
           </Button>
         </div>
@@ -116,12 +116,12 @@ const AnalyticsPage: React.FC = () => {
             <div className="text-2xl font-bold">{analytics.totalJobs}</div>
             <p className="text-xs text-muted-foreground">
               {analytics.monthlyGrowth > 0 ? (
-                <span className="text-green-600 flex items-center">
+                <span className="text-green-600 dark:text-green-400 flex items-center">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   +{analytics.monthlyGrowth}% from last month
                 </span>
               ) : (
-                <span className="text-gray-500">No change from last month</span>
+                <span className="text-muted-foreground">No change from last month</span>
               )}
             </p>
           </CardContent>
@@ -232,7 +232,7 @@ const AnalyticsPage: React.FC = () => {
           {analytics.recentActivity.length === 0 ? (
             <div className="text-center py-6">
               <Activity className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">No recent activity</h3>
+              <h3 className="mt-2 text-sm font-semibold text-foreground">No recent activity</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 Activity will appear here as you use the platform.
               </p>
@@ -243,15 +243,15 @@ const AnalyticsPage: React.FC = () => {
                 <div key={activity.id} className="flex items-center space-x-4">
                   <div className="flex-shrink-0">
                     <div className={`h-2 w-2 rounded-full ${
-                      activity.status === 'success' ? 'bg-green-500' :
-                      activity.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
+                      activity.status === 'success' ? 'bg-green-500 dark:bg-green-400' :
+                      activity.status === 'warning' ? 'bg-yellow-500 dark:bg-yellow-400' : 'bg-red-500 dark:bg-red-400'
                     }`}></div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-foreground">
                       {activity.description}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       {activity.timestamp}
                     </p>
                   </div>
@@ -275,15 +275,15 @@ const AnalyticsPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col border-border hover:bg-accent hover:text-accent-foreground">
               <BarChart3 className="h-6 w-6 mb-2" />
               Generate Report
             </Button>
-            <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col border-border hover:bg-accent hover:text-accent-foreground">
               <TrendingUp className="h-6 w-6 mb-2" />
               View Trends
             </Button>
-            <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col border-border hover:bg-accent hover:text-accent-foreground">
               <Activity className="h-6 w-6 mb-2" />
               Export Data
             </Button>

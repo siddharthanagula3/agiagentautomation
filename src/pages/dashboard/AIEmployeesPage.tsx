@@ -67,7 +67,7 @@ const AIEmployeesPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -82,7 +82,7 @@ const AIEmployeesPage: React.FC = () => {
             Manage your AI workforce and monitor their performance.
           </p>
         </div>
-        <Button>
+        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Plus className="mr-2 h-4 w-4" />
           Create Agent
         </Button>
@@ -106,7 +106,7 @@ const AIEmployeesPage: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active</CardTitle>
-            <div className="h-4 w-4 rounded-full bg-green-500"></div>
+            <div className="h-4 w-4 rounded-full bg-green-500 dark:bg-green-400"></div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.active}</div>
@@ -119,7 +119,7 @@ const AIEmployeesPage: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Busy</CardTitle>
-            <div className="h-4 w-4 rounded-full bg-yellow-500"></div>
+            <div className="h-4 w-4 rounded-full bg-yellow-500 dark:bg-yellow-400"></div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.busy}</div>
@@ -132,7 +132,7 @@ const AIEmployeesPage: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
-            <div className="h-4 w-4 rounded-full bg-blue-500"></div>
+            <div className="h-4 w-4 rounded-full bg-blue-500 dark:bg-blue-400"></div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.avgSuccessRate}%</div>
@@ -162,7 +162,7 @@ const AIEmployeesPage: React.FC = () => {
                 className="pl-8"
               />
             </div>
-            <Button variant="outline">
+            <Button variant="outline" className="border-border hover:bg-accent hover:text-accent-foreground">
               Filter
             </Button>
           </div>
@@ -181,16 +181,16 @@ const AIEmployeesPage: React.FC = () => {
           {stats.total === 0 ? (
             <div className="text-center py-12">
               <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">No AI agents yet</h3>
+              <h3 className="mt-2 text-sm font-semibold text-foreground">No AI agents yet</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 Create your first AI agent to get started with automation.
               </p>
-              <div className="mt-6">
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Your First Agent
-                </Button>
-              </div>
+                <div className="mt-6">
+                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Your First Agent
+                  </Button>
+                </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -198,22 +198,22 @@ const AIEmployeesPage: React.FC = () => {
                 <div key={agent.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center space-x-4">
                     <div className="flex-shrink-0">
-                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                        <Users className="h-5 w-5 text-blue-600" />
+                      <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+                        <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-foreground truncate">
                         {agent.name}
                       </p>
-                      <p className="text-sm text-gray-500 truncate">
+                      <p className="text-sm text-muted-foreground truncate">
                         {agent.role}
                       </p>
                       <div className="flex items-center space-x-4 mt-1">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           {agent.tasksCompleted} tasks completed
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           {agent.successRate}% success rate
                         </span>
                       </div>
@@ -247,15 +247,15 @@ const AIEmployeesPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col border-border hover:bg-accent hover:text-accent-foreground">
               <Plus className="h-6 w-6 mb-2" />
               Create Agent
             </Button>
-            <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col border-border hover:bg-accent hover:text-accent-foreground">
               <Settings className="h-6 w-6 mb-2" />
               Configure
             </Button>
-            <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col border-border hover:bg-accent hover:text-accent-foreground">
               <Users className="h-6 w-6 mb-2" />
               Manage Team
             </Button>

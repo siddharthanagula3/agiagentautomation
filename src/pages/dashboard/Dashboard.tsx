@@ -49,7 +49,7 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -65,11 +65,11 @@ const Dashboard: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button>
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <Plus className="mr-2 h-4 w-4" />
             Create Job
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" className="border-border hover:bg-accent hover:text-accent-foreground">
             <BarChart3 className="mr-2 h-4 w-4" />
             View Analytics
           </Button>
@@ -144,12 +144,12 @@ const Dashboard: React.FC = () => {
             {stats.totalJobs === 0 ? (
               <div className="text-center py-6">
                 <Briefcase className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold text-gray-900">No jobs yet</h3>
+                <h3 className="mt-2 text-sm font-semibold text-foreground">No jobs yet</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Get started by creating your first job.
                 </p>
                 <div className="mt-6">
-                  <Button>
+                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     <Plus className="mr-2 h-4 w-4" />
                     Create Job
                   </Button>
@@ -184,12 +184,12 @@ const Dashboard: React.FC = () => {
             {stats.totalAgents === 0 ? (
               <div className="text-center py-6">
                 <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-semibold text-gray-900">No agents yet</h3>
+                <h3 className="mt-2 text-sm font-semibold text-foreground">No agents yet</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Create your first AI agent to get started.
                 </p>
                 <div className="mt-6">
-                  <Button>
+                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     <Plus className="mr-2 h-4 w-4" />
                     Create Agent
                   </Button>
@@ -224,15 +224,15 @@ const Dashboard: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col border-border hover:bg-accent hover:text-accent-foreground">
               <Plus className="h-6 w-6 mb-2" />
               Create Job
             </Button>
-            <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col border-border hover:bg-accent hover:text-accent-foreground">
               <Users className="h-6 w-6 mb-2" />
               Add Agent
             </Button>
-            <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col border-border hover:bg-accent hover:text-accent-foreground">
               <BarChart3 className="h-6 w-6 mb-2" />
               View Reports
             </Button>

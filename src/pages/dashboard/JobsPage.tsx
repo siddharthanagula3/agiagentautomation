@@ -70,33 +70,33 @@ const JobsPage: React.FC = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-green-500 dark:text-green-400" />;
       case 'in_progress':
-        return <Clock className="h-4 w-4 text-blue-500" />;
+        return <Clock className="h-4 w-4 text-blue-500 dark:text-blue-400" />;
       case 'failed':
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
+        return <AlertCircle className="h-4 w-4 text-red-500 dark:text-red-400" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+        return <Clock className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
       case 'in_progress':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
       case 'failed':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-muted text-muted-foreground';
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -111,7 +111,7 @@ const JobsPage: React.FC = () => {
             Manage and monitor your automation jobs.
           </p>
         </div>
-        <Button>
+        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Plus className="mr-2 h-4 w-4" />
           Create Job
         </Button>
@@ -204,7 +204,7 @@ const JobsPage: React.FC = () => {
                 className="pl-8"
               />
             </div>
-            <Button variant="outline">
+            <Button variant="outline" className="border-border hover:bg-accent hover:text-accent-foreground">
               Filter
             </Button>
           </div>
@@ -223,16 +223,16 @@ const JobsPage: React.FC = () => {
           {stats.total === 0 ? (
             <div className="text-center py-12">
               <Briefcase className="mx-auto h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">No jobs yet</h3>
+              <h3 className="mt-2 text-sm font-semibold text-foreground">No jobs yet</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 Create your first automation job to get started.
               </p>
-              <div className="mt-6">
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Your First Job
-                </Button>
-              </div>
+                <div className="mt-6">
+                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Your First Job
+                  </Button>
+                </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -243,22 +243,22 @@ const JobsPage: React.FC = () => {
                       {getStatusIcon(job.status)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-foreground truncate">
                         {job.title}
                       </p>
-                      <p className="text-sm text-gray-500 truncate">
+                      <p className="text-sm text-muted-foreground truncate">
                         {job.description}
                       </p>
                       <div className="flex items-center space-x-4 mt-1">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           Created {job.createdAt}
                         </span>
                         {job.assignedAgent && (
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-muted-foreground">
                             Assigned to {job.assignedAgent}
                           </span>
                         )}
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                           {job.progress}% complete
                         </span>
                       </div>
@@ -289,15 +289,15 @@ const JobsPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col border-border hover:bg-accent hover:text-accent-foreground">
               <Plus className="h-6 w-6 mb-2" />
               Create Job
             </Button>
-            <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col border-border hover:bg-accent hover:text-accent-foreground">
               <Play className="h-6 w-6 mb-2" />
               Run All
             </Button>
-            <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col border-border hover:bg-accent hover:text-accent-foreground">
               <Briefcase className="h-6 w-6 mb-2" />
               View Reports
             </Button>

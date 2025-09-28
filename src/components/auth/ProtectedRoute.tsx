@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole = 'user' }) => {
   const { user, loading } = useAuth();
 
-  // IMMEDIATELY allow access if user exists, regardless of loading state
+  // ULTIMATE FIX: If user exists, allow access immediately
   if (user) {
     if (requiredRole === 'admin' && user.role !== 'admin' && user.role !== 'super_admin') {
       return <Navigate to="/dashboard" replace />;
@@ -23,13 +23,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     return <>{children}</>;
   }
 
-  // Only redirect to login if no user and not loading
+  // ULTIMATE FIX: Only redirect if we're sure there's no user and not loading
   if (!loading && !user) {
     return <Navigate to="/auth/login" replace />;
   }
 
-  // Show loading only if we're actually loading and no user
-  if (loading && !user) {
+  // ULTIMATE FIX: Show loading only if we're actually loading
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -37,8 +37,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     );
   }
 
-  // Fallback - should not reach here
-  return <Navigate to="/auth/login" replace />;
+  // ULTIMATE FIX: If we reach here, show children (this should not happen)
+  return <>{children}</>;
 };
 
 export { ProtectedRoute };

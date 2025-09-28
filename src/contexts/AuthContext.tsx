@@ -13,9 +13,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   
   
+  
   useEffect(() => {
     let isMounted = true;
-    let timeoutId: NodeJS.Timeout;
 
     // Check if Supabase is configured
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -33,89 +33,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return;
     }
 
-    // IMMEDIATELY set loading to false to prevent timeout issues
-    console.log('AuthContext: Setting loading to false immediately');
+    // ULTIMATE FIX: Set loading to false immediately and check for user
+    console.log('🚀 ULTIMATE FIX: Setting loading to false immediately');
     setLoading(false);
     
-    // Also check if user is already authenticated
-    const checkExistingUser = async () => {
+    // Check for existing user immediately
+    const checkUser = async () => {
       try {
         const { data: { user: existingUser } } = await supabase.auth.getUser();
         if (existingUser && isMounted) {
-          console.log('🚀 EXISTING USER: User found, setting user state');
+          console.log('🚀 ULTIMATE: User found, setting user state');
           setUser(existingUser);
-          setLoading(false);
-          return true;
         }
       } catch (error) {
-        console.log('Existing user check failed:', error);
-      }
-      return false;
-    };
-    
-    // Run existing user check
-    checkExistingUser();
-
-    // Check for existing session in background
-    const checkSession = async () => {
-      try {
-        // IMMEDIATE USER CHECK - bypass loading if user exists
-        const currentUser = await supabase.auth.getUser();
-        if (currentUser && currentUser.data && currentUser.data.user) {
-          console.log('🚀 IMMEDIATE: User found, bypassing loading');
-          setUser(currentUser.data.user);
-          setLoading(false);
-          return;
-        }
-        console.log('Attempting to connect to Supabase...');
-        const { user: currentUser, error } = await authService.getCurrentUser();
-        console.log('AuthService getCurrentUser result:', { hasUser: !!currentUser, hasError: !!error });
-        
-        if (isMounted) {
-          if (currentUser && !error) {
-            console.log('✅ User session found:', currentUser.email);
-            setUser(currentUser);
-          } else if (error) {
-            console.log('ℹ️  No active session (this is normal for new users)');
-          } else {
-            console.log('ℹ️  No active session - user needs to login');
-          }
-        }
-      } catch (error) {
-        console.error('Supabase connection error:', error);
-        console.log('This may be a network or Supabase service issue');
+        console.log('User check failed:', error);
       }
     };
-
-    // Run in background without blocking
-    checkSession();
-
-    // Set up auth listener if we have valid credentials
-    let subscription: any = null;
     
+    // Run user check
+    checkUser();
+
+    // Set up auth state change listener
     if (hasValidCredentials && typeof supabase?.auth?.onAuthStateChange === 'function') {
       try {
         const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-    
-  // IMMEDIATE AUTH CHECK - bypass loading if user exists
-  const immediateAuthCheck = async () => {
-    try {
-      const currentUser = await supabase.auth.getUser();
-      if (currentUser && currentUser.data && currentUser.data.user) {
-        console.log('🚀 IMMEDIATE AUTH: User found, bypassing loading');
-        setUser(currentUser.data.user);
-        setLoading(false);
-        return true;
-      }
-    } catch (error) {
-      console.log('Immediate auth check failed:', error);
-    }
-    return false;
-  };
-
-  // Run immediate check
-  immediateAuthCheck();
-
           if (!isMounted) return;
 
           if (session?.user) {
@@ -139,9 +80,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     return () => {
       isMounted = false;
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
       if (subscription) {
         subscription.unsubscribe();
       }

@@ -29,8 +29,20 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'es2015', // Use older target for better compatibility
-    minify: false, // DISABLE MINIFICATION COMPLETELY to prevent __name issues
+    minify: 'terser', // Use terser with specific configuration
     sourcemap: false,
+    terserOptions: {
+      mangle: false, // Disable all mangling
+      compress: {
+        drop_console: false,
+        drop_debugger: false,
+        keep_fnames: true, // Keep function names
+        keep_classnames: true // Keep class names
+      },
+      format: {
+        comments: false
+      }
+    },
 
     // Optimized rollup options for Netlify
     rollupOptions: {

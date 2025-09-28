@@ -1,0 +1,63 @@
+{
+  "timestamp": "2025-09-28T06:54:56.020Z",
+  "tests": [
+    {
+      "name": "Valid Login Test",
+      "status": "FAILED",
+      "error": "Waiting for selector `input[type=\"email\"]` failed"
+    },
+    {
+      "name": "Invalid Login Test",
+      "status": "FAILED",
+      "error": "Waiting for selector `input[type=\"email\"]` failed"
+    },
+    {
+      "name": "Registration Test",
+      "status": "FAILED",
+      "error": "Waiting for selector `input[type=\"email\"]` failed"
+    }
+  ],
+  "errors": [
+    {
+      "type": "console_error",
+      "message": "Global error caught: JSHandle@object",
+      "timestamp": "2025-09-28T06:55:00.147Z"
+    },
+    {
+      "type": "page_error",
+      "message": "__name is not a function",
+      "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-BrDZpptk.js:101:29)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase-FZj3E1QH.js:351:34)",
+      "timestamp": "2025-09-28T06:55:00.216Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Global error caught: JSHandle@object",
+      "timestamp": "2025-09-28T06:55:11.865Z"
+    },
+    {
+      "type": "page_error",
+      "message": "__name is not a function",
+      "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-BrDZpptk.js:101:29)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase-FZj3E1QH.js:351:34)",
+      "timestamp": "2025-09-28T06:55:11.867Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Global error caught: JSHandle@object",
+      "timestamp": "2025-09-28T06:55:23.004Z"
+    },
+    {
+      "type": "page_error",
+      "message": "__name is not a function",
+      "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-BrDZpptk.js:101:29)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase-FZj3E1QH.js:351:34)",
+      "timestamp": "2025-09-28T06:55:23.006Z"
+    }
+  ],
+  "summary": {
+    "totalTests": 3,
+    "passedTests": 0,
+    "failedTests": 3,
+    "successRate": "0%",
+    "criticalErrors": 6,
+    "timestamp": "2025-09-28T06:55:35.027Z"
+  }
+}

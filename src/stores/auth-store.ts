@@ -6,6 +6,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { authService, type AuthUser } from '../services/authService';
 
 export interface User {
   id: string;
@@ -122,61 +123,57 @@ export const useAuthStore = create<AuthStore>()(
           });
 
           try {
-            // Simulate API call
-            await new Promise((resolve, reject) => {
-              setTimeout(() => {
-                if (email === 'demo@example.com' && password === 'password') {
-                  resolve(null);
-                } else {
-                  reject(new Error('Invalid credentials'));
-                }
-              }, 1000);
-            });
+            const { user: authUser, error } = await authService.login({ email, password });
+            
+            if (error || !authUser) {
+              throw new Error(error || 'Login failed');
+            }
 
-            // Mock user data
-            const mockUser: User = {
-              id: '1',
-              email,
-              name: 'Demo User',
-              avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + email,
-              plan: 'pro',
-              role: 'user',
-              permissions: ['read', 'write', 'purchase'],
+            // Convert AuthUser to User format
+            const user: User = {
+              id: authUser.id,
+              email: authUser.email,
+              name: authUser.name,
+              avatar: authUser.avatar_url,
+              plan: 'free', // Default plan
+              role: authUser.role as 'user' | 'admin' | 'moderator',
+              permissions: ['read', 'write'],
               profile: {
-                firstName: 'Demo',
-                lastName: 'User',
-                company: 'AGI Corp',
-                bio: 'AI enthusiast and automation expert',
+                firstName: authUser.name.split(' ')[0] || authUser.name,
+                lastName: authUser.name.split(' ').slice(1).join(' ') || '',
+                company: authUser.company,
+                bio: '',
                 timezone: 'UTC',
-                preferences: {
+                preferences: authUser.preferences || {
                   emailNotifications: true,
                   pushNotifications: true,
                   marketingEmails: false,
                 },
               },
               billing: {
-                customerId: 'cus_demo123',
-                subscriptionId: 'sub_demo123',
-                subscriptionStatus: 'active',
-                currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                customerId: undefined,
+                subscriptionId: undefined,
+                subscriptionStatus: undefined,
+                trialEndsAt: undefined,
+                currentPeriodEnd: undefined,
               },
               usage: {
-                tokensUsed: 2500,
-                tokensLimit: 10000,
-                jobsCompleted: 45,
-                employeesPurchased: 3,
+                tokensUsed: 0,
+                tokensLimit: 1000,
+                jobsCompleted: 0,
+                employeesPurchased: 0,
               },
-              createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+              createdAt: new Date(authUser.created_at),
               updatedAt: new Date(),
             };
 
-            const token = 'mock-jwt-token-' + Date.now();
-            const refreshToken = 'mock-refresh-token-' + Date.now();
+            const token = 'auth-token-' + Date.now();
+            const refreshToken = 'refresh-token-' + Date.now();
             const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
             set((state) => {
               state.isAuthenticated = true;
-              state.user = mockUser;
+              state.user = user;
               state.token = token;
               state.refreshToken = refreshToken;
               state.sessionExpiresAt = expiresAt;
@@ -200,22 +197,32 @@ export const useAuthStore = create<AuthStore>()(
           });
 
           try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-
-            // Mock user creation
-            const mockUser: User = {
-              id: crypto.randomUUID(),
+            const { user: authUser, error } = await authService.register({
               email,
+              password,
               name,
+            });
+            
+            if (error || !authUser) {
+              throw new Error(error || 'Registration failed');
+            }
+
+            // Convert AuthUser to User format
+            const user: User = {
+              id: authUser.id,
+              email: authUser.email,
+              name: authUser.name,
+              avatar: authUser.avatar_url,
               plan: 'free',
-              role: 'user',
+              role: authUser.role as 'user' | 'admin' | 'moderator',
               permissions: ['read', 'write'],
               profile: {
-                firstName: name.split(' ')[0] || name,
-                lastName: name.split(' ').slice(1).join(' ') || '',
+                firstName: authUser.name.split(' ')[0] || authUser.name,
+                lastName: authUser.name.split(' ').slice(1).join(' ') || '',
+                company: authUser.company,
+                bio: '',
                 timezone: 'UTC',
-                preferences: {
+                preferences: authUser.preferences || {
                   emailNotifications: true,
                   pushNotifications: true,
                   marketingEmails: true,
@@ -231,15 +238,15 @@ export const useAuthStore = create<AuthStore>()(
                 jobsCompleted: 0,
                 employeesPurchased: 0,
               },
-              createdAt: new Date(),
+              createdAt: new Date(authUser.created_at),
               updatedAt: new Date(),
             };
 
             set((state) => {
               state.isAuthenticated = true;
-              state.user = mockUser;
-              state.token = 'mock-jwt-token-' + Date.now();
-              state.refreshToken = 'mock-refresh-token-' + Date.now();
+              state.user = user;
+              state.token = 'auth-token-' + Date.now();
+              state.refreshToken = 'refresh-token-' + Date.now();
               state.sessionExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
               state.lastLoginAt = new Date();
               state.isSigningUp = false;
@@ -260,9 +267,7 @@ export const useAuthStore = create<AuthStore>()(
           });
 
           try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 500));
-
+            await authService.logout();
             set((state) => {
               Object.assign(state, INITIAL_STATE);
             });

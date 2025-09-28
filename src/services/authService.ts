@@ -38,13 +38,7 @@ export interface AuthResponse {
 
 class AuthService {
   private isDemoMode(): boolean {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    
-    return !supabaseUrl || 
-           !supabaseKey || 
-           supabaseUrl.includes('your_supabase_url_here') || 
-           supabaseKey.includes('your_supabase_anon_key_here');
+    return import.meta.env.VITE_DEMO_MODE === 'true';
   }
 
   async login(loginData: LoginData): Promise<AuthResponse> {
@@ -88,11 +82,23 @@ class AuthService {
 
       console.log('AuthService: Supabase auth result', { hasData: !!data, hasError: !!error, error: error?.message });
 
-      
       if (error) {
-        console.log('AuthService: getUser error (non-critical):', error.message);
-        // Don't treat this as a critical error - user can still login
-        return { user: null, error: null }; // Return null error to allow login flow to continue
+        console.log('AuthService: Login error:', error.message);
+        
+        // Provide specific error messages based on the error type
+        let errorMessage = 'Login failed. Please try again.';
+        
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Invalid email or password. Please check your credentials.';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Please check your email and click the confirmation link.';
+        } else if (error.message.includes('Too many requests')) {
+          errorMessage = 'Too many login attempts. Please wait a moment and try again.';
+        } else if (error.message.includes('User not found')) {
+          errorMessage = 'No account found with this email address.';
+        }
+        
+        return { user: null, error: errorMessage };
       }
 
       if (!data.user) {

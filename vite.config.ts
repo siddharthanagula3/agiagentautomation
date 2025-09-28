@@ -28,23 +28,20 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Build optimization for Netlify
-    target: 'es2020', // More modern target for better performance
-    minify: 'esbuild', // Use esbuild for faster builds on Netlify
-    cssMinify: true,
-    
-    // Source maps for debugging
-    sourcemap: false, // Disable source maps for production to reduce size
+    target: 'es2020',
+    minify: 'terser', // Use terser instead of esbuild for better compatibility
+    sourcemap: false,
     
     // Optimized rollup options for Netlify
     rollupOptions: {
       output: {
-        // Simplified chunking strategy
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-          utils: ['clsx', 'tailwind-merge', 'date-fns']
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react')) return 'react';
+            if (id.includes('@radix-ui')) return 'radix-ui';
+            if (id.includes('@supabase')) return 'supabase';
+            return 'vendor';
+          }
         },
         
         // Optimized file naming
@@ -88,45 +85,13 @@ export default defineConfig(({ mode }) => ({
       'react',
       'react-dom',
       'react-router-dom',
-      '@tanstack/react-query',
-      '@tanstack/react-table',
-      '@stripe/stripe-js',
-      '@stripe/react-stripe-js',
       '@supabase/supabase-js',
-      '@supabase/realtime-js',
-      '@supabase/storage-js',
-      '@supabase/functions-js',
-      '@supabase/postgrest-js',
-      '@supabase/auth-helpers-react',
-      'date-fns',
-      'framer-motion',
-      'recharts',
-      'zustand',
-      'immer',
-      'clsx',
-      'tailwind-merge',
-      'class-variance-authority',
-      'lucide-react',
-      'sonner',
-      'react-hook-form',
-      '@hookform/resolvers',
-      'zod',
-      'react-day-picker',
-      'cmdk',
-      'vaul',
-      'embla-carousel-react',
-      'input-otp',
-      'react-resizable-panels',
-      'next-themes'
     ],
-    exclude: [
-      '@sentry/react' // Exclude Sentry to prevent issues
-    ],
+    exclude: [], // Remove Sentry from exclude
     esbuildOptions: {
       target: 'es2015', // Match build target
       keepNames: true, // Preserve function names
     },
-    force: true, // Force re-optimization
   },
   
   // ESBuild specific options

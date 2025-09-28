@@ -37,62 +37,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('🔍 Checking existing session...');
         const { data: { user: existingUser }, error } = await supabase.auth.getUser();
         
-        if (error) {
-          console.log('❌ Error getting user from Supabase:', error);
+        if (error || !existingUser) {
           setLoading(false);
           return;
         }
+
+        // Create basic user without fetching profile
+        const basicUser: AuthUser = {
+          id: existingUser.id,
+          email: existingUser.email || '',
+          name: existingUser.user_metadata?.name || existingUser.email || 'User',
+          role: 'user',
+          company: existingUser.user_metadata?.company || '',
+          preferences: existingUser.user_metadata?.preferences || {},
+          phone: existingUser.user_metadata?.phone || '',
+          location: existingUser.user_metadata?.location || '',
+          avatar_url: existingUser.user_metadata?.avatar_url || '',
+          created_at: existingUser.created_at || new Date().toISOString()
+        };
         
-        if (existingUser && isMounted) {
-          console.log('✅ Existing user found:', existingUser.email);
-          // Try to get the full user profile, but don't fail if it doesn't work
-          try {
-            const { user: authUser, error: profileError } = await authService.getCurrentUser();
-            if (authUser && !profileError && isMounted) {
-              console.log('✅ Full user profile loaded:', authUser.email);
-              setUser(authUser);
-            } else {
-              console.log('⚠️ Profile fetch failed, using basic user info:', profileError);
-              // Create a basic user object from Supabase auth
-              const basicUser: AuthUser = {
-                id: existingUser.id,
-                email: existingUser.email || '',
-                name: existingUser.user_metadata?.name || existingUser.email || 'User',
-                role: 'user',
-                company: existingUser.user_metadata?.company || '',
-                preferences: existingUser.user_metadata?.preferences || {},
-                phone: existingUser.user_metadata?.phone || '',
-                location: existingUser.user_metadata?.location || '',
-                avatar_url: existingUser.user_metadata?.avatar_url || '',
-                created_at: existingUser.created_at || new Date().toISOString()
-              };
-              setUser(basicUser);
-            }
-          } catch (profileError) {
-            console.log('⚠️ Profile fetch failed, using basic user info:', profileError);
-            // Create a basic user object from Supabase auth
-            const basicUser: AuthUser = {
-              id: existingUser.id,
-              email: existingUser.email || '',
-              name: existingUser.user_metadata?.name || existingUser.email || 'User',
-              role: 'user',
-              company: existingUser.user_metadata?.company || '',
-              preferences: existingUser.user_metadata?.preferences || {},
-              phone: existingUser.user_metadata?.phone || '',
-              location: existingUser.user_metadata?.location || '',
-              avatar_url: existingUser.user_metadata?.avatar_url || '',
-              created_at: existingUser.created_at || new Date().toISOString()
-            };
-            setUser(basicUser);
-          }
-          setLoading(false);
-          return;
-        }
-        
-        console.log('ℹ️ No existing session found');
+        setUser(basicUser);
         setLoading(false);
       } catch (error) {
-        console.log('❌ Error checking existing session:', error);
+        console.error('Session check failed:', error);
         setLoading(false);
       }
     };

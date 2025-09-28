@@ -119,8 +119,22 @@
             };
         }
 
-        // Comprehensive TDZ protection for all common variable patterns
+        // Comprehensive TDZ protection and React pre-initialization
         window.__preventTDZ = function() {
+            // CRITICAL: Pre-initialize React namespace before any modules load
+            if (!window.React) {
+                window.React = {
+                    createElement: function() {
+                        // Temporary createElement that gets replaced by real React
+                        console.debug('Using fallback React.createElement');
+                        return arguments;
+                    },
+                    Fragment: 'div' // Simple fragment fallback
+                };
+                globalThis.React = window.React;
+                console.debug('Pre-initialized React namespace');
+            }
+
             // Create dummy bindings for ALL common minified variable names
             var commonVars = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
             var lowerVars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];

@@ -39,6 +39,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Check for existing session in background
     const checkSession = async () => {
+    
+  // IMMEDIATE USER CHECK - bypass loading if user exists
+  const currentUser = supabase.auth.getUser();
+  if (currentUser && currentUser.data && currentUser.data.user) {
+    console.log('🚀 IMMEDIATE: User found, bypassing loading');
+    setUser(currentUser.data.user);
+    setLoading(false);
+    return;
+  }
+
       try {
         console.log('Attempting to connect to Supabase...');
         const { user: currentUser, error } = await authService.getCurrentUser();
@@ -69,6 +79,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (hasValidCredentials && typeof supabase?.auth?.onAuthStateChange === 'function') {
       try {
         const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+    
+  // IMMEDIATE AUTH CHECK - bypass loading if user exists
+  const currentUser = supabase.auth.getUser();
+  if (currentUser && currentUser.data && currentUser.data.user) {
+    console.log('🚀 IMMEDIATE AUTH: User found, bypassing loading');
+    setUser(currentUser.data.user);
+    setLoading(false);
+    return;
+  }
+
           if (!isMounted) return;
 
           if (session?.user) {

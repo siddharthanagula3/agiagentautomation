@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'es2020',
-    minify: 'terser', // Use terser instead of esbuild for better compatibility
+    minify: 'esbuild', // Use esbuild for better compatibility with React
     sourcemap: false,
     
     // Optimized rollup options for Netlify
@@ -97,7 +97,8 @@ export default defineConfig(({ mode }) => ({
   // ESBuild specific options
   esbuild: {
     legalComments: 'none',
-    target: 'es2015',
+    target: 'es2020',
     keepNames: true, // Important for debugging
+    minifyIdentifiers: false, // Prevent function name mangling
   },
 }));

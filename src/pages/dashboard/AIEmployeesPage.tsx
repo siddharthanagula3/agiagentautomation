@@ -33,7 +33,7 @@ type AIEmployee = AIAgent;
 
 const AIEmployeesPage: React.FC = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [employees, setEmployees] = useState<AIEmployee[]>([]);
   const [filteredEmployees, setFilteredEmployees] = useState<AIEmployee[]>([]);
@@ -65,6 +65,7 @@ const AIEmployeesPage: React.FC = () => {
   
   
   
+  
   const loadEmployees = useCallback(async () => {
     if (!user) return;
     
@@ -80,16 +81,23 @@ const AIEmployeesPage: React.FC = () => {
         // Add other default stats here
       });
       
-      // Always resolve loading state quickly
-      setTimeout(() => {
-        setLoading(false);
-      }, 100);
+      // NEVER wait for services - always resolve immediately
+      setLoading(false);
       
     } catch (err) {
       console.error('Error loading data:', err);
       setLoading(false);
     }
   }, [user]);
+
+  // Override useEffect to always call loadData
+  useEffect(() => {
+    if (user) {
+      loadData();
+    } else {
+      setLoading(false);
+    }
+  }, [user, loadData]);
 
   const handleCreateEmployee = async (e: React.FormEvent) => {
     e.preventDefault();

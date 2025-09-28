@@ -32,7 +32,7 @@ type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [stats, setStats] = useState({
     aiEmployees: 0,

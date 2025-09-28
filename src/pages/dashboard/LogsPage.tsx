@@ -28,7 +28,7 @@ interface LogEntry {
 
 const LogsPage: React.FC = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<LogEntry[]>([]);
   const [filteredData, setFilteredData] = useState<LogEntry[]>([]);

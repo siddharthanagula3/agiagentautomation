@@ -36,7 +36,7 @@ interface Report {
 
 const ReportsPage: React.FC = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<Report[]>([]);
   const [filteredData, setFilteredData] = useState<Report[]>([]);

@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
+import { jobsService } from '../../services/jobsService';
+import type { Database } from '../../integrations/supabase/types';
 import { 
   Target, 
   Plus, 
@@ -27,20 +29,7 @@ import {
   Users
 } from 'lucide-react';
 
-interface Job {
-  id: string;
-  title: string;
-  description: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  assigned_to: string;
-  created_by: string;
-  created_at: string;
-  due_date: string;
-  completed_at?: string;
-  tags: string[];
-  progress: number;
-}
+type Job = Database['public']['Tables']['jobs']['Row'];
 
 const JobsPage: React.FC = () => {
   const { user } = useAuth();
@@ -76,18 +65,58 @@ const JobsPage: React.FC = () => {
   }, [user]);
 
   const loadJobs = useCallback(async () => {
+    if (!user) return;
+    
     try {
       setLoading(true);
       setError(null);
       
-      // Simulate API call - in real implementation, this would fetch from Supabase
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Load real data from Supabase
+      const result = await jobsService.getJobs(user.id);
       
-      // For new users, return empty array to show proper empty state
+      if (result.error) {
+        setError(result.error);
+        setJobs([]);
+        setFilteredJobs([]);
+        setStats({
+          total: 0,
+          pending: 0,
+          in_progress: 0,
+          completed: 0,
+          cancelled: 0,
+          overdue: 0
+        });
+      } else {
+        setJobs(result.data);
+        setFilteredJobs(result.data);
+        
+        // Calculate real stats from data
+        const total = result.data.length;
+        const pending = result.data.filter(job => job.status === 'pending').length;
+        const in_progress = result.data.filter(job => job.status === 'in_progress').length;
+        const completed = result.data.filter(job => job.status === 'completed').length;
+        const cancelled = result.data.filter(job => job.status === 'cancelled').length;
+        const overdue = result.data.filter(job => {
+          if (job.status === 'completed' || job.status === 'cancelled') return false;
+          if (!job.due_date) return false;
+          return new Date(job.due_date) < new Date();
+        }).length;
+        
+        setStats({
+          total,
+          pending,
+          in_progress,
+          completed,
+          cancelled,
+          overdue
+        });
+      }
+      
+    } catch (err) {
+      console.error('Error loading jobs:', err);
+      setError('Failed to load jobs. Please try again.');
       setJobs([]);
       setFilteredJobs([]);
-      
-      // Calculate stats for new users (all zeros)
       setStats({
         total: 0,
         pending: 0,
@@ -96,41 +125,36 @@ const JobsPage: React.FC = () => {
         cancelled: 0,
         overdue: 0
       });
-      
-    } catch (err) {
-      console.error('Error loading jobs:', err);
-      setError('Failed to load jobs. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
+    
     try {
       setLoading(true);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const newJobData: Job = {
-        id: Date.now().toString(),
+      // Create job using real service
+      const result = await jobsService.createJob(user.id, {
         title: newJob.title,
         description: newJob.description,
-        status: 'pending',
         priority: newJob.priority,
-        assigned_to: user?.id || '',
-        created_by: user?.id || '',
-        created_at: new Date().toISOString(),
         due_date: newJob.due_date,
         tags: newJob.tags,
-        progress: 0
-      };
+        status: 'pending'
+      });
       
-      setJobs(prev => [...prev, newJobData]);
-      setFilteredJobs(prev => [...prev, newJobData]);
-      setNewJob({ title: '', description: '', priority: 'medium', due_date: '', tags: [] });
-      setShowCreateJob(false);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        // Refresh the list
+        await loadJobs();
+        setNewJob({ title: '', description: '', priority: 'medium', due_date: '', tags: [] });
+        setShowCreateJob(false);
+      }
       
     } catch (err) {
       console.error('Error creating job:', err);

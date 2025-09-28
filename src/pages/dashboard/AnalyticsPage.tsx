@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/auth-hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
+import { analyticsService, AnalyticsData } from '../../services/analyticsService';
 import { 
   BarChart3, 
   TrendingUp,
@@ -20,18 +21,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-interface AnalyticsData {
-  pageViews: number;
-  uniqueUsers: number;
-  sessions: number;
-  bounceRate: number;
-  avgSessionDuration: number;
-  conversionRate: number;
-  revenue: number;
-  topPages: { page: string; views: number }[];
-  userGrowth: { date: string; users: number }[];
-  revenueData: { date: string; revenue: number }[];
-}
+// Use the real AnalyticsData type from the service
 
 const AnalyticsPage: React.FC = () => {
   const { user } = useAuth();
@@ -48,36 +38,30 @@ const AnalyticsPage: React.FC = () => {
   }, [user, timeRange, refreshKey]);
 
   const loadAnalytics = useCallback(async () => {
+    if (!user) return;
+    
     try {
       setLoading(true);
       setError(null);
       
-      // Simulate API call - in real implementation, this would fetch from Supabase
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Load real analytics data from Supabase
+      const result = await analyticsService.getUserAnalytics(user.id);
       
-      // For new users, return data with zeros to show proper empty state
-      const emptyAnalytics: AnalyticsData = {
-        pageViews: 0,
-        uniqueUsers: 0,
-        sessions: 0,
-        bounceRate: 0,
-        avgSessionDuration: 0,
-        conversionRate: 0,
-        revenue: 0,
-        topPages: [],
-        userGrowth: [],
-        revenueData: []
-      };
-      
-      setAnalytics(emptyAnalytics);
+      if (result.error) {
+        setError(result.error);
+        setAnalytics(null);
+      } else {
+        setAnalytics(result.data);
+      }
       
     } catch (err) {
       console.error('Error loading analytics:', err);
       setError('Failed to load analytics. Please try again.');
+      setAnalytics(null);
     } finally {
       setLoading(false);
     }
-  }, [timeRange, refreshKey]);
+  }, [user, timeRange, refreshKey]);
 
   const handleRefresh = () => {
     setRefreshKey(prev => prev + 1);

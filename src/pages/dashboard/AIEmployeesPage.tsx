@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
+import { agentsService } from '../../services/agentsService';
+import type { Database } from '../../integrations/supabase/types';
 import { 
   Users, 
   Plus, 
@@ -24,20 +26,10 @@ import {
   DollarSign
 } from 'lucide-react';
 
-interface AIEmployee {
-  id: string;
-  name: string;
-  description: string;
-  capabilities: string[];
-  status: 'available' | 'busy' | 'offline' | 'maintenance';
-  performance: {
-    tasks_completed: number;
-    success_rate: number;
-    avg_response_time: number;
-  };
-  created_at: string;
-  last_active: string;
-}
+type AIAgent = Database['public']['Tables']['ai_agents']['Row'];
+
+// Use the real AIAgent type from database
+type AIEmployee = AIAgent;
 
 const AIEmployeesPage: React.FC = () => {
   const { user } = useAuth();
@@ -71,18 +63,56 @@ const AIEmployeesPage: React.FC = () => {
   }, [user]);
 
   const loadEmployees = useCallback(async () => {
+    if (!user) return;
+    
     try {
       setLoading(true);
       setError(null);
       
-      // Simulate API call - in real implementation, this would fetch from Supabase
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Load real data from Supabase
+      const result = await agentsService.getAgents(user.id);
       
-      // For new users, return empty array to show proper empty state
+      if (result.error) {
+        setError(result.error);
+        setEmployees([]);
+        setFilteredEmployees([]);
+        setStats({
+          total: 0,
+          available: 0,
+          busy: 0,
+          offline: 0,
+          totalTasks: 0,
+          avgSuccessRate: 0
+        });
+      } else {
+        setEmployees(result.data);
+        setFilteredEmployees(result.data);
+        
+        // Calculate real stats from data
+        const total = result.data.length;
+        const available = result.data.filter(emp => emp.status === 'available').length;
+        const busy = result.data.filter(emp => emp.status === 'busy').length;
+        const offline = result.data.filter(emp => emp.status === 'offline').length;
+        const totalTasks = result.data.reduce((sum, emp) => sum + (emp.tasks_completed || 0), 0);
+        const avgSuccessRate = result.data.length > 0 
+          ? result.data.reduce((sum, emp) => sum + (emp.success_rate || 0), 0) / result.data.length 
+          : 0;
+        
+        setStats({
+          total,
+          available,
+          busy,
+          offline,
+          totalTasks,
+          avgSuccessRate
+        });
+      }
+      
+    } catch (err) {
+      console.error('Error loading AI employees:', err);
+      setError('Failed to load AI employees. Please try again.');
       setEmployees([]);
       setFilteredEmployees([]);
-      
-      // Calculate stats for new users (all zeros)
       setStats({
         total: 0,
         available: 0,
@@ -91,42 +121,36 @@ const AIEmployeesPage: React.FC = () => {
         totalTasks: 0,
         avgSuccessRate: 0
       });
-      
-    } catch (err) {
-      console.error('Error loading AI employees:', err);
-      setError('Failed to load AI employees. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   const handleCreateEmployee = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
+    
     try {
       setLoading(true);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const newEmp: AIEmployee = {
-        id: Date.now().toString(),
+      // Create AI agent using real service
+      const result = await agentsService.createAgent(user.id, {
         name: newEmployee.name,
         description: newEmployee.description,
+        role: 'assistant',
         capabilities: newEmployee.capabilities,
         status: newEmployee.status,
-        performance: {
-          tasks_completed: 0,
-          success_rate: 0,
-          avg_response_time: 0
-        },
-        created_at: new Date().toISOString(),
-        last_active: new Date().toISOString()
-      };
+        is_active: true
+      });
       
-      setEmployees(prev => [...prev, newEmp]);
-      setFilteredEmployees(prev => [...prev, newEmp]);
-      setNewEmployee({ name: '', description: '', capabilities: [], status: 'available' });
-      setShowCreateEmployee(false);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        // Refresh the list
+        await loadEmployees();
+        setNewEmployee({ name: '', description: '', capabilities: [], status: 'available' });
+        setShowCreateEmployee(false);
+      }
       
     } catch (err) {
       console.error('Error creating AI employee:', err);

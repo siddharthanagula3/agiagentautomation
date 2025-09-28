@@ -12,6 +12,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   
+  
   useEffect(() => {
     let isMounted = true;
     let timeoutId: NodeJS.Timeout;
@@ -20,61 +21,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
     
-    // Comprehensive diagnostic for live site
-    console.log('🔍 COMPREHENSIVE DIAGNOSTIC FOR LIVE SITE');
-    console.log('==========================================');
-    
-    console.log('VITE_SUPABASE_URL:', supabaseUrl ? '✅ Set' : '❌ Not set');
-    console.log('VITE_SUPABASE_ANON_KEY:', supabaseKey ? '✅ Set' : '❌ Not set');
-    
-    if (supabaseUrl) {
-      console.log('URL Value:', supabaseUrl);
-      console.log('URL Valid:', !supabaseUrl.includes('your_supabase_url_here'));
-      console.log('URL Format:', supabaseUrl.startsWith('https://') ? '✅ Correct' : '❌ Incorrect');
-    } else {
-      console.log('❌ CRITICAL: VITE_SUPABASE_URL is missing');
-    }
-    
-    if (supabaseKey) {
-      console.log('Key Value:', supabaseKey.substring(0, 20) + '...');
-      console.log('Key Valid:', !supabaseKey.includes('your_supabase_anon_key_here'));
-      console.log('Key Format:', supabaseKey.startsWith('eyJ') ? '✅ Correct' : '❌ Incorrect');
-    } else {
-      console.log('❌ CRITICAL: VITE_SUPABASE_ANON_KEY is missing');
-    }
-    
     const hasValidCredentials = supabaseUrl && 
                                 supabaseKey && 
                                 !supabaseUrl.includes('your_supabase_url_here') && 
                                 !supabaseKey.includes('your_supabase_anon_key_here');
-    
-    console.log('Valid Credentials:', hasValidCredentials ? '✅ Yes' : '❌ No');
-    
-    if (!hasValidCredentials) {
-      console.log('⚠️  MODE: Demo Mode (No Backend)');
-      console.log('🎯 CAUSE: Missing or invalid environment variables');
-      console.log('🔧 SOLUTION: Configure Netlify environment variables');
-      console.log('');
-      console.log('📋 NETLIFY SETUP INSTRUCTIONS:');
-      console.log('1. Go to https://app.netlify.com');
-      console.log('2. Select your site: agiagentautomation');
-      console.log('3. Go to Site Settings → Environment Variables');
-      console.log('4. Click "Add variable"');
-      console.log('5. Add Variable 1:');
-      console.log('   Name: VITE_SUPABASE_URL');
-      console.log('   Value: https://lywdzvfibhzbljrgovwr.supabase.co');
-      console.log('6. Add Variable 2:');
-      console.log('   Name: VITE_SUPABASE_ANON_KEY');
-      console.log('   Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5d2R6dmZpYmh6YmxqcmdvdndyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3ODI2MDgsImV4cCI6MjA3NDM1ODYwOH0.pt991fDh770PYQRNx3L9va1D_qupbb_j-JynYo2XcTw');
-      console.log('7. Click "Save" for each variable');
-      console.log('8. Go to Deploys tab');
-      console.log('9. Click "Trigger deploy" → "Deploy site"');
-      console.log('10. Wait 2-3 minutes for deployment');
-    } else {
-      console.log('✅ MODE: Production Mode (Real Backend)');
-      console.log('🎯 CAUSE: Environment variables are correctly configured');
-      console.log('🔧 NEXT: Check for other issues (network, Supabase status, etc.)');
-    }
 
     // If no valid credentials, immediately set loading to false for demo mode
     if (!hasValidCredentials) {
@@ -83,18 +33,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return;
     }
 
-    // Check for existing session with timeout
+    // IMMEDIATELY set loading to false to prevent timeout issues
+    console.log('AuthContext: Setting loading to false immediately');
+    setLoading(false);
+
+    // Check for existing session in background
     const checkSession = async () => {
       try {
-        // Set a longer timeout for Supabase connection
-        timeoutId = setTimeout(() => {
-          if (isMounted) {
-            console.warn('Auth check timeout - Supabase connection may be slow');
-            console.log('Setting loading to false to allow user interaction');
-            setLoading(false);
-          }
-        }, 20000); // 20 second timeout for Supabase connection
-
         console.log('Attempting to connect to Supabase...');
         const { user: currentUser, error } = await authService.getCurrentUser();
         console.log('AuthService getCurrentUser result:', { hasUser: !!currentUser, hasError: !!error });
@@ -105,32 +50,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUser(currentUser);
           } else if (error) {
             console.log('ℹ️  No active session (this is normal for new users)');
-            // Don't treat auth errors as critical - user just needs to login
           } else {
             console.log('ℹ️  No active session - user needs to login');
           }
-          setLoading(false);
         }
       } catch (error) {
         console.error('Supabase connection error:', error);
         console.log('This may be a network or Supabase service issue');
-        if (isMounted) {
-          setLoading(false);
-        }
-      } finally {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        // Always set loading to false after any attempt
-        if (isMounted) {
-          setLoading(false);
-        }
       }
     };
 
+    // Run in background without blocking
     checkSession();
 
-    // Only set up auth listener if we have valid credentials
+    // Set up auth listener if we have valid credentials
     let subscription: any = null;
     
     if (hasValidCredentials && typeof supabase?.auth?.onAuthStateChange === 'function') {
@@ -150,17 +83,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           } else {
             setUser(null);
           }
-          
-          if (isMounted) {
-            setLoading(false);
-          }
         });
         subscription = data?.subscription;
       } catch (error) {
         console.error('Error setting up auth listener:', error);
-        if (isMounted) {
-          setLoading(false);
-        }
       }
     }
 

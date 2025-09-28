@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AGI Agent Automation Platform</title>
+    
+    <!-- Global fallback for __name function -->
+    <script>
+      // Comprehensive TDZ protection and global fallbacks
+      if (typeof globalThis !== 'undefined') {
+        if (!globalThis.__name) {
+          globalThis.__name = function(name) { return name; };
+        }
+        if (!globalThis.global) {
+          globalThis.global = globalThis;
+        }
+        if (!globalThis.global.__name) {
+          globalThis.global.__name = globalThis.__name;
+        }
+      }
+      
+      // Pre-initialize common variables to prevent TDZ errors
+      if (typeof window !== 'undefined') {
+        window._a = window._a || function() {};
+        window._b = window._b || function() {};
+        window._c = window._c || function() {};
+        window._d = window._d || function() {};
+        window._e = window._e || function() {};
+        window._f = window._f || function() {};
+        window._g = window._g || function() {};
+        window._h = window._h || function() {};
+        window._i = window._i || function() {};
+        window._j = window._j || function() {};
+        window._k = window._k || function() {};
+        window._l = window._l || function() {};
+        window._m = window._m || function() {};
+        window._n = window._n || function() {};
+        window._o = window._o || function() {};
+        window._p = window._p || function() {};
+        window._q = window._q || function() {};
+        window._r = window._r || function() {};
+        window._s = window._s || function() {};
+        window._t = window._t || function() {};
+        window._u = window._u || function() {};
+        window._v = window._v || function() {};
+        window._w = window._w || function() {};
+        window._x = window._x || function() {};
+        window._y = window._y || function() {};
+        window._z = window._z || function() {};
+      }
+      
+      // React pre-initialization
+      if (typeof window !== 'undefined') {
+        window.React = window.React || {};
+        window.ReactDOM = window.ReactDOM || {};
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,62 +1,64 @@
 {
-  "timestamp": "2025-09-28T06:28:41.662Z",
+  "timestamp": "2025-09-28T06:33:36.711Z",
   "tests": [
     {
       "name": "Homepage Load",
-      "status": "PASSED",
-      "loadTime": 1497,
+      "status": "FAILED",
+      "loadTime": 1364,
       "title": "AGI Agent Automation - Loading...",
       "url": "https://agiagentautomation.com/",
       "reactMounted": false,
       "errors": [
         {
-          "type": "console_error",
-          "message": "Global error caught: JSHandle@object",
-          "timestamp": "2025-09-28T06:28:44.578Z"
+          "type": "page_error",
+          "message": "global is not defined",
+          "stack": "ReferenceError: global is not defined\n    at <anonymous> (https://agiagentautomation.com/:131:13)\n    at <anonymous> (https://agiagentautomation.com/:147:11)",
+          "timestamp": "2025-09-28T06:33:39.449Z"
         },
         {
           "type": "page_error",
-          "message": "Identifier '_a' has already been declared",
-          "stack": "SyntaxError: Identifier '_a' has already been declared",
-          "timestamp": "2025-09-28T06:28:44.580Z"
+          "message": "__name is not a function",
+          "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-biVVZaAG.js:1:3376)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase-DXJGCeoN.js:1:8600)",
+          "timestamp": "2025-09-28T06:33:39.729Z"
         }
       ]
     }
   ],
   "errors": [
     {
-      "type": "console_error",
-      "message": "Global error caught: JSHandle@object",
-      "timestamp": "2025-09-28T06:28:44.578Z"
+      "type": "page_error",
+      "message": "global is not defined",
+      "stack": "ReferenceError: global is not defined\n    at <anonymous> (https://agiagentautomation.com/:131:13)\n    at <anonymous> (https://agiagentautomation.com/:147:11)",
+      "timestamp": "2025-09-28T06:33:39.449Z"
     },
     {
       "type": "page_error",
-      "message": "Identifier '_a' has already been declared",
-      "stack": "SyntaxError: Identifier '_a' has already been declared",
-      "timestamp": "2025-09-28T06:28:44.580Z"
+      "message": "__name is not a function",
+      "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-biVVZaAG.js:1:3376)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase-DXJGCeoN.js:1:8600)",
+      "timestamp": "2025-09-28T06:33:39.729Z"
     }
   ],
   "performance": {
-    "timestamp": 35144.324908,
+    "timestamp": 35439.349444,
     "documents": 3,
     "frames": 1,
-    "jsEventListeners": 4,
-    "layoutCount": 3,
-    "recalcStyleCount": 3,
-    "layoutDuration": 0.102806,
-    "recalcStyleDuration": 0.012511,
-    "scriptDuration": 0.010499,
-    "taskDuration": 0.235294,
-    "jsHeapUsedSize": 1716396,
-    "jsHeapTotalSize": 2621440
+    "jsEventListeners": 1,
+    "layoutCount": 2,
+    "recalcStyleCount": 2,
+    "layoutDuration": 0.001715,
+    "recalcStyleDuration": 0.007873,
+    "scriptDuration": 0.019095,
+    "taskDuration": 0.126348,
+    "jsHeapUsedSize": 2052052,
+    "jsHeapTotalSize": 2883584
   },
   "summary": {
     "totalTests": 1,
-    "passedTests": 1,
-    "failedTests": 0,
+    "passedTests": 0,
+    "failedTests": 1,
     "loadingIssues": 0,
-    "successRate": "100%",
+    "successRate": "0%",
     "criticalErrors": 2,
-    "timestamp": "2025-09-28T06:28:45.397Z"
+    "timestamp": "2025-09-28T06:33:40.445Z"
   }
 }

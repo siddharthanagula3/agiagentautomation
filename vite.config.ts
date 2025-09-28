@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import path from "path";
 
 // https://vitejs.dev/config/
@@ -23,14 +23,8 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react({
-      // This is the critical fix:
-      // In development mode, explicitly disable the SWC transform for React Refresh.
-      // Vite will then use its own Babel-based implementation which is more stable.
-      dev: {
-        plugins: [
-          ["@swc/plugin-react-refresh", { refresh: false }]
-        ],
-      },
+      // Use the standard React plugin instead of SWC to avoid __name function issues
+      fastRefresh: true,
     }),
   ],
   resolve: {

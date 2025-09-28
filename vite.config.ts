@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'es2015', // Use older target for better compatibility
-    minify: 'terser', // Use terser instead of esbuild for better control
+    minify: 'esbuild', // Use esbuild for better compatibility
     sourcemap: false,
 
     // Optimized rollup options for Netlify
@@ -164,6 +164,8 @@ export default defineConfig(({ mode }) => ({
     keepNames: true, // Keep names for React compatibility
     minifyIdentifiers: false, // Disable to prevent variable name conflicts
     format: 'esm', // Use ESM format for better React compatibility
+    // Prevent function name mangling that causes 's is not a function' errors
+    mangleProps: /^_/, // Only mangle properties starting with underscore
     // Fix temporal dead zone issues
     tsconfigRaw: {
       compilerOptions: {

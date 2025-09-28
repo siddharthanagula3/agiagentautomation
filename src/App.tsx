@@ -7,6 +7,8 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import Dashboard from './pages/dashboard/Dashboard';
+import DashboardHomePage from './pages/DashboardHomePage';
+import MultiTabChatInterface from './components/chat/MultiTabChatInterface';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';
 import { AIEmployeeDemo } from './pages/demo/AIEmployeeDemo';
@@ -36,6 +38,8 @@ function App() {
         }
       >
         <Route index element={<Dashboard />} />
+        <Route path="home" element={<DashboardHomePage />} />
+        <Route path="chat" element={<MultiTabChatInterface />} />
         {/* Add other dashboard routes here */}
       </Route>
     </Routes>

@@ -1,0 +1,247 @@
+{
+  "summary": {
+    "totalTests": 22,
+    "passedTests": 22,
+    "failedTests": 7,
+    "successRate": "100.00%",
+    "duration": "52.09s"
+  },
+  "details": {
+    "startTime": "2025-09-28T00:09:54.593Z",
+    "totalTests": 22,
+    "passedTests": 22,
+    "failedTests": 7,
+    "errors": [
+      "Sign out failed: Sign out button not found"
+    ],
+    "pageTests": [
+      {
+        "name": "Dashboard",
+        "url": "https://agiagentautomation.com/dashboard",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 866,
+        "errors": []
+      },
+      {
+        "name": "AI Employees",
+        "url": "https://agiagentautomation.com/dashboard/ai-employees",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 739,
+        "errors": []
+      },
+      {
+        "name": "Workforce",
+        "url": "https://agiagentautomation.com/dashboard/workforce",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 937,
+        "errors": []
+      },
+      {
+        "name": "Jobs",
+        "url": "https://agiagentautomation.com/dashboard/jobs",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 714,
+        "errors": []
+      },
+      {
+        "name": "Analytics",
+        "url": "https://agiagentautomation.com/dashboard/analytics",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 770,
+        "errors": []
+      },
+      {
+        "name": "Profile",
+        "url": "https://agiagentautomation.com/dashboard/profile",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 784,
+        "errors": []
+      },
+      {
+        "name": "Billing",
+        "url": "https://agiagentautomation.com/dashboard/billing",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 777,
+        "errors": []
+      },
+      {
+        "name": "Notifications",
+        "url": "https://agiagentautomation.com/dashboard/notifications",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 740,
+        "errors": []
+      },
+      {
+        "name": "Team",
+        "url": "https://agiagentautomation.com/dashboard/team",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 770,
+        "errors": []
+      },
+      {
+        "name": "Settings",
+        "url": "https://agiagentautomation.com/dashboard/settings",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 766,
+        "errors": []
+      },
+      {
+        "name": "Webhooks",
+        "url": "https://agiagentautomation.com/dashboard/webhooks",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 759,
+        "errors": []
+      },
+      {
+        "name": "Logs",
+        "url": "https://agiagentautomation.com/dashboard/logs",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 784,
+        "errors": []
+      },
+      {
+        "name": "Processing",
+        "url": "https://agiagentautomation.com/dashboard/processing",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 761,
+        "errors": []
+      },
+      {
+        "name": "Reports",
+        "url": "https://agiagentautomation.com/dashboard/reports",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 768,
+        "errors": []
+      },
+      {
+        "name": "API Keys",
+        "url": "https://agiagentautomation.com/dashboard/api-keys",
+        "loaded": true,
+        "elementsFound": [],
+        "elementsMissing": [
+          "Page Title",
+          "Navigation Menu",
+          "Main Content"
+        ],
+        "loadingTime": 784,
+        "errors": []
+      }
+    ],
+    "buttonTests": [],
+    "navigationTests": [],
+    "loadingTests": [
+      {
+        "name": "Dashboard Loading",
+        "loadTime": 700,
+        "success": true
+      },
+      {
+        "name": "AI Employees Loading",
+        "loadTime": 716,
+        "success": true
+      },
+      {
+        "name": "Workforce Loading",
+        "loadTime": 715,
+        "success": true
+      },
+      {
+        "name": "Jobs Loading",
+        "loadTime": 715,
+        "success": true
+      },
+      {
+        "name": "Analytics Loading",
+        "loadTime": 715,
+        "success": true
+      }
+    ],
+    "visibilityTests": [],
+    "endTime": "2025-09-28T00:10:46.687Z",
+    "duration": 52094
+  }
+}

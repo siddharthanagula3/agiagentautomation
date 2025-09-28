@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-09-28T06:26:12.210Z",
+  "timestamp": "2025-09-28T06:28:41.662Z",
   "tests": [
     {
       "name": "Homepage Load",
       "status": "PASSED",
-      "loadTime": 1505,
+      "loadTime": 1497,
       "title": "AGI Agent Automation - Loading...",
       "url": "https://agiagentautomation.com/",
       "reactMounted": false,
@@ -12,13 +12,13 @@
         {
           "type": "console_error",
           "message": "Global error caught: JSHandle@object",
-          "timestamp": "2025-09-28T06:26:15.496Z"
+          "timestamp": "2025-09-28T06:28:44.578Z"
         },
         {
           "type": "page_error",
           "message": "Identifier '_a' has already been declared",
           "stack": "SyntaxError: Identifier '_a' has already been declared",
-          "timestamp": "2025-09-28T06:26:15.500Z"
+          "timestamp": "2025-09-28T06:28:44.580Z"
         }
       ]
     }
@@ -27,27 +27,27 @@
     {
       "type": "console_error",
       "message": "Global error caught: JSHandle@object",
-      "timestamp": "2025-09-28T06:26:15.496Z"
+      "timestamp": "2025-09-28T06:28:44.578Z"
     },
     {
       "type": "page_error",
       "message": "Identifier '_a' has already been declared",
       "stack": "SyntaxError: Identifier '_a' has already been declared",
-      "timestamp": "2025-09-28T06:26:15.500Z"
+      "timestamp": "2025-09-28T06:28:44.580Z"
     }
   ],
   "performance": {
-    "timestamp": 34995.266404,
+    "timestamp": 35144.324908,
     "documents": 3,
     "frames": 1,
     "jsEventListeners": 4,
     "layoutCount": 3,
     "recalcStyleCount": 3,
-    "layoutDuration": 0.126708,
-    "recalcStyleDuration": 0.007829,
-    "scriptDuration": 0.007627,
-    "taskDuration": 0.219946,
-    "jsHeapUsedSize": 1716964,
+    "layoutDuration": 0.102806,
+    "recalcStyleDuration": 0.012511,
+    "scriptDuration": 0.010499,
+    "taskDuration": 0.235294,
+    "jsHeapUsedSize": 1716396,
     "jsHeapTotalSize": 2621440
   },
   "summary": {
@@ -57,6 +57,6 @@
     "loadingIssues": 0,
     "successRate": "100%",
     "criticalErrors": 2,
-    "timestamp": "2025-09-28T06:26:16.326Z"
+    "timestamp": "2025-09-28T06:28:45.397Z"
   }
 }

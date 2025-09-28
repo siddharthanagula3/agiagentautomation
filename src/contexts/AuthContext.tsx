@@ -92,10 +92,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.log('Setting loading to false to allow user interaction');
             setLoading(false);
           }
-        }, 10000); // 10 second timeout for Supabase connection
+        }, 20000); // 20 second timeout for Supabase connection
 
         console.log('Attempting to connect to Supabase...');
         const { user: currentUser, error } = await authService.getCurrentUser();
+        console.log('AuthService getCurrentUser result:', { hasUser: !!currentUser, hasError: !!error });
         
         if (isMounted) {
           if (currentUser && !error) {
@@ -118,6 +119,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } finally {
         if (timeoutId) {
           clearTimeout(timeoutId);
+        }
+        // Always set loading to false after any attempt
+        if (isMounted) {
+          setLoading(false);
         }
       }
     };

@@ -41,129 +41,58 @@ class AuthService {
     return import.meta.env.VITE_DEMO_MODE === 'true';
   }
 
-  async login(loginData: LoginData): Promise<AuthResponse> {
-    try {
-      console.log('AuthService: Starting login for', loginData.email);
-      
-      // Add timeout protection for login
-      const loginTimeout = setTimeout(() => {
-        console.warn('AuthService: Login timeout - this should not happen');
-      }, 10000); // 10 second timeout
-      
-      // Check if we're in demo mode
-      if (this.isDemoMode()) {
-        console.log('AuthService: Running in demo mode');
-        // Only allow demo credentials in demo mode
-        if (loginData.email === 'demo@example.com' && loginData.password === 'demo123') {
-          const demoUser: AuthUser = {
-            id: 'demo-user-123',
-            email: loginData.email,
-            name: 'Demo User',
-            avatar: '',
-            role: 'user',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            last_login: new Date().toISOString(),
-            is_active: true,
-            preferences: {},
-            phone: '',
-            location: ''
-          };
-          clearTimeout(loginTimeout);
-          return { user: demoUser, error: null };
-        }
-        clearTimeout(loginTimeout);
-        return { user: null, error: 'Invalid demo credentials. Use demo@example.com / demo123' };
+// Replace the existing login function in src/services/authService.ts with this:
+
+async login(loginData: LoginData): Promise<AuthResponse> {
+  try {
+    // Handle demo mode separately at the top for clarity.
+    if (this.isDemoMode()) {
+      console.log('AuthService: Running in demo mode');
+      if (loginData.email === 'demo@example.com' && loginData.password === 'demo123') {
+        const demoUser: AuthUser = {
+          id: 'demo-user-123',
+          email: loginData.email,
+          name: 'Demo User',
+          avatar: '',
+          role: 'user',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_active: true,
+        };
+        return { user: demoUser, error: null };
       }
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginData.email,
-        password: loginData.password,
-      });
+      return { user: null, error: 'Invalid demo credentials. Use demo@example.com / demo123' };
+    }
 
-      console.log('AuthService: Supabase auth result', { hasData: !!data, hasError: !!error, error: error?.message });
+    // Single, direct call to Supabase for authentication.
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: loginData.email,
+      password: loginData.password,
+    });
 
-      if (error) {
-        console.log('AuthService: Login error:', error.message);
-        
-        // Provide specific error messages based on the error type
-        let errorMessage = 'Login failed. Please try again.';
-        
-        if (error.message.includes('Invalid login credentials')) {
-          errorMessage = 'Invalid email or password. Please check your credentials.';
-        } else if (error.message.includes('Email not confirmed')) {
-          errorMessage = 'Please check your email and click the confirmation link.';
-        } else if (error.message.includes('Too many requests')) {
-          errorMessage = 'Too many login attempts. Please wait a moment and try again.';
-        } else if (error.message.includes('User not found')) {
-          errorMessage = 'No account found with this email address.';
-        }
-        
-        return { user: null, error: errorMessage };
-      }
+    // If Supabase returns an error, immediately return it.
+    if (error) {
+      return { user: null, error: error.message };
+    }
 
-      if (!data.user) {
-        clearTimeout(loginTimeout);
-        return { user: null, error: 'No user data returned' };
-      }
+    // If there's no error, but also no user data, return a clear error message.
+    if (!data || !data.user) {
+      return { user: null, error: 'Authentication succeeded but no user data was found.' };
+    }
 
-      // Get user profile
-      console.log('AuthService: Fetching user profile for', data.user.id);
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', data.user.id)
-        .single();
+    // Fetch the user's profile from the 'users' table.
+    const { data: profile, error: profileError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
 
-      console.log('AuthService: Profile fetch result', { hasProfile: !!profile, hasError: !!profileError, error: profileError?.message });
+    if (profileError) {
+      return { user: null, error: 'Failed to fetch user profile: ' + profileError.message };
+    }
 
-      if (profileError) {
-        console.log('AuthService: Profile error details:', profileError);
-        // If profile doesn't exist, create one
-        if (profileError.code === 'PGRST116') {
-          console.log('AuthService: Creating user profile for:', data.user.email);
-          const { data: newProfile, error: createError } = await supabase
-            .from('users')
-            .insert({
-              id: data.user.id,
-              email: data.user.email || '',
-              name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'User',
-              role: 'user',
-              is_active: true,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            })
-            .select()
-            .single();
-
-          if (createError || !newProfile) {
-            console.log('AuthService: Profile creation failed:', createError);
-            return { user: null, error: 'Failed to create user profile: ' + (createError?.message || 'Unknown error') };
-          }
-          
-          // Use the newly created profile
-          const authUser: AuthUser = {
-            id: newProfile.id,
-            email: newProfile.email,
-            name: newProfile.name,
-            avatar: newProfile.avatar,
-            role: newProfile.role,
-            created_at: newProfile.created_at,
-            updated_at: newProfile.updated_at,
-            last_login: newProfile.last_login,
-            is_active: newProfile.is_active,
-            preferences: newProfile.preferences,
-            phone: newProfile.phone,
-            location: newProfile.location,
-          };
-
-          clearTimeout(loginTimeout);
-          return { user: authUser, error: null };
-        }
-        clearTimeout(loginTimeout);
-        return { user: null, error: 'Failed to fetch user profile' };
-      }
-
-      const authUser: AuthUser = {
+    // Ensure the profile is correctly typed before returning.
+    const authUser: AuthUser = {
         id: profile.id,
         email: profile.email,
         name: profile.name,
@@ -176,14 +105,15 @@ class AuthService {
         preferences: profile.preferences,
         phone: profile.phone,
         location: profile.location,
-      };
+    };
 
-      return { user: authUser, error: null };
-    } catch (error) {
-      console.error('Service error:', error);
-      return { user: null, error: 'An unexpected error occurred' };
-    }
+    return { user: authUser, error: null };
+
+  } catch (err) {
+    console.error('A critical error occurred in authService.login:', err);
+    return { user: null, error: 'An unexpected server error occurred.' };
   }
+}
 
   async register(userData: RegisterData): Promise<AuthResponse> {
     try {
@@ -207,9 +137,8 @@ class AuthService {
 
       
       if (error) {
-        console.log('AuthService: getUser error (non-critical):', error.message);
-        // Don't treat this as a critical error - user can still login
-        return { user: null, error: null }; // Return null error to allow login flow to continue
+        console.log('AuthService: Registration error:', error.message);
+        return { user: null, error: error.message };
       }
 
       if (!data.user) {
@@ -307,8 +236,7 @@ class AuthService {
       if (error) {
         console.error('AuthService: Supabase getUser error:', error);
         console.log('AuthService: This may be a temporary Supabase connectivity issue');
-        // Don't treat this as a critical error - user can still login
-        return { user: null, error: null }; // Return null error to allow login flow to continue
+        return { user: null, error: error.message };
       }
 
       if (!user) {

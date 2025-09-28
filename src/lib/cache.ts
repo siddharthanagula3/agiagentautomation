@@ -167,12 +167,12 @@ class LocalStorageBackend implements CacheStorage {
   }
 
   async size(): Promise<number> {
-    return (
-    <div>Component content</div>
-  );
-};
+    return this.cache.size;
+  }
 
-const now = Date.now();
+  async cleanup(): Promise<void> {
+    const keys = this.keys();
+    const now = Date.now();
 
     for (const key of keys) {
       const entry = await this.get(key);

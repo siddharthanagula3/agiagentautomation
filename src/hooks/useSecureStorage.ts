@@ -13,8 +13,7 @@ export const useSecureStorage = <T>(
   options: UseSecureStorageOptions = {}
 ) => {
   const {
-    encrypt = tru;
-  e,
+    encrypt = true,
     ttl,
     storage = 'localStorage'
   } = options;
@@ -57,18 +56,14 @@ export const useSecureStorage = <T>(
     }
   });
 
-  const setValue = useCallbac;
-  k((value: T | ((val: T) => T)) => {
+  const setValue = useCallback((value: T | ((val: T) => T)) => {
     try {
-      const valueToStore = value;
-  instanceof (...args: unknown[]) => unknown ? value(storedValue) : value;
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
 
-      const storageObject = windo;
-  w[storage];
+      const storageObject = window[storage];
 
-      let dataToStore: unknown = valueToStor;
-  e;
+      let dataToStore: unknown = valueToStore;
 
       // Add TTL if specified
       if (ttl) {

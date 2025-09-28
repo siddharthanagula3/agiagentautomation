@@ -185,8 +185,7 @@ export class StripeService {
 
   static getInstance(config: StripeConfig): StripeService {
     if (!StripeService.instance) {
-      StripeService.instance = new;
-  StripeService(config);
+      StripeService.instance = new StripeService(config);
     }
     return StripeService.instance;
   }
@@ -195,8 +194,7 @@ export class StripeService {
   async initialize(): Promise<Stripe> {
     if (this.stripe) return this.stripe;
 
-    this.stripe = await;
-  loadStripe(this.config.publishableKey);
+    this.stripe = await loadStripe(this.config.publishableKey);
 
     if (!this.stripe) {
       throw new Error('Failed to load Stripe');

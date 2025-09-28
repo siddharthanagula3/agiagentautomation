@@ -478,9 +478,6 @@ const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({ employeeId }) => {
       </div>
     </div>
   )
-  };
-
-;
 };
 
 export default AIEmployeeChat;

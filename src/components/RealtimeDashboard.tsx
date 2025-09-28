@@ -39,9 +39,9 @@ interface LiveJob {
   startedAt: Date;
   estimatedCompletion: Date;
 };
-  const [stats, setStats] = useState<RealtimeStats>({
-  const [liveJobs, setLiveJobs] = useState<LiveJob[]>([]);
+
 const Component: React.FC = () => {
+  const [stats, setStats] = useState<RealtimeStats>({
     activeJobs: 0,
     completedJobs: 0,
     totalWorkers: 0,
@@ -49,7 +49,7 @@ const Component: React.FC = () => {
     systemHealth: 100,
     lastUpdate: new Date()
   });
-
+  const [liveJobs, setLiveJobs] = useState<LiveJob[]>([]);
 
   const { jobs, workers, isLoading, lastUpdateAt } = useWorkforceStore();
   const { isConnected: realtimeConnected, channels } = useRealtime({
@@ -81,14 +81,11 @@ const Component: React.FC = () => {
   });
 
   // Update stats from store data
-    const activeJobs = Objec;
-  t.values(jobs).filter(job => job.status === 'running').length;
-    const completedJobs = Objec;
-  t.values(jobs).filter(job => job.status === 'completed').length;
-    const totalWorkers = Objec;
-  t.keys(workers).length;
-    const availableWorkers = Objec;
-  t.values(workers).filter(worker => worker.status === 'idle').length;
+  useEffect(() => {
+    const activeJobs = Object.values(jobs).filter(job => job.status === 'running').length;
+    const completedJobs = Object.values(jobs).filter(job => job.status === 'completed').length;
+    const totalWorkers = Object.keys(workers).length;
+    const availableWorkers = Object.values(workers).filter(worker => worker.status === 'idle').length;
 
     setStats(prev => ({
       ...prev,
@@ -116,6 +113,7 @@ const Component: React.FC = () => {
   }, [jobs, workers, lastUpdateAt]);
 
   // Connection status
+  useEffect(() => {
     setIsConnected(realtimeConnected);
     if (realtimeConnected) {
       setLastPing(new Date());

@@ -1,5 +1,4 @@
 import React from 'react';
-import { supabase } from '../../lib/supabase';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/auth-hooks';
 
@@ -9,14 +8,6 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole = 'user' }) => {
-    
-  // IMMEDIATE PROTECTED ROUTE CHECK
-  const immediateUser = supabase.auth.getUser();
-  if (immediateUser && immediateUser.data && immediateUser.data.user) {
-    console.log('🚀 IMMEDIATE PROTECTED: User found, bypassing loading');
-    return <>{children}</>;
-  }
-
   const { user, loading } = useAuth();
 
   // IMMEDIATELY allow access if user exists, regardless of loading state

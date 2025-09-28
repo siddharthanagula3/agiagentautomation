@@ -127,8 +127,12 @@ const WorkforcePage: React.FC = () => {
       } catch (serviceError) {
         console.warn('Service failed, using default values:', serviceError);
         // Keep the default values we set above
+      } finally {
+        setLoading(false);
       }
-      
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setError('Failed to load data');
       setLoading(false);
     }
   }, []);

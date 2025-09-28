@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-09-28T08:16:16.293Z",
+  "timestamp": "2025-09-28T08:23:59.275Z",
   "tests": [
     {
       "name": "Homepage Load",
       "status": "FAILED",
-      "loadTime": 2402,
+      "loadTime": 2531,
       "title": "AGI Agent Automation - Loading...",
       "url": "https://agiagentautomation.com/",
       "reactMounted": false,
@@ -12,13 +12,13 @@
         {
           "type": "console_error",
           "message": "Global error caught: JSHandle@object",
-          "timestamp": "2025-09-28T08:16:20.664Z"
+          "timestamp": "2025-09-28T08:24:06.920Z"
         },
         {
           "type": "page_error",
           "message": "__name is not a function",
           "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-DtNypP0z.js:1:2952)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase-Dm5qELA1.js:1:8603)",
-          "timestamp": "2025-09-28T08:16:20.718Z"
+          "timestamp": "2025-09-28T08:24:06.935Z"
         }
       ]
     }
@@ -27,28 +27,28 @@
     {
       "type": "console_error",
       "message": "Global error caught: JSHandle@object",
-      "timestamp": "2025-09-28T08:16:20.664Z"
+      "timestamp": "2025-09-28T08:24:06.920Z"
     },
     {
       "type": "page_error",
       "message": "__name is not a function",
       "stack": "TypeError: __name is not a function\n    at getAugmentedNamespace (https://agiagentautomation.com/assets/react-DtNypP0z.js:1:2952)\n    at <anonymous> (https://agiagentautomation.com/assets/supabase-Dm5qELA1.js:1:8603)",
-      "timestamp": "2025-09-28T08:16:20.718Z"
+      "timestamp": "2025-09-28T08:24:06.935Z"
     }
   ],
   "performance": {
-    "timestamp": 41600.522571,
+    "timestamp": 42065.718222,
     "documents": 3,
     "frames": 1,
     "jsEventListeners": 4,
     "layoutCount": 3,
     "recalcStyleCount": 3,
-    "layoutDuration": 0.323377,
-    "recalcStyleDuration": 0.006739,
-    "scriptDuration": 0.060028,
-    "taskDuration": 0.524237,
-    "jsHeapUsedSize": 1749020,
-    "jsHeapTotalSize": 2883584
+    "layoutDuration": 0.172484,
+    "recalcStyleDuration": 0.008058,
+    "scriptDuration": 0.042709,
+    "taskDuration": 0.340478,
+    "jsHeapUsedSize": 1749588,
+    "jsHeapTotalSize": 3145728
   },
   "summary": {
     "totalTests": 1,
@@ -57,6 +57,6 @@
     "loadingIssues": 0,
     "successRate": "0%",
     "criticalErrors": 2,
-    "timestamp": "2025-09-28T08:16:21.916Z"
+    "timestamp": "2025-09-28T08:24:07.074Z"
   }
 }

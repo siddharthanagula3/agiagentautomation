@@ -13,7 +13,8 @@
       "WebFetch(domain:bricxlabs.com)",
       "Bash(npx tsc:*)",
       "Bash(npm run lint)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

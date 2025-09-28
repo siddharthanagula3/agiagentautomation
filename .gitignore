@@ -29,3 +29,10 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+
+
+# AI Documentation Files - DO NOT DELETE
+claude.md
+gemini.md
+setup-ai-tools.js
+# End AI Documentation Files

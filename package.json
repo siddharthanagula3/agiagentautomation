@@ -22,7 +22,10 @@
     "check:env": "node check-env.js",
     "clean": "rm -rf dist node_modules/.vite",
     "clean:all": "rm -rf dist node_modules package-lock.json",
-    "reinstall": "npm run clean:all && npm install"
+    "reinstall": "npm run clean:all && npm install",
+    "ai:analyze": "node scripts/analyze.js",
+    "ai:generate": "node scripts/generate.js",
+    "ai:setup": "node setup-ai-tools.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

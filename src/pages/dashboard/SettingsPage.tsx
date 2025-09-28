@@ -83,7 +83,18 @@ const SettingsPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <span className="text-muted-foreground">Loading settings...</span>
+          <span className="text-muted-foreground">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+  // Add error boundary
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground mb-2">{error}</p>
+          <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
         </div>
       </div>
     );

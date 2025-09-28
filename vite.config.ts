@@ -37,9 +37,11 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            if (id.includes('react')) return 'react';
+            // Keep React and React-DOM together to prevent createElement issues
+            if (id.includes('react') || id.includes('react-dom')) return 'react';
             if (id.includes('@radix-ui')) return 'radix-ui';
             if (id.includes('@supabase')) return 'supabase';
+            if (id.includes('zustand') || id.includes('immer')) return 'state';
             return 'vendor';
           }
         },
@@ -56,10 +58,10 @@ export default defineConfig(({ mode }) => ({
           arrowFunctions: false, // Use function declarations
           objectShorthand: false, // Avoid object shorthand that can cause issues
         },
-        // More comprehensive banner with TDZ protection
+        // More comprehensive banner with TDZ protection and React fix
         banner: `
           (function() {
-            // Define __name globally
+            // Define __name globally first (critical for React imports)
             if (typeof globalThis.__name === "undefined") {
               globalThis.__name = function(target, value) {
                 try {
@@ -70,12 +72,34 @@ export default defineConfig(({ mode }) => ({
               };
             }
 
-            // Comprehensive TDZ protection
-            var commonVars = ['C', 'R', 'P', 'A', 'B', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'Q', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-            for (var i = 0; i < commonVars.length; i++) {
-              var varName = commonVars[i];
+            // Enhanced React support - ensure React and ReactDOM are available
+            if (typeof window !== "undefined") {
+              // Pre-create React namespace to prevent undefined errors
+              if (!window.React) {
+                window.React = {
+                  createElement: function() {
+                    // Fallback createElement that will be replaced by real React
+                    return arguments;
+                  },
+                  Fragment: function() { return arguments; }
+                };
+              }
+
+              // Also ensure on globalThis
+              if (!globalThis.React) {
+                globalThis.React = window.React;
+              }
+            }
+
+            // Comprehensive TDZ protection for all common minified variables
+            var allVars = ['C', 'R', 'P', 'A', 'B', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'Q', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+            for (var i = 0; i < allVars.length; i++) {
+              var varName = allVars[i];
               if (typeof window[varName] === "undefined") {
-                try { window[varName] = {}; } catch(e) {}
+                try {
+                  window[varName] = {};
+                  globalThis[varName] = {};
+                } catch(e) {}
               }
             }
           })();
@@ -116,13 +140,20 @@ export default defineConfig(({ mode }) => ({
     include: [
       'react',
       'react-dom',
+      'react-dom/client',
+      'react/jsx-runtime',
       'react-router-dom',
       '@supabase/supabase-js',
     ],
     exclude: [], // Remove Sentry from exclude
+    // Force React to be pre-bundled together to prevent createElement issues
+    force: true,
     esbuildOptions: {
       target: 'es2020',
       keepNames: false, // Disable keepNames to prevent __name conflicts
+      jsx: 'transform',
+      jsxFactory: 'React.createElement',
+      jsxFragment: 'React.Fragment',
     },
   },
 
@@ -130,8 +161,9 @@ export default defineConfig(({ mode }) => ({
   esbuild: {
     legalComments: 'none',
     target: 'es2015', // Match build target
-    keepNames: false,
+    keepNames: true, // Keep names for React compatibility
     minifyIdentifiers: false, // Disable to prevent variable name conflicts
+    format: 'esm', // Use ESM format for better React compatibility
     // Fix temporal dead zone issues
     tsconfigRaw: {
       compilerOptions: {

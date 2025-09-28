@@ -39,17 +39,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Check for existing session in background
     const checkSession = async () => {
-    
-  // IMMEDIATE USER CHECK - bypass loading if user exists
-  const currentUser = supabase.auth.getUser();
-  if (currentUser && currentUser.data && currentUser.data.user) {
-    console.log('🚀 IMMEDIATE: User found, bypassing loading');
-    setUser(currentUser.data.user);
-    setLoading(false);
-    return;
-  }
-
       try {
+        // IMMEDIATE USER CHECK - bypass loading if user exists
+        const currentUser = await supabase.auth.getUser();
+        if (currentUser && currentUser.data && currentUser.data.user) {
+          console.log('🚀 IMMEDIATE: User found, bypassing loading');
+          setUser(currentUser.data.user);
+          setLoading(false);
+          return;
+        }
         console.log('Attempting to connect to Supabase...');
         const { user: currentUser, error } = await authService.getCurrentUser();
         console.log('AuthService getCurrentUser result:', { hasUser: !!currentUser, hasError: !!error });
@@ -81,13 +79,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
     
   // IMMEDIATE AUTH CHECK - bypass loading if user exists
-  const currentUser = supabase.auth.getUser();
-  if (currentUser && currentUser.data && currentUser.data.user) {
-    console.log('🚀 IMMEDIATE AUTH: User found, bypassing loading');
-    setUser(currentUser.data.user);
-    setLoading(false);
-    return;
-  }
+  const immediateAuthCheck = async () => {
+    try {
+      const currentUser = await supabase.auth.getUser();
+      if (currentUser && currentUser.data && currentUser.data.user) {
+        console.log('🚀 IMMEDIATE AUTH: User found, bypassing loading');
+        setUser(currentUser.data.user);
+        setLoading(false);
+        return true;
+      }
+    } catch (error) {
+      console.log('Immediate auth check failed:', error);
+    }
+    return false;
+  };
+
+  // Run immediate check
+  immediateAuthCheck();
 
           if (!isMounted) return;
 

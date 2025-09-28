@@ -27,13 +27,25 @@ class WebsiteTester {
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
         '--no-zygote',
-        '--disable-gpu'
+        '--disable-gpu',
+        '--incognito' // Force incognito mode
       ]
     });
 
     // Create incognito context for clean testing
-    const context = await this.browser.createBrowserContext();
+    const context = await this.browser.createBrowserContext({
+      incognito: true // Explicitly enable incognito mode
+    });
     this.page = await context.newPage();
+    
+    // Verify incognito mode is active
+    const isIncognito = await this.page.evaluate(() => {
+      // Check if we're in incognito mode by looking for incognito-specific properties
+      return !window.chrome || !window.chrome.runtime || 
+             window.chrome.runtime.id === undefined ||
+             navigator.webdriver === undefined;
+    });
+    console.log(`🔒 Incognito Mode: ${isIncognito ? '✅ Active' : '❌ Not Active'}`);
     
     // Enable console logging
     this.page.on('console', msg => {

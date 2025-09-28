@@ -19,11 +19,14 @@ class LiveErrorDebugger {
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
         '--no-zygote',
-        '--disable-gpu'
+        '--disable-gpu',
+        '--incognito' // Force incognito mode
       ]
     });
 
-    const context = await this.browser.createBrowserContext();
+    const context = await this.browser.createBrowserContext({
+      incognito: true // Explicitly enable incognito mode
+    });
     this.page = await context.newPage();
     
     // Capture all console messages

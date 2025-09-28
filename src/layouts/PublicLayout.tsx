@@ -5,9 +5,9 @@ import { PublicFooter } from '../components/layout/PublicFooter';
 
 const PublicLayout: React.FC = () => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen">
       <PublicHeader />
-      <main>
+      <main className="flex-1">
         <Outlet />
       </main>
       <PublicFooter />

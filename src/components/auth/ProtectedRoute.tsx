@@ -18,7 +18,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
         console.warn('ProtectedRoute: Loading timeout reached');
         setTimeoutReached(true);
       }
-    }, 15000); // 15 seconds timeout to allow AuthContext to complete
+    }, 25000); // 25 seconds timeout to allow AuthContext to complete
 
     return () => clearTimeout(timer);
   }, [loading]);

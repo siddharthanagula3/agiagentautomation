@@ -11,11 +11,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  
-  
-  
   useEffect(() => {
     let isMounted = true;
+    let subscription: any;
 
     // Check if Supabase is configured
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -33,48 +31,56 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return;
     }
 
-    // ULTIMATE FIX: Set loading to false immediately and check for user
-    console.log('🚀 ULTIMATE FIX: Setting loading to false immediately');
-    setLoading(false);
-    
-    // Check for existing user immediately
-    const checkUser = async () => {
+    // Check for existing user session
+    const checkExistingSession = async () => {
       try {
+        console.log('🔍 Checking existing session...');
         const { data: { user: existingUser } } = await supabase.auth.getUser();
+        
         if (existingUser && isMounted) {
-          console.log('🚀 ULTIMATE: User found, setting user state');
+          console.log('✅ Existing user found:', existingUser.email);
           setUser(existingUser);
+          setLoading(false);
+          return;
         }
+        
+        console.log('ℹ️ No existing session found');
+        setLoading(false);
       } catch (error) {
-        console.log('User check failed:', error);
+        console.log('❌ Error checking existing session:', error);
+        setLoading(false);
       }
     };
-    
-    // Run user check
-    checkUser();
+
+    // Run the session check
+    checkExistingSession();
 
     // Set up auth state change listener
     if (hasValidCredentials && typeof supabase?.auth?.onAuthStateChange === 'function') {
       try {
         const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log('🔄 Auth state changed:', event, session?.user?.email);
+          
           if (!isMounted) return;
 
           if (session?.user) {
             try {
               const { user: authUser, error } = await authService.getCurrentUser();
               if (authUser && !error && isMounted) {
+                console.log('✅ User authenticated:', authUser.email);
                 setUser(authUser);
               }
             } catch (error) {
-              console.error('Error getting user:', error);
+              console.error('❌ Error getting user:', error);
             }
           } else {
+            console.log('🚪 User signed out');
             setUser(null);
           }
         });
         subscription = data?.subscription;
       } catch (error) {
-        console.error('Error setting up auth listener:', error);
+        console.error('❌ Error setting up auth listener:', error);
       }
     }
 
@@ -88,7 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      console.log('Login attempt started for:', email);
+      console.log('🔐 Login attempt started for:', email);
       setLoading(true);
       
       // Check if Supabase is configured properly
@@ -99,29 +105,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                                   supabaseKey && 
                                   !supabaseUrl.includes('your_supabase_url_here') && 
                                   !supabaseKey.includes('your_supabase_anon_key_here');
-      
+
+      // Demo mode fallback
       if (!hasValidCredentials) {
-        console.warn('Supabase not configured - using demo mode');
-        setLoading(false);
-        
-        // Check for demo credentials
         if (email === 'demo@example.com' && password === 'demo123') {
-          // Create a demo user for testing
-          const demoUser = {
-            id: 'demo-user-123',
-            email: email,
+          console.log('🎭 Demo mode login successful');
+          const demoUser: AuthUser = {
+            id: 'demo-user-id',
+            email: 'demo@example.com',
             name: 'Demo User',
-            avatar: '',
             role: 'user',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            last_login: new Date().toISOString(),
-            is_active: true,
+            company: 'Demo Company',
             preferences: {},
             phone: '',
             location: ''
           };
           setUser(demoUser);
+          setLoading(false);
           return { success: true };
         } else {
           return { 
@@ -131,29 +131,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
       
-      // Simple timeout to prevent infinite loading
-      const loginTimeout = setTimeout(() => {
-        console.warn('Login timeout - forcing loading to false');
-        setLoading(false);
-        clearTimeout(loginTimeout);
-      }, 8000); // 8 second timeout for login
-      
       const { user: authUser, error } = await authService.login({ email, password });
       
-      clearTimeout(loginTimeout);
-      console.log('Login result:', { authUser: !!authUser, error });
+      console.log('🔐 Login result:', { authUser: !!authUser, error });
       
       if (error || !authUser) {
         setLoading(false);
         return { success: false, error: error || 'Login failed' };
       }
 
+      console.log('✅ Login successful, setting user state');
       setUser(authUser);
       setLoading(false);
-      console.log('Login successful');
       return { success: true };
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
       setLoading(false);
       return { success: false, error: 'Login failed. Please try again.' };
     }
@@ -168,60 +160,57 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     location?: string;
   }): Promise<{ success: boolean; error?: string }> => {
     try {
+      console.log('📝 Registration attempt started for:', userData.email);
       setLoading(true);
       
-      const { user: authUser, error } = await authService.register({
-        email: userData.email,
-        password: userData.password,
-        name: userData.name,
-        company: userData.company,
-        phone: userData.phone,
-        location: userData.location,
-      });
+      const { user: authUser, error } = await authService.register(userData);
       
       if (error || !authUser) {
+        setLoading(false);
         return { success: false, error: error || 'Registration failed' };
       }
 
       setUser(authUser);
+      setLoading(false);
       return { success: true };
     } catch (error) {
-      return { success: false, error: 'Registration failed. Please try again.' };
-    } finally {
+      console.error('❌ Registration error:', error);
       setLoading(false);
+      return { success: false, error: 'Registration failed. Please try again.' };
     }
   };
 
   const logout = async (): Promise<void> => {
     try {
-      console.log('AuthContext: Starting logout process...');
+      console.log('🚪 Logout started');
+      setLoading(true);
+      
       await authService.logout();
-      console.log('AuthContext: Logout successful, clearing user state');
       setUser(null);
-      console.log('AuthContext: User state cleared');
+      setLoading(false);
+      
+      console.log('✅ Logout successful');
     } catch (error) {
-      console.error('AuthContext: Logout error:', error);
-      // Even if logout fails, clear the user state
-      setUser(null);
+      console.error('❌ Logout error:', error);
+      setLoading(false);
     }
   };
 
   const updateProfile = async (updates: Partial<AuthUser>): Promise<{ success: boolean; error?: string }> => {
     try {
-      if (!user) {
-        return { success: false, error: 'No user logged in' };
-      }
-
-      const { user: updatedUser, error } = await authService.updateProfile(user.id, updates);
+      console.log('👤 Profile update started');
+      
+      const { user: updatedUser, error } = await authService.updateProfile(updates);
       
       if (error || !updatedUser) {
-        return { success: false, error: error || 'Update failed' };
+        return { success: false, error: error || 'Profile update failed' };
       }
 
       setUser(updatedUser);
       return { success: true };
     } catch (error) {
-      return { success: false, error: 'Update failed. Please try again.' };
+      console.error('❌ Profile update error:', error);
+      return { success: false, error: 'Profile update failed. Please try again.' };
     }
   };
 

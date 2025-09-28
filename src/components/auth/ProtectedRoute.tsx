@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/auth-hooks';
 
@@ -9,8 +9,23 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole = 'user' }) => {
   const { user, loading } = useAuth();
+  const [timeoutReached, setTimeoutReached] = useState(false);
 
-  console.log('🛡️ ProtectedRoute render:', { hasUser: !!user, loading, userEmail: user?.email });
+  // Set up timeout to prevent infinite loading
+  useEffect(() => {
+    if (loading) {
+      const timeout = setTimeout(() => {
+        console.log('⚠️ ProtectedRoute: Loading timeout reached');
+        setTimeoutReached(true);
+      }, 10000); // 10 second timeout
+
+      return () => clearTimeout(timeout);
+    } else {
+      setTimeoutReached(false);
+    }
+  }, [loading]);
+
+  console.log('🛡️ ProtectedRoute render:', { hasUser: !!user, loading, timeoutReached, userEmail: user?.email });
 
   // If we have a user, allow access (check role if needed)
   if (user) {
@@ -30,8 +45,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     return <>{children}</>;
   }
 
-  // If we're still loading, show loading spinner
-  if (loading) {
+  // If we're still loading and haven't timed out, show loading spinner
+  if (loading && !timeoutReached) {
     console.log('⏳ Still loading, showing spinner');
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -40,8 +55,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     );
   }
 
-  // If we're not loading and no user, redirect to login
-  console.log('🚪 No user found, redirecting to login');
+  // If we've timed out or are not loading and no user, redirect to login
+  if (timeoutReached) {
+    console.log('⚠️ Loading timeout reached, redirecting to login');
+  } else {
+    console.log('🚪 No user found, redirecting to login');
+  }
   return <Navigate to="/auth/login" replace />;
 };
 

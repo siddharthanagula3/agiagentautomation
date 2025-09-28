@@ -103,21 +103,47 @@
         }
     </style>
     <script>
-        // Define __name function globally to prevent build errors
-        if (typeof globalThis.__name === 'undefined') {
-            globalThis.__name = function(target, value) {
-                try {
-                    if (target && typeof value === 'string') {
-                        Object.defineProperty(target, 'name', {
-                            value: value,
-                            configurable: true
-                        });
+        // CRITICAL: Define __name function globally to prevent build errors
+        // This must be defined before any modules load
+        (function() {
+            if (typeof globalThis.__name === 'undefined') {
+                globalThis.__name = function(target, value) {
+                    try {
+                        if (target && typeof value === 'string') {
+                            Object.defineProperty(target, 'name', {
+                                value: value,
+                                configurable: true
+                            });
+                        }
+                    } catch(e) {
+                        // Silently ignore errors
                     }
-                } catch(e) {
-                    // Silently ignore errors
-                }
-            };
-        }
+                };
+            }
+            
+            // Also define on window for compatibility
+            if (typeof window.__name === 'undefined') {
+                window.__name = globalThis.__name;
+            }
+            
+            // Define on global for maximum compatibility
+            if (typeof global.__name === 'undefined') {
+                global.__name = globalThis.__name;
+            }
+            
+            // CRITICAL: Also define as a direct property on globalThis
+            try {
+                Object.defineProperty(globalThis, '__name', {
+                    value: globalThis.__name,
+                    writable: true,
+                    configurable: true,
+                    enumerable: false
+                });
+            } catch(e) {
+                // Fallback if defineProperty fails
+                globalThis.__name = globalThis.__name;
+            }
+        })();
 
         // Comprehensive TDZ protection and React pre-initialization
         window.__preventTDZ = function() {

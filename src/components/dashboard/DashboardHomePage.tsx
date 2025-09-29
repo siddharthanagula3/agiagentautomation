@@ -94,8 +94,8 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
         </h1>
         <p className="text-slate-400">
           Let's get started with building your AI workforce
-        </p>
-      </div>
+          </p>
+        </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -180,16 +180,16 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
 
       {/* Getting Started Section */}
       <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20 backdrop-blur-xl">
-        <CardHeader>
+              <CardHeader>
           <div className="flex items-center space-x-2">
             <Sparkles className="h-5 w-5 text-blue-400" />
             <CardTitle className="text-white">Getting Started</CardTitle>
-          </div>
+                  </div>
           <CardDescription>
             Follow these steps to set up your AI workforce
           </CardDescription>
-        </CardHeader>
-        <CardContent>
+              </CardHeader>
+              <CardContent>
           <div className="space-y-4">
             {/* Step 1 */}
             <div className="flex items-start space-x-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
@@ -232,7 +232,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
-            </div>
+                </div>
 
             {/* Step 3 */}
             <div className="flex items-start space-x-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
@@ -255,54 +255,54 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
                 </Button>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* Quick Actions */}
-      <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-        <CardHeader>
-          <CardTitle className="text-white">Quick Actions</CardTitle>
-          <CardDescription>Common tasks and operations</CardDescription>
-        </CardHeader>
-        <CardContent>
+          {/* Quick Actions */}
+            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+              <CardHeader>
+                <CardTitle className="text-white">Quick Actions</CardTitle>
+                <CardDescription>Common tasks and operations</CardDescription>
+              </CardHeader>
+              <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickActions.map((action) => {
-              const IconComponent = action.icon;
-              return (
+                  {quickActions.map((action) => {
+                    const IconComponent = action.icon;
+                    return (
                 <button
-                  key={action.id}
-                  onClick={action.action}
-                  className={cn(
-                    "relative p-4 rounded-lg border transition-all duration-200 text-left group",
+                        key={action.id}
+                        onClick={action.action}
+                        className={cn(
+                          "relative p-4 rounded-lg border transition-all duration-200 text-left group",
                     getActionColor(action.color)
-                  )}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-current/20 flex items-center justify-center">
-                      <IconComponent className="h-5 w-5" />
-                    </div>
-                  </div>
-                  <h3 className="font-medium text-white mb-1 group-hover:text-current transition-colors">
-                    {action.title}
-                  </h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">
-                    {action.description}
-                  </p>
+                        )}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="w-10 h-10 rounded-lg bg-current/20 flex items-center justify-center">
+                            <IconComponent className="h-5 w-5" />
+                          </div>
+                        </div>
+                        <h3 className="font-medium text-white mb-1 group-hover:text-current transition-colors">
+                          {action.title}
+                        </h3>
+                        <p className="text-sm text-slate-400 leading-relaxed">
+                          {action.description}
+                        </p>
                 </button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
 
       {/* Empty State for Activity */}
-      <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-        <CardHeader>
-          <CardTitle className="text-white">Recent Activity</CardTitle>
-          <CardDescription>Latest system events and updates</CardDescription>
-        </CardHeader>
-        <CardContent>
+            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+              <CardHeader>
+                    <CardTitle className="text-white">Recent Activity</CardTitle>
+                    <CardDescription>Latest system events and updates</CardDescription>
+              </CardHeader>
+              <CardContent>
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
               <Brain className="h-8 w-8 text-slate-500" />
@@ -319,8 +319,8 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
             >
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
+                </Button>
+              </div>
         </CardContent>
       </Card>
     </div>

@@ -22,7 +22,6 @@ import {
   Key,
   ChevronRight,
   Plus,
-  Activity,
   Briefcase,
   Clock,
   TrendingUp,
@@ -78,7 +77,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
     },
     {
       name: 'Chat',
-      href: '/dashboard/chat',
+      href: '/chat',
       icon: MessageSquare,
       description: 'AI employee communication'
     },
@@ -141,12 +140,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
 
   const systemNavigation: NavigationItem[] = [
     {
-      name: 'Activity Logs',
-      href: '/dashboard/logs',
-      icon: Activity,
-      description: 'System activity and audit trail'
-    },
-    {
       name: 'Help & Support',
       href: '/dashboard/support',
       icon: HelpCircle,
@@ -171,6 +164,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
   const isActiveLink = (href: string) => {
     if (href === '/dashboard') {
       return location.pathname === '/dashboard' || location.pathname === '/dashboard/';
+    }
+    // Special handling for chat route
+    if (href === '/chat') {
+      return location.pathname === '/chat' || location.pathname.startsWith('/chat/');
     }
     return location.pathname === href || location.pathname.startsWith(href + '/');
   };

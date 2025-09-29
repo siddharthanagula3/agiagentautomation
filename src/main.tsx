@@ -9,6 +9,9 @@ import { DebugPanel } from "./components/DebugPanel";
 import ErrorBoundary from "./components/ErrorBoundary";
 import "./index.css";
 
+// Import Supabase tester for debugging
+import './utils/test-supabase';
+
 // Create QueryClient with proper initialization
 const queryClient = new QueryClient({
   defaultOptions: {

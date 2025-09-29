@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { AI_EMPLOYEES } from '@/data/ai-employees';
 import { toast } from 'sonner';
+import DOMPurify from 'dompurify';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { getEmployeeById, listPurchasedEmployees } from '@/services/supabase-employees';
@@ -97,12 +98,14 @@ const ChatPage: React.FC = () => {
           return;
         }
         
-        console.log('Loading purchased employees for user:', user.id);
+        console.log('=== Loading purchased employees ===');
+        console.log('User ID:', user.id);
         const rows = await listPurchasedEmployees(user.id);
         
         if (!isMounted) return;
         
-        console.log('Purchased employees loaded:', rows);
+        console.log('Purchased employees raw data:', rows);
+        console.log('Number of employees:', rows.length);
         const normalized = rows.map(r => ({
           id: r.employee_id,
           name: getEmployeeById(r.employee_id)?.role || '',
@@ -165,12 +168,16 @@ const ChatPage: React.FC = () => {
 
   const handleStartChat = async (employee: PurchasedEmployee) => {
     try {
-      console.log('Starting chat with employee:', employee);
+      console.log('=== Starting chat with employee ===');
+      console.log('Employee object:', employee);
+      console.log('Employee ID:', employee.id);
       
       const employeeData = getEmployeeData(employee.id);
+      console.log('Employee data lookup result:', employeeData);
+      
       if (!employeeData) {
         console.error('Employee data not found for ID:', employee.id);
-        toast.error('Employee data not found');
+        toast.error(`Employee data not found for ID: ${employee.id}`);
         return;
       }
 
@@ -235,8 +242,22 @@ const ChatPage: React.FC = () => {
       toast.success(`Started chat with ${employee.role}`);
       console.log('Chat started successfully');
     } catch (error) {
-      console.error('Error starting chat:', error);
-      toast.error(`Failed to start chat: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('=== ERROR STARTING CHAT ===');
+      console.error('Error object:', error);
+      console.error('Error type:', typeof error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
+      
+      let errorMessage = 'Unknown error';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        errorMessage = JSON.stringify(error);
+      }
+      
+      console.error('Final error message:', errorMessage);
+      toast.error(`Failed to start chat: ${errorMessage}`, { duration: 10000 });
     }
   };
 
@@ -366,6 +387,47 @@ const ChatPage: React.FC = () => {
   };
 
   const activeTabData = activeTabs.find(tab => tab.id === selectedTab);
+
+  function renderMarkdownToHtml(markdown: string): string {
+    let html = markdown;
+    // Escape HTML first to prevent injection inside our basic replacements
+    html = html
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    // Code blocks ```
+    html = html.replace(/```([\s\S]*?)```/g, (_m, code) => `<pre><code>${code.trim()}</code></pre>`);
+    // Headings ######..#
+    for (let i = 6; i >= 1; i--) {
+      const re = new RegExp(`^${'#'.repeat(i)}\s+(.+)$`, 'gm');
+      html = html.replace(re, `<h${i}>$1</h${i}>`);
+    }
+    // Bold **text**
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // Italic *text* or _text_
+    html = html.replace(/(^|\s)\*(?!\*)([^\n*]+)\*(?=\s|$)/g, '$1<em>$2</em>');
+    html = html.replace(/(^|\s)_([^\n_]+)_(?=\s|$)/g, '$1<em>$2</em>');
+    // Inline code `code`
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    // Horizontal rule ---
+    html = html.replace(/^---$/gm, '<hr />');
+    // Links [text](url)
+    html = html.replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    // Unordered lists - item / * item
+    html = html.replace(/^(?:- |\* )(.*(?:\n(?:- |\* ).*)*)/gm, (block) => {
+      const items = block.split(/\n/).map(l => l.replace(/^(?:- |\* )/, '').trim());
+      return `<ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+    });
+    // Ordered lists 1. item
+    html = html.replace(/^(?:\d+\. )(.*(?:\n(?:\d+\. ).*)*)/gm, (block) => {
+      const items = block.split(/\n/).map(l => l.replace(/^\d+\. /, '').trim());
+      return `<ol>${items.map(i => `<li>${i}</li>`).join('')}</ol>`;
+    });
+    // New lines to paragraphs
+    html = html.replace(/\n{2,}/g, '</p><p>');
+    html = `<p>${html}</p>`;
+    return DOMPurify.sanitize(html);
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -587,7 +649,14 @@ const ChatPage: React.FC = () => {
                                 : "bg-muted text-foreground"
                             )}
                           >
-                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            {msg.role === 'assistant' ? (
+                              <div
+                                className="prose prose-invert prose-sm max-w-none"
+                                dangerouslySetInnerHTML={{ __html: renderMarkdownToHtml(msg.content) }}
+                              />
+                            ) : (
+                              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            )}
                             <span className="text-xs opacity-70 mt-1 block">
                               {msg.timestamp.toLocaleTimeString()}
                             </span>

@@ -7,6 +7,8 @@
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
 const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || '';
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
+// Allow overriding Gemini model via env; default to 2.0 Flash
+const GOOGLE_MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash';
 const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY || '';
 
 export interface AIMessage {
@@ -107,7 +109,7 @@ export async function sendToAnthropic(messages: AIMessage[], model: string = 'cl
 /**
  * Send message to Google (Gemini)
  */
-export async function sendToGoogle(messages: AIMessage[], model: string = 'gemini-1.5-flash'): Promise<AIResponse> {
+export async function sendToGoogle(messages: AIMessage[], model: string = GOOGLE_MODEL): Promise<AIResponse> {
   if (!GOOGLE_API_KEY) {
     throw new Error('Google API key not configured. Please add VITE_GOOGLE_API_KEY to your environment variables.');
   }
@@ -143,15 +145,19 @@ export async function sendToGoogle(messages: AIMessage[], model: string = 'gemin
     return resp;
   }
 
-  // Try requested model first; on model-not-found, fall back to free flash
+  // Try requested model first; on model-not-found, fall back to widely-available Flash model
   let response = await callModel(model);
   if (!response.ok) {
     let errJson: any = {};
     try { errJson = await response.json(); } catch {}
     const msg: string = errJson?.error?.message || response.statusText;
     const isModelNotFound = /not found|not supported|ListModels/i.test(msg);
-    if (isModelNotFound && model !== 'gemini-1.5-flash') {
-      response = await callModel('gemini-1.5-flash');
+    if (isModelNotFound && model !== 'gemini-2.0-flash' && model !== 'gemini-2.5-flash') {
+      // Prefer 2.5 flash if available; otherwise 2.0 flash
+      response = await callModel('gemini-2.5-flash');
+      if (!response.ok) {
+        response = await callModel('gemini-2.0-flash');
+      }
     }
     if (!response.ok) {
       const finalErr = errJson.error ? errJson : await response.json().catch(() => ({}));

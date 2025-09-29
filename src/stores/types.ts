@@ -400,10 +400,7 @@ export interface SearchResult<T = unknown> {
 // Export all types
 // ========================================
 
-export type * from './auth-store';
-export type * from './chat-store';
-export type * from './employee-store';
-export type * from './workforce-store';
-export type * from './notification-store';
-export type * from './ui-store';
-export type * from './app-store';
+// Note: Individual store types are exported from their respective files
+// Import them directly when needed, e.g.:
+// import type { AuthStore } from './unified-auth-store';
+// import type { ChatStore } from './chat-store';

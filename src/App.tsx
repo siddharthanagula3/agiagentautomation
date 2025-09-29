@@ -18,7 +18,7 @@ import { AIEmployeeDemo } from './pages/demo/AIEmployeeDemo';
 import { AuthDebugPage } from './pages/AuthDebugPage';
 import { AuthDebugMonitor } from './components/AuthDebugMonitor';
 
-// Page Components for advanced features
+// Page Components
 import WorkforcePage from './pages/workforce/WorkforcePage';
 import AutomationPage from './pages/automation/AutomationPage';
 import ChatPage from './pages/chat/ChatPage';
@@ -45,7 +45,7 @@ function App() {
             <Route path="demo" element={<AIEmployeeDemo />} />
           </Route>
 
-          {/* Marketplace - Protected Route (but not in dashboard layout) */}
+          {/* Marketplace - Protected Route */}
           <Route
             path="/marketplace"
             element={
@@ -55,7 +55,7 @@ function App() {
             }
           />
 
-          {/* Debug Route (accessible without auth) */}
+          {/* Debug Route */}
           <Route path="/debug" element={<AuthDebugPage />} />
 
           {/* Auth Routes */}
@@ -64,7 +64,7 @@ function App() {
             <Route path="register" element={<RegisterPage />} />
           </Route>
 
-          {/* Protected Routes with DashboardLayout - ROOT LEVEL FEATURES */}
+          {/* Protected Routes - ALL AT ROOT LEVEL */}
           <Route
             path="/"
             element={
@@ -73,10 +73,10 @@ function App() {
               </ProtectedRoute>
             }
           >
-            {/* Main Dashboard - Keep at /dashboard */}
+            {/* Dashboard Home */}
             <Route path="dashboard" element={<DashboardHomePage />} />
             
-            {/* Core Features at Root Level */}
+            {/* Main Features */}
             <Route path="workforce" element={<WorkforcePage />} />
             <Route path="workforce/management" element={<WorkforceManagement />} />
             
@@ -93,25 +93,20 @@ function App() {
             <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="analytics/:view" element={<AnalyticsPage />} />
             
-            {/* Account/System Features - Keep under /dashboard */}
-            <Route path="dashboard/settings" element={<SettingsPage />} />
-            <Route path="dashboard/settings/:section" element={<SettingsPage />} />
-            <Route path="dashboard/billing" element={<BillingPage />} />
-            <Route path="dashboard/api-keys" element={<APIKeysPage />} />
-            <Route path="dashboard/support" element={<HelpSupportPage />} />
-            
-            {/* Legacy routes for backward compatibility */}
-            <Route path="dashboard/old-dashboard" element={<Dashboard />} />
+            {/* Account & System at Root Level */}
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="settings/:section" element={<SettingsPage />} />
+            <Route path="billing" element={<BillingPage />} />
+            <Route path="api-keys" element={<APIKeysPage />} />
+            <Route path="support" element={<HelpSupportPage />} />
           </Route>
 
           {/* 404 Route */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
 
-        {/* Auth Debug Monitor (dev only) */}
         <AuthDebugMonitor />
 
-        {/* Global Components */}
         <Toaster 
           position="bottom-right"
           theme="dark"
@@ -126,13 +121,11 @@ function App() {
         />
       </div>
       
-      {/* React Query Devtools (only in development) */}
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </TooltipProvider>
   );
 }
 
-// Page wrapper components
 const AutomationDesignerPage = () => {
   return (
     <div className="h-full">
@@ -143,11 +136,9 @@ const AutomationDesignerPage = () => {
         enableToolExecution={true}
         onSave={(workflow) => {
           console.log('Saving workflow:', workflow);
-          // Handle workflow save
         }}
         onExecute={(workflowId) => {
           console.log('Executing workflow:', workflowId);
-          // Handle workflow execution
         }}
       />
     </div>

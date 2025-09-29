@@ -104,25 +104,25 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
   const accountNavigation: NavigationItem[] = [
     {
       name: 'Settings',
-      href: '/dashboard/settings',
+      href: '/settings',
       icon: Settings,
       description: 'Account and system settings',
       children: [
-        { name: 'Profile', href: '/dashboard/settings/profile', icon: User },
-        { name: 'Notifications', href: '/dashboard/settings/notifications', icon: Bell },
-        { name: 'Security', href: '/dashboard/settings/security', icon: Shield },
-        { name: 'System', href: '/dashboard/settings/system', icon: Database }
+        { name: 'Profile', href: '/settings/profile', icon: User },
+        { name: 'Notifications', href: '/settings/notifications', icon: Bell },
+        { name: 'Security', href: '/settings/security', icon: Shield },
+        { name: 'System', href: '/settings/system', icon: Database }
       ]
     },
     {
       name: 'Billing',
-      href: '/dashboard/billing',
+      href: '/billing',
       icon: CreditCard,
       description: 'Subscription and usage'
     },
     {
       name: 'API Keys',
-      href: '/dashboard/api-keys',
+      href: '/api-keys',
       icon: Key,
       description: 'API access management'
     }
@@ -131,7 +131,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
   const systemNavigation: NavigationItem[] = [
     {
       name: 'Help & Support',
-      href: '/dashboard/support',
+      href: '/support',
       icon: HelpCircle,
       description: 'Documentation and support'
     }

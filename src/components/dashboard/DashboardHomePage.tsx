@@ -3,12 +3,11 @@
  * Shows empty states and zero values for new users
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/stores/unified-auth-store';
+import { useAuth } from '@/stores/unified-auth-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   TrendingUp,
   Users,
@@ -16,27 +15,22 @@ import {
   Zap,
   DollarSign,
   Target,
-  Plus,
   ArrowRight,
   Sparkles,
   MessageSquare,
   BarChart3,
-  Network,
-  FileText,
   Brain
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 
 interface DashboardHomePageProps {
   className?: string;
 }
 
 export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className }) => {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Simple stats for fresh user
   const stats = {
     activeEmployees: 0,
     totalEmployees: 0,
@@ -263,7 +257,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
         <CardHeader>
           <CardTitle className="text-white">Quick Actions</CardTitle>
           <CardDescription>Common tasks and operations</CardDescription>
-        </CardContent>
+        </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action) => {

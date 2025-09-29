@@ -1,4 +1,4 @@
-// src/App.tsx
+// src/App.tsx - CLEANED VERSION (Debug components removed)
 
 import { Routes, Route } from 'react-router-dom';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -15,8 +15,6 @@ import VisualWorkflowDesigner from './components/automation/VisualWorkflowDesign
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';
 import { AIEmployeeDemo } from './pages/demo/AIEmployeeDemo';
-import { AuthDebugPage } from './pages/AuthDebugPage';
-import { AuthDebugMonitor } from './components/AuthDebugMonitor';
 
 // Page Components
 import WorkforcePage from './pages/workforce/WorkforcePage';
@@ -54,9 +52,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-          {/* Debug Route */}
-          <Route path="/debug" element={<AuthDebugPage />} />
 
           {/* Auth Routes */}
           <Route path="/auth" element={<AuthLayout />}>
@@ -104,8 +99,6 @@ function App() {
           {/* 404 Route */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-
-        <AuthDebugMonitor />
 
         <Toaster 
           position="bottom-right"

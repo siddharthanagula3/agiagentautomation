@@ -71,10 +71,20 @@ const ChatPage: React.FC = () => {
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
+
+  // Generate object URL previews for selected files
+  useEffect(() => {
+    const urls = files.map((f) => URL.createObjectURL(f));
+    setFilePreviews(urls);
+    return () => {
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [files]);
   const [configuredProviders, setConfiguredProviders] = useState<string[]>([]);
 
   // Check configured providers on mount
@@ -745,6 +755,19 @@ const ChatPage: React.FC = () => {
                         disabled={isSending}
                         className="flex-1 px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
                       />
+                      {/* Selected file thumbnails */}
+                      {filePreviews.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          {filePreviews.slice(0,3).map((src, idx) => (
+                            <div key={idx} className="relative w-10 h-10 rounded overflow-hidden border border-border">
+                              <img src={src} alt={`attachment-${idx}`} className="object-cover w-full h-full" />
+                            </div>
+                          ))}
+                          {filePreviews.length > 3 && (
+                            <span className="text-xs text-muted-foreground">+{filePreviews.length - 3}</span>
+                          )}
+                        </div>
+                      )}
                       <Button 
                         onClick={handleSendMessage} 
                         disabled={isSending || !message.trim()}

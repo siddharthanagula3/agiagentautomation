@@ -33,7 +33,9 @@ import {
   MessageSquare,
   FileText,
   Download,
-  Upload
+  Upload,
+  Building,
+  Layers
 } from 'lucide-react';
 
 interface DashboardSidebarProps {
@@ -61,31 +63,26 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       name: 'Dashboard',
       href: '/dashboard',
       icon: Home,
-      description: 'Overview and quick actions'
+      description: 'Overview and analytics'
     },
     {
-      name: 'AI Employees',
-      href: '/dashboard/employees',
-      icon: Bot,
-      badge: '12',
+      name: 'Workforce',
+      href: '/dashboard/workforce',
+      icon: Users,
+      badge: '18',
       description: 'Manage your AI workforce',
       children: [
-        { name: 'Marketplace', href: '/dashboard/employees/marketplace', icon: Users },
-        { name: 'My Employees', href: '/dashboard/employees/hired', icon: Briefcase },
-        { name: 'Performance', href: '/dashboard/employees/performance', icon: TrendingUp }
+        { name: 'Overview', href: '/dashboard/workforce', icon: Building },
+        { name: 'Management', href: '/dashboard/workforce/management', icon: Users },
+        { name: 'Analytics', href: '/dashboard/workforce/analytics', icon: BarChart3 }
       ]
     },
     {
-      name: 'AI Workforce',
-      href: '/dashboard/workforce',
-      icon: Network,
+      name: 'Chat',
+      href: '/dashboard/chat',
+      icon: MessageSquare,
       badge: '3',
-      description: 'Team management and collaboration',
-      children: [
-        { name: 'Teams', href: '/dashboard/workforce/teams', icon: Users },
-        { name: 'Projects', href: '/dashboard/workforce/projects', icon: Target },
-        { name: 'Communication', href: '/dashboard/workforce/communication', icon: MessageSquare }
-      ]
+      description: 'AI employee communication'
     },
     {
       name: 'Automation',
@@ -94,42 +91,45 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       badge: 'New',
       badgeVariant: 'secondary',
       isNew: true,
-      description: 'Autonomous workflows and tasks',
+      description: 'Workflows and automation',
       children: [
+        { name: 'Overview', href: '/dashboard/automation', icon: Layers },
         { name: 'Workflows', href: '/dashboard/automation/workflows', icon: Workflow },
-        { name: 'Triggers', href: '/dashboard/automation/triggers', icon: Clock },
-        { name: 'Standing Orders', href: '/dashboard/automation/standing-orders', icon: Calendar }
+        { name: 'Designer', href: '/dashboard/automation/designer', icon: Target }
       ]
-    },
-    {
-      name: 'Jobs & Tasks',
-      href: '/dashboard/jobs',
-      icon: Target,
-      badge: '8',
-      badgeVariant: 'destructive',
-      description: 'Active and completed jobs'
     },
     {
       name: 'Analytics',
       href: '/dashboard/analytics',
       icon: BarChart3,
-      description: 'Performance insights and metrics'
+      description: 'Performance insights',
+      children: [
+        { name: 'Overview', href: '/dashboard/analytics', icon: BarChart3 },
+        { name: 'Workforce', href: '/dashboard/analytics/workforce', icon: Users },
+        { name: 'Financial', href: '/dashboard/analytics/financial', icon: TrendingUp }
+      ]
     },
     {
-      name: 'Chat',
-      href: '/dashboard/chat',
-      icon: MessageSquare,
-      badge: '3',
-      description: 'Communicate with AI employees'
+      name: 'Integrations',
+      href: '/dashboard/integrations',
+      icon: Globe,
+      badge: '6',
+      description: 'External tool connections'
     }
   ];
 
   const accountNavigation: NavigationItem[] = [
     {
-      name: 'Profile',
-      href: '/dashboard/profile',
-      icon: User,
-      description: 'Personal settings and preferences'
+      name: 'Settings',
+      href: '/dashboard/settings',
+      icon: Settings,
+      description: 'Account and system settings',
+      children: [
+        { name: 'Profile', href: '/dashboard/settings/profile', icon: User },
+        { name: 'Notifications', href: '/dashboard/settings/notifications', icon: Bell },
+        { name: 'Security', href: '/dashboard/settings/security', icon: Shield },
+        { name: 'System', href: '/dashboard/settings/system', icon: Database }
+      ]
     },
     {
       name: 'Billing',
@@ -138,27 +138,14 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       description: 'Subscription and usage'
     },
     {
-      name: 'Notifications',
-      href: '/dashboard/notifications',
-      icon: Bell,
-      badge: '5',
-      description: 'Alerts and updates'
-    }
-  ];
-
-  const systemNavigation: NavigationItem[] = [
-    {
-      name: 'Integrations',
-      href: '/dashboard/integrations',
-      icon: Globe,
-      description: 'External tool connections'
-    },
-    {
       name: 'API Keys',
       href: '/dashboard/api-keys',
       icon: Key,
       description: 'API access management'
-    },
+    }
+  ];
+
+  const systemNavigation: NavigationItem[] = [
     {
       name: 'Activity Logs',
       href: '/dashboard/logs',
@@ -166,16 +153,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       description: 'System activity and audit trail'
     },
     {
-      name: 'Security',
-      href: '/dashboard/security',
-      icon: Shield,
-      description: 'Security settings and policies'
-    },
-    {
-      name: 'Settings',
-      href: '/dashboard/settings',
-      icon: Settings,
-      description: 'Platform configuration'
+      name: 'Help & Support',
+      href: '/dashboard/support',
+      icon: HelpCircle,
+      description: 'Documentation and support'
     }
   ];
 
@@ -194,6 +175,9 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
   };
 
   const isActiveLink = (href: string) => {
+    if (href === '/dashboard') {
+      return location.pathname === '/dashboard' || location.pathname === '/dashboard/';
+    }
     return location.pathname === href || location.pathname.startsWith(href + '/');
   };
 
@@ -343,9 +327,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
               "text-white border-0 shadow-lg shadow-blue-500/25",
               "transition-all duration-200 hover:scale-[1.02]"
             )}
+            asChild
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Hire AI Employee
+            <NavLink to="/dashboard/workforce/management">
+              <Plus className="h-4 w-4 mr-2" />
+              Hire AI Employee
+            </NavLink>
           </Button>
         </div>
       )}
@@ -387,26 +374,15 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
 
       {/* Footer */}
       <div className="border-t border-slate-700/50 p-4">
-        <Button 
-          variant="ghost" 
-          className={cn(
-            "w-full text-slate-300 hover:text-white hover:bg-slate-700/50",
-            "transition-all duration-200",
-            collapsed && "px-0"
-          )}
-          asChild
-        >
-          <NavLink to="/dashboard/support">
-            <HelpCircle className={cn("h-4 w-4", !collapsed && "mr-2")} />
-            {!collapsed && "Help & Support"}
-          </NavLink>
-        </Button>
-        
         {!collapsed && (
-          <div className="mt-3 text-center">
-            <p className="text-xs text-slate-500">
-              Version 2.0.0
+          <div className="text-center">
+            <p className="text-xs text-slate-500 mb-2">
+              AGI Platform v2.0.0
             </p>
+            <div className="flex items-center justify-center space-x-1 text-xs text-slate-500">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>All systems operational</span>
+            </div>
           </div>
         )}
       </div>

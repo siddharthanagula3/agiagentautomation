@@ -61,7 +61,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
       description: 'Build your first automation',
       icon: Zap,
       color: 'purple',
-      action: () => navigate('/dashboard/automation'),
+      action: () => navigate('/automation'),
     },
     {
       id: 'chat',
@@ -69,7 +69,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
       description: 'Chat with an AI assistant',
       icon: MessageSquare,
       color: 'green',
-      action: () => navigate('/dashboard/chat'),
+      action: () => navigate('/chat'),
     },
     {
       id: 'analytics',
@@ -77,7 +77,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
       description: 'Check performance metrics',
       icon: BarChart3,
       color: 'orange',
-      action: () => navigate('/dashboard/analytics'),
+      action: () => navigate('/analytics'),
     },
   ];
 
@@ -226,7 +226,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
                   size="sm" 
                   variant="outline" 
                   className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                  onClick={() => navigate('/dashboard/automation')}
+                  onClick={() => navigate('/automation')}
                 >
                   Create Workflow
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -247,7 +247,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
                   size="sm" 
                   variant="outline" 
                   className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                  onClick={() => navigate('/dashboard/chat')}
+                  onClick={() => navigate('/chat')}
                 >
                   Start Chat
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -263,7 +263,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
         <CardHeader>
           <CardTitle className="text-white">Quick Actions</CardTitle>
           <CardDescription>Common tasks and operations</CardDescription>
-        </CardHeader>
+        </CardContent>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action) => {

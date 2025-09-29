@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -14,7 +14,6 @@ import {
   Bell,
   Settings,
   HelpCircle,
-  Bot,
   Zap,
   Shield,
   Database,
@@ -22,17 +21,9 @@ import {
   Key,
   ChevronRight,
   Plus,
-  Briefcase,
-  Clock,
   TrendingUp,
   Brain,
-  Cpu,
-  Network,
-  Calendar,
   MessageSquare,
-  FileText,
-  Download,
-  Upload,
   Building,
   Layers
 } from 'lucide-react';
@@ -66,13 +57,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
     },
     {
       name: 'Workforce',
-      href: '/dashboard/workforce',
+      href: '/workforce',
       icon: Users,
       description: 'Manage your AI workforce',
       children: [
-        { name: 'Overview', href: '/dashboard/workforce', icon: Building },
-        { name: 'Management', href: '/dashboard/workforce/management', icon: Users },
-        { name: 'Analytics', href: '/dashboard/workforce/analytics', icon: BarChart3 }
+        { name: 'Overview', href: '/workforce', icon: Building },
+        { name: 'Management', href: '/workforce/management', icon: Users }
       ]
     },
     {
@@ -83,29 +73,29 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
     },
     {
       name: 'Automation',
-      href: '/dashboard/automation',
+      href: '/automation',
       icon: Zap,
       description: 'Workflows and automation',
       children: [
-        { name: 'Overview', href: '/dashboard/automation', icon: Layers },
-        { name: 'Workflows', href: '/dashboard/automation/workflows', icon: Workflow },
-        { name: 'Designer', href: '/dashboard/automation/designer', icon: Target }
+        { name: 'Overview', href: '/automation', icon: Layers },
+        { name: 'Workflows', href: '/automation/workflows', icon: Workflow },
+        { name: 'Designer', href: '/automation/designer', icon: Target }
       ]
     },
     {
       name: 'Analytics',
-      href: '/dashboard/analytics',
+      href: '/analytics',
       icon: BarChart3,
       description: 'Performance insights',
       children: [
-        { name: 'Overview', href: '/dashboard/analytics', icon: BarChart3 },
-        { name: 'Workforce', href: '/dashboard/analytics/workforce', icon: Users },
-        { name: 'Financial', href: '/dashboard/analytics/financial', icon: TrendingUp }
+        { name: 'Overview', href: '/analytics', icon: BarChart3 },
+        { name: 'Workforce', href: '/analytics/workforce', icon: Users },
+        { name: 'Financial', href: '/analytics/financial', icon: TrendingUp }
       ]
     },
     {
       name: 'Integrations',
-      href: '/dashboard/integrations',
+      href: '/integrations',
       icon: Globe,
       description: 'External tool connections'
     }
@@ -164,10 +154,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
   const isActiveLink = (href: string) => {
     if (href === '/dashboard') {
       return location.pathname === '/dashboard' || location.pathname === '/dashboard/';
-    }
-    // Special handling for chat route
-    if (href === '/chat') {
-      return location.pathname === '/chat' || location.pathname.startsWith('/chat/');
     }
     return location.pathname === href || location.pathname.startsWith(href + '/');
   };
@@ -253,7 +239,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
               </>
             )}
             
-            {/* Hover Tooltip for Collapsed State */}
             {collapsed && (
               <div className={cn(
                 "absolute left-full ml-2 px-3 py-2 bg-slate-800 rounded-lg",
@@ -270,7 +255,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
           </NavLink>
         )}
 
-        {/* Render Children */}
         {hasChildren && !collapsed && isGroupExpanded && (
           <div className="ml-6 mt-1 space-y-1">
             {item.children!.map(child => renderNavItem(child, level + 1))}
@@ -283,10 +267,9 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
   return (
     <div className={cn(
       "flex flex-col h-full",
-      "bg-transparent", // Let parent handle background
+      "bg-transparent",
       className
     )}>
-      {/* Logo/Brand Section */}
       <div className={cn(
         "flex items-center px-4 py-4 border-b border-slate-700/50",
         collapsed && "justify-center px-2"
@@ -308,7 +291,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
         )}
       </div>
 
-      {/* Quick Actions */}
       {!collapsed && (
         <div className="px-4 py-4 border-b border-slate-700/50">
           <Button 
@@ -328,10 +310,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
         </div>
       )}
 
-      {/* Scrollable Navigation */}
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-slate-800 scrollbar-thumb-slate-600">
         <div className="px-4 py-4 space-y-6">
-          {/* Main Navigation */}
           <nav className="space-y-1">
             {!collapsed && (
               <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
@@ -341,7 +321,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
             {navigation.map(item => renderNavItem(item))}
           </nav>
 
-          {/* Account Navigation */}
           <nav className="space-y-1">
             {!collapsed && (
               <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
@@ -351,7 +330,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
             {accountNavigation.map(item => renderNavItem(item))}
           </nav>
 
-          {/* System Navigation */}
           <nav className="space-y-1">
             {!collapsed && (
               <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
@@ -363,7 +341,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
         </div>
       </div>
 
-      {/* Footer */}
       <div className="border-t border-slate-700/50 p-4">
         {!collapsed && (
           <div className="text-center">

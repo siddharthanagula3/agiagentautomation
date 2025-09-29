@@ -64,62 +64,44 @@ function App() {
             <Route path="register" element={<RegisterPage />} />
           </Route>
 
-          {/* Chat Route - Moved outside dashboard for cleaner UX */}
+          {/* Protected Routes with DashboardLayout - ROOT LEVEL FEATURES */}
           <Route
-            path="/chat"
+            path="/"
             element={
               <ProtectedRoute>
                 <DashboardLayout />
               </ProtectedRoute>
             }
           >
-            <Route index element={<ChatPage />} />
-            <Route path=":tabId" element={<ChatPage />} />
-          </Route>
-
-          {/* Protected Dashboard Routes */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }
-          >
-            {/* Main Dashboard */}
-            <Route index element={<DashboardHomePage />} />
-            <Route path="home" element={<DashboardHomePage />} />
+            {/* Main Dashboard - Keep at /dashboard */}
+            <Route path="dashboard" element={<DashboardHomePage />} />
             
-            {/* Workforce Management */}
+            {/* Core Features at Root Level */}
             <Route path="workforce" element={<WorkforcePage />} />
             <Route path="workforce/management" element={<WorkforceManagement />} />
             
-            {/* Automation & Workflows */}
+            <Route path="chat" element={<ChatPage />} />
+            <Route path="chat/:tabId" element={<ChatPage />} />
+            
             <Route path="automation" element={<AutomationPage />} />
             <Route path="automation/workflows" element={<AutonomousWorkflowsPage />} />
             <Route path="automation/designer" element={<AutomationDesignerPage />} />
-            <Route path="automation/designer/:workflowId?" element={<AutomationDesignerPage />} />
+            <Route path="automation/designer/:workflowId" element={<AutomationDesignerPage />} />
             
-            {/* Integrations */}
             <Route path="integrations" element={<IntegrationsPage />} />
             
-            {/* Analytics & Reports */}
             <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="analytics/:view?" element={<AnalyticsPage />} />
+            <Route path="analytics/:view" element={<AnalyticsPage />} />
             
-            {/* Settings */}
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="settings/:section?" element={<SettingsPage />} />
-            
-            {/* Billing & Account */}
-            <Route path="billing" element={<BillingPage />} />
-            <Route path="api-keys" element={<APIKeysPage />} />
-            
-            {/* Help & Support */}
-            <Route path="support" element={<HelpSupportPage />} />
+            {/* Account/System Features - Keep under /dashboard */}
+            <Route path="dashboard/settings" element={<SettingsPage />} />
+            <Route path="dashboard/settings/:section" element={<SettingsPage />} />
+            <Route path="dashboard/billing" element={<BillingPage />} />
+            <Route path="dashboard/api-keys" element={<APIKeysPage />} />
+            <Route path="dashboard/support" element={<HelpSupportPage />} />
             
             {/* Legacy routes for backward compatibility */}
-            <Route path="old-dashboard" element={<Dashboard />} />
+            <Route path="dashboard/old-dashboard" element={<Dashboard />} />
           </Route>
 
           {/* 404 Route */}

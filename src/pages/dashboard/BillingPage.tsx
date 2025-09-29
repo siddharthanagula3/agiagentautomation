@@ -45,8 +45,8 @@ interface BillingInfo {
 }
 
 const BillingPage: React.FC = () => {
-  const { user } = useAuthStore();
-  const [isLoading, setisLoading] = useState(false);
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [billing, setBilling] = useState<BillingInfo | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -59,7 +59,7 @@ const BillingPage: React.FC = () => {
 
   const loadBilling = useCallback(async () => {
     try {
-      setisLoading(true);
+      setIsLoading(true);
       setError(null);
       
       // Simulate API call - in real implementation, this would fetch from Supabase
@@ -91,10 +91,10 @@ const BillingPage: React.FC = () => {
       setBilling(billingData);
       
     } catch (err) {
-      console.error('Error isLoading billing:', err);
+      console.error('Error loading billing:', err);
       setError('Failed to load billing information. Please try again.');
     } finally {
-      setisLoading(false);
+      setIsLoading(false);
     }
   }, []);
 
@@ -104,7 +104,7 @@ const BillingPage: React.FC = () => {
   };
 
   const handleDownloadInvoice = (invoiceId: string) => {
-    console.log(`DownisLoading invoice ${invoiceId}`);
+    console.log(`Downloading invoice ${invoiceId}`);
     // In real implementation, this would download the invoice
   };
 
@@ -146,7 +146,7 @@ const BillingPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <span className="text-muted-foreground">isLoading billing information...</span>
+          <span className="text-muted-foreground">Loading billing information...</span>
         </div>
       </div>
     );
@@ -164,27 +164,27 @@ const BillingPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Billing</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-3xl font-bold text-white">Billing</h1>
+          <p className="text-slate-400 mt-2">
             Manage your subscription and billing information.
           </p>
         </div>
-        <Button onClick={() => setShowUpgrade(true)}>
+        <Button onClick={() => setShowUpgrade(true)} className="bg-blue-600 hover:bg-blue-700">
           <Plus className="mr-2 h-4 w-4" />
           Upgrade Plan
         </Button>
       </div>
 
       {/* Current Plan */}
-      <Card>
+      <Card className="bg-slate-800/50 border-slate-700/50">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center space-x-2 text-white">
                 {getPlanIcon(billing?.plan || 'free')}
                 <span>Current Plan</span>
               </CardTitle>
@@ -200,22 +200,22 @@ const BillingPage: React.FC = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <p className="text-sm text-muted-foreground">Plan Price</p>
-              <p className="text-2xl font-bold">
+              <p className="text-sm text-slate-400">Plan Price</p>
+              <p className="text-2xl font-bold text-white">
                 {billing?.price === 0 ? 'Free' : formatCurrency(billing?.price || 0, billing?.currency || 'USD')}
-                {billing?.price > 0 && <span className="text-sm text-muted-foreground">/month</span>}
+                {billing?.price > 0 && <span className="text-sm text-slate-400">/month</span>}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Status</p>
+              <p className="text-sm text-slate-400">Status</p>
               <div className="flex items-center space-x-2">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium capitalize">{billing?.status || 'Active'}</span>
+                <span className="text-sm font-medium capitalize text-white">{billing?.status || 'Active'}</span>
               </div>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Next Billing Date</p>
-              <p className="text-sm font-medium">
+              <p className="text-sm text-slate-400">Next Billing Date</p>
+              <p className="text-sm font-medium text-white">
                 {billing?.current_period_end ? formatDate(billing.current_period_end) : '--'}
               </p>
             </div>
@@ -225,9 +225,9 @@ const BillingPage: React.FC = () => {
 
       {/* Usage Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+        <Card className="bg-slate-800/50 border-slate-700/50">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 text-white">
               <Zap className="h-5 w-5" />
               <span>Token Usage</span>
             </CardTitle>
@@ -238,18 +238,18 @@ const BillingPage: React.FC = () => {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Used</span>
-                <span className="font-semibold">{billing?.usage.tokens || 0}</span>
+                <span className="text-sm text-slate-400">Used</span>
+                <span className="font-semibold text-white">{billing?.usage.tokens || 0}</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-slate-700 rounded-full h-2">
                 <div 
-                  className="bg-primary h-2 rounded-full" 
+                  className="bg-blue-500 h-2 rounded-full" 
                   style={{ 
                     width: `${Math.min((billing?.usage.tokens || 0) / (billing?.usage.tokens_limit || 1000) * 100, 100)}%` 
                   }}
                 ></div>
               </div>
-              <div className="flex justify-between items-center text-sm text-muted-foreground">
+              <div className="flex justify-between items-center text-sm text-slate-400">
                 <span>0</span>
                 <span>{billing?.usage.tokens_limit || 1000} limit</span>
               </div>
@@ -257,9 +257,9 @@ const BillingPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-slate-800/50 border-slate-700/50">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+            <CardTitle className="flex items-center space-x-2 text-white">
               <DollarSign className="h-5 w-5" />
               <span>Cost Usage</span>
             </CardTitle>
@@ -270,12 +270,12 @@ const BillingPage: React.FC = () => {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Spent</span>
-                <span className="font-semibold">
+                <span className="text-sm text-slate-400">Spent</span>
+                <span className="font-semibold text-white">
                   {formatCurrency(billing?.usage.cost || 0, billing?.currency || 'USD')}
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-slate-700 rounded-full h-2">
                 <div 
                   className="bg-green-500 h-2 rounded-full" 
                   style={{ 
@@ -283,7 +283,7 @@ const BillingPage: React.FC = () => {
                   }}
                 ></div>
               </div>
-              <div className="flex justify-between items-center text-sm text-muted-foreground">
+              <div className="flex justify-between items-center text-sm text-slate-400">
                 <span>$0</span>
                 <span>${billing?.usage.cost_limit || 100} limit</span>
               </div>
@@ -293,9 +293,9 @@ const BillingPage: React.FC = () => {
       </div>
 
       {/* Plan Features */}
-      <Card>
+      <Card className="bg-slate-800/50 border-slate-700/50">
         <CardHeader>
-          <CardTitle>Plan Features</CardTitle>
+          <CardTitle className="text-white">Plan Features</CardTitle>
           <CardDescription>
             Features included in your current plan
           </CardDescription>
@@ -305,7 +305,7 @@ const BillingPage: React.FC = () => {
             {billing?.features.map((feature, index) => (
               <div key={index} className="flex items-center space-x-3">
                 <CheckCircle className="h-5 w-5 text-green-600" />
-                <span className="text-sm">{feature}</span>
+                <span className="text-sm text-slate-300">{feature}</span>
               </div>
             ))}
           </div>
@@ -313,77 +313,77 @@ const BillingPage: React.FC = () => {
       </Card>
 
       {/* Upgrade Options */}
-      <Card>
+      <Card className="bg-slate-800/50 border-slate-700/50">
         <CardHeader>
-          <CardTitle>Upgrade Your Plan</CardTitle>
+          <CardTitle className="text-white">Upgrade Your Plan</CardTitle>
           <CardDescription>
             Choose a plan that fits your needs
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border-2 border-blue-200">
+            <Card className="bg-slate-700/50 border-blue-500/50 border-2">
               <CardHeader>
                 <div className="flex items-center space-x-2">
-                  <Crown className="h-5 w-5 text-blue-600" />
-                  <CardTitle>Pro Plan</CardTitle>
+                  <Crown className="h-5 w-5 text-blue-400" />
+                  <CardTitle className="text-white">Pro Plan</CardTitle>
                 </div>
-                <div className="text-2xl font-bold">$29<span className="text-sm text-muted-foreground">/month</span></div>
+                <div className="text-2xl font-bold text-white">$29<span className="text-sm text-slate-400">/month</span></div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Unlimited AI employees</span>
+                    <span className="text-slate-300">Unlimited AI employees</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Advanced analytics</span>
+                    <span className="text-slate-300">Advanced analytics</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Priority support</span>
+                    <span className="text-slate-300">Priority support</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>API access</span>
+                    <span className="text-slate-300">API access</span>
                   </li>
                 </ul>
-                <Button className="w-full mt-4" onClick={() => handleUpgrade('pro')}>
+                <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700" onClick={() => handleUpgrade('pro')}>
                   Upgrade to Pro
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-purple-200">
+            <Card className="bg-slate-700/50 border-purple-500/50 border-2">
               <CardHeader>
                 <div className="flex items-center space-x-2">
-                  <Building className="h-5 w-5 text-purple-600" />
-                  <CardTitle>Enterprise</CardTitle>
+                  <Building className="h-5 w-5 text-purple-400" />
+                  <CardTitle className="text-white">Enterprise</CardTitle>
                 </div>
-                <div className="text-2xl font-bold">Custom<span className="text-sm text-muted-foreground"> pricing</span></div>
+                <div className="text-2xl font-bold text-white">Custom<span className="text-sm text-slate-400"> pricing</span></div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Everything in Pro</span>
+                    <span className="text-slate-300">Everything in Pro</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Custom integrations</span>
+                    <span className="text-slate-300">Custom integrations</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>Dedicated support</span>
+                    <span className="text-slate-300">Dedicated support</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span>SLA guarantee</span>
+                    <span className="text-slate-300">SLA guarantee</span>
                   </li>
                 </ul>
-                <Button className="w-full mt-4" variant="outline" onClick={() => handleUpgrade('enterprise')}>
+                <Button className="w-full mt-4 border-slate-600 text-slate-300" variant="outline" onClick={() => handleUpgrade('enterprise')}>
                   Contact Sales
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -394,9 +394,9 @@ const BillingPage: React.FC = () => {
       </Card>
 
       {/* Invoice History */}
-      <Card>
+      <Card className="bg-slate-800/50 border-slate-700/50">
         <CardHeader>
-          <CardTitle>Invoice History</CardTitle>
+          <CardTitle className="text-white">Invoice History</CardTitle>
           <CardDescription>
             Your recent invoices and payments
           </CardDescription>
@@ -404,35 +404,35 @@ const BillingPage: React.FC = () => {
         <CardContent>
           {billing?.invoices.length === 0 ? (
             <div className="text-center py-12">
-              <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-                <FileText className="h-12 w-12 text-muted-foreground" />
+              <div className="mx-auto w-24 h-24 bg-slate-700/50 rounded-full flex items-center justify-center mb-4">
+                <FileText className="h-12 w-12 text-slate-500" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">No Invoices Yet</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-lg font-semibold text-white mb-2">No Invoices Yet</h3>
+              <p className="text-slate-400">
                 Your invoice history will appear here once you start using paid features.
               </p>
             </div>
           ) : (
             <div className="space-y-4">
               {billing?.invoices.map((invoice) => (
-                <div key={invoice.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div key={invoice.id} className="flex items-center justify-between p-4 border border-slate-700 rounded-lg">
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                      <FileText className="h-5 w-5 text-primary-foreground" />
+                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                      <FileText className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <p className="font-medium">Invoice #{invoice.id}</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(invoice.date)}</p>
+                      <p className="font-medium text-white">Invoice #{invoice.id}</p>
+                      <p className="text-sm text-slate-400">{formatDate(invoice.date)}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
-                      <p className="font-medium">{formatCurrency(invoice.amount, billing?.currency || 'USD')}</p>
+                      <p className="font-medium text-white">{formatCurrency(invoice.amount, billing?.currency || 'USD')}</p>
                       <Badge variant={invoice.status === 'paid' ? 'default' : 'destructive'}>
                         {invoice.status}
                       </Badge>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => handleDownloadInvoice(invoice.id)}>
+                    <Button variant="outline" size="sm" className="border-slate-600" onClick={() => handleDownloadInvoice(invoice.id)}>
                       <Download className="h-4 w-4" />
                     </Button>
                   </div>

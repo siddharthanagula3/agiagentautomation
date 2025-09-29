@@ -60,7 +60,7 @@ import {
   MoreVertical,
   ExternalLink,
   Copy,
-  Refresh,
+  RefreshCw,
   Download,
   Upload,
   Zap,
@@ -523,7 +523,7 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
             disabled={isLoading}
             className="text-slate-400 hover:text-white"
           >
-            <Refresh className={cn("h-4 w-4", isLoading && "animate-spin")} />
+            <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
           </Button>
           <Button
             onClick={() => setShowCreateDialog(true)}

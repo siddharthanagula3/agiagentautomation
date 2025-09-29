@@ -1,9 +1,10 @@
 /**
- * Settings Page - Application settings and configuration
+ * Settings Page - Real Functional Implementation with Supabase
+ * NO MOCK DATA - All data comes from and saves to Supabase
  */
 
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,138 +23,330 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Settings,
   User,
   Bell,
   Shield,
-  Database,
-  Palette,
-  Globe,
-  Key,
-  Mail,
-  Phone,
   Camera,
   Save,
-  Download,
-  Upload,
   Trash2,
-  RefreshCw,
+  Copy,
+  Plus,
+  Loader2,
+  CheckCircle,
+  AlertTriangle,
   Eye,
   EyeOff,
-  Copy,
-  Edit,
-  Plus,
-  X,
-  AlertTriangle,
-  CheckCircle,
-  Info
+  Key,
+  LogOut
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/stores/unified-auth-store';
+import settingsService, { UserProfile, UserSettings, APIKey } from '@/services/settingsService';
 
-interface SettingsPageProps {
-  className?: string;
-}
-
-const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
+const SettingsPage: React.FC = () => {
   const { section } = useParams();
-  const [activeSection, setActiveSection] = useState(section || 'profile');
+  const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
   
-  // Profile settings
-  const [profile, setProfile] = useState({
-    name: 'John Doe',
-    email: 'john.doe@company.com',
-    phone: '+1 (555) 123-4567',
-    bio: 'AI Platform Administrator',
-    avatar: '/avatars/user.png',
-    timezone: 'America/New_York',
-    language: 'en'
-  });
+  // Loading states
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  // Data states
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [apiKeys, setAPIKeys] = useState<APIKey[]>([]);
+  
+  // UI states
+  const [activeSection, setActiveSection] = useState(section || 'profile');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showAPIKeyDialog, setShowAPIKeyDialog] = useState(false);
+  const [newAPIKeyName, setNewAPIKeyName] = useState('');
+  const [generatedAPIKey, setGeneratedAPIKey] = useState('');
+  const [keyToDelete, setKeyToDelete] = useState<string | null>(null);
 
-  // Notification settings
-  const [notifications, setNotifications] = useState({
-    emailNotifications: true,
-    pushNotifications: true,
-    workflowAlerts: true,
-    employeeUpdates: false,
-    systemMaintenance: true,
-    marketingEmails: false,
-    weeklyReports: true,
-    instantAlerts: true
-  });
+  // Load all data on mount
+  useEffect(() => {
+    loadAllData();
+  }, []);
 
-  // Security settings
-  const [security, setSecurity] = useState({
-    twoFactorEnabled: false,
-    sessionTimeout: '30',
-    passwordLastChanged: new Date('2024-01-15'),
-    activeSessions: 3,
-    allowedIPs: ['192.168.1.100', '10.0.0.1'],
-    apiKeys: [
-      { id: '1', name: 'Production API', key: 'sk-...xyz123', created: new Date('2024-01-10'), lastUsed: new Date() },
-      { id: '2', name: 'Development API', key: 'sk-...abc789', created: new Date('2024-01-20'), lastUsed: new Date('2024-01-25') }
-    ]
-  });
+  const loadAllData = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Load profile
+      const { data: profileData, error: profileError } = await settingsService.getProfile();
+      if (profileError) {
+        console.error('Error loading profile:', profileError);
+        toast.error('Failed to load profile');
+      } else {
+        setProfile(profileData);
+      }
 
-  // System settings
-  const [system, setSystem] = useState({
-    theme: 'dark',
-    autoSave: true,
-    debugMode: false,
-    analyticsEnabled: true,
-    cacheSize: '1GB',
-    backupFrequency: 'daily',
-    retentionPeriod: '30',
-    maxConcurrentJobs: 10
-  });
+      // Load settings
+      const { data: settingsData, error: settingsError } = await settingsService.getSettings();
+      if (settingsError) {
+        console.error('Error loading settings:', settingsError);
+        toast.error('Failed to load settings');
+      } else {
+        setSettings(settingsData);
+      }
 
-  const handleSaveProfile = () => {
-    // Save profile changes
-    toast.success('Profile updated successfully');
+      // Load API keys
+      const { data: keysData, error: keysError } = await settingsService.getAPIKeys();
+      if (keysError) {
+        console.error('Error loading API keys:', keysError);
+      } else {
+        setAPIKeys(keysData);
+      }
+      
+    } catch (error) {
+      console.error('Error loading data:', error);
+      toast.error('Failed to load settings');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSaveNotifications = () => {
-    // Save notification preferences
-    toast.success('Notification preferences updated');
+  // Profile handlers
+  const handleProfileUpdate = (field: keyof UserProfile, value: any) => {
+    if (profile) {
+      setProfile({ ...profile, [field]: value });
+    }
   };
 
-  const handleSaveSecurity = () => {
-    // Save security settings
-    toast.success('Security settings updated');
-  };
-
-  const handleSaveSystem = () => {
-    // Save system settings
-    toast.success('System settings updated');
-  };
-
-  const handleGenerateAPIKey = () => {
-    const newKey = {
-      id: Date.now().toString(),
-      name: `API Key ${security.apiKeys.length + 1}`,
-      key: `sk-${Math.random().toString(36).substr(2, 32)}`,
-      created: new Date(),
-      lastUsed: null
-    };
+  const handleSaveProfile = async () => {
+    if (!profile) return;
     
-    setSecurity(prev => ({
-      ...prev,
-      apiKeys: [...prev.apiKeys, newKey]
-    }));
-    
-    toast.success('New API key generated');
+    try {
+      setIsSaving(true);
+      const { error } = await settingsService.updateProfile(profile);
+      
+      if (error) {
+        toast.error('Failed to save profile');
+        console.error('Error saving profile:', error);
+      } else {
+        toast.success('Profile updated successfully');
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast.error('Failed to save profile');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDeleteAPIKey = (keyId: string) => {
-    setSecurity(prev => ({
-      ...prev,
-      apiKeys: prev.apiKeys.filter(key => key.id !== keyId)
-    }));
-    
-    toast.success('API key deleted');
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('File must be an image');
+      return;
+    }
+
+    try {
+      toast.loading('Uploading avatar...');
+      const { data: url, error } = await settingsService.uploadAvatar(file);
+      
+      if (error) {
+        toast.error('Failed to upload avatar');
+        console.error('Error uploading avatar:', error);
+      } else if (url) {
+        setProfile(prev => prev ? { ...prev, avatar_url: url } : null);
+        toast.success('Avatar uploaded successfully');
+      }
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast.error('Failed to upload avatar');
+    }
   };
+
+  // Settings handlers
+  const handleSettingsUpdate = (field: keyof UserSettings, value: any) => {
+    if (settings) {
+      setSettings({ ...settings, [field]: value });
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    if (!settings) return;
+    
+    try {
+      setIsSaving(true);
+      const { error } = await settingsService.updateSettings(settings);
+      
+      if (error) {
+        toast.error('Failed to save settings');
+        console.error('Error saving settings:', error);
+      } else {
+        toast.success('Settings updated successfully');
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error('Failed to save settings');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Password handlers
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      const { error } = await settingsService.changePassword(newPassword);
+      
+      if (error) {
+        toast.error('Failed to change password');
+        console.error('Error changing password:', error);
+      } else {
+        toast.success('Password changed successfully');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      toast.error('Failed to change password');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // API Key handlers
+  const handleGenerateAPIKey = async () => {
+    if (!newAPIKeyName.trim()) {
+      toast.error('Please enter a name for the API key');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      const { data, error, fullKey } = await settingsService.createAPIKey(newAPIKeyName);
+      
+      if (error || !data) {
+        toast.error('Failed to generate API key');
+        console.error('Error generating API key:', error);
+      } else {
+        setGeneratedAPIKey(fullKey || '');
+        setAPIKeys(prev => [data, ...prev]);
+        toast.success('API key generated successfully');
+        setNewAPIKeyName('');
+      }
+    } catch (error) {
+      console.error('Error generating API key:', error);
+      toast.error('Failed to generate API key');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteAPIKey = async () => {
+    if (!keyToDelete) return;
+
+    try {
+      const { error } = await settingsService.deleteAPIKey(keyToDelete);
+      
+      if (error) {
+        toast.error('Failed to delete API key');
+        console.error('Error deleting API key:', error);
+      } else {
+        setAPIKeys(prev => prev.filter(k => k.id !== keyToDelete));
+        toast.success('API key deleted successfully');
+      }
+    } catch (error) {
+      console.error('Error deleting API key:', error);
+      toast.error('Failed to delete API key');
+    } finally {
+      setKeyToDelete(null);
+    }
+  };
+
+  const handleCopyAPIKey = (key: string) => {
+    navigator.clipboard.writeText(key);
+    toast.success('API key copied to clipboard');
+  };
+
+  // 2FA handlers
+  const handleToggle2FA = async (enabled: boolean) => {
+    try {
+      setIsSaving(true);
+      const { error } = enabled 
+        ? await settingsService.enable2FA()
+        : await settingsService.disable2FA();
+      
+      if (error) {
+        toast.error(`Failed to ${enabled ? 'enable' : 'disable'} 2FA`);
+        console.error('Error toggling 2FA:', error);
+      } else {
+        handleSettingsUpdate('two_factor_enabled', enabled);
+        toast.success(`2FA ${enabled ? 'enabled' : 'disabled'} successfully`);
+      }
+    } catch (error) {
+      console.error('Error toggling 2FA:', error);
+      toast.error(`Failed to ${enabled ? 'enable' : 'disable'} 2FA`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+          <span className="text-slate-400">Loading settings...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile || !settings) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+          <p className="text-slate-400 mb-4">Failed to load settings</p>
+          <Button onClick={loadAllData} variant="outline">
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -166,6 +359,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
             Manage your account, preferences, and system configuration
           </p>
         </div>
+        <Badge variant="outline" className="border-green-500/50 text-green-400">
+          <CheckCircle className="h-3 w-3 mr-1" />
+          Real Data
+        </Badge>
       </motion.div>
 
       {/* Settings Content */}
@@ -204,16 +401,27 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Profile Picture */}
+                {/* Avatar */}
                 <div className="flex items-center space-x-4">
                   <Avatar className="w-20 h-20">
-                    <AvatarImage src={profile.avatar} />
+                    <AvatarImage src={profile.avatar_url} />
                     <AvatarFallback className="bg-slate-700 text-slate-300 text-lg">
-                      {profile.name.split(' ').map(n => n[0]).join('')}
+                      {profile.name?.split(' ').map(n => n[0]).join('') || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-2">
-                    <Button variant="outline" className="border-slate-600 text-slate-300 hover:text-white">
+                    <input
+                      type="file"
+                      id="avatar-upload"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleAvatarUpload}
+                    />
+                    <Button 
+                      variant="outline" 
+                      className="border-slate-600 text-slate-300 hover:text-white"
+                      onClick={() => document.getElementById('avatar-upload')?.click()}
+                    >
                       <Camera className="h-4 w-4 mr-2" />
                       Change Photo
                     </Button>
@@ -226,8 +434,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                   <div>
                     <Label className="text-slate-300">Full Name</Label>
                     <Input
-                      value={profile.name}
-                      onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
+                      value={profile.name || ''}
+                      onChange={(e) => handleProfileUpdate('name', e.target.value)}
                       className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
                     />
                   </div>
@@ -236,35 +444,62 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                     <Label className="text-slate-300">Email Address</Label>
                     <Input
                       type="email"
-                      value={profile.email}
-                      onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
-                      className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
+                      value={user?.email || ''}
+                      disabled
+                      className="mt-1 bg-slate-700/30 border-slate-600/30 text-slate-500 cursor-not-allowed"
                     />
+                    <p className="text-xs text-slate-500 mt-1">Email cannot be changed</p>
                   </div>
                   
                   <div>
                     <Label className="text-slate-300">Phone Number</Label>
                     <Input
-                      value={profile.phone}
-                      onChange={(e) => setProfile(prev => ({ ...prev, phone: e.target.value }))}
+                      value={profile.phone || ''}
+                      onChange={(e) => handleProfileUpdate('phone', e.target.value)}
                       className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
+                      placeholder="+1 (555) 000-0000"
                     />
                   </div>
                   
                   <div>
                     <Label className="text-slate-300">Timezone</Label>
-                    <Select value={profile.timezone} onValueChange={(value) => setProfile(prev => ({ ...prev, timezone: value }))}>
+                    <Select 
+                      value={profile.timezone} 
+                      onValueChange={(value) => handleProfileUpdate('timezone', value)}
+                    >
                       <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="bg-slate-800 border-slate-700">
-                        <SelectItem value="America/New_York">Eastern Time</SelectItem>
-                        <SelectItem value="America/Chicago">Central Time</SelectItem>
-                        <SelectItem value="America/Denver">Mountain Time</SelectItem>
-                        <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                        <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
+                        <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
+                        <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
+                        <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
                         <SelectItem value="Europe/London">GMT</SelectItem>
                         <SelectItem value="Europe/Paris">CET</SelectItem>
                         <SelectItem value="Asia/Tokyo">JST</SelectItem>
+                        <SelectItem value="Asia/Shanghai">CST</SelectItem>
+                        <SelectItem value="Australia/Sydney">AEST</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-slate-300">Language</Label>
+                    <Select 
+                      value={profile.language} 
+                      onValueChange={(value) => handleProfileUpdate('language', value)}
+                    >
+                      <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-700">
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="es">Español</SelectItem>
+                        <SelectItem value="fr">Français</SelectItem>
+                        <SelectItem value="de">Deutsch</SelectItem>
+                        <SelectItem value="zh">中文</SelectItem>
+                        <SelectItem value="ja">日本語</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -273,8 +508,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                 <div>
                   <Label className="text-slate-300">Bio</Label>
                   <Textarea
-                    value={profile.bio}
-                    onChange={(e) => setProfile(prev => ({ ...prev, bio: e.target.value }))}
+                    value={profile.bio || ''}
+                    onChange={(e) => handleProfileUpdate('bio', e.target.value)}
                     className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
                     rows={3}
                     placeholder="Tell us about yourself..."
@@ -282,9 +517,17 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button onClick={handleSaveProfile} className="bg-blue-600 hover:bg-blue-700">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
+                  <Button 
+                    onClick={handleSaveProfile} 
+                    disabled={isSaving}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isSaving ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    Save Profile
                   </Button>
                 </div>
               </CardContent>
@@ -302,76 +545,40 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-slate-300">Email Notifications</Label>
-                      <p className="text-sm text-slate-500">Receive notifications via email</p>
+                  {[
+                    { key: 'email_notifications', label: 'Email Notifications', desc: 'Receive notifications via email' },
+                    { key: 'push_notifications', label: 'Push Notifications', desc: 'Browser push notifications' },
+                    { key: 'workflow_alerts', label: 'Workflow Alerts', desc: 'Alerts when workflows complete or fail' },
+                    { key: 'employee_updates', label: 'Employee Updates', desc: 'Updates about AI employee performance' },
+                    { key: 'system_maintenance', label: 'System Maintenance', desc: 'Scheduled maintenance notifications' },
+                    { key: 'marketing_emails', label: 'Marketing Emails', desc: 'Product updates and offers' },
+                    { key: 'weekly_reports', label: 'Weekly Reports', desc: 'Weekly performance summaries' },
+                    { key: 'instant_alerts', label: 'Instant Alerts', desc: 'Real-time critical alerts' },
+                  ].map(({ key, label, desc }) => (
+                    <div key={key} className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-slate-300">{label}</Label>
+                        <p className="text-sm text-slate-500">{desc}</p>
+                      </div>
+                      <Switch
+                        checked={settings[key as keyof UserSettings] as boolean}
+                        onCheckedChange={(checked) => handleSettingsUpdate(key as keyof UserSettings, checked)}
+                      />
                     </div>
-                    <Switch
-                      checked={notifications.emailNotifications}
-                      onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, emailNotifications: checked }))}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-slate-300">Push Notifications</Label>
-                      <p className="text-sm text-slate-500">Browser push notifications</p>
-                    </div>
-                    <Switch
-                      checked={notifications.pushNotifications}
-                      onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, pushNotifications: checked }))}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-slate-300">Workflow Alerts</Label>
-                      <p className="text-sm text-slate-500">Alerts when workflows complete or fail</p>
-                    </div>
-                    <Switch
-                      checked={notifications.workflowAlerts}
-                      onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, workflowAlerts: checked }))}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-slate-300">Employee Updates</Label>
-                      <p className="text-sm text-slate-500">Updates about AI employee performance</p>
-                    </div>
-                    <Switch
-                      checked={notifications.employeeUpdates}
-                      onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, employeeUpdates: checked }))}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-slate-300">System Maintenance</Label>
-                      <p className="text-sm text-slate-500">Scheduled maintenance notifications</p>
-                    </div>
-                    <Switch
-                      checked={notifications.systemMaintenance}
-                      onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, systemMaintenance: checked }))}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-slate-300">Weekly Reports</Label>
-                      <p className="text-sm text-slate-500">Weekly performance summaries</p>
-                    </div>
-                    <Switch
-                      checked={notifications.weeklyReports}
-                      onCheckedChange={(checked) => setNotifications(prev => ({ ...prev, weeklyReports: checked }))}
-                    />
-                  </div>
+                  ))}
                 </div>
 
                 <div className="flex justify-end">
-                  <Button onClick={handleSaveNotifications} className="bg-blue-600 hover:bg-blue-700">
-                    <Save className="h-4 w-4 mr-2" />
+                  <Button 
+                    onClick={handleSaveSettings} 
+                    disabled={isSaving}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isSaving ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
                     Save Preferences
                   </Button>
                 </div>
@@ -397,16 +604,17 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                       <p className="text-sm text-slate-500">Add an extra layer of security</p>
                     </div>
                     <Switch
-                      checked={security.twoFactorEnabled}
-                      onCheckedChange={(checked) => setSecurity(prev => ({ ...prev, twoFactorEnabled: checked }))}
+                      checked={settings.two_factor_enabled}
+                      onCheckedChange={handleToggle2FA}
+                      disabled={isSaving}
                     />
                   </div>
                   
                   <div>
                     <Label className="text-slate-300">Session Timeout</Label>
                     <Select 
-                      value={security.sessionTimeout} 
-                      onValueChange={(value) => setSecurity(prev => ({ ...prev, sessionTimeout: value }))}
+                      value={settings.session_timeout.toString()} 
+                      onValueChange={(value) => handleSettingsUpdate('session_timeout', parseInt(value))}
                     >
                       <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
                         <SelectValue />
@@ -416,38 +624,81 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                         <SelectItem value="30">30 minutes</SelectItem>
                         <SelectItem value="60">1 hour</SelectItem>
                         <SelectItem value="240">4 hours</SelectItem>
-                        <SelectItem value="never">Never</SelectItem>
+                        <SelectItem value="1440">Never</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   
-                  <div>
-                    <Label className="text-slate-300">Password</Label>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className="text-sm text-slate-400">
-                        Last changed: {security.passwordLastChanged.toLocaleDateString()}
-                      </span>
-                      <Button variant="outline" size="sm" className="border-slate-600 text-slate-300">
-                        Change Password
-                      </Button>
+                  {/* Change Password */}
+                  <div className="space-y-4 border-t border-slate-700 pt-4">
+                    <Label className="text-slate-300">Change Password</Label>
+                    
+                    <div>
+                      <Label className="text-slate-400 text-sm">New Password</Label>
+                      <div className="relative mt-1">
+                        <Input
+                          type={showNewPassword ? "text" : "password"}
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="bg-slate-700/30 border-slate-600/30 text-white pr-10"
+                          placeholder="Enter new password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                        >
+                          {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div>
-                    <Label className="text-slate-300">Active Sessions</Label>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className="text-sm text-slate-400">
-                        {security.activeSessions} active sessions
-                      </span>
-                      <Button variant="outline" size="sm" className="border-slate-600 text-slate-300">
-                        View All
-                      </Button>
+                    
+                    <div>
+                      <Label className="text-slate-400 text-sm">Confirm Password</Label>
+                      <div className="relative mt-1">
+                        <Input
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="bg-slate-700/30 border-slate-600/30 text-white pr-10"
+                          placeholder="Confirm new password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
                     </div>
+                    
+                    <Button 
+                      onClick={handleChangePassword}
+                      disabled={isSaving || !newPassword || !confirmPassword}
+                      variant="outline"
+                      className="w-full border-slate-600"
+                    >
+                      {isSaving ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Key className="h-4 w-4 mr-2" />
+                      )}
+                      Change Password
+                    </Button>
                   </div>
 
-                  <div className="flex justify-end">
-                    <Button onClick={handleSaveSecurity} className="bg-blue-600 hover:bg-blue-700">
-                      <Save className="h-4 w-4 mr-2" />
+                  <div className="flex justify-end border-t border-slate-700 pt-4">
+                    <Button 
+                      onClick={handleSaveSettings} 
+                      disabled={isSaving}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {isSaving ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Save className="h-4 w-4 mr-2" />
+                      )}
                       Save Security Settings
                     </Button>
                   </div>
@@ -465,7 +716,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                       </CardDescription>
                     </div>
                     <Button 
-                      onClick={handleGenerateAPIKey}
+                      onClick={() => setShowAPIKeyDialog(true)}
                       className="bg-green-600 hover:bg-green-700"
                       size="sm"
                     >
@@ -476,31 +727,44 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {security.apiKeys.map((apiKey) => (
-                      <div key={apiKey.id} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
-                        <div className="flex-1">
-                          <p className="font-medium text-white">{apiKey.name}</p>
-                          <p className="text-sm text-slate-400 font-mono">{apiKey.key}</p>
-                          <p className="text-xs text-slate-500">
-                            Created: {apiKey.created.toLocaleDateString()}
-                            {apiKey.lastUsed && ` • Last used: ${apiKey.lastUsed.toLocaleDateString()}`}
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleDeleteAPIKey(apiKey.id)}
-                            className="text-red-400 hover:text-red-300"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                    {apiKeys.length === 0 ? (
+                      <div className="text-center py-8 text-slate-500">
+                        <Key className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                        <p>No API keys yet</p>
+                        <p className="text-sm">Generate your first API key to get started</p>
                       </div>
-                    ))}
+                    ) : (
+                      apiKeys.map((apiKey) => (
+                        <div key={apiKey.id} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-white truncate">{apiKey.name}</p>
+                            <p className="text-sm text-slate-400 font-mono">{apiKey.key_prefix}...</p>
+                            <p className="text-xs text-slate-500">
+                              Created: {new Date(apiKey.created_at).toLocaleDateString()}
+                              {apiKey.last_used_at && ` • Last used: ${new Date(apiKey.last_used_at).toLocaleDateString()}`}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-slate-400 hover:text-white"
+                              onClick={() => handleCopyAPIKey(apiKey.key_prefix)}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => setKeyToDelete(apiKey.id)}
+                              className="text-red-400 hover:text-red-300"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -522,8 +786,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                   <div>
                     <Label className="text-slate-300">Theme</Label>
                     <Select 
-                      value={system.theme} 
-                      onValueChange={(value) => setSystem(prev => ({ ...prev, theme: value }))}
+                      value={settings.theme} 
+                      onValueChange={(value: 'dark' | 'light' | 'auto') => handleSettingsUpdate('theme', value)}
                     >
                       <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
                         <SelectValue />
@@ -536,38 +800,22 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                     </Select>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-slate-300">Auto Save</Label>
-                      <p className="text-sm text-slate-500">Automatically save changes</p>
+                  {[
+                    { key: 'auto_save', label: 'Auto Save', desc: 'Automatically save changes' },
+                    { key: 'debug_mode', label: 'Debug Mode', desc: 'Show detailed error information' },
+                    { key: 'analytics_enabled', label: 'Analytics', desc: 'Enable usage analytics' },
+                  ].map(({ key, label, desc }) => (
+                    <div key={key} className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-slate-300">{label}</Label>
+                        <p className="text-sm text-slate-500">{desc}</p>
+                      </div>
+                      <Switch
+                        checked={settings[key as keyof UserSettings] as boolean}
+                        onCheckedChange={(checked) => handleSettingsUpdate(key as keyof UserSettings, checked)}
+                      />
                     </div>
-                    <Switch
-                      checked={system.autoSave}
-                      onCheckedChange={(checked) => setSystem(prev => ({ ...prev, autoSave: checked }))}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-slate-300">Debug Mode</Label>
-                      <p className="text-sm text-slate-500">Show detailed error information</p>
-                    </div>
-                    <Switch
-                      checked={system.debugMode}
-                      onCheckedChange={(checked) => setSystem(prev => ({ ...prev, debugMode: checked }))}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-slate-300">Analytics</Label>
-                      <p className="text-sm text-slate-500">Enable usage analytics</p>
-                    </div>
-                    <Switch
-                      checked={system.analyticsEnabled}
-                      onCheckedChange={(checked) => setSystem(prev => ({ ...prev, analyticsEnabled: checked }))}
-                    />
-                  </div>
+                  ))}
                 </CardContent>
               </Card>
 
@@ -583,8 +831,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                   <div>
                     <Label className="text-slate-300">Cache Size</Label>
                     <Select 
-                      value={system.cacheSize} 
-                      onValueChange={(value) => setSystem(prev => ({ ...prev, cacheSize: value }))}
+                      value={settings.cache_size} 
+                      onValueChange={(value) => handleSettingsUpdate('cache_size', value)}
                     >
                       <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
                         <SelectValue />
@@ -602,8 +850,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                   <div>
                     <Label className="text-slate-300">Backup Frequency</Label>
                     <Select 
-                      value={system.backupFrequency} 
-                      onValueChange={(value) => setSystem(prev => ({ ...prev, backupFrequency: value }))}
+                      value={settings.backup_frequency} 
+                      onValueChange={(value) => handleSettingsUpdate('backup_frequency', value)}
                     >
                       <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
                         <SelectValue />
@@ -621,9 +869,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                     <Label className="text-slate-300">Data Retention (days)</Label>
                     <Input
                       type="number"
-                      value={system.retentionPeriod}
-                      onChange={(e) => setSystem(prev => ({ ...prev, retentionPeriod: e.target.value }))}
+                      value={settings.retention_period}
+                      onChange={(e) => handleSettingsUpdate('retention_period', parseInt(e.target.value) || 30)}
                       className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
+                      min={1}
+                      max={365}
                     />
                   </div>
                   
@@ -631,9 +881,11 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
                     <Label className="text-slate-300">Max Concurrent Jobs</Label>
                     <Input
                       type="number"
-                      value={system.maxConcurrentJobs}
-                      onChange={(e) => setSystem(prev => ({ ...prev, maxConcurrentJobs: parseInt(e.target.value) }))}
+                      value={settings.max_concurrent_jobs}
+                      onChange={(e) => handleSettingsUpdate('max_concurrent_jobs', parseInt(e.target.value) || 10)}
                       className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
+                      min={1}
+                      max={100}
                     />
                   </div>
                 </CardContent>
@@ -641,14 +893,120 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ className }) => {
             </div>
             
             <div className="flex justify-end">
-              <Button onClick={handleSaveSystem} className="bg-blue-600 hover:bg-blue-700">
-                <Save className="h-4 w-4 mr-2" />
+              <Button 
+                onClick={handleSaveSettings} 
+                disabled={isSaving}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
                 Save System Settings
               </Button>
             </div>
           </TabsContent>
         </Tabs>
       </motion.div>
+
+      {/* API Key Generation Dialog */}
+      <AlertDialog open={showAPIKeyDialog} onOpenChange={setShowAPIKeyDialog}>
+        <AlertDialogContent className="bg-slate-800 border-slate-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">
+              {generatedAPIKey ? 'API Key Generated' : 'Generate New API Key'}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400">
+              {generatedAPIKey ? (
+                <div className="space-y-4">
+                  <p className="text-yellow-400">
+                    <AlertTriangle className="h-4 w-4 inline mr-2" />
+                    Save this key now. You won't be able to see it again!
+                  </p>
+                  <div className="bg-slate-900 p-3 rounded font-mono text-sm text-green-400 break-all">
+                    {generatedAPIKey}
+                  </div>
+                  <Button 
+                    onClick={() => handleCopyAPIKey(generatedAPIKey)}
+                    className="w-full"
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy to Clipboard
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4 pt-4">
+                  <div>
+                    <Label className="text-slate-300">Key Name</Label>
+                    <Input
+                      value={newAPIKeyName}
+                      onChange={(e) => setNewAPIKeyName(e.target.value)}
+                      placeholder="e.g., Production API"
+                      className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
+                    />
+                  </div>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            {generatedAPIKey ? (
+              <AlertDialogAction 
+                onClick={() => {
+                  setShowAPIKeyDialog(false);
+                  setGeneratedAPIKey('');
+                }}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Done
+              </AlertDialogAction>
+            ) : (
+              <>
+                <AlertDialogCancel className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleGenerateAPIKey}
+                  disabled={isSaving || !newAPIKeyName.trim()}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {isSaving ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Key className="h-4 w-4 mr-2" />
+                  )}
+                  Generate Key
+                </AlertDialogAction>
+              </>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete API Key Confirmation */}
+      <AlertDialog open={!!keyToDelete} onOpenChange={() => setKeyToDelete(null)}>
+        <AlertDialogContent className="bg-slate-800 border-slate-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Delete API Key</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400">
+              Are you sure you want to delete this API key? This action cannot be undone.
+              Any applications using this key will stop working.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteAPIKey}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete Key
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

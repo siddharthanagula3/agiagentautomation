@@ -53,7 +53,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
       description: 'Add your first AI team member',
       icon: Bot,
       color: 'blue',
-      action: () => navigate('/dashboard/marketplace'),
+      action: () => navigate('/marketplace'),
     },
     {
       id: 'workflow',

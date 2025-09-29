@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/stores/unified-auth-store';
+import { useAuthStore } from '@/stores/unified-auth-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,7 +28,7 @@ interface DashboardHomePageProps {
 }
 
 export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className }) => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
 
   const stats = {

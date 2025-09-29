@@ -107,7 +107,7 @@ export async function sendToAnthropic(messages: AIMessage[], model: string = 'cl
 /**
  * Send message to Google (Gemini)
  */
-export async function sendToGoogle(messages: AIMessage[], model: string = 'gemini-1.5-pro'): Promise<AIResponse> {
+export async function sendToGoogle(messages: AIMessage[], model: string = 'gemini-1.5-flash'): Promise<AIResponse> {
   if (!GOOGLE_API_KEY) {
     throw new Error('Google API key not configured. Please add VITE_GOOGLE_API_KEY to your environment variables.');
   }
@@ -122,27 +122,41 @@ export async function sendToGoogle(messages: AIMessage[], model: string = 'gemin
 
   const systemInstruction = messages.find(m => m.role === 'system')?.content;
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GOOGLE_API_KEY}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents,
-        systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 2000,
+  async function callModel(targetModel: string) {
+    const resp = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${GOOGLE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      }),
-    }
-  );
+        body: JSON.stringify({
+          contents,
+          systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2000,
+          },
+        }),
+      }
+    );
+    return resp;
+  }
 
+  // Try requested model first; on model-not-found, fall back to free flash
+  let response = await callModel(model);
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(`Google API error: ${error.error?.message || response.statusText}`);
+    let errJson: any = {};
+    try { errJson = await response.json(); } catch {}
+    const msg: string = errJson?.error?.message || response.statusText;
+    const isModelNotFound = /not found|not supported|ListModels/i.test(msg);
+    if (isModelNotFound && model !== 'gemini-1.5-flash') {
+      response = await callModel('gemini-1.5-flash');
+    }
+    if (!response.ok) {
+      const finalErr = errJson.error ? errJson : await response.json().catch(() => ({}));
+      throw new Error(`Google API error: ${finalErr?.error?.message || msg}`);
+    }
   }
 
   const data = await response.json();

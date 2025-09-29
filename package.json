@@ -1,7 +1,7 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "agi-agent-automation",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,16 +16,11 @@
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "test:run": "vitest run",
-    "test:supabase": "node test-supabase-connection.js",
-    "verify": "node test-supabase-connection.js && echo 'Configuration verified!'",
-    "verify:login": "node verify-login.js",
-    "check:env": "node check-env.js",
     "clean": "rm -rf dist node_modules/.vite",
     "clean:all": "rm -rf dist node_modules package-lock.json",
     "reinstall": "npm run clean:all && npm install",
-    "ai:analyze": "node scripts/analyze.js",
-    "ai:generate": "node scripts/generate.js",
-    "ai:setup": "node setup-ai-tools.js"
+    "cleanup": "node cleanup.bat",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

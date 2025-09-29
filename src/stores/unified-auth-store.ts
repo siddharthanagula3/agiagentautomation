@@ -6,17 +6,41 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
+  initialized: boolean;
   login: (loginData: LoginData) => Promise<void>;
   register: (registerData: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
+  initialize: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isLoading: true,
   error: null,
   isAuthenticated: false,
+  initialized: false,
+
+  initialize: async () => {
+    if (get().initialized) return;
+    
+    console.log('AuthStore: Initializing auth state...');
+    set({ isLoading: true, initialized: true });
+    
+    try {
+      const { user, error } = await authService.getCurrentUser();
+      if (error) {
+        console.log('AuthStore: No existing session:', error);
+        set({ user: null, isAuthenticated: false, isLoading: false });
+      } else {
+        console.log('AuthStore: Restored user session:', user?.email);
+        set({ user, isAuthenticated: !!user, isLoading: false });
+      }
+    } catch (error) {
+      console.error('AuthStore: Initialization error:', error);
+      set({ user: null, isAuthenticated: false, isLoading: false });
+    }
+  },
 
   login: async (loginData) => {
     set({ isLoading: true, error: null });
@@ -62,3 +86,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 }));
+
+// Auto-initialize the store when imported
+if (typeof window !== 'undefined') {
+  useAuthStore.getState().initialize();
+}

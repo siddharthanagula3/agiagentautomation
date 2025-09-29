@@ -20,6 +20,7 @@ import { AIEmployeeDemo } from './pages/demo/AIEmployeeDemo';
 import WorkforcePage from './pages/workforce/WorkforcePage';
 import AutomationPage from './pages/automation/AutomationPage';
 import ChatPage from './pages/chat/ChatPage';
+import ChatPageEnhanced from './pages/chat/ChatPageEnhanced';
 import IntegrationsPage from './pages/integrations/IntegrationsPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import SettingsPage from './pages/settings/SettingsPage';
@@ -75,8 +76,12 @@ function App() {
             <Route path="workforce" element={<WorkforcePage />} />
             <Route path="workforce/management" element={<WorkforceManagement />} />
             
-            <Route path="chat" element={<ChatPage />} />
-            <Route path="chat/:tabId" element={<ChatPage />} />
+            {/* Enhanced Chat (New) */}
+            <Route path="chat" element={<ChatPageEnhanced />} />
+            <Route path="chat/:tabId" element={<ChatPageEnhanced />} />
+            
+            {/* Legacy Chat (Backup) */}
+            <Route path="chat-legacy" element={<ChatPage />} />
             
             <Route path="automation" element={<AutomationPage />} />
             <Route path="automation/workflows" element={<AutonomousWorkflowsPage />} />

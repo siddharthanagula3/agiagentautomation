@@ -69,7 +69,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       name: 'Workforce',
       href: '/dashboard/workforce',
       icon: Users,
-      badge: '18',
       description: 'Manage your AI workforce',
       children: [
         { name: 'Overview', href: '/dashboard/workforce', icon: Building },
@@ -81,16 +80,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       name: 'Chat',
       href: '/dashboard/chat',
       icon: MessageSquare,
-      badge: '3',
       description: 'AI employee communication'
     },
     {
       name: 'Automation',
       href: '/dashboard/automation',
       icon: Zap,
-      badge: 'New',
-      badgeVariant: 'secondary',
-      isNew: true,
       description: 'Workflows and automation',
       children: [
         { name: 'Overview', href: '/dashboard/automation', icon: Layers },
@@ -113,7 +108,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       name: 'Integrations',
       href: '/dashboard/integrations',
       icon: Globe,
-      badge: '6',
       description: 'External tool connections'
     }
   ];

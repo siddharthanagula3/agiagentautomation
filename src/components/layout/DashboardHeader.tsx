@@ -70,33 +70,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Mock notifications - replace with real data
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'success',
-      title: 'AI Employee Hired',
-      message: 'Sarah (Data Analyst) has been successfully hired to your team.',
-      timestamp: new Date(Date.now() - 5 * 60 * 1000),
-      read: false
-    },
-    {
-      id: '2',
-      type: 'info',
-      title: 'Workflow Completed',
-      message: 'Customer data analysis workflow has been completed.',
-      timestamp: new Date(Date.now() - 15 * 60 * 1000),
-      read: false
-    },
-    {
-      id: '3',
-      type: 'warning',
-      title: 'API Limit Warning',
-      message: 'You have used 80% of your monthly API quota.',
-      timestamp: new Date(Date.now() - 30 * 60 * 1000),
-      read: true
-    }
-  ]);
+  // Notifications - load from real data
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -280,19 +255,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
         {/* Right Section */}
         <div className="flex items-center space-x-2">
-          {/* Quick Action Button */}
-          <Button
-            size="sm"
-            className={cn(
-              "hidden sm:flex bg-gradient-to-r from-blue-600 to-purple-600",
-              "hover:from-blue-700 hover:to-purple-700 text-white border-0",
-              "shadow-lg shadow-blue-500/25 transition-all duration-200 hover:scale-105"
-            )}
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            <span className="hidden lg:inline">New Job</span>
-          </Button>
-
           {/* Theme Toggle */}
           <Button
             variant="ghost"
@@ -342,48 +304,46 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   </div>
                 </div>
                 <div className="max-h-64 overflow-y-auto">
-                  {notifications.map((notification) => (
-                    <button
-                      key={notification.id}
-                      onClick={() => handleNotificationClick(notification.id)}
-                      className={cn(
-                        "w-full text-left p-4 border-b border-slate-700/50 hover:bg-slate-700/30",
-                        "transition-colors duration-200",
-                        !notification.read && "bg-slate-700/20"
-                      )}
-                    >
-                      <div className="flex items-start space-x-3">
-                        <div className="flex-shrink-0 mt-0.5">
-                          {getNotificationIcon(notification.type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium text-white truncate">
-                              {notification.title}
-                            </p>
-                            {!notification.read && (
-                              <div className="w-2 h-2 bg-blue-500 rounded-full ml-2"></div>
-                            )}
+                  {notifications.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <Bell className="h-12 w-12 text-slate-600 mx-auto mb-3" />
+                      <p className="text-sm text-slate-400">No notifications yet</p>
+                    </div>
+                  ) : (
+                    notifications.map((notification) => (
+                      <button
+                        key={notification.id}
+                        onClick={() => handleNotificationClick(notification.id)}
+                        className={cn(
+                          "w-full text-left p-4 border-b border-slate-700/50 hover:bg-slate-700/30",
+                          "transition-colors duration-200",
+                          !notification.read && "bg-slate-700/20"
+                        )}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div className="flex-shrink-0 mt-0.5">
+                            {getNotificationIcon(notification.type)}
                           </div>
-                          <p className="text-xs text-slate-400 mt-1">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            {formatTimeAgo(notification.timestamp)}
-                          </p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-medium text-white truncate">
+                                {notification.title}
+                              </p>
+                              {!notification.read && (
+                                <div className="w-2 h-2 bg-blue-500 rounded-full ml-2"></div>
+                              )}
+                            </div>
+                            <p className="text-xs text-slate-400 mt-1">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-slate-500 mt-1">
+                              {formatTimeAgo(notification.timestamp)}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                <div className="p-3 border-t border-slate-700">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full text-slate-300 hover:text-white text-xs"
-                  >
-                    View all notifications
-                  </Button>
+                      </button>
+                    ))
+                  )}
                 </div>
               </div>
             )}

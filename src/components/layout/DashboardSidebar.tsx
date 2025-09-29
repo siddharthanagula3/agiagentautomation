@@ -329,7 +329,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
             )}
             asChild
           >
-            <NavLink to="/dashboard/workforce/management">
+            <NavLink to="/marketplace">
               <Plus className="h-4 w-4 mr-2" />
               Hire AI Employee
             </NavLink>

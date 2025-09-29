@@ -1,6 +1,6 @@
 /**
  * Chat Page - Chat with your purchased AI employees
- * No mock data - loads real purchased employees from marketplace
+ * Now with real AI provider integration!
  */
 
 import React, { useState, useEffect } from 'react';
@@ -22,7 +22,9 @@ import {
   Plus, 
   MessageSquare, 
   ShoppingCart,
-  Sparkles
+  Loader2,
+  AlertCircle,
+  Settings
 } from 'lucide-react';
 import { AI_EMPLOYEES } from '@/data/ai-employees';
 import { toast } from 'sonner';
@@ -30,6 +32,7 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { getEmployeeById, listPurchasedEmployees } from '@/services/supabase-employees';
 import { createSession, listMessages, listSessions, sendMessage } from '@/services/supabase-chat';
+import { sendAIMessage, isProviderConfigured, getConfiguredProviders, type AIMessage } from '@/services/ai-chat-service';
 
 interface PurchasedEmployee {
   id: string;
@@ -63,6 +66,25 @@ const ChatPage: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [configuredProviders, setConfiguredProviders] = useState<string[]>([]);
+
+  // Check configured providers on mount
+  useEffect(() => {
+    const providers = getConfiguredProviders();
+    setConfiguredProviders(providers);
+    console.log('Configured AI providers:', providers);
+    
+    if (providers.length === 0) {
+      toast.error('No AI providers configured. Please add API keys in your .env file.', {
+        duration: 10000,
+        action: {
+          label: 'Guide',
+          onClick: () => window.open('#api-setup', '_blank')
+        }
+      });
+    }
+  }, []);
 
   // Load purchased employees
   useEffect(() => {
@@ -70,11 +92,17 @@ const ChatPage: React.FC = () => {
     async function load() {
       try {
         if (!user?.id) {
+          console.log('No user logged in, skipping employee load');
           setPurchasedEmployees([]);
           return;
         }
+        
+        console.log('Loading purchased employees for user:', user.id);
         const rows = await listPurchasedEmployees(user.id);
+        
         if (!isMounted) return;
+        
+        console.log('Purchased employees loaded:', rows);
         const normalized = rows.map(r => ({
           id: r.employee_id,
           name: getEmployeeById(r.employee_id)?.role || '',
@@ -84,13 +112,18 @@ const ChatPage: React.FC = () => {
         }));
         setPurchasedEmployees(normalized);
 
-        // Optionally load recent sessions (not required for empty state flow)
+        // Load recent sessions
         const sessions = await listSessions(user.id);
+        console.log('Chat sessions loaded:', sessions);
+        
         if (!isMounted) return;
+        
         if (sessions.length > 0) {
           // Load first session messages
           const first = sessions[0];
           const msgs = await listMessages(user.id, first.id);
+          console.log('Messages loaded for first session:', msgs);
+          
           setActiveTabs([
             {
               id: first.id,
@@ -98,13 +131,19 @@ const ChatPage: React.FC = () => {
               role: first.role,
               provider: first.provider,
               isActive: true,
-              messages: msgs.map(m => ({ id: m.id, role: m.role, content: m.content, timestamp: new Date(m.created_at) }))
+              messages: msgs.map(m => ({ 
+                id: m.id, 
+                role: m.role, 
+                content: m.content, 
+                timestamp: new Date(m.created_at) 
+              }))
             }
           ]);
           setSelectedTab(first.id);
         }
       } catch (err) {
-        console.error('Failed to load chat data', err);
+        console.error('Failed to load chat data:', err);
+        toast.error('Failed to load chat data. Please try refreshing.');
       }
     }
     load();
@@ -125,50 +164,93 @@ const ChatPage: React.FC = () => {
   };
 
   const handleStartChat = async (employee: PurchasedEmployee) => {
-    const employeeData = getEmployeeData(employee.id);
-    if (!employeeData) return;
+    try {
+      console.log('Starting chat with employee:', employee);
+      
+      const employeeData = getEmployeeData(employee.id);
+      if (!employeeData) {
+        console.error('Employee data not found for ID:', employee.id);
+        toast.error('Employee data not found');
+        return;
+      }
 
-    // Check if tab already exists
-    const existingTab = activeTabs.find(tab => tab.employeeId === employee.id);
-    if (existingTab) {
-      setSelectedTab(existingTab.id);
+      // Check if provider is configured
+      if (!isProviderConfigured(employee.provider)) {
+        toast.error(`${employee.provider} API key not configured. Please add it to your .env file.`, {
+          duration: 8000
+        });
+        return;
+      }
+
+      // Check if tab already exists
+      const existingTab = activeTabs.find(tab => tab.employeeId === employee.id);
+      if (existingTab) {
+        console.log('Tab already exists, switching to it');
+        setSelectedTab(existingTab.id);
+        setIsSelectDialogOpen(false);
+        toast.info(`Switched to ${employee.role} chat`);
+        return;
+      }
+
+      if (!user?.id) {
+        console.error('User not authenticated');
+        toast.error('Please sign in to start a chat');
+        navigate('/auth/login');
+        return;
+      }
+
+      // Create session in Supabase
+      console.log('Creating new session...');
+      const session = await createSession(user.id, { 
+        employeeId: employee.id, 
+        role: employee.role, 
+        provider: employee.provider 
+      });
+      console.log('Session created:', session);
+
+      // Create welcome message
+      const welcomeContent = `Hi! I'm your ${employee.role}. I'm powered by ${employee.provider} and I'm here to help you with ${employeeData.specialty}. How can I assist you today?`;
+      const welcomeMessage = await sendMessage(user.id, session.id, 'assistant', welcomeContent);
+      console.log('Welcome message sent:', welcomeMessage);
+
+      const newTab: ChatTab = {
+        id: session.id,
+        employeeId: employee.id,
+        role: employee.role,
+        provider: employee.provider,
+        isActive: true,
+        messages: [
+          { 
+            id: welcomeMessage.id, 
+            role: 'assistant', 
+            content: welcomeMessage.content, 
+            timestamp: new Date(welcomeMessage.created_at) 
+          }
+        ]
+      };
+
+      setActiveTabs(prev => [...prev, newTab]);
+      setSelectedTab(newTab.id);
       setIsSelectDialogOpen(false);
-      toast.info(`Switched to ${employee.role} chat`);
-      return;
+      toast.success(`Started chat with ${employee.role}`);
+      console.log('Chat started successfully');
+    } catch (error) {
+      console.error('Error starting chat:', error);
+      toast.error(`Failed to start chat: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-
-    if (!user?.id) {
-      toast.error('Please sign in to start a chat');
-      navigate('/auth/login');
-      return;
-    }
-
-    // Create session in Supabase
-    const session = await createSession(user.id, { employeeId: employee.id, role: employee.role, provider: employee.provider });
-    const welcomeMessage = await sendMessage(user.id, session.id, 'assistant', `Hi! I'm your ${employee.role}. How can I help you today?`);
-
-    const newTab: ChatTab = {
-      id: session.id,
-      employeeId: employee.id,
-      role: employee.role,
-      provider: employee.provider,
-      isActive: true,
-      messages: [
-        { id: welcomeMessage.id, role: 'assistant', content: welcomeMessage.content, timestamp: new Date(welcomeMessage.created_at) }
-      ]
-    };
-
-    setActiveTabs(prev => [...prev, newTab]);
-    setSelectedTab(newTab.id);
-    setIsSelectDialogOpen(false);
-    toast.success(`Started chat with ${employee.role}`);
   };
 
   const handleSendMessage = async () => {
-    if (!message.trim() || !selectedTab) return;
+    if (!message.trim() || !selectedTab || isSending) return;
 
     const activeTab = activeTabs.find(tab => tab.id === selectedTab);
-    if (!activeTab) return;
+    if (!activeTab) {
+      console.error('Active tab not found');
+      return;
+    }
+
+    console.log('Sending message:', message);
+    setIsSending(true);
 
     const userMessage: ChatMessage = {
       id: `msg-${Date.now()}`,
@@ -177,6 +259,7 @@ const ChatPage: React.FC = () => {
       timestamp: new Date()
     };
 
+    // Add user message to UI immediately
     setActiveTabs(prev => prev.map(tab => {
       if (tab.id === selectedTab) {
         return {
@@ -189,18 +272,89 @@ const ChatPage: React.FC = () => {
 
     setMessage('');
 
-    // Persist user message
-    if (user?.id) {
+    try {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+
+      // Persist user message to database
       await sendMessage(user.id, selectedTab, 'user', userMessage.content);
-      // Simulate AI response (placeholder until provider APIs wired)
-      const ai = await sendMessage(user.id, selectedTab, 'assistant', `I'm processing your request as your ${activeTab.role}. This would connect to ${activeTab.provider} API in production.`);
-      const aiMessage: ChatMessage = { id: ai.id, role: 'assistant', content: ai.content, timestamp: new Date(ai.created_at) };
+      console.log('User message saved to database');
+
+      // Check if provider is configured
+      if (!isProviderConfigured(activeTab.provider)) {
+        throw new Error(`${activeTab.provider} API key not configured`);
+      }
+
+      // Prepare conversation history for AI
+      const conversationHistory: AIMessage[] = activeTab.messages
+        .filter(m => m.role !== 'system')
+        .map(m => ({
+          role: m.role,
+          content: m.content
+        }));
+      
+      conversationHistory.push({
+        role: 'user',
+        content: userMessage.content
+      });
+
+      console.log('Sending to AI provider:', activeTab.provider);
+      
+      // Get AI response
+      const aiResponse = await sendAIMessage(
+        activeTab.provider,
+        conversationHistory,
+        activeTab.role
+      );
+
+      console.log('AI response received:', aiResponse);
+
+      // Save AI response to database
+      const aiMessageRecord = await sendMessage(
+        user.id, 
+        selectedTab, 
+        'assistant', 
+        aiResponse.content
+      );
+
+      // Add AI response to UI
+      const aiMessage: ChatMessage = { 
+        id: aiMessageRecord.id, 
+        role: 'assistant', 
+        content: aiResponse.content, 
+        timestamp: new Date(aiMessageRecord.created_at) 
+      };
+
       setActiveTabs(prev => prev.map(tab => {
         if (tab.id === selectedTab) {
           return { ...tab, messages: [...tab.messages, aiMessage] };
         }
         return tab;
       }));
+
+      console.log('Message exchange complete');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      
+      // Show error message in chat
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: `❌ Error: ${error instanceof Error ? error.message : 'Failed to get response from AI'}. Please check your API configuration.`,
+        timestamp: new Date()
+      };
+
+      setActiveTabs(prev => prev.map(tab => {
+        if (tab.id === selectedTab) {
+          return { ...tab, messages: [...tab.messages, errorMessage] };
+        }
+        return tab;
+      }));
+
+      toast.error(`Failed to send message: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -226,76 +380,100 @@ const ChatPage: React.FC = () => {
             <h1 className="text-3xl font-bold text-white">AI Chat</h1>
             <p className="text-slate-400 mt-1">
               Communicate with your AI employees
+              {configuredProviders.length > 0 && (
+                <span className="ml-2 text-green-400">
+                  • {configuredProviders.join(', ')} configured
+                </span>
+              )}
             </p>
           </div>
-          <Dialog open={isSelectDialogOpen} onOpenChange={setIsSelectDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4 mr-2" />
-                New Chat
+          <div className="flex gap-2">
+            {configuredProviders.length === 0 && (
+              <Button
+                variant="outline"
+                onClick={() => navigate('/dashboard/settings')}
+                className="border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10"
+              >
+                <AlertCircle className="h-4 w-4 mr-2" />
+                Setup API Keys
               </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>Select AI Employee</DialogTitle>
-                <DialogDescription>
-                  Choose from your hired AI employees to start a conversation
-                </DialogDescription>
-              </DialogHeader>
-              <div className="mt-4">
-                {purchasedEmployees.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Bot className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
-                      No AI Employees Yet
-                    </h3>
-                    <p className="text-muted-foreground mb-4">
-                      Hire AI employees from the marketplace to start chatting
-                    </p>
-                    <Button onClick={() => navigate('/marketplace')}>
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Go to Marketplace
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid gap-3 max-h-[400px] overflow-y-auto">
-                    {purchasedEmployees.map((employee) => {
-                      const employeeData = getEmployeeData(employee.id);
-                      if (!employeeData) return null;
+            )}
+            <Dialog open={isSelectDialogOpen} onOpenChange={setIsSelectDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Chat
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Select AI Employee</DialogTitle>
+                  <DialogDescription>
+                    Choose from your hired AI employees to start a conversation
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="mt-4">
+                  {purchasedEmployees.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Bot className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
+                        No AI Employees Yet
+                      </h3>
+                      <p className="text-muted-foreground mb-4">
+                        Hire AI employees from the marketplace to start chatting
+                      </p>
+                      <Button onClick={() => navigate('/marketplace')}>
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Go to Marketplace
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 max-h-[400px] overflow-y-auto">
+                      {purchasedEmployees.map((employee) => {
+                        const employeeData = getEmployeeData(employee.id);
+                        if (!employeeData) return null;
 
-                      return (
-                        <button
-                          key={employee.id}
-                          onClick={() => handleStartChat(employee)}
-                          className="flex items-center space-x-3 p-4 rounded-lg border border-border hover:bg-accent transition-colors text-left"
-                        >
-                          <img
-                            src={employeeData.avatar}
-                            alt={employee.role}
-                            className="w-12 h-12 rounded-full"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-foreground">
-                              {employee.role}
-                            </div>
-                            <div className="text-sm text-muted-foreground truncate">
-                              {employeeData.specialty}
-                            </div>
-                          </div>
-                          <Badge 
-                            variant="outline" 
-                            className={cn("text-xs", getProviderColor(employee.provider))}
+                        const providerConfigured = isProviderConfigured(employee.provider);
+
+                        return (
+                          <button
+                            key={employee.id}
+                            onClick={() => handleStartChat(employee)}
+                            disabled={!providerConfigured}
+                            className={cn(
+                              "flex items-center space-x-3 p-4 rounded-lg border border-border hover:bg-accent transition-colors text-left",
+                              !providerConfigured && "opacity-50 cursor-not-allowed"
+                            )}
                           >
-                            {employee.provider}
-                          </Badge>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+                            <img
+                              src={employeeData.avatar}
+                              alt={employee.role}
+                              className="w-12 h-12 rounded-full"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-foreground">
+                                {employee.role}
+                              </div>
+                              <div className="text-sm text-muted-foreground truncate">
+                                {employeeData.specialty}
+                              </div>
+                            </div>
+                            <Badge 
+                              variant="outline" 
+                              className={cn("text-xs", getProviderColor(employee.provider))}
+                            >
+                              {employee.provider}
+                              {!providerConfigured && ' ⚠️'}
+                            </Badge>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </motion.div>
 
@@ -409,13 +587,21 @@ const ChatPage: React.FC = () => {
                                 : "bg-muted text-foreground"
                             )}
                           >
-                            <p className="text-sm">{msg.content}</p>
+                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                             <span className="text-xs opacity-70 mt-1 block">
                               {msg.timestamp.toLocaleTimeString()}
                             </span>
                           </div>
                         </div>
                       ))}
+                      {isSending && (
+                        <div className="flex justify-start">
+                          <div className="bg-muted text-foreground rounded-lg p-4 flex items-center space-x-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span className="text-sm">AI is thinking...</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Message Input */}
@@ -424,12 +610,21 @@ const ChatPage: React.FC = () => {
                         type="text"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder="Type your message..."
-                        className="flex-1 px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        onKeyPress={(e) => e.key === 'Enter' && !isSending && handleSendMessage()}
+                        placeholder={isSending ? "Sending..." : "Type your message..."}
+                        disabled={isSending}
+                        className="flex-1 px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
                       />
-                      <Button onClick={handleSendMessage} className="bg-primary">
-                        Send
+                      <Button 
+                        onClick={handleSendMessage} 
+                        disabled={isSending || !message.trim()}
+                        className="bg-primary"
+                      >
+                        {isSending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          'Send'
+                        )}
                       </Button>
                     </div>
                   </>

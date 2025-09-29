@@ -240,13 +240,22 @@ GROUP BY pe.id;
 -- View to get recent chat sessions with message count
 CREATE OR REPLACE VIEW recent_chat_sessions AS
 SELECT 
-    cs.*,
+    cs.id,
+    cs.user_id,
+    cs.employee_id,
+    cs.role,
+    cs.provider,
+    cs.title,
+    cs.is_active,
+    cs.created_at,
+    cs.updated_at,
+    cs.last_message_at as session_last_message_at,
     COUNT(cm.id) as message_count,
-    MAX(cm.created_at) as last_message_at
+    MAX(cm.created_at) as latest_message_at
 FROM chat_sessions cs
 LEFT JOIN chat_messages cm ON cs.id = cm.session_id
-GROUP BY cs.id
-ORDER BY last_message_at DESC;
+GROUP BY cs.id, cs.user_id, cs.employee_id, cs.role, cs.provider, cs.title, cs.is_active, cs.created_at, cs.updated_at, cs.last_message_at
+ORDER BY COALESCE(MAX(cm.created_at), cs.last_message_at, cs.created_at) DESC;
 
 -- ============================================
 -- 8. SAMPLE DATA FOR TESTING (Optional)

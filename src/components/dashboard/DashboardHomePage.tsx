@@ -90,7 +90,7 @@ import {
   Video,
   Code,
   Search,
-  Refresh,
+  RefreshCw,
   ArrowRight,
   ArrowUp,
   ArrowDown,
@@ -693,7 +693,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
             disabled={refreshing}
             className="text-slate-400 hover:text-white"
           >
-            <Refresh className={cn("h-5 w-5", refreshing && "animate-spin")} />
+            <RefreshCw className={cn("h-5 w-5", refreshing && "animate-spin")} />
           </Button>
         </div>
       </motion.div>

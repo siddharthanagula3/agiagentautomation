@@ -1,202 +1,401 @@
-import { supabase } from '../integrations/supabase/client';
-import type { Database } from '../integrations/supabase/types';
+/**
+ * Settings Service - Handles all settings-related operations with Supabase
+ */
 
-type Settings = Database['public']['Tables']['settings']['Row'];
+import { supabase } from '@/integrations/supabase/client';
 
-export interface UserSettings {
+// Types
+export interface UserProfile {
   id: string;
-  user_id: string;
-  theme: 'light' | 'dark' | 'system';
-  language: string;
+  name: string;
+  phone?: string;
+  bio?: string;
+  avatar_url?: string;
   timezone: string;
-  notifications: {
-    email: boolean;
-    push: boolean;
-    sms: boolean;
-    job_completed: boolean;
-    job_failed: boolean;
-    billing: boolean;
-    security: boolean;
-  };
-  privacy: {
-    profile_public: boolean;
-    show_email: boolean;
-    show_phone: boolean;
-    show_location: boolean;
-  };
-  preferences: {
-    default_job_type: string;
-    auto_assign: boolean;
-    max_concurrent_jobs: number;
-    preferred_agents: string[];
-  };
+  language: string;
   created_at: string;
   updated_at: string;
 }
 
-export interface SettingsUpdate {
-  theme?: 'light' | 'dark' | 'system';
-  language?: string;
-  timezone?: string;
-  notifications?: Partial<UserSettings['notifications']>;
-  privacy?: Partial<UserSettings['privacy']>;
-  preferences?: Partial<UserSettings['preferences']>;
+export interface UserSettings {
+  id: string;
+  // Notifications
+  email_notifications: boolean;
+  push_notifications: boolean;
+  workflow_alerts: boolean;
+  employee_updates: boolean;
+  system_maintenance: boolean;
+  marketing_emails: boolean;
+  weekly_reports: boolean;
+  instant_alerts: boolean;
+  // Security
+  two_factor_enabled: boolean;
+  session_timeout: number;
+  // System
+  theme: 'dark' | 'light' | 'auto';
+  auto_save: boolean;
+  debug_mode: boolean;
+  analytics_enabled: boolean;
+  // Advanced
+  cache_size: string;
+  backup_frequency: string;
+  retention_period: number;
+  max_concurrent_jobs: number;
+  created_at: string;
+  updated_at: string;
 }
 
-class SettingsService {
-  async getSettings(userId: string): Promise<{ data: UserSettings | null; error: string | null }> {
+export interface APIKey {
+  id: string;
+  user_id: string;
+  name: string;
+  key_prefix: string;
+  last_used_at?: string;
+  created_at: string;
+  expires_at?: string;
+  is_active: boolean;
+}
+
+export interface UserSession {
+  id: string;
+  user_id: string;
+  device_info?: string;
+  ip_address?: string;
+  user_agent?: string;
+  last_activity: string;
+  created_at: string;
+  expires_at?: string;
+}
+
+// Profile Functions
+export const settingsService = {
+  // Get user profile
+  async getProfile(): Promise<{ data: UserProfile | null; error: any }> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { data: null, error: 'Not authenticated' };
+      }
+
       const { data, error } = await supabase
-        .from('settings')
+        .from('user_profiles')
         .select('*')
-        .eq('user_id', userId)
+        .eq('id', user.id)
         .single();
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No settings found, return default settings
-          return { 
-            data: this.getDefaultSettings(userId), 
-            error: null 
-          };
-        }
-        console.error('SettingsService: Error fetching settings:', error);
-        return { data: null, error: error.message };
+      if (error && error.code === 'PGRST116') {
+        // Profile doesn't exist, create it
+        const newProfile: Partial<UserProfile> = {
+          id: user.id,
+          name: user.user_metadata?.name || user.email || 'User',
+          timezone: 'America/New_York',
+          language: 'en'
+        };
+
+        const { data: createdProfile, error: createError } = await supabase
+          .from('user_profiles')
+          .insert(newProfile)
+          .select()
+          .single();
+
+        return { data: createdProfile, error: createError };
       }
 
-      return { data: data as UserSettings, error: null };
+      return { data, error };
     } catch (error) {
-      console.error('SettingsService: Unexpected error:', error);
-      return { data: null, error: 'Failed to fetch settings' };
+      console.error('Error getting profile:', error);
+      return { data: null, error };
     }
-  }
+  },
 
-  async updateSettings(userId: string, updates: SettingsUpdate): Promise<{ data: UserSettings | null; error: string | null }> {
+  // Update user profile
+  async updateProfile(updates: Partial<UserProfile>): Promise<{ data: UserProfile | null; error: any }> {
     try {
-      // First, get current settings
-      const { data: currentSettings, error: fetchError } = await this.getSettings(userId);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { data: null, error: 'Not authenticated' };
+      }
+
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .update(updates)
+        .eq('id', user.id)
+        .select()
+        .single();
+
+      return { data, error };
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      return { data: null, error };
+    }
+  },
+
+  // Upload avatar
+  async uploadAvatar(file: File): Promise<{ data: string | null; error: any }> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { data: null, error: 'Not authenticated' };
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      // Upload file to storage
+      const { error: uploadError } = await supabase.storage
+        .from('user-uploads')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        return { data: null, error: uploadError };
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('user-uploads')
+        .getPublicUrl(filePath);
+
+      // Update profile with new avatar URL
+      await this.updateProfile({ avatar_url: publicUrl });
+
+      return { data: publicUrl, error: null };
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      return { data: null, error };
+    }
+  },
+
+  // Settings Functions
+  async getSettings(): Promise<{ data: UserSettings | null; error: any }> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { data: null, error: 'Not authenticated' };
+      }
+
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error && error.code === 'PGRST116') {
+        // Settings don't exist, create default
+        const defaultSettings: Partial<UserSettings> = {
+          id: user.id,
+          email_notifications: true,
+          push_notifications: true,
+          workflow_alerts: true,
+          employee_updates: false,
+          system_maintenance: true,
+          marketing_emails: false,
+          weekly_reports: true,
+          instant_alerts: true,
+          two_factor_enabled: false,
+          session_timeout: 30,
+          theme: 'dark',
+          auto_save: true,
+          debug_mode: false,
+          analytics_enabled: true,
+          cache_size: '1GB',
+          backup_frequency: 'daily',
+          retention_period: 30,
+          max_concurrent_jobs: 10
+        };
+
+        const { data: createdSettings, error: createError } = await supabase
+          .from('user_settings')
+          .insert(defaultSettings)
+          .select()
+          .single();
+
+        return { data: createdSettings, error: createError };
+      }
+
+      return { data, error };
+    } catch (error) {
+      console.error('Error getting settings:', error);
+      return { data: null, error };
+    }
+  },
+
+  async updateSettings(updates: Partial<UserSettings>): Promise<{ data: UserSettings | null; error: any }> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { data: null, error: 'Not authenticated' };
+      }
+
+      const { data, error } = await supabase
+        .from('user_settings')
+        .update(updates)
+        .eq('id', user.id)
+        .select()
+        .single();
+
+      return { data, error };
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      return { data: null, error };
+    }
+  },
+
+  // API Keys Functions
+  async getAPIKeys(): Promise<{ data: APIKey[]; error: any }> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { data: [], error: 'Not authenticated' };
+      }
+
+      const { data, error } = await supabase
+        .from('user_api_keys')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      return { data: data || [], error };
+    } catch (error) {
+      console.error('Error getting API keys:', error);
+      return { data: [], error };
+    }
+  },
+
+  async createAPIKey(name: string): Promise<{ data: APIKey | null; error: any; fullKey?: string }> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { data: null, error: 'Not authenticated' };
+      }
+
+      // Generate a random API key
+      const fullKey = `sk_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+      const keyPrefix = fullKey.substring(0, 12);
       
-      if (fetchError) {
-        return { data: null, error: fetchError };
-      }
+      // In production, you should hash the key before storing
+      const keyHash = fullKey; // TODO: Hash this in production
 
-      if (!currentSettings) {
-        // Create new settings if none exist
-        return await this.createSettings(userId, updates);
-      }
-
-      // Merge updates with current settings
-      const mergedSettings = {
-        ...currentSettings,
-        ...updates,
-        notifications: { ...currentSettings.notifications, ...updates.notifications },
-        privacy: { ...currentSettings.privacy, ...updates.privacy },
-        preferences: { ...currentSettings.preferences, ...updates.preferences },
-        updated_at: new Date().toISOString()
+      const newKey = {
+        user_id: user.id,
+        name,
+        key_hash: keyHash,
+        key_prefix: keyPrefix,
+        is_active: true
       };
 
       const { data, error } = await supabase
-        .from('settings')
-        .update(mergedSettings)
-        .eq('user_id', userId)
+        .from('user_api_keys')
+        .insert(newKey)
         .select()
         .single();
 
-      if (error) {
-        console.error('SettingsService: Error updating settings:', error);
-        return { data: null, error: error.message };
+      return { data, error, fullKey };
+    } catch (error) {
+      console.error('Error creating API key:', error);
+      return { data: null, error };
+    }
+  },
+
+  async deleteAPIKey(keyId: string): Promise<{ error: any }> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { error: 'Not authenticated' };
       }
 
-      return { data: data as UserSettings, error: null };
-    } catch (error) {
-      console.error('SettingsService: Unexpected error:', error);
-      return { data: null, error: 'Failed to update settings' };
-    }
-  }
+      // Soft delete by setting is_active to false
+      const { error } = await supabase
+        .from('user_api_keys')
+        .update({ is_active: false })
+        .eq('id', keyId)
+        .eq('user_id', user.id);
 
-  async createSettings(userId: string, settings: SettingsUpdate = {}): Promise<{ data: UserSettings | null; error: string | null }> {
+      return { error };
+    } catch (error) {
+      console.error('Error deleting API key:', error);
+      return { error };
+    }
+  },
+
+  // Session Functions
+  async getSessions(): Promise<{ data: UserSession[]; error: any }> {
     try {
-      const defaultSettings = this.getDefaultSettings(userId);
-      const newSettings = {
-        ...defaultSettings,
-        ...settings,
-        notifications: { ...defaultSettings.notifications, ...settings.notifications },
-        privacy: { ...defaultSettings.privacy, ...settings.privacy },
-        preferences: { ...defaultSettings.preferences, ...settings.preferences }
-      };
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { data: [], error: 'Not authenticated' };
+      }
 
       const { data, error } = await supabase
-        .from('settings')
-        .insert(newSettings)
-        .select()
-        .single();
+        .from('user_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('last_activity', { ascending: false });
 
-      if (error) {
-        console.error('SettingsService: Error creating settings:', error);
-        return { data: null, error: error.message };
-      }
-
-      return { data: data as UserSettings, error: null };
+      return { data: data || [], error };
     } catch (error) {
-      console.error('SettingsService: Unexpected error:', error);
-      return { data: null, error: 'Failed to create settings' };
+      console.error('Error getting sessions:', error);
+      return { data: [], error };
     }
-  }
+  },
 
-  private getDefaultSettings(userId: string): UserSettings {
-    return {
-      id: '',
-      user_id: userId,
-      theme: 'system',
-      language: 'en',
-      timezone: 'UTC',
-      notifications: {
-        email: true,
-        push: true,
-        sms: false,
-        job_completed: true,
-        job_failed: true,
-        billing: true,
-        security: true
-      },
-      privacy: {
-        profile_public: false,
-        show_email: false,
-        show_phone: false,
-        show_location: false
-      },
-      preferences: {
-        default_job_type: 'general',
-        auto_assign: false,
-        max_concurrent_jobs: 5,
-        preferred_agents: []
-      },
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-  }
-
-  async resetToDefaults(userId: string): Promise<{ data: UserSettings | null; error: string | null }> {
+  async deleteSession(sessionId: string): Promise<{ error: any }> {
     try {
-      const defaultSettings = this.getDefaultSettings(userId);
-      
-      const { data, error } = await supabase
-        .from('settings')
-        .upsert(defaultSettings)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('SettingsService: Error resetting settings:', error);
-        return { data: null, error: error.message };
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { error: 'Not authenticated' };
       }
 
-      return { data: data as UserSettings, error: null };
-    } catch (error) {
-      console.error('SettingsService: Unexpected error:', error);
-      return { data: null, error: 'Failed to reset settings' };
-    }
-  }
-}
+      const { error } = await supabase
+        .from('user_sessions')
+        .delete()
+        .eq('id', sessionId)
+        .eq('user_id', user.id);
 
-export const settingsService = new SettingsService();
+      return { error };
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      return { error };
+    }
+  },
+
+  // Password Functions
+  async changePassword(newPassword: string): Promise<{ error: any }> {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      return { error };
+    } catch (error) {
+      console.error('Error changing password:', error);
+      return { error };
+    }
+  },
+
+  // 2FA Functions (Note: Supabase doesn't have built-in 2FA yet, this is a placeholder)
+  async enable2FA(): Promise<{ data: any; error: any }> {
+    // This would integrate with Supabase's 2FA once available
+    // For now, just update the setting
+    try {
+      const result = await this.updateSettings({ two_factor_enabled: true });
+      return result;
+    } catch (error) {
+      console.error('Error enabling 2FA:', error);
+      return { data: null, error };
+    }
+  },
+
+  async disable2FA(): Promise<{ data: any; error: any }> {
+    try {
+      const result = await this.updateSettings({ two_factor_enabled: false });
+      return result;
+    } catch (error) {
+      console.error('Error disabling 2FA:', error);
+      return { data: null, error };
+    }
+  },
+};
+
+export default settingsService;

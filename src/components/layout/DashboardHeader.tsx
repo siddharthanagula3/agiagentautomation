@@ -6,13 +6,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
 import { cn } from '@/lib/utils';
-import { 
-  Bell, 
-  Search, 
-  Settings, 
-  LogOut,
-  Menu,
-  User,
+import {
+Bell, 
+Search, 
+Settings, 
+LogOut,
+Menu,
+User as UserIcon,
   CreditCard,
   HelpCircle,
   Bot,
@@ -439,7 +439,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     onClick={() => {setShowUserMenu(false); navigate('/dashboard/profile');}}
                     className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:text-white hover:bg-slate-700 flex items-center space-x-2"
                   >
-                    <User className="h-4 w-4" />
+                    <UserIcon className="h-4 w-4" />
                     <span>Profile Settings</span>
                   </button>
                   <button 

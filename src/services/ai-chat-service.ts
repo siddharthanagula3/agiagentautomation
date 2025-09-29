@@ -25,6 +25,12 @@ export interface AIResponse {
   };
 }
 
+export interface AIImageAttachment {
+  type: 'image';
+  mimeType: string;
+  dataBase64: string; // base64 without data: prefix
+}
+
 /**
  * Send message to OpenAI (ChatGPT)
  */
@@ -109,7 +115,11 @@ export async function sendToAnthropic(messages: AIMessage[], model: string = 'cl
 /**
  * Send message to Google (Gemini)
  */
-export async function sendToGoogle(messages: AIMessage[], model: string = GOOGLE_MODEL): Promise<AIResponse> {
+export async function sendToGoogle(
+  messages: AIMessage[],
+  model: string = GOOGLE_MODEL,
+  attachments: AIImageAttachment[] = []
+): Promise<AIResponse> {
   if (!GOOGLE_API_KEY) {
     throw new Error('Google API key not configured. Please add VITE_GOOGLE_API_KEY to your environment variables.');
   }
@@ -121,6 +131,16 @@ export async function sendToGoogle(messages: AIMessage[], model: string = GOOGLE
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }],
     }));
+
+  // If there are image attachments, append them to the last user message; if none, create one
+  if (attachments.length > 0) {
+    const userIdx = contents.findLastIndex(c => c.role === 'user');
+    const target = userIdx >= 0 ? contents[userIdx] : { role: 'user' as const, parts: [] as any[] };
+    if (userIdx < 0) contents.push(target);
+    for (const img of attachments) {
+      target.parts.push({ inlineData: { mimeType: img.mimeType, data: img.dataBase64 } });
+    }
+  }
 
   const systemInstruction = messages.find(m => m.role === 'system')?.content;
 
@@ -220,7 +240,8 @@ export async function sendToPerplexity(messages: AIMessage[], model: string = 'l
 export async function sendAIMessage(
   provider: string,
   messages: AIMessage[],
-  employeeRole?: string
+  employeeRole?: string,
+  attachments?: AIImageAttachment[]
 ): Promise<AIResponse> {
   // Add system message with employee role context
   const messagesWithContext = employeeRole
@@ -244,7 +265,7 @@ export async function sendAIMessage(
     
     case 'gemini':
     case 'google':
-      return sendToGoogle(messagesWithContext);
+      return sendToGoogle(messagesWithContext, undefined as unknown as string, attachments);
     
     case 'perplexity':
       return sendToPerplexity(messagesWithContext);

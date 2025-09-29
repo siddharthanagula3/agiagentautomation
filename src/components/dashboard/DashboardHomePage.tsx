@@ -99,6 +99,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Active Employees Card */}
         <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -119,6 +120,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
           </CardContent>
         </Card>
 
+        {/* Active Workflows Card */}
         <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -139,6 +141,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
           </CardContent>
         </Card>
 
+        {/* Monthly Revenue Card */}
         <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -156,6 +159,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
           </CardContent>
         </Card>
 
+        {/* Success Rate Card */}
         <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -187,6 +191,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            {/* Step 1 */}
             <div className="flex items-start space-x-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 font-bold flex-shrink-0">
                 1
@@ -207,6 +212,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
               </div>
             </div>
 
+            {/* Step 2 */}
             <div className="flex items-start space-x-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 font-bold flex-shrink-0">
                 2
@@ -228,6 +234,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
               </div>
             </div>
 
+            {/* Step 3 */}
             <div className="flex items-start space-x-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500/20 text-green-400 font-bold flex-shrink-0">
                 3

@@ -6,11 +6,9 @@
 
 /* Reset any styles from the initial loading screen */
 body.app-loaded {
-  background: white !important;
   display: block !important;
   align-items: initial !important;
   justify-content: initial !important;
-  color: initial !important;
 }
 
 /* Hide the initial loader if it somehow persists */

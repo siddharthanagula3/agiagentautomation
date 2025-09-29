@@ -1,6 +1,6 @@
 /**
  * AI Employee Marketplace Page
- * Browse, search, and hire from 250+ specialized AI employees
+ * Browse, search, and hire specialized AI employees
  */
 
 import React, { useState } from 'react';
@@ -11,21 +11,15 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
-  Filter, 
   Bot, 
   Star, 
   Users, 
-  Zap, 
   Clock, 
   DollarSign,
   CheckCircle,
   Plus,
   Eye,
-  Heart,
   TrendingUp,
-  Award,
-  Shield,
-  Globe,
   Code,
   Palette,
   BarChart3,
@@ -85,166 +79,13 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
     queryKey: ['marketplace-employees', searchQuery, selectedCategory, sortBy],
     queryFn: async () => {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      const mockEmployees: AIEmployee[] = [
-        {
-          id: '1',
-          name: 'Alex Developer',
-          role: 'Senior Full-Stack Developer',
-          category: 'development',
-          description: 'Expert in React, Node.js, and cloud architecture. Can build scalable web applications from scratch.',
-          skills: ['React', 'Node.js', 'TypeScript', 'AWS', 'Docker'],
-          rating: 4.9,
-          reviews: 127,
-          price: 50,
-          isHired: false,
-          isPopular: true,
-          isNew: false,
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=alex',
-          examples: ['E-commerce platform', 'SaaS dashboard', 'Mobile app backend'],
-          tools: ['VS Code', 'Git', 'Postman', 'Figma'],
-          experience: '5+ years',
-          successRate: 98,
-          avgResponseTime: '2-4 hours',
-        },
-        {
-          id: '2',
-          name: 'Sarah Designer',
-          role: 'UI/UX Designer',
-          category: 'design',
-          description: 'Creative designer specializing in user experience and interface design. Passionate about creating beautiful, functional designs.',
-          skills: ['Figma', 'Adobe Creative Suite', 'User Research', 'Prototyping', 'Design Systems'],
-          rating: 4.8,
-          reviews: 89,
-          price: 40,
-          isHired: false,
-          isPopular: true,
-          isNew: false,
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-          examples: ['Mobile app design', 'Website redesign', 'Brand identity'],
-          tools: ['Figma', 'Sketch', 'Adobe XD', 'Principle'],
-          experience: '4+ years',
-          successRate: 95,
-          avgResponseTime: '1-3 hours',
-        },
-        {
-          id: '3',
-          name: 'Mike Writer',
-          role: 'Content Writer & Copywriter',
-          category: 'writing',
-          description: 'Versatile writer with expertise in marketing copy, technical documentation, and creative content.',
-          skills: ['Copywriting', 'SEO', 'Technical Writing', 'Blog Posts', 'Social Media'],
-          rating: 4.7,
-          reviews: 156,
-          price: 30,
-          isHired: false,
-          isPopular: false,
-          isNew: true,
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mike',
-          examples: ['Marketing campaigns', 'Technical docs', 'Blog articles'],
-          tools: ['Grammarly', 'Hemingway', 'Google Docs', 'Notion'],
-          experience: '3+ years',
-          successRate: 92,
-          avgResponseTime: '4-6 hours',
-        },
-        {
-          id: '4',
-          name: 'Emma Analyst',
-          role: 'Data Analyst & Researcher',
-          category: 'marketing',
-          description: 'Data-driven analyst with expertise in market research, analytics, and business intelligence.',
-          skills: ['Python', 'SQL', 'Tableau', 'Google Analytics', 'Market Research'],
-          rating: 4.9,
-          reviews: 73,
-          price: 45,
-          isHired: false,
-          isPopular: true,
-          isNew: false,
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=emma',
-          examples: ['Market analysis', 'Data visualization', 'Business reports'],
-          tools: ['Python', 'R', 'Tableau', 'Excel', 'Google Analytics'],
-          experience: '6+ years',
-          successRate: 96,
-          avgResponseTime: '3-5 hours',
-        },
-        {
-          id: '5',
-          name: 'David Creator',
-          role: 'Video Editor & Content Creator',
-          category: 'media',
-          description: 'Creative video editor and content creator specializing in social media, marketing videos, and educational content.',
-          skills: ['Video Editing', 'Motion Graphics', 'Color Grading', 'Audio Editing', 'Social Media'],
-          rating: 4.6,
-          reviews: 94,
-          price: 35,
-          isHired: false,
-          isPopular: false,
-          isNew: false,
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=david',
-          examples: ['Social media videos', 'Marketing campaigns', 'Educational content'],
-          tools: ['Premiere Pro', 'After Effects', 'DaVinci Resolve', 'Canva'],
-          experience: '4+ years',
-          successRate: 94,
-          avgResponseTime: '6-12 hours',
-        },
-        {
-          id: '6',
-          name: 'Lisa Tester',
-          role: 'QA Engineer & Tester',
-          category: 'development',
-          description: 'Detail-oriented QA engineer with expertise in automated testing, manual testing, and quality assurance processes.',
-          skills: ['Selenium', 'Jest', 'Manual Testing', 'API Testing', 'Bug Tracking'],
-          rating: 4.8,
-          reviews: 67,
-          price: 38,
-          isHired: false,
-          isPopular: false,
-          isNew: true,
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=lisa',
-          examples: ['Test automation', 'Bug reports', 'Quality assurance'],
-          tools: ['Selenium', 'Jest', 'Postman', 'Jira', 'TestRail'],
-          experience: '3+ years',
-          successRate: 97,
-          avgResponseTime: '2-4 hours',
-        },
-      ];
-      
-      // Filter and sort
-      let filtered = mockEmployees;
-      
-      if (selectedCategory !== 'all') {
-        filtered = filtered.filter(emp => emp.category === selectedCategory);
-      }
-      
-      if (searchQuery) {
-        filtered = filtered.filter(emp => 
-          emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          emp.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          emp.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
-        );
-      }
-      
-      // Sort
-      switch (sortBy) {
-        case 'popular':
-          filtered = filtered.sort((a, b) => (b.isPopular ? 1 : 0) - (a.isPopular ? 1 : 0));
-          break;
-        case 'rating':
-          filtered = filtered.sort((a, b) => b.rating - a.rating);
-          break;
-        case 'price-low':
-          filtered = filtered.sort((a, b) => a.price - b.price);
-          break;
-        case 'price-high':
-          filtered = filtered.sort((a, b) => b.price - a.price);
-          break;
-        case 'newest':
-          filtered = filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-          break;
-      }
-      
-      return filtered;
+      // Return empty array - no mock data
+      // In production, this would be replaced with: 
+      // const response = await fetch('/api/marketplace/employees');
+      // return response.json();
+      return [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -267,23 +108,18 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
     hireEmployeeMutation.mutate(employeeId);
   };
 
-  const getCategoryIcon = (category: string) => {
-    const categoryData = categories.find(cat => cat.id === category);
-    return categoryData?.icon || Bot;
-  };
-
   return (
     <div className={cn('p-6 space-y-6', className)}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">AI Employee Marketplace</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">AI Employee Marketplace</h1>
           <p className="text-muted-foreground">
-            Browse and hire from 250+ specialized AI employees for your projects.
+            Browse and hire specialized AI employees for your projects.
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="text-sm">
+          <Badge variant="outline" className="text-sm border-border">
             <Users className="h-3 w-3 mr-1" />
             {employees.length} Available
           </Badge>
@@ -291,7 +127,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
       </div>
 
       {/* Search and Filters */}
-      <Card>
+      <Card className="border-border bg-card">
         <CardContent className="p-6">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
@@ -302,7 +138,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
                   placeholder="Search employees by name, role, or skills..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-background border-border"
                 />
               </div>
             </div>
@@ -331,7 +167,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 border rounded-md text-sm"
+                className="px-3 py-2 border border-border rounded-md text-sm bg-background text-foreground"
               >
                 <option value="popular">Most Popular</option>
                 <option value="rating">Highest Rated</option>
@@ -344,6 +180,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
                 variant="outline"
                 size="sm"
                 onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                className="border-border"
               >
                 {viewMode === 'grid' ? 'List View' : 'Grid View'}
               </Button>
@@ -359,7 +196,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
           viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
         )}>
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className="animate-pulse border-border bg-card">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-muted rounded-full"></div>
@@ -373,13 +210,32 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
           ))}
         </div>
       ) : employees.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Bot className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Employees Found</h3>
-            <p className="text-muted-foreground text-center">
-              Try adjusting your search criteria or browse different categories.
+        <Card className="border-border bg-card">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+              <Bot className="h-10 w-10 text-primary" />
+            </div>
+            <h3 className="text-2xl font-semibold mb-2 text-foreground">No AI Employees Yet</h3>
+            <p className="text-muted-foreground text-center max-w-md mb-6">
+              Our marketplace is currently being populated. AI employees will be available soon for hire.
             </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button 
+                variant="default"
+                onClick={() => window.location.reload()}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Check Again
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setSearchQuery('')}
+                className="border-border hover:bg-accent hover:text-accent-foreground"
+              >
+                Clear Filters
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (
@@ -388,7 +244,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
           viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
         )}>
           {employees.map((employee) => (
-            <Card key={employee.id} className="hover:shadow-lg transition-shadow">
+            <Card key={employee.id} className="hover:shadow-lg transition-all duration-300 border-border bg-card hover:border-primary/50">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
@@ -398,7 +254,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
                       className="w-12 h-12 rounded-full"
                     />
                     <div>
-                      <h3 className="font-semibold">{employee.name}</h3>
+                      <h3 className="font-semibold text-card-foreground">{employee.name}</h3>
                       <p className="text-sm text-muted-foreground">{employee.role}</p>
                     </div>
                   </div>
@@ -410,7 +266,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
                       </Badge>
                     )}
                     {employee.isNew && (
-                      <Badge variant="outline" className="text-xs border-green-600 text-green-600">
+                      <Badge variant="outline" className="text-xs border-green-600 text-green-600 dark:border-green-500 dark:text-green-500">
                         New
                       </Badge>
                     )}
@@ -422,7 +278,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
                 <div className="space-y-3">
                   {/* Skills */}
                   <div>
-                    <h4 className="text-sm font-medium mb-2">Skills</h4>
+                    <h4 className="text-sm font-medium mb-2 text-card-foreground">Skills</h4>
                     <div className="flex flex-wrap gap-1">
                       {employee.skills.slice(0, 3).map((skill) => (
                         <Badge key={skill} variant="secondary" className="text-xs">
@@ -430,7 +286,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
                         </Badge>
                       ))}
                       {employee.skills.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs border-border">
                           +{employee.skills.length - 3} more
                         </Badge>
                       )}
@@ -440,27 +296,27 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
                   {/* Stats */}
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center space-x-1">
-                      <Star className="h-4 w-4 text-yellow-500" />
-                      <span>{employee.rating}</span>
+                      <Star className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
+                      <span className="text-foreground">{employee.rating}</span>
                       <span className="text-muted-foreground">({employee.reviews})</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <DollarSign className="h-4 w-4 text-green-500" />
-                      <span>${employee.price}/hr</span>
+                      <DollarSign className="h-4 w-4 text-green-500 dark:text-green-400" />
+                      <span className="text-foreground">${employee.price}/hr</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <CheckCircle className="h-4 w-4 text-blue-500" />
-                      <span>{employee.successRate}%</span>
+                      <CheckCircle className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                      <span className="text-foreground">{employee.successRate}%</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <Clock className="h-4 w-4 text-orange-500" />
-                      <span>{employee.avgResponseTime}</span>
+                      <Clock className="h-4 w-4 text-orange-500 dark:text-orange-400" />
+                      <span className="text-foreground">{employee.avgResponseTime}</span>
                     </div>
                   </div>
                   
                   {/* Examples */}
                   <div>
-                    <h4 className="text-sm font-medium mb-2">Examples</h4>
+                    <h4 className="text-sm font-medium mb-2 text-card-foreground">Examples</h4>
                     <div className="space-y-1">
                       {employee.examples.slice(0, 2).map((example, index) => (
                         <div key={index} className="text-xs text-muted-foreground">
@@ -476,6 +332,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
                     variant="outline"
                     size="sm"
                     onClick={() => console.log('View details', employee.id)}
+                    className="border-border hover:bg-accent hover:text-accent-foreground"
                   >
                     <Eye className="h-4 w-4 mr-1" />
                     View Details
@@ -485,6 +342,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
                     onClick={() => handleHireEmployee(employee.id)}
                     disabled={employee.isHired || hireEmployeeMutation.isPending}
                     size="sm"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     {employee.isHired ? (
                       <>

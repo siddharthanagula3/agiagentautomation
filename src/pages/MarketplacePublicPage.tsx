@@ -34,7 +34,6 @@ export const MarketplacePublicPage: React.FC = () => {
 
   // Filter employees
   const filteredEmployees = getEmployeesByCategory(selectedCategory).filter(emp =>
-    emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     emp.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
     emp.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
   );
@@ -47,15 +46,15 @@ export const MarketplacePublicPage: React.FC = () => {
     const purchased = JSON.parse(localStorage.getItem('purchasedEmployees') || '[]');
     purchased.push({
       id: employee.id,
-      name: employee.name,
+      name: employee.role,
       role: employee.role,
       provider: employee.provider,
       purchasedAt: new Date().toISOString()
     });
     localStorage.setItem('purchasedEmployees', JSON.stringify(purchased));
     
-    toast.success(`${employee.name} hired!`, {
-      description: `You can now chat with ${employee.name} in the AI Chat section.`,
+    toast.success(`${employee.role} hired!`, {
+      description: `You can now chat with your ${employee.role} in the AI Chat section.`,
     });
   };
 
@@ -104,40 +103,40 @@ export const MarketplacePublicPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search and Filters */}
         <Card className="mb-8 border-border bg-card">
-          <CardContent className="p-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              {/* Search */}
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by name, role, or skills..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-background border-border"
-                  />
-                </div>
-              </div>
-              
-              {/* Category Filter */}
-              <div className="flex gap-2 overflow-x-auto">
-                {categories.map((category) => (
-                  <Button
-                    key={category.id}
-                    variant={selectedCategory === category.id ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSelectedCategory(category.id)}
-                    className="whitespace-nowrap"
-                  >
-                    {category.label}
-                    <Badge variant="secondary" className="ml-2 text-xs">
-                      {category.count}
-                    </Badge>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </CardContent>
+        <CardContent className="p-6">
+        <div className="space-y-4">
+        {/* Search */}
+        <div className="w-full">
+        <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+        placeholder="Search by role or skills..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="pl-10 bg-background border-border"
+        />
+        </div>
+        </div>
+        
+        {/* Category Filter - New row */}
+        <div className="flex gap-2 overflow-x-auto pb-2">
+        {categories.map((category) => (
+        <Button
+        key={category.id}
+        variant={selectedCategory === category.id ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => setSelectedCategory(category.id)}
+        className="whitespace-nowrap flex-shrink-0"
+        >
+        {category.label}
+        <Badge variant="secondary" className="ml-2 text-xs">
+        {category.count}
+        </Badge>
+        </Button>
+        ))}
+        </div>
+        </div>
+        </CardContent>
         </Card>
 
         {/* Employees Grid */}
@@ -153,20 +152,20 @@ export const MarketplacePublicPage: React.FC = () => {
               <CardContent className="p-6">
                 {/* Employee Header */}
                 <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-3 flex-1">
                     <img
                       src={employee.avatar}
-                      alt={employee.name}
+                      alt={employee.role}
                       className="w-12 h-12 rounded-full ring-2 ring-border"
                     />
-                    <div>
-                      <h3 className="font-semibold text-card-foreground">{employee.name}</h3>
-                      <p className="text-sm text-muted-foreground">{employee.role}</p>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-card-foreground text-lg">{employee.role}</h3>
+                      <p className="text-xs text-muted-foreground">{employee.specialty}</p>
                     </div>
                   </div>
                   <Badge 
                     variant="outline" 
-                    className={cn("text-xs", getProviderColor(employee.provider))}
+                    className={cn("text-xs flex-shrink-0", getProviderColor(employee.provider))}
                   >
                     {providerInfo[employee.provider].name}
                   </Badge>

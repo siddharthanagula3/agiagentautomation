@@ -12,7 +12,6 @@ export interface ChatSessionRecord {
 export interface ChatMessageRecord {
   id: string; // uuid
   session_id: string;
-  user_id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   created_at: string;
@@ -49,12 +48,11 @@ export async function listSessions(userId: string | null | undefined): Promise<C
 }
 
 export async function listMessages(userId: string | null | undefined, sessionId: string): Promise<ChatMessageRecord[]> {
-  const uid = getUserIdOrThrow(userId);
+  getUserIdOrThrow(userId); // validate auth; RLS enforces access
   const supabase = supabaseClient as any;
   const { data, error } = await supabase
     .from('chat_messages')
     .select('*')
-    .eq('user_id', uid)
     .eq('session_id', sessionId)
     .order('created_at', { ascending: true });
   if (error) throw error;
@@ -62,11 +60,11 @@ export async function listMessages(userId: string | null | undefined, sessionId:
 }
 
 export async function sendMessage(userId: string | null | undefined, sessionId: string, role: 'user' | 'assistant' | 'system', content: string): Promise<ChatMessageRecord> {
-  const uid = getUserIdOrThrow(userId);
+  getUserIdOrThrow(userId); // validate auth; RLS enforces access
   const supabase = supabaseClient as any;
   const { data, error } = await supabase
     .from('chat_messages')
-    .insert({ session_id: sessionId, user_id: uid, role, content })
+    .insert({ session_id: sessionId, role, content })
     .select('*')
     .single();
   if (error) throw error;

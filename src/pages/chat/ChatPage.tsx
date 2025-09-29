@@ -24,7 +24,9 @@ import {
   ShoppingCart,
   Loader2,
   AlertCircle,
-  Settings
+  Settings,
+  Paperclip,
+  Mic
 } from 'lucide-react';
 import { AI_EMPLOYEES } from '@/data/ai-employees';
 import { toast } from 'sonner';
@@ -68,6 +70,11 @@ const ChatPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [isSelectDialogOpen, setIsSelectDialogOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
   const [configuredProviders, setConfiguredProviders] = useState<string[]>([]);
 
   // Check configured providers on mount
@@ -322,11 +329,22 @@ const ChatPage: React.FC = () => {
 
       console.log('Sending to AI provider:', activeTab.provider);
       
+      // Build image attachments from selected files
+      const attachments: { type: 'image'; mimeType: string; dataBase64: string }[] = [];
+      for (const f of files) {
+        if (f.type.startsWith('image/')) {
+          const buf = await f.arrayBuffer();
+          const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+          attachments.push({ type: 'image', mimeType: f.type, dataBase64: b64 });
+        }
+      }
+
       // Get AI response
       const aiResponse = await sendAIMessage(
         activeTab.provider,
         conversationHistory,
-        activeTab.role
+        activeTab.role,
+        attachments
       );
 
       console.log('AI response received:', aiResponse);
@@ -355,6 +373,7 @@ const ChatPage: React.FC = () => {
       }));
 
       console.log('Message exchange complete');
+      setFiles([]);
     } catch (error) {
       console.error('Error sending message:', error);
       
@@ -674,7 +693,49 @@ const ChatPage: React.FC = () => {
                     </div>
 
                     {/* Message Input */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
+                      {/* File attach */}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => setFiles(Array.from(e.target.files || []))}
+                      />
+                      <Button type="button" variant="ghost" className="px-2" onClick={() => fileInputRef.current?.click()}>
+                        <Paperclip className="h-5 w-5" />
+                      </Button>
+                      {/* Mic record (placeholder: logs blob) */}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className={cn('px-2', isRecording && 'text-red-400')}
+                        onClick={async () => {
+                          if (isRecording) {
+                            mediaRecorderRef.current?.stop();
+                            setIsRecording(false);
+                            return;
+                          }
+                          try {
+                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            const mr = new MediaRecorder(stream);
+                            recordedChunksRef.current = [];
+                            mr.ondataavailable = (e) => { if (e.data.size > 0) recordedChunksRef.current.push(e.data); };
+                            mr.onstop = () => {
+                              const blob = new Blob(recordedChunksRef.current, { type: 'audio/webm' });
+                              console.log('Recorded audio (send to STT):', blob);
+                            };
+                            mediaRecorderRef.current = mr;
+                            mr.start();
+                            setIsRecording(true);
+                          } catch (e) {
+                            toast.error('Microphone permission denied');
+                          }
+                        }}
+                      >
+                        <Mic className="h-5 w-5" />
+                      </Button>
                       <input
                         type="text"
                         value={message}

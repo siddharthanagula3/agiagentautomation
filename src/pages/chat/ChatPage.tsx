@@ -27,6 +27,9 @@ import {
 import { AI_EMPLOYEES } from '@/data/ai-employees';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/stores/unified-auth-store';
+import { getEmployeeById, listPurchasedEmployees } from '@/services/supabase-employees';
+import { createSession, listMessages, listSessions, sendMessage } from '@/services/supabase-chat';
 
 interface PurchasedEmployee {
   id: string;
@@ -54,6 +57,7 @@ interface ChatMessage {
 
 const ChatPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [purchasedEmployees, setPurchasedEmployees] = useState<PurchasedEmployee[]>([]);
   const [activeTabs, setActiveTabs] = useState<ChatTab[]>([]);
   const [selectedTab, setSelectedTab] = useState<string | null>(null);
@@ -62,14 +66,53 @@ const ChatPage: React.FC = () => {
 
   // Load purchased employees
   useEffect(() => {
-    const purchased = JSON.parse(localStorage.getItem('purchasedEmployees') || '[]');
-    setPurchasedEmployees(purchased);
-  }, []);
+    let isMounted = true;
+    async function load() {
+      try {
+        if (!user?.id) {
+          setPurchasedEmployees([]);
+          return;
+        }
+        const rows = await listPurchasedEmployees(user.id);
+        if (!isMounted) return;
+        const normalized = rows.map(r => ({
+          id: r.employee_id,
+          name: getEmployeeById(r.employee_id)?.role || '',
+          role: getEmployeeById(r.employee_id)?.role || '',
+          provider: r.provider,
+          purchasedAt: r.purchased_at,
+        }));
+        setPurchasedEmployees(normalized);
+
+        // Optionally load recent sessions (not required for empty state flow)
+        const sessions = await listSessions(user.id);
+        if (!isMounted) return;
+        if (sessions.length > 0) {
+          // Load first session messages
+          const first = sessions[0];
+          const msgs = await listMessages(user.id, first.id);
+          setActiveTabs([
+            {
+              id: first.id,
+              employeeId: first.employee_id,
+              role: first.role,
+              provider: first.provider,
+              isActive: true,
+              messages: msgs.map(m => ({ id: m.id, role: m.role, content: m.content, timestamp: new Date(m.created_at) }))
+            }
+          ]);
+          setSelectedTab(first.id);
+        }
+      } catch (err) {
+        console.error('Failed to load chat data', err);
+      }
+    }
+    load();
+    return () => { isMounted = false; };
+  }, [user?.id]);
 
   // Get full employee data
-  const getEmployeeData = (employeeId: string) => {
-    return AI_EMPLOYEES.find(emp => emp.id === employeeId);
-  };
+  const getEmployeeData = (employeeId: string) => getEmployeeById(employeeId);
 
   const getProviderColor = (provider: string) => {
     const colors = {
@@ -81,7 +124,7 @@ const ChatPage: React.FC = () => {
     return colors[provider as keyof typeof colors] || colors.chatgpt;
   };
 
-  const handleStartChat = (employee: PurchasedEmployee) => {
+  const handleStartChat = async (employee: PurchasedEmployee) => {
     const employeeData = getEmployeeData(employee.id);
     if (!employeeData) return;
 
@@ -94,20 +137,24 @@ const ChatPage: React.FC = () => {
       return;
     }
 
-    // Create new tab
+    if (!user?.id) {
+      toast.error('Please sign in to start a chat');
+      navigate('/auth/login');
+      return;
+    }
+
+    // Create session in Supabase
+    const session = await createSession(user.id, { employeeId: employee.id, role: employee.role, provider: employee.provider });
+    const welcomeMessage = await sendMessage(user.id, session.id, 'assistant', `Hi! I'm your ${employee.role}. How can I help you today?`);
+
     const newTab: ChatTab = {
-      id: `chat-${Date.now()}`,
+      id: session.id,
       employeeId: employee.id,
       role: employee.role,
       provider: employee.provider,
       isActive: true,
       messages: [
-        {
-          id: 'welcome-msg',
-          role: 'assistant',
-          content: `Hi! I'm your ${employee.role}. How can I help you today?`,
-          timestamp: new Date()
-        }
+        { id: welcomeMessage.id, role: 'assistant', content: welcomeMessage.content, timestamp: new Date(welcomeMessage.created_at) }
       ]
     };
 
@@ -117,7 +164,7 @@ const ChatPage: React.FC = () => {
     toast.success(`Started chat with ${employee.role}`);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!message.trim() || !selectedTab) return;
 
     const activeTab = activeTabs.find(tab => tab.id === selectedTab);
@@ -142,25 +189,19 @@ const ChatPage: React.FC = () => {
 
     setMessage('');
 
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
-      const aiMessage: ChatMessage = {
-        id: `msg-${Date.now()}`,
-        role: 'assistant',
-        content: `I'm processing your request as your ${activeTab.role}. This would connect to ${activeTab.provider} API in production.`,
-        timestamp: new Date()
-      };
-
+    // Persist user message
+    if (user?.id) {
+      await sendMessage(user.id, selectedTab, 'user', userMessage.content);
+      // Simulate AI response (placeholder until provider APIs wired)
+      const ai = await sendMessage(user.id, selectedTab, 'assistant', `I'm processing your request as your ${activeTab.role}. This would connect to ${activeTab.provider} API in production.`);
+      const aiMessage: ChatMessage = { id: ai.id, role: 'assistant', content: ai.content, timestamp: new Date(ai.created_at) };
       setActiveTabs(prev => prev.map(tab => {
         if (tab.id === selectedTab) {
-          return {
-            ...tab,
-            messages: [...tab.messages, aiMessage]
-          };
+          return { ...tab, messages: [...tab.messages, aiMessage] };
         }
         return tab;
       }));
-    }, 1000);
+    }
   };
 
   const handleCloseTab = (tabId: string) => {

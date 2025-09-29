@@ -3,7 +3,7 @@
  * Browse and purchase AI employees for $1 each
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,16 +21,34 @@ import {
 import { cn } from '@/lib/utils';
 import { AI_EMPLOYEES, categories, providerInfo, getEmployeesByCategory, type AIEmployee } from '@/data/ai-employees';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/stores/unified-auth-store';
+import { isEmployeePurchased, listPurchasedEmployees, purchaseEmployee } from '@/services/supabase-employees';
 
 export const MarketplacePublicPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [purchasedEmployees, setPurchasedEmployees] = useState<Set<string>>(() => {
-    // Load purchased employees from localStorage
-    const purchased = JSON.parse(localStorage.getItem('purchasedEmployees') || '[]');
-    return new Set(purchased.map((p: any) => p.id));
-  });
+  const [purchasedEmployees, setPurchasedEmployees] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadPurchased() {
+      try {
+        if (!user?.id) {
+          setPurchasedEmployees(new Set());
+          return;
+        }
+        const rows = await listPurchasedEmployees(user.id);
+        if (!isMounted) return;
+        setPurchasedEmployees(new Set(rows.map(r => r.employee_id)));
+      } catch (err) {
+        console.error('Failed to load purchases', err);
+      }
+    }
+    loadPurchased();
+    return () => { isMounted = false; };
+  }, [user?.id]);
 
   // Filter employees
   const filteredEmployees = getEmployeesByCategory(selectedCategory).filter(emp =>
@@ -38,24 +56,29 @@ export const MarketplacePublicPage: React.FC = () => {
     emp.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const handlePurchase = (employee: AIEmployee) => {
-    // Add to purchased employees
-    setPurchasedEmployees(prev => new Set([...prev, employee.id]));
-    
-    // Save to localStorage
-    const purchased = JSON.parse(localStorage.getItem('purchasedEmployees') || '[]');
-    purchased.push({
-      id: employee.id,
-      name: employee.role,
-      role: employee.role,
-      provider: employee.provider,
-      purchasedAt: new Date().toISOString()
-    });
-    localStorage.setItem('purchasedEmployees', JSON.stringify(purchased));
-    
-    toast.success(`${employee.role} hired!`, {
-      description: `You can now chat with your ${employee.role} in the AI Chat section.`,
-    });
+  const handlePurchase = async (employee: AIEmployee) => {
+    try {
+      if (!user?.id) {
+        toast.error('Please sign in to hire an AI employee');
+        navigate('/auth/login');
+        return;
+      }
+      const already = await isEmployeePurchased(user.id, employee.id);
+      if (already) {
+        toast.info('Already hired');
+        return;
+      }
+      await purchaseEmployee(user.id, employee);
+      // refresh list
+      const rows = await listPurchasedEmployees(user.id);
+      setPurchasedEmployees(new Set(rows.map(r => r.employee_id)));
+      toast.success(`${employee.role} hired!`, {
+        description: `You can now chat with your ${employee.role} in the AI Chat section.`,
+      });
+    } catch (err) {
+      console.error('Purchase failed', err);
+      toast.error('Failed to hire employee');
+    }
   };
 
   const isPurchased = (employeeId: string) => purchasedEmployees.has(employeeId);

@@ -205,7 +205,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
                 <Button 
                   size="sm" 
                   className="bg-blue-600 hover:bg-blue-700"
-                  onClick={() => navigate('/dashboard/marketplace')}
+                  onClick={() => navigate('/marketplace')}
                 >
                   Browse Marketplace
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -313,7 +313,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
               Your activity feed will appear here once you start using the platform
             </p>
             <Button 
-              onClick={() => navigate('/dashboard/marketplace')}
+              onClick={() => navigate('/marketplace')}
               className="bg-blue-600 hover:bg-blue-700"
             >
               Get Started

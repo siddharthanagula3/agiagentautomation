@@ -28,6 +28,9 @@ import SettingsPage from './pages/settings/SettingsPage';
 import WorkforceManagement from './components/employees/WorkforceManagement';
 import AutonomousWorkflowsPage from './pages/autonomous/AutonomousWorkflowsPage';
 import MarketplacePublicPage from './pages/MarketplacePublicPage';
+import BillingPage from './pages/dashboard/BillingPage';
+import APIKeysPage from './pages/dashboard/APIKeysPage';
+import HelpSupportPage from './pages/dashboard/HelpSupportPage';
 
 function App() {
   console.log('App.tsx: Rendering main app component');
@@ -61,6 +64,19 @@ function App() {
             <Route path="register" element={<RegisterPage />} />
           </Route>
 
+          {/* Chat Route - Moved outside dashboard for cleaner UX */}
+          <Route
+            path="/chat"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<ChatPage />} />
+            <Route path=":tabId" element={<ChatPage />} />
+          </Route>
+
           {/* Protected Dashboard Routes */}
           <Route
             path="/dashboard"
@@ -78,10 +94,6 @@ function App() {
             <Route path="workforce" element={<WorkforcePage />} />
             <Route path="workforce/management" element={<WorkforceManagement />} />
             
-            {/* Chat & Communication */}
-            <Route path="chat" element={<ChatPage />} />
-            <Route path="chat/:tabId?" element={<ChatPage />} />
-            
             {/* Automation & Workflows */}
             <Route path="automation" element={<AutomationPage />} />
             <Route path="automation/workflows" element={<AutonomousWorkflowsPage />} />
@@ -98,6 +110,13 @@ function App() {
             {/* Settings */}
             <Route path="settings" element={<SettingsPage />} />
             <Route path="settings/:section?" element={<SettingsPage />} />
+            
+            {/* Billing & Account */}
+            <Route path="billing" element={<BillingPage />} />
+            <Route path="api-keys" element={<APIKeysPage />} />
+            
+            {/* Help & Support */}
+            <Route path="support" element={<HelpSupportPage />} />
             
             {/* Legacy routes for backward compatibility */}
             <Route path="old-dashboard" element={<Dashboard />} />

@@ -27,6 +27,7 @@ import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import WorkforceManagement from './components/employees/WorkforceManagement';
 import AutonomousWorkflowsPage from './pages/autonomous/AutonomousWorkflowsPage';
+import MarketplacePublicPage from './pages/MarketplacePublicPage';
 
 function App() {
   console.log('App.tsx: Rendering main app component');
@@ -40,6 +41,16 @@ function App() {
             <Route index element={<LandingPage />} />
             <Route path="demo" element={<AIEmployeeDemo />} />
           </Route>
+
+          {/* Marketplace - Protected Route (but not in dashboard layout) */}
+          <Route
+            path="/marketplace"
+            element={
+              <ProtectedRoute>
+                <MarketplacePublicPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Debug Route (accessible without auth) */}
           <Route path="/debug" element={<AuthDebugPage />} />

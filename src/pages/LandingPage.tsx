@@ -79,9 +79,9 @@ const LandingPage: React.FC = () => {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="border-border hover:bg-accent hover:text-accent-foreground" asChild>
-                <Link to="/dashboard">
+                <Link to="/marketplace">
                   <Play className="mr-2 h-5 w-5" />
-                  Try Demo
+                  Browse AI Employees
                 </Link>
               </Button>
             </div>
@@ -137,7 +137,7 @@ const LandingPage: React.FC = () => {
               </div>
               <h3 className="text-xl font-semibold mb-4 text-foreground">1. Hire AI Employees</h3>
               <p className="text-muted-foreground">
-                Browse our marketplace of specialized AI agents and hire the ones you need.
+                Browse our marketplace and hire specialized AI agents for just $1 each.
               </p>
             </div>
             <div className="text-center">
@@ -173,26 +173,26 @@ const LandingPage: React.FC = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              size="lg" 
-              variant="secondary" 
-              className="bg-background hover:bg-background/90 text-foreground font-semibold"
-              asChild
+            size="lg" 
+            variant="secondary" 
+            className="bg-background hover:bg-background/90 text-foreground font-semibold"
+            asChild
             >
-              <Link to="/auth/register">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+            <Link to="/marketplace">
+            Browse AI Employees
+            <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
             </Button>
             <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-primary-foreground/30 bg-transparent hover:bg-primary-foreground/10 text-primary-foreground hover:text-primary-foreground font-semibold" 
-              asChild
+            size="lg" 
+            variant="outline" 
+            className="border-primary-foreground/30 bg-transparent hover:bg-primary-foreground/10 text-primary-foreground hover:text-primary-foreground font-semibold" 
+            asChild
             >
-              <Link to="/dashboard">
-                <Play className="mr-2 h-5 w-5" />
-                Try Demo
-              </Link>
+            <Link to="/auth/register">
+            <Play className="mr-2 h-5 w-5" />
+            Sign Up Free
+            </Link>
             </Button>
           </div>
         </div>

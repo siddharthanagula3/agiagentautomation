@@ -16,6 +16,7 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';
 import { AIEmployeeDemo } from './pages/demo/AIEmployeeDemo';
 import { AuthDebugPage } from './pages/AuthDebugPage';
+import { AuthDebugMonitor } from './components/AuthDebugMonitor';
 
 // Page Components for advanced features
 import WorkforcePage from './pages/workforce/WorkforcePage';
@@ -94,6 +95,9 @@ function App() {
           {/* 404 Route */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+
+        {/* Auth Debug Monitor (dev only) */}
+        <AuthDebugMonitor />
 
         {/* Global Components */}
         <Toaster 

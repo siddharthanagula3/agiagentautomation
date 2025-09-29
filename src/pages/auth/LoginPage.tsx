@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -17,8 +17,9 @@ import {
 } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
-  const { login, isLoading, error, isAuthenticated } = useAuthStore();
+  const { login, isLoading, error, isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Check if we're in demo mode
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -31,25 +32,48 @@ const LoginPage: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
 
-  // Authentication redirect logic is now handled by ProtectedRoute
+  // **KEY FIX: Add redirect logic after successful authentication**
+  useEffect(() => {
+    console.log('LoginPage: Auth state changed:', { isAuthenticated, user: user?.email });
+    
+    if (isAuthenticated && user) {
+      console.log('✅ LoginPage: User authenticated, redirecting to dashboard');
+      
+      // Get the intended destination from location state, or default to dashboard
+      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      
+      // Small delay to ensure auth state is fully settled
+      setTimeout(() => {
+        navigate(from, { replace: true });
+      }, 100);
+    }
+  }, [isAuthenticated, user, navigate, location.state]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login({ email: formData.email, password: formData.password });
+    console.log('LoginPage: Attempting login...');
+    
+    try {
+      await login({ email: formData.email, password: formData.password });
+      console.log('LoginPage: Login function completed');
+    } catch (err) {
+      console.error('LoginPage: Login failed:', err);
+    }
   };
 
   const handleDemoLogin = async () => {
+    console.log('LoginPage: Demo login triggered');
     setFormData({
       email: 'demo@example.com',
       password: 'demo123'
     });
-    // Trigger login after setting demo credentials
-    setTimeout(() => {
-      const form = document.getElementById('login-form') as HTMLFormElement;
-      if (form) {
-        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-      }
-    }, 100);
+    
+    // Trigger login immediately with demo credentials
+    try {
+      await login({ email: 'demo@example.com', password: 'demo123' });
+    } catch (err) {
+      console.error('LoginPage: Demo login failed:', err);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,6 +82,18 @@ const LoginPage: React.FC = () => {
       [e.target.name]: e.target.value
     });
   };
+
+  // Don't render login form if user is already authenticated
+  if (isAuthenticated && user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-purple-500/5 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-purple-500/5 flex items-center justify-center p-4">
@@ -105,6 +141,7 @@ const LoginPage: React.FC = () => {
                     onChange={handleChange}
                     className="pl-10"
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -122,11 +159,13 @@ const LoginPage: React.FC = () => {
                     onChange={handleChange}
                     className="pl-10 pr-10"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>

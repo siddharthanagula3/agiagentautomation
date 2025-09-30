@@ -5,7 +5,35 @@
 
 import { Task, TaskStatus, AgentType, ExecutionPlan } from '../reasoning/task-decomposer';
 import { agentCommunicator, AgentMessage } from './agent-protocol';
-import { EventEmitter } from 'events';
+
+// Simple browser-compatible EventEmitter
+class SimpleEventEmitter {
+  private listeners: Map<string, Function[]> = new Map();
+
+  on(event: string, listener: Function): void {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
+    }
+    this.listeners.get(event)!.push(listener);
+  }
+
+  emit(event: string, ...args: any[]): void {
+    const eventListeners = this.listeners.get(event);
+    if (eventListeners) {
+      eventListeners.forEach(listener => listener(...args));
+    }
+  }
+
+  removeListener(event: string, listener: Function): void {
+    const eventListeners = this.listeners.get(event);
+    if (eventListeners) {
+      const index = eventListeners.indexOf(listener);
+      if (index > -1) {
+        eventListeners.splice(index, 1);
+      }
+    }
+  }
+}
 
 export type ExecutionStatus = 
   | 'pending' 
@@ -51,7 +79,7 @@ export interface ExecutionResult {
 /**
  * ExecutionCoordinator - Main class for coordinating task execution
  */
-export class ExecutionCoordinator extends EventEmitter {
+export class ExecutionCoordinator extends SimpleEventEmitter {
   private activeExecutions: Map<string, ExecutionContext> = new Map();
   private executionHistory: ExecutionContext[] = [];
   private agentPool: Map<AgentType, AgentWorker> = new Map();

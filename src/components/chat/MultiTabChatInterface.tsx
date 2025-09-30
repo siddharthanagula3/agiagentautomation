@@ -277,17 +277,30 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
     staleTime: 30 * 1000
   });
 
-  // Update messages when loaded
+  // Update messages when loaded (prevent infinite loop by using a ref)
+  const loadedMessagesRef = useRef<ChatMessage[] | null>(null);
   useEffect(() => {
-    if (loadedMessages && activeTabId) {
+    if (loadedMessages && activeTabId && loadedMessages !== loadedMessagesRef.current) {
+      loadedMessagesRef.current = loadedMessages;
       setMessages(prev => new Map(prev.set(activeTabId, loadedMessages)));
     }
   }, [loadedMessages, activeTabId]);
 
-  // Scroll to bottom on new messages
+  // Scroll to bottom on new messages (debounced to prevent excessive scrolling)
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [activeMessages]);
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    scrollTimeoutRef.current = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [activeMessages.length]); // Only depend on length, not the entire array
 
   // Auto-focus input
   useEffect(() => {
@@ -364,12 +377,16 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
 
   // Message handlers
   const handleSendMessage = useCallback(async () => {
-    if (!messageInput.trim() || !activeTabId) return;
+    // Capture current values to avoid closure issues
+    const currentInput = messageInput;
+    const currentTabId = activeTabId;
+    
+    if (!currentInput.trim() || !currentTabId) return;
 
     const newMessage: ChatMessage = {
       id: `msg-${Date.now()}`,
       type: 'user',
-      content: messageInput.trim(),
+      content: currentInput.trim(),
       timestamp: new Date(),
       senderId: 'user-1',
       senderName: 'You',
@@ -377,11 +394,11 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
     };
 
     // Add message optimistically
-    setMessages(prev => new Map(prev.set(activeTabId, [...(prev.get(activeTabId) || []), newMessage])));
+    setMessages(prev => new Map(prev.set(currentTabId, [...(prev.get(currentTabId) || []), newMessage])));
     setMessageInput('');
 
     // Notify parent
-    onMessageSend?.(activeTabId, newMessage);
+    onMessageSend?.(currentTabId, newMessage);
 
     try {
       // Simulate sending
@@ -389,11 +406,11 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
       
       // Update status
       setMessages(prev => {
-        const tabMessages = prev.get(activeTabId) || [];
+        const tabMessages = prev.get(currentTabId) || [];
         const updatedMessages = tabMessages.map(msg =>
           msg.id === newMessage.id ? { ...msg, status: 'delivered' as const } : msg
         );
-        return new Map(prev.set(activeTabId, updatedMessages));
+        return new Map(prev.set(currentTabId, updatedMessages));
       });
 
       // Simulate AI response after a delay
@@ -401,7 +418,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
         const aiResponse: ChatMessage = {
           id: `ai-${Date.now()}`,
           type: 'assistant',
-          content: generateAIResponse(messageInput),
+          content: generateAIResponse(currentInput),
           timestamp: new Date(),
           senderId: 'ai-assistant',
           senderName: 'AI Assistant',
@@ -409,17 +426,17 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
           status: 'delivered'
         };
 
-        setMessages(prev => new Map(prev.set(activeTabId, [...(prev.get(activeTabId) || []), aiResponse])));
+        setMessages(prev => new Map(prev.set(currentTabId, [...(prev.get(currentTabId) || []), aiResponse])));
       }, 1000 + Math.random() * 2000);
 
     } catch (error) {
       // Handle error
       setMessages(prev => {
-        const tabMessages = prev.get(activeTabId) || [];
+        const tabMessages = prev.get(currentTabId) || [];
         const updatedMessages = tabMessages.map(msg =>
           msg.id === newMessage.id ? { ...msg, status: 'error' as const } : msg
         );
-        return new Map(prev.set(activeTabId, updatedMessages));
+        return new Map(prev.set(currentTabId, updatedMessages));
       });
       toast.error('Failed to send message');
     }
@@ -491,8 +508,9 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
 
   // Message actions
   const handleMessageEdit = useCallback((messageId: string, newContent: string) => {
+    const currentTabId = activeTabId;
     setMessages(prev => {
-      const tabMessages = prev.get(activeTabId) || [];
+      const tabMessages = prev.get(currentTabId) || [];
       const updatedMessages = tabMessages.map(msg =>
         msg.id === messageId 
           ? { 
@@ -506,21 +524,23 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
             }
           : msg
       );
-      return new Map(prev.set(activeTabId, updatedMessages));
+      return new Map(prev.set(currentTabId, updatedMessages));
     });
   }, [activeTabId]);
 
   const handleMessageDelete = useCallback((messageId: string) => {
+    const currentTabId = activeTabId;
     setMessages(prev => {
-      const tabMessages = prev.get(activeTabId) || [];
+      const tabMessages = prev.get(currentTabId) || [];
       const updatedMessages = tabMessages.filter(msg => msg.id !== messageId);
-      return new Map(prev.set(activeTabId, updatedMessages));
+      return new Map(prev.set(currentTabId, updatedMessages));
     });
   }, [activeTabId]);
 
   const handleMessageReaction = useCallback((messageId: string, emoji: string) => {
+    const currentTabId = activeTabId;
     setMessages(prev => {
-      const tabMessages = prev.get(activeTabId) || [];
+      const tabMessages = prev.get(currentTabId) || [];
       const updatedMessages = tabMessages.map(msg => {
         if (msg.id === messageId) {
           const reactions = msg.metadata?.reactions || [];
@@ -551,7 +571,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
         }
         return msg;
       });
-      return new Map(prev.set(activeTabId, updatedMessages));
+      return new Map(prev.set(currentTabId, updatedMessages));
     });
   }, [activeTabId]);
 

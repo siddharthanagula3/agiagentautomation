@@ -30,6 +30,7 @@ import MarketplacePublicPage from './pages/MarketplacePublicPage';
 import BillingPage from './pages/dashboard/BillingPage';
 import APIKeysPage from './pages/dashboard/APIKeysPage';
 import HelpSupportPage from './pages/dashboard/HelpSupportPage';
+import WorkforceDemoPage from './pages/workforce-demo/WorkforceDemoPage';
 
 function App() {
   console.log('App.tsx: Rendering main app component');
@@ -43,6 +44,16 @@ function App() {
             <Route index element={<LandingPage />} />
             <Route path="demo" element={<AIEmployeeDemo />} />
           </Route>
+
+          {/* Workforce Demo - Protected Route (Full Screen) */}
+          <Route
+            path="/workforce-demo"
+            element={
+              <ProtectedRoute>
+                <WorkforceDemoPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Marketplace - Protected Route */}
           <Route

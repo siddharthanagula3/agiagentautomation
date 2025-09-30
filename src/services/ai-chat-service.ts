@@ -39,34 +39,51 @@ export async function sendToOpenAI(messages: AIMessage[], model: string = 'gpt-4
     throw new Error('OpenAI API key not configured. Please add VITE_OPENAI_API_KEY to your environment variables.');
   }
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: 0.7,
-      max_tokens: 2000,
-    }),
-  });
+  try {
+    console.log('[OpenAI] Sending request...');
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7,
+        max_tokens: 2000,
+      }),
+    });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(`OpenAI API error: ${error.error?.message || response.statusText}`);
+    if (!response.ok) {
+      let errorMessage = response.statusText;
+      try {
+        const error = await response.json();
+        errorMessage = error.error?.message || errorMessage;
+      } catch (e) {
+        console.error('[OpenAI] Failed to parse error response:', e);
+      }
+      console.error('[OpenAI] API Error:', errorMessage);
+      throw new Error(`OpenAI API error: ${errorMessage}`);
+    }
+
+    const data = await response.json();
+    console.log('[OpenAI] Response received successfully');
+    return {
+      content: data.choices[0].message.content,
+      usage: {
+        promptTokens: data.usage.prompt_tokens,
+        completionTokens: data.usage.completion_tokens,
+        totalTokens: data.usage.total_tokens,
+      },
+    };
+  } catch (error) {
+    console.error('[OpenAI] Request failed:', error);
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to connect to OpenAI. Please check your internet connection.');
+    }
+    throw error;
   }
-
-  const data = await response.json();
-  return {
-    content: data.choices[0].message.content,
-    usage: {
-      promptTokens: data.usage.prompt_tokens,
-      completionTokens: data.usage.completion_tokens,
-      totalTokens: data.usage.total_tokens,
-    },
-  };
 }
 
 /**
@@ -77,39 +94,56 @@ export async function sendToAnthropic(messages: AIMessage[], model: string = 'cl
     throw new Error('Anthropic API key not configured. Please add VITE_ANTHROPIC_API_KEY to your environment variables.');
   }
 
-  // Convert messages to Anthropic format (system messages handled separately)
-  const systemMessages = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
-  const conversationMessages = messages.filter(m => m.role !== 'system');
+  try {
+    console.log('[Anthropic] Sending request...');
+    // Convert messages to Anthropic format (system messages handled separately)
+    const systemMessages = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
+    const conversationMessages = messages.filter(m => m.role !== 'system');
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: 2000,
-      system: systemMessages || undefined,
-      messages: conversationMessages,
-    }),
-  });
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 2000,
+        system: systemMessages || undefined,
+        messages: conversationMessages,
+      }),
+    });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(`Anthropic API error: ${error.error?.message || response.statusText}`);
+    if (!response.ok) {
+      let errorMessage = response.statusText;
+      try {
+        const error = await response.json();
+        errorMessage = error.error?.message || errorMessage;
+      } catch (e) {
+        console.error('[Anthropic] Failed to parse error response:', e);
+      }
+      console.error('[Anthropic] API Error:', errorMessage);
+      throw new Error(`Anthropic API error: ${errorMessage}`);
+    }
+
+    const data = await response.json();
+    console.log('[Anthropic] Response received successfully');
+    return {
+      content: data.content[0].text,
+      usage: {
+        promptTokens: data.usage.input_tokens,
+        completionTokens: data.usage.output_tokens,
+        totalTokens: data.usage.input_tokens + data.usage.output_tokens,
+      },
+    };
+  } catch (error) {
+    console.error('[Anthropic] Request failed:', error);
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to connect to Anthropic. Please check your internet connection.');
+    }
+    throw error;
   }
-
-  const data = await response.json();
-  return {
-    content: data.content[0].text,
-    usage: {
-      promptTokens: data.usage.input_tokens,
-      completionTokens: data.usage.output_tokens,
-      totalTokens: data.usage.input_tokens + data.usage.output_tokens,
-    },
-  };
 }
 
 /**
@@ -123,6 +157,8 @@ export async function sendToGoogle(
   if (!GOOGLE_API_KEY) {
     throw new Error('Google API key not configured. Please add VITE_GOOGLE_API_KEY to your environment variables.');
   }
+
+  console.log('[Google/Gemini] Sending request...');
 
   // Convert messages to Gemini format
   const contents = messages
@@ -204,38 +240,55 @@ export async function sendToPerplexity(messages: AIMessage[], model: string = 'l
     throw new Error('Perplexity API key not configured. Please add VITE_PERPLEXITY_API_KEY to your environment variables.');
   }
 
-  const response = await fetch('https://api.perplexity.ai/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: 0.7,
-      max_tokens: 2000,
-    }),
-  });
+  try {
+    console.log('[Perplexity] Sending request...');
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7,
+        max_tokens: 2000,
+      }),
+    });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(`Perplexity API error: ${error.message || response.statusText}`);
+    if (!response.ok) {
+      let errorMessage = response.statusText;
+      try {
+        const error = await response.json();
+        errorMessage = error.message || errorMessage;
+      } catch (e) {
+        console.error('[Perplexity] Failed to parse error response:', e);
+      }
+      console.error('[Perplexity] API Error:', errorMessage);
+      throw new Error(`Perplexity API error: ${errorMessage}`);
+    }
+
+    const data = await response.json();
+    console.log('[Perplexity] Response received successfully');
+    return {
+      content: data.choices[0].message.content,
+      usage: {
+        promptTokens: data.usage?.prompt_tokens || 0,
+        completionTokens: data.usage?.completion_tokens || 0,
+        totalTokens: data.usage?.total_tokens || 0,
+      },
+    };
+  } catch (error) {
+    console.error('[Perplexity] Request failed:', error);
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to connect to Perplexity. Please check your internet connection.');
+    }
+    throw error;
   }
-
-  const data = await response.json();
-  return {
-    content: data.choices[0].message.content,
-    usage: {
-      promptTokens: data.usage?.prompt_tokens || 0,
-      completionTokens: data.usage?.completion_tokens || 0,
-      totalTokens: data.usage?.total_tokens || 0,
-    },
-  };
 }
 
 /**
- * Main function to send message to appropriate AI provider
+ * Main function to send message to appropriate AI provider with fallback support
  */
 export async function sendAIMessage(
   provider: string,
@@ -243,6 +296,8 @@ export async function sendAIMessage(
   employeeRole?: string,
   attachments?: AIImageAttachment[]
 ): Promise<AIResponse> {
+  console.log(`[AI Service] Attempting to send message via ${provider}...`);
+  
   // Add system message with employee role context
   const messagesWithContext = employeeRole
     ? [
@@ -254,24 +309,65 @@ export async function sendAIMessage(
       ]
     : messages;
 
-  switch (provider.toLowerCase()) {
-    case 'chatgpt':
-    case 'openai':
-      return sendToOpenAI(messagesWithContext);
+  // Try the requested provider first
+  try {
+    const providerLower = provider.toLowerCase();
     
-    case 'claude':
-    case 'anthropic':
-      return sendToAnthropic(messagesWithContext);
+    switch (providerLower) {
+      case 'chatgpt':
+      case 'openai':
+        return await sendToOpenAI(messagesWithContext);
+      
+      case 'claude':
+      case 'anthropic':
+        return await sendToAnthropic(messagesWithContext);
+      
+      case 'gemini':
+      case 'google':
+        return await sendToGoogle(messagesWithContext, undefined as unknown as string, attachments);
+      
+      case 'perplexity':
+        return await sendToPerplexity(messagesWithContext);
+      
+      default:
+        throw new Error(`Unsupported AI provider: ${provider}`);
+    }
+  } catch (error) {
+    console.error(`[AI Service] ${provider} failed:`, error);
     
-    case 'gemini':
-    case 'google':
-      return sendToGoogle(messagesWithContext, undefined as unknown as string, attachments);
+    // Try fallback providers if primary fails
+    const fallbackProviders = getConfiguredProviders().filter(
+      p => p.toLowerCase() !== provider.toLowerCase()
+    );
     
-    case 'perplexity':
-      return sendToPerplexity(messagesWithContext);
+    if (fallbackProviders.length > 0) {
+      console.log(`[AI Service] Attempting fallback to ${fallbackProviders[0]}...`);
+      const fallbackProvider = fallbackProviders[0].toLowerCase();
+      
+      try {
+        switch (fallbackProvider) {
+          case 'chatgpt':
+            return await sendToOpenAI(messagesWithContext);
+          case 'claude':
+            return await sendToAnthropic(messagesWithContext);
+          case 'gemini':
+            return await sendToGoogle(messagesWithContext, undefined as unknown as string, attachments);
+          case 'perplexity':
+            return await sendToPerplexity(messagesWithContext);
+        }
+      } catch (fallbackError) {
+        console.error(`[AI Service] Fallback to ${fallbackProvider} also failed:`, fallbackError);
+      }
+    }
     
-    default:
-      throw new Error(`Unsupported AI provider: ${provider}`);
+    // If all fails, throw the original error with helpful message
+    throw new Error(
+      `Failed to get AI response. Primary provider (${provider}) failed. ` +
+      (fallbackProviders.length > 0 
+        ? `Fallback providers also failed. ` 
+        : `No fallback providers configured. `) +
+      `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 

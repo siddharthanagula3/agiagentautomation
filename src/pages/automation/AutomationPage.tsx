@@ -1,28 +1,27 @@
 /**
- * Automation Page - Main automation hub and workflow management
+ * Automation Page - Real Data Implementation
+ * All workflow data fetched from Supabase via automation service
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import AutonomousWorkflowsPage from '@/pages/autonomous/AutonomousWorkflowsPage';
+import { useAuthStore } from '@/stores/unified-auth-store';
+import { automationService } from '@/services/automation-service';
 import {
   Zap,
   Plus,
   Play,
-  Pause,
-  Square,
   Settings,
   BarChart3,
   Clock,
-  CheckCircle,
-  AlertTriangle,
-  Users,
   Activity,
   TrendingUp,
   Bot,
@@ -30,7 +29,6 @@ import {
   GitBranch,
   Target,
   Sparkles,
-  ArrowRight,
   Edit,
   Trash2,
   Copy,
@@ -45,120 +43,55 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-interface WorkflowSummary {
-  id: string;
-  name: string;
-  description: string;
-  status: 'running' | 'paused' | 'completed' | 'failed';
-  progress: number;
-  category: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  lastRun: Date;
-  nextRun?: Date;
-  executionCount: number;
-  successRate: number;
-  avgDuration: number;
-  assignedEmployees: string[];
-}
-
 const AutomationPage: React.FC = () => {
-  const [workflows] = useState<WorkflowSummary[]>([
-    {
-      id: 'wf-001',
-      name: 'Customer Data Pipeline',
-      description: 'Automated processing and analysis of customer data',
-      status: 'running',
-      progress: 67,
-      category: 'Data Processing',
-      priority: 'high',
-      lastRun: new Date(Date.now() - 3600000),
-      nextRun: new Date(Date.now() + 7200000),
-      executionCount: 247,
-      successRate: 98.2,
-      avgDuration: 42,
-      assignedEmployees: ['emp-001', 'emp-003']
-    },
-    {
-      id: 'wf-002',
-      name: 'Marketing Campaign Optimizer',
-      description: 'Real-time optimization of marketing campaigns',
-      status: 'running',
-      progress: 89,
-      category: 'Marketing',
-      priority: 'medium',
-      lastRun: new Date(Date.now() - 1800000),
-      nextRun: new Date(Date.now() + 3600000),
-      executionCount: 156,
-      successRate: 94.1,
-      avgDuration: 28,
-      assignedEmployees: ['emp-004']
-    },
-    {
-      id: 'wf-003',
-      name: 'Code Quality Assessment',
-      description: 'Automated code review and quality metrics',
-      status: 'paused',
-      progress: 34,
-      category: 'Development',
-      priority: 'low',
-      lastRun: new Date(Date.now() - 7200000),
-      executionCount: 89,
-      successRate: 96.7,
-      avgDuration: 15,
-      assignedEmployees: ['emp-005', 'emp-006']
-    },
-    {
-      id: 'wf-004',
-      name: 'Financial Report Generator',
-      description: 'Automated generation of financial reports and insights',
-      status: 'completed',
-      progress: 100,
-      category: 'Finance',
-      priority: 'high',
-      lastRun: new Date(Date.now() - 86400000),
-      nextRun: new Date(Date.now() + 604800000),
-      executionCount: 52,
-      successRate: 100,
-      avgDuration: 180,
-      assignedEmployees: ['emp-001']
-    }
-  ]);
+  const { user } = useAuthStore();
+  const userId = user?.id;
 
-  // Stats calculations
-  const stats = {
-    totalWorkflows: workflows.length,
-    activeWorkflows: workflows.filter(w => w.status === 'running').length,
-    pausedWorkflows: workflows.filter(w => w.status === 'paused').length,
-    averageSuccessRate: workflows.reduce((acc, w) => acc + w.successRate, 0) / workflows.length,
-    totalExecutions: workflows.reduce((acc, w) => acc + w.executionCount, 0),
-    avgExecutionTime: workflows.reduce((acc, w) => acc + w.avgDuration, 0) / workflows.length
+  // Fetch real workflows from database
+  const { data: workflows, isLoading: workflowsLoading } = useQuery({
+    queryKey: ['workflows', userId],
+    queryFn: () => automationService.getWorkflows(userId!),
+    enabled: !!userId,
+    refetchInterval: 30000,
+  });
+
+  // Fetch automation overview
+  const { data: automationOverview, isLoading: overviewLoading } = useQuery({
+    queryKey: ['automation-overview', userId],
+    queryFn: () => automationService.getAutomationOverview(userId!),
+    enabled: !!userId,
+    refetchInterval: 60000,
+  });
+
+  if (!userId) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="w-96">
+          <CardHeader>
+            <CardTitle>Authentication Required</CardTitle>
+            <CardDescription>Please log in to view automation</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link to="/login">
+              <Button className="w-full">Go to Login</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const isLoading = workflowsLoading || overviewLoading;
+
+  const getStatusColor = (isActive: boolean) => {
+    return isActive 
+      ? 'text-green-400 bg-green-500/20 border-green-500/30'
+      : 'text-slate-400 bg-slate-500/20 border-slate-500/30';
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'running': return 'text-green-400 bg-green-500/20 border-green-500/30';
-      case 'paused': return 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30';
-      case 'completed': return 'text-blue-400 bg-blue-500/20 border-blue-500/30';
-      case 'failed': return 'text-red-400 bg-red-500/20 border-red-500/30';
-      default: return 'text-slate-400 bg-slate-500/20 border-slate-500/30';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical': return 'text-red-400 bg-red-500/20 border-red-500/30';
-      case 'high': return 'text-orange-400 bg-orange-500/20 border-orange-500/30';
-      case 'medium': return 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30';
-      case 'low': return 'text-green-400 bg-green-500/20 border-green-500/30';
-      default: return 'text-slate-400 bg-slate-500/20 border-slate-500/30';
-    }
-  };
-
-  const formatDuration = (minutes: number) => {
-    if (minutes < 60) return `${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}h ${mins}m`;
+  const formatDate = (date?: Date) => {
+    if (!date) return 'Never';
+    return new Date(date).toLocaleDateString();
   };
 
   return (
@@ -195,73 +128,118 @@ const AutomationPage: React.FC = () => {
       >
         <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Total Workflows</p>
-                <p className="text-2xl font-bold text-white">{stats.totalWorkflows}</p>
-                <div className="flex items-center space-x-1 mt-1">
-                  <TrendingUp className="h-3 w-3 text-green-400" />
-                  <span className="text-xs text-green-400">+3 this week</span>
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-400">Total Workflows</p>
+                  <p className="text-2xl font-bold text-white">{automationOverview?.totalWorkflows || 0}</p>
+                  <div className="flex items-center space-x-1 mt-1">
+                    <TrendingUp className="h-3 w-3 text-green-400" />
+                    <span className="text-xs text-green-400">
+                      {automationOverview?.activeWorkflows || 0} active
+                    </span>
+                  </div>
+                </div>
+                <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                  <Workflow className="h-6 w-6 text-blue-400" />
                 </div>
               </div>
-              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                <Workflow className="h-6 w-6 text-blue-400" />
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
         <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Active Now</p>
-                <p className="text-2xl font-bold text-white">{stats.activeWorkflows}</p>
-                <div className="flex items-center space-x-1 mt-1">
-                  <Activity className="h-3 w-3 text-green-400" />
-                  <span className="text-xs text-green-400">{stats.pausedWorkflows} paused</span>
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-400">Running Now</p>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-2xl font-bold text-white">{automationOverview?.runningExecutions || 0}</p>
+                    {(automationOverview?.runningExecutions || 0) > 0 && (
+                      <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-1 mt-1">
+                    <Activity className="h-3 w-3 text-green-400" />
+                    <span className="text-xs text-green-400">Active executions</span>
+                  </div>
+                </div>
+                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                  <Play className="h-6 w-6 text-green-400" />
                 </div>
               </div>
-              <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-                <Play className="h-6 w-6 text-green-400" />
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
         <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Success Rate</p>
-                <p className="text-2xl font-bold text-white">{stats.averageSuccessRate.toFixed(1)}%</p>
-                <div className="flex items-center space-x-1 mt-1">
-                  <Target className="h-3 w-3 text-green-400" />
-                  <span className="text-xs text-green-400">+2.1% vs last month</span>
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-400">Success Rate</p>
+                  <p className="text-2xl font-bold text-white">
+                    {Math.round(automationOverview?.successRate || 0)}%
+                  </p>
+                  <div className="flex items-center space-x-1 mt-1">
+                    <Target className="h-3 w-3 text-green-400" />
+                    <span className="text-xs text-green-400">
+                      {automationOverview?.totalExecutions || 0} total
+                    </span>
+                  </div>
+                </div>
+                <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                  <Target className="h-6 w-6 text-purple-400" />
                 </div>
               </div>
-              <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                <Target className="h-6 w-6 text-purple-400" />
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
         <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Avg Duration</p>
-                <p className="text-2xl font-bold text-white">{formatDuration(stats.avgExecutionTime)}</p>
-                <div className="flex items-center space-x-1 mt-1">
-                  <Clock className="h-3 w-3 text-orange-400" />
-                  <span className="text-xs text-orange-400">{stats.totalExecutions} total runs</span>
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-400">Completed Today</p>
+                  <p className="text-2xl font-bold text-white">{automationOverview?.completedToday || 0}</p>
+                  <div className="flex items-center space-x-1 mt-1">
+                    <Clock className="h-3 w-3 text-orange-400" />
+                    <span className="text-xs text-orange-400">
+                      Avg {Math.round(automationOverview?.avgExecutionTime || 0)}s
+                    </span>
+                  </div>
+                </div>
+                <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-orange-400" />
                 </div>
               </div>
-              <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                <Clock className="h-6 w-6 text-orange-400" />
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
@@ -347,7 +325,7 @@ const AutomationPage: React.FC = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white">Active Workflows</CardTitle>
+                    <CardTitle className="text-white">Your Workflows</CardTitle>
                     <CardDescription>Manage and monitor your automation workflows</CardDescription>
                   </div>
                   <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
@@ -356,99 +334,122 @@ const AutomationPage: React.FC = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {workflows.map((workflow, index) => (
-                    <motion.div
-                      key={workflow.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.05 * index }}
-                      className="flex items-center justify-between p-4 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 transition-colors group"
-                    >
-                      <div className="flex items-center space-x-4 flex-1">
-                        <div className="flex-shrink-0">
-                          <div className="w-12 h-12 bg-slate-600/50 rounded-lg flex items-center justify-center">
-                            <Workflow className="h-6 w-6 text-slate-400" />
-                          </div>
+                {workflowsLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="flex items-center space-x-4 p-4 rounded-lg bg-slate-700/30">
+                        <Skeleton className="h-12 w-12 rounded-lg" />
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-3 w-1/2" />
                         </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <h3 className="font-medium text-white truncate group-hover:text-blue-400 transition-colors">
-                              {workflow.name}
-                            </h3>
-                            <Badge className={`text-xs border ${getStatusColor(workflow.status)}`}>
-                              {workflow.status}
-                            </Badge>
-                            <Badge className={`text-xs border ${getPriorityColor(workflow.priority)}`}>
-                              {workflow.priority}
-                            </Badge>
-                          </div>
-                          
-                          <p className="text-sm text-slate-400 truncate mb-2">
-                            {workflow.description}
-                          </p>
-                          
-                          {workflow.status === 'running' && (
-                            <div className="space-y-1">
-                              <div className="flex items-center justify-between text-xs text-slate-500">
-                                <span>Progress</span>
-                                <span>{workflow.progress}%</span>
-                              </div>
-                              <Progress value={workflow.progress} className="h-1" />
+                      </div>
+                    ))}
+                  </div>
+                ) : !workflows || workflows.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Workflow className="h-16 w-16 text-slate-600 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-white mb-2">No Workflows Yet</h3>
+                    <p className="text-slate-400 mb-6">
+                      Create your first workflow to automate tasks with your AI employees
+                    </p>
+                    <Link to="/dashboard/automation/designer">
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create First Workflow
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {workflows.map((workflow, index) => (
+                      <motion.div
+                        key={workflow.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.05 * index }}
+                        className="flex items-center justify-between p-4 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 transition-colors group"
+                      >
+                        <div className="flex items-center space-x-4 flex-1">
+                          <div className="flex-shrink-0">
+                            <div className="w-12 h-12 bg-slate-600/50 rounded-lg flex items-center justify-center">
+                              <Workflow className="h-6 w-6 text-slate-400" />
                             </div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-3 text-sm text-slate-400">
-                        <div className="text-right">
-                          <p className="text-white font-medium">{workflow.successRate}%</p>
-                          <p className="text-xs">Success Rate</p>
+                          </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <h3 className="font-medium text-white truncate group-hover:text-blue-400 transition-colors">
+                                {workflow.name}
+                              </h3>
+                              <Badge className={`text-xs border ${getStatusColor(workflow.isActive)}`}>
+                                {workflow.isActive ? 'Active' : 'Inactive'}
+                              </Badge>
+                              {workflow.category && (
+                                <Badge variant="outline" className="text-xs">
+                                  {workflow.category}
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            {workflow.description && (
+                              <p className="text-sm text-slate-400 truncate mb-2">
+                                {workflow.description}
+                              </p>
+                            )}
+                            
+                            <div className="flex items-center space-x-4 text-xs text-slate-500">
+                              <span>Last run: {formatDate(workflow.lastExecutedAt)}</span>
+                              <span>•</span>
+                              <span>Version {workflow.version}</span>
+                            </div>
+                          </div>
                         </div>
                         
-                        <div className="text-right">
-                          <p className="text-white font-medium">{workflow.executionCount}</p>
-                          <p className="text-xs">Executions</p>
+                        <div className="flex items-center space-x-3">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="bg-slate-800 border-slate-700" align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuSeparator className="bg-slate-700" />
+                              <DropdownMenuItem 
+                                className="text-slate-300"
+                                onClick={() => automationService.executeWorkflow(workflow.id)}
+                              >
+                                <Play className="h-4 w-4 mr-2" />
+                                Run Now
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-slate-300">
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Workflow
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-slate-300">
+                                <Copy className="h-4 w-4 mr-2" />
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator className="bg-slate-700" />
+                              <DropdownMenuItem 
+                                className="text-red-400"
+                                onClick={() => automationService.deleteWorkflow(workflow.id)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
-                        
-                        <div className="text-right">
-                          <p className="text-white font-medium">{formatDuration(workflow.avgDuration)}</p>
-                          <p className="text-xs">Avg Duration</p>
-                        </div>
-                        
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="bg-slate-800 border-slate-700" align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator className="bg-slate-700" />
-                            <DropdownMenuItem className="text-slate-300">
-                              <Play className="h-4 w-4 mr-2" />
-                              Run Now
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-slate-300">
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit Workflow
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-slate-300">
-                              <Copy className="h-4 w-4 mr-2" />
-                              Duplicate
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-slate-700" />
-                            <DropdownMenuItem className="text-red-400">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -466,11 +467,65 @@ const AutomationPage: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-slate-400">
-                  Detailed analytics and performance metrics for your automation workflows
-                  will be displayed here. This includes execution trends, resource utilization,
-                  and optimization opportunities.
-                </p>
+                {isLoading ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                  </div>
+                ) : automationOverview && automationOverview.totalExecutions > 0 ? (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="p-4 border border-slate-700 rounded-lg">
+                        <p className="text-sm text-slate-400">Total Executions</p>
+                        <p className="text-2xl font-bold text-white mt-1">
+                          {automationOverview.totalExecutions}
+                        </p>
+                      </div>
+                      <div className="p-4 border border-slate-700 rounded-lg">
+                        <p className="text-sm text-slate-400">Success Rate</p>
+                        <p className="text-2xl font-bold text-white mt-1">
+                          {Math.round(automationOverview.successRate)}%
+                        </p>
+                      </div>
+                      <div className="p-4 border border-slate-700 rounded-lg">
+                        <p className="text-sm text-slate-400">Avg Time</p>
+                        <p className="text-2xl font-bold text-white mt-1">
+                          {Math.round(automationOverview.avgExecutionTime)}s
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-medium text-white mb-4">Performance Insights</h3>
+                      <div className="space-y-3">
+                        <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                          <p className="text-sm text-blue-400">
+                            ✓ Your workflows have a {Math.round(automationOverview.successRate)}% success rate
+                          </p>
+                        </div>
+                        <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                          <p className="text-sm text-green-400">
+                            ✓ {automationOverview.activeWorkflows} workflows are currently active
+                          </p>
+                        </div>
+                        {automationOverview.runningExecutions > 0 && (
+                          <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                            <p className="text-sm text-orange-400">
+                              ⚡ {automationOverview.runningExecutions} executions running right now
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <BarChart3 className="h-12 w-12 text-slate-600 mx-auto mb-2" />
+                    <p className="text-sm text-slate-400">
+                      Analytics will appear here once you start running workflows
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -1,174 +1,168 @@
 @echo off
-setlocal enabledelayedexpansion
-
-:: Quick Start Verification Script (Windows)
-:: Checks if everything is set up correctly
+REM Quick Start Check Script - Windows Version
+REM Verifies setup and provides next steps
 
 echo.
-echo ========================================
-echo AI Agent Automation - Quick Start Check
-echo ========================================
+echo ============================================
+echo   AGI Agent Automation - Setup Verification
+echo ============================================
 echo.
 
-:: Check Node.js
+REM Check Node.js
 echo Checking Node.js...
-where node >nul 2>&1
-if %errorlevel% equ 0 (
-    for /f "tokens=*" %%i in ('node -v') do set NODE_VERSION=%%i
-    echo [32m✓[0m Node.js installed: !NODE_VERSION!
+where node >nul 2>nul
+if %ERRORLEVEL% EQU 0 (
+    for /f "tokens=*" %%i in ('node --version') do set NODE_VERSION=%%i
+    echo [OK] Node.js installed: %NODE_VERSION%
 ) else (
-    echo [31m✗[0m Node.js not found. Please install Node.js 18+
+    echo [ERROR] Node.js not found. Please install Node.js first.
+    pause
     exit /b 1
 )
 
-:: Check npm
+REM Check npm
+echo.
 echo Checking npm...
-where npm >nul 2>&1
-if %errorlevel% equ 0 (
-    for /f "tokens=*" %%i in ('npm -v') do set NPM_VERSION=%%i
-    echo [32m✓[0m npm installed: !NPM_VERSION!
+where npm >nul 2>nul
+if %ERRORLEVEL% EQU 0 (
+    for /f "tokens=*" %%i in ('npm --version') do set NPM_VERSION=%%i
+    echo [OK] npm installed: %NPM_VERSION%
 ) else (
-    echo [31m✗[0m npm not found
+    echo [ERROR] npm not found. Please install npm first.
+    pause
     exit /b 1
 )
 
-:: Check node_modules
+REM Check directory structure
+echo.
+echo Checking directory structure...
+if exist "package.json" (
+    echo [OK] package.json found
+) else (
+    echo [ERROR] package.json not found. Are you in the project root?
+    pause
+    exit /b 1
+)
+
+if exist "src\" (
+    echo [OK] src directory found
+) else (
+    echo [ERROR] src directory not found.
+    pause
+    exit /b 1
+)
+
+REM Check environment file
+echo.
+echo Checking environment configuration...
+if exist ".env" (
+    echo [OK] .env file found
+    
+    REM Check for required variables
+    findstr /C:"VITE_SUPABASE_URL" .env >nul 2>nul
+    if %ERRORLEVEL% EQU 0 (
+        echo [OK] VITE_SUPABASE_URL configured
+    ) else (
+        echo [WARNING] VITE_SUPABASE_URL not found in .env
+    )
+    
+    findstr /C:"VITE_SUPABASE_ANON_KEY" .env >nul 2>nul
+    if %ERRORLEVEL% EQU 0 (
+        echo [OK] VITE_SUPABASE_ANON_KEY configured
+    ) else (
+        echo [WARNING] VITE_SUPABASE_ANON_KEY not found in .env
+    )
+) else (
+    echo [WARNING] .env file not found. Please create one from .env.example
+)
+
+REM Check dependencies
+echo.
 echo Checking dependencies...
 if exist "node_modules\" (
-    echo [32m✓[0m node_modules found
+    echo [OK] node_modules directory found
 ) else (
-    echo [33m⚠[0m node_modules not found. Running npm install...
-    call npm install
+    echo [WARNING] node_modules not found. Run: npm install
 )
 
-:: Check .env file
-echo Checking environment variables...
-if exist ".env" (
-    echo [32m✓[0m .env file found
-    
-    :: Check for required keys
-    findstr /C:"VITE_SUPABASE_URL" .env >nul
-    if %errorlevel% equ 0 (
-        echo [32m✓[0m VITE_SUPABASE_URL configured
-    ) else (
-        echo [31m✗[0m VITE_SUPABASE_URL not found in .env
-    )
-    
-    findstr /C:"VITE_SUPABASE_ANON_KEY" .env >nul
-    if %errorlevel% equ 0 (
-        echo [32m✓[0m VITE_SUPABASE_ANON_KEY configured
-    ) else (
-        echo [31m✗[0m VITE_SUPABASE_ANON_KEY not found in .env
-    )
-    
-    :: Check for AI providers
-    set AI_FOUND=0
-    findstr /C:"VITE_ANTHROPIC_API_KEY=sk-" .env >nul
-    if %errorlevel% equ 0 (
-        echo [32m✓[0m Anthropic API key configured
-        set AI_FOUND=1
-    )
-    findstr /C:"VITE_GOOGLE_API_KEY=AIza" .env >nul
-    if %errorlevel% equ 0 (
-        echo [32m✓[0m Google API key configured
-        set AI_FOUND=1
-    )
-    findstr /C:"VITE_OPENAI_API_KEY=sk-" .env >nul
-    if %errorlevel% equ 0 (
-        echo [32m✓[0m OpenAI API key configured
-        set AI_FOUND=1
-    )
-    
-    if !AI_FOUND! equ 0 (
-        echo [33m⚠[0m No AI provider API keys configured
-    )
+REM Check key service files
+echo.
+echo Checking service files...
+if exist "src\services\cache-service.ts" (
+    echo [OK] src\services\cache-service.ts exists
 ) else (
-    echo [31m✗[0m .env file not found
-    if exist ".env.example" (
-        copy .env.example .env >nul
-        echo [32m✓[0m Created .env file. Please add your API keys.
-    ) else (
-        echo [31m✗[0m .env.example not found
-    )
+    echo [ERROR] src\services\cache-service.ts not found
 )
 
-:: Check implementation files
-echo.
-echo Checking implementation files...
-
-set FILES=supabase\migrations\005_analytics_tables.sql supabase\migrations\006_automation_tables.sql src\services\cache-service.ts src\services\analytics-service.ts src\services\automation-service.ts src\tools\filesystem-tools.ts find-mock-data.js IMPLEMENTATION_COMPLETE.md
-
-set ALL_FOUND=1
-for %%F in (%FILES%) do (
-    if exist "%%F" (
-        echo [32m✓[0m %%F
-    ) else (
-        echo [31m✗[0m %%F missing
-        set ALL_FOUND=0
-    )
-)
-
-:: Check required packages
-echo.
-echo Checking required packages...
-
-call npm list @tanstack/react-query >nul 2>&1
-if %errorlevel% equ 0 (
-    echo [32m✓[0m @tanstack/react-query installed
+if exist "src\services\analytics-service.ts" (
+    echo [OK] src\services\analytics-service.ts exists
 ) else (
-    echo [33m⚠[0m Installing @tanstack/react-query...
-    call npm install @tanstack/react-query
+    echo [ERROR] src\services\analytics-service.ts not found
 )
 
-call npm list zustand >nul 2>&1
-if %errorlevel% equ 0 (
-    echo [32m✓[0m zustand installed
+if exist "src\services\automation-service.ts" (
+    echo [OK] src\services\automation-service.ts exists
 ) else (
-    echo [33m⚠[0m Installing zustand...
-    call npm install zustand
+    echo [ERROR] src\services\automation-service.ts not found
 )
 
-call npm list framer-motion >nul 2>&1
-if %errorlevel% equ 0 (
-    echo [32m✓[0m framer-motion installed
+if exist "src\tools\filesystem-tools.ts" (
+    echo [OK] src\tools\filesystem-tools.ts exists
 ) else (
-    echo [33m⚠[0m Installing framer-motion...
-    call npm install framer-motion
+    echo [ERROR] src\tools\filesystem-tools.ts not found
 )
 
-:: Summary
+REM Check updated pages
 echo.
-echo ========================================
-echo Summary:
-echo.
-
-if !ALL_FOUND! equ 1 (
-    echo [32m✓[0m All implementation files present
+echo Checking updated pages...
+if exist "src\pages\dashboard\Dashboard.tsx" (
+    echo [OK] src\pages\dashboard\Dashboard.tsx exists
 ) else (
-    echo [31m✗[0m Some implementation files missing
+    echo [ERROR] src\pages\dashboard\Dashboard.tsx not found
 )
 
-echo.
-echo Next Steps:
-echo.
-echo 1. [33mRun database migrations[0m in Supabase SQL Editor
-echo    - 005_analytics_tables.sql
-echo    - 006_automation_tables.sql
-echo.
-echo 2. [33mFind and fix mock data[0m
-echo    - Run: node find-mock-data.js
-echo.
-echo 3. [33mStart development server[0m
-echo    - Run: npm run dev
-echo.
-echo 4. [33mVerify everything works[0m
-echo    - Visit: http://localhost:5173/dashboard
-echo.
-echo 📚 For detailed instructions, see:
-echo    - IMPLEMENTATION_COMPLETE.md
-echo    - Check the artifacts in Claude
-echo.
-echo ========================================
-echo.
+if exist "src\pages\analytics\AnalyticsPage.tsx" (
+    echo [OK] src\pages\analytics\AnalyticsPage.tsx exists
+) else (
+    echo [ERROR] src\pages\analytics\AnalyticsPage.tsx not found
+)
 
+if exist "src\pages\automation\AutomationPage.tsx" (
+    echo [OK] src\pages\automation\AutomationPage.tsx exists
+) else (
+    echo [ERROR] src\pages\automation\AutomationPage.tsx not found
+)
+
+REM Check scanner script
+echo.
+echo Checking mock data scanner...
+if exist "find-mock-data.js" (
+    echo [OK] find-mock-data.js exists
+) else (
+    echo [ERROR] find-mock-data.js not found
+)
+
+REM Summary
+echo.
+echo ============================================
+echo    Next Steps:
+echo ============================================
+echo.
+echo 1. Run mock data scanner:
+echo    node find-mock-data.js
+echo.
+echo 2. Install dependencies (if needed):
+echo    npm install
+echo.
+echo 3. Start development server:
+echo    npm run dev
+echo.
+echo 4. Verify database migrations in Supabase SQL Editor
+echo.
+echo 5. Read CLEANUP-GUIDE.md for detailed instructions
+echo.
+echo ============================================
+echo [OK] Setup verification complete!
+echo ============================================
+echo.
 pause

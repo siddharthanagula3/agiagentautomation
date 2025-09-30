@@ -88,6 +88,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { aiEmployeeService } from '@/services/ai-employee-service';
 
 // Types and Interfaces
 export interface AIEmployee {
@@ -202,170 +203,7 @@ interface AIEmployeeMarketplaceProps {
   onEmployeeHire?: (employee: AIEmployee) => void;
 }
 
-// Sample data - replace with real API calls
-const sampleEmployees: AIEmployee[] = [
-  {
-    id: 'emp-001',
-    name: 'Sarah Chen',
-    role: 'Data Scientist',
-    title: 'Senior AI Data Analyst',
-    department: 'Analytics',
-    avatar: '/avatars/sarah.jpg',
-    status: 'available',
-    rating: 4.9,
-    reviewCount: 147,
-    hourlyRate: 85,
-    currency: 'USD',
-    experience: 5,
-    tasksCompleted: 342,
-    successRate: 96,
-    responseTime: 2,
-    availability: {
-      timezone: 'PST',
-      workingHours: '9 AM - 6 PM',
-      daysPerWeek: 5
-    },
-    skills: [
-      { id: 's1', name: 'Python', level: 5, category: 'Programming', verified: true },
-      { id: 's2', name: 'Machine Learning', level: 5, category: 'AI/ML', verified: true },
-      { id: 's3', name: 'SQL', level: 4, category: 'Database', verified: true },
-      { id: 's4', name: 'Data Visualization', level: 4, category: 'Analytics', verified: true }
-    ],
-    specialties: ['Predictive Analytics', 'Neural Networks', 'Statistical Modeling'],
-    tools: [
-      { id: 't1', name: 'TensorFlow', proficiency: 95, category: 'ML Framework' },
-      { id: 't2', name: 'Pandas', proficiency: 98, category: 'Data Processing' },
-      { id: 't3', name: 'Tableau', proficiency: 85, category: 'Visualization' }
-    ],
-    languages: [
-      { code: 'en', name: 'English', fluency: 'native' },
-      { code: 'zh', name: 'Mandarin', fluency: 'fluent' }
-    ],
-    certifications: [
-      {
-        id: 'c1',
-        name: 'Google Cloud ML Engineer',
-        issuer: 'Google',
-        date: new Date('2023-01-15'),
-        verified: true
-      }
-    ],
-    portfolio: [
-      {
-        id: 'p1',
-        title: 'Customer Churn Prediction Model',
-        description: 'Built a machine learning model that reduced customer churn by 23%',
-        type: 'project',
-        tags: ['Machine Learning', 'Python', 'Customer Analytics'],
-        completedAt: new Date('2024-01-15')
-      }
-    ],
-    description: 'Experienced data scientist specializing in machine learning and predictive analytics. Expert in Python, TensorFlow, and statistical modeling with a track record of delivering actionable insights.',
-    personality: {
-      traits: ['Analytical', 'Detail-oriented', 'Collaborative'],
-      workStyle: 'Methodical and data-driven',
-      communication: 'Clear and technical'
-    },
-    pricing: {
-      hourly: 85,
-      daily: 680,
-      weekly: 3400,
-      monthly: 14450
-    },
-    metrics: {
-      totalEarnings: 125000,
-      clientSatisfaction: 4.9,
-      onTimeDelivery: 98,
-      qualityScore: 96
-    },
-    featured: true,
-    verified: true,
-    premium: true,
-    createdAt: new Date('2023-06-01'),
-    lastActive: new Date()
-  },
-  {
-    id: 'emp-002',
-    name: 'Marcus Rodriguez',
-    role: 'Software Engineer',
-    title: 'Full-Stack Developer',
-    department: 'Engineering',
-    avatar: '/avatars/marcus.jpg',
-    status: 'busy',
-    rating: 4.7,
-    reviewCount: 89,
-    hourlyRate: 75,
-    currency: 'USD',
-    experience: 4,
-    tasksCompleted: 156,
-    successRate: 94,
-    responseTime: 1,
-    availability: {
-      timezone: 'EST',
-      workingHours: '10 AM - 7 PM',
-      daysPerWeek: 6
-    },
-    skills: [
-      { id: 's5', name: 'React', level: 5, category: 'Frontend', verified: true },
-      { id: 's6', name: 'Node.js', level: 4, category: 'Backend', verified: true },
-      { id: 's7', name: 'TypeScript', level: 4, category: 'Programming', verified: true },
-      { id: 's8', name: 'AWS', level: 3, category: 'Cloud', verified: false }
-    ],
-    specialties: ['Full-Stack Development', 'React Applications', 'API Design'],
-    tools: [
-      { id: 't4', name: 'VS Code', proficiency: 98, category: 'IDE' },
-      { id: 't5', name: 'Docker', proficiency: 80, category: 'DevOps' },
-      { id: 't6', name: 'Git', proficiency: 95, category: 'Version Control' }
-    ],
-    languages: [
-      { code: 'en', name: 'English', fluency: 'native' },
-      { code: 'es', name: 'Spanish', fluency: 'native' }
-    ],
-    certifications: [
-      {
-        id: 'c2',
-        name: 'AWS Certified Developer',
-        issuer: 'Amazon',
-        date: new Date('2023-08-20'),
-        verified: true
-      }
-    ],
-    portfolio: [
-      {
-        id: 'p2',
-        title: 'E-commerce Platform',
-        description: 'Built a modern e-commerce platform serving 10K+ users',
-        type: 'project',
-        tags: ['React', 'Node.js', 'E-commerce'],
-        completedAt: new Date('2024-02-01')
-      }
-    ],
-    description: 'Full-stack developer with expertise in React and Node.js. Passionate about creating scalable web applications and solving complex technical challenges.',
-    personality: {
-      traits: ['Creative', 'Problem-solver', 'Team player'],
-      workStyle: 'Agile and iterative',
-      communication: 'Friendly and responsive'
-    },
-    pricing: {
-      hourly: 75,
-      daily: 600,
-      weekly: 3000,
-      monthly: 12750
-    },
-    metrics: {
-      totalEarnings: 89000,
-      clientSatisfaction: 4.7,
-      onTimeDelivery: 96,
-      qualityScore: 94
-    },
-    featured: false,
-    verified: true,
-    premium: false,
-    createdAt: new Date('2023-08-15'),
-    lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
-  },
-  // Add more sample employees...
-];
+// Removed sampleEmployees mock data. Using real data from aiEmployeeService.
 
 const employeeCategories = [
   { id: 'all', name: 'All Categories', icon: Users, count: 245 },
@@ -403,16 +241,24 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
 
   const queryClient = useQueryClient();
 
-  // Simulated API calls - replace with real implementation
-  const { data: employees = sampleEmployees, isLoading } = useQuery({
+  // Real API call via service
+  const { data: employeesData, isLoading } = useQuery({
     queryKey: ['employees', selectedCategory, filters],
     queryFn: async () => {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return sampleEmployees;
+      const { data, error } = await aiEmployeeService.getEmployees({
+        department: selectedCategory === 'all' ? undefined : selectedCategory,
+        available: filters.availability === 'available'
+      } as any);
+      if (error) {
+        toast.error('Failed to load employees');
+        return [] as AIEmployee[];
+      }
+      return (data as unknown as AIEmployee[]) || [];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
+
+  const employees = employeesData || [];
 
   const hireMutation = useMutation({
     mutationFn: async (employee: AIEmployee) => {

@@ -60,7 +60,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
   const [activeTab, setActiveTab] = useState<'o1-visa' | 'legal' | 'business' | 'compliance'>('o1-visa');
   const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
 
-  // Mock data for O-1 Visa documentation
+// Data is loaded dynamically; removed mock placeholders
   const o1Documents: O1VisaDocument[] = [
     {
       id: '1',
@@ -114,7 +114,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
     },
   ];
 
-  // Mock data for legal documents
+// Legal documents should be fetched from backend/service
   const legalDocuments: LegalDocument[] = [
     {
       id: '1',

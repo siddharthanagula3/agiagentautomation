@@ -1,167 +1,145 @@
 #!/bin/bash
+# Quick Start Check Script
+# Verifies setup and provides next steps
 
-# Quick Start Verification Script
-# Checks if everything is set up correctly
-
-echo "🚀 AI Agent Automation - Quick Start Verification"
-echo "=================================================="
+echo "🔍 AGI Agent Automation - Setup Verification"
+echo "============================================"
 echo ""
-
-# Colors
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
 
 # Check Node.js
 echo "Checking Node.js..."
 if command -v node &> /dev/null; then
-    NODE_VERSION=$(node -v)
-    echo -e "${GREEN}✓${NC} Node.js installed: $NODE_VERSION"
+    NODE_VERSION=$(node --version)
+    echo "✅ Node.js installed: $NODE_VERSION"
 else
-    echo -e "${RED}✗${NC} Node.js not found. Please install Node.js 18+"
+    echo "❌ Node.js not found. Please install Node.js first."
     exit 1
 fi
 
 # Check npm
+echo ""
 echo "Checking npm..."
 if command -v npm &> /dev/null; then
-    NPM_VERSION=$(npm -v)
-    echo -e "${GREEN}✓${NC} npm installed: $NPM_VERSION"
+    NPM_VERSION=$(npm --version)
+    echo "✅ npm installed: $NPM_VERSION"
 else
-    echo -e "${RED}✗${NC} npm not found"
+    echo "❌ npm not found. Please install npm first."
     exit 1
 fi
 
-# Check if node_modules exists
-echo "Checking dependencies..."
-if [ -d "node_modules" ]; then
-    echo -e "${GREEN}✓${NC} node_modules found"
+# Check if we're in the right directory
+echo ""
+echo "Checking directory structure..."
+if [ -f "package.json" ]; then
+    echo "✅ package.json found"
 else
-    echo -e "${YELLOW}⚠${NC} node_modules not found. Running npm install..."
-    npm install
+    echo "❌ package.json not found. Are you in the project root?"
+    exit 1
 fi
 
-# Check for .env file
-echo "Checking environment variables..."
+if [ -d "src" ]; then
+    echo "✅ src directory found"
+else
+    echo "❌ src directory not found."
+    exit 1
+fi
+
+# Check environment file
+echo ""
+echo "Checking environment configuration..."
 if [ -f ".env" ]; then
-    echo -e "${GREEN}✓${NC} .env file found"
+    echo "✅ .env file found"
     
-    # Check for required keys
+    # Check for required variables
     if grep -q "VITE_SUPABASE_URL" .env; then
-        echo -e "${GREEN}✓${NC} VITE_SUPABASE_URL configured"
+        echo "✅ VITE_SUPABASE_URL configured"
     else
-        echo -e "${RED}✗${NC} VITE_SUPABASE_URL not found in .env"
+        echo "⚠️  VITE_SUPABASE_URL not found in .env"
     fi
     
     if grep -q "VITE_SUPABASE_ANON_KEY" .env; then
-        echo -e "${GREEN}✓${NC} VITE_SUPABASE_ANON_KEY configured"
+        echo "✅ VITE_SUPABASE_ANON_KEY configured"
     else
-        echo -e "${RED}✗${NC} VITE_SUPABASE_ANON_KEY not found in .env"
-    fi
-    
-    # Check for at least one AI provider
-    AI_PROVIDER_FOUND=0
-    if grep -q "VITE_ANTHROPIC_API_KEY" .env && ! grep -q "VITE_ANTHROPIC_API_KEY=$" .env; then
-        echo -e "${GREEN}✓${NC} Anthropic API key configured"
-        AI_PROVIDER_FOUND=1
-    fi
-    if grep -q "VITE_GOOGLE_API_KEY" .env && ! grep -q "VITE_GOOGLE_API_KEY=$" .env; then
-        echo -e "${GREEN}✓${NC} Google API key configured"
-        AI_PROVIDER_FOUND=1
-    fi
-    if grep -q "VITE_OPENAI_API_KEY" .env && ! grep -q "VITE_OPENAI_API_KEY=$" .env; then
-        echo -e "${GREEN}✓${NC} OpenAI API key configured"
-        AI_PROVIDER_FOUND=1
-    fi
-    
-    if [ $AI_PROVIDER_FOUND -eq 0 ]; then
-        echo -e "${YELLOW}⚠${NC} No AI provider API keys configured (app will use mock data)"
+        echo "⚠️  VITE_SUPABASE_ANON_KEY not found in .env"
     fi
 else
-    echo -e "${RED}✗${NC} .env file not found"
-    echo "  Creating .env from .env.example..."
-    if [ -f ".env.example" ]; then
-        cp .env.example .env
-        echo -e "${GREEN}✓${NC} Created .env file. Please add your API keys."
-    else
-        echo -e "${RED}✗${NC} .env.example not found"
-    fi
+    echo "⚠️  .env file not found. Please create one from .env.example"
 fi
 
-# Check for key files
+# Check if node_modules exists
 echo ""
-echo "Checking implementation files..."
+echo "Checking dependencies..."
+if [ -d "node_modules" ]; then
+    echo "✅ node_modules directory found"
+else
+    echo "⚠️  node_modules not found. Run: npm install"
+fi
 
-FILES_TO_CHECK=(
-    "supabase/migrations/005_analytics_tables.sql"
-    "supabase/migrations/006_automation_tables.sql"
+# Check key service files
+echo ""
+echo "Checking service files..."
+
+FILES=(
     "src/services/cache-service.ts"
     "src/services/analytics-service.ts"
     "src/services/automation-service.ts"
     "src/tools/filesystem-tools.ts"
-    "find-mock-data.js"
-    "IMPLEMENTATION_COMPLETE.md"
 )
 
-ALL_FILES_FOUND=1
-for FILE in "${FILES_TO_CHECK[@]}"; do
-    if [ -f "$FILE" ]; then
-        echo -e "${GREEN}✓${NC} $FILE"
+for file in "${FILES[@]}"; do
+    if [ -f "$file" ]; then
+        echo "✅ $file exists"
     else
-        echo -e "${RED}✗${NC} $FILE missing"
-        ALL_FILES_FOUND=0
+        echo "❌ $file not found"
     fi
 done
 
-# Check required packages
+# Check updated pages
 echo ""
-echo "Checking required packages..."
+echo "Checking updated pages..."
 
-PACKAGES=(
-    "@tanstack/react-query"
-    "zustand"
-    "framer-motion"
+PAGES=(
+    "src/pages/dashboard/Dashboard.tsx"
+    "src/pages/analytics/AnalyticsPage.tsx"
+    "src/pages/automation/AutomationPage.tsx"
 )
 
-for PACKAGE in "${PACKAGES[@]}"; do
-    if npm list "$PACKAGE" &> /dev/null; then
-        echo -e "${GREEN}✓${NC} $PACKAGE installed"
+for page in "${PAGES[@]}"; do
+    if [ -f "$page" ]; then
+        echo "✅ $page exists"
     else
-        echo -e "${YELLOW}⚠${NC} $PACKAGE not found. Installing..."
-        npm install "$PACKAGE"
+        echo "❌ $page not found"
     fi
 done
+
+# Check scanner script
+echo ""
+echo "Checking mock data scanner..."
+if [ -f "find-mock-data.js" ]; then
+    echo "✅ find-mock-data.js exists"
+else
+    echo "❌ find-mock-data.js not found"
+fi
 
 # Summary
 echo ""
-echo "=================================================="
-echo "Summary:"
+echo "============================================"
+echo "📋 Next Steps:"
+echo "============================================"
 echo ""
-
-if [ $ALL_FILES_FOUND -eq 1 ]; then
-    echo -e "${GREEN}✓${NC} All implementation files present"
-else
-    echo -e "${RED}✗${NC} Some implementation files missing"
-fi
-
+echo "1. Run mock data scanner:"
+echo "   node find-mock-data.js"
 echo ""
-echo "Next Steps:"
-echo "1. ${YELLOW}Run database migrations${NC} in Supabase SQL Editor"
-echo "   - 005_analytics_tables.sql"
-echo "   - 006_automation_tables.sql"
+echo "2. Install dependencies (if needed):"
+echo "   npm install"
 echo ""
-echo "2. ${YELLOW}Find and fix mock data${NC}"
-echo "   - Run: node find-mock-data.js"
+echo "3. Start development server:"
+echo "   npm run dev"
 echo ""
-echo "3. ${YELLOW}Start development server${NC}"
-echo "   - Run: npm run dev"
+echo "4. Verify database migrations in Supabase SQL Editor"
 echo ""
-echo "4. ${YELLOW}Verify everything works${NC}"
-echo "   - Visit: http://localhost:5173/dashboard"
+echo "5. Read CLEANUP-GUIDE.md for detailed instructions"
 echo ""
-echo "📚 For detailed instructions, see:"
-echo "   - IMPLEMENTATION_COMPLETE.md"
-echo "   - Check the artifacts in Claude"
-echo ""
-echo "=================================================="
+echo "============================================"
+echo "✅ Setup verification complete!"
+echo "============================================"

@@ -396,21 +396,21 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 {/* Menu Items */}
                 <div className="py-2">
                   <button 
-                    onClick={() => {setShowUserMenu(false); navigate('/dashboard/profile');}}
+                    onClick={() => {setShowUserMenu(false); navigate('/settings/profile');}}
                     className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:text-white hover:bg-slate-700 flex items-center space-x-2"
                   >
                     <UserIcon className="h-4 w-4" />
                     <span>Profile Settings</span>
                   </button>
                   <button 
-                    onClick={() => {setShowUserMenu(false); navigate('/dashboard/billing');}}
+                    onClick={() => {setShowUserMenu(false); navigate('/billing');}}
                     className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:text-white hover:bg-slate-700 flex items-center space-x-2"
                   >
                     <CreditCard className="h-4 w-4" />
                     <span>Billing & Usage</span>
                   </button>
                   <button 
-                    onClick={() => {setShowUserMenu(false); navigate('/dashboard/settings');}}
+                    onClick={() => {setShowUserMenu(false); navigate('/settings');}}
                     className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:text-white hover:bg-slate-700 flex items-center space-x-2"
                   >
                     <Settings className="h-4 w-4" />
@@ -421,7 +421,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 {/* Support & Logout */}
                 <div className="border-t border-slate-700 py-2">
                   <button 
-                    onClick={() => {setShowUserMenu(false); navigate('/dashboard/support');}}
+                    onClick={() => {setShowUserMenu(false); navigate('/support');}}
                     className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:text-white hover:bg-slate-700 flex items-center space-x-2"
                   >
                     <HelpCircle className="h-4 w-4" />

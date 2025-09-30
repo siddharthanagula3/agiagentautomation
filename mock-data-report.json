@@ -1,0 +1,164 @@
+[
+  {
+    "file": "C:\\Users\\SIDDHARTHA NAGULA\\Desktop\\agi\\agiagentautomation\\src\\components\\automation\\VisualWorkflowDesigner.tsx",
+    "matchCount": 17,
+    "matches": [
+      {
+        "line": 219,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "outputs: [{ id: 'trigger_out', label: 'Triggered', type: 'control' }]",
+        "match": "[{ id: 'trigger_out'"
+      },
+      {
+        "line": 233,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "outputs: [{ id: 'webhook_out', label: 'Data', type: 'data' }]",
+        "match": "[{ id: 'webhook_out'"
+      },
+      {
+        "line": 249,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "inputs: [{ id: 'prompt', label: 'Prompt', type: 'data', required: true }],",
+        "match": "[{ id: 'prompt'"
+      },
+      {
+        "line": 250,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "outputs: [{ id: 'completion', label: 'Completion', type: 'data' }]",
+        "match": "[{ id: 'completion'"
+      },
+      {
+        "line": 264,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "inputs: [{ id: 'data', label: 'Data', type: 'data', required: true }],",
+        "match": "[{ id: 'data'"
+      },
+      {
+        "line": 265,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "outputs: [{ id: 'analysis', label: 'Analysis', type: 'data' }]",
+        "match": "[{ id: 'analysis'"
+      },
+      {
+        "line": 281,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "inputs: [{ id: 'input_data', label: 'Input', type: 'data', required: true }],",
+        "match": "[{ id: 'input_data'"
+      },
+      {
+        "line": 282,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "outputs: [{ id: 'output_data', label: 'Output', type: 'data' }]",
+        "match": "[{ id: 'output_data'"
+      },
+      {
+        "line": 296,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "inputs: [{ id: 'input', label: 'Input', type: 'data', required: true }],",
+        "match": "[{ id: 'input'"
+      },
+      {
+        "line": 316,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "inputs: [{ id: 'url', label: 'URL', type: 'data' }],",
+        "match": "[{ id: 'url'"
+      },
+      {
+        "line": 317,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "outputs: [{ id: 'response', label: 'Response', type: 'data' }]",
+        "match": "[{ id: 'response'"
+      },
+      {
+        "line": 336,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "outputs: [{ id: 'sent', label: 'Sent', type: 'control' }]",
+        "match": "[{ id: 'sent'"
+      },
+      {
+        "line": 354,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "outputs: [{ id: 'sent', label: 'Sent', type: 'control' }]",
+        "match": "[{ id: 'sent'"
+      },
+      {
+        "line": 370,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "inputs: [{ id: 'trigger', label: 'Trigger', type: 'control' }],",
+        "match": "[{ id: 'trigger'"
+      },
+      {
+        "line": 371,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "outputs: [{ id: 'delayed', label: 'After Delay', type: 'control' }]",
+        "match": "[{ id: 'delayed'"
+      },
+      {
+        "line": 385,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "inputs: [{ id: 'input', label: 'Input', type: 'data' }],",
+        "match": "[{ id: 'input'"
+      },
+      {
+        "line": 386,
+        "pattern": "\\[\\s*\\{\\s*id:\\s*['\"].*?['\"]",
+        "code": "outputs: [{ id: 'output', label: 'Output', type: 'data' }]",
+        "match": "[{ id: 'output'"
+      }
+    ]
+  },
+  {
+    "file": "C:\\Users\\SIDDHARTHA NAGULA\\Desktop\\agi\\agiagentautomation\\src\\components\\ui\\input-otp.tsx",
+    "matchCount": 2,
+    "matches": [
+      {
+        "line": 29,
+        "pattern": "fake[A-Z][a-zA-Z]*",
+        "code": "const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index] || { char: undefined, hasFakeCaret: false, isActive: false };",
+        "match": "FakeCaret"
+      },
+      {
+        "line": 42,
+        "pattern": "fake[A-Z][a-zA-Z]*",
+        "code": "{Boolean(hasFakeCaret) && (",
+        "match": "FakeCaret"
+      }
+    ]
+  },
+  {
+    "file": "C:\\Users\\SIDDHARTHA NAGULA\\Desktop\\agi\\agiagentautomation\\src\\pages\\legal\\BusinessLegalPage.tsx",
+    "matchCount": 1,
+    "matches": [
+      {
+        "line": 63,
+        "pattern": "placeholder[A-Z][a-zA-Z]*",
+        "code": "// Data is loaded dynamically; removed mock placeholders",
+        "match": "placeholders"
+      }
+    ]
+  },
+  {
+    "file": "C:\\Users\\SIDDHARTHA NAGULA\\Desktop\\agi\\agiagentautomation\\src\\components\\employees\\AIEmployeeMarketplace.tsx",
+    "matchCount": 1,
+    "matches": [
+      {
+        "line": 206,
+        "pattern": "sample[A-Z][a-zA-Z]*",
+        "code": "// Removed sampleEmployees mock data. Using real data from aiEmployeeService.",
+        "match": "sampleEmployees"
+      }
+    ]
+  },
+  {
+    "file": "C:\\Users\\SIDDHARTHA NAGULA\\Desktop\\agi\\agiagentautomation\\src\\components\\employees\\WorkforceManagement.tsx",
+    "matchCount": 1,
+    "matches": [
+      {
+        "line": 278,
+        "pattern": "sample[A-Z][a-zA-Z]*",
+        "code": "// Removed sampleWorkforces mock data. Using empty state until real data is wired.",
+        "match": "sampleWorkforces"
+      }
+    ]
+  }
+]

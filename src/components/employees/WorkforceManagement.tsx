@@ -108,6 +108,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { analyticsService } from '@/services/analytics-service';
 
 // Types and Interfaces
 export interface AIWorkforce {
@@ -274,193 +275,7 @@ interface WorkforceManagementProps {
   className?: string;
 }
 
-// Sample data - replace with real API calls
-const sampleWorkforces: AIWorkforce[] = [
-  {
-    id: 'wf-001',
-    name: 'Digital Marketing Team',
-    description: 'AI workforce focused on digital marketing campaigns and content creation',
-    ceoEmployeeId: 'emp-001',
-    members: [
-      {
-        id: 'wm-001',
-        employeeId: 'emp-001',
-        employee: {
-          id: 'emp-001',
-          name: 'Sarah Chen',
-          role: 'Marketing Director',
-          avatar: '/avatars/sarah.jpg',
-          rating: 4.9,
-          hourlyRate: 85,
-          status: 'available'
-        },
-        position: 'Team Lead',
-        department: 'Marketing',
-        permissions: ['manage_team', 'assign_tasks', 'view_analytics'],
-        joinedAt: new Date('2024-01-15'),
-        lastActive: new Date(),
-        productivity: {
-          tasksCompleted: 45,
-          averageTaskTime: 2.5,
-          qualityScore: 4.8,
-          collaborationRating: 4.9,
-          availabilityHours: 160,
-          utilizedHours: 145,
-          revenue: 12250
-        }
-      },
-      {
-        id: 'wm-002',
-        employeeId: 'emp-002',
-        employee: {
-          id: 'emp-002',
-          name: 'Marcus Rodriguez',
-          role: 'Content Creator',
-          avatar: '/avatars/marcus.jpg',
-          rating: 4.7,
-          hourlyRate: 65,
-          status: 'busy'
-        },
-        position: 'Senior Content Creator',
-        department: 'Marketing',
-        permissions: ['create_content', 'manage_campaigns'],
-        joinedAt: new Date('2024-01-20'),
-        lastActive: new Date(Date.now() - 30 * 60 * 1000),
-        productivity: {
-          tasksCompleted: 38,
-          averageTaskTime: 3.2,
-          qualityScore: 4.6,
-          collaborationRating: 4.5,
-          availabilityHours: 160,
-          utilizedHours: 155,
-          revenue: 10075
-        }
-      }
-    ],
-    structure: {
-      departments: [
-        {
-          id: 'dept-001',
-          name: 'Content Marketing',
-          description: 'Content creation and distribution',
-          leaderId: 'emp-001',
-          memberIds: ['emp-001', 'emp-002'],
-          budget: 25000,
-          objectives: ['Increase brand awareness', 'Generate quality leads']
-        }
-      ],
-      hierarchy: [
-        {
-          employeeId: 'emp-001',
-          level: 1,
-          children: ['emp-002']
-        },
-        {
-          employeeId: 'emp-002',
-          level: 2,
-          parentId: 'emp-001',
-          children: []
-        }
-      ],
-      reportingChain: [
-        {
-          subordinateId: 'emp-002',
-          supervisorId: 'emp-001',
-          relationship: 'direct'
-        }
-      ]
-    },
-    projects: [
-      {
-        id: 'proj-001',
-        name: 'Q1 Content Campaign',
-        description: 'Comprehensive content marketing campaign for Q1 2024',
-        status: 'active',
-        priority: 'high',
-        assignedMembers: ['emp-001', 'emp-002'],
-        budget: 15000,
-        estimatedHours: 120,
-        actualHours: 85,
-        startDate: new Date('2024-01-01'),
-        dueDate: new Date('2024-03-31'),
-        milestones: [
-          {
-            id: 'ms-001',
-            name: 'Content Strategy',
-            description: 'Complete content strategy and calendar',
-            dueDate: new Date('2024-01-31'),
-            completedAt: new Date('2024-01-28'),
-            dependencies: []
-          }
-        ],
-        tasks: [
-          {
-            id: 'task-001',
-            title: 'Create blog post series',
-            description: 'Write 10 blog posts on industry trends',
-            assigneeId: 'emp-002',
-            status: 'in_progress',
-            priority: 'high',
-            estimatedHours: 40,
-            actualHours: 28,
-            createdAt: new Date('2024-01-15'),
-            dueDate: new Date('2024-02-15'),
-            tags: ['content', 'blog', 'seo']
-          }
-        ],
-        progress: 71,
-        tags: ['marketing', 'content', 'q1']
-      }
-    ],
-    status: 'active',
-    performance: {
-      overallScore: 4.7,
-      efficiency: 89,
-      qualityScore: 4.6,
-      collaborationScore: 4.8,
-      projectsCompleted: 12,
-      onTimeDelivery: 92,
-      clientSatisfaction: 4.5,
-      totalRevenue: 125000,
-      costPerProject: 8500,
-      utilizationRate: 87
-    },
-    budget: {
-      totalBudget: 50000,
-      spentBudget: 22325,
-      allocatedBudget: 35000,
-      monthlyBurn: 11162,
-      costPerMember: 5581,
-      roi: 2.3
-    },
-    settings: {
-      workingHours: {
-        start: '09:00',
-        end: '17:00',
-        timezone: 'PST',
-        daysPerWeek: 5
-      },
-      communication: {
-        defaultChannel: 'slack',
-        meetingFrequency: 'weekly',
-        reportingSchedule: ['monday', 'friday']
-      },
-      automation: {
-        autoAssignment: true,
-        workloadBalancing: true,
-        performanceTracking: true,
-        notificationSettings: {
-          project_updates: true,
-          task_assignments: true,
-          deadlines: true,
-          performance_alerts: true
-        }
-      }
-    },
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date()
-  }
-];
+// Removed sampleWorkforces mock data. Using empty state until real data is wired.
 
 export const WorkforceManagement: React.FC<WorkforceManagementProps> = ({ className }) => {
   // State management
@@ -474,12 +289,12 @@ export const WorkforceManagement: React.FC<WorkforceManagementProps> = ({ classN
 
   const queryClient = useQueryClient();
 
-  // Simulated API calls
-  const { data: workforces = sampleWorkforces, isLoading } = useQuery({
+  // Placeholder: return empty list for now (no mock data)
+  const { data: workforces = [], isLoading } = useQuery({
     queryKey: ['workforces'],
     queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return sampleWorkforces;
+      // If there's a service later, hook it here. Empty state by default.
+      return [] as AIWorkforce[];
     },
     staleTime: 5 * 60 * 1000,
   });

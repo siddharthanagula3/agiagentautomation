@@ -269,9 +269,8 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
     queryKey: ['chat-messages', activeTabId],
     queryFn: async () => {
       if (!activeTabId) return [];
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return generateSampleMessages(activeTabId);
+      // Return empty messages by default (no mock generator)
+      return [] as ChatMessage[];
     },
     enabled: !!activeTabId,
     staleTime: 30 * 1000
@@ -309,71 +308,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
     }
   }, [activeTabId, isFullscreen]);
 
-  // Sample data generator
-  const generateSampleMessages = (tabId: string): ChatMessage[] => {
-    const baseMessages: ChatMessage[] = [
-      {
-        id: '1',
-        type: 'user',
-        content: 'Hello! I need help with analyzing our Q4 sales data.',
-        timestamp: new Date(Date.now() - 3600000),
-        senderId: 'user-1',
-        senderName: 'You',
-        status: 'read'
-      },
-      {
-        id: '2',
-        type: 'assistant',
-        content: 'I\'d be happy to help you analyze your Q4 sales data! I can assist with data processing, visualization, and generating insights. What specific aspects would you like to explore?',
-        timestamp: new Date(Date.now() - 3500000),
-        senderId: 'ai-analyst',
-        senderName: 'Data Analyst AI',
-        senderRole: 'Senior Data Analyst',
-        status: 'read'
-      },
-      {
-        id: '3',
-        type: 'tool_execution',
-        content: 'Processing sales data analysis...',
-        timestamp: new Date(Date.now() - 3000000),
-        senderId: 'ai-analyst',
-        senderName: 'Data Analyst AI',
-        status: 'completed',
-        toolExecution: {
-          id: 'tool-1',
-          toolName: 'Data Analysis Tool',
-          status: 'completed',
-          startTime: new Date(Date.now() - 3000000),
-          endTime: new Date(Date.now() - 2800000),
-          progress: 100,
-          input: { dataset: 'q4-sales.csv', analysis_type: 'comprehensive' },
-          output: { 
-            summary: 'Revenue increased 15% QoQ',
-            insights: ['Strong performance in Enterprise segment', 'Mobile sales doubled'],
-            recommendations: ['Increase mobile marketing budget', 'Expand enterprise team']
-          }
-        }
-      },
-      {
-        id: '4',
-        type: 'assistant',
-        content: 'Great news! I\'ve completed the analysis of your Q4 sales data. Here are the key findings:\n\n📈 **Overall Performance**: Revenue increased 15% compared to Q3\n\n🎯 **Top Insights**:\n• Enterprise segment showed exceptional growth\n• Mobile sales doubled from previous quarter\n• Customer retention improved by 8%\n\n💡 **Recommendations**:\n• Increase mobile marketing budget by 25%\n• Expand enterprise sales team\n• Focus on customer success initiatives\n\nWould you like me to create a detailed report or explore any specific metrics?',
-        timestamp: new Date(Date.now() - 2700000),
-        senderId: 'ai-analyst',
-        senderName: 'Data Analyst AI',
-        senderRole: 'Senior Data Analyst',
-        status: 'read',
-        metadata: {
-          reactions: [
-            { emoji: '👍', userId: 'user-1', userName: 'You', timestamp: new Date(Date.now() - 2600000) },
-            { emoji: '🎉', userId: 'user-1', userName: 'You', timestamp: new Date(Date.now() - 2600000) }
-          ]
-        }
-      }
-    ];
-
-    return baseMessages;
-  };
+  // Removed sample message generator
 
   // Message handlers
   const handleSendMessage = useCallback(async () => {
@@ -443,14 +378,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
   }, [messageInput, activeTabId, onMessageSend]);
 
   const generateAIResponse = (userMessage: string): string => {
-    const responses = [
-      "I understand your request. Let me help you with that.",
-      "That's an interesting question! Here's what I think...",
-      "I can definitely assist you with this. Let me analyze the situation.",
-      "Great question! Based on my knowledge, here's my recommendation...",
-      "I'll need to process this information. Give me a moment to provide you with the best answer."
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+    return '';
   };
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {

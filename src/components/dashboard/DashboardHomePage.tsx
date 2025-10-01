@@ -44,7 +44,6 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
     successRate: 0,
   });
 
-  // Animated counter effect
   useEffect(() => {
     const interval = setInterval(() => {
       setStats(prev => ({
@@ -64,7 +63,8 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
       title: 'Start New Task',
       description: 'Tell AI what you need in natural language',
       icon: MessageSquare,
-      gradient: 'from-blue-500 to-cyan-500',
+      iconColor: 'text-primary',
+      bgColor: 'bg-primary/10',
       action: () => navigate('/chat'),
     },
     {
@@ -72,7 +72,8 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
       title: 'Explore Capabilities',
       description: 'See what your AI workforce can do',
       icon: Sparkles,
-      gradient: 'from-purple-500 to-pink-500',
+      iconColor: 'text-accent',
+      bgColor: 'bg-accent/10',
       action: () => navigate('/marketplace'),
     },
     {
@@ -80,7 +81,8 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
       title: 'View Workflows',
       description: 'Manage automated processes',
       icon: Zap,
-      gradient: 'from-green-500 to-emerald-500',
+      iconColor: 'text-success',
+      bgColor: 'bg-success/10',
       action: () => navigate('/automation'),
     },
     {
@@ -88,7 +90,8 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
       title: 'See Analytics',
       description: 'Track performance and usage',
       icon: BarChart3,
-      gradient: 'from-orange-500 to-red-500',
+      iconColor: 'text-warning',
+      bgColor: 'bg-warning/10',
       action: () => navigate('/analytics'),
     },
   ];
@@ -272,11 +275,11 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
                     className="feature-card text-left p-6 rounded-2xl group"
                   >
                     <div className={cn(
-                      "w-14 h-14 rounded-xl mb-4 flex items-center justify-center bg-gradient-to-br",
-                      action.gradient,
+                      "w-14 h-14 rounded-xl mb-4 flex items-center justify-center",
+                      action.bgColor,
                       "feature-card-icon"
                     )}>
-                      <IconComponent className="h-7 w-7 text-white" />
+                      <IconComponent className={cn("h-7 w-7", action.iconColor)} />
                     </div>
                     <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
                       {action.title}
@@ -343,9 +346,9 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
                 >
                   <div className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0",
-                    item.color === 'primary' && "bg-primary text-white",
-                    item.color === 'accent' && "bg-accent text-white",
-                    item.color === 'secondary' && "bg-secondary text-white"
+                    item.color === 'primary' && "bg-primary text-primary-foreground",
+                    item.color === 'accent' && "bg-accent text-accent-foreground",
+                    item.color === 'secondary' && "bg-secondary text-secondary-foreground"
                   )}>
                     {item.step}
                   </div>

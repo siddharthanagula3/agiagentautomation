@@ -24,7 +24,7 @@ Inspired by Claude.ai, Linear, and modern SaaS platforms
   :root {
     /* Core Brand Colors - Professional AI Theme */
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --foreground: 0 0% 9%;
     
     /* Primary - Electric Blue (AI/Tech) */
     --primary: 217 91% 60%;
@@ -39,17 +39,17 @@ Inspired by Claude.ai, Linear, and modern SaaS platforms
     --accent: 189 94% 43%;
     --accent-foreground: 0 0% 100%;
     
-    /* Surface Colors */
+    /* Surface Colors - Clean White */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 9%;
     
-    /* UI States */
-    --muted: 220 13% 95%;
-    --muted-foreground: 220 9% 46%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
+    /* UI States - Light Gray */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
     --ring: 217 91% 60%;
     
     /* Status Colors */
@@ -66,35 +66,35 @@ Inspired by Claude.ai, Linear, and modern SaaS platforms
   }
 
   .dark {
-    /* Dark Mode - Premium Look */
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    /* Dark Mode - Pure Black Background */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
     
     --primary: 217 91% 60%;
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 0 0% 98%;
     --primary-hover: 217 91% 65%;
     
     --secondary: 262 52% 47%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary-foreground: 0 0% 98%;
     
     --accent: 189 94% 43%;
-    --accent-foreground: 210 40% 98%;
+    --accent-foreground: 0 0% 98%;
     
-    /* Dark Surfaces - Elevated Layers */
-    --card: 217 19% 18%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
+    /* Dark Surfaces - Black tones */
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 98%;
     
-    --muted: 217 19% 21%;
-    --muted-foreground: 215 20% 65%;
-    --border: 217 19% 23%;
-    --input: 217 19% 23%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
     --ring: 217 91% 60%;
     
     /* Elevated surfaces for glassmorphism */
-    --surface-elevated: 217 19% 21%;
-    --surface-glass: 217 19% 18% / 0.7;
+    --surface-elevated: 0 0% 12%;
+    --surface-glass: 0 0% 7% / 0.7;
   }
 }
 

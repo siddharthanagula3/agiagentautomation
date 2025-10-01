@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/unified-auth-store';
+import { useTheme } from '../theme-provider';
 import { Button } from '../ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
@@ -22,8 +23,7 @@ import {
   Sparkles,
   CheckCircle,
   AlertCircle,
-  Activity,
-  Zap
+  Activity
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -53,7 +53,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const { theme, setTheme, actualTheme } = useTheme();
   
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -92,6 +92,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       console.error('Logout error:', error);
       navigate('/auth/login');
     }
+  };
+
+  const toggleTheme = () => {
+    setTheme(actualTheme === 'light' ? 'dark' : 'light');
   };
 
   const handleNotificationClick = (notificationId: string) => {
@@ -215,10 +219,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            onClick={toggleTheme}
             aria-label="Toggle theme"
           >
-            {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            {actualTheme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </Button>
 
           {/* Notifications */}

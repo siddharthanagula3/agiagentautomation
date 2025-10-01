@@ -84,6 +84,13 @@ const SettingsPage: React.FC = () => {
     loadAllData();
   }, []);
 
+  // Update active section when URL changes
+  useEffect(() => {
+    if (section && section !== activeSection) {
+      setActiveSection(section);
+    }
+  }, [section]);
+
   const loadAllData = async () => {
     try {
       setIsLoading(true);
@@ -371,7 +378,10 @@ const SettingsPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <Tabs value={activeSection} onValueChange={setActiveSection} className="space-y-6">
+        <Tabs value={activeSection} onValueChange={(value) => {
+          setActiveSection(value);
+          navigate(`/settings/${value}`, { replace: true });
+        }} className="space-y-6">
           <TabsList className="bg-slate-800/50 border border-slate-700/50">
             <TabsTrigger value="profile" className="data-[state=active]:bg-slate-700">
               <User className="h-4 w-4 mr-2" />

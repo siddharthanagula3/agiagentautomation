@@ -230,7 +230,7 @@ const Dashboard: React.FC = () => {
                   <p className="text-xs text-muted-foreground mt-1">
                     {(stats?.totalTokensUsed || 0).toLocaleString()} tokens used
                   </p>
-                  <Link to="/dashboard/billing">
+                  <Link to="/billing">
                     <Button variant="link" className="h-auto p-0 mt-2 text-xs">
                       View billing →
                     </Button>

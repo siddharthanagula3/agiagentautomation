@@ -1,13 +1,14 @@
 /**
- * Dashboard Home Page Component - Simplified with Fresh User Experience
- * Shows empty states and zero values for new users
+ * Dashboard Home Page - Modern AI Workforce Interface
+ * Professional design with glassmorphism and smooth animations
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   TrendingUp,
   Users,
@@ -19,9 +20,15 @@ import {
   Sparkles,
   MessageSquare,
   BarChart3,
-  Brain
+  Brain,
+  Rocket,
+  Clock,
+  CheckCircle2,
+  Play,
+  TrendingDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 interface DashboardHomePageProps {
   className?: string;
@@ -30,299 +37,386 @@ interface DashboardHomePageProps {
 export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className }) => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-
-  const stats = {
+  const [stats, setStats] = useState({
     activeEmployees: 0,
-    totalEmployees: 0,
-    activeWorkflows: 0,
-    totalWorkflows: 0,
-    monthlyRevenue: 0,
+    totalTasks: 0,
+    tokensUsed: 0,
     successRate: 0,
-  };
+  });
+
+  // Animated counter effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStats(prev => ({
+        activeEmployees: Math.min(prev.activeEmployees + 1, 0),
+        totalTasks: Math.min(prev.totalTasks + 23, 0),
+        tokensUsed: Math.min(prev.tokensUsed + 127, 0),
+        successRate: Math.min(prev.successRate + 2.3, 0),
+      }));
+    }, 30);
+    setTimeout(() => clearInterval(interval), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const quickActions = [
     {
-      id: 'hire',
-      title: 'Hire AI Employee',
-      description: 'Add your first AI team member',
-      icon: Bot,
-      color: 'blue',
-      action: () => navigate('/marketplace'),
-    },
-    {
-      id: 'workflow',
-      title: 'Create Workflow',
-      description: 'Build your first automation',
-      icon: Zap,
-      color: 'purple',
-      action: () => navigate('/automation'),
-    },
-    {
       id: 'chat',
-      title: 'Start Chat',
-      description: 'Chat with an AI assistant',
+      title: 'Start New Task',
+      description: 'Tell AI what you need in natural language',
       icon: MessageSquare,
-      color: 'green',
+      gradient: 'from-blue-500 to-cyan-500',
       action: () => navigate('/chat'),
     },
     {
+      id: 'marketplace',
+      title: 'Explore Capabilities',
+      description: 'See what your AI workforce can do',
+      icon: Sparkles,
+      gradient: 'from-purple-500 to-pink-500',
+      action: () => navigate('/marketplace'),
+    },
+    {
+      id: 'automation',
+      title: 'View Workflows',
+      description: 'Manage automated processes',
+      icon: Zap,
+      gradient: 'from-green-500 to-emerald-500',
+      action: () => navigate('/automation'),
+    },
+    {
       id: 'analytics',
-      title: 'View Analytics',
-      description: 'Check performance metrics',
+      title: 'See Analytics',
+      description: 'Track performance and usage',
       icon: BarChart3,
-      color: 'orange',
+      gradient: 'from-orange-500 to-red-500',
       action: () => navigate('/analytics'),
     },
   ];
 
-  const getActionColor = (color: string) => {
-    const colors = {
-      blue: 'bg-blue-500/20 border-blue-500/30 text-blue-400 hover:bg-blue-500/30',
-      purple: 'bg-purple-500/20 border-purple-500/30 text-purple-400 hover:bg-purple-500/30',
-      green: 'bg-green-500/20 border-green-500/30 text-green-400 hover:bg-green-500/30',
-      orange: 'bg-orange-500/20 border-orange-500/30 text-orange-400 hover:bg-orange-500/30',
-    };
-    return colors[color as keyof typeof colors] || colors.blue;
-  };
+  const recentActivity = [
+    { type: 'info', message: 'Welcome to your AI Workforce! Start by asking AI to help with a task.', time: 'Just now' },
+  ];
 
   return (
-    <div className={cn("space-y-6 p-6", className)}>
+    <div className={cn("min-h-screen p-6 space-y-6", className)}>
       {/* Welcome Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          Welcome{user?.name ? `, ${user.name}` : ''}! 👋
-        </h1>
-        <p className="text-slate-400">
-          Let's get started with building your AI workforce
-          </p>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="glass-strong rounded-3xl p-8 relative overflow-hidden"
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+        <div className="relative z-10">
+          <div className="flex items-start justify-between">
+            <div>
+              <Badge className="mb-4 glass">
+                <Sparkles className="mr-2 h-3 w-3" />
+                AI Workforce Dashboard
+              </Badge>
+              <h1 className="text-4xl font-bold mb-2">
+                Welcome back{user?.name ? `, ${user.name}` : ''}! 👋
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                Your AI workforce is ready. Just ask what you need.
+              </p>
+            </div>
+            <Button 
+              size="lg" 
+              className="btn-glow gradient-primary text-white"
+              onClick={() => navigate('/chat')}
+            >
+              <Play className="mr-2 h-5 w-5" />
+              Start New Task
+            </Button>
+          </div>
         </div>
+      </motion.div>
 
-      {/* Stats Overview */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Active Employees Card */}
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Active Employees</p>
-                <p className="text-2xl font-bold text-white">
-                  {stats.activeEmployees}
-                  <span className="text-sm text-slate-400 font-normal">
-                    /{stats.totalEmployees}
-                  </span>
-                </p>
-                <p className="text-xs text-slate-500 mt-1">--</p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Card className="glass-strong card-hover group">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Brain className="h-6 w-6 text-primary" />
+                </div>
+                <Badge variant="secondary" className="text-xs">
+                  <TrendingUp className="mr-1 h-3 w-3" />
+                  Ready
+                </Badge>
               </div>
-              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                <Users className="h-6 w-6 text-blue-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              <p className="text-sm text-muted-foreground mb-1">AI Workforce</p>
+              <p className="text-3xl font-bold">
+                {stats.activeEmployees}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Available 24/7
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {/* Active Workflows Card */}
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Active Workflows</p>
-                <p className="text-2xl font-bold text-white">
-                  {stats.activeWorkflows}
-                  <span className="text-sm text-slate-400 font-normal">
-                    /{stats.totalWorkflows}
-                  </span>
-                </p>
-                <p className="text-xs text-slate-500 mt-1">--</p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card className="glass-strong card-hover group">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Target className="h-6 w-6 text-accent" />
+                </div>
+                <Badge variant="secondary" className="text-xs">
+                  This month
+                </Badge>
               </div>
-              <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                <Zap className="h-6 w-6 text-purple-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              <p className="text-sm text-muted-foreground mb-1">Tasks Completed</p>
+              <p className="text-3xl font-bold">
+                {stats.totalTasks.toLocaleString()}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Start your first task
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {/* Monthly Revenue Card */}
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Monthly Revenue</p>
-                <p className="text-2xl font-bold text-white">
-                  ${stats.monthlyRevenue.toLocaleString()}
-                </p>
-                <p className="text-xs text-slate-500 mt-1">--</p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Card className="glass-strong card-hover group">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Zap className="h-6 w-6 text-secondary" />
+                </div>
+                <Badge variant="secondary" className="text-xs">
+                  <Clock className="mr-1 h-3 w-3" />
+                  Free tier
+                </Badge>
               </div>
-              <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-                <DollarSign className="h-6 w-6 text-green-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              <p className="text-sm text-muted-foreground mb-1">Tokens Used</p>
+              <p className="text-3xl font-bold">
+                {stats.tokensUsed.toLocaleString()}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                5,000 free monthly
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {/* Success Rate Card */}
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Success Rate</p>
-                <p className="text-2xl font-bold text-white">
-                  {stats.successRate}%
-                </p>
-                <p className="text-xs text-slate-500 mt-1">--</p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <Card className="glass-strong card-hover group">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <CheckCircle2 className="h-6 w-6 text-success" />
+                </div>
+                <Badge variant="secondary" className="text-xs">
+                  N/A
+                </Badge>
               </div>
-              <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                <Target className="h-6 w-6 text-orange-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              <p className="text-sm text-muted-foreground mb-1">Success Rate</p>
+              <p className="text-3xl font-bold">
+                --
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Complete tasks to track
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
-      {/* Getting Started Section */}
-      <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20 backdrop-blur-xl">
-              <CardHeader>
-          <div className="flex items-center space-x-2">
-            <Sparkles className="h-5 w-5 text-blue-400" />
-            <CardTitle className="text-white">Getting Started</CardTitle>
-                  </div>
-          <CardDescription>
-            Follow these steps to set up your AI workforce
-          </CardDescription>
-              </CardHeader>
-              <CardContent>
-          <div className="space-y-4">
-            {/* Step 1 */}
-            <div className="flex items-start space-x-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 font-bold flex-shrink-0">
-                1
+      {/* Quick Actions */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+      >
+        <Card className="glass-strong">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>Start working with your AI workforce</CardDescription>
               </div>
-              <div className="flex-1">
-                <h3 className="font-medium text-white mb-1">Hire Your First AI Employee</h3>
-                <p className="text-sm text-slate-400 mb-3">
-                  Browse our marketplace and hire an AI employee to join your team
-                </p>
-                <Button 
-                  size="sm" 
-                  className="bg-blue-600 hover:bg-blue-700"
-                  onClick={() => navigate('/marketplace')}
-                >
-                  Browse Marketplace
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
+              <Rocket className="h-6 w-6 text-primary" />
             </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {quickActions.map((action, index) => {
+                const IconComponent = action.icon;
+                return (
+                  <motion.button
+                    key={action.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: 0.6 + index * 0.1 }}
+                    onClick={action.action}
+                    className="feature-card text-left p-6 rounded-2xl group"
+                  >
+                    <div className={cn(
+                      "w-14 h-14 rounded-xl mb-4 flex items-center justify-center bg-gradient-to-br",
+                      action.gradient,
+                      "feature-card-icon"
+                    )}>
+                      <IconComponent className="h-7 w-7 text-white" />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                      {action.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {action.description}
+                    </p>
+                    <ArrowRight className="h-5 w-5 text-primary mt-4 group-hover:translate-x-1 transition-transform" />
+                  </motion.button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
-            {/* Step 2 */}
-            <div className="flex items-start space-x-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 font-bold flex-shrink-0">
-                2
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium text-white mb-1">Create Your First Workflow</h3>
-                <p className="text-sm text-slate-400 mb-3">
-                  Set up an automation workflow to streamline your operations
-                </p>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
-                  onClick={() => navigate('/automation')}
+      {/* Getting Started Guide */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.9 }}
+      >
+        <Card className="card-premium">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <CardTitle>Getting Started</CardTitle>
+            </div>
+            <CardDescription>
+              Three simple steps to unlock your AI workforce
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                {
+                  step: '1',
+                  title: 'Tell AI What You Need',
+                  description: 'Just describe your task in plain English. No technical knowledge required.',
+                  action: 'Start Chat',
+                  route: '/chat',
+                  color: 'primary'
+                },
+                {
+                  step: '2',
+                  title: 'Watch It Think & Execute',
+                  description: 'AI reasons through the problem and implements every step automatically.',
+                  action: 'See Examples',
+                  route: '/demo',
+                  color: 'accent'
+                },
+                {
+                  step: '3',
+                  title: 'Get Your Results',
+                  description: 'Receive complete, ready-to-use outputs. From idea to execution in minutes.',
+                  action: 'View Analytics',
+                  route: '/analytics',
+                  color: 'secondary'
+                }
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  className="glass rounded-2xl p-6 flex items-start gap-4 card-hover"
                 >
-                  Create Workflow
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
+                  <div className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0",
+                    item.color === 'primary' && "bg-primary text-white",
+                    item.color === 'accent' && "bg-accent text-white",
+                    item.color === 'secondary' && "bg-secondary text-white"
+                  )}>
+                    {item.step}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
+                    <p className="text-muted-foreground text-sm mb-4">{item.description}</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(item.route)}
+                    >
+                      {item.action}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
-            {/* Step 3 */}
-            <div className="flex items-start space-x-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500/20 text-green-400 font-bold flex-shrink-0">
-                3
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium text-white mb-1">Start Chatting with AI</h3>
-                <p className="text-sm text-slate-400 mb-3">
-                  Have a conversation with an AI assistant to explore capabilities
+      {/* Recent Activity */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.1 }}
+      >
+        <Card className="glass-strong">
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>Your latest interactions and updates</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivity.map((activity, index) => (
+                <div
+                  key={index}
+                  className="glass rounded-xl p-4 flex items-start gap-4"
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Brain className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm">{activity.message}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
+                  </div>
+                </div>
+              ))}
+
+              {/* Empty State */}
+              <div className="text-center py-12">
+                <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No Activity Yet</h3>
+                <p className="text-muted-foreground mb-4 max-w-md mx-auto">
+                  Your activity feed will appear here once you start working with your AI workforce
                 </p>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                <Button
+                  className="btn-glow gradient-primary text-white"
                   onClick={() => navigate('/chat')}
                 >
-                  Start Chat
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <Play className="mr-2 h-4 w-4" />
+                  Start Your First Task
                 </Button>
               </div>
             </div>
-                </div>
-              </CardContent>
-            </Card>
-
-          {/* Quick Actions */}
-            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-              <CardHeader>
-                <CardTitle className="text-white">Quick Actions</CardTitle>
-                <CardDescription>Common tasks and operations</CardDescription>
-              </CardHeader>
-              <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {quickActions.map((action) => {
-                    const IconComponent = action.icon;
-                    return (
-                <button
-                        key={action.id}
-                        onClick={action.action}
-                        className={cn(
-                          "relative p-4 rounded-lg border transition-all duration-200 text-left group",
-                    getActionColor(action.color)
-                        )}
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="w-10 h-10 rounded-lg bg-current/20 flex items-center justify-center">
-                            <IconComponent className="h-5 w-5" />
-                          </div>
-                        </div>
-                        <h3 className="font-medium text-white mb-1 group-hover:text-current transition-colors">
-                          {action.title}
-                        </h3>
-                        <p className="text-sm text-slate-400 leading-relaxed">
-                          {action.description}
-                        </p>
-                </button>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-
-      {/* Empty State for Activity */}
-            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
-              <CardHeader>
-                    <CardTitle className="text-white">Recent Activity</CardTitle>
-                    <CardDescription>Latest system events and updates</CardDescription>
-              </CardHeader>
-              <CardContent>
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Brain className="h-8 w-8 text-slate-500" />
-            </div>
-            <h3 className="text-lg font-medium text-white mb-2">
-              No Activity Yet
-            </h3>
-            <p className="text-slate-400 mb-4">
-              Your activity feed will appear here once you start using the platform
-            </p>
-            <Button 
-              onClick={() => navigate('/marketplace')}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };

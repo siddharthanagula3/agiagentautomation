@@ -99,6 +99,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { autonomousWorkflowService, type AutonomousWorkflow, type StandingOrder } from '@/services/autonomous-workflow-service';
+import { useAuthStore } from '@/stores/unified-auth-store';
 import { toast } from 'sonner';
 
 interface AutonomousWorkflowsPageProps {
@@ -217,23 +218,40 @@ export const AutonomousWorkflowsPage: React.FC<AutonomousWorkflowsPageProps> = (
 
   const queryClient = useQueryClient();
 
-  // Fetch standing orders
+  const { user } = useAuthStore();
+  const userId = user?.id;
+
+  // Fetch standing orders (real user id)
   const { data: standingOrders = [], isLoading, error } = useQuery<StandingOrder[]>({
     queryKey: ['standing-orders'],
-    queryFn: () => autonomousWorkflowService.getStandingOrders('current-user-id'),
+    queryFn: () => autonomousWorkflowService.getStandingOrders(userId!),
+    enabled: !!userId,
     staleTime: 30 * 1000,
     refetchInterval: 60 * 1000, // Refetch every minute
   });
 
-  // Mock metrics - replace with real data
+  // Derived metrics from real data
   const metrics: WorkflowMetrics = useMemo(() => {
+    const total = standingOrders.length;
+    const active = standingOrders.filter(o => o.isActive).length;
+    const successAvg = Math.round(
+      standingOrders.length > 0
+        ? standingOrders.reduce((acc, o) => acc + (o.workflow.successRate || 0), 0) / standingOrders.length
+        : 0
+    );
+    const totalRuns = standingOrders.reduce((acc, o) => acc + (o.workflow.runCount || 0), 0);
+    const avgTime = standingOrders.length > 0
+      ? Math.round((standingOrders.reduce((acc, o) => acc + (o.workflow.avgExecutionTime || 0), 0) / standingOrders.length) * 10) / 10
+      : 0;
+    const upcoming = standingOrders.filter(o => !!o.workflow.nextRun && o.isActive).length;
+
     return {
-      totalWorkflows: standingOrders.length,
-      activeWorkflows: standingOrders.filter(o => o.isActive).length,
-      successRate: 94.5,
-      totalExecutions: 1234,
-      avgExecutionTime: 2.3,
-      upcomingRuns: 8
+      totalWorkflows: total,
+      activeWorkflows: active,
+      successRate: successAvg,
+      totalExecutions: totalRuns,
+      avgExecutionTime: avgTime,
+      upcomingRuns: upcoming
     };
   }, [standingOrders]);
 

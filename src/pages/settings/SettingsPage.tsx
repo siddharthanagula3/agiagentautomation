@@ -332,7 +332,7 @@ const SettingsPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-          <span className="text-slate-400">Loading settings...</span>
+          <span className="text-muted-foreground">Loading settings...</span>
         </div>
       </div>
     );
@@ -343,7 +343,7 @@ const SettingsPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-          <p className="text-slate-400 mb-4">Failed to load settings</p>
+          <p className="text-muted-foreground mb-4">Failed to load settings</p>
           <Button onClick={loadAllData} variant="outline">
             Retry
           </Button>
@@ -361,8 +361,8 @@ const SettingsPage: React.FC = () => {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-white">Settings</h1>
-          <p className="text-slate-400 mt-1">
+          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+          <p className="text-muted-foreground mt-1">
             Manage your account, preferences, and system configuration
           </p>
         </div>
@@ -382,20 +382,20 @@ const SettingsPage: React.FC = () => {
           setActiveSection(value);
           navigate(`/settings/${value}`, { replace: true });
         }} className="space-y-6">
-          <TabsList className="bg-slate-800/50 border border-slate-700/50">
-            <TabsTrigger value="profile" className="data-[state=active]:bg-slate-700">
+          <TabsList className="bg-card border border-border">
+            <TabsTrigger value="profile" className="data-[state=active]:bg-accent">
               <User className="h-4 w-4 mr-2" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="data-[state=active]:bg-slate-700">
+            <TabsTrigger value="notifications" className="data-[state=active]:bg-accent">
               <Bell className="h-4 w-4 mr-2" />
               Notifications
             </TabsTrigger>
-            <TabsTrigger value="security" className="data-[state=active]:bg-slate-700">
+            <TabsTrigger value="security" className="data-[state=active]:bg-accent">
               <Shield className="h-4 w-4 mr-2" />
               Security
             </TabsTrigger>
-            <TabsTrigger value="system" className="data-[state=active]:bg-slate-700">
+            <TabsTrigger value="system" className="data-[state=active]:bg-accent">
               <Settings className="h-4 w-4 mr-2" />
               System
             </TabsTrigger>
@@ -403,9 +403,9 @@ const SettingsPage: React.FC = () => {
 
           {/* Profile Settings */}
           <TabsContent value="profile" className="space-y-6">
-            <Card className="bg-slate-800/50 border-slate-700/50">
+            <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-white">Profile Information</CardTitle>
+                <CardTitle className="text-foreground">Profile Information</CardTitle>
                 <CardDescription>
                   Update your personal information and preferences
                 </CardDescription>
@@ -415,7 +415,7 @@ const SettingsPage: React.FC = () => {
                 <div className="flex items-center space-x-4">
                   <Avatar className="w-20 h-20">
                     <AvatarImage src={profile.avatar_url} />
-                    <AvatarFallback className="bg-slate-700 text-slate-300 text-lg">
+                    <AvatarFallback className="bg-accent text-foreground text-lg">
                       {profile.name?.split(' ').map(n => n[0]).join('') || 'U'}
                     </AvatarFallback>
                   </Avatar>
@@ -429,58 +429,58 @@ const SettingsPage: React.FC = () => {
                     />
                     <Button 
                       variant="outline" 
-                      className="border-slate-600 text-slate-300 hover:text-white"
+                      className="border-border text-foreground hover:text-foreground">
                       onClick={() => document.getElementById('avatar-upload')?.click()}
                     >
                       <Camera className="h-4 w-4 mr-2" />
                       Change Photo
                     </Button>
-                    <p className="text-xs text-slate-500">JPG, PNG up to 5MB</p>
+                    <p className="text-xs text-muted-foreground">JPG, PNG up to 5MB</p>
                   </div>
                 </div>
 
                 {/* Profile Form */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label className="text-slate-300">Full Name</Label>
+                    <Label className="text-foreground">Full Name</Label>
                     <Input
                       value={profile.name || ''}
                       onChange={(e) => handleProfileUpdate('name', e.target.value)}
-                      className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
+                      className="mt-1 bg-background border-border text-foreground"
                     />
                   </div>
                   
                   <div>
-                    <Label className="text-slate-300">Email Address</Label>
+                    <Label className="text-foreground">Email Address</Label>
                     <Input
                       type="email"
                       value={user?.email || ''}
                       disabled
-                      className="mt-1 bg-slate-700/30 border-slate-600/30 text-slate-500 cursor-not-allowed"
+                      className="mt-1 bg-muted border-border text-muted-foreground cursor-not-allowed"
                     />
-                    <p className="text-xs text-slate-500 mt-1">Email cannot be changed</p>
+                    <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
                   </div>
                   
                   <div>
-                    <Label className="text-slate-300">Phone Number</Label>
+                    <Label className="text-foreground">Phone Number</Label>
                     <Input
                       value={profile.phone || ''}
                       onChange={(e) => handleProfileUpdate('phone', e.target.value)}
-                      className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
+                      className="mt-1 bg-background border-border text-foreground"
                       placeholder="+1 (555) 000-0000"
                     />
                   </div>
                   
                   <div>
-                    <Label className="text-slate-300">Timezone</Label>
+                    <Label className="text-foreground">Timezone</Label>
                     <Select 
                       value={profile.timezone} 
                       onValueChange={(value) => handleProfileUpdate('timezone', value)}
                     >
-                      <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
+                      <SelectTrigger className="mt-1 bg-background border-border text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectContent className="bg-popover border-border">
                         <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
                         <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
                         <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
@@ -495,15 +495,15 @@ const SettingsPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <Label className="text-slate-300">Language</Label>
+                    <Label className="text-foreground">Language</Label>
                     <Select 
                       value={profile.language} 
                       onValueChange={(value) => handleProfileUpdate('language', value)}
                     >
-                      <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
+                      <SelectTrigger className="mt-1 bg-background border-border text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectContent className="bg-popover border-border">
                         <SelectItem value="en">English</SelectItem>
                         <SelectItem value="es">Español</SelectItem>
                         <SelectItem value="fr">Français</SelectItem>
@@ -516,11 +516,11 @@ const SettingsPage: React.FC = () => {
                 </div>
                 
                 <div>
-                  <Label className="text-slate-300">Bio</Label>
+                  <Label className="text-foreground">Bio</Label>
                   <Textarea
                     value={profile.bio || ''}
                     onChange={(e) => handleProfileUpdate('bio', e.target.value)}
-                    className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
+                    className="mt-1 bg-background border-border text-foreground"
                     rows={3}
                     placeholder="Tell us about yourself..."
                   />
@@ -546,9 +546,9 @@ const SettingsPage: React.FC = () => {
 
           {/* Notification Settings */}
           <TabsContent value="notifications" className="space-y-6">
-            <Card className="bg-slate-800/50 border-slate-700/50">
+            <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-white">Notification Preferences</CardTitle>
+                <CardTitle className="text-foreground">Notification Preferences</CardTitle>
                 <CardDescription>
                   Choose how and when you want to receive notifications
                 </CardDescription>
@@ -567,8 +567,8 @@ const SettingsPage: React.FC = () => {
                   ].map(({ key, label, desc }) => (
                     <div key={key} className="flex items-center justify-between">
                       <div>
-                        <Label className="text-slate-300">{label}</Label>
-                        <p className="text-sm text-slate-500">{desc}</p>
+                        <Label className="text-foreground">{label}</Label>
+                        <p className="text-sm text-muted-foreground">{desc}</p>
                       </div>
                       <Switch
                         checked={settings[key as keyof UserSettings] as boolean}
@@ -600,9 +600,9 @@ const SettingsPage: React.FC = () => {
           <TabsContent value="security" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Security Settings */}
-              <Card className="bg-slate-800/50 border-slate-700/50">
+              <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="text-white">Security Settings</CardTitle>
+                  <CardTitle className="text-foreground">Security Settings</CardTitle>
                   <CardDescription>
                     Manage your account security and authentication
                   </CardDescription>
@@ -610,8 +610,8 @@ const SettingsPage: React.FC = () => {
                 <CardContent className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label className="text-slate-300">Two-Factor Authentication</Label>
-                      <p className="text-sm text-slate-500">Add an extra layer of security</p>
+                      <Label className="text-foreground">Two-Factor Authentication</Label>
+                      <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
                     </div>
                     <Switch
                       checked={settings.two_factor_enabled}
@@ -621,15 +621,15 @@ const SettingsPage: React.FC = () => {
                   </div>
                   
                   <div>
-                    <Label className="text-slate-300">Session Timeout</Label>
+                    <Label className="text-foreground">Session Timeout</Label>
                     <Select 
                       value={settings.session_timeout.toString()} 
                       onValueChange={(value) => handleSettingsUpdate('session_timeout', parseInt(value))}
                     >
-                      <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
+                      <SelectTrigger className="mt-1 bg-background border-border text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectContent className="bg-popover border-border">
                         <SelectItem value="15">15 minutes</SelectItem>
                         <SelectItem value="30">30 minutes</SelectItem>
                         <SelectItem value="60">1 hour</SelectItem>
@@ -640,23 +640,23 @@ const SettingsPage: React.FC = () => {
                   </div>
                   
                   {/* Change Password */}
-                  <div className="space-y-4 border-t border-slate-700 pt-4">
-                    <Label className="text-slate-300">Change Password</Label>
+                  <div className="space-y-4 border-t border-border pt-4">
+                    <Label className="text-foreground">Change Password</Label>
                     
                     <div>
-                      <Label className="text-slate-400 text-sm">New Password</Label>
+                      <Label className="text-muted-foreground text-sm">New Password</Label>
                       <div className="relative mt-1">
                         <Input
                           type={showNewPassword ? "text" : "password"}
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
-                          className="bg-slate-700/30 border-slate-600/30 text-white pr-10"
+                          className="bg-background border-border text-foreground pr-10"
                           placeholder="Enter new password"
                         />
                         <button
                           type="button"
                           onClick={() => setShowNewPassword(!showNewPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         >
                           {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
@@ -664,13 +664,13 @@ const SettingsPage: React.FC = () => {
                     </div>
                     
                     <div>
-                      <Label className="text-slate-400 text-sm">Confirm Password</Label>
+                      <Label className="text-muted-foreground text-sm">Confirm Password</Label>
                       <div className="relative mt-1">
                         <Input
                           type={showConfirmPassword ? "text" : "password"}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="bg-slate-700/30 border-slate-600/30 text-white pr-10"
+                          className="bg-background border-border text-foreground pr-10"
                           placeholder="Confirm new password"
                         />
                         <button
@@ -687,7 +687,7 @@ const SettingsPage: React.FC = () => {
                       onClick={handleChangePassword}
                       disabled={isSaving || !newPassword || !confirmPassword}
                       variant="outline"
-                      className="w-full border-slate-600"
+                      className="w-full border-border"
                     >
                       {isSaving ? (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -698,7 +698,7 @@ const SettingsPage: React.FC = () => {
                     </Button>
                   </div>
 
-                  <div className="flex justify-end border-t border-slate-700 pt-4">
+                  <div className="flex justify-end border-t border-border pt-4">
                     <Button 
                       onClick={handleSaveSettings} 
                       disabled={isSaving}
@@ -716,11 +716,11 @@ const SettingsPage: React.FC = () => {
               </Card>
 
               {/* API Keys */}
-              <Card className="bg-slate-800/50 border-slate-700/50">
+              <Card className="bg-card border-border">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-white">API Keys</CardTitle>
+                      <CardTitle className="text-foreground">API Keys</CardTitle>
                       <CardDescription>
                         Manage API keys for external integrations
                       </CardDescription>
@@ -738,18 +738,18 @@ const SettingsPage: React.FC = () => {
                 <CardContent>
                   <div className="space-y-3">
                     {apiKeys.length === 0 ? (
-                      <div className="text-center py-8 text-slate-500">
+                      <div className="text-center py-8 text-muted-foreground">
                         <Key className="h-12 w-12 mx-auto mb-2 opacity-50" />
                         <p>No API keys yet</p>
                         <p className="text-sm">Generate your first API key to get started</p>
                       </div>
                     ) : (
                       apiKeys.map((apiKey) => (
-                        <div key={apiKey.id} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                        <div key={apiKey.id} className="flex items-center justify-between p-3 bg-accent/50 rounded-lg border border-border">
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-white truncate">{apiKey.name}</p>
-                            <p className="text-sm text-slate-400 font-mono">{apiKey.key_prefix}...</p>
-                            <p className="text-xs text-slate-500">
+                            <p className="font-medium text-foreground truncate">{apiKey.name}</p>
+                            <p className="text-sm text-muted-foreground font-mono">{apiKey.key_prefix}...</p>
+                            <p className="text-xs text-muted-foreground">
                               Created: {new Date(apiKey.created_at).toLocaleDateString()}
                               {apiKey.last_used_at && ` • Last used: ${new Date(apiKey.last_used_at).toLocaleDateString()}`}
                             </p>
@@ -758,7 +758,7 @@ const SettingsPage: React.FC = () => {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="text-slate-400 hover:text-white"
+                              className="text-muted-foreground hover:text-foreground"
                               onClick={() => handleCopyAPIKey(apiKey.key_prefix)}
                             >
                               <Copy className="h-4 w-4" />
@@ -785,24 +785,24 @@ const SettingsPage: React.FC = () => {
           <TabsContent value="system" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* General System Settings */}
-              <Card className="bg-slate-800/50 border-slate-700/50">
+              <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="text-white">General Settings</CardTitle>
+                  <CardTitle className="text-foreground">General Settings</CardTitle>
                   <CardDescription>
                     Configure system behavior and preferences
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <Label className="text-slate-300">Theme</Label>
+                    <Label className="text-foreground">Theme</Label>
                     <Select 
                       value={settings.theme} 
                       onValueChange={(value: 'dark' | 'light' | 'auto') => handleSettingsUpdate('theme', value)}
                     >
-                      <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
+                      <SelectTrigger className="mt-1 bg-background border-border text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectContent className="bg-popover border-border">
                         <SelectItem value="dark">Dark</SelectItem>
                         <SelectItem value="light">Light</SelectItem>
                         <SelectItem value="auto">Auto</SelectItem>
@@ -817,8 +817,8 @@ const SettingsPage: React.FC = () => {
                   ].map(({ key, label, desc }) => (
                     <div key={key} className="flex items-center justify-between">
                       <div>
-                        <Label className="text-slate-300">{label}</Label>
-                        <p className="text-sm text-slate-500">{desc}</p>
+                        <Label className="text-foreground">{label}</Label>
+                        <p className="text-sm text-muted-foreground">{desc}</p>
                       </div>
                       <Switch
                         checked={settings[key as keyof UserSettings] as boolean}
@@ -830,24 +830,24 @@ const SettingsPage: React.FC = () => {
               </Card>
 
               {/* Advanced Settings */}
-              <Card className="bg-slate-800/50 border-slate-700/50">
+              <Card className="bg-card border-border">
                 <CardHeader>
-                  <CardTitle className="text-white">Advanced Settings</CardTitle>
+                  <CardTitle className="text-foreground">Advanced Settings</CardTitle>
                   <CardDescription>
                     Advanced configuration options
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <Label className="text-slate-300">Cache Size</Label>
+                    <Label className="text-foreground">Cache Size</Label>
                     <Select 
                       value={settings.cache_size} 
                       onValueChange={(value) => handleSettingsUpdate('cache_size', value)}
                     >
-                      <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
+                      <SelectTrigger className="mt-1 bg-background border-border text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectContent className="bg-popover border-border">
                         <SelectItem value="256MB">256 MB</SelectItem>
                         <SelectItem value="512MB">512 MB</SelectItem>
                         <SelectItem value="1GB">1 GB</SelectItem>
@@ -858,15 +858,15 @@ const SettingsPage: React.FC = () => {
                   </div>
                   
                   <div>
-                    <Label className="text-slate-300">Backup Frequency</Label>
+                    <Label className="text-foreground">Backup Frequency</Label>
                     <Select 
                       value={settings.backup_frequency} 
                       onValueChange={(value) => handleSettingsUpdate('backup_frequency', value)}
                     >
-                      <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
+                      <SelectTrigger className="mt-1 bg-background border-border text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectContent className="bg-popover border-border">
                         <SelectItem value="hourly">Hourly</SelectItem>
                         <SelectItem value="daily">Daily</SelectItem>
                         <SelectItem value="weekly">Weekly</SelectItem>
@@ -876,24 +876,24 @@ const SettingsPage: React.FC = () => {
                   </div>
                   
                   <div>
-                    <Label className="text-slate-300">Data Retention (days)</Label>
+                    <Label className="text-foreground">Data Retention (days)</Label>
                     <Input
                       type="number"
                       value={settings.retention_period}
                       onChange={(e) => handleSettingsUpdate('retention_period', parseInt(e.target.value) || 30)}
-                      className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
+                      className="mt-1 bg-background border-border text-foreground"
                       min={1}
                       max={365}
                     />
                   </div>
                   
                   <div>
-                    <Label className="text-slate-300">Max Concurrent Jobs</Label>
+                    <Label className="text-foreground">Max Concurrent Jobs</Label>
                     <Input
                       type="number"
                       value={settings.max_concurrent_jobs}
                       onChange={(e) => handleSettingsUpdate('max_concurrent_jobs', parseInt(e.target.value) || 10)}
-                      className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
+                      className="mt-1 bg-background border-border text-foreground"
                       min={1}
                       max={100}
                     />
@@ -922,12 +922,12 @@ const SettingsPage: React.FC = () => {
 
       {/* API Key Generation Dialog */}
       <AlertDialog open={showAPIKeyDialog} onOpenChange={setShowAPIKeyDialog}>
-        <AlertDialogContent className="bg-slate-800 border-slate-700">
+        <AlertDialogContent className="bg-popover border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">
+            <AlertDialogTitle className="text-foreground">
               {generatedAPIKey ? 'API Key Generated' : 'Generate New API Key'}
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-400">
+            <AlertDialogDescription className="text-muted-foreground">
               {generatedAPIKey ? (
                 <div className="space-y-4">
                   <p className="text-yellow-400">
@@ -948,12 +948,12 @@ const SettingsPage: React.FC = () => {
               ) : (
                 <div className="space-y-4 pt-4">
                   <div>
-                    <Label className="text-slate-300">Key Name</Label>
+                    <Label className="text-foreground">Key Name</Label>
                     <Input
                       value={newAPIKeyName}
                       onChange={(e) => setNewAPIKeyName(e.target.value)}
                       placeholder="e.g., Production API"
-                      className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
+                      className="mt-1 bg-background border-border text-foreground"
                     />
                   </div>
                 </div>
@@ -973,7 +973,7 @@ const SettingsPage: React.FC = () => {
               </AlertDialogAction>
             ) : (
               <>
-                <AlertDialogCancel className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
+                <AlertDialogCancel className="bg-secondary hover:bg-secondary/80 text-foreground border-border">
                   Cancel
                 </AlertDialogCancel>
                 <AlertDialogAction 

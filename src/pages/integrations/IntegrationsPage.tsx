@@ -26,14 +26,14 @@ const IntegrationsPage: React.FC<IntegrationsPageProps> = ({ className }) => {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-white">Integrations</h1>
-          <p className="text-slate-400 mt-1">
+          <h1 className="text-3xl font-bold">Integrations</h1>
+          <p className="text-muted-foreground mt-1">
             Connect external tools and services to enhance your AI workforce capabilities
           </p>
         </div>
         
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2 text-slate-400">
+          <div className="flex items-center space-x-2 text-muted-foreground">
             <Network className="h-5 w-5" />
             <span className="text-sm">Connected Services</span>
           </div>

@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from 'sonner';
+import { ThemeProvider } from '@/components/theme-provider';
 import { PublicLayout } from './layouts/PublicLayout';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
@@ -36,102 +37,104 @@ function App() {
   console.log('App.tsx: Rendering main app component');
   
   return (
-    <TooltipProvider>
-      <div className="min-h-screen bg-slate-900">
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<PublicLayout />}>
-            <Route index element={<LandingPage />} />
-            <Route path="demo" element={<AIEmployeeDemo />} />
-          </Route>
+    <ThemeProvider>
+      <TooltipProvider>
+        <div className="min-h-screen bg-background">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<PublicLayout />}>
+              <Route index element={<LandingPage />} />
+              <Route path="demo" element={<AIEmployeeDemo />} />
+            </Route>
 
-          {/* Workforce Demo - Protected Route (Full Screen) */}
-          <Route
-            path="/workforce-demo"
-            element={
-              <ProtectedRoute>
-                <WorkforceDemoPage />
-              </ProtectedRoute>
-            }
+            {/* Workforce Demo - Protected Route (Full Screen) */}
+            <Route
+              path="/workforce-demo"
+              element={
+                <ProtectedRoute>
+                  <WorkforceDemoPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Marketplace - Protected Route */}
+            <Route
+              path="/marketplace"
+              element={
+                <ProtectedRoute>
+                  <MarketplacePublicPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Auth Routes */}
+            <Route path="/auth" element={<AuthLayout />}>
+              <Route path="login" element={<LoginPage />} />
+              <Route path="register" element={<RegisterPage />} />
+            </Route>
+
+            {/* Protected Routes - ALL AT ROOT LEVEL */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              {/* Dashboard Home */}
+              <Route path="dashboard" element={<DashboardHomePage />} />
+              
+              {/* Main Features */}
+              <Route path="workforce" element={<WorkforcePage />} />
+              <Route path="workforce/management" element={<WorkforceManagement />} />
+              
+              {/* Enhanced Chat (New) */}
+              <Route path="chat" element={<ChatPageEnhanced />} />
+              <Route path="chat/:tabId" element={<ChatPageEnhanced />} />
+              
+              {/* Legacy Chat (Backup) */}
+              <Route path="chat-legacy" element={<ChatPage />} />
+              
+              <Route path="automation" element={<AutomationPage />} />
+              <Route path="automation/workflows" element={<AutonomousWorkflowsPage />} />
+              <Route path="automation/designer" element={<AutomationDesignerPage />} />
+              <Route path="automation/designer/:workflowId" element={<AutomationDesignerPage />} />
+              
+              <Route path="integrations" element={<IntegrationsPage />} />
+              
+              <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="analytics/:view" element={<AnalyticsPage />} />
+              
+              {/* Account & System at Root Level */}
+              <Route path="settings" element={<SettingsPage />} />
+              <Route path="settings/:section" element={<SettingsPage />} />
+              <Route path="billing" element={<BillingPage />} />
+              <Route path="api-keys" element={<APIKeysPage />} />
+              <Route path="support" element={<HelpSupportPage />} />
+            </Route>
+
+            {/* 404 Route */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+
+          <Toaster 
+            position="bottom-right"
+            theme="dark"
+            className="toaster"
+            toastOptions={{
+              style: {
+                background: '#1F2937',
+                color: '#F9FAFB',
+                border: '1px solid #374151',
+              },
+            }}
           />
-
-          {/* Marketplace - Protected Route */}
-          <Route
-            path="/marketplace"
-            element={
-              <ProtectedRoute>
-                <MarketplacePublicPage />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Auth Routes */}
-          <Route path="/auth" element={<AuthLayout />}>
-            <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
-          </Route>
-
-          {/* Protected Routes - ALL AT ROOT LEVEL */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }
-          >
-            {/* Dashboard Home */}
-            <Route path="dashboard" element={<DashboardHomePage />} />
-            
-            {/* Main Features */}
-            <Route path="workforce" element={<WorkforcePage />} />
-            <Route path="workforce/management" element={<WorkforceManagement />} />
-            
-            {/* Enhanced Chat (New) */}
-            <Route path="chat" element={<ChatPageEnhanced />} />
-            <Route path="chat/:tabId" element={<ChatPageEnhanced />} />
-            
-            {/* Legacy Chat (Backup) */}
-            <Route path="chat-legacy" element={<ChatPage />} />
-            
-            <Route path="automation" element={<AutomationPage />} />
-            <Route path="automation/workflows" element={<AutonomousWorkflowsPage />} />
-            <Route path="automation/designer" element={<AutomationDesignerPage />} />
-            <Route path="automation/designer/:workflowId" element={<AutomationDesignerPage />} />
-            
-            <Route path="integrations" element={<IntegrationsPage />} />
-            
-            <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="analytics/:view" element={<AnalyticsPage />} />
-            
-            {/* Account & System at Root Level */}
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="settings/:section" element={<SettingsPage />} />
-            <Route path="billing" element={<BillingPage />} />
-            <Route path="api-keys" element={<APIKeysPage />} />
-            <Route path="support" element={<HelpSupportPage />} />
-          </Route>
-
-          {/* 404 Route */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-
-        <Toaster 
-          position="bottom-right"
-          theme="dark"
-          className="toaster"
-          toastOptions={{
-            style: {
-              background: '#1F2937',
-              color: '#F9FAFB',
-              border: '1px solid #374151',
-            },
-          }}
-        />
-      </div>
-      
-      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
-    </TooltipProvider>
+        </div>
+        
+        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+      </TooltipProvider>
+    </ThemeProvider>
   );
 }
 
@@ -156,13 +159,13 @@ const AutomationDesignerPage = () => {
 
 const NotFoundPage = () => {
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+    <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="text-center">
-        <h1 className="text-6xl font-bold text-white mb-4">404</h1>
-        <p className="text-xl text-slate-400 mb-8">Page not found</p>
+        <h1 className="text-6xl font-bold mb-4">404</h1>
+        <p className="text-xl text-muted-foreground mb-8">Page not found</p>
         <a 
           href="/dashboard" 
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
           Back to Dashboard
         </a>

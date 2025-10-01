@@ -429,7 +429,7 @@ const SettingsPage: React.FC = () => {
                     />
                     <Button 
                       variant="outline" 
-                      className="border-border text-foreground hover:text-foreground">
+                      className="border-border text-foreground hover:text-foreground"
                       onClick={() => document.getElementById('avatar-upload')?.click()}
                     >
                       <Camera className="h-4 w-4 mr-2" />
@@ -676,7 +676,7 @@ const SettingsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         >
                           {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
@@ -934,7 +934,7 @@ const SettingsPage: React.FC = () => {
                     <AlertTriangle className="h-4 w-4 inline mr-2" />
                     Save this key now. You won't be able to see it again!
                   </p>
-                  <div className="bg-slate-900 p-3 rounded font-mono text-sm text-green-400 break-all">
+                  <div className="bg-background/50 p-3 rounded font-mono text-sm text-green-400 break-all border border-border">
                     {generatedAPIKey}
                   </div>
                   <Button 
@@ -996,16 +996,16 @@ const SettingsPage: React.FC = () => {
 
       {/* Delete API Key Confirmation */}
       <AlertDialog open={!!keyToDelete} onOpenChange={() => setKeyToDelete(null)}>
-        <AlertDialogContent className="bg-slate-800 border-slate-700">
+        <AlertDialogContent className="bg-popover border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Delete API Key</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-400">
+            <AlertDialogTitle className="text-foreground">Delete API Key</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
               Are you sure you want to delete this API key? This action cannot be undone.
               Any applications using this key will stop working.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-slate-700 hover:bg-slate-600 text-white border-slate-600">
+            <AlertDialogCancel className="bg-secondary hover:bg-secondary/80 text-foreground border-border">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 

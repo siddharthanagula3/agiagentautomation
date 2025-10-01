@@ -85,8 +85,8 @@ const AutomationPage: React.FC = () => {
 
   const getStatusColor = (isActive: boolean) => {
     return isActive 
-      ? 'text-green-400 bg-green-500/20 border-green-500/30'
-      : 'text-slate-400 bg-slate-500/20 border-slate-500/30';
+      ? 'bg-success/20 text-success border-success/30'
+      : 'bg-muted text-muted-foreground border-border';
   };
 
   const formatDate = (date?: Date) => {
@@ -103,15 +103,15 @@ const AutomationPage: React.FC = () => {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-white">Automation Hub</h1>
-          <p className="text-slate-400 mt-1">
+          <h1 className="text-3xl font-bold">Automation Hub</h1>
+          <p className="text-muted-foreground mt-1">
             Manage workflows, automations, and AI-driven processes
           </p>
         </div>
         
         <div className="flex items-center space-x-3">
           <Link to="/dashboard/automation/designer">
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+            <Button className="gradient-primary">
               <Plus className="h-4 w-4 mr-2" />
               Create Workflow
             </Button>
@@ -126,7 +126,7 @@ const AutomationPage: React.FC = () => {
         transition={{ delay: 0.1 }}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
       >
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+        <Card>
           <CardContent className="p-6">
             {isLoading ? (
               <div className="space-y-2">
@@ -137,24 +137,24 @@ const AutomationPage: React.FC = () => {
             ) : (
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-400">Total Workflows</p>
-                  <p className="text-2xl font-bold text-white">{automationOverview?.totalWorkflows || 0}</p>
+                  <p className="text-sm text-muted-foreground">Total Workflows</p>
+                  <p className="text-2xl font-bold">{automationOverview?.totalWorkflows || 0}</p>
                   <div className="flex items-center space-x-1 mt-1">
-                    <TrendingUp className="h-3 w-3 text-green-400" />
-                    <span className="text-xs text-green-400">
+                    <TrendingUp className="h-3 w-3 text-success" />
+                    <span className="text-xs text-success">
                       {automationOverview?.activeWorkflows || 0} active
                     </span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                  <Workflow className="h-6 w-6 text-blue-400" />
+                <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center">
+                  <Workflow className="h-6 w-6 text-primary" />
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+        <Card>
           <CardContent className="p-6">
             {isLoading ? (
               <div className="space-y-2">
@@ -165,27 +165,27 @@ const AutomationPage: React.FC = () => {
             ) : (
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-400">Running Now</p>
+                  <p className="text-sm text-muted-foreground">Running Now</p>
                   <div className="flex items-center space-x-2">
-                    <p className="text-2xl font-bold text-white">{automationOverview?.runningExecutions || 0}</p>
+                    <p className="text-2xl font-bold">{automationOverview?.runningExecutions || 0}</p>
                     {(automationOverview?.runningExecutions || 0) > 0 && (
-                      <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+                      <div className="h-2 w-2 bg-success rounded-full animate-pulse" />
                     )}
                   </div>
                   <div className="flex items-center space-x-1 mt-1">
-                    <Activity className="h-3 w-3 text-green-400" />
-                    <span className="text-xs text-green-400">Active executions</span>
+                    <Activity className="h-3 w-3 text-success" />
+                    <span className="text-xs text-success">Active executions</span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-                  <Play className="h-6 w-6 text-green-400" />
+                <div className="w-12 h-12 bg-success/20 rounded-xl flex items-center justify-center">
+                  <Play className="h-6 w-6 text-success" />
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+        <Card>
           <CardContent className="p-6">
             {isLoading ? (
               <div className="space-y-2">
@@ -196,26 +196,26 @@ const AutomationPage: React.FC = () => {
             ) : (
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-400">Success Rate</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-sm text-muted-foreground">Success Rate</p>
+                  <p className="text-2xl font-bold">
                     {Math.round(automationOverview?.successRate || 0)}%
                   </p>
                   <div className="flex items-center space-x-1 mt-1">
-                    <Target className="h-3 w-3 text-green-400" />
-                    <span className="text-xs text-green-400">
+                    <Target className="h-3 w-3 text-success" />
+                    <span className="text-xs text-success">
                       {automationOverview?.totalExecutions || 0} total
                     </span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                  <Target className="h-6 w-6 text-purple-400" />
+                <div className="w-12 h-12 bg-secondary/50 rounded-xl flex items-center justify-center">
+                  <Target className="h-6 w-6 text-primary" />
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+        <Card>
           <CardContent className="p-6">
             {isLoading ? (
               <div className="space-y-2">
@@ -226,17 +226,17 @@ const AutomationPage: React.FC = () => {
             ) : (
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-400">Completed Today</p>
-                  <p className="text-2xl font-bold text-white">{automationOverview?.completedToday || 0}</p>
+                  <p className="text-sm text-muted-foreground">Completed Today</p>
+                  <p className="text-2xl font-bold">{automationOverview?.completedToday || 0}</p>
                   <div className="flex items-center space-x-1 mt-1">
-                    <Clock className="h-3 w-3 text-orange-400" />
-                    <span className="text-xs text-orange-400">
+                    <Clock className="h-3 w-3 text-primary" />
+                    <span className="text-xs text-primary">
                       Avg {Math.round(automationOverview?.avgExecutionTime || 0)}s
                     </span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-orange-400" />
+                <div className="w-12 h-12 bg-accent/50 rounded-xl flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-primary" />
                 </div>
               </div>
             )}
@@ -251,16 +251,16 @@ const AutomationPage: React.FC = () => {
         transition={{ delay: 0.2 }}
       >
         <Tabs defaultValue="workflows" className="space-y-6">
-          <TabsList className="bg-slate-800/50 border border-slate-700/50">
-            <TabsTrigger value="workflows" className="data-[state=active]:bg-slate-700">
+          <TabsList>
+            <TabsTrigger value="workflows">
               <Workflow className="h-4 w-4 mr-2" />
               Workflows
             </TabsTrigger>
-            <TabsTrigger value="autonomous" className="data-[state=active]:bg-slate-700">
+            <TabsTrigger value="autonomous">
               <Bot className="h-4 w-4 mr-2" />
               Autonomous
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="data-[state=active]:bg-slate-700">
+            <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
             </TabsTrigger>
@@ -270,50 +270,50 @@ const AutomationPage: React.FC = () => {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Link to="/dashboard/automation/designer">
-                <Card className="bg-slate-800/50 border-slate-700/50 hover:bg-slate-800/70 transition-colors cursor-pointer group">
+                <Card className="hover:bg-accent transition-colors cursor-pointer group">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
-                        <Plus className="h-6 w-6 text-blue-400" />
+                      <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+                        <Plus className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors">
+                        <h3 className="font-semibold group-hover:text-primary transition-colors">
                           Create Workflow
                         </h3>
-                        <p className="text-sm text-slate-400">Build new automation</p>
+                        <p className="text-sm text-muted-foreground">Build new automation</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
 
-              <Card className="bg-slate-800/50 border-slate-700/50 hover:bg-slate-800/70 transition-colors cursor-pointer group">
+              <Card className="hover:bg-accent transition-colors cursor-pointer group">
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
-                      <GitBranch className="h-6 w-6 text-green-400" />
+                    <div className="w-12 h-12 bg-success/20 rounded-xl flex items-center justify-center group-hover:bg-success/30 transition-colors">
+                      <GitBranch className="h-6 w-6 text-success" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white group-hover:text-green-400 transition-colors">
+                      <h3 className="font-semibold group-hover:text-success transition-colors">
                         Browse Templates
                       </h3>
-                      <p className="text-sm text-slate-400">Use pre-built workflows</p>
+                      <p className="text-sm text-muted-foreground">Use pre-built workflows</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-slate-800/50 border-slate-700/50 hover:bg-slate-800/70 transition-colors cursor-pointer group">
+              <Card className="hover:bg-accent transition-colors cursor-pointer group">
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
-                      <Sparkles className="h-6 w-6 text-purple-400" />
+                    <div className="w-12 h-12 bg-secondary rounded-xl flex items-center justify-center group-hover:bg-secondary/80 transition-colors">
+                      <Sparkles className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white group-hover:text-purple-400 transition-colors">
+                      <h3 className="font-semibold group-hover:text-primary transition-colors">
                         AI Generator
                       </h3>
-                      <p className="text-sm text-slate-400">Generate with AI</p>
+                      <p className="text-sm text-muted-foreground">Generate with AI</p>
                     </div>
                   </div>
                 </CardContent>
@@ -321,14 +321,14 @@ const AutomationPage: React.FC = () => {
             </div>
 
             {/* Workflow List */}
-            <Card className="bg-slate-800/50 border-slate-700/50">
+            <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white">Your Workflows</CardTitle>
+                    <CardTitle>Your Workflows</CardTitle>
                     <CardDescription>Manage and monitor your automation workflows</CardDescription>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                  <Button variant="ghost" size="sm">
                     <Settings className="h-4 w-4" />
                   </Button>
                 </div>
@@ -337,7 +337,7 @@ const AutomationPage: React.FC = () => {
                 {workflowsLoading ? (
                   <div className="space-y-4">
                     {[1, 2, 3].map(i => (
-                      <div key={i} className="flex items-center space-x-4 p-4 rounded-lg bg-slate-700/30">
+                      <div key={i} className="flex items-center space-x-4 p-4 rounded-lg bg-muted/50">
                         <Skeleton className="h-12 w-12 rounded-lg" />
                         <div className="flex-1 space-y-2">
                           <Skeleton className="h-4 w-3/4" />
@@ -348,9 +348,9 @@ const AutomationPage: React.FC = () => {
                   </div>
                 ) : !workflows || workflows.length === 0 ? (
                   <div className="text-center py-12">
-                    <Workflow className="h-16 w-16 text-slate-600 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-white mb-2">No Workflows Yet</h3>
-                    <p className="text-slate-400 mb-6">
+                    <Workflow className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No Workflows Yet</h3>
+                    <p className="text-muted-foreground mb-6">
                       Create your first workflow to automate tasks with your AI employees
                     </p>
                     <Link to="/dashboard/automation/designer">
@@ -368,21 +368,21 @@ const AutomationPage: React.FC = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.05 * index }}
-                        className="flex items-center justify-between p-4 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 transition-colors group"
+                        className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"
                       >
                         <div className="flex items-center space-x-4 flex-1">
                           <div className="flex-shrink-0">
-                            <div className="w-12 h-12 bg-slate-600/50 rounded-lg flex items-center justify-center">
-                              <Workflow className="h-6 w-6 text-slate-400" />
+                            <div className="w-12 h-12 bg-background rounded-lg flex items-center justify-center">
+                              <Workflow className="h-6 w-6 text-muted-foreground" />
                             </div>
                           </div>
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center space-x-3 mb-2">
-                              <h3 className="font-medium text-white truncate group-hover:text-blue-400 transition-colors">
+                              <h3 className="font-medium truncate group-hover:text-primary transition-colors">
                                 {workflow.name}
                               </h3>
-                              <Badge className={`text-xs border ${getStatusColor(workflow.isActive)}`}>
+                              <Badge className={`text-xs ${getStatusColor(workflow.isActive)}`}>
                                 {workflow.isActive ? 'Active' : 'Inactive'}
                               </Badge>
                               {workflow.category && (
@@ -393,12 +393,12 @@ const AutomationPage: React.FC = () => {
                             </div>
                             
                             {workflow.description && (
-                              <p className="text-sm text-slate-400 truncate mb-2">
+                              <p className="text-sm text-muted-foreground truncate mb-2">
                                 {workflow.description}
                               </p>
                             )}
                             
-                            <div className="flex items-center space-x-4 text-xs text-slate-500">
+                            <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                               <span>Last run: {formatDate(workflow.lastExecutedAt)}</span>
                               <span>•</span>
                               <span>Version {workflow.version}</span>
@@ -417,27 +417,26 @@ const AutomationPage: React.FC = () => {
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="bg-slate-800 border-slate-700" align="end">
+                            <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuSeparator className="bg-slate-700" />
+                              <DropdownMenuSeparator />
                               <DropdownMenuItem 
-                                className="text-slate-300"
                                 onClick={() => automationService.executeWorkflow(workflow.id)}
                               >
                                 <Play className="h-4 w-4 mr-2" />
                                 Run Now
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-slate-300">
+                              <DropdownMenuItem>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Edit Workflow
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-slate-300">
+                              <DropdownMenuItem>
                                 <Copy className="h-4 w-4 mr-2" />
                                 Duplicate
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator className="bg-slate-700" />
+                              <DropdownMenuSeparator />
                               <DropdownMenuItem 
-                                className="text-red-400"
+                                className="text-destructive"
                                 onClick={() => automationService.deleteWorkflow(workflow.id)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -459,9 +458,9 @@ const AutomationPage: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
-            <Card className="bg-slate-800/50 border-slate-700/50">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white">Automation Analytics</CardTitle>
+                <CardTitle>Automation Analytics</CardTitle>
                 <CardDescription>
                   Performance insights and optimization recommendations
                 </CardDescription>
@@ -475,42 +474,42 @@ const AutomationPage: React.FC = () => {
                 ) : automationOverview && automationOverview.totalExecutions > 0 ? (
                   <div className="space-y-6">
                     <div className="grid grid-cols-3 gap-4">
-                      <div className="p-4 border border-slate-700 rounded-lg">
-                        <p className="text-sm text-slate-400">Total Executions</p>
-                        <p className="text-2xl font-bold text-white mt-1">
+                      <div className="p-4 border rounded-lg">
+                        <p className="text-sm text-muted-foreground">Total Executions</p>
+                        <p className="text-2xl font-bold mt-1">
                           {automationOverview.totalExecutions}
                         </p>
                       </div>
-                      <div className="p-4 border border-slate-700 rounded-lg">
-                        <p className="text-sm text-slate-400">Success Rate</p>
-                        <p className="text-2xl font-bold text-white mt-1">
+                      <div className="p-4 border rounded-lg">
+                        <p className="text-sm text-muted-foreground">Success Rate</p>
+                        <p className="text-2xl font-bold mt-1">
                           {Math.round(automationOverview.successRate)}%
                         </p>
                       </div>
-                      <div className="p-4 border border-slate-700 rounded-lg">
-                        <p className="text-sm text-slate-400">Avg Time</p>
-                        <p className="text-2xl font-bold text-white mt-1">
+                      <div className="p-4 border rounded-lg">
+                        <p className="text-sm text-muted-foreground">Avg Time</p>
+                        <p className="text-2xl font-bold mt-1">
                           {Math.round(automationOverview.avgExecutionTime)}s
                         </p>
                       </div>
                     </div>
                     
                     <div>
-                      <h3 className="text-lg font-medium text-white mb-4">Performance Insights</h3>
+                      <h3 className="text-lg font-medium mb-4">Performance Insights</h3>
                       <div className="space-y-3">
-                        <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                          <p className="text-sm text-blue-400">
+                        <div className="p-4 bg-primary/10 border border-primary/30 rounded-lg">
+                          <p className="text-sm text-primary">
                             ✓ Your workflows have a {Math.round(automationOverview.successRate)}% success rate
                           </p>
                         </div>
-                        <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                          <p className="text-sm text-green-400">
+                        <div className="p-4 bg-success/10 border border-success/30 rounded-lg">
+                          <p className="text-sm text-success">
                             ✓ {automationOverview.activeWorkflows} workflows are currently active
                           </p>
                         </div>
                         {automationOverview.runningExecutions > 0 && (
-                          <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
-                            <p className="text-sm text-orange-400">
+                          <div className="p-4 bg-accent border border-border rounded-lg">
+                            <p className="text-sm text-primary">
                               ⚡ {automationOverview.runningExecutions} executions running right now
                             </p>
                           </div>
@@ -520,8 +519,8 @@ const AutomationPage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <BarChart3 className="h-12 w-12 text-slate-600 mx-auto mb-2" />
-                    <p className="text-sm text-slate-400">
+                    <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">
                       Analytics will appear here once you start running workflows
                     </p>
                   </div>

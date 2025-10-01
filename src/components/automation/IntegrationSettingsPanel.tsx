@@ -510,8 +510,8 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-white">Integration Settings</h1>
-          <p className="text-slate-400 mt-1">
+          <h1 className="text-3xl font-bold text-foreground">Integration Settings</h1>
+          <p className="text-muted-foreground mt-1">
             Configure and manage external tool integrations for your AI workforce
           </p>
         </div>
@@ -521,7 +521,7 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
             variant="ghost"
             onClick={() => queryClient.invalidateQueries({ queryKey: ['integrations'] })}
             disabled={isLoading}
-            className="text-slate-400 hover:text-white"
+            className="text-muted-foreground hover:text-foreground"
           >
             <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
           </Button>
@@ -542,29 +542,29 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
         transition={{ delay: 0.1 }}
         className="grid grid-cols-1 md:grid-cols-4 gap-4"
       >
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+        <Card className="bg-card border-border backdrop-blur-xl">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
                 <Settings className="h-5 w-5 text-blue-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-400">Total Integrations</p>
-                <p className="text-xl font-semibold text-white">{integrations.length}</p>
+                <p className="text-sm text-muted-foreground">Total Integrations</p>
+                <p className="text-xl font-semibold text-foreground">{integrations.length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+        <Card className="bg-card border-border backdrop-blur-xl">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
                 <CheckCircle className="h-5 w-5 text-green-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-400">Active</p>
-                <p className="text-xl font-semibold text-white">
+                <p className="text-sm text-muted-foreground">Active</p>
+                <p className="text-xl font-semibold text-foreground">
                   {integrations.filter(i => i.isActive).length}
                 </p>
               </div>
@@ -572,15 +572,15 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+        <Card className="bg-card border-border backdrop-blur-xl">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
                 <TrendingUp className="h-5 w-5 text-purple-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-400">Success Rate</p>
-                <p className="text-xl font-semibold text-white">
+                <p className="text-sm text-muted-foreground">Success Rate</p>
+                <p className="text-xl font-semibold text-foreground">
                   {integrations.length > 0 ? 
                     ((integrations.reduce((acc, i) => acc + (i.usageStats.successfulRequests / Math.max(1, i.usageStats.totalRequests)), 0) / integrations.length) * 100).toFixed(1) + '%' : 
                     '0%'
@@ -591,15 +591,15 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+        <Card className="bg-card border-border backdrop-blur-xl">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
                 <Activity className="h-5 w-5 text-orange-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-400">Total Requests</p>
-                <p className="text-xl font-semibold text-white">
+                <p className="text-sm text-muted-foreground">Total Requests</p>
+                <p className="text-xl font-semibold text-foreground">
                   {integrations.reduce((acc, i) => acc + i.usageStats.totalRequests, 0).toLocaleString()}
                 </p>
               </div>
@@ -615,14 +615,14 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
         transition={{ delay: 0.2 }}
       >
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="bg-slate-800/50 border border-slate-700/50">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-slate-700">
+          <TabsList className="bg-card border border-border">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-accent">
               Overview
             </TabsTrigger>
-            <TabsTrigger value="templates" className="data-[state=active]:bg-slate-700">
+            <TabsTrigger value="templates" className="data-[state=active]:bg-accent">
               Templates
             </TabsTrigger>
-            <TabsTrigger value="configured" className="data-[state=active]:bg-slate-700">
+            <TabsTrigger value="configured" className="data-[state=active]:bg-accent">
               Configured
             </TabsTrigger>
           </TabsList>
@@ -630,9 +630,9 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
           <TabsContent value="overview" className="space-y-6">
             {/* Quick Stats and Recent Activity */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+              <Card className="bg-card border-border backdrop-blur-xl">
                 <CardHeader>
-                  <CardTitle className="text-white">Integration Types</CardTitle>
+                  <CardTitle className="text-foreground">Integration Types</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -640,7 +640,7 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
                       const count = integrations.filter(i => i.type === type).length;
                       return (
                         <div key={type} className="flex items-center justify-between">
-                          <span className="text-sm text-slate-300 capitalize">
+                          <span className="text-sm text-foreground capitalize">
                             {type.replace('_', ' ')}
                           </span>
                           <Badge className={cn('text-xs border', getTypeColor(type as IntegrationType))}>
@@ -653,9 +653,9 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
                 </CardContent>
               </Card>
 
-              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+              <Card className="bg-card border-border backdrop-blur-xl">
                 <CardHeader>
-                  <CardTitle className="text-white">Available Templates</CardTitle>
+                  <CardTitle className="text-foreground">Available Templates</CardTitle>
                   <CardDescription>
                     Ready-to-use integration templates
                   </CardDescription>
@@ -673,7 +673,7 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
                             )}>
                               <IconComponent className="h-4 w-4" />
                             </div>
-                            <span className="text-sm text-slate-300">{template.name}</span>
+                            <span className="text-sm text-foreground">{template.name}</span>
                           </div>
                           <Button
                             size="sm"
@@ -692,7 +692,7 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
                     <Button
                       variant="ghost"
                       onClick={() => setSelectedTab('templates')}
-                      className="w-full mt-3 text-slate-400 hover:text-white"
+                      className="w-full mt-3 text-muted-foreground hover:text-foreground"
                     >
                       View All Templates
                     </Button>
@@ -717,8 +717,8 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
                     transition={{ delay: 0.1 }}
                   >
                     <Card className={cn(
-                      "bg-slate-800/50 border-slate-700/50 backdrop-blur-xl transition-all duration-200 group relative",
-                      !template.comingSoon && !isConfigured && "hover:bg-slate-800/70 cursor-pointer",
+                      "bg-card border-border backdrop-blur-xl transition-all duration-200 group relative",
+                      !template.comingSoon && !isConfigured && "hover:bg-accent/30 cursor-pointer",
                       isConfigured && "opacity-50"
                     )}>
                       <CardContent className="p-6">
@@ -749,20 +749,20 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
                           </div>
                         </div>
 
-                        <h3 className="font-semibold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                        <h3 className="font-semibold text-foreground mb-2 group-hover:text-blue-400 transition-colors">
                           {template.name}
                         </h3>
-                        <p className="text-sm text-slate-400 mb-4 line-clamp-2">
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                           {template.description}
                         </p>
 
                         <div className="space-y-2 mb-4">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-500">Provider:</span>
-                            <span className="text-slate-300">{template.provider}</span>
+                            <span className="text-muted-foreground">Provider:</span>
+                            <span className="text-foreground">{template.provider}</span>
                           </div>
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-500">Type:</span>
+                            <span className="text-muted-foreground">Type:</span>
                             <Badge className={cn('text-xs border', getTypeColor(template.type))}>
                               {template.type.replace('_', ' ')}
                             </Badge>
@@ -774,7 +774,7 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
                             variant="ghost"
                             size="sm"
                             asChild
-                            className="text-slate-400 hover:text-white"
+                            className="text-muted-foreground hover:text-foreground"
                           >
                             <a href={template.documentation} target="_blank" rel="noopener noreferrer">
                               <ExternalLink className="h-3 w-3 mr-1" />
@@ -804,24 +804,24 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
 
           <TabsContent value="configured" className="space-y-6">
             {/* Search and Filters */}
-            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+            <Card className="bg-card border-border backdrop-blur-xl">
               <CardContent className="p-4">
                 <div className="flex items-center space-x-4">
                   <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Search integrations..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 bg-slate-700/30 border-slate-600/30 text-white placeholder:text-slate-400"
+                      className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
                   
                   <Select value={typeFilter} onValueChange={setTypeFilter}>
-                    <SelectTrigger className="w-48 bg-slate-700/30 border-slate-600/30 text-slate-300">
+                    <SelectTrigger className="w-48 bg-background border-border text-foreground">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectContent className="bg-popover border-border">
                       <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="ai_service">AI Service</SelectItem>
                       <SelectItem value="automation">Automation</SelectItem>
@@ -838,25 +838,25 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
               {isLoading ? (
                 <div className="space-y-4">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <Card key={i} className="bg-slate-800/50 border-slate-700/50 animate-pulse">
+                    <Card key={i} className="bg-card border-border animate-pulse">
                       <CardContent className="p-6">
-                        <div className="h-4 bg-slate-700 rounded w-1/4 mb-3"></div>
-                        <div className="h-3 bg-slate-700 rounded w-1/2 mb-2"></div>
-                        <div className="h-3 bg-slate-700 rounded w-1/3"></div>
+                        <div className="h-4 bg-accent rounded w-1/4 mb-3"></div>
+                        <div className="h-3 bg-accent rounded w-1/2 mb-2"></div>
+                        <div className="h-3 bg-accent rounded w-1/3"></div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               ) : filteredIntegrations.length === 0 ? (
-                <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+                <Card className="bg-card border-border backdrop-blur-xl">
                   <CardContent className="flex flex-col items-center justify-center py-12">
-                    <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mb-4">
-                      <Settings className="h-8 w-8 text-slate-400" />
+                    <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mb-4">
+                      <Settings className="h-8 w-8 text-muted-foreground" />
                     </div>
-                    <h3 className="text-lg font-semibold text-white mb-2">
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
                       {searchQuery || typeFilter !== 'all' ? 'No integrations found' : 'No integrations configured'}
                     </h3>
-                    <p className="text-slate-400 text-center mb-6">
+                    <p className="text-muted-foreground text-center mb-6">
                       {searchQuery || typeFilter !== 'all' 
                         ? 'Try adjusting your search or filters'
                         : 'Get started by configuring your first integration'
@@ -884,12 +884,12 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                     >
-                      <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl hover:bg-slate-800/70 transition-all duration-200 group">
+                      <Card className="bg-card border-border backdrop-blur-xl hover:bg-accent/50 transition-all duration-200 group">
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center space-x-3 mb-3">
-                                <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
+                                <h3 className="text-lg font-semibold text-foreground group-hover:text-blue-400 transition-colors">
                                   {integration.name}
                                 </h3>
                                 <Badge className={cn('text-xs border', getTypeColor(integration.type))}>
@@ -915,26 +915,26 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
                                 </div>
                               </div>
                               
-                              <p className="text-slate-400 text-sm mb-4 line-clamp-2">
+                              <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                                 {integration.description}
                               </p>
 
                               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                                 <div>
-                                  <span className="text-slate-500">Provider:</span>
-                                  <p className="text-slate-300 font-medium">{integration.provider}</p>
+                                  <span className="text-muted-foreground">Provider:</span>
+                                  <p className="text-foreground font-medium">{integration.provider}</p>
                                 </div>
                                 <div>
-                                  <span className="text-slate-500">Requests:</span>
-                                  <p className="text-slate-300 font-medium">{stats.requests}</p>
+                                  <span className="text-muted-foreground">Requests:</span>
+                                  <p className="text-foreground font-medium">{stats.requests}</p>
                                 </div>
                                 <div>
-                                  <span className="text-slate-500">Success Rate:</span>
-                                  <p className="text-slate-300 font-medium">{stats.successRate}</p>
+                                  <span className="text-muted-foreground">Success Rate:</span>
+                                  <p className="text-foreground font-medium">{stats.successRate}</p>
                                 </div>
                                 <div>
-                                  <span className="text-slate-500">Cost:</span>
-                                  <p className="text-slate-300 font-medium">{formatCost(integration.cost)}</p>
+                                  <span className="text-muted-foreground">Cost:</span>
+                                  <p className="text-foreground font-medium">{formatCost(integration.cost)}</p>
                                 </div>
                               </div>
 
@@ -962,7 +962,7 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
                                     size="icon"
                                     onClick={() => handleTestConnection(integration)}
                                     disabled={testingConnection === integration.id || !integration.isActive}
-                                    className="text-slate-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
                                     {testingConnection === integration.id ? (
                                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -980,7 +980,7 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => handleEditIntegration(integration)}
-                                    className="text-slate-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
                                     <Settings className="h-4 w-4" />
                                   </Button>
@@ -1009,12 +1009,12 @@ export const IntegrationSettingsPanel: React.FC<IntegrationSettingsPanelProps> =
           setEditingIntegration(null);
         }
       }}>
-        <DialogContent className="bg-slate-800 border-slate-700 max-w-2xl">
+        <DialogContent className="bg-popover border-border max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-white">
+            <DialogTitle className="text-foreground">
               {editingIntegration ? `Configure ${editingIntegration.name}` : `Configure ${selectedTemplate?.name}`}
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-muted-foreground">
               {editingIntegration ? 
                 'Update the configuration for this integration' :
                 'Set up this integration with your API credentials and preferences'
@@ -1139,30 +1139,30 @@ const IntegrationConfigForm: React.FC<IntegrationConfigFormProps> = ({
     <form onSubmit={handleSubmit} className="space-y-6 mt-6">
       <div className="grid grid-cols-1 gap-4">
         <div>
-          <Label htmlFor="name" className="text-slate-300">Integration Name *</Label>
+          <Label htmlFor="name" className="text-foreground">Integration Name *</Label>
           <Input
             id="name"
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
             placeholder="e.g., OpenAI GPT-4"
-            className="mt-2 bg-slate-700/30 border-slate-600/30 text-white placeholder:text-slate-400"
+            className="mt-2 bg-background border-border text-foreground placeholder:text-muted-foreground"
             required
           />
         </div>
         
         <div>
-          <Label htmlFor="description" className="text-slate-300">Description</Label>
+          <Label htmlFor="description" className="text-foreground">Description</Label>
           <Textarea
             id="description"
             value={formData.description}
             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
             placeholder="Describe what this integration does..."
-            className="mt-2 min-h-[80px] bg-slate-700/30 border-slate-600/30 text-white placeholder:text-slate-400"
+            className="mt-2 min-h-[80px] bg-background border-border text-foreground placeholder:text-muted-foreground"
           />
         </div>
         
         <div>
-          <Label htmlFor="apiKey" className="text-slate-300">API Key *</Label>
+          <Label htmlFor="apiKey" className="text-foreground">API Key *</Label>
           <div className="relative mt-2">
             <Input
               id="apiKey"
@@ -1170,7 +1170,7 @@ const IntegrationConfigForm: React.FC<IntegrationConfigFormProps> = ({
               value={formData.apiKey}
               onChange={(e) => setFormData(prev => ({ ...prev, apiKey: e.target.value }))}
               placeholder="Enter your API key..."
-              className="pr-10 bg-slate-700/30 border-slate-600/30 text-white placeholder:text-slate-400"
+              className="pr-10 bg-background border-border text-foreground placeholder:text-muted-foreground"
               required
             />
             <Button
@@ -1178,7 +1178,7 @@ const IntegrationConfigForm: React.FC<IntegrationConfigFormProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => setShowApiKey(!showApiKey)}
-              className="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-white"
+              className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
             >
               {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
@@ -1186,13 +1186,13 @@ const IntegrationConfigForm: React.FC<IntegrationConfigFormProps> = ({
         </div>
         
         <div>
-          <Label htmlFor="baseUrl" className="text-slate-300">Base URL</Label>
+          <Label htmlFor="baseUrl" className="text-foreground">Base URL</Label>
           <Input
             id="baseUrl"
             value={formData.baseUrl}
             onChange={(e) => setFormData(prev => ({ ...prev, baseUrl: e.target.value }))}
             placeholder="https://api.example.com"
-            className="mt-2 bg-slate-700/30 border-slate-600/30 text-white placeholder:text-slate-400"
+            className="mt-2 bg-background border-border text-foreground placeholder:text-muted-foreground"
           />
         </div>
 
@@ -1202,7 +1202,7 @@ const IntegrationConfigForm: React.FC<IntegrationConfigFormProps> = ({
             checked={formData.isActive}
             onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
           />
-          <Label htmlFor="isActive" className="text-slate-300">
+          <Label htmlFor="isActive" className="text-foreground">
             Enable integration immediately
           </Label>
         </div>
@@ -1213,7 +1213,7 @@ const IntegrationConfigForm: React.FC<IntegrationConfigFormProps> = ({
           type="button" 
           variant="ghost" 
           onClick={onCancel}
-          className="text-slate-400 hover:text-white"
+          className="text-muted-foreground hover:text-foreground"
         >
           Cancel
         </Button>

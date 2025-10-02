@@ -33,6 +33,26 @@ import APIKeysPage from './pages/dashboard/APIKeysPage';
 import HelpSupportPage from './pages/dashboard/HelpSupportPage';
 import WorkforceDemoPage from './pages/workforce-demo/WorkforceDemoPage';
 
+// New Public Pages
+import BlogPage from './pages/BlogPage';
+import ResourcesPage from './pages/ResourcesPage';
+import HelpPage from './pages/HelpPage';
+import PricingPage from './pages/PricingPage';
+import ContactSalesPage from './pages/ContactSalesPage';
+
+// Use Cases Pages
+import StartupsPage from './pages/use-cases/StartupsPage';
+import ITServiceProvidersPage from './pages/use-cases/ITServiceProvidersPage';
+import SalesTeamsPage from './pages/use-cases/SalesTeamsPage';
+import ConsultingBusinessesPage from './pages/use-cases/ConsultingBusinessesPage';
+
+// Features Pages
+import AIChatPage from './pages/features/AIChatPage';
+import AIWorkflowsPage from './pages/features/AIWorkflowsPage';
+import IntegrationsFeaturePage from './pages/features/IntegrationsPage';
+import AIDashboardsPage from './pages/features/AIDashboardsPage';
+import AIProjectManagerPage from './pages/features/AIProjectManagerPage';
+
 function App() {
   console.log('App.tsx: Rendering main app component');
   
@@ -45,6 +65,26 @@ function App() {
             <Route path="/" element={<PublicLayout />}>
               <Route index element={<LandingPage />} />
               <Route path="demo" element={<AIEmployeeDemo />} />
+
+              {/* Marketing Pages */}
+              <Route path="blog" element={<BlogPage />} />
+              <Route path="resources" element={<ResourcesPage />} />
+              <Route path="help" element={<HelpPage />} />
+              <Route path="pricing" element={<PricingPage />} />
+              <Route path="contact-sales" element={<ContactSalesPage />} />
+
+              {/* Use Cases */}
+              <Route path="use-cases/startups" element={<StartupsPage />} />
+              <Route path="use-cases/it-service-providers" element={<ITServiceProvidersPage />} />
+              <Route path="use-cases/sales-teams" element={<SalesTeamsPage />} />
+              <Route path="use-cases/consulting-businesses" element={<ConsultingBusinessesPage />} />
+
+              {/* Features */}
+              <Route path="features/ai-chat" element={<AIChatPage />} />
+              <Route path="features/ai-workflows" element={<AIWorkflowsPage />} />
+              <Route path="features/integrations" element={<IntegrationsFeaturePage />} />
+              <Route path="features/ai-dashboards" element={<AIDashboardsPage />} />
+              <Route path="features/ai-project-manager" element={<AIProjectManagerPage />} />
             </Route>
 
             {/* Workforce Demo - Protected Route (Full Screen) */}

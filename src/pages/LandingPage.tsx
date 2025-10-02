@@ -45,6 +45,7 @@ import { Spotlight, MouseSpotlight } from '../components/ui/spotlight';
 import { BentoGrid, BentoCard } from '../components/ui/bento-grid';
 import { InteractiveHoverCard } from '../components/ui/interactive-hover-card';
 import { AnimatedGradientText } from '../components/ui/animated-gradient-text';
+import Header from '../components/layout/Header';
 
 // AI Employees data inspired by Motion.com
 const aiEmployees = [
@@ -150,30 +151,6 @@ const features = [
   }
 ];
 
-// Testimonials
-const testimonials = [
-  {
-    quote: "We saved 40 hours per week and scaled our operations 3x without hiring. Game changer!",
-    author: "Sarah Chen",
-    role: "CEO at TechCorp",
-    company: "TechCorp",
-    avatar: "SC"
-  },
-  {
-    quote: "The AI employees are like having a senior team member available 24/7. Incredible ROI.",
-    author: "Michael Rodriguez",
-    role: "CTO at StartupX",
-    company: "StartupX",
-    avatar: "MR"
-  },
-  {
-    quote: "Cut our operational costs by 65% while improving quality. This is the future of work.",
-    author: "Emily Watson",
-    role: "Founder at GrowthLab",
-    company: "GrowthLab",
-    avatar: "EW"
-  }
-];
 
 // Company logos for social proof
 const companies = [
@@ -244,8 +221,10 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen">
+      <Header />
+
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
         <Particles className="absolute inset-0 z-0" quantity={100} />
         <Spotlight className="absolute inset-0 z-0" />
         <div className="absolute inset-0 gradient-mesh"></div>
@@ -642,59 +621,6 @@ const LandingPage: React.FC = () => {
                 className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-accent to-secondary rounded-2xl shadow-xl opacity-80"
               />
             </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-32 bg-muted/30 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <Badge className="mb-4 glass px-4 py-2">
-              <Quote className="mr-2 h-4 w-4" />
-              Testimonials
-            </Badge>
-            <h2 className="text-5xl md:text-6xl font-bold mb-6">
-              Loved by Teams Worldwide
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              See how businesses are transforming with AI employees
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-              >
-                <Card className="p-6 h-full hover:shadow-xl transition-shadow border-2 border-border/50 hover:border-primary/30">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-lg mb-6 leading-relaxed">"{testimonial.quote}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
-                      {testimonial.avatar}
-                    </div>
-                    <div>
-                      <p className="font-semibold">{testimonial.author}</p>
-                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
           </div>
         </div>
       </section>

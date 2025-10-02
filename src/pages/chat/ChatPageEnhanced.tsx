@@ -62,6 +62,7 @@ import { streamAIResponse, type StreamChunk } from '@/services/streaming-service
 import { toolExecutorService, type Tool, type ToolExecutionResult } from '@/services/tool-executor-service';
 import { artifactService, type Artifact } from '@/services/artifact-service';
 import { webSearch, isWebSearchConfigured } from '@/services/web-search-service';
+import { ToolsPanel } from '@/components/chat/ToolsPanel';
 
 interface PurchasedEmployee {
   id: string;
@@ -318,8 +319,9 @@ const EnhancedChatPage: React.FC = () => {
       conversationHistory.push({ role: 'user', content: userMessage.content });
 
       // Add system message for tools if enabled
-      if (enableTools) {
-        const toolDescriptions = availableTools
+      if (enableTools && activeTab.enabledTools.length > 0) {
+        const selectedTools = availableTools.filter(t => activeTab.enabledTools.includes(t.id));
+        const toolDescriptions = selectedTools
           .map(t => `- ${t.name}: ${t.description}`)
           .join('\n');
         conversationHistory.unshift({
@@ -505,6 +507,15 @@ const EnhancedChatPage: React.FC = () => {
     }
     setIsStreaming(false);
     setStreamingContent('');
+  };
+
+  const handleToolsChange = (tools: string[]) => {
+    if (!selectedTab) return;
+    setActiveTabs(prev => prev.map(tab =>
+      tab.id === selectedTab
+        ? { ...tab, enabledTools: tools }
+        : tab
+    ));
   };
 
   const activeTabData = activeTabs.find(tab => tab.id === selectedTab);
@@ -751,7 +762,11 @@ const EnhancedChatPage: React.FC = () => {
                         <h3 className="font-semibold">{activeTabData.role}</h3>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-xs">{activeTabData.provider}</Badge>
-                          {enableTools && <Badge variant="outline" className="text-xs">Tools ON</Badge>}
+                          {enableTools && activeTabData.enabledTools.length > 0 && (
+                            <Badge variant="outline" className="text-xs">
+                              {activeTabData.enabledTools.length} {activeTabData.enabledTools.length === 1 ? 'Tool' : 'Tools'}
+                            </Badge>
+                          )}
                           {enableWebSearch && <Badge variant="outline" className="text-xs">Web Search</Badge>}
                         </div>
                       </div>
@@ -832,7 +847,7 @@ const EnhancedChatPage: React.FC = () => {
 
                   {/* Input Area */}
                   <div className="flex gap-2 items-end">
-                    <input ref={fileInputRef} type="file" accept="*/*" multiple className="hidden" 
+                    <input ref={fileInputRef} type="file" accept="*/*" multiple className="hidden"
                       onChange={e => setFiles(Array.from(e.target.files || []))} />
                     <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
                       <Paperclip className="h-5 w-5" />
@@ -840,6 +855,10 @@ const EnhancedChatPage: React.FC = () => {
                     <Button type="button" variant="ghost" size="icon" disabled>
                       <Mic className="h-5 w-5" />
                     </Button>
+                    <ToolsPanel
+                      selectedTools={activeTabData.enabledTools}
+                      onToolsChange={handleToolsChange}
+                    />
                     <div className="flex-1">
                       {filePreviews.length > 0 && (
                         <div className="flex gap-2 mb-2">

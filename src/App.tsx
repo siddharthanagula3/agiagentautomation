@@ -32,6 +32,7 @@ import BillingPage from './pages/dashboard/BillingPage';
 import APIKeysPage from './pages/dashboard/APIKeysPage';
 import HelpSupportPage from './pages/dashboard/HelpSupportPage';
 import WorkforceDemoPage from './pages/workforce-demo/WorkforceDemoPage';
+import MCPToolsPage from './pages/MCPToolsPage';
 
 // New Public Pages
 import BlogPage from './pages/BlogPage';
@@ -153,7 +154,8 @@ function App() {
               <Route path="automation/designer/:workflowId" element={<AutomationDesignerPage />} />
               
               <Route path="integrations" element={<IntegrationsPage />} />
-              
+              <Route path="mcp-tools" element={<MCPToolsPage />} />
+
               <Route path="analytics" element={<AnalyticsPage />} />
               <Route path="analytics/:view" element={<AnalyticsPage />} />
               

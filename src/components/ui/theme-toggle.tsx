@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Monitor } from 'lucide-react';
 import { Button } from './button';
 import { useUIStore } from '../../stores/ui-store';
 
@@ -8,7 +8,7 @@ export const ThemeToggle: React.FC = () => {
 
   useEffect(() => {
     const root = document.documentElement;
-    
+
     if (theme === 'dark') {
       root.classList.add('dark');
     } else if (theme === 'light') {
@@ -37,7 +37,7 @@ export const ThemeToggle: React.FC = () => {
   const getIcon = () => {
     if (theme === 'light') return <Sun className="h-4 w-4" />;
     if (theme === 'dark') return <Moon className="h-4 w-4" />;
-    return <Sun className="h-4 w-4" />; // System
+    return <Monitor className="h-4 w-4" />; // System
   };
 
   const getLabel = () => {
@@ -48,14 +48,13 @@ export const ThemeToggle: React.FC = () => {
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="sm"
       onClick={toggleTheme}
       className="gap-2"
       title={`Current theme: ${getLabel()}. Click to cycle through themes.`}
     >
       {getIcon()}
-      <span className="hidden sm:inline">{getLabel()}</span>
     </Button>
   );
 };

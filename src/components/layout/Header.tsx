@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import {
   Menu,
   X,
@@ -26,12 +27,8 @@ const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-  const aiEmployeesMenu = [
+  const productMenu = [
     { label: 'AI Marketplace', path: '/ai-marketplace', icon: Bot, description: 'Browse specialized AI employees' },
-    { label: 'Hire AI Employees', path: '/hire', icon: Users, description: 'Create your AI workforce' }
-  ];
-
-  const featuresMenu = [
     { label: 'AI Chat', path: '/features/ai-chat', icon: MessageSquare, description: 'Intelligent conversations' },
     { label: 'AI Workflows', path: '/features/ai-workflows', icon: Workflow, description: 'Automated processes' },
     { label: 'Integrations', path: '/features/integrations', icon: Plug, description: 'Connect your tools' },
@@ -39,7 +36,7 @@ const Header: React.FC = () => {
     { label: 'AI Project Manager', path: '/features/ai-project-manager', icon: Briefcase, description: 'Smart project management' }
   ];
 
-  const useCasesMenu = [
+  const companyMenu = [
     { label: 'Startups', path: '/use-cases/startups', icon: Lightbulb, description: 'Scale your startup' },
     { label: 'IT Service Providers', path: '/use-cases/it-service-providers', icon: Building2, description: 'Streamline IT operations' },
     { label: 'Sales Teams', path: '/use-cases/sales-teams', icon: TrendingUp, description: 'Boost sales performance' },
@@ -82,30 +79,21 @@ const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
-            {/* AI Employees Dropdown */}
+            {/* Product Dropdown */}
             <DropdownMenu
-              label="AI Employees"
-              items={aiEmployeesMenu}
-              isActive={activeDropdown === 'ai-employees'}
-              onToggle={() => handleDropdownToggle('ai-employees')}
+              label="Product"
+              items={productMenu}
+              isActive={activeDropdown === 'product'}
+              onToggle={() => handleDropdownToggle('product')}
               onNavigate={handleNavigation}
             />
 
-            {/* Features Dropdown */}
+            {/* Company Dropdown */}
             <DropdownMenu
-              label="Features"
-              items={featuresMenu}
-              isActive={activeDropdown === 'features'}
-              onToggle={() => handleDropdownToggle('features')}
-              onNavigate={handleNavigation}
-            />
-
-            {/* Use Cases Dropdown */}
-            <DropdownMenu
-              label="Use Cases"
-              items={useCasesMenu}
-              isActive={activeDropdown === 'use-cases'}
-              onToggle={() => handleDropdownToggle('use-cases')}
+              label="Company"
+              items={companyMenu}
+              isActive={activeDropdown === 'company'}
+              onToggle={() => handleDropdownToggle('company')}
               onNavigate={handleNavigation}
             />
 
@@ -129,6 +117,7 @@ const Header: React.FC = () => {
 
           {/* CTA Buttons */}
           <div className="hidden lg:flex items-center gap-3">
+            <ThemeToggle />
             <Button
               variant="ghost"
               onClick={() => navigate('/login')}
@@ -163,24 +152,17 @@ const Header: React.FC = () => {
               className="lg:hidden overflow-hidden"
             >
               <div className="py-4 space-y-4">
-                {/* Mobile AI Employees */}
+                {/* Mobile Product */}
                 <MobileDropdown
-                  label="AI Employees"
-                  items={aiEmployeesMenu}
+                  label="Product"
+                  items={productMenu}
                   onNavigate={handleNavigation}
                 />
 
-                {/* Mobile Features */}
+                {/* Mobile Company */}
                 <MobileDropdown
-                  label="Features"
-                  items={featuresMenu}
-                  onNavigate={handleNavigation}
-                />
-
-                {/* Mobile Use Cases */}
-                <MobileDropdown
-                  label="Use Cases"
-                  items={useCasesMenu}
+                  label="Company"
+                  items={companyMenu}
                   onNavigate={handleNavigation}
                 />
 
@@ -199,6 +181,10 @@ const Header: React.FC = () => {
                 </button>
 
                 <div className="flex flex-col gap-2 px-4 pt-2">
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm font-medium text-foreground/80">Theme</span>
+                    <ThemeToggle />
+                  </div>
                   <Button
                     variant="outline"
                     onClick={() => handleNavigation('/login')}

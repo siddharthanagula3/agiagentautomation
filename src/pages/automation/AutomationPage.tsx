@@ -5,13 +5,16 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { BentoGrid, BentoCard } from '@/components/ui/bento-grid';
+import { InteractiveHoverCard } from '@/components/ui/interactive-hover-card';
+import { Particles } from '@/components/ui/particles';
 import AutonomousWorkflowsPage from '@/pages/autonomous/AutonomousWorkflowsPage';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { automationService } from '@/services/automation-service';
@@ -267,61 +270,73 @@ const AutomationPage: React.FC = () => {
           </TabsList>
 
           <TabsContent value="workflows" className="space-y-6">
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Quick Actions with BentoGrid */}
+            <BentoGrid className="grid-cols-1 md:grid-cols-3 gap-4">
               <Link to="/dashboard/automation/designer">
-                <Card className="hover:bg-accent transition-colors cursor-pointer group">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-3">
+                <BentoCard
+                  className="cursor-pointer group"
+                  gradient={true}
+                  hover={true}
+                >
+                  <div className="flex items-center space-x-3">
+                    <InteractiveHoverCard>
                       <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center group-hover:bg-primary/30 transition-colors">
                         <Plus className="h-6 w-6 text-primary" />
                       </div>
-                      <div>
-                        <h3 className="font-semibold group-hover:text-primary transition-colors">
-                          Create Workflow
-                        </h3>
-                        <p className="text-sm text-muted-foreground">Build new automation</p>
-                      </div>
+                    </InteractiveHoverCard>
+                    <div>
+                      <h3 className="font-semibold group-hover:text-primary transition-colors">
+                        Create Workflow
+                      </h3>
+                      <p className="text-sm text-muted-foreground">Build new automation</p>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </BentoCard>
               </Link>
 
-              <Card className="hover:bg-accent transition-colors cursor-pointer group">
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-3">
+              <BentoCard
+                className="cursor-pointer group"
+                gradient={true}
+                hover={true}
+              >
+                <div className="flex items-center space-x-3">
+                  <InteractiveHoverCard>
                     <div className="w-12 h-12 bg-success/20 rounded-xl flex items-center justify-center group-hover:bg-success/30 transition-colors">
                       <GitBranch className="h-6 w-6 text-success" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold group-hover:text-success transition-colors">
-                        Browse Templates
-                      </h3>
-                      <p className="text-sm text-muted-foreground">Use pre-built workflows</p>
-                    </div>
+                  </InteractiveHoverCard>
+                  <div>
+                    <h3 className="font-semibold group-hover:text-success transition-colors">
+                      Browse Templates
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Use pre-built workflows</p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </BentoCard>
 
-              <Card className="hover:bg-accent transition-colors cursor-pointer group">
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-3">
+              <BentoCard
+                className="cursor-pointer group"
+                gradient={true}
+                hover={true}
+              >
+                <div className="flex items-center space-x-3">
+                  <InteractiveHoverCard>
                     <div className="w-12 h-12 bg-secondary rounded-xl flex items-center justify-center group-hover:bg-secondary/80 transition-colors">
                       <Sparkles className="h-6 w-6 text-primary" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold group-hover:text-primary transition-colors">
-                        AI Generator
-                      </h3>
-                      <p className="text-sm text-muted-foreground">Generate with AI</p>
-                    </div>
+                  </InteractiveHoverCard>
+                  <div>
+                    <h3 className="font-semibold group-hover:text-primary transition-colors">
+                      AI Generator
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Generate with AI</p>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </BentoCard>
+            </BentoGrid>
 
-            {/* Workflow List */}
-            <Card>
+            {/* Workflow List with Enhanced UI */}
+            <Card className="relative overflow-hidden">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
@@ -361,93 +376,137 @@ const AutomationPage: React.FC = () => {
                     </Link>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {workflows.map((workflow, index) => (
-                      <motion.div
-                        key={workflow.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.05 * index }}
-                        className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"
-                      >
-                        <div className="flex items-center space-x-4 flex-1">
-                          <div className="flex-shrink-0">
-                            <div className="w-12 h-12 bg-background rounded-lg flex items-center justify-center">
-                              <Workflow className="h-6 w-6 text-muted-foreground" />
-                            </div>
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <h3 className="font-medium truncate group-hover:text-primary transition-colors">
-                                {workflow.name}
-                              </h3>
-                              <Badge className={`text-xs ${getStatusColor(workflow.isActive)}`}>
-                                {workflow.isActive ? 'Active' : 'Inactive'}
-                              </Badge>
-                              {workflow.category && (
-                                <Badge variant="outline" className="text-xs">
-                                  {workflow.category}
-                                </Badge>
-                              )}
-                            </div>
-                            
-                            {workflow.description && (
-                              <p className="text-sm text-muted-foreground truncate mb-2">
-                                {workflow.description}
-                              </p>
+                  <BentoGrid className="grid-cols-1 md:grid-cols-2 gap-4">
+                    <AnimatePresence mode="popLayout">
+                      {workflows.map((workflow, index) => (
+                        <motion.div
+                          key={workflow.id}
+                          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                          transition={{
+                            delay: 0.1 * index,
+                            duration: 0.4,
+                            ease: [0.25, 0.46, 0.45, 0.94]
+                          }}
+                        >
+                          <BentoCard
+                            className="group relative overflow-hidden"
+                            gradient={workflow.isActive}
+                            hover={true}
+                          >
+                            {/* Animated gradient background for active workflows */}
+                            {workflow.isActive && (
+                              <>
+                                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-success/10 to-accent/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                <Particles
+                                  className="opacity-30"
+                                  quantity={20}
+                                  ease={30}
+                                />
+                              </>
                             )}
-                            
-                            <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                              <span>Last run: {formatDate(workflow.lastExecutedAt)}</span>
-                              <span>•</span>
-                              <span>Version {workflow.version}</span>
+
+                            <div className="relative z-10 flex items-start justify-between">
+                              <div className="flex items-start space-x-4 flex-1">
+                                <InteractiveHoverCard>
+                                  <div className="flex-shrink-0 w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center group-hover:bg-primary/30 transition-all duration-300">
+                                    <Workflow className="h-6 w-6 text-primary" />
+                                  </div>
+                                </InteractiveHoverCard>
+
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center space-x-3 mb-2 flex-wrap">
+                                    <motion.h3
+                                      className="font-semibold truncate group-hover:text-primary transition-colors"
+                                      whileHover={{ scale: 1.02 }}
+                                      transition={{ duration: 0.2 }}
+                                    >
+                                      {workflow.name}
+                                    </motion.h3>
+                                    <motion.div
+                                      initial={{ scale: 0.8 }}
+                                      animate={{ scale: 1 }}
+                                      transition={{ delay: 0.1 * index + 0.2 }}
+                                    >
+                                      <Badge className={`text-xs ${getStatusColor(workflow.isActive)}`}>
+                                        {workflow.isActive ? (
+                                          <span className="flex items-center gap-1">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                                            Active
+                                          </span>
+                                        ) : (
+                                          'Inactive'
+                                        )}
+                                      </Badge>
+                                    </motion.div>
+                                    {workflow.category && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {workflow.category}
+                                      </Badge>
+                                    )}
+                                  </div>
+
+                                  {workflow.description && (
+                                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                                      {workflow.description}
+                                    </p>
+                                  )}
+
+                                  <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      {formatDate(workflow.lastExecutedAt)}
+                                    </span>
+                                    <span>•</span>
+                                    <span>v{workflow.version}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="opacity-0 group-hover:opacity-100 transition-all duration-200"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => automationService.executeWorkflow(workflow.id)}
+                                  >
+                                    <Play className="h-4 w-4 mr-2" />
+                                    Run Now
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Edit Workflow
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <Copy className="h-4 w-4 mr-2" />
+                                    Duplicate
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => automationService.deleteWorkflow(workflow.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center space-x-3">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                onClick={() => automationService.executeWorkflow(workflow.id)}
-                              >
-                                <Play className="h-4 w-4 mr-2" />
-                                Run Now
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Edit Workflow
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Copy className="h-4 w-4 mr-2" />
-                                Duplicate
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                className="text-destructive"
-                                onClick={() => automationService.deleteWorkflow(workflow.id)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
+                          </BentoCard>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </BentoGrid>
                 )}
               </CardContent>
             </Card>

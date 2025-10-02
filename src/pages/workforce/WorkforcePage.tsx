@@ -11,6 +11,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { BentoGrid, BentoCard } from '@/components/ui/bento-grid';
+import { InteractiveHoverCard } from '@/components/ui/interactive-hover-card';
+import { Particles } from '@/components/ui/particles';
 import { Link } from 'react-router-dom';
 import WorkforceManagement from '@/components/employees/WorkforceManagement';
 import { listPurchasedEmployees, getEmployeeById } from '@/services/supabase-employees';
@@ -74,6 +77,7 @@ const WorkforcePage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className="glass-strong rounded-3xl p-8 relative overflow-hidden"
       >
+        <Particles className="absolute inset-0" quantity={30} ease={20} />
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
         <div className="relative z-10">
           <div className="flex items-start justify-between">
@@ -274,55 +278,63 @@ const WorkforcePage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {purchased.map((rec) => {
+                    <BentoGrid>
+                      {purchased.map((rec, index) => {
                         const emp = getEmployeeById(rec.employee_id);
                         return (
-                          <motion.div
+                          <BentoCard
                             key={rec.id}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="glass rounded-2xl p-6 card-hover group"
+                            gradient={true}
+                            className="glass group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300"
                           >
-                            <div className="flex items-start gap-4 mb-4">
-                              <div className="w-14 h-14 rounded-xl overflow-hidden bg-muted flex-shrink-0 group-hover:scale-110 transition-transform">
-                                {emp?.avatar ? (
-                                  <img src={emp.avatar} alt={emp.role} className="w-full h-full object-cover" />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center bg-primary/10">
-                                    <Bot className="h-7 w-7 text-primary" />
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="h-full flex flex-col"
+                            >
+                              <div className="flex items-start gap-4 mb-4">
+                                <InteractiveHoverCard>
+                                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-muted flex-shrink-0 group-hover:shadow-xl group-hover:shadow-primary/20 transition-all duration-300">
+                                    {emp?.avatar ? (
+                                      <img src={emp.avatar} alt={emp.role} className="w-full h-full object-cover" />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                                        <Bot className="h-7 w-7 text-primary" />
+                                      </div>
+                                    )}
                                   </div>
-                                )}
+                                </InteractiveHoverCard>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-lg truncate mb-1 group-hover:text-primary transition-colors">
+                                    {emp?.role || rec.role}
+                                  </h3>
+                                  <Badge variant="outline" className="text-xs">
+                                    {rec.provider}
+                                  </Badge>
+                                </div>
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-lg truncate mb-1">
-                                  {emp?.role || rec.role}
-                                </h3>
-                                <Badge variant="outline" className="text-xs">
-                                  {rec.provider}
-                                </Badge>
-                              </div>
-                            </div>
-                            
-                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                              {emp?.specialty || 'AI specialist ready to assist'}
-                            </p>
 
-                            <div className="flex gap-2">
-                              <Link to="/chat" className="flex-1">
-                                <Button variant="outline" size="sm" className="w-full">
-                                  <MessageSquare className="mr-2 h-4 w-4" />
-                                  Chat
+                              <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-grow">
+                                {emp?.specialty || 'AI specialist ready to assist'}
+                              </p>
+
+                              <div className="flex gap-2">
+                                <Link to="/chat" className="flex-1">
+                                  <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50 transition-colors">
+                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                    Chat
+                                  </Button>
+                                </Link>
+                                <Button variant="ghost" size="sm" className="group-hover:bg-primary/10 transition-colors">
+                                  <Settings className="h-4 w-4" />
                                 </Button>
-                              </Link>
-                              <Button variant="ghost" size="sm">
-                                <Settings className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </motion.div>
+                              </div>
+                            </motion.div>
+                          </BentoCard>
                         );
                       })}
-                    </div>
+                    </BentoGrid>
 
                     <div className="flex items-center justify-between pt-4 border-t border-border">
                       <p className="text-sm text-muted-foreground">

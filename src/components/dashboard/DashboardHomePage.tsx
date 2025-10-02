@@ -9,6 +9,8 @@ import { useAuthStore } from '@/stores/unified-auth-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { BentoGrid, BentoCard } from '@/components/ui/bento-grid';
+import { InteractiveHoverCard } from '@/components/ui/interactive-hover-card';
 import {
   TrendingUp,
   Users,
@@ -28,11 +30,28 @@ import {
   TrendingDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, useSpring, useMotionValue, useTransform, animate } from 'framer-motion';
 
 interface DashboardHomePageProps {
   className?: string;
 }
+
+// Animated Counter Component
+const AnimatedCounter: React.FC<{ value: number; format?: (val: number) => string }> = ({ value, format }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const controls = animate(0, value, {
+      duration: 1.5,
+      ease: "easeOut",
+      onUpdate: (latest) => setDisplayValue(latest),
+    });
+
+    return () => controls.stop();
+  }, [value]);
+
+  return <span>{format ? format(displayValue) : Math.round(displayValue)}</span>;
+};
 
 export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className }) => {
   const { user } = useAuthStore();
@@ -136,164 +155,144 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
         </div>
       </motion.div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+      {/* Stats Grid - Enhanced with BentoGrid */}
+      <BentoGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <BentoCard
+          gradient={true}
+          className="glass-strong"
+          icon={<Brain className="h-6 w-6 text-primary" />}
         >
-          <Card className="glass-strong card-hover group">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Brain className="h-6 w-6 text-primary" />
-                </div>
-                <Badge variant="secondary" className="text-xs">
-                  <TrendingUp className="mr-1 h-3 w-3" />
-                  Ready
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">AI Workforce</p>
-              <p className="text-3xl font-bold">
-                {stats.activeEmployees}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Available 24/7
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
+          <div className="flex items-center justify-between mb-4">
+            <Badge variant="secondary" className="text-xs">
+              <TrendingUp className="mr-1 h-3 w-3" />
+              Ready
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground mb-1">AI Workforce</p>
+          <InteractiveHoverCard>
+            <p className="text-3xl font-bold">
+              <AnimatedCounter value={stats.activeEmployees} />
+            </p>
+          </InteractiveHoverCard>
+          <p className="text-xs text-muted-foreground mt-2">
+            Available 24/7
+          </p>
+        </BentoCard>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+        <BentoCard
+          gradient={true}
+          className="glass-strong"
+          icon={<Target className="h-6 w-6 text-accent" />}
         >
-          <Card className="glass-strong card-hover group">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Target className="h-6 w-6 text-accent" />
-                </div>
-                <Badge variant="secondary" className="text-xs">
-                  This month
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">Tasks Completed</p>
-              <p className="text-3xl font-bold">
-                {stats.totalTasks.toLocaleString()}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Start your first task
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
+          <div className="flex items-center justify-between mb-4">
+            <Badge variant="secondary" className="text-xs">
+              This month
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground mb-1">Tasks Completed</p>
+          <InteractiveHoverCard>
+            <p className="text-3xl font-bold">
+              <AnimatedCounter
+                value={stats.totalTasks}
+                format={(val) => Math.round(val).toLocaleString()}
+              />
+            </p>
+          </InteractiveHoverCard>
+          <p className="text-xs text-muted-foreground mt-2">
+            Start your first task
+          </p>
+        </BentoCard>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+        <BentoCard
+          gradient={true}
+          className="glass-strong"
+          icon={<Zap className="h-6 w-6 text-secondary" />}
         >
-          <Card className="glass-strong card-hover group">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Zap className="h-6 w-6 text-secondary" />
-                </div>
-                <Badge variant="secondary" className="text-xs">
-                  <Clock className="mr-1 h-3 w-3" />
-                  Free tier
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">Tokens Used</p>
-              <p className="text-3xl font-bold">
-                {stats.tokensUsed.toLocaleString()}
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                5,000 free monthly
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
+          <div className="flex items-center justify-between mb-4">
+            <Badge variant="secondary" className="text-xs">
+              <Clock className="mr-1 h-3 w-3" />
+              Free tier
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground mb-1">Tokens Used</p>
+          <InteractiveHoverCard>
+            <p className="text-3xl font-bold">
+              <AnimatedCounter
+                value={stats.tokensUsed}
+                format={(val) => Math.round(val).toLocaleString()}
+              />
+            </p>
+          </InteractiveHoverCard>
+          <p className="text-xs text-muted-foreground mt-2">
+            5,000 free monthly
+          </p>
+        </BentoCard>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
+        <BentoCard
+          gradient={true}
+          className="glass-strong"
+          icon={<CheckCircle2 className="h-6 w-6 text-success" />}
         >
-          <Card className="glass-strong card-hover group">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <CheckCircle2 className="h-6 w-6 text-success" />
-                </div>
-                <Badge variant="secondary" className="text-xs">
-                  N/A
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">Success Rate</p>
-              <p className="text-3xl font-bold">
-                --
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Complete tasks to track
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+          <div className="flex items-center justify-between mb-4">
+            <Badge variant="secondary" className="text-xs">
+              N/A
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground mb-1">Success Rate</p>
+          <InteractiveHoverCard>
+            <p className="text-3xl font-bold">
+              --
+            </p>
+          </InteractiveHoverCard>
+          <p className="text-xs text-muted-foreground mt-2">
+            Complete tasks to track
+          </p>
+        </BentoCard>
+      </BentoGrid>
 
-      {/* Quick Actions */}
+      {/* Quick Actions - Enhanced with BentoGrid */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.5 }}
       >
-        <Card className="glass-strong">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>Start working with your AI workforce</CardDescription>
-              </div>
-              <Rocket className="h-6 w-6 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {quickActions.map((action, index) => {
-                const IconComponent = action.icon;
-                return (
-                  <motion.button
-                    key={action.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: 0.6 + index * 0.1 }}
-                    onClick={action.action}
-                    className="feature-card text-left p-6 rounded-2xl group"
-                  >
-                    <div className={cn(
-                      "w-14 h-14 rounded-xl mb-4 flex items-center justify-center",
-                      action.bgColor,
-                      "feature-card-icon"
-                    )}>
-                      <IconComponent className={cn("h-7 w-7", action.iconColor)} />
-                    </div>
-                    <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
-                      {action.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {action.description}
-                    </p>
-                    <ArrowRight className="h-5 w-5 text-primary mt-4 group-hover:translate-x-1 transition-transform" />
-                  </motion.button>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-2">
+            <Rocket className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-bold">Quick Actions</h2>
+          </div>
+          <p className="text-muted-foreground">Start working with your AI workforce</p>
+        </div>
+
+        <BentoGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {quickActions.map((action, index) => {
+            const IconComponent = action.icon;
+            const isFirst = index === 0;
+            return (
+              <BentoCard
+                key={action.id}
+                gradient={true}
+                colSpan={isFirst ? 2 : 1}
+                className="cursor-pointer"
+                onClick={action.action}
+              >
+                <div className={cn(
+                  "w-14 h-14 rounded-xl mb-4 flex items-center justify-center",
+                  action.bgColor
+                )}>
+                  <IconComponent className={cn("h-7 w-7", action.iconColor)} />
+                </div>
+                <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                  {action.title}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {action.description}
+                </p>
+                <ArrowRight className="h-5 w-5 text-primary mt-4 group-hover:translate-x-1 transition-transform" />
+              </BentoCard>
+            );
+          })}
+        </BentoGrid>
       </motion.div>
 
       {/* Getting Started Guide */}

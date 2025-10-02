@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { 
-  ArrowRight, 
+import {
+  ArrowRight,
   Sparkles,
   Zap,
   Brain,
@@ -23,8 +23,13 @@ import {
   Lock
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { Particles } from '../components/ui/particles';
+import { Spotlight, MouseSpotlight } from '../components/ui/spotlight';
+import { BentoGrid, BentoCard } from '../components/ui/bento-grid';
+import { InteractiveHoverCard } from '../components/ui/interactive-hover-card';
+import { AnimatedGradientText } from '../components/ui/animated-gradient-text';
 
 const LandingPage: React.FC = () => {
   const [activeFeature, setActiveFeature] = useState(0);
@@ -53,8 +58,10 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <Particles className="absolute inset-0 z-0" quantity={100} />
+        <Spotlight className="absolute inset-0 z-0" />
         <div className="absolute inset-0 gradient-mesh"></div>
-        
+
         <div className="absolute inset-0 overflow-hidden">
           <motion.div
             animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
@@ -86,8 +93,22 @@ const LandingPage: React.FC = () => {
             </Badge>
 
             <h1 className="text-6xl md:text-8xl font-bold mb-8 leading-tight">
-              <span className="block mb-2">One Person.</span>
-              <span className="block text-gradient-primary">Billion Dollar Company.</span>
+              <motion.span
+                className="block mb-2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                One Person.
+              </motion.span>
+              <motion.span
+                className="block"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <AnimatedGradientText>Billion Dollar Company.</AnimatedGradientText>
+              </motion.span>
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
@@ -127,25 +148,64 @@ const LandingPage: React.FC = () => {
               </Button>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
-            >
-              <div className="glass rounded-2xl p-8">
-                <div className="text-4xl font-bold text-primary mb-2">{stats.tasks.toLocaleString()}+</div>
-                <div className="text-sm text-muted-foreground">Tasks Completed Daily</div>
-              </div>
-              <div className="glass rounded-2xl p-8">
-                <div className="text-4xl font-bold text-accent mb-2">{stats.time.toFixed(0)}%</div>
-                <div className="text-sm text-muted-foreground">Time Saved</div>
-              </div>
-              <div className="glass rounded-2xl p-8">
-                <div className="text-4xl font-bold text-secondary mb-2">{stats.cost.toFixed(0)}%</div>
-                <div className="text-sm text-muted-foreground">Cost Reduction</div>
-              </div>
-            </motion.div>
+            <BentoGrid className="max-w-4xl mx-auto">
+              <BentoCard
+                className="backdrop-blur-xl bg-background/40 border-primary/20"
+                hover={true}
+              >
+                <InteractiveHoverCard>
+                  <div className="text-center">
+                    <motion.div
+                      className="text-4xl font-bold text-primary mb-2"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                    >
+                      {stats.tasks.toLocaleString()}+
+                    </motion.div>
+                    <div className="text-sm text-muted-foreground">Tasks Completed Daily</div>
+                  </div>
+                </InteractiveHoverCard>
+              </BentoCard>
+
+              <BentoCard
+                className="backdrop-blur-xl bg-background/40 border-accent/20"
+                hover={true}
+              >
+                <InteractiveHoverCard>
+                  <div className="text-center">
+                    <motion.div
+                      className="text-4xl font-bold text-accent mb-2"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: 0.4 }}
+                    >
+                      {stats.time.toFixed(0)}%
+                    </motion.div>
+                    <div className="text-sm text-muted-foreground">Time Saved</div>
+                  </div>
+                </InteractiveHoverCard>
+              </BentoCard>
+
+              <BentoCard
+                className="backdrop-blur-xl bg-background/40 border-secondary/20"
+                hover={true}
+              >
+                <InteractiveHoverCard>
+                  <div className="text-center">
+                    <motion.div
+                      className="text-4xl font-bold text-secondary mb-2"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: 0.5 }}
+                    >
+                      {stats.cost.toFixed(0)}%
+                    </motion.div>
+                    <div className="text-sm text-muted-foreground">Cost Reduction</div>
+                  </div>
+                </InteractiveHoverCard>
+              </BentoCard>
+            </BentoGrid>
           </motion.div>
         </div>
       </section>

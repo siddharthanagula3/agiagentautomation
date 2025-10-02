@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, CheckCircle2, ArrowRight, Users, Building2, Zap } from 'lucide-react';
+import { Mail, Phone, MapPin, CheckCircle2, ArrowRight, Users, Building2, Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
+import { submitContactForm } from '@/services/marketing-api';
+import { toast } from 'sonner';
 
 const ContactSalesPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -18,11 +20,32 @@ const ContactSalesPage: React.FC = () => {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    setSubmitted(true);
+    setIsSubmitting(true);
+
+    try {
+      await submitContactForm({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        company: formData.company,
+        phone: formData.phone,
+        companySize: formData.employees,
+        message: formData.message,
+        source: 'contact_sales_page'
+      });
+
+      setSubmitted(true);
+      toast.success('Contact form submitted successfully!');
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to submit form. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const benefits = [
@@ -236,9 +259,23 @@ const ContactSalesPage: React.FC = () => {
                   />
                 </div>
 
-                <Button type="submit" size="lg" className="w-full bg-gradient-to-r from-primary to-accent">
-                  Submit Request
-                  <ArrowRight className="ml-2" size={18} />
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full bg-gradient-to-r from-primary to-accent"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 animate-spin" size={18} />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      Submit Request
+                      <ArrowRight className="ml-2" size={18} />
+                    </>
+                  )}
                 </Button>
               </form>
             </motion.div>

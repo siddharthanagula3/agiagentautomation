@@ -243,7 +243,10 @@ const EnhancedChatPage: React.FC = () => {
         provider: employee.provider 
       });
 
-      const welcomeContent = `Hi! I'm your ${employee.role}. I'm powered by ${employee.provider} and ready to help! I have access to various tools and can create interactive artifacts for you.`;
+      const toolsList = employeeData.defaultTools && employeeData.defaultTools.length > 0
+        ? ` I have access to: ${employeeData.defaultTools.map(t => t.replace(/_/g, ' ')).join(', ')}.`
+        : '';
+      const welcomeContent = `Hi! I'm your ${employee.role}. I'm powered by ${employee.provider} and ready to help!${toolsList} Feel free to ask me anything related to my expertise.`;
       const welcomeMessage = await sendMessage(user.id, session.id, 'assistant', welcomeContent);
 
       const newTab: ChatTab = {
@@ -252,14 +255,14 @@ const EnhancedChatPage: React.FC = () => {
         role: employee.role,
         provider: employee.provider,
         isActive: true,
-        messages: [{ 
-          id: welcomeMessage.id, 
-          role: 'assistant', 
-          content: welcomeMessage.content, 
-          timestamp: new Date(welcomeMessage.created_at) 
+        messages: [{
+          id: welcomeMessage.id,
+          role: 'assistant',
+          content: welcomeMessage.content,
+          timestamp: new Date(welcomeMessage.created_at)
         }],
         artifacts: [],
-        enabledTools: [],
+        enabledTools: employeeData.defaultTools || [],
       };
 
       setActiveTabs(prev => [...prev, newTab]);

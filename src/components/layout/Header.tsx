@@ -107,12 +107,12 @@ const Header: React.FC = () => {
             />
 
             {/* Pricing Link */}
-            <Link
-              to="/pricing"
+            <button
+              onClick={() => handleNavigation('/pricing')}
               className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
             >
               Pricing
-            </Link>
+            </button>
           </div>
 
           {/* CTA Buttons */}

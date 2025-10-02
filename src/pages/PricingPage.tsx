@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Check, X, ArrowRight, Zap } from 'lucide-react';
+import { Check, X, ArrowRight, Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
+import { getPricingPlans, type PricingPlan as DBPricingPlan } from '@/services/marketing-api';
 
 interface PricingPlan {
   name: string;
@@ -21,8 +22,51 @@ interface PricingPlan {
 
 const PricingPage: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [plans, setPlans] = useState<PricingPlan[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const plans: PricingPlan[] = [
+  useEffect(() => {
+    loadPlans();
+  }, []);
+
+  async function loadPlans() {
+    try {
+      const dbPlans = await getPricingPlans();
+      const formattedPlans: PricingPlan[] = dbPlans.map(plan => ({
+        name: plan.name,
+        price: plan.name === 'Enterprise' ? 'Custom' : (
+          billingCycle === 'monthly'
+            ? `$${plan.price_monthly}`
+            : `$${plan.price_yearly}`
+        ),
+        period: plan.name === 'Enterprise' ? '' : (
+          billingCycle === 'monthly' ? '/month' : '/month (billed annually)'
+        ),
+        description: plan.description,
+        features: plan.features,
+        notIncluded: plan.not_included || [],
+        popular: plan.popular,
+        cta: plan.name === 'Enterprise' ? 'Contact Sales' : 'Start Free Trial',
+        color: plan.color_gradient
+      }));
+      setPlans(formattedPlans);
+    } catch (error) {
+      console.error('Error loading pricing plans:', error);
+      // Fallback to hardcoded plans if fetch fails
+      setPlans(fallbackPlans);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Update plan prices when billing cycle changes
+  useEffect(() => {
+    if (plans.length > 0 && !loading) {
+      loadPlans();
+    }
+  }, [billingCycle]);
+
+  const fallbackPlans: PricingPlan[] = [
     {
       name: 'Starter',
       price: billingCycle === 'monthly' ? '$49' : '$39',
@@ -195,11 +239,17 @@ const PricingPage: React.FC = () => {
       {/* Pricing Cards */}
       <section className="pb-20 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {plans.map((plan, idx) => (
-              <PricingCard key={idx} plan={plan} index={idx} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <Loader2 className="animate-spin text-primary" size={48} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {plans.map((plan, idx) => (
+                <PricingCard key={idx} plan={plan} index={idx} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

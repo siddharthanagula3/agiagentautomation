@@ -1,0 +1,84 @@
+# MARKDOWN FILES CLEANUP ANALYSIS
+
+## FILES TO REMOVE (Obsolete completion/status reports - 38 files):
+
+### Completion Reports (Already Implemented):
+- BUILD_FIX_AND_REAL_DATA_COMPLETE.md (build fix from Sept - done)
+- CHAT_ENHANCEMENT_COMPLETE.md (chat features - implemented)
+- CHAT_ERRORS_COMPLETE_FIX.md (error fixes - done)
+- CHAT_ERRORS_FIX.md (duplicate fix report)
+- IMPLEMENTATION_COMPLETE.md (old completion report)
+- IMPLEMENTATION_COMPLETE_CHECKLIST.md (old checklist)
+- IMPLEMENTATION-COMPLETE.md (duplicate completion)
+- UI_ENHANCEMENT_COMPLETE.md (UI work - done)
+- FINAL_IMPLEMENTATION_SUMMARY.md (old summary)
+- FINAL_UPDATE.md (old update)
+- DEPLOYMENT_TRIGGER.md (90 bytes - useless)
+
+### Fix Documentation (Obsolete):
+- BUG_FIX_INDEX.md (old bug tracking)
+- COMPLETE_FIX_GUIDE.md (old fix guide)
+- COMPREHENSIVE_FIX_PLAN.md (old plan)
+- FIX_PLAN.md (old plan)
+- FIX_PROGRESS.md (old progress)
+- FIX_SUMMARY.md (old summary)
+- QUICK_START_AFTER_FIX.md (old quickstart)
+- STACK_OVERFLOW_FIX.md (specific fix - done)
+- START_HERE_CHAT_FIX.md (old fix guide)
+- START_HERE_FIXES.md (old fix guide)
+- REACT_HOOKS_DIAGNOSTIC.md (diagnostic - done)
+
+### Implementation Docs (Obsolete):
+- IMPLEMENTATION_PROGRESS.md (old progress)
+- IMPLEMENTATION_STATUS.md (old status)
+- IMPLEMENTATION_STEPS.md (old steps)
+- REAL_DATA_IMPLEMENTATION_GUIDE.md (done)
+- WORKFORCE_IMPLEMENTATION_PLAN.md (old plan)
+
+### Cleanup/Todo Docs (Obsolete):
+- ASSISTANT-TODO-LIST.md (old todo)
+- PRODUCTION_TODO.md (old todo)
+- CLEANUP-GUIDE.md (old cleanup guide)
+- COMPLETE_CLEANUP_PLAN.md (old plan)
+- ONE_COMMAND_CLEANUP.md (old script)
+- PROJECT_CLEANUP_SUMMARY.md (old summary)
+
+### Duplicate Summaries:
+- EXECUTIVE_SUMMARY.md (duplicate)
+- EXECUTIVE-SUMMARY.md (duplicate)
+- CLAUDE_COMPLETION_REPORT.md (old report)
+- FINAL-STATUS.md (old status)
+
+### Other Agent Docs:
+- CURSOR_AGENT_PROMPT.md (for Cursor, not Claude Code)
+
+## FILES TO KEEP (Essential - 15 files):
+
+### Essential Documentation:
+- README.md (Main project documentation)
+- CLAUDE.md (Claude Code guidance - just created)
+
+### Setup Guides:
+- API_SETUP_GUIDE.md (API key setup)
+- ENV_SETUP_GUIDE.md (Environment setup)
+- SETUP_GUIDE.md (General setup)
+- SUPABASE_SETUP_GUIDE.md (Database setup)
+- SUPABASE_SCHEMA_SIMPLE.md (Schema reference)
+- DATABASE_SETUP_COMPLETE.md (Database migration guide)
+
+### Feature Guides:
+- AI_WORKFORCE_README.md (Workforce feature guide)
+- WORKFORCE_QUICKSTART.md (Quick start)
+- QUICK_START_ENHANCED_CHAT.md (Chat quickstart)
+
+### Reference Docs:
+- MASTER_INDEX.md (Resource index)
+- START_HERE.md (Getting started)
+- QUICK_CHECKLIST.md (Quick checklist)
+- QUICK-REFERENCE.md (Quick reference)
+
+## SUMMARY:
+- Total: 53 files
+- Remove: 38 files (obsolete reports/plans)
+- Keep: 15 files (essential docs)
+- Space saved: ~400KB+

@@ -5,16 +5,19 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { useAuthStore } from '../../stores/unified-auth-store';
-import { 
-  Bot, 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
+import {
+  Bot,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
   ArrowRight,
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Particles } from '../../components/ui/particles';
+import { Spotlight } from '../../components/ui/spotlight';
 
 const LoginPage: React.FC = () => {
   const { login, isLoading, error, isAuthenticated, user } = useAuthStore();
@@ -96,15 +99,55 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-purple-500/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="border-0 shadow-2xl">
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      {/* Enhanced background with particles and spotlight */}
+      <Particles className="absolute inset-0" quantity={60} />
+      <Spotlight className="absolute inset-0" />
+
+      {/* Animated gradient blobs */}
+      <div className="absolute inset-0">
+        <motion.div
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 20, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-20 left-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            y: [0, 30, 0],
+            x: [0, -20, 0],
+            scale: [1, 1.15, 1]
+          }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-20 right-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl"
+        />
+      </div>
+
+      <motion.div
+        className="w-full max-w-md relative z-10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className="border border-border/50 backdrop-blur-xl bg-background/60 shadow-2xl">
           <CardHeader className="space-y-1 text-center pb-8">
-            <div className="flex justify-center mb-4">
-              <div className="p-3 bg-primary/10 rounded-full">
+            <motion.div
+              className="flex justify-center mb-4"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+            >
+              <motion.div
+                className="p-3 bg-primary/10 rounded-full"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+              >
                 <Bot className="h-8 w-8 text-primary" />
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
             <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
             <CardDescription>
               Sign in to your AGI Agent Automation account
@@ -228,7 +271,7 @@ const LoginPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
     </div>
   );
 };

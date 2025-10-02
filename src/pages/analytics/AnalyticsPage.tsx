@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,9 @@ import {
 } from 'recharts';
 import { analyticsService } from '@/services/analytics-service';
 import { useAuthStore } from '@/stores/unified-auth-store';
+import { BentoGrid, BentoCard } from '@/components/ui/bento-grid';
+import { InteractiveHoverCard } from '@/components/ui/interactive-hover-card';
+import { Particles } from '@/components/ui/particles';
 
 const AnalyticsPage: React.FC = () => {
   const { user } = useAuthStore();
@@ -112,12 +115,15 @@ const AnalyticsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="relative space-y-6 p-6">
+      {/* Subtle Particles Background */}
+      <Particles className="absolute inset-0 pointer-events-none opacity-30" quantity={40} />
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="relative flex items-center justify-between"
       >
         <div>
           <h1 className="text-3xl font-bold">Analytics</h1>
@@ -150,127 +156,174 @@ const AnalyticsPage: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Key Metrics */}
+      {/* Key Metrics with BentoGrid */}
+      <BentoGrid className="relative">
+        {/* Total Cost */}
+        <BentoCard gradient={true} hover={true}>
+          {isLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-3 w-full" />
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Cost</p>
+                <InteractiveHoverCard>
+                  <motion.p
+                    className="text-2xl font-bold"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {formatCurrency(stats?.totalCost || 0)}
+                  </motion.p>
+                </InteractiveHoverCard>
+                <div className="flex items-center space-x-1 mt-1">
+                  <DollarSign className="h-3 w-3 text-green-600" />
+                  <span className="text-xs text-muted-foreground">
+                    {(stats?.totalTokensUsed || 0).toLocaleString()} tokens
+                  </span>
+                </div>
+              </div>
+              <motion.div
+                className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+              >
+                <DollarSign className="h-6 w-6 text-green-600" />
+              </motion.div>
+            </div>
+          )}
+        </BentoCard>
+
+        {/* Tasks Completed */}
+        <BentoCard gradient={true} hover={true}>
+          {isLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-3 w-full" />
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Tasks Completed</p>
+                <InteractiveHoverCard>
+                  <motion.p
+                    className="text-2xl font-bold"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                  >
+                    {stats?.totalExecutions || 0}
+                  </motion.p>
+                </InteractiveHoverCard>
+                <div className="flex items-center space-x-1 mt-1">
+                  <Activity className="h-3 w-3 text-blue-600" />
+                  <span className="text-xs text-muted-foreground">All time</span>
+                </div>
+              </div>
+              <motion.div
+                className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+              >
+                <Activity className="h-6 w-6 text-blue-600" />
+              </motion.div>
+            </div>
+          )}
+        </BentoCard>
+
+        {/* Success Rate */}
+        <BentoCard gradient={true} hover={true}>
+          {isLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-3 w-full" />
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Success Rate</p>
+                <InteractiveHoverCard>
+                  <motion.p
+                    className="text-2xl font-bold"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    {Math.round(stats?.successRate || 0)}%
+                  </motion.p>
+                </InteractiveHoverCard>
+                <div className="flex items-center space-x-1 mt-1">
+                  <Target className="h-3 w-3 text-purple-600" />
+                  <span className="text-xs text-muted-foreground">
+                    Quality metric
+                  </span>
+                </div>
+              </div>
+              <motion.div
+                className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+              >
+                <Target className="h-6 w-6 text-purple-600" />
+              </motion.div>
+            </div>
+          )}
+        </BentoCard>
+
+        {/* Active Employees */}
+        <BentoCard gradient={true} hover={true}>
+          {isLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-3 w-full" />
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">AI Employees</p>
+                <InteractiveHoverCard>
+                  <motion.p
+                    className="text-2xl font-bold"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                  >
+                    {stats?.activeEmployees || 0}
+                  </motion.p>
+                </InteractiveHoverCard>
+                <div className="flex items-center space-x-1 mt-1">
+                  <Users className="h-3 w-3 text-orange-600" />
+                  <span className="text-xs text-muted-foreground">
+                    {stats?.totalEmployees || 0} total
+                  </span>
+                </div>
+              </div>
+              <motion.div
+                className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+              >
+                <Users className="h-6 w-6 text-orange-600" />
+              </motion.div>
+            </div>
+          )}
+        </BentoCard>
+      </BentoGrid>
+
+      {/* Charts Section - Keep as regular cards for chart containers */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        transition={{ delay: 0.2 }}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
-        {/* Total Cost */}
-        <Card>
-          <CardContent className="p-6">
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-32" />
-                <Skeleton className="h-3 w-full" />
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Cost</p>
-                  <p className="text-2xl font-bold">{formatCurrency(stats?.totalCost || 0)}</p>
-                  <div className="flex items-center space-x-1 mt-1">
-                    <DollarSign className="h-3 w-3 text-green-600" />
-                    <span className="text-xs text-muted-foreground">
-                      {(stats?.totalTokensUsed || 0).toLocaleString()} tokens
-                    </span>
-                  </div>
-                </div>
-                <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Tasks Completed */}
-        <Card>
-          <CardContent className="p-6">
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-32" />
-                <Skeleton className="h-3 w-full" />
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Tasks Completed</p>
-                  <p className="text-2xl font-bold">{stats?.totalExecutions || 0}</p>
-                  <div className="flex items-center space-x-1 mt-1">
-                    <Activity className="h-3 w-3 text-blue-600" />
-                    <span className="text-xs text-muted-foreground">All time</span>
-                  </div>
-                </div>
-                <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
-                  <Activity className="h-6 w-6 text-blue-600" />
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Success Rate */}
-        <Card>
-          <CardContent className="p-6">
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-32" />
-                <Skeleton className="h-3 w-full" />
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Success Rate</p>
-                  <p className="text-2xl font-bold">{Math.round(stats?.successRate || 0)}%</p>
-                  <div className="flex items-center space-x-1 mt-1">
-                    <Target className="h-3 w-3 text-purple-600" />
-                    <span className="text-xs text-muted-foreground">
-                      Quality metric
-                    </span>
-                  </div>
-                </div>
-                <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center">
-                  <Target className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Active Employees */}
-        <Card>
-          <CardContent className="p-6">
-            {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-32" />
-                <Skeleton className="h-3 w-full" />
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">AI Employees</p>
-                  <p className="text-2xl font-bold">{stats?.activeEmployees || 0}</p>
-                  <div className="flex items-center space-x-1 mt-1">
-                    <Users className="h-3 w-3 text-orange-600" />
-                    <span className="text-xs text-muted-foreground">
-                      {stats?.totalEmployees || 0} total
-                    </span>
-                  </div>
-                </div>
-                <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center">
-                  <Users className="h-6 w-6 text-orange-600" />
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Avg Execution Time */}
         <Card>
           <CardContent className="p-6">

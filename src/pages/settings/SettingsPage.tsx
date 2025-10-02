@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,6 +53,8 @@ import {
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import settingsService, { UserProfile, UserSettings, APIKey } from '@/services/settingsService';
+import { InteractiveHoverCard } from '@/components/ui/interactive-hover-card';
+import { Particles } from '@/components/ui/particles';
 
 const SettingsPage: React.FC = () => {
   const { section } = useParams();
@@ -353,12 +355,20 @@ const SettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="relative min-h-screen space-y-6 p-6">
+      {/* Subtle Background Particles */}
+      <Particles
+        className="absolute inset-0 pointer-events-none opacity-20"
+        quantity={30}
+        ease={80}
+        staticity={50}
+      />
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="relative flex items-center justify-between"
       >
         <div>
           <h1 className="text-3xl font-bold text-foreground">Settings</h1>
@@ -377,25 +387,39 @@ const SettingsPage: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
+        className="relative"
       >
         <Tabs value={activeSection} onValueChange={(value) => {
           setActiveSection(value);
           navigate(`/settings/${value}`, { replace: true });
         }} className="space-y-6">
-          <TabsList className="bg-card border border-border">
-            <TabsTrigger value="profile" className="data-[state=active]:bg-accent">
+          {/* Glassmorphism Tabs with enhanced styling */}
+          <TabsList className="bg-card/50 backdrop-blur-xl border border-border/50 shadow-lg p-1">
+            <TabsTrigger
+              value="profile"
+              className="data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm transition-all duration-300 hover:bg-accent/40"
+            >
               <User className="h-4 w-4 mr-2" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="data-[state=active]:bg-accent">
+            <TabsTrigger
+              value="notifications"
+              className="data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm transition-all duration-300 hover:bg-accent/40"
+            >
               <Bell className="h-4 w-4 mr-2" />
               Notifications
             </TabsTrigger>
-            <TabsTrigger value="security" className="data-[state=active]:bg-accent">
+            <TabsTrigger
+              value="security"
+              className="data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm transition-all duration-300 hover:bg-accent/40"
+            >
               <Shield className="h-4 w-4 mr-2" />
               Security
             </TabsTrigger>
-            <TabsTrigger value="system" className="data-[state=active]:bg-accent">
+            <TabsTrigger
+              value="system"
+              className="data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm transition-all duration-300 hover:bg-accent/40"
+            >
               <Settings className="h-4 w-4 mr-2" />
               System
             </TabsTrigger>
@@ -411,14 +435,16 @@ const SettingsPage: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Avatar */}
+                {/* Avatar with 3D Hover Effect */}
                 <div className="flex items-center space-x-4">
-                  <Avatar className="w-20 h-20">
-                    <AvatarImage src={profile.avatar_url} />
-                    <AvatarFallback className="bg-accent text-foreground text-lg">
-                      {profile.name?.split(' ').map(n => n[0]).join('') || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
+                  <InteractiveHoverCard>
+                    <Avatar className="w-20 h-20 ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-300">
+                      <AvatarImage src={profile.avatar_url} />
+                      <AvatarFallback className="bg-accent text-foreground text-lg">
+                        {profile.name?.split(' ').map(n => n[0]).join('') || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </InteractiveHoverCard>
                   <div className="space-y-2">
                     <input
                       type="file"
@@ -427,9 +453,9 @@ const SettingsPage: React.FC = () => {
                       className="hidden"
                       onChange={handleAvatarUpload}
                     />
-                    <Button 
-                      variant="outline" 
-                      className="border-border text-foreground hover:text-foreground"
+                    <Button
+                      variant="outline"
+                      className="border-border text-foreground hover:text-foreground hover:scale-105 transition-transform duration-200"
                       onClick={() => document.getElementById('avatar-upload')?.click()}
                     >
                       <Camera className="h-4 w-4 mr-2" />

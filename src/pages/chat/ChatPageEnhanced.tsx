@@ -10,6 +10,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Particles } from '@/components/ui/particles';
 import {
   Dialog,
   DialogContent,
@@ -24,10 +26,10 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { 
-  Bot, 
-  Plus, 
-  MessageSquare, 
+import {
+  Bot,
+  Plus,
+  MessageSquare,
   ShoppingCart,
   Loader2,
   AlertCircle,
@@ -109,7 +111,8 @@ const EnhancedChatPage: React.FC = () => {
   const [availableTools, setAvailableTools] = useState<Tool[]>([]);
   const [showToolPanel, setShowToolPanel] = useState(false);
   const [showArtifactPanel, setShowArtifactPanel] = useState(false);
-  
+  const [isLoading, setIsLoading] = useState(true);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -139,14 +142,17 @@ const EnhancedChatPage: React.FC = () => {
   // Load purchased employees
   useEffect(() => {
     let isMounted = true;
-    
+
     async function load() {
-      if (!user?.id) return;
-      
+      if (!user?.id) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const rows = await listPurchasedEmployees(user.id);
         if (!isMounted) return;
-        
+
         const normalized = rows.map(r => ({
           id: r.employee_id,
           name: getEmployeeById(r.employee_id)?.role || '',
@@ -159,22 +165,22 @@ const EnhancedChatPage: React.FC = () => {
         // Load recent sessions
         const sessions = await listSessions(user.id);
         if (!isMounted) return;
-        
+
         if (sessions.length > 0) {
           const first = sessions[0];
           const msgs = await listMessages(user.id, first.id);
-          
+
           setActiveTabs([{
             id: first.id,
             employeeId: first.employee_id,
             role: first.role,
             provider: first.provider,
             isActive: true,
-            messages: msgs.map(m => ({ 
-              id: m.id, 
-              role: m.role, 
-              content: m.content, 
-              timestamp: new Date(m.created_at) 
+            messages: msgs.map(m => ({
+              id: m.id,
+              role: m.role,
+              content: m.content,
+              timestamp: new Date(m.created_at)
             })),
             artifacts: [],
             enabledTools: [],
@@ -184,9 +190,11 @@ const EnhancedChatPage: React.FC = () => {
       } catch (err) {
         console.error('Failed to load chat data:', err);
         toast.error('Failed to load chat data');
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     }
-    
+
     load();
     return () => { isMounted = false; };
   }, [user?.id]);
@@ -518,30 +526,78 @@ const EnhancedChatPage: React.FC = () => {
     return DOMPurify.sanitize(html);
   };
 
+  if (isLoading) {
+    return (
+      <div className="h-full flex flex-col relative">
+        <Particles className="absolute inset-0 pointer-events-none" quantity={30} staticity={50} ease={50} />
+        <div className="mb-6 relative z-10">
+          <Skeleton className="h-10 w-64 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <div className="flex-1 flex gap-4 min-h-0 relative z-10">
+          <div className="w-64 space-y-2">
+            <Card className="backdrop-blur-xl bg-background/60 border-border/50">
+              <CardContent className="p-4">
+                <Skeleton className="h-6 w-32 mb-3" />
+                <div className="space-y-2">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <Card className="flex-1">
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <Skeleton className="h-16 w-full" />
+                <div className="space-y-3">
+                  <Skeleton className="h-20 w-3/4" />
+                  <Skeleton className="h-20 w-2/3 ml-auto" />
+                  <Skeleton className="h-20 w-3/4" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   if (purchasedEmployees.length === 0 && !activeTabs.length) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="p-12 text-center">
-            <MessageSquare className="h-20 w-20 text-muted-foreground mx-auto mb-6" />
-            <h2 className="text-2xl font-bold mb-3">No AI Employees</h2>
-            <p className="text-muted-foreground mb-6">
-              Hire AI employees from the marketplace to start chatting
-            </p>
-            <Button onClick={() => navigate('/marketplace')}>
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Go to Marketplace
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="h-full flex items-center justify-center relative">
+        <Particles className="absolute inset-0 pointer-events-none" quantity={30} staticity={50} ease={50} />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="max-w-md backdrop-blur-xl bg-background/60 border-border/50">
+            <CardContent className="p-12 text-center">
+              <MessageSquare className="h-20 w-20 text-muted-foreground mx-auto mb-6" />
+              <h2 className="text-2xl font-bold mb-3">No AI Employees</h2>
+              <p className="text-muted-foreground mb-6">
+                Hire AI employees from the marketplace to start chatting
+              </p>
+              <Button onClick={() => navigate('/marketplace')}>
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Go to Marketplace
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col relative">
+      {/* Particles Background */}
+      <Particles className="absolute inset-0 pointer-events-none" quantity={30} staticity={50} ease={50} />
+
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6 relative z-10">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">AI Chat</h1>
@@ -633,39 +689,51 @@ const EnhancedChatPage: React.FC = () => {
 
       {/* Chat Interface */}
       {activeTabs.length > 0 && (
-        <motion.div 
-          initial={{ opacity: 0 }} 
-          animate={{ opacity: 1 }} 
-          className="flex-1 flex gap-4 min-h-0"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex-1 flex gap-4 min-h-0 relative z-10"
         >
-          {/* Sidebar */}
+          {/* Sidebar with Glassmorphism */}
           <div className="w-64 space-y-2">
-            <Card>
+            <Card className="backdrop-blur-xl bg-background/60 border-border/50">
               <CardContent className="p-4">
                 <h3 className="font-semibold mb-3">Active Chats</h3>
-                <div className="space-y-2">
-                  {activeTabs.map(tab => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setSelectedTab(tab.id)}
-                      className={cn(
-                        "w-full flex items-center justify-between p-3 rounded-lg transition-colors text-left",
-                        selectedTab === tab.id ? "bg-primary text-primary-foreground" : "hover:bg-accent"
-                      )}
-                    >
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <Bot className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm font-medium truncate">{tab.role}</span>
-                      </div>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.id); }}
-                        className="ml-2 hover:text-destructive"
+                {isLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {activeTabs.map(tab => (
+                      <motion.button
+                        key={tab.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        onClick={() => setSelectedTab(tab.id)}
+                        className={cn(
+                          "w-full flex items-center justify-between p-3 rounded-lg transition-all duration-200 text-left",
+                          selectedTab === tab.id
+                            ? "bg-primary text-primary-foreground shadow-lg"
+                            : "hover:bg-accent/50 hover:shadow-md"
+                        )}
                       >
-                        ×
-                      </button>
-                    </button>
-                  ))}
-                </div>
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <Bot className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-sm font-medium truncate">{tab.role}</span>
+                        </div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleCloseTab(tab.id); }}
+                          className="ml-2 hover:text-destructive transition-colors"
+                        >
+                          ×
+                        </button>
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -698,41 +766,66 @@ const EnhancedChatPage: React.FC = () => {
 
                   {/* Messages */}
                   <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-                    {activeTabData.messages.map(msg => (
-                      <div
-                        key={msg.id}
-                        className={cn("flex", msg.role === 'user' ? "justify-end" : "justify-start")}
-                      >
-                        <div
-                          className={cn(
-                            "max-w-[80%] rounded-lg p-4 relative",
-                            msg.role === 'user' ? "bg-primary text-primary-foreground" : "bg-muted"
-                          )}
+                    <AnimatePresence mode="popLayout">
+                      {activeTabData.messages.map((msg, index) => (
+                        <motion.div
+                          key={msg.id}
+                          initial={{
+                            opacity: 0,
+                            x: msg.role === 'user' ? 50 : -50,
+                            y: 20
+                          }}
+                          animate={{
+                            opacity: 1,
+                            x: 0,
+                            y: 0
+                          }}
+                          transition={{
+                            duration: 0.4,
+                            ease: [0.25, 0.1, 0.25, 1],
+                            delay: index * 0.05
+                          }}
+                          className={cn("flex", msg.role === 'user' ? "justify-end" : "justify-start")}
                         >
-                          {msg.isStreaming && (
-                            <Loader2 className="h-3 w-3 animate-spin absolute top-2 right-2" />
-                          )}
-                          {msg.role === 'assistant' ? (
-                            <div
-                              className="prose prose-sm max-w-none dark:prose-invert"
-                              dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
-                            />
-                          ) : (
-                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                          )}
-                          <span className="text-xs opacity-70 mt-1 block">
-                            {msg.timestamp.toLocaleTimeString()}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                          <motion.div
+                            whileHover={{ scale: 1.02, y: -2 }}
+                            transition={{ duration: 0.2 }}
+                            className={cn(
+                              "max-w-[80%] rounded-lg p-4 relative transition-all duration-200",
+                              msg.role === 'user'
+                                ? "bg-primary text-primary-foreground shadow-lg hover:shadow-xl"
+                                : "backdrop-blur-xl bg-muted/80 border border-border/50 shadow-md hover:shadow-lg"
+                            )}
+                          >
+                            {msg.isStreaming && (
+                              <Loader2 className="h-3 w-3 animate-spin absolute top-2 right-2" />
+                            )}
+                            {msg.role === 'assistant' ? (
+                              <div
+                                className="prose prose-sm max-w-none dark:prose-invert"
+                                dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
+                              />
+                            ) : (
+                              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            )}
+                            <span className="text-xs opacity-70 mt-1 block">
+                              {msg.timestamp.toLocaleTimeString()}
+                            </span>
+                          </motion.div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                     {isSending && !isStreaming && (
-                      <div className="flex justify-start">
-                        <div className="bg-muted rounded-lg p-4 flex items-center gap-2">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex justify-start"
+                      >
+                        <div className="backdrop-blur-xl bg-muted/80 border border-border/50 rounded-lg p-4 flex items-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
                           <span className="text-sm">Thinking...</span>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
                     <div ref={messagesEndRef} />
                   </div>
@@ -788,17 +881,24 @@ const EnhancedChatPage: React.FC = () => {
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: 300, opacity: 1 }}
                 exit={{ width: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
                 className="border-l pl-4"
               >
-                <Card>
+                <Card className="backdrop-blur-xl bg-background/60 border-border/50">
                   <CardContent className="p-4">
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
                       <Sparkles className="h-4 w-4" />
                       Artifacts
                     </h3>
                     <div className="space-y-2">
-                      {activeTabData.artifacts.map(artifact => (
-                        <div key={artifact.id} className="p-3 rounded-lg border bg-card hover:bg-accent transition-colors">
+                      {activeTabData.artifacts.map((artifact, index) => (
+                        <motion.div
+                          key={artifact.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="p-3 rounded-lg border bg-card/50 hover:bg-accent/50 transition-all duration-200 hover:shadow-md"
+                        >
                           <div className="font-medium text-sm">{artifact.title}</div>
                           <div className="text-xs text-muted-foreground">{artifact.type}</div>
                           <div className="flex gap-1 mt-2">
@@ -809,7 +909,7 @@ const EnhancedChatPage: React.FC = () => {
                               <Share2 className="h-3 w-3" />
                             </Button>
                           </div>
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
                   </CardContent>

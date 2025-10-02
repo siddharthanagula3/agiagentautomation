@@ -15,7 +15,16 @@
       "Bash(npm run lint)",
       "Bash(node:*)",
       "Bash(tree:*)",
-      "Bash(npm run preview:*)"
+      "Bash(npm run preview:*)",
+      "Bash(for:*)",
+      "Bash(do [ -f \"$file\" ])",
+      "Bash(echo \"$file\")",
+      "Bash(done)",
+      "Bash(supabase:*)",
+      "Bash(where:*)",
+      "Bash(cat:*)",
+      "Bash(tee:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

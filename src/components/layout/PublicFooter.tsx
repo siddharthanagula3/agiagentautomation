@@ -10,27 +10,27 @@ const PublicFooter: React.FC = () => {
 
   const footerLinks = {
     product: [
-      { label: 'Features', href: '#features' },
-      { label: 'Pricing', href: '#pricing' },
-      { label: 'Marketplace', href: '/marketplace' },
-      { label: 'AI Chat', href: '/chat' },
+      { label: 'AI Marketplace', href: '/ai-marketplace' },
+      { label: 'AI Chat', href: '/features/ai-chat' },
+      { label: 'AI Workflows', href: '/features/ai-workflows' },
+      { label: 'Pricing', href: '/pricing' },
     ],
     company: [
       { label: 'About Us', href: '/about' },
-      { label: 'Blog', href: '/blog' },
       { label: 'Careers', href: '/careers' },
-      { label: 'Contact', href: '/contact' },
+      { label: 'Blog', href: '/blog' },
+      { label: 'Contact', href: '/contact-sales' },
     ],
     resources: [
-      { label: 'Documentation', href: '/docs' },
-      { label: 'API Reference', href: '/api' },
-      { label: 'Guides', href: '/guides' },
-      { label: 'Support', href: '/support' },
+      { label: 'Documentation', href: '/documentation' },
+      { label: 'API Reference', href: '/api-reference' },
+      { label: 'Help Center', href: '/help' },
+      { label: 'Security', href: '/security' },
     ],
     legal: [
-      { label: 'Privacy Policy', href: '/legal' },
-      { label: 'Terms of Service', href: '/legal' },
-      { label: 'Cookie Policy', href: '/legal' },
+      { label: 'Privacy Policy', href: '/privacy-policy' },
+      { label: 'Terms of Service', href: '/terms-of-service' },
+      { label: 'Cookie Policy', href: '/cookie-policy' },
       { label: 'Security', href: '/security' },
     ],
   };
@@ -144,16 +144,16 @@ const PublicFooter: React.FC = () => {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground text-center md:text-left">
-            © {currentYear} AI Workforce. All rights reserved. Built with AI for the AI age.
+            © {currentYear} AGI Agent Automation. All rights reserved. Built with AI for the AI age.
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/legal" className="hover:text-foreground transition-colors">
+            <Link to="/privacy-policy" className="hover:text-foreground transition-colors">
               Privacy
             </Link>
-            <Link to="/legal" className="hover:text-foreground transition-colors">
+            <Link to="/terms-of-service" className="hover:text-foreground transition-colors">
               Terms
             </Link>
-            <Link to="/contact" className="hover:text-foreground transition-colors">
+            <Link to="/help" className="hover:text-foreground transition-colors">
               Support
             </Link>
           </div>

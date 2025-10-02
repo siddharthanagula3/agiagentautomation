@@ -39,6 +39,16 @@ import ResourcesPage from './pages/ResourcesPage';
 import HelpPage from './pages/HelpPage';
 import PricingPage from './pages/PricingPage';
 import ContactSalesPage from './pages/ContactSalesPage';
+import AboutPage from './pages/AboutPage';
+import CareersPage from './pages/CareersPage';
+import SecurityPage from './pages/SecurityPage';
+import DocumentationPage from './pages/DocumentationPage';
+import APIReferencePage from './pages/APIReferencePage';
+
+// Legal Pages
+import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/legal/TermsOfServicePage';
+import CookiePolicyPage from './pages/legal/CookiePolicyPage';
 
 // Use Cases Pages
 import StartupsPage from './pages/use-cases/StartupsPage';
@@ -72,6 +82,17 @@ function App() {
               <Route path="help" element={<HelpPage />} />
               <Route path="pricing" element={<PricingPage />} />
               <Route path="contact-sales" element={<ContactSalesPage />} />
+              <Route path="about" element={<AboutPage />} />
+              <Route path="careers" element={<CareersPage />} />
+              <Route path="security" element={<SecurityPage />} />
+              <Route path="documentation" element={<DocumentationPage />} />
+              <Route path="api-reference" element={<APIReferencePage />} />
+              <Route path="ai-marketplace" element={<MarketplacePublicPage />} />
+
+              {/* Legal Pages */}
+              <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
+              <Route path="terms-of-service" element={<TermsOfServicePage />} />
+              <Route path="cookie-policy" element={<CookiePolicyPage />} />
 
               {/* Use Cases */}
               <Route path="use-cases/startups" element={<StartupsPage />} />
@@ -93,16 +114,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <WorkforceDemoPage />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Marketplace - Protected Route */}
-            <Route
-              path="/marketplace"
-              element={
-                <ProtectedRoute>
-                  <MarketplacePublicPage />
                 </ProtectedRoute>
               }
             />

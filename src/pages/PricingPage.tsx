@@ -21,7 +21,6 @@ interface PricingPlan {
 }
 
 const PricingPage: React.FC = () => {
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,23 +31,33 @@ const PricingPage: React.FC = () => {
   async function loadPlans() {
     try {
       const dbPlans = await getPricingPlans();
-      const formattedPlans: PricingPlan[] = dbPlans.map(plan => ({
-        name: plan.name,
-        price: plan.name === 'Enterprise' ? 'Custom' : (
-          billingCycle === 'monthly'
-            ? `$${plan.price_monthly}`
-            : `$${plan.price_yearly}`
-        ),
-        period: plan.name === 'Enterprise' ? '' : (
-          billingCycle === 'monthly' ? '/month' : '/month (billed annually)'
-        ),
-        description: plan.description,
-        features: plan.features,
-        notIncluded: plan.not_included || [],
-        popular: plan.popular,
-        cta: plan.name === 'Enterprise' ? 'Contact Sales' : 'Start Free Trial',
-        color: plan.color_gradient
-      }));
+      const formattedPlans: PricingPlan[] = dbPlans.map(plan => {
+        let price = 'Custom';
+        let period = '';
+
+        if (plan.slug === 'pay-per-employee') {
+          price = '$1';
+          period = '/employee/month';
+        } else if (plan.slug === 'all-access') {
+          price = '$19';
+          period = '/month';
+        } else if (plan.slug === 'enterprise') {
+          price = 'Custom';
+          period = '';
+        }
+
+        return {
+          name: plan.name,
+          price,
+          period,
+          description: plan.description,
+          features: plan.features,
+          notIncluded: plan.not_included || [],
+          popular: plan.popular,
+          cta: plan.name === 'Enterprise' ? 'Contact Sales' : 'Get Started',
+          color: plan.color_gradient
+        };
+      });
       setPlans(formattedPlans);
     } catch (error) {
       console.error('Error loading pricing plans:', error);
@@ -59,78 +68,59 @@ const PricingPage: React.FC = () => {
     }
   }
 
-  // Update plan prices when billing cycle changes
-  useEffect(() => {
-    if (plans.length > 0 && !loading) {
-      loadPlans();
-    }
-  }, [billingCycle]);
 
   const fallbackPlans: PricingPlan[] = [
     {
-      name: 'Starter',
-      price: billingCycle === 'monthly' ? '$49' : '$39',
-      period: billingCycle === 'monthly' ? '/month' : '/month (billed annually)',
-      description: 'Perfect for individuals and small teams getting started with AI automation',
+      name: 'Pay Per Employee',
+      price: '$1',
+      period: '/employee/month',
+      description: 'Perfect for teams that want flexibility',
       features: [
-        'Up to 3 AI employees',
-        '10 active workflows',
-        '1,000 workflow executions/month',
-        'Basic integrations (10+ apps)',
-        'AI chat support',
-        'Standard analytics dashboard',
-        'Email support'
+        '$1 per AI employee per month',
+        'Pay-as-you-go after purchase',
+        'No upfront commitment',
+        'Cancel anytime',
+        'Weekly billing',
+        'All AI features included',
+        '24/7 Support'
       ],
-      notIncluded: [
-        'Advanced AI models',
-        'Custom integrations',
-        'Priority support'
-      ],
-      cta: 'Start Free Trial',
+      cta: 'Get Started',
       color: 'from-blue-500 to-cyan-500'
     },
     {
-      name: 'Professional',
-      price: billingCycle === 'monthly' ? '$149' : '$119',
-      period: billingCycle === 'monthly' ? '/month' : '/month (billed annually)',
-      description: 'For growing teams that need advanced AI capabilities and integrations',
+      name: 'All Access',
+      price: '$19',
+      period: '/month',
+      description: 'Best value - Hire unlimited AI employees',
       features: [
-        'Up to 10 AI employees',
-        'Unlimited workflows',
-        '10,000 workflow executions/month',
-        'All integrations (50+ apps)',
-        'Advanced AI models',
-        'Custom AI training',
-        'Real-time analytics & insights',
-        'AI project manager',
-        'Priority email & chat support',
-        'Team collaboration (up to 10 users)',
-        'Custom branding'
+        'Hire ALL AI employees',
+        '$10 bonus credits for first-time users',
+        'Pay-as-you-go after credits',
+        'Weekly billing',
+        'All AI features included',
+        'Priority support',
+        'Advanced analytics',
+        'Custom integrations'
       ],
       popular: true,
-      cta: 'Start Free Trial',
+      cta: 'Get Started',
       color: 'from-purple-500 to-pink-500'
     },
     {
       name: 'Enterprise',
       price: 'Custom',
       period: '',
-      description: 'For large organizations requiring maximum scale, security, and customization',
+      description: 'Custom pricing for large organizations',
       features: [
         'Unlimited AI employees',
-        'Unlimited workflows',
-        'Unlimited workflow executions',
-        'All integrations + custom API',
-        'Dedicated AI infrastructure',
-        'Custom AI model development',
-        'Advanced security & compliance',
-        'SSO & SAML authentication',
+        'Custom credit packages',
+        'Volume discounts',
         'Dedicated account manager',
-        '24/7 priority support',
-        'Unlimited team members',
-        'Custom SLAs',
-        'On-premise deployment option',
-        'Custom contract terms'
+        'SLA guarantees',
+        'Custom integrations',
+        'Advanced security',
+        'Training & onboarding',
+        '24/7 Priority support'
       ],
       cta: 'Contact Sales',
       color: 'from-orange-500 to-red-500'
@@ -141,48 +131,37 @@ const PricingPage: React.FC = () => {
     {
       category: 'AI Employees',
       features: [
-        { name: 'Number of AI employees', starter: '3', pro: '10', enterprise: 'Unlimited' },
-        { name: 'Advanced AI models', starter: false, pro: true, enterprise: true },
-        { name: 'Custom AI training', starter: false, pro: true, enterprise: true },
-        { name: 'Dedicated AI infrastructure', starter: false, pro: false, enterprise: true }
+        { name: 'Number of AI employees', starter: 'Pay per employee', pro: 'Unlimited', enterprise: 'Unlimited' },
+        { name: 'Pricing model', starter: '$1/employee/month', pro: '$19/month flat', enterprise: 'Custom' },
+        { name: 'Bonus credits', starter: false, pro: '$10 (first-time)', enterprise: 'Custom packages' },
+        { name: 'Billing frequency', starter: 'Weekly', pro: 'Weekly', enterprise: 'Custom' }
       ]
     },
     {
-      category: 'Workflows & Automation',
+      category: 'Features',
       features: [
-        { name: 'Active workflows', starter: '10', pro: 'Unlimited', enterprise: 'Unlimited' },
-        { name: 'Workflow executions/month', starter: '1,000', pro: '10,000', enterprise: 'Unlimited' },
-        { name: 'Workflow templates', starter: true, pro: true, enterprise: true },
-        { name: 'Custom workflow builder', starter: true, pro: true, enterprise: true }
+        { name: 'All AI features', starter: true, pro: true, enterprise: true },
+        { name: 'Workflow automation', starter: true, pro: true, enterprise: true },
+        { name: 'Pay-as-you-go', starter: true, pro: true, enterprise: false },
+        { name: 'Custom integrations', starter: false, pro: true, enterprise: true }
       ]
     },
     {
-      category: 'Integrations',
+      category: 'Support',
       features: [
-        { name: 'Native integrations', starter: '10+', pro: '50+', enterprise: '50+' },
-        { name: 'REST API access', starter: false, pro: true, enterprise: true },
-        { name: 'Webhooks', starter: false, pro: true, enterprise: true },
-        { name: 'Custom integrations', starter: false, pro: false, enterprise: true }
-      ]
-    },
-    {
-      category: 'Analytics & Reporting',
-      features: [
-        { name: 'Basic dashboards', starter: true, pro: true, enterprise: true },
-        { name: 'Real-time analytics', starter: false, pro: true, enterprise: true },
-        { name: 'Predictive insights', starter: false, pro: true, enterprise: true },
-        { name: 'Custom reports', starter: false, pro: true, enterprise: true }
-      ]
-    },
-    {
-      category: 'Support & Security',
-      features: [
-        { name: 'Email support', starter: true, pro: true, enterprise: true },
+        { name: '24/7 Support', starter: true, pro: true, enterprise: true },
         { name: 'Priority support', starter: false, pro: true, enterprise: true },
-        { name: '24/7 support', starter: false, pro: false, enterprise: true },
         { name: 'Dedicated account manager', starter: false, pro: false, enterprise: true },
-        { name: 'SSO & SAML', starter: false, pro: false, enterprise: true },
-        { name: 'Custom SLAs', starter: false, pro: false, enterprise: true }
+        { name: 'Training & onboarding', starter: false, pro: false, enterprise: true }
+      ]
+    },
+    {
+      category: 'Advanced',
+      features: [
+        { name: 'Advanced analytics', starter: false, pro: true, enterprise: true },
+        { name: 'Volume discounts', starter: false, pro: false, enterprise: true },
+        { name: 'SLA guarantees', starter: false, pro: false, enterprise: true },
+        { name: 'Advanced security', starter: false, pro: false, enterprise: true }
       ]
     }
   ];
@@ -202,36 +181,11 @@ const PricingPage: React.FC = () => {
             className="text-center max-w-3xl mx-auto"
           >
             <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary">
-              Simple, Transparent Pricing
+              Pay-As-You-Go Pricing
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              Choose the plan that's right for your team. All plans include a 14-day free trial.
+            <p className="text-xl text-muted-foreground mb-12">
+              Only pay for what you use. $1 per AI employee or $19 for unlimited access with $10 bonus credits for first-time users.
             </p>
-
-            {/* Billing Toggle */}
-            <div className="flex items-center justify-center gap-4 mb-12">
-              <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                Monthly
-              </span>
-              <button
-                onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
-                className="relative w-14 h-7 rounded-full bg-primary/20 transition-colors"
-              >
-                <motion.div
-                  className="absolute top-1 left-1 w-5 h-5 rounded-full bg-primary"
-                  animate={{ x: billingCycle === 'yearly' ? 28 : 0 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                />
-              </button>
-              <span className={`text-sm font-medium ${billingCycle === 'yearly' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                Yearly
-              </span>
-              {billingCycle === 'yearly' && (
-                <span className="px-2 py-1 rounded-full bg-green-500/20 text-green-500 text-xs font-semibold">
-                  Save 20%
-                </span>
-              )}
-            </div>
           </motion.div>
         </div>
       </section>
@@ -270,8 +224,8 @@ const PricingPage: React.FC = () => {
               <thead>
                 <tr className="border-b border-border/40">
                   <th className="text-left py-4 px-6 font-semibold">Features</th>
-                  <th className="text-center py-4 px-6 font-semibold">Starter</th>
-                  <th className="text-center py-4 px-6 font-semibold">Professional</th>
+                  <th className="text-center py-4 px-6 font-semibold">Pay Per Employee</th>
+                  <th className="text-center py-4 px-6 font-semibold">All Access</th>
                   <th className="text-center py-4 px-6 font-semibold">Enterprise</th>
                 </tr>
               </thead>

@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
-import { 
+import {
   LayoutDashboard,
   Users,
   MessageSquare,
@@ -22,7 +22,8 @@ import {
   ChevronDown,
   Search,
   Moon,
-  Sun
+  Sun,
+  Wrench
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -102,6 +103,14 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       href: '/integrations',
       icon: Globe,
       description: 'Connected services'
+    },
+    {
+      name: 'MCP Tools',
+      href: '/mcp-tools',
+      icon: Wrench,
+      description: 'Model Context Protocol',
+      badge: 'New',
+      isNew: true,
     },
   ];
 

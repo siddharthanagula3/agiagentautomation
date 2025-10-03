@@ -59,6 +59,32 @@
     <priority>0.8</priority>
   </url>
   
+  <!-- Comparison Pages - HIGH PRIORITY FOR SEO -->
+  <url>
+    <loc>https://agiworkforce.com/vs-chatgpt</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://agiworkforce.com/vs-claude</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://agiworkforce.com/chatgpt-alternative</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://agiworkforce.com/claude-alternative</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
   <!-- Use Cases -->
   <url>
     <loc>https://agiworkforce.com/use-cases/startups</loc>

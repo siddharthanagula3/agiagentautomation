@@ -165,11 +165,11 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center text-sm">
               <div>
-                <strong>Email:</strong> legal@agiagent.com
+                <strong>Email:</strong> legal@agiworkforce.com
               </div>
               <div className="hidden sm:block text-muted-foreground">|</div>
               <div>
-                <strong>Support:</strong> support@agiagent.com
+                <strong>Support:</strong> support@agiworkforce.com
               </div>
             </div>
           </motion.div>

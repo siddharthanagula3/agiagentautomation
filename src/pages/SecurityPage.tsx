@@ -121,7 +121,7 @@ const SecurityPage: React.FC = () => {
               Found a security vulnerability? We appreciate responsible disclosure.
             </p>
             <div className="flex flex-col gap-2">
-              <p className="text-sm"><strong>Email:</strong> security@agiagent.com</p>
+              <p className="text-sm"><strong>Email:</strong> security@agiworkforce.com</p>
               <p className="text-sm"><strong>PGP Key:</strong> Available upon request</p>
             </div>
           </motion.div>

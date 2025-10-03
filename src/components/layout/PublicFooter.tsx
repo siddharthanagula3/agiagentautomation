@@ -144,7 +144,7 @@ const PublicFooter: React.FC = () => {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground text-center md:text-left">
-            © {currentYear} AGI Agent Automation. All rights reserved. Built with AI for the AI age.
+            © {currentYear} AGI Workforce. All rights reserved. Built with AI for the AI age.
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <Link to="/privacy-policy" className="hover:text-foreground transition-colors">

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { useAuthStore } from '@/stores/unified-auth-store';
 import {
   Menu,
   X,
@@ -24,6 +25,7 @@ import {
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
@@ -118,19 +120,30 @@ const Header: React.FC = () => {
           {/* CTA Buttons */}
           <div className="hidden lg:flex items-center gap-3">
             <ThemeToggle />
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/login')}
-              className="text-sm font-medium"
-            >
-              Login
-            </Button>
-            <Button
-              onClick={() => navigate('/contact-sales')}
-              className="text-sm font-medium bg-gradient-to-r from-primary to-accent hover:opacity-90"
-            >
-              Contact Sales
-            </Button>
+            {user ? (
+              <Button
+                onClick={() => navigate('/dashboard')}
+                className="text-sm font-medium bg-gradient-to-r from-primary to-accent hover:opacity-90"
+              >
+                Go to Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/auth/login')}
+                  className="text-sm font-medium"
+                >
+                  Login
+                </Button>
+                <Button
+                  onClick={() => navigate('/register')}
+                  className="text-sm font-medium bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                >
+                  Get Started Free
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -185,19 +198,30 @@ const Header: React.FC = () => {
                     <span className="text-sm font-medium text-foreground/80">Theme</span>
                     <ThemeToggle />
                   </div>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleNavigation('/login')}
-                    className="w-full"
-                  >
-                    Login
-                  </Button>
-                  <Button
-                    onClick={() => handleNavigation('/contact-sales')}
-                    className="w-full bg-gradient-to-r from-primary to-accent"
-                  >
-                    Contact Sales
-                  </Button>
+                  {user ? (
+                    <Button
+                      onClick={() => handleNavigation('/dashboard')}
+                      className="w-full bg-gradient-to-r from-primary to-accent"
+                    >
+                      Go to Dashboard
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleNavigation('/auth/login')}
+                        className="w-full"
+                      >
+                        Login
+                      </Button>
+                      <Button
+                        onClick={() => handleNavigation('/register')}
+                        className="w-full bg-gradient-to-r from-primary to-accent"
+                      >
+                        Get Started Free
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>

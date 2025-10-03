@@ -37,7 +37,7 @@ import {
   Layers,
   Package
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Particles } from '../components/ui/particles';
@@ -46,6 +46,7 @@ import { BentoGrid, BentoCard } from '../components/ui/bento-grid';
 import { InteractiveHoverCard } from '../components/ui/interactive-hover-card';
 import { AnimatedGradientText } from '../components/ui/animated-gradient-text';
 import Header from '../components/layout/Header';
+import { useAuthStore } from '@/stores/unified-auth-store';
 
 // AI Employees data inspired by Motion.com
 const aiEmployees = [
@@ -191,6 +192,16 @@ const faqs = [
 ];
 
 const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/register');
+    }
+  };
   const [activeFeature, setActiveFeature] = useState(0);
   const [stats, setStats] = useState({ tasks: 0, time: 0, cost: 0 });
   const [activeEmployee, setActiveEmployee] = useState(0);
@@ -286,11 +297,13 @@ const LandingPage: React.FC = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button size="lg" className="btn-glow gradient-primary text-white text-lg px-10 py-7 shadow-xl" asChild>
-                  <Link to="/auth/register">
-                    Start Building Free
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
+                <Button
+                  size="lg"
+                  className="btn-glow gradient-primary text-white text-lg px-10 py-7 shadow-xl"
+                  onClick={handleGetStarted}
+                >
+                  {user ? 'Go to Dashboard' : 'Get Started Free'}
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -693,12 +706,10 @@ const LandingPage: React.FC = () => {
                   size="lg"
                   variant="secondary"
                   className="bg-white hover:bg-white/90 text-primary text-lg px-10 py-7 font-semibold shadow-2xl"
-                  asChild
+                  onClick={handleGetStarted}
                 >
-                  <Link to="/auth/register">
-                    Start Building Free
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
+                  {user ? 'Go to Dashboard' : 'Get Started Free'}
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

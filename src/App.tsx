@@ -129,11 +129,15 @@ function App() {
               }
             />
 
-            {/* Auth Routes */}
+            {/* Auth Routes - Both /auth/* and root level */}
             <Route path="/auth" element={<AuthLayout />}>
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
             </Route>
+
+            {/* Root level auth routes for convenience */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
 
             {/* Protected Routes - ALL AT ROOT LEVEL */}
             <Route

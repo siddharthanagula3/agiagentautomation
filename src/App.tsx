@@ -64,6 +64,10 @@ import IntegrationsFeaturePage from './pages/features/IntegrationsPage';
 import AIDashboardsPage from './pages/features/AIDashboardsPage';
 import AIProjectManagerPage from './pages/features/AIProjectManagerPage';
 
+// Comparison Pages
+import VsChatGPTPage from './pages/comparisons/VsChatGPTPage';
+import VsClaudePage from './pages/comparisons/VsClaudePage';
+
 function App() {
   console.log('App.tsx: Rendering main app component');
   
@@ -107,6 +111,12 @@ function App() {
               <Route path="features/integrations" element={<IntegrationsFeaturePage />} />
               <Route path="features/ai-dashboards" element={<AIDashboardsPage />} />
               <Route path="features/ai-project-manager" element={<AIProjectManagerPage />} />
+
+              {/* Comparison Pages */}
+              <Route path="vs-chatgpt" element={<VsChatGPTPage />} />
+              <Route path="vs-claude" element={<VsClaudePage />} />
+              <Route path="chatgpt-alternative" element={<VsChatGPTPage />} />
+              <Route path="claude-alternative" element={<VsClaudePage />} />
             </Route>
 
             {/* Workforce Demo - Protected Route (Full Screen) */}

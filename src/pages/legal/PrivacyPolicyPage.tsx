@@ -65,7 +65,7 @@ Your data is stored in secure, ISO 27001 certified data centers with 24/7 monito
 • Withdraw consent at any time
 • File a complaint with a supervisory authority
 
-Contact us at privacy@agiagent.com to exercise these rights.`
+Contact us at privacy@agiworkforce.com to exercise these rights.`
     },
     {
       icon: FileText,
@@ -89,7 +89,7 @@ You can request early deletion by contacting support.`
 • California Consumer Privacy Act (CCPA) for California residents
 • Other applicable data protection laws worldwide
 
-We have appointed a Data Protection Officer (DPO) available at dpo@agiagent.com.`
+We have appointed a Data Protection Officer (DPO) available at dpo@agiworkforce.com.`
     }
   ];
 
@@ -133,7 +133,7 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiagent.com.
             className="prose prose-lg max-w-none dark:prose-invert"
           >
             <p className="text-lg text-muted-foreground leading-relaxed">
-              This Privacy Policy explains how AGI Agent Automation Platform ("we", "us", "our") collects,
+              This Privacy Policy explains how AGI Workforce ("we", "us", "our") collects,
               uses, discloses, and protects your personal information when you use our AI automation platform
               and services. By using our services, you agree to the collection and use of information in
               accordance with this policy.
@@ -184,15 +184,15 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiagent.com.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center text-sm">
               <div>
-                <strong>Email:</strong> privacy@agiagent.com
+                <strong>Email:</strong> privacy@agiworkforce.com
               </div>
               <div className="hidden sm:block text-muted-foreground">|</div>
               <div>
-                <strong>DPO:</strong> dpo@agiagent.com
+                <strong>DPO:</strong> dpo@agiworkforce.com
               </div>
               <div className="hidden sm:block text-muted-foreground">|</div>
               <div>
-                <strong>Support:</strong> support@agiagent.com
+                <strong>Support:</strong> support@agiworkforce.com
               </div>
             </div>
           </motion.div>

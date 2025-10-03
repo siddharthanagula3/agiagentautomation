@@ -214,7 +214,7 @@ const HelpSupportPage: React.FC = () => {
           <TabsContent value="contact" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { title: 'Email Support', desc: 'support@agiplatform.com', icon: Mail, action: 'Send Email', href: 'mailto:support@agiplatform.com' },
+                { title: 'Email Support', desc: 'support@agiworkforce.com', icon: Mail, action: 'Send Email', href: 'mailto:support@agiworkforce.com' },
                 { title: 'Live Chat', desc: 'Chat with our support team', icon: MessageCircle, action: 'Start Chat', href: '#' },
                 { title: 'Community Forum', desc: 'Connect with other users', icon: Users, action: 'Visit Forum', href: '#' }
               ].map((ch, i) => (

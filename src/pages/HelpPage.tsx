@@ -291,7 +291,7 @@ const HelpPage: React.FC = () => {
             <ContactCard
               icon={Mail}
               title="Email Support"
-              description="support@agiagent.com"
+              description="support@agiworkforce.com"
               cta="Send Email"
               color="from-purple-500 to-pink-500"
               index={1}

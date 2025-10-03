@@ -131,10 +131,10 @@ const Header: React.FC = () => {
               <>
                 <Button
                   variant="ghost"
-                  onClick={() => navigate('/auth/login')}
+                  onClick={() => navigate('/contact-sales')}
                   className="text-sm font-medium"
                 >
-                  Login
+                  Contact Sales
                 </Button>
                 <Button
                   onClick={() => navigate('/register')}
@@ -209,10 +209,10 @@ const Header: React.FC = () => {
                     <>
                       <Button
                         variant="outline"
-                        onClick={() => handleNavigation('/auth/login')}
+                        onClick={() => handleNavigation('/contact-sales')}
                         className="w-full"
                       >
-                        Login
+                        Contact Sales
                       </Button>
                       <Button
                         onClick={() => handleNavigation('/register')}

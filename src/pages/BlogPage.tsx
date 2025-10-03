@@ -42,11 +42,11 @@ const BlogPage: React.FC = () => {
       title: 'How AI Employees Are Transforming Modern Workplaces',
       excerpt: 'Discover how businesses are leveraging AI employees to automate repetitive tasks, boost productivity, and scale operations without traditional hiring constraints.',
       category: 'AI Automation',
-      date: '2025-01-28',
+      date: '2024-10-02',
       readTime: '8 min read',
       author: {
-        name: 'Sarah Chen',
-        avatar: '👩‍💼'
+        name: 'Siddhartha Nagula',
+        avatar: '👨‍💻'
       },
       image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=500&fit=crop',
       featured: true
@@ -56,10 +56,10 @@ const BlogPage: React.FC = () => {
       title: '10 Ways AI Workflows Save Your Team 20 Hours Per Week',
       excerpt: 'Learn the practical strategies top companies use to implement AI-driven workflows that eliminate bottlenecks and reclaim valuable time.',
       category: 'Productivity',
-      date: '2025-01-25',
+      date: '2024-09-28',
       readTime: '6 min read',
       author: {
-        name: 'Marcus Rodriguez',
+        name: 'Siddhartha Nagula',
         avatar: '👨‍💻'
       },
       image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop'
@@ -69,11 +69,11 @@ const BlogPage: React.FC = () => {
       title: 'Case Study: How StartupX Scaled to 100 Customers with 3 Employees',
       excerpt: 'A deep dive into how a lean startup used AI employees to handle customer support, sales outreach, and operations at scale.',
       category: 'Case Studies',
-      date: '2025-01-22',
+      date: '2024-09-22',
       readTime: '10 min read',
       author: {
-        name: 'Emily Johnson',
-        avatar: '👩‍🔬'
+        name: 'Siddhartha Nagula',
+        avatar: '👨‍💻'
       },
       image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=500&fit=crop'
     },
@@ -82,11 +82,11 @@ const BlogPage: React.FC = () => {
       title: 'The Future of Work: AI Collaboration in 2025',
       excerpt: 'Explore emerging trends in human-AI collaboration and what it means for your business strategy this year.',
       category: 'AI Insights',
-      date: '2025-01-20',
+      date: '2024-09-15',
       readTime: '7 min read',
       author: {
-        name: 'Dr. Alex Kumar',
-        avatar: '👨‍🔬'
+        name: 'Siddhartha Nagula',
+        avatar: '👨‍💻'
       },
       image: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&h=500&fit=crop'
     },
@@ -95,11 +95,11 @@ const BlogPage: React.FC = () => {
       title: 'Building High-Performance Teams with AI Project Managers',
       excerpt: 'Discover how AI project managers coordinate tasks, predict bottlenecks, and keep your team aligned on goals.',
       category: 'Team Management',
-      date: '2025-01-18',
+      date: '2024-09-08',
       readTime: '9 min read',
       author: {
-        name: 'Jessica Taylor',
-        avatar: '👩‍💼'
+        name: 'Siddhartha Nagula',
+        avatar: '👨‍💻'
       },
       image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=500&fit=crop'
     },
@@ -108,11 +108,11 @@ const BlogPage: React.FC = () => {
       title: 'Automating Customer Support: A Complete Guide',
       excerpt: 'Step-by-step strategies to implement AI-powered customer support that delights customers and reduces response times.',
       category: 'AI Automation',
-      date: '2025-01-15',
+      date: '2024-09-01',
       readTime: '12 min read',
       author: {
-        name: 'Michael Park',
-        avatar: '👨‍💼'
+        name: 'Siddhartha Nagula',
+        avatar: '👨‍💻'
       },
       image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=500&fit=crop'
     },
@@ -121,10 +121,10 @@ const BlogPage: React.FC = () => {
       title: 'ROI Analysis: The True Cost Savings of AI Employees',
       excerpt: 'Hard numbers and real-world data on how AI employees impact your bottom line compared to traditional hiring.',
       category: 'Case Studies',
-      date: '2025-01-12',
+      date: '2024-08-25',
       readTime: '8 min read',
       author: {
-        name: 'David Wong',
+        name: 'Siddhartha Nagula',
         avatar: '👨‍💻'
       },
       image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop'
@@ -134,11 +134,11 @@ const BlogPage: React.FC = () => {
       title: 'AI Dashboards: Turning Data Into Actionable Insights',
       excerpt: 'Learn how AI-powered dashboards help you make faster, smarter decisions with real-time analytics and predictions.',
       category: 'Productivity',
-      date: '2025-01-10',
+      date: '2024-08-18',
       readTime: '6 min read',
       author: {
-        name: 'Sophia Martinez',
-        avatar: '👩‍💼'
+        name: 'Siddhartha Nagula',
+        avatar: '👨‍💻'
       },
       image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop'
     },
@@ -147,10 +147,10 @@ const BlogPage: React.FC = () => {
       title: 'Integration Strategies: Connecting Your Entire Tech Stack',
       excerpt: 'Best practices for integrating AI employees with your existing tools like Slack, Salesforce, and project management platforms.',
       category: 'AI Automation',
-      date: '2025-01-08',
+      date: '2024-08-11',
       readTime: '7 min read',
       author: {
-        name: 'Chris Anderson',
+        name: 'Siddhartha Nagula',
         avatar: '👨‍💻'
       },
       image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=500&fit=crop'

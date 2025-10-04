@@ -7,8 +7,8 @@ interface AuthState {
   error: string | null;
   isAuthenticated: boolean;
   initialized: boolean;
-  login: (loginData: LoginData) => Promise<void>;
-  register: (registerData: RegisterData) => Promise<void>;
+  login: (loginData: LoginData) => Promise<{ success: boolean; error: string | null }>;
+  register: (registerData: RegisterData) => Promise<{ success: boolean; error: string | null }>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
   initialize: () => Promise<void>;
@@ -46,11 +46,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { user, error } = await authService.login(loginData);
-      if (error) throw new Error(error);
+      if (error) {
+        set({ error, isLoading: false, isAuthenticated: false, user: null });
+        return { success: false, error };
+      }
       set({ user, isAuthenticated: !!user, isLoading: false });
+      return { success: true, error: null };
     } catch (err) {
-      const error = err as Error;
-      set({ error: error.message, isLoading: false, isAuthenticated: false, user: null });
+      const error = (err as Error).message;
+      set({ error, isLoading: false, isAuthenticated: false, user: null });
+      return { success: false, error };
     }
   },
 
@@ -58,11 +63,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const { user, error } = await authService.register(registerData);
-      if (error) throw new Error(error);
+      if (error) {
+        set({ error, isLoading: false, isAuthenticated: false, user: null });
+        return { success: false, error };
+      }
       set({ user, isAuthenticated: !!user, isLoading: false });
+      return { success: true, error: null };
     } catch (err) {
-        const error = err as Error;
-        set({ error: error.message, isLoading: false, isAuthenticated: false, user: null });
+      const error = (err as Error).message;
+      set({ error, isLoading: false, isAuthenticated: false, user: null });
+      return { success: false, error };
     }
   },
 

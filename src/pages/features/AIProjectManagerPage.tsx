@@ -2,10 +2,25 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Briefcase, Target, Users, Calendar, Zap, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/unified-auth-store';
 
 const AIProjectManagerPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  const handleStartTrial = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/register');
+    }
+  };
+
+  const handleSeeHowItWorks = () => {
+    navigate('/demo');
+  };
   const features = [
     {
       icon: Target,
@@ -35,7 +50,6 @@ const AIProjectManagerPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={50} staticity={40} />
 
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
@@ -53,10 +67,10 @@ const AIProjectManagerPage: React.FC = () => {
                 AI project managers coordinate teams, predict delays, optimize resources, and keep everyone aligned.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-gradient-to-r from-primary to-accent">
-                  Start Free Trial <ArrowRight className="ml-2" />
+                <Button size="lg" className="bg-gradient-to-r from-primary to-accent" onClick={handleStartTrial}>
+                  {user ? 'Go to Dashboard' : 'Start Free Trial'} <ArrowRight className="ml-2" />
                 </Button>
-                <Button size="lg" variant="outline">See How It Works</Button>
+                <Button size="lg" variant="outline" onClick={handleSeeHowItWorks}>See How It Works</Button>
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
@@ -93,7 +107,9 @@ const AIProjectManagerPage: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-12 text-center text-white">
             <h2 className="text-4xl font-bold mb-4">Ready to Ship Projects Faster?</h2>
             <p className="text-xl mb-8 opacity-90">Let AI handle project coordination</p>
-            <Button size="lg" variant="secondary">Start Free Trial</Button>
+            <Button size="lg" variant="secondary" onClick={handleStartTrial}>
+              {user ? 'Go to Dashboard' : 'Start Free Trial'}
+            </Button>
           </motion.div>
         </div>
       </section>

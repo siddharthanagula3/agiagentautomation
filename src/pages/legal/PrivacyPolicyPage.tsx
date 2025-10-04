@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import Header from '@/components/layout/Header';
 import { Shield, Lock, Eye, Server, UserCheck, FileText } from 'lucide-react';
 
 const PrivacyPolicyPage: React.FC = () => {
@@ -95,7 +94,6 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiworkforce.
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
 
       {/* Hero Section */}
       <section className="pt-32 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-primary/5 to-transparent">

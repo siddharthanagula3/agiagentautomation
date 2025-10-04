@@ -5,7 +5,6 @@ import { useRef } from 'react';
 import { Calendar, Clock, ArrowRight, Search, TrendingUp, Zap, Brain, Users, Rocket, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
 
 interface BlogPost {
@@ -169,7 +168,6 @@ const BlogPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={50} staticity={30} />
 
       {/* Hero Section */}

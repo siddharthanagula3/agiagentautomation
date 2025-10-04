@@ -2,10 +2,25 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Briefcase, FileText, Users, Clock, CheckCircle2, ArrowRight, BarChart3, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/unified-auth-store';
 
 const ConsultingBusinessesPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  const handleStartTrial = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/register');
+    }
+  };
+
+  const handleWatchDemo = () => {
+    navigate('/demo');
+  };
   const benefits = [
     {
       icon: Clock,
@@ -58,7 +73,6 @@ const ConsultingBusinessesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={50} staticity={40} />
 
       {/* Hero */}
@@ -81,11 +95,11 @@ const ConsultingBusinessesPage: React.FC = () => {
                 Automate research, reporting, client management, and operations. Serve more clients without growing headcount.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-gradient-to-r from-primary to-accent">
-                  Start Free Trial
+                <Button size="lg" className="bg-gradient-to-r from-primary to-accent" onClick={handleStartTrial}>
+                  {user ? 'Go to Dashboard' : 'Start Free Trial'}
                   <ArrowRight className="ml-2" />
                 </Button>
-                <Button size="lg" variant="outline">Watch Demo</Button>
+                <Button size="lg" variant="outline" onClick={handleWatchDemo}>Watch Demo</Button>
               </div>
             </motion.div>
             <motion.div
@@ -249,7 +263,9 @@ const ConsultingBusinessesPage: React.FC = () => {
             <p className="text-xl mb-8 opacity-90">
               Join 800+ consulting firms using AI to serve more clients profitably
             </p>
-            <Button size="lg" variant="secondary">Start Free Trial</Button>
+            <Button size="lg" variant="secondary" onClick={handleStartTrial}>
+              {user ? 'Go to Dashboard' : 'Start Free Trial'}
+            </Button>
           </motion.div>
         </div>
       </section>

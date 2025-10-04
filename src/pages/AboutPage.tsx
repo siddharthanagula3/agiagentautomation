@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
 import {
   Target,
@@ -76,7 +75,6 @@ const AboutPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={50} staticity={50} />
 
       {/* Hero Section */}

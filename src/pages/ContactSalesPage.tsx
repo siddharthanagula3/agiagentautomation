@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, CheckCircle2, ArrowRight, Users, Building2, Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
 import { submitContactForm } from '@/services/marketing-api';
 import { toast } from 'sonner';
@@ -90,7 +89,6 @@ const ContactSalesPage: React.FC = () => {
   if (submitted) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <Particles className="absolute inset-0 -z-10" quantity={50} staticity={40} />
         <div className="flex items-center justify-center min-h-screen px-4">
           <motion.div
@@ -117,7 +115,6 @@ const ContactSalesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={50} staticity={40} />
 
       {/* Hero */}

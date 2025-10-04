@@ -18,7 +18,6 @@ import {
   PlayCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
 
 interface Resource {
@@ -253,7 +252,6 @@ const ResourcesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={40} staticity={40} />
 
       {/* Hero Section */}

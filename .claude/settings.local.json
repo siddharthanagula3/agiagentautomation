@@ -33,7 +33,19 @@
       "Bash(git commit:*)",
       "WebFetch(domain:openai.com)",
       "WebFetch(domain:anthropic.com)",
-      "WebFetch(domain:gemini.google.com)"
+      "WebFetch(domain:gemini.google.com)",
+      "Bash(do grep -n \"<Header />\" \"$file\")",
+      "Bash(find:*)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(grep:*)",
+      "Bash(tasklist)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(awk:*)",
+      "Bash(do if [ -f \"$file\" ])",
+      "Bash(then echo \"=== $file ===\")",
+      "Bash(fi)"
     ],
     "deny": [],
     "ask": []

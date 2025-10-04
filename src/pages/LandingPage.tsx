@@ -45,72 +45,9 @@ import { Spotlight, MouseSpotlight } from '../components/ui/spotlight';
 import { BentoGrid, BentoCard } from '../components/ui/bento-grid';
 import { InteractiveHoverCard } from '../components/ui/interactive-hover-card';
 import { AnimatedGradientText } from '../components/ui/animated-gradient-text';
-import Header from '../components/layout/Header';
 import { useAuthStore } from '@/stores/unified-auth-store';
-
-// AI Employees data inspired by Motion.com
-const aiEmployees = [
-  {
-    id: 1,
-    name: "Alex - Code Architect",
-    role: "Senior Developer",
-    avatar: "👨‍💻",
-    specialty: "Full-stack development",
-    skills: ["React", "Node.js", "Python", "TypeScript"],
-    color: "from-blue-500 to-cyan-500",
-    available: true
-  },
-  {
-    id: 2,
-    name: "Maya - Design Genius",
-    role: "UI/UX Designer",
-    avatar: "🎨",
-    specialty: "Product design & branding",
-    skills: ["Figma", "Design Systems", "Prototyping", "Animation"],
-    color: "from-purple-500 to-pink-500",
-    available: true
-  },
-  {
-    id: 3,
-    name: "Sage - Data Scientist",
-    role: "Analytics Expert",
-    avatar: "📊",
-    specialty: "Data analysis & ML",
-    skills: ["Python", "TensorFlow", "Analytics", "Visualization"],
-    color: "from-green-500 to-emerald-500",
-    available: true
-  },
-  {
-    id: 4,
-    name: "Phoenix - Marketing Pro",
-    role: "Growth Marketer",
-    avatar: "📈",
-    specialty: "Growth & content strategy",
-    skills: ["SEO", "Content", "Analytics", "Campaigns"],
-    color: "from-orange-500 to-red-500",
-    available: true
-  },
-  {
-    id: 5,
-    name: "Nova - Customer Success",
-    role: "Support Specialist",
-    avatar: "💬",
-    specialty: "Customer engagement",
-    skills: ["Support", "Onboarding", "Documentation", "Training"],
-    color: "from-indigo-500 to-violet-500",
-    available: true
-  },
-  {
-    id: 6,
-    name: "Atlas - DevOps Engineer",
-    role: "Infrastructure Expert",
-    avatar: "🚀",
-    specialty: "Cloud & deployment",
-    skills: ["AWS", "Docker", "Kubernetes", "CI/CD"],
-    color: "from-yellow-500 to-amber-500",
-    available: true
-  }
-];
+import { AI_EMPLOYEES, providerInfo, type AIProvider } from '@/data/ai-employees';
+import { DollarSign } from 'lucide-react';
 
 // Features data
 const features = [
@@ -223,16 +160,28 @@ const LandingPage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Use only 6 employees for landing page display
+  const displayedEmployees = AI_EMPLOYEES.slice(0, 6);
+
+  const getProviderGradient = (provider: AIProvider) => {
+    const gradients = {
+      chatgpt: 'from-green-500 to-emerald-500',
+      claude: 'from-purple-500 to-pink-500',
+      gemini: 'from-blue-500 to-cyan-500',
+      perplexity: 'from-orange-500 to-red-500',
+    };
+    return gradients[provider];
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveEmployee((prev) => (prev + 1) % aiEmployees.length);
+      setActiveEmployee((prev) => (prev + 1) % displayedEmployees.length);
     }, 4000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="min-h-screen">
-      <Header />
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
@@ -432,60 +381,122 @@ const LandingPage: React.FC = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {aiEmployees.map((employee, idx) => (
+            {displayedEmployees.map((employee, idx) => (
               <motion.div
                 key={employee.id}
                 initial={{ opacity: 0, y: 50 }}
                 animate={employeesInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
               >
-                <InteractiveHoverCard>
-                  <Card className={cn(
-                    "group relative overflow-hidden border-2 transition-all duration-300",
-                    "hover:shadow-2xl hover:shadow-primary/20",
-                    activeEmployee === idx ? "border-primary/50" : "border-border/50"
-                  )}>
-                    <div className={cn(
-                      "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity",
-                      employee.color
-                    )} />
-                    <div className="p-6 relative z-10">
-                      <div className="flex items-start justify-between mb-4">
+                <Card className={cn(
+                  "glass-strong card-hover group h-full relative overflow-hidden border-2 transition-all duration-300",
+                  "hover:shadow-2xl hover:shadow-primary/20",
+                  activeEmployee === idx ? "border-primary/50" : "border-border/50"
+                )}>
+                  <div className={cn(
+                    "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity",
+                    getProviderGradient(employee.provider)
+                  )} />
+                  <div className="p-6 relative z-10 flex flex-col h-full">
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
                         <motion.div
-                          className="text-6xl"
+                          className="w-14 h-14 rounded-xl overflow-hidden ring-2 ring-border flex-shrink-0"
+                          whileHover={{ scale: 1.1 }}
                           animate={activeEmployee === idx ? {
-                            scale: [1, 1.2, 1],
-                            rotate: [0, 10, -10, 0]
+                            scale: [1, 1.1, 1],
+                            rotate: [0, 5, -5, 0]
                           } : {}}
                           transition={{ duration: 0.5 }}
                         >
-                          {employee.avatar}
+                          <img
+                            src={employee.avatar}
+                            alt={employee.role}
+                            className="w-full h-full object-cover"
+                          />
                         </motion.div>
-                        {employee.available && (
-                          <Badge className="bg-green-500/10 text-green-400 border-green-500/20">
-                            Available
-                          </Badge>
-                        )}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-lg mb-1 truncate">
+                            {employee.role}
+                          </h3>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {employee.specialty}
+                          </p>
+                        </div>
                       </div>
-                      <h3 className="text-xl font-bold mb-1">{employee.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">{employee.role}</p>
-                      <p className="text-sm mb-4">{employee.specialty}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {employee.skills.map((skill) => (
+                      <Badge
+                        className={cn(
+                          "flex-shrink-0 bg-gradient-to-r text-white border-0",
+                          getProviderGradient(employee.provider)
+                        )}
+                      >
+                        {providerInfo[employee.provider].name}
+                      </Badge>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-grow">
+                      {employee.description}
+                    </p>
+
+                    {/* Skills */}
+                    <div className="mb-4">
+                      <div className="flex flex-wrap gap-1">
+                        {employee.skills.slice(0, 4).map((skill) => (
                           <Badge key={skill} variant="secondary" className="text-xs">
                             {skill}
                           </Badge>
                         ))}
+                        {employee.skills.length > 4 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{employee.skills.length - 4}
+                          </Badge>
+                        )}
                       </div>
-                      <Button className="w-full mt-4 group-hover:bg-primary group-hover:text-white transition-colors" asChild>
-                        <Link to="/marketplace">
-                          Hire Now
-                          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+
+                    {/* Fit Level */}
+                    <div className="flex items-center gap-2 mb-4 pb-4 border-b border-border">
+                      {employee.fitLevel === 'excellent' ? (
+                        <>
+                          <Zap className="h-4 w-4 text-primary" />
+                          <span className="text-xs font-medium text-primary">
+                            Excellent Fit
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <TrendingUp className="h-4 w-4 text-accent" />
+                          <span className="text-xs font-medium text-accent">
+                            Great Fit
+                          </span>
+                        </>
+                      )}
+                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 ml-auto" />
+                    </div>
+
+                    {/* Price and CTA */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-baseline gap-1">
+                        <DollarSign className="h-5 w-5 text-success" />
+                        <span className="text-3xl font-bold">{employee.price}</span>
+                        <span className="text-sm text-muted-foreground">one-time</span>
+                      </div>
+
+                      <Button
+                        size="sm"
+                        className="btn-glow gradient-primary text-white"
+                        asChild
+                      >
+                        <Link to="/ai-marketplace">
+                          <ShoppingCart className="h-4 w-4 mr-2" />
+                          Hire
                         </Link>
                       </Button>
                     </div>
-                  </Card>
-                </InteractiveHoverCard>
+                  </div>
+                </Card>
               </motion.div>
             ))}
           </div>
@@ -497,8 +508,8 @@ const LandingPage: React.FC = () => {
             className="text-center mt-12"
           >
             <Button size="lg" variant="outline" className="glass" asChild>
-              <Link to="/marketplace">
-                Browse All AI Employees
+              <Link to="/ai-marketplace">
+                Browse All {AI_EMPLOYEES.length} AI Employees
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>

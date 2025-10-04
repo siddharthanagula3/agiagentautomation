@@ -2,10 +2,25 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare, Zap, Globe, Shield, Clock, CheckCircle2, ArrowRight, Bot, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/unified-auth-store';
 
 const AIChatPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  const handleStartTrial = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/register');
+    }
+  };
+
+  const handleSeeDemo = () => {
+    navigate('/demo');
+  };
   const features = [
     {
       icon: Zap,
@@ -42,7 +57,6 @@ const AIChatPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={50} staticity={40} />
 
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
@@ -60,10 +74,10 @@ const AIChatPage: React.FC = () => {
                 Deploy AI chat agents that understand context, speak 100+ languages, and provide instant support 24/7.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-gradient-to-r from-primary to-accent">
-                  Start Free Trial <ArrowRight className="ml-2" />
+                <Button size="lg" className="bg-gradient-to-r from-primary to-accent" onClick={handleStartTrial}>
+                  {user ? 'Go to Dashboard' : 'Start Free Trial'} <ArrowRight className="ml-2" />
                 </Button>
-                <Button size="lg" variant="outline">See Demo</Button>
+                <Button size="lg" variant="outline" onClick={handleSeeDemo}>See Demo</Button>
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
@@ -116,7 +130,9 @@ const AIChatPage: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-12 text-center text-white">
             <h2 className="text-4xl font-bold mb-4">Ready to Transform Customer Conversations?</h2>
             <p className="text-xl mb-8 opacity-90">Deploy AI chat in minutes and start delivering instant support</p>
-            <Button size="lg" variant="secondary">Start Free Trial</Button>
+            <Button size="lg" variant="secondary" onClick={handleStartTrial}>
+              {user ? 'Go to Dashboard' : 'Start Free Trial'}
+            </Button>
           </motion.div>
         </div>
       </section>

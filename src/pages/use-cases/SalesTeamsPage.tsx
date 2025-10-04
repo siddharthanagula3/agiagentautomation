@@ -2,10 +2,25 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, Target, Users, Zap, CheckCircle2, ArrowRight, Mail, Phone, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/unified-auth-store';
 
 const SalesTeamsPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  const handleStartTrial = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/register');
+    }
+  };
+
+  const handleSeeDemo = () => {
+    navigate('/demo');
+  };
   const benefits = [
     {
       icon: Target,
@@ -58,7 +73,6 @@ const SalesTeamsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={50} staticity={40} />
 
       {/* Hero */}
@@ -81,11 +95,11 @@ const SalesTeamsPage: React.FC = () => {
                 Automate lead qualification, outreach, follow-ups, and CRM management. Your human reps focus on closing deals.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-gradient-to-r from-primary to-accent">
-                  Start Free Trial
+                <Button size="lg" className="bg-gradient-to-r from-primary to-accent" onClick={handleStartTrial}>
+                  {user ? 'Go to Dashboard' : 'Start Free Trial'}
                   <ArrowRight className="ml-2" />
                 </Button>
-                <Button size="lg" variant="outline">See Demo</Button>
+                <Button size="lg" variant="outline" onClick={handleSeeDemo}>See Demo</Button>
               </div>
             </motion.div>
             <motion.div
@@ -213,7 +227,9 @@ const SalesTeamsPage: React.FC = () => {
             <p className="text-xl mb-8 opacity-90">
               Join 2,000+ sales teams using AI to crush their quotas
             </p>
-            <Button size="lg" variant="secondary">Start Free Trial</Button>
+            <Button size="lg" variant="secondary" onClick={handleStartTrial}>
+              {user ? 'Go to Dashboard' : 'Start Free Trial'}
+            </Button>
           </motion.div>
         </div>
       </section>

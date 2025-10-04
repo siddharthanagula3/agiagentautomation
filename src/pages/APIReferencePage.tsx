@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
 import { Code, Terminal, Key, Zap, FileJson, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -73,7 +72,6 @@ const APIReferencePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={40} />
 
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">

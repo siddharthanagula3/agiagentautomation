@@ -4,7 +4,6 @@ import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { Check, X, ArrowRight, Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
 import { getPricingPlans, type PricingPlan as DBPricingPlan } from '@/services/marketing-api';
 
@@ -168,7 +167,6 @@ const PricingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={40} staticity={50} />
 
       {/* Hero */}

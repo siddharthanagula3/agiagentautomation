@@ -1,13 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import Header from '@/components/layout/Header';
 import { Cookie, Settings, BarChart3, Shield } from 'lucide-react';
 
 const CookiePolicyPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Header />
 
       <section className="pt-32 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl">

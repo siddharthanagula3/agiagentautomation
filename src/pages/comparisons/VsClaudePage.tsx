@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import Header from '@/components/layout/Header';
 import { Check, X, ArrowRight, TrendingDown, Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -75,7 +74,6 @@ const VsClaudePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">

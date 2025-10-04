@@ -2,10 +2,25 @@ import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Server, Shield, Zap, Clock, CheckCircle2, ArrowRight, AlertTriangle, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/unified-auth-store';
 
 const ITServiceProvidersPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  const handleStartTrial = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/register');
+    }
+  };
+
+  const handleScheduleDemo = () => {
+    navigate('/demo');
+  };
   const benefits = [
     {
       icon: Clock,
@@ -58,7 +73,6 @@ const ITServiceProvidersPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={50} staticity={40} />
 
       {/* Hero */}
@@ -81,11 +95,11 @@ const ITServiceProvidersPage: React.FC = () => {
                 Handle 10x more clients with the same team. AI employees manage help desk, monitoring, security, and operations 24/7.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-gradient-to-r from-primary to-accent">
-                  Start Free Trial
+                <Button size="lg" className="bg-gradient-to-r from-primary to-accent" onClick={handleStartTrial}>
+                  {user ? 'Go to Dashboard' : 'Start Free Trial'}
                   <ArrowRight className="ml-2" />
                 </Button>
-                <Button size="lg" variant="outline">Schedule Demo</Button>
+                <Button size="lg" variant="outline" onClick={handleScheduleDemo}>Schedule Demo</Button>
               </div>
             </motion.div>
             <motion.div
@@ -189,7 +203,9 @@ const ITServiceProvidersPage: React.FC = () => {
             <p className="text-xl mb-8 opacity-90">
               Join 500+ IT providers using AI to deliver better service at lower cost
             </p>
-            <Button size="lg" variant="secondary">Start Free Trial</Button>
+            <Button size="lg" variant="secondary" onClick={handleStartTrial}>
+              {user ? 'Go to Dashboard' : 'Start Free Trial'}
+            </Button>
           </motion.div>
         </div>
       </section>

@@ -2,10 +2,25 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, BarChart3, TrendingUp, Zap, Eye, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/unified-auth-store';
 
 const AIDashboardsPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  const handleStartTrial = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/register');
+    }
+  };
+
+  const handleViewDemo = () => {
+    navigate('/demo');
+  };
   const features = [
     {
       icon: BarChart3,
@@ -35,7 +50,6 @@ const AIDashboardsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={50} staticity={40} />
 
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
@@ -53,10 +67,10 @@ const AIDashboardsPage: React.FC = () => {
                 AI-powered dashboards that visualize your data, predict trends, and surface actionable insights in real-time.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-gradient-to-r from-primary to-accent">
-                  Start Free Trial <ArrowRight className="ml-2" />
+                <Button size="lg" className="bg-gradient-to-r from-primary to-accent" onClick={handleStartTrial}>
+                  {user ? 'Go to Dashboard' : 'Start Free Trial'} <ArrowRight className="ml-2" />
                 </Button>
-                <Button size="lg" variant="outline">View Demo</Button>
+                <Button size="lg" variant="outline" onClick={handleViewDemo}>View Demo</Button>
               </div>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
@@ -93,7 +107,9 @@ const AIDashboardsPage: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-12 text-center text-white">
             <h2 className="text-4xl font-bold mb-4">Ready to See the Bigger Picture?</h2>
             <p className="text-xl mb-8 opacity-90">Create AI-powered dashboards in minutes</p>
-            <Button size="lg" variant="secondary">Start Free Trial</Button>
+            <Button size="lg" variant="secondary" onClick={handleStartTrial}>
+              {user ? 'Go to Dashboard' : 'Start Free Trial'}
+            </Button>
           </motion.div>
         </div>
       </section>

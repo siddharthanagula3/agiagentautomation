@@ -9,6 +9,8 @@ import { PublicLayout } from './layouts/PublicLayout';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import Dashboard from './pages/dashboard/Dashboard';
 import DashboardHomePage from './components/dashboard/DashboardHomePage';
@@ -133,11 +135,15 @@ function App() {
             <Route path="/auth" element={<AuthLayout />}>
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
+              <Route path="forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="reset-password" element={<ResetPasswordPage />} />
             </Route>
 
             {/* Root level auth routes for convenience */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* Protected Routes - ALL AT ROOT LEVEL */}
             <Route

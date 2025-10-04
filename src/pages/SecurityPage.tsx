@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
 import { Shield, Lock, Eye, Server, Key, CheckCircle2, AlertTriangle, FileCheck } from 'lucide-react';
 
@@ -51,7 +50,6 @@ const SecurityPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={40} />
 
       <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">

@@ -2,11 +2,30 @@ import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Rocket, Zap, TrendingUp, Users, DollarSign, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Header from '@/components/layout/Header';
 import { Particles } from '@/components/ui/particles';
 import { BentoGrid, BentoCard } from '@/components/ui/bento-grid';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/unified-auth-store';
 
 const StartupsPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+
+  const handleStartTrial = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/register');
+    }
+  };
+
+  const handleWatchDemo = () => {
+    navigate('/demo');
+  };
+
+  const handleTalkToFounders = () => {
+    navigate('/contact-sales');
+  };
   const benefits = [
     {
       icon: DollarSign,
@@ -98,7 +117,6 @@ const StartupsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <Particles className="absolute inset-0 -z-10" quantity={60} staticity={30} />
 
       {/* Hero Section */}
@@ -121,11 +139,11 @@ const StartupsPage: React.FC = () => {
                 Scale faster, spend less, and compete with companies 10x your size. AI employees give you the leverage to move at hyperspeed.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-lg">
-                  Start Free Trial
+                <Button size="lg" className="bg-gradient-to-r from-primary to-accent text-lg" onClick={handleStartTrial}>
+                  {user ? 'Go to Dashboard' : 'Start Free Trial'}
                   <ArrowRight className="ml-2" size={20} />
                 </Button>
-                <Button size="lg" variant="outline">
+                <Button size="lg" variant="outline" onClick={handleWatchDemo}>
                   Watch Demo
                 </Button>
               </div>
@@ -249,10 +267,10 @@ const StartupsPage: React.FC = () => {
               Join 1,000+ startups using AI employees to move faster than ever
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" className="text-lg">
-                Start Free Trial
+              <Button size="lg" variant="secondary" className="text-lg" onClick={handleStartTrial}>
+                {user ? 'Go to Dashboard' : 'Start Free Trial'}
               </Button>
-              <Button size="lg" variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20">
+              <Button size="lg" variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20" onClick={handleTalkToFounders}>
                 Talk to Founders
               </Button>
             </div>

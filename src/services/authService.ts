@@ -9,6 +9,7 @@ export interface AuthUser {
   name: string;
   avatar?: string;
   role: string;
+  company?: string;
   created_at: string;
   updated_at: string;
   last_login?: string;
@@ -27,6 +28,7 @@ export interface RegisterData {
   email: string;
   password: string;
   name: string;
+  company?: string;
   phone?: string;
   location?: string;
 }
@@ -122,48 +124,58 @@ async login(loginData: LoginData): Promise<AuthResponse> {
         console.log('AuthService: Registration in demo mode');
         return { user: null, error: 'Registration is disabled in demo mode. Please configure Supabase for full functionality.' };
       }
-      
-      // Add timeout protection for registration
-      const registrationTimeout = setTimeout(() => {
-        console.warn('Registration timeout - this should not happen');
-      }, 10000); // 10 second timeout
-      
+
+      console.log('AuthService: Starting registration for:', userData.email);
+
+      // Sign up with metadata - this will trigger the database function to create the user profile
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
+        options: {
+          data: {
+            name: userData.name,
+            company: userData.company || '',
+            phone: userData.phone || '',
+            location: userData.location || '',
+            role: 'user',
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
-      
-      clearTimeout(registrationTimeout);
 
-      
       if (error) {
-        console.log('AuthService: Registration error:', error.message);
+        console.error('AuthService: Registration error:', error.message);
         return { user: null, error: error.message };
       }
 
       if (!data.user) {
-        return { user: null, error: 'No user data returned' };
+        return { user: null, error: 'No user data returned from signup' };
       }
 
+      console.log('AuthService: User created in auth.users:', data.user.id);
+
       // Check if email confirmation is required
-      if (data.user && !data.session) {
+      if (!data.session) {
         console.log('AuthService: Email confirmation required for:', data.user.email);
-        return { 
-          user: null, 
-          error: 'Please check your email and click the confirmation link to complete registration.' 
+        return {
+          user: null,
+          error: 'Registration successful! Please check your email and click the confirmation link to activate your account.'
         };
       }
 
-      // Create user profile
-      const { data: profile, error: profileError } = await supabase
+      // Create user profile in database (no trigger, we handle it directly)
+      console.log('AuthService: Creating user profile for:', data.user.id);
+      const { data: newProfile, error: createError } = await supabase
         .from('users')
         .insert({
           id: data.user.id,
           email: userData.email,
           name: userData.name,
-          phone: userData.phone,
-          location: userData.location,
+          company: userData.company || null,
+          phone: userData.phone || null,
+          location: userData.location || null,
           role: 'user',
+          avatar: null,
           is_active: true,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -171,29 +183,31 @@ async login(loginData: LoginData): Promise<AuthResponse> {
         .select()
         .single();
 
-      if (profileError) {
-        return { user: null, error: 'Failed to create user profile' };
+      if (createError) {
+        console.error('AuthService: Failed to create profile:', createError);
+        return { user: null, error: 'Account created but profile setup failed. Please try again or contact support.' };
       }
 
       const authUser: AuthUser = {
-        id: profile.id,
-        email: profile.email,
-        name: profile.name,
-        avatar: profile.avatar,
-        role: profile.role,
-        created_at: profile.created_at,
-        updated_at: profile.updated_at,
-        last_login: profile.last_login,
-        is_active: profile.is_active,
-        preferences: profile.preferences,
-        phone: profile.phone,
-        location: profile.location,
+        id: newProfile.id,
+        email: newProfile.email,
+        name: newProfile.name,
+        avatar: newProfile.avatar,
+        role: newProfile.role,
+        created_at: newProfile.created_at,
+        updated_at: newProfile.updated_at,
+        last_login: newProfile.last_login,
+        is_active: newProfile.is_active !== false,
+        preferences: newProfile.preferences,
+        phone: newProfile.phone,
+        location: newProfile.location,
       };
 
+      console.log('AuthService: Registration successful for:', authUser.email);
       return { user: authUser, error: null };
     } catch (error) {
-      console.error('Service error:', error);
-      return { user: null, error: 'An unexpected error occurred' };
+      console.error('AuthService: Unexpected error during registration:', error);
+      return { user: null, error: 'An unexpected error occurred during registration. Please try again.' };
     }
   }
 

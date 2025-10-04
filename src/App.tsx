@@ -95,7 +95,7 @@ function App() {
               <Route path="security" element={<SecurityPage />} />
               <Route path="documentation" element={<DocumentationPage />} />
               <Route path="api-reference" element={<APIReferencePage />} />
-              <Route path="ai-marketplace" element={<MarketplacePublicPage />} />
+              <Route path="marketplace" element={<MarketplacePublicPage />} />
 
               {/* Legal Pages */}
               <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
@@ -161,7 +161,6 @@ function App() {
               {/* Main Features */}
               <Route path="workforce" element={<WorkforcePage />} />
               <Route path="workforce/management" element={<WorkforceManagement />} />
-              <Route path="marketplace" element={<MarketplacePage />} />
               
               {/* Enhanced Chat (New) */}
               <Route path="chat" element={<ChatPageEnhanced />} />

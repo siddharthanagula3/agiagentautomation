@@ -31,18 +31,27 @@ const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-  const productMenu = [
+  // AI Employees
+  const aiEmployeesMenu = [
     { label: 'AI Marketplace', path: '/marketplace', icon: Bot, description: 'Browse specialized AI employees' },
-    { label: 'AI Chat', path: '/features/ai-chat', icon: MessageSquare, description: 'Intelligent conversations' },
-    { label: 'AI Workflows', path: '/features/ai-workflows', icon: Workflow, description: 'Automated processes' },
-    { label: 'Pricing', path: '/pricing', icon: LayoutDashboard, description: 'Simple, transparent pricing' },
+    { label: 'AI Workforce', path: '/workforce', icon: Users, description: 'Manage your AI workforce' },
   ];
 
-  const companyMenu = [
-    { label: 'About Us', path: '/about', icon: Building2, description: 'Learn about our mission' },
-    { label: 'Careers', path: '/careers', icon: Briefcase, description: 'Join our team' },
-    { label: 'Blog', path: '/blog', icon: Newspaper, description: 'Latest insights & updates' },
-    { label: 'Contact', path: '/contact-sales', icon: Lightbulb, description: 'Get in touch with us' },
+  // Features
+  const featuresMenu = [
+    { label: 'AI Chat', path: '/features/ai-chat', icon: MessageSquare, description: 'Intelligent conversations' },
+    { label: 'AI Workflows', path: '/features/ai-workflows', icon: Workflow, description: 'Automated processes' },
+    { label: 'Integrations', path: '/features/integrations', icon: Plug, description: 'Connect your tools' },
+    { label: 'AI Dashboards', path: '/features/ai-dashboards', icon: LayoutDashboard, description: 'Real-time insights' },
+    { label: 'AI Project Manager', path: '/features/ai-project-manager', icon: Briefcase, description: 'Smart project management' },
+  ];
+
+  // Use Cases
+  const useCasesMenu = [
+    { label: 'Startups', path: '/use-cases/startups', icon: Lightbulb, description: 'Scale your startup' },
+    { label: 'IT Service Providers', path: '/use-cases/it-service-providers', icon: Building2, description: 'Streamline IT operations' },
+    { label: 'Sales Teams', path: '/use-cases/sales-teams', icon: TrendingUp, description: 'Boost sales performance' },
+    { label: 'Consulting Businesses', path: '/use-cases/consulting-businesses', icon: Briefcase, description: 'Enhance consulting services' },
   ];
 
   const resourcesMenu = [
@@ -82,25 +91,34 @@ const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
-            {/* Product Dropdown */}
+            {/* AI Employees */}
             <DropdownMenu
-              label="Product"
-              items={productMenu}
-              isActive={activeDropdown === 'product'}
-              onToggle={() => handleDropdownToggle('product')}
+              label="AI Employees"
+              items={aiEmployeesMenu}
+              isActive={activeDropdown === 'aiEmployees'}
+              onToggle={() => handleDropdownToggle('aiEmployees')}
               onNavigate={handleNavigation}
             />
 
-            {/* Company Dropdown */}
+            {/* Features */}
             <DropdownMenu
-              label="Company"
-              items={companyMenu}
-              isActive={activeDropdown === 'company'}
-              onToggle={() => handleDropdownToggle('company')}
+              label="Features"
+              items={featuresMenu}
+              isActive={activeDropdown === 'features'}
+              onToggle={() => handleDropdownToggle('features')}
               onNavigate={handleNavigation}
             />
 
-            {/* Resources Dropdown */}
+            {/* Use Cases */}
+            <DropdownMenu
+              label="Use Cases"
+              items={useCasesMenu}
+              isActive={activeDropdown === 'useCases'}
+              onToggle={() => handleDropdownToggle('useCases')}
+              onNavigate={handleNavigation}
+            />
+
+            {/* Resources */}
             <DropdownMenu
               label="Resources"
               items={resourcesMenu}

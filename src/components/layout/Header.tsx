@@ -20,7 +20,9 @@ import {
   Lightbulb,
   BookOpen,
   HelpCircle,
-  Newspaper
+  Newspaper,
+  Shield,
+  FileCode
 } from 'lucide-react';
 
 const Header: React.FC = () => {
@@ -30,25 +32,24 @@ const Header: React.FC = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const productMenu = [
-    { label: 'AI Marketplace', path: '/ai-marketplace', icon: Bot, description: 'Browse specialized AI employees' },
+    { label: 'AI Marketplace', path: '/marketplace', icon: Bot, description: 'Browse specialized AI employees' },
     { label: 'AI Chat', path: '/features/ai-chat', icon: MessageSquare, description: 'Intelligent conversations' },
     { label: 'AI Workflows', path: '/features/ai-workflows', icon: Workflow, description: 'Automated processes' },
-    { label: 'Integrations', path: '/features/integrations', icon: Plug, description: 'Connect your tools' },
-    { label: 'AI Dashboards', path: '/features/ai-dashboards', icon: LayoutDashboard, description: 'Real-time insights' },
-    { label: 'AI Project Manager', path: '/features/ai-project-manager', icon: Briefcase, description: 'Smart project management' }
+    { label: 'Pricing', path: '/pricing', icon: LayoutDashboard, description: 'Simple, transparent pricing' },
   ];
 
   const companyMenu = [
-    { label: 'Startups', path: '/use-cases/startups', icon: Lightbulb, description: 'Scale your startup' },
-    { label: 'IT Service Providers', path: '/use-cases/it-service-providers', icon: Building2, description: 'Streamline IT operations' },
-    { label: 'Sales Teams', path: '/use-cases/sales-teams', icon: TrendingUp, description: 'Boost sales performance' },
-    { label: 'Consulting Businesses', path: '/use-cases/consulting-businesses', icon: Briefcase, description: 'Enhance consulting services' }
+    { label: 'About Us', path: '/about', icon: Building2, description: 'Learn about our mission' },
+    { label: 'Careers', path: '/careers', icon: Briefcase, description: 'Join our team' },
+    { label: 'Blog', path: '/blog', icon: Newspaper, description: 'Latest insights & updates' },
+    { label: 'Contact', path: '/contact-sales', icon: Lightbulb, description: 'Get in touch with us' },
   ];
 
   const resourcesMenu = [
-    { label: 'Blog', path: '/blog', icon: Newspaper, description: 'Latest insights & updates' },
-    { label: 'Resources', path: '/resources', icon: BookOpen, description: 'Guides & documentation' },
-    { label: 'Help Center', path: '/help', icon: HelpCircle, description: 'Get support' }
+    { label: 'Documentation', path: '/documentation', icon: BookOpen, description: 'Product guides and docs' },
+    { label: 'API Reference', path: '/api-reference', icon: FileCode, description: 'Endpoints and examples' },
+    { label: 'Help Center', path: '/help', icon: HelpCircle, description: 'Get support' },
+    { label: 'Security', path: '/security', icon: Shield, description: 'Security practices and posture' },
   ];
 
   const handleDropdownToggle = (menu: string) => {
@@ -108,13 +109,7 @@ const Header: React.FC = () => {
               onNavigate={handleNavigation}
             />
 
-            {/* Pricing Link */}
-            <button
-              onClick={() => handleNavigation('/pricing')}
-              className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
-            >
-              Pricing
-            </button>
+            {/* Pricing surfaced inside Product menu; keep optional quick link if desired */}
           </div>
 
           {/* CTA Buttons */}

@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { ThemeToggle } from '../ui/theme-toggle';
-import { Bot, Menu, X, Sparkles, ChevronDown, MessageSquare, Workflow, LayoutDashboard, Briefcase, Building2, Lightbulb, BookOpen, HelpCircle, Newspaper, FileCode } from 'lucide-react';
+import { Bot, Menu, X, Sparkles, ChevronDown, MessageSquare, Workflow, LayoutDashboard, Briefcase, Building2, Lightbulb, BookOpen, HelpCircle, Newspaper, FileCode, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/stores/unified-auth-store';
 
 const PublicHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,6 +13,7 @@ const PublicHeader: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const { user } = useAuthStore();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,7 +25,7 @@ const PublicHeader: React.FC = () => {
 
   // Menus aligned with footer
   const productMenu = [
-    { label: 'AI Marketplace', path: '/ai-marketplace', icon: Bot, description: 'Browse specialized AI employees' },
+    { label: 'AI Marketplace', path: '/marketplace', icon: Bot, description: 'Browse specialized AI employees' },
     { label: 'AI Chat', path: '/features/ai-chat', icon: MessageSquare, description: 'Intelligent conversations' },
     { label: 'AI Workflows', path: '/features/ai-workflows', icon: Workflow, description: 'Automated processes' },
   ];
@@ -80,21 +82,33 @@ const PublicHeader: React.FC = () => {
           {/* Desktop Auth */}
           <div className="hidden md:flex items-center space-x-3">
             <ThemeToggle />
-            <Button 
-              variant="ghost" 
-              asChild
-              className="text-sm"
-            >
-              <Link to="/auth/login">Sign In</Link>
-            </Button>
-            <Button 
-              asChild
-              className="btn-glow gradient-primary text-white text-sm"
-            >
-              <Link to="/auth/register">
-                Get Started Free
-              </Link>
-            </Button>
+            {user ? (
+              <Button 
+                onClick={() => handleNavigate('/dashboard')}
+                className="btn-glow gradient-primary text-white text-sm"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  variant="ghost" 
+                  asChild
+                  className="text-sm"
+                >
+                  <Link to="/auth/login">Sign In</Link>
+                </Button>
+                <Button 
+                  asChild
+                  className="btn-glow gradient-primary text-white text-sm"
+                >
+                  <Link to="/auth/register">
+                    Get Started Free
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -120,16 +134,31 @@ const PublicHeader: React.FC = () => {
                 <MobileDropdown label="Company" items={companyMenu} onNavigate={handleNavigate} />
                 <MobileDropdown label="Resources" items={resourcesMenu} onNavigate={handleNavigate} />
                 <div className="pt-4 space-y-2">
-                  <Link to="/auth/login" onClick={() => setIsMenuOpen(false)} className="block">
-                    <Button variant="ghost" className="w-full justify-start">
-                      Sign In
+                  {user ? (
+                    <Button 
+                      onClick={() => {
+                        handleNavigate('/dashboard');
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full gradient-primary text-white"
+                    >
+                      <User className="w-4 h-4 mr-2" />
+                      Dashboard
                     </Button>
-                  </Link>
-                  <Link to="/auth/register" onClick={() => setIsMenuOpen(false)} className="block">
-                    <Button className="w-full gradient-primary text-white">
-                      Get Started Free
-                    </Button>
-                  </Link>
+                  ) : (
+                    <>
+                      <Link to="/auth/login" onClick={() => setIsMenuOpen(false)} className="block">
+                        <Button variant="ghost" className="w-full justify-start">
+                          Sign In
+                        </Button>
+                      </Link>
+                      <Link to="/auth/register" onClick={() => setIsMenuOpen(false)} className="block">
+                        <Button className="w-full gradient-primary text-white">
+                          Get Started Free
+                        </Button>
+                      </Link>
+                    </>
+                  )}
                   <Button variant="ghost" className="w-full justify-start" onClick={() => handleNavigate('/pricing')}>Pricing</Button>
                 </div>
               </nav>

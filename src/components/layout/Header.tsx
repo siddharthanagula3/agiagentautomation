@@ -31,27 +31,19 @@ const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-  // AI Employees
-  const aiEmployeesMenu = [
-    { label: 'AI Marketplace', path: '/marketplace', icon: Bot, description: 'Browse specialized AI employees' },
-    { label: 'AI Workforce', path: '/workforce', icon: Users, description: 'Manage your AI workforce' },
-  ];
-
-  // Features
-  const featuresMenu = [
+  // Product (matches footer Product)
+  const productMenu = [
+    { label: 'AI Marketplace', path: '/ai-marketplace', icon: Bot, description: 'Browse specialized AI employees' },
     { label: 'AI Chat', path: '/features/ai-chat', icon: MessageSquare, description: 'Intelligent conversations' },
     { label: 'AI Workflows', path: '/features/ai-workflows', icon: Workflow, description: 'Automated processes' },
-    { label: 'Integrations', path: '/features/integrations', icon: Plug, description: 'Connect your tools' },
-    { label: 'AI Dashboards', path: '/features/ai-dashboards', icon: LayoutDashboard, description: 'Real-time insights' },
-    { label: 'AI Project Manager', path: '/features/ai-project-manager', icon: Briefcase, description: 'Smart project management' },
   ];
 
-  // Use Cases
-  const useCasesMenu = [
-    { label: 'Startups', path: '/use-cases/startups', icon: Lightbulb, description: 'Scale your startup' },
-    { label: 'IT Service Providers', path: '/use-cases/it-service-providers', icon: Building2, description: 'Streamline IT operations' },
-    { label: 'Sales Teams', path: '/use-cases/sales-teams', icon: TrendingUp, description: 'Boost sales performance' },
-    { label: 'Consulting Businesses', path: '/use-cases/consulting-businesses', icon: Briefcase, description: 'Enhance consulting services' },
+  // Company (matches footer Company)
+  const companyMenu = [
+    { label: 'About Us', path: '/about', icon: Building2, description: 'Learn about our mission' },
+    { label: 'Careers', path: '/careers', icon: Briefcase, description: 'Join our team' },
+    { label: 'Blog', path: '/blog', icon: Newspaper, description: 'Latest insights & updates' },
+    { label: 'Contact', path: '/contact-sales', icon: Lightbulb, description: 'Get in touch with us' },
   ];
 
   const resourcesMenu = [
@@ -91,30 +83,21 @@ const Header: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
-            {/* AI Employees */}
+            {/* Product */}
             <DropdownMenu
-              label="AI Employees"
-              items={aiEmployeesMenu}
-              isActive={activeDropdown === 'aiEmployees'}
-              onToggle={() => handleDropdownToggle('aiEmployees')}
+              label="Product"
+              items={productMenu}
+              isActive={activeDropdown === 'product'}
+              onToggle={() => handleDropdownToggle('product')}
               onNavigate={handleNavigation}
             />
 
-            {/* Features */}
+            {/* Company */}
             <DropdownMenu
-              label="Features"
-              items={featuresMenu}
-              isActive={activeDropdown === 'features'}
-              onToggle={() => handleDropdownToggle('features')}
-              onNavigate={handleNavigation}
-            />
-
-            {/* Use Cases */}
-            <DropdownMenu
-              label="Use Cases"
-              items={useCasesMenu}
-              isActive={activeDropdown === 'useCases'}
-              onToggle={() => handleDropdownToggle('useCases')}
+              label="Company"
+              items={companyMenu}
+              isActive={activeDropdown === 'company'}
+              onToggle={() => handleDropdownToggle('company')}
               onNavigate={handleNavigation}
             />
 

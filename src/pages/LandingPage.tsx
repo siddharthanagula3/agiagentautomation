@@ -40,6 +40,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { ExpandableChatDemo } from '@/components/ui/expandable-chat-demo';
 import { Particles } from '../components/ui/particles';
 import { Spotlight, MouseSpotlight } from '../components/ui/spotlight';
 import { BentoGrid, BentoCard } from '../components/ui/bento-grid';
@@ -326,6 +327,7 @@ const LandingPage: React.FC = () => {
           </motion.div>
         </div>
       </section>
+      <ExpandableChatDemo />
 
       {/* Social Proof - Company Logos */}
       <section className="py-16 bg-muted/30 backdrop-blur-sm border-y border-border/50">

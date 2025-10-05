@@ -33,7 +33,7 @@ const Header: React.FC = () => {
 
   // Product (matches footer Product)
   const productMenu = [
-    { label: 'AI Marketplace', path: '/ai-marketplace', icon: Bot, description: 'Browse specialized AI employees' },
+    { label: 'AI Marketplace', path: '/marketplace', icon: Bot, description: 'Browse specialized AI employees' },
     { label: 'AI Chat', path: '/features/ai-chat', icon: MessageSquare, description: 'Intelligent conversations' },
     { label: 'AI Workflows', path: '/features/ai-workflows', icon: Workflow, description: 'Automated processes' },
   ];

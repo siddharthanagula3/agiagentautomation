@@ -45,7 +45,9 @@
       "Bash(awk:*)",
       "Bash(do if [ -f \"$file\" ])",
       "Bash(then echo \"=== $file ===\")",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(npx supabase:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []

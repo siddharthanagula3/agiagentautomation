@@ -70,6 +70,7 @@ import AIProjectManagerPage from './pages/features/AIProjectManagerPage';
 // Comparison Pages
 import VsChatGPTPage from './pages/comparisons/VsChatGPTPage';
 import VsClaudePage from './pages/comparisons/VsClaudePage';
+import AiPromptDemo from './pages/demo/AiPromptDemo';
 
 function App() {
   console.log('App.tsx: Rendering main app component');
@@ -83,6 +84,7 @@ function App() {
             <Route path="/" element={<PublicLayout />}>
               <Route index element={<LandingPage />} />
               <Route path="demo" element={<AIEmployeeDemo />} />
+              <Route path="demo/ai-prompt" element={<AiPromptDemo />} />
 
               {/* Marketing Pages */}
               <Route path="blog" element={<BlogPage />} />

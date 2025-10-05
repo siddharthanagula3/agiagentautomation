@@ -57,7 +57,7 @@ import { useAuthStore } from '@/stores/unified-auth-store';
 import { AI_EMPLOYEES } from '@/data/ai-employees';
 import { getEmployeeById, listPurchasedEmployees } from '@/services/supabase-employees';
 import { createSession, listMessages, listSessions, sendMessage } from '@/services/supabase-chat';
-import { sendAIMessage, isProviderConfigured, getConfiguredProviders } from '@/services/ai-chat-service';
+import { sendAIMessage, isProviderConfigured, getConfiguredProviders } from '@/services/enhanced-ai-chat-service';
 import { streamAIResponse, type StreamChunk } from '@/services/streaming-service';
 import { toolExecutorService, type Tool, type ToolExecutionResult } from '@/services/tool-executor-service';
 import { artifactService, type Artifact } from '@/services/artifact-service';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import CompleteAIEmployeeMarketplace from '@/components/CompleteAIEmployeeMarketplace';
-import CompleteAdminDashboard from '@/components/CompleteAdminDashboard';
+import AIEmployeeMarketplace from '@/components/employees/AIEmployeeMarketplace';
+import WorkforceManagement from '@/components/employees/WorkforceManagement';
 
 const AIEmployees: React.FC = () => {
   const [activeTab, setActiveTab] = useState('marketplace');
@@ -15,11 +15,11 @@ const AIEmployees: React.FC = () => {
         </TabsList>
         
         <TabsContent value="marketplace" className="h-full">
-          <CompleteAIEmployeeMarketplace />
+          <AIEmployeeMarketplace />
         </TabsContent>
         
         <TabsContent value="dashboard" className="h-full">
-          <CompleteAdminDashboard />
+          <WorkforceManagement />
         </TabsContent>
       </Tabs>
     </div>

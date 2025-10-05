@@ -48,27 +48,27 @@ const AboutPage: React.FC = () => {
 
   const team = [
     {
-      name: 'Sarah Chen',
-      role: 'CEO & Co-Founder',
-      bio: 'Former Google AI Lead with 15+ years in ML',
-      avatar: '👩‍💼'
+      name: 'Siddhartha Nagula',
+      role: 'Founder & CEO',
+      bio: 'Visionary leader building the future of AI workforce automation',
+      avatar: '👨‍💼'
     },
     {
-      name: 'Michael Rodriguez',
-      role: 'CTO & Co-Founder',
-      bio: 'Ex-OpenAI Engineer, AI Systems Architect',
+      name: 'Siddhartha Nagula',
+      role: 'CTO',
+      bio: 'Full-stack architect and AI systems expert',
       avatar: '👨‍💻'
     },
     {
-      name: 'Emily Watson',
+      name: 'Siddhartha Nagula',
       role: 'Head of Product',
-      bio: 'Product leader from Microsoft, UX expert',
-      avatar: '👩‍🎨'
+      bio: 'Product strategy and user experience visionary',
+      avatar: '👨‍🎨'
     },
     {
-      name: 'David Kim',
+      name: 'Siddhartha Nagula',
       role: 'Head of Engineering',
-      bio: 'Engineering leader from Tesla, scaling expert',
+      bio: 'Engineering excellence and scaling specialist',
       avatar: '👨‍🔧'
     }
   ];

@@ -109,7 +109,13 @@ const Header: React.FC = () => {
               onNavigate={handleNavigation}
             />
 
-            {/* Pricing surfaced inside Product menu; keep optional quick link if desired */}
+            {/* Pricing Quick Link */}
+            <button
+              onClick={() => handleNavigation('/pricing')}
+              className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+            >
+              Pricing
+            </button>
           </div>
 
           {/* CTA Buttons */}

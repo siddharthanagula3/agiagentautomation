@@ -27,6 +27,7 @@ import ChatPageEnhanced from './pages/chat/ChatPageEnhanced';
 import IntegrationsPage from './pages/integrations/IntegrationsPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import SettingsPage from './pages/settings/SettingsPage';
+import AIConfigurationPage from './pages/settings/AIConfigurationPage';
 import WorkforceManagement from './components/employees/WorkforceManagement';
 import AutonomousWorkflowsPage from './pages/autonomous/AutonomousWorkflowsPage';
 import MarketplacePublicPage from './pages/MarketplacePublicPage';
@@ -187,6 +188,7 @@ function App() {
               {/* Account & System at Root Level */}
               <Route path="settings" element={<SettingsPage />} />
               <Route path="settings/:section" element={<SettingsPage />} />
+              <Route path="settings/ai-configuration" element={<AIConfigurationPage />} />
               <Route path="billing" element={<BillingPage />} />
               <Route path="api-keys" element={<APIKeysPage />} />
               <Route path="support" element={<HelpSupportPage />} />

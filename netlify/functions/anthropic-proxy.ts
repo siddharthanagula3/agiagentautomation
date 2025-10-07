@@ -94,12 +94,17 @@ export const handler: Handler = async (event: HandlerEvent) => {
       };
     }
 
+    // Normalize content for UI
+    const content = Array.isArray(data.content)
+      ? (data.content[0]?.text || data.output_text)
+      : (data.output_text || data.content);
+    const normalized = { ...data, content };
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(normalized),
     };
   } catch (error) {
     console.error('[Anthropic Proxy] Error:', error);

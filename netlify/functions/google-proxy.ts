@@ -134,12 +134,26 @@ export const handler: Handler = async (event: HandlerEvent) => {
       };
     }
 
+    // Normalize response to ensure a plain text content exists for the UI
+    let normalizedContent: string | undefined = undefined;
+    try {
+      normalizedContent = data.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join('')
+        || data.candidates?.[0]?.content?.parts?.[0]?.text
+        || data.output_text
+        || data.content;
+    } catch {}
+
+    const normalized = {
+      ...data,
+      content: normalizedContent,
+    };
+
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(normalized),
     };
   } catch (error) {
     console.error('[Google Proxy] Error:', error);

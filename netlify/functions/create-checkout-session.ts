@@ -15,7 +15,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
   }
 
   try {
-    const { employeeId, employeeRole, price, userId, userEmail, provider } = JSON.parse(event.body || '{}');
+    const { employeeId, employeeRole, price, userId, userEmail, provider, discountCode } = JSON.parse(event.body || '{}');
 
     if (!employeeId || !employeeRole || !price || !userId || !userEmail) {
       return {
@@ -33,6 +33,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
       userId,
       userEmail,
       provider,
+      discountCode,
     });
 
     // Create or retrieve Stripe customer
@@ -55,11 +56,12 @@ export const handler: Handler = async (event: HandlerEvent) => {
       console.log('[Stripe Checkout] Created new customer:', customer.id);
     }
 
-    // Create Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    // Prepare checkout session data
+    const sessionData: any = {
       customer: customer.id,
       mode: 'subscription',
       payment_method_types: ['card'],
+      allow_promotion_codes: true, // Enable discount code field in Stripe Checkout
       line_items: [
         {
           price_data: {
@@ -97,7 +99,34 @@ export const handler: Handler = async (event: HandlerEvent) => {
           provider: provider || 'chatgpt',
         },
       },
-    });
+    };
+
+    // Add discount code if provided
+    if (discountCode && discountCode.trim()) {
+      try {
+        // Validate that the discount code exists
+        const coupons = await stripe.coupons.list({
+          code: discountCode.trim(),
+          limit: 1,
+        });
+
+        if (coupons.data.length > 0) {
+          sessionData.discounts = [{
+            coupon: coupons.data[0].id,
+          }];
+          console.log('[Stripe Checkout] Applied discount code:', discountCode);
+        } else {
+          console.warn('[Stripe Checkout] Invalid discount code:', discountCode);
+          // Don't fail the checkout, just log the warning
+        }
+      } catch (error) {
+        console.error('[Stripe Checkout] Error validating discount code:', error);
+        // Don't fail the checkout if discount code validation fails
+      }
+    }
+
+    // Create Checkout Session
+    const session = await stripe.checkout.sessions.create(sessionData);
 
     console.log('[Stripe Checkout] Session created:', session.id);
 

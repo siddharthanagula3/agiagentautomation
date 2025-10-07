@@ -483,7 +483,7 @@ const LandingPage: React.FC = () => {
                       <div className="flex items-baseline gap-1">
                         <DollarSign className="h-5 w-5 text-success" />
                         <span className="text-3xl font-bold">{employee.price}</span>
-                        <span className="text-sm text-muted-foreground">one-time</span>
+                        <span className="text-sm text-muted-foreground">per month</span>
                       </div>
 
                       <Button

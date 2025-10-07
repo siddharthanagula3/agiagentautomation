@@ -359,6 +359,7 @@ Remember: You are an expert in your field. Provide detailed, professional advice
       };
     }
   }
+}
 
 // Export the service class
 export const enhancedAIEmployeeService = new EnhancedAIEmployeeService();

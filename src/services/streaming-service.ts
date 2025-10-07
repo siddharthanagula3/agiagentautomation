@@ -39,6 +39,25 @@ export async function streamOpenAI(
   tools?: any[],
   model: string = 'gpt-4-turbo-preview'
 ) {
+  // In production, use Netlify proxy (non-stream) and emit a single chunk
+  if (import.meta.env.PROD) {
+    const response = await fetch('/.netlify/functions/openai-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model, messages, temperature: 0.7 })
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({} as any));
+      throw new Error(data?.error || `OpenAI proxy error: ${response.statusText}`);
+    }
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || data.content;
+    if (content) onChunk({ type: 'content', content });
+    onChunk({ type: 'done' });
+    return;
+  }
+
+  // Development: stream directly from provider API
   if (!OPENAI_API_KEY) {
     throw new Error('OpenAI API key not configured');
   }
@@ -72,51 +91,23 @@ export async function streamOpenAI(
   try {
     while (true) {
       const { done, value } = await reader.read();
-      
-      if (done) {
-        onChunk({ type: 'done' });
-        break;
-      }
-
+      if (done) { onChunk({ type: 'done' }); break; }
       const chunk = decoder.decode(value);
       const lines = chunk.split('\n').filter(line => line.trim() !== '');
-
       for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6);
-          
-          if (data === '[DONE]') {
-            onChunk({ type: 'done' });
-            continue;
-          }
-
-          try {
-            const parsed = JSON.parse(data);
-            const delta = parsed.choices[0]?.delta;
-
-            if (delta?.content) {
-              onChunk({
-                type: 'content',
-                content: delta.content,
-              });
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6);
+        if (data === '[DONE]') { onChunk({ type: 'done' }); continue; }
+        try {
+          const parsed = JSON.parse(data);
+          const delta = parsed.choices[0]?.delta;
+          if (delta?.content) onChunk({ type: 'content', content: delta.content });
+          if (delta?.tool_calls) {
+            for (const toolCall of delta.tool_calls) {
+              onChunk({ type: 'tool_call', toolCall: { id: toolCall.id, name: toolCall.function?.name, arguments: toolCall.function?.arguments } });
             }
-
-            if (delta?.tool_calls) {
-              for (const toolCall of delta.tool_calls) {
-                onChunk({
-                  type: 'tool_call',
-                  toolCall: {
-                    id: toolCall.id,
-                    name: toolCall.function?.name,
-                    arguments: toolCall.function?.arguments,
-                  },
-                });
-              }
-            }
-          } catch (e) {
-            console.warn('Failed to parse SSE chunk:', e);
           }
-        }
+        } catch (e) { console.warn('Failed to parse SSE chunk:', e); }
       }
     }
   } finally {
@@ -133,12 +124,31 @@ export async function streamAnthropic(
   tools?: any[],
   model: string = 'claude-3-5-sonnet-20241022'
 ) {
+  const systemMessage = messages.find(m => m.role === 'system');
+  const conversationMessages = messages.filter(m => m.role !== 'system');
+
+  // In production, call Netlify proxy (non-stream) and emit one chunk
+  if (import.meta.env.PROD) {
+    const response = await fetch('/.netlify/functions/anthropic-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model, max_tokens: 4096, system: systemMessage?.content, messages: conversationMessages, temperature: 0.7 })
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({} as any));
+      throw new Error(data?.error || `Anthropic proxy error: ${response.statusText}`);
+    }
+    const data = await response.json();
+    const content = data.content?.[0]?.text || data.content || data.output_text;
+    if (content) onChunk({ type: 'content', content });
+    onChunk({ type: 'done' });
+    return;
+  }
+
+  // Development: stream directly
   if (!ANTHROPIC_API_KEY) {
     throw new Error('Anthropic API key not configured');
   }
-
-  const systemMessage = messages.find(m => m.role === 'system');
-  const conversationMessages = messages.filter(m => m.role !== 'system');
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -171,38 +181,19 @@ export async function streamAnthropic(
   try {
     while (true) {
       const { done, value } = await reader.read();
-      
-      if (done) {
-        onChunk({ type: 'done' });
-        break;
-      }
-
+      if (done) { onChunk({ type: 'done' }); break; }
       const chunk = decoder.decode(value);
       const lines = chunk.split('\n').filter(line => line.trim() !== '');
-
       for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.slice(6);
-          
-          try {
-            const parsed = JSON.parse(data);
-
-            if (parsed.type === 'content_block_delta') {
-              if (parsed.delta?.text) {
-                onChunk({
-                  type: 'content',
-                  content: parsed.delta.text,
-                });
-              }
-            }
-
-            if (parsed.type === 'message_stop') {
-              onChunk({ type: 'done' });
-            }
-          } catch (e) {
-            console.warn('Failed to parse SSE chunk:', e);
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6);
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+            onChunk({ type: 'content', content: parsed.delta.text });
           }
-        }
+          if (parsed.type === 'message_stop') onChunk({ type: 'done' });
+        } catch (e) { console.warn('Failed to parse SSE chunk:', e); }
       }
     }
   } finally {
@@ -218,33 +209,43 @@ export async function streamGoogle(
   onChunk: StreamCallback,
   model: string = 'gemini-2.0-flash'
 ) {
+  // In production, use Netlify proxy (non-stream)
+  if (import.meta.env.PROD) {
+    const response = await fetch('/.netlify/functions/google-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model, messages, temperature: 0.7 })
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({} as any));
+      throw new Error(data?.error || `Google proxy error: ${response.statusText}`);
+    }
+    const data = await response.json();
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || data.content;
+    if (content) onChunk({ type: 'content', content });
+    onChunk({ type: 'done' });
+    return;
+  }
+
+  // Development: stream directly
   if (!GOOGLE_API_KEY) {
     throw new Error('Google API key not configured');
   }
 
   const contents = messages
     .filter(m => m.role !== 'system')
-    .map(m => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    }));
-
+    .map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
   const systemInstruction = messages.find(m => m.role === 'system')?.content;
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?key=${GOOGLE_API_KEY}`,
     {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents,
         systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 2000,
-        },
+        generationConfig: { temperature: 0.7, maxOutputTokens: 2000 },
       }),
     }
   );
@@ -264,31 +265,18 @@ export async function streamGoogle(
     let buffer = '';
     while (true) {
       const { done, value } = await reader.read();
-      
-      if (done) {
-        onChunk({ type: 'done' });
-        break;
-      }
-
+      if (done) { onChunk({ type: 'done' }); break; }
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop() || '';
-
       for (const line of lines) {
         if (line.trim() === '') continue;
-        
         try {
           const parsed = JSON.parse(line);
-          
           if (parsed.candidates?.[0]?.content?.parts?.[0]?.text) {
-            onChunk({
-              type: 'content',
-              content: parsed.candidates[0].content.parts[0].text,
-            });
+            onChunk({ type: 'content', content: parsed.candidates[0].content.parts[0].text });
           }
-        } catch (e) {
-          console.warn('Failed to parse streaming chunk:', e);
-        }
+        } catch (e) { console.warn('Failed to parse streaming chunk:', e); }
       }
     }
   } finally {

@@ -157,12 +157,23 @@ export async function sendToOpenAI(messages: AIMessage[], model: string = 'gpt-4
   try {
     console.log('[OpenAI] Sending request with model:', model);
 
-    const response = await fetchWithRetry('https://api.openai.com/v1/chat/completions', {
+    // Use Netlify function proxy in production to avoid CORS and keep API keys secure
+    const apiUrl = import.meta.env.PROD 
+      ? '/.netlify/functions/openai-proxy'
+      : 'https://api.openai.com/v1/chat/completions';
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Only add Authorization header when calling API directly (dev mode)
+    if (!import.meta.env.PROD) {
+      headers['Authorization'] = `Bearer ${OPENAI_API_KEY}`;
+    }
+
+    const response = await fetchWithRetry(apiUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-      },
+      headers,
       body: JSON.stringify({
         model,
         messages,
@@ -229,13 +240,24 @@ export async function sendToAnthropic(messages: AIMessage[], model: string = 'cl
     const systemMessages = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
     const conversationMessages = messages.filter(m => m.role !== 'system');
 
-    const response = await fetchWithRetry('https://api.anthropic.com/v1/messages', {
+    // Use Netlify function proxy in production to avoid CORS and keep API keys secure
+    const apiUrl = import.meta.env.PROD 
+      ? '/.netlify/functions/anthropic-proxy'
+      : 'https://api.anthropic.com/v1/messages';
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Only add API key header when calling API directly (dev mode)
+    if (!import.meta.env.PROD) {
+      headers['x-api-key'] = ANTHROPIC_API_KEY;
+      headers['anthropic-version'] = '2023-06-01';
+    }
+
+    const response = await fetchWithRetry(apiUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
+      headers,
       body: JSON.stringify({
         model,
         system: systemMessages || undefined,
@@ -328,21 +350,31 @@ export async function sendToGoogle(
       });
     }
 
-    const requestBody: any = {
-      contents,
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 8192,
-      }
-    };
+    // Use Netlify function proxy in production to avoid CORS and keep API keys secure
+    const apiUrl = import.meta.env.PROD 
+      ? '/.netlify/functions/google-proxy'
+      : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GOOGLE_API_KEY}`;
 
-    if (systemMessage) {
+    const requestBody: any = import.meta.env.PROD
+      ? {
+          model,
+          messages,
+          attachments,
+          temperature: 0.7,
+        }
+      : {
+          contents,
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 8192,
+          }
+        };
+
+    if (!import.meta.env.PROD && systemMessage) {
       requestBody.systemInstruction = { parts: [{ text: systemMessage }] };
     }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GOOGLE_API_KEY}`;
-
-    const response = await fetchWithRetry(url, {
+    const response = await fetchWithRetry(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody),
@@ -459,8 +491,17 @@ export async function sendToPerplexity(messages: AIMessage[], model: string = 'l
 
 /**
  * Check if a provider is configured
+ * In production, we assume all providers are potentially configured (validated by Netlify functions)
+ * In development, we check for actual API keys
  */
 export function isProviderConfigured(provider: string): boolean {
+  // In production, Netlify functions handle API key validation
+  // We can't check keys in browser, so assume all providers are available
+  if (import.meta.env.PROD) {
+    return true;
+  }
+  
+  // In development, check if API keys are present
   const lowerProvider = provider.toLowerCase();
   if (lowerProvider === 'chatgpt' || lowerProvider === 'openai') return !!OPENAI_API_KEY || IS_DEMO_MODE;
   if (lowerProvider === 'claude' || lowerProvider === 'anthropic') return !!ANTHROPIC_API_KEY || IS_DEMO_MODE;
@@ -471,8 +512,16 @@ export function isProviderConfigured(provider: string): boolean {
 
 /**
  * Get list of configured providers
+ * In production, return all providers (validated by Netlify functions)
+ * In development, return only providers with API keys
  */
 export function getConfiguredProviders(): string[] {
+  // In production, all providers are potentially available via Netlify functions
+  if (import.meta.env.PROD) {
+    return ['Gemini', 'ChatGPT', 'Claude'];
+  }
+  
+  // In development, check for actual API keys
   const providers: string[] = [];
   if (GOOGLE_API_KEY || IS_DEMO_MODE) providers.push('Gemini');
   if (OPENAI_API_KEY || IS_DEMO_MODE) providers.push('ChatGPT');

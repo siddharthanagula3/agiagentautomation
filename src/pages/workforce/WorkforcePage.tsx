@@ -6,7 +6,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,11 +14,10 @@ import { BentoGrid, BentoCard } from '@/components/ui/bento-grid';
 import { InteractiveHoverCard } from '@/components/ui/interactive-hover-card';
 import { Particles } from '@/components/ui/particles';
 import { Link } from 'react-router-dom';
-import WorkforceManagement from '@/components/employees/WorkforceManagement';
 import { listPurchasedEmployees, getEmployeeById } from '@/services/supabase-employees';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { analyticsService } from '@/services/analytics-service';
-import { Users, Bot, BarChart3, Settings, Plus, TrendingUp, Sparkles, Zap, Target, Clock, ArrowRight, MessageSquare } from 'lucide-react';
+import { Users, Bot, Plus, TrendingUp, Sparkles, Zap, Target, Clock, ArrowRight, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const WorkforcePage: React.FC = () => {
@@ -218,23 +216,9 @@ const WorkforcePage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.5 }}
       >
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="glass-strong p-1">
-            <TabsTrigger value="overview" className="data-[state=active]:glass">
-              <Users className="h-4 w-4 mr-2" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="management" className="data-[state=active]:glass">
-              <Settings className="h-4 w-4 mr-2" />
-              Management
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="data-[state=active]:glass">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Analytics
-            </TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
 
-          <TabsContent value="overview" className="space-y-6">
+          <div className="space-y-6">
             {/* Hired Employees */}
             <Card className="glass-strong">
               <CardHeader>
@@ -440,89 +424,8 @@ const WorkforcePage: React.FC = () => {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="management">
-            <WorkforceManagement />
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-6">
-            <Card className="glass-strong">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                  Performance Analytics
-                </CardTitle>
-                <CardDescription>
-                  Detailed analytics and insights about your workforce performance
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {perfLoading ? (
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                      <Skeleton key={i} className="h-32 w-full rounded-2xl" />
-                    ))}
-                  </div>
-                ) : employeePerformance && employeePerformance.length > 0 ? (
-                  <div className="space-y-4">
-                    {employeePerformance.map((employee, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="glass rounded-2xl p-6"
-                      >
-                        <div className="flex items-center justify-between mb-6">
-                          <div>
-                            <h4 className="font-semibold text-lg">{employee.name}</h4>
-                            <Badge variant="outline" className="mt-1">{employee.provider}</Badge>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-3xl font-bold text-primary">{employee.successRate}%</p>
-                            <p className="text-xs text-muted-foreground">Success Rate</p>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="glass rounded-xl p-4 text-center">
-                            <p className="text-muted-foreground text-xs mb-1">Tasks</p>
-                            <p className="font-semibold text-lg">{employee.tasks}</p>
-                          </div>
-                          <div className="glass rounded-xl p-4 text-center">
-                            <p className="text-muted-foreground text-xs mb-1">Avg Duration</p>
-                            <p className="font-semibold text-lg">{employee.avgDuration}s</p>
-                          </div>
-                          <div className="glass rounded-xl p-4 text-center">
-                            <p className="text-muted-foreground text-xs mb-1">Cost</p>
-                            <p className="font-semibold text-lg">${employee.cost.toFixed(2)}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-16">
-                    <div className="w-20 h-20 rounded-full bg-muted/20 flex items-center justify-center mx-auto mb-6">
-                      <BarChart3 className="h-10 w-10 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">No Analytics Yet</h3>
-                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      Performance analytics will appear here once your AI employees complete tasks
-                    </p>
-                    <Link to="/chat">
-                      <Button className="gradient-primary text-white">
-                        <MessageSquare className="mr-2 h-4 w-4" />
-                        Start First Task
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </motion.div>
     </div>
   );

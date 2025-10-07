@@ -438,7 +438,10 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
           >
             {viewMode === 'grid' ? 'List View' : 'Grid View'}
           </Button>
-          <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          <Button 
+            onClick={() => window.location.href = '/workforce'}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
             <Users className="h-4 w-4 mr-2" />
             My Team
           </Button>

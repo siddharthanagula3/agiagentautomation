@@ -8,6 +8,7 @@
 import { contextManagementService } from './context-management-service';
 import { systemPromptsService } from './system-prompts-service';
 import { chatPersistenceService } from './chat-persistence-service';
+import { tokenTrackingService } from './token-tracking-service';
 
 // Environment variables for API keys
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
@@ -30,6 +31,19 @@ export interface AIResponse {
   };
   provider?: string;
   model?: string;
+  tokenUsage?: {
+    provider: string;
+    model: string;
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    inputCost: number;
+    outputCost: number;
+    totalCost: number;
+    timestamp: Date;
+    sessionId?: string;
+    userId?: string;
+  };
 }
 
 export interface AIImageAttachment {
@@ -715,12 +729,28 @@ export async function sendAIMessage(
         throw new APIError(`Unsupported AI provider: ${provider}`);
     }
 
+    // Track token usage
+    if (response.usage) {
+      const tokenUsage = tokenTrackingService.calculateTokenUsage(
+        provider,
+        model || 'default',
+        response.usage.promptTokens,
+        response.usage.completionTokens,
+        sessionId,
+        undefined // userId would be passed from the calling component
+      );
+      
+      // Add token usage to response
+      response.tokenUsage = tokenUsage;
+    }
+
     // Save response to persistence if session ID provided
     if (sessionId && response.content) {
       await chatPersistenceService.addMessage(sessionId, 'assistant', response.content, {
         provider,
         model,
-        usage: response.usage
+        usage: response.usage,
+        tokenUsage: response.tokenUsage
       });
     }
 

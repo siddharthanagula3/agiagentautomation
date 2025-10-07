@@ -127,38 +127,6 @@ export const MarketplacePublicPage: React.FC = () => {
 
   return (
     <div className="min-h-screen pt-24 p-6">
-      {/* Tester Banner */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
-      >
-        <Card className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border-green-500/20">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <span className="text-lg">🧪</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-green-700 dark:text-green-400">Testing Mode Active</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Use discount code <code className="bg-green-100 dark:bg-green-900 px-1 rounded">TESTER100</code> for 100% off all AI employees
-                  </p>
-                </div>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setDiscountCode('TESTER100')}
-                className="border-green-500/30 text-green-700 dark:text-green-400 hover:bg-green-500/10"
-              >
-                Apply Code
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
 
       {/* Hero Header */}
       <motion.div 
@@ -294,14 +262,13 @@ export const MarketplacePublicPage: React.FC = () => {
           </p>
         </div>
         
-        {(searchQuery || selectedCategory !== 'all' || discountCode) && (
+        {(searchQuery || selectedCategory !== 'all') && (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => {
               setSearchQuery('');
               setSelectedCategory('all');
-              setDiscountCode('');
             }}
           >
             <X className="h-4 w-4 mr-2" />
@@ -409,7 +376,6 @@ export const MarketplacePublicPage: React.FC = () => {
                   {/* Price and Purchase */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-baseline gap-2">
-                      <DollarSign className="h-5 w-5 text-success" />
                       <div className="flex items-baseline gap-2">
                         <span className="text-3xl font-bold">{employee.price}</span>
                         <span className="text-sm text-muted-foreground">per month</span>

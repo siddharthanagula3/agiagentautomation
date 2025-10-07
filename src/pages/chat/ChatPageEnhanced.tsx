@@ -492,10 +492,23 @@ const EnhancedChatPage: React.FC = () => {
     } catch (error) {
       console.error('Error sending message:', error);
       
+      // Create a more user-friendly error message
+      let errorContent = `❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      
+      // Check if it's a network/fetch error
+      if (error instanceof Error && (error.message.includes('fetch') || error.message.includes('Failed to fetch'))) {
+        errorContent = `❌ Connection Error\n\n` +
+          `Unable to connect to the AI service. This could be due to:\n\n` +
+          `• Network connectivity issues\n` +
+          `• API service temporarily unavailable\n` +
+          `• Browser security settings blocking the request\n\n` +
+          `Please try again in a moment. If the problem persists, check your internet connection.`;
+      }
+      
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
         role: 'assistant',
-        content: `❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        content: errorContent,
         timestamp: new Date()
       };
 
@@ -505,7 +518,7 @@ const EnhancedChatPage: React.FC = () => {
           : tab
       ));
 
-      toast.error('Failed to send message');
+      toast.error('Failed to send message. Please try again.');
     } finally {
       setIsSending(false);
       setIsStreaming(false);

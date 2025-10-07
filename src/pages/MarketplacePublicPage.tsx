@@ -15,7 +15,6 @@ import {
   CheckCircle,
   Bot,
   Sparkles,
-  DollarSign,
   Star,
   Zap,
   TrendingUp,
@@ -38,7 +37,6 @@ export const MarketplacePublicPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [purchasedEmployees, setPurchasedEmployees] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
-  const [discountCode, setDiscountCode] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -83,15 +81,14 @@ export const MarketplacePublicPage: React.FC = () => {
         // Use Stripe for payment
         toast.loading('Redirecting to checkout...', { id: 'checkout' });
         
-        await createCheckoutSession({
-          employeeId: employee.id,
-          employeeRole: employee.role,
-          price: employee.price,
-          userId: user.id,
-          userEmail: user.email || '',
-          provider: employee.provider, // Pass the actual LLM provider
-          discountCode: discountCode.trim() || undefined, // Pass discount code if provided
-        });
+      await createCheckoutSession({
+        employeeId: employee.id,
+        employeeRole: employee.role,
+        price: employee.price,
+        userId: user.id,
+        userEmail: user.email || '',
+        provider: employee.provider, // Pass the actual LLM provider
+      });
         
         // The user will be redirected to Stripe Checkout
         // After successful payment, webhook will create the purchased_employee record
@@ -200,71 +197,12 @@ export const MarketplacePublicPage: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Discount Code Section - Always Visible */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <Card className="glass-strong mb-6 border-green-500/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-green-700 dark:text-green-400">Discount Code</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Enter a discount code to get special pricing
-                  </p>
-                </div>
-              </div>
-              {discountCode && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setDiscountCode('')}
-                  className="text-green-600 border-green-500/30"
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Clear
-                </Button>
-              )}
-            </div>
-            
-            <div className="flex gap-2 mb-4">
-              <Input
-                placeholder="Enter discount code (e.g., TESTER100)"
-                value={discountCode}
-                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                className="flex-1 glass"
-              />
-            </div>
-            
-            <div className="p-3 bg-green-500/5 rounded-lg border border-green-500/20">
-              <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-2">🧪 Tester Discount Codes:</p>
-              <div className="flex flex-wrap gap-1">
-                <Badge variant="outline" className="text-xs cursor-pointer hover:bg-green-500/10 border-green-500/30" onClick={() => setDiscountCode('TESTER100')}>
-                  TESTER100 (100% off forever)
-                </Badge>
-                <Badge variant="outline" className="text-xs cursor-pointer hover:bg-green-500/10 border-green-500/30" onClick={() => setDiscountCode('FREEBIE')}>
-                  FREEBIE (100% off once)
-                </Badge>
-                <Badge variant="outline" className="text-xs cursor-pointer hover:bg-green-500/10 border-green-500/30" onClick={() => setDiscountCode('DEMO100')}>
-                  DEMO100 (100% off 1 month)
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
 
       {/* Search and Filters */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.1 }}
       >
         <Card className="glass-strong mb-8">
           <CardContent className="p-6">
@@ -538,7 +476,6 @@ export const MarketplacePublicPage: React.FC = () => {
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedCategory('all');
-                  setDiscountCode('');
                 }}
                 className="gradient-primary text-white"
               >

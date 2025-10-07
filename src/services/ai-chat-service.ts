@@ -2,7 +2,12 @@
  * AI Chat Service - Production-ready implementation
  * Based on official documentation and best practices for each provider
  * Supports: OpenAI (ChatGPT), Anthropic (Claude), Google (Gemini), Perplexity
+ * Integrated with context management, system prompts, and persistence
  */
+
+import { contextManagementService } from './context-management-service';
+import { systemPromptsService } from './system-prompts-service';
+import { chatPersistenceService } from './chat-persistence-service';
 
 // Environment variables for API keys
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
@@ -634,49 +639,92 @@ export async function sendToPerplexity(
 }
 
 /**
- * Main function to send message to appropriate AI provider
+ * Main function to send message to appropriate AI provider with enhanced context management
  */
 export async function sendAIMessage(
   provider: string,
   messages: AIMessage[],
   employeeRole?: string,
-  attachments?: AIImageAttachment[]
+  attachments?: AIImageAttachment[],
+  sessionId?: string,
+  model?: string
 ): Promise<AIResponse> {
   console.log(`[AI Service] Attempting to send message via ${provider}...`);
   
-  // Add system message with employee role context
-  const messagesWithContext = employeeRole
-    ? [
+  try {
+    // Get optimized system prompt
+    const systemPrompt = systemPromptsService.createRolePrompt(
+      employeeRole || 'Assistant',
+      provider,
+      'Provide detailed, actionable advice based on your expertise.'
+    );
+
+    // Get optimized context if session ID provided
+    let optimizedMessages: AIMessage[];
+    if (sessionId) {
+      // Add messages to context management
+      messages.forEach(msg => {
+        contextManagementService.addMessage(sessionId, {
+          role: msg.role,
+          content: msg.content,
+          timestamp: new Date()
+        });
+      });
+
+      // Get optimized context
+      const contextMessages = contextManagementService.getOptimizedContext(sessionId, provider, model || 'default');
+      optimizedMessages = contextMessages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+    } else {
+      // Use provided messages with system prompt
+      optimizedMessages = [
         {
           role: 'system' as const,
-          content: `You are a ${employeeRole}. Respond professionally and helpfully in that role. Provide detailed, actionable advice based on your expertise.`,
+          content: systemPrompt.content,
         },
         ...messages,
-      ]
-    : messages;
+      ];
+    }
 
-  try {
     const providerLower = provider.toLowerCase();
+    let response: AIResponse;
     
     switch (providerLower) {
       case 'chatgpt':
       case 'openai':
-        return await sendToOpenAI(messagesWithContext);
+        response = await sendToOpenAI(optimizedMessages, model);
+        break;
       
       case 'claude':
       case 'anthropic':
-        return await sendToAnthropic(messagesWithContext);
+        response = await sendToAnthropic(optimizedMessages, model);
+        break;
       
       case 'gemini':
       case 'google':
-        return await sendToGoogle(messagesWithContext, 'gemini-2.0-flash', attachments);
+        response = await sendToGoogle(optimizedMessages, model || 'gemini-2.0-flash', attachments);
+        break;
       
       case 'perplexity':
-        return await sendToPerplexity(messagesWithContext);
+        response = await sendToPerplexity(optimizedMessages, model);
+        break;
       
       default:
         throw new APIError(`Unsupported AI provider: ${provider}`);
     }
+
+    // Save response to persistence if session ID provided
+    if (sessionId && response.content) {
+      await chatPersistenceService.addMessage(sessionId, 'assistant', response.content, {
+        provider,
+        model,
+        usage: response.usage
+      });
+    }
+
+    return response;
   } catch (error) {
     console.error(`[AI Service] Error with ${provider}:`, error);
     

@@ -99,12 +99,15 @@ export const handler: Handler = async (event: HandlerEvent) => {
       };
     }
 
+    // Normalize content for UI consumers
+    const content = data.choices?.[0]?.message?.content || data.content;
+    const normalized = { ...data, content };
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(normalized),
     };
   } catch (error) {
     console.error('[OpenAI Proxy] Error:', error);

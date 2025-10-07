@@ -18,6 +18,17 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
 const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY || '';
 const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
 
+// Log environment status for debugging (only in development)
+if (import.meta.env.DEV) {
+  console.log('[AI Service] Environment status:', {
+    openai: OPENAI_API_KEY ? `✅ Configured (${OPENAI_API_KEY.substring(0, 20)}...)` : '❌ Not configured',
+    anthropic: ANTHROPIC_API_KEY ? `✅ Configured (${ANTHROPIC_API_KEY.substring(0, 20)}...)` : '❌ Not configured',
+    google: GOOGLE_API_KEY ? `✅ Configured (${GOOGLE_API_KEY.substring(0, 20)}...)` : '❌ Not configured',
+    perplexity: PERPLEXITY_API_KEY ? `✅ Configured` : '❌ Not configured',
+    demoMode: IS_DEMO_MODE ? '✅ Enabled' : '❌ Disabled'
+  });
+}
+
 export interface AIMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
@@ -185,24 +196,38 @@ export async function sendToOpenAI(
     try {
       console.log('[OpenAI] Sending request with model:', model);
       
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      // Use Netlify function proxy to avoid CORS issues
+      const apiUrl = import.meta.env.PROD 
+        ? '/.netlify/functions/openai-proxy'
+        : 'https://api.openai.com/v1/chat/completions';
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Only add Authorization header when calling API directly (dev mode)
+      if (!import.meta.env.PROD) {
+        headers['Authorization'] = `Bearer ${OPENAI_API_KEY}`;
+      }
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          temperature: 0.7,
+        headers,
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7,
           max_tokens: 4000,
           top_p: 1,
           frequency_penalty: 0,
           presence_penalty: 0,
-        }),
-      });
+          // For token tracking in Netlify functions
+          userId,
+          sessionId,
+      }),
+    });
 
-      if (!response.ok) {
+    if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.error?.message || response.statusText;
         
@@ -243,27 +268,27 @@ export async function sendToOpenAI(
           response.status,
           'OpenAI'
         );
-      }
+    }
 
-      const data = await response.json();
+    const data = await response.json();
       console.log('[OpenAI] ✅ Success');
 
-      return {
-        content: data.choices[0].message.content,
-        usage: {
-          promptTokens: data.usage.prompt_tokens,
-          completionTokens: data.usage.completion_tokens,
-          totalTokens: data.usage.total_tokens,
-        },
+    return {
+      content: data.choices[0].message.content,
+      usage: {
+        promptTokens: data.usage.prompt_tokens,
+        completionTokens: data.usage.completion_tokens,
+        totalTokens: data.usage.total_tokens,
+      },
         provider: 'OpenAI',
         model: data.model
-      };
-    } catch (error) {
-      console.error('[OpenAI] Request failed:', error);
+    };
+  } catch (error) {
+    console.error('[OpenAI] Request failed:', error);
       if (error instanceof APIError) {
         throw error;
       }
-      if (error instanceof TypeError && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new APIError(
           'Network error: Unable to connect to OpenAI. Please check your internet connection.',
           undefined,
@@ -288,6 +313,8 @@ export async function sendToAnthropic(
   messages: AIMessage[], 
   model: string = 'claude-3-5-sonnet-20241022'
 ): Promise<AIResponse> {
+  console.log('[Anthropic] API Key status:', ANTHROPIC_API_KEY ? `Present (${ANTHROPIC_API_KEY.substring(0, 15)}...)` : 'Missing');
+  
   if (!ANTHROPIC_API_KEY) {
     if (IS_DEMO_MODE) {
       console.log('[Anthropic] Demo mode enabled, returning mock response');
@@ -308,26 +335,40 @@ export async function sendToAnthropic(
       console.log('[Anthropic] Sending request with model:', model);
       
       // Convert messages to Anthropic format
-      const systemMessages = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
-      const conversationMessages = messages.filter(m => m.role !== 'system');
+    const systemMessages = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
+    const conversationMessages = messages.filter(m => m.role !== 'system');
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      // Use Netlify function proxy to avoid CORS issues
+      const apiUrl = import.meta.env.PROD 
+        ? '/.netlify/functions/anthropic-proxy'
+        : 'https://api.anthropic.com/v1/messages';
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Only add API key header when calling API directly (dev mode)
+      if (!import.meta.env.PROD) {
+        headers['x-api-key'] = ANTHROPIC_API_KEY;
+        headers['anthropic-version'] = '2023-06-01';
+      }
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model,
+        headers,
+      body: JSON.stringify({
+        model,
           max_tokens: 4000,
-          system: systemMessages || undefined,
-          messages: conversationMessages,
+        system: systemMessages || undefined,
+        messages: conversationMessages,
           temperature: 0.7,
-        }),
-      });
+          // For token tracking in Netlify functions
+          userId,
+          sessionId,
+      }),
+    });
 
-      if (!response.ok) {
+    if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.error?.message || response.statusText;
         
@@ -359,27 +400,27 @@ export async function sendToAnthropic(
           response.status,
           'Anthropic'
         );
-      }
+    }
 
-      const data = await response.json();
+    const data = await response.json();
       console.log('[Anthropic] ✅ Success');
 
-      return {
-        content: data.content[0].text,
-        usage: {
-          promptTokens: data.usage.input_tokens,
-          completionTokens: data.usage.output_tokens,
-          totalTokens: data.usage.input_tokens + data.usage.output_tokens,
-        },
+    return {
+      content: data.content[0].text,
+      usage: {
+        promptTokens: data.usage.input_tokens,
+        completionTokens: data.usage.output_tokens,
+        totalTokens: data.usage.input_tokens + data.usage.output_tokens,
+      },
         provider: 'Anthropic',
         model: data.model
-      };
-    } catch (error) {
-      console.error('[Anthropic] Request failed:', error);
+    };
+  } catch (error) {
+    console.error('[Anthropic] Request failed:', error);
       if (error instanceof APIError) {
         throw error;
       }
-      if (error instanceof TypeError && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new APIError(
           'Network error: Unable to connect to Anthropic. Please check your internet connection.',
           undefined,
@@ -423,69 +464,83 @@ export async function sendToGoogle(
   return retryWithBackoff(async () => {
     try {
       console.log('[Google] Sending request with model:', model);
-      
-      // Convert messages to Gemini format
-      const contents = messages
-        .filter(m => m.role !== 'system')
-        .map(m => ({
-          role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }],
-        }));
+
+  // Convert messages to Gemini format
+  const contents = messages
+    .filter(m => m.role !== 'system')
+    .map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }));
 
       // Handle image attachments
-      if (attachments.length > 0) {
-        const userIdx = contents.findLastIndex(c => c.role === 'user');
-        const target = userIdx >= 0 ? contents[userIdx] : { role: 'user' as const, parts: [] as any[] };
-        if (userIdx < 0) contents.push(target);
-        for (const img of attachments) {
+  if (attachments.length > 0) {
+    const userIdx = contents.findLastIndex(c => c.role === 'user');
+    const target = userIdx >= 0 ? contents[userIdx] : { role: 'user' as const, parts: [] as any[] };
+    if (userIdx < 0) contents.push(target);
+    for (const img of attachments) {
           target.parts.push({ 
             inlineData: { 
               mimeType: img.mimeType, 
               data: img.dataBase64 
             } 
           });
-        }
-      }
+    }
+  }
 
-      const systemInstruction = messages.find(m => m.role === 'system')?.content;
+  const systemInstruction = messages.find(m => m.role === 'system')?.content;
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GOOGLE_API_KEY}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents,
-            systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 4000,
-              topP: 1,
-              topK: 40,
-            },
-            safetySettings: [
-              {
-                category: 'HARM_CATEGORY_HARASSMENT',
-                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-              },
-              {
-                category: 'HARM_CATEGORY_HATE_SPEECH',
-                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-              },
-              {
-                category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-              },
-              {
-                category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+      // Use Netlify function proxy to avoid CORS issues
+      const apiUrl = import.meta.env.PROD 
+        ? '/.netlify/functions/google-proxy'
+        : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GOOGLE_API_KEY}`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(
+          import.meta.env.PROD
+            ? {
+                model,
+                messages,
+                attachments,
+                temperature: 0.7,
+                // For token tracking in Netlify functions
+                userId,
+                sessionId,
               }
-            ]
-          }),
-        }
-      );
+            : {
+          contents,
+          systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
+          generationConfig: {
+            temperature: 0.7,
+                  maxOutputTokens: 4000,
+                  topP: 1,
+                  topK: 40,
+                },
+                safetySettings: [
+                  {
+                    category: 'HARM_CATEGORY_HARASSMENT',
+                    threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+                  },
+                  {
+                    category: 'HARM_CATEGORY_HATE_SPEECH',
+                    threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+                  },
+                  {
+                    category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                    threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+                  },
+                  {
+                    category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                    threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+                  }
+                ]
+              }
+        ),
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -519,18 +574,18 @@ export async function sendToGoogle(
           response.status,
           'Google'
         );
-      }
+  }
 
-      const data = await response.json();
+  const data = await response.json();
       console.log('[Google] ✅ Success');
 
-      return {
-        content: data.candidates[0].content.parts[0].text,
-        usage: {
-          promptTokens: data.usageMetadata?.promptTokenCount || 0,
-          completionTokens: data.usageMetadata?.candidatesTokenCount || 0,
-          totalTokens: data.usageMetadata?.totalTokenCount || 0,
-        },
+  return {
+    content: data.candidates[0].content.parts[0].text,
+    usage: {
+      promptTokens: data.usageMetadata?.promptTokenCount || 0,
+      completionTokens: data.usageMetadata?.candidatesTokenCount || 0,
+      totalTokens: data.usageMetadata?.totalTokenCount || 0,
+    },
         provider: 'Google',
         model: data.model || model
       };
@@ -583,21 +638,21 @@ export async function sendToPerplexity(
     try {
       console.log('[Perplexity] Sending request with model:', model);
       
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          temperature: 0.7,
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7,
           max_tokens: 4000,
-        }),
-      });
+      }),
+    });
 
-      if (!response.ok) {
+    if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.error?.message || response.statusText;
         
@@ -622,27 +677,27 @@ export async function sendToPerplexity(
           response.status,
           'Perplexity'
         );
-      }
+    }
 
-      const data = await response.json();
+    const data = await response.json();
       console.log('[Perplexity] ✅ Success');
 
-      return {
-        content: data.choices[0].message.content,
-        usage: {
+    return {
+      content: data.choices[0].message.content,
+      usage: {
           promptTokens: data.usage.prompt_tokens,
           completionTokens: data.usage.completion_tokens,
           totalTokens: data.usage.total_tokens,
         },
         provider: 'Perplexity',
         model: data.model
-      };
-    } catch (error) {
-      console.error('[Perplexity] Request failed:', error);
+    };
+  } catch (error) {
+    console.error('[Perplexity] Request failed:', error);
       if (error instanceof APIError) {
         throw error;
       }
-      if (error instanceof TypeError && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new APIError(
           'Network error: Unable to connect to Perplexity. Please check your internet connection.',
           undefined,
@@ -669,7 +724,8 @@ export async function sendAIMessage(
   employeeRole?: string,
   attachments?: AIImageAttachment[],
   sessionId?: string,
-  model?: string
+  model?: string,
+  userId?: string
 ): Promise<AIResponse> {
   console.log(`[AI Service] Attempting to send message via ${provider}...`);
   
@@ -774,9 +830,31 @@ export async function sendAIMessage(
     return response;
   } catch (error) {
     console.error(`[AI Service] Error with ${provider}:`, error);
+    console.error('[AI Service] Full error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      provider,
+      model
+    });
     
     if (error instanceof APIError) {
       throw error;
+    }
+    
+    // Handle network errors specifically
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new APIError(
+        `Network error: Unable to connect to ${provider} API. This could be due to:\n` +
+        '• Internet connection issues\n' +
+        '• CORS restrictions (when running locally)\n' +
+        '• Firewall or network blocking\n' +
+        '• API service temporarily unavailable\n\n' +
+        'Please check your connection and try again.',
+        undefined,
+        provider,
+        true // Retryable
+      );
     }
     
     throw new APIError(

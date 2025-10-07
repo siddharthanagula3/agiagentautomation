@@ -5,12 +5,6 @@
 -- Add Stripe subscription columns to purchased_employees
 DO $$
 BEGIN
-  -- Add columns if the table exists
-  IF EXISTS (
-    SELECT FROM information_schema.tables 
-    WHERE table_schema = 'public' 
-    AND table_name = 'purchased_employees'
-  ) THEN
     -- Add stripe_subscription_id if not exists
     IF NOT EXISTS (
       SELECT FROM information_schema.columns 
@@ -101,7 +95,6 @@ BEGIN
       CREATE INDEX idx_purchased_employees_stripe_customer 
       ON public.purchased_employees(stripe_customer_id);
     END IF;
-  END IF;
 END $$;
 
 -- Add Stripe invoice/payment history table

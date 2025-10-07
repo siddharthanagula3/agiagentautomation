@@ -10,6 +10,7 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
 // Allow overriding Gemini model via env; default to 2.0 Flash
 const GOOGLE_MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash';
 const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY || '';
+const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
 
 export interface AIMessage {
   role: 'user' | 'assistant' | 'system';
@@ -32,11 +33,45 @@ export interface AIImageAttachment {
 }
 
 /**
+ * Generate demo response when API keys are not configured
+ */
+function generateDemoResponse(messages: AIMessage[], provider: string): AIResponse {
+  const lastMessage = messages[messages.length - 1];
+  const role = messages.find(m => m.role === 'system')?.content?.includes('Product Manager') ? 'Product Manager' :
+              messages.find(m => m.role === 'system')?.content?.includes('Data Scientist') ? 'Data Scientist' :
+              messages.find(m => m.role === 'system')?.content?.includes('Video Content Creator') ? 'Video Content Creator' :
+              'AI Assistant';
+
+  const responses = {
+    'Product Manager': `As your Product Manager, I'd be happy to help you with product strategy, roadmap planning, and feature prioritization. In demo mode, I can't provide real AI responses, but I'm ready to assist with product management tasks once you configure your API keys.`,
+    'Data Scientist': `As your Data Scientist, I'm here to help with data analysis, machine learning models, and statistical insights. In demo mode, I can't process real data, but I'm ready to assist with data science tasks once you configure your API keys.`,
+    'Video Content Creator': `As your Video Content Creator, I can help with script writing, video planning, and content strategy. In demo mode, I can't create real content, but I'm ready to assist with video production tasks once you configure your API keys.`,
+    'AI Assistant': `Hello! I'm your AI Assistant powered by ${provider}. In demo mode, I can't provide real AI responses, but I'm ready to help once you configure your API keys.`
+  };
+
+  return {
+    content: responses[role as keyof typeof responses] || responses['AI Assistant'],
+    usage: {
+      promptTokens: 50,
+      completionTokens: 100,
+      totalTokens: 150,
+    },
+  };
+}
+
+/**
  * Send message to OpenAI (ChatGPT)
  */
 export async function sendToOpenAI(messages: AIMessage[], model: string = 'gpt-4'): Promise<AIResponse> {
   if (!OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured. Please add VITE_OPENAI_API_KEY to your environment variables.');
+    if (IS_DEMO_MODE) {
+      console.log('[OpenAI] Demo mode enabled, returning mock response');
+      return generateDemoResponse(messages, 'ChatGPT');
+    }
+    throw new Error('OpenAI API key not configured.\n\n' +
+      '✅ Get a FREE key at: https://platform.openai.com/api-keys\n' +
+      '📝 Add to .env file: VITE_OPENAI_API_KEY=your_key_here\n' +
+      '💡 Or enable demo mode: VITE_DEMO_MODE=true');
   }
 
   try {
@@ -91,7 +126,14 @@ export async function sendToOpenAI(messages: AIMessage[], model: string = 'gpt-4
  */
 export async function sendToAnthropic(messages: AIMessage[], model: string = 'claude-3-5-sonnet-20241022'): Promise<AIResponse> {
   if (!ANTHROPIC_API_KEY) {
-    throw new Error('Anthropic API key not configured. Please add VITE_ANTHROPIC_API_KEY to your environment variables.');
+    if (IS_DEMO_MODE) {
+      console.log('[Anthropic] Demo mode enabled, returning mock response');
+      return generateDemoResponse(messages, 'Claude');
+    }
+    throw new Error('Anthropic API key not configured.\n\n' +
+      '✅ Get a FREE key at: https://console.anthropic.com/\n' +
+      '📝 Add to .env file: VITE_ANTHROPIC_API_KEY=your_key_here\n' +
+      '💡 Or enable demo mode: VITE_DEMO_MODE=true');
   }
 
   try {
@@ -155,7 +197,14 @@ export async function sendToGoogle(
   attachments: AIImageAttachment[] = []
 ): Promise<AIResponse> {
   if (!GOOGLE_API_KEY) {
-    throw new Error('Google API key not configured. Please add VITE_GOOGLE_API_KEY to your environment variables.');
+    if (IS_DEMO_MODE) {
+      console.log('[Google] Demo mode enabled, returning mock response');
+      return generateDemoResponse(messages, 'Gemini');
+    }
+    throw new Error('Google API key not configured.\n\n' +
+      '✅ Get a FREE key at: https://aistudio.google.com/app/apikey\n' +
+      '📝 Add to .env file: VITE_GOOGLE_API_KEY=your_key_here\n' +
+      '💡 Or enable demo mode: VITE_DEMO_MODE=true');
   }
 
   console.log('[Google/Gemini] Sending request...');
@@ -237,7 +286,14 @@ export async function sendToGoogle(
  */
 export async function sendToPerplexity(messages: AIMessage[], model: string = 'llama-3.1-sonar-large-128k-online'): Promise<AIResponse> {
   if (!PERPLEXITY_API_KEY) {
-    throw new Error('Perplexity API key not configured. Please add VITE_PERPLEXITY_API_KEY to your environment variables.');
+    if (IS_DEMO_MODE) {
+      console.log('[Perplexity] Demo mode enabled, returning mock response');
+      return generateDemoResponse(messages, 'Perplexity');
+    }
+    throw new Error('Perplexity API key not configured.\n\n' +
+      '✅ Get a FREE key at: https://www.perplexity.ai/settings/api\n' +
+      '📝 Add to .env file: VITE_PERPLEXITY_API_KEY=your_key_here\n' +
+      '💡 Or enable demo mode: VITE_DEMO_MODE=true');
   }
 
   try {

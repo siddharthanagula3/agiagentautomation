@@ -51,33 +51,36 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       name: 'Dashboard',
       href: '/dashboard',
       icon: LayoutDashboard,
-      description: 'Overview and analytics'
+      description: 'Overview and analytics',
+      badge: 'Beta'
     },
     {
       name: 'AI Workforce',
       href: '/workforce',
       icon: Users,
-      description: 'Manage AI employees'
+      description: 'Manage AI employees',
+      badge: 'Beta'
     },
     {
       name: 'Chat',
       href: '/chat',
       icon: MessageSquare,
       description: 'AI communication hub',
-      badge: 'New',
-      isNew: true,
+      badge: 'Beta'
     },
     {
       name: 'Marketplace',
       href: '/marketplace',
       icon: ShoppingBag,
-      description: 'Hire AI employees'
+      description: 'Hire AI employees',
+      badge: 'Beta'
     },
     {
       name: 'Automation',
       href: '/automation',
       icon: Zap,
       description: 'Workflow automation',
+      badge: 'Beta',
       children: [
         { name: 'Overview', href: '/automation', icon: LayoutDashboard, description: 'All workflows' },
         { name: 'Workflows', href: '/automation/workflows', icon: Zap, description: 'Manage workflows' },
@@ -88,21 +91,22 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       name: 'Analytics',
       href: '/analytics',
       icon: BarChart3,
-      description: 'Performance insights'
+      description: 'Performance insights',
+      badge: 'Beta'
     },
     {
       name: 'Integrations',
       href: '/integrations',
       icon: Globe,
-      description: 'Connected services'
+      description: 'Connected services',
+      badge: 'Beta'
     },
     {
       name: 'MCP Tools',
       href: '/mcp-tools',
       icon: Wrench,
       description: 'Model Context Protocol',
-      badge: 'New',
-      isNew: true,
+      badge: 'Beta'
     },
   ];
 

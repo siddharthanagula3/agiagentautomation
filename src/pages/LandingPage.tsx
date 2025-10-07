@@ -491,7 +491,7 @@ const LandingPage: React.FC = () => {
                         className="btn-glow gradient-primary text-white"
                         asChild
                       >
-                        <Link to="/ai-marketplace">
+                        <Link to="/marketplace">
                           <ShoppingCart className="h-4 w-4 mr-2" />
                           Hire
                         </Link>
@@ -510,7 +510,7 @@ const LandingPage: React.FC = () => {
             className="text-center mt-12"
           >
             <Button size="lg" variant="outline" className="glass" asChild>
-              <Link to="/ai-marketplace">
+              <Link to="/marketplace">
                 Browse All {AI_EMPLOYEES.length} AI Employees
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>

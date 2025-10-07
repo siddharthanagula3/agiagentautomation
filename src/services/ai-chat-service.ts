@@ -9,6 +9,7 @@ import { contextManagementService } from './context-management-service';
 import { systemPromptsService } from './system-prompts-service';
 import { chatPersistenceService } from './chat-persistence-service';
 import { tokenTrackingService } from './token-tracking-service';
+import { mediaGenerationService } from './media-generation-service';
 
 // Environment variables for API keys
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
@@ -43,6 +44,13 @@ export interface AIResponse {
     timestamp: Date;
     sessionId?: string;
     userId?: string;
+  };
+  mediaGeneration?: {
+    type: 'image' | 'video';
+    url: string;
+    thumbnailUrl?: string;
+    prompt: string;
+    metadata: any;
   };
 }
 
@@ -729,6 +737,15 @@ export async function sendAIMessage(
         throw new APIError(`Unsupported AI provider: ${provider}`);
     }
 
+    // Check for media generation requests
+    const lastUserMessage = messages.find(m => m.role === 'user');
+    if (lastUserMessage) {
+      const mediaGeneration = await handleMediaGeneration(lastUserMessage.content, provider);
+      if (mediaGeneration) {
+        response.mediaGeneration = mediaGeneration;
+      }
+    }
+
     // Track token usage
     if (response.usage) {
       const tokenUsage = tokenTrackingService.calculateTokenUsage(
@@ -805,6 +822,95 @@ export function getConfiguredProviders(): string[] {
   if (PERPLEXITY_API_KEY) providers.push('Perplexity');
   
   return providers;
+}
+
+/**
+ * Detect if a message contains media generation requests
+ */
+export function detectMediaGenerationRequest(message: string): {
+  hasImageRequest: boolean;
+  hasVideoRequest: boolean;
+  imagePrompt?: string;
+  videoPrompt?: string;
+} {
+  const lowerMessage = message.toLowerCase();
+  
+  // Image generation keywords
+  const imageKeywords = [
+    'generate image', 'create image', 'draw', 'paint', 'illustrate',
+    'image of', 'picture of', 'photo of', 'visual of', 'show me'
+  ];
+  
+  // Video generation keywords
+  const videoKeywords = [
+    'generate video', 'create video', 'make video', 'video of',
+    'animate', 'motion', 'film', 'movie', 'clip'
+  ];
+  
+  const hasImageRequest = imageKeywords.some(keyword => lowerMessage.includes(keyword));
+  const hasVideoRequest = videoKeywords.some(keyword => lowerMessage.includes(keyword));
+  
+  return {
+    hasImageRequest,
+    hasVideoRequest,
+    imagePrompt: hasImageRequest ? message : undefined,
+    videoPrompt: hasVideoRequest ? message : undefined
+  };
+}
+
+/**
+ * Handle media generation requests
+ */
+export async function handleMediaGeneration(
+  message: string,
+  provider: string
+): Promise<AIResponse['mediaGeneration'] | null> {
+  const detection = detectMediaGenerationRequest(message);
+  
+  if (!detection.hasImageRequest && !detection.hasVideoRequest) {
+    return null;
+  }
+  
+  try {
+    if (detection.hasImageRequest && detection.imagePrompt) {
+      const result = await mediaGenerationService.generateImage({
+        prompt: detection.imagePrompt,
+        style: 'realistic',
+        size: '1024x1024',
+        quality: 'standard'
+      });
+      
+      return {
+        type: 'image',
+        url: result.url,
+        thumbnailUrl: result.thumbnailUrl,
+        prompt: result.prompt,
+        metadata: result.metadata
+      };
+    }
+    
+    if (detection.hasVideoRequest && detection.videoPrompt) {
+      const result = await mediaGenerationService.generateVideo({
+        prompt: detection.videoPrompt,
+        duration: 5,
+        resolution: '1080p',
+        style: 'realistic'
+      });
+      
+      return {
+        type: 'video',
+        url: result.url,
+        thumbnailUrl: result.thumbnailUrl,
+        prompt: result.prompt,
+        metadata: result.metadata
+      };
+    }
+  } catch (error) {
+    console.error('Media generation failed:', error);
+    return null;
+  }
+  
+  return null;
 }
 
 export { APIError };

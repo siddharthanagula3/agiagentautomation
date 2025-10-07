@@ -18,6 +18,7 @@ export interface AIEmployee {
   skills: string[];
   specialty: string;
   fitLevel: 'excellent' | 'good';
+  popular?: boolean; // Mark popular employees
   defaultTools?: string[]; // MCP tools this employee should use by default
 }
 
@@ -36,6 +37,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['System Design', 'Architecture', 'Scalability', 'Cloud Infrastructure'],
     specialty: 'System architecture and technical leadership',
     fitLevel: 'excellent',
+    popular: true,
     defaultTools: ['code_interpreter', 'web_search', 'create_visualization', 'analyze_file']
   },
   {
@@ -113,6 +115,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['Product Strategy', 'Roadmapping', 'User Research', 'Analytics'],
     specialty: 'Product strategy and execution',
     fitLevel: 'excellent',
+    popular: true,
     defaultTools: ['web_search', 'create_visualization', 'analyze_file']
   },
   {
@@ -145,6 +148,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['Machine Learning', 'Python', 'Statistics', 'Data Visualization'],
     specialty: 'Data science and ML engineering',
     fitLevel: 'excellent',
+    popular: true,
     defaultTools: ['code_interpreter', 'analyze_file', 'create_visualization', 'web_search']
   },
   {
@@ -224,6 +228,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['Content Strategy', 'Copywriting', 'SEO', 'Social Media'],
     specialty: 'Content marketing and strategy',
     fitLevel: 'excellent',
+    popular: true,
     defaultTools: ['web_search', 'analyze_file']
   },
   {
@@ -256,6 +261,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['Figma', 'User Research', 'Wireframing', 'Prototyping', 'Design Systems'],
     specialty: 'User interface and experience design',
     fitLevel: 'good',
+    popular: true,
     defaultTools: ['web_search', 'analyze_file']
   },
   {
@@ -1234,6 +1240,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['Data Input', 'Data Validation', 'Excel', 'Database Management', 'OCR'],
     specialty: 'Data entry and processing automation',
     fitLevel: 'excellent',
+    popular: true,
     defaultTools: ['analyze_file', 'web_search']
   },
   {
@@ -1358,6 +1365,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['Article Writing', 'Blog Posts', 'Marketing Copy', 'SEO Content', 'Creative Writing'],
     specialty: 'Automated content writing and copy generation',
     fitLevel: 'excellent',
+    popular: true,
     defaultTools: ['web_search', 'analyze_file']
   },
   {

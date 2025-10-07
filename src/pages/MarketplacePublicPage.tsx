@@ -281,9 +281,16 @@ export const MarketplacePublicPage: React.FC = () => {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg mb-1 truncate">
-                          {employee.role}
-                        </h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-lg truncate">
+                            {employee.role}
+                          </h3>
+                          {employee.popular && (
+                            <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800 border-orange-200">
+                              Popular
+                            </Badge>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground truncate">
                           {employee.specialty}
                         </p>
@@ -342,10 +349,22 @@ export const MarketplacePublicPage: React.FC = () => {
 
                   {/* Price and Purchase */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-baseline gap-1">
+                    <div className="flex items-baseline gap-2">
                       <DollarSign className="h-5 w-5 text-success" />
-                      <span className="text-3xl font-bold">{employee.price}</span>
-                      <span className="text-sm text-muted-foreground">per month</span>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-bold">{employee.price}</span>
+                        <span className="text-sm text-muted-foreground">per month</span>
+                        {employee.originalPrice && employee.originalPrice > employee.price && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm text-muted-foreground line-through">
+                              ${employee.originalPrice}
+                            </span>
+                            <Badge variant="destructive" className="text-xs">
+                              50% OFF
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <Button

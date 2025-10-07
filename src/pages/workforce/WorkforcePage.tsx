@@ -290,9 +290,16 @@ const WorkforcePage: React.FC = () => {
                                   </div>
                                 </InteractiveHoverCard>
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="font-semibold text-lg truncate mb-1 group-hover:text-primary transition-colors">
-                                    {emp?.role || rec.role}
-                                  </h3>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="font-semibold text-lg truncate group-hover:text-primary transition-colors">
+                                      {emp?.role || rec.role}
+                                    </h3>
+                                    {emp?.popular && (
+                                      <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800 border-orange-200">
+                                        Popular
+                                      </Badge>
+                                    )}
+                                  </div>
                                   <Badge variant="outline" className="text-xs">
                                     {rec.provider}
                                   </Badge>

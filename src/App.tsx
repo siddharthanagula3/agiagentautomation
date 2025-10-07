@@ -29,7 +29,6 @@ import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import AIConfigurationPage from './pages/settings/AIConfigurationPage';
 import AIEmployeeTestingPage from './pages/testing/AIEmployeeTestingPage';
-import WorkforceManagement from './components/employees/WorkforceManagement';
 import AutonomousWorkflowsPage from './pages/autonomous/AutonomousWorkflowsPage';
 import MarketplacePublicPage from './pages/MarketplacePublicPage';
 import MarketplacePage from './pages/marketplace/MarketplacePage';
@@ -166,7 +165,6 @@ function App() {
               
               {/* Main Features */}
               <Route path="workforce" element={<WorkforcePage />} />
-              <Route path="workforce/management" element={<WorkforceManagement />} />
               
               {/* Enhanced Chat (New) */}
               <Route path="chat" element={<ChatPageEnhanced />} />

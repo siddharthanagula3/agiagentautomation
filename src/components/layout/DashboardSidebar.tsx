@@ -21,8 +21,6 @@ import {
   Circle,
   ChevronDown,
   Search,
-  Moon,
-  Sun,
   Wrench
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,8 +43,7 @@ interface NavigationItem {
 
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, className }) => {
   const location = useLocation();
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['AI Workforce', 'Automation']));
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Automation']));
   const [searchQuery, setSearchQuery] = useState('');
 
   const navigation: NavigationItem[] = [
@@ -60,12 +57,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       name: 'AI Workforce',
       href: '/workforce',
       icon: Users,
-      description: 'Manage AI employees',
-      children: [
-        { name: 'Overview', href: '/workforce', icon: LayoutDashboard, description: 'View all employees' },
-        { name: 'Management', href: '/workforce/management', icon: Users, description: 'Manage team' },
-        { name: 'Analytics', href: '/workforce/analytics', icon: BarChart3, description: 'Performance metrics' }
-      ]
+      description: 'Manage AI employees'
     },
     {
       name: 'Chat',
@@ -472,70 +464,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
 
       {/* Footer with dark mode toggle */}
       <div className="border-t border-border/50 p-4 space-y-3 bg-gradient-to-t from-muted/20 to-transparent">
-        {/* Theme Toggle */}
-        {!collapsed && (
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={cn(
-              "w-full flex items-center justify-between px-3 py-2.5 rounded-lg",
-              "bg-muted/50 hover:bg-muted transition-all duration-300",
-              "border border-border/50"
-            )}
-          >
-            <div className="flex items-center gap-2">
-              {isDarkMode ? (
-                <>
-                  <Moon className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">Dark Mode</span>
-                </>
-              ) : (
-                <>
-                  <Sun className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">Light Mode</span>
-                </>
-              )}
-            </div>
-            <motion.div
-              animate={{ rotate: isDarkMode ? 0 : 180 }}
-              transition={{ duration: 0.3 }}
-              className={cn(
-                "w-10 h-5 rounded-full relative",
-                isDarkMode ? "bg-primary" : "bg-muted"
-              )}
-            >
-              <motion.div
-                animate={{ x: isDarkMode ? 20 : 2 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm"
-              />
-            </motion.div>
-          </button>
-        )}
-
-        {/* Status indicator */}
-        {collapsed ? (
-          <div className="flex justify-center">
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-2.5 h-2.5 bg-success rounded-full shadow-lg shadow-success/50"
-            />
-          </div>
-        ) : (
-          <div className="glass rounded-xl p-3 text-center space-y-2 border border-border/50">
-            <div className="flex items-center justify-center gap-2">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="w-2 h-2 bg-success rounded-full shadow-lg shadow-success/50"
-              />
-              <p className="text-xs font-medium">All Systems Online</p>
-            </div>
-            <p className="text-[10px] text-muted-foreground">
-              v2.0.0 • Updated Today
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -124,7 +124,7 @@ export const MarketplacePublicPage: React.FC = () => {
                 </Badge>
                 <h1 className="text-4xl font-bold mb-2">Hire Your AI Workforce</h1>
                 <p className="text-xl text-muted-foreground">
-                  Specialized AI employees for $1 each • {AI_EMPLOYEES.length} available
+                  Specialized AI employees for $10/month • {AI_EMPLOYEES.length} available
                 </p>
               </div>
             </div>

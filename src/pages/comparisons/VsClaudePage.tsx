@@ -10,7 +10,7 @@ const VsClaudePage: React.FC = () => {
   const comparisonFeatures = [
     {
       feature: 'Monthly Cost',
-      agiWorkforce: '$1/employee',
+      agiWorkforce: '$10/employee/month',
       claude: '$20/month',
       winner: 'agi',
       savings: '95% cheaper'
@@ -65,7 +65,7 @@ const VsClaudePage: React.FC = () => {
     },
     {
       feature: '10 Team Members Cost',
-      agiWorkforce: '$10/month',
+      agiWorkforce: '$10/employee/month',
       claude: '$200/month',
       winner: 'agi',
       savings: 'Save $190/month'
@@ -95,7 +95,7 @@ const VsClaudePage: React.FC = () => {
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto mb-8">
-              We use the <span className="text-primary font-bold">same Claude 3.5 Sonnet</span> model. But at <span className="text-primary font-bold">$1/month</span> instead of $20. Plus get GPT-4, Gemini, and 20+ specialized AI employees.
+              We use the <span className="text-primary font-bold">same Claude 3.5 Sonnet</span> model. But at <span className="text-primary font-bold">$10/month</span> instead of $20. Plus get GPT-4, Gemini, and 100+ specialized AI employees.
             </p>
 
             {/* Pricing Comparison */}
@@ -142,7 +142,7 @@ const VsClaudePage: React.FC = () => {
                   </div>
                   <div className="text-4xl mb-2">🚀</div>
                   <h3 className="text-2xl font-bold mb-4">AGI Workforce</h3>
-                  <div className="text-5xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">$1</div>
+                  <div className="text-5xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">$10</div>
                   <div className="text-muted-foreground mb-4">/month per AI employee</div>
                   <div className="space-y-2 text-left">
                     <div className="flex items-start gap-2">
@@ -168,7 +168,7 @@ const VsClaudePage: React.FC = () => {
               <div className="mt-8 pt-8 border-t border-border">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-green-500 mb-2">
-                    Save $19/month = $228/year per person
+                    Save $10/month = $120/year per person
                   </p>
                   <p className="text-muted-foreground">
                     For a 10-person team: <span className="text-primary font-bold">Save $2,280/year</span>
@@ -179,7 +179,7 @@ const VsClaudePage: React.FC = () => {
 
             <Button asChild size="lg" className="bg-gradient-to-r from-primary to-accent text-white text-lg px-8 py-6">
               <Link to="/register">
-                Get Claude 3.5 for $1/month <ArrowRight className="ml-2 h-5 w-5" />
+                Get Claude 3.5 for $10/month <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </motion.div>

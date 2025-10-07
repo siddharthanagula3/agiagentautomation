@@ -10,7 +10,7 @@ const VsChatGPTPage: React.FC = () => {
   const comparisonFeatures = [
     {
       feature: 'Monthly Cost per User',
-      agiWorkforce: '$1/employee',
+      agiWorkforce: '$10/employee/month',
       chatgpt: '$20/month',
       winner: 'agi',
       savings: '95% cheaper'
@@ -169,7 +169,7 @@ const VsChatGPTPage: React.FC = () => {
                   </div>
                   <div className="text-4xl mb-2">🚀</div>
                   <h3 className="text-2xl font-bold mb-4">AGI Workforce</h3>
-                  <div className="text-5xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">$1</div>
+                  <div className="text-5xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">$10</div>
                   <div className="text-muted-foreground mb-4">/month per AI employee</div>
                   <div className="space-y-2 text-left">
                     <div className="flex items-start gap-2">
@@ -195,7 +195,7 @@ const VsChatGPTPage: React.FC = () => {
               <div className="mt-8 pt-8 border-t border-border">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-green-500 mb-2">
-                    Save $19/month per person = $228/year
+                    Save $10/month per person = $120/year
                   </p>
                   <p className="text-muted-foreground">
                     For a 10-person team: <span className="text-primary font-bold">Save $2,280/year</span>

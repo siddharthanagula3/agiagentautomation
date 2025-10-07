@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -95,6 +95,7 @@ interface ChatMessage {
 
 const EnhancedChatPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
   const [purchasedEmployees, setPurchasedEmployees] = useState<PurchasedEmployee[]>([]);
   const [activeTabs, setActiveTabs] = useState<ChatTab[]>([]);
@@ -199,6 +200,22 @@ const EnhancedChatPage: React.FC = () => {
     load();
     return () => { isMounted = false; };
   }, [user?.id]);
+
+  // Handle URL parameter for auto-starting chat with specific employee
+  useEffect(() => {
+    const employeeId = searchParams.get('employee');
+    if (employeeId && purchasedEmployees.length > 0) {
+      const employee = purchasedEmployees.find(emp => emp.id === employeeId);
+      if (employee) {
+        console.log('Auto-starting chat with employee:', employee);
+        handleStartChat(employee);
+        // Clear the URL parameter to avoid re-triggering
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('employee');
+        window.history.replaceState({}, '', newUrl.toString());
+      }
+    }
+  }, [purchasedEmployees, searchParams]);
 
   // Auto-scroll to bottom
   useEffect(() => {

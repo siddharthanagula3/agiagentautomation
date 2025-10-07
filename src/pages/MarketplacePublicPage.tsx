@@ -130,7 +130,7 @@ export const MarketplacePublicPage: React.FC = () => {
             </div>
 
             <Button 
-              onClick={() => navigate('/chat')}
+              onClick={() => navigate('/workforce')}
               size="lg"
               className="btn-glow gradient-primary text-white"
             >

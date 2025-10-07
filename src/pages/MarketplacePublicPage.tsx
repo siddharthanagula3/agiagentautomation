@@ -29,6 +29,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { isEmployeePurchased, listPurchasedEmployees, purchaseEmployee } from '@/services/supabase-employees';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createCheckoutSession, isStripeConfigured } from '@/services/stripe-service';
 
 export const MarketplacePublicPage: React.FC = () => {
   const navigate = useNavigate();
@@ -69,24 +70,47 @@ export const MarketplacePublicPage: React.FC = () => {
         navigate('/auth/login');
         return;
       }
+      
       const already = await isEmployeePurchased(user.id, employee.id);
       if (already) {
         toast.info('Already hired');
         return;
       }
-      await purchaseEmployee(user.id, employee);
-      const rows = await listPurchasedEmployees(user.id);
-      setPurchasedEmployees(new Set(rows.map(r => r.employee_id)));
-      toast.success(`${employee.role} hired!`, {
-        description: `Start working with your ${employee.role} in the chat.`,
-        action: {
-          label: 'Go to Chat',
-          onClick: () => navigate('/chat')
-        }
-      });
+
+      // Check if Stripe is configured
+      if (isStripeConfigured()) {
+        // Use Stripe for payment
+        toast.loading('Redirecting to checkout...', { id: 'checkout' });
+        
+        await createCheckoutSession({
+          employeeId: employee.id,
+          employeeRole: employee.role,
+          price: employee.price,
+          userId: user.id,
+          userEmail: user.email || '',
+          provider: employee.provider, // Pass the actual LLM provider
+        });
+        
+        // The user will be redirected to Stripe Checkout
+        // After successful payment, webhook will create the purchased_employee record
+      } else {
+        // Fallback: Direct purchase without payment (for development/testing)
+        console.warn('[Marketplace] Stripe not configured, using direct purchase');
+        await purchaseEmployee(user.id, employee);
+        const rows = await listPurchasedEmployees(user.id);
+        setPurchasedEmployees(new Set(rows.map(r => r.employee_id)));
+        toast.success(`${employee.role} hired!`, {
+          description: `Start working with your ${employee.role} in the chat.`,
+          action: {
+            label: 'Go to Chat',
+            onClick: () => navigate('/chat')
+          }
+        });
+      }
     } catch (err) {
       console.error('Purchase failed', err);
       toast.error('Failed to hire employee');
+      toast.dismiss('checkout');
     }
   };
 

@@ -38,6 +38,7 @@ export const MarketplacePublicPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [purchasedEmployees, setPurchasedEmployees] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
+  const [discountCode, setDiscountCode] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -89,6 +90,7 @@ export const MarketplacePublicPage: React.FC = () => {
           userId: user.id,
           userEmail: user.email || '',
           provider: employee.provider, // Pass the actual LLM provider
+          discountCode: discountCode.trim() || undefined, // Pass discount code if provided
         });
         
         // The user will be redirected to Stripe Checkout
@@ -128,6 +130,39 @@ export const MarketplacePublicPage: React.FC = () => {
 
   return (
     <div className="min-h-screen pt-24 p-6">
+      {/* Tester Banner */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6"
+      >
+        <Card className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border-green-500/20">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <span className="text-lg">🧪</span>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-green-700 dark:text-green-400">Testing Mode Active</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Use discount code <code className="bg-green-100 dark:bg-green-900 px-1 rounded">TESTER100</code> for 100% off all AI employees
+                  </p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setDiscountCode('TESTER100')}
+                className="border-green-500/30 text-green-700 dark:text-green-400 hover:bg-green-500/10"
+              >
+                Apply Code
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* Hero Header */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -165,11 +200,71 @@ export const MarketplacePublicPage: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Search and Filters */}
+      {/* Discount Code Section - Always Visible */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
+      >
+        <Card className="glass-strong mb-6 border-green-500/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-green-700 dark:text-green-400">Discount Code</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Enter a discount code to get special pricing
+                  </p>
+                </div>
+              </div>
+              {discountCode && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setDiscountCode('')}
+                  className="text-green-600 border-green-500/30"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Clear
+                </Button>
+              )}
+            </div>
+            
+            <div className="flex gap-2 mb-4">
+              <Input
+                placeholder="Enter discount code (e.g., TESTER100)"
+                value={discountCode}
+                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                className="flex-1 glass"
+              />
+            </div>
+            
+            <div className="p-3 bg-green-500/5 rounded-lg border border-green-500/20">
+              <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-2">🧪 Tester Discount Codes:</p>
+              <div className="flex flex-wrap gap-1">
+                <Badge variant="outline" className="text-xs cursor-pointer hover:bg-green-500/10 border-green-500/30" onClick={() => setDiscountCode('TESTER100')}>
+                  TESTER100 (100% off forever)
+                </Badge>
+                <Badge variant="outline" className="text-xs cursor-pointer hover:bg-green-500/10 border-green-500/30" onClick={() => setDiscountCode('FREEBIE')}>
+                  FREEBIE (100% off once)
+                </Badge>
+                <Badge variant="outline" className="text-xs cursor-pointer hover:bg-green-500/10 border-green-500/30" onClick={() => setDiscountCode('DEMO100')}>
+                  DEMO100 (100% off 1 month)
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Search and Filters */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
       >
         <Card className="glass-strong mb-8">
           <CardContent className="p-6">
@@ -209,6 +304,7 @@ export const MarketplacePublicPage: React.FC = () => {
                 )}
               </Button>
             </div>
+
 
             {/* Category Filters */}
             <AnimatePresence>
@@ -260,13 +356,14 @@ export const MarketplacePublicPage: React.FC = () => {
           </p>
         </div>
         
-        {(searchQuery || selectedCategory !== 'all') && (
+        {(searchQuery || selectedCategory !== 'all' || discountCode) && (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => {
               setSearchQuery('');
               setSelectedCategory('all');
+              setDiscountCode('');
             }}
           >
             <X className="h-4 w-4 mr-2" />
@@ -441,6 +538,7 @@ export const MarketplacePublicPage: React.FC = () => {
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedCategory('all');
+                  setDiscountCode('');
                 }}
                 className="gradient-primary text-white"
               >

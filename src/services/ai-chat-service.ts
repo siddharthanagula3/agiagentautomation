@@ -175,7 +175,9 @@ function generateDemoResponse(messages: AIMessage[], provider: string): AIRespon
  */
 export async function sendToOpenAI(
   messages: AIMessage[], 
-  model: string = 'gpt-4o-mini'
+  model: string = 'gpt-4o-mini',
+  userId?: string,
+  sessionId?: string
 ): Promise<AIResponse> {
   if (!OPENAI_API_KEY) {
     if (IS_DEMO_MODE) {
@@ -311,7 +313,9 @@ export async function sendToOpenAI(
  */
 export async function sendToAnthropic(
   messages: AIMessage[], 
-  model: string = 'claude-3-5-sonnet-20241022'
+  model: string = 'claude-3-5-sonnet-20241022',
+  userId?: string,
+  sessionId?: string
 ): Promise<AIResponse> {
   console.log('[Anthropic] API Key status:', ANTHROPIC_API_KEY ? `Present (${ANTHROPIC_API_KEY.substring(0, 15)}...)` : 'Missing');
   
@@ -444,7 +448,9 @@ export async function sendToAnthropic(
 export async function sendToGoogle(
   messages: AIMessage[],
   model: string = 'gemini-2.0-flash',
-  attachments: AIImageAttachment[] = []
+  attachments: AIImageAttachment[] = [],
+  userId?: string,
+  sessionId?: string
 ): Promise<AIResponse> {
   if (!GOOGLE_API_KEY) {
     if (IS_DEMO_MODE) {
@@ -772,17 +778,17 @@ export async function sendAIMessage(
     switch (providerLower) {
       case 'chatgpt':
       case 'openai':
-        response = await sendToOpenAI(optimizedMessages, model);
+        response = await sendToOpenAI(optimizedMessages, model, userId, sessionId);
         break;
       
       case 'claude':
       case 'anthropic':
-        response = await sendToAnthropic(optimizedMessages, model);
+        response = await sendToAnthropic(optimizedMessages, model, userId, sessionId);
         break;
       
       case 'gemini':
       case 'google':
-        response = await sendToGoogle(optimizedMessages, model || 'gemini-2.0-flash', attachments);
+        response = await sendToGoogle(optimizedMessages, model || 'gemini-2.0-flash', attachments, userId, sessionId);
         break;
       
       case 'perplexity':
@@ -867,22 +873,31 @@ export async function sendAIMessage(
 
 /**
  * Check if a provider is configured
+ * In production, we assume all providers are potentially configured (validated by Netlify functions)
+ * In development, we check for actual API keys
  */
 export function isProviderConfigured(provider: string): boolean {
+  // In production, Netlify functions handle API key validation
+  // We can't check keys in browser, so assume all providers are available
+  if (import.meta.env.PROD) {
+    return true;
+  }
+  
+  // In development, check if API keys are present
   const providerLower = provider.toLowerCase();
   
   switch (providerLower) {
     case 'chatgpt':
     case 'openai':
-      return !!OPENAI_API_KEY;
+      return !!OPENAI_API_KEY || IS_DEMO_MODE;
     case 'claude':
     case 'anthropic':
-      return !!ANTHROPIC_API_KEY;
+      return !!ANTHROPIC_API_KEY || IS_DEMO_MODE;
     case 'gemini':
     case 'google':
-      return !!GOOGLE_API_KEY;
+      return !!GOOGLE_API_KEY || IS_DEMO_MODE;
     case 'perplexity':
-      return !!PERPLEXITY_API_KEY;
+      return !!PERPLEXITY_API_KEY || IS_DEMO_MODE;
     default:
       return false;
   }
@@ -890,14 +905,22 @@ export function isProviderConfigured(provider: string): boolean {
 
 /**
  * Get list of configured providers
+ * In production, return all providers (validated by Netlify functions)
+ * In development, return only providers with API keys
  */
 export function getConfiguredProviders(): string[] {
+  // In production, all providers are potentially available via Netlify functions
+  if (import.meta.env.PROD) {
+    return ['OpenAI', 'Anthropic', 'Google'];
+  }
+  
+  // In development, check for actual API keys
   const providers: string[] = [];
   
-  if (OPENAI_API_KEY) providers.push('OpenAI');
-  if (ANTHROPIC_API_KEY) providers.push('Anthropic');
-  if (GOOGLE_API_KEY) providers.push('Google');
-  if (PERPLEXITY_API_KEY) providers.push('Perplexity');
+  if (OPENAI_API_KEY || IS_DEMO_MODE) providers.push('OpenAI');
+  if (ANTHROPIC_API_KEY || IS_DEMO_MODE) providers.push('Anthropic');
+  if (GOOGLE_API_KEY || IS_DEMO_MODE) providers.push('Google');
+  if (PERPLEXITY_API_KEY || IS_DEMO_MODE) providers.push('Perplexity');
   
   return providers;
 }

@@ -15,7 +15,6 @@ export interface CheckoutSessionData {
   userId: string;
   userEmail: string;
   provider?: string; // LLM provider (chatgpt, claude, gemini, perplexity)
-  discountCode?: string; // Optional discount code
 }
 
 /**

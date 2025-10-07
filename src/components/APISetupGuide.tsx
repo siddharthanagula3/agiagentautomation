@@ -3,61 +3,48 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Key, 
-  ExternalLink, 
-  CheckCircle, 
-  AlertCircle, 
-  Copy, 
-  Settings,
-  Bot,
-  Sparkles
-} from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CheckCircle, XCircle, ExternalLink, Copy, AlertTriangle, Info } from 'lucide-react';
 
 interface APISetupGuideProps {
   onClose?: () => void;
 }
 
-const APISetupGuide: React.FC<APISetupGuideProps> = ({ onClose }) => {
+export function APISetupGuide({ onClose }: APISetupGuideProps) {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const apiProviders = [
+  const providers = [
     {
       name: 'OpenAI (ChatGPT)',
-      icon: '🤖',
-      description: 'Most popular AI model, great for general tasks',
+      key: 'VITE_OPENAI_API_KEY',
       url: 'https://platform.openai.com/api-keys',
-      envVar: 'VITE_OPENAI_API_KEY',
-      cost: '$0.01-0.06 per 1K tokens',
-      free: false
+      description: 'Most popular AI provider with GPT models',
+      features: ['GPT-4', 'GPT-3.5', 'Function calling', 'Image analysis'],
+      status: 'active'
     },
     {
       name: 'Anthropic (Claude)',
-      icon: '🧠',
-      description: 'Advanced reasoning and analysis',
+      key: 'VITE_ANTHROPIC_API_KEY',
       url: 'https://console.anthropic.com/',
-      envVar: 'VITE_ANTHROPIC_API_KEY',
-      cost: '$0.003-0.015 per 1K tokens',
-      free: false
+      description: 'Advanced AI with long context and safety features',
+      features: ['Claude 3.5 Sonnet', 'Long context', 'Safety controls', 'System instructions'],
+      status: 'active'
     },
     {
       name: 'Google (Gemini)',
-      icon: '💎',
-      description: 'Google\'s latest AI model with free tier',
+      key: 'VITE_GOOGLE_API_KEY',
       url: 'https://aistudio.google.com/app/apikey',
-      envVar: 'VITE_GOOGLE_API_KEY',
-      cost: 'Free tier available',
-      free: true
+      description: 'Multimodal AI with image and text capabilities',
+      features: ['Gemini 2.0', 'Multimodal', 'Image analysis', 'Real-time data'],
+      status: 'active'
     },
     {
       name: 'Perplexity',
-      icon: '🔍',
-      description: 'Real-time web search and information',
+      key: 'VITE_PERPLEXITY_API_KEY',
       url: 'https://www.perplexity.ai/settings/api',
-      envVar: 'VITE_PERPLEXITY_API_KEY',
-      cost: '$0.20 per 1M tokens',
-      free: false
+      description: 'AI with real-time web search capabilities',
+      features: ['Web search', 'Real-time data', 'Up-to-date information', 'Research assistant'],
+      status: 'active'
     }
   ];
 
@@ -67,177 +54,268 @@ const APISetupGuide: React.FC<APISetupGuideProps> = ({ onClose }) => {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  const envExample = `# AI API Keys Configuration
-VITE_OPENAI_API_KEY=your_openai_api_key_here
-VITE_ANTHROPIC_API_KEY=your_anthropic_api_key_here
-VITE_GOOGLE_API_KEY=your_google_api_key_here
-VITE_PERPLEXITY_API_KEY=your_perplexity_api_key_here
+  const envExample = `# AI Provider API Keys
+VITE_OPENAI_API_KEY=your_openai_key_here
+VITE_ANTHROPIC_API_KEY=your_anthropic_key_here
+VITE_GOOGLE_API_KEY=your_google_key_here
+VITE_PERPLEXITY_API_KEY=your_perplexity_key_here
 
-# Demo Mode (set to true to use mock responses)
-VITE_DEMO_MODE=false`;
+# Demo Mode (optional - enables mock responses when keys are missing)
+VITE_DEMO_MODE=true`;
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-4"
-      >
-        <div className="flex items-center justify-center gap-3">
-          <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
-            <Key className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold">AI API Setup Guide</h1>
-            <p className="text-muted-foreground">Configure your AI providers to unlock the full potential</p>
-          </div>
-        </div>
-      </motion.div>
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold">AI API Setup Guide</h1>
+        <p className="text-muted-foreground">
+          Configure API keys for all supported AI providers to enable full functionality
+        </p>
+      </div>
 
       <Alert>
-        <AlertCircle className="h-4 w-4" />
+        <Info className="h-4 w-4" />
         <AlertDescription>
-          <strong>Quick Start:</strong> You can enable demo mode by setting <code>VITE_DEMO_MODE=true</code> in your .env file to test the application without API keys.
+          <strong>Quick Start:</strong> You only need to configure one API key to get started. 
+          The app will work with demo mode for unconfigured providers.
         </AlertDescription>
       </Alert>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {apiProviders.map((provider, index) => (
-          <motion.div
-            key={provider.name}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card className="h-full">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{provider.icon}</span>
-                    <div>
-                      <CardTitle className="text-lg">{provider.name}</CardTitle>
-                      <CardDescription>{provider.description}</CardDescription>
+      <Tabs defaultValue="providers" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="providers">API Providers</TabsTrigger>
+          <TabsTrigger value="setup">Setup Instructions</TabsTrigger>
+          <TabsTrigger value="troubleshooting">Troubleshooting</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="providers" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            {providers.map((provider) => (
+              <Card key={provider.name} className="relative">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">{provider.name}</CardTitle>
+                    <Badge variant={provider.status === 'active' ? 'default' : 'secondary'}>
+                      {provider.status === 'active' ? 'Available' : 'Coming Soon'}
+                    </Badge>
+                  </div>
+                  <CardDescription>{provider.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Key Features:</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {provider.features.map((feature) => (
+                        <Badge key={feature} variant="outline" className="text-xs">
+                          {feature}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
-                  {provider.free && (
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                      Free Tier
-                    </Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Cost:</span>
-                  <span className="text-sm font-medium">{provider.cost}</span>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Environment Variable:</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(provider.envVar, provider.name)}
-                    >
-                      {copiedKey === provider.name ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <code className="text-sm bg-muted px-2 py-1 rounded">
+                        {provider.key}
+                      </code>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => copyToClipboard(provider.key, provider.key)}
+                      >
+                        {copiedKey === provider.key ? (
+                          <CheckCircle className="h-3 w-3" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                  <code className="block p-2 bg-muted rounded text-sm font-mono">
-                    {provider.envVar}
-                  </code>
+
+                  <Button asChild className="w-full">
+                    <a href={provider.url} target="_blank" rel="noopener noreferrer">
+                      Get API Key
+                      <ExternalLink className="ml-2 h-4 w-4" />
+                    </a>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="setup" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Step 1: Create Environment File</CardTitle>
+              <CardDescription>
+                Create a <code>.env</code> file in your project root
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="relative">
+                <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto">
+                  {envExample}
+                </pre>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="absolute top-2 right-2"
+                  onClick={() => copyToClipboard(envExample, 'env')}
+                >
+                  {copiedKey === 'env' ? (
+                    <CheckCircle className="h-3 w-3" />
+                  ) : (
+                    <Copy className="h-3 w-3" />
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Step 2: Get API Keys</CardTitle>
+              <CardDescription>
+                Follow the links below to get your API keys
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {providers.map((provider) => (
+                <div key={provider.name} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <div className="font-medium">{provider.name}</div>
+                    <div className="text-sm text-muted-foreground">{provider.description}</div>
+                  </div>
+                  <Button asChild variant="outline" size="sm">
+                    <a href={provider.url} target="_blank" rel="noopener noreferrer">
+                      Get Key
+                      <ExternalLink className="ml-2 h-3 w-3" />
+                    </a>
+                  </Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Step 3: Test Your Setup</CardTitle>
+              <CardDescription>
+                Start the development server and test the chat interface
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <code className="block bg-muted p-2 rounded text-sm">
+                  npm run dev
+                </code>
+                <p className="text-sm text-muted-foreground">
+                  Navigate to the chat interface and try sending a message with each AI provider.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="troubleshooting" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Common Issues & Solutions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="p-3 border rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
+                    <div>
+                      <div className="font-medium">"Invalid API key" Error</div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        • Check if the key is correctly copied (no extra spaces)<br/>
+                        • Verify the key is active in the provider's dashboard<br/>
+                        • Ensure the key has the correct permissions
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <Button 
-                  asChild 
-                  className="w-full"
-                  variant="outline"
-                >
-                  <a 
-                    href={provider.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Get API Key
-                  </a>
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+                <div className="p-3 border rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-yellow-500 mt-0.5" />
+                    <div>
+                      <div className="font-medium">"Rate limit exceeded" Error</div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        • Wait a few minutes and try again<br/>
+                        • Check your usage limits in the provider's dashboard<br/>
+                        • Consider upgrading your plan if needed
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              Environment Configuration
-            </CardTitle>
-            <CardDescription>
-              Create a .env file in your project root with the following configuration:
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="relative">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute top-2 right-2"
-                onClick={() => copyToClipboard(envExample, 'env')}
-              >
-                {copiedKey === 'env' ? (
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </Button>
-              <pre className="bg-muted p-4 rounded-lg text-sm font-mono overflow-x-auto">
-                {envExample}
-              </pre>
-            </div>
-            
-            <Alert>
-              <Bot className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Demo Mode:</strong> Set <code>VITE_DEMO_MODE=true</code> to use mock responses without API keys.
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
-      </motion.div>
+                <div className="p-3 border rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <XCircle className="h-4 w-4 text-red-500 mt-0.5" />
+                    <div>
+                      <div className="font-medium">"Network error" Error</div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        • Check your internet connection<br/>
+                        • Verify firewall settings aren't blocking requests<br/>
+                        • Try again in a few minutes
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="text-center space-y-4"
-      >
-        <div className="flex items-center justify-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
-          <span className="text-lg font-semibold">Ready to get started?</span>
-        </div>
-        <p className="text-muted-foreground">
-          After configuring your API keys, restart your development server to see the changes take effect.
-        </p>
-        {onClose && (
-          <Button onClick={onClose} className="gradient-primary text-white">
-            Got it!
+                <div className="p-3 border rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-yellow-500 mt-0.5" />
+                    <div>
+                      <div className="font-medium">"Insufficient funds" Error</div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        • Add credits to your OpenAI/Anthropic account<br/>
+                        • Check billing information is up to date<br/>
+                        • Set up billing alerts to avoid surprises
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Demo Mode</CardTitle>
+              <CardDescription>
+                Enable demo mode to test the interface without API keys
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-sm">
+                  Add <code>VITE_DEMO_MODE=true</code> to your <code>.env</code> file to enable demo mode.
+                  This will show mock responses instead of errors when API keys are missing.
+                </p>
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    Demo mode is perfect for testing the interface and showing the app to others
+                    without requiring API keys.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {onClose && (
+        <div className="flex justify-end">
+          <Button onClick={onClose} variant="outline">
+            Close Guide
           </Button>
-        )}
-      </motion.div>
+        </div>
+      )}
     </div>
   );
-};
-
-export default APISetupGuide;
+}

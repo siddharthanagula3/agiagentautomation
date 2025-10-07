@@ -1,5 +1,5 @@
 /**
- * AI Chat Service - Production-ready implementation
+ * Robust AI Service - Production-ready implementation
  * Based on official documentation and best practices for each provider
  * Supports: OpenAI (ChatGPT), Anthropic (Claude), Google (Gemini), Perplexity
  */

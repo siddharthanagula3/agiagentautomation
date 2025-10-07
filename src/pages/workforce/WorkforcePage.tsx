@@ -17,7 +17,7 @@ import { Link } from 'react-router-dom';
 import { listPurchasedEmployees, getEmployeeById } from '@/services/supabase-employees';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { analyticsService } from '@/services/analytics-service';
-import { Users, Bot, Plus, TrendingUp, Sparkles, Zap, Target, Clock, ArrowRight, MessageSquare } from 'lucide-react';
+import { Users, Bot, BarChart3, Settings, Plus, TrendingUp, Sparkles, Zap, Target, Clock, ArrowRight, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const WorkforcePage: React.FC = () => {
@@ -304,7 +304,7 @@ const WorkforcePage: React.FC = () => {
                               </p>
 
                               <div className="flex gap-2">
-                                <Link to="/chat" className="flex-1">
+                                <Link to={`/chat?employee=${emp?.id}`} className="flex-1">
                                   <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50 transition-colors">
                                     <MessageSquare className="mr-2 h-4 w-4" />
                                     Chat

@@ -111,7 +111,7 @@ async function createPurchasedEmployee(data: {
 
     console.log('[Manual Purchase] Creating purchased employee record:', data);
 
-    // Create purchased employee record
+    // Create purchased employee record (without Stripe columns for now)
     const { data: insertData, error } = await supabase
       .from('purchased_employees')
       .insert({
@@ -120,8 +120,9 @@ async function createPurchasedEmployee(data: {
         role: data.employeeRole,
         provider: data.provider,
         is_active: true,
-        stripe_subscription_id: data.subscriptionId,
-        stripe_customer_id: data.customerId,
+        // Note: Stripe columns will be added later via database migration
+        // stripe_subscription_id: data.subscriptionId,
+        // stripe_customer_id: data.customerId,
       })
       .select();
 

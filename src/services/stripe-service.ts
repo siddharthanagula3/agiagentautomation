@@ -5,8 +5,22 @@
 
 import { loadStripe } from '@stripe/stripe-js';
 
-// Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
+// Lazy loader with guard
+let stripePromise: Promise<import('@stripe/stripe-js').Stripe | null> | null = null;
+function getStripe() {
+  const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+  if (!publishableKey || !publishableKey.startsWith('pk_')) {
+    return Promise.resolve(null);
+  }
+  if (!stripePromise) {
+    try {
+      stripePromise = loadStripe(publishableKey);
+    } catch (e) {
+      stripePromise = Promise.resolve(null);
+    }
+  }
+  return stripePromise;
+}
 
 export interface CheckoutSessionData {
   employeeId: string;
@@ -46,9 +60,10 @@ export async function createCheckoutSession(data: CheckoutSessionData): Promise<
       window.location.href = url;
     } else {
       // Fallback: use Stripe.js redirect
-      const stripe = await stripePromise;
+      const stripe = await getStripe();
       if (!stripe) {
-        throw new Error('Stripe failed to load');
+        console.warn('[Stripe Service] Stripe.js not available or publishable key missing. Redirect URL expected.');
+        throw new Error('Payment temporarily unavailable: Stripe.js not loaded.');
       }
       
       const { error } = await stripe.redirectToCheckout({ sessionId });

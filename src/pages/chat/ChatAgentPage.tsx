@@ -459,7 +459,7 @@ const ChatAgentPage: React.FC = () => {
                         {employee.status}
                       </Badge>
                       <div className="text-xs text-gray-500">
-                        {employee.usage_stats.messages_sent} messages
+                        {(employee?.usage_stats?.messages_sent ?? 0)} messages
                       </div>
                     </div>
                   </div>

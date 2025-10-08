@@ -77,11 +77,11 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 class AgentChatService {
-  private getAuthHeaders() {
-    const token = supabase.auth.getSession().then(session => session.data.session?.access_token);
+  private async getAuthHeaders() {
+    const { data: { session } } = await supabase.auth.getSession();
     return {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      'Authorization': `Bearer ${session?.access_token || ''}`,
     };
   }
 

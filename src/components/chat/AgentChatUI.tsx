@@ -510,7 +510,7 @@ const ToolPanel: React.FC<{
         <div className="flex items-center gap-2">
           <Wrench className="w-4 h-4 text-gray-500" />
           <span className="text-sm font-medium">Available Tools</span>
-          <Badge variant="secondary">{tools.length}</Badge>
+          <Badge variant="secondary">{tools?.length || 0}</Badge>
         </div>
         {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
       </button>
@@ -524,7 +524,7 @@ const ToolPanel: React.FC<{
             className="overflow-hidden"
           >
             <div className="p-3 space-y-2">
-              {tools.map(tool => (
+              {(tools || []).map(tool => (
                 <div key={tool} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                   <div className="flex items-center gap-2">
                     <Icon name="wrench" className="w-4 h-4 text-gray-500" />
@@ -808,7 +808,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
       {/* Messages */}
       <ScrollArea className="flex-1">
         <div className="space-y-1">
-          {messages.map((message) => (
+          {(messages || []).map((message) => (
             <MessageItem
               key={message.id}
               message={message}

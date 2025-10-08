@@ -189,7 +189,7 @@ const ChatAgentPage: React.FC = () => {
     }));
     
     const configuredCount = status.filter(s => s.configured).length;
-    return { status, configuredCount, total: providers.length };
+    return { status: status || [], configuredCount, total: providers.length };
   };
 
   const providerStatus = getProviderStatus();
@@ -354,7 +354,7 @@ const ChatAgentPage: React.FC = () => {
           <div className="p-6 border-b border-gray-200">
             <h4 className="font-medium text-gray-900 mb-3">Provider Status</h4>
             <div className="space-y-2">
-              {providerStatus.status.map(({ provider, configured }) => (
+              {(providerStatus.status || []).map(({ provider, configured }) => (
                 <div key={provider} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {provider === 'openai' && <Brain className="w-4 h-4 text-green-500" />}
@@ -383,7 +383,7 @@ const ChatAgentPage: React.FC = () => {
             <div className="p-6 flex-1">
               <h4 className="font-medium text-gray-900 mb-3">Capabilities</h4>
               <div className="flex flex-wrap gap-2">
-                {selectedEmployee.capabilities.map((capability, index) => (
+                {(selectedEmployee.capabilities || []).map((capability, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">
                     {capability}
                   </Badge>
@@ -435,7 +435,7 @@ const ChatAgentPage: React.FC = () => {
           </DialogHeader>
           
           <div className="grid gap-4 py-4">
-            {employees.map((employee) => (
+            {(employees || []).map((employee) => (
               <Card
                 key={employee.id}
                 className={cn(

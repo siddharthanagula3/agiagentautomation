@@ -83,7 +83,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       badge: 'Beta',
       children: [
         { name: 'Overview', href: '/automation', icon: LayoutDashboard, description: 'All workflows' },
-        { name: 'Workflows', href: '/automation/workflows', icon: Zap, description: 'Manage workflows' },
         { name: 'Designer', href: '/automation/designer', icon: Circle, description: 'Create workflows' }
       ]
     },

@@ -494,7 +494,7 @@ const ChatAgentPage: React.FC = () => {
         </div>
 
         {/* Right Side - Chat Interface */}
-        <div className="flex-1 flex flex-col bg-gray-100 dark:bg-[#0d0e11]">
+        <div className="flex-1 flex flex-col bg-gray-50 dark:bg-[#0d0e11]">
           {/* Chat Header */}
           <div className="bg-white dark:bg-[#171717] border-b border-gray-200 dark:border-gray-800 px-6 py-3">
             <div className="flex items-center justify-between">
@@ -517,7 +517,7 @@ const ChatAgentPage: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-gray-700 text-gray-400 hover:text-white"
+                  className="border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 >
                   <Activity className="w-4 h-4 mr-2" />
                   View Traces
@@ -525,7 +525,7 @@ const ChatAgentPage: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-gray-700 text-gray-400 hover:text-white"
+                  className="border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 >
                   <Terminal className="w-4 h-4 mr-2" />
                   Console
@@ -556,11 +556,11 @@ const ChatAgentPage: React.FC = () => {
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
-                <div className="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4">
-                  <MessageSquare className="w-10 h-10 text-gray-600" />
+                <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="w-10 h-10 text-gray-400 dark:text-gray-600" />
                 </div>
-                <h2 className="text-xl font-medium text-white mb-2">Your conversation will appear here</h2>
-                <p className="text-gray-500 max-w-md">
+                <h2 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Your conversation will appear here</h2>
+                <p className="text-gray-600 dark:text-gray-500 max-w-md">
                   Configure your agent on the left and start chatting. Your AI employee is ready to assist!
                 </p>
               </div>
@@ -571,38 +571,38 @@ const ChatAgentPage: React.FC = () => {
 
       {/* New Prompt Dialog */}
       <Dialog open={showNewPromptDialog} onOpenChange={setShowNewPromptDialog}>
-        <DialogContent className="bg-[#171717] border-gray-800">
+        <DialogContent className="bg-white dark:bg-[#171717] border-gray-200 dark:border-gray-800">
           <DialogHeader>
-            <DialogTitle className="text-white">Create New Agent Prompt</DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogTitle className="text-gray-900 dark:text-white">Create New Agent Prompt</DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               Configure a new agent with specific instructions and tools
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-sm text-gray-300 mb-2 block">Agent Name</label>
+              <label className="text-sm text-gray-700 dark:text-gray-300 mb-2 block">Agent Name</label>
               <Input
                 placeholder="e.g., Research Assistant"
-                className="bg-[#0d0e11] border-gray-700 text-white"
+                className="bg-white dark:bg-[#0d0e11] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
               />
             </div>
             
             <div>
-              <label className="text-sm text-gray-300 mb-2 block">Instructions</label>
+              <label className="text-sm text-gray-700 dark:text-gray-300 mb-2 block">Instructions</label>
               <Textarea
                 placeholder="Describe what this agent should do..."
-                className="min-h-[100px] bg-[#0d0e11] border-gray-700 text-white"
+                className="min-h-[100px] bg-white dark:bg-[#0d0e11] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
               />
             </div>
             
             <div>
-              <label className="text-sm text-gray-300 mb-2 block">Model</label>
+              <label className="text-sm text-gray-700 dark:text-gray-300 mb-2 block">Model</label>
               <Select defaultValue="gpt-4o">
-                <SelectTrigger className="bg-[#0d0e11] border-gray-700 text-white">
+                <SelectTrigger className="bg-white dark:bg-[#0d0e11] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-[#171717] border-gray-200 dark:border-gray-800">
                   <SelectItem value="gpt-4o">GPT-4o</SelectItem>
                   <SelectItem value="gpt-4">GPT-4</SelectItem>
                   <SelectItem value="gpt-3.5">GPT-3.5 Turbo</SelectItem>
@@ -615,7 +615,7 @@ const ChatAgentPage: React.FC = () => {
             <Button
               variant="outline"
               onClick={() => setShowNewPromptDialog(false)}
-              className="border-gray-700 text-gray-400 hover:text-white"
+              className="border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             >
               Cancel
             </Button>
@@ -624,7 +624,7 @@ const ChatAgentPage: React.FC = () => {
                 setShowNewPromptDialog(false);
                 toast.success('New agent prompt created');
               }}
-              className="bg-white text-black hover:bg-gray-200"
+              className="bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
             >
               Create
             </Button>

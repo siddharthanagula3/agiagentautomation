@@ -695,6 +695,3 @@ export class AgentSDKService {
 
 // Export singleton instance
 export const agentSDKService = new AgentSDKService();
-
-// Export types and utilities
-export { AgentError };

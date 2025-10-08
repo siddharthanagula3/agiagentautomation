@@ -49,7 +49,7 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  Tool,
+  Wrench,
   Webhook,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -301,7 +301,7 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
     
     if (message.metadata?.tools?.length) {
       return <Badge variant="secondary" className="text-xs">
-        <Tool className="w-3 h-3 mr-1" />
+        <Wrench className="w-3 h-3 mr-1" />
         {message.metadata.tools.length} tool(s)
       </Badge>;
     }

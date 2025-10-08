@@ -1,0 +1,112 @@
+{
+  "pageLoad": true,
+  "noErrors": false,
+  "noWarnings": true,
+  "consoleMessages": [
+    {
+      "type": "warn",
+      "text": "ChatKit script not available. Using fallback implementation.",
+      "timestamp": "2025-10-08T22:29:43.822Z"
+    },
+    {
+      "type": "warn",
+      "text": "Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.",
+      "timestamp": "2025-10-08T22:29:44.532Z"
+    },
+    {
+      "type": "warn",
+      "text": "Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.",
+      "timestamp": "2025-10-08T22:29:44.536Z"
+    },
+    {
+      "type": "warn",
+      "text": "Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.",
+      "timestamp": "2025-10-08T22:29:44.539Z"
+    },
+    {
+      "type": "warn",
+      "text": "Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.",
+      "timestamp": "2025-10-08T22:29:44.539Z"
+    },
+    {
+      "type": "warn",
+      "text": "Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.",
+      "timestamp": "2025-10-08T22:29:44.540Z"
+    },
+    {
+      "type": "warn",
+      "text": "Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.",
+      "timestamp": "2025-10-08T22:29:44.542Z"
+    },
+    {
+      "type": "log",
+      "text": "OpenAI Agents Service initialized",
+      "timestamp": "2025-10-08T22:29:44.543Z"
+    },
+    {
+      "type": "log",
+      "text": "🚀 Starting AGI Agent Automation app...",
+      "timestamp": "2025-10-08T22:29:45.089Z"
+    },
+    {
+      "type": "log",
+      "text": "Environment: JSHandle@object",
+      "timestamp": "2025-10-08T22:29:45.090Z"
+    },
+    {
+      "type": "log",
+      "text": "✅ App rendering initiated",
+      "timestamp": "2025-10-08T22:29:45.093Z"
+    },
+    {
+      "type": "log",
+      "text": "AppRouter: Auth State Change: JSHandle@object",
+      "timestamp": "2025-10-08T22:29:45.155Z"
+    },
+    {
+      "type": "log",
+      "text": "AuthService: Supabase getUser completed",
+      "timestamp": "2025-10-08T22:29:45.202Z"
+    },
+    {
+      "type": "error",
+      "text": "AuthService: Supabase getUser error: JSHandle@error",
+      "timestamp": "2025-10-08T22:29:45.205Z"
+    },
+    {
+      "type": "log",
+      "text": "AuthService: This may be a temporary Supabase connectivity issue",
+      "timestamp": "2025-10-08T22:29:45.206Z"
+    },
+    {
+      "type": "log",
+      "text": "App.tsx: Rendering main app component",
+      "timestamp": "2025-10-08T22:29:45.208Z"
+    },
+    {
+      "type": "log",
+      "text": "🛡️ ProtectedRoute render: JSHandle@object",
+      "timestamp": "2025-10-08T22:29:45.222Z"
+    },
+    {
+      "type": "log",
+      "text": "AppRouter: Auth State Change: JSHandle@object",
+      "timestamp": "2025-10-08T22:29:45.240Z"
+    },
+    {
+      "type": "log",
+      "text": "LoginPage: Auth state changed: JSHandle@object",
+      "timestamp": "2025-10-08T22:29:45.599Z"
+    },
+    {
+      "type": "verbose",
+      "text": "[DOM] Input elements should have autocomplete attributes (suggested: \"current-password\"): (More info: https://goo.gl/9p2vKq) %o",
+      "timestamp": "2025-10-08T22:29:45.637Z"
+    }
+  ],
+  "errors": [
+    "AuthService: Supabase getUser error: JSHandle@error"
+  ],
+  "warnings": [],
+  "networkErrors": []
+}

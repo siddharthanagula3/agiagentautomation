@@ -259,11 +259,11 @@ const ChatAgentPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-screen bg-[#0d0e11] dark:bg-[#0d0e11] bg-gray-50">
+      <div className="flex flex-col h-screen bg-white dark:bg-[#0d0e11]">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400 dark:text-gray-400 text-gray-600" />
-            <p className="text-gray-400 dark:text-gray-400 text-gray-600">Loading AI agents...</p>
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-600 dark:text-gray-400" />
+            <p className="text-gray-600 dark:text-gray-400">Loading AI agents...</p>
           </div>
         </div>
       </div>
@@ -271,21 +271,21 @@ const ChatAgentPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#0d0e11]">
+    <div className="flex flex-col h-screen bg-white dark:bg-[#0d0e11]">
       {/* Header */}
-      <div className="bg-[#171717] border-b border-gray-800 px-6 py-4">
+      <div className="bg-gray-50 dark:bg-[#171717] border-b border-gray-200 dark:border-gray-800 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-medium text-white">AGI Agent Automation</h1>
-            <ChevronRight className="w-4 h-4 text-gray-600" />
-            <span className="text-gray-400">Chat Agent</span>
+            <h1 className="text-xl font-medium text-gray-900 dark:text-white">AGI Agent Automation</h1>
+            <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-600" />
+            <span className="text-gray-500 dark:text-gray-400">Chat Agent</span>
           </div>
           
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="sm"
-              className="border-gray-700 text-gray-300 hover:text-white hover:border-gray-600"
+              className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-gray-600"
               onClick={() => navigate('/workforce')}
             >
               Back to Workforce
@@ -297,11 +297,11 @@ const ChatAgentPage: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 flex">
         {/* Left Sidebar - Configuration */}
-        <div className="w-80 bg-[#171717] border-r border-gray-800 flex flex-col">
+        <div className="w-80 bg-gray-50 dark:bg-[#171717] border-r border-gray-200 dark:border-gray-800 flex flex-col">
           {/* New Prompt Button */}
-          <div className="p-4 border-b border-gray-800">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
             <Button 
-              className="w-full bg-white text-black hover:bg-gray-200 justify-start"
+              className="w-full bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 justify-start"
               onClick={handleAddNewPrompt}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -314,16 +314,16 @@ const ChatAgentPage: React.FC = () => {
             <div className="p-4 space-y-6">
               {/* Model Name */}
               <div>
-                <label className="text-xs text-gray-400 uppercase tracking-wider">Model</label>
+                <label className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Model</label>
                 <div className="mt-2 flex items-center gap-2">
                   <Input
                     value={agentName}
                     onChange={(e) => setAgentName(e.target.value)}
-                    className="bg-[#0d0e11] border-gray-700 text-white"
+                    className="bg-white dark:bg-[#0d0e11] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                     placeholder="Agent name"
                   />
                   {isDraft && (
-                    <Badge variant="outline" className="text-gray-400 border-gray-600">
+                    <Badge variant="outline" className="text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600">
                       Draft
                     </Badge>
                   )}
@@ -332,26 +332,26 @@ const ChatAgentPage: React.FC = () => {
 
               {/* Variables */}
               <div>
-                <label className="text-xs text-gray-400 uppercase tracking-wider">Variables</label>
+                <label className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Variables</label>
                 <div className="mt-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500">text</span>
-                    <span className="text-xs text-gray-600">format:</span>
-                    <Badge variant="outline" className="text-xs border-gray-700 text-gray-400">
+                    <span className="text-sm text-gray-600 dark:text-gray-500">text</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-600">format:</span>
+                    <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400">
                       text
                     </Badge>
-                    <span className="text-xs text-gray-600">effect:</span>
-                    <Badge variant="outline" className="text-xs border-gray-700 text-gray-400">
+                    <span className="text-xs text-gray-500 dark:text-gray-600">effect:</span>
+                    <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400">
                       high
                     </Badge>
                   </div>
-                  <div className="mt-2 flex items-center gap-2 text-xs text-gray-600">
+                  <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-600">
                     <span>verbosity:</span>
-                    <Badge variant="outline" className="text-xs border-gray-700 text-gray-400">
+                    <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400">
                       medium
                     </Badge>
                     <span>store:</span>
-                    <Badge variant="outline" className="text-xs border-gray-700 text-blue-400">
+                    <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-700 text-blue-600 dark:text-blue-400">
                       true
                     </Badge>
                   </div>
@@ -361,11 +361,11 @@ const ChatAgentPage: React.FC = () => {
               {/* Tools Section */}
               <div>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 bg-[#0d0e11] border border-gray-700">
-                    <TabsTrigger value="hosted" className="data-[state=active]:bg-gray-800">
+                  <TabsList className="grid w-full grid-cols-2 bg-white dark:bg-[#0d0e11] border border-gray-300 dark:border-gray-700">
+                    <TabsTrigger value="hosted" className="data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-800">
                       Hosted
                     </TabsTrigger>
-                    <TabsTrigger value="local" className="data-[state=active]:bg-gray-800">
+                    <TabsTrigger value="local" className="data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-800">
                       Local
                     </TabsTrigger>
                   </TabsList>

@@ -68,7 +68,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
 import { useTheme } from '@/components/theme-provider';
-import { agentChatService, type AgentConfig, type Message } from '@/services/agent-chat-service';
+import { agentsService } from '@/services/agents-service';
 
 // Types
 
@@ -94,6 +94,8 @@ interface AgentChatUIProps {
   conversationId: string;
   userId: string;
   agentConfig: AgentConfig;
+  threadId?: string;
+  assistantId?: string;
   className?: string;
   onSessionCreated?: (session: any) => void;
   onError?: (error: Error) => void;
@@ -553,6 +555,8 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
   conversationId,
   userId,
   agentConfig,
+  threadId,
+  assistantId,
   className,
   onSessionCreated,
   onError,
@@ -575,7 +579,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
         setIsLoading(true);
         
         // Load existing messages
-        const existingMessages = await agentChatService.getMessages(conversationId);
+        const existingMessages = await agentsService.getConversationMessages(conversationId);
         
         if (existingMessages.length === 0) {
           // Create initial system message for new conversations
@@ -589,7 +593,14 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
           
           setMessages([systemMessage]);
         } else {
-          setMessages(existingMessages);
+          setMessages(existingMessages.map(msg => ({
+            id: msg.id,
+            role: msg.role as 'user' | 'assistant' | 'system' | 'tool',
+            content: msg.content,
+            timestamp: new Date(msg.createdAt),
+            status: 'sent' as 'sending' | 'sent' | 'error' | 'streaming',
+            metadata: msg.metadata,
+          })));
         }
         
         // Create session
@@ -605,6 +616,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
         
       } catch (err) {
         const error = err as Error;
+        console.error('Error initializing conversation:', error);
         setError(error.message);
         onError?.(error);
       } finally {
@@ -617,7 +629,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
 
   // Send message
   const handleSendMessage = async (content: string, attachments?: Attachment[]) => {
-    if (!content.trim()) return;
+    if (!content.trim() || !threadId || !assistantId) return;
 
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -632,133 +644,57 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
     setIsStreaming(true);
 
     try {
-      if (agentConfig.streaming) {
-        // Use streaming
-        await agentChatService.streamMessage(
-          conversationId,
-          content,
-          agentConfig,
-          (chunk) => {
-            if (chunk.type === 'start') {
-              // Message started streaming
-              setMessages(prev => [...prev, {
-                id: chunk.messageId,
-                role: 'assistant',
-                content: '',
-                timestamp: new Date(),
-                status: 'streaming',
-                metadata: { model: agentConfig.model },
-              }]);
-            } else if (chunk.type === 'content') {
-              // Append content
-              setMessages(prev => prev.map(msg => 
-                msg.id === chunk.messageId 
-                  ? { ...msg, content: msg.content + chunk.content }
-                  : msg
-              ));
-            }
+      // Send message to agent
+      const response = await agentsService.sendAgentMessage({
+        conversationId,
+        userId,
+        message: content,
+        threadId,
+        assistantId,
+        streaming: agentConfig.streaming,
+      });
+
+      if (response.success && response.response) {
+        const agentMessage: Message = {
+          id: response.messageId || `agent-${Date.now()}`,
+          role: 'assistant',
+          content: response.response,
+          timestamp: new Date(),
+          status: 'sent',
+          metadata: {
+            model: agentConfig.model,
+            threadMessageId: response.threadMessageId,
+            runId: response.runId,
           },
-          (message) => {
-            // Message complete
-            setMessages(prev => prev.map(msg => 
-              msg.id === message.id 
-                ? { ...message, status: 'sent' }
-                : msg
-            ));
-            setIsStreaming(false);
-          },
-          (error) => {
-            setError(error.message);
-            onError?.(error);
-            setIsStreaming(false);
-          }
-        );
-      } else {
-        // Use non-streaming
-        const agentMessage = await agentChatService.sendMessage(
-          conversationId,
-          content,
-          agentConfig,
-          attachments
-        );
+        };
         
         setMessages(prev => [...prev, agentMessage]);
-        setIsStreaming(false);
+      } else {
+        throw new Error(response.error || 'Failed to get agent response');
       }
+      
+      setIsStreaming(false);
 
     } catch (err) {
       const error = err as Error;
+      console.error('Error sending message:', error);
       setError(error.message);
       onError?.(error);
       setIsStreaming(false);
+      
+      // Mark user message as error
+      setMessages(prev => prev.map(msg => 
+        msg.id === userMessage.id 
+          ? { ...msg, status: 'error' }
+          : msg
+      ));
     }
   };
 
-  // Handle tool invocation
+  // Handle tool invocation (placeholder for future enhancement)
   const handleToolInvoke = async (toolName: string, parameters: any) => {
-    const toolMessage: Message = {
-      id: `tool-${Date.now()}`,
-      role: 'tool',
-      content: `Invoking tool: ${toolName}`,
-      timestamp: new Date(),
-      status: 'sending',
-      metadata: {
-        tool: {
-          name: toolName,
-          parameters,
-          status: 'running',
-        },
-      },
-    };
-
-    setMessages(prev => [...prev, toolMessage]);
-
-    try {
-      const toolExecution = await agentChatService.invokeTool(
-        conversationId,
-        toolName,
-        parameters
-      );
-
-      // Update message with result
-      setMessages(prev => prev.map(msg => 
-        msg.id === toolMessage.id 
-          ? {
-              ...msg,
-              status: 'sent',
-              metadata: {
-                ...msg.metadata,
-                tool: {
-                  ...msg.metadata?.tool!,
-                  status: toolExecution.status,
-                  result: toolExecution.result,
-                },
-              },
-            }
-          : msg
-      ));
-
-    } catch (err) {
-      const error = err as Error;
-      
-      // Update message with error
-      setMessages(prev => prev.map(msg => 
-        msg.id === toolMessage.id 
-          ? {
-              ...msg,
-              status: 'error',
-              metadata: {
-                ...msg.metadata,
-                tool: {
-                  ...msg.metadata?.tool!,
-                  status: 'error',
-                  result: { error: error.message },
-                },
-              },
-            }
-          : msg
-      ));
-    }
+    console.log('Tool invocation requested:', toolName, parameters);
+    toast.info(`Tool "${toolName}" invoked - implementation pending`);
   };
 
   if (error) {

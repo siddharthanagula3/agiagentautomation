@@ -46,8 +46,9 @@ export const handler: Handler = async (event) => {
             employeeId: finalEmployeeId,
             employeeRole: finalEmployeeRole,
             provider: finalProvider,
-            subscriptionId: finalSubscriptionId,
-            customerId: finalCustomerId,
+            // Note: Stripe columns will be added later via database migration
+            // subscriptionId: finalSubscriptionId,
+            // customerId: finalCustomerId,
           });
         } else {
           return {
@@ -83,8 +84,9 @@ export const handler: Handler = async (event) => {
       employeeId,
       employeeRole,
       provider: provider || 'chatgpt',
-      subscriptionId,
-      customerId,
+      // Note: Stripe columns will be added later via database migration
+      // subscriptionId,
+      // customerId,
     });
 
   } catch (error) {
@@ -104,8 +106,9 @@ async function createPurchasedEmployee(data: {
   employeeId: string;
   employeeRole: string;
   provider: string;
-  subscriptionId?: string;
-  customerId?: string;
+  // Note: Stripe columns will be added later via database migration
+  // subscriptionId?: string;
+  // customerId?: string;
 }) {
   try {
 

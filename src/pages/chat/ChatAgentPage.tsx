@@ -381,30 +381,32 @@ const ChatAgentPage: React.FC = () => {
                             className={cn(
                               "p-3 rounded-lg border cursor-pointer transition-all",
                               isSelected
-                                ? "bg-gray-800 border-gray-600"
-                                : "bg-[#0d0e11] border-gray-700 hover:border-gray-600"
+                                ? "bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+                                : "bg-white dark:bg-[#0d0e11] border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                             )}
                             onClick={() => handleToolToggle(tool.name)}
                           >
                             <div className="flex items-start gap-3">
                               <div className={cn(
                                 "w-8 h-8 rounded flex items-center justify-center",
-                                isSelected ? "bg-gray-700" : "bg-gray-800"
+                                isSelected 
+                                  ? "bg-gray-200 dark:bg-gray-700" 
+                                  : "bg-gray-100 dark:bg-gray-800"
                               )}>
-                                <Icon className="w-4 h-4 text-gray-400" />
+                                <Icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-sm font-medium text-white">
+                                  <span className="text-sm font-medium text-gray-900 dark:text-white">
                                     {tool.name}
                                   </span>
                                   {!tool.enabled && (
-                                    <Badge variant="outline" className="text-xs border-gray-700 text-gray-500">
+                                    <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-700 text-gray-500">
                                       Coming soon
                                     </Badge>
                                   )}
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                                   {tool.description}
                                 </p>
                               </div>
@@ -426,23 +428,25 @@ const ChatAgentPage: React.FC = () => {
                             className={cn(
                               "p-3 rounded-lg border cursor-pointer transition-all",
                               isSelected
-                                ? "bg-gray-800 border-gray-600"
-                                : "bg-[#0d0e11] border-gray-700 hover:border-gray-600"
+                                ? "bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+                                : "bg-white dark:bg-[#0d0e11] border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                             )}
                             onClick={() => handleToolToggle(tool.name)}
                           >
                             <div className="flex items-start gap-3">
                               <div className={cn(
                                 "w-8 h-8 rounded flex items-center justify-center",
-                                isSelected ? "bg-gray-700" : "bg-gray-800"
+                                isSelected 
+                                  ? "bg-gray-200 dark:bg-gray-700" 
+                                  : "bg-gray-100 dark:bg-gray-800"
                               )}>
-                                <Icon className="w-4 h-4 text-gray-400" />
+                                <Icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                               </div>
                               <div className="flex-1">
-                                <span className="text-sm font-medium text-white">
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">
                                   {tool.name}
                                 </span>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                                   {tool.description}
                                 </p>
                               </div>
@@ -457,21 +461,21 @@ const ChatAgentPage: React.FC = () => {
 
               {/* Developer Message */}
               <div>
-                <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">
+                <label className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 block">
                   Developer message
                 </label>
                 <Textarea
                   value={agentInstructions}
                   onChange={(e) => setAgentInstructions(e.target.value)}
                   placeholder="You are a research assistant and reliable information. In all your responses, provide accurate information and, when appropriate, cite your sources."
-                  className="min-h-[120px] bg-[#0d0e11] border-gray-700 text-white placeholder:text-gray-600"
+                  className="min-h-[120px] bg-white dark:bg-[#0d0e11] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
                 />
               </div>
 
               {/* Action Buttons */}
               <div className="flex gap-2">
                 <Button
-                  className="flex-1 bg-white text-black hover:bg-gray-200"
+                  className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
                   onClick={handleSaveConfiguration}
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -480,7 +484,7 @@ const ChatAgentPage: React.FC = () => {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="border-gray-700 text-gray-400 hover:text-white"
+                  className="border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 >
                   <Settings className="w-4 h-4" />
                 </Button>
@@ -490,14 +494,14 @@ const ChatAgentPage: React.FC = () => {
         </div>
 
         {/* Right Side - Chat Interface */}
-        <div className="flex-1 flex flex-col bg-[#0d0e11]">
+        <div className="flex-1 flex flex-col bg-gray-100 dark:bg-[#0d0e11]">
           {/* Chat Header */}
-          <div className="bg-[#171717] border-b border-gray-800 px-6 py-3">
+          <div className="bg-white dark:bg-[#171717] border-b border-gray-200 dark:border-gray-800 px-6 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-400">Topic:</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Topic:</span>
                 <Select defaultValue="general">
-                  <SelectTrigger className="w-40 h-8 bg-[#0d0e11] border-gray-700 text-white">
+                  <SelectTrigger className="w-40 h-8 bg-white dark:bg-[#0d0e11] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

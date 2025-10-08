@@ -167,13 +167,13 @@ function App() {
               {/* Main Features */}
               <Route path="workforce" element={<WorkforcePage />} />
               
-        {/* Multi-LLM Chat (Latest) */}
-        <Route path="chat" element={<TabbedLLMChatPage />} />
-        <Route path="chat/:sessionId" element={<TabbedLLMChatPage />} />
+        {/* Agent SDK Chat (Working) */}
+        <Route path="chat" element={<AgentSDKChatPage />} />
+        <Route path="chat/:sessionId" element={<AgentSDKChatPage />} />
         
-        {/* Agent SDK Chat (Previous) */}
-        <Route path="chat-agent" element={<AgentSDKChatPage />} />
-        <Route path="chat-agent/:sessionId" element={<AgentSDKChatPage />} />
+        {/* Multi-LLM Chat (Temporarily Disabled) */}
+        <Route path="chat-multi" element={<TabbedLLMChatPage />} />
+        <Route path="chat-multi/:sessionId" element={<TabbedLLMChatPage />} />
               
               {/* Enhanced Chat (Previous) */}
               <Route path="chat-enhanced" element={<ChatPageEnhanced />} />

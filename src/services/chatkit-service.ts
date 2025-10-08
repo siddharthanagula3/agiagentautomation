@@ -4,7 +4,7 @@
  * Based on OpenAI ChatKit patterns
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase-client';
 
 // Types
 export interface ChatKitSession {
@@ -42,11 +42,6 @@ export interface ChatKitWorkflow {
   createdAt: Date;
   updatedAt: Date;
 }
-
-// Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // API base URL
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';

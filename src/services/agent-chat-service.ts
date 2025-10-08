@@ -4,7 +4,7 @@
  * Implements streaming, tool execution, and conversation management
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase-client';
 
 // Types
 export interface AgentConfig {
@@ -68,10 +68,7 @@ export interface ToolExecution {
   created_at: Date;
 }
 
-// Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Supabase client is imported from centralized location
 
 // API base URL
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';

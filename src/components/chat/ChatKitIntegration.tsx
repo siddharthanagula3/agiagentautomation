@@ -59,6 +59,13 @@ declare global {
   }
 }
 
+// Check if ChatKit is available
+const isChatKitAvailable = () => {
+  return typeof window !== 'undefined' && 
+         window.ChatKit && 
+         window.ChatKit.loaded !== false;
+};
+
 interface PurchasedEmployee {
   id: string;
   name: string;
@@ -343,7 +350,23 @@ const ChatKitIntegration: React.FC<ChatKitIntegrationProps> = ({ className }) =>
 
         {/* ChatKit Interface */}
         <div className="flex-1 flex flex-col">
-          {chatKitConfig ? (
+          {!isChatKitAvailable() ? (
+            <div className="flex-1 flex items-center justify-center">
+              <Card className="max-w-md mx-auto">
+                <CardContent className="p-6 text-center">
+                  <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+                  <h2 className="text-lg font-semibold mb-2">ChatKit Not Available</h2>
+                  <p className="text-gray-600 mb-4">
+                    The ChatKit script is not available. Please use the regular chat interface instead.
+                  </p>
+                  <Button onClick={() => window.location.href = '/chat'}>
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Go to Regular Chat
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          ) : chatKitConfig ? (
             <div className="flex-1">
               <openai-chatkit
                 ref={chatkitRef}

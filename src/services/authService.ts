@@ -1,5 +1,6 @@
 import { supabase } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
+import { logger } from '@/lib/logger';
 
 type User = Database['public']['Tables']['users']['Row'];
 
@@ -49,7 +50,7 @@ async login(loginData: LoginData): Promise<AuthResponse> {
   try {
     // Handle demo mode separately at the top for clarity.
     if (this.isDemoMode()) {
-      console.log('AuthService: Running in demo mode');
+      logger.info('Running in demo mode');
       if (loginData.email === 'demo@example.com' && loginData.password === 'demo123') {
         const demoUser: AuthUser = {
           id: 'demo-user-123',
@@ -235,7 +236,7 @@ async login(loginData: LoginData): Promise<AuthResponse> {
         return { user: null, error: 'No session in demo mode' };
       }
       
-      console.log('AuthService: Attempting to get current user from Supabase...');
+      logger.auth('Attempting to get current user from Supabase...');
       
       // Add timeout to prevent hanging
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -258,7 +259,7 @@ async login(loginData: LoginData): Promise<AuthResponse> {
         return { user: null, error: 'No user found' };
       }
 
-      console.log('AuthService: User found:', user.email);
+      logger.auth('User found:', user.email);
 
       // Get user profile with proper headers
       console.log('AuthService: Fetching user profile for ID:', user.id);

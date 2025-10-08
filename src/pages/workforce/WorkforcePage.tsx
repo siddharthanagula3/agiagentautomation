@@ -356,7 +356,7 @@ const WorkforcePage: React.FC = () => {
                               </p>
 
                               <div className="flex gap-2">
-                                <Link to={`/chat?employee=${emp?.id}`} className="flex-1">
+                                <Link to={`/chat-agent?employee=${emp?.id}`} className="flex-1">
                                   <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50 transition-colors">
                                     <MessageSquare className="mr-2 h-4 w-4" />
                                     Chat
@@ -376,7 +376,7 @@ const WorkforcePage: React.FC = () => {
                       <p className="text-sm text-muted-foreground">
                         Showing {purchased.length} {purchased.length === 1 ? 'employee' : 'employees'}
                       </p>
-                      <Link to="/chat">
+                      <Link to="/chat-agent">
                         <Button variant="outline">
                           Start Working
                           <ArrowRight className="ml-2 h-4 w-4" />
@@ -449,7 +449,7 @@ const WorkforcePage: React.FC = () => {
                           View Detailed Analytics
                         </Button>
                       </Link>
-                      <Link to="/chat">
+                      <Link to="/chat-agent">
                         <Button className="gradient-primary text-white">
                           <MessageSquare className="mr-2 h-4 w-4" />
                           Start Task

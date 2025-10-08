@@ -1,16 +1,25 @@
 /**
  * Chat Agent Page
  * Advanced AI agent interface using OpenAI's Agent SDK
- * Implements streaming, tools, and multi-agent orchestration
+ * Implements the exact interface from the OpenAI platform
  */
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -19,84 +28,136 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+import {
   Bot,
   Plus,
   MessageSquare,
-  ShoppingCart,
   Loader2,
   AlertCircle,
   Settings,
-  Sparkles,
-  Zap,
-  Users,
-  Clock,
-  TrendingUp,
-  Activity,
-  Brain,
-  Globe,
-  Search,
-  ArrowLeft,
-  Star,
-  Crown,
-  Wrench,
   Play,
   Square,
   RotateCcw,
+  Code,
+  Search,
+  FileText,
+  Database,
+  Globe,
+  Wrench,
+  Copy,
+  Download,
+  Upload,
+  Terminal,
+  Brain,
+  Sparkles,
+  Activity,
+  ChevronRight,
+  Save,
+  Edit,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { listPurchasedEmployees } from '@/services/supabase-employees';
-import { AI_EMPLOYEES } from '@/data/ai-employees';
+import { openAIAgentsService, type AgentSession, type AgentConfig } from '@/services/openai-agents-service';
 import AgentChatUI from '@/components/chat/AgentChatUI';
-import { agentsService, type AgentSession } from '@/services/agents-service';
 
 interface PurchasedEmployee {
   id: string;
+  employee_id: string;
   name: string;
   role: string;
   description: string;
   avatar_url?: string;
   created_at: string;
   status: 'active' | 'inactive';
-  capabilities: string[];
-  pricing: {
-    monthly: number;
-    yearly: number;
-  };
-  usage_stats: {
-    messages_sent: number;
-    last_used: string;
-    total_sessions: number;
-  };
+  capabilities?: string[];
+  provider?: string;
 }
 
-interface AgentConfig {
-  id: string;
+interface ToolDefinition {
   name: string;
   description: string;
-  model: string;
-  persona: string;
-  tools: string[];
-  capabilities: string[];
-  streaming: boolean;
-  maxTokens: number;
-  temperature: number;
+  enabled: boolean;
+  icon: React.ComponentType<{ className?: string }>;
+  category: 'local' | 'function' | 'custom' | 'image';
 }
+
+const availableTools: ToolDefinition[] = [
+  {
+    name: 'Web Search',
+    description: 'Search the web for information',
+    enabled: true,
+    icon: Globe,
+    category: 'local',
+  },
+  {
+    name: 'Code Interpreter',
+    description: 'Execute code and return results',
+    enabled: true,
+    icon: Code,
+    category: 'function',
+  },
+  {
+    name: 'File Search',
+    description: 'Search through uploaded files',
+    enabled: true,
+    icon: FileText,
+    category: 'local',
+  },
+  {
+    name: 'Image Generation',
+    description: 'Generate images from text descriptions',
+    enabled: false,
+    icon: Sparkles,
+    category: 'image',
+  },
+  {
+    name: 'Data Analysis',
+    description: 'Analyze data and provide insights',
+    enabled: true,
+    icon: Database,
+    category: 'function',
+  },
+  {
+    name: 'Custom Function',
+    description: 'Custom tool implementation',
+    enabled: false,
+    icon: Wrench,
+    category: 'custom',
+  },
+];
 
 const ChatAgentPage: React.FC = () => {
   const navigate = useNavigate();
   const { sessionId } = useParams();
+  const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
   
+  // State
   const [employees, setEmployees] = useState<PurchasedEmployee[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<PurchasedEmployee | null>(null);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(sessionId || null);
   const [agentSession, setAgentSession] = useState<AgentSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showEmployeeSelector, setShowEmployeeSelector] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [agentConfig, setAgentConfig] = useState<AgentConfig | null>(null);
+  const [showNewPromptDialog, setShowNewPromptDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState('hosted');
+  
+  // Agent configuration state
+  const [agentName, setAgentName] = useState('gpt-4o');
+  const [model, setModel] = useState('gpt-4o');
+  const [agentInstructions, setAgentInstructions] = useState('');
+  const [selectedTools, setSelectedTools] = useState<string[]>(['Web Search']);
+  const [isDraft, setIsDraft] = useState(true);
+
+  // Get employee ID from query params
+  const employeeIdFromParams = searchParams.get('employee');
 
   // Load purchased employees
   useEffect(() => {
@@ -108,13 +169,26 @@ const ChatAgentPage: React.FC = () => {
         const data = await listPurchasedEmployees(user.id);
         setEmployees(data);
         
-        // Auto-select first employee if available
-        if (data.length > 0 && !selectedEmployee) {
-          setSelectedEmployee(data[0]);
+        // Select employee from URL param or first available
+        if (data.length > 0) {
+          let employeeToSelect = data[0];
+          
+          // If employee ID in URL, try to find it
+          if (employeeIdFromParams) {
+            const foundEmployee = data.find(emp => emp.id === employeeIdFromParams);
+            if (foundEmployee) {
+              employeeToSelect = foundEmployee;
+            }
+          }
+          
+          setSelectedEmployee(employeeToSelect);
+          setAgentName(employeeToSelect.name);
+          setAgentInstructions(
+            `You are ${employeeToSelect.name}, a professional ${employeeToSelect.role}. ${employeeToSelect.description}`
+          );
         }
       } catch (err) {
         console.error('Failed to load employees:', err);
-        setError('Failed to load AI employees');
         toast.error('Failed to load AI employees');
       } finally {
         setIsLoading(false);
@@ -122,62 +196,38 @@ const ChatAgentPage: React.FC = () => {
     };
 
     loadEmployees();
-  }, [user?.id, selectedEmployee]);
+  }, [user?.id, employeeIdFromParams]);
 
-  // Generate session ID if not provided
+  // Create agent session when employee is selected
   useEffect(() => {
-    if (!activeSessionId && selectedEmployee) {
-      const newSessionId = `agent-${selectedEmployee.id}-${Date.now()}`;
-      setActiveSessionId(newSessionId);
+    if (selectedEmployee && user?.id && !agentSession) {
+      createAgentSession();
     }
-  }, [activeSessionId, selectedEmployee]);
+  }, [selectedEmployee, user?.id]);
 
-  // Create agent config from selected employee
-  useEffect(() => {
-    if (selectedEmployee) {
-      const config: AgentConfig = {
-        id: selectedEmployee.id,
-        name: selectedEmployee.name,
-        description: selectedEmployee.description,
-        model: 'gpt-4o',
-        persona: `You are ${selectedEmployee.name}, a professional ${selectedEmployee.role}. You are part of an AI workforce and should provide expert assistance in your field.`,
-        tools: ['web_search', 'code_interpreter', 'file_upload', 'data_analysis'],
-        capabilities: selectedEmployee.capabilities,
-        streaming: true,
-        maxTokens: 4000,
-        temperature: 0.7,
-      };
-      setAgentConfig(config);
-    }
-  }, [selectedEmployee]);
+  // Create agent session
+  const createAgentSession = async () => {
+    if (!selectedEmployee || !user?.id) return;
 
-  // Handle employee selection
-  const handleEmployeeSelect = async (employee: PurchasedEmployee) => {
     try {
       setIsLoading(true);
-      setSelectedEmployee(employee);
-      setShowEmployeeSelector(false);
       
-      // Find matching AI employee data
-      const aiEmployee = AI_EMPLOYEES.find(emp => emp.id === employee.employee_id);
-      const capabilities = aiEmployee?.capabilities || employee.capabilities || [];
+      // Create agent from employee
+      const agent = openAIAgentsService.createAgentFromEmployee(selectedEmployee);
       
-      // Create agent session
-      const session = await agentsService.createAgentSession(
-        user!.id,
-        employee.id,
-        employee.name,
-        employee.role,
-        capabilities
+      // Start session
+      const session = await openAIAgentsService.startSession(
+        user.id,
+        selectedEmployee.id,
+        agent
       );
       
       setAgentSession(session);
-      setActiveSessionId(session.conversationId);
       
-      // Update URL
-      navigate(`/chat-agent/${session.conversationId}`, { replace: true });
-      
-      toast.success(`Connected to ${employee.name}`);
+      // Update URL if needed
+      if (!sessionId) {
+        navigate(`/chat-agent/${session.sessionId}`, { replace: true });
+      }
     } catch (error) {
       console.error('Error creating agent session:', error);
       toast.error('Failed to create agent session');
@@ -186,299 +236,394 @@ const ChatAgentPage: React.FC = () => {
     }
   };
 
-  // Handle errors
-  const handleError = (error: Error) => {
-    console.error('Agent error:', error);
-    toast.error(`Agent error: ${error.message}`);
+  // Handle tool toggle
+  const handleToolToggle = (toolName: string) => {
+    setSelectedTools(prev => {
+      if (prev.includes(toolName)) {
+        return prev.filter(t => t !== toolName);
+      }
+      return [...prev, toolName];
+    });
   };
 
-  // Get OpenAI provider status
-  const getProviderStatus = () => {
-    const openaiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    const configured = !!openaiKey;
-    
-    return { 
-      status: [{ provider: 'openai', configured }],
-      configuredCount: configured ? 1 : 0, 
-      total: 1 
-    };
+  // Handle save configuration
+  const handleSaveConfiguration = () => {
+    setIsDraft(false);
+    toast.success('Agent configuration saved');
   };
 
-  const providerStatus = getProviderStatus();
+  // Handle add new prompt
+  const handleAddNewPrompt = () => {
+    setShowNewPromptDialog(true);
+  };
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-screen bg-gray-50">
+      <div className="flex flex-col h-screen bg-[#0d0e11]">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-            <p className="text-gray-600">Loading AI agents...</p>
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
+            <p className="text-gray-400">Loading AI agents...</p>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col h-screen bg-gray-50">
-        <div className="flex-1 flex items-center justify-center">
-          <Card className="max-w-md mx-auto">
-            <CardContent className="p-6 text-center">
-              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-lg font-semibold mb-2">Error Loading Agents</h2>
-              <p className="text-gray-600 mb-4">{error}</p>
-              <Button onClick={() => window.location.reload()}>
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Retry
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  if (employees.length === 0) {
-    return (
-      <div className="flex flex-col h-screen bg-gray-50">
-        <div className="flex-1 flex items-center justify-center">
-          <Card className="max-w-md mx-auto">
-            <CardContent className="p-6 text-center">
-              <Bot className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-lg font-semibold mb-2">No AI Agents Found</h2>
-              <p className="text-gray-600 mb-4">
-                You need to purchase AI employees from the marketplace to start using the advanced agent interface.
-              </p>
-              <Button onClick={() => navigate('/marketplace')}>
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Browse Marketplace
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-[#0d0e11]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-[#171717] border-b border-gray-800 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/workforce')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Workforce
-            </Button>
-            
-            <div className="h-6 w-px bg-gray-300" />
-            
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">Chat Agent</h1>
-                <p className="text-sm text-gray-600">
-                  Advanced AI agent interface with streaming, tools, and multi-agent orchestration
-                </p>
-              </div>
-            </div>
+            <h1 className="text-xl font-medium text-white">AGI Agent Automation</h1>
+            <ChevronRight className="w-4 h-4 text-gray-600" />
+            <span className="text-gray-400">Chat Agent</span>
           </div>
-
+          
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowEmployeeSelector(true)}
-              className="flex items-center gap-2"
+              className="border-gray-700 text-gray-300 hover:text-white hover:border-gray-600"
+              onClick={() => navigate('/workforce')}
             >
-              <Users className="w-4 h-4" />
-              Switch Agent
+              Back to Workforce
             </Button>
-            
-            <Badge variant="outline" className="flex items-center gap-1">
-              <Star className="w-3 h-3" />
-              Advanced
-            </Badge>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 flex">
-        {/* Sidebar */}
-        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-          {/* Agent Info */}
-          {selectedEmployee && agentConfig && (
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center">
-                  <Bot className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{selectedEmployee.name}</h3>
-                  <p className="text-sm text-gray-600">{selectedEmployee.role}</p>
-                </div>
-              </div>
-              
-              <p className="text-sm text-gray-600 mb-4">{selectedEmployee.description}</p>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Model</span>
-                  <span className="font-medium">{agentConfig.model}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Streaming</span>
-                  <span className="font-medium">{agentConfig.streaming ? 'Enabled' : 'Disabled'}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Tools</span>
-                  <span className="font-medium">{agentConfig.tools.length}</span>
-                </div>
-              </div>
-            </div>
-          )}
+        {/* Left Sidebar - Configuration */}
+        <div className="w-80 bg-[#171717] border-r border-gray-800 flex flex-col">
+          {/* New Prompt Button */}
+          <div className="p-4 border-b border-gray-800">
+            <Button 
+              className="w-full bg-white text-black hover:bg-gray-200 justify-start"
+              onClick={handleAddNewPrompt}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              New prompt
+            </Button>
+          </div>
 
-          {/* Agent Tools */}
-          {agentConfig && (
-            <div className="p-6 border-b border-gray-200">
-              <h4 className="font-medium text-gray-900 mb-3">Available Tools</h4>
-              <div className="space-y-2">
-                {agentConfig.tools.map((tool, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Wrench className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-600 capitalize">{tool.replace('_', ' ')}</span>
-                  </div>
-                ))}
+          {/* Model Configuration */}
+          <ScrollArea className="flex-1">
+            <div className="p-4 space-y-6">
+              {/* Model Name */}
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wider">Model</label>
+                <div className="mt-2 flex items-center gap-2">
+                  <Input
+                    value={agentName}
+                    onChange={(e) => setAgentName(e.target.value)}
+                    className="bg-[#0d0e11] border-gray-700 text-white"
+                    placeholder="Agent name"
+                  />
+                  {isDraft && (
+                    <Badge variant="outline" className="text-gray-400 border-gray-600">
+                      Draft
+                    </Badge>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
 
-          {/* Provider Status */}
-          <div className="p-6 border-b border-gray-200">
-            <h4 className="font-medium text-gray-900 mb-3">Provider Status</h4>
-            <div className="space-y-2">
-              {(providerStatus.status || []).map(({ provider, configured }) => (
-                <div key={provider} className="flex items-center justify-between">
+              {/* Variables */}
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wider">Variables</label>
+                <div className="mt-2">
                   <div className="flex items-center gap-2">
-                    {provider === 'openai' && <Brain className="w-4 h-4 text-green-500" />}
-                    {provider === 'anthropic' && <Sparkles className="w-4 h-4 text-orange-500" />}
-                    {provider === 'google' && <Globe className="w-4 h-4 text-blue-500" />}
-                    {provider === 'perplexity' && <Search className="w-4 h-4 text-purple-500" />}
-                    <span className="text-sm capitalize">{provider}</span>
+                    <span className="text-sm text-gray-500">text</span>
+                    <span className="text-xs text-gray-600">format:</span>
+                    <Badge variant="outline" className="text-xs border-gray-700 text-gray-400">
+                      text
+                    </Badge>
+                    <span className="text-xs text-gray-600">effect:</span>
+                    <Badge variant="outline" className="text-xs border-gray-700 text-gray-400">
+                      high
+                    </Badge>
                   </div>
-                  <div className="flex items-center gap-1">
-                    {configured ? (
-                      <div className="w-2 h-2 rounded-full bg-green-500" />
-                    ) : (
-                      <div className="w-2 h-2 rounded-full bg-red-500" />
-                    )}
-                    <span className="text-xs text-gray-500">
-                      {configured ? 'Ready' : 'Not configured'}
-                    </span>
+                  <div className="mt-2 flex items-center gap-2 text-xs text-gray-600">
+                    <span>verbosity:</span>
+                    <Badge variant="outline" className="text-xs border-gray-700 text-gray-400">
+                      medium
+                    </Badge>
+                    <span>store:</span>
+                    <Badge variant="outline" className="text-xs border-gray-700 text-blue-400">
+                      true
+                    </Badge>
                   </div>
                 </div>
-              ))}
+              </div>
+
+              {/* Tools Section */}
+              <div>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 bg-[#0d0e11] border border-gray-700">
+                    <TabsTrigger value="hosted" className="data-[state=active]:bg-gray-800">
+                      Hosted
+                    </TabsTrigger>
+                    <TabsTrigger value="local" className="data-[state=active]:bg-gray-800">
+                      Local
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="hosted" className="space-y-3 mt-4">
+                    <div className="space-y-2">
+                      {availableTools.filter(t => t.category !== 'local').map((tool) => {
+                        const Icon = tool.icon;
+                        const isSelected = selectedTools.includes(tool.name);
+                        return (
+                          <div
+                            key={tool.name}
+                            className={cn(
+                              "p-3 rounded-lg border cursor-pointer transition-all",
+                              isSelected
+                                ? "bg-gray-800 border-gray-600"
+                                : "bg-[#0d0e11] border-gray-700 hover:border-gray-600"
+                            )}
+                            onClick={() => handleToolToggle(tool.name)}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={cn(
+                                "w-8 h-8 rounded flex items-center justify-center",
+                                isSelected ? "bg-gray-700" : "bg-gray-800"
+                              )}>
+                                <Icon className="w-4 h-4 text-gray-400" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium text-white">
+                                    {tool.name}
+                                  </span>
+                                  {!tool.enabled && (
+                                    <Badge variant="outline" className="text-xs border-gray-700 text-gray-500">
+                                      Coming soon
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {tool.description}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="local" className="space-y-3 mt-4">
+                    <div className="space-y-2">
+                      {availableTools.filter(t => t.category === 'local').map((tool) => {
+                        const Icon = tool.icon;
+                        const isSelected = selectedTools.includes(tool.name);
+                        return (
+                          <div
+                            key={tool.name}
+                            className={cn(
+                              "p-3 rounded-lg border cursor-pointer transition-all",
+                              isSelected
+                                ? "bg-gray-800 border-gray-600"
+                                : "bg-[#0d0e11] border-gray-700 hover:border-gray-600"
+                            )}
+                            onClick={() => handleToolToggle(tool.name)}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={cn(
+                                "w-8 h-8 rounded flex items-center justify-center",
+                                isSelected ? "bg-gray-700" : "bg-gray-800"
+                              )}>
+                                <Icon className="w-4 h-4 text-gray-400" />
+                              </div>
+                              <div className="flex-1">
+                                <span className="text-sm font-medium text-white">
+                                  {tool.name}
+                                </span>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {tool.description}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+
+              {/* Developer Message */}
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">
+                  Developer message
+                </label>
+                <Textarea
+                  value={agentInstructions}
+                  onChange={(e) => setAgentInstructions(e.target.value)}
+                  placeholder="You are a research assistant and reliable information. In all your responses, provide accurate information and, when appropriate, cite your sources."
+                  className="min-h-[120px] bg-[#0d0e11] border-gray-700 text-white placeholder:text-gray-600"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 bg-white text-black hover:bg-gray-200"
+                  onClick={handleSaveConfiguration}
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Save
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border-gray-700 text-gray-400 hover:text-white"
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* Right Side - Chat Interface */}
+        <div className="flex-1 flex flex-col bg-[#0d0e11]">
+          {/* Chat Header */}
+          <div className="bg-[#171717] border-b border-gray-800 px-6 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-400">Topic:</span>
+                <Select defaultValue="general">
+                  <SelectTrigger className="w-40 h-8 bg-[#0d0e11] border-gray-700 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="code">Code</SelectItem>
+                    <SelectItem value="research">Research</SelectItem>
+                    <SelectItem value="data">Data Analysis</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-700 text-gray-400 hover:text-white"
+                >
+                  <Activity className="w-4 h-4 mr-2" />
+                  View Traces
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-700 text-gray-400 hover:text-white"
+                >
+                  <Terminal className="w-4 h-4 mr-2" />
+                  Console
+                </Button>
+              </div>
             </div>
           </div>
 
-          {/* Capabilities */}
-          {selectedEmployee && (
-            <div className="p-6 flex-1">
-              <h4 className="font-medium text-gray-900 mb-3">Capabilities</h4>
-              <div className="flex flex-wrap gap-2">
-                {(selectedEmployee.capabilities || []).map((capability, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {capability}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Chat Interface */}
-        <div className="flex-1 flex flex-col">
-          {activeSessionId && selectedEmployee && agentConfig && agentSession ? (
+          {/* Chat Content */}
+          {agentSession && selectedEmployee ? (
             <AgentChatUI
-              conversationId={activeSessionId}
+              sessionId={agentSession.sessionId}
               userId={user?.id || ''}
-              agentConfig={agentConfig}
-              threadId={agentSession.threadId}
-              assistantId={agentSession.assistantId}
+              agentName={selectedEmployee.name}
+              agentRole={selectedEmployee.role}
+              agentCapabilities={selectedEmployee.capabilities || []}
               className="flex-1"
-              onError={handleError}
+              onError={(error) => {
+                console.error('Chat error:', error);
+                toast.error(`Error: ${error.message}`);
+              }}
+              onSessionEnd={() => {
+                openAIAgentsService.endSession(agentSession.sessionId);
+                setAgentSession(null);
+                navigate('/workforce');
+              }}
             />
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center mx-auto mb-4">
-                  <MessageSquare className="w-8 h-8 text-white" />
+                <div className="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="w-10 h-10 text-gray-600" />
                 </div>
-                <h2 className="text-xl font-semibold mb-2">Select an AI Agent</h2>
-                <p className="text-gray-600 mb-4">
-                  Choose an AI agent to start an advanced conversation
+                <h2 className="text-xl font-medium text-white mb-2">Your conversation will appear here</h2>
+                <p className="text-gray-500 max-w-md">
+                  Configure your agent on the left and start chatting. Your AI employee is ready to assist!
                 </p>
-                <Button onClick={() => setShowEmployeeSelector(true)}>
-                  <Users className="w-4 h-4 mr-2" />
-                  Select Agent
-                </Button>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Employee Selector Dialog */}
-      <Dialog open={showEmployeeSelector} onOpenChange={setShowEmployeeSelector}>
-        <DialogContent className="max-w-2xl">
+      {/* New Prompt Dialog */}
+      <Dialog open={showNewPromptDialog} onOpenChange={setShowNewPromptDialog}>
+        <DialogContent className="bg-[#171717] border-gray-800">
           <DialogHeader>
-            <DialogTitle>Select AI Agent</DialogTitle>
-            <DialogDescription>
-              Choose an AI agent to start an advanced conversation with
+            <DialogTitle className="text-white">Create New Agent Prompt</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Configure a new agent with specific instructions and tools
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid gap-4 py-4">
-            {(employees || []).map((employee) => (
-              <Card
-                key={employee.id}
-                className={cn(
-                  "cursor-pointer transition-all duration-200 hover:shadow-md",
-                  selectedEmployee?.id === employee.id && "ring-2 ring-purple-500"
-                )}
-                onClick={() => handleEmployeeSelect(employee)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center">
-                      <Bot className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{employee.name}</h3>
-                      <p className="text-sm text-gray-600">{employee.role}</p>
-                      <p className="text-xs text-gray-500 mt-1">{employee.description}</p>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="outline" className="mb-2">
-                        {employee.status}
-                      </Badge>
-                      <div className="text-xs text-gray-500">
-                        {(employee?.usage_stats?.messages_sent ?? 0)} messages
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm text-gray-300 mb-2 block">Agent Name</label>
+              <Input
+                placeholder="e.g., Research Assistant"
+                className="bg-[#0d0e11] border-gray-700 text-white"
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-300 mb-2 block">Instructions</label>
+              <Textarea
+                placeholder="Describe what this agent should do..."
+                className="min-h-[100px] bg-[#0d0e11] border-gray-700 text-white"
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-300 mb-2 block">Model</label>
+              <Select defaultValue="gpt-4o">
+                <SelectTrigger className="bg-[#0d0e11] border-gray-700 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gpt-4o">GPT-4o</SelectItem>
+                  <SelectItem value="gpt-4">GPT-4</SelectItem>
+                  <SelectItem value="gpt-3.5">GPT-3.5 Turbo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowNewPromptDialog(false)}
+              className="border-gray-700 text-gray-400 hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setShowNewPromptDialog(false);
+                toast.success('New agent prompt created');
+              }}
+              className="bg-white text-black hover:bg-gray-200"
+            >
+              Create
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

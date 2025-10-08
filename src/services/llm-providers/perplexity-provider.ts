@@ -12,9 +12,9 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Initialize clients
-const perplexity = new Perplexity({
+const perplexity = PERPLEXITY_API_KEY ? new Perplexity({
   apiKey: PERPLEXITY_API_KEY,
-});
+}) : null;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -117,6 +117,12 @@ export class PerplexityProvider {
       };
 
       // Make the API call
+      if (!perplexity) {
+        throw new PerplexityError(
+          'Perplexity client not initialized. Please check your API key configuration.',
+          'CLIENT_NOT_INITIALIZED'
+        );
+      }
       const response = await perplexity.chat.completions.create(request);
 
       // Process the response
@@ -231,6 +237,12 @@ export class PerplexityProvider {
       };
 
       // Make the streaming API call
+      if (!perplexity) {
+        throw new PerplexityError(
+          'Perplexity client not initialized. Please check your API key configuration.',
+          'CLIENT_NOT_INITIALIZED'
+        );
+      }
       const stream = await perplexity.chat.completions.create(request);
 
       let fullContent = '';

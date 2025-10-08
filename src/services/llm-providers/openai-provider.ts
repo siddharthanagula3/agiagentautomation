@@ -12,9 +12,9 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Initialize clients
-const openai = new OpenAI({
+const openai = OPENAI_API_KEY ? new OpenAI({
   apiKey: OPENAI_API_KEY,
-});
+}) : null;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -106,6 +106,12 @@ export class OpenAIProvider {
       };
 
       // Make the API call
+      if (!openai) {
+        throw new OpenAIError(
+          'OpenAI client not initialized. Please check your API key configuration.',
+          'CLIENT_NOT_INITIALIZED'
+        );
+      }
       const response = await openai.chat.completions.create(request);
 
       // Process the response
@@ -192,6 +198,12 @@ export class OpenAIProvider {
       };
 
       // Make the streaming API call
+      if (!openai) {
+        throw new OpenAIError(
+          'OpenAI client not initialized. Please check your API key configuration.',
+          'CLIENT_NOT_INITIALIZED'
+        );
+      }
       const stream = await openai.chat.completions.create(request);
 
       let fullContent = '';

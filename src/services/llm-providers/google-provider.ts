@@ -12,7 +12,7 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Initialize clients
-const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+const genAI = GOOGLE_API_KEY ? new GoogleGenerativeAI(GOOGLE_API_KEY) : null;
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export interface GoogleMessage {
@@ -73,13 +73,13 @@ export class GoogleProvider {
       ...config
     };
     
-    this.model = genAI.getGenerativeModel({ 
+    this.model = genAI ? genAI.getGenerativeModel({ 
       model: this.config.model,
       generationConfig: {
         maxOutputTokens: this.config.maxTokens,
         temperature: this.config.temperature,
       }
-    });
+    }) : null;
   }
 
   /**
@@ -108,6 +108,12 @@ export class GoogleProvider {
       };
 
       // Make the API call
+      if (!this.model) {
+        throw new GoogleError(
+          'Google client not initialized. Please check your API key configuration.',
+          'CLIENT_NOT_INITIALIZED'
+        );
+      }
       const result = await this.model.generateContent(prompt, generationConfig);
       const response = await result.response;
 
@@ -206,6 +212,12 @@ export class GoogleProvider {
       };
 
       // Make the streaming API call
+      if (!this.model) {
+        throw new GoogleError(
+          'Google client not initialized. Please check your API key configuration.',
+          'CLIENT_NOT_INITIALIZED'
+        );
+      }
       const result = await this.model.generateContentStream(prompt, generationConfig);
 
       let fullContent = '';

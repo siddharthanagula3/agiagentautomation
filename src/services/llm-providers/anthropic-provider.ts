@@ -12,9 +12,9 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Initialize clients
-const anthropic = new Anthropic({
+const anthropic = ANTHROPIC_API_KEY ? new Anthropic({
   apiKey: ANTHROPIC_API_KEY,
-});
+}) : null;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -106,6 +106,12 @@ export class AnthropicProvider {
       };
 
       // Make the API call
+      if (!anthropic) {
+        throw new AnthropicError(
+          'Anthropic client not initialized. Please check your API key configuration.',
+          'CLIENT_NOT_INITIALIZED'
+        );
+      }
       const response = await anthropic.messages.create(request);
 
       // Process the response
@@ -192,6 +198,12 @@ export class AnthropicProvider {
       };
 
       // Make the streaming API call
+      if (!anthropic) {
+        throw new AnthropicError(
+          'Anthropic client not initialized. Please check your API key configuration.',
+          'CLIENT_NOT_INITIALIZED'
+        );
+      }
       const stream = await anthropic.messages.create(request);
 
       let fullContent = '';

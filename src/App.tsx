@@ -25,6 +25,7 @@ import AutomationPage from './pages/automation/AutomationPage';
 import ChatPage from './pages/chat/ChatPage';
 import ChatPageEnhanced from './pages/chat/ChatPageEnhanced';
 import AgentSDKChatPage from './pages/chat/AgentSDKChatPage';
+import TabbedLLMChatPage from './pages/chat/TabbedLLMChatPage';
 import IntegrationsPage from './pages/integrations/IntegrationsPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import SettingsPage from './pages/settings/SettingsPage';
@@ -167,9 +168,13 @@ function App() {
               {/* Main Features */}
               <Route path="workforce" element={<WorkforcePage />} />
               
-              {/* Agent SDK Chat (Latest) */}
-              <Route path="chat" element={<AgentSDKChatPage />} />
-              <Route path="chat/:sessionId" element={<AgentSDKChatPage />} />
+        {/* Multi-LLM Chat (Latest) */}
+        <Route path="chat" element={<TabbedLLMChatPage />} />
+        <Route path="chat/:sessionId" element={<TabbedLLMChatPage />} />
+        
+        {/* Agent SDK Chat (Previous) */}
+        <Route path="chat-agent" element={<AgentSDKChatPage />} />
+        <Route path="chat-agent/:sessionId" element={<AgentSDKChatPage />} />
               
               {/* Enhanced Chat (Previous) */}
               <Route path="chat-enhanced" element={<ChatPageEnhanced />} />

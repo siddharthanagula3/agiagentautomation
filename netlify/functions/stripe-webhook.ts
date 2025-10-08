@@ -88,7 +88,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
         //     updated_at: new Date().toISOString(),
         //   });
 
-        // Create purchased employee record
+        // Create purchased employee record (without Stripe columns for now)
         const { data: insertData, error: purchaseError } = await supabase
           .from('purchased_employees')
           .insert({
@@ -97,8 +97,9 @@ export const handler: Handler = async (event: HandlerEvent) => {
             role: employeeRole,
             provider: employeeProvider, // Use actual LLM provider
             is_active: true,
-            stripe_subscription_id: subscriptionId,
-            stripe_customer_id: customerId,
+            // Note: Stripe columns will be added later via database migration
+            // stripe_subscription_id: subscriptionId,
+            // stripe_customer_id: customerId,
           })
           .select();
 

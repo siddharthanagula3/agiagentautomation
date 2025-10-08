@@ -259,11 +259,11 @@ const ChatAgentPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-screen bg-[#0d0e11]">
+      <div className="flex flex-col h-screen bg-[#0d0e11] dark:bg-[#0d0e11] bg-gray-50">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-400">Loading AI agents...</p>
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400 dark:text-gray-400 text-gray-600" />
+            <p className="text-gray-400 dark:text-gray-400 text-gray-600">Loading AI agents...</p>
           </div>
         </div>
       </div>

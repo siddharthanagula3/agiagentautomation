@@ -56,8 +56,15 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
         const { userId, employeeId, employeeRole, provider } = session.metadata || {};
 
+        console.log('[Stripe Webhook] Session metadata:', session.metadata);
+
         if (!userId || !employeeId || !employeeRole) {
-          console.error('[Stripe Webhook] Missing metadata in session');
+          console.error('[Stripe Webhook] Missing metadata in session:', {
+            userId: !!userId,
+            employeeId: !!employeeId,
+            employeeRole: !!employeeRole,
+            provider: !!provider
+          });
           break;
         }
 
@@ -82,7 +89,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
         //   });
 
         // Create purchased employee record
-        const { error: purchaseError } = await supabase
+        const { data: insertData, error: purchaseError } = await supabase
           .from('purchased_employees')
           .insert({
             user_id: userId,
@@ -92,12 +99,14 @@ export const handler: Handler = async (event: HandlerEvent) => {
             is_active: true,
             stripe_subscription_id: subscriptionId,
             stripe_customer_id: customerId,
-          });
+          })
+          .select();
 
         if (purchaseError) {
           console.error('[Stripe Webhook] Failed to create purchased employee:', purchaseError);
+          console.error('[Stripe Webhook] Error details:', JSON.stringify(purchaseError, null, 2));
         } else {
-          console.log('[Stripe Webhook] Successfully created purchased employee');
+          console.log('[Stripe Webhook] Successfully created purchased employee:', insertData);
         }
 
         break;

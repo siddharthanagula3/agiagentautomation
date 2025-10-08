@@ -123,3 +123,36 @@ export function getStripeConfig() {
   };
 }
 
+/**
+ * Manually create purchased employee record (fallback for failed webhooks)
+ */
+export async function manualPurchaseEmployee(data: {
+  userId: string;
+  employeeId: string;
+  employeeRole: string;
+  provider?: string;
+  subscriptionId?: string;
+  customerId?: string;
+}): Promise<void> {
+  try {
+    const response = await fetch('/.netlify/functions/manual-purchase', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create purchased employee record');
+    }
+
+    const result = await response.json();
+    console.log('[Manual Purchase] Success:', result);
+  } catch (error) {
+    console.error('[Manual Purchase] Error:', error);
+    throw error;
+  }
+}
+

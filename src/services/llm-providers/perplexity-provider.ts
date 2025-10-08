@@ -14,6 +14,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 // Initialize clients
 const perplexity = PERPLEXITY_API_KEY ? new Perplexity({
   apiKey: PERPLEXITY_API_KEY,
+  dangerouslyAllowBrowser: true, // Allow browser usage for client-side
 }) : null;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

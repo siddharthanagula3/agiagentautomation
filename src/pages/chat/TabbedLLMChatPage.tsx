@@ -40,14 +40,12 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { listPurchasedEmployees } from '@/services/supabase-employees';
-// Temporarily commented out to fix white screen issue
-// import TabbedLLMChatInterface from '@/components/chat/TabbedLLMChatInterface';
-// Temporarily commented out to fix white screen issue
-// import { 
-//   unifiedLLMService, 
-//   LLMProvider,
-//   UnifiedLLMError 
-// } from '@/services/llm-providers/unified-llm-service';
+import TabbedLLMChatInterface from '@/components/chat/TabbedLLMChatInterface';
+import { 
+  unifiedLLMService, 
+  LLMProvider,
+  UnifiedLLMError 
+} from '@/services/llm-providers/unified-llm-service';
 
 interface PurchasedEmployee {
   id: string;
@@ -375,20 +373,21 @@ const TabbedLLMChatPage: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {activeSessionId && selectedEmployee ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center mx-auto mb-4">
-                <Bot className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-xl font-semibold mb-2">Multi-LLM Chat Interface</h2>
-              <p className="text-muted-foreground mb-4">
-                Chat interface is temporarily disabled while fixing integration issues.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Selected: {selectedEmployee.name} ({selectedEmployee.role})
-              </p>
-            </div>
-          </div>
+          <TabbedLLMChatInterface
+            conversationId={activeSessionId}
+            userId={user?.id || ''}
+            employeeId={selectedEmployee.id}
+            employeeRole={selectedEmployee.role}
+            employeeName={selectedEmployee.name}
+            className="flex-1"
+            onSessionCreated={(session) => {
+              console.log('Session created:', session);
+            }}
+            onError={(error) => {
+              console.error('Chat error:', error);
+              toast.error(`Error: ${error.message}`);
+            }}
+          />
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">

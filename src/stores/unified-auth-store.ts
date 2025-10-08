@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { authService, AuthUser, LoginData, RegisterData } from '../services/authService';
+import { logger } from '@/lib/logger';
 
 interface AuthState {
   user: AuthUser | null;
@@ -24,20 +25,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialize: async () => {
     if (get().initialized) return;
     
-    console.log('AuthStore: Initializing auth state...');
+    logger.auth('Initializing auth state...');
     set({ isLoading: true, initialized: true });
     
     try {
       const { user, error } = await authService.getCurrentUser();
       if (error) {
-        console.log('AuthStore: No existing session:', error);
+        logger.debug('No existing session:', error);
         set({ user: null, isAuthenticated: false, isLoading: false });
       } else {
-        console.log('AuthStore: Restored user session:', user?.email);
+        logger.auth('Restored user session:', user?.email);
         set({ user, isAuthenticated: !!user, isLoading: false });
       }
     } catch (error) {
-      console.error('AuthStore: Initialization error:', error);
+      logger.error('Initialization error:', error);
       set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },

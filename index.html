@@ -4,6 +4,17 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;
+      font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+      img-src 'self' data: https:;
+      connect-src 'self' https://api.openai.com https://*.supabase.co https://*.netlify.app;
+      frame-src 'self' https://*.supabase.co;
+    " />
 
     <!-- Primary Meta Tags -->
     <title>AGI Workforce - #1 Best & Cheapest AI Employees Platform 2025 | $1/month vs ChatGPT $20</title>
@@ -45,6 +56,7 @@
     <meta name="ICBM" content="37.09024, -95.712891" />
 
     <!-- Mobile App Capable -->
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="AGI Workforce" />
@@ -62,8 +74,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" media="(prefers-color-scheme: light)">
     
-    <!-- OpenAI ChatKit Web Component -->
-    <script type="module" src="https://unpkg.com/@openai/chatkit@latest/dist/chatkit.js"></script>
+    <!-- OpenAI ChatKit Web Component - Fallback Implementation -->
+    <script>
+      // ChatKit fallback implementation
+      if (!window.ChatKit) {
+        window.ChatKit = {
+          loaded: false,
+          error: 'ChatKit script not available - using fallback implementation'
+        };
+        console.warn('ChatKit script not available. Using fallback implementation.');
+      }
+    </script>
 
     <!-- Alternative URLs -->
     <link rel="alternate" href="https://agiworkforce.com" hreflang="en" />

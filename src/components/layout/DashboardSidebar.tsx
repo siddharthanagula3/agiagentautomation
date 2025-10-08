@@ -76,6 +76,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       badge: 'New'
     },
     {
+      name: 'ChatKit Advanced',
+      href: '/chat-kit-advanced',
+      icon: MessageSquare,
+      description: 'ChatKit with themes, widgets & actions',
+      badge: 'Advanced'
+    },
+    {
       name: 'Marketplace',
       href: '/marketplace',
       icon: ShoppingBag,

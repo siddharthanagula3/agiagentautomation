@@ -26,6 +26,7 @@ import ChatPage from './pages/chat/ChatPage';
 import ChatPageEnhanced from './pages/chat/ChatPageEnhanced';
 import AgentSDKChatPage from './pages/chat/AgentSDKChatPage';
 import TabbedLLMChatPage from './pages/chat/TabbedLLMChatPage';
+import ChatKitPage from './pages/chat/ChatKitPage';
 import IntegrationsPage from './pages/integrations/IntegrationsPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import SettingsPage from './pages/settings/SettingsPage';
@@ -167,11 +168,15 @@ function App() {
               {/* Main Features */}
               <Route path="workforce" element={<WorkforcePage />} />
               
-        {/* Agent SDK Chat (Working) */}
-        <Route path="chat" element={<AgentSDKChatPage />} />
-        <Route path="chat/:sessionId" element={<AgentSDKChatPage />} />
+        {/* ChatKit Chat (Latest) */}
+        <Route path="chat" element={<ChatKitPage />} />
+        <Route path="chat/:sessionId" element={<ChatKitPage />} />
         
-        {/* Multi-LLM Chat (Temporarily Disabled) */}
+        {/* Agent SDK Chat (Previous) */}
+        <Route path="chat-agent" element={<AgentSDKChatPage />} />
+        <Route path="chat-agent/:sessionId" element={<AgentSDKChatPage />} />
+        
+        {/* Multi-LLM Chat (Previous) */}
         <Route path="chat-multi" element={<TabbedLLMChatPage />} />
         <Route path="chat-multi/:sessionId" element={<TabbedLLMChatPage />} />
               

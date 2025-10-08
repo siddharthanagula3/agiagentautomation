@@ -3,8 +3,9 @@
  * Professional design with glassmorphism and real-time data
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,12 +18,14 @@ import { Link } from 'react-router-dom';
 import { listPurchasedEmployees, getEmployeeById } from '@/services/supabase-employees';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { analyticsService } from '@/services/analytics-service';
+import { manualPurchaseEmployee } from '@/services/stripe-service';
 import { Users, Bot, BarChart3, Settings, Plus, TrendingUp, Sparkles, Zap, Target, Clock, ArrowRight, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const WorkforcePage: React.FC = () => {
   const { user } = useAuthStore();
   const userId = user?.id;
+  const [searchParams] = useSearchParams();
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats', userId],
@@ -37,12 +40,54 @@ const WorkforcePage: React.FC = () => {
     enabled: !!userId,
   });
 
-  const { data: purchased = [], isLoading: hiresLoading } = useQuery({
+  const { data: purchased = [], isLoading: hiresLoading, refetch: refetchPurchased } = useQuery({
     queryKey: ['purchased-employees', userId],
     queryFn: () => listPurchasedEmployees(userId!),
     enabled: !!userId,
     refetchInterval: 30000,
   });
+
+  // Handle successful Stripe payments
+  useEffect(() => {
+    const handleSuccessfulPayment = async () => {
+      const success = searchParams.get('success');
+      const sessionId = searchParams.get('session_id');
+      
+      if (success === 'true' && sessionId && userId) {
+        console.log('[Workforce] Detected successful payment, checking for missing employee record...');
+        
+        try {
+          // Check if we have any purchased employees
+          const currentPurchased = await listPurchasedEmployees(userId);
+          
+          // If no employees found, try to manually create the record
+          // This is a fallback for when the webhook fails
+          if (currentPurchased.length === 0) {
+            console.log('[Workforce] No purchased employees found, attempting manual purchase...');
+            
+            try {
+              // Use the manual purchase function with sessionId to retrieve and create the record
+              await manualPurchaseEmployee({
+                userId,
+                sessionId,
+              });
+              
+              console.log('[Workforce] Successfully created purchased employee record');
+              
+              // Refetch the purchased employees to show the new record
+              await refetchPurchased();
+            } catch (error) {
+              console.error('[Workforce] Failed to create purchased employee record:', error);
+            }
+          }
+        } catch (error) {
+          console.error('[Workforce] Error handling successful payment:', error);
+        }
+      }
+    };
+
+    handleSuccessfulPayment();
+  }, [searchParams, userId, refetchPurchased]);
 
   if (!userId) {
     return (

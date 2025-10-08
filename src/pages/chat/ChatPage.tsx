@@ -31,6 +31,8 @@ import {
 import { AI_EMPLOYEES } from '@/data/ai-employees';
 import { toast } from 'sonner';
 import DOMPurify from 'dompurify';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { getEmployeeById, listPurchasedEmployees } from '@/services/supabase-employees';
@@ -417,46 +419,41 @@ const ChatPage: React.FC = () => {
 
   const activeTabData = activeTabs.find(tab => tab.id === selectedTab);
 
-  function renderMarkdownToHtml(markdown: string): string {
-    let html = markdown;
-    // Escape HTML first to prevent injection inside our basic replacements
-    html = html
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-    // Code blocks ```
-    html = html.replace(/```([\s\S]*?)```/g, (_m, code) => `<pre><code>${code.trim()}</code></pre>`);
-    // Headings ######..#
-    for (let i = 6; i >= 1; i--) {
-      const re = new RegExp(`^${'#'.repeat(i)}\s+(.+)$`, 'gm');
-      html = html.replace(re, `<h${i}>$1</h${i}>`);
-    }
-    // Bold **text**
-    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    // Italic *text* or _text_
-    html = html.replace(/(^|\s)\*(?!\*)([^\n*]+)\*(?=\s|$)/g, '$1<em>$2</em>');
-    html = html.replace(/(^|\s)_([^\n_]+)_(?=\s|$)/g, '$1<em>$2</em>');
-    // Inline code `code`
-    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-    // Horizontal rule ---
-    html = html.replace(/^---$/gm, '<hr />');
-    // Links [text](url)
-    html = html.replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-    // Unordered lists - item / * item
-    html = html.replace(/^(?:- |\* )(.*(?:\n(?:- |\* ).*)*)/gm, (block) => {
-      const items = block.split(/\n/).map(l => l.replace(/^(?:- |\* )/, '').trim());
-      return `<ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
-    });
-    // Ordered lists 1. item
-    html = html.replace(/^(?:\d+\. )(.*(?:\n(?:\d+\. ).*)*)/gm, (block) => {
-      const items = block.split(/\n/).map(l => l.replace(/^\d+\. /, '').trim());
-      return `<ol>${items.map(i => `<li>${i}</li>`).join('')}</ol>`;
-    });
-    // New lines to paragraphs
-    html = html.replace(/\n{2,}/g, '</p><p>');
-    html = `<p>${html}</p>`;
-    return DOMPurify.sanitize(html);
-  }
+  // Custom components for ReactMarkdown
+  const markdownComponents = {
+    h1: ({ children }: any) => <h1 className="text-xl font-bold mb-2 text-white">{children}</h1>,
+    h2: ({ children }: any) => <h2 className="text-lg font-semibold mb-2 text-white">{children}</h2>,
+    h3: ({ children }: any) => <h3 className="text-base font-medium mb-1 text-white">{children}</h3>,
+    h4: ({ children }: any) => <h4 className="text-sm font-medium mb-1 text-white">{children}</h4>,
+    p: ({ children }: any) => <p className="mb-2 text-gray-200">{children}</p>,
+    strong: ({ children }: any) => <strong className="font-semibold text-white">{children}</strong>,
+    em: ({ children }: any) => <em className="italic text-gray-300">{children}</em>,
+    code: ({ children, className }: any) => {
+      const isInline = !className;
+      if (isInline) {
+        return <code className="bg-gray-700 text-green-400 px-1 py-0.5 rounded text-sm">{children}</code>;
+      }
+      return (
+        <pre className="bg-gray-800 p-3 rounded-lg overflow-x-auto mb-2">
+          <code className="text-green-400 text-sm">{children}</code>
+        </pre>
+      );
+    },
+    ul: ({ children }: any) => <ul className="list-disc list-inside mb-2 text-gray-200">{children}</ul>,
+    ol: ({ children }: any) => <ol className="list-decimal list-inside mb-2 text-gray-200">{children}</ol>,
+    li: ({ children }: any) => <li className="mb-1">{children}</li>,
+    blockquote: ({ children }: any) => (
+      <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-300 mb-2">
+        {children}
+      </blockquote>
+    ),
+    hr: () => <hr className="border-gray-600 my-4" />,
+    a: ({ href, children }: any) => (
+      <a href={href} className="text-blue-400 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    ),
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -679,10 +676,14 @@ const ChatPage: React.FC = () => {
                             )}
                           >
                             {msg.role === 'assistant' ? (
-                              <div
-                                className="prose prose-invert prose-sm max-w-none"
-                                dangerouslySetInnerHTML={{ __html: renderMarkdownToHtml(msg.content) }}
-                              />
+                              <div className="prose prose-invert prose-sm max-w-none">
+                                <ReactMarkdown 
+                                  components={markdownComponents}
+                                  remarkPlugins={[remarkGfm]}
+                                >
+                                  {msg.content}
+                                </ReactMarkdown>
+                              </div>
                             ) : (
                               <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                             )}

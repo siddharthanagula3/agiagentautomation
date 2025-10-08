@@ -69,6 +69,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       badge: 'Beta'
     },
     {
+      name: 'Chat Agent',
+      href: '/chat-agent',
+      icon: Sparkles,
+      description: 'Advanced AI agent interface',
+      badge: 'New'
+    },
+    {
       name: 'Marketplace',
       href: '/marketplace',
       icon: ShoppingBag,

@@ -31,7 +31,6 @@ import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import AIConfigurationPage from './pages/settings/AIConfigurationPage';
 import AIEmployeeTestingPage from './pages/testing/AIEmployeeTestingPage';
-import AutonomousWorkflowsPage from './pages/autonomous/AutonomousWorkflowsPage';
 import MarketplacePublicPage from './pages/MarketplacePublicPage';
 import MarketplacePage from './pages/marketplace/MarketplacePage';
 import BillingPage from './pages/dashboard/BillingPage';
@@ -184,7 +183,6 @@ function App() {
               <Route path="chat-legacy" element={<ChatPage />} />
               
               <Route path="automation" element={<AutomationPage />} />
-              <Route path="automation/workflows" element={<AutonomousWorkflowsPage />} />
               <Route path="automation/designer" element={<AutomationDesignerPage />} />
               <Route path="automation/designer/:workflowId" element={<AutomationDesignerPage />} />
               

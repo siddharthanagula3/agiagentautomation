@@ -323,11 +323,11 @@ const ChatKitIntegration: React.FC<ChatKitIntegrationProps> = ({ className }) =>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Messages</span>
-                  <span className="font-medium">{selectedEmployee.usage_stats.messages_sent}</span>
+                  <span className="font-medium">{selectedEmployee?.usage_stats?.messages_sent ?? 0}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Sessions</span>
-                  <span className="font-medium">{selectedEmployee.usage_stats.total_sessions}</span>
+                  <span className="font-medium">{selectedEmployee?.usage_stats?.total_sessions ?? 0}</span>
                 </div>
               </div>
             </div>
@@ -469,7 +469,7 @@ const ChatKitIntegration: React.FC<ChatKitIntegrationProps> = ({ className }) =>
                           {employee.status}
                         </Badge>
                         <div className="text-xs text-gray-500">
-                          {employee.usage_stats.messages_sent} messages
+                          {(employee?.usage_stats?.messages_sent ?? 0)} messages
                         </div>
                       </div>
                     </div>

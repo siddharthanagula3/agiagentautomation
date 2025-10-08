@@ -47,12 +47,9 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { listPurchasedEmployees } from '@/services/supabase-employees';
+import { AI_EMPLOYEES } from '@/data/ai-employees';
 import AgentChatUI from '@/components/chat/AgentChatUI';
-import { 
-  unifiedLLMService, 
-  LLMProvider,
-  UnifiedLLMError 
-} from '@/services/llm-providers/unified-llm-service';
+import { agentsService, type AgentSession } from '@/services/agents-service';
 
 interface PurchasedEmployee {
   id: string;
@@ -95,6 +92,7 @@ const ChatAgentPage: React.FC = () => {
   const [employees, setEmployees] = useState<PurchasedEmployee[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<PurchasedEmployee | null>(null);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(sessionId || null);
+  const [agentSession, setAgentSession] = useState<AgentSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showEmployeeSelector, setShowEmployeeSelector] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -154,42 +152,56 @@ const ChatAgentPage: React.FC = () => {
   }, [selectedEmployee]);
 
   // Handle employee selection
-  const handleEmployeeSelect = (employee: PurchasedEmployee) => {
-    setSelectedEmployee(employee);
-    setShowEmployeeSelector(false);
-    
-    // Generate new session ID for the selected employee
-    const newSessionId = `agent-${employee.id}-${Date.now()}`;
-    setActiveSessionId(newSessionId);
-    
-    // Update URL
-    navigate(`/chat-agent/${newSessionId}`, { replace: true });
-    
-    toast.success(`Switched to ${employee.name}`);
-  };
-
-  // Handle session creation
-  const handleSessionCreated = (session: any) => {
-    console.log('Agent session created:', session);
-    toast.success('Agent session started');
+  const handleEmployeeSelect = async (employee: PurchasedEmployee) => {
+    try {
+      setIsLoading(true);
+      setSelectedEmployee(employee);
+      setShowEmployeeSelector(false);
+      
+      // Find matching AI employee data
+      const aiEmployee = AI_EMPLOYEES.find(emp => emp.id === employee.employee_id);
+      const capabilities = aiEmployee?.capabilities || employee.capabilities || [];
+      
+      // Create agent session
+      const session = await agentsService.createAgentSession(
+        user!.id,
+        employee.id,
+        employee.name,
+        employee.role,
+        capabilities
+      );
+      
+      setAgentSession(session);
+      setActiveSessionId(session.conversationId);
+      
+      // Update URL
+      navigate(`/chat-agent/${session.conversationId}`, { replace: true });
+      
+      toast.success(`Connected to ${employee.name}`);
+    } catch (error) {
+      console.error('Error creating agent session:', error);
+      toast.error('Failed to create agent session');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Handle errors
-  const handleError = (error: UnifiedLLMError) => {
+  const handleError = (error: Error) => {
     console.error('Agent error:', error);
     toast.error(`Agent error: ${error.message}`);
   };
 
-  // Get provider status
+  // Get OpenAI provider status
   const getProviderStatus = () => {
-    const providers: LLMProvider[] = ['openai', 'anthropic', 'google', 'perplexity'];
-    const status = providers.map(provider => ({
-      provider,
-      configured: unifiedLLMService.isProviderConfigured(provider),
-    }));
+    const openaiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const configured = !!openaiKey;
     
-    const configuredCount = status.filter(s => s.configured).length;
-    return { status: status || [], configuredCount, total: providers.length };
+    return { 
+      status: [{ provider: 'openai', configured }],
+      configuredCount: configured ? 1 : 0, 
+      total: 1 
+    };
   };
 
   const providerStatus = getProviderStatus();
@@ -395,13 +407,14 @@ const ChatAgentPage: React.FC = () => {
 
         {/* Chat Interface */}
         <div className="flex-1 flex flex-col">
-          {activeSessionId && selectedEmployee && agentConfig ? (
+          {activeSessionId && selectedEmployee && agentConfig && agentSession ? (
             <AgentChatUI
               conversationId={activeSessionId}
               userId={user?.id || ''}
               agentConfig={agentConfig}
+              threadId={agentSession.threadId}
+              assistantId={agentSession.assistantId}
               className="flex-1"
-              onSessionCreated={handleSessionCreated}
               onError={handleError}
             />
           ) : (

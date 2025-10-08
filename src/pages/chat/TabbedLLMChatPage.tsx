@@ -40,6 +40,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { listPurchasedEmployees } from '@/services/supabase-employees';
+import { AI_EMPLOYEES } from '@/data/ai-employees';
 import TabbedLLMChatInterface from '@/components/chat/TabbedLLMChatInterface';
 import { 
   unifiedLLMService, 
@@ -97,38 +98,30 @@ const TabbedLLMChatPage: React.FC = () => {
         const employees = await listPurchasedEmployees(user.id);
         setPurchasedEmployees(employees);
 
-        // Load existing chat sessions (mock data for now)
-        const mockSessions: ChatSession[] = [
-          {
-            id: 'session-1',
-            employeeId: 'emp-001',
-            employeeName: 'Alex Chen',
-            employeeRole: 'Software Architect',
-            provider: 'openai',
-            lastMessage: 'I can help you design a scalable microservices architecture...',
-            lastMessageTime: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-            messageCount: 15,
-            isActive: true,
-          },
-          {
-            id: 'session-2',
-            employeeId: 'emp-002',
-            employeeName: 'Sarah Johnson',
-            employeeRole: 'Product Manager',
-            provider: 'anthropic',
-            lastMessage: 'Let\'s prioritize the user authentication feature...',
-            lastMessageTime: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-            messageCount: 8,
-            isActive: false,
-          },
-        ];
+        // Create chat sessions from purchased employees
+        const employeeSessions: ChatSession[] = employees.map((employee, index) => {
+          // Find the AI employee details from the master list
+          const aiEmployee = AI_EMPLOYEES.find(emp => emp.id === employee.employee_id);
+          
+          return {
+            id: `session-${employee.id}`,
+            employeeId: employee.id,
+            employeeName: aiEmployee?.name || employee.employee_id, // Use AI employee name or fallback to ID
+            employeeRole: aiEmployee?.role || employee.role,
+            provider: employee.provider,
+            lastMessage: 'Ready to help you with your tasks...',
+            lastMessageTime: new Date(employee.purchased_at),
+            messageCount: 0,
+            isActive: index === 0, // Make first employee active
+          };
+        });
         
-        setChatSessions(mockSessions);
+        setChatSessions(employeeSessions);
         setSessionStats({
-          totalSessions: mockSessions.length,
-          totalMessages: mockSessions.reduce((sum, session) => sum + session.messageCount, 0),
-          totalTokens: 1250, // Mock data
-          activeEmployees: mockSessions.filter(s => s.isActive).length
+          totalSessions: employeeSessions.length,
+          totalMessages: employeeSessions.reduce((sum, session) => sum + session.messageCount, 0),
+          totalTokens: 0,
+          activeEmployees: employeeSessions.filter(s => s.isActive).length
         });
 
       } catch (error) {
@@ -418,36 +411,49 @@ const TabbedLLMChatPage: React.FC = () => {
           </DialogHeader>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-            {purchasedEmployees.map((employee) => (
-              <motion.div
-                key={employee.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => handleStartNewChat(employee)}
-              >
-                <div className="flex items-center space-x-3">
-                  <div className={cn(
-                    "w-12 h-12 rounded-full flex items-center justify-center text-white",
-                    getProviderColor(employee.provider)
-                  )}>
-                    {getProviderIcon(employee.provider)}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{employee.name}</h3>
-                    <p className="text-sm text-gray-600">{employee.role}</p>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <Badge variant="outline" className="text-xs">
-                        {employee.provider}
-                      </Badge>
-                      <span className="text-xs text-gray-500">
-                        Purchased {new Date(employee.purchasedAt).toLocaleDateString()}
-                      </span>
+            {purchasedEmployees.map((employee) => {
+              // Find the AI employee details from the master list
+              const aiEmployee = AI_EMPLOYEES.find(emp => emp.id === employee.employee_id);
+              
+              return (
+                <motion.div
+                  key={employee.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={() => handleStartNewChat({
+                    ...employee,
+                    name: aiEmployee?.name || employee.employee_id,
+                    role: aiEmployee?.role || employee.role,
+                  })}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className={cn(
+                      "w-12 h-12 rounded-full flex items-center justify-center text-white",
+                      getProviderColor(employee.provider)
+                    )}>
+                      {getProviderIcon(employee.provider)}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900">
+                        {aiEmployee?.name || employee.employee_id}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {aiEmployee?.role || employee.role}
+                      </p>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <Badge variant="outline" className="text-xs">
+                          {employee.provider}
+                        </Badge>
+                        <span className="text-xs text-gray-500">
+                          Purchased {new Date(employee.purchased_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
 
           {purchasedEmployees.length === 0 && (

@@ -39,6 +39,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/unified-auth-store';
+import { useTheme } from '@/components/theme-provider';
 import { getEmployeeById, listPurchasedEmployees } from '@/services/supabase-employees';
 import { createSession, listMessages, listSessions, sendMessage } from '@/services/supabase-chat';
 import { sendAIMessage, isProviderConfigured, getConfiguredProviders, type AIMessage } from '@/services/ai-chat-service';
@@ -423,45 +424,49 @@ const ChatPage: React.FC = () => {
 
   const activeTabData = activeTabs.find(tab => tab.id === selectedTab);
 
-  // Comprehensive markdown components for ReactMarkdown
+  // Get theme for dynamic styling
+  const { actualTheme } = useTheme();
+  const isDark = actualTheme === 'dark';
+
+  // Comprehensive markdown components for ReactMarkdown with theme support
   const markdownComponents = {
     // Headings - All levels
-    h1: ({ children }: any) => <h1 className="text-2xl font-bold mb-3 text-white border-b border-gray-600 pb-1">{children}</h1>,
-    h2: ({ children }: any) => <h2 className="text-xl font-bold mb-2 text-white">{children}</h2>,
-    h3: ({ children }: any) => <h3 className="text-lg font-semibold mb-2 text-white">{children}</h3>,
-    h4: ({ children }: any) => <h4 className="text-base font-semibold mb-1 text-white">{children}</h4>,
-    h5: ({ children }: any) => <h5 className="text-sm font-semibold mb-1 text-white">{children}</h5>,
-    h6: ({ children }: any) => <h6 className="text-xs font-semibold mb-1 text-white">{children}</h6>,
+    h1: ({ children }: any) => <h1 className={cn("text-2xl font-bold mb-3 border-b pb-1", isDark ? "text-white border-gray-600" : "text-gray-900 border-gray-300")}>{children}</h1>,
+    h2: ({ children }: any) => <h2 className={cn("text-xl font-bold mb-2", isDark ? "text-white" : "text-gray-900")}>{children}</h2>,
+    h3: ({ children }: any) => <h3 className={cn("text-lg font-semibold mb-2", isDark ? "text-white" : "text-gray-900")}>{children}</h3>,
+    h4: ({ children }: any) => <h4 className={cn("text-base font-semibold mb-1", isDark ? "text-white" : "text-gray-900")}>{children}</h4>,
+    h5: ({ children }: any) => <h5 className={cn("text-sm font-semibold mb-1", isDark ? "text-white" : "text-gray-900")}>{children}</h5>,
+    h6: ({ children }: any) => <h6 className={cn("text-xs font-semibold mb-1", isDark ? "text-white" : "text-gray-900")}>{children}</h6>,
     
     // Paragraphs
-    p: ({ children }: any) => <p className="mb-3 text-gray-200 leading-relaxed">{children}</p>,
+    p: ({ children }: any) => <p className={cn("mb-3 leading-relaxed", isDark ? "text-gray-200" : "text-gray-700")}>{children}</p>,
     
     // Text formatting
-    strong: ({ children }: any) => <strong className="font-bold text-white">{children}</strong>,
-    em: ({ children }: any) => <em className="italic text-gray-300">{children}</em>,
-    del: ({ children }: any) => <del className="line-through text-gray-400">{children}</del>,
+    strong: ({ children }: any) => <strong className={cn("font-bold", isDark ? "text-white" : "text-gray-900")}>{children}</strong>,
+    em: ({ children }: any) => <em className={cn("italic", isDark ? "text-gray-300" : "text-gray-600")}>{children}</em>,
+    del: ({ children }: any) => <del className={cn("line-through", isDark ? "text-gray-400" : "text-gray-500")}>{children}</del>,
     mark: ({ children }: any) => <mark className="bg-yellow-200 text-black px-1 rounded">{children}</mark>,
     
     // Code blocks and inline code
     code: ({ children, className, inline }: any) => {
       if (inline) {
-        return <code className="bg-gray-700 text-green-400 px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>;
+        return <code className={cn("px-1.5 py-0.5 rounded text-sm font-mono", isDark ? "bg-gray-700 text-green-400" : "bg-gray-100 text-green-600")}>{children}</code>;
       }
       return (
-        <pre className="bg-gray-900 border border-gray-700 p-4 rounded-lg overflow-x-auto mb-4">
-          <code className="text-green-400 text-sm font-mono leading-relaxed">{children}</code>
+        <pre className={cn("border p-4 rounded-lg overflow-x-auto mb-4", isDark ? "bg-gray-900 border-gray-700" : "bg-gray-50 border-gray-300")}>
+          <code className={cn("text-sm font-mono leading-relaxed", isDark ? "text-green-400" : "text-green-600")}>{children}</code>
         </pre>
       );
     },
     pre: ({ children }: any) => (
-      <pre className="bg-gray-900 border border-gray-700 p-4 rounded-lg overflow-x-auto mb-4">
+      <pre className={cn("border p-4 rounded-lg overflow-x-auto mb-4", isDark ? "bg-gray-900 border-gray-700" : "bg-gray-50 border-gray-300")}>
         {children}
       </pre>
     ),
     
     // Lists
-    ul: ({ children }: any) => <ul className="list-disc list-inside mb-3 text-gray-200 space-y-1">{children}</ul>,
-    ol: ({ children }: any) => <ol className="list-decimal list-inside mb-3 text-gray-200 space-y-1">{children}</ol>,
+    ul: ({ children }: any) => <ul className={cn("list-disc list-inside mb-3 space-y-1", isDark ? "text-gray-200" : "text-gray-700")}>{children}</ul>,
+    ol: ({ children }: any) => <ol className={cn("list-decimal list-inside mb-3 space-y-1", isDark ? "text-gray-200" : "text-gray-700")}>{children}</ol>,
     li: ({ children }: any) => <li className="mb-1">{children}</li>,
     
     // Nested lists
@@ -472,19 +477,19 @@ const ChatPage: React.FC = () => {
     
     // Blockquotes
     blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-300 mb-3 bg-gray-800/50 py-2 rounded-r">
+      <blockquote className={cn("border-l-4 border-blue-500 pl-4 italic mb-3 py-2 rounded-r", isDark ? "text-gray-300 bg-gray-800/50" : "text-gray-600 bg-gray-100/50")}>
         {children}
       </blockquote>
     ),
     
     // Horizontal rules
-    hr: () => <hr className="border-gray-600 my-6" />,
+    hr: () => <hr className={cn("my-6", isDark ? "border-gray-600" : "border-gray-300")} />,
     
     // Links
     a: ({ href, children }: any) => (
       <a 
         href={href} 
-        className="text-blue-400 hover:text-blue-300 underline decoration-blue-400 hover:decoration-blue-300" 
+        className={cn("underline", isDark ? "text-blue-400 hover:text-blue-300 decoration-blue-400 hover:decoration-blue-300" : "text-blue-600 hover:text-blue-500 decoration-blue-600 hover:decoration-blue-500")} 
         target="_blank" 
         rel="noopener noreferrer"
       >
@@ -495,16 +500,16 @@ const ChatPage: React.FC = () => {
     // Tables
     table: ({ children }: any) => (
       <div className="overflow-x-auto mb-4">
-        <table className="min-w-full border border-gray-600 rounded-lg">
+        <table className={cn("min-w-full border rounded-lg", isDark ? "border-gray-600" : "border-gray-300")}>
           {children}
         </table>
       </div>
     ),
-    thead: ({ children }: any) => <thead className="bg-gray-800">{children}</thead>,
-    tbody: ({ children }: any) => <tbody className="bg-gray-900">{children}</tbody>,
-    tr: ({ children }: any) => <tr className="border-b border-gray-600">{children}</tr>,
-    th: ({ children }: any) => <th className="px-4 py-2 text-left font-semibold text-white border-r border-gray-600">{children}</th>,
-    td: ({ children }: any) => <td className="px-4 py-2 text-gray-200 border-r border-gray-600">{children}</td>,
+    thead: ({ children }: any) => <thead className={cn(isDark ? "bg-gray-800" : "bg-gray-100")}>{children}</thead>,
+    tbody: ({ children }: any) => <tbody className={cn(isDark ? "bg-gray-900" : "bg-white")}>{children}</tbody>,
+    tr: ({ children }: any) => <tr className={cn("border-b", isDark ? "border-gray-600" : "border-gray-300")}>{children}</tr>,
+    th: ({ children }: any) => <th className={cn("px-4 py-2 text-left font-semibold border-r", isDark ? "text-white border-gray-600" : "text-gray-900 border-gray-300")}>{children}</th>,
+    td: ({ children }: any) => <td className={cn("px-4 py-2 border-r", isDark ? "text-gray-200 border-gray-600" : "text-gray-700 border-gray-300")}>{children}</td>,
     
     // Task lists (GitHub Flavored Markdown)
     input: ({ type, checked, ...props }: any) => {
@@ -524,15 +529,15 @@ const ChatPage: React.FC = () => {
     
     // Definition lists
     dl: ({ children }: any) => <dl className="mb-3">{children}</dl>,
-    dt: ({ children }: any) => <dt className="font-semibold text-white mb-1">{children}</dt>,
-    dd: ({ children }: any) => <dd className="ml-4 mb-2 text-gray-200">{children}</dd>,
+    dt: ({ children }: any) => <dt className={cn("font-semibold mb-1", isDark ? "text-white" : "text-gray-900")}>{children}</dt>,
+    dd: ({ children }: any) => <dd className={cn("ml-4 mb-2", isDark ? "text-gray-200" : "text-gray-700")}>{children}</dd>,
     
     // Images
     img: ({ src, alt, ...props }: any) => (
       <img 
         src={src} 
         alt={alt} 
-        className="max-w-full h-auto rounded-lg border border-gray-600 mb-3" 
+        className={cn("max-w-full h-auto rounded-lg border mb-3", isDark ? "border-gray-600" : "border-gray-300")} 
         {...props} 
       />
     ),
@@ -541,31 +546,31 @@ const ChatPage: React.FC = () => {
     br: () => <br className="mb-1" />,
     
     // Subscript and superscript
-    sub: ({ children }: any) => <sub className="text-xs text-gray-400">{children}</sub>,
-    sup: ({ children }: any) => <sup className="text-xs text-gray-400">{children}</sup>,
+    sub: ({ children }: any) => <sub className={cn("text-xs", isDark ? "text-gray-400" : "text-gray-500")}>{children}</sub>,
+    sup: ({ children }: any) => <sup className={cn("text-xs", isDark ? "text-gray-400" : "text-gray-500")}>{children}</sup>,
     
     // Keyboard keys
     kbd: ({ children }: any) => (
-      <kbd className="bg-gray-700 text-gray-200 px-2 py-1 rounded text-xs font-mono border border-gray-600">
+      <kbd className={cn("px-2 py-1 rounded text-xs font-mono border", isDark ? "bg-gray-700 text-gray-200 border-gray-600" : "bg-gray-100 text-gray-700 border-gray-300")}>
         {children}
       </kbd>
     ),
     
     // Abbreviations
     abbr: ({ title, children }: any) => (
-      <abbr title={title} className="border-b border-dotted border-gray-400 cursor-help">
+      <abbr title={title} className={cn("border-b border-dotted cursor-help", isDark ? "border-gray-400" : "border-gray-500")}>
         {children}
       </abbr>
     ),
     
     // Citations
-    cite: ({ children }: any) => <cite className="italic text-gray-400">{children}</cite>,
+    cite: ({ children }: any) => <cite className={cn("italic", isDark ? "text-gray-400" : "text-gray-500")}>{children}</cite>,
     
     // Small text
-    small: ({ children }: any) => <small className="text-xs text-gray-400">{children}</small>,
+    small: ({ children }: any) => <small className={cn("text-xs", isDark ? "text-gray-400" : "text-gray-500")}>{children}</small>,
     
     // Time
-    time: ({ children }: any) => <time className="text-gray-400">{children}</time>,
+    time: ({ children }: any) => <time className={cn(isDark ? "text-gray-400" : "text-gray-500")}>{children}</time>,
   };
 
   return (

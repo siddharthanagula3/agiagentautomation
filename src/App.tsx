@@ -27,6 +27,7 @@ import ChatPageEnhanced from './pages/chat/ChatPageEnhanced';
 import AgentSDKChatPage from './pages/chat/AgentSDKChatPage';
 import TabbedLLMChatPage from './pages/chat/TabbedLLMChatPage';
 import ChatKitPage from './pages/chat/ChatKitPage';
+import ChatKitAdvancedPage from './pages/chat/ChatKitAdvancedPage';
 import ChatAgentPage from './pages/chat/ChatAgentPage';
 import IntegrationsPage from './pages/integrations/IntegrationsPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
@@ -184,6 +185,10 @@ function App() {
         {/* ChatKit Chat (Latest) */}
         <Route path="chat-kit" element={<ChatKitPage />} />
         <Route path="chat-kit/:sessionId" element={<ChatKitPage />} />
+        
+        {/* Advanced ChatKit Chat (With Themes, Widgets & Actions) */}
+        <Route path="chat-kit-advanced" element={<ChatKitAdvancedPage />} />
+        <Route path="chat-kit-advanced/:sessionId" element={<ChatKitAdvancedPage />} />
               
               {/* Enhanced Chat (Previous) */}
               <Route path="chat-enhanced" element={<ChatPageEnhanced />} />

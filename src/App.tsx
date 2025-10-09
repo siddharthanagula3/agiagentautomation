@@ -42,8 +42,6 @@ import CareersPage from './pages/CareersPage';
 import SecurityPage from './pages/SecurityPage';
 import DocumentationPage from './pages/DocumentationPage';
 import APIReferencePage from './pages/APIReferencePage';
-import AIEmployees from './pages/ai-employees/AIEmployees';
-
 // Legal Pages
 import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/legal/TermsOfServicePage';
@@ -86,7 +84,6 @@ function App() {
               <Route path="documentation" element={<DocumentationPage />} />
               <Route path="api-reference" element={<APIReferencePage />} />
               <Route path="marketplace" element={<MarketplacePublicPage />} />
-              <Route path="ai-employees" element={<AIEmployees />} />
 
               {/* Legal Pages */}
               <Route path="privacy-policy" element={<PrivacyPolicyPage />} />

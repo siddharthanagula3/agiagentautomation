@@ -5,10 +5,16 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia',
 });
 
-// Pro Plan Pricing
-const PRO_PLAN_PRICES = {
-  monthly: 20, // $20/month
-  yearly: 200, // $200/year (save $40)
+// Plan Pricing
+const PLAN_PRICES = {
+  pro: {
+    monthly: 20, // $20/month
+    yearly: 200, // $200/year (save $40)
+  },
+  max: {
+    monthly: 299, // $299/month
+    yearly: 2990, // $2990/year (save $598)
+  },
 };
 
 export const handler: Handler = async (event: HandlerEvent) => {
@@ -21,7 +27,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
   }
 
   try {
-    const { userId, userEmail, billingPeriod = 'monthly' } = JSON.parse(event.body || '{}');
+    const { userId, userEmail, billingPeriod = 'monthly', plan = 'pro' } = JSON.parse(event.body || '{}');
 
     if (!userId || !userEmail) {
       return {
@@ -32,10 +38,20 @@ export const handler: Handler = async (event: HandlerEvent) => {
       };
     }
 
-    console.log('[Pro Subscription] Creating session for:', {
+    if (!['pro', 'max'].includes(plan)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ 
+          error: 'Invalid plan. Must be "pro" or "max"' 
+        }),
+      };
+    }
+
+    console.log(`[${plan.toUpperCase()} Subscription] Creating session for:`, {
       userId,
       userEmail,
       billingPeriod,
+      plan,
     });
 
     // Create or retrieve Stripe customer
@@ -47,7 +63,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
     if (existingCustomers.data.length > 0) {
       customer = existingCustomers.data[0];
-      console.log('[Pro Subscription] Found existing customer:', customer.id);
+      console.log(`[${plan.toUpperCase()} Subscription] Found existing customer:`, customer.id);
     } else {
       customer = await stripe.customers.create({
         email: userEmail,
@@ -55,12 +71,19 @@ export const handler: Handler = async (event: HandlerEvent) => {
           userId,
         },
       });
-      console.log('[Pro Subscription] Created new customer:', customer.id);
+      console.log(`[${plan.toUpperCase()} Subscription] Created new customer:`, customer.id);
     }
 
-    // Determine price based on billing period
-    const price = billingPeriod === 'yearly' ? PRO_PLAN_PRICES.yearly : PRO_PLAN_PRICES.monthly;
+    // Determine price based on billing period and plan
+    const prices = PLAN_PRICES[plan as 'pro' | 'max'];
+    const price = billingPeriod === 'yearly' ? prices.yearly : prices.monthly;
     const interval = billingPeriod === 'yearly' ? 'year' : 'month';
+
+    // Plan descriptions
+    const planDescriptions = {
+      pro: '10M tokens/month (2.5M per LLM), all providers, priority support',
+      max: '40M tokens/month (10M per LLM), all providers, dedicated support, advanced features',
+    };
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
@@ -73,8 +96,8 @@ export const handler: Handler = async (event: HandlerEvent) => {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'Pro Plan',
-              description: '10M tokens/month (2.5M per LLM), all providers, priority support',
+              name: `${plan === 'pro' ? 'Pro' : 'Max'} Plan`,
+              description: planDescriptions[plan as 'pro' | 'max'],
               images: ['https://agiagentautomation.com/favicon.ico'],
             },
             recurring: {
@@ -87,13 +110,13 @@ export const handler: Handler = async (event: HandlerEvent) => {
       ],
       metadata: {
         userId,
-        plan: 'pro',
+        plan,
         billingPeriod,
       },
       subscription_data: {
         metadata: {
           userId,
-          plan: 'pro',
+          plan,
           billingPeriod,
         },
       },
@@ -101,7 +124,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
       cancel_url: `${process.env.URL || 'http://localhost:5173'}/billing?canceled=true`,
     });
 
-    console.log('[Pro Subscription] Session created:', session.id);
+    console.log(`[${plan.toUpperCase()} Subscription] Session created:`, session.id);
 
     return {
       statusCode: 200,
@@ -114,11 +137,11 @@ export const handler: Handler = async (event: HandlerEvent) => {
       }),
     };
   } catch (error) {
-    console.error('[Pro Subscription] Error:', error);
+    console.error('[Plan Subscription] Error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({
-        error: `Failed to create Pro subscription: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error: `Failed to create subscription: ${error instanceof Error ? error.message : 'Unknown error'}`,
         details: error instanceof Error ? error.stack : String(error),
       }),
     };

@@ -15,19 +15,20 @@ export const handler: Handler = async (event: HandlerEvent) => {
   }
 
   try {
-    const { employeeId, employeeRole, price, userId, userEmail, provider, billingPeriod = 'yearly' } = JSON.parse(event.body || '{}');
+    const { employeeId, employeeName, employeeRole, price, userId, userEmail, provider, billingPeriod = 'yearly' } = JSON.parse(event.body || '{}');
 
-    if (!employeeId || !employeeRole || !price || !userId || !userEmail) {
+    if (!employeeId || !employeeName || !employeeRole || !price || !userId || !userEmail) {
       return {
         statusCode: 400,
         body: JSON.stringify({ 
-          error: 'Missing required fields: employeeId, employeeRole, price, userId, userEmail' 
+          error: 'Missing required fields: employeeId, employeeName, employeeRole, price, userId, userEmail' 
         }),
       };
     }
 
     console.log('[Stripe Checkout] Creating session for:', {
       employeeId,
+      employeeName,
       employeeRole,
       price,
       userId,
@@ -93,6 +94,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
       metadata: {
         userId,
         employeeId,
+        employeeName,
         employeeRole,
         provider: provider || 'chatgpt',
         billingPeriod,
@@ -103,6 +105,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
         metadata: {
           userId,
           employeeId,
+          employeeName,
           employeeRole,
           provider: provider || 'chatgpt',
           billingPeriod,

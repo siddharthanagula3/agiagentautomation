@@ -83,6 +83,7 @@ export const MarketplacePublicPage: React.FC = () => {
         
       await createCheckoutSession({
         employeeId: employee.id,
+        employeeName: employee.name,
         employeeRole: employee.role,
         price: employee.price,
         userId: user.id,

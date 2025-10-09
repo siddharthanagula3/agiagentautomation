@@ -54,7 +54,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
         const session = stripeEvent.data.object as Stripe.Checkout.Session;
         console.log('[Stripe Webhook] Checkout completed:', session.id);
 
-        const { userId, employeeId, employeeRole, provider, plan, billingPeriod } = session.metadata || {};
+        const { userId, employeeId, employeeName, employeeRole, provider, plan, billingPeriod } = session.metadata || {};
 
         console.log('[Stripe Webhook] Session metadata:', session.metadata);
 
@@ -62,9 +62,9 @@ export const handler: Handler = async (event: HandlerEvent) => {
         const subscriptionId = session.subscription as string;
         const customerId = session.customer as string;
 
-        // Handle Pro Plan Subscription
-        if (plan === 'pro' && userId) {
-          console.log('[Stripe Webhook] Processing Pro plan subscription for user:', userId);
+        // Handle Pro or Max Plan Subscription
+        if ((plan === 'pro' || plan === 'max') && userId) {
+          console.log(`[Stripe Webhook] Processing ${plan.toUpperCase()} plan subscription for user:`, userId);
 
           // Calculate subscription dates
           const now = new Date();
@@ -79,7 +79,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
           const { error: userUpdateError } = await supabase
             .from('users')
             .update({
-              plan: 'pro',
+              plan: plan, // 'pro' or 'max'
               plan_status: 'active',
               stripe_customer_id: customerId,
               stripe_subscription_id: subscriptionId,
@@ -91,19 +91,20 @@ export const handler: Handler = async (event: HandlerEvent) => {
             .eq('id', userId);
 
           if (userUpdateError) {
-            console.error('[Stripe Webhook] Failed to update user plan:', userUpdateError);
+            console.error(`[Stripe Webhook] Failed to update user to ${plan} plan:`, userUpdateError);
           } else {
-            console.log('[Stripe Webhook] Successfully upgraded user to Pro plan');
+            console.log(`[Stripe Webhook] Successfully upgraded user to ${plan.toUpperCase()} plan`);
           }
 
           break;
         }
 
         // Handle AI Employee Purchase (legacy flow)
-        if (!userId || !employeeId || !employeeRole) {
+        if (!userId || !employeeId || !employeeName || !employeeRole) {
           console.error('[Stripe Webhook] Missing metadata in session:', {
             userId: !!userId,
             employeeId: !!employeeId,
+            employeeName: !!employeeName,
             employeeRole: !!employeeRole,
             provider: !!provider
           });
@@ -120,6 +121,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
           .insert({
             user_id: userId,
             employee_id: employeeId,
+            name: employeeName,
             role: employeeRole,
             provider: employeeProvider,
             is_active: true,

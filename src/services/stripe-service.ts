@@ -24,6 +24,7 @@ function getStripe() {
 
 export interface CheckoutSessionData {
   employeeId: string;
+  employeeName: string;
   employeeRole: string;
   price: number;
   userId: string;
@@ -186,10 +187,33 @@ export async function upgradeToProPlan(data: {
   userEmail: string;
   billingPeriod?: 'monthly' | 'yearly';
 }): Promise<void> {
-  try {
-    console.log('[Stripe Service] Creating Pro plan subscription:', data);
+  return upgradeToPlan({ ...data, plan: 'pro' });
+}
 
-    // Call Netlify function to create Pro subscription checkout session
+/**
+ * Create Max Plan subscription and redirect to Stripe Checkout
+ */
+export async function upgradeToMaxPlan(data: {
+  userId: string;
+  userEmail: string;
+  billingPeriod?: 'monthly' | 'yearly';
+}): Promise<void> {
+  return upgradeToPlan({ ...data, plan: 'max' });
+}
+
+/**
+ * Generic function to upgrade to any plan
+ */
+async function upgradeToPlan(data: {
+  userId: string;
+  userEmail: string;
+  plan: 'pro' | 'max';
+  billingPeriod?: 'monthly' | 'yearly';
+}): Promise<void> {
+  try {
+    console.log(`[Stripe Service] Creating ${data.plan.toUpperCase()} plan subscription:`, data);
+
+    // Call Netlify function to create subscription checkout session
     const response = await fetch('/.netlify/functions/create-pro-subscription', {
       method: 'POST',
       headers: {
@@ -200,11 +224,11 @@ export async function upgradeToProPlan(data: {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to create Pro subscription');
+      throw new Error(error.error || `Failed to create ${data.plan.toUpperCase()} subscription`);
     }
 
     const { url } = await response.json();
-    console.log('[Stripe Service] Pro subscription checkout URL:', url);
+    console.log(`[Stripe Service] ${data.plan.toUpperCase()} subscription checkout URL:`, url);
 
     // Redirect to Stripe Checkout
     if (url) {
@@ -213,7 +237,7 @@ export async function upgradeToProPlan(data: {
       throw new Error('No checkout URL received from server');
     }
   } catch (error) {
-    console.error('[Stripe Service] Pro upgrade error:', error);
+    console.error(`[Stripe Service] ${data.plan} upgrade error:`, error);
     throw error;
   }
 }

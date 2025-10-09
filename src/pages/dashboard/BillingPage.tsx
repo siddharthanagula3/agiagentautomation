@@ -167,9 +167,26 @@ const BillingPage: React.FC = () => {
       const totalTokens = llmUsage.reduce((sum, llm) => sum + llm.tokens, 0);
       const totalCost = llmUsage.reduce((sum, llm) => sum + llm.cost, 0);
       
-      // Check if user has Pro plan (would come from database)
-      // For now, default to free plan
-      const userPlan = 'free'; // TODO: Fetch from database
+      // Fetch user's plan from database
+      let userPlan: 'free' | 'pro' | 'enterprise' = 'free';
+      let subscriptionEndDate: string | null = null;
+      
+      try {
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('plan, subscription_end_date, plan_status')
+          .eq('id', user.id)
+          .single();
+        
+        if (!userError && userData) {
+          userPlan = userData.plan || 'free';
+          subscriptionEndDate = userData.subscription_end_date;
+          console.log('[Billing] User plan:', userPlan);
+        }
+      } catch (err) {
+        console.error('[Billing] Error fetching user plan:', err);
+      }
+      
       const isPro = userPlan === 'pro';
       
       // Update limits based on plan
@@ -186,8 +203,10 @@ const BillingPage: React.FC = () => {
       const billingData: BillingInfo = {
         plan: userPlan,
         status: 'active',
-        current_period_start: new Date().toISOString(),
-        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        current_period_start: subscriptionEndDate 
+          ? new Date(new Date(subscriptionEndDate).getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
+          : new Date().toISOString(),
+        current_period_end: subscriptionEndDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         price: isPro ? 20 : 0,
         currency: 'USD',
         features: isPro ? [

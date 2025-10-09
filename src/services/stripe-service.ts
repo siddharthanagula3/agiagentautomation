@@ -171,3 +171,76 @@ export async function manualPurchaseEmployee(data: {
   }
 }
 
+/**
+ * Create Pro Plan subscription and redirect to Stripe Checkout
+ */
+export async function upgradeToProPlan(data: {
+  userId: string;
+  userEmail: string;
+  billingPeriod?: 'monthly' | 'yearly';
+}): Promise<void> {
+  try {
+    console.log('[Stripe Service] Creating Pro plan subscription:', data);
+
+    // Call Netlify function to create Pro subscription checkout session
+    const response = await fetch('/.netlify/functions/create-pro-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create Pro subscription');
+    }
+
+    const { url } = await response.json();
+    console.log('[Stripe Service] Pro subscription checkout URL:', url);
+
+    // Redirect to Stripe Checkout
+    if (url) {
+      window.location.href = url;
+    } else {
+      throw new Error('No checkout URL received from server');
+    }
+  } catch (error) {
+    console.error('[Stripe Service] Pro upgrade error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create Enterprise plan inquiry (Contact sales)
+ */
+export async function contactEnterpriseSales(data: {
+  userId: string;
+  userEmail: string;
+  userName?: string;
+  companyName?: string;
+  message?: string;
+}): Promise<void> {
+  try {
+    console.log('[Stripe Service] Enterprise inquiry:', data);
+
+    // In a real implementation, this would send an email or create a lead in CRM
+    // For now, we'll just open the contact page or show a success message
+    console.log('[Enterprise Sales] Contact request submitted');
+    
+    // You can implement this to send to your CRM or email service
+    // For now, redirect to contact page with pre-filled info
+    const params = new URLSearchParams({
+      email: data.userEmail,
+      plan: 'enterprise',
+      ...(data.userName && { name: data.userName }),
+      ...(data.companyName && { company: data.companyName }),
+    });
+    
+    window.location.href = `/contact-sales?${params.toString()}`;
+  } catch (error) {
+    console.error('[Stripe Service] Enterprise inquiry error:', error);
+    throw error;
+  }
+}
+

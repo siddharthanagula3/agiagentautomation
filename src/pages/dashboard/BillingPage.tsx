@@ -174,17 +174,27 @@ const BillingPage: React.FC = () => {
       try {
         const { data: userData, error: userError } = await supabase
           .from('users')
-          .select('plan, subscription_end_date, plan_status')
+          .select('plan, subscription_end_date, plan_status, stripe_customer_id, stripe_subscription_id, billing_period')
           .eq('id', user.id)
           .single();
         
         if (!userError && userData) {
           userPlan = userData.plan || 'free';
           subscriptionEndDate = userData.subscription_end_date;
-          console.log('[Billing] User plan:', userPlan);
+          console.log('[Billing] ✅ User plan loaded successfully:');
+          console.log('[Billing]    Plan:', userPlan);
+          console.log('[Billing]    Status:', userData.plan_status);
+          console.log('[Billing]    Billing Period:', userData.billing_period);
+          console.log('[Billing]    Subscription End:', subscriptionEndDate);
+          console.log('[Billing]    Stripe Customer ID:', userData.stripe_customer_id ? 'Set ✓' : 'Not set ✗');
+          console.log('[Billing]    Stripe Subscription ID:', userData.stripe_subscription_id ? 'Set ✓' : 'Not set ✗');
+        } else if (userError) {
+          console.error('[Billing] ❌ Error fetching user plan:', userError);
+          console.error('[Billing]    This might mean the "plan" column doesn\'t exist in the users table.');
+          console.error('[Billing]    Please run: supabase db push');
         }
       } catch (err) {
-        console.error('[Billing] Error fetching user plan:', err);
+        console.error('[Billing] ❌ Error fetching user plan:', err);
       }
       
       const isPro = userPlan === 'pro';
@@ -192,6 +202,12 @@ const BillingPage: React.FC = () => {
       // Update limits based on plan
       const proProviderLimit = 2500000; // 2.5M per provider
       const proTotalLimit = 10000000;   // 10M total
+      
+      console.log('[Billing] 📊 Applying token limits:');
+      console.log('[Billing]    User Plan:', userPlan);
+      console.log('[Billing]    Is Pro?', isPro ? 'Yes ✓' : 'No ✗');
+      console.log('[Billing]    Token Limit per LLM:', isPro ? '2.5M (Pro)' : '250k (Free)');
+      console.log('[Billing]    Total Token Limit:', isPro ? '10M (Pro)' : '1M (Free)');
       
       if (isPro) {
         llmUsage = llmUsage.map(llm => ({

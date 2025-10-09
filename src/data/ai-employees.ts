@@ -12,8 +12,9 @@ export interface AIEmployee {
   category: string;
   description: string;
   provider: AIProvider;
-  price: number;
-  originalPrice: number;
+  price: number; // Monthly price when billed yearly ($10)
+  originalPrice: number; // Original monthly price ($20)
+  yearlyPrice?: number; // Total yearly price ($120)
   avatar: string;
   skills: string[];
   specialty: string;

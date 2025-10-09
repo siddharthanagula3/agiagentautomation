@@ -413,7 +413,7 @@ const BillingPage: React.FC = () => {
                 <span className="text-2xl font-bold">{billing?.usage.totalTokens.toLocaleString() || 0}</span>
               </div>
               <Progress 
-                value={(billing?.usage.totalTokens || 0) / (billing?.usage.totalLimit || 1000000) * 100} 
+                value={billing?.usage.totalTokens && billing?.usage.totalLimit ? (billing.usage.totalTokens / billing.usage.totalLimit) * 100 : 0} 
                 className="h-3"
               />
               <div className="flex justify-between items-center text-sm">
@@ -519,7 +519,7 @@ const BillingPage: React.FC = () => {
                   
                   <div className="space-y-2">
                     <Progress 
-                      value={Math.min(percentage, 100)} 
+                      value={llm.tokens > 0 ? Math.min(percentage, 100) : 0} 
                       className={`h-2 ${isAtLimit ? 'bg-red-100 dark:bg-red-950/30' : isNearLimit ? 'bg-amber-100 dark:bg-amber-950/30' : ''}`}
                     />
                     <div className="flex justify-between items-center text-xs text-muted-foreground">

@@ -18,6 +18,7 @@ import { Link } from 'react-router-dom';
 import { listPurchasedEmployees, getEmployeeById } from '@/services/supabase-employees';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { manualPurchaseEmployee } from '@/services/stripe-service';
+import { toast } from 'sonner';
 import { Users, Bot, BarChart3, Settings, Plus, TrendingUp, Sparkles, Zap, Target, Clock, ArrowRight, MessageSquare, Code } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -42,16 +43,25 @@ const WorkforcePage: React.FC = () => {
       const sessionId = searchParams.get('session_id');
       
       if (success === 'true' && sessionId && userId) {
-        console.log('[Workforce] Detected successful payment, checking for missing employee record...');
+        console.log('[Workforce] 🎉 Detected successful payment!');
+        console.log('[Workforce] Session ID:', sessionId);
+        console.log('[Workforce] User ID:', userId);
+        
+        // Show loading toast
+        toast.loading('Processing your purchase...', { id: 'purchase-loading' });
         
         try {
+          // Wait a moment for webhook to process
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
           // Check if we have any purchased employees
           const currentPurchased = await listPurchasedEmployees(userId);
+          console.log('[Workforce] Current purchased employees count:', currentPurchased.length);
           
-          // If no employees found, try to manually create the record
-          // This is a fallback for when the webhook fails
+          // If no employees found, webhook likely failed - use manual fallback
           if (currentPurchased.length === 0) {
-            console.log('[Workforce] No purchased employees found, attempting manual purchase...');
+            console.log('[Workforce] ⚠️ No purchased employees found, webhook may have failed');
+            console.log('[Workforce] 🔄 Attempting manual purchase fallback...');
             
             try {
               // Use the manual purchase function with sessionId to retrieve and create the record
@@ -60,16 +70,24 @@ const WorkforcePage: React.FC = () => {
                 sessionId,
               });
               
-              console.log('[Workforce] Successfully created purchased employee record');
+              console.log('[Workforce] ✅ Successfully created purchased employee record via manual fallback');
               
-              // Refetch the purchased employees to show the new record
+              // Wait a moment then refetch
+              await new Promise(resolve => setTimeout(resolve, 1000));
               await refetchPurchased();
+              
+              toast.success('AI Employee hired successfully! 🎉', { id: 'purchase-loading' });
             } catch (error) {
-              console.error('[Workforce] Failed to create purchased employee record:', error);
+              console.error('[Workforce] ❌ Failed to create purchased employee record:', error);
+              toast.error('Failed to complete purchase. Please contact support.', { id: 'purchase-loading' });
             }
+          } else {
+            console.log('[Workforce] ✅ Webhook processed successfully, employee already in database');
+            toast.success('AI Employee hired successfully! 🎉', { id: 'purchase-loading' });
           }
         } catch (error) {
-          console.error('[Workforce] Error handling successful payment:', error);
+          console.error('[Workforce] ❌ Error handling successful payment:', error);
+          toast.error('Error processing purchase. Please refresh the page.', { id: 'purchase-loading' });
         }
       }
     };

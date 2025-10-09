@@ -20,7 +20,7 @@ export const handler: Handler = async (event) => {
   }
 
   try {
-    const { userId, sessionId, employeeId, employeeRole, provider, subscriptionId, customerId } = JSON.parse(event.body || '{}');
+    const { userId, sessionId, employeeId, employeeName, employeeRole, provider, subscriptionId, customerId } = JSON.parse(event.body || '{}');
 
     // If sessionId is provided, retrieve session details from Stripe
     if (sessionId && !employeeId) {
@@ -28,14 +28,15 @@ export const handler: Handler = async (event) => {
       
       try {
         const session = await stripe.checkout.sessions.retrieve(sessionId);
-        const { userId: sessionUserId, employeeId: sessionEmployeeId, employeeRole: sessionEmployeeRole, provider: sessionProvider } = session.metadata || {};
+        const { userId: sessionUserId, employeeId: sessionEmployeeId, employeeName: sessionEmployeeName, employeeRole: sessionEmployeeRole, provider: sessionProvider } = session.metadata || {};
         
-        if (sessionUserId && sessionEmployeeId && sessionEmployeeRole) {
+        if (sessionUserId && sessionEmployeeId && sessionEmployeeName && sessionEmployeeRole) {
           console.log('[Manual Purchase] Retrieved session metadata:', session.metadata);
           
           // Use session data
           const finalUserId = userId || sessionUserId;
           const finalEmployeeId = sessionEmployeeId;
+          const finalEmployeeName = employeeName || sessionEmployeeName;
           const finalEmployeeRole = sessionEmployeeRole;
           const finalProvider = provider || sessionProvider || 'chatgpt';
           const finalSubscriptionId = subscriptionId || (session.subscription as string);
@@ -44,6 +45,7 @@ export const handler: Handler = async (event) => {
           return await createPurchasedEmployee({
             userId: finalUserId,
             employeeId: finalEmployeeId,
+            employeeName: finalEmployeeName,
             employeeRole: finalEmployeeRole,
             provider: finalProvider,
             // Note: Stripe columns will be added later via database migration
@@ -54,7 +56,8 @@ export const handler: Handler = async (event) => {
           return {
             statusCode: 400,
             body: JSON.stringify({ 
-              error: 'Session metadata missing required fields' 
+              error: 'Session metadata missing required fields',
+              metadata: session.metadata
             }),
           };
         }
@@ -70,11 +73,11 @@ export const handler: Handler = async (event) => {
     }
 
     // Direct purchase with provided data
-    if (!userId || !employeeId || !employeeRole) {
+    if (!userId || !employeeId || !employeeName || !employeeRole) {
       return {
         statusCode: 400,
         body: JSON.stringify({ 
-          error: 'Missing required fields: userId, employeeId, employeeRole' 
+          error: 'Missing required fields: userId, employeeId, employeeName, employeeRole' 
         }),
       };
     }
@@ -82,6 +85,7 @@ export const handler: Handler = async (event) => {
     return await createPurchasedEmployee({
       userId,
       employeeId,
+      employeeName,
       employeeRole,
       provider: provider || 'chatgpt',
       // Note: Stripe columns will be added later via database migration
@@ -104,6 +108,7 @@ export const handler: Handler = async (event) => {
 async function createPurchasedEmployee(data: {
   userId: string;
   employeeId: string;
+  employeeName: string;
   employeeRole: string;
   provider: string;
   // Note: Stripe columns will be added later via database migration
@@ -120,6 +125,7 @@ async function createPurchasedEmployee(data: {
       .insert({
         user_id: data.userId,
         employee_id: data.employeeId,
+        name: data.employeeName,
         role: data.employeeRole,
         provider: data.provider,
         is_active: true,

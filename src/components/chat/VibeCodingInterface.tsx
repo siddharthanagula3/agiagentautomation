@@ -36,6 +36,9 @@ import {
   CheckCircle2,
   Circle,
   AlertCircle,
+  Users,
+  ArrowRight,
+  MessageCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -43,17 +46,27 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTheme } from '@/components/theme-provider';
 import { mcpToolsService, type Artifact, type FileOperation, type CommandExecution } from '@/services/mcp-tools-service';
+import { 
+  multiAgentOrchestrator, 
+  type AgentCommunication, 
+  type AgentStatus,
+  type OrchestrationPlan 
+} from '@/services/multi-agent-orchestrator';
 
 interface VibeCodingMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
+  agentName?: string; // Which agent sent this message
+  agentRole?: string; // Agent's role
   content: string;
   timestamp: Date;
-  thinking?: string;
+  messageType?: 'chat' | 'status' | 'handoff' | 'collaboration' | 'thinking' | 'result';
   plan?: PlanStep[];
   fileOperations?: FileOperation[];
   artifacts?: Artifact[];
   isStreaming?: boolean;
+  targetAgent?: string; // For handoff messages
+  progress?: number; // For status updates
 }
 
 interface PlanStep {
@@ -85,6 +98,8 @@ export const VibeCodingInterface: React.FC<Props> = ({
   const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null);
   const [fileSystem, setFileSystem] = useState<Map<string, string>>(new Map());
   const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
+  const [activeAgents, setActiveAgents] = useState<AgentStatus[]>([]);
+  const [agentCommunications, setAgentCommunications] = useState<AgentCommunication[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -106,55 +121,95 @@ export const VibeCodingInterface: React.FC<Props> = ({
 
   const simulateVibeCoding = async (userRequest: string) => {
     setIsGenerating(true);
+    setAgentCommunications([]);
+    setActiveAgents([]);
 
     try {
-      // Step 1: Thinking
-      const thinkingMsg: VibeCodingMessage = {
-        id: `msg-${Date.now()}-thinking`,
-        role: 'assistant',
-        content: '',
+      // Step 1: Analyze intent and create plan
+      const analysisMsg: VibeCodingMessage = {
+        id: `msg-${Date.now()}-analysis`,
+        role: 'system',
+        content: '🧠 Analyzing your request and assembling the right AI team...',
         timestamp: new Date(),
-        thinking: 'Analyzing your request...',
-        isStreaming: true,
+        thinking: 'Determining which AI Employees to deploy...',
       };
-      setMessages(prev => [...prev, thinkingMsg]);
+      setMessages(prev => [...prev, analysisMsg]);
       await new Promise(r => setTimeout(r, 800));
 
-      // Step 2: Planning
-      const plan: PlanStep[] = [
-        {
-          id: 'step-1',
-          description: 'Understand requirements',
-          status: 'completed',
-        },
-        {
-          id: 'step-2',
-          description: 'Design architecture',
-          status: 'in_progress',
-          substeps: [
-            { id: 'step-2-1', description: 'Choose tech stack', status: 'completed' },
-            { id: 'step-2-2', description: 'Plan file structure', status: 'in_progress' },
-          ],
-        },
-        {
-          id: 'step-3',
-          description: 'Generate code',
-          status: 'pending',
-        },
-        {
-          id: 'step-4',
-          description: 'Test and verify',
-          status: 'pending',
-        },
-      ];
-
-      setCurrentPlan(plan);
-      setMessages(prev => prev.map(msg =>
-        msg.id === thinkingMsg.id
-          ? { ...msg, thinking: 'Creating a plan...', plan }
-          : msg
-      ));
+      const plan = await multiAgentOrchestrator.analyzeIntent(userRequest);
+      
+      // Show which agents are being assembled
+      const agentListMsg: VibeCodingMessage = {
+        id: `msg-${Date.now()}-agents`,
+        role: 'system',
+        content: `📋 **Execution Plan**: ${plan.intent}\n\n**AI Team Assembled:**\n${plan.requiredAgents.map(a => `• ${a.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`).join('\n')}\n\n**Strategy**: ${plan.executionStrategy} execution\n**Tasks**: ${plan.tasks.length}`,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, agentListMsg]);
       await new Promise(r => setTimeout(r, 1000));
+
+      // Step 2: Execute with multi-agent orchestrator
+      const communications: AgentCommunication[] = [];
+      
+      const handleCommunication = (comm: AgentCommunication) => {
+        communications.push(comm);
+        setAgentCommunications(prev => [...prev, comm]);
+        
+        // Determine message type and agent
+        let messageType: VibeCodingMessage['messageType'] = 'chat';
+        if (comm.type === 'handoff') messageType = 'handoff';
+        else if (comm.type === 'collaboration') messageType = 'collaboration';
+        else if (comm.type === 'status') messageType = 'status';
+        else if (comm.type === 'response') messageType = 'result';
+        
+        // Add communication as a message with agent info
+        const commMsg: VibeCodingMessage = {
+          id: `comm-${comm.id}`,
+          role: comm.from === 'System' ? 'system' : 'assistant',
+          agentName: comm.from,
+          content: comm.message,
+          timestamp: comm.timestamp,
+          messageType,
+          targetAgent: comm.to !== 'user' ? comm.to : undefined,
+        };
+        setMessages(prev => [...prev, commMsg]);
+      };
+
+      const handleStatusUpdate = (status: AgentStatus) => {
+        setActiveAgents(prev => {
+          const updated = prev.filter(a => a.agentName !== status.agentName);
+          return [...updated, status];
+        });
+        
+        // Add status update as a message when progress changes significantly
+        if (status.progress === 30 || status.progress === 60 || status.progress === 90) {
+          const statusMsg: VibeCodingMessage = {
+            id: `status-${Date.now()}-${status.agentName}`,
+            role: 'assistant',
+            agentName: status.agentName,
+            content: `${status.currentTask || 'Working'}... ${status.progress}% complete`,
+            timestamp: new Date(),
+            messageType: 'status',
+            progress: status.progress,
+          };
+          setMessages(prev => [...prev, statusMsg]);
+        }
+      };
+
+      // Execute the orchestration plan
+      const results = await multiAgentOrchestrator.executePlan(
+        plan,
+        handleCommunication,
+        handleStatusUpdate
+      );
+
+      // Convert orchestration plan tasks to PlanSteps for UI
+      const planSteps: PlanStep[] = plan.tasks.map(task => ({
+        id: task.id,
+        description: task.description,
+        status: task.status,
+      }));
+      setCurrentPlan(planSteps);
 
       // Step 3: Generate Code
       const codeArtifact: Artifact = {
@@ -425,6 +480,10 @@ export default App;`,
                     <Terminal className="h-4 w-4 mr-2" />
                     Terminal
                   </TabsTrigger>
+                  <TabsTrigger value="agents">
+                    <Users className="h-4 w-4 mr-2" />
+                    Agents
+                  </TabsTrigger>
                   <TabsTrigger value="plan">
                     <Brain className="h-4 w-4 mr-2" />
                     Plan
@@ -546,6 +605,50 @@ export default App;`,
                 </ScrollArea>
               </TabsContent>
 
+              <TabsContent value="agents" className="flex-1 m-0">
+                <ScrollArea className="h-full">
+                  <div className="p-6">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <Users className="h-5 w-5 text-primary" />
+                      AI Employees Working
+                    </h3>
+                    {activeAgents.length === 0 ? (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No agents deployed yet</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {activeAgents.map((agent) => (
+                          <AgentStatusCard key={agent.agentName} agent={agent} />
+                        ))}
+                        
+                        {agentCommunications.length > 0 && (
+                          <div className="mt-6 pt-6 border-t border-border">
+                            <h4 className="font-semibold mb-3 text-sm flex items-center gap-2">
+                              <MessageCircle className="h-4 w-4" />
+                              Agent Communications
+                            </h4>
+                            <div className="space-y-2">
+                              {agentCommunications.slice(-5).map((comm) => (
+                                <div key={comm.id} className="text-sm p-3 rounded-lg bg-accent/30">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-medium text-xs">{comm.from}</span>
+                                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                                    <span className="font-medium text-xs">{comm.to}</span>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">{comm.message}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+
               <TabsContent value="plan" className="flex-1 m-0">
                 <ScrollArea className="h-full">
                   <div className="p-6">
@@ -645,6 +748,79 @@ const VibeCodingMessage: React.FC<{
           )}
         </div>
       </div>
+    </div>
+  );
+};
+
+// Agent Status Card Component
+const AgentStatusCard: React.FC<{ agent: AgentStatus }> = ({ agent }) => {
+  const getStatusColor = () => {
+    switch (agent.status) {
+      case 'working':
+        return 'text-blue-500 bg-blue-50 dark:bg-blue-950/30';
+      case 'completed':
+        return 'text-green-500 bg-green-50 dark:bg-green-950/30';
+      case 'analyzing':
+        return 'text-purple-500 bg-purple-50 dark:bg-purple-950/30';
+      case 'waiting':
+        return 'text-orange-500 bg-orange-50 dark:bg-orange-950/30';
+      default:
+        return 'text-gray-500 bg-gray-50 dark:bg-gray-950/30';
+    }
+  };
+
+  const getStatusIcon = () => {
+    switch (agent.status) {
+      case 'working':
+      case 'analyzing':
+        return <Loader2 className="h-4 w-4 animate-spin" />;
+      case 'completed':
+        return <CheckCircle2 className="h-4 w-4" />;
+      case 'waiting':
+        return <Circle className="h-4 w-4" />;
+      default:
+        return <Circle className="h-4 w-4" />;
+    }
+  };
+
+  return (
+    <div className={cn("p-4 rounded-lg border transition-all", getStatusColor())}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          {getStatusIcon()}
+          <span className="font-semibold">{agent.agentName}</span>
+        </div>
+        <Badge variant="outline" className="text-xs">
+          {agent.status.replace('_', ' ')}
+        </Badge>
+      </div>
+      
+      {agent.currentTask && (
+        <p className="text-sm text-muted-foreground mb-3">{agent.currentTask}</p>
+      )}
+      
+      <div className="space-y-2">
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-muted-foreground">Progress</span>
+          <span className="font-semibold">{agent.progress}%</span>
+        </div>
+        <div className="h-2 bg-background rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-current transition-all duration-500"
+            style={{ width: `${agent.progress}%` }}
+          />
+        </div>
+      </div>
+
+      {agent.toolsUsing && agent.toolsUsing.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1">
+          {agent.toolsUsing.map((tool, idx) => (
+            <Badge key={idx} variant="secondary" className="text-xs">
+              {tool}
+            </Badge>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

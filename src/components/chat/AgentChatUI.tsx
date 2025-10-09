@@ -304,17 +304,17 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
   };
 
   return (
-    <div className={cn('flex flex-col h-full bg-gray-50', className)}>
+    <div className={cn('flex flex-col h-full bg-gray-50 dark:bg-[#0d0e11]', className)}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="bg-white dark:bg-[#171717] border-b border-gray-200 dark:border-gray-800 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
               <Bot className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">{agentName}</h3>
-              <p className="text-sm text-gray-600">{agentRole}</p>
+              <h3 className="font-semibold text-gray-900 dark:text-white">{agentName}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{agentRole}</p>
             </div>
           </div>
 
@@ -357,8 +357,8 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
               <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">Start a Conversation</h3>
-              <p className="text-gray-600">
+              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Start a Conversation</h3>
+              <p className="text-gray-600 dark:text-gray-400">
                 Ask {agentName} anything. They're ready to help!
               </p>
             </div>
@@ -387,7 +387,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                     'max-w-xl rounded-lg px-4 py-3',
                     message.role === 'user'
                       ? 'bg-purple-600 text-white'
-                      : 'bg-white border border-gray-200'
+                      : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
                   )}
                 >
                   {message.role === 'assistant' ? (
@@ -396,7 +396,8 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                         className={cn(
                           'prose prose-sm max-w-none',
                           'prose-p:mb-2 prose-p:mt-0',
-                          'prose-pre:bg-gray-900 prose-pre:text-gray-100'
+                          'prose-pre:bg-gray-900 prose-pre:text-gray-100',
+                          'dark:prose-invert'
                         )}
                         components={{
                           code({ node, inline, className, children, ...props }) {
@@ -411,7 +412,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                                 {String(children).replace(/\n$/, '')}
                               </SyntaxHighlighter>
                             ) : (
-                              <code className="bg-gray-100 px-1 py-0.5 rounded text-sm" {...props}>
+                              <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm text-gray-900 dark:text-gray-100" {...props}>
                                 {children}
                               </code>
                             );
@@ -423,10 +424,10 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
 
                       {/* Tool executions */}
                       {message.metadata?.toolsUsed && message.metadata.toolsUsed.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-gray-200">
+                        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                           <div className="flex items-center gap-2 mb-2">
-                            <Wrench className="w-4 h-4 text-gray-500" />
-                            <span className="text-sm text-gray-600">Tools Used:</span>
+                            <Wrench className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                            <span className="text-sm text-gray-600 dark:text-gray-400">Tools Used:</span>
                           </div>
                           <div className="space-y-2">
                             {message.metadata.toolsUsed.map((tool, toolIndex) => {
@@ -437,7 +438,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                               return (
                                 <div
                                   key={toolIndex}
-                                  className="bg-gray-50 rounded-lg p-2"
+                                  className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2"
                                 >
                                   <button
                                     onClick={() => toggleToolExpansion(`${message.id}-${tool}`)}
@@ -469,16 +470,16 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                                     <div className="mt-2 pl-9 space-y-2">
                                       {toolExecution.input && (
                                         <div className="text-xs">
-                                          <span className="font-medium text-gray-600">Input:</span>
-                                          <pre className="mt-1 bg-white p-2 rounded border border-gray-200 overflow-x-auto">
+                                          <span className="font-medium text-gray-600 dark:text-gray-400">Input:</span>
+                                          <pre className="mt-1 bg-white dark:bg-gray-900 p-2 rounded border border-gray-200 dark:border-gray-700 overflow-x-auto text-gray-900 dark:text-gray-100">
                                             {JSON.stringify(toolExecution.input, null, 2)}
                                           </pre>
                                         </div>
                                       )}
                                       {toolExecution.output && (
                                         <div className="text-xs">
-                                          <span className="font-medium text-gray-600">Output:</span>
-                                          <pre className="mt-1 bg-white p-2 rounded border border-gray-200 overflow-x-auto">
+                                          <span className="font-medium text-gray-600 dark:text-gray-400">Output:</span>
+                                          <pre className="mt-1 bg-white dark:bg-gray-900 p-2 rounded border border-gray-200 dark:border-gray-700 overflow-x-auto text-gray-900 dark:text-gray-100">
                                             {JSON.stringify(toolExecution.output, null, 2)}
                                           </pre>
                                         </div>
@@ -538,8 +539,8 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
 
                 {message.role === 'user' && (
                   <Avatar className="w-8 h-8 flex-shrink-0">
-                    <AvatarFallback className="bg-gray-200">
-                      <User className="w-4 h-4 text-gray-600" />
+                    <AvatarFallback className="bg-gray-200 dark:bg-gray-700">
+                      <User className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                     </AvatarFallback>
                   </Avatar>
                 )}
@@ -566,7 +567,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
       </ScrollArea>
 
       {/* Input Area */}
-      <div className="bg-white border-t border-gray-200 px-4 py-4">
+      <div className="bg-white dark:bg-[#171717] border-t border-gray-200 dark:border-gray-800 px-4 py-4">
         <form onSubmit={handleSubmit} className="flex gap-3 max-w-3xl mx-auto">
           <Input
             ref={inputRef}
@@ -633,7 +634,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
 
             <div>
               <h4 className="text-sm font-medium mb-2">Session Info</h4>
-              <div className="space-y-1 text-sm text-gray-600">
+              <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                 <p>Session ID: {sessionId}</p>
                 <p>Messages: {messages.length}</p>
               </div>

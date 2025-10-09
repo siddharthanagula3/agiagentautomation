@@ -377,29 +377,8 @@ export const MarketplacePublicPage: React.FC = () => {
                   {/* Price and Purchase */}
                   <div className="space-y-3">
                     {/* Pricing Display */}
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-3xl font-bold">${employee.price}</span>
-                          <span className="text-sm text-muted-foreground">/month</span>
-                          {employee.originalPrice && employee.originalPrice > employee.price && (
-                            <span className="text-sm text-muted-foreground line-through">
-                              ${employee.originalPrice}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">
-                            or ${employee.price}/mo billed yearly
-                          </span>
-                          <Badge variant="secondary" className="text-xs">
-                            50% OFF
-                          </Badge>
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Yearly: ${employee.price * 12} (save ${(employee.originalPrice - employee.price) * 12})
-                        </div>
-                      </div>
+                    <div className="text-sm text-muted-foreground">
+                      ${employee.price} /month billed yearly
                     </div>
 
                     {/* Purchase Button */}

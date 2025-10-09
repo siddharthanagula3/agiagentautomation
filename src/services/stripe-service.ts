@@ -29,6 +29,7 @@ export interface CheckoutSessionData {
   userId: string;
   userEmail: string;
   provider?: string; // LLM provider (chatgpt, claude, gemini, perplexity)
+  billingPeriod?: 'monthly' | 'yearly'; // Billing period (defaults to yearly)
 }
 
 /**
@@ -38,13 +39,19 @@ export async function createCheckoutSession(data: CheckoutSessionData): Promise<
   try {
     console.log('[Stripe Service] Creating checkout session:', data);
 
+    // Default to yearly billing for AI employees
+    const checkoutData = {
+      ...data,
+      billingPeriod: data.billingPeriod || 'yearly',
+    };
+
     // Call Netlify function to create checkout session
     const response = await fetch('/.netlify/functions/create-checkout-session', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(checkoutData),
     });
 
     if (!response.ok) {

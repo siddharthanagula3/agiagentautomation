@@ -374,30 +374,40 @@ export const MarketplacePublicPage: React.FC = () => {
                   </div>
 
                   {/* Price and Purchase */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-baseline gap-2">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-bold">{employee.price}</span>
-                        <span className="text-sm text-muted-foreground">per month</span>
-                        {employee.originalPrice && employee.originalPrice > employee.price && (
-                          <div className="flex items-center gap-1">
+                  <div className="space-y-3">
+                    {/* Pricing Display */}
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl font-bold">${employee.price}</span>
+                          <span className="text-sm text-muted-foreground">/month</span>
+                          {employee.originalPrice && employee.originalPrice > employee.price && (
                             <span className="text-sm text-muted-foreground line-through">
                               ${employee.originalPrice}
                             </span>
-                            <Badge variant="destructive" className="text-xs">
-                              50% OFF
-                            </Badge>
-                          </div>
-                        )}
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            or ${employee.price}/mo billed yearly
+                          </span>
+                          <Badge variant="secondary" className="text-xs">
+                            50% OFF
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Yearly: ${employee.price * 12} (save ${(employee.originalPrice - employee.price) * 12})
+                        </div>
                       </div>
                     </div>
 
+                    {/* Purchase Button */}
                     <Button
                       onClick={() => handlePurchase(employee)}
                       disabled={isPurchased(employee.id)}
                       size="sm"
                       className={cn(
-                        "btn-glow",
+                        "btn-glow w-full",
                         isPurchased(employee.id) 
                           ? "bg-success hover:bg-success cursor-default" 
                           : "gradient-primary text-white"

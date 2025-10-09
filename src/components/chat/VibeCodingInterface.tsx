@@ -13,6 +13,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
@@ -39,6 +45,21 @@ import {
   Users,
   ArrowRight,
   MessageCircle,
+  Wrench,
+  Palette,
+  Database,
+  Rocket,
+  Shield,
+  BarChart,
+  PenTool,
+  Briefcase,
+  Bot,
+  Cpu,
+  Network,
+  GitBranch,
+  TestTube,
+  Hammer,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -46,12 +67,13 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTheme } from '@/components/theme-provider';
 import { mcpToolsService, type Artifact, type FileOperation, type CommandExecution } from '@/services/mcp-tools-service';
-import { 
-  multiAgentOrchestrator, 
-  type AgentCommunication, 
+import {
+  multiAgentOrchestrator,
+  type AgentCommunication,
   type AgentStatus,
-  type OrchestrationPlan 
+  type OrchestrationPlan
 } from '@/services/multi-agent-orchestrator';
+import { AgentCollaborationGraph } from './AgentCollaborationGraph';
 
 interface VibeCodingMessage {
   id: string;
@@ -100,6 +122,8 @@ export const VibeCodingInterface: React.FC<Props> = ({
   const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
   const [activeAgents, setActiveAgents] = useState<AgentStatus[]>([]);
   const [agentCommunications, setAgentCommunications] = useState<AgentCommunication[]>([]);
+  const [typingAgent, setTypingAgent] = useState<string | null>(null);
+  const [showAgentSidebar, setShowAgentSidebar] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -131,7 +155,6 @@ export const VibeCodingInterface: React.FC<Props> = ({
         role: 'system',
         content: '🧠 Analyzing your request and assembling the right AI team...',
         timestamp: new Date(),
-        thinking: 'Determining which AI Employees to deploy...',
       };
       setMessages(prev => [...prev, analysisMsg]);
       await new Promise(r => setTimeout(r, 800));
@@ -154,25 +177,32 @@ export const VibeCodingInterface: React.FC<Props> = ({
       const handleCommunication = (comm: AgentCommunication) => {
         communications.push(comm);
         setAgentCommunications(prev => [...prev, comm]);
-        
+
+        // Show typing indicator before adding message
+        setTypingAgent(comm.from);
+
         // Determine message type and agent
         let messageType: VibeCodingMessage['messageType'] = 'chat';
         if (comm.type === 'handoff') messageType = 'handoff';
         else if (comm.type === 'collaboration') messageType = 'collaboration';
         else if (comm.type === 'status') messageType = 'status';
         else if (comm.type === 'response') messageType = 'result';
-        
-        // Add communication as a message with agent info
-        const commMsg: VibeCodingMessage = {
-          id: `comm-${comm.id}`,
-          role: comm.from === 'System' ? 'system' : 'assistant',
-          agentName: comm.from,
-          content: comm.message,
-          timestamp: comm.timestamp,
-          messageType,
-          targetAgent: comm.to !== 'user' ? comm.to : undefined,
-        };
-        setMessages(prev => [...prev, commMsg]);
+
+        // Delay to show typing indicator
+        setTimeout(() => {
+          // Add communication as a message with agent info
+          const commMsg: VibeCodingMessage = {
+            id: `comm-${comm.id}`,
+            role: comm.from === 'System' ? 'system' : 'assistant',
+            agentName: comm.from,
+            content: comm.message,
+            timestamp: comm.timestamp,
+            messageType,
+            targetAgent: comm.to !== 'user' ? comm.to : undefined,
+          };
+          setMessages(prev => [...prev, commMsg]);
+          setTypingAgent(null);
+        }, 800);
       };
 
       const handleStatusUpdate = (status: AgentStatus) => {
@@ -314,7 +344,7 @@ export default App;`,
         artifacts: [codeArtifact],
       };
 
-      setMessages(prev => prev.filter(m => m.id !== thinkingMsg.id).concat(finalMsg));
+      setMessages(prev => [...prev, finalMsg]);
 
       // Simulate terminal output
       setTerminalOutput(prev => [
@@ -364,6 +394,29 @@ export default App;`,
     toast.success('Code copied to clipboard!');
   };
 
+  // Group consecutive messages from the same agent
+  const groupMessages = (messages: VibeCodingMessage[]): VibeCodingMessage[][] => {
+    const groups: VibeCodingMessage[][] = [];
+    let currentGroup: VibeCodingMessage[] = [];
+
+    messages.forEach((msg, idx) => {
+      if (idx === 0 || msg.agentName !== messages[idx - 1].agentName || msg.role !== messages[idx - 1].role) {
+        if (currentGroup.length > 0) {
+          groups.push(currentGroup);
+        }
+        currentGroup = [msg];
+      } else {
+        currentGroup.push(msg);
+      }
+    });
+
+    if (currentGroup.length > 0) {
+      groups.push(currentGroup);
+    }
+
+    return groups;
+  };
+
   return (
     <div className={cn("flex flex-col h-full bg-background", className)}>
       <ResizablePanelGroup direction="horizontal">
@@ -410,14 +463,28 @@ export default App;`,
                     </div>
                   </div>
                 ) : (
-                  messages.map((msg) => (
-                    <MessageBubble
-                      key={msg.id}
-                      message={msg}
-                      theme={actualTheme}
-                      onArtifactClick={setSelectedArtifact}
-                    />
-                  ))
+                  <>
+                    {groupMessages(messages).map((group, groupIdx) => (
+                      <div key={`group-${groupIdx}`} className="space-y-2">
+                        {group.map((msg, msgIdx) => (
+                          <MessageBubble
+                            key={msg.id}
+                            message={msg}
+                            theme={actualTheme}
+                            onArtifactClick={setSelectedArtifact}
+                            showTimestamp={msgIdx === 0}
+                            isGrouped={group.length > 1}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                    {/* Typing Indicator */}
+                    <AnimatePresence>
+                      {typingAgent && (
+                        <AgentTypingIndicator agentName={typingAgent} />
+                      )}
+                    </AnimatePresence>
+                  </>
                 )}
                 <div ref={messagesEndRef} />
               </div>
@@ -487,6 +554,10 @@ export default App;`,
                   <TabsTrigger value="plan">
                     <Brain className="h-4 w-4 mr-2" />
                     Plan
+                  </TabsTrigger>
+                  <TabsTrigger value="graph">
+                    <Network className="h-4 w-4 mr-2" />
+                    Graph
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -671,43 +742,514 @@ export default App;`,
                   </div>
                 </ScrollArea>
               </TabsContent>
+
+              <TabsContent value="graph" className="flex-1 m-0">
+                <AgentCollaborationGraph
+                  agents={activeAgents}
+                  communications={agentCommunications}
+                  onAgentClick={(agentName) => {
+                    // Scroll to agent's messages in chat
+                    const agentMessages = messages.filter(m => m.agentName === agentName);
+                    if (agentMessages.length > 0) {
+                      scrollToBottom();
+                    }
+                  }}
+                />
+              </TabsContent>
             </Tabs>
           </div>
         </ResizablePanel>
+
+        {/* Agent Status Sidebar */}
+        {showAgentSidebar && activeAgents.length > 0 && (
+          <>
+            <ResizableHandle />
+            <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+              <div className="flex flex-col h-full border-l border-border bg-card/20 backdrop-blur-sm">
+                {/* Header */}
+                <div className="px-4 py-3 border-b border-border bg-card/30 backdrop-blur-sm">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-sm flex items-center gap-2">
+                      <Users className="h-4 w-4 text-primary" />
+                      Active Agents
+                      <Badge variant="secondary" className="text-xs">
+                        {activeAgents.length}
+                      </Badge>
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAgentSidebar(false)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Agent Cards */}
+                <ScrollArea className="flex-1">
+                  <div className="p-4 space-y-3">
+                    {activeAgents.map((agent) => (
+                      <motion.div
+                        key={agent.agentName}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        className="space-y-2"
+                      >
+                        <EnhancedAgentStatusCard agent={agent} />
+                      </motion.div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </ResizablePanel>
+          </>
+        )}
+
+        {/* Show sidebar button when hidden */}
+        {!showAgentSidebar && activeAgents.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAgentSidebar(true)}
+            className="absolute top-4 right-4 z-10"
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Show Agents ({activeAgents.length})
+          </Button>
+        )}
       </ResizablePanelGroup>
     </div>
   );
 };
 
-// Agent Avatar Component
-const AgentAvatar: React.FC<{ agentName?: string; role?: 'user' | 'assistant' | 'system' }> = ({ agentName, role }) => {
+// Agent Typing Indicator Component
+const AgentTypingIndicator: React.FC<{ agentName: string }> = ({ agentName }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="flex gap-3 items-center"
+    >
+      <AgentAvatar agentName={agentName} role="assistant" />
+      <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent/80 dark:bg-accent/40 border border-border/30">
+        <span className="text-sm text-muted-foreground">{agentName} is typing</span>
+        <div className="flex gap-1">
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              className="w-1.5 h-1.5 rounded-full bg-primary"
+              animate={{
+                y: [0, -6, 0],
+                opacity: [0.5, 1, 0.5],
+              }}
+              transition={{
+                duration: 0.8,
+                repeat: Infinity,
+                delay: i * 0.15,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Code Artifact Preview Component
+const CodeArtifactPreview: React.FC<{
+  artifact: Artifact;
+  theme: string;
+  onCopy: (code: string) => void;
+}> = ({ artifact, theme, onCopy }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const lineCount = artifact.content.split('\n').length;
+  const previewLines = artifact.content.split('\n').slice(0, 5).join('\n');
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="mt-2 rounded-xl border border-border/50 overflow-hidden bg-card/80 dark:bg-card/40 backdrop-blur-sm"
+    >
+      <div className="flex items-center justify-between px-4 py-2 bg-muted/50 border-b border-border/50">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center">
+            <FileText className="h-3.5 w-3.5 text-primary" />
+          </div>
+          <span className="text-sm font-medium">{artifact.title}</span>
+          <Badge variant="secondary" className="text-xs">
+            {artifact.language}
+          </Badge>
+          <span className="text-xs text-muted-foreground">{lineCount} lines</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onCopy(artifact.content)}
+            className="h-7 px-2"
+          >
+            <Copy className="h-3.5 w-3.5 mr-1" />
+            Copy
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="h-7 px-2"
+          >
+            <Eye className="h-3.5 w-3.5 mr-1" />
+            {isExpanded ? 'Collapse' : 'View Full'}
+          </Button>
+        </div>
+      </div>
+      <div className="max-h-[300px] overflow-auto">
+        <SyntaxHighlighter
+          language={artifact.language || 'typescript'}
+          style={theme === 'dark' ? vscDarkPlus : vs}
+          customStyle={{
+            margin: 0,
+            fontSize: '0.813rem',
+            background: 'transparent',
+          }}
+          showLineNumbers
+        >
+          {isExpanded ? artifact.content : previewLines}
+        </SyntaxHighlighter>
+        {!isExpanded && lineCount > 5 && (
+          <div className="px-4 py-2 text-xs text-center text-muted-foreground bg-muted/30 border-t border-border/30">
+            Click "View Full" to see all {lineCount} lines
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+// Multi-Stage Progress Indicator Component
+const MultiStageProgress: React.FC<{
+  progress: number;
+  stages?: { label: string; value: number }[];
+}> = ({ progress, stages }) => {
+  const defaultStages = [
+    { label: 'Start', value: 0 },
+    { label: 'Planning', value: 25 },
+    { label: 'Building', value: 50 },
+    { label: 'Testing', value: 75 },
+    { label: 'Complete', value: 100 },
+  ];
+
+  const milestones = stages || defaultStages;
+
+  return (
+    <div className="space-y-2">
+      <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+        <motion.div
+          className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        />
+      </div>
+      <div className="flex justify-between items-center">
+        {milestones.map((milestone, idx) => {
+          const isActive = progress >= milestone.value;
+          const isCurrent = progress >= milestone.value && (idx === milestones.length - 1 || progress < milestones[idx + 1].value);
+
+          return (
+            <div key={milestone.label} className="flex flex-col items-center gap-1">
+              <motion.div
+                className={cn(
+                  "w-2 h-2 rounded-full border-2 transition-colors",
+                  isActive ? "bg-primary border-primary" : "bg-background border-muted-foreground/30"
+                )}
+                animate={isCurrent ? { scale: [1, 1.3, 1] } : {}}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
+              <span className={cn(
+                "text-[10px] font-medium",
+                isActive ? "text-foreground" : "text-muted-foreground"
+              )}>
+                {milestone.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Agent Avatar Component with Icons and Status
+interface AgentAvatarProps {
+  agentName?: string;
+  role?: 'user' | 'assistant' | 'system';
+  status?: 'idle' | 'analyzing' | 'working' | 'waiting' | 'completed' | 'blocked' | 'error';
+  showTooltip?: boolean;
+}
+
+const AgentAvatar: React.FC<AgentAvatarProps> = ({
+  agentName,
+  role,
+  status,
+  showTooltip = true
+}) => {
+  // User avatar
   if (role === 'user') {
     return (
-      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-        <span className="text-sm">👤</span>
+      <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+        <Users className="h-4 w-4 text-white" />
       </div>
     );
   }
 
-  // Different colors/emojis for different agents
-  const getAgentStyle = (name?: string) => {
-    if (!name) return { bg: 'bg-gradient-to-br from-gray-500 to-gray-600', emoji: '🤖' };
-    if (name.includes('Architect')) return { bg: 'bg-gradient-to-br from-blue-500 to-indigo-600', emoji: '🏗️' };
-    if (name.includes('Frontend')) return { bg: 'bg-gradient-to-br from-green-500 to-emerald-600', emoji: '🎨' };
-    if (name.includes('Backend')) return { bg: 'bg-gradient-to-br from-orange-500 to-red-600', emoji: '⚙️' };
-    if (name.includes('DevOps')) return { bg: 'bg-gradient-to-br from-purple-500 to-violet-600', emoji: '🚀' };
-    if (name.includes('QA')) return { bg: 'bg-gradient-to-br from-yellow-500 to-amber-600', emoji: '✅' };
-    if (name.includes('System')) return { bg: 'bg-gradient-to-br from-gray-600 to-gray-700', emoji: '⚡' };
-    return { bg: 'bg-gradient-to-br from-purple-500 to-pink-500', emoji: '✨' };
+  // Get agent style based on name/role
+  const getAgentConfig = (name?: string): {
+    bg: string;
+    icon: LucideIcon;
+    category: string;
+    description: string;
+  } => {
+    const nameLower = name?.toLowerCase() || '';
+
+    // Architecture & Design
+    if (nameLower.includes('architect')) {
+      return {
+        bg: 'from-blue-500 to-indigo-600',
+        icon: Hammer,
+        category: 'Architecture',
+        description: 'System architecture and design'
+      };
+    }
+
+    // Frontend Development
+    if (nameLower.includes('frontend') || nameLower.includes('ui') || nameLower.includes('design')) {
+      return {
+        bg: 'from-green-500 to-emerald-600',
+        icon: Palette,
+        category: 'Frontend',
+        description: 'UI/UX and frontend development'
+      };
+    }
+
+    // Backend Development
+    if (nameLower.includes('backend') || nameLower.includes('api')) {
+      return {
+        bg: 'from-orange-500 to-red-600',
+        icon: Database,
+        category: 'Backend',
+        description: 'Backend services and APIs'
+      };
+    }
+
+    // DevOps & Infrastructure
+    if (nameLower.includes('devops') || nameLower.includes('infrastructure') || nameLower.includes('deploy')) {
+      return {
+        bg: 'from-purple-500 to-violet-600',
+        icon: Rocket,
+        category: 'DevOps',
+        description: 'Infrastructure and deployment'
+      };
+    }
+
+    // QA & Testing
+    if (nameLower.includes('qa') || nameLower.includes('test') || nameLower.includes('quality')) {
+      return {
+        bg: 'from-yellow-500 to-amber-600',
+        icon: TestTube,
+        category: 'QA',
+        description: 'Quality assurance and testing'
+      };
+    }
+
+    // Security
+    if (nameLower.includes('security') || nameLower.includes('sec')) {
+      return {
+        bg: 'from-red-600 to-pink-600',
+        icon: Shield,
+        category: 'Security',
+        description: 'Security and compliance'
+      };
+    }
+
+    // Data & Analytics
+    if (nameLower.includes('data') || nameLower.includes('analytics') || nameLower.includes('analyst')) {
+      return {
+        bg: 'from-cyan-500 to-blue-600',
+        icon: BarChart,
+        category: 'Data',
+        description: 'Data analysis and insights'
+      };
+    }
+
+    // Content & Writing
+    if (nameLower.includes('content') || nameLower.includes('writer') || nameLower.includes('copy')) {
+      return {
+        bg: 'from-pink-500 to-rose-600',
+        icon: PenTool,
+        category: 'Content',
+        description: 'Content creation and writing'
+      };
+    }
+
+    // Business & Management
+    if (nameLower.includes('manager') || nameLower.includes('business') || nameLower.includes('ceo') || nameLower.includes('cto')) {
+      return {
+        bg: 'from-indigo-600 to-purple-700',
+        icon: Briefcase,
+        category: 'Management',
+        description: 'Business and management'
+      };
+    }
+
+    // AI/ML & Intelligence
+    if (nameLower.includes('ai') || nameLower.includes('ml') || nameLower.includes('intelligence')) {
+      return {
+        bg: 'from-violet-500 to-fuchsia-600',
+        icon: Brain,
+        category: 'AI/ML',
+        description: 'Artificial intelligence and ML'
+      };
+    }
+
+    // Code & Development
+    if (nameLower.includes('developer') || nameLower.includes('engineer') || nameLower.includes('code')) {
+      return {
+        bg: 'from-emerald-500 to-teal-600',
+        icon: Code,
+        category: 'Development',
+        description: 'Software development'
+      };
+    }
+
+    // Network & Integration
+    if (nameLower.includes('network') || nameLower.includes('integration')) {
+      return {
+        bg: 'from-sky-500 to-blue-600',
+        icon: Network,
+        category: 'Network',
+        description: 'Network and integrations'
+      };
+    }
+
+    // Version Control & Git
+    if (nameLower.includes('git') || nameLower.includes('version')) {
+      return {
+        bg: 'from-orange-600 to-red-700',
+        icon: GitBranch,
+        category: 'Version Control',
+        description: 'Version control and Git'
+      };
+    }
+
+    // System/General
+    if (nameLower.includes('system')) {
+      return {
+        bg: 'from-gray-600 to-gray-700',
+        icon: Cpu,
+        category: 'System',
+        description: 'System operations'
+      };
+    }
+
+    // Default
+    return {
+      bg: 'from-purple-500 to-pink-500',
+      icon: Bot,
+      category: 'AI Agent',
+      description: 'AI assistant'
+    };
   };
 
-  const style = getAgentStyle(agentName);
-  
-  return (
-    <div className={cn("w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0", style.bg)}>
-      <span className="text-sm">{style.emoji}</span>
-    </div>
+  const config = getAgentConfig(agentName);
+  const Icon = config.icon;
+
+  // Get status indicator color
+  const getStatusColor = () => {
+    switch (status) {
+      case 'working':
+      case 'analyzing':
+        return 'bg-blue-500';
+      case 'completed':
+        return 'bg-green-500';
+      case 'error':
+      case 'blocked':
+        return 'bg-red-500';
+      case 'waiting':
+        return 'bg-orange-500';
+      case 'idle':
+      default:
+        return 'bg-gray-400';
+    }
+  };
+
+  const avatar = (
+    <motion.div
+      className="relative"
+      whileHover={{ scale: 1.05 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className={cn(
+        "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-md transition-all",
+        "bg-gradient-to-br",
+        config.bg
+      )}>
+        <Icon className="h-4 w-4 text-white" />
+      </div>
+
+      {/* Status Indicator Dot */}
+      {status && (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background"
+        >
+          <div className={cn("w-full h-full rounded-full", getStatusColor())}>
+            {(status === 'working' || status === 'analyzing') && (
+              <motion.div
+                className="w-full h-full rounded-full bg-current"
+                animate={{ opacity: [1, 0.5, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
+            )}
+          </div>
+        </motion.div>
+      )}
+    </motion.div>
   );
+
+  // Wrap with tooltip if enabled and has agent name
+  if (showTooltip && agentName) {
+    return (
+      <TooltipProvider delayDuration={300}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {avatar}
+          </TooltipTrigger>
+          <TooltipContent side="right" className="max-w-xs">
+            <div className="space-y-1">
+              <p className="font-semibold text-sm">{agentName}</p>
+              <p className="text-xs text-muted-foreground">{config.category}</p>
+              <p className="text-xs">{config.description}</p>
+              {status && (
+                <div className="flex items-center gap-1.5 pt-1">
+                  <div className={cn("w-2 h-2 rounded-full", getStatusColor())} />
+                  <span className="text-xs capitalize">{status}</span>
+                </div>
+              )}
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return avatar;
 };
 
 // Message Component
@@ -715,25 +1257,45 @@ const MessageBubble: React.FC<{
   message: VibeCodingMessage;
   theme: string;
   onArtifactClick: (artifact: Artifact) => void;
-}> = ({ message, theme, onArtifactClick }) => {
+  showTimestamp?: boolean;
+  isGrouped?: boolean;
+  agentStatus?: AgentStatus['status'];
+}> = ({ message, theme, onArtifactClick, showTimestamp = true, isGrouped = false, agentStatus }) => {
   const isUser = message.role === 'user';
   const isSystem = message.role === 'system';
   const isHandoff = message.messageType === 'handoff';
   const isStatus = message.messageType === 'status';
 
+  // Determine status from message type if not explicitly provided
+  const derivedStatus = agentStatus || (
+    message.messageType === 'status' ? 'working' :
+    message.messageType === 'result' ? 'completed' :
+    message.messageType === 'handoff' ? 'analyzing' :
+    undefined
+  );
+
   return (
     <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <div className={cn("flex gap-3", isUser && "flex-row-reverse")}>
-        <AgentAvatar agentName={message.agentName} role={message.role} />
+        {/* Show avatar only for first message in group */}
+        {!isGrouped || showTimestamp ? (
+          <AgentAvatar
+            agentName={message.agentName}
+            role={message.role}
+            status={derivedStatus}
+          />
+        ) : (
+          <div className="w-8" /> /* Spacer for alignment */
+        )}
 
         <div className="flex-1 space-y-2 max-w-[85%]">
-          {/* Agent Name & Metadata */}
-          {!isUser && message.agentName && (
+          {/* Agent Name & Metadata - only for first message in group */}
+          {!isUser && message.agentName && showTimestamp && (
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm font-semibold text-foreground">{message.agentName}</span>
               {message.messageType && (
-                <Badge 
-                  variant="outline" 
+                <Badge
+                  variant="outline"
                   className={cn(
                     "text-xs",
                     message.messageType === 'handoff' && "border-blue-500 text-blue-600 dark:text-blue-400",
@@ -741,7 +1303,7 @@ const MessageBubble: React.FC<{
                     message.messageType === 'result' && "border-green-500 text-green-600 dark:text-green-400"
                   )}
                 >
-                  {message.messageType === 'handoff' ? '📞 calling' : 
+                  {message.messageType === 'handoff' ? '📞 calling' :
                    message.messageType === 'status' ? '⚡ working' :
                    message.messageType === 'result' ? '✅ completed' :
                    message.messageType}
@@ -753,34 +1315,60 @@ const MessageBubble: React.FC<{
             </div>
           )}
 
-          {/* Handoff Message */}
+          {/* Enhanced Handoff Message with Animation */}
           {isHandoff && message.targetAgent && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50">
-              <ArrowRight className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <span className="text-sm text-foreground">
-                <span className="font-semibold">{message.agentName}</span>
-                {' → '}
-                <span className="font-semibold text-blue-600 dark:text-blue-400">{message.targetAgent}</span>
-              </span>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="relative overflow-hidden p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800/50"
+            >
+              {/* Animated background effect */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent"
+                initial={{ x: '-100%' }}
+                animate={{ x: '100%' }}
+                transition={{ duration: 1.5, ease: "easeInOut" }}
+              />
+
+              <div className="relative flex items-center gap-3">
+                {/* From Agent */}
+                <div className="flex items-center gap-2">
+                  <AgentAvatar agentName={message.agentName} role="assistant" status="completed" />
+                  <span className="text-sm font-semibold">{message.agentName}</span>
+                </div>
+
+                {/* Animated Arrow */}
+                <motion.div
+                  animate={{ x: [0, 8, 0] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <ArrowRight className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </motion.div>
+
+                {/* To Agent */}
+                <div className="flex items-center gap-2">
+                  <AgentAvatar agentName={message.targetAgent} role="assistant" status="analyzing" />
+                  <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">{message.targetAgent}</span>
+                </div>
+              </div>
+            </motion.div>
           )}
 
-          {/* Status Message with Progress */}
+          {/* Status Message with Multi-Stage Progress */}
           {isStatus && message.progress !== undefined && (
-            <div className="p-3 rounded-lg bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border border-orange-200 dark:border-orange-800/50">
-              <div className="flex items-center justify-between mb-2">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-4 rounded-lg bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border border-orange-200 dark:border-orange-800/50"
+            >
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-foreground">{message.content}</span>
                 <Badge variant="secondary" className="text-xs font-semibold">
                   {message.progress}%
                 </Badge>
               </div>
-              <div className="h-1.5 bg-white dark:bg-gray-900 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-500 ease-out"
-                  style={{ width: `${message.progress}%` }}
-                />
-              </div>
-            </div>
+              <MultiStageProgress progress={message.progress} />
+            </motion.div>
           )}
 
           {/* Regular Content */}
@@ -797,30 +1385,20 @@ const MessageBubble: React.FC<{
             </div>
           )}
 
-          {/* Artifacts */}
+          {/* Artifacts with Preview */}
           {message.artifacts && message.artifacts.length > 0 && (
             <div className="space-y-2 mt-2">
               {message.artifacts.map((artifact) => (
-                <button
+                <CodeArtifactPreview
                   key={artifact.id}
-                  onClick={() => onArtifactClick(artifact)}
-                  className="w-full text-left px-4 py-3 rounded-xl bg-card/80 dark:bg-card/40 border border-border/50 hover:border-primary/50 hover:bg-card transition-all duration-200 group backdrop-blur-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Code className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-sm">{artifact.title}</span>
-                        <Badge variant="secondary" className="text-xs w-fit mt-0.5">
-                          {artifact.language}
-                        </Badge>
-                      </div>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" />
-                  </div>
-                </button>
+                  artifact={artifact}
+                  theme={theme}
+                  onCopy={(code) => {
+                    navigator.clipboard.writeText(code);
+                    toast.success('Code copied to clipboard!');
+                    onArtifactClick(artifact);
+                  }}
+                />
               ))}
             </div>
           )}
@@ -830,7 +1408,103 @@ const MessageBubble: React.FC<{
   );
 };
 
-// Agent Status Card Component
+// Enhanced Agent Status Card for Sidebar
+const EnhancedAgentStatusCard: React.FC<{ agent: AgentStatus }> = ({ agent }) => {
+  const getStatusColor = () => {
+    switch (agent.status) {
+      case 'working':
+        return 'border-blue-500/50 bg-blue-50/50 dark:bg-blue-950/20';
+      case 'completed':
+        return 'border-green-500/50 bg-green-50/50 dark:bg-green-950/20';
+      case 'analyzing':
+        return 'border-purple-500/50 bg-purple-50/50 dark:bg-purple-950/20';
+      case 'waiting':
+        return 'border-orange-500/50 bg-orange-50/50 dark:bg-orange-950/20';
+      case 'idle':
+        return 'border-gray-500/50 bg-gray-50/50 dark:bg-gray-950/20';
+      default:
+        return 'border-gray-500/50 bg-gray-50/50 dark:bg-gray-950/20';
+    }
+  };
+
+  const getStatusIcon = () => {
+    switch (agent.status) {
+      case 'working':
+      case 'analyzing':
+        return <Loader2 className="h-3.5 w-3.5 animate-spin" />;
+      case 'completed':
+        return <CheckCircle2 className="h-3.5 w-3.5" />;
+      case 'waiting':
+        return <Circle className="h-3.5 w-3.5" />;
+      default:
+        return <Circle className="h-3.5 w-3.5" />;
+    }
+  };
+
+  return (
+    <motion.div
+      layout
+      className={cn("p-3 rounded-lg border transition-all", getStatusColor())}
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <AgentAvatar agentName={agent.agentName} role="assistant" status={agent.status} />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              {getStatusIcon()}
+              <span className="text-xs font-semibold truncate">{agent.agentName}</span>
+            </div>
+            <Badge variant="outline" className="text-[10px] h-4 mt-0.5">
+              {agent.status}
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      {/* Current Task */}
+      {agent.currentTask && (
+        <p className="text-[11px] text-muted-foreground mb-2 line-clamp-2">
+          {agent.currentTask}
+        </p>
+      )}
+
+      {/* Progress */}
+      <div className="space-y-1">
+        <div className="flex justify-between items-center text-[10px]">
+          <span className="text-muted-foreground">Progress</span>
+          <span className="font-semibold">{agent.progress}%</span>
+        </div>
+        <div className="h-1.5 bg-background rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+            initial={{ width: 0 }}
+            animate={{ width: `${agent.progress}%` }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          />
+        </div>
+      </div>
+
+      {/* Tools Using */}
+      {agent.toolsUsing && agent.toolsUsing.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {agent.toolsUsing.slice(0, 3).map((tool, idx) => (
+            <Badge key={idx} variant="secondary" className="text-[10px] h-4 px-1.5">
+              {tool}
+            </Badge>
+          ))}
+          {agent.toolsUsing.length > 3 && (
+            <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+              +{agent.toolsUsing.length - 3}
+            </Badge>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
+// Agent Status Card Component (for Agents tab)
 const AgentStatusCard: React.FC<{ agent: AgentStatus }> = ({ agent }) => {
   const getStatusColor = () => {
     switch (agent.status) {
@@ -872,18 +1546,18 @@ const AgentStatusCard: React.FC<{ agent: AgentStatus }> = ({ agent }) => {
           {agent.status.replace('_', ' ')}
         </Badge>
       </div>
-      
+
       {agent.currentTask && (
         <p className="text-sm text-muted-foreground mb-3">{agent.currentTask}</p>
       )}
-      
+
       <div className="space-y-2">
         <div className="flex justify-between items-center text-xs">
           <span className="text-muted-foreground">Progress</span>
           <span className="font-semibold">{agent.progress}%</span>
         </div>
         <div className="h-2 bg-background rounded-full overflow-hidden">
-          <div 
+          <div
             className="h-full bg-current transition-all duration-500"
             style={{ width: `${agent.progress}%` }}
           />

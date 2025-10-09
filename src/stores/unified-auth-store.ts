@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { authService, AuthUser, LoginData, RegisterData } from '../services/authService';
+import { authService, AuthUser, LoginData, RegisterData } from '@/services/auth-service';
 import { logger } from '@/lib/logger';
 
 interface AuthState {

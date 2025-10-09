@@ -52,7 +52,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/unified-auth-store';
-import settingsService, { UserProfile, UserSettings, APIKey } from '@/services/settingsService';
+import settingsService, { UserProfile, UserSettings, APIKey } from '@/services/settings-service';
 import { InteractiveHoverCard } from '@/components/ui/interactive-hover-card';
 import { Particles } from '@/components/ui/particles';
 

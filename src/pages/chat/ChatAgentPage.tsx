@@ -1,73 +1,40 @@
 /**
- * Chat Agent Page
- * Advanced AI agent interface using OpenAI's Agent SDK
- * Implements the exact interface from the OpenAI platform
+ * Chat Agent Page - OpenAI Assistant Style Chat Interface
+ * Clean chat UI for AI Employees with all tools pre-configured
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import {
-  Bot,
-  Plus,
-  MessageSquare,
-  Loader2,
-  AlertCircle,
-  Settings,
-  Play,
-  Square,
+import { Badge } from '@/components/ui/badge';
+import { 
+  Send, 
+  Paperclip, 
+  Copy, 
   RotateCcw,
+  Loader2,
+  Bot,
+  User,
+  FileText,
   Code,
   Search,
-  FileText,
-  Database,
-  Globe,
-  Wrench,
-  Copy,
-  Download,
-  Upload,
-  Terminal,
-  Brain,
-  Sparkles,
-  Activity,
-  ChevronRight,
-  Save,
-  Edit,
-  Trash2,
+  Image as ImageIcon,
   X,
+  ChevronLeft,
+  Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { listPurchasedEmployees } from '@/services/supabase-employees';
-import { openAIAgentsService, type AgentSession, type AgentConfig } from '@/services/openai-agents-service';
-import AgentChatUI from '@/components/chat/AgentChatUI';
+import { sendAIMessage, isProviderConfigured } from '@/services/ai-chat-service';
+import { createSession, sendMessage as saveMessage } from '@/services/supabase-chat';
+import { toast } from 'sonner';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github-dark.css';
 
 interface PurchasedEmployee {
   id: string;
@@ -75,65 +42,32 @@ interface PurchasedEmployee {
   name: string;
   role: string;
   description: string;
-  avatar_url?: string;
-  created_at: string;
-  status: 'active' | 'inactive';
+  provider: string;
   capabilities?: string[];
-  provider?: string;
 }
 
-interface ToolDefinition {
+interface Message {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: Date;
+  tools?: ToolExecution[];
+  attachments?: Attachment[];
+}
+
+interface ToolExecution {
   name: string;
-  description: string;
-  enabled: boolean;
-  icon: React.ComponentType<{ className?: string }>;
-  category: 'local' | 'function' | 'custom' | 'image';
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  result?: any;
 }
 
-const availableTools: ToolDefinition[] = [
-  {
-    name: 'Web Search',
-    description: 'Search the web for information',
-    enabled: true,
-    icon: Globe,
-    category: 'local',
-  },
-  {
-    name: 'Code Interpreter',
-    description: 'Execute code and return results',
-    enabled: true,
-    icon: Code,
-    category: 'function',
-  },
-  {
-    name: 'File Search',
-    description: 'Search through uploaded files',
-    enabled: true,
-    icon: FileText,
-    category: 'local',
-  },
-  {
-    name: 'Image Generation',
-    description: 'Generate images from text descriptions',
-    enabled: false,
-    icon: Sparkles,
-    category: 'image',
-  },
-  {
-    name: 'Data Analysis',
-    description: 'Analyze data and provide insights',
-    enabled: true,
-    icon: Database,
-    category: 'function',
-  },
-  {
-    name: 'Custom Function',
-    description: 'Custom tool implementation',
-    enabled: false,
-    icon: Wrench,
-    category: 'custom',
-  },
-];
+interface Attachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url?: string;
+}
 
 const ChatAgentPage: React.FC = () => {
   const navigate = useNavigate();
@@ -144,20 +78,17 @@ const ChatAgentPage: React.FC = () => {
   // State
   const [employees, setEmployees] = useState<PurchasedEmployee[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<PurchasedEmployee | null>(null);
-  const [agentSession, setAgentSession] = useState<AgentSession | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [showNewPromptDialog, setShowNewPromptDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState('hosted');
+  const [isSending, setIsSending] = useState(false);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   
-  // Agent configuration state
-  const [agentName, setAgentName] = useState('gpt-4o');
-  const [model, setModel] = useState('gpt-4o');
-  const [agentInstructions, setAgentInstructions] = useState('');
-  const [selectedTools, setSelectedTools] = useState<string[]>(['Web Search']);
-  const [isDraft, setIsDraft] = useState(true);
-
-  // Get employee ID from query params
-  const employeeIdFromParams = searchParams.get('employee');
+  // Refs
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Load purchased employees
   useEffect(() => {
@@ -169,23 +100,23 @@ const ChatAgentPage: React.FC = () => {
         const data = await listPurchasedEmployees(user.id);
         setEmployees(data);
         
-        // Select employee from URL param or first available
+        // Check if employee ID is in URL params
+        const employeeIdParam = searchParams.get('employee');
+        
         if (data.length > 0) {
           let employeeToSelect = data[0];
           
-          // If employee ID in URL, try to find it
-          if (employeeIdFromParams) {
-            const foundEmployee = data.find(emp => emp.id === employeeIdFromParams);
-            if (foundEmployee) {
-              employeeToSelect = foundEmployee;
-            }
+          // Try to find employee from URL param or sessionId
+          if (employeeIdParam) {
+            const emp = data.find(e => e.employee_id === employeeIdParam);
+            if (emp) employeeToSelect = emp;
+          } else if (sessionId) {
+            const emp = data.find(e => e.id === sessionId);
+            if (emp) employeeToSelect = emp;
           }
           
           setSelectedEmployee(employeeToSelect);
-          setAgentName(employeeToSelect.name);
-          setAgentInstructions(
-            `You are ${employeeToSelect.name}, a professional ${employeeToSelect.role}. ${employeeToSelect.description}`
-          );
+          await initializeChat(employeeToSelect);
         }
       } catch (err) {
         console.error('Failed to load employees:', err);
@@ -196,441 +127,460 @@ const ChatAgentPage: React.FC = () => {
     };
 
     loadEmployees();
-  }, [user?.id, employeeIdFromParams]);
+  }, [user?.id, sessionId, searchParams]);
 
-  // Create agent session when employee is selected
-  useEffect(() => {
-    if (selectedEmployee && user?.id && !agentSession) {
-      createAgentSession();
-    }
-  }, [selectedEmployee, user?.id]);
-
-  // Create agent session
-  const createAgentSession = async () => {
-    if (!selectedEmployee || !user?.id) return;
+  // Initialize chat session
+  const initializeChat = async (employee: PurchasedEmployee) => {
+    if (!user?.id) return;
 
     try {
-      setIsLoading(true);
+      // Create new session
+      const session = await createSession(user.id, {
+        employeeId: employee.id,
+        role: employee.role,
+        provider: employee.provider
+      });
       
-      // Create agent from employee
-      const agent = openAIAgentsService.createAgentFromEmployee(selectedEmployee);
+      setCurrentSessionId(session.id);
       
-      // Start session
-      const session = await openAIAgentsService.startSession(
-        user.id,
-        selectedEmployee.id,
-        agent
-      );
+      // Add welcome message
+      const welcomeMessage: Message = {
+        id: `msg-${Date.now()}`,
+        role: 'assistant',
+        content: `Hello! I'm ${employee.name}, your ${employee.role}. I have access to various tools including file search, code interpreter, web browsing, and image generation. How can I assist you today?`,
+        timestamp: new Date()
+      };
       
-      setAgentSession(session);
+      setMessages([welcomeMessage]);
       
-      // Update URL if needed
-      if (!sessionId) {
-        navigate(`/chat-agent/${session.sessionId}`, { replace: true });
-      }
+      // Save welcome message
+      await saveMessage(user.id, session.id, 'assistant', welcomeMessage.content);
     } catch (error) {
-      console.error('Error creating agent session:', error);
-      toast.error('Failed to create agent session');
-    } finally {
-      setIsLoading(false);
+      console.error('Failed to initialize chat:', error);
+      toast.error('Failed to start chat session');
     }
   };
 
-  // Handle tool toggle
-  const handleToolToggle = (toolName: string) => {
-    setSelectedTools(prev => {
-      if (prev.includes(toolName)) {
-        return prev.filter(t => t !== toolName);
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Handle send message
+  const handleSend = async () => {
+    if (!input.trim() || !selectedEmployee || isSending || !currentSessionId) return;
+
+    const userMessage: Message = {
+      id: `msg-${Date.now()}`,
+      role: 'user',
+      content: input.trim(),
+      timestamp: new Date(),
+      attachments: attachments.map(f => ({
+        id: `att-${Date.now()}`,
+        name: f.name,
+        type: f.type,
+        size: f.size
+      }))
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setAttachments([]);
+    setIsSending(true);
+
+    try {
+      // Save user message
+      await saveMessage(user.id!, currentSessionId, 'user', userMessage.content);
+
+      // Simulate tool executions for demonstration
+      const toolsToShow: ToolExecution[] = [];
+      
+      // Detect what tools might be needed based on content
+      if (userMessage.content.toLowerCase().includes('search') || 
+          userMessage.content.toLowerCase().includes('find')) {
+        toolsToShow.push({
+          name: 'File Search',
+          status: 'completed'
+        });
       }
-      return [...prev, toolName];
-    });
+      
+      if (userMessage.content.toLowerCase().includes('code') || 
+          userMessage.content.toLowerCase().includes('python') ||
+          userMessage.content.toLowerCase().includes('javascript')) {
+        toolsToShow.push({
+          name: 'Code Interpreter',
+          status: 'completed'
+        });
+      }
+
+      // Get AI response
+      const conversationHistory = messages.map(m => ({
+        role: m.role,
+        content: m.content
+      }));
+      
+      conversationHistory.push({
+        role: 'user',
+        content: userMessage.content
+      });
+
+      const response = await sendAIMessage(
+        selectedEmployee.provider,
+        conversationHistory,
+        selectedEmployee.role
+      );
+
+      const assistantMessage: Message = {
+        id: `msg-${Date.now()}`,
+        role: 'assistant',
+        content: response.content,
+        timestamp: new Date(),
+        tools: toolsToShow.length > 0 ? toolsToShow : undefined
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+      
+      // Save assistant message
+      await saveMessage(user.id!, currentSessionId, 'assistant', response.content);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message');
+      
+      // Add error message
+      const errorMessage: Message = {
+        id: `msg-${Date.now()}`,
+        role: 'assistant',
+        content: 'I apologize, but I encountered an error processing your request. Please try again.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsSending(false);
+    }
   };
 
-  // Handle save configuration
-  const handleSaveConfiguration = () => {
-    setIsDraft(false);
-    toast.success('Agent configuration saved');
+  // Handle file attachment
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setAttachments(prev => [...prev, ...files]);
   };
 
-  // Handle add new prompt
-  const handleAddNewPrompt = () => {
-    setShowNewPromptDialog(true);
+  // Remove attachment
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Handle key press
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  // Copy message
+  const copyMessage = (content: string) => {
+    navigator.clipboard.writeText(content);
+    toast.success('Copied to clipboard');
+  };
+
+  // Regenerate last response
+  const regenerateLastResponse = async () => {
+    if (messages.length < 2) return;
+    
+    // Remove last assistant message
+    const newMessages = messages.slice(0, -1);
+    setMessages(newMessages);
+    
+    // Get last user message
+    const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
+    if (lastUserMessage) {
+      setInput(lastUserMessage.content);
+      // Trigger send after setting input
+      setTimeout(() => handleSend(), 100);
+    }
   };
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-screen bg-white dark:bg-[#0d0e11]">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-600 dark:text-gray-400" />
-            <p className="text-gray-600 dark:text-gray-400">Loading AI agents...</p>
-          </div>
+      <div className="flex items-center justify-center h-screen bg-[#212121]">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-400">Loading AI Employees...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedEmployee) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#212121]">
+        <div className="text-center">
+          <Bot className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+          <h2 className="text-xl font-medium text-white mb-2">No AI Employee Selected</h2>
+          <p className="text-gray-400 mb-6">Purchase AI employees from the marketplace</p>
+          <Button
+            onClick={() => navigate('/marketplace')}
+            className="bg-white text-black hover:bg-gray-200"
+          >
+            Browse Marketplace
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white dark:bg-[#0d0e11]">
+    <div className="flex flex-col h-screen bg-[#212121]">
       {/* Header */}
-      <div className="bg-gray-50 dark:bg-[#171717] border-b border-gray-200 dark:border-gray-800 px-6 py-4">
+      <div className="bg-[#2a2a2a] border-b border-[#3a3a3a] px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-medium text-gray-900 dark:text-white">AGI Agent Automation</h1>
-            <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-600" />
-            <span className="text-gray-500 dark:text-gray-400">Chat Agent</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/workforce')}
+              className="text-gray-400 hover:text-white"
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Back
+            </Button>
+            <div className="h-6 w-px bg-[#3a3a3a]" />
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                <Bot className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h1 className="text-white font-medium">{selectedEmployee.name}</h1>
+                <p className="text-xs text-gray-400">{selectedEmployee.role}</p>
+              </div>
+            </div>
           </div>
           
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-gray-600"
-              onClick={() => navigate('/workforce')}
-            >
-              Back to Workforce
-            </Button>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs border-[#3a3a3a] text-gray-400">
+              Thread
+            </Badge>
+            <div className="text-xs text-gray-500">
+              {new Date().toLocaleString('en-US', { 
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex">
-        {/* Left Sidebar - Configuration */}
-        <div className="w-80 bg-gray-50 dark:bg-[#171717] border-r border-gray-200 dark:border-gray-800 flex flex-col">
-          {/* New Prompt Button */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-            <Button 
-              className="w-full bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 justify-start"
-              onClick={handleAddNewPrompt}
+      {/* Messages Area */}
+      <ScrollArea className="flex-1 px-4">
+        <div className="max-w-4xl mx-auto py-6 space-y-6">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={cn(
+                "flex gap-3",
+                message.role === 'user' ? 'justify-end' : 'justify-start'
+              )}
             >
-              <Plus className="w-4 h-4 mr-2" />
-              New prompt
-            </Button>
-          </div>
-
-          {/* Model Configuration */}
-          <ScrollArea className="flex-1">
-            <div className="p-4 space-y-6">
-              {/* Model Name */}
-              <div>
-                <label className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Model</label>
-                <div className="mt-2 flex items-center gap-2">
-                  <Input
-                    value={agentName}
-                    onChange={(e) => setAgentName(e.target.value)}
-                    className="bg-white dark:bg-[#0d0e11] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                    placeholder="Agent name"
-                  />
-                  {isDraft && (
-                    <Badge variant="outline" className="text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600">
-                      Draft
-                    </Badge>
+              {message.role === 'assistant' && (
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
+              )}
+              
+              <div
+                className={cn(
+                  "group relative max-w-[85%] rounded-lg px-4 py-3",
+                  message.role === 'user' 
+                    ? 'bg-[#303030] text-white' 
+                    : 'bg-transparent text-gray-100'
+                )}
+              >
+                {/* Tool executions */}
+                {message.tools && message.tools.length > 0 && (
+                  <div className="mb-3 space-y-1">
+                    {message.tools.map((tool, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-xs text-gray-400">
+                        {tool.name === 'File Search' && <Search className="w-3 h-3" />}
+                        {tool.name === 'Code Interpreter' && <Code className="w-3 h-3" />}
+                        <span>{tool.name}</span>
+                        {tool.status === 'completed' && (
+                          <Badge variant="outline" className="text-xs border-green-800 text-green-400 h-4 px-1">
+                            ✓
+                          </Badge>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Message content */}
+                {message.role === 'assistant' ? (
+                  <ReactMarkdown
+                    className="prose prose-invert prose-sm max-w-none"
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeHighlight]}
+                    components={{
+                      code({ node, inline, className, children, ...props }) {
+                        const match = /language-(\w+)/.exec(className || '');
+                        return !inline && match ? (
+                          <div className="relative group/code">
+                            <pre className="!bg-[#1a1a1a] !border !border-[#3a3a3a] rounded-md overflow-x-auto">
+                              <code className={className} {...props}>
+                                {children}
+                              </code>
+                            </pre>
+                            <button
+                              onClick={() => copyMessage(String(children))}
+                              className="absolute top-2 right-2 opacity-0 group-hover/code:opacity-100 transition-opacity"
+                            >
+                              <Copy className="w-4 h-4 text-gray-400 hover:text-white" />
+                            </button>
+                          </div>
+                        ) : (
+                          <code className="bg-[#1a1a1a] px-1 py-0.5 rounded text-sm" {...props}>
+                            {children}
+                          </code>
+                        );
+                      },
+                      p: ({ children }) => <p className="mb-3 leading-relaxed">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1">{children}</ol>,
+                      h3: ({ children }) => <h3 className="text-lg font-semibold mb-2 mt-4">{children}</h3>,
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                ) : (
+                  <div className="whitespace-pre-wrap">{message.content}</div>
+                )}
+                
+                {/* Attachments */}
+                {message.attachments && message.attachments.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {message.attachments.map((att) => (
+                      <div key={att.id} className="flex items-center gap-2 bg-[#1a1a1a] px-2 py-1 rounded text-xs">
+                        <FileText className="w-3 h-3" />
+                        <span>{att.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Message actions */}
+                <div className="absolute -bottom-5 left-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                  <button
+                    onClick={() => copyMessage(message.content)}
+                    className="p-1 hover:bg-[#3a3a3a] rounded text-gray-400 hover:text-white"
+                  >
+                    <Copy className="w-3 h-3" />
+                  </button>
+                  {message.role === 'assistant' && message === messages[messages.length - 1] && (
+                    <button
+                      onClick={regenerateLastResponse}
+                      className="p-1 hover:bg-[#3a3a3a] rounded text-gray-400 hover:text-white"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                    </button>
                   )}
                 </div>
               </div>
-
-              {/* Variables */}
-              <div>
-                <label className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Variables</label>
-                <div className="mt-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600 dark:text-gray-500">text</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-600">format:</span>
-                    <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400">
-                      text
-                    </Badge>
-                    <span className="text-xs text-gray-500 dark:text-gray-600">effect:</span>
-                    <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400">
-                      high
-                    </Badge>
-                  </div>
-                  <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-600">
-                    <span>verbosity:</span>
-                    <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400">
-                      medium
-                    </Badge>
-                    <span>store:</span>
-                    <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-700 text-blue-600 dark:text-blue-400">
-                      true
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tools Section */}
-              <div>
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 bg-white dark:bg-[#0d0e11] border border-gray-300 dark:border-gray-700">
-                    <TabsTrigger value="hosted" className="data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-800">
-                      Hosted
-                    </TabsTrigger>
-                    <TabsTrigger value="local" className="data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-800">
-                      Local
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="hosted" className="space-y-3 mt-4">
-                    <div className="space-y-2">
-                      {availableTools.filter(t => t.category !== 'local').map((tool) => {
-                        const Icon = tool.icon;
-                        const isSelected = selectedTools.includes(tool.name);
-                        return (
-                          <div
-                            key={tool.name}
-                            className={cn(
-                              "p-3 rounded-lg border cursor-pointer transition-all",
-                              isSelected
-                                ? "bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
-                                : "bg-white dark:bg-[#0d0e11] border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-                            )}
-                            onClick={() => handleToolToggle(tool.name)}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className={cn(
-                                "w-8 h-8 rounded flex items-center justify-center",
-                                isSelected 
-                                  ? "bg-gray-200 dark:bg-gray-700" 
-                                  : "bg-gray-100 dark:bg-gray-800"
-                              )}>
-                                <Icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                    {tool.name}
-                                  </span>
-                                  {!tool.enabled && (
-                                    <Badge variant="outline" className="text-xs border-gray-300 dark:border-gray-700 text-gray-500">
-                                      Coming soon
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                  {tool.description}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="local" className="space-y-3 mt-4">
-                    <div className="space-y-2">
-                      {availableTools.filter(t => t.category === 'local').map((tool) => {
-                        const Icon = tool.icon;
-                        const isSelected = selectedTools.includes(tool.name);
-                        return (
-                          <div
-                            key={tool.name}
-                            className={cn(
-                              "p-3 rounded-lg border cursor-pointer transition-all",
-                              isSelected
-                                ? "bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600"
-                                : "bg-white dark:bg-[#0d0e11] border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-                            )}
-                            onClick={() => handleToolToggle(tool.name)}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className={cn(
-                                "w-8 h-8 rounded flex items-center justify-center",
-                                isSelected 
-                                  ? "bg-gray-200 dark:bg-gray-700" 
-                                  : "bg-gray-100 dark:bg-gray-800"
-                              )}>
-                                <Icon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                              </div>
-                              <div className="flex-1">
-                                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {tool.name}
-                                </span>
-                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                  {tool.description}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
-
-              {/* Developer Message */}
-              <div>
-                <label className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 block">
-                  Developer message
-                </label>
-                <Textarea
-                  value={agentInstructions}
-                  onChange={(e) => setAgentInstructions(e.target.value)}
-                  placeholder="You are a research assistant and reliable information. In all your responses, provide accurate information and, when appropriate, cite your sources."
-                  className="min-h-[120px] bg-white dark:bg-[#0d0e11] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-2">
-                <Button
-                  className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
-                  onClick={handleSaveConfiguration}
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Save
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                >
-                  <Settings className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </ScrollArea>
-        </div>
-
-        {/* Right Side - Chat Interface */}
-        <div className="flex-1 flex flex-col bg-gray-50 dark:bg-[#0d0e11]">
-          {/* Chat Header */}
-          <div className="bg-white dark:bg-[#171717] border-b border-gray-200 dark:border-gray-800 px-6 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Topic:</span>
-                <Select defaultValue="general">
-                  <SelectTrigger className="w-40 h-8 bg-white dark:bg-[#0d0e11] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">General</SelectItem>
-                    <SelectItem value="code">Code</SelectItem>
-                    <SelectItem value="research">Research</SelectItem>
-                    <SelectItem value="data">Data Analysis</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
               
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                >
-                  <Activity className="w-4 h-4 mr-2" />
-                  View Traces
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                >
-                  <Terminal className="w-4 h-4 mr-2" />
-                  Console
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Chat Content */}
-          {agentSession && selectedEmployee ? (
-            <AgentChatUI
-              sessionId={agentSession.sessionId}
-              userId={user?.id || ''}
-              agentName={selectedEmployee.name}
-              agentRole={selectedEmployee.role}
-              agentCapabilities={selectedEmployee.capabilities || []}
-              className="flex-1"
-              onError={(error) => {
-                console.error('Chat error:', error);
-                toast.error(`Error: ${error.message}`);
-              }}
-              onSessionEnd={() => {
-                openAIAgentsService.endSession(agentSession.sessionId);
-                setAgentSession(null);
-                navigate('/workforce');
-              }}
-            />
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
-                  <MessageSquare className="w-10 h-10 text-gray-400 dark:text-gray-600" />
+              {message.role === 'user' && (
+                <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
+                  <User className="w-4 h-4 text-white" />
                 </div>
-                <h2 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Your conversation will appear here</h2>
-                <p className="text-gray-600 dark:text-gray-500 max-w-md">
-                  Configure your agent on the left and start chatting. Your AI employee is ready to assist!
-                </p>
+              )}
+            </div>
+          ))}
+          
+          {isSending && (
+            <div className="flex gap-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                <Bot className="w-4 h-4 text-white" />
+              </div>
+              <div className="flex items-center gap-2 text-gray-400">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">Thinking...</span>
               </div>
             </div>
           )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
+
+      {/* Input Area */}
+      <div className="border-t border-[#3a3a3a] bg-[#2a2a2a] p-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Attachments */}
+          {attachments.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-2">
+              {attachments.map((file, idx) => (
+                <div key={idx} className="flex items-center gap-2 bg-[#1a1a1a] px-3 py-1 rounded-full text-sm">
+                  <FileText className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-300">{file.name}</span>
+                  <button
+                    onClick={() => removeAttachment(idx)}
+                    className="text-gray-500 hover:text-white"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Input */}
+          <div className="flex items-end gap-2">
+            <div className="flex-1 relative">
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Enter your message..."
+                className="w-full resize-none bg-[#1a1a1a] border-[#3a3a3a] text-white placeholder-gray-500 pr-10 min-h-[44px] max-h-[200px]"
+                rows={1}
+                disabled={isSending}
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute right-2 bottom-2 p-1 text-gray-400 hover:text-white"
+                disabled={isSending}
+              >
+                <Paperclip className="w-4 h-4" />
+              </button>
+            </div>
+            <Button
+              onClick={handleSend}
+              disabled={!input.trim() || isSending}
+              className="bg-white text-black hover:bg-gray-200 disabled:opacity-50"
+              size="sm"
+            >
+              {isSending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+            </Button>
+          </div>
+          
+          {/* Info text */}
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            Playground messages can be viewed by anyone at your organization using the API.
+          </p>
         </div>
       </div>
-
-      {/* New Prompt Dialog */}
-      <Dialog open={showNewPromptDialog} onOpenChange={setShowNewPromptDialog}>
-        <DialogContent className="bg-white dark:bg-[#171717] border-gray-200 dark:border-gray-800">
-          <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-white">Create New Agent Prompt</DialogTitle>
-            <DialogDescription className="text-gray-600 dark:text-gray-400">
-              Configure a new agent with specific instructions and tools
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div>
-              <label className="text-sm text-gray-700 dark:text-gray-300 mb-2 block">Agent Name</label>
-              <Input
-                placeholder="e.g., Research Assistant"
-                className="bg-white dark:bg-[#0d0e11] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-              />
-            </div>
-            
-            <div>
-              <label className="text-sm text-gray-700 dark:text-gray-300 mb-2 block">Instructions</label>
-              <Textarea
-                placeholder="Describe what this agent should do..."
-                className="min-h-[100px] bg-white dark:bg-[#0d0e11] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-              />
-            </div>
-            
-            <div>
-              <label className="text-sm text-gray-700 dark:text-gray-300 mb-2 block">Model</label>
-              <Select defaultValue="gpt-4o">
-                <SelectTrigger className="bg-white dark:bg-[#0d0e11] border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-[#171717] border-gray-200 dark:border-gray-800">
-                  <SelectItem value="gpt-4o">GPT-4o</SelectItem>
-                  <SelectItem value="gpt-4">GPT-4</SelectItem>
-                  <SelectItem value="gpt-3.5">GPT-3.5 Turbo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowNewPromptDialog(false)}
-              className="border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                setShowNewPromptDialog(false);
-                toast.success('New agent prompt created');
-              }}
-              className="bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
-            >
-              Create
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

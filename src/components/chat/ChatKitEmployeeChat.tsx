@@ -1,31 +1,15 @@
 /**
  * ChatKit Employee Chat Component
- * Integrates OpenAI ChatKit web component with AI Employee system
+ * Integrates OpenAI ChatKit with AI Employee system using proper SDK configuration
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import type { ChatKitOptions } from '@openai/chatkit';
 import { toast } from 'sonner';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthStore } from '@/stores/auth-store';
-
-// Declare ChatKit custom element for TypeScript
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'openai-chatkit': React.DetailedHTMLProps<
-        React.HTMLAttributes<HTMLElement> & {
-          'session-token'?: string;
-          'greeting'?: string;
-          'placeholder'?: string;
-          'starters'?: string;
-          theme?: 'light' | 'dark' | 'auto';
-        },
-        HTMLElement
-      >;
-    }
-  }
-}
+import { useTheme } from '@/components/theme-provider';
 
 interface ChatKitEmployeeChatProps {
   employeeId: string;
@@ -45,152 +29,149 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
   className = '',
 }) => {
   const { user } = useAuthStore();
-  const chatkitRef = useRef<HTMLElement>(null);
-  const [sessionToken, setSessionToken] = useState<string>('');
+  const { actualTheme } = useTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
-  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [chatKitInstance, setChatKitInstance] = useState<any>(null);
 
-  // Load ChatKit script
   useEffect(() => {
-    // Check if already loaded
-    if (document.querySelector('script[src*="chatkit"]')) {
-      setScriptLoaded(true);
-      return;
-    }
+    if (!user || !workflowId || !containerRef.current) return;
 
-    const script = document.createElement('script');
-    script.src = 'https://cdn.openai.com/chatkit/v1/chatkit.js';
-    script.async = true;
-    script.type = 'module';
-    
-    script.onload = () => {
-      console.log('ChatKit script loaded');
-      setScriptLoaded(true);
-    };
-    
-    script.onerror = () => {
-      console.error('Failed to load ChatKit script');
-      setError('Failed to load ChatKit. Please refresh the page.');
-      setScriptLoaded(false);
-    };
-
-    document.head.appendChild(script);
-
-    return () => {
-      // Don't remove script on cleanup to avoid re-downloads
-    };
-  }, []);
-
-  // Create ChatKit session
-  useEffect(() => {
-    if (!scriptLoaded || !user || !workflowId) return;
-
-    const createSession = async () => {
+    const initializeChatKit = async () => {
       try {
         setIsLoading(true);
         setError('');
 
-        console.log('Creating ChatKit session for:', {
-          employeeId,
-          employeeName,
-          workflowId,
-        });
+        // Load ChatKit dynamically
+        const { ChatKit } = await import('@openai/chatkit');
 
-        const response = await fetch('/.netlify/functions/create-chatkit-session', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            employeeId,
-            workflowId,
-            userId: user.id,
-            employeeName,
-          }),
-        });
+        // Generate starter prompts from capabilities
+        const starterPrompts = capabilities.slice(0, 5).map((cap, index) => ({
+          icon: 'sparkles' as const,
+          label: cap,
+          prompt: `Help me with ${cap}`,
+        }));
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || 'Failed to create session');
+        // Add default prompts if no capabilities
+        if (starterPrompts.length === 0) {
+          starterPrompts.push(
+            {
+              icon: 'circle-question' as const,
+              label: `What can you do?`,
+              prompt: `What are your capabilities?`,
+            },
+            {
+              icon: 'lightbulb' as const,
+              label: 'Get started',
+              prompt: `Tell me how you can help me`,
+            }
+          );
         }
 
-        const data = await response.json();
-        console.log('ChatKit session created:', data.session_id);
+        // Configure ChatKit with proper options
+        const options: ChatKitOptions = {
+          api: {
+            // Session creation endpoint
+            createSession: async () => {
+              const response = await fetch('/.netlify/functions/create-chatkit-session', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  employeeId,
+                  workflowId,
+                  userId: user.id,
+                  employeeName,
+                }),
+              });
 
-        setSessionToken(data.client_secret);
+              if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Failed to create session');
+              }
+
+              const data = await response.json();
+              return {
+                session_id: data.session_id,
+                client_secret: data.client_secret,
+              };
+            },
+          },
+          theme: {
+            // Use light or dark based on current theme
+            colorScheme: actualTheme,
+            radius: 'medium',
+            density: 'normal',
+            typography: {
+              baseSize: 16,
+              fontFamily:
+                '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+              fontFamilyMono:
+                'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+            },
+          },
+          composer: {
+            attachments: {
+              enabled: true,
+              maxCount: 5,
+              maxSize: 10485760, // 10MB
+            },
+            placeholder: `Message ${employeeName}...`,
+          },
+          startScreen: {
+            greeting: `Hi! I'm ${employeeName}, your ${employeeRole}. How can I help you today?`,
+            prompts: starterPrompts,
+          },
+          // Handle errors
+          onError: (error: any) => {
+            console.error('ChatKit error:', error);
+            toast.error('Chat error occurred');
+          },
+        };
+
+        // Initialize ChatKit
+        const chatkit = new ChatKit(containerRef.current, options);
+        setChatKitInstance(chatkit);
+
+        console.log('ChatKit initialized for:', employeeName);
         toast.success(`Connected to ${employeeName}`);
+        setIsLoading(false);
       } catch (err: any) {
-        console.error('Session creation error:', err);
-        setError(err.message || 'Failed to start chat session');
+        console.error('ChatKit initialization error:', err);
+        setError(err.message || 'Failed to initialize chat');
         toast.error('Failed to connect to AI Employee');
-      } finally {
         setIsLoading(false);
       }
     };
 
-    createSession();
-  }, [scriptLoaded, user, employeeId, employeeName, workflowId]);
+    initializeChatKit();
 
-  // Listen to ChatKit events
-  useEffect(() => {
-    if (!chatkitRef.current) return;
-
-    const handleMessage = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      console.log('ChatKit message:', customEvent.detail);
-    };
-
-    const handleError = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      console.error('ChatKit error:', customEvent.detail);
-      toast.error('Chat error occurred');
-    };
-
-    const element = chatkitRef.current;
-    element.addEventListener('message', handleMessage);
-    element.addEventListener('error', handleError);
-
+    // Cleanup
     return () => {
-      element.removeEventListener('message', handleMessage);
-      element.removeEventListener('error', handleError);
+      if (chatKitInstance && typeof chatKitInstance.destroy === 'function') {
+        chatKitInstance.destroy();
+      }
     };
-  }, [sessionToken]);
+  }, [
+    user,
+    workflowId,
+    employeeId,
+    employeeName,
+    employeeRole,
+    capabilities,
+    actualTheme,
+  ]);
 
-  // Generate greeting message
-  const greeting = `Hi! I'm ${employeeName}, your ${employeeRole}. How can I help you today?`;
-
-  // Generate starter prompts based on capabilities
-  const starters = JSON.stringify(
-    capabilities.slice(0, 4).map(cap => ({
-      prompt: `Help me with ${cap}`,
-      label: cap,
-    })) || [
-      { prompt: `What can you help me with?`, label: 'Your capabilities' },
-      { prompt: `Tell me about yourself`, label: 'About you' },
-    ]
-  );
-
-  // Detect current theme
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-  
+  // Update theme when it changes
   useEffect(() => {
-    const updateTheme = () => {
-      const isDark = document.documentElement.classList.contains('dark');
-      setTheme(isDark ? 'dark' : 'light');
-    };
-
-    updateTheme();
-
-    // Watch for theme changes
-    const observer = new MutationObserver(updateTheme);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-
-    return () => observer.disconnect();
-  }, []);
+    if (chatKitInstance && typeof chatKitInstance.updateTheme === 'function') {
+      chatKitInstance.updateTheme({
+        colorScheme: actualTheme,
+      });
+    }
+  }, [actualTheme, chatKitInstance]);
 
   if (error) {
     return (
@@ -203,7 +184,7 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
     );
   }
 
-  if (isLoading || !sessionToken) {
+  if (isLoading) {
     return (
       <div className={`flex flex-col items-center justify-center h-full gap-4 ${className}`}>
         <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
@@ -215,23 +196,15 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
   }
 
   return (
-    <div className={`h-full ${className}`}>
-      <openai-chatkit
-        ref={chatkitRef}
-        session-token={sessionToken}
-        greeting={greeting}
-        placeholder={`Message ${employeeName}...`}
-        starters={starters}
-        theme={theme}
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'block',
-        }}
-      />
-    </div>
+    <div
+      ref={containerRef}
+      className={`w-full h-full ${className}`}
+      style={{
+        // Ensure ChatKit takes full height
+        minHeight: '500px',
+      }}
+    />
   );
 };
 
 export default ChatKitEmployeeChat;
-

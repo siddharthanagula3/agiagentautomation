@@ -356,7 +356,7 @@ const WorkforcePage: React.FC = () => {
                               </p>
 
                               <div className="flex gap-2">
-                                <Link to={`/chat-agent?employee=${emp?.id}`} className="flex-1">
+                                <Link to={`/chat-agent?employee=${rec.employee_id}`} className="flex-1">
                                   <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50 transition-colors">
                                     <MessageSquare className="mr-2 h-4 w-4" />
                                     Chat

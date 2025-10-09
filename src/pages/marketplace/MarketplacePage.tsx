@@ -29,6 +29,8 @@ import {
   Gamepad2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface AIEmployee {
   id: string;
@@ -67,6 +69,7 @@ const categories = [
 ];
 
 export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('popular');
@@ -104,8 +107,16 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
     },
   });
 
-  const handleHireEmployee = (employeeId: string) => {
-    hireEmployeeMutation.mutate(employeeId);
+  const handleHireEmployee = async (employeeId: string) => {
+    try {
+      await hireEmployeeMutation.mutateAsync(employeeId);
+      toast.success('AI Employee hired successfully! Redirecting to chat...');
+      setTimeout(() => {
+        navigate(`/chat-agent?employee=${employeeId}`);
+      }, 1500);
+    } catch (error) {
+      toast.error('Failed to hire employee');
+    }
   };
 
   return (

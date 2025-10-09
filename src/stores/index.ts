@@ -48,6 +48,13 @@ export {
   useUserProfileStore,
 } from './user-profile-store';
 
+// Agent Metrics Store - Real-time metrics from agent activity
+export {
+  useAgentMetricsStore,
+  type ChatSession,
+  type AgentMetrics,
+} from './agent-metrics-store';
+
 // ========================================
 // React Query Configuration
 // ========================================

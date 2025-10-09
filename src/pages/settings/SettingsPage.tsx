@@ -48,10 +48,14 @@ import {
   Eye,
   EyeOff,
   Key,
-  LogOut
+  LogOut,
+  Bot,
+  Play
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/unified-auth-store';
+import { useAgentMetricsStore } from '@/stores/agent-metrics-store';
+import { backgroundChatService } from '@/services/background-chat-service';
 import settingsService, { UserProfile, UserSettings, APIKey } from '@/services/settings-service';
 import { InteractiveHoverCard } from '@/components/ui/interactive-hover-card';
 import { Particles } from '@/components/ui/particles';
@@ -60,6 +64,7 @@ const SettingsPage: React.FC = () => {
   const { section } = useParams();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+  const metricsStore = useAgentMetricsStore();
   
   // Loading states
   const [isLoading, setIsLoading] = useState(true);
@@ -927,10 +932,105 @@ const SettingsPage: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
-            
+
+            {/* Agent & Metrics Settings */}
+            <Card className="bg-card border-border">
+              <CardHeader>
+                <CardTitle className="text-foreground flex items-center gap-2">
+                  <Bot className="h-5 w-5 text-primary" />
+                  Agent & Metrics
+                </CardTitle>
+                <CardDescription>
+                  Manage background services and metrics tracking
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Background Service Status */}
+                <div className="p-4 rounded-lg bg-accent/20 border border-border/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "w-2 h-2 rounded-full",
+                        metricsStore.isBackgroundServiceRunning ? "bg-green-500 animate-pulse" : "bg-gray-500"
+                      )} />
+                      <span className="font-medium">Background Service</span>
+                    </div>
+                    <Badge variant={metricsStore.isBackgroundServiceRunning ? "default" : "outline"}>
+                      {metricsStore.isBackgroundServiceRunning ? "Running" : "Stopped"}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Enables agents to continue working when you navigate away
+                  </p>
+                </div>
+
+                {/* Metrics Summary */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                    <p className="text-xs text-muted-foreground">Active Agents</p>
+                    <p className="text-2xl font-bold text-blue-400">{metricsStore.activeAgents}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                    <p className="text-xs text-muted-foreground">Completed Tasks</p>
+                    <p className="text-2xl font-bold text-green-400">{metricsStore.completedTasks}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                    <p className="text-xs text-muted-foreground">Total Tokens</p>
+                    <p className="text-2xl font-bold text-purple-400">{metricsStore.totalTokensUsed.toLocaleString()}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                    <p className="text-xs text-muted-foreground">Success Rate</p>
+                    <p className="text-2xl font-bold text-orange-400">
+                      {metricsStore.getSuccessRate().toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      metricsStore.reset();
+                      toast.success('Metrics reset successfully');
+                    }}
+                    className="flex-1"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Reset Metrics
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      if (metricsStore.isBackgroundServiceRunning) {
+                        backgroundChatService.stop();
+                        toast.info('Background service stopped');
+                      } else {
+                        backgroundChatService.start();
+                        toast.success('Background service started');
+                      }
+                    }}
+                    className="flex-1"
+                  >
+                    {metricsStore.isBackgroundServiceRunning ? (
+                      <>
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Stop Service
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-4 w-4 mr-2" />
+                        Start Service
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="flex justify-end">
-              <Button 
-                onClick={handleSaveSettings} 
+              <Button
+                onClick={handleSaveSettings}
                 disabled={isSaving}
                 className="bg-blue-600 hover:bg-blue-700"
               >

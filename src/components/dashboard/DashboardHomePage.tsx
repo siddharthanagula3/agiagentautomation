@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/unified-auth-store';
+import { useAgentMetricsStore } from '@/stores/agent-metrics-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,7 +28,8 @@ import {
   Clock,
   CheckCircle2,
   Play,
-  TrendingDown
+  TrendingDown,
+  Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, useSpring, useMotionValue, useTransform, animate } from 'framer-motion';
@@ -56,25 +58,18 @@ const AnimatedCounter: React.FC<{ value: number; format?: (val: number) => strin
 export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className }) => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const [stats, setStats] = useState({
-    activeEmployees: 0,
-    totalTasks: 0,
-    tokensUsed: 0,
-    successRate: 0,
-  });
+  const metricsStore = useAgentMetricsStore();
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStats(prev => ({
-        activeEmployees: Math.min(prev.activeEmployees + 1, 0),
-        totalTasks: Math.min(prev.totalTasks + 23, 0),
-        tokensUsed: Math.min(prev.tokensUsed + 127, 0),
-        successRate: Math.min(prev.successRate + 2.3, 0),
-      }));
-    }, 30);
-    setTimeout(() => clearInterval(interval), 1000);
-    return () => clearInterval(interval);
-  }, []);
+  // Get live metrics from store
+  const stats = {
+    activeEmployees: metricsStore.totalAgents, // Total agents available
+    activeWorkingAgents: metricsStore.activeAgents, // Agents currently working
+    totalTasks: metricsStore.completedTasks + metricsStore.failedTasks,
+    completedTasks: metricsStore.completedTasks,
+    tokensUsed: metricsStore.totalTokensUsed,
+    successRate: metricsStore.getSuccessRate(),
+    activeSessions: metricsStore.getActiveSessionsCount(),
+  };
 
   const quickActions = [
     {
@@ -115,9 +110,23 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
     },
   ];
 
-  const recentActivity = [
-    { type: 'info', message: 'Welcome to your AI Workforce! Start by asking AI to help with a task.', time: 'Just now' },
-  ];
+  // Get recent activity from metrics store
+  const recentActivity = metricsStore.recentActivity.length > 0
+    ? metricsStore.recentActivity.slice(0, 10).map((activity) => ({
+        type: activity.type.includes('failed') || activity.type.includes('error') ? 'error' : 'info',
+        message: activity.message,
+        time: getTimeAgo(activity.timestamp),
+      }))
+    : [{ type: 'info' as const, message: 'Welcome to your AI Workforce! Start by asking AI to help with a task.', time: 'Just now' }];
+
+  // Helper to format time ago
+  function getTimeAgo(date: Date): string {
+    const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return `${Math.floor(seconds / 86400)}d ago`;
+  }
 
   return (
     <div className={cn("min-h-screen p-6 space-y-6", className)}>
@@ -164,8 +173,17 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
         >
           <div className="flex items-center justify-between mb-4">
             <Badge variant="secondary" className="text-xs">
-              <TrendingUp className="mr-1 h-3 w-3" />
-              Ready
+              {stats.activeWorkingAgents > 0 ? (
+                <>
+                  <Zap className="mr-1 h-3 w-3 animate-pulse" />
+                  {stats.activeWorkingAgents} Working
+                </>
+              ) : (
+                <>
+                  <TrendingUp className="mr-1 h-3 w-3" />
+                  Ready
+                </>
+              )}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mb-1">AI Workforce</p>
@@ -175,7 +193,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
             </p>
           </InteractiveHoverCard>
           <p className="text-xs text-muted-foreground mt-2">
-            Available 24/7
+            {stats.activeEmployees > 0 ? `${stats.activeEmployees} agents ready` : 'Deploy agents to start'}
           </p>
         </BentoCard>
 
@@ -186,20 +204,27 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
         >
           <div className="flex items-center justify-between mb-4">
             <Badge variant="secondary" className="text-xs">
-              This month
+              {stats.activeSessions > 0 ? (
+                <>
+                  <Activity className="mr-1 h-3 w-3 animate-pulse" />
+                  {stats.activeSessions} Active
+                </>
+              ) : (
+                'All Time'
+              )}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mb-1">Tasks Completed</p>
           <InteractiveHoverCard>
             <p className="text-3xl font-bold">
               <AnimatedCounter
-                value={stats.totalTasks}
+                value={stats.completedTasks}
                 format={(val) => Math.round(val).toLocaleString()}
               />
             </p>
           </InteractiveHoverCard>
           <p className="text-xs text-muted-foreground mt-2">
-            Start your first task
+            {stats.totalTasks > 0 ? `${stats.totalTasks} total tasks` : 'Start your first task'}
           </p>
         </BentoCard>
 
@@ -235,17 +260,24 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
         >
           <div className="flex items-center justify-between mb-4">
             <Badge variant="secondary" className="text-xs">
-              N/A
+              {stats.successRate >= 90 ? <TrendingUp className="mr-1 h-3 w-3" /> : <TrendingDown className="mr-1 h-3 w-3" />}
+              {stats.totalTasks > 0 ? 'Tracking' : 'N/A'}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mb-1">Success Rate</p>
           <InteractiveHoverCard>
             <p className="text-3xl font-bold">
-              --
+              {stats.totalTasks > 0 ? (
+                <>
+                  <AnimatedCounter value={stats.successRate} />%
+                </>
+              ) : (
+                '--'
+              )}
             </p>
           </InteractiveHoverCard>
           <p className="text-xs text-muted-foreground mt-2">
-            Complete tasks to track
+            {stats.totalTasks > 0 ? `${metricsStore.completedTasks} completed` : 'Complete tasks to track'}
           </p>
         </BentoCard>
       </BentoGrid>

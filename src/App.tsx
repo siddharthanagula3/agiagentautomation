@@ -28,7 +28,6 @@ import AIConfigurationPage from './pages/settings/AIConfigurationPage';
 import MarketplacePublicPage from './pages/MarketplacePublicPage';
 import MarketplacePage from './pages/marketplace/MarketplacePage';
 import BillingPage from './pages/dashboard/BillingPage';
-import APIKeysPage from './pages/dashboard/APIKeysPage';
 import HelpSupportPage from './pages/dashboard/HelpSupportPage';
 
 // New Public Pages
@@ -151,7 +150,6 @@ function App() {
               <Route path="settings/:section" element={<SettingsPage />} />
               <Route path="settings/ai-configuration" element={<AIConfigurationPage />} />
               <Route path="billing" element={<BillingPage />} />
-              <Route path="api-keys" element={<APIKeysPage />} />
               <Route path="support" element={<HelpSupportPage />} />
             </Route>
 

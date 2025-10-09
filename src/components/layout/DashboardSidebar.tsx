@@ -10,7 +10,6 @@ import {
   ShoppingBag,
   Settings,
   CreditCard,
-  Key,
   HelpCircle,
   Sparkles,
   ChevronRight,
@@ -84,12 +83,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       href: '/billing',
       icon: CreditCard,
       description: 'Manage subscription'
-    },
-    {
-      name: 'API Keys',
-      href: '/api-keys',
-      icon: Key,
-      description: 'Developer access'
     },
     {
       name: 'Support',

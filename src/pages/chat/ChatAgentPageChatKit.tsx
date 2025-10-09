@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAuthStore } from '@/stores/unified-auth-store';
 import { supabase } from '@/lib/supabase-client';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';

@@ -7,7 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAuthStore } from '@/stores/unified-auth-store';
 import { useTheme } from '@/components/theme-provider';
 
 interface ChatKitEmployeeChatProps {

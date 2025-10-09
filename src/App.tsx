@@ -14,18 +14,14 @@ import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import Dashboard from './pages/dashboard/Dashboard';
 import DashboardHomePage from './components/dashboard/DashboardHomePage';
-import VisualWorkflowDesigner from './components/automation/VisualWorkflowDesigner';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';
 
 // Page Components
 import WorkforcePage from './pages/workforce/WorkforcePage';
-import AutomationPage from './pages/automation/AutomationPage';
 import ChatPage from './pages/chat/ChatPage';
 import TabbedLLMChatPage from './pages/chat/TabbedLLMChatPage';
 import ChatAgentPageChatKit from './pages/chat/ChatAgentPageChatKit';
-import IntegrationsPage from './pages/integrations/IntegrationsPage';
-import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import AIConfigurationPage from './pages/settings/AIConfigurationPage';
 import MarketplacePublicPage from './pages/MarketplacePublicPage';
@@ -33,7 +29,6 @@ import MarketplacePage from './pages/marketplace/MarketplacePage';
 import BillingPage from './pages/dashboard/BillingPage';
 import APIKeysPage from './pages/dashboard/APIKeysPage';
 import HelpSupportPage from './pages/dashboard/HelpSupportPage';
-import MCPToolsPage from './pages/MCPToolsPage';
 
 // New Public Pages
 import BlogPage from './pages/BlogPage';
@@ -61,8 +56,6 @@ import ConsultingBusinessesPage from './pages/use-cases/ConsultingBusinessesPage
 
 // Features Pages
 import AIChatPage from './pages/features/AIChatPage';
-import AIWorkflowsPage from './pages/features/AIWorkflowsPage';
-import IntegrationsFeaturePage from './pages/features/IntegrationsPage';
 import AIDashboardsPage from './pages/features/AIDashboardsPage';
 import AIProjectManagerPage from './pages/features/AIProjectManagerPage';
 
@@ -107,8 +100,6 @@ function App() {
 
               {/* Features */}
               <Route path="features/ai-chat" element={<AIChatPage />} />
-              <Route path="features/ai-workflows" element={<AIWorkflowsPage />} />
-              <Route path="features/integrations" element={<IntegrationsFeaturePage />} />
               <Route path="features/ai-dashboards" element={<AIDashboardsPage />} />
               <Route path="features/ai-project-manager" element={<AIProjectManagerPage />} />
 
@@ -160,16 +151,6 @@ function App() {
               <Route path="chat-multi" element={<TabbedLLMChatPage />} />
               <Route path="chat-multi/:sessionId" element={<TabbedLLMChatPage />} />
               
-              <Route path="automation" element={<AutomationPage />} />
-              <Route path="automation/designer" element={<AutomationDesignerPage />} />
-              <Route path="automation/designer/:workflowId" element={<AutomationDesignerPage />} />
-              
-              <Route path="integrations" element={<IntegrationsPage />} />
-              <Route path="mcp-tools" element={<MCPToolsPage />} />
-
-              <Route path="analytics" element={<AnalyticsPage />} />
-              <Route path="analytics/:view" element={<AnalyticsPage />} />
-              
               {/* Account & System at Root Level */}
               <Route path="settings" element={<SettingsPage />} />
               <Route path="settings/:section" element={<SettingsPage />} />
@@ -202,25 +183,6 @@ function App() {
     </ThemeProvider>
   );
 }
-
-const AutomationDesignerPage = () => {
-  return (
-    <div className="h-full">
-      <VisualWorkflowDesigner 
-        className="h-[calc(100vh-12rem)]"
-        allowTabCreation={true}
-        maxTabs={10}
-        enableToolExecution={true}
-        onSave={(workflow) => {
-          // Workflow saved
-        }}
-        onExecute={(workflowId) => {
-          // Workflow executed
-        }}
-      />
-    </div>
-  );
-};
 
 const NotFoundPage = () => {
   return (

@@ -826,9 +826,9 @@ const ChatPage: React.FC = () => {
                     </div>
 
                     {/* Token Usage Warning */}
-                    {activeTab && (
+                    {activeTabData && (
                       <TokenUsageWarning 
-                        provider={activeTab.provider as 'openai' | 'anthropic' | 'google' | 'perplexity'}
+                        provider={activeTabData.provider as 'openai' | 'anthropic' | 'google' | 'perplexity'}
                         className="mb-4"
                       />
                     )}

@@ -74,6 +74,7 @@ import {
   type OrchestrationPlan
 } from '@/services/multi-agent-orchestrator';
 import { AgentCollaborationGraph } from './AgentCollaborationGraph';
+import { useAgentMetricsStore } from '@/stores/agent-metrics-store';
 
 interface VibeCodingMessage {
   id: string;
@@ -112,6 +113,8 @@ export const VibeCodingInterface: React.FC<Props> = ({
   className,
 }) => {
   const { actualTheme } = useTheme();
+  const metricsStore = useAgentMetricsStore();
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<VibeCodingMessage[]>([]);
   const [input, setInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -148,6 +151,14 @@ export const VibeCodingInterface: React.FC<Props> = ({
     setAgentCommunications([]);
     setActiveAgents([]);
 
+    // Start new session in metrics store
+    const sessionId = metricsStore.startSession({
+      userId: 'current-user', // TODO: Get from auth store
+      taskDescription: userRequest,
+      agentsInvolved: [],
+    });
+    setCurrentSessionId(sessionId);
+
     try {
       // Step 1: Analyze intent and create plan
       const analysisMsg: VibeCodingMessage = {
@@ -177,6 +188,16 @@ export const VibeCodingInterface: React.FC<Props> = ({
       const handleCommunication = (comm: AgentCommunication) => {
         communications.push(comm);
         setAgentCommunications(prev => [...prev, comm]);
+
+        // Update metrics store
+        metricsStore.addCommunication(comm);
+
+        // Update session message count
+        if (currentSessionId) {
+          metricsStore.updateSession(currentSessionId, {
+            messagesCount: communications.length,
+          });
+        }
 
         // Show typing indicator before adding message
         setTypingAgent(comm.from);
@@ -210,6 +231,9 @@ export const VibeCodingInterface: React.FC<Props> = ({
           const updated = prev.filter(a => a.agentName !== status.agentName);
           return [...updated, status];
         });
+
+        // Update metrics store
+        metricsStore.updateAgentStatus(status.agentName, status);
         
         // Add status update as a message when progress changes significantly
         if (status.progress === 30 || status.progress === 60 || status.progress === 90) {
@@ -358,9 +382,19 @@ export default App;`,
         '✓ Server running on http://localhost:5173',
       ]);
 
+      // Mark session as completed
+      if (currentSessionId) {
+        metricsStore.endSession(currentSessionId, 'completed', 'Task completed successfully');
+      }
+
     } catch (error) {
       console.error('Vibe coding error:', error);
       toast.error('Failed to generate code');
+
+      // Mark session as failed
+      if (currentSessionId) {
+        metricsStore.endSession(currentSessionId, 'failed', error instanceof Error ? error.message : 'Unknown error');
+      }
     } finally {
       setIsGenerating(false);
     }

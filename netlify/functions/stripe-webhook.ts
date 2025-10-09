@@ -54,10 +54,52 @@ export const handler: Handler = async (event: HandlerEvent) => {
         const session = stripeEvent.data.object as Stripe.Checkout.Session;
         console.log('[Stripe Webhook] Checkout completed:', session.id);
 
-        const { userId, employeeId, employeeRole, provider } = session.metadata || {};
+        const { userId, employeeId, employeeRole, provider, plan, billingPeriod } = session.metadata || {};
 
         console.log('[Stripe Webhook] Session metadata:', session.metadata);
 
+        // Get the subscription ID and customer ID
+        const subscriptionId = session.subscription as string;
+        const customerId = session.customer as string;
+
+        // Handle Pro Plan Subscription
+        if (plan === 'pro' && userId) {
+          console.log('[Stripe Webhook] Processing Pro plan subscription for user:', userId);
+
+          // Calculate subscription dates
+          const now = new Date();
+          const endDate = new Date(now);
+          if (billingPeriod === 'yearly') {
+            endDate.setFullYear(endDate.getFullYear() + 1);
+          } else {
+            endDate.setMonth(endDate.getMonth() + 1);
+          }
+
+          // Update user's plan and Stripe info
+          const { error: userUpdateError } = await supabase
+            .from('users')
+            .update({
+              plan: 'pro',
+              plan_status: 'active',
+              stripe_customer_id: customerId,
+              stripe_subscription_id: subscriptionId,
+              subscription_start_date: now.toISOString(),
+              subscription_end_date: endDate.toISOString(),
+              billing_period: billingPeriod || 'monthly',
+              updated_at: now.toISOString(),
+            })
+            .eq('id', userId);
+
+          if (userUpdateError) {
+            console.error('[Stripe Webhook] Failed to update user plan:', userUpdateError);
+          } else {
+            console.log('[Stripe Webhook] Successfully upgraded user to Pro plan');
+          }
+
+          break;
+        }
+
+        // Handle AI Employee Purchase (legacy flow)
         if (!userId || !employeeId || !employeeRole) {
           console.error('[Stripe Webhook] Missing metadata in session:', {
             userId: !!userId,
@@ -68,38 +110,19 @@ export const handler: Handler = async (event: HandlerEvent) => {
           break;
         }
 
-        // Get the subscription ID
-        const subscriptionId = session.subscription as string;
-
-        // Get customer ID
-        const customerId = session.customer as string;
-
         // Use provider from metadata (passed from frontend via checkout session)
         const employeeProvider = provider || 'chatgpt';
         console.log('[Stripe Webhook] Using provider:', employeeProvider);
 
-        // Update user with Stripe customer ID if not already set
-        // Note: user_profiles table may not exist, so we'll skip this for now
-        // await supabase
-        //   .from('user_profiles')
-        //   .upsert({
-        //     id: userId,
-        //     stripe_customer_id: customerId,
-        //     updated_at: new Date().toISOString(),
-        //   });
-
-        // Create purchased employee record (without Stripe columns for now)
+        // Create purchased employee record
         const { data: insertData, error: purchaseError } = await supabase
           .from('purchased_employees')
           .insert({
             user_id: userId,
             employee_id: employeeId,
             role: employeeRole,
-            provider: employeeProvider, // Use actual LLM provider
+            provider: employeeProvider,
             is_active: true,
-            // Note: Stripe columns will be added later via database migration
-            // stripe_subscription_id: subscriptionId,
-            // stripe_customer_id: customerId,
           })
           .select();
 
@@ -166,17 +189,37 @@ export const handler: Handler = async (event: HandlerEvent) => {
         console.log('[Stripe Webhook] Subscription updated:', subscription.id);
 
         const isActive = subscription.status === 'active';
+        const now = new Date();
 
+        // Update user plan status
+        const { error: userError } = await supabase
+          .from('users')
+          .update({
+            plan_status: subscription.status === 'active' ? 'active' : 
+                         subscription.status === 'past_due' ? 'past_due' :
+                         subscription.status === 'canceled' ? 'cancelled' : 'unpaid',
+            subscription_end_date: subscription.current_period_end 
+              ? new Date(subscription.current_period_end * 1000).toISOString() 
+              : null,
+            updated_at: now.toISOString(),
+          })
+          .eq('stripe_subscription_id', subscription.id);
+
+        if (userError) {
+          console.error('[Stripe Webhook] Failed to update user subscription status:', userError);
+        }
+
+        // Also update purchased employees if any
         const { error } = await supabase
           .from('purchased_employees')
           .update({
             is_active: isActive,
-            updated_at: new Date().toISOString(),
+            updated_at: now.toISOString(),
           })
           .eq('stripe_subscription_id', subscription.id);
 
         if (error) {
-          console.error('[Stripe Webhook] Failed to update subscription:', error);
+          console.error('[Stripe Webhook] Failed to update purchased employee subscription:', error);
         }
 
         break;
@@ -185,18 +228,35 @@ export const handler: Handler = async (event: HandlerEvent) => {
       case 'customer.subscription.deleted': {
         const subscription = stripeEvent.data.object as Stripe.Subscription;
         console.log('[Stripe Webhook] Subscription deleted:', subscription.id);
+        
+        const now = new Date();
 
-        // Soft delete - mark as inactive
+        // Downgrade user to free plan
+        const { error: userError } = await supabase
+          .from('users')
+          .update({
+            plan: 'free',
+            plan_status: 'cancelled',
+            subscription_end_date: now.toISOString(),
+            updated_at: now.toISOString(),
+          })
+          .eq('stripe_subscription_id', subscription.id);
+
+        if (userError) {
+          console.error('[Stripe Webhook] Failed to downgrade user to free plan:', userError);
+        }
+
+        // Soft delete - mark purchased employees as inactive
         const { error } = await supabase
           .from('purchased_employees')
           .update({
             is_active: false,
-            updated_at: new Date().toISOString(),
+            updated_at: now.toISOString(),
           })
           .eq('stripe_subscription_id', subscription.id);
 
         if (error) {
-          console.error('[Stripe Webhook] Failed to delete subscription:', error);
+          console.error('[Stripe Webhook] Failed to deactivate purchased employees:', error);
         }
 
         break;

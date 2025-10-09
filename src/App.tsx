@@ -17,30 +17,22 @@ import DashboardHomePage from './components/dashboard/DashboardHomePage';
 import VisualWorkflowDesigner from './components/automation/VisualWorkflowDesigner';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';
-import { AIEmployeeDemo } from './pages/demo/AIEmployeeDemo';
 
 // Page Components
 import WorkforcePage from './pages/workforce/WorkforcePage';
 import AutomationPage from './pages/automation/AutomationPage';
 import ChatPage from './pages/chat/ChatPage';
-import ChatPageEnhanced from './pages/chat/ChatPageEnhanced';
-import AgentSDKChatPage from './pages/chat/AgentSDKChatPage';
 import TabbedLLMChatPage from './pages/chat/TabbedLLMChatPage';
-import ChatKitPage from './pages/chat/ChatKitPage';
-import ChatKitAdvancedPage from './pages/chat/ChatKitAdvancedPage';
-import ChatAgentPage from './pages/chat/ChatAgentPage';
 import ChatAgentPageChatKit from './pages/chat/ChatAgentPageChatKit';
 import IntegrationsPage from './pages/integrations/IntegrationsPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import AIConfigurationPage from './pages/settings/AIConfigurationPage';
-import AIEmployeeTestingPage from './pages/testing/AIEmployeeTestingPage';
 import MarketplacePublicPage from './pages/MarketplacePublicPage';
 import MarketplacePage from './pages/marketplace/MarketplacePage';
 import BillingPage from './pages/dashboard/BillingPage';
 import APIKeysPage from './pages/dashboard/APIKeysPage';
 import HelpSupportPage from './pages/dashboard/HelpSupportPage';
-import WorkforceDemoPage from './pages/workforce-demo/WorkforceDemoPage';
 import MCPToolsPage from './pages/MCPToolsPage';
 
 // New Public Pages
@@ -77,11 +69,8 @@ import AIProjectManagerPage from './pages/features/AIProjectManagerPage';
 // Comparison Pages
 import VsChatGPTPage from './pages/comparisons/VsChatGPTPage';
 import VsClaudePage from './pages/comparisons/VsClaudePage';
-import AiPromptDemo from './pages/demo/AiPromptDemo';
 
 function App() {
-  console.log('App.tsx: Rendering main app component');
-  
   return (
     <ThemeProvider>
       <TooltipProvider>
@@ -90,8 +79,6 @@ function App() {
             {/* Public Routes */}
             <Route path="/" element={<PublicLayout />}>
               <Route index element={<LandingPage />} />
-              <Route path="demo" element={<AIEmployeeDemo />} />
-              <Route path="demo/ai-prompt" element={<AiPromptDemo />} />
 
               {/* Marketing Pages */}
               <Route path="blog" element={<BlogPage />} />
@@ -132,16 +119,6 @@ function App() {
               <Route path="claude-alternative" element={<VsClaudePage />} />
             </Route>
 
-            {/* Workforce Demo - Protected Route (Full Screen) */}
-            <Route
-              path="/workforce-demo"
-              element={
-                <ProtectedRoute>
-                  <WorkforceDemoPage />
-                </ProtectedRoute>
-              }
-            />
-
             {/* Auth Routes - Both /auth/* and root level */}
             <Route path="/auth" element={<AuthLayout />}>
               <Route path="login" element={<LoginPage />} />
@@ -171,35 +148,17 @@ function App() {
               {/* Main Features */}
               <Route path="workforce" element={<WorkforcePage />} />
               
-        {/* Original Chat (Working - Previous Version) */}
-        <Route path="chat" element={<ChatPage />} />
-        <Route path="chat/:sessionId" element={<ChatPage />} />
-        
-        {/* Chat Agent (ChatKit-based AI Employee Chat) */}
-        <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
-        <Route path="chat-agent/:sessionId" element={<ChatAgentPageChatKit />} />
-        
-        {/* Old Custom Chat Agent (Backup) */}
-        <Route path="chat-agent-custom" element={<ChatAgentPage />} />
-        
-        {/* Multi-LLM Chat (Previous) */}
-        <Route path="chat-multi" element={<TabbedLLMChatPage />} />
-        <Route path="chat-multi/:sessionId" element={<TabbedLLMChatPage />} />
-        
-        {/* ChatKit Chat (Latest) */}
-        <Route path="chat-kit" element={<ChatKitPage />} />
-        <Route path="chat-kit/:sessionId" element={<ChatKitPage />} />
-        
-        {/* Advanced ChatKit Chat (With Themes, Widgets & Actions) */}
-        <Route path="chat-kit-advanced" element={<ChatKitAdvancedPage />} />
-        <Route path="chat-kit-advanced/:sessionId" element={<ChatKitAdvancedPage />} />
+              {/* Chat Routes */}
+              <Route path="chat" element={<ChatPage />} />
+              <Route path="chat/:sessionId" element={<ChatPage />} />
               
-              {/* Enhanced Chat (Previous) */}
-              <Route path="chat-enhanced" element={<ChatPageEnhanced />} />
-              <Route path="chat-enhanced/:tabId" element={<ChatPageEnhanced />} />
+              {/* Chat Agent (ChatKit-based AI Employee Chat) */}
+              <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
+              <Route path="chat-agent/:sessionId" element={<ChatAgentPageChatKit />} />
               
-              {/* Legacy Chat (Backup) */}
-              <Route path="chat-legacy" element={<ChatPage />} />
+              {/* Multi-LLM Chat */}
+              <Route path="chat-multi" element={<TabbedLLMChatPage />} />
+              <Route path="chat-multi/:sessionId" element={<TabbedLLMChatPage />} />
               
               <Route path="automation" element={<AutomationPage />} />
               <Route path="automation/designer" element={<AutomationDesignerPage />} />
@@ -215,7 +174,6 @@ function App() {
               <Route path="settings" element={<SettingsPage />} />
               <Route path="settings/:section" element={<SettingsPage />} />
               <Route path="settings/ai-configuration" element={<AIConfigurationPage />} />
-              <Route path="testing/ai-employees" element={<AIEmployeeTestingPage />} />
               <Route path="billing" element={<BillingPage />} />
               <Route path="api-keys" element={<APIKeysPage />} />
               <Route path="support" element={<HelpSupportPage />} />
@@ -254,10 +212,10 @@ const AutomationDesignerPage = () => {
         maxTabs={10}
         enableToolExecution={true}
         onSave={(workflow) => {
-          console.log('Saving workflow:', workflow);
+          // Workflow saved
         }}
         onExecute={(workflowId) => {
-          console.log('Executing workflow:', workflowId);
+          // Workflow executed
         }}
       />
     </div>

@@ -42,6 +42,7 @@ import { useAuthStore } from '@/stores/unified-auth-store';
 import { listPurchasedEmployees } from '@/services/supabase-employees';
 import { AI_EMPLOYEES } from '@/data/ai-employees';
 import TabbedLLMChatInterface from '@/components/chat/TabbedLLMChatInterface';
+import { TokenUsageWarning } from '@/components/chat/TokenUsageWarning';
 import { 
   unifiedLLMService, 
   LLMProvider,

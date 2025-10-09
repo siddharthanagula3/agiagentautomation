@@ -43,6 +43,7 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import DOMPurify from 'dompurify';
+import { TokenUsageWarning } from './TokenUsageWarning';
 import { 
   unifiedLLMService, 
   UnifiedMessage, 
@@ -587,6 +588,12 @@ const TabbedLLMChatInterface: React.FC<TabbedLLMChatInterfaceProps> = ({
                     <div ref={messagesEndRef} />
                   </div>
                 </ScrollArea>
+
+                {/* Token Usage Warning */}
+                <TokenUsageWarning 
+                  provider={tab.provider}
+                  className="mx-4 mb-2"
+                />
 
                 {/* Input */}
                 <div className="p-4 border-t">

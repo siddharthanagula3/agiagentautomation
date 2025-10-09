@@ -33,11 +33,12 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: 'es2020',
     minify: 'terser',
-    sourcemap: false,
+    sourcemap: mode === 'production' ? false : true,
     terserOptions: {
       compress: {
-        drop_console: false,
+        drop_console: mode === 'production' ? ['log', 'debug', 'info'] : false,
         drop_debugger: true,
+        pure_funcs: mode === 'production' ? ['console.log', 'console.debug', 'console.info'] : [],
       },
       format: {
         comments: false

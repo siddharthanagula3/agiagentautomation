@@ -81,3 +81,43 @@ supabase/.temp
 
 # Local development
 .local
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Vite cache
+.vite/
+node_modules/.vite/
+
+# Test files
+*.test.ts.snap
+test-results/
+playwright-report/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Debug files
+debug.log
+error.log
+
+# Package manager locks (optional - keep package-lock.json for consistency)
+# package-lock.json
+# pnpm-lock.yaml
+# yarn.lock
+
+# Sentry
+.sentryclirc
+
+# Database
+*.db
+*.sqlite
+
+# Backup files
+*.backup
+*.bak
+
+# Documentation drafts
+docs/drafts/

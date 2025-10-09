@@ -5,6 +5,8 @@ import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Progress } from '../../components/ui/progress';
 import { supabase } from '../../lib/supabase-client';
+import { upgradeToProPlan, contactEnterpriseSales } from '../../services/stripe-service';
+import { toast } from 'sonner';
 import { 
   CreditCard, 
   DollarSign, 
@@ -66,6 +68,7 @@ const BillingPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [billing, setBilling] = useState<BillingInfo | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
   useEffect(() => {
     if (user) {
@@ -164,14 +167,36 @@ const BillingPage: React.FC = () => {
       const totalTokens = llmUsage.reduce((sum, llm) => sum + llm.tokens, 0);
       const totalCost = llmUsage.reduce((sum, llm) => sum + llm.cost, 0);
       
+      // Check if user has Pro plan (would come from database)
+      // For now, default to free plan
+      const userPlan = 'free'; // TODO: Fetch from database
+      const isPro = userPlan === 'pro';
+      
+      // Update limits based on plan
+      const proProviderLimit = 2500000; // 2.5M per provider
+      const proTotalLimit = 10000000;   // 10M total
+      
+      if (isPro) {
+        llmUsage = llmUsage.map(llm => ({
+          ...llm,
+          limit: proProviderLimit
+        }));
+      }
+      
       const billingData: BillingInfo = {
-        plan: 'free',
+        plan: userPlan,
         status: 'active',
         current_period_start: new Date().toISOString(),
         current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        price: 0,
+        price: isPro ? 20 : 0,
         currency: 'USD',
-        features: [
+        features: isPro ? [
+          '10M tokens/month (2.5M per LLM)',
+          'All 4 AI providers included',
+          'Advanced analytics',
+          'Priority support',
+          'API access'
+        ] : [
           '1M tokens/month (250k per LLM)',
           'All 4 AI providers included',
           'Basic analytics',
@@ -179,7 +204,7 @@ const BillingPage: React.FC = () => {
         ],
         usage: {
           totalTokens,
-          totalLimit: TOTAL_LIMIT,
+          totalLimit: isPro ? proTotalLimit : TOTAL_LIMIT,
           totalCost,
           llmUsage
         },
@@ -196,9 +221,31 @@ const BillingPage: React.FC = () => {
     }
   }, [user]);
 
-  const handleUpgrade = (plan: 'pro' | 'enterprise') => {
-    console.log(`Upgrading to ${plan} plan`);
-    // In real implementation, this would redirect to payment processing
+  const handleUpgrade = async (plan: 'pro' | 'enterprise', billingPeriod: 'monthly' | 'yearly' = 'monthly') => {
+    if (!user) {
+      toast.error('Please log in to upgrade your plan');
+      return;
+    }
+
+    try {
+      if (plan === 'pro') {
+        toast.loading('Redirecting to checkout...');
+        await upgradeToProPlan({
+          userId: user.id,
+          userEmail: user.email || '',
+          billingPeriod,
+        });
+      } else if (plan === 'enterprise') {
+        await contactEnterpriseSales({
+          userId: user.id,
+          userEmail: user.email || '',
+          userName: user.user_metadata?.full_name || user.email,
+        });
+      }
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to process upgrade');
+    }
   };
 
   const handleDownloadInvoice = (invoiceId: string) => {
@@ -262,9 +309,9 @@ const BillingPage: React.FC = () => {
             Manage your subscription and billing information.
           </p>
         </div>
-        <Button onClick={() => setShowUpgrade(true)} className="gradient-primary">
-          <Plus className="mr-2 h-4 w-4" />
-          Upgrade Plan
+        <Button onClick={() => handleUpgrade('pro')} className="gradient-primary">
+          <Crown className="mr-2 h-4 w-4" />
+          Upgrade to Pro
         </Button>
       </div>
 
@@ -390,11 +437,14 @@ const BillingPage: React.FC = () => {
                 <span>Token Usage by LLM Provider</span>
               </CardTitle>
               <CardDescription className="mt-1">
-                Each provider has a 250k token limit • {(billing?.usage.totalLimit || 1000000).toLocaleString()} total
+                {billing?.plan === 'pro' 
+                  ? 'Each provider has a 2.5M token limit • 10M total' 
+                  : 'Each provider has a 250k token limit • 1M total'
+                }
               </CardDescription>
             </div>
             <Badge variant="outline" className="px-3 py-1">
-              Free Tier
+              {billing?.plan === 'pro' ? 'Pro Plan' : 'Free Tier'}
             </Badge>
           </div>
         </CardHeader>
@@ -468,10 +518,10 @@ const BillingPage: React.FC = () => {
               <div className="flex-1">
                 <h4 className="font-medium mb-1">Need more tokens?</h4>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Upgrade to Pro for unlimited tokens across all LLM providers
+                  Upgrade to Pro for 10M tokens/month (2.5M per LLM) - Only $20/month
                 </p>
-                <Button className="gradient-primary" onClick={() => handleUpgrade('pro')}>
-                  Upgrade to Pro
+                <Button className="gradient-primary" onClick={() => handleUpgrade('pro', 'monthly')}>
+                  Upgrade to Pro - $20/month
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -516,13 +566,21 @@ const BillingPage: React.FC = () => {
                   <Crown className="h-5 w-5 text-primary" />
                   <CardTitle>Pro Plan</CardTitle>
                 </div>
-                <div className="text-2xl font-bold">$29<span className="text-sm text-muted-foreground">/month</span></div>
+                <div className="text-2xl font-bold">$20<span className="text-sm text-muted-foreground">/month</span></div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-success" />
-                    <span>Unlimited AI employees</span>
+                    <span>10M tokens/month</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span>2.5M tokens per LLM</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    <span>All 4 AI providers</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-success" />
@@ -537,7 +595,7 @@ const BillingPage: React.FC = () => {
                     <span>API access</span>
                   </li>
                 </ul>
-                <Button className="w-full mt-4 gradient-primary" onClick={() => handleUpgrade('pro')}>
+                <Button className="w-full mt-4 gradient-primary" onClick={() => handleUpgrade('pro', 'monthly')}>
                   Upgrade to Pro
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -571,7 +629,7 @@ const BillingPage: React.FC = () => {
                     <span>SLA guarantee</span>
                   </li>
                 </ul>
-                <Button className="w-full mt-4" variant="outline" onClick={() => handleUpgrade('enterprise')}>
+                <Button className="w-full mt-4" variant="outline" onClick={() => handleUpgrade('enterprise', 'monthly')}>
                   Contact Sales
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>

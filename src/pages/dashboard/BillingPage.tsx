@@ -424,7 +424,7 @@ const BillingPage: React.FC = () => {
                 <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-500">
                   <AlertTriangle className="h-4 w-4" />
                   <span>Approaching limit - {((1 - (billing?.usage.totalTokens / billing?.usage.totalLimit)) * 100).toFixed(0)}% remaining</span>
-                </div>
+              </div>
               )}
             </div>
           </CardContent>
@@ -452,7 +452,7 @@ const BillingPage: React.FC = () => {
                 <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                   <CheckCircle className="h-5 w-5" />
                   <span className="font-medium">Free Tier Active</span>
-                </div>
+              </div>
                 <p className="text-sm text-green-600 dark:text-green-500 mt-1">
                   You're saving {formatCurrency(billing?.usage.totalCost || 0, 'USD')} with the free plan!
                 </p>

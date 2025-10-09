@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 import { listPurchasedEmployees, getEmployeeById } from '@/services/supabase-employees';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { manualPurchaseEmployee } from '@/services/stripe-service';
-import { Users, Bot, BarChart3, Settings, Plus, TrendingUp, Sparkles, Zap, Target, Clock, ArrowRight, MessageSquare } from 'lucide-react';
+import { Users, Bot, BarChart3, Settings, Plus, TrendingUp, Sparkles, Zap, Target, Clock, ArrowRight, MessageSquare, Code } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const WorkforcePage: React.FC = () => {
@@ -343,10 +343,10 @@ const WorkforcePage: React.FC = () => {
                               </p>
 
                               <div className="flex gap-2">
-                                <Link to={`/chat-agent?employee=${rec.employee_id}`} className="flex-1">
+                                <Link to={`/vibe?employee=${rec.employee_id}`} className="flex-1">
                                   <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50 transition-colors">
-                                    <MessageSquare className="mr-2 h-4 w-4" />
-                                    Chat
+                                    <Code className="mr-2 h-4 w-4" />
+                                    Build with AI
                                   </Button>
                                 </Link>
                                 <Button variant="ghost" size="sm" className="group-hover:bg-primary/10 transition-colors">
@@ -363,9 +363,10 @@ const WorkforcePage: React.FC = () => {
                       <p className="text-sm text-muted-foreground">
                         Showing {purchased.length} {purchased.length === 1 ? 'employee' : 'employees'}
                       </p>
-                      <Link to="/chat-agent">
+                      <Link to="/vibe">
                         <Button variant="outline">
-                          Start Working
+                          <Code className="mr-2 h-4 w-4" />
+                          Start Building
                           <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                       </Link>
@@ -430,10 +431,10 @@ const WorkforcePage: React.FC = () => {
                           View Detailed Analytics
                         </Button>
                       </Link>
-                      <Link to="/chat-agent">
+                      <Link to="/vibe">
                         <Button className="gradient-primary text-white">
-                          <MessageSquare className="mr-2 h-4 w-4" />
-                          Start Task
+                          <Code className="mr-2 h-4 w-4" />
+                          Start Building
                         </Button>
                       </Link>
                     </div>

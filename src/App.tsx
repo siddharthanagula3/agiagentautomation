@@ -22,6 +22,8 @@ import WorkforcePage from './pages/workforce/WorkforcePage';
 import ChatPage from './pages/chat/ChatPage';
 import TabbedLLMChatPage from './pages/chat/TabbedLLMChatPage';
 import ChatAgentPageChatKit from './pages/chat/ChatAgentPageChatKit';
+import EnhancedChatPage from './pages/chat/EnhancedChatPage';
+import VibeCodingPage from './pages/chat/VibeCodingPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import AIConfigurationPage from './pages/settings/AIConfigurationPage';
 import MarketplacePublicPage from './pages/MarketplacePublicPage';
@@ -139,17 +141,23 @@ function App() {
               {/* Main Features */}
               <Route path="workforce" element={<WorkforcePage />} />
               
-              {/* Chat Routes */}
-              <Route path="chat" element={<ChatPage />} />
-              <Route path="chat/:sessionId" element={<ChatPage />} />
-              
-              {/* Chat Agent (ChatKit-based AI Employee Chat) */}
-              <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
-              <Route path="chat-agent/:sessionId" element={<ChatAgentPageChatKit />} />
-              
-              {/* Multi-LLM Chat */}
-              <Route path="chat-multi" element={<TabbedLLMChatPage />} />
-              <Route path="chat-multi/:sessionId" element={<TabbedLLMChatPage />} />
+                  {/* Vibe Coding - Main AI Employee Coding Interface */}
+                  <Route path="vibe" element={<VibeCodingPage />} />
+                  
+                  {/* Chat Routes */}
+                  <Route path="chat" element={<ChatPage />} />
+                  <Route path="chat/:sessionId" element={<ChatPage />} />
+                  
+                  {/* Enhanced Chat (bolt.new style) */}
+                  <Route path="chat-enhanced" element={<EnhancedChatPage />} />
+                  
+                  {/* Chat Agent (ChatKit-based AI Employee Chat) */}
+                  <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
+                  <Route path="chat-agent/:sessionId" element={<ChatAgentPageChatKit />} />
+                  
+                  {/* Multi-LLM Chat */}
+                  <Route path="chat-multi" element={<TabbedLLMChatPage />} />
+                  <Route path="chat-multi/:sessionId" element={<TabbedLLMChatPage />} />
               
               {/* Account & System at Root Level */}
               <Route path="settings" element={<SettingsPage />} />

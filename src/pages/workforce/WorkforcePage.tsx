@@ -97,7 +97,20 @@ const WorkforcePage: React.FC = () => {
 
   const isLoading = hiresLoading;
   const totalEmployees = purchased.length;
-  const activeEmployees = purchased.filter(emp => emp.status === 'active').length;
+  const activeEmployees = purchased.filter(emp => emp.is_active).length;
+  
+  console.log('[WorkforcePage] 📊 Current state:', {
+    userId,
+    totalEmployees,
+    activeEmployees,
+    purchased: purchased.map(emp => ({
+      id: emp.id,
+      employee_id: emp.employee_id,
+      name: emp.name,
+      role: emp.role,
+      is_active: emp.is_active
+    }))
+  });
 
   return (
     <div className="min-h-screen p-6 space-y-6">

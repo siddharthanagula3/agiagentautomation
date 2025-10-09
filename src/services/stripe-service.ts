@@ -151,13 +151,17 @@ export function getStripeConfig() {
  */
 export async function manualPurchaseEmployee(data: {
   userId: string;
-  employeeId: string;
-  employeeRole: string;
+  sessionId?: string;
+  employeeId?: string;
+  employeeName?: string;
+  employeeRole?: string;
   provider?: string;
   subscriptionId?: string;
   customerId?: string;
 }): Promise<void> {
   try {
+    console.log('[Manual Purchase Service] Calling with data:', data);
+    
     const response = await fetch('/.netlify/functions/manual-purchase', {
       method: 'POST',
       headers: {
@@ -168,13 +172,14 @@ export async function manualPurchaseEmployee(data: {
 
     if (!response.ok) {
       const error = await response.json();
+      console.error('[Manual Purchase Service] Error response:', error);
       throw new Error(error.error || 'Failed to create purchased employee record');
     }
 
     const result = await response.json();
-    console.log('[Manual Purchase] Success:', result);
+    console.log('[Manual Purchase Service] Success:', result);
   } catch (error) {
-    console.error('[Manual Purchase] Error:', error);
+    console.error('[Manual Purchase Service] Error:', error);
     throw error;
   }
 }

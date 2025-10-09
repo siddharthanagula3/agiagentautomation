@@ -1,0 +1,15 @@
+If the SQL Editor continues to fail, you can run this via psql command line:
+
+1. Get your database connection string from Supabase:
+   - Go to Project Settings → Database
+   - Copy the connection string (Connection pooling mode)
+   - It looks like: postgresql://postgres.xxx:[PASSWORD]@xxx.supabase.co:5432/postgres
+
+2. Open PowerShell and run:
+
+psql "YOUR_CONNECTION_STRING_HERE" -c "ALTER TABLE purchased_employees ADD COLUMN name TEXT; UPDATE purchased_employees SET name = role WHERE name IS NULL;"
+
+Replace YOUR_CONNECTION_STRING_HERE with your actual connection string.
+
+This bypasses the Supabase web interface entirely and runs directly against the database.
+

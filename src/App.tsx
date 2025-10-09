@@ -29,6 +29,7 @@ import TabbedLLMChatPage from './pages/chat/TabbedLLMChatPage';
 import ChatKitPage from './pages/chat/ChatKitPage';
 import ChatKitAdvancedPage from './pages/chat/ChatKitAdvancedPage';
 import ChatAgentPage from './pages/chat/ChatAgentPage';
+import ChatAgentPageChatKit from './pages/chat/ChatAgentPageChatKit';
 import IntegrationsPage from './pages/integrations/IntegrationsPage';
 import AnalyticsPage from './pages/analytics/AnalyticsPage';
 import SettingsPage from './pages/settings/SettingsPage';
@@ -174,9 +175,12 @@ function App() {
         <Route path="chat" element={<ChatPage />} />
         <Route path="chat/:sessionId" element={<ChatPage />} />
         
-        {/* Chat Agent (Advanced AI Agent Interface) */}
-        <Route path="chat-agent" element={<ChatAgentPage />} />
-        <Route path="chat-agent/:sessionId" element={<ChatAgentPage />} />
+        {/* Chat Agent (ChatKit-based AI Employee Chat) */}
+        <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
+        <Route path="chat-agent/:sessionId" element={<ChatAgentPageChatKit />} />
+        
+        {/* Old Custom Chat Agent (Backup) */}
+        <Route path="chat-agent-custom" element={<ChatAgentPage />} />
         
         {/* Multi-LLM Chat (Previous) */}
         <Route path="chat-multi" element={<TabbedLLMChatPage />} />

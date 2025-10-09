@@ -6,6 +6,7 @@
 
 import { AI_EMPLOYEES, type AIEmployee } from '@/data/ai-employees';
 import { mcpToolsService, type MCPTool } from './mcp-tools-service';
+import { UnifiedLLMService, type LLMProvider } from './llm-providers/unified-llm-service';
 
 export interface AgentCapability {
   employeeId: string;
@@ -116,6 +117,7 @@ const EMPLOYEE_CAPABILITIES = buildCapabilityMap();
 class MultiAgentOrchestrator {
   private activePlans: Map<string, OrchestrationPlan> = new Map();
   private agentStatuses: Map<string, AgentStatus> = new Map();
+  private llmService: UnifiedLLMService;
   
   /**
    * Analyze user intent and create an orchestration plan
@@ -247,38 +249,62 @@ class MultiAgentOrchestrator {
     
     const agentName = task.assignedTo;
     
-    // Update agent status
-    this.updateAgentStatus(agentName, {
-      agentName,
-      status: 'working',
-      currentTask: task.description,
-      progress: 30,
-      toolsUsing: this.getAgentTools(agentName),
-    }, onStatusUpdate);
-    
     // Send handoff communication if appropriate
     if (this.isHandoff(task, plan)) {
       this.sendHandoff(task, plan, onCommunication);
     }
     
-    // Simulate agent working (in real implementation, this would call actual LLM)
-    await this.simulateAgentWork(task, agentName, onStatusUpdate);
+    // Get provider for this agent
+    const agentKey = agentName.toLowerCase().replace(/\s+/g, '-');
+    const capability = EMPLOYEE_CAPABILITIES[agentKey];
+    const provider = this.mapProviderToLLM(capability?.provider || 'claude');
     
-    // Mark complete
-    task.status = 'completed';
-    task.endTime = new Date();
-    results.set(task.id, { success: true, output: `Completed: ${task.description}` });
-    
-    // Update agent status
-    this.updateAgentStatus(agentName, {
-      agentName,
-      status: 'completed',
-      currentTask: task.description,
-      progress: 100,
-    }, onStatusUpdate);
-    
-    // Send completion communication
-    this.sendTaskCompletion(task, onCommunication);
+    // Execute task with real LLM
+    try {
+      const result = await this.executeAgentTask(task, agentName, provider, onStatusUpdate);
+      
+      // Mark complete
+      task.status = 'completed';
+      task.endTime = new Date();
+      task.result = result;
+      results.set(task.id, { success: true, output: result });
+      
+      // Update agent status
+      this.updateAgentStatus(agentName, {
+        agentName,
+        status: 'completed',
+        currentTask: task.description,
+        progress: 100,
+        output: result,
+      }, onStatusUpdate);
+      
+      // Send completion communication
+      this.sendTaskCompletion(task, onCommunication);
+      
+    } catch (error) {
+      // Mark failed
+      task.status = 'failed';
+      task.endTime = new Date();
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      task.result = errorMsg;
+      results.set(task.id, { success: false, output: errorMsg });
+      
+      // Update agent status
+      this.updateAgentStatus(agentName, {
+        agentName,
+        status: 'failed',
+        currentTask: task.description,
+        progress: 0,
+        output: errorMsg,
+      }, onStatusUpdate);
+      
+      // Optionally retry or delegate to another agent
+      if (task.retryCount < task.maxRetries) {
+        task.retryCount++;
+        task.status = 'pending'; // Reset for retry
+        console.log(`[Orchestrator] Retrying task ${task.id}, attempt ${task.retryCount}/${task.maxRetries}`);
+      }
+    }
     
     // Move to next phase if needed
     this.updatePhase(plan);
@@ -755,21 +781,121 @@ class MultiAgentOrchestrator {
   }
   
   /**
-   * Simulate agent work (in production, this would call actual LLM APIs)
+   * Initialize the orchestrator with LLM service
    */
-  private async simulateAgentWork(task: AgentTask, agentName: string, onStatusUpdate: (status: AgentStatus) => void): Promise<void> {
-    const steps = [30, 60, 90];
+  constructor() {
+    this.llmService = new UnifiedLLMService();
+  }
+  
+  /**
+   * Map AI employee provider to LLM provider enum
+   */
+  private mapProviderToLLM(provider: string): LLMProvider {
+    const providerMap: Record<string, LLMProvider> = {
+      'chatgpt': 'openai',
+      'openai': 'openai',
+      'claude': 'anthropic',
+      'anthropic': 'anthropic',
+      'gemini': 'google',
+      'google': 'google',
+      'perplexity': 'perplexity',
+    };
     
-    for (const progress of steps) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    return providerMap[provider.toLowerCase()] || 'anthropic'; // Default to Anthropic (Claude)
+  }
+  
+  /**
+   * Execute agent task using real LLM API calls
+   */
+  private async executeAgentTask(
+    task: AgentTask, 
+    agentName: string, 
+    provider: LLMProvider,
+    onStatusUpdate: (status: AgentStatus) => void
+  ): Promise<string> {
+    console.log(`[Orchestrator] ${agentName} executing task:`, task.description);
+    
+    // Update status: starting
+    this.updateAgentStatus(agentName, {
+      agentName,
+      status: 'working',
+      currentTask: task.description,
+      progress: 0,
+      toolsUsing: this.getAgentTools(agentName),
+    }, onStatusUpdate);
+    
+    // Get agent capability to create specialized prompt
+    const agentKey = agentName.toLowerCase().replace(/\s+/g, '-');
+    const capability = EMPLOYEE_CAPABILITIES[agentKey];
+    
+    // Create specialized system prompt for this agent
+    const systemPrompt = `You are ${agentName}, a ${capability?.role || 'specialist'}.
+Your specializations: ${capability?.specialization.join(', ') || 'various tasks'}.
+Your available tools: ${capability?.tools.join(', ') || 'standard tools'}.
+
+Execute this task to the best of your ability. Be thorough and provide actionable results.
+If you need help from another specialist, explain what you need.`;
+    
+    // Prepare messages for LLM
+    const messages = [
+      { role: 'system' as const, content: systemPrompt },
+      { role: 'user' as const, content: `Task: ${task.description}\n\nProvide your complete implementation or solution.` }
+    ];
+    
+    let fullResponse = '';
+    let progress = 0;
+    
+    try {
+      // Stream the response from LLM
+      const stream = this.llmService.streamMessage(
+        messages,
+        `orchestration-${task.id}`,
+        undefined, // userId - will be added when auth is integrated
+        provider
+      );
       
+      for await (const chunk of stream) {
+        if (!chunk.done && chunk.content) {
+          fullResponse += chunk.content;
+          progress = Math.min(95, progress + 5);
+          
+          // Update progress
+          this.updateAgentStatus(agentName, {
+            agentName,
+            status: 'working',
+            currentTask: task.description,
+            progress,
+            toolsUsing: this.getAgentTools(agentName),
+          }, onStatusUpdate);
+        }
+        
+        if (chunk.done) {
+          // Task complete
+          this.updateAgentStatus(agentName, {
+            agentName,
+            status: 'completed',
+            currentTask: task.description,
+            progress: 100,
+            output: fullResponse,
+          }, onStatusUpdate);
+        }
+      }
+      
+      return fullResponse;
+      
+    } catch (error) {
+      console.error(`[Orchestrator] Error executing task for ${agentName}:`, error);
+      
+      // Update status: failed
       this.updateAgentStatus(agentName, {
         agentName,
-        status: 'working',
+        status: 'failed',
         currentTask: task.description,
-        progress,
-        toolsUsing: this.getAgentTools(agentName),
+        progress: 0,
+        output: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
       }, onStatusUpdate);
+      
+      throw error;
     }
   }
 }

@@ -3,6 +3,8 @@ import { useAuthStore } from '../../stores/unified-auth-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
+import { Progress } from '../../components/ui/progress';
+import { supabase } from '../../lib/supabase-client';
 import { 
   CreditCard, 
   DollarSign, 
@@ -18,8 +20,22 @@ import {
   Star,
   ArrowRight,
   Clock,
-  FileText
+  FileText,
+  Brain,
+  Code,
+  Search,
+  Sparkles
 } from 'lucide-react';
+
+interface LLMUsage {
+  provider: string;
+  tokens: number;
+  cost: number;
+  limit: number;
+  icon: React.ReactNode;
+  color: string;
+  bgColor: string;
+}
 
 interface BillingInfo {
   plan: 'free' | 'pro' | 'enterprise';
@@ -30,10 +46,10 @@ interface BillingInfo {
   currency: string;
   features: string[];
   usage: {
-    tokens: number;
-    tokens_limit: number;
-    cost: number;
-    cost_limit: number;
+    totalTokens: number;
+    totalLimit: number;
+    totalCost: number;
+    llmUsage: LLMUsage[];
   };
   invoices: {
     id: string;
@@ -62,10 +78,92 @@ const BillingPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       
-      // Simulate API call - in real implementation, this would fetch from Supabase
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Free tier limits: 1M total, 250k per provider
+      const PROVIDER_LIMIT = 250000; // 250k tokens per LLM
+      const TOTAL_LIMIT = 1000000;   // 1M total tokens
       
-      // For new users, return free plan data
+      // Fetch token usage from Supabase
+      let llmUsage: LLMUsage[] = [
+        {
+          provider: 'OpenAI',
+          tokens: 0,
+          cost: 0,
+          limit: PROVIDER_LIMIT,
+          icon: <Brain className="h-5 w-5" />,
+          color: 'text-green-600',
+          bgColor: 'bg-green-50 dark:bg-green-950/30'
+        },
+        {
+          provider: 'Anthropic',
+          tokens: 0,
+          cost: 0,
+          limit: PROVIDER_LIMIT,
+          icon: <Code className="h-5 w-5" />,
+          color: 'text-blue-600',
+          bgColor: 'bg-blue-50 dark:bg-blue-950/30'
+        },
+        {
+          provider: 'Google',
+          tokens: 0,
+          cost: 0,
+          limit: PROVIDER_LIMIT,
+          icon: <Search className="h-5 w-5" />,
+          color: 'text-purple-600',
+          bgColor: 'bg-purple-50 dark:bg-purple-950/30'
+        },
+        {
+          provider: 'Perplexity',
+          tokens: 0,
+          cost: 0,
+          limit: PROVIDER_LIMIT,
+          icon: <Sparkles className="h-5 w-5" />,
+          color: 'text-orange-600',
+          bgColor: 'bg-orange-50 dark:bg-orange-950/30'
+        }
+      ];
+
+      if (user) {
+        try {
+          // Fetch usage from Supabase token_usage table
+          const { data: usageData, error: usageError } = await supabase
+            .from('token_usage')
+            .select('provider, input_tokens, output_tokens, total_tokens, total_cost')
+            .eq('user_id', user.id);
+
+          if (usageError) {
+            console.error('Error fetching token usage:', usageError);
+          } else if (usageData && usageData.length > 0) {
+            // Aggregate by provider
+            const providerMap = new Map<string, { tokens: number; cost: number }>();
+            
+            usageData.forEach(row => {
+              const provider = row.provider.toLowerCase();
+              const current = providerMap.get(provider) || { tokens: 0, cost: 0 };
+              current.tokens += row.total_tokens || 0;
+              current.cost += row.total_cost || 0;
+              providerMap.set(provider, current);
+            });
+
+            // Update LLM usage with actual data
+            llmUsage = llmUsage.map(llm => {
+              const providerKey = llm.provider.toLowerCase();
+              const usage = providerMap.get(providerKey) || { tokens: 0, cost: 0 };
+              return {
+                ...llm,
+                tokens: usage.tokens,
+                cost: usage.cost
+              };
+            });
+          }
+        } catch (err) {
+          console.error('Error querying token usage:', err);
+        }
+      }
+
+      // Calculate total usage
+      const totalTokens = llmUsage.reduce((sum, llm) => sum + llm.tokens, 0);
+      const totalCost = llmUsage.reduce((sum, llm) => sum + llm.cost, 0);
+      
       const billingData: BillingInfo = {
         plan: 'free',
         status: 'active',
@@ -74,16 +172,16 @@ const BillingPage: React.FC = () => {
         price: 0,
         currency: 'USD',
         features: [
-          'Basic AI employees',
-          'Limited job creation',
+          '1M tokens/month (250k per LLM)',
+          'All 4 AI providers included',
           'Basic analytics',
-          'Email support'
+          'Community support'
         ],
         usage: {
-          tokens: 0,
-          tokens_limit: 1000,
-          cost: 0,
-          cost_limit: 0
+          totalTokens,
+          totalLimit: TOTAL_LIMIT,
+          totalCost,
+          llmUsage
         },
         invoices: []
       };
@@ -96,7 +194,7 @@ const BillingPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
   const handleUpgrade = (plan: 'pro' | 'enterprise') => {
     console.log(`Upgrading to ${plan} plan`);
@@ -214,36 +312,38 @@ const BillingPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Usage Statistics */}
+      {/* Total Usage Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Zap className="h-5 w-5" />
-              <span>Token Usage</span>
+              <span>Total Token Usage</span>
             </CardTitle>
             <CardDescription>
-              Your current token consumption
+              Combined usage across all LLM providers
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Used</span>
-                <span className="font-semibold">{billing?.usage.tokens || 0}</span>
+                <span className="text-2xl font-bold">{billing?.usage.totalTokens.toLocaleString() || 0}</span>
               </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div 
-                  className="bg-primary h-2 rounded-full" 
-                  style={{ 
-                    width: `${Math.min((billing?.usage.tokens || 0) / (billing?.usage.tokens_limit || 1000) * 100, 100)}%` 
-                  }}
-                ></div>
+              <Progress 
+                value={(billing?.usage.totalTokens || 0) / (billing?.usage.totalLimit || 1000000) * 100} 
+                className="h-3"
+              />
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Free Tier Limit</span>
+                <span className="font-medium">{(billing?.usage.totalLimit || 1000000).toLocaleString()} tokens</span>
               </div>
-              <div className="flex justify-between items-center text-sm text-muted-foreground">
-                <span>0</span>
-                <span>{billing?.usage.tokens_limit || 1000} limit</span>
-              </div>
+              {billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.8 && (
+                <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-500">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span>Approaching limit - {((1 - (billing?.usage.totalTokens / billing?.usage.totalLimit)) * 100).toFixed(0)}% remaining</span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -252,36 +352,133 @@ const BillingPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <DollarSign className="h-5 w-5" />
-              <span>Cost Usage</span>
+              <span>Total Cost</span>
             </CardTitle>
             <CardDescription>
-              Your current cost consumption
+              Estimated cost (currently free)
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Spent</span>
-                <span className="font-semibold">
-                  {formatCurrency(billing?.usage.cost || 0, billing?.currency || 'USD')}
+                <span className="text-sm text-muted-foreground">Would be</span>
+                <span className="text-2xl font-bold">
+                  {formatCurrency(billing?.usage.totalCost || 0, billing?.currency || 'USD')}
                 </span>
               </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div 
-                  className="bg-success h-2 rounded-full" 
-                  style={{ 
-                    width: `${Math.min((billing?.usage.cost || 0) / (billing?.usage.cost_limit || 100) * 100, 100)}%` 
-                  }}
-                ></div>
-              </div>
-              <div className="flex justify-between items-center text-sm text-muted-foreground">
-                <span>$0</span>
-                <span>${billing?.usage.cost_limit || 100} limit</span>
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="font-medium">Free Tier Active</span>
+                </div>
+                <p className="text-sm text-green-600 dark:text-green-500 mt-1">
+                  You're saving {formatCurrency(billing?.usage.totalCost || 0, 'USD')} with the free plan!
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Per-LLM Token Usage */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center space-x-2">
+                <Brain className="h-5 w-5" />
+                <span>Token Usage by LLM Provider</span>
+              </CardTitle>
+              <CardDescription className="mt-1">
+                Each provider has a 250k token limit • {(billing?.usage.totalLimit || 1000000).toLocaleString()} total
+              </CardDescription>
+            </div>
+            <Badge variant="outline" className="px-3 py-1">
+              Free Tier
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {billing?.usage.llmUsage.map((llm, index) => {
+              const percentage = (llm.tokens / llm.limit) * 100;
+              const isNearLimit = percentage >= 80;
+              const isAtLimit = percentage >= 100;
+              
+              return (
+                <div 
+                  key={llm.provider} 
+                  className={`p-4 rounded-lg border transition-all ${llm.bgColor} ${isAtLimit ? 'border-red-300 dark:border-red-800' : isNearLimit ? 'border-amber-300 dark:border-amber-800' : ''}`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg bg-white dark:bg-gray-800 ${llm.color}`}>
+                        {llm.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-base">{llm.provider}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {llm.tokens.toLocaleString()} / {llm.limit.toLocaleString()} tokens
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-lg font-bold ${isAtLimit ? 'text-red-600 dark:text-red-500' : isNearLimit ? 'text-amber-600 dark:text-amber-500' : ''}`}>
+                        {percentage.toFixed(1)}%
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {formatCurrency(llm.cost, 'USD')}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Progress 
+                      value={Math.min(percentage, 100)} 
+                      className={`h-2 ${isAtLimit ? 'bg-red-100 dark:bg-red-950/30' : isNearLimit ? 'bg-amber-100 dark:bg-amber-950/30' : ''}`}
+                    />
+                    <div className="flex justify-between items-center text-xs text-muted-foreground">
+                      <span>0</span>
+                      <span>{(llm.limit - llm.tokens).toLocaleString()} remaining</span>
+                    </div>
+                    
+                    {isAtLimit && (
+                      <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-500 mt-2">
+                        <AlertTriangle className="h-4 w-4" />
+                        <span>Limit reached! Upgrade to continue using {llm.provider}</span>
+                      </div>
+                    )}
+                    {!isAtLimit && isNearLimit && (
+                      <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-500 mt-2">
+                        <AlertTriangle className="h-4 w-4" />
+                        <span>{(100 - percentage).toFixed(0)}% remaining</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          <div className="mt-6 p-4 rounded-lg bg-muted/50 border border-dashed">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Crown className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-medium mb-1">Need more tokens?</h4>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Upgrade to Pro for unlimited tokens across all LLM providers
+                </p>
+                <Button className="gradient-primary" onClick={() => handleUpgrade('pro')}>
+                  Upgrade to Pro
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Plan Features */}
       <Card>

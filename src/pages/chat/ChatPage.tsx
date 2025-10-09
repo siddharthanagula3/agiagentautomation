@@ -43,6 +43,7 @@ import { useTheme } from '@/components/theme-provider';
 import { getEmployeeById, listPurchasedEmployees } from '@/services/supabase-employees';
 import { createSession, listMessages, listSessions, sendMessage } from '@/services/supabase-chat';
 import { sendAIMessage, isProviderConfigured, getConfiguredProviders, type AIMessage } from '@/services/ai-chat-service';
+import { TokenUsageWarning } from '@/components/chat/TokenUsageWarning';
 
 interface PurchasedEmployee {
   id: string;
@@ -823,6 +824,14 @@ const ChatPage: React.FC = () => {
                         </div>
                       )}
                     </div>
+
+                    {/* Token Usage Warning */}
+                    {activeTab && (
+                      <TokenUsageWarning 
+                        provider={activeTab.provider as 'openai' | 'anthropic' | 'google' | 'perplexity'}
+                        className="mb-4"
+                      />
+                    )}
 
                     {/* Message Input */}
                     <div className="flex gap-2 items-center">

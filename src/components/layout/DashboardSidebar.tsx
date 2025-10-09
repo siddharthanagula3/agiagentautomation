@@ -8,9 +8,6 @@ import {
   Users,
   MessageSquare,
   ShoppingBag,
-  Zap,
-  BarChart3,
-  Globe,
   Settings,
   CreditCard,
   Key,
@@ -18,10 +15,8 @@ import {
   Sparkles,
   ChevronRight,
   Plus,
-  Circle,
   ChevronDown,
-  Search,
-  Wrench
+  Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -43,7 +38,7 @@ interface NavigationItem {
 
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, className }) => {
   const location = useLocation();
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Automation']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
 
   const navigation: NavigationItem[] = [
@@ -73,38 +68,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ collapsed = false, 
       href: '/marketplace',
       icon: ShoppingBag,
       description: 'Hire AI employees',
-      badge: 'Beta'
-    },
-    {
-      name: 'Automation',
-      href: '/automation',
-      icon: Zap,
-      description: 'Workflow automation',
-      badge: 'Beta',
-      children: [
-        { name: 'Overview', href: '/automation', icon: LayoutDashboard, description: 'All workflows' },
-        { name: 'Designer', href: '/automation/designer', icon: Circle, description: 'Create workflows' }
-      ]
-    },
-    {
-      name: 'Analytics',
-      href: '/analytics',
-      icon: BarChart3,
-      description: 'Performance insights',
-      badge: 'Beta'
-    },
-    {
-      name: 'Integrations',
-      href: '/integrations',
-      icon: Globe,
-      description: 'Connected services',
-      badge: 'Beta'
-    },
-    {
-      name: 'MCP Tools',
-      href: '/mcp-tools',
-      icon: Wrench,
-      description: 'Model Context Protocol',
       badge: 'Beta'
     },
   ];

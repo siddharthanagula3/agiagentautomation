@@ -15,7 +15,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
   }
 
   try {
-    const { employeeId, employeeRole, price, userId, userEmail, provider } = JSON.parse(event.body || '{}');
+    const { employeeId, employeeRole, price, userId, userEmail, provider, billingPeriod = 'yearly' } = JSON.parse(event.body || '{}');
 
     if (!employeeId || !employeeRole || !price || !userId || !userEmail) {
       return {
@@ -33,6 +33,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
       userId,
       userEmail,
       provider,
+      billingPeriod,
     });
 
     // Create or retrieve Stripe customer
@@ -55,29 +56,36 @@ export const handler: Handler = async (event: HandlerEvent) => {
       console.log('[Stripe Checkout] Created new customer:', customer.id);
     }
 
+    // Calculate price based on billing period
+    const interval = billingPeriod === 'monthly' ? 'month' : 'year';
+    const totalPrice = billingPeriod === 'monthly' ? price : price * 12;
+
     // Prepare checkout session data
     const sessionData: any = {
       customer: customer.id,
       mode: 'subscription',
       payment_method_types: ['card'],
-      allow_promotion_codes: true, // Enable discount code field in Stripe Checkout
+      allow_promotion_codes: true, // Enable discount code field in Stripe Checkout (includes "Betatester" coupon)
       line_items: [
         {
           price_data: {
             currency: 'usd',
             product_data: {
               name: `AI Employee: ${employeeRole}`,
-              description: `Monthly subscription for ${employeeRole}`,
+              description: billingPeriod === 'yearly' 
+                ? `Yearly subscription for ${employeeRole} - $${price}/month billed annually` 
+                : `Monthly subscription for ${employeeRole}`,
               metadata: {
                 employeeId,
                 employeeRole,
-                provider: provider || 'chatgpt', // Store provider for webhook
+                provider: provider || 'chatgpt',
+                billingPeriod,
               },
             },
             recurring: {
-              interval: 'month',
+              interval: interval as 'month' | 'year',
             },
-            unit_amount: price * 100, // Convert to cents
+            unit_amount: totalPrice * 100, // Convert to cents
           },
           quantity: 1,
         },
@@ -87,6 +95,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
         employeeId,
         employeeRole,
         provider: provider || 'chatgpt',
+        billingPeriod,
       },
       success_url: `${process.env.URL || 'http://localhost:5173'}/workforce?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.URL || 'http://localhost:5173'}/marketplace?canceled=true`,
@@ -96,6 +105,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
           employeeId,
           employeeRole,
           provider: provider || 'chatgpt',
+          billingPeriod,
         },
       },
     };

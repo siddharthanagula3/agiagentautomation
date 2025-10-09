@@ -1,10 +1,9 @@
 /**
  * ChatKit Employee Chat Component
- * Integrates OpenAI ChatKit with AI Employee system using proper SDK configuration
+ * Uses ChatKit via CDN (no npm package available yet)
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import type { ChatKitOptions } from '@openai/chatkit';
 import { toast } from 'sonner';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -38,17 +37,50 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
   useEffect(() => {
     if (!user || !workflowId || !containerRef.current) return;
 
+    // Load ChatKit script from CDN
+    const loadChatKit = () => {
+      return new Promise((resolve, reject) => {
+        // Check if already loaded
+        if ((window as any).ChatKit) {
+          resolve((window as any).ChatKit);
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://cdn.openai.com/chatkit/v1/chatkit.js';
+        script.type = 'module';
+        script.async = true;
+
+        script.onload = () => {
+          // Wait a bit for module to initialize
+          setTimeout(() => {
+            if ((window as any).ChatKit) {
+              resolve((window as any).ChatKit);
+            } else {
+              reject(new Error('ChatKit not available after load'));
+            }
+          }, 100);
+        };
+
+        script.onerror = () => {
+          reject(new Error('Failed to load ChatKit script'));
+        };
+
+        document.head.appendChild(script);
+      });
+    };
+
     const initializeChatKit = async () => {
       try {
         setIsLoading(true);
         setError('');
 
-        // Load ChatKit dynamically
-        const { ChatKit } = await import('@openai/chatkit');
+        // Load ChatKit from CDN
+        const ChatKit = await loadChatKit();
 
         // Generate starter prompts from capabilities
-        const starterPrompts = capabilities.slice(0, 5).map((cap, index) => ({
-          icon: 'sparkles' as const,
+        const starterPrompts = capabilities.slice(0, 5).map((cap) => ({
+          icon: 'sparkles',
           label: cap,
           prompt: `Help me with ${cap}`,
         }));
@@ -57,22 +89,21 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
         if (starterPrompts.length === 0) {
           starterPrompts.push(
             {
-              icon: 'circle-question' as const,
+              icon: 'circle-question',
               label: `What can you do?`,
               prompt: `What are your capabilities?`,
             },
             {
-              icon: 'lightbulb' as const,
+              icon: 'lightbulb',
               label: 'Get started',
               prompt: `Tell me how you can help me`,
             }
           );
         }
 
-        // Configure ChatKit with proper options
-        const options: ChatKitOptions = {
+        // Configure ChatKit
+        const options = {
           api: {
-            // Session creation endpoint
             createSession: async () => {
               const response = await fetch('/.netlify/functions/create-chatkit-session', {
                 method: 'POST',
@@ -100,7 +131,6 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
             },
           },
           theme: {
-            // Use light or dark based on current theme
             colorScheme: actualTheme,
             radius: 'medium',
             density: 'normal',
@@ -116,7 +146,7 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
             attachments: {
               enabled: true,
               maxCount: 5,
-              maxSize: 10485760, // 10MB
+              maxSize: 10485760,
             },
             placeholder: `Message ${employeeName}...`,
           },
@@ -124,7 +154,6 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
             greeting: `Hi! I'm ${employeeName}, your ${employeeRole}. How can I help you today?`,
             prompts: starterPrompts,
           },
-          // Handle errors
           onError: (error: any) => {
             console.error('ChatKit error:', error);
             toast.error('Chat error occurred');
@@ -154,15 +183,7 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
         chatKitInstance.destroy();
       }
     };
-  }, [
-    user,
-    workflowId,
-    employeeId,
-    employeeName,
-    employeeRole,
-    capabilities,
-    actualTheme,
-  ]);
+  }, [user, workflowId, employeeId, employeeName, employeeRole, capabilities, actualTheme]);
 
   // Update theme when it changes
   useEffect(() => {
@@ -200,7 +221,6 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
       ref={containerRef}
       className={`w-full h-full ${className}`}
       style={{
-        // Ensure ChatKit takes full height
         minHeight: '500px',
       }}
     />

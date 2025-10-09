@@ -411,7 +411,7 @@ export default App;`,
                   </div>
                 ) : (
                   messages.map((msg) => (
-                    <VibeCodingMessage
+                    <MessageBubble
                       key={msg.id}
                       message={msg}
                       theme={actualTheme}
@@ -679,68 +679,146 @@ export default App;`,
   );
 };
 
+// Agent Avatar Component
+const AgentAvatar: React.FC<{ agentName?: string; role?: 'user' | 'assistant' | 'system' }> = ({ agentName, role }) => {
+  if (role === 'user') {
+    return (
+      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+        <span className="text-sm">👤</span>
+      </div>
+    );
+  }
+
+  // Different colors/emojis for different agents
+  const getAgentStyle = (name?: string) => {
+    if (!name) return { bg: 'bg-gradient-to-br from-gray-500 to-gray-600', emoji: '🤖' };
+    if (name.includes('Architect')) return { bg: 'bg-gradient-to-br from-blue-500 to-indigo-600', emoji: '🏗️' };
+    if (name.includes('Frontend')) return { bg: 'bg-gradient-to-br from-green-500 to-emerald-600', emoji: '🎨' };
+    if (name.includes('Backend')) return { bg: 'bg-gradient-to-br from-orange-500 to-red-600', emoji: '⚙️' };
+    if (name.includes('DevOps')) return { bg: 'bg-gradient-to-br from-purple-500 to-violet-600', emoji: '🚀' };
+    if (name.includes('QA')) return { bg: 'bg-gradient-to-br from-yellow-500 to-amber-600', emoji: '✅' };
+    if (name.includes('System')) return { bg: 'bg-gradient-to-br from-gray-600 to-gray-700', emoji: '⚡' };
+    return { bg: 'bg-gradient-to-br from-purple-500 to-pink-500', emoji: '✨' };
+  };
+
+  const style = getAgentStyle(agentName);
+  
+  return (
+    <div className={cn("w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0", style.bg)}>
+      <span className="text-sm">{style.emoji}</span>
+    </div>
+  );
+};
+
 // Message Component
-const VibeCodingMessage: React.FC<{
+const MessageBubble: React.FC<{
   message: VibeCodingMessage;
   theme: string;
   onArtifactClick: (artifact: Artifact) => void;
 }> = ({ message, theme, onArtifactClick }) => {
   const isUser = message.role === 'user';
+  const isSystem = message.role === 'system';
+  const isHandoff = message.messageType === 'handoff';
+  const isStatus = message.messageType === 'status';
 
   return (
-    <div className={cn("space-y-3", isUser && "flex flex-row-reverse")}>
-      <div className={cn(
-        "flex gap-3 max-w-[85%]",
-        isUser && "flex-row-reverse ml-auto"
-      )}>
-        <div className={cn(
-          "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-          isUser ? "bg-primary" : "bg-gradient-to-br from-purple-500 to-pink-500"
-        )}>
-          {isUser ? (
-            <span className="text-primary-foreground text-sm font-semibold">U</span>
-          ) : (
-            <Sparkles className="h-4 w-4 text-white" />
-          )}
-        </div>
+    <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <div className={cn("flex gap-3", isUser && "flex-row-reverse")}>
+        <AgentAvatar agentName={message.agentName} role={message.role} />
 
-        <div className="flex-1 space-y-2">
-          {/* Thinking */}
-          {message.thinking && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>{message.thinking}</span>
+        <div className="flex-1 space-y-2 max-w-[85%]">
+          {/* Agent Name & Metadata */}
+          {!isUser && message.agentName && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-semibold text-foreground">{message.agentName}</span>
+              {message.messageType && (
+                <Badge 
+                  variant="outline" 
+                  className={cn(
+                    "text-xs",
+                    message.messageType === 'handoff' && "border-blue-500 text-blue-600 dark:text-blue-400",
+                    message.messageType === 'status' && "border-orange-500 text-orange-600 dark:text-orange-400",
+                    message.messageType === 'result' && "border-green-500 text-green-600 dark:text-green-400"
+                  )}
+                >
+                  {message.messageType === 'handoff' ? '📞 calling' : 
+                   message.messageType === 'status' ? '⚡ working' :
+                   message.messageType === 'result' ? '✅ completed' :
+                   message.messageType}
+                </Badge>
+              )}
+              <span className="text-xs text-muted-foreground">
+                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
             </div>
           )}
 
-          {/* Content */}
-          {message.content && (
+          {/* Handoff Message */}
+          {isHandoff && message.targetAgent && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50">
+              <ArrowRight className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <span className="text-sm text-foreground">
+                <span className="font-semibold">{message.agentName}</span>
+                {' → '}
+                <span className="font-semibold text-blue-600 dark:text-blue-400">{message.targetAgent}</span>
+              </span>
+            </div>
+          )}
+
+          {/* Status Message with Progress */}
+          {isStatus && message.progress !== undefined && (
+            <div className="p-3 rounded-lg bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border border-orange-200 dark:border-orange-800/50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-foreground">{message.content}</span>
+                <Badge variant="secondary" className="text-xs font-semibold">
+                  {message.progress}%
+                </Badge>
+              </div>
+              <div className="h-1.5 bg-white dark:bg-gray-900 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-500 ease-out"
+                  style={{ width: `${message.progress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Regular Content */}
+          {!isHandoff && !isStatus && message.content && (
             <div className={cn(
-              "rounded-lg px-4 py-3",
-              isUser ? "bg-primary text-primary-foreground" : "bg-accent"
+              "rounded-xl px-4 py-3 shadow-sm",
+              isUser 
+                ? "bg-primary text-primary-foreground ml-auto" 
+                : isSystem 
+                  ? "bg-muted/50 border border-border/50 backdrop-blur-sm" 
+                  : "bg-accent/80 dark:bg-accent/40 border border-border/30"
             )}>
-              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
             </div>
           )}
 
           {/* Artifacts */}
           {message.artifacts && message.artifacts.length > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-2 mt-2">
               {message.artifacts.map((artifact) => (
                 <button
                   key={artifact.id}
                   onClick={() => onArtifactClick(artifact)}
-                  className="w-full text-left px-4 py-3 rounded-lg bg-card border border-border hover:border-primary transition-colors group"
+                  className="w-full text-left px-4 py-3 rounded-xl bg-card/80 dark:bg-card/40 border border-border/50 hover:border-primary/50 hover:bg-card transition-all duration-200 group backdrop-blur-sm"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Code className="h-4 w-4 text-primary" />
-                      <span className="font-medium text-sm">{artifact.title}</span>
-                      <Badge variant="secondary" className="text-xs">
-                        {artifact.language}
-                      </Badge>
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Code className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm">{artifact.title}</span>
+                        <Badge variant="secondary" className="text-xs w-fit mt-0.5">
+                          {artifact.language}
+                        </Badge>
+                      </div>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" />
                   </div>
                 </button>
               ))}

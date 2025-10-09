@@ -204,14 +204,14 @@ const WorkforcePage: React.FC = () => {
                   {totalEmployees > 5 ? 'Excellent' : totalEmployees > 2 ? 'Good' : 'Growing'}
                 </Badge>
               </div>
-              {isLoading ? (
-                <Skeleton className="h-8 w-20 mb-2" />
-              ) : (
-                <>
-                  <p className="text-3xl font-bold mb-1">{purchased.length > 0 ? '95' : '0'}%</p>
-                  <p className="text-sm text-muted-foreground">Avg Performance</p>
-                </>
-              )}
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-20 mb-2" />
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold mb-1">{activeEmployees}</p>
+                      <p className="text-sm text-muted-foreground">Ready to Work</p>
+                    </>
+                  )}
             </CardContent>
           </Card>
         </motion.div>
@@ -229,14 +229,14 @@ const WorkforcePage: React.FC = () => {
                 </div>
                 <Badge variant="secondary" className="text-xs">Utilization</Badge>
               </div>
-              {isLoading ? (
-                <Skeleton className="h-8 w-20 mb-2" />
-              ) : (
-                <>
-                  <p className="text-3xl font-bold mb-1">{purchased.length > 0 ? '85' : '0'}%</p>
-                  <p className="text-sm text-muted-foreground">Workforce Usage</p>
-                </>
-              )}
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-20 mb-2" />
+                  ) : (
+                    <>
+                      <p className="text-3xl font-bold mb-1">{totalEmployees}</p>
+                      <p className="text-sm text-muted-foreground">Total Hired</p>
+                    </>
+                  )}
             </CardContent>
           </Card>
         </motion.div>

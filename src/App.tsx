@@ -22,7 +22,6 @@ import WorkforcePage from './pages/workforce/WorkforcePage';
 import ChatPage from './pages/chat/ChatPage';
 import TabbedLLMChatPage from './pages/chat/TabbedLLMChatPage';
 import ChatAgentPageChatKit from './pages/chat/ChatAgentPageChatKit';
-import EnhancedChatPage from './pages/chat/EnhancedChatPage';
 import VibeCodingPage from './pages/chat/VibeCodingPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import AIConfigurationPage from './pages/settings/AIConfigurationPage';
@@ -141,23 +140,14 @@ function App() {
               {/* Main Features */}
               <Route path="workforce" element={<WorkforcePage />} />
               
-                  {/* Vibe Coding - Main AI Employee Coding Interface */}
+                  {/* Vibe Coding - Multi-Agent Orchestration */}
                   <Route path="vibe" element={<VibeCodingPage />} />
                   
-                  {/* Chat Routes */}
+                  {/* Legacy Chat Routes (for backward compatibility) */}
                   <Route path="chat" element={<ChatPage />} />
                   <Route path="chat/:sessionId" element={<ChatPage />} />
-                  
-                  {/* Enhanced Chat (bolt.new style) */}
-                  <Route path="chat-enhanced" element={<EnhancedChatPage />} />
-                  
-                  {/* Chat Agent (ChatKit-based AI Employee Chat) */}
                   <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
-                  <Route path="chat-agent/:sessionId" element={<ChatAgentPageChatKit />} />
-                  
-                  {/* Multi-LLM Chat */}
                   <Route path="chat-multi" element={<TabbedLLMChatPage />} />
-                  <Route path="chat-multi/:sessionId" element={<TabbedLLMChatPage />} />
               
               {/* Account & System at Root Level */}
               <Route path="settings" element={<SettingsPage />} />

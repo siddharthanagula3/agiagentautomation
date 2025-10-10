@@ -34,8 +34,14 @@ export interface AuthResponse {
 class AuthService {
   async getCurrentUser(): Promise<AuthResponse> {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
+      // Add timeout to prevent hanging on invalid tokens
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Auth timeout - possible invalid token')), 3000)
+      );
+
+      const authPromise = supabase.auth.getUser();
+      const { data: { user }, error } = await Promise.race([authPromise, timeoutPromise]);
+
       if (error) {
         return { user: null, error: error.message };
       }
@@ -57,6 +63,14 @@ class AuthService {
 
       return { user: authUser, error: null };
     } catch (error: any) {
+      // On timeout or error, clear invalid auth data
+      if (error.message?.includes('timeout')) {
+        try {
+          await supabase.auth.signOut();
+        } catch (e) {
+          // Ignore signout errors
+        }
+      }
       return { user: null, error: error.message || 'Failed to get user' };
     }
   }

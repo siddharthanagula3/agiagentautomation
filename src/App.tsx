@@ -28,6 +28,7 @@ import MarketplacePublicPage from './pages/MarketplacePublicPage';
 import MarketplacePage from './pages/marketplace/MarketplacePage';
 import BillingPage from './pages/dashboard/BillingPage';
 import HelpSupportPage from './pages/dashboard/HelpSupportPage';
+import SetupGuidePage from './pages/SetupGuidePage';
 
 // New Public Pages
 import BlogPage from './pages/BlogPage';
@@ -82,6 +83,7 @@ function App() {
               <Route path="documentation" element={<DocumentationPage />} />
               <Route path="api-reference" element={<APIReferencePage />} />
               <Route path="marketplace" element={<MarketplacePublicPage />} />
+              <Route path="setup-guide" element={<SetupGuidePage />} />
 
               {/* Legal Pages */}
               <Route path="privacy-policy" element={<PrivacyPolicyPage />} />

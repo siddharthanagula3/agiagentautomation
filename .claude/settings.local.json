@@ -50,7 +50,8 @@
       "WebFetch(domain:github.com)",
       "Bash(timeout:*)",
       "WebFetch(domain:platform.openai.com)",
-      "WebFetch(domain:ai.google.dev)"
+      "WebFetch(domain:ai.google.dev)",
+      "Bash(npm run test:e2e:full:*)"
     ],
     "deny": [],
     "ask": []

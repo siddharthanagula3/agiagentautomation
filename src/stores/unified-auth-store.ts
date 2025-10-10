@@ -24,14 +24,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initialize: async () => {
     if (get().initialized) return;
-    
+
     logger.auth('Initializing auth state...');
     set({ isLoading: true, initialized: true });
-    
+
     try {
-      const { user, error } = await authService.getCurrentUser();
+      // Add timeout to prevent hanging on invalid tokens
+      const timeoutPromise = new Promise<{ user: null; error: string }>((_, reject) =>
+        setTimeout(() => reject(new Error('Auth initialization timeout')), 5000)
+      );
+
+      const authPromise = authService.getCurrentUser();
+      const { user, error } = await Promise.race([authPromise, timeoutPromise]);
+
       if (error) {
         logger.debug('No existing session:', error);
+        // Clear any invalid auth data from localStorage
+        try {
+          localStorage.removeItem('supabase.auth.token');
+          localStorage.removeItem('sb-lywdzvfibhzbljrgovwr-auth-token');
+        } catch (e) {
+          logger.debug('Could not clear localStorage');
+        }
         set({ user: null, isAuthenticated: false, isLoading: false });
       } else {
         logger.auth('Restored user session:', user?.email);
@@ -39,6 +53,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     } catch (error) {
       logger.error('Initialization error:', error);
+      // Clear any invalid auth data
+      try {
+        localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('sb-lywdzvfibhzbljrgovwr-auth-token');
+      } catch (e) {
+        logger.debug('Could not clear localStorage');
+      }
       set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },

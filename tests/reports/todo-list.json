@@ -1,0 +1,146 @@
+[
+  {
+    "priority": "CRITICAL",
+    "count": 8,
+    "items": [
+      {
+        "page": "Landing Page",
+        "route": "/",
+        "issues": [
+          {
+            "type": "error",
+            "message": "Navigation timeout of 30000 ms exceeded"
+          }
+        ]
+      },
+      {
+        "page": "Register",
+        "route": "/register",
+        "issues": [
+          {
+            "type": "console-errors",
+            "count": 3,
+            "samples": [
+              "JSHandle@error",
+              "ErrorBoundary caught an error: JSHandle@error JSHandle@object",
+              "Failed to load resource: the server responded with a status of 400 ()"
+            ]
+          },
+          {
+            "type": "network-errors",
+            "count": 1,
+            "samples": [
+              "400: https://lywdzvfibhzbljrgovwr.supabase.co/auth/v1/token?grant_type=password"
+            ]
+          }
+        ]
+      },
+      {
+        "page": "Dashboard",
+        "route": "/dashboard",
+        "issues": [
+          {
+            "type": "error",
+            "message": "Could not test - login failed"
+          }
+        ]
+      },
+      {
+        "page": "Workforce",
+        "route": "/workforce",
+        "issues": [
+          {
+            "type": "error",
+            "message": "Could not test - login failed"
+          }
+        ]
+      },
+      {
+        "page": "Vibe Coding",
+        "route": "/vibe",
+        "issues": [
+          {
+            "type": "error",
+            "message": "Could not test - login failed"
+          }
+        ]
+      },
+      {
+        "page": "Chat",
+        "route": "/chat",
+        "issues": [
+          {
+            "type": "error",
+            "message": "Could not test - login failed"
+          }
+        ]
+      },
+      {
+        "page": "Settings",
+        "route": "/settings",
+        "issues": [
+          {
+            "type": "error",
+            "message": "Could not test - login failed"
+          }
+        ]
+      },
+      {
+        "page": "Billing",
+        "route": "/billing",
+        "issues": [
+          {
+            "type": "error",
+            "message": "Could not test - login failed"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "priority": "LOW",
+    "count": 4,
+    "items": [
+      {
+        "page": "Chat Agent",
+        "route": "/chat-agent",
+        "issues": [
+          {
+            "type": "error",
+            "message": "Could not test - login failed"
+          }
+        ]
+      },
+      {
+        "page": "Multi Chat",
+        "route": "/chat-multi",
+        "issues": [
+          {
+            "type": "error",
+            "message": "Could not test - login failed"
+          }
+        ]
+      },
+      {
+        "page": "AI Configuration",
+        "route": "/settings/ai-configuration",
+        "issues": [
+          {
+            "type": "error",
+            "message": "Could not test - login failed"
+          }
+        ]
+      },
+      {
+        "page": "Support",
+        "route": "/support",
+        "issues": [
+          {
+            "type": "error",
+            "message": "Could not test - login failed"
+          }
+        ]
+      }
+    ]
+  }
+]

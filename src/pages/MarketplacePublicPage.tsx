@@ -358,15 +358,30 @@ export const MarketplacePublicPage: React.FC = () => {
                     <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 ml-auto" />
                   </div>
 
-                  {/* Hire Button - Free */}
+                  {/* Pricing and Hire Button */}
                   <div className="space-y-3">
-                    {/* Free Badge */}
+                    {/* Limited Time Offer Badge */}
                     <div className="flex items-center justify-center">
-                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
+                      <Badge className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white border-0 animate-pulse">
                         <Sparkles className="h-3 w-3 mr-1" />
-                        Free to Hire
+                        Limited Time Offer
                       </Badge>
                     </div>
+
+                    {/* Pricing Display */}
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-lg font-semibold text-muted-foreground line-through decoration-2">
+                        $20/mo
+                      </span>
+                      <span className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+                        $0
+                      </span>
+                    </div>
+
+                    {/* Introductory Offer Text */}
+                    <p className="text-xs text-center text-muted-foreground italic">
+                      🎉 Introductory offer for early adopters
+                    </p>
 
                     {/* Hire Button */}
                     <Button
@@ -387,8 +402,8 @@ export const MarketplacePublicPage: React.FC = () => {
                         </>
                       ) : (
                         <>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Hire for Free
+                          <Zap className="h-4 w-4 mr-2" />
+                          Hire Now - Free!
                         </>
                       )}
                     </Button>

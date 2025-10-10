@@ -1,3 +1,20 @@
+# 🚨 URGENT: Run This SQL Script Now
+
+## The "Failed to hire employee" error is because the database table doesn't exist yet.
+
+### Steps to Fix (2 minutes):
+
+1. **Open Supabase Dashboard**
+   - Go to: https://supabase.com/dashboard
+   - Select your project: `agiagentautomation`
+
+2. **Open SQL Editor**
+   - Click "SQL Editor" in the left sidebar
+   - Click "New Query"
+
+3. **Copy and Paste This SQL**
+
+```sql
 -- ============================================
 -- Free AI Employee Hiring System Setup
 -- Run this in Supabase SQL Editor
@@ -72,4 +89,38 @@ BEGIN
     RAISE NOTICE '👥 AI Employees can now be hired instantly for free';
     RAISE NOTICE '🔐 RLS policies enabled for secure access';
 END $$;
+```
+
+4. **Click "Run" (or press F5)**
+
+5. **Verify Success**
+   - You should see a success message
+   - Check the "Messages" tab for "✅ Free hiring system setup complete!"
+
+6. **Refresh Your Marketplace Page**
+   - Go back to your app
+   - Try hiring an employee again
+   - It should work now! 🎉
+
+---
+
+## What This Does
+
+- Creates the `purchased_employees` table
+- Sets up proper security (RLS policies)
+- Adds performance indexes
+- Enables free instant hiring
+
+## After Running This
+
+✅ Hiring will work instantly  
+✅ No payment required  
+✅ All employees are free  
+✅ Only subscriptions (Pro/Max) cost money
+
+---
+
+**Time to fix**: ~2 minutes  
+**Difficulty**: Copy & paste  
+**Impact**: Fixes all hiring errors
 

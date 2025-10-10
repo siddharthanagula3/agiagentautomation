@@ -1,25 +1,17 @@
 # E2E Test Fixes - Todo List
 
-Generated: 2025-10-10T08:02:42.717Z
+Generated: 2025-10-10T08:27:33.751Z
 
 ## Summary
 
-- 🔥 **CRITICAL**: 8 pages
+- 🔥 **CRITICAL**: 7 pages
 - 📝 **LOW**: 4 pages
 
 ---
 
-## CRITICAL Priority (8 items)
+## CRITICAL Priority (7 items)
 
-### 1. Landing Page
-
-**Route**: `/`
-
-**Issues**:
-
-- ❌ **Error**: Navigation timeout of 30000 ms exceeded
-
-### 2. Register
+### 1. Register
 
 **Route**: `/register`
 
@@ -32,7 +24,7 @@ Generated: 2025-10-10T08:02:42.717Z
 - 🌐 **Network Errors**: 1 errors
   - `400: https://lywdzvfibhzbljrgovwr.supabase.co/auth/v1/token?grant_type=password`
 
-### 3. Dashboard
+### 2. Dashboard
 
 **Route**: `/dashboard`
 
@@ -40,7 +32,7 @@ Generated: 2025-10-10T08:02:42.717Z
 
 - ❌ **Error**: Could not test - login failed
 
-### 4. Workforce
+### 3. Workforce
 
 **Route**: `/workforce`
 
@@ -48,7 +40,7 @@ Generated: 2025-10-10T08:02:42.717Z
 
 - ❌ **Error**: Could not test - login failed
 
-### 5. Vibe Coding
+### 4. Vibe Coding
 
 **Route**: `/vibe`
 
@@ -56,7 +48,7 @@ Generated: 2025-10-10T08:02:42.717Z
 
 - ❌ **Error**: Could not test - login failed
 
-### 6. Chat
+### 5. Chat
 
 **Route**: `/chat`
 
@@ -64,7 +56,7 @@ Generated: 2025-10-10T08:02:42.717Z
 
 - ❌ **Error**: Could not test - login failed
 
-### 7. Settings
+### 6. Settings
 
 **Route**: `/settings`
 
@@ -72,7 +64,7 @@ Generated: 2025-10-10T08:02:42.717Z
 
 - ❌ **Error**: Could not test - login failed
 
-### 8. Billing
+### 7. Billing
 
 **Route**: `/billing`
 

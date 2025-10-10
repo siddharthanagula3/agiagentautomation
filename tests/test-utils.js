@@ -189,7 +189,7 @@ export async function checkSEOTags(page) {
 export async function login(page, email, password) {
   try {
     await page.goto(`${TEST_CONFIG.baseURL}/login`, {
-      waitUntil: 'networkidle2',
+      waitUntil: 'domcontentloaded',
       timeout: TEST_CONFIG.timeout.navigation
     });
 
@@ -200,19 +200,42 @@ export async function login(page, email, password) {
     await page.type('input[type="email"]', email);
     await page.type('input[type="password"]', password);
 
-    // Submit form
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: 'networkidle2' }),
-      page.click('button[type="submit"]')
+    // Click submit button and wait for either navigation OR error message
+    await page.click('button[type="submit"]');
+
+    // Wait for either navigation or error (whichever comes first)
+    await Promise.race([
+      page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 10000 }).catch(() => {}),
+      page.waitForSelector('[role="alert"]', { timeout: 10000 }).catch(() => {}),
+      page.waitForSelector('.error', { timeout: 10000 }).catch(() => {}),
+      wait(10000) // Fallback: wait 10 seconds
     ]);
+
+    // Give the page time to settle
+    await wait(2000);
 
     // Check if login successful (should redirect to dashboard)
     const url = page.url();
     const isLoggedIn = url.includes('/dashboard') || url.includes('/workforce') || url.includes('/vibe');
 
+    // If login failed, try to get error message for debugging
+    let errorMessage = null;
+    if (!isLoggedIn) {
+      try {
+        errorMessage = await page.evaluate(() => {
+          const alert = document.querySelector('[role="alert"]');
+          const error = document.querySelector('.error, .text-destructive, .text-red-500');
+          return alert?.textContent || error?.textContent || 'No error message found';
+        });
+      } catch (e) {
+        errorMessage = 'Could not extract error message';
+      }
+    }
+
     return {
       success: isLoggedIn,
-      currentURL: url
+      currentURL: url,
+      error: isLoggedIn ? null : errorMessage
     };
   } catch (error) {
     return {

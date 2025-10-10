@@ -5,7 +5,7 @@ export const TEST_CONFIG = {
 
   // Test credentials
   credentials: {
-    email: 'siddharthanagula@gmail.com',
+    email: 'siddharthanagula3@gmail.com',
     password: 'Sid@1234'
   },
 

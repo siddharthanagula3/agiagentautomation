@@ -46,6 +46,8 @@ import { Spotlight, MouseSpotlight } from '../components/ui/spotlight';
 import { BentoGrid, BentoCard } from '../components/ui/bento-grid';
 import { InteractiveHoverCard } from '../components/ui/interactive-hover-card';
 import { AnimatedGradientText } from '../components/ui/animated-gradient-text';
+import { CountdownTimer, createDiscountEndDate } from '@/components/ui/countdown-timer';
+import { SEOHead } from '@/components/seo/SEOHead';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { AI_EMPLOYEES, providerInfo, type AIProvider } from '@/data/ai-employees';
 import { DollarSign } from 'lucide-react';
@@ -183,6 +185,25 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen">
+      <SEOHead
+        title="AGI Agent Automation | #1 AI Employees Platform USA | Hire 165+ AI Agents"
+        description="Hire AI Employees starting at $1/month. 165+ specialized AI agents for automation, customer support, sales, marketing & more. Best AI workforce platform in USA. 24/7 operation, 95% cost savings. Start free trial today!"
+        keywords={[
+          'ai employees',
+          'hire ai employees',
+          'ai agents',
+          'ai automation',
+          'agi agent automation',
+          'cheapest ai employees',
+          'best ai employees usa',
+          'no 1 in usa',
+          'ai workforce',
+          'agi',
+          'asi',
+          'hiring ai employees'
+        ]}
+        ogImage="https://agiagentautomation.com/og-landing.jpg"
+      />
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
@@ -239,11 +260,21 @@ const LandingPage: React.FC = () => {
               </motion.span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto leading-relaxed">
               Build your dream team of AI employees who work 24/7.
               <span className="text-foreground font-semibold"> No hiring, no training, no overhead</span> -
               just instant expertise across every function.
             </p>
+
+            {/* Limited Time Offer Countdown */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
+              className="mb-12"
+            >
+              <CountdownTimer targetDate={createDiscountEndDate()} />
+            </motion.div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

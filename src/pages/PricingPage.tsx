@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Check, X, ArrowRight, Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Particles } from '@/components/ui/particles';
+import { CountdownTimer, createDiscountEndDate } from '@/components/ui/countdown-timer';
 import { getPricingPlans, type PricingPlan as DBPricingPlan } from '@/services/marketing-api';
+import { useAuthStore } from '@/stores/unified-auth-store';
 
 interface PricingPlan {
   name: string;
@@ -20,12 +23,28 @@ interface PricingPlan {
 }
 
 const PricingPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadPlans();
   }, []);
+
+  const handleSelectPlan = (planName: string) => {
+    if (planName === 'Enterprise') {
+      navigate('/contact-sales');
+    } else {
+      // If user is logged in, redirect to billing page with selected plan
+      // Otherwise, redirect to register page
+      if (user) {
+        navigate('/billing', { state: { selectedPlan: planName } });
+      } else {
+        navigate('/register', { state: { selectedPlan: planName } });
+      }
+    }
+  };
 
   async function loadPlans() {
     try {
@@ -181,9 +200,19 @@ const PricingPage: React.FC = () => {
             <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary">
               Pay-As-You-Go Pricing
             </h1>
-            <p className="text-xl text-muted-foreground mb-12">
+            <p className="text-xl text-muted-foreground mb-8">
               Only pay for what you use. $1 per AI employee or $19 for unlimited access with $10 bonus credits for first-time users.
             </p>
+
+            {/* Countdown Timer for Limited Offer */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mt-8"
+            >
+              <CountdownTimer targetDate={createDiscountEndDate()} />
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -198,7 +227,7 @@ const PricingPage: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {plans.map((plan, idx) => (
-                <PricingCard key={idx} plan={plan} index={idx} />
+                <PricingCard key={idx} plan={plan} index={idx} onSelect={() => handleSelectPlan(plan.name)} />
               ))}
             </div>
           )}
@@ -341,7 +370,7 @@ const PricingPage: React.FC = () => {
             <p className="text-xl mb-8 opacity-90">
               Our team is here to help you find the perfect plan
             </p>
-            <Button size="lg" variant="secondary">
+            <Button size="lg" variant="secondary" onClick={() => navigate('/contact-sales')}>
               Contact Sales
             </Button>
           </motion.div>
@@ -351,7 +380,7 @@ const PricingPage: React.FC = () => {
   );
 };
 
-const PricingCard: React.FC<{ plan: PricingPlan; index: number }> = ({ plan, index }) => {
+const PricingCard: React.FC<{ plan: PricingPlan; index: number; onSelect: () => void }> = ({ plan, index, onSelect }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
 
@@ -382,6 +411,7 @@ const PricingCard: React.FC<{ plan: PricingPlan; index: number }> = ({ plan, ind
       <p className="text-muted-foreground mb-8">{plan.description}</p>
 
       <Button
+        onClick={onSelect}
         className={`w-full mb-8 ${
           plan.popular ? 'bg-gradient-to-r from-primary to-accent' : ''
         }`}

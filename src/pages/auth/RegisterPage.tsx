@@ -35,30 +35,30 @@ const RegisterPage: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isisLoading, setIsisLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsisLoading(true);
+    setIsLoading(true);
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
-      setIsisLoading(false);
+      setIsLoading(false);
       return;
     }
 
     if (!acceptTerms) {
       setError('Please accept the terms and conditions');
-      setIsisLoading(false);
+      setIsLoading(false);
       return;
     }
 
     // Add timeout protection for registration
     const timeoutId = setTimeout(() => {
-      setIsisLoading(false);
+      setIsLoading(false);
       setError('Registration timeout. Please try again.');
     }, 15000); // 15 second timeout
 
@@ -83,14 +83,14 @@ const RegisterPage: React.FC = () => {
         } else {
           setError(result.error || 'Registration failed. Please try again.');
         }
-        setIsisLoading(false);
+        setIsLoading(false);
         return;
       }
     } catch (err) {
       clearTimeout(timeoutId);
       setError('An unexpected error occurred. Please try again.');
     } finally {
-      setIsisLoading(false);
+      setIsLoading(false);
     }
   };
 

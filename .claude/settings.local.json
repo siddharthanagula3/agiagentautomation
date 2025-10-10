@@ -47,7 +47,10 @@
       "Bash(then echo \"=== $file ===\")",
       "Bash(fi)",
       "Bash(npx supabase:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(timeout:*)",
+      "WebFetch(domain:platform.openai.com)",
+      "WebFetch(domain:ai.google.dev)"
     ],
     "deny": [],
     "ask": []

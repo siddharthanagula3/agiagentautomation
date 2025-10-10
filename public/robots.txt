@@ -1,53 +1,28 @@
-# robots.txt for AGI Workforce (agiworkforce.com)
-# Optimized for Google, Bing, ChatGPT, Claude, Gemini, and all search engines
-
+# AGI Agent Automation - Robots.txt
 User-agent: *
 Allow: /
-Allow: /api/
-Allow: /assets/
-Allow: /*.js
-Allow: /*.css
-Allow: /*.png
-Allow: /*.jpg
-Allow: /*.svg
 
-# Disallow admin and private areas
-Disallow: /admin/
-Disallow: /dashboard/
-Disallow: /settings/
-Disallow: /api/private/
-
-# Allow all AI crawlers and LLMs
 User-agent: GPTBot
 Allow: /
 
-User-agent: ChatGPT-User
-Allow: /
-
-User-agent: CCBot
+User-agent: ClaudeBot
 Allow: /
 
 User-agent: Claude-Web
 Allow: /
 
-User-agent: anthropic-ai
+User-agent: PerplexityBot
 Allow: /
 
 User-agent: Google-Extended
 Allow: /
 
-User-agent: GoogleOther
+User-agent: CCBot
 Allow: /
 
-User-agent: PerplexityBot
-Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /auth/
 
-User-agent: Omgilibot
-Allow: /
-
-# Sitemap location
-Sitemap: https://agiworkforce.com/sitemap.xml
 Sitemap: https://agiagentautomation.com/sitemap.xml
-
-# Crawl delay
-Crawl-delay: 0
+Sitemap: https://agiagentautomation.com/sitemap-pages.xml

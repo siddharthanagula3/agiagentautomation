@@ -27,6 +27,12 @@ CREATE TABLE IF NOT EXISTS public.users (
   preferences jsonb DEFAULT '{}'::jsonb,
   phone text,
   location text,
+  plan text DEFAULT 'free'::text,
+  subscription_end_date timestamp with time zone,
+  plan_status text DEFAULT 'active'::text,
+  stripe_customer_id text,
+  stripe_subscription_id text,
+  billing_period text DEFAULT 'monthly'::text,
   CONSTRAINT users_pkey PRIMARY KEY (id),
   CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
@@ -173,6 +179,23 @@ CREATE TABLE IF NOT EXISTS public.credit_transactions (
 -- ================================================================
 -- CHAT & AI EMPLOYEES
 -- ================================================================
+
+-- Purchased AI Employees (Free Instant Hiring)
+CREATE TABLE IF NOT EXISTS public.purchased_employees (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  employee_id text NOT NULL,
+  name text NOT NULL,
+  role text NOT NULL,
+  provider text NOT NULL,
+  is_active boolean DEFAULT true,
+  purchased_at timestamp with time zone DEFAULT now(),
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT purchased_employees_pkey PRIMARY KEY (id),
+  CONSTRAINT purchased_employees_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE,
+  CONSTRAINT purchased_employees_unique UNIQUE (user_id, employee_id)
+);
 
 -- Chat sessions
 CREATE TABLE IF NOT EXISTS public.chat_sessions (
@@ -669,6 +692,15 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON public.users(role);
 CREATE INDEX IF NOT EXISTS idx_users_is_active ON public.users(is_active);
+CREATE INDEX IF NOT EXISTS idx_users_plan ON public.users(plan);
+CREATE INDEX IF NOT EXISTS idx_users_plan_status ON public.users(plan_status);
+CREATE INDEX IF NOT EXISTS idx_users_stripe_customer ON public.users(stripe_customer_id);
+
+-- Purchased employees indexes
+CREATE INDEX IF NOT EXISTS idx_purchased_employees_user_id ON public.purchased_employees(user_id);
+CREATE INDEX IF NOT EXISTS idx_purchased_employees_employee_id ON public.purchased_employees(employee_id);
+CREATE INDEX IF NOT EXISTS idx_purchased_employees_active ON public.purchased_employees(is_active) WHERE is_active = true;
+CREATE INDEX IF NOT EXISTS idx_purchased_employees_purchased_at ON public.purchased_employees(purchased_at DESC);
 
 -- Chat indexes
 CREATE INDEX IF NOT EXISTS idx_chat_sessions_user_id ON public.chat_sessions(user_id);
@@ -701,6 +733,7 @@ ALTER TABLE public.user_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_credits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.credit_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.purchased_employees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.token_usage ENABLE ROW LEVEL SECURITY;
@@ -739,6 +772,19 @@ CREATE POLICY "Users can update their own settings" ON public.user_settings
 
 CREATE POLICY "Users can insert their own settings" ON public.user_settings
   FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- Purchased employees policies
+CREATE POLICY "Users can view their own hired employees" ON public.purchased_employees
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can hire employees (insert)" ON public.purchased_employees
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own hired employees" ON public.purchased_employees
+  FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own hired employees" ON public.purchased_employees
+  FOR DELETE USING (auth.uid() = user_id);
 
 -- Chat sessions policies
 CREATE POLICY "Users can view their own chat sessions" ON public.chat_sessions
@@ -841,6 +887,9 @@ CREATE TRIGGER update_user_settings_updated_at BEFORE UPDATE ON public.user_sett
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 CREATE TRIGGER update_automation_workflows_updated_at BEFORE UPDATE ON public.automation_workflows
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_purchased_employees_updated_at BEFORE UPDATE ON public.purchased_employees
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- ================================================================

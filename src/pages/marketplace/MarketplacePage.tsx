@@ -312,8 +312,9 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({ className }) =
                       <span className="text-muted-foreground">({employee.reviews})</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <DollarSign className="h-4 w-4 text-green-500 dark:text-green-400" />
-                      <span className="text-foreground">${employee.price}/hr</span>
+                      <span className="text-sm text-muted-foreground line-through">$20/hr</span>
+                      <span className="text-foreground font-semibold text-green-500">$0/hr</span>
+                      <span className="text-xs text-muted-foreground">Free</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <CheckCircle className="h-4 w-4 text-blue-500 dark:text-blue-400" />

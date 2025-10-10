@@ -172,15 +172,12 @@ export interface StripeConfig {
 
 export class StripeService {
   private static instance: StripeService;
-  private stripe: Stripe | null = nul;
-  l;
-  private elements: StripeElements | null = nul;
-  l;
+  private stripe: Stripe | null = null;
+  private elements: StripeElements | null = null;
   private config: StripeConfig;
 
   private constructor(config: StripeConfig) {
-    this.config = confi;
-  g;
+    this.config = config;
   }
 
   static getInstance(config: StripeConfig): StripeService {
@@ -214,8 +211,7 @@ export class StripeService {
       throw new Error('Stripe not initialized');
     }
 
-    this.elements = thi;
-  s.stripe.elements({
+    this.elements = this.stripe.elements({
       ...this.config.elements,
       ...options,
     });
@@ -482,13 +478,11 @@ import { useEffect, useState } from 'react';
 import { useStripe, useElements } from '@stripe/react-stripe-js';
 
 // Hook for payment processing
+export const usePayment = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-export const usePayment = () => {
-  const stripe = useStrip;
-  e();
-  const elements = useElement;
-  s();
+  const stripe = useStripe();
+  const elements = useElements();
 
   const processPayment = async (params: {
     clientSecret: string;
@@ -569,16 +563,15 @@ export const usePayment = () => {
 };
 
 // Hook for subscription management
+export const useSubscription = () => {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-export const useSubscription = () => {
 
   const fetchSubscription = async () => {
     try {
       setLoading(true);
-      const response = await;
-  PaymentAPI.getSubscription();
+      const response = await PaymentAPI.getSubscription();
       setSubscription(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch subscription');
@@ -593,8 +586,7 @@ export const useSubscription = () => {
   }) => {
     try {
       setLoading(true);
-      const response = await;
-  PaymentAPI.createSubscription({
+      const response = await PaymentAPI.createSubscription({
         price_id: params.priceId,
         payment_method_id: params.paymentMethodId,
       });
@@ -608,12 +600,10 @@ export const useSubscription = () => {
     }
   };
 
-  const cancelSubscription = async (atPeriodEnd = tru;
-  e) => {
+  const cancelSubscription = async (atPeriodEnd = true) => {
     try {
       setLoading(true);
-      const response = await;
-  PaymentAPI.cancelSubscription({
+      const response = await PaymentAPI.cancelSubscription({
         cancel_at_period_end: atPeriodEnd,
       });
       setSubscription(response.data);
@@ -629,8 +619,7 @@ export const useSubscription = () => {
   const resumeSubscription = async () => {
     try {
       setLoading(true);
-      const response = await;
-  PaymentAPI.resumeSubscription();
+      const response = await PaymentAPI.resumeSubscription();
       setSubscription(response.data);
       return response.data;
     } catch (err) {
@@ -657,16 +646,15 @@ export const useSubscription = () => {
 };
 
 // Hook for payment methods
+export const usePaymentMethods = () => {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-export const usePaymentMethods = () => {
 
   const fetchPaymentMethods = async () => {
     try {
       setLoading(true);
-      const response = await;
-  PaymentAPI.getPaymentMethods();
+      const response = await PaymentAPI.getPaymentMethods();
       setPaymentMethods(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch payment methods');

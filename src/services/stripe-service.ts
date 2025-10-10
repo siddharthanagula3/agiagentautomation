@@ -22,68 +22,7 @@ function getStripe() {
   return stripePromise;
 }
 
-export interface CheckoutSessionData {
-  employeeId: string;
-  employeeName: string;
-  employeeRole: string;
-  price: number;
-  userId: string;
-  userEmail: string;
-  provider?: string; // LLM provider (chatgpt, claude, gemini, perplexity)
-  billingPeriod?: 'monthly' | 'yearly'; // Billing period (defaults to yearly)
-}
-
-/**
- * Create a Stripe Checkout session and redirect to payment
- */
-export async function createCheckoutSession(data: CheckoutSessionData): Promise<void> {
-  try {
-    console.log('[Stripe Service] Creating checkout session:', data);
-
-    // Default to yearly billing for AI employees
-    const checkoutData = {
-      ...data,
-      billingPeriod: data.billingPeriod || 'yearly',
-    };
-
-    // Call Netlify function to create checkout session
-    const response = await fetch('/.netlify/functions/create-checkout-session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(checkoutData),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to create checkout session');
-    }
-
-    const { sessionId, url } = await response.json();
-    console.log('[Stripe Service] Checkout session created:', sessionId);
-
-    // Redirect to Stripe Checkout
-    if (url) {
-      window.location.href = url;
-    } else {
-      // Fallback: use Stripe.js redirect
-      const stripe = await getStripe();
-      if (!stripe) {
-        console.warn('[Stripe Service] Stripe.js not available or publishable key missing. Redirect URL expected.');
-        throw new Error('Payment temporarily unavailable: Stripe.js not loaded.');
-      }
-      
-      const { error } = await stripe.redirectToCheckout({ sessionId });
-      if (error) {
-        throw error;
-      }
-    }
-  } catch (error) {
-    console.error('[Stripe Service] Checkout error:', error);
-    throw error;
-  }
-}
+// Employee purchase functions removed - hiring is now free
 
 /**
  * Open Stripe Customer Portal for subscription management
@@ -146,43 +85,7 @@ export function getStripeConfig() {
   };
 }
 
-/**
- * Manually create purchased employee record (fallback for failed webhooks)
- */
-export async function manualPurchaseEmployee(data: {
-  userId: string;
-  sessionId?: string;
-  employeeId?: string;
-  employeeName?: string;
-  employeeRole?: string;
-  provider?: string;
-  subscriptionId?: string;
-  customerId?: string;
-}): Promise<void> {
-  try {
-    console.log('[Manual Purchase Service] Calling with data:', data);
-    
-    const response = await fetch('/.netlify/functions/manual-purchase', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('[Manual Purchase Service] Error response:', error);
-      throw new Error(error.error || 'Failed to create purchased employee record');
-    }
-
-    const result = await response.json();
-    console.log('[Manual Purchase Service] Success:', result);
-  } catch (error) {
-    console.error('[Manual Purchase Service] Error:', error);
-    throw error;
-  }
-}
+// Manual purchase function removed - hiring is now free
 
 /**
  * Create Pro Plan subscription and redirect to Stripe Checkout

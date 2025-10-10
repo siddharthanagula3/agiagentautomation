@@ -143,7 +143,7 @@ export const MarketplacePublicPage: React.FC = () => {
               size="lg"
               className="btn-glow gradient-primary text-white"
             >
-              <ShoppingCart className="h-5 w-5 mr-2" />
+              <Bot className="h-5 w-5 mr-2" />
               My Team ({purchasedEmployees.size})
             </Button>
           </div>

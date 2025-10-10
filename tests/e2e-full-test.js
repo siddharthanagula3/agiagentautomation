@@ -37,9 +37,10 @@ async function testRoute(page, route, isProtected = false) {
     const consoleErrors = setupConsoleListener(page);
     const networkErrors = setupNetworkListener(page);
 
-    // Navigate to route
+    // Navigate to route - use domcontentloaded instead of networkidle2
+    // to avoid hanging on background auth requests
     const response = await page.goto(`${TEST_CONFIG.baseURL}${route.path}`, {
-      waitUntil: 'networkidle2',
+      waitUntil: 'domcontentloaded',
       timeout: TEST_CONFIG.timeout.navigation
     });
 

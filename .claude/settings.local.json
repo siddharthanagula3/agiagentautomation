@@ -51,7 +51,9 @@
       "Bash(timeout:*)",
       "WebFetch(domain:platform.openai.com)",
       "WebFetch(domain:ai.google.dev)",
-      "Bash(npm run test:e2e:full:*)"
+      "Bash(npm run test:e2e:full:*)",
+      "WebFetch(domain:agiagentautomation.com)",
+      "Bash(if exist nul del /f /q nul)"
     ],
     "deny": [],
     "ask": []

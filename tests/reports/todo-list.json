@@ -1,18 +1,8 @@
 [
   {
     "priority": "CRITICAL",
-    "count": 8,
+    "count": 7,
     "items": [
-      {
-        "page": "Landing Page",
-        "route": "/",
-        "issues": [
-          {
-            "type": "error",
-            "message": "Navigation timeout of 30000 ms exceeded"
-          }
-        ]
-      },
       {
         "page": "Register",
         "route": "/register",

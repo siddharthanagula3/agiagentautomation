@@ -12,7 +12,6 @@ import RegisterPage from './pages/auth/RegisterPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import { DashboardLayout } from './layouts/DashboardLayout';
-import Dashboard from './pages/dashboard/Dashboard';
 import DashboardHomePage from './components/dashboard/DashboardHomePage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';

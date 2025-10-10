@@ -130,6 +130,29 @@ export const VibeCodingInterface: React.FC<Props> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Helper function to extract code blocks from LLM responses
+  const extractCodeBlocks = (text: string): Array<{ code: string; language: string; filename?: string }> => {
+    const codeBlocks: Array<{ code: string; language: string; filename?: string }> = [];
+
+    // Match markdown code blocks with language and optional filename
+    const codeBlockRegex = /```(\w+)(?:\s+(.+?))?\n([\s\S]*?)```/g;
+    let match;
+
+    while ((match = codeBlockRegex.exec(text)) !== null) {
+      const language = match[1] || 'text';
+      const filename = match[2]?.trim();
+      const code = match[3].trim();
+
+      codeBlocks.push({
+        language,
+        filename,
+        code,
+      });
+    }
+
+    return codeBlocks;
+  };
+
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
@@ -265,13 +288,54 @@ export const VibeCodingInterface: React.FC<Props> = ({
       }));
       setCurrentPlan(planSteps);
 
-      // Step 3: Generate Code
-      const codeArtifact: Artifact = {
-        id: `artifact-${Date.now()}`,
-        type: 'code',
-        title: 'App.tsx',
-        language: 'typescript',
-        content: `import React, { useState } from 'react';
+      // Step 3: Extract Code Artifacts from orchestrator results
+      const generatedArtifacts: Artifact[] = [];
+
+      // Parse results for code blocks and extract plans/reasoning
+      for (const [taskId, result] of results.entries()) {
+        if (result.success && result.output) {
+          // Extract plan/thinking section
+          const planMatch = result.output.match(/## Plan\n([\s\S]*?)(?=\n##|```|$)/i);
+          if (planMatch) {
+            const thinkingMsg: VibeCodingMessage = {
+              id: `thinking-${taskId}`,
+              role: 'assistant',
+              agentName: plan.tasks.find(t => t.id === taskId)?.assignedTo || employeeName,
+              content: `💭 **Thinking & Planning**\n\n${planMatch[1].trim()}`,
+              timestamp: new Date(),
+              messageType: 'thinking',
+            };
+            setMessages(prev => [...prev, thinkingMsg]);
+          }
+
+          // Extract code blocks
+          const codeBlocks = extractCodeBlocks(result.output);
+
+          codeBlocks.forEach((block, index) => {
+            generatedArtifacts.push({
+              id: `artifact-${taskId}-${index}`,
+              type: 'code',
+              title: block.filename || `Generated-${index + 1}.${block.language}`,
+              language: block.language,
+              content: block.code,
+              metadata: {
+                createdBy: employeeName,
+                provider,
+                taskId,
+              },
+            });
+          });
+        }
+      }
+
+      // If no code artifacts were generated, create a default one
+      if (generatedArtifacts.length === 0) {
+        const defaultArtifact: Artifact = {
+          id: `artifact-${Date.now()}`,
+          type: 'code',
+          title: 'App.tsx',
+          language: 'typescript',
+          content: `import React, { useState } from 'react';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -279,8 +343,8 @@ function App() {
   return (
     <div className="app">
       <h1>Hello from ${employeeName}!</h1>
-      <p>I'm your {employeeRole} powered by {provider}</p>
-      
+      <p>I'm your ${employeeRole} powered by ${provider}</p>
+
       <div className="counter">
         <button onClick={() => setCount(count - 1)}>-</button>
         <span>{count}</span>
@@ -291,14 +355,16 @@ function App() {
 }
 
 export default App;`,
-        metadata: {
-          createdBy: employeeName,
-          provider,
-        },
-      };
+          metadata: {
+            createdBy: employeeName,
+            provider,
+          },
+        };
+        generatedArtifacts.push(defaultArtifact);
+      }
 
-      setArtifacts([codeArtifact]);
-      setSelectedArtifact(codeArtifact);
+      setArtifacts(generatedArtifacts);
+      setSelectedArtifact(generatedArtifacts[0]);
 
       // Update plan
       const updatedPlan = plan.map(step => {
@@ -317,14 +383,16 @@ export default App;`,
       setCurrentPlan(updatedPlan);
       await new Promise(r => setTimeout(r, 1200));
 
-      // Step 4: File Operations
-      const fileOps: FileOperation[] = [
-        {
-          type: 'create',
-          path: 'src/App.tsx',
-          content: codeArtifact.content,
-        },
-        {
+      // Step 4: File Operations - Create files from generated artifacts
+      const fileOps: FileOperation[] = generatedArtifacts.map(artifact => ({
+        type: 'create' as const,
+        path: `src/${artifact.title}`,
+        content: artifact.content,
+      }));
+
+      // Add package.json if not already present
+      if (!fileOps.some(op => op.path.includes('package.json'))) {
+        fileOps.push({
           type: 'create',
           path: 'package.json',
           content: JSON.stringify({
@@ -335,8 +403,8 @@ export default App;`,
               'react-dom': '^18.2.0',
             },
           }, null, 2),
-        },
-      ];
+        });
+      }
 
       // Execute file operations
       for (const op of fileOps) {
@@ -354,18 +422,21 @@ export default App;`,
       const finalMsg: VibeCodingMessage = {
         id: `msg-${Date.now()}-final`,
         role: 'assistant',
-        content: `Perfect! I've created your project based on your request: "${userRequest}"\n\n` +
-          `**What I built:**\n` +
-          `- Created React component with counter functionality\n` +
-          `- Added proper TypeScript types\n` +
-          `- Set up package.json with dependencies\n\n` +
-          `**Files created:**\n` +
+        agentName: employeeName,
+        content: `✅ Perfect! I've completed your request: "${userRequest}"\n\n` +
+          `**Generated Artifacts:**\n` +
+          generatedArtifacts.map(a => `- ${a.title} (${a.language})`).join('\n') + '\n\n' +
+          `**Files Created:**\n` +
           fileOps.map(op => `- ${op.path}`).join('\n') + '\n\n' +
-          `You can now preview the code in the artifact panel on the right! 🎉`,
+          `**Next Steps:**\n` +
+          `- View the code in the Code tab →\n` +
+          `- Check the Files tab to see all generated files\n` +
+          `- Run \`npm install\` and \`npm run dev\` to start your app\n\n` +
+          `You can now preview everything in the artifact panel on the right! 🎉`,
         timestamp: new Date(),
         plan: finalPlan,
         fileOperations: fileOps,
-        artifacts: [codeArtifact],
+        artifacts: generatedArtifacts,
       };
 
       setMessages(prev => [...prev, finalMsg]);
@@ -1299,12 +1370,14 @@ const MessageBubble: React.FC<{
   const isSystem = message.role === 'system';
   const isHandoff = message.messageType === 'handoff';
   const isStatus = message.messageType === 'status';
+  const isThinking = message.messageType === 'thinking';
 
   // Determine status from message type if not explicitly provided
   const derivedStatus = agentStatus || (
     message.messageType === 'status' ? 'working' :
     message.messageType === 'result' ? 'completed' :
     message.messageType === 'handoff' ? 'analyzing' :
+    message.messageType === 'thinking' ? 'analyzing' :
     undefined
   );
 
@@ -1334,12 +1407,14 @@ const MessageBubble: React.FC<{
                     "text-xs",
                     message.messageType === 'handoff' && "border-blue-500 text-blue-600 dark:text-blue-400",
                     message.messageType === 'status' && "border-orange-500 text-orange-600 dark:text-orange-400",
-                    message.messageType === 'result' && "border-green-500 text-green-600 dark:text-green-400"
+                    message.messageType === 'result' && "border-green-500 text-green-600 dark:text-green-400",
+                    message.messageType === 'thinking' && "border-purple-500 text-purple-600 dark:text-purple-400"
                   )}
                 >
                   {message.messageType === 'handoff' ? '📞 calling' :
                    message.messageType === 'status' ? '⚡ working' :
                    message.messageType === 'result' ? '✅ completed' :
+                   message.messageType === 'thinking' ? '💭 thinking' :
                    message.messageType}
                 </Badge>
               )}
@@ -1388,6 +1463,21 @@ const MessageBubble: React.FC<{
             </motion.div>
           )}
 
+          {/* Thinking/Planning Display */}
+          {isThinking && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 border border-purple-200 dark:border-purple-800/50"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">Agent Reasoning</span>
+              </div>
+              <p className="text-sm whitespace-pre-wrap leading-relaxed text-foreground">{message.content}</p>
+            </motion.div>
+          )}
+
           {/* Status Message with Multi-Stage Progress */}
           {isStatus && message.progress !== undefined && (
             <motion.div
@@ -1406,7 +1496,7 @@ const MessageBubble: React.FC<{
           )}
 
           {/* Regular Content */}
-          {!isHandoff && !isStatus && message.content && (
+          {!isHandoff && !isStatus && !isThinking && message.content && (
             <div className={cn(
               "rounded-xl px-4 py-3 shadow-sm",
               isUser 

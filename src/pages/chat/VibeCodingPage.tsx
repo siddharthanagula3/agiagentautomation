@@ -56,7 +56,7 @@ const VibeCodingPage: React.FC = () => {
       const { data, error: fetchError } = await supabase
         .from('purchased_employees')
         .select('*')
-        .eq('id', employeeIdFromParams)
+        .eq('employee_id', employeeIdFromParams)
         .eq('user_id', user.id)
         .single();
 

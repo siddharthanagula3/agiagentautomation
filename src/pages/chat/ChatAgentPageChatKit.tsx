@@ -41,9 +41,9 @@ const ChatAgentPageChatKit: React.FC = () => {
         const { data: employeeData, error: employeeError } = await supabase
           .from('purchased_employees')
           .select('*')
-          .eq('id', employeeIdFromParams)
+          .eq('employee_id', employeeIdFromParams)
           .eq('user_id', user.id)
-          .eq('status', 'active')
+          .eq('is_active', true)
           .single();
 
         if (employeeError || !employeeData) {

@@ -50,7 +50,7 @@ import { CountdownTimer, createDiscountEndDate } from '@/components/ui/countdown
 import { SEOHead } from '@/components/seo/SEOHead';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { AI_EMPLOYEES, providerInfo, type AIProvider } from '@/data/ai-employees';
-import { DollarSign } from 'lucide-react';
+import { DollarSign, Bot } from 'lucide-react';
 
 // Features data
 const features = [
@@ -512,9 +512,15 @@ const LandingPage: React.FC = () => {
                     {/* Price and CTA */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-baseline gap-1">
-                        <DollarSign className="h-5 w-5 text-success" />
-                        <span className="text-3xl font-bold">{employee.price}</span>
-                        <span className="text-sm text-muted-foreground">per month</span>
+                        <span className="text-lg font-semibold text-muted-foreground line-through decoration-2">
+                          $20/mo
+                        </span>
+                        <span className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+                          $0
+                        </span>
+                        <span className="text-xs text-muted-foreground italic">
+                          Limited Time
+                        </span>
                       </div>
 
                       <Button
@@ -523,8 +529,8 @@ const LandingPage: React.FC = () => {
                         asChild
                       >
                         <Link to="/marketplace">
-                          <ShoppingCart className="h-4 w-4 mr-2" />
-                          Hire
+                          <Bot className="h-4 w-4 mr-2" />
+                          Hire Free
                         </Link>
                       </Button>
                     </div>

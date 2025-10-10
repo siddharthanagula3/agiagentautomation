@@ -99,42 +99,8 @@ export const handler: Handler = async (event: HandlerEvent) => {
           break;
         }
 
-        // Handle AI Employee Purchase (legacy flow)
-        if (!userId || !employeeId || !employeeName || !employeeRole) {
-          console.error('[Stripe Webhook] Missing metadata in session:', {
-            userId: !!userId,
-            employeeId: !!employeeId,
-            employeeName: !!employeeName,
-            employeeRole: !!employeeRole,
-            provider: !!provider
-          });
-          break;
-        }
-
-        // Use provider from metadata (passed from frontend via checkout session)
-        const employeeProvider = provider || 'chatgpt';
-        console.log('[Stripe Webhook] Using provider:', employeeProvider);
-
-        // Create purchased employee record
-        const { data: insertData, error: purchaseError } = await supabase
-          .from('purchased_employees')
-          .insert({
-            user_id: userId,
-            employee_id: employeeId,
-            name: employeeName,
-            role: employeeRole,
-            provider: employeeProvider,
-            is_active: true,
-          })
-          .select();
-
-        if (purchaseError) {
-          console.error('[Stripe Webhook] Failed to create purchased employee:', purchaseError);
-          console.error('[Stripe Webhook] Error details:', JSON.stringify(purchaseError, null, 2));
-        } else {
-          console.log('[Stripe Webhook] Successfully created purchased employee:', insertData);
-        }
-
+        // AI Employee purchases are now free - no Stripe handling needed
+        console.log('[Stripe Webhook] Checkout session completed (not a subscription)');
         break;
       }
 
@@ -145,17 +111,19 @@ export const handler: Handler = async (event: HandlerEvent) => {
         const subscriptionId = invoice.subscription as string;
 
         if (subscriptionId) {
-          // Update subscription status to active
+          // Update user subscription status to active
           const { error } = await supabase
-            .from('purchased_employees')
+            .from('users')
             .update({
-              is_active: true,
+              plan_status: 'active',
               updated_at: new Date().toISOString(),
             })
             .eq('stripe_subscription_id', subscriptionId);
 
           if (error) {
-            console.error('[Stripe Webhook] Failed to update subscription status:', error);
+            console.error('[Stripe Webhook] Failed to update user subscription status:', error);
+          } else {
+            console.log('[Stripe Webhook] Successfully updated user subscription to active');
           }
         }
 
@@ -169,11 +137,11 @@ export const handler: Handler = async (event: HandlerEvent) => {
         const subscriptionId = invoice.subscription as string;
 
         if (subscriptionId) {
-          // Deactivate employee access
+          // Update user subscription status to past_due
           const { error } = await supabase
-            .from('purchased_employees')
+            .from('users')
             .update({
-              is_active: false,
+              plan_status: 'past_due',
               updated_at: new Date().toISOString(),
             })
             .eq('stripe_subscription_id', subscriptionId);
@@ -211,19 +179,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
           console.error('[Stripe Webhook] Failed to update user subscription status:', userError);
         }
 
-        // Also update purchased employees if any
-        const { error } = await supabase
-          .from('purchased_employees')
-          .update({
-            is_active: isActive,
-            updated_at: now.toISOString(),
-          })
-          .eq('stripe_subscription_id', subscription.id);
-
-        if (error) {
-          console.error('[Stripe Webhook] Failed to update purchased employee subscription:', error);
-        }
-
+        // AI Employees are free - no need to update purchased_employees
         break;
       }
 
@@ -246,20 +202,11 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
         if (userError) {
           console.error('[Stripe Webhook] Failed to downgrade user to free plan:', userError);
+        } else {
+          console.log('[Stripe Webhook] Successfully downgraded user to free plan');
         }
 
-        // Soft delete - mark purchased employees as inactive
-        const { error } = await supabase
-          .from('purchased_employees')
-          .update({
-            is_active: false,
-            updated_at: now.toISOString(),
-          })
-          .eq('stripe_subscription_id', subscription.id);
-
-        if (error) {
-          console.error('[Stripe Webhook] Failed to deactivate purchased employees:', error);
-        }
+        // AI Employees remain active - they are free and not tied to subscriptions
 
         break;
       }

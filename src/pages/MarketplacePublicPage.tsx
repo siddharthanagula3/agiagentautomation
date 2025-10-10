@@ -11,7 +11,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
-  ShoppingCart,
   CheckCircle,
   Bot,
   Sparkles,
@@ -20,7 +19,8 @@ import {
   TrendingUp,
   Filter,
   X,
-  ArrowRight
+  ArrowRight,
+  Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AI_EMPLOYEES, categories, providerInfo, getEmployeesByCategory, type AIEmployee } from '@/data/ai-employees';
@@ -28,7 +28,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { isEmployeePurchased, listPurchasedEmployees, purchaseEmployee } from '@/services/supabase-employees';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createCheckoutSession, isStripeConfigured } from '@/services/stripe-service';
+// Stripe removed - free hiring only
 
 export const MarketplacePublicPage: React.FC = () => {
   const navigate = useNavigate();
@@ -76,37 +76,21 @@ export const MarketplacePublicPage: React.FC = () => {
         return;
       }
 
-      // Check if Stripe is configured
-      if (isStripeConfigured()) {
-        // Use Stripe for payment
-        toast.loading('Redirecting to checkout...', { id: 'checkout' });
-        
-      await createCheckoutSession({
-        employeeId: employee.id,
-        employeeName: employee.name,
-        employeeRole: employee.role,
-        price: employee.price,
-        userId: user.id,
-        userEmail: user.email || '',
-        provider: employee.provider, // Pass the actual LLM provider
+      // Free instant hiring - no payment required
+      toast.loading('Hiring employee...', { id: 'hire' });
+      
+      await purchaseEmployee(user.id, employee);
+      const rows = await listPurchasedEmployees(user.id);
+      setPurchasedEmployees(new Set(rows.map(r => r.employee_id)));
+      
+      toast.success(`${employee.name} hired successfully! 🎉`, {
+        id: 'hire',
+        description: `Start building with your new ${employee.role}.`,
+        action: {
+          label: 'Go to Workforce',
+          onClick: () => navigate('/workforce')
+        }
       });
-        
-        // The user will be redirected to Stripe Checkout
-        // After successful payment, webhook will create the purchased_employee record
-      } else {
-        // Fallback: Direct purchase without payment (for development/testing)
-        console.warn('[Marketplace] Stripe not configured, using direct purchase');
-        await purchaseEmployee(user.id, employee);
-        const rows = await listPurchasedEmployees(user.id);
-        setPurchasedEmployees(new Set(rows.map(r => r.employee_id)));
-        toast.success(`${employee.role} hired!`, {
-          description: `Start working with your ${employee.role} in the chat.`,
-          action: {
-            label: 'Go to Chat',
-            onClick: () => navigate('/chat')
-          }
-        });
-      }
     } catch (err) {
       console.error('Purchase failed', err);
       toast.error('Failed to hire employee');
@@ -374,14 +358,17 @@ export const MarketplacePublicPage: React.FC = () => {
                     <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 ml-auto" />
                   </div>
 
-                  {/* Price and Purchase */}
+                  {/* Hire Button - Free */}
                   <div className="space-y-3">
-                    {/* Pricing Display */}
-                    <div className="text-sm text-muted-foreground">
-                      ${employee.price} /month billed yearly
+                    {/* Free Badge */}
+                    <div className="flex items-center justify-center">
+                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
+                        <Sparkles className="h-3 w-3 mr-1" />
+                        Free to Hire
+                      </Badge>
                     </div>
 
-                    {/* Purchase Button */}
+                    {/* Hire Button */}
                     <Button
                       onClick={() => handlePurchase(employee)}
                       disabled={isPurchased(employee.id)}
@@ -400,8 +387,8 @@ export const MarketplacePublicPage: React.FC = () => {
                         </>
                       ) : (
                         <>
-                          <ShoppingCart className="h-4 w-4 mr-2" />
-                          Hire Now
+                          <Plus className="h-4 w-4 mr-2" />
+                          Hire for Free
                         </>
                       )}
                     </Button>

@@ -5,7 +5,7 @@
 
 import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+// No longer needed - removed Stripe success handling
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ import { Particles } from '@/components/ui/particles';
 import { Link } from 'react-router-dom';
 import { listPurchasedEmployees, getEmployeeById } from '@/services/supabase-employees';
 import { useAuthStore } from '@/stores/unified-auth-store';
-import { manualPurchaseEmployee } from '@/services/stripe-service';
+// No longer needed - removed Stripe success handling
 import { toast } from 'sonner';
 import { Users, Bot, BarChart3, Settings, Plus, TrendingUp, Sparkles, Zap, Target, Clock, ArrowRight, MessageSquare, Code } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -25,7 +25,6 @@ import { cn } from '@/lib/utils';
 const WorkforcePage: React.FC = () => {
   const { user } = useAuthStore();
   const userId = user?.id;
-  const [searchParams] = useSearchParams();
 
   // Removed analytics queries - stats and performance data
 
@@ -36,64 +35,7 @@ const WorkforcePage: React.FC = () => {
     refetchInterval: 30000,
   });
 
-  // Handle successful Stripe payments
-  useEffect(() => {
-    const handleSuccessfulPayment = async () => {
-      const success = searchParams.get('success');
-      const sessionId = searchParams.get('session_id');
-      
-      if (success === 'true' && sessionId && userId) {
-        console.log('[Workforce] 🎉 Detected successful payment!');
-        console.log('[Workforce] Session ID:', sessionId);
-        console.log('[Workforce] User ID:', userId);
-        
-        // Show loading toast
-        toast.loading('Processing your purchase...', { id: 'purchase-loading' });
-        
-        try {
-          // Wait a moment for webhook to process
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
-          // Check if we have any purchased employees
-          const currentPurchased = await listPurchasedEmployees(userId);
-          console.log('[Workforce] Current purchased employees count:', currentPurchased.length);
-          
-          // If no employees found, webhook likely failed - use manual fallback
-          if (currentPurchased.length === 0) {
-            console.log('[Workforce] ⚠️ No purchased employees found, webhook may have failed');
-            console.log('[Workforce] 🔄 Attempting manual purchase fallback...');
-            
-            try {
-              // Use the manual purchase function with sessionId to retrieve and create the record
-              await manualPurchaseEmployee({
-                userId,
-                sessionId,
-              });
-              
-              console.log('[Workforce] ✅ Successfully created purchased employee record via manual fallback');
-              
-              // Wait a moment then refetch
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              await refetchPurchased();
-              
-              toast.success('AI Employee hired successfully! 🎉', { id: 'purchase-loading' });
-            } catch (error) {
-              console.error('[Workforce] ❌ Failed to create purchased employee record:', error);
-              toast.error('Failed to complete purchase. Please contact support.', { id: 'purchase-loading' });
-            }
-          } else {
-            console.log('[Workforce] ✅ Webhook processed successfully, employee already in database');
-            toast.success('AI Employee hired successfully! 🎉', { id: 'purchase-loading' });
-          }
-        } catch (error) {
-          console.error('[Workforce] ❌ Error handling successful payment:', error);
-          toast.error('Error processing purchase. Please refresh the page.', { id: 'purchase-loading' });
-        }
-      }
-    };
-
-    handleSuccessfulPayment();
-  }, [searchParams, userId, refetchPurchased]);
+  // No Stripe handling needed - hiring is free and instant
 
   if (!userId) {
     return (

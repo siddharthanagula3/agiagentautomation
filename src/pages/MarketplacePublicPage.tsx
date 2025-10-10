@@ -93,8 +93,26 @@ export const MarketplacePublicPage: React.FC = () => {
       });
     } catch (err) {
       console.error('Purchase failed', err);
-      toast.error('Failed to hire employee');
-      toast.dismiss('checkout');
+      
+      // Check if it's a database setup error
+      if (err instanceof Error && err.message.includes('DATABASE_SETUP_REQUIRED')) {
+        toast.error('Database Setup Required', {
+          description: 'Please run the database setup script in Supabase to enable free hiring.',
+          action: {
+            label: 'View Setup Guide',
+            onClick: () => {
+              // Open the setup guide in a new tab
+              window.open('/setup-guide', '_blank');
+            }
+          }
+        });
+      } else {
+        toast.error('Failed to hire employee', {
+          description: 'Please try again or contact support if the issue persists.'
+        });
+      }
+      
+      toast.dismiss('hire');
     }
   };
 

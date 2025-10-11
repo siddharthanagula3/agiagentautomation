@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-
-type Theme = 'light' | 'dark' | 'system';
+import { 
+  type Theme, 
+  THEME_STORAGE_KEY, 
+  DEFAULT_THEME, 
+  getSystemTheme, 
+  applyThemeToDocument 
+} from './theme-constants';
 
 interface ThemeContextType {
   theme: Theme;
@@ -12,22 +17,15 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem('theme') as Theme;
-    return stored || 'system';
+    const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme;
+    return stored || DEFAULT_THEME;
   });
 
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
-    const root = window.document.documentElement;
-    
-    const getSystemTheme = () => {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    };
-
     const applyTheme = (newTheme: 'light' | 'dark') => {
-      root.classList.remove('light', 'dark');
-      root.classList.add(newTheme);
+      applyThemeToDocument(newTheme);
       setActualTheme(newTheme);
     };
 
@@ -43,7 +41,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       applyTheme(theme);
     }
 
-    localStorage.setItem('theme', theme);
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
 
   return (

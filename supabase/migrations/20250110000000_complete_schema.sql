@@ -103,8 +103,8 @@ CREATE TABLE IF NOT EXISTS public.subscription_plans (
   name text NOT NULL,
   slug text NOT NULL UNIQUE,
   description text,
-  price_monthly numeric NOT NULL,
-  price_yearly numeric NOT NULL,
+  price_monthly numeric,
+  price_yearly numeric,
   features jsonb NOT NULL DEFAULT '[]'::jsonb,
   not_included jsonb DEFAULT '[]'::jsonb,
   popular boolean DEFAULT false,
@@ -199,7 +199,7 @@ CREATE TABLE IF NOT EXISTS public.purchased_employees (
 
 -- Chat sessions
 CREATE TABLE IF NOT EXISTS public.chat_sessions (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   employee_id character varying NOT NULL,
   role character varying NOT NULL,
@@ -215,7 +215,7 @@ CREATE TABLE IF NOT EXISTS public.chat_sessions (
 
 -- Chat messages
 CREATE TABLE IF NOT EXISTS public.chat_messages (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   session_id uuid NOT NULL,
   role character varying NOT NULL CHECK (role::text = ANY (ARRAY['user'::character varying, 'assistant'::character varying, 'system'::character varying]::text[])),
   content text NOT NULL,
@@ -248,7 +248,7 @@ CREATE TABLE IF NOT EXISTS public.token_usage (
 
 -- Automation workflows
 CREATE TABLE IF NOT EXISTS public.automation_workflows (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   name character varying NOT NULL,
   description text,
@@ -269,7 +269,7 @@ CREATE TABLE IF NOT EXISTS public.automation_workflows (
 
 -- Automation nodes
 CREATE TABLE IF NOT EXISTS public.automation_nodes (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   workflow_id uuid NOT NULL,
   node_id character varying NOT NULL,
   node_type character varying NOT NULL,
@@ -283,7 +283,7 @@ CREATE TABLE IF NOT EXISTS public.automation_nodes (
 
 -- Automation connections
 CREATE TABLE IF NOT EXISTS public.automation_connections (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   workflow_id uuid NOT NULL,
   source_node_id character varying NOT NULL,
   target_node_id character varying NOT NULL,
@@ -295,7 +295,7 @@ CREATE TABLE IF NOT EXISTS public.automation_connections (
 
 -- Automation executions
 CREATE TABLE IF NOT EXISTS public.automation_executions (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   workflow_id uuid NOT NULL,
   status character varying NOT NULL DEFAULT 'pending'::character varying,
@@ -317,7 +317,7 @@ CREATE TABLE IF NOT EXISTS public.automation_executions (
 
 -- Scheduled tasks
 CREATE TABLE IF NOT EXISTS public.scheduled_tasks (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   workflow_id uuid NOT NULL,
   name character varying NOT NULL,
@@ -340,7 +340,7 @@ CREATE TABLE IF NOT EXISTS public.scheduled_tasks (
 
 -- Integration configurations
 CREATE TABLE IF NOT EXISTS public.integration_configs (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   integration_type character varying NOT NULL,
   integration_name character varying NOT NULL,
@@ -358,7 +358,7 @@ CREATE TABLE IF NOT EXISTS public.integration_configs (
 
 -- Webhook configurations
 CREATE TABLE IF NOT EXISTS public.webhook_configs (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   workflow_id uuid,
   name character varying NOT NULL,
@@ -617,7 +617,7 @@ CREATE TABLE IF NOT EXISTS public.resource_downloads (
 
 -- API rate limits
 CREATE TABLE IF NOT EXISTS public.api_rate_limits (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   api_endpoint character varying NOT NULL,
   request_count integer DEFAULT 0,
@@ -660,7 +660,7 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
 
 -- Cache entries
 CREATE TABLE IF NOT EXISTS public.cache_entries (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   cache_key character varying NOT NULL UNIQUE,
   cache_value jsonb NOT NULL,
   expires_at timestamp with time zone NOT NULL,
@@ -672,7 +672,7 @@ CREATE TABLE IF NOT EXISTS public.cache_entries (
 
 -- Notifications
 CREATE TABLE IF NOT EXISTS public.notifications (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   type character varying NOT NULL CHECK (type::text = ANY (ARRAY['info'::character varying, 'success'::character varying, 'warning'::character varying, 'error'::character varying]::text[])),
   title character varying NOT NULL,

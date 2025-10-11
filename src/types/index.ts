@@ -26,7 +26,7 @@ export interface AIEmployee {
   performance: PerformanceMetrics;
   availability: AvailabilitySettings;
   cost: CostStructure;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -61,13 +61,13 @@ export interface ToolParameter {
   type: 'string' | 'number' | 'boolean' | 'object' | 'array';
   required: boolean;
   description: string;
-  defaultValue?: any;
+  defaultValue?: unknown;
 }
 
 export interface ToolInvocation {
   toolId: string;
   employeeId: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   context: ExecutionContext;
   validate(): ValidationResult;
   execute(): Promise<ToolResult>;
@@ -79,11 +79,11 @@ export interface ToolInvocation {
 
 export interface ToolResult {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
   executionTime: number;
   cost: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface ExecutionContext {
@@ -137,7 +137,7 @@ export interface JobResult {
 export interface Deliverable {
   type: 'code' | 'document' | 'data' | 'design' | 'report';
   name: string;
-  content: any;
+  content: unknown;
   format: string;
   size: number;
   url?: string;
@@ -206,11 +206,11 @@ export interface InterAgentMessage {
   from: string;
   to: string;
   type: 'task' | 'query' | 'response' | 'status' | 'escalation';
-  content: any;
+  content: unknown;
   conversationId: string;
   timestamp: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface ChatSession {
@@ -231,7 +231,7 @@ export interface ChatMessage {
   sender_id: string;
   message: string;
   message_type: 'text' | 'tool_invocation' | 'tool_result' | 'file' | 'system';
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   created_at: string;
 }
 
@@ -241,7 +241,7 @@ export interface Workflow {
   name: string;
   description: string;
   trigger_type: 'webhook' | 'schedule' | 'event' | 'manual';
-  trigger_config: Record<string, any>;
+  trigger_config: Record<string, unknown>;
   steps: WorkflowStep[];
   status: 'active' | 'inactive' | 'draft';
   last_executed?: string;
@@ -264,7 +264,7 @@ export interface WorkflowStep {
 export interface WorkflowStepConfig {
   employeeId?: string;
   tool?: string;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
   condition?: string;
   delay?: number;
   notification?: NotificationConfig;
@@ -274,17 +274,17 @@ export interface NotificationConfig {
   type: 'email' | 'slack' | 'webhook' | 'sms';
   recipients: string[];
   template: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 export interface WorkflowExecution {
   id: string;
   workflow_id: string;
-  trigger_data: Record<string, any>;
+  trigger_data: Record<string, unknown>;
   status: 'running' | 'completed' | 'failed' | 'cancelled';
   started_at: string;
   completed_at?: string;
-  result?: Record<string, any>;
+  result?: Record<string, unknown>;
   error_message?: string;
   steps_completed: number;
   total_steps: number;
@@ -360,14 +360,14 @@ export interface Billing {
   current_period_end: string;
   stripe_customer_id?: string;
   stripe_subscription_id?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface AnalyticsEvent {
   id: string;
   user_id: string;
   event_type: string;
-  event_data: Record<string, any>;
+  event_data: Record<string, unknown>;
   employee_id?: string;
   job_id?: string;
   workflow_id?: string;
@@ -380,7 +380,7 @@ export interface APIResponse<T> {
   data?: T;
   error?: string;
   message?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PaginatedResponse<T> {
@@ -404,7 +404,7 @@ export interface ClientEvents {
 export interface ServerEvents {
   'chat:response': { sessionId: string; message: ChatMessage };
   'chat:thinking': { sessionId: string; status: string };
-  'job:update': { jobId: string; status: string; data: any };
+  'job:update': { jobId: string; status: string; data: unknown };
   'workflow:update': { workflowId: string; status: string };
   'tool:execution': { toolId: string; status: string };
   'employee:update': { employeeId: string; status: string };
@@ -426,7 +426,7 @@ export class ToolExecutionError extends Error {
   constructor(
     message: string,
     public toolId: string,
-    public parameters: Record<string, any>
+    public parameters: Record<string, unknown>
   ) {
     super(message);
     this.name = 'ToolExecutionError';
@@ -437,7 +437,7 @@ export class ValidationError extends Error {
   constructor(
     message: string,
     public field: string,
-    public value: any
+    public value: unknown
   ) {
     super(message);
     this.name = 'ValidationError';

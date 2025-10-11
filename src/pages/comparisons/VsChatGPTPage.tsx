@@ -88,7 +88,7 @@ const VsChatGPTPage: React.FC = () => {
     {
       name: 'Mike Rodriguez',
       role: 'Founder, Growth Labs',
-      quote: 'ChatGPT was costing us $200/month for 10 team members. AGI Workforce costs $10/month for the same people. No-brainer.',
+      quote: 'ChatGPT was costing us $200/month for 10 team members. AGI Workforce costs $0 per month for the same people. No-brainer.',
       savings: '$2,280/year'
     },
     {
@@ -195,7 +195,7 @@ const VsChatGPTPage: React.FC = () => {
               <div className="mt-8 pt-8 border-t border-border">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-green-500 mb-2">
-                    Save $10/month per person = $120/year
+                    Save $20/month per person = $240/year
                   </p>
                   <p className="text-muted-foreground">
                     For a 10-person team: <span className="text-primary font-bold">Save $2,280/year</span>

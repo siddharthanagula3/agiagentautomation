@@ -14,39 +14,39 @@ class Logger {
     return level === 'warn' || level === 'error';
   }
 
-  debug(message: string, ...args: any[]): void {
+  debug(message: string, ...args: unknown[]): void {
     if (this.shouldLog('debug')) {
       console.debug(`[DEBUG] ${message}`, ...args);
     }
   }
 
-  info(message: string, ...args: any[]): void {
+  info(message: string, ...args: unknown[]): void {
     if (this.shouldLog('info')) {
       console.info(`[INFO] ${message}`, ...args);
     }
   }
 
-  warn(message: string, ...args: any[]): void {
+  warn(message: string, ...args: unknown[]): void {
     if (this.shouldLog('warn')) {
       console.warn(`[WARN] ${message}`, ...args);
     }
   }
 
-  error(message: string, ...args: any[]): void {
+  error(message: string, ...args: unknown[]): void {
     if (this.shouldLog('error')) {
       console.error(`[ERROR] ${message}`, ...args);
     }
   }
 
   // Special method for auth-related logs (always show in development)
-  auth(message: string, ...args: any[]): void {
+  auth(message: string, ...args: unknown[]): void {
     if (isDevelopment) {
       console.info(`[AUTH] ${message}`, ...args);
     }
   }
 
   // Special method for app initialization (always show)
-  app(message: string, ...args: any[]): void {
+  app(message: string, ...args: unknown[]): void {
     console.info(`[APP] ${message}`, ...args);
   }
 }

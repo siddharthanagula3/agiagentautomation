@@ -95,7 +95,7 @@ const VsClaudePage: React.FC = () => {
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto mb-8">
-              We use the <span className="text-primary font-bold">same Claude 3.5 Sonnet</span> model. But at <span className="text-primary font-bold">$10/month</span> instead of $20. Plus get GPT-4, Gemini, and 100+ specialized AI employees.
+              We use the <span className="text-primary font-bold">same Claude 3.5 Sonnet</span> model. But at <span className="text-primary font-bold">$0 per month</span> instead of $20. Plus get GPT-4, Gemini, and 100+ specialized AI employees.
             </p>
 
             {/* Pricing Comparison */}
@@ -168,7 +168,7 @@ const VsClaudePage: React.FC = () => {
               <div className="mt-8 pt-8 border-t border-border">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-green-500 mb-2">
-                    Save $10/month = $120/year per person
+                    Save $20/month = $240/year per person
                   </p>
                   <p className="text-muted-foreground">
                     For a 10-person team: <span className="text-primary font-bold">Save $2,280/year</span>
@@ -179,7 +179,7 @@ const VsClaudePage: React.FC = () => {
 
             <Button asChild size="lg" className="bg-gradient-to-r from-primary to-accent text-white text-lg px-8 py-6">
               <Link to="/register">
-                Get Claude 3.5 for $10/month <ArrowRight className="ml-2 h-5 w-5" />
+                Get Claude 3.5 for $0 per month <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </motion.div>

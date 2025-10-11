@@ -81,6 +81,8 @@ const ChatPage: React.FC = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [filePreviews, setFilePreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const messageInputRef = useRef<HTMLInputElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
@@ -93,6 +95,21 @@ const ChatPage: React.FC = () => {
       urls.forEach((u) => URL.revokeObjectURL(u));
     };
   }, [files]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [activeTabData?.messages]);
+
+  // Focus message input when tab changes
+  useEffect(() => {
+    if (selectedTab && messageInputRef.current) {
+      messageInputRef.current.focus();
+    }
+  }, [selectedTab]);
+
   const [configuredProviders, setConfiguredProviders] = useState<string[]>([]);
 
   // Check configured providers on mount
@@ -318,6 +335,13 @@ const ChatPage: React.FC = () => {
 
     setMessage('');
 
+    // Maintain focus on input after sending
+    setTimeout(() => {
+      if (messageInputRef.current) {
+        messageInputRef.current.focus();
+      }
+    }, 0);
+
     try {
       if (!user?.id) {
         throw new Error('User not authenticated');
@@ -413,6 +437,12 @@ const ChatPage: React.FC = () => {
       toast.error(`Failed to send message: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSending(false);
+      // Maintain focus on input after error
+      setTimeout(() => {
+        if (messageInputRef.current) {
+          messageInputRef.current.focus();
+        }
+      }, 0);
     }
   };
 
@@ -823,6 +853,7 @@ const ChatPage: React.FC = () => {
                           </div>
                         </div>
                       )}
+                      <div ref={messagesEndRef} />
                     </div>
 
                     {/* Token Usage Warning */}
@@ -878,6 +909,7 @@ const ChatPage: React.FC = () => {
                         <Mic className="h-5 w-5" />
                       </Button>
                       <input
+                        ref={messageInputRef}
                         type="text"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}

@@ -23,13 +23,13 @@ class ApiClient {
     };
   }
 
-  private handleError(error: any, context: string): string {
+  private handleError(error: unknown, context: string): string {
     console.error(`API Error in ${context}:`, error);
     
     let errorMessage = 'An unexpected error occurred';
     
-    if (error?.message) {
-      errorMessage = error.message;
+    if (error && typeof error === 'object' && 'message' in error) {
+      errorMessage = String(error.message);
     } else if (typeof error === 'string') {
       errorMessage = error;
     }
@@ -61,7 +61,7 @@ class ApiClient {
     }
   }
 
-  async post<T>(url: string, body: any, context: string = 'POST request'): Promise<ApiResponse<T>> {
+  async post<T>(url: string, body: unknown, context: string = 'POST request'): Promise<ApiResponse<T>> {
     try {
       const headers = await this.getAuthHeaders();
       
@@ -83,7 +83,7 @@ class ApiClient {
     }
   }
 
-  async put<T>(url: string, body: any, context: string = 'PUT request'): Promise<ApiResponse<T>> {
+  async put<T>(url: string, body: unknown, context: string = 'PUT request'): Promise<ApiResponse<T>> {
     try {
       const headers = await this.getAuthHeaders();
       
@@ -129,7 +129,7 @@ class ApiClient {
   // Supabase-specific methods
   async supabaseQuery<T>(
     table: string, 
-    query: any, 
+    query: unknown, 
     context: string = 'Supabase query'
   ): Promise<ApiResponse<T>> {
     try {

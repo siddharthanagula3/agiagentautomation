@@ -8,8 +8,7 @@ interface CountdownTimerProps {
 }
 
 interface TimeLeft {
-  days: number;
-  hours: number;
+  totalHours: number;
   minutes: number;
   seconds: number;
 }
@@ -21,15 +20,18 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDate, clas
     const difference = +targetDate - +new Date();
 
     if (difference > 0) {
+      const totalSeconds = Math.floor(difference / 1000);
+      const totalMinutes = Math.floor(totalSeconds / 60);
+      const totalHours = Math.floor(totalMinutes / 60);
+      
       return {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
+        totalHours: totalHours,
+        minutes: totalMinutes % 60,
+        seconds: totalSeconds % 60,
       };
     }
 
-    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    return { totalHours: 0, minutes: 0, seconds: 0 };
   }
 
   useEffect(() => {
@@ -41,8 +43,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDate, clas
   }, [targetDate]);
 
   const timeBlocks = [
-    { label: 'Days', value: timeLeft.days },
-    { label: 'Hours', value: timeLeft.hours },
+    { label: 'Hours', value: timeLeft.totalHours },
     { label: 'Minutes', value: timeLeft.minutes },
     { label: 'Seconds', value: timeLeft.seconds },
   ];
@@ -93,6 +94,8 @@ export const getOneMonthFromNow = (): Date => {
 
 // Helper to create a specific end date (e.g., end of January 2026)
 export const createDiscountEndDate = (): Date => {
-  // Set to February 9, 2026 23:59:59 (1 month from Oct 9, 2025)
-  return new Date('2026-02-09T23:59:59');
+  // Set to 99 hours, 59 minutes, 59 seconds from now
+  const now = new Date();
+  const targetTime = new Date(now.getTime() + (99 * 60 * 60 * 1000) + (59 * 60 * 1000) + (59 * 1000));
+  return targetTime;
 };

@@ -11,15 +11,15 @@ export interface ChatMessage {
 export interface ToolCall {
   id: string;
   name: string;
-  parameters: Record<string, any>;
-  result?: any;
+  parameters: Record<string, unknown>;
+  result?: unknown;
 }
 
 export interface Tool {
   id: string;
   name: string;
   description: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 export const useChat = (employeeId: string) => {

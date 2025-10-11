@@ -139,32 +139,37 @@ export const MarketplacePublicPage: React.FC = () => {
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
         <div className="relative z-10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center">
-                <Sparkles className="h-8 w-8 text-white" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center">
+                  <Sparkles className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <Badge className="mb-2 glass">
+                    <Bot className="mr-2 h-3 w-3" />
+                    AI Marketplace
+                  </Badge>
+                  <h1 className="text-4xl font-bold mb-2">Hire Your AI Workforce</h1>
+                  <p className="text-xl text-muted-foreground">
+                    Specialized AI employees for $0 per month • {AI_EMPLOYEES.length} available
+                  </p>
+                </div>
               </div>
-              <div>
-                <Badge className="mb-2 glass">
-                  <Bot className="mr-2 h-3 w-3" />
-                  AI Marketplace
-                </Badge>
-                <h1 className="text-4xl font-bold mb-2">Hire Your AI Workforce</h1>
-                <p className="text-xl text-muted-foreground">
-                  Specialized AI employees for $10/month • {AI_EMPLOYEES.length} available
-                </p>
+
+              <div className="flex items-center gap-4">
+                <div className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                  Limited time offer ends in
+                </div>
+                <Button 
+                  onClick={() => navigate('/workforce')}
+                  size="lg"
+                  className="btn-glow gradient-primary text-white"
+                >
+                  <Bot className="h-5 w-5 mr-2" />
+                  My Team ({purchasedEmployees.size})
+                </Button>
               </div>
             </div>
-
-            <Button 
-              onClick={() => navigate('/workforce')}
-              size="lg"
-              className="btn-glow gradient-primary text-white"
-            >
-              <Bot className="h-5 w-5 mr-2" />
-              My Team ({purchasedEmployees.size})
-            </Button>
-          </div>
         </div>
       </motion.div>
 
@@ -378,28 +383,31 @@ export const MarketplacePublicPage: React.FC = () => {
 
                   {/* Pricing and Hire Button */}
                   <div className="space-y-3">
-                    {/* Limited Time Offer Badge */}
-                    <div className="flex items-center justify-center">
-                      <Badge className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white border-0 animate-pulse">
-                        <Sparkles className="h-3 w-3 mr-1" />
-                        Limited Time Offer
-                      </Badge>
-                    </div>
+                    {/* Two-column layout for desktop, stacked for mobile */}
+                    <div className="flex items-start justify-between gap-4 sm:flex-row flex-col">
+                      {/* Left column: Price */}
+                      <div className="flex flex-col items-start sm:items-start">
+                        <div className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+                          $0
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          per month
+                        </div>
+                      </div>
 
-                    {/* Pricing Display */}
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="text-lg font-semibold text-muted-foreground line-through decoration-2">
-                        $20/mo
-                      </span>
-                      <span className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
-                        $0
-                      </span>
+                      {/* Right column: Offers (right-aligned on desktop) */}
+                      <div className="flex flex-col items-end sm:items-end text-right">
+                        <div className="mb-1">
+                          <Badge className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white border-0 animate-pulse text-xs">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Limited time offer
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground italic">
+                          🎉 Introductory offer
+                        </div>
+                      </div>
                     </div>
-
-                    {/* Introductory Offer Text */}
-                    <p className="text-xs text-center text-muted-foreground italic">
-                      🎉 Introductory offer for early adopters
-                    </p>
 
                     {/* Hire Button */}
                     <Button

@@ -6,39 +6,13 @@
 
 import React from 'react';
 import { useAuthStore } from '@/stores/unified-auth-store';
-import { listPurchasedEmployees } from '@/services/supabase-employees';
 import { AgentSDKChatUI } from './AgentSDKChatUI';
 import ChatPageEnhanced from '@/pages/chat/ChatPageEnhanced';
-import ChatPage from '@/pages/chat/ChatPage';
+import { isAgentChannel, type ChatConversation } from './chat-utils';
 
 interface ChatWrapperProps {
-  conversation?: {
-    id: string;
-    channel?: string;
-    employeeId?: string;
-    employeeRole?: string;
-    employeeName?: string;
-    userId?: string;
-  };
+  conversation?: ChatConversation;
   className?: string;
-}
-
-/**
- * Determines if the conversation is with ChatGPT-powered AI Employees
- */
-function isAgentChannel(conversation?: ChatWrapperProps['conversation']): boolean {
-  // Check for explicit channel flag
-  if (conversation?.channel === 'ai_employees') {
-    return true;
-  }
-  
-  // Check if it's a purchased AI employee conversation
-  if (conversation?.employeeId && conversation?.employeeRole) {
-    return true;
-  }
-  
-  // Default to false for regular human conversations
-  return false;
 }
 
 /**
@@ -82,30 +56,7 @@ export const ChatWrapper: React.FC<ChatWrapperProps> = ({
   );
 };
 
-/**
- * Hook to determine if current conversation is with AI employees
- */
-export function useIsAgentChannel(conversation?: ChatWrapperProps['conversation']): boolean {
-  return isAgentChannel(conversation);
-}
-
-/**
- * Hook to get AI employee conversation metadata
- */
-export function useAgentConversation(conversation?: ChatWrapperProps['conversation']) {
-  const isAgent = isAgentChannel(conversation);
-  
-  if (!isAgent || !conversation) {
-    return null;
-  }
-  
-  return {
-    employeeId: conversation.employeeId,
-    employeeRole: conversation.employeeRole,
-    employeeName: conversation.employeeName,
-    userId: conversation.userId,
-    channel: conversation.channel || 'ai_employees'
-  };
-}
+// Re-export utilities for backward compatibility
+export { useIsAgentChannel, useAgentConversation } from './chat-utils';
 
 export default ChatWrapper;

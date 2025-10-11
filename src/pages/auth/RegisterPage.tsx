@@ -88,8 +88,8 @@ const RegisterPage: React.FC = () => {
       }
     } catch (err) {
       clearTimeout(timeoutId);
+      console.error('Registration error:', err);
       setError('An unexpected error occurred. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };

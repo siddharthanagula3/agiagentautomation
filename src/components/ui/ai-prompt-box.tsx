@@ -262,7 +262,9 @@ const PromptInputTextarea: React.FC<PromptInputTextareaProps & React.ComponentPr
   );
 };
 
-interface PromptInputActionsProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface PromptInputActionsProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode;
+}
 const PromptInputActions: React.FC<PromptInputActionsProps> = ({ children, className, ...props }) => (
   <div className={cn("flex items-center gap-2", className)} {...props}>
     {children}

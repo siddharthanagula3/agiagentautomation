@@ -24,6 +24,9 @@ export interface RegisterData {
   email: string;
   password: string;
   name?: string;
+  company?: string;
+  phone?: string;
+  location?: string;
 }
 
 export interface AuthResponse {
@@ -115,6 +118,9 @@ class AuthService {
           data: {
             full_name: registerData.name,
             name: registerData.name,
+            company: registerData.company,
+            phone: registerData.phone,
+            location: registerData.location,
           },
         },
       });

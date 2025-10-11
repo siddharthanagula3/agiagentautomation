@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../stores/unified-auth-store';
+import { useAuthStore } from '../../stores/unified-auth-store';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import isLoadingSpinner from '../ui/isLoading-spinner';
-const Component: React.FC = () => {
+
+const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -14,7 +14,9 @@ const Component: React.FC = () => {
     company: ''
   });
 
-  const { register, isisLoading } = useAuthStore();
+  const { register, isLoading } = useAuthStore();
+  const [error, setError] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const navigate = useNavigate();
 
   const validatePassword = (password: string): string[] => {
@@ -50,8 +52,7 @@ const Component: React.FC = () => {
     }
 
     // Validate password strength
-    const passwordValidationErrors = validatePasswor;
-  d(formData.password);
+    const passwordValidationErrors = validatePassword(formData.password);
     if (passwordValidationErrors.length > 0) {
       setPasswordErrors(passwordValidationErrors);
       return;

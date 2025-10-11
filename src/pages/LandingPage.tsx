@@ -93,15 +93,6 @@ const features = [
 ];
 
 
-// Company logos for social proof
-const companies = [
-  { name: "TechCorp", logo: "🏢" },
-  { name: "StartupX", logo: "🚀" },
-  { name: "GrowthLab", logo: "📈" },
-  { name: "DataFlow", logo: "💾" },
-  { name: "CloudNine", logo: "☁️" },
-  { name: "InnovateCo", logo: "💡" }
-];
 
 // FAQ data
 const faqs = [
@@ -248,7 +239,7 @@ const LandingPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                Hire Hundreds of
+                Hire
               </motion.span>
               <motion.span
                 className="block"
@@ -266,14 +257,17 @@ const LandingPage: React.FC = () => {
               just instant expertise across every function.
             </p>
 
-            {/* Limited Time Offer Countdown */}
+            {/* Limited Time Offer Text */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
-              className="mb-12"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="mb-8"
             >
-              <CountdownTimer targetDate={createDiscountEndDate()} />
+              <div className="flex items-center justify-center gap-4 text-lg font-semibold text-muted-foreground">
+                <span>Limited time offer ends in</span>
+                <CountdownTimer targetDate={createDiscountEndDate()} />
+              </div>
             </motion.div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -360,38 +354,9 @@ const LandingPage: React.FC = () => {
       </section>
       <ExpandableChatDemo />
 
-      {/* Social Proof - Company Logos */}
-      <section className="py-16 bg-muted/30 backdrop-blur-sm border-y border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center text-muted-foreground mb-12"
-          >
-            Trusted by innovative companies worldwide
-          </motion.p>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center justify-items-center">
-            {companies.map((company, idx) => (
-              <motion.div
-                key={company.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                whileHover={{ scale: 1.1 }}
-                className="flex flex-col items-center gap-2 p-4"
-              >
-                <span className="text-4xl">{company.logo}</span>
-                <span className="text-sm font-medium text-muted-foreground">{company.name}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* AI Employees Marketplace Preview */}
-      <section ref={employeesRef} className="py-32 relative overflow-hidden">
+      <section ref={employeesRef} className="py-20 relative overflow-hidden">
         <Particles className="absolute inset-0 opacity-20" quantity={50} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
@@ -510,22 +475,36 @@ const LandingPage: React.FC = () => {
                     </div>
 
                     {/* Price and CTA */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-semibold text-muted-foreground line-through decoration-2">
-                          $20/mo
-                        </span>
-                        <span className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
-                          $0
-                        </span>
-                        <span className="text-xs text-muted-foreground italic">
-                          Limited Time
-                        </span>
+                    <div className="space-y-3">
+                      {/* Two-column layout for desktop, stacked for mobile */}
+                      <div className="flex items-start justify-between gap-4 sm:flex-row flex-col">
+                        {/* Left column: Price */}
+                        <div className="flex flex-col items-start sm:items-start">
+                          <div className="text-2xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+                            $0
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            per month
+                          </div>
+                        </div>
+
+                        {/* Right column: Offers (right-aligned on desktop) */}
+                        <div className="flex flex-col items-end sm:items-end text-right">
+                          <div className="mb-1">
+                            <Badge className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white border-0 animate-pulse text-xs">
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              Limited time offer
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground italic">
+                            🎉 Introductory offer
+                          </div>
+                        </div>
                       </div>
 
                       <Button
                         size="sm"
-                        className="btn-glow gradient-primary text-white"
+                        className="btn-glow gradient-primary text-white w-full"
                         asChild
                       >
                         <Link to="/marketplace">
@@ -557,7 +536,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section ref={featuresRef} className="py-32 bg-muted/30 relative overflow-hidden">
+      <section ref={featuresRef} className="py-20 bg-muted/30 relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
         </div>
@@ -612,7 +591,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Product Demo Section */}
-      <section className="py-32 relative overflow-hidden">
+      <section className="py-20 relative overflow-hidden">
         <Spotlight className="absolute inset-0" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -689,7 +668,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-32 relative overflow-hidden">
+      <section className="py-20 relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -732,7 +711,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Final CTA */}
-      <section className="py-32 relative overflow-hidden">
+      <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 gradient-primary opacity-90"></div>
         <Particles className="absolute inset-0" quantity={100} />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center text-white">

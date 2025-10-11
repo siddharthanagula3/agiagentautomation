@@ -144,7 +144,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
           )}
         >
           <div className="min-h-screen pt-16">
-            <Outlet />
+            <div className="px-6 lg:px-8">
+              <Outlet />
+            </div>
           </div>
         </main>
       </div>

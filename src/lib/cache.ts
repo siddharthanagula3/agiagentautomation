@@ -167,11 +167,11 @@ class LocalStorageBackend implements CacheStorage {
   }
 
   async size(): Promise<number> {
-    return this.cache.size;
+    return (await this.keys()).length;
   }
 
   async cleanup(): Promise<void> {
-    const keys = this.keys();
+    const keys = await this.keys();
     const now = Date.now();
 
     for (const key of keys) {
@@ -790,10 +790,7 @@ export const useCache = <T = unknown>(
 
   useEffect(() => {
     fetchData();
-  }, [fetchData])
-  };
-
-;
+  }, [fetchData]);
 
   return {
     data,

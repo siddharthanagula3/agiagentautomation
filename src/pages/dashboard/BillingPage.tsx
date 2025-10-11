@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '../../stores/unified-auth-store';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Progress } from '../../components/ui/progress';
 import { supabase } from '../../lib/supabase-client';
-import { upgradeToProPlan, upgradeToMaxPlan, contactEnterpriseSales } from '../../services/stripe-service';
+import { upgradeToProPlan, contactEnterpriseSales } from '../../services/stripe-service';
 import { toast } from 'sonner';
 import { 
   CreditCard, 
@@ -40,7 +41,7 @@ interface LLMUsage {
 }
 
 interface BillingInfo {
-  plan: 'free' | 'pro' | 'max' | 'enterprise';
+  plan: 'free' | 'pro' | 'enterprise';
   status: 'active' | 'cancelled' | 'past_due' | 'unpaid';
   current_period_start: string;
   current_period_end: string;
@@ -64,6 +65,7 @@ interface BillingInfo {
 
 const BillingPage: React.FC = () => {
   const { user } = useAuthStore();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [billing, setBilling] = useState<BillingInfo | null>(null);
@@ -74,7 +76,23 @@ const BillingPage: React.FC = () => {
     if (user) {
       loadBilling();
     }
-  }, [user]);
+  }, [user, loadBilling]);
+
+  // Check for successful payment and refresh billing data
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const sessionId = searchParams.get('session_id');
+    
+    if (success === 'true' && sessionId && user) {
+      console.log('[Billing] Payment successful, refreshing billing data...');
+      toast.success('Payment successful! Your subscription has been upgraded.');
+      
+      // Wait a moment for webhook to process, then refresh
+      setTimeout(() => {
+        loadBilling();
+      }, 2000);
+    }
+  }, [searchParams, user, loadBilling]);
 
   const loadBilling = useCallback(async () => {
     try {
@@ -198,30 +216,21 @@ const BillingPage: React.FC = () => {
       }
       
       const isPro = userPlan === 'pro';
-      const isMax = userPlan === 'max';
       
       // Update limits based on plan
       const proProviderLimit = 2500000;  // 2.5M per provider (Pro)
-      const maxProviderLimit = 10000000; // 10M per provider (Max)
       const proTotalLimit = 10000000;    // 10M total (Pro)
-      const maxTotalLimit = 40000000;    // 40M total (Max)
       
       console.log('[Billing] 📊 Applying token limits:');
       console.log('[Billing]    User Plan:', userPlan);
       console.log('[Billing]    Is Pro?', isPro ? 'Yes ✓' : 'No ✗');
-      console.log('[Billing]    Is Max?', isMax ? 'Yes ✓' : 'No ✗');
-      console.log('[Billing]    Token Limit per LLM:', isMax ? '10M (Max)' : isPro ? '2.5M (Pro)' : '250k (Free)');
-      console.log('[Billing]    Total Token Limit:', isMax ? '40M (Max)' : isPro ? '10M (Pro)' : '1M (Free)');
+      console.log('[Billing]    Token Limit per LLM:', isPro ? '2.5M (Pro)' : '250k (Free)');
+      console.log('[Billing]    Total Token Limit:', isPro ? '10M (Pro)' : '1M (Free)');
       
       if (isPro) {
         llmUsage = llmUsage.map(llm => ({
           ...llm,
           limit: proProviderLimit
-        }));
-      } else if (isMax) {
-        llmUsage = llmUsage.map(llm => ({
-          ...llm,
-          limit: maxProviderLimit
         }));
       }
       
@@ -232,17 +241,9 @@ const BillingPage: React.FC = () => {
           ? new Date(new Date(subscriptionEndDate).getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
           : new Date().toISOString(),
         current_period_end: subscriptionEndDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        price: isMax ? 299 : isPro ? 20 : 0,
+        price: isPro ? 29 : 0,
         currency: 'USD',
-        features: isMax ? [
-          '40M tokens/month (10M per LLM)',
-          'All 4 AI providers included',
-          'Advanced analytics & insights',
-          'Dedicated support (24/7)',
-          'Full API access',
-          'Custom integrations',
-          'Team collaboration'
-        ] : isPro ? [
+        features: isPro ? [
           '10M tokens/month (2.5M per LLM)',
           'All 4 AI providers included',
           'Advanced analytics',
@@ -256,7 +257,7 @@ const BillingPage: React.FC = () => {
         ],
         usage: {
           totalTokens,
-          totalLimit: isMax ? maxTotalLimit : isPro ? proTotalLimit : TOTAL_LIMIT,
+          totalLimit: isPro ? proTotalLimit : TOTAL_LIMIT,
           totalCost,
           llmUsage
         },
@@ -273,7 +274,7 @@ const BillingPage: React.FC = () => {
     }
   }, [user]);
 
-  const handleUpgrade = async (plan: 'pro' | 'max' | 'enterprise', billingPeriod: 'monthly' | 'yearly' = 'monthly') => {
+  const handleUpgrade = async (plan: 'pro' | 'enterprise', billingPeriod: 'monthly' | 'yearly' = 'monthly') => {
     if (!user) {
       toast.error('Please log in to upgrade your plan');
       return;
@@ -283,13 +284,6 @@ const BillingPage: React.FC = () => {
       if (plan === 'pro') {
         toast.loading('Redirecting to checkout...');
         await upgradeToProPlan({
-          userId: user.id,
-          userEmail: user.email || '',
-          billingPeriod,
-        });
-      } else if (plan === 'max') {
-        toast.loading('Redirecting to checkout...');
-        await upgradeToMaxPlan({
           userId: user.id,
           userEmail: user.email || '',
           billingPeriod,
@@ -331,7 +325,6 @@ const BillingPage: React.FC = () => {
     switch (plan) {
       case 'free': return <Zap className="h-5 w-5" />;
       case 'pro': return <Crown className="h-5 w-5" />;
-      case 'max': return <Sparkles className="h-5 w-5" />;
       case 'enterprise': return <Building className="h-5 w-5" />;
       default: return <Zap className="h-5 w-5" />;
     }
@@ -438,7 +431,7 @@ const BillingPage: React.FC = () => {
                 <span className="text-2xl font-bold">{billing?.usage.totalTokens.toLocaleString() || 0}</span>
               </div>
               <Progress 
-                value={billing?.usage.totalTokens && billing?.usage.totalLimit ? (billing.usage.totalTokens / billing.usage.totalLimit) * 100 : 0} 
+                value={billing?.usage.totalTokens && billing?.usage.totalLimit ? Math.min(Math.max((billing.usage.totalTokens / billing.usage.totalLimit) * 100, 0), 100) : 0} 
                 className="h-3"
               />
               <div className="flex justify-between items-center text-sm">
@@ -578,18 +571,12 @@ const BillingPage: React.FC = () => {
               <div className="flex-1">
                 <h4 className="font-medium mb-1">Need more tokens?</h4>
                 <p className="text-sm text-muted-foreground mb-3">
-                  {billing?.plan === 'free' && 'Upgrade to Pro for 10M tokens/month (2.5M per LLM) - Only $20/month'}
-                  {billing?.plan === 'pro' && 'Upgrade to Max for 40M tokens/month (10M per LLM) - $299/month'}
+                  {billing?.plan === 'free' && 'Upgrade to Pro for 10M tokens/month (2.5M per LLM) - Only $29/month'}
+                  {billing?.plan === 'pro' && 'You have the Pro plan with 10M tokens/month (2.5M per LLM)'}
                 </p>
                 {billing?.plan === 'free' && (
                   <Button className="gradient-primary" onClick={() => handleUpgrade('pro', 'monthly')}>
-                    Upgrade to Pro - $20/month
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                )}
-                {billing?.plan === 'pro' && (
-                  <Button className="gradient-primary" onClick={() => handleUpgrade('max', 'monthly')}>
-                    Upgrade to Max - $299/month
+                    Upgrade to Pro - $29/month
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 )}
@@ -636,7 +623,7 @@ const BillingPage: React.FC = () => {
                   <Crown className="h-5 w-5 text-primary" />
                   <CardTitle>Pro Plan</CardTitle>
                 </div>
-                <div className="text-2xl font-bold">$20<span className="text-sm text-muted-foreground">/month</span></div>
+                <div className="text-2xl font-bold">$29<span className="text-sm text-muted-foreground">/month</span></div>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
@@ -672,62 +659,6 @@ const BillingPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Max Plan */}
-            <Card className="border-2 border-amber-500 relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
-                  <Sparkles className="h-3 w-3 mr-1" />
-                  BEST VALUE
-                </Badge>
-              </div>
-              <CardHeader>
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="h-5 w-5 text-amber-500" />
-                  <CardTitle>Max Plan</CardTitle>
-                </div>
-                <div className="text-2xl font-bold">$299<span className="text-sm text-muted-foreground">/month</span></div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-success" />
-                    <span>40M tokens/month</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-success" />
-                    <span>10M tokens per LLM</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-success" />
-                    <span>All 4 AI providers</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-success" />
-                    <span>Advanced analytics & insights</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-success" />
-                    <span>Dedicated support (24/7)</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-success" />
-                    <span>Full API access</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-success" />
-                    <span>Custom integrations</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-success" />
-                    <span>Team collaboration</span>
-                  </li>
-                </ul>
-                <Button className="w-full mt-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white" onClick={() => handleUpgrade('max', 'monthly')}>
-                  Upgrade to Max
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
 
             {/* Enterprise Plan */}
             <Card className="border-2 border-secondary">
@@ -742,7 +673,7 @@ const BillingPage: React.FC = () => {
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-success" />
-                    <span>Everything in Max</span>
+                    <span>Everything in Pro</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4 text-success" />

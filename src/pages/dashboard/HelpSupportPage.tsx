@@ -59,7 +59,7 @@ const HelpSupportPage: React.FC = () => {
     {
       category: 'Getting Started',
       question: 'How do I hire my first AI employee?',
-      answer: 'Visit the Marketplace page, browse available AI employees, and click "Hire Now" on the employee you want. The cost is $10/month for standard roles and $20/month for premium roles, and they will be immediately available in your Chat page.'
+      answer: 'Visit the Marketplace page, browse available AI employees, and click "Hire Now" on the employee you want. The cost is $0 per month for standard roles and $29/month for premium roles, and they will be immediately available in your Chat page.'
     },
     {
       category: 'Getting Started',
@@ -74,7 +74,7 @@ const HelpSupportPage: React.FC = () => {
     {
       category: 'Billing',
       question: 'How much does it cost?',
-      answer: 'Currently, hiring AI employees costs $10/month for standard roles and $20/month for premium roles. The actual AI API costs depend on your usage and the provider you\'re using.'
+      answer: 'Currently, hiring AI employees costs $0 per month for standard roles and $29/month for premium roles. The actual AI API costs depend on your usage and the provider you\'re using.'
     },
     {
       category: 'Technical',

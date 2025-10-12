@@ -6,7 +6,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
 };
 
 interface DownloadRequest {
@@ -14,7 +15,7 @@ interface DownloadRequest {
   userEmail?: string;
 }
 
-serve(async (req) => {
+serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -25,12 +26,15 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { resourceId, userEmail } = await req.json() as DownloadRequest;
+    const { resourceId, userEmail } = (await req.json()) as DownloadRequest;
 
     if (!resourceId) {
       return new Response(
         JSON.stringify({ error: 'Resource ID is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
       );
     }
 
@@ -43,10 +47,10 @@ serve(async (req) => {
       .single();
 
     if (resourceError || !resource) {
-      return new Response(
-        JSON.stringify({ error: 'Resource not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Resource not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Track download
@@ -55,7 +59,7 @@ serve(async (req) => {
       .insert({
         resource_id: resourceId,
         user_id: null, // Will be set by RLS if authenticated
-        user_email: userEmail
+        user_email: userEmail,
       });
 
     if (trackError) {
@@ -75,16 +79,18 @@ serve(async (req) => {
         success: true,
         downloadUrl: resource.file_url,
         title: resource.title,
-        type: resource.type
+        type: resource.type,
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
     );
-
   } catch (error) {
     console.error('Error in resource-download function:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

@@ -3,7 +3,12 @@
  * This is the central controller for the AI Workforce
  */
 
-import { Task, TaskStatus, AgentType, ExecutionPlan } from '../reasoning/task-decomposer';
+import {
+  Task,
+  TaskStatus,
+  AgentType,
+  ExecutionPlan,
+} from '../reasoning/task-decomposer';
 import { agentCommunicator, AgentMessage } from './agent-protocol';
 
 // Simple browser-compatible EventEmitter
@@ -35,13 +40,13 @@ class SimpleEventEmitter {
   }
 }
 
-export type ExecutionStatus = 
-  | 'pending' 
-  | 'planning' 
-  | 'running' 
-  | 'paused' 
-  | 'completed' 
-  | 'failed' 
+export type ExecutionStatus =
+  | 'pending'
+  | 'planning'
+  | 'running'
+  | 'paused'
+  | 'completed'
+  | 'failed'
   | 'cancelled';
 
 export interface ExecutionContext {
@@ -60,7 +65,13 @@ export interface ExecutionContext {
 }
 
 export interface ExecutionUpdate {
-  type: 'status' | 'task_start' | 'task_progress' | 'task_complete' | 'task_error' | 'agent_message';
+  type:
+    | 'status'
+    | 'task_start'
+    | 'task_progress'
+    | 'task_complete'
+    | 'task_error'
+    | 'agent_message';
   executionId: string;
   timestamp: Date;
   data: any;
@@ -109,7 +120,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
       completedTasks: [],
       failedTasks: [],
       startedAt: new Date(),
-      metadata
+      metadata,
     };
 
     this.activeExecutions.set(executionId, context);
@@ -119,7 +130,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
       type: 'status',
       executionId,
       timestamp: new Date(),
-      data: { status: 'planning', message: 'Preparing execution plan...' }
+      data: { status: 'planning', message: 'Preparing execution plan...' },
     });
 
     // Return async generator for streaming updates
@@ -129,37 +140,43 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
   /**
    * Execute plan and yield updates
    */
-  private async *executeWithUpdates(context: ExecutionContext): AsyncGenerator<ExecutionUpdate> {
+  private async *executeWithUpdates(
+    context: ExecutionContext
+  ): AsyncGenerator<ExecutionUpdate> {
     try {
       context.status = 'running';
-      
+
       yield {
         type: 'status',
         executionId: context.id,
         timestamp: new Date(),
-        data: { 
-          status: 'running', 
-          message: `Starting execution of ${context.plan.tasks.length} tasks...` 
-        }
+        data: {
+          status: 'running',
+          message: `Starting execution of ${context.plan.tasks.length} tasks...`,
+        },
       };
 
       // Execute tasks level by level (parallel execution within levels)
-      for (let levelIndex = 0; levelIndex < context.plan.executionOrder.length; levelIndex++) {
+      for (
+        let levelIndex = 0;
+        levelIndex < context.plan.executionOrder.length;
+        levelIndex++
+      ) {
         const taskIds = context.plan.executionOrder[levelIndex];
-        
+
         yield {
           type: 'status',
           executionId: context.id,
           timestamp: new Date(),
-          data: { 
+          data: {
             status: 'running',
-            message: `Executing level ${levelIndex + 1}/${context.plan.executionOrder.length} with ${taskIds.length} tasks...`
-          }
+            message: `Executing level ${levelIndex + 1}/${context.plan.executionOrder.length} with ${taskIds.length} tasks...`,
+          },
         };
 
         // Execute all tasks in this level in parallel
-        const levelTasks = taskIds.map(id => 
-          context.plan.tasks.find(t => t.id === id)!
+        const levelTasks = taskIds.map(
+          id => context.plan.tasks.find(t => t.id === id)!
         );
 
         const results = await Promise.allSettled(
@@ -173,34 +190,36 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
 
           if (result.status === 'fulfilled') {
             context.completedTasks.push(task);
-            
+
             yield {
               type: 'task_complete',
               executionId: context.id,
               timestamp: new Date(),
-              data: { 
+              data: {
                 task: task.id,
                 title: task.title,
-                result: result.value 
-              }
+                result: result.value,
+              },
             };
           } else {
             context.failedTasks.push(task);
-            
+
             yield {
               type: 'task_error',
               executionId: context.id,
               timestamp: new Date(),
-              data: { 
+              data: {
                 task: task.id,
                 title: task.title,
-                error: result.reason?.message || 'Unknown error'
-              }
+                error: result.reason?.message || 'Unknown error',
+              },
             };
 
             // Check if we should continue or abort
             if (task.priority === 'critical') {
-              throw new Error(`Critical task ${task.title} failed: ${result.reason?.message}`);
+              throw new Error(
+                `Critical task ${task.title} failed: ${result.reason?.message}`
+              );
             }
           }
         }
@@ -211,7 +230,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
             type: 'status',
             executionId: context.id,
             timestamp: new Date(),
-            data: { status: 'paused', message: 'Execution paused by user' }
+            data: { status: 'paused', message: 'Execution paused by user' },
           };
           return;
         }
@@ -222,7 +241,10 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
             type: 'status',
             executionId: context.id,
             timestamp: new Date(),
-            data: { status: 'cancelled', message: 'Execution cancelled by user' }
+            data: {
+              status: 'cancelled',
+              message: 'Execution cancelled by user',
+            },
           };
           return;
         }
@@ -236,14 +258,13 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
         type: 'status',
         executionId: context.id,
         timestamp: new Date(),
-        data: { 
+        data: {
           status: 'completed',
           message: 'All tasks completed successfully!',
           completedTasks: context.completedTasks.length,
-          failedTasks: context.failedTasks.length
-        }
+          failedTasks: context.failedTasks.length,
+        },
       };
-
     } catch (error) {
       context.status = 'failed';
       context.error = (error as Error).message;
@@ -253,11 +274,11 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
         type: 'status',
         executionId: context.id,
         timestamp: new Date(),
-        data: { 
+        data: {
           status: 'failed',
           message: (error as Error).message,
-          error: (error as Error).stack
-        }
+          error: (error as Error).stack,
+        },
       };
     } finally {
       // Move to history
@@ -269,8 +290,13 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
   /**
    * Execute a single task
    */
-  private async executeTask(context: ExecutionContext, task: Task): Promise<any> {
-    console.log(`🎯 Executing task: ${task.title} with agent: ${task.requiredAgent}`);
+  private async executeTask(
+    context: ExecutionContext,
+    task: Task
+  ): Promise<any> {
+    console.log(
+      `🎯 Executing task: ${task.title} with agent: ${task.requiredAgent}`
+    );
 
     context.currentTask = task;
     task.status = 'in_progress';
@@ -280,11 +306,11 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
       type: 'task_start',
       executionId: context.id,
       timestamp: new Date(),
-      data: { 
+      data: {
         task: task.id,
         title: task.title,
-        agent: task.requiredAgent
-      }
+        agent: task.requiredAgent,
+      },
     });
 
     try {
@@ -310,7 +336,8 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
       // Mark task as complete
       task.status = 'completed';
       task.completedAt = new Date();
-      task.actualTime = (task.completedAt.getTime() - task.startedAt!.getTime()) / 1000 / 60; // minutes
+      task.actualTime =
+        (task.completedAt.getTime() - task.startedAt!.getTime()) / 1000 / 60; // minutes
       task.result = result;
 
       // Mark agent as available
@@ -319,7 +346,6 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
       agent.tasksCompleted++;
 
       return result;
-
     } catch (error) {
       console.error(`❌ Task ${task.title} failed:`, error);
 
@@ -329,11 +355,15 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
 
       // Retry logic
       if (task.retryCount < task.maxRetries) {
-        console.log(`🔄 Retrying task ${task.title} (${task.retryCount}/${task.maxRetries})...`);
-        
+        console.log(
+          `🔄 Retrying task ${task.title} (${task.retryCount}/${task.maxRetries})...`
+        );
+
         // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, 2000 * task.retryCount));
-        
+        await new Promise(resolve =>
+          setTimeout(resolve, 2000 * task.retryCount)
+        );
+
         // Reset status and retry
         task.status = 'pending';
         return this.executeTask(context, task);
@@ -372,13 +402,13 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
           type: task.type,
           domain: task.domain,
           tools: task.requiredTools,
-          context: task.context
+          context: task.context,
         },
         executionContext: {
           id: context.id,
           userId: context.userId,
-          metadata: context.metadata
-        }
+          metadata: context.metadata,
+        },
       },
       'high',
       300000 // 5 minute timeout
@@ -390,14 +420,17 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
   /**
    * Wait for agent to become available
    */
-  private async waitForAgent(agent: AgentWorker, timeout: number): Promise<void> {
+  private async waitForAgent(
+    agent: AgentWorker,
+    timeout: number
+  ): Promise<void> {
     const startTime = Date.now();
-    
+
     while (!agent.available) {
       if (Date.now() - startTime > timeout) {
         throw new Error(`Timeout waiting for agent ${agent.type}`);
       }
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
@@ -422,7 +455,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
       type: 'status',
       executionId,
       timestamp: new Date(),
-      data: { status: 'paused', message: 'Execution paused' }
+      data: { status: 'paused', message: 'Execution paused' },
     });
   }
 
@@ -446,7 +479,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
       type: 'status',
       executionId,
       timestamp: new Date(),
-      data: { status: 'running', message: 'Execution resumed' }
+      data: { status: 'running', message: 'Execution resumed' },
     });
 
     return this.executeWithUpdates(context);
@@ -468,7 +501,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
       type: 'status',
       executionId,
       timestamp: new Date(),
-      data: { status: 'cancelled', message: 'Execution cancelled by user' }
+      data: { status: 'cancelled', message: 'Execution cancelled by user' },
     });
 
     // Move to history
@@ -513,10 +546,10 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
       type: 'status',
       executionId,
       timestamp: new Date(),
-      data: { 
+      data: {
         status: 'running',
-        message: `Rolled back to task: ${toTaskId}` 
-      }
+        message: `Rolled back to task: ${toTaskId}`,
+      },
     });
   }
 
@@ -553,7 +586,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
       'web-search',
       'bash-executor',
       'puppeteer-agent',
-      'mcp-tool'
+      'mcp-tool',
     ];
 
     agentTypes.forEach(type => {
@@ -562,7 +595,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
         available: true,
         tasksCompleted: 0,
         tasksFailed: 0,
-        currentTask: undefined
+        currentTask: undefined,
       });
     });
   }
@@ -574,8 +607,8 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
     // Listen for agent messages
     agentCommunicator.addListener((message: AgentMessage) => {
       // Find execution context for this message
-      const context = Array.from(this.activeExecutions.values()).find(ctx =>
-        ctx.currentTask && message.payload?.taskId === ctx.currentTask.id
+      const context = Array.from(this.activeExecutions.values()).find(
+        ctx => ctx.currentTask && message.payload?.taskId === ctx.currentTask.id
       );
 
       if (context) {
@@ -585,8 +618,8 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
           timestamp: new Date(),
           data: {
             agent: message.from,
-            message: message.payload
-          }
+            message: message.payload,
+          },
         });
       }
     });
@@ -638,7 +671,9 @@ export function pauseExecution(executionId: string): void {
   executionCoordinator.pause(executionId);
 }
 
-export function resumeExecution(executionId: string): Promise<AsyncGenerator<ExecutionUpdate>> {
+export function resumeExecution(
+  executionId: string
+): Promise<AsyncGenerator<ExecutionUpdate>> {
   return executionCoordinator.resume(executionId);
 }
 
@@ -646,10 +681,15 @@ export function cancelExecution(executionId: string): void {
   executionCoordinator.cancel(executionId);
 }
 
-export function rollbackExecution(executionId: string, toTaskId: string): Promise<void> {
+export function rollbackExecution(
+  executionId: string,
+  toTaskId: string
+): Promise<void> {
   return executionCoordinator.rollback(executionId, toTaskId);
 }
 
-export function getExecutionStatus(executionId: string): ExecutionContext | undefined {
+export function getExecutionStatus(
+  executionId: string
+): ExecutionContext | undefined {
   return executionCoordinator.getCurrentStatus(executionId);
 }

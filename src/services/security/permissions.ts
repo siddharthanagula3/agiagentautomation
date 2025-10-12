@@ -26,7 +26,7 @@ export class PermissionService {
   ): Promise<PermissionCheck> {
     const cacheKey = `${userId}:${resource}:${action}`;
     const cached = this.cache.get(cacheKey);
-    
+
     if (cached && this.isCacheValid(cacheKey)) {
       return cached;
     }
@@ -41,7 +41,8 @@ export class PermissionService {
         .gte('expires_at', new Date().toISOString())
         .single();
 
-      if (error && error.code !== 'PGRST116') { // Not found error
+      if (error && error.code !== 'PGRST116') {
+        // Not found error
         throw error;
       }
 
@@ -52,7 +53,7 @@ export class PermissionService {
       if (data) {
         const actions = data.actions || [];
         allowed = actions.includes(action);
-        
+
         if (allowed) {
           reason = 'Permission granted';
           constraints = data.constraints || {};
@@ -63,7 +64,7 @@ export class PermissionService {
         // Check default permissions
         const defaultPermissions = await this.getDefaultPermissions(userId);
         allowed = defaultPermissions.includes(action);
-        
+
         if (allowed) {
           reason = 'Default permission granted';
         } else {
@@ -74,7 +75,7 @@ export class PermissionService {
       const result: PermissionCheck = {
         allowed,
         reason,
-        constraints
+        constraints,
       };
 
       // Cache the result
@@ -85,7 +86,7 @@ export class PermissionService {
     } catch (error) {
       return {
         allowed: false,
-        reason: `Permission check failed: ${error.message}`
+        reason: `Permission check failed: ${error.message}`,
       };
     }
   }
@@ -93,17 +94,15 @@ export class PermissionService {
   async grantPermission(rule: PermissionRule): Promise<void> {
     try {
       // Store in database
-      const { error } = await supabase
-        .from('user_permissions')
-        .upsert({
-          user_id: rule.userId,
-          resource: rule.resource,
-          actions: rule.actions,
-          constraints: rule.constraints || {},
-          expires_at: rule.expiresAt?.toISOString() || null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+      const { error } = await supabase.from('user_permissions').upsert({
+        user_id: rule.userId,
+        resource: rule.resource,
+        actions: rule.actions,
+        constraints: rule.constraints || {},
+        expires_at: rule.expiresAt?.toISOString() || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
 
       if (error) {
         throw error;
@@ -111,14 +110,16 @@ export class PermissionService {
 
       // Update local cache
       const userRules = this.rules.get(rule.userId) || [];
-      const existingIndex = userRules.findIndex(r => r.resource === rule.resource);
-      
+      const existingIndex = userRules.findIndex(
+        r => r.resource === rule.resource
+      );
+
       if (existingIndex >= 0) {
         userRules[existingIndex] = rule;
       } else {
         userRules.push(rule);
       }
-      
+
       this.rules.set(rule.userId, userRules);
 
       // Clear related cache entries
@@ -128,10 +129,7 @@ export class PermissionService {
     }
   }
 
-  async revokePermission(
-    userId: string,
-    resource: string
-  ): Promise<void> {
+  async revokePermission(userId: string, resource: string): Promise<void> {
     try {
       // Remove from database
       const { error } = await supabase

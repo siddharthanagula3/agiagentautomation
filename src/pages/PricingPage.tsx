@@ -6,9 +6,22 @@ import { useNavigate } from 'react-router-dom';
 import { Check, X, ArrowRight, Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Particles } from '@/components/ui/particles';
-import { CountdownTimer, createDiscountEndDate } from '@/components/ui/countdown-timer';
-import { getPricingPlans, type PricingPlan as DBPricingPlan } from '@/services/marketing-api';
+import {
+  CountdownTimer,
+  createDiscountEndDate,
+} from '@/components/ui/countdown-timer';
+import {
+  getPricingPlans,
+  type PricingPlan as DBPricingPlan,
+} from '@/services/marketing-api';
 import { useAuthStore } from '@/stores/unified-auth-store';
+import { SEOHead } from '@/components/seo/SEOHead';
+import {
+  upgradeToProPlan,
+  upgradeToMaxPlan,
+  isStripeConfigured,
+} from '@/services/stripe-service';
+import { toast } from 'sonner';
 
 interface PricingPlan {
   name: string;
@@ -27,22 +40,66 @@ const PricingPage: React.FC = () => {
   const { user } = useAuthStore();
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isCreatingSubscription, setIsCreatingSubscription] = useState(false);
 
   useEffect(() => {
     loadPlans();
   }, []);
 
-  const handleSelectPlan = (planName: string) => {
+  const handleSelectPlan = async (planName: string) => {
     if (planName === 'Enterprise') {
       navigate('/contact-sales');
-    } else {
-      // If user is logged in, redirect to billing page with selected plan
-      // Otherwise, redirect to register page
-      if (user) {
-        navigate('/billing', { state: { selectedPlan: planName } });
+      return;
+    }
+
+    // If user is not logged in, redirect to register page
+    if (!user) {
+      navigate('/register', { state: { selectedPlan: planName } });
+      return;
+    }
+
+    // Check if Stripe is configured
+    if (!isStripeConfigured()) {
+      toast.error('Payment system is not configured. Please contact support.');
+      return;
+    }
+
+    try {
+      setIsCreatingSubscription(true);
+      toast.loading('Creating subscription...');
+
+      // Map plan names to Stripe price IDs
+      let priceId: string;
+      if (planName === 'Pay Per Employee') {
+        priceId = 'price_1SHESN21oG095Q15MXZ3eBfD'; // $1/month Pay Per Employee
+      } else if (planName === 'All Access') {
+        priceId = 'price_1SHESd21oG095Q15kQzHLzVW'; // $19/month All Access
       } else {
-        navigate('/register', { state: { selectedPlan: planName } });
+        throw new Error('Invalid plan selected');
       }
+
+      // Get current user data
+      const userData = {
+        userId: user?.id || 'anonymous',
+        userEmail: user?.email || 'user@example.com',
+        billingPeriod: 'monthly' as const,
+      };
+
+      // Use the proper upgrade function instead
+      if (planName === 'Pay Per Employee') {
+        await upgradeToProPlan(userData);
+      } else if (planName === 'All Access') {
+        await upgradeToMaxPlan(userData);
+      }
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to create subscription. Please try again.'
+      );
+    } finally {
+      setIsCreatingSubscription(false);
     }
   };
 
@@ -73,7 +130,7 @@ const PricingPage: React.FC = () => {
           notIncluded: plan.not_included || [],
           popular: plan.popular,
           cta: plan.name === 'Enterprise' ? 'Contact Sales' : 'Get Started',
-          color: plan.color_gradient
+          color: plan.color_gradient,
         };
       });
       setPlans(formattedPlans);
@@ -85,7 +142,6 @@ const PricingPage: React.FC = () => {
       setLoading(false);
     }
   }
-
 
   const fallbackPlans: PricingPlan[] = [
     {
@@ -100,10 +156,10 @@ const PricingPage: React.FC = () => {
         'Cancel anytime',
         'Weekly billing',
         'All AI features included',
-        '24/7 Support'
+        '24/7 Support',
       ],
       cta: 'Get Started',
-      color: 'from-blue-500 to-cyan-500'
+      color: 'from-blue-500 to-cyan-500',
     },
     {
       name: 'All Access',
@@ -118,11 +174,11 @@ const PricingPage: React.FC = () => {
         'All AI features included',
         'Priority support',
         'Advanced analytics',
-        'Custom integrations'
+        'Custom integrations',
       ],
       popular: true,
       cta: 'Get Started',
-      color: 'from-purple-500 to-pink-500'
+      color: 'from-purple-500 to-pink-500',
     },
     {
       name: 'Enterprise',
@@ -138,70 +194,173 @@ const PricingPage: React.FC = () => {
         'Custom integrations',
         'Advanced security',
         'Training & onboarding',
-        '24/7 Priority support'
+        '24/7 Priority support',
       ],
       cta: 'Contact Sales',
-      color: 'from-orange-500 to-red-500'
-    }
+      color: 'from-orange-500 to-red-500',
+    },
   ];
 
   const comparisonFeatures = [
     {
       category: 'AI Employees',
       features: [
-        { name: 'Number of AI employees', starter: 'Pay per employee', pro: 'Unlimited', enterprise: 'Unlimited' },
-        { name: 'Pricing model', starter: '$1/employee/month', pro: '$19/month flat', enterprise: 'Custom' },
-        { name: 'Bonus credits', starter: false, pro: '$10 (first-time)', enterprise: 'Custom packages' },
-        { name: 'Billing frequency', starter: 'Weekly', pro: 'Weekly', enterprise: 'Custom' }
-      ]
+        {
+          name: 'Number of AI employees',
+          starter: 'Pay per employee',
+          pro: 'Unlimited',
+          enterprise: 'Unlimited',
+        },
+        {
+          name: 'Pricing model',
+          starter: '$1/employee/month',
+          pro: '$19/month flat',
+          enterprise: 'Custom',
+        },
+        {
+          name: 'Bonus credits',
+          starter: false,
+          pro: '$10 (first-time)',
+          enterprise: 'Custom packages',
+        },
+        {
+          name: 'Billing frequency',
+          starter: 'Weekly',
+          pro: 'Weekly',
+          enterprise: 'Custom',
+        },
+      ],
     },
     {
       category: 'Features',
       features: [
         { name: 'All AI features', starter: true, pro: true, enterprise: true },
-        { name: 'Workflow automation', starter: true, pro: true, enterprise: true },
+        {
+          name: 'Workflow automation',
+          starter: true,
+          pro: true,
+          enterprise: true,
+        },
         { name: 'Pay-as-you-go', starter: true, pro: true, enterprise: false },
-        { name: 'Custom integrations', starter: false, pro: true, enterprise: true }
-      ]
+        {
+          name: 'Custom integrations',
+          starter: false,
+          pro: true,
+          enterprise: true,
+        },
+      ],
     },
     {
       category: 'Support',
       features: [
         { name: '24/7 Support', starter: true, pro: true, enterprise: true },
-        { name: 'Priority support', starter: false, pro: true, enterprise: true },
-        { name: 'Dedicated account manager', starter: false, pro: false, enterprise: true },
-        { name: 'Training & onboarding', starter: false, pro: false, enterprise: true }
-      ]
+        {
+          name: 'Priority support',
+          starter: false,
+          pro: true,
+          enterprise: true,
+        },
+        {
+          name: 'Dedicated account manager',
+          starter: false,
+          pro: false,
+          enterprise: true,
+        },
+        {
+          name: 'Training & onboarding',
+          starter: false,
+          pro: false,
+          enterprise: true,
+        },
+      ],
     },
     {
       category: 'Advanced',
       features: [
-        { name: 'Advanced analytics', starter: false, pro: true, enterprise: true },
-        { name: 'Volume discounts', starter: false, pro: false, enterprise: true },
-        { name: 'SLA guarantees', starter: false, pro: false, enterprise: true },
-        { name: 'Advanced security', starter: false, pro: false, enterprise: true }
-      ]
-    }
+        {
+          name: 'Advanced analytics',
+          starter: false,
+          pro: true,
+          enterprise: true,
+        },
+        {
+          name: 'Volume discounts',
+          starter: false,
+          pro: false,
+          enterprise: true,
+        },
+        {
+          name: 'SLA guarantees',
+          starter: false,
+          pro: false,
+          enterprise: true,
+        },
+        {
+          name: 'Advanced security',
+          starter: false,
+          pro: false,
+          enterprise: true,
+        },
+      ],
+    },
   ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Particles className="absolute inset-0 -z-10" quantity={40} staticity={50} />
+      <SEOHead
+        title="AI Employee Pricing | Starting at $1/month | AGI Agent Automation"
+        description="Affordable AI employee pricing starting at $1/month. Choose from Pay Per Employee, All Access, or Enterprise plans. 14-day free trial. No setup fees. Cancel anytime."
+        keywords={[
+          'ai employee pricing',
+          'ai agents cost',
+          'ai automation pricing',
+          'hire ai employees price',
+          'ai workforce pricing',
+          'cheap ai employees',
+          'ai employee subscription',
+          'ai automation plans',
+          'ai agents monthly cost',
+        ]}
+        ogType="website"
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: 'AI Employee Platform',
+          description: 'Affordable AI employee platform starting at $1/month',
+          brand: {
+            '@type': 'Brand',
+            name: 'AGI Agent Automation',
+          },
+          offers: {
+            '@type': 'AggregateOffer',
+            lowPrice: '1',
+            highPrice: '19',
+            priceCurrency: 'USD',
+            offerCount: '3',
+          },
+        }}
+      />
+      <Particles
+        className="absolute inset-0 -z-10"
+        quantity={40}
+        staticity={50}
+      />
 
       {/* Hero */}
-      <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+      <section className="px-4 pb-16 pt-32 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto"
+            className="mx-auto max-w-3xl text-center"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary">
+            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
               Pay-As-You-Go Pricing
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              Only pay for what you use. $1 per AI employee or $19 for unlimited access with $10 bonus credits for first-time users.
+            <p className="mb-8 text-xl text-muted-foreground">
+              Only pay for what you use. $1 per AI employee or $19 for unlimited
+              access with $10 bonus credits for first-time users.
             </p>
 
             {/* Countdown Timer for Limited Offer */}
@@ -218,16 +377,22 @@ const PricingPage: React.FC = () => {
       </section>
 
       {/* Pricing Cards */}
-      <section className="pb-20 px-4 sm:px-6 lg:px-8">
+      <section className="px-4 pb-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           {loading ? (
-            <div className="flex justify-center items-center py-20">
+            <div className="flex items-center justify-center py-20">
               <Loader2 className="animate-spin text-primary" size={48} />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
               {plans.map((plan, idx) => (
-                <PricingCard key={idx} plan={plan} index={idx} onSelect={() => handleSelectPlan(plan.name)} />
+                <PricingCard
+                  key={idx}
+                  plan={plan}
+                  index={idx}
+                  onSelect={() => handleSelectPlan(plan.name)}
+                  isLoading={isCreatingSubscription}
+                />
               ))}
             </div>
           )}
@@ -235,13 +400,13 @@ const PricingPage: React.FC = () => {
       </section>
 
       {/* Comparison Table */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background to-accent/5">
+      <section className="bg-gradient-to-b from-background to-accent/5 px-4 py-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl font-bold text-center mb-16"
+            className="mb-16 text-center text-4xl font-bold"
           >
             Compare Plans
           </motion.h2>
@@ -250,54 +415,85 @@ const PricingPage: React.FC = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-border/40">
-                  <th className="text-left py-4 px-6 font-semibold">Features</th>
-                  <th className="text-center py-4 px-6 font-semibold">Pay Per Employee</th>
-                  <th className="text-center py-4 px-6 font-semibold">All Access</th>
-                  <th className="text-center py-4 px-6 font-semibold">Enterprise</th>
+                  <th className="px-6 py-4 text-left font-semibold">
+                    Features
+                  </th>
+                  <th className="px-6 py-4 text-center font-semibold">
+                    Pay Per Employee
+                  </th>
+                  <th className="px-6 py-4 text-center font-semibold">
+                    All Access
+                  </th>
+                  <th className="px-6 py-4 text-center font-semibold">
+                    Enterprise
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {comparisonFeatures.map((category, catIdx) => (
                   <React.Fragment key={catIdx}>
                     <tr className="bg-accent/5">
-                      <td colSpan={4} className="py-3 px-6 font-bold text-sm">
+                      <td colSpan={4} className="px-6 py-3 text-sm font-bold">
                         {category.category}
                       </td>
                     </tr>
                     {category.features.map((feature, featIdx) => (
-                      <tr key={featIdx} className="border-b border-border/20 hover:bg-accent/5">
-                        <td className="py-3 px-6 text-sm">{feature.name}</td>
-                        <td className="py-3 px-6 text-center">
+                      <tr
+                        key={featIdx}
+                        className="border-b border-border/20 hover:bg-accent/5"
+                      >
+                        <td className="px-6 py-3 text-sm">{feature.name}</td>
+                        <td className="px-6 py-3 text-center">
                           {typeof feature.starter === 'boolean' ? (
                             feature.starter ? (
-                              <Check size={18} className="inline text-green-500" />
+                              <Check
+                                size={18}
+                                className="inline text-green-500"
+                              />
                             ) : (
-                              <X size={18} className="inline text-muted-foreground" />
+                              <X
+                                size={18}
+                                className="inline text-muted-foreground"
+                              />
                             )
                           ) : (
                             <span className="text-sm">{feature.starter}</span>
                           )}
                         </td>
-                        <td className="py-3 px-6 text-center">
+                        <td className="px-6 py-3 text-center">
                           {typeof feature.pro === 'boolean' ? (
                             feature.pro ? (
-                              <Check size={18} className="inline text-green-500" />
+                              <Check
+                                size={18}
+                                className="inline text-green-500"
+                              />
                             ) : (
-                              <X size={18} className="inline text-muted-foreground" />
+                              <X
+                                size={18}
+                                className="inline text-muted-foreground"
+                              />
                             )
                           ) : (
                             <span className="text-sm">{feature.pro}</span>
                           )}
                         </td>
-                        <td className="py-3 px-6 text-center">
+                        <td className="px-6 py-3 text-center">
                           {typeof feature.enterprise === 'boolean' ? (
                             feature.enterprise ? (
-                              <Check size={18} className="inline text-green-500" />
+                              <Check
+                                size={18}
+                                className="inline text-green-500"
+                              />
                             ) : (
-                              <X size={18} className="inline text-muted-foreground" />
+                              <X
+                                size={18}
+                                className="inline text-muted-foreground"
+                              />
                             )
                           ) : (
-                            <span className="text-sm">{feature.enterprise}</span>
+                            <span className="text-sm">
+                              {feature.enterprise}
+                            </span>
                           )}
                         </td>
                       </tr>
@@ -311,13 +507,13 @@ const PricingPage: React.FC = () => {
       </section>
 
       {/* FAQ */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl font-bold text-center mb-12"
+            className="mb-12 text-center text-4xl font-bold"
           >
             Frequently Asked Questions
           </motion.h2>
@@ -326,20 +522,20 @@ const PricingPage: React.FC = () => {
             {[
               {
                 q: 'Can I change plans anytime?',
-                a: 'Yes, you can upgrade or downgrade at any time. Changes take effect immediately for upgrades and at the next billing cycle for downgrades.'
+                a: 'Yes, you can upgrade or downgrade at any time. Changes take effect immediately for upgrades and at the next billing cycle for downgrades.',
               },
               {
                 q: 'What payment methods do you accept?',
-                a: 'We accept all major credit cards, PayPal, and wire transfer for Enterprise plans.'
+                a: 'We accept all major credit cards, PayPal, and wire transfer for Enterprise plans.',
               },
               {
                 q: 'Is there a free trial?',
-                a: 'Yes! All plans include a 14-day free trial with full access to features. No credit card required.'
+                a: 'Yes! All plans include a 14-day free trial with full access to features. No credit card required.',
               },
               {
                 q: 'What happens if I exceed my limits?',
-                a: 'We\'ll notify you before you reach your limits. You can upgrade or purchase add-ons to continue without interruption.'
-              }
+                a: "We'll notify you before you reach your limits. You can upgrade or purchase add-ons to continue without interruption.",
+              },
             ].map((faq, idx) => (
               <motion.div
                 key={idx}
@@ -347,9 +543,9 @@ const PricingPage: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="rounded-xl bg-background/60 backdrop-blur-xl border border-border/40 p-6"
+                className="rounded-xl border border-border/40 bg-background/60 p-6 backdrop-blur-xl"
               >
-                <h3 className="text-lg font-bold mb-2">{faq.q}</h3>
+                <h3 className="mb-2 text-lg font-bold">{faq.q}</h3>
                 <p className="text-muted-foreground">{faq.a}</p>
               </motion.div>
             ))}
@@ -358,7 +554,7 @@ const PricingPage: React.FC = () => {
       </section>
 
       {/* CTA */}
-      <section className="pb-24 px-4 sm:px-6 lg:px-8">
+      <section className="px-4 pb-24 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -366,11 +562,15 @@ const PricingPage: React.FC = () => {
             viewport={{ once: true }}
             className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-12 text-center text-white"
           >
-            <h2 className="text-4xl font-bold mb-4">Still Have Questions?</h2>
-            <p className="text-xl mb-8 opacity-90">
+            <h2 className="mb-4 text-4xl font-bold">Still Have Questions?</h2>
+            <p className="mb-8 text-xl opacity-90">
               Our team is here to help you find the perfect plan
             </p>
-            <Button size="lg" variant="secondary" onClick={() => navigate('/contact-sales')}>
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={() => navigate('/contact-sales')}
+            >
               Contact Sales
             </Button>
           </motion.div>
@@ -380,7 +580,12 @@ const PricingPage: React.FC = () => {
   );
 };
 
-const PricingCard: React.FC<{ plan: PricingPlan; index: number; onSelect: () => void }> = ({ plan, index, onSelect }) => {
+const PricingCard: React.FC<{
+  plan: PricingPlan;
+  index: number;
+  onSelect: () => void;
+  isLoading: boolean;
+}> = ({ plan, index, onSelect, isLoading }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
 
@@ -390,47 +595,62 @@ const PricingCard: React.FC<{ plan: PricingPlan; index: number; onSelect: () => 
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className={`relative overflow-hidden rounded-3xl backdrop-blur-xl border p-8 ${
+      className={`relative overflow-hidden rounded-3xl border p-8 backdrop-blur-xl ${
         plan.popular
-          ? 'border-primary bg-gradient-to-b from-primary/10 to-accent/10 shadow-2xl scale-105'
+          ? 'scale-105 border-primary bg-gradient-to-b from-primary/10 to-accent/10 shadow-2xl'
           : 'border-border/40 bg-background/60'
       }`}
       whileHover={{ y: -8 }}
     >
       {plan.popular && (
-        <div className="absolute top-0 right-0 bg-gradient-to-r from-primary to-accent text-white text-xs font-bold px-4 py-1 rounded-bl-xl">
+        <div className="absolute right-0 top-0 rounded-bl-xl bg-gradient-to-r from-primary to-accent px-4 py-1 text-xs font-bold text-white">
           MOST POPULAR
         </div>
       )}
 
-      <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+      <h3 className="mb-2 text-2xl font-bold">{plan.name}</h3>
       <div className="mb-4">
         <span className="text-5xl font-bold">{plan.price}</span>
-        {plan.period && <span className="text-muted-foreground ml-2">{plan.period}</span>}
+        {plan.period && (
+          <span className="ml-2 text-muted-foreground">{plan.period}</span>
+        )}
       </div>
-      <p className="text-muted-foreground mb-8">{plan.description}</p>
+      <p className="mb-8 text-muted-foreground">{plan.description}</p>
 
       <Button
         onClick={onSelect}
-        className={`w-full mb-8 ${
+        disabled={isLoading}
+        className={`mb-8 w-full ${
           plan.popular ? 'bg-gradient-to-r from-primary to-accent' : ''
         }`}
         variant={plan.popular ? 'default' : 'outline'}
       >
-        {plan.cta}
-        <ArrowRight className="ml-2" size={16} />
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 animate-spin" size={16} />
+            Creating...
+          </>
+        ) : (
+          <>
+            {plan.cta}
+            <ArrowRight className="ml-2" size={16} />
+          </>
+        )}
       </Button>
 
       <div className="space-y-3">
         {plan.features.map((feature, idx) => (
           <div key={idx} className="flex items-start gap-3">
-            <Check size={18} className="text-green-500 mt-0.5 flex-shrink-0" />
+            <Check size={18} className="mt-0.5 flex-shrink-0 text-green-500" />
             <span className="text-sm">{feature}</span>
           </div>
         ))}
         {plan.notIncluded?.map((feature, idx) => (
           <div key={idx} className="flex items-start gap-3 opacity-50">
-            <X size={18} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+            <X
+              size={18}
+              className="mt-0.5 flex-shrink-0 text-muted-foreground"
+            />
             <span className="text-sm">{feature}</span>
           </div>
         ))}

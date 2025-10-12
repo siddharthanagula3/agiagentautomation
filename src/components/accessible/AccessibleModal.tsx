@@ -1,5 +1,11 @@
 import React, { useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '../ui/dialog';
 import { useModal, useScreenReader } from '../../hooks/useAccessibility';
 import { cn } from '@/lib/utils';
 
@@ -53,8 +59,10 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
         className={cn(className)}
         aria-labelledby={ariaLabelledBy}
         aria-describedby={ariaDescribedBy}
-        onEscapeKeyDown={closeOnEscape ? undefined : (e) => e.preventDefault()}
-        onInteractOutside={closeOnOutsideClick ? undefined : (e) => e.preventDefault()}
+        onEscapeKeyDown={closeOnEscape ? undefined : e => e.preventDefault()}
+        onInteractOutside={
+          closeOnOutsideClick ? undefined : e => e.preventDefault()
+        }
       >
         <DialogHeader>
           <DialogTitle id={ariaLabelledBy || 'modal-title'}>
@@ -67,9 +75,7 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
           )}
         </DialogHeader>
 
-        <div className="mt-4">
-          {children}
-        </div>
+        <div className="mt-4">{children}</div>
       </DialogContent>
     </Dialog>
   );

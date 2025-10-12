@@ -19,7 +19,7 @@ export interface AIEmployee {
   updatedAt: string;
 }
 
-export type EmployeeCategory = 
+export type EmployeeCategory =
   | 'executive_leadership'
   | 'engineering_technology'
   | 'product_management'
@@ -34,7 +34,7 @@ export type EmployeeCategory =
   | 'legal_risk_compliance'
   | 'specialized_niche';
 
-export type EmployeeLevel = 
+export type EmployeeLevel =
   | 'entry'
   | 'junior'
   | 'mid'
@@ -46,7 +46,7 @@ export type EmployeeLevel =
   | 'vp'
   | 'c_level';
 
-export type EmployeeStatus = 
+export type EmployeeStatus =
   | 'available'
   | 'working'
   | 'busy'
@@ -76,7 +76,7 @@ export interface ToolDefinition {
   isActive: boolean;
 }
 
-export type ToolType = 
+export type ToolType =
   | 'code_generation'
   | 'data_analysis'
   | 'api_integration'
@@ -89,7 +89,7 @@ export type ToolType =
   | 'monitoring'
   | 'custom';
 
-export type IntegrationType = 
+export type IntegrationType =
   | 'n8n_workflow'
   | 'openai_api'
   | 'anthropic_api'
@@ -218,7 +218,7 @@ export interface JobAssignment {
   feedback?: string;
 }
 
-export type AssignmentStatus = 
+export type AssignmentStatus =
   | 'assigned'
   | 'in_progress'
   | 'completed'

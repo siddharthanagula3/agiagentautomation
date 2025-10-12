@@ -9,7 +9,9 @@ export const THEME_STORAGE_KEY = 'theme';
 export const DEFAULT_THEME: Theme = 'system';
 
 export const getSystemTheme = (): 'light' | 'dark' => {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
 };
 
 export const applyThemeToDocument = (theme: 'light' | 'dark'): void => {

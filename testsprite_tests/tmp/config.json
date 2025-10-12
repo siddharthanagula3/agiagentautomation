@@ -1,0 +1,18 @@
+{
+  "status": "init",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:8082",
+  "loginUser": "siddharthanagula3@gmail.com",
+  "loginPassword": "Sid@1234",
+  "executionArgs": {
+    "projectName": "agiagentautomation",
+    "projectPath": "C:\\Users\\SIDDHARTHA NAGULA\\Desktop\\agi\\agiagentautomation",
+    "testIds": [],
+    "additionalInstruction": "Re-run tests to validate that the duplicate import fix resolved the blocking issues. Focus on authentication, UI functionality, and basic application flow.",
+    "envs": {
+      "API_KEY": "sk-user-LYmWcQO03DyGyUC55n85m7KlzgEIvTwhuvSMQGdXvnyRimQdk2vv-HCKh8GTN3PMPetvLX5RRBVyDq1jMolPoMT-Iu8eTXCReSN89iCQ1237LXLiPybRKSMY9uQ8GrzP6Y0"
+    }
+  },
+  "proxy": "http://0f1351df-0fa8-47d9-89f9-3e44cb74105b:tsNUvLPrtBj2oCgAkOaGLsxcWZNIOxEv@tun.testsprite.com:8080"
+}

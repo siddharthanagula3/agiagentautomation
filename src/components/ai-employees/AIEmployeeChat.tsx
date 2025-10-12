@@ -14,7 +14,7 @@ interface AIEmployeeChatProps {
 export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
   employee,
   userId,
-  onToolExecution
+  onToolExecution,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -32,7 +32,7 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
       message: `Hello! I'm ${employee.name}, your ${employee.role}. I'm here to help you with ${employee.capabilities.coreSkills.join(', ')}. What can I do for you today?`,
       message_type: 'text',
       metadata: {},
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
     setMessages([welcomeMessage]);
   }, [employee]);
@@ -53,7 +53,7 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
       message: inputMessage,
       message_type: 'text',
       metadata: {},
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -68,7 +68,7 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
         jobId: `job-${Date.now()}`,
         sessionId: 'session-001',
         timestamp: new Date().toISOString(),
-        environment: 'development' as const
+        environment: 'development' as const,
       };
 
       // Create AI Employee executor
@@ -87,7 +87,7 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
         if (result.toolsUsed.length > 0) {
           responseMessage = `I've completed your request using ${result.toolsUsed.join(', ')}. Here's what I accomplished:\n\n${JSON.stringify(result.result, null, 2)}`;
           messageType = 'tool_result';
-          
+
           // Notify parent component about tool execution
           if (onToolExecution) {
             onToolExecution(result.toolsUsed[0], {
@@ -95,7 +95,7 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
               data: result.result,
               executionTime: result.executionTime,
               cost: result.cost,
-              metadata: {}
+              metadata: {},
             });
           }
         } else {
@@ -117,13 +117,12 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
           toolsUsed: result.toolsUsed,
           executionTime: result.executionTime,
           cost: result.cost,
-          success: result.success
+          success: result.success,
         },
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       };
 
       setMessages(prev => [...prev, employeeMessage]);
-
     } catch (error) {
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
@@ -133,7 +132,7 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
         message: `I'm sorry, but I encountered an unexpected error: ${(error as Error).message}. Please try again.`,
         message_type: 'system',
         metadata: { error: true },
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       };
 
       setMessages(prev => [...prev, errorMessage]);
@@ -151,12 +150,15 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-background border rounded-lg">
+    <div className="flex h-full flex-col rounded-lg border bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-muted/50">
+      <div className="flex items-center justify-between border-b bg-muted/50 p-4">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-semibold">
-            {employee.name.split(' ').map(n => n[0]).join('')}
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
+            {employee.name
+              .split(' ')
+              .map(n => n[0])
+              .join('')}
           </div>
           <div>
             <h3 className="font-semibold text-foreground">{employee.name}</h3>
@@ -164,14 +166,18 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <div className={`w-2 h-2 rounded-full ${employee.status === 'available' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-          <span className="text-xs text-muted-foreground capitalize">{employee.status}</span>
+          <div
+            className={`h-2 w-2 rounded-full ${employee.status === 'available' ? 'bg-green-500' : 'bg-yellow-500'}`}
+          ></div>
+          <span className="text-xs capitalize text-muted-foreground">
+            {employee.status}
+          </span>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        {messages.map(message => (
           <div
             key={message.id}
             className={`flex ${message.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -181,10 +187,10 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
                 message.sender_type === 'user'
                   ? 'bg-primary text-primary-foreground'
                   : message.message_type === 'tool_result'
-                  ? 'bg-green-100 text-green-900 border border-green-200'
-                  : message.message_type === 'system'
-                  ? 'bg-yellow-100 text-yellow-900 border border-yellow-200'
-                  : 'bg-muted text-foreground'
+                    ? 'border border-green-200 bg-green-100 text-green-900'
+                    : message.message_type === 'system'
+                      ? 'border border-yellow-200 bg-yellow-100 text-yellow-900'
+                      : 'bg-muted text-foreground'
               }`}
             >
               <div className="whitespace-pre-wrap">{message.message}</div>
@@ -206,47 +212,54 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
             </div>
           </div>
         ))}
-        
+
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-muted text-foreground rounded-lg px-4 py-2">
+            <div className="rounded-lg bg-muted px-4 py-2 text-foreground">
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-current"></div>
+                <div
+                  className="h-2 w-2 animate-bounce rounded-full bg-current"
+                  style={{ animationDelay: '0.1s' }}
+                ></div>
+                <div
+                  className="h-2 w-2 animate-bounce rounded-full bg-current"
+                  style={{ animationDelay: '0.2s' }}
+                ></div>
                 <span className="ml-2 text-sm">Thinking...</span>
               </div>
             </div>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t bg-muted/25">
+      <div className="border-t bg-muted/25 p-4">
         <div className="flex space-x-2">
           <input
             type="text"
             value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
+            onChange={e => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={`Ask ${employee.name} to help you with something...`}
-            className="flex-1 px-3 py-2 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+            className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
             disabled={isLoading}
           />
           <button
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || isLoading}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? 'Sending...' : 'Send'}
           </button>
         </div>
-        
+
         {/* Available Tools */}
         <div className="mt-2 text-xs text-muted-foreground">
-          <span className="font-medium">Available tools:</span> {employee.tools.map(tool => tool.name).join(', ')}
+          <span className="font-medium">Available tools:</span>{' '}
+          {employee.tools.map(tool => tool.name).join(', ')}
         </div>
       </div>
     </div>

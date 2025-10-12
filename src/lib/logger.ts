@@ -9,7 +9,7 @@ const isProduction = import.meta.env.PROD;
 class Logger {
   private shouldLog(level: 'debug' | 'info' | 'warn' | 'error'): boolean {
     if (isDevelopment) return true;
-    
+
     // In production, only log warnings and errors
     return level === 'warn' || level === 'error';
   }

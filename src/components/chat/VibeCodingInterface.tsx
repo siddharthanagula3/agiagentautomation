@@ -64,14 +64,22 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import {
+  vscDarkPlus,
+  vs,
+} from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTheme } from '@/components/theme-provider';
-import { mcpToolsService, type Artifact, type FileOperation, type CommandExecution } from '@/services/mcp-tools-service';
+import {
+  mcpToolsService,
+  type Artifact,
+  type FileOperation,
+  type CommandExecution,
+} from '@/services/mcp-tools-service';
 import {
   multiAgentOrchestrator,
   type AgentCommunication,
   type AgentStatus,
-  type OrchestrationPlan
+  type OrchestrationPlan,
 } from '@/services/multi-agent-orchestrator';
 import { AgentCollaborationGraph } from './AgentCollaborationGraph';
 import { useAgentMetricsStore } from '@/stores/agent-metrics-store';
@@ -83,7 +91,13 @@ interface VibeCodingMessage {
   agentRole?: string; // Agent's role
   content: string;
   timestamp: Date;
-  messageType?: 'chat' | 'status' | 'handoff' | 'collaboration' | 'thinking' | 'result';
+  messageType?:
+    | 'chat'
+    | 'status'
+    | 'handoff'
+    | 'collaboration'
+    | 'thinking'
+    | 'result';
   plan?: PlanStep[];
   fileOperations?: FileOperation[];
   artifacts?: Artifact[];
@@ -120,19 +134,29 @@ export const VibeCodingInterface: React.FC<Props> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<PlanStep[]>([]);
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
-  const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null);
+  const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(
+    null
+  );
   const [fileSystem, setFileSystem] = useState<Map<string, string>>(new Map());
   const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
   const [activeAgents, setActiveAgents] = useState<AgentStatus[]>([]);
-  const [agentCommunications, setAgentCommunications] = useState<AgentCommunication[]>([]);
+  const [agentCommunications, setAgentCommunications] = useState<
+    AgentCommunication[]
+  >([]);
   const [typingAgent, setTypingAgent] = useState<string | null>(null);
   const [showAgentSidebar, setShowAgentSidebar] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Helper function to extract code blocks from LLM responses
-  const extractCodeBlocks = (text: string): Array<{ code: string; language: string; filename?: string }> => {
-    const codeBlocks: Array<{ code: string; language: string; filename?: string }> = [];
+  const extractCodeBlocks = (
+    text: string
+  ): Array<{ code: string; language: string; filename?: string }> => {
+    const codeBlocks: Array<{
+      code: string;
+      language: string;
+      filename?: string;
+    }> = [];
 
     // Match markdown code blocks with language and optional filename
     const codeBlockRegex = /```(\w+)(?:\s+(.+?))?\n([\s\S]*?)```/g;
@@ -165,7 +189,8 @@ export const VibeCodingInterface: React.FC<Props> = ({
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 200) + 'px';
+      textareaRef.current.style.height =
+        Math.min(textareaRef.current.scrollHeight, 200) + 'px';
     }
   }, [input]);
 
@@ -187,14 +212,15 @@ export const VibeCodingInterface: React.FC<Props> = ({
       const analysisMsg: VibeCodingMessage = {
         id: `msg-${Date.now()}-analysis`,
         role: 'system',
-        content: '🧠 Analyzing your request and assembling the right AI team...',
+        content:
+          '🧠 Analyzing your request and assembling the right AI team...',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, analysisMsg]);
       await new Promise(r => setTimeout(r, 800));
 
       const plan = await multiAgentOrchestrator.analyzeIntent(userRequest);
-      
+
       // Show which agents are being assembled
       const agentListMsg: VibeCodingMessage = {
         id: `msg-${Date.now()}-agents`,
@@ -207,7 +233,7 @@ export const VibeCodingInterface: React.FC<Props> = ({
 
       // Step 2: Execute with multi-agent orchestrator
       const communications: AgentCommunication[] = [];
-      
+
       const handleCommunication = (comm: AgentCommunication) => {
         communications.push(comm);
         setAgentCommunications(prev => [...prev, comm]);
@@ -257,9 +283,13 @@ export const VibeCodingInterface: React.FC<Props> = ({
 
         // Update metrics store
         metricsStore.updateAgentStatus(status.agentName, status);
-        
+
         // Add status update as a message when progress changes significantly
-        if (status.progress === 30 || status.progress === 60 || status.progress === 90) {
+        if (
+          status.progress === 30 ||
+          status.progress === 60 ||
+          status.progress === 90
+        ) {
           const statusMsg: VibeCodingMessage = {
             id: `status-${Date.now()}-${status.agentName}`,
             role: 'assistant',
@@ -295,12 +325,16 @@ export const VibeCodingInterface: React.FC<Props> = ({
       for (const [taskId, result] of results.entries()) {
         if (result.success && result.output) {
           // Extract plan/thinking section
-          const planMatch = result.output.match(/## Plan\n([\s\S]*?)(?=\n##|```|$)/i);
+          const planMatch = result.output.match(
+            /## Plan\n([\s\S]*?)(?=\n##|```|$)/i
+          );
           if (planMatch) {
             const thinkingMsg: VibeCodingMessage = {
               id: `thinking-${taskId}`,
               role: 'assistant',
-              agentName: plan.tasks.find(t => t.id === taskId)?.assignedTo || employeeName,
+              agentName:
+                plan.tasks.find(t => t.id === taskId)?.assignedTo ||
+                employeeName,
               content: `💭 **Thinking & Planning**\n\n${planMatch[1].trim()}`,
               timestamp: new Date(),
               messageType: 'thinking',
@@ -315,7 +349,8 @@ export const VibeCodingInterface: React.FC<Props> = ({
             generatedArtifacts.push({
               id: `artifact-${taskId}-${index}`,
               type: 'code',
-              title: block.filename || `Generated-${index + 1}.${block.language}`,
+              title:
+                block.filename || `Generated-${index + 1}.${block.language}`,
               language: block.language,
               content: block.code,
               metadata: {
@@ -372,7 +407,10 @@ export default App;`,
           return {
             ...step,
             status: 'completed' as const,
-            substeps: step.substeps?.map(s => ({ ...s, status: 'completed' as const })),
+            substeps: step.substeps?.map(s => ({
+              ...s,
+              status: 'completed' as const,
+            })),
           };
         }
         if (step.id === 'step-3') {
@@ -395,14 +433,18 @@ export default App;`,
         fileOps.push({
           type: 'create',
           path: 'package.json',
-          content: JSON.stringify({
-            name: 'vibe-coding-project',
-            version: '1.0.0',
-            dependencies: {
-              'react': '^18.2.0',
-              'react-dom': '^18.2.0',
+          content: JSON.stringify(
+            {
+              name: 'vibe-coding-project',
+              version: '1.0.0',
+              dependencies: {
+                react: '^18.2.0',
+                'react-dom': '^18.2.0',
+              },
             },
-          }, null, 2),
+            null,
+            2
+          ),
         });
       }
 
@@ -416,18 +458,26 @@ export default App;`,
       setFileSystem(new Map(mcpToolsService.getFileSystem()));
 
       // Final message
-      const finalPlan = updatedPlan.map(step => ({ ...step, status: 'completed' as const }));
+      const finalPlan = updatedPlan.map(step => ({
+        ...step,
+        status: 'completed' as const,
+      }));
       setCurrentPlan(finalPlan);
 
       const finalMsg: VibeCodingMessage = {
         id: `msg-${Date.now()}-final`,
         role: 'assistant',
         agentName: employeeName,
-        content: `✅ Perfect! I've completed your request: "${userRequest}"\n\n` +
+        content:
+          `✅ Perfect! I've completed your request: "${userRequest}"\n\n` +
           `**Generated Artifacts:**\n` +
-          generatedArtifacts.map(a => `- ${a.title} (${a.language})`).join('\n') + '\n\n' +
+          generatedArtifacts
+            .map(a => `- ${a.title} (${a.language})`)
+            .join('\n') +
+          '\n\n' +
           `**Files Created:**\n` +
-          fileOps.map(op => `- ${op.path}`).join('\n') + '\n\n' +
+          fileOps.map(op => `- ${op.path}`).join('\n') +
+          '\n\n' +
           `**Next Steps:**\n` +
           `- View the code in the Code tab →\n` +
           `- Check the Files tab to see all generated files\n` +
@@ -455,16 +505,23 @@ export default App;`,
 
       // Mark session as completed
       if (currentSessionId) {
-        metricsStore.endSession(currentSessionId, 'completed', 'Task completed successfully');
+        metricsStore.endSession(
+          currentSessionId,
+          'completed',
+          'Task completed successfully'
+        );
       }
-
     } catch (error) {
       console.error('Vibe coding error:', error);
       toast.error('Failed to generate code');
 
       // Mark session as failed
       if (currentSessionId) {
-        metricsStore.endSession(currentSessionId, 'failed', error instanceof Error ? error.message : 'Unknown error');
+        metricsStore.endSession(
+          currentSessionId,
+          'failed',
+          error instanceof Error ? error.message : 'Unknown error'
+        );
       }
     } finally {
       setIsGenerating(false);
@@ -500,12 +557,18 @@ export default App;`,
   };
 
   // Group consecutive messages from the same agent
-  const groupMessages = (messages: VibeCodingMessage[]): VibeCodingMessage[][] => {
+  const groupMessages = (
+    messages: VibeCodingMessage[]
+  ): VibeCodingMessage[][] => {
     const groups: VibeCodingMessage[][] = [];
     let currentGroup: VibeCodingMessage[] = [];
 
     messages.forEach((msg, idx) => {
-      if (idx === 0 || msg.agentName !== messages[idx - 1].agentName || msg.role !== messages[idx - 1].role) {
+      if (
+        idx === 0 ||
+        msg.agentName !== messages[idx - 1].agentName ||
+        msg.role !== messages[idx - 1].role
+      ) {
         if (currentGroup.length > 0) {
           groups.push(currentGroup);
         }
@@ -523,23 +586,25 @@ export default App;`,
   };
 
   return (
-    <div className={cn("flex flex-col h-full bg-background", className)}>
+    <div className={cn('flex h-full flex-col bg-background', className)}>
       <ResizablePanelGroup direction="horizontal">
         {/* Chat Panel */}
         <ResizablePanel defaultSize={45} minSize={30}>
-          <div className="flex flex-col h-full border-r border-border">
+          <div className="flex h-full flex-col border-r border-border">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-border bg-card/30 backdrop-blur-sm">
+            <div className="border-b border-border bg-card/30 px-6 py-4 backdrop-blur-sm">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500">
                   <Sparkles className="h-5 w-5 text-white" />
                 </div>
                 <div>
                   <h2 className="font-semibold">{employeeName}</h2>
-                  <p className="text-sm text-muted-foreground">Vibe Coding Assistant</p>
+                  <p className="text-sm text-muted-foreground">
+                    Vibe Coding Assistant
+                  </p>
                 </div>
                 <Badge className="ml-auto" variant="secondary">
-                  <Zap className="h-3 w-3 mr-1" />
+                  <Zap className="mr-1 h-3 w-3" />
                   AI Powered
                 </Badge>
               </div>
@@ -547,20 +612,21 @@ export default App;`,
 
             {/* Messages */}
             <ScrollArea className="flex-1">
-              <div className="p-6 space-y-6">
+              <div className="space-y-6 p-6">
                 {messages.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4">
+                  <div className="py-12 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500">
                       <Code className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">
+                    <h3 className="mb-2 text-xl font-semibold">
                       Vibe Coding with AI
                     </h3>
-                    <p className="text-muted-foreground max-w-md mx-auto">
-                      Just describe what you want to build, and I'll create it for you!
-                      I can generate code, create files, and even set up entire projects.
+                    <p className="mx-auto max-w-md text-muted-foreground">
+                      Just describe what you want to build, and I'll create it
+                      for you! I can generate code, create files, and even set
+                      up entire projects.
                     </p>
-                    <div className="mt-6 flex flex-wrap gap-2 justify-center">
+                    <div className="mt-6 flex flex-wrap justify-center gap-2">
                       <Badge variant="outline">React Apps</Badge>
                       <Badge variant="outline">Components</Badge>
                       <Badge variant="outline">APIs</Badge>
@@ -596,15 +662,15 @@ export default App;`,
             </ScrollArea>
 
             {/* Input */}
-            <div className="p-6 border-t border-border bg-card/30 backdrop-blur-sm">
+            <div className="border-t border-border bg-card/30 p-6 backdrop-blur-sm">
               <div className="relative">
                 <Textarea
                   ref={textareaRef}
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={e => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Describe what you want to build... (Cmd+Enter to send)"
-                  className="min-h-[80px] pr-12 resize-none"
+                  className="min-h-[80px] resize-none pr-12"
                   disabled={isGenerating}
                 />
                 <Button
@@ -620,7 +686,7 @@ export default App;`,
                   )}
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Powered by {provider} • Cmd+Enter to send
               </p>
             </div>
@@ -631,50 +697,52 @@ export default App;`,
 
         {/* Artifact Panel */}
         <ResizablePanel defaultSize={55} minSize={30}>
-          <div className="flex flex-col h-full">
+          <div className="flex h-full flex-col">
             {/* Artifact Tabs */}
-            <Tabs defaultValue="code" className="flex-1 flex flex-col">
-              <div className="px-6 py-3 border-b border-border bg-card/30 backdrop-blur-sm">
+            <Tabs defaultValue="code" className="flex flex-1 flex-col">
+              <div className="border-b border-border bg-card/30 px-6 py-3 backdrop-blur-sm">
                 <TabsList>
                   <TabsTrigger value="code">
-                    <Code className="h-4 w-4 mr-2" />
+                    <Code className="mr-2 h-4 w-4" />
                     Code
                   </TabsTrigger>
                   <TabsTrigger value="preview">
-                    <Eye className="h-4 w-4 mr-2" />
+                    <Eye className="mr-2 h-4 w-4" />
                     Preview
                   </TabsTrigger>
                   <TabsTrigger value="files">
-                    <Folder className="h-4 w-4 mr-2" />
+                    <Folder className="mr-2 h-4 w-4" />
                     Files
                   </TabsTrigger>
                   <TabsTrigger value="terminal">
-                    <Terminal className="h-4 w-4 mr-2" />
+                    <Terminal className="mr-2 h-4 w-4" />
                     Terminal
                   </TabsTrigger>
                   <TabsTrigger value="agents">
-                    <Users className="h-4 w-4 mr-2" />
+                    <Users className="mr-2 h-4 w-4" />
                     Agents
                   </TabsTrigger>
                   <TabsTrigger value="plan">
-                    <Brain className="h-4 w-4 mr-2" />
+                    <Brain className="mr-2 h-4 w-4" />
                     Plan
                   </TabsTrigger>
                   <TabsTrigger value="graph">
-                    <Network className="h-4 w-4 mr-2" />
+                    <Network className="mr-2 h-4 w-4" />
                     Graph
                   </TabsTrigger>
                 </TabsList>
               </div>
 
-              <TabsContent value="code" className="flex-1 m-0">
+              <TabsContent value="code" className="m-0 flex-1">
                 <ScrollArea className="h-full">
                   {selectedArtifact ? (
                     <div className="p-6">
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="mb-4 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <FileText className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{selectedArtifact.title}</span>
+                          <span className="font-medium">
+                            {selectedArtifact.title}
+                          </span>
                           <Badge variant="secondary" className="text-xs">
                             {selectedArtifact.language}
                           </Badge>
@@ -684,7 +752,7 @@ export default App;`,
                           size="sm"
                           onClick={() => copyCode(selectedArtifact.content)}
                         >
-                          <Copy className="h-4 w-4 mr-2" />
+                          <Copy className="mr-2 h-4 w-4" />
                           Copy
                         </Button>
                       </div>
@@ -701,77 +769,91 @@ export default App;`,
                       </SyntaxHighlighter>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                    <div className="flex h-full items-center justify-center text-muted-foreground">
                       <div className="text-center">
-                        <Code className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <Code className="mx-auto mb-4 h-12 w-12 opacity-50" />
                         <p>No code generated yet</p>
-                        <p className="text-sm">Describe what you want to build!</p>
+                        <p className="text-sm">
+                          Describe what you want to build!
+                        </p>
                       </div>
                     </div>
                   )}
                 </ScrollArea>
               </TabsContent>
 
-              <TabsContent value="preview" className="flex-1 m-0">
-                <div className="h-full bg-white dark:bg-gray-900 flex items-center justify-center">
+              <TabsContent value="preview" className="m-0 flex-1">
+                <div className="flex h-full items-center justify-center bg-white dark:bg-gray-900">
                   <div className="text-center text-muted-foreground">
-                    <Eye className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <Eye className="mx-auto mb-4 h-12 w-12 opacity-50" />
                     <p>Live preview coming soon!</p>
                     <p className="text-sm">Interactive preview of your app</p>
                   </div>
                 </div>
               </TabsContent>
 
-              <TabsContent value="files" className="flex-1 m-0">
+              <TabsContent value="files" className="m-0 flex-1">
                 <ScrollArea className="h-full">
                   <div className="p-6">
-                    <h3 className="font-semibold mb-4">File System</h3>
+                    <h3 className="mb-4 font-semibold">File System</h3>
                     {fileSystem.size === 0 ? (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Folder className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <div className="py-12 text-center text-muted-foreground">
+                        <Folder className="mx-auto mb-4 h-12 w-12 opacity-50" />
                         <p>No files created yet</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        {Array.from(fileSystem.entries()).map(([path, content]) => (
-                          <button
-                            key={path}
-                            onClick={() => setSelectedArtifact({
-                              id: path,
-                              type: 'code',
-                              title: path,
-                              language: path.endsWith('.tsx') ? 'typescript' : 'json',
-                              content,
-                            })}
-                            className="w-full text-left px-4 py-2 rounded-lg hover:bg-accent transition-colors flex items-center gap-2"
-                          >
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm">{path}</span>
-                          </button>
-                        ))}
+                        {Array.from(fileSystem.entries()).map(
+                          ([path, content]) => (
+                            <button
+                              key={path}
+                              onClick={() =>
+                                setSelectedArtifact({
+                                  id: path,
+                                  type: 'code',
+                                  title: path,
+                                  language: path.endsWith('.tsx')
+                                    ? 'typescript'
+                                    : 'json',
+                                  content,
+                                })
+                              }
+                              className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-left transition-colors hover:bg-accent"
+                            >
+                              <FileText className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">{path}</span>
+                            </button>
+                          )
+                        )}
                       </div>
                     )}
                   </div>
                 </ScrollArea>
               </TabsContent>
 
-              <TabsContent value="terminal" className="flex-1 m-0">
+              <TabsContent value="terminal" className="m-0 flex-1">
                 <ScrollArea className="h-full">
                   <div className="p-6 font-mono text-sm">
                     {terminalOutput.length === 0 ? (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Terminal className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <div className="py-12 text-center text-muted-foreground">
+                        <Terminal className="mx-auto mb-4 h-12 w-12 opacity-50" />
                         <p>No terminal output yet</p>
                       </div>
                     ) : (
                       <div className="space-y-1">
                         {terminalOutput.map((line, idx) => (
-                          <div key={idx} className={cn(
-                            line.startsWith('$') ? 'text-primary font-semibold' :
-                            line.startsWith('✓') ? 'text-green-500' :
-                            line.startsWith('✗') ? 'text-red-500' :
-                            'text-foreground'
-                          )}>
+                          <div
+                            key={idx}
+                            className={cn(
+                              line.startsWith('$')
+                                ? 'font-semibold text-primary'
+                                : line.startsWith('✓')
+                                  ? 'text-green-500'
+                                  : line.startsWith('✗')
+                                    ? 'text-red-500'
+                                    : 'text-foreground'
+                            )}
+                          >
                             {line}
                           </div>
                         ))}
@@ -781,39 +863,51 @@ export default App;`,
                 </ScrollArea>
               </TabsContent>
 
-              <TabsContent value="agents" className="flex-1 m-0">
+              <TabsContent value="agents" className="m-0 flex-1">
                 <ScrollArea className="h-full">
                   <div className="p-6">
-                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <h3 className="mb-4 flex items-center gap-2 font-semibold">
                       <Users className="h-5 w-5 text-primary" />
                       AI Employees Working
                     </h3>
                     {activeAgents.length === 0 ? (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <div className="py-12 text-center text-muted-foreground">
+                        <Users className="mx-auto mb-4 h-12 w-12 opacity-50" />
                         <p>No agents deployed yet</p>
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {activeAgents.map((agent) => (
-                          <AgentStatusCard key={agent.agentName} agent={agent} />
+                        {activeAgents.map(agent => (
+                          <AgentStatusCard
+                            key={agent.agentName}
+                            agent={agent}
+                          />
                         ))}
-                        
+
                         {agentCommunications.length > 0 && (
-                          <div className="mt-6 pt-6 border-t border-border">
-                            <h4 className="font-semibold mb-3 text-sm flex items-center gap-2">
+                          <div className="mt-6 border-t border-border pt-6">
+                            <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
                               <MessageCircle className="h-4 w-4" />
                               Agent Communications
                             </h4>
                             <div className="space-y-2">
-                              {agentCommunications.slice(-5).map((comm) => (
-                                <div key={comm.id} className="text-sm p-3 rounded-lg bg-accent/30">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-medium text-xs">{comm.from}</span>
+                              {agentCommunications.slice(-5).map(comm => (
+                                <div
+                                  key={comm.id}
+                                  className="rounded-lg bg-accent/30 p-3 text-sm"
+                                >
+                                  <div className="mb-1 flex items-center gap-2">
+                                    <span className="text-xs font-medium">
+                                      {comm.from}
+                                    </span>
                                     <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                                    <span className="font-medium text-xs">{comm.to}</span>
+                                    <span className="text-xs font-medium">
+                                      {comm.to}
+                                    </span>
                                   </div>
-                                  <p className="text-xs text-muted-foreground">{comm.message}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {comm.message}
+                                  </p>
                                 </div>
                               ))}
                             </div>
@@ -825,21 +919,21 @@ export default App;`,
                 </ScrollArea>
               </TabsContent>
 
-              <TabsContent value="plan" className="flex-1 m-0">
+              <TabsContent value="plan" className="m-0 flex-1">
                 <ScrollArea className="h-full">
                   <div className="p-6">
-                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <h3 className="mb-4 flex items-center gap-2 font-semibold">
                       <Brain className="h-5 w-5 text-primary" />
                       Execution Plan
                     </h3>
                     {currentPlan.length === 0 ? (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <div className="py-12 text-center text-muted-foreground">
+                        <Brain className="mx-auto mb-4 h-12 w-12 opacity-50" />
                         <p>No plan generated yet</p>
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {currentPlan.map((step) => (
+                        {currentPlan.map(step => (
                           <PlanStepComponent key={step.id} step={step} />
                         ))}
                       </div>
@@ -848,13 +942,15 @@ export default App;`,
                 </ScrollArea>
               </TabsContent>
 
-              <TabsContent value="graph" className="flex-1 m-0">
+              <TabsContent value="graph" className="m-0 flex-1">
                 <AgentCollaborationGraph
                   agents={activeAgents}
                   communications={agentCommunications}
-                  onAgentClick={(agentName) => {
+                  onAgentClick={agentName => {
                     // Scroll to agent's messages in chat
-                    const agentMessages = messages.filter(m => m.agentName === agentName);
+                    const agentMessages = messages.filter(
+                      m => m.agentName === agentName
+                    );
                     if (agentMessages.length > 0) {
                       scrollToBottom();
                     }
@@ -870,11 +966,11 @@ export default App;`,
           <>
             <ResizableHandle />
             <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-              <div className="flex flex-col h-full border-l border-border bg-card/20 backdrop-blur-sm">
+              <div className="flex h-full flex-col border-l border-border bg-card/20 backdrop-blur-sm">
                 {/* Header */}
-                <div className="px-4 py-3 border-b border-border bg-card/30 backdrop-blur-sm">
+                <div className="border-b border-border bg-card/30 px-4 py-3 backdrop-blur-sm">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm flex items-center gap-2">
+                    <h3 className="flex items-center gap-2 text-sm font-semibold">
                       <Users className="h-4 w-4 text-primary" />
                       Active Agents
                       <Badge variant="secondary" className="text-xs">
@@ -894,8 +990,8 @@ export default App;`,
 
                 {/* Agent Cards */}
                 <ScrollArea className="flex-1">
-                  <div className="p-4 space-y-3">
-                    {activeAgents.map((agent) => (
+                  <div className="space-y-3 p-4">
+                    {activeAgents.map(agent => (
                       <motion.div
                         key={agent.agentName}
                         initial={{ opacity: 0, x: 20 }}
@@ -919,9 +1015,9 @@ export default App;`,
             variant="outline"
             size="sm"
             onClick={() => setShowAgentSidebar(true)}
-            className="absolute top-4 right-4 z-10"
+            className="absolute right-4 top-4 z-10"
           >
-            <Users className="h-4 w-4 mr-2" />
+            <Users className="mr-2 h-4 w-4" />
             Show Agents ({activeAgents.length})
           </Button>
         )}
@@ -931,22 +1027,26 @@ export default App;`,
 };
 
 // Agent Typing Indicator Component
-const AgentTypingIndicator: React.FC<{ agentName: string }> = ({ agentName }) => {
+const AgentTypingIndicator: React.FC<{ agentName: string }> = ({
+  agentName,
+}) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="flex gap-3 items-center"
+      className="flex items-center gap-3"
     >
       <AgentAvatar agentName={agentName} role="assistant" />
-      <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent/80 dark:bg-accent/40 border border-border/30">
-        <span className="text-sm text-muted-foreground">{agentName} is typing</span>
+      <div className="flex items-center gap-2 rounded-xl border border-border/30 bg-accent/80 px-4 py-2 dark:bg-accent/40">
+        <span className="text-sm text-muted-foreground">
+          {agentName} is typing
+        </span>
         <div className="flex gap-1">
-          {[0, 1, 2].map((i) => (
+          {[0, 1, 2].map(i => (
             <motion.div
               key={i}
-              className="w-1.5 h-1.5 rounded-full bg-primary"
+              className="h-1.5 w-1.5 rounded-full bg-primary"
               animate={{
                 y: [0, -6, 0],
                 opacity: [0.5, 1, 0.5],
@@ -955,7 +1055,7 @@ const AgentTypingIndicator: React.FC<{ agentName: string }> = ({ agentName }) =>
                 duration: 0.8,
                 repeat: Infinity,
                 delay: i * 0.15,
-                ease: "easeInOut",
+                ease: 'easeInOut',
               }}
             />
           ))}
@@ -979,18 +1079,20 @@ const CodeArtifactPreview: React.FC<{
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="mt-2 rounded-xl border border-border/50 overflow-hidden bg-card/80 dark:bg-card/40 backdrop-blur-sm"
+      className="mt-2 overflow-hidden rounded-xl border border-border/50 bg-card/80 backdrop-blur-sm dark:bg-card/40"
     >
-      <div className="flex items-center justify-between px-4 py-2 bg-muted/50 border-b border-border/50">
+      <div className="flex items-center justify-between border-b border-border/50 bg-muted/50 px-4 py-2">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center">
+          <div className="flex h-6 w-6 items-center justify-center rounded bg-primary/10">
             <FileText className="h-3.5 w-3.5 text-primary" />
           </div>
           <span className="text-sm font-medium">{artifact.title}</span>
           <Badge variant="secondary" className="text-xs">
             {artifact.language}
           </Badge>
-          <span className="text-xs text-muted-foreground">{lineCount} lines</span>
+          <span className="text-xs text-muted-foreground">
+            {lineCount} lines
+          </span>
         </div>
         <div className="flex items-center gap-1">
           <Button
@@ -999,7 +1101,7 @@ const CodeArtifactPreview: React.FC<{
             onClick={() => onCopy(artifact.content)}
             className="h-7 px-2"
           >
-            <Copy className="h-3.5 w-3.5 mr-1" />
+            <Copy className="mr-1 h-3.5 w-3.5" />
             Copy
           </Button>
           <Button
@@ -1008,7 +1110,7 @@ const CodeArtifactPreview: React.FC<{
             onClick={() => setIsExpanded(!isExpanded)}
             className="h-7 px-2"
           >
-            <Eye className="h-3.5 w-3.5 mr-1" />
+            <Eye className="mr-1 h-3.5 w-3.5" />
             {isExpanded ? 'Collapse' : 'View Full'}
           </Button>
         </div>
@@ -1027,7 +1129,7 @@ const CodeArtifactPreview: React.FC<{
           {isExpanded ? artifact.content : previewLines}
         </SyntaxHighlighter>
         {!isExpanded && lineCount > 5 && (
-          <div className="px-4 py-2 text-xs text-center text-muted-foreground bg-muted/30 border-t border-border/30">
+          <div className="border-t border-border/30 bg-muted/30 px-4 py-2 text-center text-xs text-muted-foreground">
             Click "View Full" to see all {lineCount} lines
           </div>
         )}
@@ -1053,33 +1155,43 @@ const MultiStageProgress: React.FC<{
 
   return (
     <div className="space-y-2">
-      <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+      <div className="relative h-2 overflow-hidden rounded-full bg-muted">
         <motion.div
           className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
         />
       </div>
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         {milestones.map((milestone, idx) => {
           const isActive = progress >= milestone.value;
-          const isCurrent = progress >= milestone.value && (idx === milestones.length - 1 || progress < milestones[idx + 1].value);
+          const isCurrent =
+            progress >= milestone.value &&
+            (idx === milestones.length - 1 ||
+              progress < milestones[idx + 1].value);
 
           return (
-            <div key={milestone.label} className="flex flex-col items-center gap-1">
+            <div
+              key={milestone.label}
+              className="flex flex-col items-center gap-1"
+            >
               <motion.div
                 className={cn(
-                  "w-2 h-2 rounded-full border-2 transition-colors",
-                  isActive ? "bg-primary border-primary" : "bg-background border-muted-foreground/30"
+                  'h-2 w-2 rounded-full border-2 transition-colors',
+                  isActive
+                    ? 'border-primary bg-primary'
+                    : 'border-muted-foreground/30 bg-background'
                 )}
                 animate={isCurrent ? { scale: [1, 1.3, 1] } : {}}
                 transition={{ duration: 1, repeat: Infinity }}
               />
-              <span className={cn(
-                "text-[10px] font-medium",
-                isActive ? "text-foreground" : "text-muted-foreground"
-              )}>
+              <span
+                className={cn(
+                  'text-[10px] font-medium',
+                  isActive ? 'text-foreground' : 'text-muted-foreground'
+                )}
+              >
                 {milestone.label}
               </span>
             </div>
@@ -1094,7 +1206,14 @@ const MultiStageProgress: React.FC<{
 interface AgentAvatarProps {
   agentName?: string;
   role?: 'user' | 'assistant' | 'system';
-  status?: 'idle' | 'analyzing' | 'working' | 'waiting' | 'completed' | 'blocked' | 'error';
+  status?:
+    | 'idle'
+    | 'analyzing'
+    | 'working'
+    | 'waiting'
+    | 'completed'
+    | 'blocked'
+    | 'error';
   showTooltip?: boolean;
 }
 
@@ -1102,19 +1221,21 @@ const AgentAvatar: React.FC<AgentAvatarProps> = ({
   agentName,
   role,
   status,
-  showTooltip = true
+  showTooltip = true,
 }) => {
   // User avatar
   if (role === 'user') {
     return (
-      <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+      <div className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 shadow-sm">
         <Users className="h-4 w-4 text-white" />
       </div>
     );
   }
 
   // Get agent style based on name/role
-  const getAgentConfig = (name?: string): {
+  const getAgentConfig = (
+    name?: string
+  ): {
     bg: string;
     icon: LucideIcon;
     category: string;
@@ -1128,17 +1249,21 @@ const AgentAvatar: React.FC<AgentAvatarProps> = ({
         bg: 'from-blue-500 to-indigo-600',
         icon: Hammer,
         category: 'Architecture',
-        description: 'System architecture and design'
+        description: 'System architecture and design',
       };
     }
 
     // Frontend Development
-    if (nameLower.includes('frontend') || nameLower.includes('ui') || nameLower.includes('design')) {
+    if (
+      nameLower.includes('frontend') ||
+      nameLower.includes('ui') ||
+      nameLower.includes('design')
+    ) {
       return {
         bg: 'from-green-500 to-emerald-600',
         icon: Palette,
         category: 'Frontend',
-        description: 'UI/UX and frontend development'
+        description: 'UI/UX and frontend development',
       };
     }
 
@@ -1148,27 +1273,35 @@ const AgentAvatar: React.FC<AgentAvatarProps> = ({
         bg: 'from-orange-500 to-red-600',
         icon: Database,
         category: 'Backend',
-        description: 'Backend services and APIs'
+        description: 'Backend services and APIs',
       };
     }
 
     // DevOps & Infrastructure
-    if (nameLower.includes('devops') || nameLower.includes('infrastructure') || nameLower.includes('deploy')) {
+    if (
+      nameLower.includes('devops') ||
+      nameLower.includes('infrastructure') ||
+      nameLower.includes('deploy')
+    ) {
       return {
         bg: 'from-purple-500 to-violet-600',
         icon: Rocket,
         category: 'DevOps',
-        description: 'Infrastructure and deployment'
+        description: 'Infrastructure and deployment',
       };
     }
 
     // QA & Testing
-    if (nameLower.includes('qa') || nameLower.includes('test') || nameLower.includes('quality')) {
+    if (
+      nameLower.includes('qa') ||
+      nameLower.includes('test') ||
+      nameLower.includes('quality')
+    ) {
       return {
         bg: 'from-yellow-500 to-amber-600',
         icon: TestTube,
         category: 'QA',
-        description: 'Quality assurance and testing'
+        description: 'Quality assurance and testing',
       };
     }
 
@@ -1178,57 +1311,78 @@ const AgentAvatar: React.FC<AgentAvatarProps> = ({
         bg: 'from-red-600 to-pink-600',
         icon: Shield,
         category: 'Security',
-        description: 'Security and compliance'
+        description: 'Security and compliance',
       };
     }
 
     // Data & Analytics
-    if (nameLower.includes('data') || nameLower.includes('analytics') || nameLower.includes('analyst')) {
+    if (
+      nameLower.includes('data') ||
+      nameLower.includes('analytics') ||
+      nameLower.includes('analyst')
+    ) {
       return {
         bg: 'from-cyan-500 to-blue-600',
         icon: BarChart,
         category: 'Data',
-        description: 'Data analysis and insights'
+        description: 'Data analysis and insights',
       };
     }
 
     // Content & Writing
-    if (nameLower.includes('content') || nameLower.includes('writer') || nameLower.includes('copy')) {
+    if (
+      nameLower.includes('content') ||
+      nameLower.includes('writer') ||
+      nameLower.includes('copy')
+    ) {
       return {
         bg: 'from-pink-500 to-rose-600',
         icon: PenTool,
         category: 'Content',
-        description: 'Content creation and writing'
+        description: 'Content creation and writing',
       };
     }
 
     // Business & Management
-    if (nameLower.includes('manager') || nameLower.includes('business') || nameLower.includes('ceo') || nameLower.includes('cto')) {
+    if (
+      nameLower.includes('manager') ||
+      nameLower.includes('business') ||
+      nameLower.includes('ceo') ||
+      nameLower.includes('cto')
+    ) {
       return {
         bg: 'from-indigo-600 to-purple-700',
         icon: Briefcase,
         category: 'Management',
-        description: 'Business and management'
+        description: 'Business and management',
       };
     }
 
     // AI/ML & Intelligence
-    if (nameLower.includes('ai') || nameLower.includes('ml') || nameLower.includes('intelligence')) {
+    if (
+      nameLower.includes('ai') ||
+      nameLower.includes('ml') ||
+      nameLower.includes('intelligence')
+    ) {
       return {
         bg: 'from-violet-500 to-fuchsia-600',
         icon: Brain,
         category: 'AI/ML',
-        description: 'Artificial intelligence and ML'
+        description: 'Artificial intelligence and ML',
       };
     }
 
     // Code & Development
-    if (nameLower.includes('developer') || nameLower.includes('engineer') || nameLower.includes('code')) {
+    if (
+      nameLower.includes('developer') ||
+      nameLower.includes('engineer') ||
+      nameLower.includes('code')
+    ) {
       return {
         bg: 'from-emerald-500 to-teal-600',
         icon: Code,
         category: 'Development',
-        description: 'Software development'
+        description: 'Software development',
       };
     }
 
@@ -1238,7 +1392,7 @@ const AgentAvatar: React.FC<AgentAvatarProps> = ({
         bg: 'from-sky-500 to-blue-600',
         icon: Network,
         category: 'Network',
-        description: 'Network and integrations'
+        description: 'Network and integrations',
       };
     }
 
@@ -1248,7 +1402,7 @@ const AgentAvatar: React.FC<AgentAvatarProps> = ({
         bg: 'from-orange-600 to-red-700',
         icon: GitBranch,
         category: 'Version Control',
-        description: 'Version control and Git'
+        description: 'Version control and Git',
       };
     }
 
@@ -1258,7 +1412,7 @@ const AgentAvatar: React.FC<AgentAvatarProps> = ({
         bg: 'from-gray-600 to-gray-700',
         icon: Cpu,
         category: 'System',
-        description: 'System operations'
+        description: 'System operations',
       };
     }
 
@@ -1267,7 +1421,7 @@ const AgentAvatar: React.FC<AgentAvatarProps> = ({
       bg: 'from-purple-500 to-pink-500',
       icon: Bot,
       category: 'AI Agent',
-      description: 'AI assistant'
+      description: 'AI assistant',
     };
   };
 
@@ -1299,11 +1453,13 @@ const AgentAvatar: React.FC<AgentAvatarProps> = ({
       whileHover={{ scale: 1.05 }}
       transition={{ duration: 0.2 }}
     >
-      <div className={cn(
-        "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-md transition-all",
-        "bg-gradient-to-br",
-        config.bg
-      )}>
+      <div
+        className={cn(
+          'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full shadow-md transition-all',
+          'bg-gradient-to-br',
+          config.bg
+        )}
+      >
         <Icon className="h-4 w-4 text-white" />
       </div>
 
@@ -1312,12 +1468,12 @@ const AgentAvatar: React.FC<AgentAvatarProps> = ({
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background"
+          className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background"
         >
-          <div className={cn("w-full h-full rounded-full", getStatusColor())}>
+          <div className={cn('h-full w-full rounded-full', getStatusColor())}>
             {(status === 'working' || status === 'analyzing') && (
               <motion.div
-                className="w-full h-full rounded-full bg-current"
+                className="h-full w-full rounded-full bg-current"
                 animate={{ opacity: [1, 0.5, 1] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
               />
@@ -1333,17 +1489,17 @@ const AgentAvatar: React.FC<AgentAvatarProps> = ({
     return (
       <TooltipProvider delayDuration={300}>
         <Tooltip>
-          <TooltipTrigger asChild>
-            {avatar}
-          </TooltipTrigger>
+          <TooltipTrigger asChild>{avatar}</TooltipTrigger>
           <TooltipContent side="right" className="max-w-xs">
             <div className="space-y-1">
-              <p className="font-semibold text-sm">{agentName}</p>
+              <p className="text-sm font-semibold">{agentName}</p>
               <p className="text-xs text-muted-foreground">{config.category}</p>
               <p className="text-xs">{config.description}</p>
               {status && (
                 <div className="flex items-center gap-1.5 pt-1">
-                  <div className={cn("w-2 h-2 rounded-full", getStatusColor())} />
+                  <div
+                    className={cn('h-2 w-2 rounded-full', getStatusColor())}
+                  />
                   <span className="text-xs capitalize">{status}</span>
                 </div>
               )}
@@ -1365,7 +1521,14 @@ const MessageBubble: React.FC<{
   showTimestamp?: boolean;
   isGrouped?: boolean;
   agentStatus?: AgentStatus['status'];
-}> = ({ message, theme, onArtifactClick, showTimestamp = true, isGrouped = false, agentStatus }) => {
+}> = ({
+  message,
+  theme,
+  onArtifactClick,
+  showTimestamp = true,
+  isGrouped = false,
+  agentStatus,
+}) => {
   const isUser = message.role === 'user';
   const isSystem = message.role === 'system';
   const isHandoff = message.messageType === 'handoff';
@@ -1373,17 +1536,21 @@ const MessageBubble: React.FC<{
   const isThinking = message.messageType === 'thinking';
 
   // Determine status from message type if not explicitly provided
-  const derivedStatus = agentStatus || (
-    message.messageType === 'status' ? 'working' :
-    message.messageType === 'result' ? 'completed' :
-    message.messageType === 'handoff' ? 'analyzing' :
-    message.messageType === 'thinking' ? 'analyzing' :
-    undefined
-  );
+  const derivedStatus =
+    agentStatus ||
+    (message.messageType === 'status'
+      ? 'working'
+      : message.messageType === 'result'
+        ? 'completed'
+        : message.messageType === 'handoff'
+          ? 'analyzing'
+          : message.messageType === 'thinking'
+            ? 'analyzing'
+            : undefined);
 
   return (
-    <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className={cn("flex gap-3", isUser && "flex-row-reverse")}>
+    <div className="space-y-2 duration-300 animate-in fade-in slide-in-from-bottom-4">
+      <div className={cn('flex gap-3', isUser && 'flex-row-reverse')}>
         {/* Show avatar only for first message in group */}
         {!isGrouped || showTimestamp ? (
           <AgentAvatar
@@ -1395,31 +1562,44 @@ const MessageBubble: React.FC<{
           <div className="w-8" /> /* Spacer for alignment */
         )}
 
-        <div className="flex-1 space-y-2 max-w-[85%]">
+        <div className="max-w-[85%] flex-1 space-y-2">
           {/* Agent Name & Metadata - only for first message in group */}
           {!isUser && message.agentName && showTimestamp && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-semibold text-foreground">{message.agentName}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-semibold text-foreground">
+                {message.agentName}
+              </span>
               {message.messageType && (
                 <Badge
                   variant="outline"
                   className={cn(
-                    "text-xs",
-                    message.messageType === 'handoff' && "border-blue-500 text-blue-600 dark:text-blue-400",
-                    message.messageType === 'status' && "border-orange-500 text-orange-600 dark:text-orange-400",
-                    message.messageType === 'result' && "border-green-500 text-green-600 dark:text-green-400",
-                    message.messageType === 'thinking' && "border-purple-500 text-purple-600 dark:text-purple-400"
+                    'text-xs',
+                    message.messageType === 'handoff' &&
+                      'border-blue-500 text-blue-600 dark:text-blue-400',
+                    message.messageType === 'status' &&
+                      'border-orange-500 text-orange-600 dark:text-orange-400',
+                    message.messageType === 'result' &&
+                      'border-green-500 text-green-600 dark:text-green-400',
+                    message.messageType === 'thinking' &&
+                      'border-purple-500 text-purple-600 dark:text-purple-400'
                   )}
                 >
-                  {message.messageType === 'handoff' ? '📞 calling' :
-                   message.messageType === 'status' ? '⚡ working' :
-                   message.messageType === 'result' ? '✅ completed' :
-                   message.messageType === 'thinking' ? '💭 thinking' :
-                   message.messageType}
+                  {message.messageType === 'handoff'
+                    ? '📞 calling'
+                    : message.messageType === 'status'
+                      ? '⚡ working'
+                      : message.messageType === 'result'
+                        ? '✅ completed'
+                        : message.messageType === 'thinking'
+                          ? '💭 thinking'
+                          : message.messageType}
                 </Badge>
               )}
               <span className="text-xs text-muted-foreground">
-                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {message.timestamp.toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
               </span>
             </div>
           )}
@@ -1429,35 +1609,51 @@ const MessageBubble: React.FC<{
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="relative overflow-hidden p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800/50"
+              className="relative overflow-hidden rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-3 dark:border-blue-800/50 dark:from-blue-950/30 dark:to-indigo-950/30"
             >
               {/* Animated background effect */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent"
                 initial={{ x: '-100%' }}
                 animate={{ x: '100%' }}
-                transition={{ duration: 1.5, ease: "easeInOut" }}
+                transition={{ duration: 1.5, ease: 'easeInOut' }}
               />
 
               <div className="relative flex items-center gap-3">
                 {/* From Agent */}
                 <div className="flex items-center gap-2">
-                  <AgentAvatar agentName={message.agentName} role="assistant" status="completed" />
-                  <span className="text-sm font-semibold">{message.agentName}</span>
+                  <AgentAvatar
+                    agentName={message.agentName}
+                    role="assistant"
+                    status="completed"
+                  />
+                  <span className="text-sm font-semibold">
+                    {message.agentName}
+                  </span>
                 </div>
 
                 {/* Animated Arrow */}
                 <motion.div
                   animate={{ x: [0, 8, 0] }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
                 >
                   <ArrowRight className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </motion.div>
 
                 {/* To Agent */}
                 <div className="flex items-center gap-2">
-                  <AgentAvatar agentName={message.targetAgent} role="assistant" status="analyzing" />
-                  <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">{message.targetAgent}</span>
+                  <AgentAvatar
+                    agentName={message.targetAgent}
+                    role="assistant"
+                    status="analyzing"
+                  />
+                  <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                    {message.targetAgent}
+                  </span>
                 </div>
               </div>
             </motion.div>
@@ -1468,13 +1664,17 @@ const MessageBubble: React.FC<{
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 border border-purple-200 dark:border-purple-800/50"
+              className="rounded-lg border border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 p-4 dark:border-purple-800/50 dark:from-purple-950/20 dark:to-indigo-950/20"
             >
-              <div className="flex items-center gap-2 mb-2">
+              <div className="mb-2 flex items-center gap-2">
                 <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">Agent Reasoning</span>
+                <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">
+                  Agent Reasoning
+                </span>
               </div>
-              <p className="text-sm whitespace-pre-wrap leading-relaxed text-foreground">{message.content}</p>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                {message.content}
+              </p>
             </motion.div>
           )}
 
@@ -1483,10 +1683,12 @@ const MessageBubble: React.FC<{
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="p-4 rounded-lg bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border border-orange-200 dark:border-orange-800/50"
+              className="rounded-lg border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 p-4 dark:border-orange-800/50 dark:from-orange-950/20 dark:to-amber-950/20"
             >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-foreground">{message.content}</span>
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-sm font-medium text-foreground">
+                  {message.content}
+                </span>
                 <Badge variant="secondary" className="text-xs font-semibold">
                   {message.progress}%
                 </Badge>
@@ -1497,27 +1699,31 @@ const MessageBubble: React.FC<{
 
           {/* Regular Content */}
           {!isHandoff && !isStatus && !isThinking && message.content && (
-            <div className={cn(
-              "rounded-xl px-4 py-3 shadow-sm",
-              isUser 
-                ? "bg-primary text-primary-foreground ml-auto" 
-                : isSystem 
-                  ? "bg-muted/50 border border-border/50 backdrop-blur-sm" 
-                  : "bg-accent/80 dark:bg-accent/40 border border-border/30"
-            )}>
-              <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+            <div
+              className={cn(
+                'rounded-xl px-4 py-3 shadow-sm',
+                isUser
+                  ? 'ml-auto bg-primary text-primary-foreground'
+                  : isSystem
+                    ? 'border border-border/50 bg-muted/50 backdrop-blur-sm'
+                    : 'border border-border/30 bg-accent/80 dark:bg-accent/40'
+              )}
+            >
+              <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                {message.content}
+              </p>
             </div>
           )}
 
           {/* Artifacts with Preview */}
           {message.artifacts && message.artifacts.length > 0 && (
-            <div className="space-y-2 mt-2">
-              {message.artifacts.map((artifact) => (
+            <div className="mt-2 space-y-2">
+              {message.artifacts.map(artifact => (
                 <CodeArtifactPreview
                   key={artifact.id}
                   artifact={artifact}
                   theme={theme}
-                  onCopy={(code) => {
+                  onCopy={code => {
                     navigator.clipboard.writeText(code);
                     toast.success('Code copied to clipboard!');
                     onArtifactClick(artifact);
@@ -1533,7 +1739,9 @@ const MessageBubble: React.FC<{
 };
 
 // Enhanced Agent Status Card for Sidebar
-const EnhancedAgentStatusCard: React.FC<{ agent: AgentStatus }> = ({ agent }) => {
+const EnhancedAgentStatusCard: React.FC<{ agent: AgentStatus }> = ({
+  agent,
+}) => {
   const getStatusColor = () => {
     switch (agent.status) {
       case 'working':
@@ -1568,18 +1776,24 @@ const EnhancedAgentStatusCard: React.FC<{ agent: AgentStatus }> = ({ agent }) =>
   return (
     <motion.div
       layout
-      className={cn("p-3 rounded-lg border transition-all", getStatusColor())}
+      className={cn('rounded-lg border p-3 transition-all', getStatusColor())}
     >
       {/* Header */}
-      <div className="flex items-start justify-between mb-2">
+      <div className="mb-2 flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <AgentAvatar agentName={agent.agentName} role="assistant" status={agent.status} />
-          <div className="flex-1 min-w-0">
+          <AgentAvatar
+            agentName={agent.agentName}
+            role="assistant"
+            status={agent.status}
+          />
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               {getStatusIcon()}
-              <span className="text-xs font-semibold truncate">{agent.agentName}</span>
+              <span className="truncate text-xs font-semibold">
+                {agent.agentName}
+              </span>
             </div>
-            <Badge variant="outline" className="text-[10px] h-4 mt-0.5">
+            <Badge variant="outline" className="mt-0.5 h-4 text-[10px]">
               {agent.status}
             </Badge>
           </div>
@@ -1588,23 +1802,23 @@ const EnhancedAgentStatusCard: React.FC<{ agent: AgentStatus }> = ({ agent }) =>
 
       {/* Current Task */}
       {agent.currentTask && (
-        <p className="text-[11px] text-muted-foreground mb-2 line-clamp-2">
+        <p className="mb-2 line-clamp-2 text-[11px] text-muted-foreground">
           {agent.currentTask}
         </p>
       )}
 
       {/* Progress */}
       <div className="space-y-1">
-        <div className="flex justify-between items-center text-[10px]">
+        <div className="flex items-center justify-between text-[10px]">
           <span className="text-muted-foreground">Progress</span>
           <span className="font-semibold">{agent.progress}%</span>
         </div>
-        <div className="h-1.5 bg-background rounded-full overflow-hidden">
+        <div className="h-1.5 overflow-hidden rounded-full bg-background">
           <motion.div
             className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
             initial={{ width: 0 }}
             animate={{ width: `${agent.progress}%` }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
           />
         </div>
       </div>
@@ -1613,12 +1827,16 @@ const EnhancedAgentStatusCard: React.FC<{ agent: AgentStatus }> = ({ agent }) =>
       {agent.toolsUsing && agent.toolsUsing.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
           {agent.toolsUsing.slice(0, 3).map((tool, idx) => (
-            <Badge key={idx} variant="secondary" className="text-[10px] h-4 px-1.5">
+            <Badge
+              key={idx}
+              variant="secondary"
+              className="h-4 px-1.5 text-[10px]"
+            >
               {tool}
             </Badge>
           ))}
           {agent.toolsUsing.length > 3 && (
-            <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+            <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">
               +{agent.toolsUsing.length - 3}
             </Badge>
           )}
@@ -1660,8 +1878,10 @@ const AgentStatusCard: React.FC<{ agent: AgentStatus }> = ({ agent }) => {
   };
 
   return (
-    <div className={cn("p-4 rounded-lg border transition-all", getStatusColor())}>
-      <div className="flex items-center justify-between mb-3">
+    <div
+      className={cn('rounded-lg border p-4 transition-all', getStatusColor())}
+    >
+      <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {getStatusIcon()}
           <span className="font-semibold">{agent.agentName}</span>
@@ -1672,15 +1892,17 @@ const AgentStatusCard: React.FC<{ agent: AgentStatus }> = ({ agent }) => {
       </div>
 
       {agent.currentTask && (
-        <p className="text-sm text-muted-foreground mb-3">{agent.currentTask}</p>
+        <p className="mb-3 text-sm text-muted-foreground">
+          {agent.currentTask}
+        </p>
       )}
 
       <div className="space-y-2">
-        <div className="flex justify-between items-center text-xs">
+        <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground">Progress</span>
           <span className="font-semibold">{agent.progress}%</span>
         </div>
-        <div className="h-2 bg-background rounded-full overflow-hidden">
+        <div className="h-2 overflow-hidden rounded-full bg-background">
           <div
             className="h-full bg-current transition-all duration-500"
             style={{ width: `${agent.progress}%` }}
@@ -1702,13 +1924,16 @@ const AgentStatusCard: React.FC<{ agent: AgentStatus }> = ({ agent }) => {
 };
 
 // Plan Step Component
-const PlanStepComponent: React.FC<{ step: PlanStep; level?: number }> = ({ step, level = 0 }) => {
+const PlanStepComponent: React.FC<{ step: PlanStep; level?: number }> = ({
+  step,
+  level = 0,
+}) => {
   const getIcon = () => {
     switch (step.status) {
       case 'completed':
         return <CheckCircle2 className="h-4 w-4 text-green-500" />;
       case 'in_progress':
-        return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
+        return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
       case 'failed':
         return <AlertCircle className="h-4 w-4 text-red-500" />;
       default:
@@ -1720,14 +1945,16 @@ const PlanStepComponent: React.FC<{ step: PlanStep; level?: number }> = ({ step,
     <div className="space-y-2" style={{ marginLeft: `${level * 1.5}rem` }}>
       <div className="flex items-start gap-2">
         {getIcon()}
-        <span className={cn(
-          "text-sm flex-1",
-          step.status === 'completed' && "text-muted-foreground"
-        )}>
+        <span
+          className={cn(
+            'flex-1 text-sm',
+            step.status === 'completed' && 'text-muted-foreground'
+          )}
+        >
           {step.description}
         </span>
       </div>
-      {step.substeps?.map((substep) => (
+      {step.substeps?.map(substep => (
         <PlanStepComponent key={substep.id} step={substep} level={level + 1} />
       ))}
     </div>
@@ -1735,4 +1962,3 @@ const PlanStepComponent: React.FC<{ step: PlanStep; level?: number }> = ({ step,
 };
 
 export default VibeCodingInterface;
-

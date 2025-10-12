@@ -8,16 +8,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { 
-  CheckCircle, 
-  Clock, 
-  AlertCircle, 
-  Play, 
-  Pause, 
+import {
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Play,
+  Pause,
   RotateCcw,
   Brain,
   Zap,
-  Target
+  Target,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -75,7 +75,7 @@ export const TaskDivision: React.FC<TaskDivisionProps> = ({
       case 'completed':
         return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'running':
-        return <Clock className="h-4 w-4 text-blue-600 animate-pulse" />;
+        return <Clock className="h-4 w-4 animate-pulse text-blue-600" />;
       case 'failed':
         return <AlertCircle className="h-4 w-4 text-red-600" />;
       case 'pending':
@@ -120,18 +120,23 @@ export const TaskDivision: React.FC<TaskDivisionProps> = ({
     return `${hours}h ${remainingMinutes}m`;
   };
 
-  const completedTasks = tasks.filter(task => task.status === 'completed').length;
+  const completedTasks = tasks.filter(
+    task => task.status === 'completed'
+  ).length;
   const totalTasks = tasks.length;
   const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
-  const estimatedTotalTime = tasks.reduce((total, task) => total + task.estimatedTime, 0);
+  const estimatedTotalTime = tasks.reduce(
+    (total, task) => total + task.estimatedTime,
+    0
+  );
 
   return (
     <Card className={cn('', className)}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center">
-            <Brain className="h-5 w-5 mr-2" />
+            <Brain className="mr-2 h-5 w-5" />
             Task Division & Plan
           </CardTitle>
           <div className="flex items-center space-x-2">
@@ -147,62 +152,72 @@ export const TaskDivision: React.FC<TaskDivisionProps> = ({
             )}
             {isRunning && (
               <Button variant="outline" size="sm" onClick={onPause}>
-                <Pause className="h-4 w-4 mr-1" />
+                <Pause className="mr-1 h-4 w-4" />
                 Pause
               </Button>
             )}
             {isPaused && (
               <Button size="sm" onClick={onStart}>
-                <Play className="h-4 w-4 mr-1" />
+                <Play className="mr-1 h-4 w-4" />
                 Resume
               </Button>
             )}
             {(isRunning || isPaused) && (
               <Button variant="ghost" size="sm" onClick={onReset}>
-                <RotateCcw className="h-4 w-4 mr-1" />
+                <RotateCcw className="mr-1 h-4 w-4" />
                 Reset
               </Button>
             )}
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span>Progress: {completedTasks}/{totalTasks} tasks</span>
+            <span>
+              Progress: {completedTasks}/{totalTasks} tasks
+            </span>
             <span>Estimated time: {formatTime(estimatedTotalTime)}</span>
           </div>
           <Progress value={progress} className="h-2" />
         </div>
       </CardHeader>
-      
+
       <CardContent>
         <div className="space-y-4">
           {tasks.map((task, index) => (
             <div
               key={task.id}
               className={cn(
-                'p-4 rounded-lg border transition-all',
-                task.status === 'running' && 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/10',
-                task.status === 'completed' && 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/10',
-                task.status === 'failed' && 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/10'
+                'rounded-lg border p-4 transition-all',
+                task.status === 'running' &&
+                  'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/10',
+                task.status === 'completed' &&
+                  'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/10',
+                task.status === 'failed' &&
+                  'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/10'
               )}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 mt-1">
+                  <div className="mt-1 flex-shrink-0">
                     {getTaskIcon(task.type)}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex items-center space-x-2">
                       <h4 className="text-sm font-medium">{task.title}</h4>
-                      <Badge className={cn('text-xs', getTaskStatusColor(task.status))}>
+                      <Badge
+                        className={cn(
+                          'text-xs',
+                          getTaskStatusColor(task.status)
+                        )}
+                      >
                         {task.status}
                       </Badge>
                       <Badge className={cn('text-xs', getTypeColor(task.type))}>
                         {task.type}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">
+                    <p className="mb-2 text-sm text-muted-foreground">
                       {task.description}
                     </p>
                     <div className="flex items-center space-x-4 text-xs text-muted-foreground">
@@ -215,29 +230,31 @@ export const TaskDivision: React.FC<TaskDivisionProps> = ({
                       )}
                     </div>
                     {task.result && (
-                      <div className="mt-2 p-2 bg-muted rounded text-sm">
+                      <div className="mt-2 rounded bg-muted p-2 text-sm">
                         <strong>Result:</strong> {task.result}
                       </div>
                     )}
                     {task.error && (
-                      <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-sm text-red-600">
+                      <div className="mt-2 rounded bg-red-50 p-2 text-sm text-red-600 dark:bg-red-900/20">
                         <strong>Error:</strong> {task.error}
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="flex-shrink-0 ml-4">
+                <div className="ml-4 flex-shrink-0">
                   {getTaskStatusIcon(task.status)}
                 </div>
               </div>
             </div>
           ))}
         </div>
-        
+
         {tasks.length === 0 && (
-          <div className="text-center py-8">
+          <div className="py-8 text-center">
             <Brain className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-2 text-sm font-semibold text-foreground">No tasks planned</h3>
+            <h3 className="mt-2 text-sm font-semibold text-foreground">
+              No tasks planned
+            </h3>
             <p className="mt-1 text-sm text-muted-foreground">
               The AI will analyze your request and create a task plan.
             </p>

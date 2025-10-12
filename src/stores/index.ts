@@ -8,45 +8,28 @@
 // ========================================
 
 // App Store - Global application state
-export {
-  useAppStore,
-  type AppStore,
-} from './app-store';
+export { useAppStore, type AppStore } from './app-store';
 
 // Auth Store - Authentication and user management (unified)
-export {
-  useAuthStore,
-} from './unified-auth-store';
+export { useAuthStore } from './unified-auth-store';
 
 // Chat Store - Chat conversations and messages
-export {
-  useChatStore,
-} from './chat-store';
+export { useChatStore } from './chat-store';
 
 // Workforce Store - AI workforce and job management
-export {
-  useWorkforceStore,
-} from './workforce-store';
+export { useWorkforceStore } from './workforce-store';
 
 // Employee Store - AI employee marketplace
-export {
-  useEmployeeStore,
-} from './ai-employee-store';
+export { useEmployeeStore } from './ai-employee-store';
 
 // Notification Store - App notifications and toasts
-export {
-  useNotificationStore,
-} from './notification-store';
+export { useNotificationStore } from './notification-store';
 
 // UI Store - UI state and theme management
-export {
-  useUIStore,
-} from './ui-store';
+export { useUIStore } from './ui-store';
 
 // User Profile Store
-export {
-  useUserProfileStore,
-} from './user-profile-store';
+export { useUserProfileStore } from './user-profile-store';
 
 // Agent Metrics Store - Real-time metrics from agent activity
 export {
@@ -59,9 +42,7 @@ export {
 // React Query Configuration
 // ========================================
 
-export {
-  queryClient,
-} from './query-client';
+export { queryClient } from './query-client';
 
 // ========================================
 // Type Definitions

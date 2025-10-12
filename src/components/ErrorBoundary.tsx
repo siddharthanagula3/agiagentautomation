@@ -1,7 +1,13 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from './ui/card';
 
 interface Props {
   children: ReactNode;
@@ -15,7 +21,7 @@ interface State {
 
 class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false
+    hasError: false,
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -24,13 +30,15 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Don't catch auth-related errors as they're handled by auth context
-    if (error.message.includes('AuthService') || 
-        error.message.includes('Supabase') ||
-        error.message.includes('auth')) {
+    if (
+      error.message.includes('AuthService') ||
+      error.message.includes('Supabase') ||
+      error.message.includes('auth')
+    ) {
       console.log('ErrorBoundary: Ignoring auth-related error:', error.message);
       return;
     }
-    
+
     console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
@@ -45,7 +53,7 @@ class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="flex min-h-screen items-center justify-center p-4">
           <Card className="w-full max-w-md">
             <CardHeader>
               <div className="flex items-center space-x-2">
@@ -58,19 +66,19 @@ class ErrorBoundary extends Component<Props, State> {
             </CardHeader>
             <CardContent className="space-y-4">
               {this.state.error && (
-                <div className="p-3 bg-destructive/10 rounded-md">
-                  <p className="text-sm text-destructive font-mono">
+                <div className="rounded-md bg-destructive/10 p-3">
+                  <p className="font-mono text-sm text-destructive">
                     {this.state.error.message}
                   </p>
                 </div>
               )}
               <div className="flex space-x-2">
                 <Button onClick={this.handleRetry} className="flex-1">
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="mr-2 h-4 w-4" />
                   Try Again
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => window.location.reload()}
                   className="flex-1"
                 >

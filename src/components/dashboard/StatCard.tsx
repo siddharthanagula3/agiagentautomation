@@ -17,7 +17,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   change,
   changeType = 'neutral',
   icon,
-  description
+  description,
 }) => {
   const getChangeIcon = () => {
     switch (changeType) {
@@ -59,7 +59,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           </div>
         )}
         {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{description}</p>
         )}
       </CardContent>
     </Card>

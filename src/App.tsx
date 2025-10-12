@@ -25,9 +25,8 @@ import VibeCodingPage from './pages/chat/VibeCodingPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import AIConfigurationPage from './pages/settings/AIConfigurationPage';
 import MarketplacePublicPage from './pages/MarketplacePublicPage';
-import MarketplacePage from './pages/marketplace/MarketplacePage';
-import BillingPage from './pages/dashboard/BillingPage';
-import HelpSupportPage from './pages/dashboard/HelpSupportPage';
+import BillingPage from './pages/BillingPage';
+import HelpSupportPage from './pages/HelpSupportPage';
 import SetupGuidePage from './pages/SetupGuidePage';
 
 // New Public Pages
@@ -61,6 +60,10 @@ import AIProjectManagerPage from './pages/features/AIProjectManagerPage';
 import VsChatGPTPage from './pages/comparisons/VsChatGPTPage';
 import VsClaudePage from './pages/comparisons/VsClaudePage';
 
+// 404 Page
+import NotFoundPage from './pages/NotFoundPage';
+import BlogPostPage from './pages/BlogPostPage';
+
 function App() {
   return (
     <ThemeProvider>
@@ -73,6 +76,7 @@ function App() {
 
               {/* Marketing Pages */}
               <Route path="blog" element={<BlogPage />} />
+              <Route path="blog/:slug" element={<BlogPostPage />} />
               <Route path="resources" element={<ResourcesPage />} />
               <Route path="help" element={<HelpPage />} />
               <Route path="pricing" element={<PricingPage />} />
@@ -92,14 +96,29 @@ function App() {
 
               {/* Use Cases */}
               <Route path="use-cases/startups" element={<StartupsPage />} />
-              <Route path="use-cases/it-service-providers" element={<ITServiceProvidersPage />} />
-              <Route path="use-cases/sales-teams" element={<SalesTeamsPage />} />
-              <Route path="use-cases/consulting-businesses" element={<ConsultingBusinessesPage />} />
+              <Route
+                path="use-cases/it-service-providers"
+                element={<ITServiceProvidersPage />}
+              />
+              <Route
+                path="use-cases/sales-teams"
+                element={<SalesTeamsPage />}
+              />
+              <Route
+                path="use-cases/consulting-businesses"
+                element={<ConsultingBusinessesPage />}
+              />
 
               {/* Features */}
               <Route path="features/ai-chat" element={<AIChatPage />} />
-              <Route path="features/ai-dashboards" element={<AIDashboardsPage />} />
-              <Route path="features/ai-project-manager" element={<AIProjectManagerPage />} />
+              <Route
+                path="features/ai-dashboards"
+                element={<AIDashboardsPage />}
+              />
+              <Route
+                path="features/ai-project-manager"
+                element={<AIProjectManagerPage />}
+              />
 
               {/* Comparison Pages */}
               <Route path="vs-chatgpt" element={<VsChatGPTPage />} />
@@ -133,23 +152,26 @@ function App() {
             >
               {/* Dashboard Home */}
               <Route path="dashboard" element={<DashboardHomePage />} />
-              
+
               {/* Main Features */}
               <Route path="workforce" element={<WorkforcePage />} />
-              
-                  {/* Vibe Coding - Multi-Agent Orchestration */}
-                  <Route path="vibe" element={<VibeCodingPage />} />
-                  
-                  {/* Legacy Chat Routes (for backward compatibility) */}
-                  <Route path="chat" element={<ChatPage />} />
-                  <Route path="chat/:sessionId" element={<ChatPage />} />
-                  <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
-                  <Route path="chat-multi" element={<TabbedLLMChatPage />} />
-              
+
+              {/* Vibe Coding - Multi-Agent Orchestration */}
+              <Route path="vibe" element={<VibeCodingPage />} />
+
+              {/* Legacy Chat Routes (for backward compatibility) */}
+              <Route path="chat" element={<ChatPage />} />
+              <Route path="chat/:sessionId" element={<ChatPage />} />
+              <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
+              <Route path="chat-multi" element={<TabbedLLMChatPage />} />
+
               {/* Account & System at Root Level */}
               <Route path="settings" element={<SettingsPage />} />
               <Route path="settings/:section" element={<SettingsPage />} />
-              <Route path="settings/ai-configuration" element={<AIConfigurationPage />} />
+              <Route
+                path="settings/ai-configuration"
+                element={<AIConfigurationPage />}
+              />
               <Route path="billing" element={<BillingPage />} />
               <Route path="support" element={<HelpSupportPage />} />
             </Route>
@@ -158,7 +180,7 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
 
-          <Toaster 
+          <Toaster
             position="bottom-right"
             theme="dark"
             className="toaster"
@@ -171,28 +193,11 @@ function App() {
             }}
           />
         </div>
-        
+
         {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
       </TooltipProvider>
     </ThemeProvider>
   );
 }
-
-const NotFoundPage = () => {
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-6xl font-bold mb-4">404</h1>
-        <p className="text-xl text-muted-foreground mb-8">Page not found</p>
-        <a 
-          href="/dashboard" 
-          className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          Back to Dashboard
-        </a>
-      </div>
-    </div>
-  );
-};
 
 export default App;

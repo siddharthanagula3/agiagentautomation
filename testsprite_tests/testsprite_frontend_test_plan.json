@@ -1,0 +1,453 @@
+[
+  {
+    "id": "TC001",
+    "title": "User Login Success",
+    "description": "Verify that a user can successfully log in using valid credentials.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to login page."
+      },
+      {
+        "type": "action",
+        "description": "Input valid username/email and password."
+      },
+      {
+        "type": "action",
+        "description": "Click the login button."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm user is redirected to the main dashboard or home page."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify user authentication token/session is created and stored securely."
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "User Login Failure with Incorrect Credentials",
+    "description": "Ensure the system correctly rejects login attempts with invalid username/email or password.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to login page."
+      },
+      {
+        "type": "action",
+        "description": "Input invalid username/email or password."
+      },
+      {
+        "type": "action",
+        "description": "Click the login button."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an appropriate error message is displayed."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm user remains on login page with no changes to authentication state."
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Password Reset Workflow",
+    "description": "Verify that users can successfully initiate and complete a password reset process.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the forgot password page."
+      },
+      {
+        "type": "action",
+        "description": "Input a registered email address and submit request."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm a notification is sent that password reset instructions were emailed."
+      },
+      {
+        "type": "action",
+        "description": "Follow reset link from email to reset password page."
+      },
+      {
+        "type": "action",
+        "description": "Input new password and confirm."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify password is updated and user can log in with new password."
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Submit Natural Language Task Request",
+    "description": "Verify that user can submit a valid multi-step task request using the chat interface and system accepts it.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in and open the chat interface."
+      },
+      {
+        "type": "action",
+        "description": "Enter a complex multi-step task request in natural language into chat."
+      },
+      {
+        "type": "action",
+        "description": "Submit the request."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify system acknowledges and displays execution plan preview with estimated time and cost."
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Execution Plan Preview and Approval",
+    "description": "Verify that the user can view an execution plan preview with estimated time and cost, and approve or reject it before task execution.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "After task request submission, observe the execution plan preview."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm estimated time and cost are displayed clearly."
+      },
+      {
+        "type": "action",
+        "description": "Click approve button to accept the plan."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the task execution starts and real-time updates commence."
+      },
+      {
+        "type": "action",
+        "description": "Repeat and choose reject button to cancel the task before execution."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm task is not executed and user is notified accordingly."
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Real-time Task Execution Updates and Controls",
+    "description": "Confirm that real-time execution updates are provided and user controls (pause, resume, cancel) operate correctly.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Start a complex multi-step task."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify real-time visual status updates for task progress and AI Employee interactions appear on chat and collaboration interface."
+      },
+      {
+        "type": "action",
+        "description": "Pause the task execution via user control."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate that task execution halts and UI status reflects paused state."
+      },
+      {
+        "type": "action",
+        "description": "Resume the task execution."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm task resumes and status updates continue."
+      },
+      {
+        "type": "action",
+        "description": "Cancel the task execution."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify task execution stops, cleanup happens, and user is notified."
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Multi-Agent Orchestrator Autonomy and Task Handoff",
+    "description": "Verify that the Multi-Agent Orchestrator effectively coordinates AI Employees, assigns tasks based on skills and cost, and handles dynamic handoffs.",
+    "category": "integration",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Submit a multi-step task requiring various AI specializations."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify TaskDecomposer breaks down the request accurately into subtasks with dependencies."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm AgentSelector assigns tasks to AI Employees optimized for skill and cost."
+      },
+      {
+        "type": "assertion",
+        "description": "Observe AI Employees execute tasks autonomously and hand off work dynamically."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate no deadlocks or task failures during orchestration."
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "AI Employee Marketplace Hiring and Workforce Management",
+    "description": "Ensure that users can browse, hire, and manage AI Employees via the marketplace and workforce dashboard.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the AI Employee marketplace page."
+      },
+      {
+        "type": "action",
+        "description": "Browse AI Employees by specialization and capabilities."
+      },
+      {
+        "type": "action",
+        "description": "Hire one or more AI Employees."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify hired employees appear in the workforce dashboard."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm workforce dashboard shows employee status, health, and performance metrics correctly."
+      },
+      {
+        "type": "action",
+        "description": "Manage employee status and reassign or dismiss employees."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate that changes persist and dashboard updates accordingly."
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Integration with Multiple LLM Providers and External Tools",
+    "description": "Verify integration support for multiple LLM providers and tools such as code executors and web search works correctly and selects providers dynamically.",
+    "category": "integration",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Invoke tasks requiring different LLM providers (OpenAI, Anthropic, Google, Perplexity)."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm API calls are routed correctly to selected LLM providers."
+      },
+      {
+        "type": "action",
+        "description": "Use external tools such as code executors and web search within tasks."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify tool responses are received and displayed correctly in task execution."
+      },
+      {
+        "type": "assertion",
+        "description": "Simulate provider failure and confirm fallback mechanisms engage smoothly."
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "User Authentication Lifecycle and Secure Storage",
+    "description": "Test the authentication system for full user lifecycle management with secure data storage.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Register a new user account successfully."
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure user data is stored securely with encryption as appropriate."
+      },
+      {
+        "type": "action",
+        "description": "Log in with registered credentials."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify protected routes are accessible only when logged in."
+      },
+      {
+        "type": "action",
+        "description": "Log out and attempt to access protected routes."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm access is denied and redirect to login page."
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Subscription and Payment Processing via Stripe",
+    "description": "Verify that subscription management and payment processing function correctly and handle errors gracefully.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the billing page."
+      },
+      {
+        "type": "action",
+        "description": "Subscribe to a paid plan using valid payment details."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm subscription status updates and billing information is shown."
+      },
+      {
+        "type": "action",
+        "description": "Simulate payment failure (e.g., declined card)."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify appropriate error messages are shown and retry options are provided."
+      },
+      {
+        "type": "action",
+        "description": "Cancel subscription and confirm cancellation is processed."
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Accessibility Compliance and Responsive Layout",
+    "description": "Ensure accessibility features meet compliance standards and UI layout is responsive on different devices and screen sizes.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate through key UI components using keyboard only."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate all interactive elements are accessible via keyboard focus and have appropriate labels."
+      },
+      {
+        "type": "action",
+        "description": "Use screen reader to verify UI semantic correctness and announcements."
+      },
+      {
+        "type": "action",
+        "description": "Resize browser window to mobile and tablet sizes."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm layout adjusts correctly and remains usable."
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "System Failure Recovery and Retry Mechanisms",
+    "description": "Verify the system handles AI Employee execution failures and orchestrator errors with retry and fallback strategies.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Inject failure or simulate timeout in task execution for an AI Employee."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm retry attempts are made automatically according to policy."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify fallback agents or tools are engaged if retries fail."
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure the user is notified of failure and recovery actions."
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Real-time Updates and WebSocket Connection Stability",
+    "description": "Test real-time UI updates and WebSocket connections for task progress and AI Employee interactions maintain stability under normal and adverse network conditions.",
+    "category": "integration",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Start task execution and observe real-time UI updates."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm updates reflect actual task progress and AI Employee communication."
+      },
+      {
+        "type": "action",
+        "description": "Simulate network interruption and recovery."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify WebSocket reconnects automatically and updates resume correctly."
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "UI Components and Reusable Layout Elements",
+    "description": "Verify that UI components (buttons, cards, dialogs, dropdowns) and layouts function correctly and maintain consistent styling and behavior.",
+    "category": "ui",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Interact with all common UI components across different pages."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm components render without errors and respond to user interactions."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate consistent styling and accessibility compliance for components."
+      }
+    ]
+  }
+]

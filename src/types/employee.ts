@@ -106,5 +106,15 @@ export interface EmployeeCategory {
 }
 
 export type EmployeeStatus = 'active' | 'inactive' | 'suspended' | 'archived';
-export type EmployeeProvider = 'openai' | 'anthropic' | 'google' | 'perplexity' | 'custom';
-export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'trialing' | 'unpaid';
+export type EmployeeProvider =
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'perplexity'
+  | 'custom';
+export type SubscriptionStatus =
+  | 'active'
+  | 'canceled'
+  | 'past_due'
+  | 'trialing'
+  | 'unpaid';

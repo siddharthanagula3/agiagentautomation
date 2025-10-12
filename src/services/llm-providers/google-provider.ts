@@ -3,8 +3,12 @@
  * Official SDK integration for Google AI Studio Gemini models
  */
 
-import { GoogleGenerativeAI, GenerativeModel, GenerationConfig } from '@google/generative-ai';
-import { createClient } from '@supabase/supabase-js';
+import {
+  GoogleGenerativeAI,
+  GenerativeModel,
+  GenerationConfig,
+} from '@google/generative-ai';
+import { supabase } from '@/lib/supabase-client';
 
 // Environment variables
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
@@ -13,7 +17,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Initialize clients
 const genAI = GOOGLE_API_KEY ? new GoogleGenerativeAI(GOOGLE_API_KEY) : null;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Using centralized Supabase client
 
 export interface GoogleMessage {
   role: 'user' | 'assistant' | 'system';
@@ -70,16 +74,18 @@ export class GoogleProvider {
       temperature: 0.7,
       systemPrompt: 'You are a helpful AI assistant.',
       tools: [],
-      ...config
+      ...config,
     };
-    
-    this.model = genAI ? genAI.getGenerativeModel({ 
-      model: this.config.model,
-      generationConfig: {
-        maxOutputTokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-      }
-    }) : null;
+
+    this.model = genAI
+      ? genAI.getGenerativeModel({
+          model: this.config.model,
+          generationConfig: {
+            maxOutputTokens: this.config.maxTokens,
+            temperature: this.config.temperature,
+          },
+        })
+      : null;
   }
 
   /**
@@ -132,8 +138,8 @@ export class GoogleProvider {
             provider: 'google',
             model: this.config.model,
             usage,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
       }
 
@@ -145,13 +151,12 @@ export class GoogleProvider {
         userId,
         metadata: {
           finishReason: response.candidates?.[0]?.finishReason,
-          usage: result.usageMetadata
-        }
+          usage: result.usageMetadata,
+        },
       };
-
     } catch (error) {
       console.error('[Google Provider] Error:', error);
-      
+
       if (error instanceof Error) {
         // Check for specific Google API errors
         if (error.message.includes('API_KEY_INVALID')) {
@@ -160,7 +165,7 @@ export class GoogleProvider {
             'INVALID_API_KEY'
           );
         }
-        
+
         if (error.message.includes('QUOTA_EXCEEDED')) {
           throw new GoogleError(
             'Google API quota exceeded. Please try again later.',
@@ -168,7 +173,7 @@ export class GoogleProvider {
             true
           );
         }
-        
+
         if (error.message.includes('SAFETY')) {
           throw new GoogleError(
             'Content blocked by safety filters.',
@@ -177,7 +182,7 @@ export class GoogleProvider {
           );
         }
       }
-      
+
       throw new GoogleError(
         `Google request failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'REQUEST_FAILED',
@@ -218,7 +223,10 @@ export class GoogleProvider {
           'CLIENT_NOT_INITIALIZED'
         );
       }
-      const result = await this.model.generateContentStream(prompt, generationConfig);
+      const result = await this.model.generateContentStream(
+        prompt,
+        generationConfig
+      );
 
       let fullContent = '';
       let usage: any = null;
@@ -247,14 +255,13 @@ export class GoogleProvider {
             provider: 'google',
             model: this.config.model,
             usage,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
       }
-
     } catch (error) {
       console.error('[Google Provider] Streaming error:', error);
-      
+
       if (error instanceof Error) {
         if (error.message.includes('API_KEY_INVALID')) {
           throw new GoogleError(
@@ -262,7 +269,7 @@ export class GoogleProvider {
             'INVALID_API_KEY'
           );
         }
-        
+
         if (error.message.includes('QUOTA_EXCEEDED')) {
           throw new GoogleError(
             'Google API quota exceeded. Please try again later.',
@@ -271,7 +278,7 @@ export class GoogleProvider {
           );
         }
       }
-      
+
       throw new GoogleError(
         `Google streaming failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'STREAMING_FAILED',
@@ -285,12 +292,12 @@ export class GoogleProvider {
    */
   private convertMessagesToGemini(messages: GoogleMessage[]): string {
     let prompt = '';
-    
+
     // Add system prompt if provided
     if (this.config.systemPrompt) {
       prompt += `System: ${this.config.systemPrompt}\n\n`;
     }
-    
+
     // Convert conversation history
     for (const message of messages) {
       if (message.role === 'system') {
@@ -301,10 +308,10 @@ export class GoogleProvider {
         prompt += `Assistant: ${message.content}\n\n`;
       }
     }
-    
+
     // Add final prompt for response
     prompt += 'Assistant:';
-    
+
     return prompt;
   }
 
@@ -320,7 +327,7 @@ export class GoogleProvider {
       return {
         promptTokens: result.usageMetadata.promptTokenCount || 0,
         completionTokens: result.usageMetadata.candidatesTokenCount || 0,
-        totalTokens: result.usageMetadata.totalTokenCount || 0
+        totalTokens: result.usageMetadata.totalTokenCount || 0,
       };
     }
     return { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
@@ -337,22 +344,23 @@ export class GoogleProvider {
     metadata: Record<string, any>;
   }): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('agent_messages')
-        .insert({
-          session_id: message.sessionId,
-          user_id: message.userId,
-          role: message.role,
-          content: message.content,
-          metadata: message.metadata,
-          created_at: new Date().toISOString()
-        });
+      const { error } = await supabase.from('agent_messages').insert({
+        session_id: message.sessionId,
+        user_id: message.userId,
+        role: message.role,
+        content: message.content,
+        metadata: message.metadata,
+        created_at: new Date().toISOString(),
+      });
 
       if (error) {
         console.error('[Google Provider] Error saving message:', error);
       }
     } catch (error) {
-      console.error('[Google Provider] Unexpected error saving message:', error);
+      console.error(
+        '[Google Provider] Unexpected error saving message:',
+        error
+      );
     }
   }
 
@@ -361,14 +369,14 @@ export class GoogleProvider {
    */
   updateConfig(newConfig: Partial<GoogleConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    
+
     // Reinitialize model with new config
-    this.model = genAI.getGenerativeModel({ 
+    this.model = genAI.getGenerativeModel({
       model: this.config.model,
       generationConfig: {
         maxOutputTokens: this.config.maxTokens,
         temperature: this.config.temperature,
-      }
+      },
     });
   }
 
@@ -390,11 +398,7 @@ export class GoogleProvider {
    * Get available models
    */
   static getAvailableModels(): string[] {
-    return [
-      'gemini-1.5-pro',
-      'gemini-1.5-flash',
-      'gemini-1.0-pro'
-    ];
+    return ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'];
   }
 }
 

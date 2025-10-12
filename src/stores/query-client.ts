@@ -4,7 +4,13 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider, useQuery, useMutation, useInfiniteQuery } from '@tanstack/react-query';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+  useMutation,
+  useInfiniteQuery,
+} from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 // Configure query client with optimized defaults
@@ -28,7 +34,7 @@ export const queryClient = new QueryClient({
       },
 
       // Retry delay (exponential backoff)
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
 
       // Refetch on window focus
       refetchOnWindowFocus: false,
@@ -68,7 +74,7 @@ export const QueryProvider: React.FC<QueryProviderProps> = ({ children }) => {
     children,
     React.createElement(ReactQueryDevtools, {
       initialIsOpen: false,
-      buttonPosition: 'bottom-right'
+      buttonPosition: 'bottom-right',
     })
   );
 };
@@ -86,7 +92,8 @@ export const queryKeys = {
   chat: {
     conversations: () => ['chat', 'conversations'] as const,
     conversation: (id: string) => ['chat', 'conversation', id] as const,
-    messages: (conversationId: string) => ['chat', 'messages', conversationId] as const,
+    messages: (conversationId: string) =>
+      ['chat', 'messages', conversationId] as const,
     models: () => ['chat', 'models'] as const,
   },
 
@@ -216,7 +223,8 @@ export const apiFetch = async <T = unknown>(
 
     if (!response.ok) {
       throw new APIException({
-        message: data.message || `HTTP ${response.status}: ${response.statusText}`,
+        message:
+          data.message || `HTTP ${response.status}: ${response.statusText}`,
         status: response.status,
         details: data.errors || data,
       });
@@ -230,14 +238,18 @@ export const apiFetch = async <T = unknown>(
 
     // Network or parsing error
     throw new APIException({
-      message: error instanceof Error ? error.message : 'Network error occurred',
+      message:
+        error instanceof Error ? error.message : 'Network error occurred',
       code: 'NETWORK_ERROR',
     });
   }
 };
 
 // Utility functions for common API patterns
-export const apiGet = <T = unknown>(url: string, params?: Record<string, unknown>) => {
+export const apiGet = <T = unknown>(
+  url: string,
+  params?: Record<string, unknown>
+) => {
   const searchParams = new URLSearchParams();
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
@@ -280,7 +292,7 @@ export const invalidateQueries = (patterns: (keyof typeof queryKeys)[]) => {
   patterns.forEach(pattern => {
     queryClient.invalidateQueries({
       queryKey: [pattern],
-      exact: false
+      exact: false,
     });
   });
 };
@@ -329,9 +341,14 @@ export const optimisticUpdate = <T = unknown>(
 export const backgroundSync = (queryKey: readonly unknown[]) => {
   return queryClient.refetchQueries({
     queryKey,
-    type: 'active'
+    type: 'active',
   });
 };
 
 // Export commonly used hooks for convenience
-export { useQuery, useMutation, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+export {
+  useQuery,
+  useMutation,
+  useInfiniteQuery,
+  useQueryClient,
+} from '@tanstack/react-query';

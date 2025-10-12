@@ -13,7 +13,10 @@ interface UseEmployeeOptions {
   cacheTime?: number;
 }
 
-export const useEmployee = (employeeId: string, options: UseEmployeeOptions = {}) => {
+export const useEmployee = (
+  employeeId: string,
+  options: UseEmployeeOptions = {}
+) => {
   const { employees, loadEmployee } = useAIEmployeeStore();
   const queryClient = useQueryClient();
 
@@ -34,7 +37,7 @@ export const useEmployee = (employeeId: string, options: UseEmployeeOptions = {}
       await new Promise(resolve => setTimeout(resolve, 1000));
       return { ...employees[employeeId], ...updates };
     },
-    onSuccess: (updatedEmployee) => {
+    onSuccess: updatedEmployee => {
       // Update the cache
       queryClient.setQueryData(['employee', employeeId], updatedEmployee);
     },

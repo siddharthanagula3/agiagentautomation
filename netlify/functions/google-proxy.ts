@@ -1,5 +1,9 @@
 import { Handler, HandlerEvent } from '@netlify/functions';
-import { calculateTokenCost, storeTokenUsage, extractRequestMetadata } from './utils/token-tracking';
+import {
+  calculateTokenCost,
+  storeTokenUsage,
+  extractRequestMetadata,
+} from './utils/token-tracking';
 
 /**
  * Netlify Function to proxy Google Gemini API calls
@@ -17,12 +21,12 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
   // Get API key from environment
   const GOOGLE_API_KEY = process.env.VITE_GOOGLE_API_KEY;
-  
+
   if (!GOOGLE_API_KEY) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
-        error: 'Google API key not configured in Netlify environment variables' 
+      body: JSON.stringify({
+        error: 'Google API key not configured in Netlify environment variables',
       }),
     };
   }
@@ -30,41 +34,43 @@ export const handler: Handler = async (event: HandlerEvent) => {
   try {
     // Parse request body
     const body = JSON.parse(event.body || '{}');
-    const { 
-      messages, 
+    const {
+      messages,
       model = 'gemini-2.0-flash-exp',
       temperature = 0.7,
-      attachments = []
+      attachments = [],
     } = body;
 
     console.log('[Google Proxy] Received request:', {
       model,
       messageCount: messages?.length,
-      attachmentCount: attachments.length
+      attachmentCount: attachments.length,
     });
 
     // Convert messages to Gemini format
     const systemMessage = messages.find((m: any) => m.role === 'system');
-    const conversationMessages = messages.filter((m: any) => m.role !== 'system');
+    const conversationMessages = messages.filter(
+      (m: any) => m.role !== 'system'
+    );
 
     const geminiContents = conversationMessages.map((msg: any) => {
       const parts: any[] = [{ text: msg.content }];
-      
+
       // Add attachments if this is the last user message
       if (msg.role === 'user' && attachments.length > 0) {
         attachments.forEach((attachment: any) => {
           parts.push({
             inline_data: {
               mime_type: attachment.mimeType,
-              data: attachment.dataBase64
-            }
+              data: attachment.dataBase64,
+            },
           });
         });
       }
 
       return {
         role: msg.role === 'assistant' ? 'model' : 'user',
-        parts
+        parts,
       };
     });
 
@@ -73,13 +79,13 @@ export const handler: Handler = async (event: HandlerEvent) => {
       generationConfig: {
         temperature,
         maxOutputTokens: 4000,
-      }
+      },
     };
 
     // Add system instruction if present
     if (systemMessage) {
       requestBody.systemInstruction = {
-        parts: [{ text: systemMessage.content }]
+        parts: [{ text: systemMessage.content }],
       };
     }
 
@@ -101,9 +107,9 @@ export const handler: Handler = async (event: HandlerEvent) => {
       console.error('[Google Proxy] API Error:', data);
       return {
         statusCode: response.status,
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           error: data.error?.message || 'Google API error',
-          details: data 
+          details: data,
         }),
       };
     }
@@ -121,9 +127,11 @@ export const handler: Handler = async (event: HandlerEvent) => {
       );
 
       // Store usage in Supabase (non-blocking)
-      storeTokenUsage('google', model, userId, sessionId, tokenUsage).catch(err => {
-        console.error('[Google Proxy] Failed to store token usage:', err);
-      });
+      storeTokenUsage('google', model, userId, sessionId, tokenUsage).catch(
+        err => {
+          console.error('[Google Proxy] Failed to store token usage:', err);
+        }
+      );
 
       // Add token usage info to response
       data.tokenTracking = {
@@ -137,10 +145,13 @@ export const handler: Handler = async (event: HandlerEvent) => {
     // Normalize response to ensure a plain text content exists for the UI
     let normalizedContent: string | undefined = undefined;
     try {
-      normalizedContent = data.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join('')
-        || data.candidates?.[0]?.content?.parts?.[0]?.text
-        || data.output_text
-        || data.content;
+      normalizedContent =
+        data.candidates?.[0]?.content?.parts
+          ?.map((p: any) => p.text)
+          .join('') ||
+        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        data.output_text ||
+        data.content;
     } catch {}
 
     const normalized = {
@@ -159,11 +170,10 @@ export const handler: Handler = async (event: HandlerEvent) => {
     console.error('[Google Proxy] Error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         error: 'Failed to process request',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       }),
     };
   }
 };
-

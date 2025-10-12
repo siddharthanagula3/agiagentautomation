@@ -1,13 +1,13 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Toaster } from "sonner";
-import AppRouter from "./AppRouter";
-import ErrorBoundary from "./components/ErrorBoundary";
-import "./index.css";
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Toaster } from 'sonner';
+import AppRouter from './AppRouter';
+import ErrorBoundary from './components/ErrorBoundary';
+import './index.css';
 
 // Import Supabase tester for debugging (only in development)
 if (import.meta.env.DEV) {
@@ -30,11 +30,15 @@ const Main = () => {
     <StrictMode>
       <ErrorBoundary>
         <HelmetProvider>
-          <BrowserRouter>
+          <BrowserRouter
+            future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+          >
             <QueryClientProvider client={queryClient}>
               <AppRouter />
               <Toaster position="top-right" richColors />
-              {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+              {import.meta.env.DEV && (
+                <ReactQueryDevtools initialIsOpen={false} />
+              )}
             </QueryClientProvider>
           </BrowserRouter>
         </HelmetProvider>
@@ -44,55 +48,61 @@ const Main = () => {
 };
 
 // Ensure DOM is ready before rendering
-const rootElement = document.getElementById("root");
+const rootElement = document.getElementById('root');
 
 if (!rootElement) {
-  throw new Error("Failed to find the root element. Ensure index.html has a div with id='root'");
+  throw new Error(
+    "Failed to find the root element. Ensure index.html has a div with id='root'"
+  );
 }
 
-// Add some initial logging for debugging
-console.log('🚀 Starting AGI Agent Automation app...');
-console.log('Environment:', {
-  mode: import.meta.env.MODE,
-  dev: import.meta.env.DEV,
-  supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? 'Set ✅' : 'Missing ❌',
-  demoMode: import.meta.env.VITE_DEMO_MODE
-});
+// Add some initial logging for debugging (development only)
+if (import.meta.env.DEV) {
+  console.log('🚀 Starting AGI Agent Automation app...');
+  console.log('Environment:', {
+    mode: import.meta.env.MODE,
+    dev: import.meta.env.DEV,
+    supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? 'Set ✅' : 'Missing ❌',
+    demoMode: import.meta.env.VITE_DEMO_MODE,
+  });
+}
 
 // Wrap in try-catch to handle initialization errors
 try {
   const root = createRoot(rootElement);
-  
+
   // Add timeout to prevent infinite loading
   const renderTimeout = setTimeout(() => {
     console.warn('⚠️ App initialization taking longer than expected');
   }, 10000); // Increased to 10 seconds
-  
+
   root.render(<Main />);
-  
+
   // Clear timeout once app is rendered
   clearTimeout(renderTimeout);
-  
+
   // Hide the initial loader immediately after render is called
   setTimeout(() => {
     const loader = document.getElementById('initial-loader');
     const errorContainer = document.querySelector('.error-container');
-    
+
     if (loader) {
       loader.style.display = 'none';
     }
     if (errorContainer) {
       errorContainer.style.display = 'none';
     }
-    
+
     // Remove loading class and add app-loaded class
     document.body.classList.remove('loading');
     document.body.classList.add('app-loaded');
   }, 500); // Increased delay to ensure React has started mounting
-  
-  console.log('✅ App rendering initiated');
+
+  if (import.meta.env.DEV) {
+    console.log('✅ App rendering initiated');
+  }
 } catch (error) {
-  console.error("❌ Failed to initialize application:", error);
+  console.error('❌ Failed to initialize application:', error);
   // Display error in the DOM
   rootElement.innerHTML = `
     <div style="padding: 20px; font-family: monospace; color: red; background: #111; min-height: 100vh;">

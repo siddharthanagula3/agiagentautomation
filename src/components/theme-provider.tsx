@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { 
-  type Theme, 
-  THEME_STORAGE_KEY, 
-  DEFAULT_THEME, 
-  getSystemTheme, 
-  applyThemeToDocument 
+import {
+  type Theme,
+  THEME_STORAGE_KEY,
+  DEFAULT_THEME,
+  getSystemTheme,
+  applyThemeToDocument,
 } from './theme-constants';
 
 interface ThemeContextType {

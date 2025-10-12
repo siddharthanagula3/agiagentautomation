@@ -112,7 +112,9 @@ const INITIAL_STATE: AppState = {
   },
   version: import.meta.env.VITE_APP_VERSION || '1.0.0',
   buildNumber: import.meta.env.VITE_BUILD_NUMBER || 'dev',
-  environment: (import.meta.env.MODE as 'development' | 'production' | 'test') || 'development',
+  environment:
+    (import.meta.env.MODE as 'development' | 'production' | 'test') ||
+    'development',
 };
 
 export const useAppStore = create<AppStore>()(
@@ -123,71 +125,74 @@ export const useAppStore = create<AppStore>()(
 
         // Initialization
         initialize: async () => {
-          set((state) => {
+          set(state => {
             state.loading = true;
             state.error = null;
           });
 
           try {
             // Simulate initialization
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-            set((state) => {
+            set(state => {
               state.initialized = true;
               state.loading = false;
               state.sessionId = crypto.randomUUID();
               state.lastActivity = new Date();
             });
           } catch (error) {
-            set((state) => {
+            set(state => {
               state.loading = false;
-              state.error = error instanceof Error ? error.message : 'Failed to initialize app';
+              state.error =
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to initialize app';
             });
           }
         },
 
         setLoading: (loading: boolean) =>
-          set((state) => {
+          set(state => {
             state.loading = loading;
           }),
 
         setError: (error: string | null) =>
-          set((state) => {
+          set(state => {
             state.error = error;
           }),
 
         // Settings management
         updateSettings: (newSettings: Partial<AppSettings>) =>
-          set((state) => {
+          set(state => {
             state.settings = { ...state.settings, ...newSettings };
           }),
 
         resetSettings: () =>
-          set((state) => {
+          set(state => {
             state.settings = DEFAULT_SETTINGS;
           }),
 
         // Session management
         startSession: () =>
-          set((state) => {
+          set(state => {
             state.sessionId = crypto.randomUUID();
             state.lastActivity = new Date();
           }),
 
         endSession: () =>
-          set((state) => {
+          set(state => {
             state.sessionId = null;
             state.lastActivity = null;
           }),
 
         updateActivity: () =>
-          set((state) => {
+          set(state => {
             state.lastActivity = new Date();
           }),
 
         // Feature flags
         setFeature: (feature: string, enabled: boolean) =>
-          set((state) => {
+          set(state => {
             state.features[feature] = enabled;
           }),
 
@@ -198,14 +203,14 @@ export const useAppStore = create<AppStore>()(
 
         // Utility actions
         reset: () =>
-          set((state) => {
+          set(state => {
             Object.assign(state, INITIAL_STATE);
           }),
       })),
       {
         name: 'agi-app-store',
         version: 1,
-        partialize: (state) => ({
+        partialize: state => ({
           settings: state.settings,
           features: state.features,
         }),
@@ -218,11 +223,12 @@ export const useAppStore = create<AppStore>()(
 );
 
 // Selectors for optimized re-renders
-export const useAppLoading = () => useAppStore((state) => state.loading);
-export const useAppError = () => useAppStore((state) => state.error);
-export const useAppSettings = () => useAppStore((state) => state.settings);
-export const useAppFeatures = () => useAppStore((state) => state.features);
-export const useAppSession = () => useAppStore((state) => ({
-  sessionId: state.sessionId,
-  lastActivity: state.lastActivity,
-}));
+export const useAppLoading = () => useAppStore(state => state.loading);
+export const useAppError = () => useAppStore(state => state.error);
+export const useAppSettings = () => useAppStore(state => state.settings);
+export const useAppFeatures = () => useAppStore(state => state.features);
+export const useAppSession = () =>
+  useAppStore(state => ({
+    sessionId: state.sessionId,
+    lastActivity: state.lastActivity,
+  }));

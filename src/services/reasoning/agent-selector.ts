@@ -60,9 +60,9 @@ export class AgentSelector {
 
     // Get all compatible agents
     const compatibleAgents = this.getCompatibleAgents(task);
-    
+
     // Evaluate each agent
-    const evaluations = compatibleAgents.map(agent => 
+    const evaluations = compatibleAgents.map(agent =>
       this.evaluateAgentFit(task, agent)
     );
 
@@ -81,7 +81,7 @@ export class AgentSelector {
       primaryAgent,
       fallbackAgents,
       evaluation: sortedEvaluations,
-      selectionReason
+      selectionReason,
     };
   }
 
@@ -95,19 +95,20 @@ export class AgentSelector {
     capabilities.set('claude-code', {
       agentType: 'claude-code',
       name: 'Claude Code',
-      description: 'Advanced AI coding assistant with excellent code understanding',
+      description:
+        'Advanced AI coding assistant with excellent code understanding',
       strengths: [
         'Code generation and understanding',
         'Debugging and problem solving',
         'Technical documentation',
         'Code review and analysis',
         'Multi-language support',
-        'Complex reasoning'
+        'Complex reasoning',
       ],
       limitations: [
         'No direct IDE integration',
         'Cannot execute code directly',
-        'Limited to text-based interaction'
+        'Limited to text-based interaction',
       ],
       supportedDomains: ['code', 'data', 'testing', 'automation'],
       supportedIntents: ['create', 'modify', 'analyze', 'debug', 'test'],
@@ -117,7 +118,7 @@ export class AgentSelector {
       maxComplexity: 'expert',
       tools: ['code-analyzer', 'document-generator', 'test-generator'],
       apiProvider: 'anthropic',
-      model: 'claude-sonnet-4-20250514'
+      model: 'claude-sonnet-4-20250514',
     });
 
     // Cursor Agent - Best for IDE operations and real-time coding
@@ -131,22 +132,22 @@ export class AgentSelector {
         'IDE integration',
         'Multi-file changes',
         'Refactoring tools',
-        'Fast iterations'
+        'Fast iterations',
       ],
       limitations: [
         'Requires IDE setup',
         'Limited to coding tasks',
-        'Less capable at complex reasoning'
+        'Less capable at complex reasoning',
       ],
       supportedDomains: ['code'],
       supportedIntents: ['create', 'modify', 'debug'],
       costPerOperation: 1.5,
       averageResponseTime: 2,
-      reliability: 0.90,
+      reliability: 0.9,
       maxComplexity: 'complex',
       tools: ['file-editor', 'code-generator', 'refactoring-tool'],
       apiProvider: 'cursor',
-      model: 'cursor-agent-v2'
+      model: 'cursor-agent-v2',
     });
 
     // Replit Agent 3 - Best for full-stack development and deployment
@@ -160,12 +161,12 @@ export class AgentSelector {
         'Deployment automation',
         'Testing integration',
         'Package management',
-        'Environment setup'
+        'Environment setup',
       ],
       limitations: [
         'Slower for simple tasks',
         'Higher cost per operation',
-        'Limited to web technologies'
+        'Limited to web technologies',
       ],
       supportedDomains: ['code', 'automation', 'devops'],
       supportedIntents: ['create', 'deploy', 'test'],
@@ -175,7 +176,7 @@ export class AgentSelector {
       maxComplexity: 'expert',
       tools: ['project-generator', 'deployment-manager', 'test-runner'],
       apiProvider: 'replit',
-      model: 'replit-agent-3'
+      model: 'replit-agent-3',
     });
 
     // Gemini CLI - Best for research, analysis, and content
@@ -189,12 +190,12 @@ export class AgentSelector {
         'Content generation',
         'Multi-modal understanding',
         'Fast processing',
-        'Cost-effective'
+        'Cost-effective',
       ],
       limitations: [
         'Less capable at coding',
         'Limited tool integrations',
-        'Shorter context window'
+        'Shorter context window',
       ],
       supportedDomains: ['data', 'design', 'content'],
       supportedIntents: ['research', 'analyze', 'create'],
@@ -204,24 +205,25 @@ export class AgentSelector {
       maxComplexity: 'complex',
       tools: ['web-search', 'web-fetch', 'analyzer', 'content-generator'],
       apiProvider: 'google',
-      model: 'gemini-2.0-flash'
+      model: 'gemini-2.0-flash',
     });
 
     // Web Search - Best for gathering information
     capabilities.set('web-search', {
       agentType: 'web-search',
       name: 'Web Search Agent',
-      description: 'Specialized agent for web research and information gathering',
+      description:
+        'Specialized agent for web research and information gathering',
       strengths: [
         'Real-time web data',
         'Multiple source aggregation',
         'Fact verification',
-        'Current information'
+        'Current information',
       ],
       limitations: [
         'Cannot process complex logic',
         'Limited to information retrieval',
-        'No code execution'
+        'No code execution',
       ],
       supportedDomains: ['data', 'content'],
       supportedIntents: ['research'],
@@ -231,7 +233,7 @@ export class AgentSelector {
       maxComplexity: 'medium',
       tools: ['web-search', 'web-fetch'],
       apiProvider: 'brave',
-      model: 'web-search-v1'
+      model: 'web-search-v1',
     });
 
     // Bash Executor - Best for system operations
@@ -243,13 +245,9 @@ export class AgentSelector {
         'Direct system access',
         'Script execution',
         'File operations',
-        'Process management'
+        'Process management',
       ],
-      limitations: [
-        'Security risks',
-        'OS-dependent',
-        'No AI reasoning'
-      ],
+      limitations: ['Security risks', 'OS-dependent', 'No AI reasoning'],
       supportedDomains: ['automation', 'devops'],
       supportedIntents: ['create', 'deploy'],
       costPerOperation: 0.1,
@@ -258,7 +256,7 @@ export class AgentSelector {
       maxComplexity: 'medium',
       tools: ['bash', 'shell'],
       apiProvider: 'system',
-      model: 'bash-v1'
+      model: 'bash-v1',
     });
 
     // Puppeteer Agent - Best for browser automation
@@ -271,12 +269,12 @@ export class AgentSelector {
         'Web scraping',
         'UI testing',
         'Screenshot capture',
-        'Form filling'
+        'Form filling',
       ],
       limitations: [
         'Limited to web tasks',
         'Slower execution',
-        'Resource intensive'
+        'Resource intensive',
       ],
       supportedDomains: ['automation', 'testing'],
       supportedIntents: ['test', 'research'],
@@ -286,7 +284,7 @@ export class AgentSelector {
       maxComplexity: 'complex',
       tools: ['puppeteer', 'web-scraper'],
       apiProvider: 'puppeteer',
-      model: 'puppeteer-v1'
+      model: 'puppeteer-v1',
     });
 
     // MCP Tool - Generic tool execution
@@ -297,21 +295,18 @@ export class AgentSelector {
       strengths: [
         'Flexible tool integration',
         'Protocol standardization',
-        'Extensible'
+        'Extensible',
       ],
-      limitations: [
-        'Depends on tool availability',
-        'No built-in intelligence'
-      ],
+      limitations: ['Depends on tool availability', 'No built-in intelligence'],
       supportedDomains: ['code', 'data', 'automation'],
       supportedIntents: ['create', 'modify', 'analyze'],
       costPerOperation: 0.8,
       averageResponseTime: 2,
-      reliability: 0.90,
+      reliability: 0.9,
       maxComplexity: 'complex',
       tools: ['mcp-tools'],
       apiProvider: 'mcp',
-      model: 'mcp-v1'
+      model: 'mcp-v1',
     });
 
     return capabilities;
@@ -328,7 +323,7 @@ export class AgentSelector {
         failedTasks: 0,
         averageExecutionTime: capability.averageResponseTime,
         totalCost: 0,
-        lastUsed: new Date()
+        lastUsed: new Date(),
       });
     });
   }
@@ -351,10 +346,17 @@ export class AgentSelector {
       }
 
       // Check complexity level
-      const complexityOrder: ComplexityLevel[] = ['simple', 'medium', 'complex', 'expert'];
+      const complexityOrder: ComplexityLevel[] = [
+        'simple',
+        'medium',
+        'complex',
+        'expert',
+      ];
       const taskComplexityIndex = complexityOrder.indexOf(task.complexity);
-      const agentMaxComplexityIndex = complexityOrder.indexOf(capability.maxComplexity);
-      
+      const agentMaxComplexityIndex = complexityOrder.indexOf(
+        capability.maxComplexity
+      );
+
       if (taskComplexityIndex > agentMaxComplexityIndex) {
         return;
       }
@@ -388,13 +390,20 @@ export class AgentSelector {
     }
 
     // Complexity capability (0-20 points)
-    const complexityOrder: ComplexityLevel[] = ['simple', 'medium', 'complex', 'expert'];
+    const complexityOrder: ComplexityLevel[] = [
+      'simple',
+      'medium',
+      'complex',
+      'expert',
+    ];
     const taskComplexityIndex = complexityOrder.indexOf(task.complexity);
-    const agentMaxComplexityIndex = complexityOrder.indexOf(capability.maxComplexity);
+    const agentMaxComplexityIndex = complexityOrder.indexOf(
+      capability.maxComplexity
+    );
     const complexityDiff = agentMaxComplexityIndex - taskComplexityIndex;
-    
+
     if (complexityDiff >= 0) {
-      score += 20 - (complexityDiff * 3); // Slight penalty for over-qualified agents
+      score += 20 - complexityDiff * 3; // Slight penalty for over-qualified agents
       reasons.push(`Can handle ${task.complexity} complexity`);
     }
 
@@ -402,10 +411,13 @@ export class AgentSelector {
     const requiredToolsAvailable = task.requiredTools.filter(tool =>
       capability.tools.some(t => t.includes(tool) || tool.includes(t))
     ).length;
-    const toolScore = (requiredToolsAvailable / Math.max(task.requiredTools.length, 1)) * 10;
+    const toolScore =
+      (requiredToolsAvailable / Math.max(task.requiredTools.length, 1)) * 10;
     score += toolScore;
     if (toolScore > 0) {
-      reasons.push(`Has ${requiredToolsAvailable}/${task.requiredTools.length} required tools`);
+      reasons.push(
+        `Has ${requiredToolsAvailable}/${task.requiredTools.length} required tools`
+      );
     }
 
     // Performance history (0-10 points)
@@ -427,7 +439,7 @@ export class AgentSelector {
 
     // Cost efficiency (0-5 points - inverse scoring, lower cost = higher score)
     const maxCost = 5.0; // Max expected cost
-    const costScore = (1 - (capability.costPerOperation / maxCost)) * 5;
+    const costScore = (1 - capability.costPerOperation / maxCost) * 5;
     score += Math.max(0, costScore);
     if (capability.costPerOperation < 2.0) {
       reasons.push('Cost-effective');
@@ -435,7 +447,7 @@ export class AgentSelector {
 
     // Speed (0-5 points - inverse scoring, faster = higher score)
     const maxTime = 10; // Max expected time in seconds
-    const speedScore = (1 - (capability.averageResponseTime / maxTime)) * 5;
+    const speedScore = (1 - capability.averageResponseTime / maxTime) * 5;
     score += Math.max(0, speedScore);
     if (capability.averageResponseTime < 3) {
       reasons.push('Fast response time');
@@ -443,7 +455,8 @@ export class AgentSelector {
 
     // Calculate estimated cost and time
     const estimatedCost = capability.costPerOperation;
-    const estimatedTime = capability.averageResponseTime * (task.estimatedTime / 5); // Scale by task complexity
+    const estimatedTime =
+      capability.averageResponseTime * (task.estimatedTime / 5); // Scale by task complexity
 
     // Calculate confidence (0-1)
     const confidence = Math.min(score / 100, 1.0);
@@ -454,19 +467,26 @@ export class AgentSelector {
       reasons,
       estimatedCost,
       estimatedTime,
-      confidence
+      confidence,
     };
   }
 
   /**
    * Get fallback agent when primary agent fails
    */
-  fallbackStrategy(task: Task, failedAgent: AgentType, reason: string): AgentType {
-    console.log(`⚠️ Agent ${failedAgent} failed for task ${task.id}: ${reason}`);
+  fallbackStrategy(
+    task: Task,
+    failedAgent: AgentType,
+    reason: string
+  ): AgentType {
+    console.log(
+      `⚠️ Agent ${failedAgent} failed for task ${task.id}: ${reason}`
+    );
 
     // Get all compatible agents except the failed one
-    const compatibleAgents = this.getCompatibleAgents(task)
-      .filter(agent => agent !== failedAgent);
+    const compatibleAgents = this.getCompatibleAgents(task).filter(
+      agent => agent !== failedAgent
+    );
 
     if (compatibleAgents.length === 0) {
       // Fall back to Claude Code as universal fallback
@@ -486,14 +506,19 @@ export class AgentSelector {
   /**
    * Generate human-readable selection reason
    */
-  private generateSelectionReason(evaluation: AgentEvaluation, task: Task): string {
+  private generateSelectionReason(
+    evaluation: AgentEvaluation,
+    task: Task
+  ): string {
     const capability = this.capabilities.get(evaluation.agent)!;
-    
+
     const topReasons = evaluation.reasons.slice(0, 3).join(', ');
-    
-    return `Selected ${capability.name} because it ${topReasons.toLowerCase()}. ` +
-           `Estimated cost: $${(evaluation.estimatedCost / 100).toFixed(2)}, ` +
-           `Time: ~${Math.round(evaluation.estimatedTime)}s (confidence: ${(evaluation.confidence * 100).toFixed(0)}%)`;
+
+    return (
+      `Selected ${capability.name} because it ${topReasons.toLowerCase()}. ` +
+      `Estimated cost: $${(evaluation.estimatedCost / 100).toFixed(2)}, ` +
+      `Time: ~${Math.round(evaluation.estimatedTime)}s (confidence: ${(evaluation.confidence * 100).toFixed(0)}%)`
+    );
   }
 
   /**
@@ -516,8 +541,9 @@ export class AgentSelector {
     }
 
     // Update moving average for execution time
-    performance.averageExecutionTime = 
-      (performance.averageExecutionTime * (performance.totalTasks - 1) + executionTime) / 
+    performance.averageExecutionTime =
+      (performance.averageExecutionTime * (performance.totalTasks - 1) +
+        executionTime) /
       performance.totalTasks;
 
     performance.totalCost += cost;
@@ -580,7 +606,11 @@ export function selectAgent(task: Task): Promise<AgentSelectionResult> {
   return agentSelector.selectOptimalAgent(task);
 }
 
-export function getFallbackAgent(task: Task, failedAgent: AgentType, reason: string): AgentType {
+export function getFallbackAgent(
+  task: Task,
+  failedAgent: AgentType,
+  reason: string
+): AgentType {
   return agentSelector.fallbackStrategy(task, failedAgent, reason);
 }
 

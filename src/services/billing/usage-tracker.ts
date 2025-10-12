@@ -48,23 +48,21 @@ export class UsageTracker {
         apiProvider: call.provider,
         tokensUsed: call.tokensUsed,
         cost: call.cost,
-        taskId: call.taskId
+        taskId: call.taskId,
       };
 
       // Store in database
-      const { error } = await supabase
-        .from('api_usage')
-        .insert({
-          user_id: call.userId,
-          timestamp: call.timestamp.toISOString(),
-          agent_type: call.agentType,
-          api_provider: call.provider,
-          tokens_used: call.tokensUsed,
-          input_tokens: call.inputTokens,
-          output_tokens: call.outputTokens,
-          cost: call.cost,
-          task_id: call.taskId
-        });
+      const { error } = await supabase.from('api_usage').insert({
+        user_id: call.userId,
+        timestamp: call.timestamp.toISOString(),
+        agent_type: call.agentType,
+        api_provider: call.provider,
+        tokens_used: call.tokensUsed,
+        input_tokens: call.inputTokens,
+        output_tokens: call.outputTokens,
+        cost: call.cost,
+        task_id: call.taskId,
+      });
 
       if (error) {
         throw error;
@@ -103,13 +101,13 @@ export class UsageTracker {
       }
 
       const usage = data || [];
-      
+
       const summary: UsageSummary = {
         totalCalls: usage.length,
         totalTokens: usage.reduce((sum, r) => sum + (r.tokens_used || 0), 0),
         totalCost: usage.reduce((sum, r) => sum + (r.cost || 0), 0),
         byAgent: this.groupByAgent(usage),
-        byDay: this.groupByDay(usage)
+        byDay: this.groupByDay(usage),
       };
 
       return summary;
@@ -118,39 +116,49 @@ export class UsageTracker {
     }
   }
 
-  private groupByAgent(usage: any[]): Record<string, { calls: number; tokens: number; cost: number }> {
-    const grouped: Record<string, { calls: number; tokens: number; cost: number }> = {};
-    
+  private groupByAgent(
+    usage: any[]
+  ): Record<string, { calls: number; tokens: number; cost: number }> {
+    const grouped: Record<
+      string,
+      { calls: number; tokens: number; cost: number }
+    > = {};
+
     for (const record of usage) {
       const agent = record.agent_type || 'unknown';
-      
+
       if (!grouped[agent]) {
         grouped[agent] = { calls: 0, tokens: 0, cost: 0 };
       }
-      
+
       grouped[agent].calls += 1;
       grouped[agent].tokens += record.tokens_used || 0;
       grouped[agent].cost += record.cost || 0;
     }
-    
+
     return grouped;
   }
 
-  private groupByDay(usage: any[]): Record<string, { calls: number; tokens: number; cost: number }> {
-    const grouped: Record<string, { calls: number; tokens: number; cost: number }> = {};
-    
+  private groupByDay(
+    usage: any[]
+  ): Record<string, { calls: number; tokens: number; cost: number }> {
+    const grouped: Record<
+      string,
+      { calls: number; tokens: number; cost: number }
+    > = {};
+
     for (const record of usage) {
       const date = new Date(record.timestamp).toISOString().split('T')[0];
-      
+
       if (!grouped[date]) {
         grouped[date] = { calls: 0, tokens: 0, cost: 0 };
       }
-      
+
       grouped[date].calls += 1;
       grouped[date].tokens += record.tokens_used || 0;
       grouped[date].cost += record.cost || 0;
     }
-    
+
     return grouped;
   }
 
@@ -160,10 +168,10 @@ export class UsageTracker {
     outputTokens: number
   ): number {
     const rates: Record<string, { input: number; output: number }> = {
-      'claude': { input: 3, output: 15 },
-      'gemini': { input: 0.075, output: 0.30 },
-      'gpt4': { input: 10, output: 30 },
-      'gpt3.5': { input: 0.5, output: 1.5 }
+      claude: { input: 3, output: 15 },
+      gemini: { input: 0.075, output: 0.3 },
+      gpt4: { input: 10, output: 30 },
+      'gpt3.5': { input: 0.5, output: 1.5 },
     };
 
     const rate = rates[provider.toLowerCase()] || { input: 1, output: 1 };
@@ -180,11 +188,14 @@ export class UsageTracker {
 
     return this.getUsageSummary(userId, {
       start: startOfMonth,
-      end: endOfMonth
+      end: endOfMonth,
     });
   }
 
-  async getDailyUsage(userId: string, days: number = 30): Promise<UsageSummary> {
+  async getDailyUsage(
+    userId: string,
+    days: number = 30
+  ): Promise<UsageSummary> {
     const end = new Date();
     const start = new Date();
     start.setDate(start.getDate() - days);

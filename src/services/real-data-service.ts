@@ -84,7 +84,7 @@ export class WorkflowService {
 
   async getAllWorkflows(userId: string): Promise<Workflow[]> {
     const cacheKey = `${this.cachePrefix}all:${userId}`;
-    
+
     // Try cache first
     const cached = await enhancedCache.get<Workflow[]>(cacheKey);
     if (cached) return cached;
@@ -99,7 +99,7 @@ export class WorkflowService {
       if (error) throw error;
 
       const workflows = data || [];
-      
+
       // Cache for 5 minutes
       await enhancedCache.set(cacheKey, workflows, {
         ttl: 5 * 60 * 1000,
@@ -128,14 +128,18 @@ export class WorkflowService {
       active: workflows.filter(w => w.status === 'running').length,
       paused: workflows.filter(w => w.status === 'paused').length,
       avgSuccessRate:
-        workflows.reduce((acc, w) => acc + w.success_rate, 0) / workflows.length || 0,
+        workflows.reduce((acc, w) => acc + w.success_rate, 0) /
+          workflows.length || 0,
       totalExecutions: workflows.reduce((acc, w) => acc + w.execution_count, 0),
       avgDuration:
-        workflows.reduce((acc, w) => acc + w.avg_duration_minutes, 0) / workflows.length || 0,
+        workflows.reduce((acc, w) => acc + w.avg_duration_minutes, 0) /
+          workflows.length || 0,
     };
   }
 
-  async createWorkflow(workflow: Omit<Workflow, 'id' | 'created_at' | 'updated_at'>): Promise<Workflow | null> {
+  async createWorkflow(
+    workflow: Omit<Workflow, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<Workflow | null> {
     try {
       const { data, error } = await supabase
         .from('workflows')
@@ -155,11 +159,14 @@ export class WorkflowService {
     }
   }
 
-  async updateWorkflow(id: string, updates: Partial<Workflow>): Promise<Workflow | null> {
+  async updateWorkflow(
+    id: string,
+    updates: Partial<Workflow>
+  ): Promise<Workflow | null> {
     try {
       const { data, error } = await supabase
         .from('workflows')
-        .update({...updates, updated_at: new Date().toISOString() })
+        .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
         .single();
@@ -178,10 +185,7 @@ export class WorkflowService {
 
   async deleteWorkflow(id: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('workflows')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('workflows').delete().eq('id', id);
 
       if (error) throw error;
 
@@ -203,44 +207,69 @@ export class WorkflowService {
 export class AnalyticsService {
   private cachePrefix = 'analytics:';
 
-  async getMetrics(userId: string, timeRange: string = '7d'): Promise<AnalyticsMetrics> {
+  async getMetrics(
+    userId: string,
+    timeRange: string = '7d'
+  ): Promise<AnalyticsMetrics> {
     const cacheKey = `${this.cachePrefix}metrics:${userId}:${timeRange}`;
-    
+
     // Try cache first
     const cached = await enhancedCache.get<AnalyticsMetrics>(cacheKey);
     if (cached) return cached;
 
     try {
       // Get current period data
-      const { data: currentData } = await supabase
-        .rpc('get_analytics_metrics', {
+      const { data: currentData } = await supabase.rpc(
+        'get_analytics_metrics',
+        {
           p_user_id: userId,
           p_time_range: timeRange,
-        });
+        }
+      );
 
       // Get previous period for comparison
-      const { data: previousData } = await supabase
-        .rpc('get_analytics_metrics', {
+      const { data: previousData } = await supabase.rpc(
+        'get_analytics_metrics',
+        {
           p_user_id: userId,
           p_time_range: this.getPreviousPeriod(timeRange),
-        });
+        }
+      );
 
       const current = currentData || {};
       const previous = previousData || {};
 
       const metrics: AnalyticsMetrics = {
         totalRevenue: current.total_revenue || 0,
-        revenueGrowth: this.calculateGrowth(current.total_revenue, previous.total_revenue),
+        revenueGrowth: this.calculateGrowth(
+          current.total_revenue,
+          previous.total_revenue
+        ),
         totalTasks: current.total_tasks || 0,
-        taskGrowth: this.calculateGrowth(current.total_tasks, previous.total_tasks),
+        taskGrowth: this.calculateGrowth(
+          current.total_tasks,
+          previous.total_tasks
+        ),
         averageEfficiency: current.avg_efficiency || 0,
-        efficiencyGrowth: this.calculateGrowth(current.avg_efficiency, previous.avg_efficiency),
+        efficiencyGrowth: this.calculateGrowth(
+          current.avg_efficiency,
+          previous.avg_efficiency
+        ),
         activeEmployees: current.active_employees || 0,
-        employeeGrowth: this.calculateGrowth(current.active_employees, previous.active_employees),
+        employeeGrowth: this.calculateGrowth(
+          current.active_employees,
+          previous.active_employees
+        ),
         successRate: current.success_rate || 0,
-        successGrowth: this.calculateGrowth(current.success_rate, previous.success_rate),
+        successGrowth: this.calculateGrowth(
+          current.success_rate,
+          previous.success_rate
+        ),
         avgResponseTime: current.avg_response_time || 0,
-        responseTimeChange: this.calculateGrowth(previous.avg_response_time, current.avg_response_time), // Lower is better
+        responseTimeChange: this.calculateGrowth(
+          previous.avg_response_time,
+          current.avg_response_time
+        ), // Lower is better
       };
 
       // Cache for 10 minutes
@@ -270,19 +299,21 @@ export class AnalyticsService {
     }
   }
 
-  async getPerformanceData(userId: string, timeRange: string = '7d'): Promise<PerformanceData[]> {
+  async getPerformanceData(
+    userId: string,
+    timeRange: string = '7d'
+  ): Promise<PerformanceData[]> {
     const cacheKey = `${this.cachePrefix}performance:${userId}:${timeRange}`;
-    
+
     // Try cache first
     const cached = await enhancedCache.get<PerformanceData[]>(cacheKey);
     if (cached) return cached;
 
     try {
-      const { data, error } = await supabase
-        .rpc('get_performance_data', {
-          p_user_id: userId,
-          p_time_range: timeRange,
-        });
+      const { data, error } = await supabase.rpc('get_performance_data', {
+        p_user_id: userId,
+        p_time_range: timeRange,
+      });
 
       if (error) throw error;
 
@@ -301,18 +332,22 @@ export class AnalyticsService {
     }
   }
 
-  async getDepartmentDistribution(userId: string): Promise<DepartmentDistribution[]> {
+  async getDepartmentDistribution(
+    userId: string
+  ): Promise<DepartmentDistribution[]> {
     const cacheKey = `${this.cachePrefix}departments:${userId}`;
-    
+
     // Try cache first
     const cached = await enhancedCache.get<DepartmentDistribution[]>(cacheKey);
     if (cached) return cached;
 
     try {
-      const { data, error } = await supabase
-        .rpc('get_department_distribution', {
+      const { data, error } = await supabase.rpc(
+        'get_department_distribution',
+        {
           p_user_id: userId,
-        });
+        }
+      );
 
       if (error) throw error;
 
@@ -333,16 +368,15 @@ export class AnalyticsService {
 
   async getEmployeePerformance(userId: string): Promise<EmployeePerformance[]> {
     const cacheKey = `${this.cachePrefix}employees:${userId}`;
-    
+
     // Try cache first
     const cached = await enhancedCache.get<EmployeePerformance[]>(cacheKey);
     if (cached) return cached;
 
     try {
-      const { data, error } = await supabase
-        .rpc('get_employee_performance', {
-          p_user_id: userId,
-        });
+      const { data, error } = await supabase.rpc('get_employee_performance', {
+        p_user_id: userId,
+      });
 
       if (error) throw error;
 
@@ -363,16 +397,15 @@ export class AnalyticsService {
 
   async getWorkflowStats(userId: string): Promise<WorkflowStats[]> {
     const cacheKey = `${this.cachePrefix}workflow_stats:${userId}`;
-    
+
     // Try cache first
     const cached = await enhancedCache.get<WorkflowStats[]>(cacheKey);
     if (cached) return cached;
 
     try {
-      const { data, error } = await supabase
-        .rpc('get_workflow_stats', {
-          p_user_id: userId,
-        });
+      const { data, error } = await supabase.rpc('get_workflow_stats', {
+        p_user_id: userId,
+      });
 
       if (error) throw error;
 

@@ -48,13 +48,13 @@ export class BrowserAutomationTool {
         default:
           return {
             success: false,
-            error: 'Invalid action'
+            error: 'Invalid action',
           };
       }
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -64,26 +64,26 @@ export class BrowserAutomationTool {
       // Simulate navigation in browser environment
       if (typeof window !== 'undefined') {
         window.open(url, '_blank');
-        
+
         return {
           success: true,
           data: {
             success: true,
             data: { url },
-            logs: [`Navigated to ${url}`]
+            logs: [`Navigated to ${url}`],
           },
-          cost: 0.001
+          cost: 0.001,
         };
       } else {
         return {
           success: false,
-          error: 'Browser automation not available in this environment'
+          error: 'Browser automation not available in this environment',
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -94,32 +94,32 @@ export class BrowserAutomationTool {
         const element = document.querySelector(selector);
         if (element) {
           (element as HTMLElement).click();
-          
+
           return {
             success: true,
             data: {
               success: true,
               data: { selector, clicked: true },
-              logs: [`Clicked element: ${selector}`]
+              logs: [`Clicked element: ${selector}`],
             },
-            cost: 0.001
+            cost: 0.001,
           };
         } else {
           return {
             success: false,
-            error: `Element not found: ${selector}`
+            error: `Element not found: ${selector}`,
           };
         }
       } else {
         return {
           success: false,
-          error: 'DOM not available'
+          error: 'DOM not available',
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -132,32 +132,32 @@ export class BrowserAutomationTool {
           element.value = text;
           element.dispatchEvent(new Event('input', { bubbles: true }));
           element.dispatchEvent(new Event('change', { bubbles: true }));
-          
+
           return {
             success: true,
             data: {
               success: true,
               data: { selector, text, typed: true },
-              logs: [`Typed "${text}" into ${selector}`]
+              logs: [`Typed "${text}" into ${selector}`],
             },
-            cost: 0.001
+            cost: 0.001,
           };
         } else {
           return {
             success: false,
-            error: `Input element not found: ${selector}`
+            error: `Input element not found: ${selector}`,
           };
         }
       } else {
         return {
           success: false,
-          error: 'DOM not available'
+          error: 'DOM not available',
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -169,15 +169,15 @@ export class BrowserAutomationTool {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiKey}`
+            Authorization: `Bearer ${this.apiKey}`,
           },
           body: JSON.stringify({
             url: url,
             options: {
               fullPage: true,
-              quality: 80
-            }
-          })
+              quality: 80,
+            },
+          }),
         });
 
         if (!response.ok) {
@@ -185,16 +185,16 @@ export class BrowserAutomationTool {
         }
 
         const screenshot = await response.text();
-        
+
         return {
           success: true,
           data: {
             success: true,
             data: { url, screenshot },
             screenshots: [screenshot],
-            logs: [`Screenshot taken of ${url}`]
+            logs: [`Screenshot taken of ${url}`],
           },
-          cost: 0.01
+          cost: 0.01,
         };
       } else {
         // Fallback: use browser's built-in screenshot capability
@@ -202,28 +202,28 @@ export class BrowserAutomationTool {
           const html2canvas = (window as any).html2canvas;
           const canvas = await html2canvas(document.body);
           const screenshot = canvas.toDataURL('image/png');
-          
+
           return {
             success: true,
             data: {
               success: true,
               data: { url: window.location.href, screenshot },
               screenshots: [screenshot],
-              logs: ['Screenshot taken using html2canvas']
+              logs: ['Screenshot taken using html2canvas'],
             },
-            cost: 0.001
+            cost: 0.001,
           };
         } else {
           return {
             success: false,
-            error: 'Screenshot capability not available'
+            error: 'Screenshot capability not available',
           };
         }
       }
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -235,31 +235,36 @@ export class BrowserAutomationTool {
         const data = Array.from(elements).map(el => ({
           text: el.textContent?.trim(),
           html: el.innerHTML,
-          attributes: Array.from(el.attributes).reduce((acc, attr) => {
-            acc[attr.name] = attr.value;
-            return acc;
-          }, {} as Record<string, string>)
+          attributes: Array.from(el.attributes).reduce(
+            (acc, attr) => {
+              acc[attr.name] = attr.value;
+              return acc;
+            },
+            {} as Record<string, string>
+          ),
         }));
-        
+
         return {
           success: true,
           data: {
             success: true,
             data: { selector, extracted: data },
-            logs: [`Extracted data from ${elements.length} elements matching ${selector}`]
+            logs: [
+              `Extracted data from ${elements.length} elements matching ${selector}`,
+            ],
           },
-          cost: 0.001
+          cost: 0.001,
         };
       } else {
         return {
           success: false,
-          error: 'DOM not available'
+          error: 'DOM not available',
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -268,8 +273,8 @@ export class BrowserAutomationTool {
     try {
       if (typeof document !== 'undefined') {
         const startTime = Date.now();
-        
-        return new Promise((resolve) => {
+
+        return new Promise(resolve => {
           const checkElement = () => {
             const element = document.querySelector(selector);
             if (element) {
@@ -277,45 +282,44 @@ export class BrowserAutomationTool {
                 success: true,
                 data: {
                   success: true,
-                  data: { selector, found: true, waitTime: Date.now() - startTime },
-                  logs: [`Element ${selector} found after ${Date.now() - startTime}ms`]
+                  data: {
+                    selector,
+                    found: true,
+                    waitTime: Date.now() - startTime,
+                  },
+                  logs: [
+                    `Element ${selector} found after ${Date.now() - startTime}ms`,
+                  ],
                 },
-                cost: 0.001
+                cost: 0.001,
               });
             } else if (Date.now() - startTime > timeout) {
               resolve({
                 success: false,
-                error: `Element ${selector} not found within ${timeout}ms`
+                error: `Element ${selector} not found within ${timeout}ms`,
               });
             } else {
               setTimeout(checkElement, 100);
             }
           };
-          
+
           checkElement();
         });
       } else {
         return {
           success: false,
-          error: 'DOM not available'
+          error: 'DOM not available',
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
 
   async getSupportedActions(): Promise<string[]> {
-    return [
-      'navigate',
-      'click',
-      'type',
-      'screenshot',
-      'extract',
-      'wait'
-    ];
+    return ['navigate', 'click', 'type', 'screenshot', 'extract', 'wait'];
   }
 }

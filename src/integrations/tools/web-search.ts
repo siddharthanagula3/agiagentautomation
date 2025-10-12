@@ -34,7 +34,7 @@ export class WebSearchTool {
       if (!this.apiKey) {
         return {
           success: false,
-          error: 'Brave Search API key not configured'
+          error: 'Brave Search API key not configured',
         };
       }
 
@@ -43,41 +43,44 @@ export class WebSearchTool {
         count: (params.count || 10).toString(),
         offset: '0',
         mkt: params.language || 'en-US',
-        safesearch: params.safeSearch ? 'strict' : 'moderate'
+        safesearch: params.safeSearch ? 'strict' : 'moderate',
       });
 
       const response = await fetch(`${this.baseUrl}?${searchParams}`, {
         method: 'GET',
         headers: {
-          'Accept': 'application/json',
+          Accept: 'application/json',
           'Accept-Encoding': 'gzip',
-          'X-Subscription-Token': this.apiKey
-        }
+          'X-Subscription-Token': this.apiKey,
+        },
       });
 
       if (!response.ok) {
-        throw new Error(`Search API error: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Search API error: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
-      
-      const results: SearchResult[] = data.web?.results?.map((result: any) => ({
-        title: result.title,
-        url: result.url,
-        description: result.description,
-        publishedDate: result.age,
-        author: result.extra_snippets?.[0]
-      })) || [];
+
+      const results: SearchResult[] =
+        data.web?.results?.map((result: any) => ({
+          title: result.title,
+          url: result.url,
+          description: result.description,
+          publishedDate: result.age,
+          author: result.extra_snippets?.[0],
+        })) || [];
 
       return {
         success: true,
         data: results,
-        cost: 0.005 // Approximate cost per search
+        cost: 0.005, // Approximate cost per search
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -87,8 +90,9 @@ export class WebSearchTool {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
       });
 
       if (!response.ok) {
@@ -96,21 +100,23 @@ export class WebSearchTool {
       }
 
       const content = await response.text();
-      
+
       return {
         success: true,
-        data: [{
-          title: this.extractTitle(content),
-          url: url,
-          description: this.extractDescription(content),
-          publishedDate: this.extractDate(content)
-        }],
-        cost: 0.002 // Approximate cost per page fetch
+        data: [
+          {
+            title: this.extractTitle(content),
+            url: url,
+            description: this.extractDescription(content),
+            publishedDate: this.extractDate(content),
+          },
+        ],
+        cost: 0.002, // Approximate cost per page fetch
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -121,12 +127,16 @@ export class WebSearchTool {
   }
 
   private extractDescription(html: string): string {
-    const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i);
+    const descMatch = html.match(
+      /<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i
+    );
     return descMatch ? descMatch[1].trim() : 'No description available';
   }
 
   private extractDate(html: string): string | undefined {
-    const dateMatch = html.match(/<meta[^>]*property=["']article:published_time["'][^>]*content=["']([^"']+)["']/i);
+    const dateMatch = html.match(
+      /<meta[^>]*property=["']article:published_time["'][^>]*content=["']([^"']+)["']/i
+    );
     return dateMatch ? dateMatch[1] : undefined;
   }
 
@@ -134,7 +144,7 @@ export class WebSearchTool {
     try {
       const testResult = await this.execute({
         query: 'test search',
-        count: 1
+        count: 1,
       });
       return testResult.success;
     } catch (error) {

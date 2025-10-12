@@ -66,7 +66,10 @@ import {
   Tag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { tokenTrackingService, type TokenUsage } from '@/services/token-tracking-service';
+import {
+  tokenTrackingService,
+  type TokenUsage,
+} from '@/services/token-tracking-service';
 
 export interface Task {
   id: string;
@@ -137,10 +140,15 @@ const ModernChatInterface: React.FC = () => {
         name: 'Code Assistant',
         role: 'Software Engineer',
         description: 'Helps with coding, debugging, and code review',
-        capabilities: ['Code Generation', 'Debugging', 'Code Review', 'Documentation'],
+        capabilities: [
+          'Code Generation',
+          'Debugging',
+          'Code Review',
+          'Documentation',
+        ],
         provider: 'openai',
         isActive: true,
-        status: 'idle'
+        status: 'idle',
       },
       {
         id: 'agent-2',
@@ -150,7 +158,7 @@ const ModernChatInterface: React.FC = () => {
         capabilities: ['Strategy', 'Planning', 'Analysis', 'Roadmapping'],
         provider: 'anthropic',
         isActive: true,
-        status: 'idle'
+        status: 'idle',
       },
       {
         id: 'agent-3',
@@ -160,8 +168,8 @@ const ModernChatInterface: React.FC = () => {
         capabilities: ['Data Analysis', 'Visualization', 'Statistics', 'ML'],
         provider: 'google',
         isActive: true,
-        status: 'idle'
-      }
+        status: 'idle',
+      },
     ];
     setAgents(initialAgents);
   }, []);
@@ -184,7 +192,7 @@ const ModernChatInterface: React.FC = () => {
       id: `msg-${Date.now()}`,
       role: 'user',
       content: inputMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -206,12 +214,14 @@ const ModernChatInterface: React.FC = () => {
           model: 'gpt-4o-mini',
           inputTokens: Math.floor(inputMessage.length / 4),
           outputTokens: Math.floor(inputMessage.length / 3),
-          totalTokens: Math.floor(inputMessage.length / 4) + Math.floor(inputMessage.length / 3),
+          totalTokens:
+            Math.floor(inputMessage.length / 4) +
+            Math.floor(inputMessage.length / 3),
           inputCost: 0.0001,
           outputCost: 0.0002,
           totalCost: 0.0003,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       };
 
       setMessages(prev => [...prev, aiResponse]);
@@ -230,7 +240,6 @@ const ModernChatInterface: React.FC = () => {
           aiResponse.tokenUsage.outputTokens
         );
       }
-
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
@@ -255,7 +264,7 @@ const ModernChatInterface: React.FC = () => {
         updatedAt: new Date(),
         tags: ['design', 'website'],
         estimatedTime: 120,
-        aiGenerated: true
+        aiGenerated: true,
       });
     }
 
@@ -271,7 +280,7 @@ const ModernChatInterface: React.FC = () => {
         updatedAt: new Date(),
         tags: ['coding', 'development'],
         estimatedTime: 180,
-        aiGenerated: true
+        aiGenerated: true,
       });
     }
 
@@ -287,7 +296,7 @@ const ModernChatInterface: React.FC = () => {
         updatedAt: new Date(),
         tags: ['testing', 'quality'],
         estimatedTime: 90,
-        aiGenerated: true
+        aiGenerated: true,
       });
     }
 
@@ -295,19 +304,22 @@ const ModernChatInterface: React.FC = () => {
   };
 
   const handleTaskStatusChange = (taskId: string, status: Task['status']) => {
-    setTasks(prev => prev.map(task => 
-      task.id === taskId 
-        ? { ...task, status, updatedAt: new Date() }
-        : task
-    ));
+    setTasks(prev =>
+      prev.map(task =>
+        task.id === taskId ? { ...task, status, updatedAt: new Date() } : task
+      )
+    );
   };
 
-  const handleTaskPriorityChange = (taskId: string, priority: Task['priority']) => {
-    setTasks(prev => prev.map(task => 
-      task.id === taskId 
-        ? { ...task, priority, updatedAt: new Date() }
-        : task
-    ));
+  const handleTaskPriorityChange = (
+    taskId: string,
+    priority: Task['priority']
+  ) => {
+    setTasks(prev =>
+      prev.map(task =>
+        task.id === taskId ? { ...task, priority, updatedAt: new Date() } : task
+      )
+    );
   };
 
   const handleDeleteTask = (taskId: string) => {
@@ -315,45 +327,61 @@ const ModernChatInterface: React.FC = () => {
   };
 
   const filteredTasks = tasks.filter(task => {
-    const matchesStatus = filterStatus === 'all' || task.status === filterStatus;
-    const matchesPriority = filterPriority === 'all' || task.priority === filterPriority;
-    const matchesSearch = searchQuery === '' || 
+    const matchesStatus =
+      filterStatus === 'all' || task.status === filterStatus;
+    const matchesPriority =
+      filterPriority === 'all' || task.priority === filterPriority;
+    const matchesSearch =
+      searchQuery === '' ||
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     return matchesStatus && matchesPriority && matchesSearch;
   });
 
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {
-      case 'urgent': return 'text-red-500 bg-red-50 border-red-200';
-      case 'high': return 'text-orange-500 bg-orange-50 border-orange-200';
-      case 'medium': return 'text-yellow-500 bg-yellow-50 border-yellow-200';
-      case 'low': return 'text-green-500 bg-green-50 border-green-200';
-      default: return 'text-gray-500 bg-gray-50 border-gray-200';
+      case 'urgent':
+        return 'text-red-500 bg-red-50 border-red-200';
+      case 'high':
+        return 'text-orange-500 bg-orange-50 border-orange-200';
+      case 'medium':
+        return 'text-yellow-500 bg-yellow-50 border-yellow-200';
+      case 'low':
+        return 'text-green-500 bg-green-50 border-green-200';
+      default:
+        return 'text-gray-500 bg-gray-50 border-gray-200';
     }
   };
 
   const getStatusIcon = (status: Task['status']) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'in-progress': return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
-      case 'cancelled': return <Square className="h-4 w-4 text-gray-400" />;
-      default: return <Circle className="h-4 w-4 text-gray-400" />;
+      case 'completed':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'in-progress':
+        return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
+      case 'cancelled':
+        return <Square className="h-4 w-4 text-gray-400" />;
+      default:
+        return <Circle className="h-4 w-4 text-gray-400" />;
     }
   };
 
   const getAgentStatusColor = (status: Agent['status']) => {
     switch (status) {
-      case 'working': return 'text-green-500 bg-green-50';
-      case 'thinking': return 'text-yellow-500 bg-yellow-50';
-      case 'error': return 'text-red-500 bg-red-50';
-      default: return 'text-gray-500 bg-gray-50';
+      case 'working':
+        return 'text-green-500 bg-green-50';
+      case 'thinking':
+        return 'text-yellow-500 bg-yellow-50';
+      case 'error':
+        return 'text-red-500 bg-red-50';
+      default:
+        return 'text-gray-500 bg-gray-50';
     }
   };
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="flex h-full flex-col bg-background">
       {/* Header */}
       <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center justify-between p-4">
@@ -366,18 +394,18 @@ const ModernChatInterface: React.FC = () => {
               {agents.filter(a => a.isActive).length} Agents Active
             </Badge>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowAnalytics(!showAnalytics)}
             >
-              <BarChart3 className="h-4 w-4 mr-2" />
+              <BarChart3 className="mr-2 h-4 w-4" />
               Analytics
             </Button>
             <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
+              <Settings className="mr-2 h-4 w-4" />
               Settings
             </Button>
           </div>
@@ -385,36 +413,43 @@ const ModernChatInterface: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex min-h-0">
+      <div className="flex min-h-0 flex-1">
         {/* Sidebar */}
-        <div className="w-80 border-r bg-muted/30 flex flex-col">
-          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 m-2">
+        <div className="flex w-80 flex-col border-r bg-muted/30">
+          <Tabs
+            value={selectedTab}
+            onValueChange={setSelectedTab}
+            className="flex flex-1 flex-col"
+          >
+            <TabsList className="m-2 grid w-full grid-cols-3">
               <TabsTrigger value="chat" className="text-xs">
-                <MessageSquare className="h-4 w-4 mr-1" />
+                <MessageSquare className="mr-1 h-4 w-4" />
                 Chat
               </TabsTrigger>
               <TabsTrigger value="tasks" className="text-xs">
-                <CheckSquare className="h-4 w-4 mr-1" />
+                <CheckSquare className="mr-1 h-4 w-4" />
                 Tasks
               </TabsTrigger>
               <TabsTrigger value="agents" className="text-xs">
-                <Bot className="h-4 w-4 mr-1" />
+                <Bot className="mr-1 h-4 w-4" />
                 Agents
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="chat" className="flex-1 flex flex-col">
-              <div className="p-4 space-y-4">
+            <TabsContent value="chat" className="flex flex-1 flex-col">
+              <div className="space-y-4 p-4">
                 <div className="space-y-2">
                   <h3 className="font-medium">Recent Conversations</h3>
                   <div className="space-y-1">
                     {messages.slice(-3).map((msg, index) => (
-                      <div key={msg.id} className="p-2 rounded-lg bg-background border text-sm">
-                        <div className="font-medium truncate">
+                      <div
+                        key={msg.id}
+                        className="rounded-lg border bg-background p-2 text-sm"
+                      >
+                        <div className="truncate font-medium">
                           {msg.role === 'user' ? 'You' : 'AI Assistant'}
                         </div>
-                        <div className="text-muted-foreground text-xs truncate">
+                        <div className="truncate text-xs text-muted-foreground">
                           {msg.content}
                         </div>
                       </div>
@@ -424,33 +459,30 @@ const ModernChatInterface: React.FC = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="tasks" className="flex-1 flex flex-col">
-              <div className="p-4 space-y-4">
+            <TabsContent value="tasks" className="flex flex-1 flex-col">
+              <div className="space-y-4 p-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium">Tasks</h3>
-                    <Button
-                      size="sm"
-                      onClick={() => setShowTaskDialog(true)}
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
+                    <Button size="sm" onClick={() => setShowTaskDialog(true)}>
+                      <Plus className="mr-1 h-4 w-4" />
                       New
                     </Button>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Input
                       placeholder="Search tasks..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={e => setSearchQuery(e.target.value)}
                       className="h-8"
                     />
-                    
+
                     <div className="flex gap-1">
                       <select
                         value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="text-xs px-2 py-1 rounded border bg-background"
+                        onChange={e => setFilterStatus(e.target.value)}
+                        className="rounded border bg-background px-2 py-1 text-xs"
                       >
                         <option value="all">All Status</option>
                         <option value="pending">Pending</option>
@@ -458,11 +490,11 @@ const ModernChatInterface: React.FC = () => {
                         <option value="completed">Completed</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
-                      
+
                       <select
                         value={filterPriority}
-                        onChange={(e) => setFilterPriority(e.target.value)}
-                        className="text-xs px-2 py-1 rounded border bg-background"
+                        onChange={e => setFilterPriority(e.target.value)}
+                        className="rounded border bg-background px-2 py-1 text-xs"
                       >
                         <option value="all">All Priority</option>
                         <option value="urgent">Urgent</option>
@@ -474,39 +506,47 @@ const ModernChatInterface: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {filteredTasks.map((task) => (
+                <div className="max-h-96 space-y-2 overflow-y-auto">
+                  {filteredTasks.map(task => (
                     <motion.div
                       key={task.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="p-3 rounded-lg border bg-background hover:bg-muted/50 transition-colors"
+                      className="rounded-lg border bg-background p-3 transition-colors hover:bg-muted/50"
                     >
                       <div className="flex items-start gap-3">
                         <Checkbox
                           checked={task.status === 'completed'}
-                          onCheckedChange={(checked) => 
-                            handleTaskStatusChange(task.id, checked ? 'completed' : 'pending')
+                          onCheckedChange={checked =>
+                            handleTaskStatusChange(
+                              task.id,
+                              checked ? 'completed' : 'pending'
+                            )
                           }
                         />
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium text-sm truncate">{task.title}</h4>
-                            <Badge 
-                              variant="outline" 
-                              className={cn("text-xs", getPriorityColor(task.priority))}
+
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-1 flex items-center gap-2">
+                            <h4 className="truncate text-sm font-medium">
+                              {task.title}
+                            </h4>
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                'text-xs',
+                                getPriorityColor(task.priority)
+                              )}
                             >
                               {task.priority}
                             </Badge>
                           </div>
-                          
+
                           {task.description && (
-                            <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                            <p className="mb-2 line-clamp-2 text-xs text-muted-foreground">
                               {task.description}
                             </p>
                           )}
-                          
+
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>{task.category}</span>
                             {task.estimatedTime && (
@@ -519,14 +559,14 @@ const ModernChatInterface: React.FC = () => {
                               <>
                                 <span>•</span>
                                 <Badge variant="secondary" className="text-xs">
-                                  <Sparkles className="h-3 w-3 mr-1" />
+                                  <Sparkles className="mr-1 h-3 w-3" />
                                   AI
                                 </Badge>
                               </>
                             )}
                           </div>
                         </div>
-                        
+
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm">
@@ -534,15 +574,17 @@ const ModernChatInterface: React.FC = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setEditingTask(task)}>
-                              <Edit className="h-4 w-4 mr-2" />
+                            <DropdownMenuItem
+                              onClick={() => setEditingTask(task)}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={() => handleDeleteTask(task.id)}
                               className="text-red-500"
                             >
-                              <Trash2 className="h-4 w-4 mr-2" />
+                              <Trash2 className="mr-2 h-4 w-4" />
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -554,34 +596,50 @@ const ModernChatInterface: React.FC = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="agents" className="flex-1 flex flex-col">
-              <div className="p-4 space-y-4">
+            <TabsContent value="agents" className="flex flex-1 flex-col">
+              <div className="space-y-4 p-4">
                 <div className="space-y-2">
                   <h3 className="font-medium">AI Agents</h3>
                   <div className="space-y-2">
-                    {agents.map((agent) => (
-                      <div key={agent.id} className="p-3 rounded-lg border bg-background">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    {agents.map(agent => (
+                      <div
+                        key={agent.id}
+                        className="rounded-lg border bg-background p-3"
+                      >
+                        <div className="mb-2 flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                             <Bot className="h-4 w-4 text-primary" />
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm">{agent.name}</div>
-                            <div className="text-xs text-muted-foreground">{agent.role}</div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium">
+                              {agent.name}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {agent.role}
+                            </div>
                           </div>
-                          <Badge 
-                            variant="outline" 
-                            className={cn("text-xs", getAgentStatusColor(agent.status))}
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              'text-xs',
+                              getAgentStatusColor(agent.status)
+                            )}
                           >
                             {agent.status}
                           </Badge>
                         </div>
-                        
-                        <p className="text-xs text-muted-foreground mb-2">{agent.description}</p>
-                        
+
+                        <p className="mb-2 text-xs text-muted-foreground">
+                          {agent.description}
+                        </p>
+
                         <div className="flex flex-wrap gap-1">
-                          {agent.capabilities.slice(0, 3).map((capability) => (
-                            <Badge key={capability} variant="secondary" className="text-xs">
+                          {agent.capabilities.slice(0, 3).map(capability => (
+                            <Badge
+                              key={capability}
+                              variant="secondary"
+                              className="text-xs"
+                            >
                               {capability}
                             </Badge>
                           ))}
@@ -601,29 +659,33 @@ const ModernChatInterface: React.FC = () => {
         </div>
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex min-w-0 flex-1 flex-col">
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 space-y-4 overflow-y-auto p-4">
             <AnimatePresence>
-              {messages.map((message) => (
+              {messages.map(message => (
                 <motion.div
                   key={message.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   className={cn(
-                    "flex",
-                    message.role === 'user' ? "justify-end" : "justify-start"
+                    'flex',
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
                   )}
                 >
-                  <div className={cn(
-                    "max-w-[80%] rounded-lg p-4",
-                    message.role === 'user'
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted border"
-                  )}>
-                    <div className="flex items-center gap-2 mb-2">
-                      {message.role === 'assistant' && <Bot className="h-4 w-4" />}
+                  <div
+                    className={cn(
+                      'max-w-[80%] rounded-lg p-4',
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'border bg-muted'
+                    )}
+                  >
+                    <div className="mb-2 flex items-center gap-2">
+                      {message.role === 'assistant' && (
+                        <Bot className="h-4 w-4" />
+                      )}
                       <span className="text-sm font-medium">
                         {message.role === 'user' ? 'You' : 'AI Assistant'}
                       </span>
@@ -633,16 +695,19 @@ const ModernChatInterface: React.FC = () => {
                         </Badge>
                       )}
                     </div>
-                    
+
                     <p className="text-sm">{message.content}</p>
-                    
+
                     {message.tasks && message.tasks.length > 0 && (
                       <div className="mt-3 space-y-2">
                         <div className="text-xs font-medium text-muted-foreground">
                           Generated Tasks:
                         </div>
-                        {message.tasks.map((task) => (
-                          <div key={task.id} className="flex items-center gap-2 p-2 rounded bg-background/50">
+                        {message.tasks.map(task => (
+                          <div
+                            key={task.id}
+                            className="flex items-center gap-2 rounded bg-background/50 p-2"
+                          >
                             <Circle className="h-3 w-3" />
                             <span className="text-xs">{task.title}</span>
                             <Badge variant="outline" className="text-xs">
@@ -652,28 +717,28 @@ const ModernChatInterface: React.FC = () => {
                         ))}
                       </div>
                     )}
-                    
-                    <div className="text-xs opacity-70 mt-2">
+
+                    <div className="mt-2 text-xs opacity-70">
                       {message.timestamp.toLocaleTimeString()}
                     </div>
                   </div>
                 </motion.div>
               ))}
             </AnimatePresence>
-            
+
             {isLoading && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex justify-start"
               >
-                <div className="bg-muted border rounded-lg p-4 flex items-center gap-2">
+                <div className="flex items-center gap-2 rounded-lg border bg-muted p-4">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span className="text-sm">AI is thinking...</span>
                 </div>
               </motion.div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
 
@@ -683,15 +748,15 @@ const ModernChatInterface: React.FC = () => {
               <Textarea
                 ref={inputRef}
                 value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyDown={(e) => {
+                onChange={e => setInputMessage(e.target.value)}
+                onKeyDown={e => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSendMessage();
                   }
                 }}
                 placeholder="Ask AI to help with your tasks..."
-                className="flex-1 min-h-[60px] max-h-[120px] resize-none"
+                className="max-h-[120px] min-h-[60px] flex-1 resize-none"
                 disabled={isLoading}
               />
               <Button
@@ -731,32 +796,43 @@ const ModernChatInterface: React.FC = () => {
                   ×
                 </Button>
               </div>
-              
+
               {tokenStats && (
                 <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-background border">
+                  <div className="rounded-lg border bg-background p-3">
                     <div className="text-sm font-medium">Total Usage</div>
-                    <div className="text-2xl font-bold">{tokenStats.totalTokens.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">
+                      {tokenStats.totalTokens.toLocaleString()}
+                    </div>
                     <div className="text-xs text-muted-foreground">tokens</div>
                   </div>
-                  
-                  <div className="p-3 rounded-lg bg-background border">
+
+                  <div className="rounded-lg border bg-background p-3">
                     <div className="text-sm font-medium">Total Cost</div>
-                    <div className="text-2xl font-bold">${tokenStats.totalCost.toFixed(4)}</div>
+                    <div className="text-2xl font-bold">
+                      ${tokenStats.totalCost.toFixed(4)}
+                    </div>
                     <div className="text-xs text-muted-foreground">USD</div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="text-sm font-medium">By Provider</div>
-                    {Object.entries(tokenStats.providerBreakdown).map(([provider, stats]) => (
-                      <div key={provider} className="flex items-center justify-between text-sm">
-                        <span className="capitalize">{provider}</span>
-                        <div className="text-right">
-                          <div>{stats.tokens.toLocaleString()}</div>
-                          <div className="text-xs text-muted-foreground">${stats.cost.toFixed(4)}</div>
+                    {Object.entries(tokenStats.providerBreakdown).map(
+                      ([provider, stats]) => (
+                        <div
+                          key={provider}
+                          className="flex items-center justify-between text-sm"
+                        >
+                          <span className="capitalize">{provider}</span>
+                          <div className="text-right">
+                            <div>{stats.tokens.toLocaleString()}</div>
+                            <div className="text-xs text-muted-foreground">
+                              ${stats.cost.toFixed(4)}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 </div>
               )}

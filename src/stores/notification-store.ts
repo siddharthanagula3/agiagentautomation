@@ -70,7 +70,9 @@ export interface NotificationState {
 
 export interface NotificationActions {
   // Notification management
-  addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => string;
+  addNotification: (
+    notification: Omit<Notification, 'id' | 'timestamp' | 'read'>
+  ) => string;
   updateNotification: (id: string, updates: Partial<Notification>) => void;
   removeNotification: (id: string) => void;
   markAsRead: (id: string) => void;
@@ -84,14 +86,33 @@ export interface NotificationActions {
   clearToasts: () => void;
 
   // Quick notification methods
-  showSuccess: (message: string, title?: string, options?: Partial<Notification>) => void;
-  showError: (message: string, title?: string, options?: Partial<Notification>) => void;
-  showWarning: (message: string, title?: string, options?: Partial<Notification>) => void;
-  showInfo: (message: string, title?: string, options?: Partial<Notification>) => void;
+  showSuccess: (
+    message: string,
+    title?: string,
+    options?: Partial<Notification>
+  ) => void;
+  showError: (
+    message: string,
+    title?: string,
+    options?: Partial<Notification>
+  ) => void;
+  showWarning: (
+    message: string,
+    title?: string,
+    options?: Partial<Notification>
+  ) => void;
+  showInfo: (
+    message: string,
+    title?: string,
+    options?: Partial<Notification>
+  ) => void;
 
   // Settings
   updateSettings: (settings: Partial<NotificationState['settings']>) => void;
-  setCategorySettings: (category: string, settings: NotificationState['settings']['categories'][string]) => void;
+  setCategorySettings: (
+    category: string,
+    settings: NotificationState['settings']['categories'][string]
+  ) => void;
 
   // UI state
   openNotifications: () => void;
@@ -112,7 +133,9 @@ export interface NotificationActions {
   cleanup: () => void;
 }
 
-export interface NotificationStore extends NotificationState, NotificationActions {}
+export interface NotificationStore
+  extends NotificationState,
+    NotificationActions {}
 
 const DEFAULT_SETTINGS: NotificationState['settings'] = {
   enableDesktopNotifications: true,
@@ -146,7 +169,9 @@ export const useNotificationStore = create<NotificationStore>()(
         ...INITIAL_STATE,
 
         // Notification management
-        addNotification: (notificationData: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+        addNotification: (
+          notificationData: Omit<Notification, 'id' | 'timestamp' | 'read'>
+        ) => {
           const id = crypto.randomUUID();
           const notification: Notification = {
             ...notificationData,
@@ -155,14 +180,15 @@ export const useNotificationStore = create<NotificationStore>()(
             read: false,
           };
 
-          set((state) => {
+          set(state => {
             state.notifications[id] = notification;
             state.unreadCount += 1;
           });
 
           // Send desktop notification if enabled
           const { settings, sendDesktopNotification } = get();
-          const categorySettings = settings.categories[notification.category || 'system'];
+          const categorySettings =
+            settings.categories[notification.category || 'system'];
 
           if (
             !settings.muteAll &&
@@ -192,10 +218,13 @@ export const useNotificationStore = create<NotificationStore>()(
         },
 
         updateNotification: (id: string, updates: Partial<Notification>) =>
-          set((state) => {
+          set(state => {
             if (state.notifications[id]) {
               const wasUnread = !state.notifications[id].read;
-              state.notifications[id] = { ...state.notifications[id], ...updates };
+              state.notifications[id] = {
+                ...state.notifications[id],
+                ...updates,
+              };
 
               // Update unread count if read status changed
               if (wasUnread && updates.read === true) {
@@ -207,7 +236,7 @@ export const useNotificationStore = create<NotificationStore>()(
           }),
 
         removeNotification: (id: string) =>
-          set((state) => {
+          set(state => {
             const notification = state.notifications[id];
             if (notification) {
               if (!notification.read) {
@@ -222,8 +251,8 @@ export const useNotificationStore = create<NotificationStore>()(
         },
 
         markAllAsRead: () =>
-          set((state) => {
-            Object.values(state.notifications).forEach((notification) => {
+          set(state => {
+            Object.values(state.notifications).forEach(notification => {
               if (!notification.read) {
                 notification.read = true;
               }
@@ -232,22 +261,29 @@ export const useNotificationStore = create<NotificationStore>()(
           }),
 
         clearAll: () =>
-          set((state) => {
+          set(state => {
             state.notifications = {};
             state.unreadCount = 0;
           }),
 
         clearOld: (olderThan: number) => {
-          const cutoffDate = new Date(Date.now() - olderThan * 24 * 60 * 60 * 1000);
+          const cutoffDate = new Date(
+            Date.now() - olderThan * 24 * 60 * 60 * 1000
+          );
 
-          set((state) => {
+          set(state => {
             let clearedUnread = 0;
-            Object.entries(state.notifications).forEach(([id, notification]) => {
-              if (notification.timestamp < cutoffDate && !notification.persistent) {
-                if (!notification.read) clearedUnread++;
-                delete state.notifications[id];
+            Object.entries(state.notifications).forEach(
+              ([id, notification]) => {
+                if (
+                  notification.timestamp < cutoffDate &&
+                  !notification.persistent
+                ) {
+                  if (!notification.read) clearedUnread++;
+                  delete state.notifications[id];
+                }
               }
-            });
+            );
             state.unreadCount = Math.max(0, state.unreadCount - clearedUnread);
           });
         },
@@ -260,7 +296,7 @@ export const useNotificationStore = create<NotificationStore>()(
             id,
           };
 
-          set((state) => {
+          set(state => {
             state.toasts[id] = toast;
           });
 
@@ -273,7 +309,7 @@ export const useNotificationStore = create<NotificationStore>()(
         },
 
         removeToast: (id: string) =>
-          set((state) => {
+          set(state => {
             const toast = state.toasts[id];
             if (toast?.onClose) {
               toast.onClose();
@@ -282,8 +318,8 @@ export const useNotificationStore = create<NotificationStore>()(
           }),
 
         clearToasts: () =>
-          set((state) => {
-            Object.values(state.toasts).forEach((toast) => {
+          set(state => {
+            Object.values(state.toasts).forEach(toast => {
               if (toast.onClose) toast.onClose();
             });
             state.toasts = {};
@@ -338,40 +374,43 @@ export const useNotificationStore = create<NotificationStore>()(
 
         // Settings
         updateSettings: (newSettings: Partial<NotificationState['settings']>) =>
-          set((state) => {
+          set(state => {
             state.settings = { ...state.settings, ...newSettings };
           }),
 
-        setCategorySettings: (category: string, categorySettings: NotificationState['settings']['categories'][string]) =>
-          set((state) => {
+        setCategorySettings: (
+          category: string,
+          categorySettings: NotificationState['settings']['categories'][string]
+        ) =>
+          set(state => {
             state.settings.categories[category] = categorySettings;
           }),
 
         // UI state
         openNotifications: () =>
-          set((state) => {
+          set(state => {
             state.isOpen = true;
           }),
 
         closeNotifications: () =>
-          set((state) => {
+          set(state => {
             state.isOpen = false;
           }),
 
         toggleNotifications: () =>
-          set((state) => {
+          set(state => {
             state.isOpen = !state.isOpen;
           }),
 
         setSelectedCategory: (category: string | null) =>
-          set((state) => {
+          set(state => {
             state.selectedCategory = category;
           }),
 
         // Permissions
         requestDesktopPermission: async () => {
           if (!('Notification' in window)) {
-            set((state) => {
+            set(state => {
               state.desktopPermission = 'denied';
             });
             return 'denied';
@@ -379,7 +418,7 @@ export const useNotificationStore = create<NotificationStore>()(
 
           const permission = await Notification.requestPermission();
 
-          set((state) => {
+          set(state => {
             state.desktopPermission = permission;
           });
 
@@ -417,7 +456,9 @@ export const useNotificationStore = create<NotificationStore>()(
         playNotificationSound: () => {
           try {
             // Create a simple beep sound
-            const audioContext = new (window.AudioContext || (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
+            const audioContext = new (window.AudioContext ||
+              (window as { webkitAudioContext?: typeof AudioContext })
+                .webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
 
@@ -428,8 +469,14 @@ export const useNotificationStore = create<NotificationStore>()(
             oscillator.type = 'sine';
 
             gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.01);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            gainNode.gain.linearRampToValueAtTime(
+              0.2,
+              audioContext.currentTime + 0.01
+            );
+            gainNode.gain.exponentialRampToValueAtTime(
+              0.01,
+              audioContext.currentTime + 0.3
+            );
 
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.3);
@@ -442,14 +489,14 @@ export const useNotificationStore = create<NotificationStore>()(
         getNotificationsByCategory: (category: string) => {
           const { notifications } = get();
           return Object.values(notifications).filter(
-            (notification) => notification.category === category
+            notification => notification.category === category
           );
         },
 
         getUnreadNotifications: () => {
           const { notifications } = get();
           return Object.values(notifications).filter(
-            (notification) => !notification.read
+            notification => !notification.read
           );
         },
 
@@ -464,7 +511,7 @@ export const useNotificationStore = create<NotificationStore>()(
       {
         name: 'agi-notification-store',
         version: 1,
-        partialize: (state) => ({
+        partialize: state => ({
           notifications: state.notifications,
           unreadCount: state.unreadCount,
           settings: state.settings,
@@ -478,18 +525,23 @@ export const useNotificationStore = create<NotificationStore>()(
 );
 
 // Selectors for optimized re-renders
-export const useNotifications = () => useNotificationStore((state) =>
-  Object.values(state.notifications).sort(
-    (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
-  )
-);
+export const useNotifications = () =>
+  useNotificationStore(state =>
+    Object.values(state.notifications).sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+    )
+  );
 
-export const useUnreadNotifications = () => useNotificationStore((state) =>
-  Object.values(state.notifications)
-    .filter(n => !n.read)
-    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-);
+export const useUnreadNotifications = () =>
+  useNotificationStore(state =>
+    Object.values(state.notifications)
+      .filter(n => !n.read)
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+  );
 
-export const useToasts = () => useNotificationStore((state) => Object.values(state.toasts));
-export const useUnreadCount = () => useNotificationStore((state) => state.unreadCount);
-export const useNotificationSettings = () => useNotificationStore((state) => state.settings);
+export const useToasts = () =>
+  useNotificationStore(state => Object.values(state.toasts));
+export const useUnreadCount = () =>
+  useNotificationStore(state => state.unreadCount);
+export const useNotificationSettings = () =>
+  useNotificationStore(state => state.settings);

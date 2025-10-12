@@ -20,7 +20,7 @@ interface RecentActivityProps {
 
 export const RecentActivity: React.FC<RecentActivityProps> = ({
   activities,
-  isLoading = false
+  isLoading = false,
 }) => {
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -69,10 +69,10 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="flex items-center space-x-4">
-                <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
+                <div className="h-4 w-4 animate-pulse rounded bg-gray-200" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded animate-pulse" />
-                  <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4" />
+                  <div className="h-4 animate-pulse rounded bg-gray-200" />
+                  <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200" />
                 </div>
               </div>
             ))}
@@ -90,19 +90,21 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
       <CardContent>
         <div className="space-y-4">
           {activities.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Clock className="h-8 w-8 mx-auto mb-2" />
+            <div className="py-8 text-center text-muted-foreground">
+              <Clock className="mx-auto mb-2 h-8 w-8" />
               <p>No recent activity</p>
             </div>
           ) : (
-            activities.map((activity) => (
+            activities.map(activity => (
               <div key={activity.id} className="flex items-start space-x-4">
                 <div className="flex-shrink-0">
                   {getTypeIcon(activity.type)}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium truncate">{activity.title}</p>
+                    <p className="truncate text-sm font-medium">
+                      {activity.title}
+                    </p>
                     <div className="flex items-center space-x-2">
                       {getStatusIcon(activity.status)}
                       <Badge className={getStatusColor(activity.status)}>
@@ -110,10 +112,10 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
                       </Badge>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {activity.description}
                   </p>
-                  <div className="flex items-center space-x-2 mt-2">
+                  <div className="mt-2 flex items-center space-x-2">
                     <span className="text-xs text-muted-foreground">
                       {new Date(activity.timestamp).toLocaleString()}
                     </span>

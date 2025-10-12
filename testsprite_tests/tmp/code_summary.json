@@ -1,0 +1,182 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "React",
+    "Vite",
+    "Tailwind CSS",
+    "Supabase",
+    "PostgreSQL",
+    "Netlify Functions",
+    "Stripe",
+    "Zustand",
+    "React Query",
+    "React Router",
+    "Radix UI",
+    "Framer Motion"
+  ],
+  "features": [
+    {
+      "name": "Authentication System",
+      "description": "Complete user authentication with Supabase Auth including login, register, password reset, and protected routes",
+      "files": [
+        "src/components/auth/ProtectedRoute.tsx",
+        "src/pages/auth/LoginPage.tsx",
+        "src/pages/auth/RegisterPage.tsx",
+        "src/pages/auth/ForgotPasswordPage.tsx",
+        "src/pages/auth/ResetPasswordPage.tsx",
+        "src/services/auth-service.ts",
+        "src/stores/unified-auth-store.ts"
+      ]
+    },
+    {
+      "name": "AI Workforce Management",
+      "description": "Hire and manage AI employees with different specializations and capabilities",
+      "files": [
+        "src/pages/workforce/WorkforcePage.tsx",
+        "src/components/employees/WorkforceManagement.tsx",
+        "src/data/ai-employees.ts",
+        "src/services/supabase-employees.ts",
+        "src/hooks/useEmployee.ts"
+      ]
+    },
+    {
+      "name": "Multi-Tab Chat Interface",
+      "description": "Advanced chat interface for communicating with AI employees with multiple tabs and real-time messaging",
+      "files": [
+        "src/pages/chat/ChatPage.tsx",
+        "src/pages/chat/TabbedLLMChatPage.tsx",
+        "src/pages/chat/ChatAgentPageChatKit.tsx",
+        "src/pages/chat/VibeCodingPage.tsx",
+        "src/components/chat/MultiTabChatInterface.tsx",
+        "src/components/chat/ModernChatInterface.tsx",
+        "src/hooks/useChat.ts",
+        "src/services/ai-chat-service.ts"
+      ]
+    },
+    {
+      "name": "Dashboard Analytics",
+      "description": "Comprehensive dashboard with metrics, analytics, and performance monitoring",
+      "files": [
+        "src/components/dashboard/DashboardHomePage.tsx",
+        "src/pages/dashboard/BillingPage.tsx",
+        "src/pages/dashboard/HelpSupportPage.tsx",
+        "src/hooks/useDashboardStats.ts",
+        "src/components/dashboard/DashboardStats.tsx"
+      ]
+    },
+    {
+      "name": "Payment Integration",
+      "description": "Stripe integration for subscription management and billing",
+      "files": [
+        "src/services/stripe-service.ts",
+        "src/lib/stripe.ts",
+        "src/pages/dashboard/BillingPage.tsx",
+        "netlify/functions/create-pro-subscription.ts",
+        "netlify/functions/stripe-webhook.ts"
+      ]
+    },
+    {
+      "name": "Settings Management",
+      "description": "User settings, preferences, and AI configuration management",
+      "files": [
+        "src/pages/settings/SettingsPage.tsx",
+        "src/pages/settings/AIConfigurationPage.tsx",
+        "src/services/settings-service.ts"
+      ]
+    },
+    {
+      "name": "Integration Hub",
+      "description": "Connect and manage external AI services and tools",
+      "files": [
+        "src/integrations/tool-integrations.ts",
+        "src/services/llm-providers/openai-service.ts",
+        "src/services/llm-providers/anthropic-service.ts",
+        "src/services/llm-providers/google-service.ts",
+        "src/services/llm-providers/perplexity-service.ts",
+        "src/services/mcp-tools-service.ts"
+      ]
+    },
+    {
+      "name": "Security & Storage",
+      "description": "Secure storage, encryption, and security management",
+      "files": [
+        "src/hooks/useSecureStorage.ts",
+        "src/lib/security.ts",
+        "src/config/security.ts",
+        "src/services/security/security-service.ts"
+      ]
+    },
+    {
+      "name": "Caching System",
+      "description": "Advanced caching with memory and persistent storage",
+      "files": ["src/lib/cache.ts", "src/services/cache/cache-service.ts"]
+    },
+    {
+      "name": "Real-time Features",
+      "description": "Real-time updates and WebSocket connections",
+      "files": [
+        "src/hooks/useRealtime.ts",
+        "src/lib/websocket.ts",
+        "src/services/supabase/supabase-realtime.ts"
+      ]
+    },
+    {
+      "name": "Accessibility",
+      "description": "Accessibility features and compliance",
+      "files": [
+        "src/hooks/useAccessibility.ts",
+        "src/lib/accessibility.ts",
+        "src/components/accessibility/AccessibilityProvider.tsx"
+      ]
+    },
+    {
+      "name": "Public Marketing Pages",
+      "description": "Landing page, pricing, features, and marketing content",
+      "files": [
+        "src/pages/LandingPage.tsx",
+        "src/pages/PricingPage.tsx",
+        "src/pages/AboutPage.tsx",
+        "src/pages/features/AIChatPage.tsx",
+        "src/pages/features/AIDashboardsPage.tsx",
+        "src/pages/features/AIProjectManagerPage.tsx",
+        "src/pages/comparisons/VsChatGPTPage.tsx",
+        "src/pages/comparisons/VsClaudePage.tsx"
+      ]
+    },
+    {
+      "name": "Layout System",
+      "description": "Responsive layout components and navigation",
+      "files": [
+        "src/layouts/PublicLayout.tsx",
+        "src/layouts/AuthLayout.tsx",
+        "src/layouts/DashboardLayout.tsx",
+        "src/components/layout/Header.tsx",
+        "src/components/layout/Sidebar.tsx",
+        "src/components/layout/Footer.tsx"
+      ]
+    },
+    {
+      "name": "UI Components",
+      "description": "Reusable UI components built with Radix UI and Tailwind",
+      "files": [
+        "src/components/ui/button.tsx",
+        "src/components/ui/input.tsx",
+        "src/components/ui/card.tsx",
+        "src/components/ui/dialog.tsx",
+        "src/components/ui/dropdown-menu.tsx",
+        "src/components/ui/toast.tsx",
+        "src/components/ui/tooltip.tsx"
+      ]
+    },
+    {
+      "name": "State Management",
+      "description": "Global state management with Zustand stores",
+      "files": [
+        "src/stores/unified-auth-store.ts",
+        "src/stores/chat-store.ts",
+        "src/stores/workforce-store.ts",
+        "src/stores/settings-store.ts"
+      ]
+    }
+  ]
+}

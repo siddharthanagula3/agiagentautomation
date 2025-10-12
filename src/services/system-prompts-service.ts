@@ -28,7 +28,8 @@ export class SystemPromptsService {
   private static instance: SystemPromptsService;
   private prompts: Map<string, SystemPrompt> = new Map();
   private guidelines: Map<string, PromptGuidelines> = new Map();
-  private cache: Map<string, { prompt: SystemPrompt; timestamp: Date }> = new Map();
+  private cache: Map<string, { prompt: SystemPrompt; timestamp: Date }> =
+    new Map();
 
   static getInstance(): SystemPromptsService {
     if (!SystemPromptsService.instance) {
@@ -57,10 +58,10 @@ export class SystemPromptsService {
         'Be concise and clear',
         'Admit uncertainty when appropriate',
         'Provide accurate information',
-        'Maintain helpful and professional tone'
+        'Maintain helpful and professional tone',
       ],
       cacheKey: 'openai-general',
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
 
     // Anthropic/Claude prompts
@@ -74,10 +75,10 @@ export class SystemPromptsService {
         'Be thorough and thoughtful',
         'Consider multiple perspectives',
         'Provide detailed explanations',
-        'Maintain ethical standards'
+        'Maintain ethical standards',
       ],
       cacheKey: 'anthropic-general',
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
 
     // Google/Gemini prompts
@@ -91,10 +92,10 @@ export class SystemPromptsService {
         'Be informative and helpful',
         'Provide clear explanations',
         'Use appropriate language',
-        'Ensure safety and accuracy'
+        'Ensure safety and accuracy',
       ],
       cacheKey: 'google-general',
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
 
     // Perplexity prompts
@@ -108,10 +109,10 @@ export class SystemPromptsService {
         'Provide current information',
         'Include citations when possible',
         'Be comprehensive in research',
-        'Verify information accuracy'
+        'Verify information accuracy',
       ],
       cacheKey: 'perplexity-general',
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
   }
 
@@ -127,19 +128,19 @@ export class SystemPromptsService {
         'Role definition',
         'Behavior guidelines',
         'Response format',
-        'Safety instructions'
+        'Safety instructions',
       ],
       optimizationTips: [
         'Keep prompts concise',
         'Be specific about behavior',
         'Include examples when helpful',
-        'Test with different scenarios'
+        'Test with different scenarios',
       ],
       providerSpecific: {
         supportsFunctionCalling: true,
         supportsSystemMessages: true,
-        supportsFewShot: true
-      }
+        supportsFewShot: true,
+      },
     });
 
     // Anthropic guidelines
@@ -150,19 +151,19 @@ export class SystemPromptsService {
         'Role and identity',
         'Capabilities and limitations',
         'Response style',
-        'Ethical guidelines'
+        'Ethical guidelines',
       ],
       optimizationTips: [
         'Be detailed about capabilities',
         'Include ethical considerations',
         'Specify response format',
-        'Consider context length'
+        'Consider context length',
       ],
       providerSpecific: {
         supportsSystemInstructions: true,
         supportsConstitutionalAI: true,
-        supportsLongContext: true
-      }
+        supportsLongContext: true,
+      },
     });
 
     // Google guidelines
@@ -173,19 +174,19 @@ export class SystemPromptsService {
         'Assistant identity',
         'Response guidelines',
         'Safety measures',
-        'Multimodal capabilities'
+        'Multimodal capabilities',
       ],
       optimizationTips: [
         'Include safety instructions',
         'Specify multimodal capabilities',
         'Be clear about limitations',
-        'Test with different inputs'
+        'Test with different inputs',
       ],
       providerSpecific: {
         supportsMultimodal: true,
         supportsSystemInstructions: true,
-        supportsSafetySettings: true
-      }
+        supportsSafetySettings: true,
+      },
     });
 
     // Perplexity guidelines
@@ -196,19 +197,19 @@ export class SystemPromptsService {
         'Research focus',
         'Citation requirements',
         'Accuracy standards',
-        'Response format'
+        'Response format',
       ],
       optimizationTips: [
         'Emphasize accuracy',
         'Request citations',
         'Specify research depth',
-        'Include verification steps'
+        'Include verification steps',
       ],
       providerSpecific: {
         supportsWebSearch: true,
         supportsCitations: true,
-        supportsRealTimeData: true
-      }
+        supportsRealTimeData: true,
+      },
     });
   }
 
@@ -225,7 +226,7 @@ export class SystemPromptsService {
    */
   getPrompt(provider: string, role?: string, model?: string): SystemPrompt {
     const cacheKey = `${provider}-${role || 'general'}`;
-    
+
     // Check cache first
     if (this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey)!;
@@ -237,7 +238,7 @@ export class SystemPromptsService {
 
     // Find appropriate prompt
     let prompt = this.prompts.get(`${provider}-${role || 'general'}`);
-    
+
     if (!prompt) {
       // Fallback to general prompt
       prompt = this.prompts.get(`${provider}-general`);
@@ -253,25 +254,29 @@ export class SystemPromptsService {
         category: 'general',
         guidelines: ['Be helpful', 'Be accurate', 'Be safe'],
         cacheKey,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       };
     }
 
     // Cache the result
     this.cache.set(cacheKey, { prompt, timestamp: new Date() });
-    
+
     return prompt;
   }
 
   /**
    * Create role-specific prompt
    */
-  createRolePrompt(role: string, provider: string, additionalInstructions?: string): SystemPrompt {
+  createRolePrompt(
+    role: string,
+    provider: string,
+    additionalInstructions?: string
+  ): SystemPrompt {
     const basePrompt = this.getPrompt(provider);
     const guidelines = this.guidelines.get(provider.toLowerCase());
-    
+
     let content = `You are a ${role}. `;
-    
+
     // Add role-specific instructions
     switch (role.toLowerCase()) {
       case 'product manager':
@@ -316,7 +321,7 @@ export class SystemPromptsService {
       category: 'role-specific',
       guidelines: basePrompt.guidelines,
       cacheKey: `${provider}-${role.toLowerCase()}`,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -347,13 +352,14 @@ export class SystemPromptsService {
 
     // Ensure prompt length is within limits
     if (optimizedContent.length > guidelines.maxLength) {
-      optimizedContent = optimizedContent.substring(0, guidelines.maxLength - 100) + '...';
+      optimizedContent =
+        optimizedContent.substring(0, guidelines.maxLength - 100) + '...';
     }
 
     return {
       ...prompt,
       content: optimizedContent,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -377,7 +383,9 @@ export class SystemPromptsService {
     }
 
     if (prompt.content.length > guidelines.maxLength) {
-      errors.push(`Prompt too long: ${prompt.content.length} > ${guidelines.maxLength}`);
+      errors.push(
+        `Prompt too long: ${prompt.content.length} > ${guidelines.maxLength}`
+      );
     }
 
     if (prompt.content.length < 50) {
@@ -385,8 +393,8 @@ export class SystemPromptsService {
     }
 
     // Check for key elements
-    const missingElements = guidelines.keyElements.filter(element => 
-      !prompt.content.toLowerCase().includes(element.toLowerCase())
+    const missingElements = guidelines.keyElements.filter(
+      element => !prompt.content.toLowerCase().includes(element.toLowerCase())
     );
 
     if (missingElements.length > 0) {
@@ -395,7 +403,7 @@ export class SystemPromptsService {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -412,7 +420,7 @@ export class SystemPromptsService {
   getCacheStats(): { size: number; entries: string[] } {
     return {
       size: this.cache.size,
-      entries: Array.from(this.cache.keys())
+      entries: Array.from(this.cache.keys()),
     };
   }
 }

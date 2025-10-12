@@ -19,17 +19,22 @@ interface ChatWrapperProps {
  * Chat Wrapper Component
  * Conditionally renders Agent SDK ChatUI for AI employees or regular chat for humans
  */
-export const ChatWrapper: React.FC<ChatWrapperProps> = ({ 
-  conversation, 
-  className 
+export const ChatWrapper: React.FC<ChatWrapperProps> = ({
+  conversation,
+  className,
 }) => {
   const { user } = useAuthStore();
-  
+
   // Determine if this is an AI employee channel
   const isAgent = isAgentChannel(conversation);
-  
+
   // If it's an AI employee channel, render Agent SDK ChatUI
-  if (isAgent && conversation?.employeeId && conversation?.employeeRole && conversation?.employeeName) {
+  if (
+    isAgent &&
+    conversation?.employeeId &&
+    conversation?.employeeRole &&
+    conversation?.employeeName
+  ) {
     return (
       <AgentSDKChatUI
         conversationId={conversation.id}
@@ -38,16 +43,18 @@ export const ChatWrapper: React.FC<ChatWrapperProps> = ({
         employeeRole={conversation.employeeRole}
         employeeName={conversation.employeeName}
         className={className}
-        onSessionCreated={(session) => {
-          console.log('[ChatWrapper] Agent session created:', session);
+        onSessionCreated={session => {
+          if (import.meta.env.DEV) {
+            console.log('[ChatWrapper] Agent session created:', session);
+          }
         }}
-        onError={(error) => {
+        onError={error => {
           console.error('[ChatWrapper] Agent error:', error);
         }}
       />
     );
   }
-  
+
   // For regular human conversations, render the enhanced chat
   return (
     <div className={className}>

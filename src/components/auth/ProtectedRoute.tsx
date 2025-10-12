@@ -7,7 +7,10 @@ interface ProtectedRouteProps {
   requiredRole?: 'user' | 'admin' | 'super_admin';
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole = 'user' }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requiredRole = 'user',
+}) => {
   const { user, isLoading } = useAuthStore();
   const [timeoutReached, setTimeoutReached] = useState(false);
 
@@ -15,7 +18,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
   useEffect(() => {
     if (isLoading) {
       const timeout = setTimeout(() => {
-        console.error('ProtectedRoute: Auth loading timed out, redirecting to login');
+        console.error(
+          'ProtectedRoute: Auth loading timed out, redirecting to login'
+        );
         setTimeoutReached(true);
       }, 5000); // Reduce to 5 seconds
 
@@ -25,13 +30,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     }
   }, [isLoading]);
 
-  console.log('🛡️ ProtectedRoute render:', { hasUser: !!user, isLoading, timeoutReached, userEmail: user?.email });
+  console.log('🛡️ ProtectedRoute render:', {
+    hasUser: !!user,
+    isLoading,
+    timeoutReached,
+    userEmail: user?.email,
+  });
 
   // If we have a user, allow access (check role if needed)
   if (user) {
     console.log('✅ User authenticated, checking role');
-    
-    if (requiredRole === 'admin' && user.role !== 'admin' && user.role !== 'super_admin') {
+
+    if (
+      requiredRole === 'admin' &&
+      user.role !== 'admin' &&
+      user.role !== 'super_admin'
+    ) {
       console.log('❌ Insufficient permissions for admin route');
       return <Navigate to="/dashboard" replace />;
     }
@@ -49,8 +63,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
   if (isLoading && !timeoutReached) {
     console.log('⏳ Still loading, showing spinner');
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -62,8 +76,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     );
   }

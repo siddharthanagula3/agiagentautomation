@@ -9,11 +9,14 @@ interface SpotlightProps {
 
 export const Spotlight: React.FC<SpotlightProps> = ({
   className,
-  fill = 'rgba(139, 92, 246, 0.2)'
+  fill = 'rgba(139, 92, 246, 0.2)',
 }) => {
   return (
     <svg
-      className={cn('absolute inset-0 w-full h-full pointer-events-none', className)}
+      className={cn(
+        'pointer-events-none absolute inset-0 h-full w-full',
+        className
+      )}
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
@@ -44,7 +47,7 @@ interface MouseSpotlightProps {
 export const MouseSpotlight: React.FC<MouseSpotlightProps> = ({
   children,
   className,
-  spotlightColor = 'rgba(139, 92, 246, 0.15)'
+  spotlightColor = 'rgba(139, 92, 246, 0.15)',
 }) => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);

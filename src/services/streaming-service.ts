@@ -44,11 +44,13 @@ export async function streamOpenAI(
     const response = await fetch('/.netlify/functions/openai-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, messages, temperature: 0.7 })
+      body: JSON.stringify({ model, messages, temperature: 0.7 }),
     });
     if (!response.ok) {
-      const data = await response.json().catch(() => ({} as any));
-      throw new Error(data?.error || `OpenAI proxy error: ${response.statusText}`);
+      const data = await response.json().catch(() => ({}) as any);
+      throw new Error(
+        data?.error || `OpenAI proxy error: ${response.statusText}`
+      );
     }
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || data.content;
@@ -66,7 +68,7 @@ export async function streamOpenAI(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`,
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
       model,
@@ -91,23 +93,39 @@ export async function streamOpenAI(
   try {
     while (true) {
       const { done, value } = await reader.read();
-      if (done) { onChunk({ type: 'done' }); break; }
+      if (done) {
+        onChunk({ type: 'done' });
+        break;
+      }
       const chunk = decoder.decode(value);
       const lines = chunk.split('\n').filter(line => line.trim() !== '');
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const data = line.slice(6);
-        if (data === '[DONE]') { onChunk({ type: 'done' }); continue; }
+        if (data === '[DONE]') {
+          onChunk({ type: 'done' });
+          continue;
+        }
         try {
           const parsed = JSON.parse(data);
           const delta = parsed.choices[0]?.delta;
-          if (delta?.content) onChunk({ type: 'content', content: delta.content });
+          if (delta?.content)
+            onChunk({ type: 'content', content: delta.content });
           if (delta?.tool_calls) {
             for (const toolCall of delta.tool_calls) {
-              onChunk({ type: 'tool_call', toolCall: { id: toolCall.id, name: toolCall.function?.name, arguments: toolCall.function?.arguments } });
+              onChunk({
+                type: 'tool_call',
+                toolCall: {
+                  id: toolCall.id,
+                  name: toolCall.function?.name,
+                  arguments: toolCall.function?.arguments,
+                },
+              });
             }
           }
-        } catch (e) { console.warn('Failed to parse SSE chunk:', e); }
+        } catch (e) {
+          console.warn('Failed to parse SSE chunk:', e);
+        }
       }
     }
   } finally {
@@ -132,11 +150,19 @@ export async function streamAnthropic(
     const response = await fetch('/.netlify/functions/anthropic-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, max_tokens: 4096, system: systemMessage?.content, messages: conversationMessages, temperature: 0.7 })
+      body: JSON.stringify({
+        model,
+        max_tokens: 4096,
+        system: systemMessage?.content,
+        messages: conversationMessages,
+        temperature: 0.7,
+      }),
     });
     if (!response.ok) {
-      const data = await response.json().catch(() => ({} as any));
-      throw new Error(data?.error || `Anthropic proxy error: ${response.statusText}`);
+      const data = await response.json().catch(() => ({}) as any);
+      throw new Error(
+        data?.error || `Anthropic proxy error: ${response.statusText}`
+      );
     }
     const data = await response.json();
     const content = data.content?.[0]?.text || data.content || data.output_text;
@@ -181,7 +207,10 @@ export async function streamAnthropic(
   try {
     while (true) {
       const { done, value } = await reader.read();
-      if (done) { onChunk({ type: 'done' }); break; }
+      if (done) {
+        onChunk({ type: 'done' });
+        break;
+      }
       const chunk = decoder.decode(value);
       const lines = chunk.split('\n').filter(line => line.trim() !== '');
       for (const line of lines) {
@@ -193,7 +222,9 @@ export async function streamAnthropic(
             onChunk({ type: 'content', content: parsed.delta.text });
           }
           if (parsed.type === 'message_stop') onChunk({ type: 'done' });
-        } catch (e) { console.warn('Failed to parse SSE chunk:', e); }
+        } catch (e) {
+          console.warn('Failed to parse SSE chunk:', e);
+        }
       }
     }
   } finally {
@@ -214,14 +245,17 @@ export async function streamGoogle(
     const response = await fetch('/.netlify/functions/google-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, messages, temperature: 0.7 })
+      body: JSON.stringify({ model, messages, temperature: 0.7 }),
     });
     if (!response.ok) {
-      const data = await response.json().catch(() => ({} as any));
-      throw new Error(data?.error || `Google proxy error: ${response.statusText}`);
+      const data = await response.json().catch(() => ({}) as any);
+      throw new Error(
+        data?.error || `Google proxy error: ${response.statusText}`
+      );
     }
     const data = await response.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || data.content;
+    const content =
+      data.candidates?.[0]?.content?.parts?.[0]?.text || data.content;
     if (content) onChunk({ type: 'content', content });
     onChunk({ type: 'done' });
     return;
@@ -234,7 +268,10 @@ export async function streamGoogle(
 
   const contents = messages
     .filter(m => m.role !== 'system')
-    .map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
+    .map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }));
   const systemInstruction = messages.find(m => m.role === 'system')?.content;
 
   const response = await fetch(
@@ -244,7 +281,9 @@ export async function streamGoogle(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents,
-        systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
+        systemInstruction: systemInstruction
+          ? { parts: [{ text: systemInstruction }] }
+          : undefined,
         generationConfig: { temperature: 0.7, maxOutputTokens: 2000 },
       }),
     }
@@ -265,7 +304,10 @@ export async function streamGoogle(
     let buffer = '';
     while (true) {
       const { done, value } = await reader.read();
-      if (done) { onChunk({ type: 'done' }); break; }
+      if (done) {
+        onChunk({ type: 'done' });
+        break;
+      }
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop() || '';
@@ -274,9 +316,14 @@ export async function streamGoogle(
         try {
           const parsed = JSON.parse(line);
           if (parsed.candidates?.[0]?.content?.parts?.[0]?.text) {
-            onChunk({ type: 'content', content: parsed.candidates[0].content.parts[0].text });
+            onChunk({
+              type: 'content',
+              content: parsed.candidates[0].content.parts[0].text,
+            });
           }
-        } catch (e) { console.warn('Failed to parse streaming chunk:', e); }
+        } catch (e) {
+          console.warn('Failed to parse streaming chunk:', e);
+        }
       }
     }
   } finally {
@@ -297,19 +344,19 @@ export async function streamAIResponse(
     case 'chatgpt':
     case 'openai':
       return streamOpenAI(messages, onChunk, tools);
-    
+
     case 'claude':
     case 'anthropic':
       return streamAnthropic(messages, onChunk, tools);
-    
+
     case 'gemini':
     case 'google':
       return streamGoogle(messages, onChunk);
-    
+
     case 'perplexity':
       // Perplexity doesn't support streaming yet, fall back to regular
       throw new Error('Perplexity streaming not yet supported');
-    
+
     default:
       throw new Error(`Unsupported provider: ${provider}`);
   }

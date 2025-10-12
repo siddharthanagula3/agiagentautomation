@@ -11,7 +11,7 @@ export interface UIState {
   // Sidebar state
   sidebarOpen: boolean;
   sidebarCollapsed: boolean;
-  
+
   // Modal states
   modals: {
     createEmployee: boolean;
@@ -20,17 +20,17 @@ export interface UIState {
     billing: boolean;
     help: boolean;
   };
-  
+
   // Theme
   theme: 'light' | 'dark' | 'system';
-  
+
   // Chat interface
   chatInterface: {
     showTools: boolean;
     selectedTools: string[];
     currentConversation: string | null;
   };
-  
+
   // Dashboard layout
   dashboard: {
     viewMode: 'grid' | 'list';
@@ -38,7 +38,7 @@ export interface UIState {
     sortBy: string;
     sortOrder: 'asc' | 'desc';
   };
-  
+
   // Notifications
   notifications: {
     enabled: boolean;
@@ -52,31 +52,31 @@ export interface UIActions {
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
-  
+
   // Modal actions
   openModal: (modal: keyof UIState['modals']) => void;
   closeModal: (modal: keyof UIState['modals']) => void;
   closeAllModals: () => void;
-  
+
   // Theme actions
   setTheme: (theme: UIState['theme']) => void;
-  
+
   // Chat interface actions
   toggleChatTools: () => void;
   setSelectedTools: (tools: string[]) => void;
   setCurrentConversation: (conversationId: string | null) => void;
-  
+
   // Dashboard actions
   setViewMode: (mode: UIState['dashboard']['viewMode']) => void;
   setFilters: (filters: Record<string, unknown>) => void;
   setSortBy: (sortBy: string) => void;
   setSortOrder: (order: 'asc' | 'desc') => void;
-  
+
   // Notification actions
   setNotificationEnabled: (enabled: boolean) => void;
   setNotificationSound: (sound: boolean) => void;
   setDesktopNotifications: (desktop: boolean) => void;
-  
+
   // Utility actions
   reset: () => void;
 }
@@ -120,107 +120,107 @@ export const useUIStore = create<UIStore>()(
 
         // Sidebar actions
         toggleSidebar: () =>
-          set((state) => {
+          set(state => {
             state.sidebarOpen = !state.sidebarOpen;
           }),
 
         setSidebarOpen: (open: boolean) =>
-          set((state) => {
+          set(state => {
             state.sidebarOpen = open;
           }),
 
         setSidebarCollapsed: (collapsed: boolean) =>
-          set((state) => {
+          set(state => {
             state.sidebarCollapsed = collapsed;
           }),
 
         // Modal actions
         openModal: (modal: keyof UIState['modals']) =>
-          set((state) => {
+          set(state => {
             state.modals[modal] = true;
           }),
 
         closeModal: (modal: keyof UIState['modals']) =>
-          set((state) => {
+          set(state => {
             state.modals[modal] = false;
           }),
 
         closeAllModals: () =>
-          set((state) => {
-            Object.keys(state.modals).forEach((key) => {
+          set(state => {
+            Object.keys(state.modals).forEach(key => {
               state.modals[key as keyof UIState['modals']] = false;
             });
           }),
 
         // Theme actions
         setTheme: (theme: UIState['theme']) =>
-          set((state) => {
+          set(state => {
             state.theme = theme;
           }),
 
         // Chat interface actions
         toggleChatTools: () =>
-          set((state) => {
+          set(state => {
             state.chatInterface.showTools = !state.chatInterface.showTools;
           }),
 
         setSelectedTools: (tools: string[]) =>
-          set((state) => {
+          set(state => {
             state.chatInterface.selectedTools = tools;
           }),
 
         setCurrentConversation: (conversationId: string | null) =>
-          set((state) => {
+          set(state => {
             state.chatInterface.currentConversation = conversationId;
           }),
 
         // Dashboard actions
         setViewMode: (mode: UIState['dashboard']['viewMode']) =>
-          set((state) => {
+          set(state => {
             state.dashboard.viewMode = mode;
           }),
 
         setFilters: (filters: Record<string, unknown>) =>
-          set((state) => {
+          set(state => {
             state.dashboard.filters = filters;
           }),
 
         setSortBy: (sortBy: string) =>
-          set((state) => {
+          set(state => {
             state.dashboard.sortBy = sortBy;
           }),
 
         setSortOrder: (order: 'asc' | 'desc') =>
-          set((state) => {
+          set(state => {
             state.dashboard.sortOrder = order;
           }),
 
         // Notification actions
         setNotificationEnabled: (enabled: boolean) =>
-          set((state) => {
+          set(state => {
             state.notifications.enabled = enabled;
           }),
 
         setNotificationSound: (sound: boolean) =>
-          set((state) => {
+          set(state => {
             state.notifications.sound = sound;
           }),
 
         setDesktopNotifications: (desktop: boolean) =>
-          set((state) => {
+          set(state => {
             state.notifications.desktop = desktop;
           }),
 
         // Utility actions
         reset: () =>
-          set((state) => {
+          set(state => {
             Object.assign(state, INITIAL_STATE);
           }),
       })),
       {
         name: 'agi-ui-store',
         version: 1,
-        partialize: (state) => ({
+        partialize: state => ({
           sidebarOpen: state.sidebarOpen,
           sidebarCollapsed: state.sidebarCollapsed,
           theme: state.theme,
@@ -236,13 +236,14 @@ export const useUIStore = create<UIStore>()(
 );
 
 // Selectors for optimized re-renders
-export const useSidebar = () => useUIStore((state) => ({
-  sidebarOpen: state.sidebarOpen,
-  sidebarCollapsed: state.sidebarCollapsed,
-}));
+export const useSidebar = () =>
+  useUIStore(state => ({
+    sidebarOpen: state.sidebarOpen,
+    sidebarCollapsed: state.sidebarCollapsed,
+  }));
 
-export const useModals = () => useUIStore((state) => state.modals);
-export const useTheme = () => useUIStore((state) => state.theme);
-export const useChatInterface = () => useUIStore((state) => state.chatInterface);
-export const useDashboard = () => useUIStore((state) => state.dashboard);
-export const useNotifications = () => useUIStore((state) => state.notifications);
+export const useModals = () => useUIStore(state => state.modals);
+export const useTheme = () => useUIStore(state => state.theme);
+export const useChatInterface = () => useUIStore(state => state.chatInterface);
+export const useDashboard = () => useUIStore(state => state.dashboard);
+export const useNotifications = () => useUIStore(state => state.notifications);

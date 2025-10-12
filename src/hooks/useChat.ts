@@ -73,7 +73,7 @@ export const useChat = (employeeId: string) => {
 
     try {
       // TODO: Send to API
-      const response = await new Promise<ChatMessage>((resolve) => {
+      const response = await new Promise<ChatMessage>(resolve => {
         setTimeout(() => {
           resolve({
             id: (Date.now() + 1).toString(),
@@ -100,8 +100,8 @@ export const useChat = (employeeId: string) => {
   }, [inputMessage, isLoading]);
 
   const toggleTool = useCallback((toolId: string) => {
-    setSelectedTools(prev => 
-      prev.includes(toolId) 
+    setSelectedTools(prev =>
+      prev.includes(toolId)
         ? prev.filter(id => id !== toolId)
         : [...prev, toolId]
     );

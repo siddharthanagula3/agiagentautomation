@@ -6,7 +6,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
 };
 
 interface NewsletterData {
@@ -16,7 +17,7 @@ interface NewsletterData {
   tags?: string[];
 }
 
-serve(async (req) => {
+serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -27,14 +28,17 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { email, name, source, tags } = await req.json() as NewsletterData;
+    const { email, name, source, tags } = (await req.json()) as NewsletterData;
 
     // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) {
       return new Response(
         JSON.stringify({ error: 'Valid email is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
       );
     }
 
@@ -51,9 +55,12 @@ serve(async (req) => {
           JSON.stringify({
             success: true,
             message: 'Already subscribed',
-            alreadySubscribed: true
+            alreadySubscribed: true,
           }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
         );
       } else {
         // Reactivate if previously unsubscribed
@@ -62,7 +69,7 @@ serve(async (req) => {
           .update({
             status: 'active',
             subscribed_at: new Date().toISOString(),
-            unsubscribed_at: null
+            unsubscribed_at: null,
           })
           .eq('id', existing.id);
 
@@ -71,9 +78,12 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({
             success: true,
-            message: 'Resubscribed successfully'
+            message: 'Resubscribed successfully',
           }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
         );
       }
     }
@@ -86,15 +96,15 @@ serve(async (req) => {
         name,
         source: source || 'website',
         tags: tags || [],
-        status: 'active'
+        status: 'active',
       });
 
     if (insertError) {
       console.error('Error subscribing to newsletter:', insertError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to subscribe' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: 'Failed to subscribe' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // TODO: Send welcome email
@@ -103,16 +113,18 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Successfully subscribed to newsletter'
+        message: 'Successfully subscribed to newsletter',
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
     );
-
   } catch (error) {
     console.error('Error in newsletter-subscribe function:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

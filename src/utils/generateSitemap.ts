@@ -4,7 +4,14 @@
 interface SitemapEntry {
   url: string;
   lastmod?: string;
-  changefreq?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
+  changefreq?:
+    | 'always'
+    | 'hourly'
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'yearly'
+    | 'never';
   priority?: number;
 }
 
@@ -17,12 +24,16 @@ export function generateSitemap(entries: SitemapEntry[]): string {
         xmlns:xhtml="http://www.w3.org/1999/xhtml"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-${entries.map(entry => `  <url>
+${entries
+  .map(
+    entry => `  <url>
     <loc>${siteUrl}${entry.url}</loc>
     ${entry.lastmod ? `<lastmod>${entry.lastmod}</lastmod>` : ''}
     ${entry.changefreq ? `<changefreq>${entry.changefreq}</changefreq>` : ''}
     ${entry.priority !== undefined ? `<priority>${entry.priority}</priority>` : ''}
-  </url>`).join('\n')}
+  </url>`
+  )
+  .join('\n')}
 </urlset>`;
 
   return xml;
@@ -42,9 +53,17 @@ export const staticPages: SitemapEntry[] = [
 
   // Use cases
   { url: '/use-cases/startups', changefreq: 'weekly', priority: 0.8 },
-  { url: '/use-cases/it-service-providers', changefreq: 'weekly', priority: 0.8 },
+  {
+    url: '/use-cases/it-service-providers',
+    changefreq: 'weekly',
+    priority: 0.8,
+  },
   { url: '/use-cases/sales-teams', changefreq: 'weekly', priority: 0.8 },
-  { url: '/use-cases/consulting-businesses', changefreq: 'weekly', priority: 0.8 },
+  {
+    url: '/use-cases/consulting-businesses',
+    changefreq: 'weekly',
+    priority: 0.8,
+  },
 
   // Marketing pages
   { url: '/blog', changefreq: 'daily', priority: 0.9 },
@@ -72,7 +91,9 @@ export const staticPages: SitemapEntry[] = [
 ];
 
 // Generate blog sitemap from database
-export function generateBlogSitemap(posts: Array<{ slug: string; updated_at: string }>): string {
+export function generateBlogSitemap(
+  posts: Array<{ slug: string; updated_at: string }>
+): string {
   const entries: SitemapEntry[] = posts.map(post => ({
     url: `/blog/${post.slug}`,
     lastmod: new Date(post.updated_at).toISOString(),

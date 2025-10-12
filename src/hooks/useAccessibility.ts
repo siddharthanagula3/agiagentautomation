@@ -51,7 +51,8 @@ export const useHighContrast = () => {
 
   useEffect(() => {
     setIsHighContrast(HighContrastDetector.isHighContrast());
-    const cleanup = HighContrastDetector.onHighContrastChange(setIsHighContrast);
+    const cleanup =
+      HighContrastDetector.onHighContrastChange(setIsHighContrast);
     return cleanup;
   }, []);
 
@@ -64,7 +65,9 @@ export const useMotionPreferences = () => {
 
   useEffect(() => {
     setPrefersReducedMotion(MotionPreferences.prefersReducedMotion());
-    const cleanup = MotionPreferences.onMotionPreferenceChange(setPrefersReducedMotion);
+    const cleanup = MotionPreferences.onMotionPreferenceChange(
+      setPrefersReducedMotion
+    );
     return cleanup;
   }, []);
 
@@ -108,52 +111,58 @@ export const useKeyboardNavigation = (
     onEnd?: () => void;
   } = {}
 ) => {
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    switch (event.key) {
-      case KEYS.ENTER:
-        event.preventDefault();
-        options.onEnter?.();
-        break;
-      case KEYS.SPACE:
-        event.preventDefault();
-        options.onSpace?.();
-        break;
-      case KEYS.ESCAPE:
-        event.preventDefault();
-        options.onEscape?.();
-        break;
-      case KEYS.ARROW_UP:
-        event.preventDefault();
-        options.onArrowUp?.();
-        break;
-      case KEYS.ARROW_DOWN:
-        event.preventDefault();
-        options.onArrowDown?.();
-        break;
-      case KEYS.ARROW_LEFT:
-        event.preventDefault();
-        options.onArrowLeft?.();
-        break;
-      case KEYS.ARROW_RIGHT:
-        event.preventDefault();
-        options.onArrowRight?.();
-        break;
-      case KEYS.HOME:
-        event.preventDefault();
-        options.onHome?.();
-        break;
-      case KEYS.END:
-        event.preventDefault();
-        options.onEnd?.();
-        break;
-    }
-  }, [options]);
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      switch (event.key) {
+        case KEYS.ENTER:
+          event.preventDefault();
+          options.onEnter?.();
+          break;
+        case KEYS.SPACE:
+          event.preventDefault();
+          options.onSpace?.();
+          break;
+        case KEYS.ESCAPE:
+          event.preventDefault();
+          options.onEscape?.();
+          break;
+        case KEYS.ARROW_UP:
+          event.preventDefault();
+          options.onArrowUp?.();
+          break;
+        case KEYS.ARROW_DOWN:
+          event.preventDefault();
+          options.onArrowDown?.();
+          break;
+        case KEYS.ARROW_LEFT:
+          event.preventDefault();
+          options.onArrowLeft?.();
+          break;
+        case KEYS.ARROW_RIGHT:
+          event.preventDefault();
+          options.onArrowRight?.();
+          break;
+        case KEYS.HOME:
+          event.preventDefault();
+          options.onHome?.();
+          break;
+        case KEYS.END:
+          event.preventDefault();
+          options.onEnd?.();
+          break;
+      }
+    },
+    [options]
+  );
 
   return { handleKeyDown };
 };
 
 // Hook for list navigation (useful for menus, listboxes)
-export const useListNavigation = (items: unknown[], options?: { loop?: boolean }) => {
+export const useListNavigation = (
+  items: unknown[],
+  options?: { loop?: boolean }
+) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { loop = true } = options || {};
 
@@ -211,18 +220,24 @@ export const useDisclosure = (initialState = false) => {
   const close = useCallback(() => setIsOpen(false), []);
   const toggle = useCallback(() => setIsOpen(prev => !prev), []);
 
-  const getTriggerProps = useCallback(() => ({
-    id: triggerId,
-    'aria-expanded': isOpen,
-    'aria-controls': contentId,
-    onClick: toggle,
-  }), [triggerId, contentId, isOpen, toggle]);
+  const getTriggerProps = useCallback(
+    () => ({
+      id: triggerId,
+      'aria-expanded': isOpen,
+      'aria-controls': contentId,
+      onClick: toggle,
+    }),
+    [triggerId, contentId, isOpen, toggle]
+  );
 
-  const getContentProps = useCallback(() => ({
-    id: contentId,
-    'aria-labelledby': triggerId,
-    hidden: !isOpen,
-  }), [contentId, triggerId, isOpen]);
+  const getContentProps = useCallback(
+    () => ({
+      id: contentId,
+      'aria-labelledby': triggerId,
+      hidden: !isOpen,
+    }),
+    [contentId, triggerId, isOpen]
+  );
 
   return {
     isOpen,
@@ -264,12 +279,15 @@ export const useModal = () => {
     };
   }, []);
 
-  const getModalProps = useCallback(() => ({
-    ref: modalRef,
-    role: 'dialog',
-    'aria-modal': true,
-    onKeyDown: handleKeyDown,
-  }), [modalRef, handleKeyDown]);
+  const getModalProps = useCallback(
+    () => ({
+      ref: modalRef,
+      role: 'dialog',
+      'aria-modal': true,
+      onKeyDown: handleKeyDown,
+    }),
+    [modalRef, handleKeyDown]
+  );
 
   return {
     isOpen,
@@ -280,7 +298,9 @@ export const useModal = () => {
 };
 
 // Hook for live regions
-export const useLiveRegion = (politeness: 'polite' | 'assertive' = 'polite') => {
+export const useLiveRegion = (
+  politeness: 'polite' | 'assertive' = 'polite'
+) => {
   const [message, setMessage] = useState('');
   const regionId = useAriaId('live-region');
 
@@ -289,12 +309,15 @@ export const useLiveRegion = (politeness: 'polite' | 'assertive' = 'polite') => 
     setTimeout(() => setMessage(''), 1000);
   }, []);
 
-  const getLiveRegionProps = useCallback(() => ({
-    id: regionId,
-    'aria-live': politeness,
-    'aria-atomic': true,
-    className: 'sr-only',
-  }), [regionId, politeness]);
+  const getLiveRegionProps = useCallback(
+    () => ({
+      id: regionId,
+      'aria-live': politeness,
+      'aria-atomic': true,
+      className: 'sr-only',
+    }),
+    [regionId, politeness]
+  );
 
   return {
     message,
@@ -315,16 +338,19 @@ export const useSkipLink = () => {
     }
   }, []);
 
-  const getSkipLinkProps = useCallback((targetId: string, label: string) => ({
-    ref: skipRef,
-    href: `#${targetId}`,
-    onClick: (e: React.MouseEvent) => {
-      e.preventDefault();
-      skipToContent(targetId);
-    },
-    className: 'skip-link',
-    children: label,
-  }), [skipToContent]);
+  const getSkipLinkProps = useCallback(
+    (targetId: string, label: string) => ({
+      ref: skipRef,
+      href: `#${targetId}`,
+      onClick: (e: React.MouseEvent) => {
+        e.preventDefault();
+        skipToContent(targetId);
+      },
+      className: 'skip-link',
+      children: label,
+    }),
+    [skipToContent]
+  );
 
   return {
     skipToContent,

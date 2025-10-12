@@ -48,7 +48,12 @@ export interface Tool {
   id: string;
   name: string;
   description: string;
-  category: 'code_generation' | 'data_analysis' | 'design' | 'marketing' | 'business';
+  category:
+    | 'code_generation'
+    | 'data_analysis'
+    | 'design'
+    | 'marketing'
+    | 'business';
   parameters: ToolParameter[];
   executionEndpoint: string;
   costPerExecution: number;
@@ -252,7 +257,12 @@ export interface Workflow {
 
 export interface WorkflowStep {
   id: string;
-  type: 'ai_employee_task' | 'tool_invocation' | 'condition' | 'delay' | 'notification';
+  type:
+    | 'ai_employee_task'
+    | 'tool_invocation'
+    | 'condition'
+    | 'delay'
+    | 'notification';
   config: WorkflowStepConfig;
   onSuccess: string;
   onFailure: string;

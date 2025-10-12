@@ -43,13 +43,13 @@ class ClaudeService {
 
     try {
       const prompt = this.buildPrompt(task);
-      
+
       const response = await fetch(`${this.baseURL}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': this.apiKey,
-          'anthropic-version': '2023-06-01'
+          'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
@@ -57,10 +57,10 @@ class ClaudeService {
           messages: [
             {
               role: 'user',
-              content: prompt
-            }
-          ]
-        })
+              content: prompt,
+            },
+          ],
+        }),
       });
 
       if (!response.ok) {
@@ -71,7 +71,7 @@ class ClaudeService {
       const data = await response.json();
       const content = data.content[0].text;
       const tokensUsed = data.usage.input_tokens + data.usage.output_tokens;
-      
+
       // Calculate cost (Claude Sonnet 4 pricing: $3/M input, $15/M output)
       const inputCost = (data.usage.input_tokens / 1000000) * 3;
       const outputCost = (data.usage.output_tokens / 1000000) * 15;
@@ -82,7 +82,7 @@ class ClaudeService {
         tokensUsed,
         cost,
         model: 'claude-sonnet-4-20250514',
-        provider: 'anthropic'
+        provider: 'anthropic',
       };
     } catch (error) {
       console.error('Claude API error:', error);
@@ -128,31 +128,31 @@ class GeminiService {
 
     try {
       const prompt = this.buildPrompt(task);
-      
+
       const response = await fetch(
         `${this.baseURL}/models/gemini-2.0-flash-exp:generateContent?key=${this.apiKey}`,
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             contents: [
               {
                 parts: [
                   {
-                    text: prompt
-                  }
-                ]
-              }
+                    text: prompt,
+                  },
+                ],
+              },
             ],
             generationConfig: {
               temperature: 0.7,
               topK: 40,
               topP: 0.95,
-              maxOutputTokens: 8192
-            }
-          })
+              maxOutputTokens: 8192,
+            },
+          }),
         }
       );
 
@@ -163,9 +163,10 @@ class GeminiService {
 
       const data = await response.json();
       const content = data.candidates[0].content.parts[0].text;
-      const tokensUsed = (data.usageMetadata?.promptTokenCount || 0) + 
-                        (data.usageMetadata?.candidatesTokenCount || 0);
-      
+      const tokensUsed =
+        (data.usageMetadata?.promptTokenCount || 0) +
+        (data.usageMetadata?.candidatesTokenCount || 0);
+
       // Calculate cost (Gemini 2.0 Flash pricing: free for now, but estimate)
       const cost = (tokensUsed / 1000000) * 0.35; // $0.35 per million tokens
 
@@ -174,7 +175,7 @@ class GeminiService {
         tokensUsed,
         cost,
         model: 'gemini-2.0-flash-exp',
-        provider: 'google'
+        provider: 'google',
       };
     } catch (error) {
       console.error('Gemini API error:', error);
@@ -218,28 +219,28 @@ class OpenAIService {
 
     try {
       const prompt = this.buildPrompt(task);
-      
+
       const response = await fetch(`${this.baseURL}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`
+          Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
           model: 'gpt-4-turbo-preview',
           messages: [
             {
               role: 'system',
-              content: `You are an expert AI assistant specializing in ${task.domain}.`
+              content: `You are an expert AI assistant specializing in ${task.domain}.`,
             },
             {
               role: 'user',
-              content: prompt
-            }
+              content: prompt,
+            },
           ],
           max_tokens: 4096,
-          temperature: 0.7
-        })
+          temperature: 0.7,
+        }),
       });
 
       if (!response.ok) {
@@ -250,7 +251,7 @@ class OpenAIService {
       const data = await response.json();
       const content = data.choices[0].message.content;
       const tokensUsed = data.usage.total_tokens;
-      
+
       // Calculate cost (GPT-4 Turbo pricing: $10/M input, $30/M output)
       const inputCost = (data.usage.prompt_tokens / 1000000) * 10;
       const outputCost = (data.usage.completion_tokens / 1000000) * 30;
@@ -261,7 +262,7 @@ class OpenAIService {
         tokensUsed,
         cost,
         model: 'gpt-4-turbo-preview',
-        provider: 'openai'
+        provider: 'openai',
       };
     } catch (error) {
       console.error('OpenAI API error:', error);
@@ -289,25 +290,29 @@ Please complete this task with detailed, high-quality output.`;
 class MockAIService {
   async executeTask(task: Task): Promise<AIResponse> {
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+    await new Promise(resolve =>
+      setTimeout(resolve, 1000 + Math.random() * 2000)
+    );
 
     const mockResponses: Record<string, string> = {
-      'create': `I've successfully created the ${task.title}. Here's what I've done:\n\n1. Analyzed the requirements\n2. Designed the solution architecture\n3. Implemented the core functionality\n4. Added error handling and validation\n5. Created documentation\n\nThe implementation is complete and ready for use.`,
-      'modify': `I've modified the ${task.title} as requested. Changes made:\n\n1. Updated the implementation\n2. Refactored for better performance\n3. Added requested features\n4. Updated tests and documentation\n\nAll changes have been applied successfully.`,
-      'analyze': `Analysis of ${task.title}:\n\n**Key Findings:**\n1. Current state is functional but has optimization opportunities\n2. Performance metrics are within acceptable range\n3. Code quality is good with minor improvements needed\n\n**Recommendations:**\n1. Implement caching for frequently accessed data\n2. Add comprehensive error handling\n3. Improve documentation\n\nDetailed analysis complete.`,
-      'debug': `Debug report for ${task.title}:\n\n**Issue Identified:**\nThe problem was caused by incorrect error handling in the main function.\n\n**Root Cause:**\nMissing try-catch block leading to unhandled exceptions.\n\n**Solution Applied:**\n1. Added proper error handling\n2. Implemented fallback mechanisms\n3. Added logging for debugging\n\n**Status:** Fixed and tested successfully.`,
-      'test': `Test results for ${task.title}:\n\n**Test Summary:**\n- Total Tests: 15\n- Passed: 15\n- Failed: 0\n- Coverage: 95%\n\n**All tests passed successfully!**\n\nThe implementation is working as expected and ready for deployment.`,
-      'research': `Research findings for ${task.title}:\n\n**Summary:**\nConducted comprehensive research on the topic.\n\n**Key Insights:**\n1. Current best practices suggest using modern approaches\n2. Industry trends favor scalable solutions\n3. Performance considerations are critical\n\n**Recommendations:**\nImplement using latest standards and frameworks.\n\nFull research report generated.`
+      create: `I've successfully created the ${task.title}. Here's what I've done:\n\n1. Analyzed the requirements\n2. Designed the solution architecture\n3. Implemented the core functionality\n4. Added error handling and validation\n5. Created documentation\n\nThe implementation is complete and ready for use.`,
+      modify: `I've modified the ${task.title} as requested. Changes made:\n\n1. Updated the implementation\n2. Refactored for better performance\n3. Added requested features\n4. Updated tests and documentation\n\nAll changes have been applied successfully.`,
+      analyze: `Analysis of ${task.title}:\n\n**Key Findings:**\n1. Current state is functional but has optimization opportunities\n2. Performance metrics are within acceptable range\n3. Code quality is good with minor improvements needed\n\n**Recommendations:**\n1. Implement caching for frequently accessed data\n2. Add comprehensive error handling\n3. Improve documentation\n\nDetailed analysis complete.`,
+      debug: `Debug report for ${task.title}:\n\n**Issue Identified:**\nThe problem was caused by incorrect error handling in the main function.\n\n**Root Cause:**\nMissing try-catch block leading to unhandled exceptions.\n\n**Solution Applied:**\n1. Added proper error handling\n2. Implemented fallback mechanisms\n3. Added logging for debugging\n\n**Status:** Fixed and tested successfully.`,
+      test: `Test results for ${task.title}:\n\n**Test Summary:**\n- Total Tests: 15\n- Passed: 15\n- Failed: 0\n- Coverage: 95%\n\n**All tests passed successfully!**\n\nThe implementation is working as expected and ready for deployment.`,
+      research: `Research findings for ${task.title}:\n\n**Summary:**\nConducted comprehensive research on the topic.\n\n**Key Insights:**\n1. Current best practices suggest using modern approaches\n2. Industry trends favor scalable solutions\n3. Performance considerations are critical\n\n**Recommendations:**\nImplement using latest standards and frameworks.\n\nFull research report generated.`,
     };
 
-    const content = mockResponses[task.type] || `Successfully completed: ${task.title}\n\nThis is a mock response for development. Configure API keys to use real AI services.`;
+    const content =
+      mockResponses[task.type] ||
+      `Successfully completed: ${task.title}\n\nThis is a mock response for development. Configure API keys to use real AI services.`;
 
     return {
       content,
       tokensUsed: Math.floor(500 + Math.random() * 1500),
       cost: 0.001 + Math.random() * 0.05,
       model: 'mock-model',
-      provider: 'mock'
+      provider: 'mock',
     };
   }
 }
@@ -386,7 +391,10 @@ export const aiService = new AIServiceRouter();
 export { ClaudeService, GeminiService, OpenAIService, MockAIService };
 
 // Helper function for easy access
-export async function executeAITask(task: Task, agentType: AgentType): Promise<AIResponse> {
+export async function executeAITask(
+  task: Task,
+  agentType: AgentType
+): Promise<AIResponse> {
   return aiService.executeTask(task, agentType);
 }
 

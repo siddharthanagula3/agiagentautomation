@@ -18,7 +18,7 @@ import {
   CheckCircle,
   Loader2,
   Clock,
-  Cpu
+  Cpu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -47,10 +47,12 @@ export const CodeExecutionSandbox: React.FC<CodeExecutionSandboxProps> = ({
   execution,
   onRerun,
   onCancel,
-  className
+  className,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<'output' | 'logs' | 'code'>('output');
+  const [activeTab, setActiveTab] = useState<'output' | 'logs' | 'code'>(
+    'output'
+  );
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(execution.code);
@@ -58,7 +60,12 @@ export const CodeExecutionSandbox: React.FC<CodeExecutionSandboxProps> = ({
   };
 
   const handleDownload = () => {
-    const ext = execution.language === 'python' ? 'py' : execution.language === 'bash' ? 'sh' : 'js';
+    const ext =
+      execution.language === 'python'
+        ? 'py'
+        : execution.language === 'bash'
+          ? 'sh'
+          : 'js';
     const blob = new Blob([execution.code], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -101,20 +108,22 @@ export const CodeExecutionSandbox: React.FC<CodeExecutionSandboxProps> = ({
       animate={{ opacity: 1, y: 0 }}
       className={cn('my-3', className)}
     >
-      <Card className={cn(
-        'border-2 overflow-hidden transition-all',
-        getStatusColor()
-      )}>
+      <Card
+        className={cn(
+          'overflow-hidden border-2 transition-all',
+          getStatusColor()
+        )}
+      >
         {/* Header */}
-        <div className="p-4 bg-muted/30 border-b border-border/50">
+        <div className="border-b border-border/50 bg-muted/30 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="rounded-lg bg-primary/10 p-2">
                 <Terminal className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h4 className="font-semibold text-sm">Code Execution</h4>
+                  <h4 className="text-sm font-semibold">Code Execution</h4>
                   <Badge variant="outline" className="text-xs">
                     {execution.language}
                   </Badge>
@@ -125,8 +134,9 @@ export const CodeExecutionSandbox: React.FC<CodeExecutionSandboxProps> = ({
                     </span>
                   </div>
                 </div>
-                {(execution.executionTime !== undefined || execution.memoryUsage !== undefined) && (
-                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                {(execution.executionTime !== undefined ||
+                  execution.memoryUsage !== undefined) && (
+                  <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
                     {execution.executionTime !== undefined && (
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
@@ -146,37 +156,21 @@ export const CodeExecutionSandbox: React.FC<CodeExecutionSandboxProps> = ({
 
             <div className="flex items-center gap-2">
               {execution.status === 'running' && onCancel && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={onCancel}
-                >
-                  <Square className="h-3 w-3 mr-1" />
+                <Button variant="destructive" size="sm" onClick={onCancel}>
+                  <Square className="mr-1 h-3 w-3" />
                   Cancel
                 </Button>
               )}
               {execution.status !== 'running' && onRerun && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onRerun}
-                >
-                  <Play className="h-3 w-3 mr-1" />
+                <Button variant="outline" size="sm" onClick={onRerun}>
+                  <Play className="mr-1 h-3 w-3" />
                   Rerun
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopyCode}
-              >
+              <Button variant="ghost" size="sm" onClick={handleCopyCode}>
                 <Copy className="h-3 w-3" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDownload}
-              >
+              <Button variant="ghost" size="sm" onClick={handleDownload}>
                 <Download className="h-3 w-3" />
               </Button>
               <Button
@@ -195,30 +189,36 @@ export const CodeExecutionSandbox: React.FC<CodeExecutionSandboxProps> = ({
         </div>
 
         {/* Content */}
-        <div className={cn(
-          'transition-all duration-300',
-          isExpanded ? 'max-h-[600px]' : 'max-h-[300px]'
-        )}>
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
+        <div
+          className={cn(
+            'transition-all duration-300',
+            isExpanded ? 'max-h-[600px]' : 'max-h-[300px]'
+          )}
+        >
+          <Tabs
+            value={activeTab}
+            onValueChange={v => setActiveTab(v as any)}
+            className="w-full"
+          >
             <TabsList className="w-full rounded-none border-b">
               <TabsTrigger value="output" className="flex-1">
-                <FileText className="h-3 w-3 mr-1" />
+                <FileText className="mr-1 h-3 w-3" />
                 Output
               </TabsTrigger>
               <TabsTrigger value="code" className="flex-1">
-                <Code className="h-3 w-3 mr-1" />
+                <Code className="mr-1 h-3 w-3" />
                 Code
               </TabsTrigger>
               {execution.logs && execution.logs.length > 0 && (
                 <TabsTrigger value="logs" className="flex-1">
-                  <Terminal className="h-3 w-3 mr-1" />
+                  <Terminal className="mr-1 h-3 w-3" />
                   Logs ({execution.logs.length})
                 </TabsTrigger>
               )}
             </TabsList>
 
-            <TabsContent value="output" className="p-0 m-0">
-              <div className="p-4 max-h-[500px] overflow-y-auto">
+            <TabsContent value="output" className="m-0 p-0">
+              <div className="max-h-[500px] overflow-y-auto p-4">
                 {execution.status === 'running' && (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -226,15 +226,15 @@ export const CodeExecutionSandbox: React.FC<CodeExecutionSandboxProps> = ({
                   </div>
                 )}
                 {execution.status === 'success' && execution.output && (
-                  <pre className="text-sm font-mono whitespace-pre-wrap bg-background/50 p-3 rounded-lg border">
+                  <pre className="whitespace-pre-wrap rounded-lg border bg-background/50 p-3 font-mono text-sm">
                     {execution.output}
                   </pre>
                 )}
                 {execution.status === 'error' && execution.error && (
-                  <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                  <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3">
                     <div className="flex items-start gap-2">
-                      <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                      <pre className="text-sm font-mono whitespace-pre-wrap text-red-500 flex-1">
+                      <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
+                      <pre className="flex-1 whitespace-pre-wrap font-mono text-sm text-red-500">
                         {execution.error}
                       </pre>
                     </div>
@@ -245,34 +245,36 @@ export const CodeExecutionSandbox: React.FC<CodeExecutionSandboxProps> = ({
                     Execution was cancelled
                   </div>
                 )}
-                {!execution.output && !execution.error && execution.status === 'success' && (
-                  <div className="text-sm text-muted-foreground italic">
-                    No output
-                  </div>
-                )}
+                {!execution.output &&
+                  !execution.error &&
+                  execution.status === 'success' && (
+                    <div className="text-sm italic text-muted-foreground">
+                      No output
+                    </div>
+                  )}
               </div>
             </TabsContent>
 
-            <TabsContent value="code" className="p-0 m-0">
-              <div className="p-4 max-h-[500px] overflow-y-auto">
-                <pre className="text-sm font-mono whitespace-pre-wrap bg-background/50 p-3 rounded-lg border">
+            <TabsContent value="code" className="m-0 p-0">
+              <div className="max-h-[500px] overflow-y-auto p-4">
+                <pre className="whitespace-pre-wrap rounded-lg border bg-background/50 p-3 font-mono text-sm">
                   <code>{execution.code}</code>
                 </pre>
               </div>
             </TabsContent>
 
             {execution.logs && execution.logs.length > 0 && (
-              <TabsContent value="logs" className="p-0 m-0">
-                <div className="p-4 max-h-[500px] overflow-y-auto space-y-1">
+              <TabsContent value="logs" className="m-0 p-0">
+                <div className="max-h-[500px] space-y-1 overflow-y-auto p-4">
                   {execution.logs.map((log, idx) => (
                     <motion.div
                       key={idx}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="text-sm font-mono text-muted-foreground bg-background/50 p-2 rounded border"
+                      className="rounded border bg-background/50 p-2 font-mono text-sm text-muted-foreground"
                     >
-                      <span className="text-xs text-muted-foreground/70 mr-2">
+                      <span className="mr-2 text-xs text-muted-foreground/70">
                         [{idx + 1}]
                       </span>
                       {log}

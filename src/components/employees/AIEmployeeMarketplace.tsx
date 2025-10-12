@@ -31,12 +31,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Search,
   Filter,
@@ -84,7 +79,7 @@ import {
   Calendar,
   Phone,
   Mail,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -213,21 +208,25 @@ const employeeCategories = [
   { id: 'marketing', name: 'Marketing', icon: MessageSquare, count: 34 },
   { id: 'finance', name: 'Finance', icon: DollarSign, count: 23 },
   { id: 'support', name: 'Customer Support', icon: Headphones, count: 19 },
-  { id: 'content', name: 'Content Creation', icon: FileText, count: 15 }
+  { id: 'content', name: 'Content Creation', icon: FileText, count: 15 },
 ];
 
 export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
   className,
   onEmployeeSelect,
-  onEmployeeHire
+  onEmployeeHire,
 }) => {
   // State management
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'rating' | 'price' | 'experience' | 'availability'>('rating');
+  const [sortBy, setSortBy] = useState<
+    'rating' | 'price' | 'experience' | 'availability'
+  >('rating');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [selectedEmployee, setSelectedEmployee] = useState<AIEmployee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<AIEmployee | null>(
+    null
+  );
   const [showEmployeeDetails, setShowEmployeeDetails] = useState(false);
   const [showHireDialog, setShowHireDialog] = useState(false);
   const [filters, setFilters] = useState<Partial<EmployeeFilters>>({
@@ -235,7 +234,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
     maxHourlyRate: 1000,
     skills: [],
     availability: 'all',
-    experience: 'all'
+    experience: 'all',
   });
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
@@ -247,7 +246,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
     queryFn: async () => {
       const { data, error } = await aiEmployeeService.getEmployees({
         department: selectedCategory === 'all' ? undefined : selectedCategory,
-        available: filters.availability === 'available'
+        available: filters.availability === 'available',
       } as any);
       if (error) {
         toast.error('Failed to load employees');
@@ -274,14 +273,17 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
     },
     onError: () => {
       toast.error('Failed to hire employee. Please try again.');
-    }
+    },
   });
 
   // Filter and sort employees
   const filteredEmployees = useMemo(() => {
     let filtered = employees.filter(employee => {
       // Category filter
-      if (selectedCategory !== 'all' && employee.department.toLowerCase() !== selectedCategory) {
+      if (
+        selectedCategory !== 'all' &&
+        employee.department.toLowerCase() !== selectedCategory
+      ) {
         return false;
       }
 
@@ -290,14 +292,16 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
         const query = searchQuery.toLowerCase();
         const matchesName = employee.name.toLowerCase().includes(query);
         const matchesRole = employee.role.toLowerCase().includes(query);
-        const matchesSkills = employee.skills.some(skill => 
+        const matchesSkills = employee.skills.some(skill =>
           skill.name.toLowerCase().includes(query)
         );
         const matchesSpecialties = employee.specialties.some(specialty =>
           specialty.toLowerCase().includes(query)
         );
-        
-        if (!(matchesName || matchesRole || matchesSkills || matchesSpecialties)) {
+
+        if (
+          !(matchesName || matchesRole || matchesSkills || matchesSpecialties)
+        ) {
           return false;
         }
       }
@@ -308,13 +312,19 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
       }
 
       // Price filter
-      if (filters.maxHourlyRate && employee.hourlyRate > filters.maxHourlyRate) {
+      if (
+        filters.maxHourlyRate &&
+        employee.hourlyRate > filters.maxHourlyRate
+      ) {
         return false;
       }
 
       // Availability filter
       if (filters.availability && filters.availability !== 'all') {
-        if (filters.availability === 'available' && employee.status !== 'available') {
+        if (
+          filters.availability === 'available' &&
+          employee.status !== 'available'
+        ) {
           return false;
         }
       }
@@ -358,11 +368,14 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
   }, [employees, selectedCategory, searchQuery, sortBy, sortOrder, filters]);
 
   // Handlers
-  const handleEmployeeClick = useCallback((employee: AIEmployee) => {
-    setSelectedEmployee(employee);
-    setShowEmployeeDetails(true);
-    onEmployeeSelect?.(employee);
-  }, [onEmployeeSelect]);
+  const handleEmployeeClick = useCallback(
+    (employee: AIEmployee) => {
+      setSelectedEmployee(employee);
+      setShowEmployeeDetails(true);
+      onEmployeeSelect?.(employee);
+    },
+    [onEmployeeSelect]
+  );
 
   const handleHireClick = useCallback((employee: AIEmployee) => {
     setSelectedEmployee(employee);
@@ -391,33 +404,43 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
 
   const getStatusColor = (status: AIEmployee['status']) => {
     switch (status) {
-      case 'available': return 'bg-green-500';
-      case 'busy': return 'bg-yellow-500';
-      case 'offline': return 'bg-gray-500';
-      case 'in_training': return 'bg-blue-500';
-      default: return 'bg-gray-500';
+      case 'available':
+        return 'bg-green-500';
+      case 'busy':
+        return 'bg-yellow-500';
+      case 'offline':
+        return 'bg-gray-500';
+      case 'in_training':
+        return 'bg-blue-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
   const getStatusText = (status: AIEmployee['status']) => {
     switch (status) {
-      case 'available': return 'Available';
-      case 'busy': return 'Busy';
-      case 'offline': return 'Offline';
-      case 'in_training': return 'In Training';
-      default: return 'Unknown';
+      case 'available':
+        return 'Available';
+      case 'busy':
+        return 'Busy';
+      case 'offline':
+        return 'Offline';
+      case 'in_training':
+        return 'In Training';
+      default:
+        return 'Unknown';
     }
   };
 
   const formatCurrency = (amount: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency
+      currency,
     }).format(amount);
   };
 
   return (
-    <div className={cn('p-6 space-y-6', className)}>
+    <div className={cn('space-y-6 p-6', className)}>
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -425,8 +448,10 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-white">AI Employee Marketplace</h1>
-          <p className="text-slate-400 mt-1">
+          <h1 className="text-3xl font-bold text-white">
+            AI Employee Marketplace
+          </h1>
+          <p className="mt-1 text-slate-400">
             Discover and hire specialized AI employees for your workforce
           </p>
         </div>
@@ -438,11 +463,11 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
           >
             {viewMode === 'grid' ? 'List View' : 'Grid View'}
           </Button>
-          <Button 
-            onClick={() => window.location.href = '/workforce'}
+          <Button
+            onClick={() => (window.location.href = '/workforce')}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
-            <Users className="h-4 w-4 mr-2" />
+            <Users className="mr-2 h-4 w-4" />
             My Team
           </Button>
         </div>
@@ -454,21 +479,23 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+        <Card className="border-slate-700/50 bg-slate-800/50 backdrop-blur-xl">
           <CardContent className="p-4">
             <div className="flex flex-wrap gap-2">
-              {employeeCategories.map((category) => {
+              {employeeCategories.map(category => {
                 const IconComponent = category.icon;
                 return (
                   <Button
                     key={category.id}
-                    variant={selectedCategory === category.id ? "default" : "ghost"}
+                    variant={
+                      selectedCategory === category.id ? 'default' : 'ghost'
+                    }
                     onClick={() => setSelectedCategory(category.id)}
                     className={cn(
-                      "flex items-center space-x-2",
+                      'flex items-center space-x-2',
                       selectedCategory === category.id
-                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
-                        : "text-slate-400 hover:text-white hover:bg-slate-700/50"
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                        : 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
                     )}
                   >
                     <IconComponent className="h-4 w-4" />
@@ -490,27 +517,30 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+        <Card className="border-slate-700/50 bg-slate-800/50 backdrop-blur-xl">
           <CardContent className="p-4">
-            <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex flex-col gap-4 lg:flex-row">
               {/* Search */}
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-slate-400" />
                 <Input
                   placeholder="Search by name, role, or skills..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-slate-700/30 border-slate-600/30 text-white placeholder:text-slate-400"
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="border-slate-600/30 bg-slate-700/30 pl-10 text-white placeholder:text-slate-400"
                 />
               </div>
 
               {/* Filters */}
               <div className="flex items-center space-x-2">
-                <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-                  <SelectTrigger className="w-40 bg-slate-700/30 border-slate-600/30 text-slate-300">
+                <Select
+                  value={sortBy}
+                  onValueChange={(value: any) => setSortBy(value)}
+                >
+                  <SelectTrigger className="w-40 border-slate-600/30 bg-slate-700/30 text-slate-300">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="border-slate-700 bg-slate-800">
                     <SelectItem value="rating">Rating</SelectItem>
                     <SelectItem value="price">Price</SelectItem>
                     <SelectItem value="experience">Experience</SelectItem>
@@ -521,14 +551,23 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  onClick={() =>
+                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+                  }
                   className="text-slate-400 hover:text-white"
                 >
-                  {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                  {sortOrder === 'asc' ? (
+                    <SortAsc className="h-4 w-4" />
+                  ) : (
+                    <SortDesc className="h-4 w-4" />
+                  )}
                 </Button>
 
-                <Button variant="ghost" className="text-slate-400 hover:text-white">
-                  <Filter className="h-4 w-4 mr-2" />
+                <Button
+                  variant="ghost"
+                  className="text-slate-400 hover:text-white"
+                >
+                  <Filter className="mr-2 h-4 w-4" />
                   Filters
                 </Button>
               </div>
@@ -547,7 +586,9 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
         {/* Results Header */}
         <div className="flex items-center justify-between">
           <p className="text-slate-400">
-            {isLoading ? 'Loading...' : `${filteredEmployees.length} employees found`}
+            {isLoading
+              ? 'Loading...'
+              : `${filteredEmployees.length} employees found`}
           </p>
           <div className="flex items-center space-x-2 text-sm text-slate-400">
             <Sparkles className="h-4 w-4" />
@@ -557,45 +598,59 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
 
         {/* Employee Grid/List */}
         {isLoading ? (
-          <div className={cn(
-            "grid gap-6",
-            viewMode === 'grid' ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
-          )}>
+          <div
+            className={cn(
+              'grid gap-6',
+              viewMode === 'grid'
+                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                : 'grid-cols-1'
+            )}
+          >
             {Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className="bg-slate-800/50 border-slate-700/50 animate-pulse">
+              <Card
+                key={i}
+                className="animate-pulse border-slate-700/50 bg-slate-800/50"
+              >
                 <CardContent className="p-6">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-slate-700 rounded-full"></div>
+                  <div className="mb-4 flex items-center space-x-4">
+                    <div className="h-12 w-12 rounded-full bg-slate-700"></div>
                     <div className="flex-1">
-                      <div className="h-4 bg-slate-700 rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-slate-700 rounded w-1/2"></div>
+                      <div className="mb-2 h-4 w-3/4 rounded bg-slate-700"></div>
+                      <div className="h-3 w-1/2 rounded bg-slate-700"></div>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <div className="h-3 bg-slate-700 rounded"></div>
-                    <div className="h-3 bg-slate-700 rounded w-5/6"></div>
+                    <div className="h-3 rounded bg-slate-700"></div>
+                    <div className="h-3 w-5/6 rounded bg-slate-700"></div>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : filteredEmployees.length === 0 ? (
-          <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl">
+          <Card className="border-slate-700/50 bg-slate-800/50 backdrop-blur-xl">
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mb-4">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-700/50">
                 <Search className="h-8 w-8 text-slate-400" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">No employees found</h3>
-              <p className="text-slate-400 text-center">
-                Try adjusting your search criteria or browse different categories
+              <h3 className="mb-2 text-lg font-semibold text-white">
+                No employees found
+              </h3>
+              <p className="text-center text-slate-400">
+                Try adjusting your search criteria or browse different
+                categories
               </p>
             </CardContent>
           </Card>
         ) : (
-          <div className={cn(
-            "grid gap-6",
-            viewMode === 'grid' ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"
-          )}>
+          <div
+            className={cn(
+              'grid gap-6',
+              viewMode === 'grid'
+                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                : 'grid-cols-1'
+            )}
+          >
             <AnimatePresence mode="popLayout">
               {filteredEmployees.map((employee, index) => (
                 <motion.div
@@ -623,7 +678,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
 
       {/* Employee Details Dialog */}
       <Dialog open={showEmployeeDetails} onOpenChange={setShowEmployeeDetails}>
-        <DialogContent className="bg-slate-800 border-slate-700 max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto border-slate-700 bg-slate-800">
           {selectedEmployee && (
             <EmployeeDetailsView
               employee={selectedEmployee}
@@ -636,7 +691,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
 
       {/* Hire Confirmation Dialog */}
       <Dialog open={showHireDialog} onOpenChange={setShowHireDialog}>
-        <DialogContent className="bg-slate-800 border-slate-700 max-w-md">
+        <DialogContent className="max-w-md border-slate-700 bg-slate-800">
           {selectedEmployee && (
             <HireConfirmationDialog
               employee={selectedEmployee}
@@ -667,45 +722,55 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
   isFavorite,
   onToggleFavorite,
   onClick,
-  onHire
+  onHire,
 }) => {
   const getStatusColor = (status: AIEmployee['status']) => {
     switch (status) {
-      case 'available': return 'bg-green-500';
-      case 'busy': return 'bg-yellow-500';
-      case 'offline': return 'bg-gray-500';
-      case 'in_training': return 'bg-blue-500';
-      default: return 'bg-gray-500';
+      case 'available':
+        return 'bg-green-500';
+      case 'busy':
+        return 'bg-yellow-500';
+      case 'offline':
+        return 'bg-gray-500';
+      case 'in_training':
+        return 'bg-blue-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
   const formatCurrency = (amount: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency
+      currency,
     }).format(amount);
   };
 
   if (viewMode === 'list') {
     return (
-      <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl hover:bg-slate-800/70 transition-all duration-200 group cursor-pointer">
+      <Card className="group cursor-pointer border-slate-700/50 bg-slate-800/50 backdrop-blur-xl transition-all duration-200 hover:bg-slate-800/70">
         <CardContent className="p-6" onClick={onClick}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               {/* Avatar */}
               <div className="relative">
-                <Avatar className="w-16 h-16">
+                <Avatar className="h-16 w-16">
                   <AvatarImage src={employee.avatar} alt={employee.name} />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-lg font-semibold">
-                    {employee.name.split(' ').map(n => n[0]).join('')}
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-semibold text-white">
+                    {employee.name
+                      .split(' ')
+                      .map(n => n[0])
+                      .join('')}
                   </AvatarFallback>
                 </Avatar>
-                <div className={cn(
-                  "absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-slate-800",
-                  getStatusColor(employee.status)
-                )} />
+                <div
+                  className={cn(
+                    'absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 border-slate-800',
+                    getStatusColor(employee.status)
+                  )}
+                />
                 {employee.verified && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
                     <CheckCircle className="h-3 w-3 text-white" />
                   </div>
                 )}
@@ -713,24 +778,24 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
 
               {/* Basic Info */}
               <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-1">
-                  <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
+                <div className="mb-1 flex items-center space-x-2">
+                  <h3 className="text-lg font-semibold text-white transition-colors group-hover:text-blue-400">
                     {employee.name}
                   </h3>
                   {employee.featured && (
-                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                      <Star className="h-3 w-3 mr-1" />
+                    <Badge className="border-yellow-500/30 bg-yellow-500/20 text-yellow-400">
+                      <Star className="mr-1 h-3 w-3" />
                       Featured
                     </Badge>
                   )}
                   {employee.premium && (
-                    <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                      <Sparkles className="h-3 w-3 mr-1" />
+                    <Badge className="border-purple-500/30 bg-purple-500/20 text-purple-400">
+                      <Sparkles className="mr-1 h-3 w-3" />
                       Premium
                     </Badge>
                   )}
                 </div>
-                <p className="text-slate-400 text-sm mb-2">{employee.title}</p>
+                <p className="mb-2 text-sm text-slate-400">{employee.title}</p>
                 <div className="flex items-center space-x-4 text-sm text-slate-400">
                   <div className="flex items-center space-x-1">
                     <Star className="h-4 w-4 text-yellow-400" />
@@ -751,18 +816,21 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
 
             {/* Skills & Pricing */}
             <div className="flex items-center space-x-6">
-              <div className="flex flex-wrap gap-1 max-w-xs">
-                {employee.skills.slice(0, 3).map((skill) => (
+              <div className="flex max-w-xs flex-wrap gap-1">
+                {employee.skills.slice(0, 3).map(skill => (
                   <Badge
                     key={skill.id}
                     variant="outline"
-                    className="text-xs border-slate-600 text-slate-300"
+                    className="border-slate-600 text-xs text-slate-300"
                   >
                     {skill.name}
                   </Badge>
                 ))}
                 {employee.skills.length > 3 && (
-                  <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+                  <Badge
+                    variant="outline"
+                    className="border-slate-600 text-xs text-slate-300"
+                  >
                     +{employee.skills.length - 3} more
                   </Badge>
                 )}
@@ -784,13 +852,18 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         onToggleFavorite();
                       }}
                       className="text-slate-400 hover:text-red-400"
                     >
-                      <Heart className={cn("h-4 w-4", isFavorite && "fill-red-400 text-red-400")} />
+                      <Heart
+                        className={cn(
+                          'h-4 w-4',
+                          isFavorite && 'fill-red-400 text-red-400'
+                        )}
+                      />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -799,14 +872,14 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
                 </Tooltip>
 
                 <Button
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                     onHire();
                   }}
                   disabled={employee.status !== 'available'}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  <ShoppingCart className="mr-2 h-4 w-4" />
                   Hire Now
                 </Button>
               </div>
@@ -819,30 +892,35 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
 
   // Grid view
   return (
-    <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-xl hover:bg-slate-800/70 transition-all duration-200 group cursor-pointer">
+    <Card className="group cursor-pointer border-slate-700/50 bg-slate-800/50 backdrop-blur-xl transition-all duration-200 hover:bg-slate-800/70">
       <CardContent className="p-6" onClick={onClick}>
         {/* Header */}
-        <div className="flex items-start justify-between mb-4">
+        <div className="mb-4 flex items-start justify-between">
           <div className="flex items-center space-x-3">
             <div className="relative">
-              <Avatar className="w-12 h-12">
+              <Avatar className="h-12 w-12">
                 <AvatarImage src={employee.avatar} alt={employee.name} />
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                  {employee.name.split(' ').map(n => n[0]).join('')}
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 font-semibold text-white">
+                  {employee.name
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')}
                 </AvatarFallback>
               </Avatar>
-              <div className={cn(
-                "absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-slate-800",
-                getStatusColor(employee.status)
-              )} />
+              <div
+                className={cn(
+                  'absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-slate-800',
+                  getStatusColor(employee.status)
+                )}
+              />
               {employee.verified && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500">
                   <CheckCircle className="h-2.5 w-2.5 text-white" />
                 </div>
               )}
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors">
+              <h3 className="font-semibold text-white transition-colors group-hover:text-blue-400">
                 {employee.name}
               </h3>
               <p className="text-sm text-slate-400">{employee.title}</p>
@@ -852,38 +930,43 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               onToggleFavorite();
             }}
-            className="text-slate-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="text-slate-400 opacity-0 transition-opacity hover:text-red-400 group-hover:opacity-100"
           >
-            <Heart className={cn("h-4 w-4", isFavorite && "fill-red-400 text-red-400")} />
+            <Heart
+              className={cn(
+                'h-4 w-4',
+                isFavorite && 'fill-red-400 text-red-400'
+              )}
+            />
           </Button>
         </div>
 
         {/* Badges */}
-        <div className="flex flex-wrap gap-1 mb-4">
+        <div className="mb-4 flex flex-wrap gap-1">
           {employee.featured && (
-            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-xs">
-              <Star className="h-3 w-3 mr-1" />
+            <Badge className="border-yellow-500/30 bg-yellow-500/20 text-xs text-yellow-400">
+              <Star className="mr-1 h-3 w-3" />
               Featured
             </Badge>
           )}
           {employee.premium && (
-            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
-              <Sparkles className="h-3 w-3 mr-1" />
+            <Badge className="border-purple-500/30 bg-purple-500/20 text-xs text-purple-400">
+              <Sparkles className="mr-1 h-3 w-3" />
               Premium
             </Badge>
           )}
         </div>
 
         {/* Rating & Stats */}
-        <div className="space-y-3 mb-4">
+        <div className="mb-4 space-y-3">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-1">
               <Star className="h-4 w-4 text-yellow-400" />
-              <span className="text-white font-medium">{employee.rating}</span>
+              <span className="font-medium text-white">{employee.rating}</span>
               <span className="text-slate-400">({employee.reviewCount})</span>
             </div>
             <div className="flex items-center space-x-1 text-slate-400">
@@ -907,17 +990,20 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
         {/* Skills */}
         <div className="mb-4">
           <div className="flex flex-wrap gap-1">
-            {employee.skills.slice(0, 3).map((skill) => (
+            {employee.skills.slice(0, 3).map(skill => (
               <Badge
                 key={skill.id}
                 variant="outline"
-                className="text-xs border-slate-600 text-slate-300"
+                className="border-slate-600 text-xs text-slate-300"
               >
                 {skill.name}
               </Badge>
             ))}
             {employee.skills.length > 3 && (
-              <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+              <Badge
+                variant="outline"
+                className="border-slate-600 text-xs text-slate-300"
+              >
                 +{employee.skills.length - 3}
               </Badge>
             )}
@@ -925,16 +1011,20 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
         </div>
 
         {/* Pricing */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <div>
             <p className="text-lg font-semibold text-white">
               {formatCurrency(employee.hourlyRate)}/hr
             </p>
-            <p className="text-xs text-slate-400">{employee.availability.workingHours}</p>
+            <p className="text-xs text-slate-400">
+              {employee.availability.workingHours}
+            </p>
           </div>
           <div className="text-right">
             <p className="text-sm text-slate-400">Experience</p>
-            <p className="font-medium text-white">{employee.experience} years</p>
+            <p className="font-medium text-white">
+              {employee.experience} years
+            </p>
           </div>
         </div>
 
@@ -942,24 +1032,24 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
         <div className="flex space-x-2">
           <Button
             variant="ghost"
-            className="flex-1 text-slate-400 hover:text-white border border-slate-600 hover:border-slate-500"
-            onClick={(e) => {
+            className="flex-1 border border-slate-600 text-slate-400 hover:border-slate-500 hover:text-white"
+            onClick={e => {
               e.stopPropagation();
               // View profile action
             }}
           >
-            <Eye className="h-4 w-4 mr-2" />
+            <Eye className="mr-2 h-4 w-4" />
             View Profile
           </Button>
           <Button
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               onHire();
             }}
             disabled={employee.status !== 'available'}
             className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50"
           >
-            <ShoppingCart className="h-4 w-4 mr-2" />
+            <ShoppingCart className="mr-2 h-4 w-4" />
             Hire
           </Button>
         </div>
@@ -978,22 +1068,27 @@ interface EmployeeDetailsViewProps {
 const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
   employee,
   onHire,
-  onClose
+  onClose,
 }) => {
   const getStatusColor = (status: AIEmployee['status']) => {
     switch (status) {
-      case 'available': return 'bg-green-500';
-      case 'busy': return 'bg-yellow-500';
-      case 'offline': return 'bg-gray-500';
-      case 'in_training': return 'bg-blue-500';
-      default: return 'bg-gray-500';
+      case 'available':
+        return 'bg-green-500';
+      case 'busy':
+        return 'bg-yellow-500';
+      case 'offline':
+        return 'bg-gray-500';
+      case 'in_training':
+        return 'bg-blue-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
   const formatCurrency = (amount: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency
+      currency,
     }).format(amount);
   };
 
@@ -1003,45 +1098,54 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-4">
           <div className="relative">
-            <Avatar className="w-20 h-20">
+            <Avatar className="h-20 w-20">
               <AvatarImage src={employee.avatar} alt={employee.name} />
-              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-2xl font-semibold">
-                {employee.name.split(' ').map(n => n[0]).join('')}
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-2xl font-semibold text-white">
+                {employee.name
+                  .split(' ')
+                  .map(n => n[0])
+                  .join('')}
               </AvatarFallback>
             </Avatar>
-            <div className={cn(
-              "absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-slate-800",
-              getStatusColor(employee.status)
-            )} />
+            <div
+              className={cn(
+                'absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-2 border-slate-800',
+                getStatusColor(employee.status)
+              )}
+            />
             {employee.verified && (
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+              <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500">
                 <CheckCircle className="h-4 w-4 text-white" />
               </div>
             )}
           </div>
           <div>
-            <div className="flex items-center space-x-2 mb-1">
+            <div className="mb-1 flex items-center space-x-2">
               <h2 className="text-2xl font-bold text-white">{employee.name}</h2>
               {employee.featured && (
-                <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                  <Star className="h-3 w-3 mr-1" />
+                <Badge className="border-yellow-500/30 bg-yellow-500/20 text-yellow-400">
+                  <Star className="mr-1 h-3 w-3" />
                   Featured
                 </Badge>
               )}
               {employee.premium && (
-                <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                  <Sparkles className="h-3 w-3 mr-1" />
+                <Badge className="border-purple-500/30 bg-purple-500/20 text-purple-400">
+                  <Sparkles className="mr-1 h-3 w-3" />
                   Premium
                 </Badge>
               )}
             </div>
             <p className="text-lg text-slate-300">{employee.title}</p>
             <p className="text-slate-400">{employee.department}</p>
-            <div className="flex items-center space-x-4 mt-2 text-sm">
+            <div className="mt-2 flex items-center space-x-4 text-sm">
               <div className="flex items-center space-x-1">
                 <Star className="h-4 w-4 text-yellow-400" />
-                <span className="text-white font-medium">{employee.rating}</span>
-                <span className="text-slate-400">({employee.reviewCount} reviews)</span>
+                <span className="font-medium text-white">
+                  {employee.rating}
+                </span>
+                <span className="text-slate-400">
+                  ({employee.reviewCount} reviews)
+                </span>
               </div>
               <div className="flex items-center space-x-1 text-slate-400">
                 <MapPin className="h-4 w-4" />
@@ -1060,7 +1164,7 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
             disabled={employee.status !== 'available'}
             className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
-            <ShoppingCart className="h-4 w-4 mr-2" />
+            <ShoppingCart className="mr-2 h-4 w-4" />
             Hire Now
           </Button>
         </div>
@@ -1068,61 +1172,75 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="bg-slate-800/50 border border-slate-700/50">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-slate-700">
+        <TabsList className="border border-slate-700/50 bg-slate-800/50">
+          <TabsTrigger
+            value="overview"
+            className="data-[state=active]:bg-slate-700"
+          >
             Overview
           </TabsTrigger>
-          <TabsTrigger value="skills" className="data-[state=active]:bg-slate-700">
+          <TabsTrigger
+            value="skills"
+            className="data-[state=active]:bg-slate-700"
+          >
             Skills & Tools
           </TabsTrigger>
-          <TabsTrigger value="portfolio" className="data-[state=active]:bg-slate-700">
+          <TabsTrigger
+            value="portfolio"
+            className="data-[state=active]:bg-slate-700"
+          >
             Portfolio
           </TabsTrigger>
-          <TabsTrigger value="reviews" className="data-[state=active]:bg-slate-700">
+          <TabsTrigger
+            value="reviews"
+            className="data-[state=active]:bg-slate-700"
+          >
             Reviews
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           {/* Description */}
-          <Card className="bg-slate-800/50 border-slate-700/50">
+          <Card className="border-slate-700/50 bg-slate-800/50">
             <CardHeader>
               <CardTitle className="text-white">About</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-slate-300 leading-relaxed">{employee.description}</p>
+              <p className="leading-relaxed text-slate-300">
+                {employee.description}
+              </p>
             </CardContent>
           </Card>
 
           {/* Metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="bg-slate-800/50 border-slate-700/50">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <Card className="border-slate-700/50 bg-slate-800/50">
               <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-white mb-1">
+                <div className="mb-1 text-2xl font-bold text-white">
                   {employee.tasksCompleted}
                 </div>
                 <div className="text-sm text-slate-400">Tasks Completed</div>
               </CardContent>
             </Card>
-            <Card className="bg-slate-800/50 border-slate-700/50">
+            <Card className="border-slate-700/50 bg-slate-800/50">
               <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-white mb-1">
+                <div className="mb-1 text-2xl font-bold text-white">
                   {employee.successRate}%
                 </div>
                 <div className="text-sm text-slate-400">Success Rate</div>
               </CardContent>
             </Card>
-            <Card className="bg-slate-800/50 border-slate-700/50">
+            <Card className="border-slate-700/50 bg-slate-800/50">
               <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-white mb-1">
+                <div className="mb-1 text-2xl font-bold text-white">
                   {employee.responseTime}h
                 </div>
                 <div className="text-sm text-slate-400">Avg Response</div>
               </CardContent>
             </Card>
-            <Card className="bg-slate-800/50 border-slate-700/50">
+            <Card className="border-slate-700/50 bg-slate-800/50">
               <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-white mb-1">
+                <div className="mb-1 text-2xl font-bold text-white">
                   {employee.experience}
                 </div>
                 <div className="text-sm text-slate-400">Years Experience</div>
@@ -1131,28 +1249,44 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
           </div>
 
           {/* Personality & Work Style */}
-          <Card className="bg-slate-800/50 border-slate-700/50">
+          <Card className="border-slate-700/50 bg-slate-800/50">
             <CardHeader>
-              <CardTitle className="text-white">Personality & Work Style</CardTitle>
+              <CardTitle className="text-white">
+                Personality & Work Style
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="text-sm font-medium text-slate-300 mb-2">Traits</h4>
+                <h4 className="mb-2 text-sm font-medium text-slate-300">
+                  Traits
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {employee.personality.traits.map((trait, index) => (
-                    <Badge key={index} variant="outline" className="border-slate-600 text-slate-300">
+                    <Badge
+                      key={index}
+                      variant="outline"
+                      className="border-slate-600 text-slate-300"
+                    >
                       {trait}
                     </Badge>
                   ))}
                 </div>
               </div>
               <div>
-                <h4 className="text-sm font-medium text-slate-300 mb-1">Work Style</h4>
-                <p className="text-slate-400">{employee.personality.workStyle}</p>
+                <h4 className="mb-1 text-sm font-medium text-slate-300">
+                  Work Style
+                </h4>
+                <p className="text-slate-400">
+                  {employee.personality.workStyle}
+                </p>
               </div>
               <div>
-                <h4 className="text-sm font-medium text-slate-300 mb-1">Communication</h4>
-                <p className="text-slate-400">{employee.personality.communication}</p>
+                <h4 className="mb-1 text-sm font-medium text-slate-300">
+                  Communication
+                </h4>
+                <p className="text-slate-400">
+                  {employee.personality.communication}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -1160,17 +1294,25 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
 
         <TabsContent value="skills" className="space-y-6">
           {/* Skills */}
-          <Card className="bg-slate-800/50 border-slate-700/50">
+          <Card className="border-slate-700/50 bg-slate-800/50">
             <CardHeader>
               <CardTitle className="text-white">Skills</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {employee.skills.map((skill) => (
-                  <div key={skill.id} className="flex items-center justify-between">
+                {employee.skills.map(skill => (
+                  <div
+                    key={skill.id}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex items-center space-x-3">
-                      <span className="text-white font-medium">{skill.name}</span>
-                      <Badge variant="outline" className="text-xs border-slate-600 text-slate-400">
+                      <span className="font-medium text-white">
+                        {skill.name}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className="border-slate-600 text-xs text-slate-400"
+                      >
                         {skill.category}
                       </Badge>
                       {skill.verified && (
@@ -1178,8 +1320,10 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
                       )}
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Progress value={skill.level * 20} className="w-20 h-2" />
-                      <span className="text-sm text-slate-400">{skill.level}/5</span>
+                      <Progress value={skill.level * 20} className="h-2 w-20" />
+                      <span className="text-sm text-slate-400">
+                        {skill.level}/5
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -1188,23 +1332,33 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
           </Card>
 
           {/* Tools */}
-          <Card className="bg-slate-800/50 border-slate-700/50">
+          <Card className="border-slate-700/50 bg-slate-800/50">
             <CardHeader>
               <CardTitle className="text-white">Tools & Technologies</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {employee.tools.map((tool) => (
-                  <div key={tool.id} className="flex items-center justify-between">
+                {employee.tools.map(tool => (
+                  <div
+                    key={tool.id}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex items-center space-x-3">
-                      <span className="text-white font-medium">{tool.name}</span>
-                      <Badge variant="outline" className="text-xs border-slate-600 text-slate-400">
+                      <span className="font-medium text-white">
+                        {tool.name}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className="border-slate-600 text-xs text-slate-400"
+                      >
                         {tool.category}
                       </Badge>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Progress value={tool.proficiency} className="w-20 h-2" />
-                      <span className="text-sm text-slate-400">{tool.proficiency}%</span>
+                      <Progress value={tool.proficiency} className="h-2 w-20" />
+                      <span className="text-sm text-slate-400">
+                        {tool.proficiency}%
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -1213,14 +1367,17 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
           </Card>
 
           {/* Certifications */}
-          <Card className="bg-slate-800/50 border-slate-700/50">
+          <Card className="border-slate-700/50 bg-slate-800/50">
             <CardHeader>
               <CardTitle className="text-white">Certifications</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {employee.certifications.map((cert) => (
-                  <div key={cert.id} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                {employee.certifications.map(cert => (
+                  <div
+                    key={cert.id}
+                    className="flex items-center justify-between rounded-lg bg-slate-700/30 p-3"
+                  >
                     <div>
                       <div className="flex items-center space-x-2">
                         <h4 className="font-medium text-white">{cert.name}</h4>
@@ -1228,7 +1385,9 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
                           <CheckCircle className="h-4 w-4 text-green-400" />
                         )}
                       </div>
-                      <p className="text-sm text-slate-400">Issued by {cert.issuer}</p>
+                      <p className="text-sm text-slate-400">
+                        Issued by {cert.issuer}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-slate-300">
@@ -1249,21 +1408,33 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
 
         <TabsContent value="portfolio" className="space-y-6">
           <div className="grid gap-6">
-            {employee.portfolio.map((item) => (
-              <Card key={item.id} className="bg-slate-800/50 border-slate-700/50">
+            {employee.portfolio.map(item => (
+              <Card
+                key={item.id}
+                className="border-slate-700/50 bg-slate-800/50"
+              >
                 <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
+                  <div className="mb-4 flex items-start justify-between">
                     <div>
-                      <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
+                      <h3 className="mb-2 text-lg font-semibold text-white">
+                        {item.title}
+                      </h3>
                       <p className="text-slate-400">{item.description}</p>
                     </div>
-                    <Badge variant="outline" className="border-slate-600 text-slate-300">
+                    <Badge
+                      variant="outline"
+                      className="border-slate-600 text-slate-300"
+                    >
                       {item.type.replace('_', ' ')}
                     </Badge>
                   </div>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="mb-4 flex flex-wrap gap-2">
                     {item.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className="text-xs"
+                      >
                         {tag}
                       </Badge>
                     ))}
@@ -1278,8 +1449,8 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
         </TabsContent>
 
         <TabsContent value="reviews" className="space-y-6">
-          <div className="text-center py-8">
-            <MessageSquare className="h-12 w-12 mx-auto text-slate-400 mb-4" />
+          <div className="py-8 text-center">
+            <MessageSquare className="mx-auto mb-4 h-12 w-12 text-slate-400" />
             <p className="text-slate-400">Reviews will be displayed here</p>
           </div>
         </TabsContent>
@@ -1300,12 +1471,12 @@ const HireConfirmationDialog: React.FC<HireConfirmationDialogProps> = ({
   employee,
   onConfirm,
   onCancel,
-  isLoading
+  isLoading,
 }) => {
   const formatCurrency = (amount: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency
+      currency,
     }).format(amount);
   };
 
@@ -1320,22 +1491,29 @@ const HireConfirmationDialog: React.FC<HireConfirmationDialogProps> = ({
 
       <div className="space-y-4">
         {/* Employee Summary */}
-        <Card className="bg-slate-700/30 border-slate-600/30">
+        <Card className="border-slate-600/30 bg-slate-700/30">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
-              <Avatar className="w-12 h-12">
+              <Avatar className="h-12 w-12">
                 <AvatarImage src={employee.avatar} alt={employee.name} />
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                  {employee.name.split(' ').map(n => n[0]).join('')}
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 font-semibold text-white">
+                  {employee.name
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <h3 className="font-semibold text-white">{employee.name}</h3>
                 <p className="text-sm text-slate-400">{employee.title}</p>
-                <div className="flex items-center space-x-1 mt-1">
+                <div className="mt-1 flex items-center space-x-1">
                   <Star className="h-3 w-3 text-yellow-400" />
-                  <span className="text-xs text-slate-300">{employee.rating}</span>
-                  <span className="text-xs text-slate-400">({employee.reviewCount} reviews)</span>
+                  <span className="text-xs text-slate-300">
+                    {employee.rating}
+                  </span>
+                  <span className="text-xs text-slate-400">
+                    ({employee.reviewCount} reviews)
+                  </span>
                 </div>
               </div>
             </div>
@@ -1343,31 +1521,42 @@ const HireConfirmationDialog: React.FC<HireConfirmationDialogProps> = ({
         </Card>
 
         {/* Pricing */}
-        <div className="bg-slate-700/30 rounded-lg p-4">
-          <h4 className="font-medium text-white mb-3">Pricing Options</h4>
+        <div className="rounded-lg bg-slate-700/30 p-4">
+          <h4 className="mb-3 font-medium text-white">Pricing Options</h4>
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-slate-400">Hourly Rate</span>
-              <span className="text-white font-medium">{formatCurrency(employee.pricing.hourly)}/hr</span>
+              <span className="font-medium text-white">
+                {formatCurrency(employee.pricing.hourly)}/hr
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Daily Rate</span>
-              <span className="text-white font-medium">{formatCurrency(employee.pricing.daily)}/day</span>
+              <span className="font-medium text-white">
+                {formatCurrency(employee.pricing.daily)}/day
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Weekly Rate</span>
-              <span className="text-white font-medium">{formatCurrency(employee.pricing.weekly)}/week</span>
+              <span className="font-medium text-white">
+                {formatCurrency(employee.pricing.weekly)}/week
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Monthly Rate</span>
-              <span className="text-white font-medium">{formatCurrency(employee.pricing.monthly)}/month</span>
+              <span className="font-medium text-white">
+                {formatCurrency(employee.pricing.monthly)}/month
+              </span>
             </div>
           </div>
         </div>
 
         {/* Terms */}
-        <div className="text-sm text-slate-400 space-y-1">
-          <p>• You can start working with {employee.name} immediately after hiring</p>
+        <div className="space-y-1 text-sm text-slate-400">
+          <p>
+            • You can start working with {employee.name} immediately after
+            hiring
+          </p>
           <p>• Billing starts when work begins</p>
           <p>• You can modify or end the engagement at any time</p>
           <p>• All work is protected by our quality guarantee</p>
@@ -1389,9 +1578,9 @@ const HireConfirmationDialog: React.FC<HireConfirmationDialogProps> = ({
           disabled={isLoading}
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
-            <ShoppingCart className="h-4 w-4 mr-2" />
+            <ShoppingCart className="mr-2 h-4 w-4" />
           )}
           Confirm & Hire
         </Button>

@@ -15,7 +15,10 @@ export const ThemeToggle: React.FC = () => {
       root.classList.remove('dark');
     } else {
       // System theme
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
+        .matches
+        ? 'dark'
+        : 'light';
       if (systemTheme === 'dark') {
         root.classList.add('dark');
       } else {

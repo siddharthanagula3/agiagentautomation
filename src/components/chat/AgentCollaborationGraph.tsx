@@ -18,7 +18,10 @@ import {
   ArrowRight,
   Activity,
 } from 'lucide-react';
-import type { AgentStatus, AgentCommunication } from '@/services/multi-agent-orchestrator';
+import type {
+  AgentStatus,
+  AgentCommunication,
+} from '@/services/multi-agent-orchestrator';
 
 interface Node {
   id: string;
@@ -33,7 +36,14 @@ interface Edge {
   id: string;
   from: string;
   to: string;
-  type: 'request' | 'response' | 'handoff' | 'collaboration' | 'status' | 'error' | 'completion';
+  type:
+    | 'request'
+    | 'response'
+    | 'handoff'
+    | 'collaboration'
+    | 'status'
+    | 'error'
+    | 'completion';
   timestamp: Date;
   message: string;
   isActive: boolean;
@@ -46,12 +56,9 @@ interface AgentCollaborationGraphProps {
   className?: string;
 }
 
-export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = ({
-  agents,
-  communications,
-  onAgentClick,
-  className,
-}) => {
+export const AgentCollaborationGraph: React.FC<
+  AgentCollaborationGraphProps
+> = ({ agents, communications, onAgentClick, className }) => {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [hoveredAgent, setHoveredAgent] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -72,7 +79,7 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
 
       // Count messages for this agent
       const messageCount = communications.filter(
-        (c) => c.from === agent.agentName || c.to === agent.agentName
+        c => c.from === agent.agentName || c.to === agent.agentName
       ).length;
 
       return {
@@ -90,12 +97,12 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
   const edges = useMemo(() => {
     const edgeMap = new Map<string, Edge>();
 
-    communications.forEach((comm) => {
+    communications.forEach(comm => {
       // Skip system messages or user messages
       if (comm.from === 'System' || comm.to === 'user') return;
 
-      const fromNode = nodes.find((n) => n.id === comm.from);
-      const toNode = nodes.find((n) => n.id === comm.to);
+      const fromNode = nodes.find(n => n.id === comm.from);
+      const toNode = nodes.find(n => n.id === comm.to);
 
       if (!fromNode || !toNode) return;
 
@@ -139,7 +146,7 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
         return `rgba(251, 146, 60, ${alpha})`; // orange
       default:
         return `rgba(156, 163, 175, ${alpha})`; // gray
-    };
+    }
   };
 
   // Get node color based on status
@@ -171,24 +178,24 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
 
   // Filter edges for selected agent
   const visibleEdges = selectedAgent
-    ? edges.filter((e) => e.from === selectedAgent || e.to === selectedAgent)
+    ? edges.filter(e => e.from === selectedAgent || e.to === selectedAgent)
     : edges;
 
   // Get related communications for selected agent
   const selectedAgentCommunications = selectedAgent
     ? communications.filter(
-        (c) => c.from === selectedAgent || c.to === selectedAgent
+        c => c.from === selectedAgent || c.to === selectedAgent
       )
     : [];
 
   return (
-    <div className={cn("flex flex-col h-full bg-background", className)}>
+    <div className={cn('flex h-full flex-col bg-background', className)}>
       {/* Header */}
-      <div className="px-4 py-3 border-b border-border bg-card/30 backdrop-blur-sm">
+      <div className="border-b border-border bg-card/30 px-4 py-3 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Network className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold text-sm">Agent Collaboration</h3>
+            <h3 className="text-sm font-semibold">Agent Collaboration</h3>
             <Badge variant="secondary" className="text-xs">
               {agents.length} agents
             </Badge>
@@ -205,7 +212,7 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
             >
               <ZoomOut className="h-3.5 w-3.5" />
             </Button>
-            <span className="text-xs text-muted-foreground px-2">
+            <span className="px-2 text-xs text-muted-foreground">
               {Math.round(zoom * 100)}%
             </span>
             <Button
@@ -229,20 +236,22 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
       </div>
 
       {/* Graph Area */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
         {/* Main Graph */}
-        <div className="flex-1 relative overflow-hidden bg-gradient-to-br from-background via-background to-accent/5">
+        <div className="relative flex-1 overflow-hidden bg-gradient-to-br from-background via-background to-accent/5">
           {agents.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
               <div className="text-center">
-                <Network className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <Network className="mx-auto mb-2 h-12 w-12 opacity-50" />
                 <p className="text-sm">No active agents</p>
-                <p className="text-xs">Agents will appear as they start working</p>
+                <p className="text-xs">
+                  Agents will appear as they start working
+                </p>
               </div>
             </div>
           ) : (
             <svg
-              className="absolute inset-0 w-full h-full"
+              className="absolute inset-0 h-full w-full"
               viewBox="0 0 400 400"
               style={{
                 transform: `scale(${zoom})`,
@@ -271,9 +280,9 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
               {/* Edges */}
               <g className="edges">
                 <AnimatePresence>
-                  {visibleEdges.map((edge) => {
-                    const fromNode = nodes.find((n) => n.id === edge.from);
-                    const toNode = nodes.find((n) => n.id === edge.to);
+                  {visibleEdges.map(edge => {
+                    const fromNode = nodes.find(n => n.id === edge.from);
+                    const toNode = nodes.find(n => n.id === edge.to);
 
                     if (!fromNode || !toNode) return null;
 
@@ -314,7 +323,7 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
                             transition={{
                               duration: 1.5,
                               repeat: Infinity,
-                              ease: "linear",
+                              ease: 'linear',
                             }}
                           />
                         )}
@@ -344,7 +353,7 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
 
               {/* Nodes */}
               <g className="nodes">
-                {nodes.map((node) => {
+                {nodes.map(node => {
                   const isSelected = selectedAgent === node.id;
                   const isHovered = hoveredAgent === node.id;
                   const nodeSize = isSelected ? 16 : isHovered ? 14 : 12;
@@ -352,7 +361,9 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
                   return (
                     <g key={node.id}>
                       {/* Node glow for active/selected */}
-                      {(isSelected || node.status === 'working' || node.status === 'analyzing') && (
+                      {(isSelected ||
+                        node.status === 'working' ||
+                        node.status === 'analyzing') && (
                         <motion.circle
                           cx={node.x}
                           cy={node.y}
@@ -366,7 +377,7 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
                           transition={{
                             duration: 2,
                             repeat: Infinity,
-                            ease: "easeInOut",
+                            ease: 'easeInOut',
                           }}
                         />
                       )}
@@ -374,8 +385,16 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
                       {/* Node gradient */}
                       <defs>
                         <radialGradient id={`gradient-${node.id}`}>
-                          <stop offset="0%" stopColor={getNodeColor(node.status).split(' ')[0].replace('from-', '')} />
-                          <stop offset="100%" stopColor={getNodeColor(node.status).split(' ')[2]} />
+                          <stop
+                            offset="0%"
+                            stopColor={getNodeColor(node.status)
+                              .split(' ')[0]
+                              .replace('from-', '')}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor={getNodeColor(node.status).split(' ')[2]}
+                          />
                         </radialGradient>
                       </defs>
 
@@ -411,7 +430,7 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
                             y={node.y - 8}
                             textAnchor="middle"
                             dominantBaseline="central"
-                            className="text-[8px] font-bold fill-primary"
+                            className="fill-primary text-[8px] font-bold"
                           >
                             {node.messageCount}
                           </text>
@@ -425,8 +444,10 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
                           y={node.y + nodeSize + 12}
                           textAnchor="middle"
                           className={cn(
-                            "text-[10px] font-medium pointer-events-none",
-                            isSelected ? "fill-primary font-bold" : "fill-foreground"
+                            'pointer-events-none text-[10px] font-medium',
+                            isSelected
+                              ? 'fill-primary font-bold'
+                              : 'fill-foreground'
                           )}
                         >
                           {node.name.length > 15
@@ -449,13 +470,13 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
               initial={{ width: 0, opacity: 0 }}
               animate={{ width: 280, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
-              className="border-l border-border bg-card/50 backdrop-blur-sm overflow-hidden"
+              className="overflow-hidden border-l border-border bg-card/50 backdrop-blur-sm"
             >
-              <div className="flex flex-col h-full">
+              <div className="flex h-full flex-col">
                 {/* Panel Header */}
-                <div className="px-4 py-3 border-b border-border bg-card/30 flex items-center justify-between">
+                <div className="flex items-center justify-between border-b border-border bg-card/30 px-4 py-3">
                   <div>
-                    <h4 className="font-semibold text-sm">{selectedAgent}</h4>
+                    <h4 className="text-sm font-semibold">{selectedAgent}</h4>
                     <p className="text-xs text-muted-foreground">
                       {selectedAgentCommunications.length} communications
                     </p>
@@ -472,26 +493,30 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
 
                 {/* Communications List */}
                 <ScrollArea className="flex-1">
-                  <div className="p-4 space-y-3">
+                  <div className="space-y-3 p-4">
                     {selectedAgentCommunications.length === 0 ? (
-                      <p className="text-xs text-muted-foreground text-center py-8">
+                      <p className="py-8 text-center text-xs text-muted-foreground">
                         No communications yet
                       </p>
                     ) : (
-                      selectedAgentCommunications.map((comm) => (
+                      selectedAgentCommunications.map(comm => (
                         <div
                           key={comm.id}
-                          className="p-3 rounded-lg bg-accent/30 border border-border/50 space-y-1"
+                          className="space-y-1 rounded-lg border border-border/50 bg-accent/30 p-3"
                         >
                           <div className="flex items-center gap-2">
                             <Badge
                               variant="outline"
                               className={cn(
-                                "text-[10px]",
-                                comm.type === 'handoff' && 'border-blue-500 text-blue-600',
-                                comm.type === 'collaboration' && 'border-purple-500 text-purple-600',
-                                comm.type === 'response' && 'border-green-500 text-green-600',
-                                comm.type === 'error' && 'border-red-500 text-red-600'
+                                'text-[10px]',
+                                comm.type === 'handoff' &&
+                                  'border-blue-500 text-blue-600',
+                                comm.type === 'collaboration' &&
+                                  'border-purple-500 text-purple-600',
+                                comm.type === 'response' &&
+                                  'border-green-500 text-green-600',
+                                comm.type === 'error' &&
+                                  'border-red-500 text-red-600'
                               )}
                             >
                               {comm.type}
@@ -505,7 +530,7 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
                             <ArrowRight className="h-3 w-3 text-muted-foreground" />
                             <span className="font-medium">{comm.to}</span>
                           </div>
-                          <p className="text-xs text-muted-foreground line-clamp-2">
+                          <p className="line-clamp-2 text-xs text-muted-foreground">
                             {comm.message}
                           </p>
                         </div>
@@ -520,23 +545,23 @@ export const AgentCollaborationGraph: React.FC<AgentCollaborationGraphProps> = (
       </div>
 
       {/* Legend */}
-      <div className="px-4 py-2 border-t border-border bg-card/30 backdrop-blur-sm">
+      <div className="border-t border-border bg-card/30 px-4 py-2 backdrop-blur-sm">
         <div className="flex items-center gap-3 text-xs">
           <Activity className="h-3.5 w-3.5 text-muted-foreground" />
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-blue-500" />
+            <div className="h-2 w-2 rounded-full bg-blue-500" />
             <span className="text-muted-foreground">Handoff</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-purple-500" />
+            <div className="h-2 w-2 rounded-full bg-purple-500" />
             <span className="text-muted-foreground">Collaboration</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-green-500" />
+            <div className="h-2 w-2 rounded-full bg-green-500" />
             <span className="text-muted-foreground">Response</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-orange-500" />
+            <div className="h-2 w-2 rounded-full bg-orange-500" />
             <span className="text-muted-foreground">Status</span>
           </div>
         </div>

@@ -34,13 +34,13 @@ export class FileSystemTool {
         default:
           return {
             success: false,
-            error: 'Invalid operation'
+            error: 'Invalid operation',
           };
       }
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -50,17 +50,27 @@ export class FileSystemTool {
       // Use browser File System Access API
       if ('showOpenFilePicker' in window) {
         const [fileHandle] = await (window as any).showOpenFilePicker({
-          types: [{
-            description: 'Text files',
-            accept: {
-              'text/plain': ['.txt', '.md', '.js', '.ts', '.json', '.html', '.css']
-            }
-          }]
+          types: [
+            {
+              description: 'Text files',
+              accept: {
+                'text/plain': [
+                  '.txt',
+                  '.md',
+                  '.js',
+                  '.ts',
+                  '.json',
+                  '.html',
+                  '.css',
+                ],
+              },
+            },
+          ],
         });
-        
+
         const file = await fileHandle.getFile();
         const content = await file.text();
-        
+
         return {
           success: true,
           data: {
@@ -68,21 +78,21 @@ export class FileSystemTool {
             content: content,
             size: file.size,
             type: file.type,
-            lastModified: new Date(file.lastModified)
+            lastModified: new Date(file.lastModified),
           },
-          cost: 0.001
+          cost: 0.001,
         };
       } else {
         // Fallback for browsers without File System Access API
         return {
           success: false,
-          error: 'File System Access API not supported in this browser'
+          error: 'File System Access API not supported in this browser',
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -92,18 +102,28 @@ export class FileSystemTool {
       if ('showSaveFilePicker' in window) {
         const fileHandle = await (window as any).showSaveFilePicker({
           suggestedName: path,
-          types: [{
-            description: 'Text files',
-            accept: {
-              'text/plain': ['.txt', '.md', '.js', '.ts', '.json', '.html', '.css']
-            }
-          }]
+          types: [
+            {
+              description: 'Text files',
+              accept: {
+                'text/plain': [
+                  '.txt',
+                  '.md',
+                  '.js',
+                  '.ts',
+                  '.json',
+                  '.html',
+                  '.css',
+                ],
+              },
+            },
+          ],
         });
-        
+
         const writable = await fileHandle.createWritable();
         await writable.write(content);
         await writable.close();
-        
+
         return {
           success: true,
           data: {
@@ -111,9 +131,9 @@ export class FileSystemTool {
             content: content,
             size: content.length,
             type: 'text/plain',
-            lastModified: new Date()
+            lastModified: new Date(),
           },
-          cost: 0.001
+          cost: 0.001,
         };
       } else {
         // Fallback: download file
@@ -126,7 +146,7 @@ export class FileSystemTool {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         return {
           success: true,
           data: {
@@ -134,15 +154,15 @@ export class FileSystemTool {
             content: content,
             size: content.length,
             type: 'text/plain',
-            lastModified: new Date()
+            lastModified: new Date(),
           },
-          cost: 0.001
+          cost: 0.001,
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -152,7 +172,7 @@ export class FileSystemTool {
       if ('showDirectoryPicker' in window) {
         const dirHandle = await (window as any).showDirectoryPicker();
         const files: FileResult[] = [];
-        
+
         for await (const [name, handle] of dirHandle.entries()) {
           if (handle.kind === 'file') {
             const file = await handle.getFile();
@@ -161,26 +181,26 @@ export class FileSystemTool {
               content: '', // Don't load content for directory listing
               size: file.size,
               type: file.type,
-              lastModified: new Date(file.lastModified)
+              lastModified: new Date(file.lastModified),
             });
           }
         }
-        
+
         return {
           success: true,
           data: files,
-          cost: 0.001
+          cost: 0.001,
         };
       } else {
         return {
           success: false,
-          error: 'Directory picker not supported in this browser'
+          error: 'Directory picker not supported in this browser',
         };
       }
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -191,12 +211,12 @@ export class FileSystemTool {
       // This would need to be implemented through a different approach
       return {
         success: false,
-        error: 'File deletion not supported in browser environment'
+        error: 'File deletion not supported in browser environment',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }

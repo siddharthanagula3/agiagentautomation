@@ -24,7 +24,7 @@ const DEFAULT_CONFIG: APIConfig = {
   retryDelay: 1000, // 1 second
   defaultHeaders: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
 };
 
@@ -69,7 +69,9 @@ export class APIClient {
   }
 
   // Build request headers
-  private buildHeaders(customHeaders: Record<string, string> = {}): HeadersInit {
+  private buildHeaders(
+    customHeaders: Record<string, string> = {}
+  ): HeadersInit {
     const headers: Record<string, string> = {
       ...this.config.defaultHeaders,
       ...customHeaders,
@@ -164,8 +166,8 @@ export class APIClient {
     requestOptions.signal = controller.signal;
 
     try {
-      const response = await this.retryRequest(
-        () => fetch(url, requestOptions)
+      const response = await this.retryRequest(() =>
+        fetch(url, requestOptions)
       );
 
       clearTimeout(timeoutId);
@@ -177,7 +179,9 @@ export class APIClient {
           // Retry the original request with new token
           const retryOptions = {
             ...requestOptions,
-            headers: this.buildHeaders(options.headers as Record<string, string>),
+            headers: this.buildHeaders(
+              options.headers as Record<string, string>
+            ),
           };
           const retryResponse = await fetch(url, retryOptions);
           return this.parseResponse<T>(retryResponse);
@@ -193,7 +197,6 @@ export class APIClient {
       }
 
       return this.parseResponse<T>(response);
-
     } catch (error) {
       clearTimeout(timeoutId);
 
@@ -267,7 +270,8 @@ export class APIClient {
     // Handle error responses
     if (!response.ok) {
       throw new APIException({
-        message: data.message || `HTTP ${response.status}: ${response.statusText}`,
+        message:
+          data.message || `HTTP ${response.status}: ${response.statusText}`,
         status: response.status,
         details: data.errors || data,
       });
@@ -277,7 +281,10 @@ export class APIClient {
   }
 
   // HTTP method implementations
-  async get<T = unknown>(endpoint: string, params?: Record<string, unknown>): Promise<APIResponse<T>> {
+  async get<T = unknown>(
+    endpoint: string,
+    params?: Record<string, unknown>
+  ): Promise<APIResponse<T>> {
     let url = endpoint;
 
     if (params) {
@@ -301,7 +308,10 @@ export class APIClient {
     return this.makeRequest<T>(url, { method: 'GET' });
   }
 
-  async post<T = unknown>(endpoint: string, data?: unknown): Promise<APIResponse<T>> {
+  async post<T = unknown>(
+    endpoint: string,
+    data?: unknown
+  ): Promise<APIResponse<T>> {
     const options: RequestInit = {
       method: 'POST',
     };
@@ -318,14 +328,20 @@ export class APIClient {
     return this.makeRequest<T>(endpoint, options);
   }
 
-  async put<T = unknown>(endpoint: string, data?: unknown): Promise<APIResponse<T>> {
+  async put<T = unknown>(
+    endpoint: string,
+    data?: unknown
+  ): Promise<APIResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async patch<T = unknown>(endpoint: string, data?: unknown): Promise<APIResponse<T>> {
+  async patch<T = unknown>(
+    endpoint: string,
+    data?: unknown
+  ): Promise<APIResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
@@ -362,7 +378,7 @@ export class APIClient {
 
       // Track upload progress
       if (onProgress) {
-        xhr.upload.addEventListener('progress', (event) => {
+        xhr.upload.addEventListener('progress', event => {
           if (event.lengthComputable) {
             const progress = (event.loaded / event.total) * 100;
             onProgress(progress);
@@ -375,13 +391,20 @@ export class APIClient {
           const response = new Response(xhr.response, {
             status: xhr.status,
             statusText: xhr.statusText,
-            headers: new Headers(xhr.getAllResponseHeaders().split('\r\n')
-              .filter(line => line.trim())
-              .reduce((headers, line) => {
-                const [key, value] = line.split(': ');
-                if (key && value) headers[key.toLowerCase()] = value;
-                return headers;
-              }, {} as Record<string, string>)),
+            headers: new Headers(
+              xhr
+                .getAllResponseHeaders()
+                .split('\r\n')
+                .filter(line => line.trim())
+                .reduce(
+                  (headers, line) => {
+                    const [key, value] = line.split(': ');
+                    if (key && value) headers[key.toLowerCase()] = value;
+                    return headers;
+                  },
+                  {} as Record<string, string>
+                )
+            ),
           });
 
           const result = await this.parseResponse<T>(response);
@@ -392,18 +415,22 @@ export class APIClient {
       });
 
       xhr.addEventListener('error', () => {
-        reject(new APIException({
-          message: 'Upload failed',
-          code: 'UPLOAD_FAILED',
-        }));
+        reject(
+          new APIException({
+            message: 'Upload failed',
+            code: 'UPLOAD_FAILED',
+          })
+        );
       });
 
       xhr.addEventListener('timeout', () => {
-        reject(new APIException({
-          message: 'Upload timeout',
-          code: 'UPLOAD_TIMEOUT',
-          status: 408,
-        }));
+        reject(
+          new APIException({
+            message: 'Upload timeout',
+            code: 'UPLOAD_TIMEOUT',
+            status: 408,
+          })
+        );
       });
 
       const url = endpoint.startsWith('http')
@@ -424,11 +451,13 @@ export class APIClient {
   }
 
   // Authentication methods
-  async login(credentials: { email: string; password: string }): Promise<APIResponse<{
-    user: unknown;
-    token: string;
-    refreshToken: string;
-  }>> {
+  async login(credentials: { email: string; password: string }): Promise<
+    APIResponse<{
+      user: unknown;
+      token: string;
+      refreshToken: string;
+    }>
+  > {
     const response = await this.post<{
       user: unknown;
       token: string;
@@ -468,7 +497,9 @@ export class APIClient {
   }
 
   // Health check
-  async healthCheck(): Promise<APIResponse<{ status: string; timestamp: string }>> {
+  async healthCheck(): Promise<
+    APIResponse<{ status: string; timestamp: string }>
+  > {
     return this.get('/health');
   }
 
@@ -610,7 +641,10 @@ export const buildQueryString = (params: Record<string, unknown>): string => {
 };
 
 // Check if error is a specific type
-export const isAPIError = (error: unknown, code?: string): error is APIException => {
+export const isAPIError = (
+  error: unknown,
+  code?: string
+): error is APIException => {
   return error instanceof APIException && (!code || error.code === code);
 };
 
@@ -626,7 +660,10 @@ export const getErrorMessage = (error: unknown): string => {
 };
 
 // Mock API responses for development
-export const createMockResponse = <T>(data: T, delay = 1000): Promise<APIResponse<T>> => {
+export const createMockResponse = <T>(
+  data: T,
+  delay = 1000
+): Promise<APIResponse<T>> => {
   return new Promise(resolve => {
     setTimeout(() => {
       resolve({

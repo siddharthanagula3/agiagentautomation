@@ -1,5 +1,9 @@
 import { Handler, HandlerEvent } from '@netlify/functions';
-import { calculateTokenCost, storeTokenUsage, extractRequestMetadata } from './utils/token-tracking';
+import {
+  calculateTokenCost,
+  storeTokenUsage,
+  extractRequestMetadata,
+} from './utils/token-tracking';
 
 /**
  * Netlify Function to proxy Anthropic Claude API calls
@@ -17,12 +21,13 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
   // Get API key from environment
   const ANTHROPIC_API_KEY = process.env.VITE_ANTHROPIC_API_KEY;
-  
+
   if (!ANTHROPIC_API_KEY) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
-        error: 'Anthropic API key not configured in Netlify environment variables' 
+      body: JSON.stringify({
+        error:
+          'Anthropic API key not configured in Netlify environment variables',
       }),
     };
   }
@@ -30,12 +35,18 @@ export const handler: Handler = async (event: HandlerEvent) => {
   try {
     // Parse request body
     const body = JSON.parse(event.body || '{}');
-    const { messages, model = 'claude-3-5-sonnet-20241022', max_tokens = 4000, system, temperature = 0.7 } = body;
+    const {
+      messages,
+      model = 'claude-3-5-sonnet-20241022',
+      max_tokens = 4000,
+      system,
+      temperature = 0.7,
+    } = body;
 
     console.log('[Anthropic Proxy] Received request:', {
       model,
       messageCount: messages?.length,
-      hasSystem: !!system
+      hasSystem: !!system,
     });
 
     // Make request to Anthropic API
@@ -61,9 +72,9 @@ export const handler: Handler = async (event: HandlerEvent) => {
       console.error('[Anthropic Proxy] API Error:', data);
       return {
         statusCode: response.status,
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           error: data.error?.message || 'Anthropic API error',
-          details: data 
+          details: data,
         }),
       };
     }
@@ -81,9 +92,11 @@ export const handler: Handler = async (event: HandlerEvent) => {
       );
 
       // Store usage in Supabase (non-blocking)
-      storeTokenUsage('anthropic', model, userId, sessionId, tokenUsage).catch(err => {
-        console.error('[Anthropic Proxy] Failed to store token usage:', err);
-      });
+      storeTokenUsage('anthropic', model, userId, sessionId, tokenUsage).catch(
+        err => {
+          console.error('[Anthropic Proxy] Failed to store token usage:', err);
+        }
+      );
 
       // Add token usage info to response
       data.tokenTracking = {
@@ -96,8 +109,8 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
     // Normalize content for UI
     const content = Array.isArray(data.content)
-      ? (data.content[0]?.text || data.output_text)
-      : (data.output_text || data.content);
+      ? data.content[0]?.text || data.output_text
+      : data.output_text || data.content;
     const normalized = { ...data, content };
     return {
       statusCode: 200,
@@ -110,11 +123,10 @@ export const handler: Handler = async (event: HandlerEvent) => {
     console.error('[Anthropic Proxy] Error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         error: 'Failed to process request',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       }),
     };
   }
 };
-

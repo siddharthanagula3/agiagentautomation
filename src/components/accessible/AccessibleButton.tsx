@@ -1,6 +1,9 @@
 import React, { forwardRef } from 'react';
 import { Button, ButtonProps } from '../ui/button';
-import { useScreenReader, useKeyboardNavigation } from '../../hooks/useAccessibility';
+import {
+  useScreenReader,
+  useKeyboardNavigation,
+} from '../../hooks/useAccessibility';
 import { cn } from '@/lib/utils';
 
 interface AccessibleButtonProps extends ButtonProps {
@@ -17,18 +20,24 @@ interface AccessibleButtonProps extends ButtonProps {
   visuallyHidden?: boolean;
 }
 
-export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonProps>(
-  ({
-    children,
-    onClick,
-    onActivate,
-    isLoading = false,
-    loadingText = 'Loading',
-    visuallyHidden = false,
-    className,
-    disabled,
-    ...props
-  }, ref) => {
+export const AccessibleButton = forwardRef<
+  HTMLButtonElement,
+  AccessibleButtonProps
+>(
+  (
+    {
+      children,
+      onClick,
+      onActivate,
+      isLoading = false,
+      loadingText = 'Loading',
+      visuallyHidden = false,
+      className,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     const { announceError } = useScreenReader();
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -52,7 +61,8 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
       <Button
         ref={ref}
         className={cn(
-          visuallyHidden && 'sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50',
+          visuallyHidden &&
+            'sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50',
           className
         )}
         disabled={isDisabled}
@@ -68,7 +78,7 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
         {isLoading ? (
           <span className="flex items-center gap-2">
             <span
-              className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-current"
+              className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-current"
               aria-hidden="true"
             />
             {loadingText}

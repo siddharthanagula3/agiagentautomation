@@ -9,19 +9,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Bot, 
-  User, 
-  Loader2, 
-  Wrench, 
-  CheckCircle, 
+import {
+  Bot,
+  User,
+  Loader2,
+  Wrench,
+  CheckCircle,
   AlertCircle,
   Brain,
   Zap,
   Target,
   Play,
   Pause,
-  RotateCcw
+  RotateCcw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MessageInput } from './MessageInput';
@@ -63,7 +63,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
   const [isTaskPlanApproved, setIsTaskPlanApproved] = useState(false);
   const [isTaskExecutionRunning, setIsTaskExecutionRunning] = useState(false);
   const [isTaskExecutionPaused, setIsTaskExecutionPaused] = useState(false);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const { chatInterface } = useUIStore();
@@ -75,12 +75,42 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
       return [
-        { id: '1', name: 'Web Search', description: 'Search the web for information', category: 'research' },
-        { id: '2', name: 'Code Analysis', description: 'Analyze and review code', category: 'development' },
-        { id: '3', name: 'Data Processing', description: 'Process and analyze data', category: 'analytics' },
-        { id: '4', name: 'Content Generation', description: 'Generate written content', category: 'writing' },
-        { id: '5', name: 'Image Analysis', description: 'Analyze and describe images', category: 'vision' },
-        { id: '6', name: 'API Integration', description: 'Connect to external APIs', category: 'integration' },
+        {
+          id: '1',
+          name: 'Web Search',
+          description: 'Search the web for information',
+          category: 'research',
+        },
+        {
+          id: '2',
+          name: 'Code Analysis',
+          description: 'Analyze and review code',
+          category: 'development',
+        },
+        {
+          id: '3',
+          name: 'Data Processing',
+          description: 'Process and analyze data',
+          category: 'analytics',
+        },
+        {
+          id: '4',
+          name: 'Content Generation',
+          description: 'Generate written content',
+          category: 'writing',
+        },
+        {
+          id: '5',
+          name: 'Image Analysis',
+          description: 'Analyze and describe images',
+          category: 'vision',
+        },
+        {
+          id: '6',
+          name: 'API Integration',
+          description: 'Connect to external APIs',
+          category: 'integration',
+        },
       ];
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
@@ -95,24 +125,26 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
       if (stored) {
         return JSON.parse(stored).map((msg: any) => ({
           ...msg,
-          timestamp: new Date(msg.timestamp)
+          timestamp: new Date(msg.timestamp),
         }));
       }
       return [];
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       if (data.length > 0) {
         setMessages(data);
       } else {
         // Add welcome message
-        setMessages([{
-          id: 'welcome',
-          type: 'assistant',
-          content: `Hello! I'm ${employeeName}, your AI assistant. I can help you with various tasks using my specialized tools. What would you like to work on today?`,
-          timestamp: new Date()
-        }]);
+        setMessages([
+          {
+            id: 'welcome',
+            type: 'assistant',
+            content: `Hello! I'm ${employeeName}, your AI assistant. I can help you with various tasks using my specialized tools. What would you like to work on today?`,
+            timestamp: new Date(),
+          },
+        ]);
       }
-    }
+    },
   });
 
   // Auto-scroll to bottom
@@ -123,7 +155,10 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
   // Save conversation to localStorage
   useEffect(() => {
     if (messages.length > 0) {
-      localStorage.setItem(`conversation-${employeeId}`, JSON.stringify(messages));
+      localStorage.setItem(
+        `conversation-${employeeId}`,
+        JSON.stringify(messages)
+      );
     }
   }, [messages, employeeId]);
 
@@ -132,56 +167,57 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
     mutationFn: async (message: string) => {
       // Simulate AI processing
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Generate task plan
       const taskPlan: Task[] = generateTaskPlan(message);
       setCurrentTaskPlan(taskPlan);
-      
+
       return {
         response: `I've analyzed your request and created a plan with ${taskPlan.length} tasks. Please review and approve the plan to proceed.`,
-        taskPlan
+        taskPlan,
       };
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       const assistantMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         type: 'assistant',
         content: data.response,
         timestamp: new Date(),
         status: 'completed',
-        taskPlan: data.taskPlan
+        taskPlan: data.taskPlan,
       };
-      
+
       setMessages(prev => [...prev, assistantMessage]);
     },
-    onError: (error) => {
+    onError: error => {
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
         type: 'assistant',
         content: `Sorry, I encountered an error: ${error.message}`,
         timestamp: new Date(),
-        status: 'error'
+        status: 'error',
       };
       setMessages(prev => [...prev, errorMessage]);
-    }
+    },
   });
 
   // Generate task plan based on user input
   const generateTaskPlan = (input: string): Task[] => {
     const lowerInput = input.toLowerCase();
     const tasks: Task[] = [];
-    
+
     if (lowerInput.includes('website') || lowerInput.includes('web')) {
       tasks.push({
         id: '1',
         title: 'Research Website Requirements',
-        description: 'Analyze the website requirements and gather necessary information',
+        description:
+          'Analyze the website requirements and gather necessary information',
         type: 'simple',
         status: 'pending',
         estimatedTime: 15,
-        assignedEmployee: 'Research Assistant'
+        assignedEmployee: 'Research Assistant',
       });
-      
+
       tasks.push({
         id: '2',
         title: 'Design Website Structure',
@@ -190,9 +226,9 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
         status: 'pending',
         estimatedTime: 30,
         assignedEmployee: 'Web Designer',
-        dependencies: ['1']
+        dependencies: ['1'],
       });
-      
+
       tasks.push({
         id: '3',
         title: 'Implement Website',
@@ -201,7 +237,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
         status: 'pending',
         estimatedTime: 120,
         assignedEmployee: 'Web Developer',
-        dependencies: ['2']
+        dependencies: ['2'],
       });
     } else if (lowerInput.includes('data') || lowerInput.includes('analysis')) {
       tasks.push({
@@ -211,9 +247,9 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
         type: 'simple',
         status: 'pending',
         estimatedTime: 20,
-        assignedEmployee: 'Data Collector'
+        assignedEmployee: 'Data Collector',
       });
-      
+
       tasks.push({
         id: '2',
         title: 'Data Analysis',
@@ -222,7 +258,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
         status: 'pending',
         estimatedTime: 45,
         assignedEmployee: 'Data Analyst',
-        dependencies: ['1']
+        dependencies: ['1'],
       });
     } else {
       tasks.push({
@@ -232,14 +268,18 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
         type: 'simple',
         status: 'pending',
         estimatedTime: 10,
-        assignedEmployee: 'Task Coordinator'
+        assignedEmployee: 'Task Coordinator',
       });
     }
-    
+
     return tasks;
   };
 
-  const handleSendMessage = (message: string, attachments?: any[], tools?: Tool[]) => {
+  const handleSendMessage = (
+    message: string,
+    attachments?: any[],
+    tools?: Tool[]
+  ) => {
     if (!message.trim()) return;
 
     // Add user message
@@ -247,12 +287,12 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
       id: `user-${Date.now()}`,
       type: 'user',
       content: message,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
-    
+
     // Send to AI
     sendMessageMutation.mutate(message);
   };
@@ -260,7 +300,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
   const handleApproveTaskPlan = () => {
     setIsTaskPlanApproved(true);
     setIsTaskExecutionRunning(true);
-    
+
     // Simulate task execution
     executeTasks();
   };
@@ -290,34 +330,40 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
   const executeTasks = async () => {
     for (const task of currentTaskPlan) {
       if (isTaskExecutionPaused) break;
-      
+
       // Update task status to running
-      setCurrentTaskPlan(prev => 
-        prev.map(t => t.id === task.id ? { ...t, status: 'running' as const } : t)
+      setCurrentTaskPlan(prev =>
+        prev.map(t =>
+          t.id === task.id ? { ...t, status: 'running' as const } : t
+        )
       );
-      
+
       // Simulate task execution
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Update task status to completed
-      setCurrentTaskPlan(prev => 
-        prev.map(t => t.id === task.id ? { 
-          ...t, 
-          status: 'completed' as const,
-          result: `Task "${t.title}" completed successfully.`
-        } : t)
+      setCurrentTaskPlan(prev =>
+        prev.map(t =>
+          t.id === task.id
+            ? {
+                ...t,
+                status: 'completed' as const,
+                result: `Task "${t.title}" completed successfully.`,
+              }
+            : t
+        )
       );
     }
-    
+
     setIsTaskExecutionRunning(false);
   };
 
   const getStatusIcon = (status?: ChatMessage['status']) => {
     switch (status) {
       case 'thinking':
-        return <Brain className="h-4 w-4 text-blue-600 animate-pulse" />;
+        return <Brain className="h-4 w-4 animate-pulse text-blue-600" />;
       case 'working':
-        return <Wrench className="h-4 w-4 text-yellow-600 animate-spin" />;
+        return <Wrench className="h-4 w-4 animate-spin text-yellow-600" />;
       case 'completed':
         return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'error':
@@ -328,12 +374,12 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
   };
 
   return (
-    <div className={cn('flex flex-col h-screen bg-background', className)}>
+    <div className={cn('flex h-screen flex-col bg-background', className)}>
       {/* Header */}
       <div className="border-b bg-card p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-primary to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-purple-600">
               <Bot className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -352,7 +398,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
-          {messages.map((message) => (
+          {messages.map(message => (
             <div
               key={message.id}
               className={cn(
@@ -360,13 +406,15 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
                 message.type === 'user' ? 'justify-end' : 'justify-start'
               )}
             >
-              <div className={cn(
-                'max-w-[80%] rounded-lg p-4',
-                message.type === 'user' 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-muted"
-              )}>
-                <div className="flex items-center space-x-2 mb-2">
+              <div
+                className={cn(
+                  'max-w-[80%] rounded-lg p-4',
+                  message.type === 'user'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted'
+                )}
+              >
+                <div className="mb-2 flex items-center space-x-2">
                   {message.type === 'user' ? (
                     <User className="h-4 w-4" />
                   ) : (
@@ -377,19 +425,19 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
                   </span>
                   {message.status && getStatusIcon(message.status)}
                 </div>
-                
+
                 <div className="whitespace-pre-wrap">{message.content}</div>
-                
-                <div className="text-xs text-muted-foreground mt-2">
+
+                <div className="mt-2 text-xs text-muted-foreground">
                   {message.timestamp.toLocaleTimeString()}
                 </div>
               </div>
             </div>
           ))}
-          
+
           {sendMessageMutation.isPending && (
             <div className="flex justify-start">
-              <div className="bg-muted rounded-lg p-4">
+              <div className="rounded-lg bg-muted p-4">
                 <div className="flex items-center space-x-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span className="text-sm">Analyzing your request...</span>
@@ -397,7 +445,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
@@ -427,7 +475,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
         placeholder={`Ask ${employeeName} anything...`}
         showTools={chatInterface.showTools}
         availableTools={availableTools}
-        onToolSelect={(tool) => {
+        onToolSelect={tool => {
           setInputValue(prev => prev + `\n\nPlease use the ${tool.name} tool.`);
         }}
       />

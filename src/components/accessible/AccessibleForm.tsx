@@ -29,28 +29,35 @@ export const AccessibleForm: React.FC<AccessibleFormProps> = ({
   const { announceError, announceSuccess } = useScreenReader();
   const errorSummaryId = useAriaId('error-summary');
 
-  const handleSubmit = useCallback((event: React.FormEvent) => {
-    event.preventDefault();
+  const handleSubmit = useCallback(
+    (event: React.FormEvent) => {
+      event.preventDefault();
 
-    const errorKeys = Object.keys(errors);
-    if (errorKeys.length > 0) {
-      const errorMessage = `Form has ${errorKeys.length} error${errorKeys.length > 1 ? 's' : ''}`;
-      announceError(errorMessage);
+      const errorKeys = Object.keys(errors);
+      if (errorKeys.length > 0) {
+        const errorMessage = `Form has ${errorKeys.length} error${errorKeys.length > 1 ? 's' : ''}`;
+        announceError(errorMessage);
 
-      // Focus first error field
-      const firstErrorField = formRef.current?.querySelector(`[name="${errorKeys[0]}"]`) as HTMLElement;
-      if (firstErrorField) {
-        firstErrorField.focus();
+        // Focus first error field
+        const firstErrorField = formRef.current?.querySelector(
+          `[name="${errorKeys[0]}"]`
+        ) as HTMLElement;
+        if (firstErrorField) {
+          firstErrorField.focus();
+        }
+        return;
       }
-      return;
-    }
 
-    try {
-      onSubmit(event);
-    } catch (error) {
-      announceError('Form submission failed. Please check your input and try again.');
-    }
-  }, [onSubmit, errors, announceError]);
+      try {
+        onSubmit(event);
+      } catch (error) {
+        announceError(
+          'Form submission failed. Please check your input and try again.'
+        );
+      }
+    },
+    [onSubmit, errors, announceError]
+  );
 
   const hasErrors = Object.keys(errors).length > 0;
 
@@ -68,22 +75,28 @@ export const AccessibleForm: React.FC<AccessibleFormProps> = ({
       {hasErrors && (
         <div
           id={errorSummaryId}
-          className="mb-6 p-4 border border-red-300 rounded-md bg-red-50"
+          className="mb-6 rounded-md border border-red-300 bg-red-50 p-4"
           role="alert"
           aria-labelledby="error-summary-title"
         >
-          <h2 id="error-summary-title" className="text-lg font-semibold text-red-800 mb-2">
-            There are {Object.keys(errors).length} error{Object.keys(errors).length > 1 ? 's' : ''} in this form
+          <h2
+            id="error-summary-title"
+            className="mb-2 text-lg font-semibold text-red-800"
+          >
+            There are {Object.keys(errors).length} error
+            {Object.keys(errors).length > 1 ? 's' : ''} in this form
           </h2>
-          <ul className="list-disc list-inside space-y-1">
+          <ul className="list-inside list-disc space-y-1">
             {Object.entries(errors).map(([field, message]) => (
               <li key={field}>
                 <a
                   href={`#${field}`}
-                  className="text-red-700 hover:text-red-900 underline"
-                  onClick={(e) => {
+                  className="text-red-700 underline hover:text-red-900"
+                  onClick={e => {
                     e.preventDefault();
-                    const element = document.querySelector(`[name="${field}"]`) as HTMLElement;
+                    const element = document.querySelector(
+                      `[name="${field}"]`
+                    ) as HTMLElement;
                     element?.focus();
                   }}
                 >
@@ -134,7 +147,7 @@ export const AccessibleField: React.FC<AccessibleFieldProps> = ({
       >
         {label}
         {required && (
-          <span className="text-red-500 ml-1" aria-label="required">
+          <span className="ml-1 text-red-500" aria-label="required">
             *
           </span>
         )}
@@ -152,10 +165,10 @@ export const AccessibleField: React.FC<AccessibleFieldProps> = ({
           name,
           'aria-required': required,
           'aria-invalid': !!error,
-          'aria-describedby': [
-            description && descriptionId,
-            error && errorId,
-          ].filter(Boolean).join(' ') || undefined,
+          'aria-describedby':
+            [description && descriptionId, error && errorId]
+              .filter(Boolean)
+              .join(' ') || undefined,
           className: cn(
             'w-full',
             error && 'border-red-500 focus:border-red-500 focus:ring-red-500'
@@ -167,9 +180,9 @@ export const AccessibleField: React.FC<AccessibleFieldProps> = ({
         <div
           id={errorId}
           role="alert"
-          className="text-sm text-red-600 flex items-start gap-1"
+          className="flex items-start gap-1 text-sm text-red-600"
         >
-          <span aria-hidden="true" className="text-red-500 font-bold">
+          <span aria-hidden="true" className="font-bold text-red-500">
             ×
           </span>
           {error}

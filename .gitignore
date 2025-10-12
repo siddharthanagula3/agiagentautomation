@@ -121,3 +121,9 @@ error.log
 
 # Documentation drafts
 docs/drafts/
+
+# Playwright
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

@@ -10,7 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -42,12 +48,12 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { 
-  mediaGenerationService, 
-  type ImageGenerationRequest, 
+import {
+  mediaGenerationService,
+  type ImageGenerationRequest,
   type VideoGenerationRequest,
   type MediaGenerationResult,
-  type MediaGenerationStats 
+  type MediaGenerationStats,
 } from '@/services/media-generation-service';
 
 interface MediaGenerationPanelProps {
@@ -59,13 +65,16 @@ interface MediaGenerationPanelProps {
 const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
   isOpen,
   onClose,
-  onMediaGenerated
+  onMediaGenerated,
 }) => {
   const [activeTab, setActiveTab] = useState<'image' | 'video'>('image');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
-  const [currentGeneration, setCurrentGeneration] = useState<MediaGenerationResult | null>(null);
-  const [generationHistory, setGenerationHistory] = useState<MediaGenerationResult[]>([]);
+  const [currentGeneration, setCurrentGeneration] =
+    useState<MediaGenerationResult | null>(null);
+  const [generationHistory, setGenerationHistory] = useState<
+    MediaGenerationResult[]
+  >([]);
   const [stats, setStats] = useState<MediaGenerationStats | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -91,7 +100,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
   const [serviceStatus, setServiceStatus] = useState({
     nanoBanana: false,
     veo3: false,
-    gemini: false
+    gemini: false,
   });
 
   useEffect(() => {
@@ -104,7 +113,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
     const history = mediaGenerationService.getGenerationHistory();
     const stats = mediaGenerationService.getGenerationStats();
     const status = mediaGenerationService.isServiceAvailable();
-    
+
     setGenerationHistory(history);
     setStats(stats);
     setServiceStatus(status);
@@ -137,17 +146,17 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
         negativePrompt: negativePrompt || undefined,
         seed: imageSeed,
         steps: 20,
-        guidance: 7.5
+        guidance: 7.5,
       };
 
       const result = await mediaGenerationService.generateImage(request);
-      
+
       clearInterval(progressInterval);
       setGenerationProgress(100);
       setCurrentGeneration(result);
       setGenerationHistory(mediaGenerationService.getGenerationHistory());
       setStats(mediaGenerationService.getGenerationStats());
-      
+
       if (onMediaGenerated) {
         onMediaGenerated(result);
       }
@@ -184,17 +193,17 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
         style: videoStyle as any,
         aspectRatio: videoAspectRatio as any,
         fps: videoFps,
-        seed: videoSeed
+        seed: videoSeed,
       };
 
       const result = await mediaGenerationService.generateVideo(request);
-      
+
       clearInterval(progressInterval);
       setGenerationProgress(100);
       setCurrentGeneration(result);
       setGenerationHistory(mediaGenerationService.getGenerationHistory());
       setStats(mediaGenerationService.getGenerationStats());
-      
+
       if (onMediaGenerated) {
         onMediaGenerated(result);
       }
@@ -221,27 +230,37 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
 
   const getStatusIcon = (status: MediaGenerationResult['status']) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'generating': return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
-      case 'processing': return <RefreshCw className="h-4 w-4 animate-spin text-yellow-500" />;
-      case 'failed': return <XCircle className="h-4 w-4 text-red-500" />;
-      default: return <AlertCircle className="h-4 w-4 text-gray-500" />;
+      case 'completed':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'generating':
+        return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
+      case 'processing':
+        return <RefreshCw className="h-4 w-4 animate-spin text-yellow-500" />;
+      case 'failed':
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return <AlertCircle className="h-4 w-4 text-gray-500" />;
     }
   };
 
   const getStatusColor = (status: MediaGenerationResult['status']) => {
     switch (status) {
-      case 'completed': return 'text-green-500 bg-green-50 border-green-200';
-      case 'generating': return 'text-blue-500 bg-blue-50 border-blue-200';
-      case 'processing': return 'text-yellow-500 bg-yellow-50 border-yellow-200';
-      case 'failed': return 'text-red-500 bg-red-50 border-red-200';
-      default: return 'text-gray-500 bg-gray-50 border-gray-200';
+      case 'completed':
+        return 'text-green-500 bg-green-50 border-green-200';
+      case 'generating':
+        return 'text-blue-500 bg-blue-50 border-blue-200';
+      case 'processing':
+        return 'text-yellow-500 bg-yellow-50 border-yellow-200';
+      case 'failed':
+        return 'text-red-500 bg-red-50 border-red-200';
+      default:
+        return 'text-gray-500 bg-gray-50 border-gray-200';
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
@@ -251,38 +270,51 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
             </Badge>
           </DialogTitle>
           <DialogDescription>
-            Generate images with Nano Banana and videos with Veo3, enhanced by Google AI Studio
+            Generate images with Nano Banana and videos with Veo3, enhanced by
+            Google AI Studio
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Service Status */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="flex items-center gap-2 p-3 rounded-lg border">
+            <div className="flex items-center gap-2 rounded-lg border p-3">
               <Image className="h-4 w-4" />
               <span className="text-sm font-medium">Nano Banana</span>
-              <Badge variant={serviceStatus.nanoBanana ? "default" : "secondary"} className="ml-auto">
+              <Badge
+                variant={serviceStatus.nanoBanana ? 'default' : 'secondary'}
+                className="ml-auto"
+              >
                 {serviceStatus.nanoBanana ? 'Available' : 'Not configured'}
               </Badge>
             </div>
-            <div className="flex items-center gap-2 p-3 rounded-lg border">
+            <div className="flex items-center gap-2 rounded-lg border p-3">
               <Video className="h-4 w-4" />
               <span className="text-sm font-medium">Veo3</span>
-              <Badge variant={serviceStatus.veo3 ? "default" : "secondary"} className="ml-auto">
+              <Badge
+                variant={serviceStatus.veo3 ? 'default' : 'secondary'}
+                className="ml-auto"
+              >
                 {serviceStatus.veo3 ? 'Available' : 'Not configured'}
               </Badge>
             </div>
-            <div className="flex items-center gap-2 p-3 rounded-lg border">
+            <div className="flex items-center gap-2 rounded-lg border p-3">
               <Zap className="h-4 w-4" />
               <span className="text-sm font-medium">Gemini</span>
-              <Badge variant={serviceStatus.gemini ? "default" : "secondary"} className="ml-auto">
+              <Badge
+                variant={serviceStatus.gemini ? 'default' : 'secondary'}
+                className="ml-auto"
+              >
                 {serviceStatus.gemini ? 'Available' : 'Not configured'}
               </Badge>
             </div>
           </div>
 
           {/* Generation Tabs */}
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'image' | 'video')}>
+          <Tabs
+            value={activeTab}
+            onValueChange={value => setActiveTab(value as 'image' | 'video')}
+          >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="image">Image Generation</TabsTrigger>
               <TabsTrigger value="video">Video Generation</TabsTrigger>
@@ -301,7 +333,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                     <label className="text-sm font-medium">Prompt</label>
                     <Textarea
                       value={imagePrompt}
-                      onChange={(e) => setImagePrompt(e.target.value)}
+                      onChange={e => setImagePrompt(e.target.value)}
                       placeholder="Describe the image you want to generate..."
                       className="min-h-[100px]"
                     />
@@ -315,11 +347,13 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {mediaGenerationService.getImageStyles().map(style => (
-                            <SelectItem key={style} value={style}>
-                              {style.charAt(0).toUpperCase() + style.slice(1)}
-                            </SelectItem>
-                          ))}
+                          {mediaGenerationService
+                            .getImageStyles()
+                            .map(style => (
+                              <SelectItem key={style} value={style}>
+                                {style.charAt(0).toUpperCase() + style.slice(1)}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -344,7 +378,10 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Quality</label>
-                      <Select value={imageQuality} onValueChange={setImageQuality}>
+                      <Select
+                        value={imageQuality}
+                        onValueChange={setImageQuality}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -356,8 +393,13 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Aspect Ratio</label>
-                      <Select value={imageAspectRatio} onValueChange={setImageAspectRatio}>
+                      <label className="text-sm font-medium">
+                        Aspect Ratio
+                      </label>
+                      <Select
+                        value={imageAspectRatio}
+                        onValueChange={setImageAspectRatio}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -373,27 +415,29 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Negative Prompt (Optional)</label>
+                    <label className="text-sm font-medium">
+                      Negative Prompt (Optional)
+                    </label>
                     <Input
                       value={negativePrompt}
-                      onChange={(e) => setNegativePrompt(e.target.value)}
+                      onChange={e => setNegativePrompt(e.target.value)}
                       placeholder="What you don't want in the image..."
                     />
                   </div>
 
-                  <Button 
-                    onClick={handleImageGeneration} 
+                  <Button
+                    onClick={handleImageGeneration}
                     disabled={!imagePrompt.trim() || isGenerating}
                     className="w-full"
                   >
                     {isGenerating ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Generating...
                       </>
                     ) : (
                       <>
-                        <Image className="h-4 w-4 mr-2" />
+                        <Image className="mr-2 h-4 w-4" />
                         Generate Image
                       </>
                     )}
@@ -425,7 +469,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                     <label className="text-sm font-medium">Prompt</label>
                     <Textarea
                       value={videoPrompt}
-                      onChange={(e) => setVideoPrompt(e.target.value)}
+                      onChange={e => setVideoPrompt(e.target.value)}
                       placeholder="Describe the video you want to generate..."
                       className="min-h-[100px]"
                     />
@@ -439,27 +483,34 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {mediaGenerationService.getVideoStyles().map(style => (
-                            <SelectItem key={style} value={style}>
-                              {style.charAt(0).toUpperCase() + style.slice(1)}
-                            </SelectItem>
-                          ))}
+                          {mediaGenerationService
+                            .getVideoStyles()
+                            .map(style => (
+                              <SelectItem key={style} value={style}>
+                                {style.charAt(0).toUpperCase() + style.slice(1)}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Resolution</label>
-                      <Select value={videoResolution} onValueChange={setVideoResolution}>
+                      <Select
+                        value={videoResolution}
+                        onValueChange={setVideoResolution}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {mediaGenerationService.getVideoResolutions().map(res => (
-                            <SelectItem key={res} value={res}>
-                              {res}
-                            </SelectItem>
-                          ))}
+                          {mediaGenerationService
+                            .getVideoResolutions()
+                            .map(res => (
+                              <SelectItem key={res} value={res}>
+                                {res}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -467,11 +518,13 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Duration (seconds)</label>
+                      <label className="text-sm font-medium">
+                        Duration (seconds)
+                      </label>
                       <Input
                         type="number"
                         value={videoDuration}
-                        onChange={(e) => setVideoDuration(Number(e.target.value))}
+                        onChange={e => setVideoDuration(Number(e.target.value))}
                         min="1"
                         max="60"
                       />
@@ -482,7 +535,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                       <Input
                         type="number"
                         value={videoFps}
-                        onChange={(e) => setVideoFps(Number(e.target.value))}
+                        onChange={e => setVideoFps(Number(e.target.value))}
                         min="12"
                         max="60"
                       />
@@ -491,7 +544,10 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Aspect Ratio</label>
-                    <Select value={videoAspectRatio} onValueChange={setVideoAspectRatio}>
+                    <Select
+                      value={videoAspectRatio}
+                      onValueChange={setVideoAspectRatio}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -504,19 +560,19 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                     </Select>
                   </div>
 
-                  <Button 
-                    onClick={handleVideoGeneration} 
+                  <Button
+                    onClick={handleVideoGeneration}
                     disabled={!videoPrompt.trim() || isGenerating}
                     className="w-full"
                   >
                     {isGenerating ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Generating...
                       </>
                     ) : (
                       <>
-                        <Video className="h-4 w-4 mr-2" />
+                        <Video className="mr-2 h-4 w-4" />
                         Generate Video
                       </>
                     )}
@@ -547,69 +603,79 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                     size="sm"
                     onClick={() => mediaGenerationService.clearHistory()}
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Clear
                   </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3 max-h-60 overflow-y-auto">
-                  {generationHistory.slice(-10).reverse().map((result) => (
-                    <motion.div
-                      key={result.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center gap-3 p-3 rounded-lg border"
-                    >
-                      <div className="flex items-center gap-2">
-                        {result.type === 'image' ? (
-                          <Image className="h-4 w-4" />
-                        ) : (
-                          <Video className="h-4 w-4" />
-                        )}
-                        {getStatusIcon(result.status)}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{result.prompt}</p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>{result.type}</span>
-                          <span>•</span>
-                          <span>{result.metadata.size || result.metadata.resolution}</span>
-                          <span>•</span>
-                          <span>${result.cost.toFixed(4)}</span>
+                <div className="max-h-60 space-y-3 overflow-y-auto">
+                  {generationHistory
+                    .slice(-10)
+                    .reverse()
+                    .map(result => (
+                      <motion.div
+                        key={result.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center gap-3 rounded-lg border p-3"
+                      >
+                        <div className="flex items-center gap-2">
+                          {result.type === 'image' ? (
+                            <Image className="h-4 w-4" />
+                          ) : (
+                            <Video className="h-4 w-4" />
+                          )}
+                          {getStatusIcon(result.status)}
                         </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-1">
-                        {result.status === 'completed' && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDownload(result)}
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => window.open(result.url, '_blank')}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(result.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </motion.div>
-                  ))}
+
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">
+                            {result.prompt}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>{result.type}</span>
+                            <span>•</span>
+                            <span>
+                              {result.metadata.size ||
+                                result.metadata.resolution}
+                            </span>
+                            <span>•</span>
+                            <span>${result.cost.toFixed(4)}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          {result.status === 'completed' && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDownload(result)}
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  window.open(result.url, '_blank')
+                                }
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(result.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </motion.div>
+                    ))}
                 </div>
               </CardContent>
             </Card>
@@ -622,22 +688,32 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                 <CardTitle>Generation Statistics</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{stats.totalGenerations}</div>
+                    <div className="text-2xl font-bold">
+                      {stats.totalGenerations}
+                    </div>
                     <div className="text-sm text-muted-foreground">Total</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{stats.imagesGenerated}</div>
+                    <div className="text-2xl font-bold">
+                      {stats.imagesGenerated}
+                    </div>
                     <div className="text-sm text-muted-foreground">Images</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">{stats.videosGenerated}</div>
+                    <div className="text-2xl font-bold">
+                      {stats.videosGenerated}
+                    </div>
                     <div className="text-sm text-muted-foreground">Videos</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold">${stats.totalCost.toFixed(2)}</div>
-                    <div className="text-sm text-muted-foreground">Total Cost</div>
+                    <div className="text-2xl font-bold">
+                      ${stats.totalCost.toFixed(2)}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Total Cost
+                    </div>
                   </div>
                 </div>
               </CardContent>

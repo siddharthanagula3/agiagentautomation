@@ -6,29 +6,29 @@ import { createClient } from '@supabase/supabase-js';
  */
 const TOKEN_PRICING = {
   openai: {
-    'gpt-4o': { input: 2.50, output: 10.00 },
-    'gpt-4o-mini': { input: 0.15, output: 0.60 },
-    'gpt-4-turbo': { input: 10.00, output: 30.00 },
-    'gpt-4': { input: 30.00, output: 60.00 },
-    'gpt-3.5-turbo': { input: 0.50, output: 1.50 },
+    'gpt-4o': { input: 2.5, output: 10.0 },
+    'gpt-4o-mini': { input: 0.15, output: 0.6 },
+    'gpt-4-turbo': { input: 10.0, output: 30.0 },
+    'gpt-4': { input: 30.0, output: 60.0 },
+    'gpt-3.5-turbo': { input: 0.5, output: 1.5 },
   },
   anthropic: {
-    'claude-3-5-sonnet-20241022': { input: 3.00, output: 15.00 },
-    'claude-3-5-sonnet-20240620': { input: 3.00, output: 15.00 },
-    'claude-3-opus': { input: 15.00, output: 75.00 },
-    'claude-3-sonnet': { input: 3.00, output: 15.00 },
+    'claude-3-5-sonnet-20241022': { input: 3.0, output: 15.0 },
+    'claude-3-5-sonnet-20240620': { input: 3.0, output: 15.0 },
+    'claude-3-opus': { input: 15.0, output: 75.0 },
+    'claude-3-sonnet': { input: 3.0, output: 15.0 },
     'claude-3-haiku': { input: 0.25, output: 1.25 },
   },
   google: {
-    'gemini-2.0-flash-exp': { input: 0.00, output: 0.00 }, // Free during preview
-    'gemini-2.0-flash': { input: 0.075, output: 0.30 },
-    'gemini-1.5-pro': { input: 1.25, output: 5.00 },
-    'gemini-1.5-flash': { input: 0.075, output: 0.30 },
+    'gemini-2.0-flash-exp': { input: 0.0, output: 0.0 }, // Free during preview
+    'gemini-2.0-flash': { input: 0.075, output: 0.3 },
+    'gemini-1.5-pro': { input: 1.25, output: 5.0 },
+    'gemini-1.5-flash': { input: 0.075, output: 0.3 },
   },
   perplexity: {
-    'sonar-small-chat': { input: 0.20, output: 0.20 },
-    'sonar-medium-chat': { input: 0.60, output: 0.60 },
-    'sonar-large-chat': { input: 1.00, output: 1.00 },
+    'sonar-small-chat': { input: 0.2, output: 0.2 },
+    'sonar-medium-chat': { input: 0.6, output: 0.6 },
+    'sonar-large-chat': { input: 1.0, output: 1.0 },
   },
 };
 
@@ -50,19 +50,26 @@ export function calculateTokenCost(
   inputTokens: number,
   outputTokens: number
 ): TokenUsage {
-  const pricing = TOKEN_PRICING[provider][model as keyof typeof TOKEN_PRICING[typeof provider]];
-  
+  const pricing =
+    TOKEN_PRICING[provider][
+      model as keyof (typeof TOKEN_PRICING)[typeof provider]
+    ];
+
   if (!pricing) {
-    console.warn(`[Token Tracking] Unknown model: ${provider}/${model}, using default pricing`);
+    console.warn(
+      `[Token Tracking] Unknown model: ${provider}/${model}, using default pricing`
+    );
     // Default pricing if model not found
-    const defaultPricing = { input: 1.00, output: 2.00 };
+    const defaultPricing = { input: 1.0, output: 2.0 };
     return {
       inputTokens,
       outputTokens,
       totalTokens: inputTokens + outputTokens,
       inputCost: (inputTokens / 1_000_000) * defaultPricing.input,
       outputCost: (outputTokens / 1_000_000) * defaultPricing.output,
-      totalCost: ((inputTokens / 1_000_000) * defaultPricing.input) + ((outputTokens / 1_000_000) * defaultPricing.output),
+      totalCost:
+        (inputTokens / 1_000_000) * defaultPricing.input +
+        (outputTokens / 1_000_000) * defaultPricing.output,
     };
   }
 
@@ -94,7 +101,9 @@ export async function storeTokenUsage(
     const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
-      console.warn('[Token Tracking] Supabase not configured, skipping storage');
+      console.warn(
+        '[Token Tracking] Supabase not configured, skipping storage'
+      );
       return;
     }
 
@@ -149,4 +158,3 @@ export function extractRequestMetadata(event: any): {
     };
   }
 }
-

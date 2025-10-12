@@ -4,7 +4,7 @@
  */
 
 // Types
-export type IntegrationType = 
+export type IntegrationType =
   | 'ai_service'
   | 'automation'
   | 'communication'
@@ -39,7 +39,13 @@ export interface RateLimit {
 }
 
 export interface CostStructure {
-  type: 'flat_rate' | 'per_request' | 'per_token' | 'per_minute' | 'per_gb' | 'tiered';
+  type:
+    | 'flat_rate'
+    | 'per_request'
+    | 'per_token'
+    | 'per_minute'
+    | 'per_gb'
+    | 'tiered';
   amount: number;
   currency: string;
   unit?: string;
@@ -129,21 +135,24 @@ class ToolIntegrationManager {
     try {
       // Validate integration
       this.validateIntegration(integration);
-      
+
       // Test connection if active
       if (integration.isActive) {
         await this.testConnection(integration);
       }
-      
+
       // Store integration
       this.integrations.set(integration.id, {
         ...integration,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
-      
+
       console.log(`Integration '${integration.name}' registered successfully`);
     } catch (error) {
-      console.error(`Failed to register integration '${integration.name}':`, error);
+      console.error(
+        `Failed to register integration '${integration.name}':`,
+        error
+      );
       throw error;
     }
   }
@@ -157,7 +166,7 @@ class ToolIntegrationManager {
     this.integrations.set(integrationId, {
       ...integration,
       isActive: false,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 
@@ -170,11 +179,15 @@ class ToolIntegrationManager {
   }
 
   getActiveIntegrations(): ToolIntegration[] {
-    return this.getAllIntegrations().filter(integration => integration.isActive);
+    return this.getAllIntegrations().filter(
+      integration => integration.isActive
+    );
   }
 
   getIntegrationsByType(type: IntegrationType): ToolIntegration[] {
-    return this.getAllIntegrations().filter(integration => integration.type === type);
+    return this.getAllIntegrations().filter(
+      integration => integration.type === type
+    );
   }
 
   // Tool Execution
@@ -191,7 +204,7 @@ class ToolIntegrationManager {
         parameters,
         context,
         resolve,
-        reject
+        reject,
       });
 
       if (!this.isProcessing) {
@@ -209,7 +222,7 @@ class ToolIntegrationManager {
 
     while (this.executionQueue.length > 0) {
       const task = this.executionQueue.shift()!;
-      
+
       try {
         const result = await this.executeIntegrationTask(
           task.integrationId,
@@ -233,7 +246,7 @@ class ToolIntegrationManager {
     context: ToolExecutionContext
   ): Promise<ToolExecutionResult> {
     const integration = this.integrations.get(integrationId);
-    
+
     if (!integration) {
       throw new Error(`Integration '${integrationId}' not found`);
     }
@@ -249,7 +262,12 @@ class ToolIntegrationManager {
       await this.checkRateLimit(integration);
 
       // Execute the operation
-      const result = await this.performOperation(integration, operation, parameters, context);
+      const result = await this.performOperation(
+        integration,
+        operation,
+        parameters,
+        context
+      );
 
       const executionTime = Date.now() - startTime;
 
@@ -261,18 +279,18 @@ class ToolIntegrationManager {
         data: result.data,
         metadata: result.metadata,
         executionTime,
-        cost: result.cost
+        cost: result.cost,
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
+
       // Update usage statistics for failed request
       this.updateUsageStats(integration, false, executionTime, 0);
 
       return {
         success: false,
         error: (error as Error).message,
-        executionTime
+        executionTime,
       };
     }
   }
@@ -284,15 +302,25 @@ class ToolIntegrationManager {
     context: ToolExecutionContext
   ): Promise<{ data?: any; metadata?: any; cost?: number }> {
     // Simulate different operations based on integration type
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 500));
+    await new Promise(resolve =>
+      setTimeout(resolve, Math.random() * 2000 + 500)
+    );
 
     switch (integration.type) {
       case 'ai_service':
         return this.performAIOperation(integration, operation, parameters);
       case 'communication':
-        return this.performCommunicationOperation(integration, operation, parameters);
+        return this.performCommunicationOperation(
+          integration,
+          operation,
+          parameters
+        );
       case 'automation':
-        return this.performAutomationOperation(integration, operation, parameters);
+        return this.performAutomationOperation(
+          integration,
+          operation,
+          parameters
+        );
       default:
         return this.performGenericOperation(integration, operation, parameters);
     }
@@ -309,23 +337,23 @@ class ToolIntegrationManager {
           data: {
             text: `Generated text response for: "${parameters.prompt}"`,
             model: integration.config.defaultModel || 'gpt-4',
-            tokens: 150
+            tokens: 150,
           },
-          cost: 0.003
+          cost: 0.003,
         };
       case 'chat_completion':
         return {
           data: {
             message: `AI response to: "${parameters.messages?.[0]?.content || 'Hello'}"`,
             model: integration.config.defaultModel || 'gpt-4',
-            tokens: 200
+            tokens: 200,
           },
-          cost: 0.004
+          cost: 0.004,
         };
       case 'test_connection':
         return {
           data: { status: 'connected', version: integration.version },
-          metadata: { provider: integration.provider }
+          metadata: { provider: integration.provider },
         };
       default:
         throw new Error(`Unsupported AI operation: ${operation}`);
@@ -343,13 +371,13 @@ class ToolIntegrationManager {
           data: {
             messageId: `msg_${Date.now()}`,
             channel: parameters.channel || integration.config.defaultChannel,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         };
       case 'test_connection':
         return {
           data: { status: 'connected', workspace: 'demo-workspace' },
-          metadata: { provider: integration.provider }
+          metadata: { provider: integration.provider },
         };
       default:
         throw new Error(`Unsupported communication operation: ${operation}`);
@@ -367,14 +395,14 @@ class ToolIntegrationManager {
           data: {
             workflowId: parameters.workflowId,
             executionId: `exec_${Date.now()}`,
-            status: 'started'
+            status: 'started',
           },
-          cost: 0.001
+          cost: 0.001,
         };
       case 'test_connection':
         return {
           data: { status: 'connected', workflows: 12 },
-          metadata: { provider: integration.provider }
+          metadata: { provider: integration.provider },
         };
       default:
         throw new Error(`Unsupported automation operation: ${operation}`);
@@ -390,12 +418,12 @@ class ToolIntegrationManager {
       case 'test_connection':
         return {
           data: { status: 'connected' },
-          metadata: { provider: integration.provider }
+          metadata: { provider: integration.provider },
         };
       default:
         return {
           data: { result: 'success', operation, parameters },
-          metadata: { integration: integration.name }
+          metadata: { integration: integration.name },
         };
     }
   }
@@ -420,7 +448,9 @@ class ToolIntegrationManager {
         break;
       case 'oauth':
         if (!auth.config.clientId || !auth.config.clientSecret) {
-          throw new Error('OAuth authentication requires clientId and clientSecret');
+          throw new Error(
+            'OAuth authentication requires clientId and clientSecret'
+          );
         }
         break;
       case 'bearer_token':
@@ -453,9 +483,10 @@ class ToolIntegrationManager {
     // For demo purposes, we'll simulate rate limit checking
     const now = Date.now();
     const rateLimit = integration.rateLimit;
-    
+
     // Simulate rate limit check (in reality, this would check Redis or similar)
-    if (Math.random() < 0.01) { // 1% chance of hitting rate limit
+    if (Math.random() < 0.01) {
+      // 1% chance of hitting rate limit
       throw new Error(`Rate limit exceeded for ${integration.name}`);
     }
   }
@@ -467,20 +498,19 @@ class ToolIntegrationManager {
     cost: number
   ): void {
     const stats = integration.usageStats;
-    
+
     stats.totalRequests++;
     if (success) {
       stats.successfulRequests++;
     } else {
       stats.failedRequests++;
     }
-    
+
     // Update average response time
-    stats.averageResponseTime = (
-      (stats.averageResponseTime * (stats.totalRequests - 1) + executionTime) / 
-      stats.totalRequests
-    );
-    
+    stats.averageResponseTime =
+      (stats.averageResponseTime * (stats.totalRequests - 1) + executionTime) /
+      stats.totalRequests;
+
     stats.totalCost += cost;
     stats.lastUpdated = new Date();
 
@@ -498,18 +528,32 @@ class ToolIntegrationManager {
     averageResponseTime: number;
   } {
     const integrations = this.getAllIntegrations();
-    const totalRequests = integrations.reduce((sum, int) => sum + int.usageStats.totalRequests, 0);
-    const successfulRequests = integrations.reduce((sum, int) => sum + int.usageStats.successfulRequests, 0);
-    const totalCost = integrations.reduce((sum, int) => sum + int.usageStats.totalCost, 0);
-    const avgResponseTime = integrations.reduce((sum, int) => sum + int.usageStats.averageResponseTime, 0) / integrations.length;
+    const totalRequests = integrations.reduce(
+      (sum, int) => sum + int.usageStats.totalRequests,
+      0
+    );
+    const successfulRequests = integrations.reduce(
+      (sum, int) => sum + int.usageStats.successfulRequests,
+      0
+    );
+    const totalCost = integrations.reduce(
+      (sum, int) => sum + int.usageStats.totalCost,
+      0
+    );
+    const avgResponseTime =
+      integrations.reduce(
+        (sum, int) => sum + int.usageStats.averageResponseTime,
+        0
+      ) / integrations.length;
 
     return {
       totalIntegrations: integrations.length,
       activeIntegrations: integrations.filter(int => int.isActive).length,
       totalRequests,
-      successRate: totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0,
+      successRate:
+        totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0,
       totalCost,
-      averageResponseTime: avgResponseTime || 0
+      averageResponseTime: avgResponseTime || 0,
     };
   }
 
@@ -525,9 +569,11 @@ class ToolIntegrationManager {
       name: integration.name,
       cost: integration.usageStats.totalCost,
       requests: integration.usageStats.totalRequests,
-      costPerRequest: integration.usageStats.totalRequests > 0 
-        ? integration.usageStats.totalCost / integration.usageStats.totalRequests 
-        : 0
+      costPerRequest:
+        integration.usageStats.totalRequests > 0
+          ? integration.usageStats.totalCost /
+            integration.usageStats.totalRequests
+          : 0,
     }));
   }
 }
@@ -547,14 +593,16 @@ export const createIntegration = (
       successfulRequests: 0,
       failedRequests: 0,
       averageResponseTime: 0,
-      totalCost: 0
+      totalCost: 0,
     },
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   };
 };
 
-export const validateIntegrationConfig = (integration: Partial<ToolIntegration>): string[] => {
+export const validateIntegrationConfig = (
+  integration: Partial<ToolIntegration>
+): string[] => {
   const errors: string[] = [];
 
   if (!integration.name?.trim()) {

@@ -151,7 +151,10 @@ export class ScreenReaderUtils {
   }
 
   // Announce message to screen readers
-  static announce(message: string, priority: 'polite' | 'assertive' = 'polite'): void {
+  static announce(
+    message: string,
+    priority: 'polite' | 'assertive' = 'polite'
+  ): void {
     this.init();
     if (!this.announceElement) return;
 
@@ -208,13 +211,16 @@ export class HighContrastDetector {
     document.body.appendChild(testElement);
 
     const computedStyle = window.getComputedStyle(testElement);
-    const isHighContrast = computedStyle.backgroundColor !== computedStyle.borderColor;
+    const isHighContrast =
+      computedStyle.backgroundColor !== computedStyle.borderColor;
 
     document.body.removeChild(testElement);
     return isHighContrast;
   }
 
-  static onHighContrastChange(callback: (isHighContrast: boolean) => void): () => void {
+  static onHighContrastChange(
+    callback: (isHighContrast: boolean) => void
+  ): () => void {
     const mediaQuery = window.matchMedia('(prefers-contrast: high)');
     const forcedColorsQuery = window.matchMedia('(forced-colors: active)');
 
@@ -236,7 +242,9 @@ export class MotionPreferences {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
-  static onMotionPreferenceChange(callback: (prefersReduced: boolean) => void): () => void {
+  static onMotionPreferenceChange(
+    callback: (prefersReduced: boolean) => void
+  ): () => void {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     const handler = () => callback(mediaQuery.matches);
 
@@ -253,13 +261,19 @@ export const ariaHelpers = {
   },
 
   // Create describedby relationship
-  createDescribedBy: (elementId: string, descriptionId: string): Record<string, string> => ({
+  createDescribedBy: (
+    elementId: string,
+    descriptionId: string
+  ): Record<string, string> => ({
     id: elementId,
     'aria-describedby': descriptionId,
   }),
 
   // Create labelledby relationship
-  createLabelledBy: (elementId: string, labelId: string): Record<string, string> => ({
+  createLabelledBy: (
+    elementId: string,
+    labelId: string
+  ): Record<string, string> => ({
     id: elementId,
     'aria-labelledby': labelId,
   }),
@@ -275,7 +289,9 @@ export const ariaHelpers = {
   }),
 
   // Create checked state for checkable elements
-  createCheckedState: (isChecked: boolean | 'mixed'): Record<string, string> => ({
+  createCheckedState: (
+    isChecked: boolean | 'mixed'
+  ): Record<string, string> => ({
     'aria-checked': String(isChecked),
   }),
 
@@ -292,13 +308,18 @@ export const ariaHelpers = {
   }),
 
   // Create live region attributes
-  createLiveRegion: (politeness: 'polite' | 'assertive' | 'off' = 'polite'): Record<string, string> => ({
+  createLiveRegion: (
+    politeness: 'polite' | 'assertive' | 'off' = 'polite'
+  ): Record<string, string> => ({
     'aria-live': politeness,
     'aria-atomic': 'true',
   }),
 
   // Create loading state
-  createLoadingState: (isLoading: boolean, label = 'Loading'): Record<string, string> => ({
+  createLoadingState: (
+    isLoading: boolean,
+    label = 'Loading'
+  ): Record<string, string> => ({
     'aria-busy': String(isLoading),
     ...(isLoading && { 'aria-label': label }),
   }),
@@ -334,15 +355,21 @@ export class ContrastUtils {
   // Convert hex to RGB
   static hexToRgb(hex: string): { r: number; g: number; b: number } | null {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16),
-    } : null;
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
   }
 
   // Check if contrast meets WCAG standards
-  static meetsWCAG(foreground: string, background: string, level: 'AA' | 'AAA' = 'AA'): boolean {
+  static meetsWCAG(
+    foreground: string,
+    background: string,
+    level: 'AA' | 'AAA' = 'AA'
+  ): boolean {
     const ratio = this.getContrastRatio(foreground, background);
     return level === 'AAA' ? ratio >= 7 : ratio >= 4.5;
   }

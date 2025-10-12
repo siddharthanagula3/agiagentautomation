@@ -47,10 +47,10 @@ export const designTokens = {
 
   spacing: {
     xs: '0.25rem', // 4px
-    sm: '0.5rem',  // 8px
-    md: '1rem',    // 16px
-    lg: '1.5rem',  // 24px
-    xl: '2rem',    // 32px
+    sm: '0.5rem', // 8px
+    md: '1rem', // 16px
+    lg: '1.5rem', // 24px
+    xl: '2rem', // 32px
     '2xl': '3rem', // 48px
     '3xl': '4rem', // 64px
     '4xl': '5rem', // 80px
@@ -63,14 +63,14 @@ export const designTokens = {
       mono: ['JetBrains Mono', 'Monaco', 'Consolas', 'monospace'],
     },
     fontSize: {
-      xs: ['0.75rem', { lineHeight: '1rem' }],    // 12px
+      xs: ['0.75rem', { lineHeight: '1rem' }], // 12px
       sm: ['0.875rem', { lineHeight: '1.25rem' }], // 14px
-      base: ['1rem', { lineHeight: '1.5rem' }],    // 16px
+      base: ['1rem', { lineHeight: '1.5rem' }], // 16px
       lg: ['1.125rem', { lineHeight: '1.75rem' }], // 18px
-      xl: ['1.25rem', { lineHeight: '1.75rem' }],  // 20px
-      '2xl': ['1.5rem', { lineHeight: '2rem' }],   // 24px
+      xl: ['1.25rem', { lineHeight: '1.75rem' }], // 20px
+      '2xl': ['1.5rem', { lineHeight: '2rem' }], // 24px
       '3xl': ['1.875rem', { lineHeight: '2.25rem' }], // 30px
-      '4xl': ['2.25rem', { lineHeight: '2.5rem' }],   // 36px
+      '4xl': ['2.25rem', { lineHeight: '2.5rem' }], // 36px
     },
     fontWeight: {
       normal: '400',
@@ -82,11 +82,11 @@ export const designTokens = {
 
   borderRadius: {
     none: '0',
-    sm: '0.25rem',  // 4px
+    sm: '0.25rem', // 4px
     md: '0.375rem', // 6px
-    lg: '0.5rem',   // 8px
-    xl: '0.75rem',  // 12px
-    '2xl': '1rem',  // 16px
+    lg: '0.5rem', // 8px
+    xl: '0.75rem', // 12px
+    '2xl': '1rem', // 16px
     '3xl': '1.5rem', // 24px
     full: '9999px',
   },
@@ -225,7 +225,9 @@ export const breakpointValues = {
   '2xl': 1536,
 } as const;
 
-export const isBreakpoint = (breakpoint: keyof typeof breakpointValues): boolean => {
+export const isBreakpoint = (
+  breakpoint: keyof typeof breakpointValues
+): boolean => {
   if (typeof window === 'undefined') return false;
   return window.innerWidth >= breakpointValues[breakpoint];
 };

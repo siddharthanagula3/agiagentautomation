@@ -1,13 +1,13 @@
 import { supabase } from '../integrations/supabase/client';
-import type { 
-  AIEmployee, 
-  EmployeeCategory, 
-  EmployeeLevel, 
+import type {
+  AIEmployee,
+  EmployeeCategory,
+  EmployeeLevel,
   EmployeeStatus,
   ToolDefinition,
   WorkflowDefinition,
   JobAssignment,
-  AIEmployeeSystemConfig
+  AIEmployeeSystemConfig,
 } from '../types/ai-employee';
 
 class AIEmployeeService {
@@ -20,7 +20,7 @@ class AIEmployeeService {
     monitoringEnabled: true,
     alertingEnabled: true,
     backupEmployees: [],
-    escalationRules: []
+    escalationRules: [],
   };
 
   // Get all AI employees
@@ -33,7 +33,7 @@ class AIEmployeeService {
   }) {
     try {
       let query = supabase.from('ai_employees').select('*');
-      
+
       if (filters?.category) {
         query = query.eq('category', filters.category);
       }
@@ -51,7 +51,7 @@ class AIEmployeeService {
       }
 
       const { data, error } = await query.order('name');
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
@@ -67,7 +67,7 @@ class AIEmployeeService {
         .select('*')
         .eq('id', id)
         .single();
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
@@ -76,18 +76,20 @@ class AIEmployeeService {
   }
 
   // Create new AI employee
-  async createEmployee(employee: Omit<AIEmployee, 'id' | 'createdAt' | 'updatedAt'>) {
+  async createEmployee(
+    employee: Omit<AIEmployee, 'id' | 'createdAt' | 'updatedAt'>
+  ) {
     try {
       const { data, error } = await supabase
         .from('ai_employees')
         .insert({
           ...employee,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .select()
         .single();
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
@@ -102,12 +104,12 @@ class AIEmployeeService {
         .from('ai_employees')
         .update({
           ...updates,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', id)
         .select()
         .single();
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
@@ -122,7 +124,7 @@ class AIEmployeeService {
         .from('ai_employees')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
       return { data: true, error: null };
     } catch (error: unknown) {
@@ -157,25 +159,26 @@ class AIEmployeeService {
 
       // Filter by additional requirements
       let filteredEmployees = data || [];
-      
+
       if (requirements?.skills && requirements.skills.length > 0) {
-        filteredEmployees = filteredEmployees.filter(emp => 
-          requirements.skills!.some(skill => 
-            emp.capabilities?.core_skills?.includes(skill) ||
-            emp.capabilities?.technical_skills?.includes(skill)
+        filteredEmployees = filteredEmployees.filter(emp =>
+          requirements.skills!.some(
+            skill =>
+              emp.capabilities?.core_skills?.includes(skill) ||
+              emp.capabilities?.technical_skills?.includes(skill)
           )
         );
       }
 
       if (requirements?.level) {
-        filteredEmployees = filteredEmployees.filter(emp => 
-          emp.level === requirements.level
+        filteredEmployees = filteredEmployees.filter(
+          emp => emp.level === requirements.level
         );
       }
 
       if (requirements?.maxCost) {
-        filteredEmployees = filteredEmployees.filter(emp => 
-          emp.cost?.hourly_rate <= requirements.maxCost!
+        filteredEmployees = filteredEmployees.filter(
+          emp => emp.cost?.hourly_rate <= requirements.maxCost!
         );
       }
 
@@ -186,7 +189,11 @@ class AIEmployeeService {
   }
 
   // Assign employee to job
-  async assignEmployeeToJob(employeeId: string, jobId: string, priority: number = 1) {
+  async assignEmployeeToJob(
+    employeeId: string,
+    jobId: string,
+    priority: number = 1
+  ) {
     try {
       const assignment: Omit<JobAssignment, 'id'> = {
         jobId,
@@ -203,8 +210,8 @@ class AIEmployeeService {
           timeliness: 0,
           toolUsage: {},
           errors: 0,
-          iterations: 0
-        }
+          iterations: 0,
+        },
       };
 
       const { data, error } = await supabase
@@ -212,7 +219,7 @@ class AIEmployeeService {
         .insert(assignment)
         .select()
         .single();
-      
+
       if (error) throw error;
 
       // Update employee status
@@ -232,7 +239,7 @@ class AIEmployeeService {
         .select('performance')
         .eq('id', employeeId)
         .single();
-      
+
       if (error) throw error;
       return { data: data?.performance, error: null };
     } catch (error: unknown) {
@@ -247,12 +254,12 @@ class AIEmployeeService {
         .from('ai_employees')
         .update({
           performance,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', employeeId)
         .select()
         .single();
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
@@ -279,7 +286,7 @@ class AIEmployeeService {
         .select('tools')
         .eq('id', employeeId)
         .single();
-      
+
       if (error) throw error;
       return { data: data?.tools || [], error: null };
     } catch (error: unknown) {
@@ -294,12 +301,12 @@ class AIEmployeeService {
         .from('ai_employees')
         .update({
           tools,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', employeeId)
         .select()
         .single();
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
@@ -315,7 +322,7 @@ class AIEmployeeService {
         .select('workflows')
         .eq('id', employeeId)
         .single();
-      
+
       if (error) throw error;
       return { data: data?.workflows || [], error: null };
     } catch (error: unknown) {
@@ -324,18 +331,21 @@ class AIEmployeeService {
   }
 
   // Update employee workflows
-  async updateEmployeeWorkflows(employeeId: string, workflows: WorkflowDefinition[]) {
+  async updateEmployeeWorkflows(
+    employeeId: string,
+    workflows: WorkflowDefinition[]
+  ) {
     try {
       const { data, error } = await supabase
         .from('ai_employees')
         .update({
           workflows,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', employeeId)
         .select()
         .single();
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
@@ -351,7 +361,7 @@ class AIEmployeeService {
         .select('*')
         .eq('status', 'available')
         .limit(limit);
-      
+
       if (error) throw error;
 
       // Filter employees by skills match
@@ -359,11 +369,11 @@ class AIEmployeeService {
         const allSkills = [
           ...(emp.capabilities?.core_skills || []),
           ...(emp.capabilities?.technical_skills || []),
-          ...(emp.capabilities?.specializations || [])
+          ...(emp.capabilities?.specializations || []),
         ];
-        
-        return skills.some(skill => 
-          allSkills.some(empSkill => 
+
+        return skills.some(skill =>
+          allSkills.some(empSkill =>
             empSkill.toLowerCase().includes(skill.toLowerCase())
           )
         );
@@ -383,7 +393,7 @@ class AIEmployeeService {
         .select('*')
         .eq('employee_id', employeeId)
         .order('assigned_at', { ascending: false });
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
@@ -408,12 +418,18 @@ class AIEmployeeService {
 
       const stats = {
         totalEmployees: employees?.length || 0,
-        availableEmployees: employees?.filter(emp => emp.status === 'available').length || 0,
-        workingEmployees: employees?.filter(emp => emp.status === 'working').length || 0,
-        activeAssignments: assignments?.filter(assign => assign.status === 'in_progress').length || 0,
-        completedAssignments: assignments?.filter(assign => assign.status === 'completed').length || 0,
+        availableEmployees:
+          employees?.filter(emp => emp.status === 'available').length || 0,
+        workingEmployees:
+          employees?.filter(emp => emp.status === 'working').length || 0,
+        activeAssignments:
+          assignments?.filter(assign => assign.status === 'in_progress')
+            .length || 0,
+        completedAssignments:
+          assignments?.filter(assign => assign.status === 'completed').length ||
+          0,
         categories: this.groupByCategory(employees || []),
-        levels: this.groupByLevel(employees || [])
+        levels: this.groupByLevel(employees || []),
       };
 
       return { data: stats, error: null };

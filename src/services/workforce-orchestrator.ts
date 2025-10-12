@@ -6,10 +6,10 @@
 import { nlpProcessor, AnalysisResult } from './reasoning/nlp-processor';
 import { taskDecomposer, ExecutionPlan } from './reasoning/task-decomposer';
 import { agentSelector } from './reasoning/agent-selector';
-import { 
-  executionCoordinator, 
+import {
+  executionCoordinator,
   ExecutionContext,
-  ExecutionUpdate 
+  ExecutionUpdate,
 } from './orchestration/execution-coordinator';
 
 export interface WorkforceRequest {
@@ -54,31 +54,31 @@ export class WorkforceOrchestrator {
       if (!validation.valid) {
         return {
           success: false,
-          error: validation.reason
+          error: validation.reason,
         };
       }
 
       // Step 2: Analyze user input (NLP)
       console.log('🧠 Step 1: Analyzing user intent...');
       const analysis = await nlpProcessor.analyzeInput(request.input);
-      
+
       console.log('📊 Analysis Result:', {
         intent: analysis.intent.type,
         domain: analysis.intent.domain,
         complexity: analysis.intent.complexity,
         confidence: analysis.intent.confidence,
-        estimatedDuration: analysis.intent.estimatedDuration
+        estimatedDuration: analysis.intent.estimatedDuration,
       });
 
       // Step 3: Decompose into tasks
       console.log('🧩 Step 2: Decomposing into tasks...');
       const plan = await taskDecomposer.decompose(analysis.intent);
-      
+
       console.log('📋 Execution Plan:', {
         totalTasks: plan.tasks.length,
         estimatedTime: plan.estimatedTotalTime,
         executionLevels: plan.executionOrder.length,
-        criticalPath: plan.criticalPath.length
+        criticalPath: plan.criticalPath.length,
       });
 
       // Step 4: Select optimal agents for each task
@@ -86,7 +86,7 @@ export class WorkforceOrchestrator {
       for (const task of plan.tasks) {
         const selection = await agentSelector.selectOptimalAgent(task);
         task.requiredAgent = selection.primaryAgent;
-        
+
         console.log(`  ✓ ${task.title} -> ${selection.primaryAgent}`);
         console.log(`    Reason: ${selection.selectionReason}`);
       }
@@ -99,7 +99,7 @@ export class WorkforceOrchestrator {
         {
           ...request.context,
           originalInput: request.input,
-          analysis: analysis.intent
+          analysis: analysis.intent,
         }
       );
 
@@ -111,15 +111,14 @@ export class WorkforceOrchestrator {
         executionId: (await execution.next()).value.executionId,
         analysis,
         plan,
-        updates: execution
+        updates: execution,
       };
-
     } catch (error) {
       console.error('❌ Error processing request:', error);
-      
+
       return {
         success: false,
-        error: (error as Error).message
+        error: (error as Error).message,
       };
     }
   }
@@ -127,11 +126,14 @@ export class WorkforceOrchestrator {
   /**
    * Quick execution - for simple tasks
    */
-  async quickExecute(userId: string, input: string): Promise<WorkforceResponse> {
+  async quickExecute(
+    userId: string,
+    input: string
+  ): Promise<WorkforceResponse> {
     return this.processRequest({
       userId,
       input,
-      context: { quickMode: true }
+      context: { quickMode: true },
     });
   }
 
@@ -161,7 +163,7 @@ export class WorkforceOrchestrator {
       totalTasksCompleted,
       totalTasksFailed,
       agentsAvailable: agentPool.size - agentsBusy,
-      agentsBusy
+      agentsBusy,
     };
   }
 
@@ -182,7 +184,9 @@ export class WorkforceOrchestrator {
   /**
    * Resume an execution
    */
-  async resumeExecution(executionId: string): Promise<AsyncGenerator<ExecutionUpdate>> {
+  async resumeExecution(
+    executionId: string
+  ): Promise<AsyncGenerator<ExecutionUpdate>> {
     return executionCoordinator.resume(executionId);
   }
 
@@ -196,7 +200,10 @@ export class WorkforceOrchestrator {
   /**
    * Rollback to a specific task
    */
-  async rollbackExecution(executionId: string, toTaskId: string): Promise<void> {
+  async rollbackExecution(
+    executionId: string,
+    toTaskId: string
+  ): Promise<void> {
     return executionCoordinator.rollback(executionId, toTaskId);
   }
 
@@ -210,7 +217,10 @@ export class WorkforceOrchestrator {
   /**
    * Preview what would happen without executing
    */
-  async preview(userId: string, input: string): Promise<{
+  async preview(
+    userId: string,
+    input: string
+  ): Promise<{
     analysis: AnalysisResult;
     plan: ExecutionPlan;
     estimatedCost: number;
@@ -231,7 +241,7 @@ export class WorkforceOrchestrator {
       analysis,
       plan,
       estimatedCost,
-      estimatedTime: plan.estimatedTotalTime
+      estimatedTime: plan.estimatedTotalTime,
     };
   }
 
@@ -269,11 +279,14 @@ export async function executeWorkforce(
   return workforceOrchestrator.processRequest({
     userId,
     input,
-    context
+    context,
   });
 }
 
-export async function quickExecute(userId: string, input: string): Promise<WorkforceResponse> {
+export async function quickExecute(
+  userId: string,
+  input: string
+): Promise<WorkforceResponse> {
   return workforceOrchestrator.quickExecute(userId, input);
 }
 
@@ -297,7 +310,9 @@ export function pauseWorkforce(executionId: string): void {
   workforceOrchestrator.pauseExecution(executionId);
 }
 
-export function resumeWorkforce(executionId: string): Promise<AsyncGenerator<ExecutionUpdate>> {
+export function resumeWorkforce(
+  executionId: string
+): Promise<AsyncGenerator<ExecutionUpdate>> {
   return workforceOrchestrator.resumeExecution(executionId);
 }
 
@@ -305,6 +320,9 @@ export function cancelWorkforce(executionId: string): void {
   workforceOrchestrator.cancelExecution(executionId);
 }
 
-export function rollbackWorkforce(executionId: string, toTaskId: string): Promise<void> {
+export function rollbackWorkforce(
+  executionId: string,
+  toTaskId: string
+): Promise<void> {
   return workforceOrchestrator.rollbackExecution(executionId, toTaskId);
 }

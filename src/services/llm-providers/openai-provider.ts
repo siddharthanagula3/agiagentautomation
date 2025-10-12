@@ -4,7 +4,7 @@
  */
 
 import OpenAI from 'openai';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase-client';
 
 // Environment variables
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
@@ -12,12 +12,14 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Initialize clients
-const openai = OPENAI_API_KEY ? new OpenAI({
-  apiKey: OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true, // Allow browser usage for client-side
-}) : null;
+const openai = OPENAI_API_KEY
+  ? new OpenAI({
+      apiKey: OPENAI_API_KEY,
+      dangerouslyAllowBrowser: true, // Allow browser usage for client-side
+    })
+  : null;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Using centralized Supabase client
 
 export interface OpenAIMessage {
   role: 'user' | 'assistant' | 'system';
@@ -73,7 +75,7 @@ export class OpenAIProvider {
       temperature: 0.7,
       systemPrompt: 'You are a helpful AI assistant.',
       tools: [],
-      ...config
+      ...config,
     };
   }
 
@@ -131,8 +133,8 @@ export class OpenAIProvider {
             model: this.config.model,
             usage,
             responseId: response.id,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
       }
 
@@ -145,13 +147,12 @@ export class OpenAIProvider {
         metadata: {
           responseId: response.id,
           finishReason: response.choices[0]?.finish_reason,
-          usage: response.usage
-        }
+          usage: response.usage,
+        },
       };
-
     } catch (error) {
       console.error('[OpenAI Provider] Error:', error);
-      
+
       if (error instanceof OpenAI.APIError) {
         throw new OpenAIError(
           `OpenAI API error: ${error.message}`,
@@ -159,7 +160,7 @@ export class OpenAIProvider {
           error.status === 429 || error.status === 503
         );
       }
-      
+
       throw new OpenAIError(
         `OpenAI request failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'REQUEST_FAILED',
@@ -216,7 +217,7 @@ export class OpenAIProvider {
           fullContent += content;
           yield { content, done: false };
         }
-        
+
         if (chunk.choices[0]?.finish_reason) {
           usage = chunk.usage;
           yield { content: '', done: true, usage };
@@ -234,14 +235,13 @@ export class OpenAIProvider {
             provider: 'openai',
             model: this.config.model,
             usage,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
       }
-
     } catch (error) {
       console.error('[OpenAI Provider] Streaming error:', error);
-      
+
       if (error instanceof OpenAI.APIError) {
         throw new OpenAIError(
           `OpenAI API error: ${error.message}`,
@@ -249,7 +249,7 @@ export class OpenAIProvider {
           error.status === 429 || error.status === 503
         );
       }
-      
+
       throw new OpenAIError(
         `OpenAI streaming failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'STREAMING_FAILED',
@@ -261,24 +261,30 @@ export class OpenAIProvider {
   /**
    * Convert our message format to OpenAI format
    */
-  private convertMessagesToOpenAI(messages: OpenAIMessage[]): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
+  private convertMessagesToOpenAI(
+    messages: OpenAIMessage[]
+  ): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
     return messages.map(msg => ({
       role: msg.role,
-      content: msg.content
+      content: msg.content,
     }));
   }
 
   /**
    * Extract content from OpenAI response
    */
-  private extractContentFromResponse(response: OpenAI.Chat.Completions.ChatCompletion): string {
+  private extractContentFromResponse(
+    response: OpenAI.Chat.Completions.ChatCompletion
+  ): string {
     return response.choices[0]?.message?.content || '';
   }
 
   /**
    * Extract usage information from OpenAI response
    */
-  private extractUsageFromResponse(response: OpenAI.Chat.Completions.ChatCompletion): {
+  private extractUsageFromResponse(
+    response: OpenAI.Chat.Completions.ChatCompletion
+  ): {
     promptTokens: number;
     completionTokens: number;
     totalTokens: number;
@@ -287,7 +293,7 @@ export class OpenAIProvider {
       return {
         promptTokens: response.usage.prompt_tokens,
         completionTokens: response.usage.completion_tokens,
-        totalTokens: response.usage.total_tokens
+        totalTokens: response.usage.total_tokens,
       };
     }
     return { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
@@ -304,22 +310,23 @@ export class OpenAIProvider {
     metadata: Record<string, any>;
   }): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('agent_messages')
-        .insert({
-          session_id: message.sessionId,
-          user_id: message.userId,
-          role: message.role,
-          content: message.content,
-          metadata: message.metadata,
-          created_at: new Date().toISOString()
-        });
+      const { error } = await supabase.from('agent_messages').insert({
+        session_id: message.sessionId,
+        user_id: message.userId,
+        role: message.role,
+        content: message.content,
+        metadata: message.metadata,
+        created_at: new Date().toISOString(),
+      });
 
       if (error) {
         console.error('[OpenAI Provider] Error saving message:', error);
       }
     } catch (error) {
-      console.error('[OpenAI Provider] Unexpected error saving message:', error);
+      console.error(
+        '[OpenAI Provider] Unexpected error saving message:',
+        error
+      );
     }
   }
 
@@ -348,12 +355,7 @@ export class OpenAIProvider {
    * Get available models
    */
   static getAvailableModels(): string[] {
-    return [
-      'gpt-4o',
-      'gpt-4o-mini',
-      'gpt-4-turbo',
-      'gpt-3.5-turbo'
-    ];
+    return ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'];
   }
 }
 

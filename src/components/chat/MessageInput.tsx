@@ -16,7 +16,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   onChange,
   onSend,
   isLoading,
-  placeholder = "Type your message...",
+  placeholder = 'Type your message...',
 }) => {
   const [isComposing, setIsComposing] = useState(false);
 
@@ -39,46 +39,36 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         <div className="flex-1">
           <Textarea
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={e => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={() => setIsComposing(false)}
             placeholder={placeholder}
-            className="min-h-[40px] max-h-32 resize-none"
+            className="max-h-32 min-h-[40px] resize-none"
             disabled={isLoading}
           />
         </div>
-        
+
         <div className="flex items-center space-x-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="p-2"
-            title="Attach file"
-          >
-            <Paperclip className="w-4 h-4" />
+          <Button variant="ghost" size="sm" className="p-2" title="Attach file">
+            <Paperclip className="h-4 w-4" />
           </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            className="p-2"
-            title="Emoji"
-          >
-            <Smile className="w-4 h-4" />
+
+          <Button variant="ghost" size="sm" className="p-2" title="Emoji">
+            <Smile className="h-4 w-4" />
           </Button>
-          
+
           <Button
             onClick={handleSend}
             disabled={!value.trim() || isLoading}
             size="sm"
             className="px-4"
           >
-            <Send className="w-4 h-4" />
+            <Send className="h-4 w-4" />
           </Button>
         </div>
       </div>
-      
+
       <div className="mt-2 text-xs text-muted-foreground">
         Press Enter to send, Shift+Enter for new line
       </div>

@@ -1,7 +1,13 @@
 // AI Employee Executor
 // Handles AI Employee task execution and tool invocation
 
-import { AIEmployee, ToolInvocation, ToolResult, ExecutionContext, Job } from '../../types';
+import {
+  AIEmployee,
+  ToolInvocation,
+  ToolResult,
+  ExecutionContext,
+  Job,
+} from '../../types';
 import { toolInvocationService } from '../tools/tool-invocation-service';
 import { aiEmployeeService } from './ai-employee-service';
 
@@ -56,7 +62,7 @@ export class AIEmployeeExecutor {
 
       // Combine results
       const combinedResult = this.combineResults(results);
-      
+
       // Update employee performance
       await this.updatePerformance(true, Date.now() - startTime);
 
@@ -65,12 +71,11 @@ export class AIEmployeeExecutor {
         result: combinedResult,
         toolsUsed,
         executionTime: Date.now() - startTime,
-        cost: totalCost
+        cost: totalCost,
       };
-
     } catch (error) {
       console.error(`Task execution failed for ${this.employee.name}:`, error);
-      
+
       // Update employee performance with failure
       await this.updatePerformance(false, Date.now() - startTime);
 
@@ -79,7 +84,7 @@ export class AIEmployeeExecutor {
         error: (error as Error).message,
         toolsUsed,
         executionTime: Date.now() - startTime,
-        cost: totalCost
+        cost: totalCost,
       };
     }
   }
@@ -95,31 +100,51 @@ export class AIEmployeeExecutor {
     const taskLower = task.toLowerCase();
 
     // Code generation tasks
-    if (taskLower.includes('code') || taskLower.includes('program') || taskLower.includes('function')) {
+    if (
+      taskLower.includes('code') ||
+      taskLower.includes('program') ||
+      taskLower.includes('function')
+    ) {
       const codeTool = availableTools.find(tool => tool.id === 'generate_code');
       if (codeTool) requiredTools.push('generate_code');
     }
 
     // Data analysis tasks
-    if (taskLower.includes('analyze') || taskLower.includes('data') || taskLower.includes('report')) {
+    if (
+      taskLower.includes('analyze') ||
+      taskLower.includes('data') ||
+      taskLower.includes('report')
+    ) {
       const dataTool = availableTools.find(tool => tool.id === 'analyze_data');
       if (dataTool) requiredTools.push('analyze_data');
     }
 
     // Email tasks
-    if (taskLower.includes('email') || taskLower.includes('send') || taskLower.includes('message')) {
+    if (
+      taskLower.includes('email') ||
+      taskLower.includes('send') ||
+      taskLower.includes('message')
+    ) {
       const emailTool = availableTools.find(tool => tool.id === 'send_email');
       if (emailTool) requiredTools.push('send_email');
     }
 
     // Web search tasks
-    if (taskLower.includes('search') || taskLower.includes('find') || taskLower.includes('research')) {
+    if (
+      taskLower.includes('search') ||
+      taskLower.includes('find') ||
+      taskLower.includes('research')
+    ) {
       const searchTool = availableTools.find(tool => tool.id === 'web_search');
       if (searchTool) requiredTools.push('web_search');
     }
 
     // File upload tasks
-    if (taskLower.includes('upload') || taskLower.includes('file') || taskLower.includes('document')) {
+    if (
+      taskLower.includes('upload') ||
+      taskLower.includes('file') ||
+      taskLower.includes('document')
+    ) {
       const uploadTool = availableTools.find(tool => tool.id === 'file_upload');
       if (uploadTool) requiredTools.push('file_upload');
     }
@@ -135,12 +160,20 @@ export class AIEmployeeExecutor {
   /**
    * Execute a specific tool
    */
-  private async executeTool(toolId: string, task: string, job?: Job): Promise<ToolResult> {
+  private async executeTool(
+    toolId: string,
+    task: string,
+    job?: Job
+  ): Promise<ToolResult> {
     // Prepare parameters based on task and tool
     const parameters = this.prepareToolParameters(toolId, task, job);
 
     // Execute the tool
-    const result = await toolInvocationService.invokeTool(toolId, parameters, this.context);
+    const result = await toolInvocationService.invokeTool(
+      toolId,
+      parameters,
+      this.context
+    );
 
     return result;
   }
@@ -148,12 +181,16 @@ export class AIEmployeeExecutor {
   /**
    * Prepare tool parameters based on task description
    */
-  private prepareToolParameters(toolId: string, task: string, job?: Job): Record<string, any> {
+  private prepareToolParameters(
+    toolId: string,
+    task: string,
+    job?: Job
+  ): Record<string, any> {
     const baseParameters = {
       task,
       employee: this.employee.name,
       role: this.employee.role,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     // Add job context if available
@@ -170,7 +207,7 @@ export class AIEmployeeExecutor {
           ...baseParameters,
           language: this.extractLanguage(task) || 'javascript',
           requirements: task,
-          framework: this.extractFramework(task) || 'react'
+          framework: this.extractFramework(task) || 'react',
         };
 
       case 'analyze_data':
@@ -178,7 +215,7 @@ export class AIEmployeeExecutor {
           ...baseParameters,
           data: this.extractDataReference(task),
           analysisType: this.extractAnalysisType(task) || 'descriptive',
-          format: 'json'
+          format: 'json',
         };
 
       case 'send_email':
@@ -186,14 +223,14 @@ export class AIEmployeeExecutor {
           ...baseParameters,
           to: this.extractEmail(task) || 'user@example.com',
           subject: this.extractSubject(task) || 'Task Update',
-          body: task
+          body: task,
         };
 
       case 'web_search':
         return {
           ...baseParameters,
           query: task,
-          maxResults: 10
+          maxResults: 10,
         };
 
       case 'file_upload':
@@ -201,7 +238,7 @@ export class AIEmployeeExecutor {
           ...baseParameters,
           filename: this.extractFilename(task) || 'document.txt',
           content: task,
-          type: 'text/plain'
+          type: 'text/plain',
         };
 
       default:
@@ -213,9 +250,18 @@ export class AIEmployeeExecutor {
    * Extract programming language from task
    */
   private extractLanguage(task: string): string | null {
-    const languages = ['javascript', 'python', 'java', 'typescript', 'csharp', 'php', 'ruby', 'go'];
+    const languages = [
+      'javascript',
+      'python',
+      'java',
+      'typescript',
+      'csharp',
+      'php',
+      'ruby',
+      'go',
+    ];
     const taskLower = task.toLowerCase();
-    
+
     for (const lang of languages) {
       if (taskLower.includes(lang)) {
         return lang;
@@ -228,9 +274,18 @@ export class AIEmployeeExecutor {
    * Extract framework from task
    */
   private extractFramework(task: string): string | null {
-    const frameworks = ['react', 'vue', 'angular', 'node', 'express', 'django', 'flask', 'spring'];
+    const frameworks = [
+      'react',
+      'vue',
+      'angular',
+      'node',
+      'express',
+      'django',
+      'flask',
+      'spring',
+    ];
     const taskLower = task.toLowerCase();
-    
+
     for (const framework of frameworks) {
       if (taskLower.includes(framework)) {
         return framework;
@@ -248,7 +303,7 @@ export class AIEmployeeExecutor {
     return {
       type: 'mock_dataset',
       size: 1000,
-      fields: ['id', 'name', 'value', 'timestamp']
+      fields: ['id', 'name', 'value', 'timestamp'],
     };
   }
 
@@ -258,7 +313,7 @@ export class AIEmployeeExecutor {
   private extractAnalysisType(task: string): string | null {
     const types = ['descriptive', 'predictive', 'diagnostic', 'prescriptive'];
     const taskLower = task.toLowerCase();
-    
+
     for (const type of types) {
       if (taskLower.includes(type)) {
         return type;
@@ -310,27 +365,38 @@ export class AIEmployeeExecutor {
       combined: true,
       results,
       summary: `Executed ${results.length} tools successfully`,
-      totalResults: results.length
+      totalResults: results.length,
     };
   }
 
   /**
    * Update employee performance metrics
    */
-  private async updatePerformance(success: boolean, executionTime: number): Promise<void> {
+  private async updatePerformance(
+    success: boolean,
+    executionTime: number
+  ): Promise<void> {
     try {
-      const currentMetrics = await aiEmployeeService.getPerformanceMetrics(this.employee.id);
-      
+      const currentMetrics = await aiEmployeeService.getPerformanceMetrics(
+        this.employee.id
+      );
+
       const updatedMetrics = {
         ...currentMetrics,
         tasksCompleted: currentMetrics.tasksCompleted + (success ? 1 : 0),
         successRate: this.calculateSuccessRate(currentMetrics, success),
-        averageExecutionTime: this.calculateAverageExecutionTime(currentMetrics, executionTime),
+        averageExecutionTime: this.calculateAverageExecutionTime(
+          currentMetrics,
+          executionTime
+        ),
         errorRate: this.calculateErrorRate(currentMetrics, success),
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       };
 
-      await aiEmployeeService.updatePerformance(this.employee.id, updatedMetrics);
+      await aiEmployeeService.updatePerformance(
+        this.employee.id,
+        updatedMetrics
+      );
     } catch (error) {
       console.error('Failed to update performance metrics:', error);
     }
@@ -341,16 +407,22 @@ export class AIEmployeeExecutor {
    */
   private calculateSuccessRate(currentMetrics: any, success: boolean): number {
     const totalTasks = currentMetrics.tasksCompleted + (success ? 1 : 0);
-    const successfulTasks = currentMetrics.tasksCompleted * (currentMetrics.successRate / 100) + (success ? 1 : 0);
+    const successfulTasks =
+      currentMetrics.tasksCompleted * (currentMetrics.successRate / 100) +
+      (success ? 1 : 0);
     return totalTasks > 0 ? (successfulTasks / totalTasks) * 100 : 0;
   }
 
   /**
    * Calculate average execution time
    */
-  private calculateAverageExecutionTime(currentMetrics: any, executionTime: number): number {
+  private calculateAverageExecutionTime(
+    currentMetrics: any,
+    executionTime: number
+  ): number {
     const totalTasks = currentMetrics.tasksCompleted + 1;
-    const currentTotal = currentMetrics.averageExecutionTime * currentMetrics.tasksCompleted;
+    const currentTotal =
+      currentMetrics.averageExecutionTime * currentMetrics.tasksCompleted;
     return (currentTotal + executionTime) / totalTasks;
   }
 
@@ -359,12 +431,18 @@ export class AIEmployeeExecutor {
    */
   private calculateErrorRate(currentMetrics: any, success: boolean): number {
     const totalTasks = currentMetrics.tasksCompleted + 1;
-    const currentErrors = currentMetrics.errorRate * currentMetrics.tasksCompleted / 100;
+    const currentErrors =
+      (currentMetrics.errorRate * currentMetrics.tasksCompleted) / 100;
     const newErrors = success ? 0 : 1;
-    return totalTasks > 0 ? ((currentErrors + newErrors) / totalTasks) * 100 : 0;
+    return totalTasks > 0
+      ? ((currentErrors + newErrors) / totalTasks) * 100
+      : 0;
   }
 }
 
-export const createAIEmployeeExecutor = (employee: AIEmployee, context: ExecutionContext) => {
+export const createAIEmployeeExecutor = (
+  employee: AIEmployee,
+  context: ExecutionContext
+) => {
   return new AIEmployeeExecutor(employee, context);
 };

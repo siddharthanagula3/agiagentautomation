@@ -25,7 +25,7 @@ const VibeCodingPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
-  
+
   const [employee, setEmployee] = useState<EmployeeData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -88,7 +88,7 @@ const VibeCodingPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background">
+      <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -96,15 +96,17 @@ const VibeCodingPage: React.FC = () => {
 
   if (error || !employee) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-background p-6">
+      <div className="flex h-screen flex-col items-center justify-center bg-background p-6">
         <Card className="max-w-md p-6 text-center">
-          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Unable to Load Vibe Coding</h2>
-          <p className="text-muted-foreground mb-4">
+          <AlertCircle className="mx-auto mb-4 h-12 w-12 text-destructive" />
+          <h2 className="mb-2 text-xl font-semibold">
+            Unable to Load Vibe Coding
+          </h2>
+          <p className="mb-4 text-muted-foreground">
             {error || 'Something went wrong. Please try again.'}
           </p>
           <Button onClick={() => navigate('/workforce')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Workforce
           </Button>
         </Card>
@@ -128,4 +130,3 @@ const VibeCodingPage: React.FC = () => {
 };
 
 export default VibeCodingPage;
-

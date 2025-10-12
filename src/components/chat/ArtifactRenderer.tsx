@@ -8,15 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Download,
-  Copy,
-  Code,
-  Eye,
-  Edit,
-  Maximize2,
-  X,
-} from 'lucide-react';
+import { Download, Copy, Code, Eye, Edit, Maximize2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Artifact } from '@/services/artifact-service';
@@ -112,7 +104,7 @@ export const ArtifactRenderer: React.FC<ArtifactRendererProps> = ({
           <iframe
             ref={iframeRef}
             srcDoc={artifact.content}
-            className="w-full h-full border-0 rounded-lg"
+            className="h-full w-full rounded-lg border-0"
             sandbox="allow-scripts"
             title={artifact.title}
           />
@@ -121,15 +113,15 @@ export const ArtifactRenderer: React.FC<ArtifactRendererProps> = ({
       case 'svg':
         return (
           <div
-            className="w-full h-full flex items-center justify-center bg-white rounded-lg"
+            className="flex h-full w-full items-center justify-center rounded-lg bg-white"
             dangerouslySetInnerHTML={{ __html: artifact.content }}
           />
         );
 
       case 'react':
         return (
-          <div className="p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground mb-2">
+          <div className="rounded-lg bg-muted p-4">
+            <p className="mb-2 text-sm text-muted-foreground">
               React Component (preview not available)
             </p>
             <SyntaxHighlighter
@@ -150,14 +142,16 @@ export const ArtifactRenderer: React.FC<ArtifactRendererProps> = ({
         return (
           <div
             className="prose prose-sm dark:prose-invert max-w-none p-4"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(artifact.content) }}
+            dangerouslySetInnerHTML={{
+              __html: renderMarkdown(artifact.content),
+            }}
           />
         );
 
       case 'mermaid':
         return (
-          <div className="p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground mb-2">
+          <div className="rounded-lg bg-muted p-4">
+            <p className="mb-2 text-sm text-muted-foreground">
               Mermaid Diagram (preview requires mermaid.js)
             </p>
             <SyntaxHighlighter
@@ -176,7 +170,7 @@ export const ArtifactRenderer: React.FC<ArtifactRendererProps> = ({
 
       default:
         return (
-          <pre className="p-4 bg-muted rounded-lg overflow-auto text-sm">
+          <pre className="overflow-auto rounded-lg bg-muted p-4 text-sm">
             {artifact.content}
           </pre>
         );
@@ -203,7 +197,7 @@ export const ArtifactRenderer: React.FC<ArtifactRendererProps> = ({
             <Code className="h-5 w-5 text-primary" />
             <div>
               <CardTitle className="text-lg">{artifact.title}</CardTitle>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="mt-1 flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
                   {artifact.type}
                 </Badge>
@@ -261,15 +255,15 @@ export const ArtifactRenderer: React.FC<ArtifactRendererProps> = ({
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col min-h-0">
+      <CardContent className="flex min-h-0 flex-1 flex-col">
         {isEditing ? (
-          <div className="flex flex-col h-full gap-2">
+          <div className="flex h-full flex-col gap-2">
             <textarea
               value={editedContent}
-              onChange={(e) => setEditedContent(e.target.value)}
-              className="flex-1 p-4 font-mono text-sm bg-muted rounded-lg border resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+              onChange={e => setEditedContent(e.target.value)}
+              className="flex-1 resize-none rounded-lg border bg-muted p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <div className="flex gap-2 justify-end">
+            <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsEditing(false)}>
                 Cancel
               </Button>
@@ -279,8 +273,8 @@ export const ArtifactRenderer: React.FC<ArtifactRendererProps> = ({
         ) : (
           <Tabs
             value={activeTab}
-            onValueChange={(v) => setActiveTab(v as 'preview' | 'code')}
-            className="flex-1 flex flex-col"
+            onValueChange={v => setActiveTab(v as 'preview' | 'code')}
+            className="flex flex-1 flex-col"
           >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="preview" className="flex items-center gap-2">
@@ -293,11 +287,11 @@ export const ArtifactRenderer: React.FC<ArtifactRendererProps> = ({
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="preview" className="flex-1 mt-4 overflow-auto">
+            <TabsContent value="preview" className="mt-4 flex-1 overflow-auto">
               {renderPreview()}
             </TabsContent>
 
-            <TabsContent value="code" className="flex-1 mt-4 overflow-auto">
+            <TabsContent value="code" className="mt-4 flex-1 overflow-auto">
               <SyntaxHighlighter
                 language={artifact.language || 'text'}
                 style={vscDarkPlus}

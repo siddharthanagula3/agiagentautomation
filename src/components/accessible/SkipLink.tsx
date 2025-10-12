@@ -8,7 +8,11 @@ interface SkipLinkProps {
   className?: string;
 }
 
-export const SkipLink: React.FC<SkipLinkProps> = ({ targetId, label, className }) => {
+export const SkipLink: React.FC<SkipLinkProps> = ({
+  targetId,
+  label,
+  className,
+}) => {
   const { getSkipLinkProps } = useSkipLink();
 
   return (
@@ -16,9 +20,9 @@ export const SkipLink: React.FC<SkipLinkProps> = ({ targetId, label, className }
       {...getSkipLinkProps(targetId, label)}
       className={cn(
         // Hide by default, show on focus
-        'absolute -top-10 left-6 z-50 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md shadow-lg transition-all duration-200',
+        'absolute -top-10 left-6 z-50 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200',
         'focus:top-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-        'transform translate-y-0 focus:translate-y-0',
+        'translate-y-0 transform focus:translate-y-0',
         className
       )}
     />

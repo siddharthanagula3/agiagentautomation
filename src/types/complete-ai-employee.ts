@@ -1,7 +1,7 @@
 // Complete AI Employee Type Definitions
 // Comprehensive types for the AI Employee system with MCP integration
 
-export type EmployeeCategory = 
+export type EmployeeCategory =
   | 'executive_leadership'
   | 'engineering_technology'
   | 'product_management'
@@ -16,7 +16,7 @@ export type EmployeeCategory =
   | 'legal_risk_compliance'
   | 'specialized_niche';
 
-export type EmployeeLevel = 
+export type EmployeeLevel =
   | 'entry'
   | 'junior'
   | 'mid'
@@ -28,7 +28,7 @@ export type EmployeeLevel =
   | 'vp'
   | 'c_level';
 
-export type EmployeeStatus = 
+export type EmployeeStatus =
   | 'available'
   | 'working'
   | 'busy'
@@ -36,7 +36,7 @@ export type EmployeeStatus =
   | 'training'
   | 'offline';
 
-export type ToolType = 
+export type ToolType =
   | 'code_generation'
   | 'data_analysis'
   | 'api_integration'
@@ -49,7 +49,7 @@ export type ToolType =
   | 'monitoring'
   | 'custom';
 
-export type IntegrationType = 
+export type IntegrationType =
   | 'n8n_workflow'
   | 'openai_api'
   | 'anthropic_api'
@@ -61,7 +61,7 @@ export type IntegrationType =
   | 'database'
   | 'file_system';
 
-export type AssignmentStatus = 
+export type AssignmentStatus =
   | 'assigned'
   | 'in_progress'
   | 'completed'
@@ -69,7 +69,7 @@ export type AssignmentStatus =
   | 'cancelled'
   | 'on_hold';
 
-export type PaymentStatus = 
+export type PaymentStatus =
   | 'pending'
   | 'processing'
   | 'completed'
@@ -77,14 +77,14 @@ export type PaymentStatus =
   | 'refunded'
   | 'cancelled';
 
-export type MessageType = 
+export type MessageType =
   | 'text'
   | 'tool_call'
   | 'tool_result'
   | 'system'
   | 'error';
 
-export type TrainingStatus = 
+export type TrainingStatus =
   | 'not_started'
   | 'in_progress'
   | 'completed'
@@ -662,7 +662,12 @@ export interface PaginatedResponse<T> {
 
 // Real-time Event Types
 export interface EmployeeEvent {
-  type: 'employee_updated' | 'assignment_created' | 'tool_executed' | 'message_sent' | 'performance_updated';
+  type:
+    | 'employee_updated'
+    | 'assignment_created'
+    | 'tool_executed'
+    | 'message_sent'
+    | 'performance_updated';
   employeeId: string;
   data: Record<string, unknown>;
   timestamp: string;
@@ -748,5 +753,5 @@ export type {
   RealtimeSubscription,
   EmployeeSystemConfig,
   ValidationSchema,
-  ValidationResult
+  ValidationResult,
 };

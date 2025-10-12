@@ -54,11 +54,14 @@ export class WebSocketClient {
   private reconnectTimer: NodeJS.Timeout | null = null;
   private heartbeatTimer: NodeJS.Timeout | null = null;
   private messageQueue: WebSocketMessage[] = [];
-  private pendingMessages = new Map<string, {
-    resolve: (value: unknown) => void;
-    reject: (reason: unknown) => void;
-    timeout: NodeJS.Timeout;
-  }>();
+  private pendingMessages = new Map<
+    string,
+    {
+      resolve: (value: unknown) => void;
+      reject: (reason: unknown) => void;
+      timeout: NodeJS.Timeout;
+    }
+  >();
 
   constructor(config: Partial<WebSocketConfig> & { url: string }) {
     this.config = {
@@ -83,7 +86,10 @@ export class WebSocketClient {
       this.setStatus('connecting');
 
       try {
-        this.ws = apiClient.createWebSocket(this.config.url, this.config.protocols);
+        this.ws = apiClient.createWebSocket(
+          this.config.url,
+          this.config.protocols
+        );
 
         this.ws.onopen = () => {
           this.setStatus('connected');
@@ -94,7 +100,7 @@ export class WebSocketClient {
           resolve();
         };
 
-        this.ws.onclose = (event) => {
+        this.ws.onclose = event => {
           this.cleanup();
           this.handlers.onClose?.(event);
 
@@ -105,17 +111,16 @@ export class WebSocketClient {
           }
         };
 
-        this.ws.onerror = (error) => {
+        this.ws.onerror = error => {
           this.handlers.onError?.(error);
           if (this.status === 'connecting') {
             reject(new Error('WebSocket connection failed'));
           }
         };
 
-        this.ws.onmessage = (event) => {
+        this.ws.onmessage = event => {
           this.handleMessage(event);
         };
-
       } catch (error) {
         this.setStatus('failed');
         reject(error);
@@ -173,7 +178,6 @@ export class WebSocketClient {
 
       // Handle regular message
       this.handlers.onMessage?.(message);
-
     } catch (error) {
       console.error('Failed to parse WebSocket message:', error);
     }
@@ -225,7 +229,10 @@ export class WebSocketClient {
       });
 
       // Send message
-      if (this.status === 'connected' && this.ws?.readyState === WebSocket.OPEN) {
+      if (
+        this.status === 'connected' &&
+        this.ws?.readyState === WebSocket.OPEN
+      ) {
         this.ws.send(JSON.stringify(fullMessage));
       } else {
         this.queueMessage(fullMessage);
@@ -242,7 +249,10 @@ export class WebSocketClient {
   }
 
   private flushMessageQueue(): void {
-    while (this.messageQueue.length > 0 && this.ws?.readyState === WebSocket.OPEN) {
+    while (
+      this.messageQueue.length > 0 &&
+      this.ws?.readyState === WebSocket.OPEN
+    ) {
       const message = this.messageQueue.shift()!;
       this.ws.send(JSON.stringify(message));
     }
@@ -339,7 +349,9 @@ export class WebSocketClient {
   }
 
   isConnected(): boolean {
-    return this.status === 'connected' && this.ws?.readyState === WebSocket.OPEN;
+    return (
+      this.status === 'connected' && this.ws?.readyState === WebSocket.OPEN
+    );
   }
 
   getQueueSize(): number {

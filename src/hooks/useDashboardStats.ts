@@ -26,7 +26,7 @@ export const useDashboardStats = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -67,33 +67,51 @@ export const useDashboardStats = () => {
 
         // Calculate stats
         const totalJobs = jobs?.length || 0;
-        const activeJobs = jobs?.filter(job => job.status === 'in_progress').length || 0;
-        const completedJobs = jobs?.filter(job => job.status === 'completed').length || 0;
-        
+        const activeJobs =
+          jobs?.filter(job => job.status === 'in_progress').length || 0;
+        const completedJobs =
+          jobs?.filter(job => job.status === 'completed').length || 0;
+
         const totalEmployees = employees?.length || 0;
-        const activeEmployees = employees?.filter(emp => emp.status === 'active').length || 0;
-        
-        const totalRevenue = revenue?.reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
-        
+        const activeEmployees =
+          employees?.filter(emp => emp.status === 'active').length || 0;
+
+        const totalRevenue =
+          revenue?.reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
+
         // Calculate monthly revenue
         const currentMonth = new Date().getMonth();
         const currentYear = new Date().getFullYear();
-        const monthlyRevenue = revenue?.filter(item => {
-          const itemDate = new Date(item.created_at);
-          return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
-        }).reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
+        const monthlyRevenue =
+          revenue
+            ?.filter(item => {
+              const itemDate = new Date(item.created_at);
+              return (
+                itemDate.getMonth() === currentMonth &&
+                itemDate.getFullYear() === currentYear
+              );
+            })
+            .reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
 
         // Calculate revenue growth (simplified)
         const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
         const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-        const previousMonthRevenue = revenue?.filter(item => {
-          const itemDate = new Date(item.created_at);
-          return itemDate.getMonth() === previousMonth && itemDate.getFullYear() === previousYear;
-        }).reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
+        const previousMonthRevenue =
+          revenue
+            ?.filter(item => {
+              const itemDate = new Date(item.created_at);
+              return (
+                itemDate.getMonth() === previousMonth &&
+                itemDate.getFullYear() === previousYear
+              );
+            })
+            .reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
 
-        const revenueGrowth = previousMonthRevenue > 0 
-          ? ((monthlyRevenue - previousMonthRevenue) / previousMonthRevenue) * 100 
-          : 0;
+        const revenueGrowth =
+          previousMonthRevenue > 0
+            ? ((monthlyRevenue - previousMonthRevenue) / previousMonthRevenue) *
+              100
+            : 0;
 
         setStats({
           totalJobs,

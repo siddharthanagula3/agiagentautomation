@@ -81,7 +81,13 @@ export interface WorkforceState {
 
   // Filtering and search
   searchQuery: string;
-  statusFilter: 'all' | 'queued' | 'running' | 'completed' | 'failed' | 'paused';
+  statusFilter:
+    | 'all'
+    | 'queued'
+    | 'running'
+    | 'completed'
+    | 'failed'
+    | 'paused';
   priorityFilter: 'all' | 'low' | 'medium' | 'high';
   workerFilter: string[];
 
@@ -125,7 +131,10 @@ export interface WorkforceActions {
   createTemplate: (template: Omit<JobTemplate, 'id'>) => string;
   updateTemplate: (id: string, updates: Partial<JobTemplate>) => void;
   deleteTemplate: (id: string) => void;
-  createJobFromTemplate: (templateId: string, parameters: Record<string, unknown>) => string;
+  createJobFromTemplate: (
+    templateId: string,
+    parameters: Record<string, unknown>
+  ) => string;
 
   // Search and filtering
   setSearchQuery: (query: string) => void;
@@ -158,7 +167,8 @@ const MOCK_TEMPLATES: JobTemplate[] = [
     category: 'Analytics',
     estimatedDuration: 3600,
     requiredSkills: ['data-analysis', 'statistics', 'python'],
-    defaultInstructions: 'Analyze the provided dataset and generate a comprehensive report with insights and recommendations.',
+    defaultInstructions:
+      'Analyze the provided dataset and generate a comprehensive report with insights and recommendations.',
     parameters: [
       {
         name: 'dataset_url',
@@ -188,7 +198,8 @@ const MOCK_TEMPLATES: JobTemplate[] = [
     category: 'Marketing',
     estimatedDuration: 1800,
     requiredSkills: ['writing', 'marketing', 'seo'],
-    defaultInstructions: 'Create engaging marketing content based on the provided brief and target audience.',
+    defaultInstructions:
+      'Create engaging marketing content based on the provided brief and target audience.',
     parameters: [
       {
         name: 'content_type',
@@ -221,10 +232,13 @@ const INITIAL_STATE: WorkforceState = {
   workers: {},
   availableWorkers: [],
   busyWorkers: [],
-  templates: MOCK_TEMPLATES.reduce((acc, template) => {
-    acc[template.id] = template;
-    return acc;
-  }, {} as Record<string, JobTemplate>),
+  templates: MOCK_TEMPLATES.reduce(
+    (acc, template) => {
+      acc[template.id] = template;
+      return acc;
+    },
+    {} as Record<string, JobTemplate>
+  ),
   isLoading: false,
   error: null,
   selectedJobId: null,
@@ -251,7 +265,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
 
         // Job management
         createJob: async (jobData: Omit<WorkforceJob, 'id' | 'createdAt'>) => {
-          set((state) => {
+          set(state => {
             state.isLoading = true;
             state.error = null;
           });
@@ -259,21 +273,27 @@ export const useWorkforceStore = create<WorkforceStore>()(
           try {
             // Get current user ID (you'll need to implement this)
             const userId = 'current-user-id'; // TODO: Get from auth context
-            
+
             const { data: job, error } = await jobsService.createJob(userId, {
               title: jobData.title,
               description: jobData.description,
               priority: jobData.priority as unknown,
               assigned_agent_id: jobData.assignedWorkers[0]?.id,
-              estimated_duration: jobData.estimatedCompletion ? 
-                Math.floor((new Date(jobData.estimatedCompletion).getTime() - Date.now()) / 1000 / 60) : undefined,
+              estimated_duration: jobData.estimatedCompletion
+                ? Math.floor(
+                    (new Date(jobData.estimatedCompletion).getTime() -
+                      Date.now()) /
+                      1000 /
+                      60
+                  )
+                : undefined,
               files: [],
               tags: [],
-              metadata: {}
+              metadata: {},
             });
 
             if (error) {
-              set((state) => {
+              set(state => {
                 state.error = error;
                 state.isLoading = false;
               });
@@ -288,21 +308,28 @@ export const useWorkforceStore = create<WorkforceStore>()(
                 status: job.status as unknown,
                 priority: job.priority as unknown,
                 progress: job.progress || 0,
-                assignedWorkers: job.assigned_agent_id ? [{
-                  id: job.assigned_agent_id,
-                  name: 'AI Agent',
-                  role: 'AI Assistant',
-                  status: 'idle'
-                }] : [],
-                estimatedCompletion: job.estimated_duration ? 
-                  new Date(Date.now() + job.estimated_duration * 60 * 1000).toISOString() : undefined,
+                assignedWorkers: job.assigned_agent_id
+                  ? [
+                      {
+                        id: job.assigned_agent_id,
+                        name: 'AI Agent',
+                        role: 'AI Assistant',
+                        status: 'idle',
+                      },
+                    ]
+                  : [],
+                estimatedCompletion: job.estimated_duration
+                  ? new Date(
+                      Date.now() + job.estimated_duration * 60 * 1000
+                    ).toISOString()
+                  : undefined,
                 tokensUsed: 0,
                 cost: job.cost || 0,
                 subtasks: [],
-                createdAt: job.created_at
+                createdAt: job.created_at,
               };
 
-              set((state) => {
+              set(state => {
                 state.jobs[job.id] = workforceJob;
                 state.isLoading = false;
 
@@ -325,7 +352,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
 
             return '';
           } catch (error) {
-            set((state) => {
+            set(state => {
               state.error = 'Failed to create job';
               state.isLoading = false;
             });
@@ -334,7 +361,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
         },
 
         updateJob: (id: string, updates: Partial<WorkforceJob>) =>
-          set((state) => {
+          set(state => {
             if (state.jobs[id]) {
               const oldStatus = state.jobs[id].status;
               const newJob = { ...state.jobs[id], ...updates };
@@ -345,13 +372,19 @@ export const useWorkforceStore = create<WorkforceStore>()(
                 // Remove from old list
                 switch (oldStatus) {
                   case 'running':
-                    state.activeJobs = state.activeJobs.filter((jobId) => jobId !== id);
+                    state.activeJobs = state.activeJobs.filter(
+                      jobId => jobId !== id
+                    );
                     break;
                   case 'completed':
-                    state.completedJobs = state.completedJobs.filter((jobId) => jobId !== id);
+                    state.completedJobs = state.completedJobs.filter(
+                      jobId => jobId !== id
+                    );
                     break;
                   case 'failed':
-                    state.failedJobs = state.failedJobs.filter((jobId) => jobId !== id);
+                    state.failedJobs = state.failedJobs.filter(
+                      jobId => jobId !== id
+                    );
                     break;
                 }
 
@@ -374,15 +407,17 @@ export const useWorkforceStore = create<WorkforceStore>()(
           }),
 
         deleteJob: (id: string) =>
-          set((state) => {
+          set(state => {
             const job = state.jobs[id];
             if (job) {
               delete state.jobs[id];
 
               // Remove from all lists
-              state.activeJobs = state.activeJobs.filter((jobId) => jobId !== id);
-              state.completedJobs = state.completedJobs.filter((jobId) => jobId !== id);
-              state.failedJobs = state.failedJobs.filter((jobId) => jobId !== id);
+              state.activeJobs = state.activeJobs.filter(jobId => jobId !== id);
+              state.completedJobs = state.completedJobs.filter(
+                jobId => jobId !== id
+              );
+              state.failedJobs = state.failedJobs.filter(jobId => jobId !== id);
 
               if (state.selectedJobId === id) {
                 state.selectedJobId = null;
@@ -391,11 +426,11 @@ export const useWorkforceStore = create<WorkforceStore>()(
           }),
 
         assignWorkers: (jobId: string, workerIds: string[]) =>
-          set((state) => {
+          set(state => {
             const job = state.jobs[jobId];
             if (job) {
               // Update job with assigned workers
-              job.assignedWorkers = workerIds.map((workerId) => {
+              job.assignedWorkers = workerIds.map(workerId => {
                 const worker = state.workers[workerId];
                 return {
                   id: workerId,
@@ -407,7 +442,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
               });
 
               // Update worker statuses
-              workerIds.forEach((workerId) => {
+              workerIds.forEach(workerId => {
                 if (state.workers[workerId]) {
                   state.workers[workerId].status = 'working';
                   state.workers[workerId].currentJobId = jobId;
@@ -419,7 +454,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
           }),
 
         startJob: async (jobId: string) => {
-          set((state) => {
+          set(state => {
             const job = state.jobs[jobId];
             if (job) {
               job.status = 'running';
@@ -431,7 +466,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
           const job = get().jobs[jobId];
           if (job) {
             for (let progress = 0; progress <= 100; progress += 10) {
-              await new Promise((resolve) => setTimeout(resolve, 500));
+              await new Promise(resolve => setTimeout(resolve, 500));
               get().updateJob(jobId, { progress });
             }
             get().updateJob(jobId, { status: 'completed', progress: 100 });
@@ -439,7 +474,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
         },
 
         pauseJob: async (jobId: string) => {
-          set((state) => {
+          set(state => {
             const job = state.jobs[jobId];
             if (job && job.status === 'running') {
               job.status = 'paused';
@@ -448,7 +483,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
         },
 
         resumeJob: async (jobId: string) => {
-          set((state) => {
+          set(state => {
             const job = state.jobs[jobId];
             if (job && job.status === 'paused') {
               job.status = 'running';
@@ -457,12 +492,12 @@ export const useWorkforceStore = create<WorkforceStore>()(
         },
 
         cancelJob: async (jobId: string) => {
-          set((state) => {
+          set(state => {
             const job = state.jobs[jobId];
             if (job) {
               job.status = 'failed';
               // Free up assigned workers
-              job.assignedWorkers.forEach((worker) => {
+              job.assignedWorkers.forEach(worker => {
                 if (state.workers[worker.id]) {
                   state.workers[worker.id].status = 'idle';
                   state.workers[worker.id].currentJobId = undefined;
@@ -473,7 +508,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
         },
 
         retryJob: async (jobId: string) => {
-          set((state) => {
+          set(state => {
             const job = state.jobs[jobId];
             if (job && job.status === 'failed') {
               job.status = 'queued';
@@ -486,7 +521,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
         addWorker: (workerData: Omit<WorkforceWorker, 'id'>) => {
           const id = crypto.randomUUID();
 
-          set((state) => {
+          set(state => {
             const worker: WorkforceWorker = {
               ...workerData,
               id,
@@ -505,7 +540,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
         },
 
         updateWorker: (id: string, updates: Partial<WorkforceWorker>) =>
-          set((state) => {
+          set(state => {
             if (state.workers[id]) {
               const oldStatus = state.workers[id].status;
               state.workers[id] = { ...state.workers[id], ...updates };
@@ -514,9 +549,13 @@ export const useWorkforceStore = create<WorkforceStore>()(
               if (updates.status && updates.status !== oldStatus) {
                 // Remove from old list
                 if (oldStatus === 'idle') {
-                  state.availableWorkers = state.availableWorkers.filter((wId) => wId !== id);
+                  state.availableWorkers = state.availableWorkers.filter(
+                    wId => wId !== id
+                  );
                 } else if (oldStatus === 'working') {
-                  state.busyWorkers = state.busyWorkers.filter((wId) => wId !== id);
+                  state.busyWorkers = state.busyWorkers.filter(
+                    wId => wId !== id
+                  );
                 }
 
                 // Add to new list
@@ -530,10 +569,12 @@ export const useWorkforceStore = create<WorkforceStore>()(
           }),
 
         removeWorker: (id: string) =>
-          set((state) => {
+          set(state => {
             delete state.workers[id];
-            state.availableWorkers = state.availableWorkers.filter((wId) => wId !== id);
-            state.busyWorkers = state.busyWorkers.filter((wId) => wId !== id);
+            state.availableWorkers = state.availableWorkers.filter(
+              wId => wId !== id
+            );
+            state.busyWorkers = state.busyWorkers.filter(wId => wId !== id);
           }),
 
         setWorkerStatus: (id: string, status: WorkforceWorker['status']) => {
@@ -544,7 +585,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
         createTemplate: (templateData: Omit<JobTemplate, 'id'>) => {
           const id = crypto.randomUUID();
 
-          set((state) => {
+          set(state => {
             state.templates[id] = {
               ...templateData,
               id,
@@ -555,18 +596,21 @@ export const useWorkforceStore = create<WorkforceStore>()(
         },
 
         updateTemplate: (id: string, updates: Partial<JobTemplate>) =>
-          set((state) => {
+          set(state => {
             if (state.templates[id]) {
               state.templates[id] = { ...state.templates[id], ...updates };
             }
           }),
 
         deleteTemplate: (id: string) =>
-          set((state) => {
+          set(state => {
             delete state.templates[id];
           }),
 
-        createJobFromTemplate: (templateId: string, parameters: Record<string, unknown>) => {
+        createJobFromTemplate: (
+          templateId: string,
+          parameters: Record<string, unknown>
+        ) => {
           const { templates, createJob } = get();
           const template = templates[templateId];
 
@@ -579,7 +623,9 @@ export const useWorkforceStore = create<WorkforceStore>()(
             priority: 'medium',
             progress: 0,
             assignedWorkers: [],
-            estimatedCompletion: new Date(Date.now() + template.estimatedDuration * 1000).toLocaleTimeString(),
+            estimatedCompletion: new Date(
+              Date.now() + template.estimatedDuration * 1000
+            ).toLocaleTimeString(),
             tokensUsed: 0,
             cost: 0,
             subtasks: [],
@@ -590,27 +636,27 @@ export const useWorkforceStore = create<WorkforceStore>()(
 
         // Search and filtering
         setSearchQuery: (query: string) =>
-          set((state) => {
+          set(state => {
             state.searchQuery = query;
           }),
 
         setStatusFilter: (status: WorkforceState['statusFilter']) =>
-          set((state) => {
+          set(state => {
             state.statusFilter = status;
           }),
 
         setPriorityFilter: (priority: WorkforceState['priorityFilter']) =>
-          set((state) => {
+          set(state => {
             state.priorityFilter = priority;
           }),
 
         setWorkerFilter: (workerIds: string[]) =>
-          set((state) => {
+          set(state => {
             state.workerFilter = workerIds;
           }),
 
         clearFilters: () =>
-          set((state) => {
+          set(state => {
             state.searchQuery = '';
             state.statusFilter = 'all';
             state.priorityFilter = 'all';
@@ -619,27 +665,29 @@ export const useWorkforceStore = create<WorkforceStore>()(
 
         // Real-time updates
         setLiveUpdates: (enabled: boolean) =>
-          set((state) => {
+          set(state => {
             state.liveUpdates = enabled;
           }),
 
         refreshData: async () => {
-          set((state) => {
+          set(state => {
             state.isLoading = true;
             state.error = null;
           });
 
           try {
             const userId = 'current-user-id'; // TODO: Get from auth context
-            
+
             // Load jobs
-            const { data: jobs, error: jobsError } = await jobsService.getJobs(userId);
+            const { data: jobs, error: jobsError } =
+              await jobsService.getJobs(userId);
             if (jobsError) {
               throw new Error(jobsError);
             }
 
             // Load agents
-            const { data: agents, error: agentsError } = await agentsService.getAgents();
+            const { data: agents, error: agentsError } =
+              await agentsService.getAgents();
             if (agentsError) {
               throw new Error(agentsError);
             }
@@ -658,18 +706,25 @@ export const useWorkforceStore = create<WorkforceStore>()(
                 status: job.status as unknown,
                 priority: job.priority as unknown,
                 progress: job.progress || 0,
-                assignedWorkers: job.assigned_agent_id ? [{
-                  id: job.assigned_agent_id,
-                  name: 'AI Agent',
-                  role: 'AI Assistant',
-                  status: 'idle'
-                }] : [],
-                estimatedCompletion: job.estimated_duration ? 
-                  new Date(Date.now() + job.estimated_duration * 60 * 1000).toISOString() : undefined,
+                assignedWorkers: job.assigned_agent_id
+                  ? [
+                      {
+                        id: job.assigned_agent_id,
+                        name: 'AI Agent',
+                        role: 'AI Assistant',
+                        status: 'idle',
+                      },
+                    ]
+                  : [],
+                estimatedCompletion: job.estimated_duration
+                  ? new Date(
+                      Date.now() + job.estimated_duration * 60 * 1000
+                    ).toISOString()
+                  : undefined,
                 tokensUsed: 0,
                 cost: job.cost || 0,
                 subtasks: [],
-                createdAt: job.created_at
+                createdAt: job.created_at,
               };
 
               workforceJobs[job.id] = workforceJob;
@@ -705,15 +760,15 @@ export const useWorkforceStore = create<WorkforceStore>()(
                   successRate: 95,
                   averageResponseTime: 30,
                   totalJobsCompleted: agent.tasks_completed || 0,
-                  rating: agent.rating || 0
+                  rating: agent.rating || 0,
                 },
                 hourlyRate: agent.hourly_rate || 0,
                 lastActiveAt: new Date(),
                 availability: {
                   timezone: 'UTC',
                   workingHours: { start: '09:00', end: '17:00' },
-                  daysOfWeek: [1, 2, 3, 4, 5]
-                }
+                  daysOfWeek: [1, 2, 3, 4, 5],
+                },
               };
 
               workers[agent.id] = worker;
@@ -725,7 +780,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
               }
             });
 
-            set((state) => {
+            set(state => {
               state.jobs = workforceJobs;
               state.activeJobs = activeJobs;
               state.completedJobs = completedJobs;
@@ -736,11 +791,13 @@ export const useWorkforceStore = create<WorkforceStore>()(
               state.lastUpdateAt = new Date();
               state.isLoading = false;
             });
-
           } catch (error) {
-            set((state) => {
+            set(state => {
               state.isLoading = false;
-              state.error = error instanceof Error ? error.message : 'Failed to refresh data';
+              state.error =
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to refresh data';
             });
           }
         },
@@ -748,12 +805,14 @@ export const useWorkforceStore = create<WorkforceStore>()(
         // Utility actions
         getJobsByStatus: (status: WorkforceJob['status']) => {
           const { jobs } = get();
-          return Object.values(jobs).filter((job) => job.status === status);
+          return Object.values(jobs).filter(job => job.status === status);
         },
 
         getWorkersByStatus: (status: WorkforceWorker['status']) => {
           const { workers } = get();
-          return Object.values(workers).filter((worker) => worker.status === status);
+          return Object.values(workers).filter(
+            worker => worker.status === status
+          );
         },
 
         calculateJobCost: (jobId: string) => {
@@ -786,11 +845,13 @@ export const useWorkforceStore = create<WorkforceStore>()(
 
           // Simple optimization: assign available workers with highest success rate
           const availableWorkers = Object.values(workers)
-            .filter((worker) => worker.status === 'idle')
-            .sort((a, b) => b.performance.successRate - a.performance.successRate)
+            .filter(worker => worker.status === 'idle')
+            .sort(
+              (a, b) => b.performance.successRate - a.performance.successRate
+            )
             .slice(0, 3); // Limit to 3 workers
 
-          return availableWorkers.map((worker) => worker.id);
+          return availableWorkers.map(worker => worker.id);
         },
 
         exportJobs: (format: 'csv' | 'json') => {
@@ -801,8 +862,15 @@ export const useWorkforceStore = create<WorkforceStore>()(
           }
 
           // CSV export
-          const headers = ['ID', 'Title', 'Status', 'Priority', 'Progress', 'Created At'];
-          const rows = Object.values(jobs).map((job) => [
+          const headers = [
+            'ID',
+            'Title',
+            'Status',
+            'Priority',
+            'Progress',
+            'Created At',
+          ];
+          const rows = Object.values(jobs).map(job => [
             job.id,
             job.title,
             job.status,
@@ -811,11 +879,11 @@ export const useWorkforceStore = create<WorkforceStore>()(
             job.createdAt,
           ]);
 
-          return [headers, ...rows].map((row) => row.join(',')).join('\n');
+          return [headers, ...rows].map(row => row.join(',')).join('\n');
         },
 
         setError: (error: string | null) =>
-          set((state) => {
+          set(state => {
             state.error = error;
           }),
 
@@ -823,7 +891,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
         initializeRealtime: async (userId: string) => {
           try {
             await realtimeService.initializeRealtime(userId, {
-              onJobCreated: (job) => {
+              onJobCreated: job => {
                 const workforceJob: WorkforceJob = {
                   id: job.id,
                   title: job.title,
@@ -831,34 +899,41 @@ export const useWorkforceStore = create<WorkforceStore>()(
                   status: job.status as unknown,
                   priority: job.priority as unknown,
                   progress: job.progress || 0,
-                  assignedWorkers: job.assigned_agent_id ? [{
-                    id: job.assigned_agent_id,
-                    name: 'AI Agent',
-                    role: 'AI Assistant',
-                    status: 'idle'
-                  }] : [],
-                  estimatedCompletion: job.estimated_duration ? 
-                    new Date(Date.now() + job.estimated_duration * 60 * 1000).toISOString() : undefined,
+                  assignedWorkers: job.assigned_agent_id
+                    ? [
+                        {
+                          id: job.assigned_agent_id,
+                          name: 'AI Agent',
+                          role: 'AI Assistant',
+                          status: 'idle',
+                        },
+                      ]
+                    : [],
+                  estimatedCompletion: job.estimated_duration
+                    ? new Date(
+                        Date.now() + job.estimated_duration * 60 * 1000
+                      ).toISOString()
+                    : undefined,
                   tokensUsed: 0,
                   cost: job.cost || 0,
                   subtasks: [],
-                  createdAt: job.created_at
+                  createdAt: job.created_at,
                 };
 
-                set((state) => {
+                set(state => {
                   state.jobs[job.id] = workforceJob;
                   state.lastUpdateAt = new Date();
                 });
               },
-              onJobUpdate: (job) => {
-                set((state) => {
+              onJobUpdate: job => {
+                set(state => {
                   if (state.jobs[job.id]) {
                     const oldStatus = state.jobs[job.id].status;
                     state.jobs[job.id] = {
                       ...state.jobs[job.id],
                       status: job.status as unknown,
                       progress: job.progress || 0,
-                      cost: job.cost || 0
+                      cost: job.cost || 0,
                     };
 
                     // Update job lists if status changed
@@ -866,13 +941,19 @@ export const useWorkforceStore = create<WorkforceStore>()(
                       // Remove from old list
                       switch (oldStatus) {
                         case 'running':
-                          state.activeJobs = state.activeJobs.filter(id => id !== job.id);
+                          state.activeJobs = state.activeJobs.filter(
+                            id => id !== job.id
+                          );
                           break;
                         case 'completed':
-                          state.completedJobs = state.completedJobs.filter(id => id !== job.id);
+                          state.completedJobs = state.completedJobs.filter(
+                            id => id !== job.id
+                          );
                           break;
                         case 'failed':
-                          state.failedJobs = state.failedJobs.filter(id => id !== job.id);
+                          state.failedJobs = state.failedJobs.filter(
+                            id => id !== job.id
+                          );
                           break;
                       }
 
@@ -894,17 +975,23 @@ export const useWorkforceStore = create<WorkforceStore>()(
                   }
                 });
               },
-              onJobDeleted: (jobId) => {
-                set((state) => {
+              onJobDeleted: jobId => {
+                set(state => {
                   delete state.jobs[jobId];
-                  state.activeJobs = state.activeJobs.filter(id => id !== jobId);
-                  state.completedJobs = state.completedJobs.filter(id => id !== jobId);
-                  state.failedJobs = state.failedJobs.filter(id => id !== jobId);
+                  state.activeJobs = state.activeJobs.filter(
+                    id => id !== jobId
+                  );
+                  state.completedJobs = state.completedJobs.filter(
+                    id => id !== jobId
+                  );
+                  state.failedJobs = state.failedJobs.filter(
+                    id => id !== jobId
+                  );
                   state.lastUpdateAt = new Date();
                 });
               },
-              onAgentUpdate: (agent) => {
-                set((state) => {
+              onAgentUpdate: agent => {
+                set(state => {
                   if (state.workers[agent.id]) {
                     state.workers[agent.id] = {
                       ...state.workers[agent.id],
@@ -912,21 +999,21 @@ export const useWorkforceStore = create<WorkforceStore>()(
                       performance: {
                         ...state.workers[agent.id].performance,
                         totalJobsCompleted: agent.tasks_completed || 0,
-                        rating: agent.rating || 0
-                      }
+                        rating: agent.rating || 0,
+                      },
                     };
                     state.lastUpdateAt = new Date();
                   }
                 });
               },
-              onError: (error) => {
-                set((state) => {
+              onError: error => {
+                set(state => {
                   state.error = error;
                 });
-              }
+              },
             });
           } catch (error) {
-            set((state) => {
+            set(state => {
               state.error = 'Failed to initialize real-time updates';
             });
           }
@@ -943,7 +1030,7 @@ export const useWorkforceStore = create<WorkforceStore>()(
       {
         name: 'agi-workforce-store',
         version: 1,
-        partialize: (state) => ({
+        partialize: state => ({
           jobs: state.jobs,
           workers: state.workers,
           templates: state.templates,
@@ -958,8 +1045,10 @@ export const useWorkforceStore = create<WorkforceStore>()(
 );
 
 // Selectors for optimized re-renders
-export const useWorkforceJobs = () => useWorkforceStore((state) => state.jobs);
-export const useWorkforceWorkers = () => useWorkforceStore((state) => state.workers);
-export const useWorkforceStats = () => useWorkforceStore((state) => state.stats);
-export const useWorkforceLoading = () => useWorkforceStore((state) => state.isLoading);
-export const useWorkforceError = () => useWorkforceStore((state) => state.error);
+export const useWorkforceJobs = () => useWorkforceStore(state => state.jobs);
+export const useWorkforceWorkers = () =>
+  useWorkforceStore(state => state.workers);
+export const useWorkforceStats = () => useWorkforceStore(state => state.stats);
+export const useWorkforceLoading = () =>
+  useWorkforceStore(state => state.isLoading);
+export const useWorkforceError = () => useWorkforceStore(state => state.error);

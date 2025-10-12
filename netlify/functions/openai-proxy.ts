@@ -1,5 +1,9 @@
 import { Handler, HandlerEvent } from '@netlify/functions';
-import { calculateTokenCost, storeTokenUsage, extractRequestMetadata } from './utils/token-tracking';
+import {
+  calculateTokenCost,
+  storeTokenUsage,
+  extractRequestMetadata,
+} from './utils/token-tracking';
 
 /**
  * Netlify Function to proxy OpenAI API calls
@@ -17,12 +21,12 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
   // Get API key from environment
   const OPENAI_API_KEY = process.env.VITE_OPENAI_API_KEY;
-  
+
   if (!OPENAI_API_KEY) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
-        error: 'OpenAI API key not configured in Netlify environment variables' 
+      body: JSON.stringify({
+        error: 'OpenAI API key not configured in Netlify environment variables',
       }),
     };
   }
@@ -30,16 +34,16 @@ export const handler: Handler = async (event: HandlerEvent) => {
   try {
     // Parse request body
     const body = JSON.parse(event.body || '{}');
-    const { 
-      messages, 
+    const {
+      messages,
       model = 'gpt-4o-mini',
       temperature = 0.7,
-      max_tokens = 4000
+      max_tokens = 4000,
     } = body;
 
     console.log('[OpenAI Proxy] Received request:', {
       model,
-      messageCount: messages?.length
+      messageCount: messages?.length,
     });
 
     // Make request to OpenAI API
@@ -47,7 +51,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model,
@@ -66,9 +70,9 @@ export const handler: Handler = async (event: HandlerEvent) => {
       console.error('[OpenAI Proxy] API Error:', data);
       return {
         statusCode: response.status,
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           error: data.error?.message || 'OpenAI API error',
-          details: data 
+          details: data,
         }),
       };
     }
@@ -86,9 +90,11 @@ export const handler: Handler = async (event: HandlerEvent) => {
       );
 
       // Store usage in Supabase (non-blocking)
-      storeTokenUsage('openai', model, userId, sessionId, tokenUsage).catch(err => {
-        console.error('[OpenAI Proxy] Failed to store token usage:', err);
-      });
+      storeTokenUsage('openai', model, userId, sessionId, tokenUsage).catch(
+        err => {
+          console.error('[OpenAI Proxy] Failed to store token usage:', err);
+        }
+      );
 
       // Add token usage info to response
       data.tokenTracking = {
@@ -113,11 +119,10 @@ export const handler: Handler = async (event: HandlerEvent) => {
     console.error('[OpenAI Proxy] Error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         error: 'Failed to process request',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       }),
     };
   }
 };
-

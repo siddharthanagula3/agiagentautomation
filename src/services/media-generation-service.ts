@@ -73,11 +73,11 @@ const PRICING = {
     '512x512': 0.001,
     '256x256': 0.0005,
   },
-  'veo3': {
+  veo3: {
     '720p': 0.05,
     '1080p': 0.08,
     '4k': 0.15,
-  }
+  },
 };
 
 export class MediaGenerationService {
@@ -95,16 +95,20 @@ export class MediaGenerationService {
   /**
    * Generate image using Nano Banana with Gemini enhancement
    */
-  async generateImage(request: ImageGenerationRequest): Promise<MediaGenerationResult> {
+  async generateImage(
+    request: ImageGenerationRequest
+  ): Promise<MediaGenerationResult> {
     if (!NANO_BANANA_API_KEY && !IS_DEMO_MODE) {
-      throw new Error('Nano Banana API key not configured.\n\n' +
-        '✅ Get a FREE key at: https://nanoimg.com/\n' +
-        '📝 Add to .env file: VITE_NANO_BANANA_API_KEY=your_key_here\n' +
-        '💡 Or enable demo mode: VITE_DEMO_MODE=true');
+      throw new Error(
+        'Nano Banana API key not configured.\n\n' +
+          '✅ Get a FREE key at: https://nanoimg.com/\n' +
+          '📝 Add to .env file: VITE_NANO_BANANA_API_KEY=your_key_here\n' +
+          '💡 Or enable demo mode: VITE_DEMO_MODE=true'
+      );
     }
 
     const generationId = `img-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Create initial result
     const result: MediaGenerationResult = {
       id: generationId,
@@ -121,7 +125,7 @@ export class MediaGenerationService {
       cost: 0,
       tokensUsed: 0,
       createdAt: new Date(),
-      status: 'generating'
+      status: 'generating',
     };
 
     this.generationHistory.push(result);
@@ -130,50 +134,62 @@ export class MediaGenerationService {
       // Enhance prompt with Gemini if available
       let enhancedPrompt = request.prompt;
       if (GOOGLE_API_KEY) {
-        enhancedPrompt = await this.enhancePromptWithGemini(request.prompt, 'image');
+        enhancedPrompt = await this.enhancePromptWithGemini(
+          request.prompt,
+          'image'
+        );
       }
 
       if (IS_DEMO_MODE) {
         // Demo mode - return mock result
         await new Promise(resolve => setTimeout(resolve, 2000));
-        result.url = 'https://via.placeholder.com/1024x1024/4F46E5/FFFFFF?text=Demo+Image';
+        result.url =
+          'https://via.placeholder.com/1024x1024/4F46E5/FFFFFF?text=Demo+Image';
         result.status = 'completed';
-        result.cost = PRICING['nano-banana'][request.size || '1024x1024'] || 0.002;
+        result.cost =
+          PRICING['nano-banana'][request.size || '1024x1024'] || 0.002;
         result.tokensUsed = Math.floor(enhancedPrompt.length / 4);
       } else {
         // Real Nano Banana API call
         const nanoBananaResult = await this.callNanoBananaAPI({
           ...request,
-          prompt: enhancedPrompt
+          prompt: enhancedPrompt,
         });
 
         result.url = nanoBananaResult.url;
         result.thumbnailUrl = nanoBananaResult.thumbnailUrl;
         result.status = 'completed';
-        result.cost = PRICING['nano-banana'][request.size || '1024x1024'] || 0.002;
+        result.cost =
+          PRICING['nano-banana'][request.size || '1024x1024'] || 0.002;
         result.tokensUsed = Math.floor(enhancedPrompt.length / 4);
       }
 
       return result;
     } catch (error) {
       result.status = 'failed';
-      throw new Error(`Image generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Image generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Generate video using Veo3 with Gemini enhancement
    */
-  async generateVideo(request: VideoGenerationRequest): Promise<MediaGenerationResult> {
+  async generateVideo(
+    request: VideoGenerationRequest
+  ): Promise<MediaGenerationResult> {
     if (!VEO3_API_KEY && !IS_DEMO_MODE) {
-      throw new Error('Veo3 API key not configured.\n\n' +
-        '✅ Get a FREE key at: https://aistudio.google.com/app/apikey\n' +
-        '📝 Add to .env file: VITE_VEO3_API_KEY=your_key_here\n' +
-        '💡 Or enable demo mode: VITE_DEMO_MODE=true');
+      throw new Error(
+        'Veo3 API key not configured.\n\n' +
+          '✅ Get a FREE key at: https://aistudio.google.com/app/apikey\n' +
+          '📝 Add to .env file: VITE_VEO3_API_KEY=your_key_here\n' +
+          '💡 Or enable demo mode: VITE_DEMO_MODE=true'
+      );
     }
 
     const generationId = `vid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Create initial result
     const result: MediaGenerationResult = {
       id: generationId,
@@ -190,7 +206,7 @@ export class MediaGenerationService {
       cost: 0,
       tokensUsed: 0,
       createdAt: new Date(),
-      status: 'generating'
+      status: 'generating',
     };
 
     this.generationHistory.push(result);
@@ -199,14 +215,19 @@ export class MediaGenerationService {
       // Enhance prompt with Gemini if available
       let enhancedPrompt = request.prompt;
       if (GOOGLE_API_KEY) {
-        enhancedPrompt = await this.enhancePromptWithGemini(request.prompt, 'video');
+        enhancedPrompt = await this.enhancePromptWithGemini(
+          request.prompt,
+          'video'
+        );
       }
 
       if (IS_DEMO_MODE) {
         // Demo mode - return mock result
         await new Promise(resolve => setTimeout(resolve, 5000));
-        result.url = 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4';
-        result.thumbnailUrl = 'https://via.placeholder.com/1280x720/4F46E5/FFFFFF?text=Demo+Video';
+        result.url =
+          'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4';
+        result.thumbnailUrl =
+          'https://via.placeholder.com/1280x720/4F46E5/FFFFFF?text=Demo+Video';
         result.status = 'completed';
         result.cost = PRICING['veo3'][request.resolution || '1080p'] || 0.08;
         result.tokensUsed = Math.floor(enhancedPrompt.length / 4);
@@ -214,7 +235,7 @@ export class MediaGenerationService {
         // Real Veo3 API call
         const veo3Result = await this.callVeo3API({
           ...request,
-          prompt: enhancedPrompt
+          prompt: enhancedPrompt,
         });
 
         result.url = veo3Result.url;
@@ -227,20 +248,26 @@ export class MediaGenerationService {
       return result;
     } catch (error) {
       result.status = 'failed';
-      throw new Error(`Video generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Video generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Enhance prompt using Gemini
    */
-  private async enhancePromptWithGemini(prompt: string, type: 'image' | 'video'): Promise<string> {
+  private async enhancePromptWithGemini(
+    prompt: string,
+    type: 'image' | 'video'
+  ): Promise<string> {
     if (!GOOGLE_API_KEY) return prompt;
 
     try {
-      const systemPrompt = type === 'image' 
-        ? 'You are an expert at creating detailed, high-quality image generation prompts. Enhance the given prompt to be more specific, descriptive, and likely to produce excellent results. Focus on visual details, composition, lighting, and style.'
-        : 'You are an expert at creating detailed, high-quality video generation prompts. Enhance the given prompt to be more specific, descriptive, and likely to produce excellent results. Focus on motion, cinematography, lighting, and visual storytelling.';
+      const systemPrompt =
+        type === 'image'
+          ? 'You are an expert at creating detailed, high-quality image generation prompts. Enhance the given prompt to be more specific, descriptive, and likely to produce excellent results. Focus on visual details, composition, lighting, and style.'
+          : 'You are an expert at creating detailed, high-quality video generation prompts. Enhance the given prompt to be more specific, descriptive, and likely to produce excellent results. Focus on motion, cinematography, lighting, and visual storytelling.';
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_API_KEY}`,
@@ -250,15 +277,21 @@ export class MediaGenerationService {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            contents: [{
-              role: 'user',
-              parts: [{ text: `${systemPrompt}\n\nOriginal prompt: ${prompt}\n\nEnhanced prompt:` }]
-            }],
+            contents: [
+              {
+                role: 'user',
+                parts: [
+                  {
+                    text: `${systemPrompt}\n\nOriginal prompt: ${prompt}\n\nEnhanced prompt:`,
+                  },
+                ],
+              },
+            ],
             generationConfig: {
               temperature: 0.7,
               maxOutputTokens: 200,
-            }
-          })
+            },
+          }),
         }
       );
 
@@ -268,8 +301,9 @@ export class MediaGenerationService {
       }
 
       const data = await response.json();
-      const enhancedPrompt = data.candidates?.[0]?.content?.parts?.[0]?.text || prompt;
-      
+      const enhancedPrompt =
+        data.candidates?.[0]?.content?.parts?.[0]?.text || prompt;
+
       return enhancedPrompt.trim();
     } catch (error) {
       console.warn('Error enhancing prompt with Gemini:', error);
@@ -288,7 +322,7 @@ export class MediaGenerationService {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${NANO_BANANA_API_KEY}`,
+        Authorization: `Bearer ${NANO_BANANA_API_KEY}`,
       },
       body: JSON.stringify({
         prompt: request.prompt,
@@ -300,18 +334,20 @@ export class MediaGenerationService {
         seed: request.seed,
         steps: request.steps || 20,
         guidance: request.guidance || 7.5,
-      })
+      }),
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(`Nano Banana API error: ${errorData.message || response.statusText}`);
+      throw new Error(
+        `Nano Banana API error: ${errorData.message || response.statusText}`
+      );
     }
 
     const data = await response.json();
     return {
       url: data.url,
-      thumbnailUrl: data.thumbnailUrl
+      thumbnailUrl: data.thumbnailUrl,
     };
   }
 
@@ -322,32 +358,37 @@ export class MediaGenerationService {
     url: string;
     thumbnailUrl?: string;
   }> {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/veo3:generateVideo', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${VEO3_API_KEY}`,
-      },
-      body: JSON.stringify({
-        prompt: request.prompt,
-        duration: request.duration || 5,
-        resolution: request.resolution || '1080p',
-        style: request.style || 'realistic',
-        aspectRatio: request.aspectRatio || '16:9',
-        fps: request.fps || 24,
-        seed: request.seed,
-      })
-    });
+    const response = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/veo3:generateVideo',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${VEO3_API_KEY}`,
+        },
+        body: JSON.stringify({
+          prompt: request.prompt,
+          duration: request.duration || 5,
+          resolution: request.resolution || '1080p',
+          style: request.style || 'realistic',
+          aspectRatio: request.aspectRatio || '16:9',
+          fps: request.fps || 24,
+          seed: request.seed,
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(`Veo3 API error: ${errorData.message || response.statusText}`);
+      throw new Error(
+        `Veo3 API error: ${errorData.message || response.statusText}`
+      );
     }
 
     const data = await response.json();
     return {
       url: data.url,
-      thumbnailUrl: data.thumbnailUrl
+      thumbnailUrl: data.thumbnailUrl,
     };
   }
 
@@ -363,18 +404,26 @@ export class MediaGenerationService {
    */
   getGenerationStats(): MediaGenerationStats {
     const totalGenerations = this.generationHistory.length;
-    const totalCost = this.generationHistory.reduce((sum, gen) => sum + gen.cost, 0);
-    const imagesGenerated = this.generationHistory.filter(gen => gen.type === 'image').length;
-    const videosGenerated = this.generationHistory.filter(gen => gen.type === 'video').length;
-    
+    const totalCost = this.generationHistory.reduce(
+      (sum, gen) => sum + gen.cost,
+      0
+    );
+    const imagesGenerated = this.generationHistory.filter(
+      gen => gen.type === 'image'
+    ).length;
+    const videosGenerated = this.generationHistory.filter(
+      gen => gen.type === 'video'
+    ).length;
+
     const styleCounts: Record<string, number> = {};
     this.generationHistory.forEach(gen => {
       const style = gen.metadata.style || 'unknown';
       styleCounts[style] = (styleCounts[style] || 0) + 1;
     });
-    
-    const mostUsedStyle = Object.keys(styleCounts).reduce((a, b) => 
-      styleCounts[a] > styleCounts[b] ? a : b, 'unknown'
+
+    const mostUsedStyle = Object.keys(styleCounts).reduce(
+      (a, b) => (styleCounts[a] > styleCounts[b] ? a : b),
+      'unknown'
     );
 
     return {
@@ -382,9 +431,10 @@ export class MediaGenerationService {
       totalCost,
       imagesGenerated,
       videosGenerated,
-      averageCostPerGeneration: totalGenerations > 0 ? totalCost / totalGenerations : 0,
+      averageCostPerGeneration:
+        totalGenerations > 0 ? totalCost / totalGenerations : 0,
       mostUsedStyle,
-      averageGenerationTime: 0 // Would be calculated from actual generation times
+      averageGenerationTime: 0, // Would be calculated from actual generation times
     };
   }
 
@@ -425,7 +475,7 @@ export class MediaGenerationService {
     return {
       nanoBanana: !!NANO_BANANA_API_KEY || IS_DEMO_MODE,
       veo3: !!VEO3_API_KEY || IS_DEMO_MODE,
-      gemini: !!GOOGLE_API_KEY || IS_DEMO_MODE
+      gemini: !!GOOGLE_API_KEY || IS_DEMO_MODE,
     };
   }
 

@@ -26,7 +26,7 @@ export interface ErrorHandler {
 class DefaultErrorHandler implements ErrorHandler {
   handle(error: APIException): void {
     console.error('API Error:', error);
-    
+
     // Show user-friendly error message
     const userMessage = this.getUserFriendlyMessage(error);
     toast.error(userMessage);
@@ -143,17 +143,17 @@ export class EnhancedAPIClient {
         return response;
       } catch (error) {
         lastError = error as APIException;
-        
+
         // Handle the error
         errorHandlers.handleError(lastError);
-        
+
         // Check if we should retry
         if (attempt < this.maxRetries && errorHandlers.shouldRetry(lastError)) {
           const delay = errorHandlers.getRetryDelay(lastError, attempt);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
-        
+
         throw lastError;
       }
     }
@@ -173,15 +173,15 @@ export class EnhancedAPIClient {
         return response;
       } catch (error) {
         lastError = error as APIException;
-        
+
         errorHandlers.handleError(lastError);
-        
+
         if (attempt < this.maxRetries && errorHandlers.shouldRetry(lastError)) {
           const delay = errorHandlers.getRetryDelay(lastError, attempt);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
-        
+
         throw lastError;
       }
     }
@@ -201,15 +201,15 @@ export class EnhancedAPIClient {
         return response;
       } catch (error) {
         lastError = error as APIException;
-        
+
         errorHandlers.handleError(lastError);
-        
+
         if (attempt < this.maxRetries && errorHandlers.shouldRetry(lastError)) {
           const delay = errorHandlers.getRetryDelay(lastError, attempt);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
-        
+
         throw lastError;
       }
     }
@@ -226,15 +226,15 @@ export class EnhancedAPIClient {
         return response;
       } catch (error) {
         lastError = error as APIException;
-        
+
         errorHandlers.handleError(lastError);
-        
+
         if (attempt < this.maxRetries && errorHandlers.shouldRetry(lastError)) {
           const delay = errorHandlers.getRetryDelay(lastError, attempt);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
-        
+
         throw lastError;
       }
     }
@@ -252,11 +252,11 @@ export const handleAPIError = (error: unknown): string => {
     errorHandlers.handleError(error);
     return error.message;
   }
-  
+
   if (error instanceof Error) {
     return error.message;
   }
-  
+
   return 'An unknown error occurred';
 };
 

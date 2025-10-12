@@ -56,7 +56,12 @@ export function isProviderConfigured(provider: AIProvider): boolean {
 }
 
 export function getConfiguredProviders(): AIProvider[] {
-  const providers: AIProvider[] = ['openai', 'anthropic', 'google', 'perplexity'];
+  const providers: AIProvider[] = [
+    'openai',
+    'anthropic',
+    'google',
+    'perplexity',
+  ];
   return providers.filter(provider => isProviderConfigured(provider));
 }
 
@@ -72,4 +77,3 @@ function getDefaultModel(provider: AIProvider): string {
 }
 
 export { type AIProvider as Provider };
-

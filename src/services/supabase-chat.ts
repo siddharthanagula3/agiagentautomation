@@ -22,7 +22,10 @@ function getUserIdOrThrow(userId?: string | null): string {
   return userId;
 }
 
-export async function createSession(userId: string | null | undefined, params: { employeeId: string; role: string; provider: string; }): Promise<ChatSessionRecord> {
+export async function createSession(
+  userId: string | null | undefined,
+  params: { employeeId: string; role: string; provider: string }
+): Promise<ChatSessionRecord> {
   const uid = getUserIdOrThrow(userId);
   const { employeeId, role, provider } = params;
   const supabase = supabaseClient as any;
@@ -35,7 +38,9 @@ export async function createSession(userId: string | null | undefined, params: {
   return data as ChatSessionRecord;
 }
 
-export async function listSessions(userId: string | null | undefined): Promise<ChatSessionRecord[]> {
+export async function listSessions(
+  userId: string | null | undefined
+): Promise<ChatSessionRecord[]> {
   const uid = getUserIdOrThrow(userId);
   const supabase = supabaseClient as any;
   const { data, error } = await supabase
@@ -47,7 +52,10 @@ export async function listSessions(userId: string | null | undefined): Promise<C
   return (data || []) as ChatSessionRecord[];
 }
 
-export async function listMessages(userId: string | null | undefined, sessionId: string): Promise<ChatMessageRecord[]> {
+export async function listMessages(
+  userId: string | null | undefined,
+  sessionId: string
+): Promise<ChatMessageRecord[]> {
   getUserIdOrThrow(userId); // validate auth; RLS enforces access
   const supabase = supabaseClient as any;
   const { data, error } = await supabase
@@ -59,7 +67,12 @@ export async function listMessages(userId: string | null | undefined, sessionId:
   return (data || []) as ChatMessageRecord[];
 }
 
-export async function sendMessage(userId: string | null | undefined, sessionId: string, role: 'user' | 'assistant' | 'system', content: string): Promise<ChatMessageRecord> {
+export async function sendMessage(
+  userId: string | null | undefined,
+  sessionId: string,
+  role: 'user' | 'assistant' | 'system',
+  content: string
+): Promise<ChatMessageRecord> {
   getUserIdOrThrow(userId); // validate auth; RLS enforces access
   const supabase = supabaseClient as any;
   const { data, error } = await supabase
@@ -70,5 +83,3 @@ export async function sendMessage(userId: string | null | undefined, sessionId: 
   if (error) throw error;
   return data as ChatMessageRecord;
 }
-
-

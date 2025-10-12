@@ -11,7 +11,7 @@ interface InteractiveHoverCardProps {
 export const InteractiveHoverCard: React.FC<InteractiveHoverCardProps> = ({
   children,
   className,
-  containerClassName
+  containerClassName,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -21,8 +21,16 @@ export const InteractiveHoverCard: React.FC<InteractiveHoverCardProps> = ({
   const mouseXSpring = useSpring(x);
   const mouseYSpring = useSpring(y);
 
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ['7.5deg', '-7.5deg']);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ['-7.5deg', '7.5deg']);
+  const rotateX = useTransform(
+    mouseYSpring,
+    [-0.5, 0.5],
+    ['7.5deg', '-7.5deg']
+  );
+  const rotateY = useTransform(
+    mouseXSpring,
+    [-0.5, 0.5],
+    ['-7.5deg', '7.5deg']
+  );
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!ref.current) return;
@@ -63,7 +71,7 @@ export const InteractiveHoverCard: React.FC<InteractiveHoverCardProps> = ({
           transform: 'translateZ(75px)',
           transformStyle: 'preserve-3d',
         }}
-        className={cn('w-full h-full', className)}
+        className={cn('h-full w-full', className)}
       >
         {children}
       </div>

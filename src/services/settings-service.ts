@@ -33,7 +33,9 @@ export interface APIKey {
 class SettingsService {
   async getUserProfile(): Promise<UserProfile | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       return {
@@ -50,7 +52,9 @@ class SettingsService {
     }
   }
 
-  async updateProfile(updates: Partial<UserProfile>): Promise<{ success: boolean; error?: string }> {
+  async updateProfile(
+    updates: Partial<UserProfile>
+  ): Promise<{ success: boolean; error?: string }> {
     try {
       const { error } = await supabase.auth.updateUser({
         data: {
@@ -71,7 +75,9 @@ class SettingsService {
 
   async getUserSettings(): Promise<UserSettings> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return {};
 
       const { data, error } = await supabase
@@ -90,7 +96,7 @@ class SettingsService {
         notifications: data.push_notifications,
         emailNotifications: data.email_notifications,
         language: data.language || 'en',
-        timezone: data.timezone || 'America/New_York'
+        timezone: data.timezone || 'America/New_York',
       };
     } catch (error) {
       console.error('Error getting user settings:', error);
@@ -98,24 +104,26 @@ class SettingsService {
     }
   }
 
-  async updateSettings(settings: UserSettings): Promise<{ success: boolean; error?: string }> {
+  async updateSettings(
+    settings: UserSettings
+  ): Promise<{ success: boolean; error?: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         return { success: false, error: 'User not authenticated' };
       }
 
-      const { error } = await supabase
-        .from('user_settings')
-        .upsert({
-          id: user.id,
-          theme: settings.theme,
-          push_notifications: settings.notifications,
-          email_notifications: settings.emailNotifications,
-          language: settings.language,
-          timezone: settings.timezone,
-          updated_at: new Date().toISOString()
-        });
+      const { error } = await supabase.from('user_settings').upsert({
+        id: user.id,
+        theme: settings.theme,
+        push_notifications: settings.notifications,
+        email_notifications: settings.emailNotifications,
+        language: settings.language,
+        timezone: settings.timezone,
+        updated_at: new Date().toISOString(),
+      });
 
       if (error) {
         console.error('Error updating user settings:', error);
@@ -169,7 +177,7 @@ class SettingsService {
   async changePassword(newPassword: string): Promise<{ error?: string }> {
     try {
       const { error } = await supabase.auth.updateUser({
-        password: newPassword
+        password: newPassword,
       });
 
       if (error) {
@@ -182,16 +190,21 @@ class SettingsService {
     }
   }
 
-  async createAPIKey(name: string): Promise<{ data: APIKey; error?: string; fullKey?: string }> {
+  async createAPIKey(
+    name: string
+  ): Promise<{ data: APIKey; error?: string; fullKey?: string }> {
     try {
       // Generate a random API key
-      const key = 'ak_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      
+      const key =
+        'ak_' +
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
+
       const apiKey: APIKey = {
         id: Math.random().toString(36).substring(2, 15),
         name,
         key: key.substring(0, 8) + '...',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       };
 
       return { data: apiKey, fullKey: key };
@@ -231,4 +244,3 @@ class SettingsService {
 const settingsService = new SettingsService();
 export default settingsService;
 export { settingsService };
-

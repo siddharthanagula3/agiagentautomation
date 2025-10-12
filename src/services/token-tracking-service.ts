@@ -21,16 +21,22 @@ export interface TokenUsage {
 export interface TokenStats {
   totalTokens: number;
   totalCost: number;
-  providerBreakdown: Record<string, {
-    tokens: number;
-    cost: number;
-    percentage: number;
-  }>;
-  modelBreakdown: Record<string, {
-    tokens: number;
-    cost: number;
-    percentage: number;
-  }>;
+  providerBreakdown: Record<
+    string,
+    {
+      tokens: number;
+      cost: number;
+      percentage: number;
+    }
+  >;
+  modelBreakdown: Record<
+    string,
+    {
+      tokens: number;
+      cost: number;
+      percentage: number;
+    }
+  >;
   dailyUsage: Array<{
     date: string;
     tokens: number;
@@ -63,14 +69,15 @@ const PRICING = {
   },
   perplexity: {
     'llama-3.1-sonar-large-128k-online': { input: 0.2, output: 0.2 },
-  }
+  },
 };
 
 export class TokenTrackingService {
   private static instance: TokenTrackingService;
   private usageHistory: TokenUsage[] = [];
   private dailyStats: Map<string, { tokens: number; cost: number }> = new Map();
-  private monthlyStats: Map<string, { tokens: number; cost: number }> = new Map();
+  private monthlyStats: Map<string, { tokens: number; cost: number }> =
+    new Map();
 
   static getInstance(): TokenTrackingService {
     if (!TokenTrackingService.instance) {
@@ -92,17 +99,22 @@ export class TokenTrackingService {
   ): TokenUsage {
     const providerKey = provider.toLowerCase();
     const modelKey = model.toLowerCase();
-    
+
     // Get pricing for the model
-    const pricing = PRICING[providerKey as keyof typeof PRICING]?.[modelKey as keyof typeof PRICING[typeof providerKey]];
-    
+    const pricing =
+      PRICING[providerKey as keyof typeof PRICING]?.[
+        modelKey as keyof (typeof PRICING)[typeof providerKey]
+      ];
+
     if (!pricing) {
-      console.warn(`No pricing found for ${provider}/${model}, using default rates`);
+      console.warn(
+        `No pricing found for ${provider}/${model}, using default rates`
+      );
       // Default fallback pricing
       const defaultPricing = { input: 1, output: 2 };
       const inputCost = (inputTokens / 1000000) * defaultPricing.input;
       const outputCost = (outputTokens / 1000000) * defaultPricing.output;
-      
+
       return {
         provider,
         model,
@@ -114,7 +126,7 @@ export class TokenTrackingService {
         totalCost: inputCost + outputCost,
         timestamp: new Date(),
         sessionId,
-        userId
+        userId,
       };
     }
 
@@ -133,7 +145,7 @@ export class TokenTrackingService {
       totalCost: inputCost + outputCost,
       timestamp: new Date(),
       sessionId,
-      userId
+      userId,
     };
 
     // Store usage
@@ -149,27 +161,42 @@ export class TokenTrackingService {
    */
   getTokenStats(userId?: string, startDate?: Date, endDate?: Date): TokenStats {
     let filteredUsage = this.usageHistory;
-    
+
     if (userId) {
       filteredUsage = filteredUsage.filter(usage => usage.userId === userId);
     }
-    
+
     if (startDate) {
-      filteredUsage = filteredUsage.filter(usage => usage.timestamp >= startDate);
+      filteredUsage = filteredUsage.filter(
+        usage => usage.timestamp >= startDate
+      );
     }
-    
+
     if (endDate) {
       filteredUsage = filteredUsage.filter(usage => usage.timestamp <= endDate);
     }
 
-    const totalTokens = filteredUsage.reduce((sum, usage) => sum + usage.totalTokens, 0);
-    const totalCost = filteredUsage.reduce((sum, usage) => sum + usage.totalCost, 0);
+    const totalTokens = filteredUsage.reduce(
+      (sum, usage) => sum + usage.totalTokens,
+      0
+    );
+    const totalCost = filteredUsage.reduce(
+      (sum, usage) => sum + usage.totalCost,
+      0
+    );
 
     // Provider breakdown
-    const providerBreakdown: Record<string, { tokens: number; cost: number; percentage: number }> = {};
+    const providerBreakdown: Record<
+      string,
+      { tokens: number; cost: number; percentage: number }
+    > = {};
     filteredUsage.forEach(usage => {
       if (!providerBreakdown[usage.provider]) {
-        providerBreakdown[usage.provider] = { tokens: 0, cost: 0, percentage: 0 };
+        providerBreakdown[usage.provider] = {
+          tokens: 0,
+          cost: 0,
+          percentage: 0,
+        };
       }
       providerBreakdown[usage.provider].tokens += usage.totalTokens;
       providerBreakdown[usage.provider].cost += usage.totalCost;
@@ -177,13 +204,17 @@ export class TokenTrackingService {
 
     // Calculate percentages
     Object.keys(providerBreakdown).forEach(provider => {
-      providerBreakdown[provider].percentage = totalTokens > 0 
-        ? (providerBreakdown[provider].tokens / totalTokens) * 100 
-        : 0;
+      providerBreakdown[provider].percentage =
+        totalTokens > 0
+          ? (providerBreakdown[provider].tokens / totalTokens) * 100
+          : 0;
     });
 
     // Model breakdown
-    const modelBreakdown: Record<string, { tokens: number; cost: number; percentage: number }> = {};
+    const modelBreakdown: Record<
+      string,
+      { tokens: number; cost: number; percentage: number }
+    > = {};
     filteredUsage.forEach(usage => {
       const key = `${usage.provider}/${usage.model}`;
       if (!modelBreakdown[key]) {
@@ -195,14 +226,15 @@ export class TokenTrackingService {
 
     // Calculate percentages for models
     Object.keys(modelBreakdown).forEach(model => {
-      modelBreakdown[model].percentage = totalTokens > 0 
-        ? (modelBreakdown[model].tokens / totalTokens) * 100 
-        : 0;
+      modelBreakdown[model].percentage =
+        totalTokens > 0
+          ? (modelBreakdown[model].tokens / totalTokens) * 100
+          : 0;
     });
 
     // Daily usage (last 30 days)
     const dailyUsage = this.getDailyUsage(30);
-    
+
     // Monthly usage (last 12 months)
     const monthlyUsage = this.getMonthlyUsage(12);
 
@@ -212,7 +244,7 @@ export class TokenTrackingService {
       providerBreakdown,
       modelBreakdown,
       dailyUsage,
-      monthlyUsage
+      monthlyUsage,
     };
   }
 
@@ -220,9 +252,10 @@ export class TokenTrackingService {
    * Get usage by provider
    */
   getUsageByProvider(provider: string, userId?: string): TokenUsage[] {
-    return this.usageHistory.filter(usage => 
-      usage.provider.toLowerCase() === provider.toLowerCase() &&
-      (!userId || usage.userId === userId)
+    return this.usageHistory.filter(
+      usage =>
+        usage.provider.toLowerCase() === provider.toLowerCase() &&
+        (!userId || usage.userId === userId)
     );
   }
 
@@ -230,9 +263,10 @@ export class TokenTrackingService {
    * Get usage by model
    */
   getUsageByModel(model: string, userId?: string): TokenUsage[] {
-    return this.usageHistory.filter(usage => 
-      usage.model.toLowerCase() === model.toLowerCase() &&
-      (!userId || usage.userId === userId)
+    return this.usageHistory.filter(
+      usage =>
+        usage.model.toLowerCase() === model.toLowerCase() &&
+        (!userId || usage.userId === userId)
     );
   }
 
@@ -241,7 +275,7 @@ export class TokenTrackingService {
    */
   getCostBreakdown(userId?: string): Record<string, number> {
     const breakdown: Record<string, number> = {};
-    
+
     this.usageHistory
       .filter(usage => !userId || usage.userId === userId)
       .forEach(usage => {
@@ -264,28 +298,38 @@ export class TokenTrackingService {
     mostUsedModel: string;
     costPerToken: number;
   } {
-    const filteredUsage = this.usageHistory.filter(usage => !userId || usage.userId === userId);
-    
+    const filteredUsage = this.usageHistory.filter(
+      usage => !userId || usage.userId === userId
+    );
+
     if (filteredUsage.length === 0) {
       return {
         avgTokensPerRequest: 0,
         avgCostPerRequest: 0,
         mostUsedProvider: '',
         mostUsedModel: '',
-        costPerToken: 0
+        costPerToken: 0,
       };
     }
 
-    const totalTokens = filteredUsage.reduce((sum, usage) => sum + usage.totalTokens, 0);
-    const totalCost = filteredUsage.reduce((sum, usage) => sum + usage.totalCost, 0);
-    
+    const totalTokens = filteredUsage.reduce(
+      (sum, usage) => sum + usage.totalTokens,
+      0
+    );
+    const totalCost = filteredUsage.reduce(
+      (sum, usage) => sum + usage.totalCost,
+      0
+    );
+
     // Most used provider
     const providerCounts: Record<string, number> = {};
     filteredUsage.forEach(usage => {
-      providerCounts[usage.provider] = (providerCounts[usage.provider] || 0) + 1;
+      providerCounts[usage.provider] =
+        (providerCounts[usage.provider] || 0) + 1;
     });
-    const mostUsedProvider = Object.keys(providerCounts).reduce((a, b) => 
-      providerCounts[a] > providerCounts[b] ? a : b, ''
+    const mostUsedProvider = Object.keys(providerCounts).reduce(
+      (a, b) => (providerCounts[a] > providerCounts[b] ? a : b),
+      ''
     );
 
     // Most used model
@@ -294,8 +338,9 @@ export class TokenTrackingService {
       const key = `${usage.provider}/${usage.model}`;
       modelCounts[key] = (modelCounts[key] || 0) + 1;
     });
-    const mostUsedModel = Object.keys(modelCounts).reduce((a, b) => 
-      modelCounts[a] > modelCounts[b] ? a : b, ''
+    const mostUsedModel = Object.keys(modelCounts).reduce(
+      (a, b) => (modelCounts[a] > modelCounts[b] ? a : b),
+      ''
     );
 
     return {
@@ -303,7 +348,7 @@ export class TokenTrackingService {
       avgCostPerRequest: totalCost / filteredUsage.length,
       mostUsedProvider,
       mostUsedModel,
-      costPerToken: totalTokens > 0 ? totalCost / totalTokens : 0
+      costPerToken: totalTokens > 0 ? totalCost / totalTokens : 0,
     };
   }
 
@@ -311,16 +356,20 @@ export class TokenTrackingService {
    * Export usage data
    */
   exportUsageData(userId?: string, format: 'json' | 'csv' = 'json'): string {
-    const filteredUsage = this.usageHistory.filter(usage => !userId || usage.userId === userId);
-    
+    const filteredUsage = this.usageHistory.filter(
+      usage => !userId || usage.userId === userId
+    );
+
     if (format === 'csv') {
-      const headers = 'Provider,Model,Input Tokens,Output Tokens,Total Tokens,Input Cost,Output Cost,Total Cost,Timestamp,Session ID,User ID';
-      const rows = filteredUsage.map(usage => 
-        `${usage.provider},${usage.model},${usage.inputTokens},${usage.outputTokens},${usage.totalTokens},${usage.inputCost.toFixed(6)},${usage.outputCost.toFixed(6)},${usage.totalCost.toFixed(6)},${usage.timestamp.toISOString()},${usage.sessionId || ''},${usage.userId || ''}`
+      const headers =
+        'Provider,Model,Input Tokens,Output Tokens,Total Tokens,Input Cost,Output Cost,Total Cost,Timestamp,Session ID,User ID';
+      const rows = filteredUsage.map(
+        usage =>
+          `${usage.provider},${usage.model},${usage.inputTokens},${usage.outputTokens},${usage.totalTokens},${usage.inputCost.toFixed(6)},${usage.outputCost.toFixed(6)},${usage.totalCost.toFixed(6)},${usage.timestamp.toISOString()},${usage.sessionId || ''},${usage.userId || ''}`
       );
       return [headers, ...rows].join('\n');
     }
-    
+
     return JSON.stringify(filteredUsage, null, 2);
   }
 
@@ -329,7 +378,9 @@ export class TokenTrackingService {
    */
   clearHistory(userId?: string): void {
     if (userId) {
-      this.usageHistory = this.usageHistory.filter(usage => usage.userId !== userId);
+      this.usageHistory = this.usageHistory.filter(
+        usage => usage.userId !== userId
+      );
     } else {
       this.usageHistory = [];
     }
@@ -362,10 +413,12 @@ export class TokenTrackingService {
   /**
    * Get daily usage for the last N days
    */
-  private getDailyUsage(days: number): Array<{ date: string; tokens: number; cost: number }> {
+  private getDailyUsage(
+    days: number
+  ): Array<{ date: string; tokens: number; cost: number }> {
     const result: Array<{ date: string; tokens: number; cost: number }> = [];
     const today = new Date();
-    
+
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
@@ -374,20 +427,22 @@ export class TokenTrackingService {
       result.push({
         date: dateKey,
         tokens: stats.tokens,
-        cost: stats.cost
+        cost: stats.cost,
       });
     }
-    
+
     return result;
   }
 
   /**
    * Get monthly usage for the last N months
    */
-  private getMonthlyUsage(months: number): Array<{ month: string; tokens: number; cost: number }> {
+  private getMonthlyUsage(
+    months: number
+  ): Array<{ month: string; tokens: number; cost: number }> {
     const result: Array<{ month: string; tokens: number; cost: number }> = [];
     const today = new Date();
-    
+
     for (let i = months - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setMonth(date.getMonth() - i);
@@ -396,10 +451,10 @@ export class TokenTrackingService {
       result.push({
         month: monthKey,
         tokens: stats.tokens,
-        cost: stats.cost
+        cost: stats.cost,
       });
     }
-    
+
     return result;
   }
 }

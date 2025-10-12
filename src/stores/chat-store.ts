@@ -140,17 +140,27 @@ export interface ChatActions {
   duplicateConversation: (id: string) => string;
 
   // Message management
-  addMessage: (conversationId: string, message: Omit<Message, 'id' | 'timestamp'>) => string;
+  addMessage: (
+    conversationId: string,
+    message: Omit<Message, 'id' | 'timestamp'>
+  ) => string;
   updateMessage: (messageId: string, updates: Partial<Message>) => void;
   deleteMessage: (messageId: string) => void;
-  reactToMessage: (messageId: string, reaction: MessageReaction['type']) => void;
+  reactToMessage: (
+    messageId: string,
+    reaction: MessageReaction['type']
+  ) => void;
 
   // AI interactions
-  sendMessage: (conversationId: string, content: string, options?: {
-    model?: string;
-    temperature?: number;
-    maxTokens?: number;
-  }) => Promise<void>;
+  sendMessage: (
+    conversationId: string,
+    content: string,
+    options?: {
+      model?: string;
+      temperature?: number;
+      maxTokens?: number;
+    }
+  ) => Promise<void>;
   regenerateResponse: (messageId: string) => Promise<void>;
   stopGeneration: () => void;
 
@@ -165,7 +175,10 @@ export interface ChatActions {
   updateModelSettings: (settings: Partial<Conversation['settings']>) => void;
 
   // Utility actions
-  exportConversation: (id: string, format: 'json' | 'markdown' | 'txt') => string;
+  exportConversation: (
+    id: string,
+    format: 'json' | 'markdown' | 'txt'
+  ) => string;
   importConversations: (data: Conversation[]) => void;
   clearHistory: () => void;
   setError: (error: string | null) => void;
@@ -244,7 +257,7 @@ export const useChatStore = create<ChatStore>()(
           const id = crypto.randomUUID();
           const now = new Date();
 
-          set((state) => {
+          set(state => {
             const conversation: Conversation = {
               id,
               title: title || 'New Conversation',
@@ -273,7 +286,7 @@ export const useChatStore = create<ChatStore>()(
         },
 
         updateConversation: (id: string, updates: Partial<Conversation>) =>
-          set((state) => {
+          set(state => {
             if (state.conversations[id]) {
               state.conversations[id] = {
                 ...state.conversations[id],
@@ -288,7 +301,7 @@ export const useChatStore = create<ChatStore>()(
           }),
 
         deleteConversation: (id: string) =>
-          set((state) => {
+          set(state => {
             delete state.conversations[id];
             if (state.activeConversationId === id) {
               state.activeConversationId = null;
@@ -296,7 +309,7 @@ export const useChatStore = create<ChatStore>()(
           }),
 
         setActiveConversation: (id: string | null) =>
-          set((state) => {
+          set(state => {
             state.activeConversationId = id;
             state.lastActivity = new Date();
           }),
@@ -307,7 +320,7 @@ export const useChatStore = create<ChatStore>()(
           if (!original) return '';
 
           const newId = crypto.randomUUID();
-          set((state) => {
+          set(state => {
             state.conversations[newId] = {
               ...original,
               id: newId,
@@ -324,10 +337,13 @@ export const useChatStore = create<ChatStore>()(
         },
 
         // Message management
-        addMessage: (conversationId: string, message: Omit<Message, 'id' | 'timestamp'>) => {
+        addMessage: (
+          conversationId: string,
+          message: Omit<Message, 'id' | 'timestamp'>
+        ) => {
           const messageId = crypto.randomUUID();
 
-          set((state) => {
+          set(state => {
             if (state.conversations[conversationId]) {
               const newMessage: Message = {
                 ...message,
@@ -336,15 +352,18 @@ export const useChatStore = create<ChatStore>()(
               };
 
               state.conversations[conversationId].messages.push(newMessage);
-              state.conversations[conversationId].metadata.updatedAt = new Date();
+              state.conversations[conversationId].metadata.updatedAt =
+                new Date();
               state.conversations[conversationId].metadata.totalMessages += 1;
 
               if (message.metadata?.tokensUsed) {
-                state.conversations[conversationId].metadata.totalTokens += message.metadata.tokensUsed;
+                state.conversations[conversationId].metadata.totalTokens +=
+                  message.metadata.tokensUsed;
               }
 
               if (message.metadata?.cost) {
-                state.conversations[conversationId].metadata.totalCost += message.metadata.cost;
+                state.conversations[conversationId].metadata.totalCost +=
+                  message.metadata.cost;
               }
             }
           });
@@ -353,9 +372,11 @@ export const useChatStore = create<ChatStore>()(
         },
 
         updateMessage: (messageId: string, updates: Partial<Message>) =>
-          set((state) => {
+          set(state => {
             for (const conversation of Object.values(state.conversations)) {
-              const message = conversation.messages.find((m) => m.id === messageId);
+              const message = conversation.messages.find(
+                m => m.id === messageId
+              );
               if (message) {
                 Object.assign(message, updates);
                 conversation.metadata.updatedAt = new Date();
@@ -365,32 +386,44 @@ export const useChatStore = create<ChatStore>()(
           }),
 
         deleteMessage: (messageId: string) =>
-          set((state) => {
+          set(state => {
             for (const conversation of Object.values(state.conversations)) {
-              const index = conversation.messages.findIndex((m) => m.id === messageId);
+              const index = conversation.messages.findIndex(
+                m => m.id === messageId
+              );
               if (index !== -1) {
                 conversation.messages.splice(index, 1);
                 conversation.metadata.updatedAt = new Date();
-                conversation.metadata.totalMessages = Math.max(0, conversation.metadata.totalMessages - 1);
+                conversation.metadata.totalMessages = Math.max(
+                  0,
+                  conversation.metadata.totalMessages - 1
+                );
                 break;
               }
             }
           }),
 
-        reactToMessage: (messageId: string, reactionType: MessageReaction['type']) =>
-          set((state) => {
+        reactToMessage: (
+          messageId: string,
+          reactionType: MessageReaction['type']
+        ) =>
+          set(state => {
             for (const conversation of Object.values(state.conversations)) {
-              const message = conversation.messages.find((m) => m.id === messageId);
+              const message = conversation.messages.find(
+                m => m.id === messageId
+              );
               if (message) {
                 if (!message.reactions) message.reactions = [];
 
                 const existingReaction = message.reactions.find(
-                  (r) => r.type === reactionType && r.userId === 'current-user'
+                  r => r.type === reactionType && r.userId === 'current-user'
                 );
 
                 if (existingReaction) {
                   // Remove existing reaction
-                  message.reactions = message.reactions.filter((r) => r !== existingReaction);
+                  message.reactions = message.reactions.filter(
+                    r => r !== existingReaction
+                  );
                 } else {
                   // Add new reaction
                   message.reactions.push({
@@ -405,7 +438,11 @@ export const useChatStore = create<ChatStore>()(
           }),
 
         // AI interactions
-        sendMessage: async (conversationId: string, content: string, options = {}) => {
+        sendMessage: async (
+          conversationId: string,
+          content: string,
+          options = {}
+        ) => {
           const { addMessage } = get();
 
           // Add user message
@@ -415,7 +452,7 @@ export const useChatStore = create<ChatStore>()(
             content,
           });
 
-          set((state) => {
+          set(state => {
             state.isStreamingResponse = true;
             state.error = null;
           });
@@ -436,12 +473,14 @@ export const useChatStore = create<ChatStore>()(
             const words = fullResponse.split(' ');
 
             for (let i = 0; i < words.length; i++) {
-              await new Promise((resolve) => setTimeout(resolve, 50));
+              await new Promise(resolve => setTimeout(resolve, 50));
               currentContent += (i > 0 ? ' ' : '') + words[i];
 
-              set((state) => {
+              set(state => {
                 for (const conversation of Object.values(state.conversations)) {
-                  const message = conversation.messages.find((m) => m.id === assistantMessageId);
+                  const message = conversation.messages.find(
+                    m => m.id === assistantMessageId
+                  );
                   if (message) {
                     message.content = currentContent;
                     break;
@@ -451,9 +490,11 @@ export const useChatStore = create<ChatStore>()(
             }
 
             // Complete the streaming
-            set((state) => {
+            set(state => {
               for (const conversation of Object.values(state.conversations)) {
-                const message = conversation.messages.find((m) => m.id === assistantMessageId);
+                const message = conversation.messages.find(
+                  m => m.id === assistantMessageId
+                );
                 if (message) {
                   message.isStreaming = false;
                   message.streamingComplete = true;
@@ -462,7 +503,8 @@ export const useChatStore = create<ChatStore>()(
                     tokensUsed: words.length * 1.3, // Rough estimate
                     cost: (words.length * 1.3 * 0.002) / 1000,
                     processingTime: words.length * 50,
-                    temperature: options.temperature || state.defaultSettings.temperature,
+                    temperature:
+                      options.temperature || state.defaultSettings.temperature,
                   };
                   break;
                 }
@@ -471,9 +513,12 @@ export const useChatStore = create<ChatStore>()(
               state.isStreamingResponse = false;
             });
           } catch (error) {
-            set((state) => {
+            set(state => {
               state.isStreamingResponse = false;
-              state.error = error instanceof Error ? error.message : 'Failed to send message';
+              state.error =
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to send message';
             });
           }
         },
@@ -484,47 +529,50 @@ export const useChatStore = create<ChatStore>()(
         },
 
         stopGeneration: () =>
-          set((state) => {
+          set(state => {
             state.isStreamingResponse = false;
           }),
 
         // Search and filtering
         setSearchQuery: (query: string) =>
-          set((state) => {
+          set(state => {
             state.searchQuery = query;
           }),
 
         addFilterTag: (tag: string) =>
-          set((state) => {
+          set(state => {
             if (!state.filterTags.includes(tag)) {
               state.filterTags.push(tag);
             }
           }),
 
         removeFilterTag: (tag: string) =>
-          set((state) => {
-            state.filterTags = state.filterTags.filter((t) => t !== tag);
+          set(state => {
+            state.filterTags = state.filterTags.filter(t => t !== tag);
           }),
 
         clearFilters: () =>
-          set((state) => {
+          set(state => {
             state.searchQuery = '';
             state.filterTags = [];
           }),
 
         // Model management
         setSelectedModel: (modelId: string) =>
-          set((state) => {
+          set(state => {
             state.selectedModel = modelId;
           }),
 
         updateModelSettings: (settings: Partial<Conversation['settings']>) =>
-          set((state) => {
+          set(state => {
             state.defaultSettings = { ...state.defaultSettings, ...settings };
           }),
 
         // Utility actions
-        exportConversation: (id: string, format: 'json' | 'markdown' | 'txt') => {
+        exportConversation: (
+          id: string,
+          format: 'json' | 'markdown' | 'txt'
+        ) => {
           const { conversations } = get();
           const conversation = conversations[id];
           if (!conversation) return '';
@@ -534,7 +582,7 @@ export const useChatStore = create<ChatStore>()(
               return JSON.stringify(conversation, null, 2);
             case 'markdown': {
               let markdown = `# ${conversation.title}\n\n`;
-              conversation.messages.forEach((message) => {
+              conversation.messages.forEach(message => {
                 markdown += `## ${message.role.charAt(0).toUpperCase() + message.role.slice(1)}\n\n`;
                 markdown += `${message.content}\n\n`;
               });
@@ -542,7 +590,7 @@ export const useChatStore = create<ChatStore>()(
             }
             case 'txt':
               return conversation.messages
-                .map((m) => `${m.role}: ${m.content}`)
+                .map(m => `${m.role}: ${m.content}`)
                 .join('\n\n');
             default:
               return '';
@@ -554,20 +602,20 @@ export const useChatStore = create<ChatStore>()(
         },
 
         clearHistory: () =>
-          set((state) => {
+          set(state => {
             state.conversations = {};
             state.activeConversationId = null;
           }),
 
         setError: (error: string | null) =>
-          set((state) => {
+          set(state => {
             state.error = error;
           }),
       })),
       {
         name: 'agi-chat-store',
         version: 1,
-        partialize: (state) => ({
+        partialize: state => ({
           conversations: state.conversations,
           selectedModel: state.selectedModel,
           defaultSettings: state.defaultSettings,

@@ -7,7 +7,13 @@ import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 // No longer needed - removed Stripe success handling
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,11 +21,28 @@ import { BentoGrid, BentoCard } from '@/components/ui/bento-grid';
 import { InteractiveHoverCard } from '@/components/ui/interactive-hover-card';
 import { Particles } from '@/components/ui/particles';
 import { Link } from 'react-router-dom';
-import { listPurchasedEmployees, getEmployeeById } from '@/services/supabase-employees';
+import {
+  listPurchasedEmployees,
+  getEmployeeById,
+} from '@/services/supabase-employees';
 import { useAuthStore } from '@/stores/unified-auth-store';
 // No longer needed - removed Stripe success handling
 import { toast } from 'sonner';
-import { Users, Bot, BarChart3, Settings, Plus, TrendingUp, Sparkles, Zap, Target, Clock, ArrowRight, MessageSquare, Code } from 'lucide-react';
+import {
+  Users,
+  Bot,
+  BarChart3,
+  Settings,
+  Plus,
+  TrendingUp,
+  Sparkles,
+  Zap,
+  Target,
+  Clock,
+  ArrowRight,
+  MessageSquare,
+  Code,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const WorkforcePage: React.FC = () => {
@@ -28,7 +51,11 @@ const WorkforcePage: React.FC = () => {
 
   // Removed analytics queries - stats and performance data
 
-  const { data: purchased = [], isLoading: hiresLoading, refetch: refetchPurchased } = useQuery({
+  const {
+    data: purchased = [],
+    isLoading: hiresLoading,
+    refetch: refetchPurchased,
+  } = useQuery({
     queryKey: ['purchased-employees', userId],
     queryFn: () => listPurchasedEmployees(userId!),
     enabled: !!userId,
@@ -39,7 +66,7 @@ const WorkforcePage: React.FC = () => {
 
   if (!userId) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <Card className="glass-strong max-w-md">
           <CardHeader>
             <CardTitle>Authentication Required</CardTitle>
@@ -47,7 +74,9 @@ const WorkforcePage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <Link to="/login">
-              <Button className="w-full gradient-primary text-white">Go to Login</Button>
+              <Button className="gradient-primary w-full text-white">
+                Go to Login
+              </Button>
             </Link>
           </CardContent>
         </Card>
@@ -58,7 +87,7 @@ const WorkforcePage: React.FC = () => {
   const isLoading = hiresLoading;
   const totalEmployees = purchased.length;
   const activeEmployees = purchased.filter(emp => emp.is_active).length;
-  
+
   console.log('[WorkforcePage] 📊 Current state:', {
     userId,
     totalEmployees,
@@ -68,34 +97,37 @@ const WorkforcePage: React.FC = () => {
       employee_id: emp.employee_id,
       name: emp.name,
       role: emp.role,
-      is_active: emp.is_active
-    }))
+      is_active: emp.is_active,
+    })),
   });
 
   return (
-    <div className="min-h-screen p-6 space-y-6">
+    <div className="min-h-screen space-y-6 p-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-strong rounded-3xl p-8 relative overflow-hidden"
+        className="glass-strong relative overflow-hidden rounded-3xl p-8"
       >
         <Particles className="absolute inset-0" quantity={30} ease={20} />
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+        <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
         <div className="relative z-10">
           <div className="flex items-start justify-between">
             <div>
-              <Badge className="mb-4 glass">
+              <Badge className="glass mb-4">
                 <Users className="mr-2 h-3 w-3" />
                 AI Workforce Management
               </Badge>
-              <h1 className="text-4xl font-bold mb-2">Your AI Workforce</h1>
+              <h1 className="mb-2 text-4xl font-bold">Your AI Workforce</h1>
               <p className="text-xl text-muted-foreground">
                 Manage your AI team and track performance in real-time
               </p>
             </div>
             <Link to="/marketplace">
-              <Button size="lg" className="btn-glow gradient-primary text-white">
+              <Button
+                size="lg"
+                className="btn-glow gradient-primary text-white"
+              >
                 <Plus className="mr-2 h-5 w-5" />
                 Hire AI Employee
               </Button>
@@ -105,7 +137,7 @@ const WorkforcePage: React.FC = () => {
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -113,18 +145,22 @@ const WorkforcePage: React.FC = () => {
         >
           <Card className="glass-strong card-hover group">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-transform group-hover:scale-110">
                   <Users className="h-6 w-6 text-primary" />
                 </div>
-                <Badge variant="secondary" className="text-xs">Total</Badge>
+                <Badge variant="secondary" className="text-xs">
+                  Total
+                </Badge>
               </div>
               {isLoading ? (
-                <Skeleton className="h-8 w-20 mb-2" />
+                <Skeleton className="mb-2 h-8 w-20" />
               ) : (
                 <>
-                  <p className="text-3xl font-bold mb-1">{totalEmployees}</p>
-                  <p className="text-sm text-muted-foreground">Total Employees</p>
+                  <p className="mb-1 text-3xl font-bold">{totalEmployees}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Total Employees
+                  </p>
                 </>
               )}
             </CardContent>
@@ -138,22 +174,24 @@ const WorkforcePage: React.FC = () => {
         >
           <Card className="glass-strong card-hover group">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10 transition-transform group-hover:scale-110">
                   <Bot className="h-6 w-6 text-success" />
                 </div>
                 <div className="flex items-center gap-1">
                   {activeEmployees > 0 && (
                     <div className="status-dot status-active"></div>
                   )}
-                  <Badge variant="secondary" className="text-xs">Active</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    Active
+                  </Badge>
                 </div>
               </div>
               {isLoading ? (
-                <Skeleton className="h-8 w-20 mb-2" />
+                <Skeleton className="mb-2 h-8 w-20" />
               ) : (
                 <>
-                  <p className="text-3xl font-bold mb-1">{activeEmployees}</p>
+                  <p className="mb-1 text-3xl font-bold">{activeEmployees}</p>
                   <p className="text-sm text-muted-foreground">Active Now</p>
                 </>
               )}
@@ -168,23 +206,27 @@ const WorkforcePage: React.FC = () => {
         >
           <Card className="glass-strong card-hover group">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 transition-transform group-hover:scale-110">
                   <Target className="h-6 w-6 text-accent" />
                 </div>
                 <Badge variant="secondary" className="text-xs">
                   <TrendingUp className="mr-1 h-3 w-3" />
-                  {totalEmployees > 5 ? 'Excellent' : totalEmployees > 2 ? 'Good' : 'Growing'}
+                  {totalEmployees > 5
+                    ? 'Excellent'
+                    : totalEmployees > 2
+                      ? 'Good'
+                      : 'Growing'}
                 </Badge>
               </div>
-                  {isLoading ? (
-                    <Skeleton className="h-8 w-20 mb-2" />
-                  ) : (
-                    <>
-                      <p className="text-3xl font-bold mb-1">{activeEmployees}</p>
-                      <p className="text-sm text-muted-foreground">Ready to Work</p>
-                    </>
-                  )}
+              {isLoading ? (
+                <Skeleton className="mb-2 h-8 w-20" />
+              ) : (
+                <>
+                  <p className="mb-1 text-3xl font-bold">{activeEmployees}</p>
+                  <p className="text-sm text-muted-foreground">Ready to Work</p>
+                </>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -196,20 +238,22 @@ const WorkforcePage: React.FC = () => {
         >
           <Card className="glass-strong card-hover group">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/10 transition-transform group-hover:scale-110">
                   <Zap className="h-6 w-6 text-secondary" />
                 </div>
-                <Badge variant="secondary" className="text-xs">Utilization</Badge>
+                <Badge variant="secondary" className="text-xs">
+                  Utilization
+                </Badge>
               </div>
-                  {isLoading ? (
-                    <Skeleton className="h-8 w-20 mb-2" />
-                  ) : (
-                    <>
-                      <p className="text-3xl font-bold mb-1">{totalEmployees}</p>
-                      <p className="text-sm text-muted-foreground">Total Hired</p>
-                    </>
-                  )}
+              {isLoading ? (
+                <Skeleton className="mb-2 h-8 w-20" />
+              ) : (
+                <>
+                  <p className="mb-1 text-3xl font-bold">{totalEmployees}</p>
+                  <p className="text-sm text-muted-foreground">Total Hired</p>
+                </>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -222,7 +266,6 @@ const WorkforcePage: React.FC = () => {
         transition={{ duration: 0.5, delay: 0.5 }}
       >
         <div className="space-y-6">
-
           <div className="space-y-6">
             {/* Hired Employees */}
             <Card className="glass-strong">
@@ -238,28 +281,35 @@ const WorkforcePage: React.FC = () => {
                     </CardDescription>
                   </div>
                   <Badge variant="outline">
-                    {purchased.length} {purchased.length === 1 ? 'Employee' : 'Employees'}
+                    {purchased.length}{' '}
+                    {purchased.length === 1 ? 'Employee' : 'Employees'}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 {hiresLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {[...Array(3)].map((_, i) => (
                       <Skeleton key={i} className="h-32 w-full rounded-2xl" />
                     ))}
                   </div>
                 ) : purchased.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="w-20 h-20 rounded-full bg-muted/20 flex items-center justify-center mx-auto mb-6">
+                  <div className="py-16 text-center">
+                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-muted/20">
                       <Users className="h-10 w-10 text-muted-foreground" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">No AI Employees Yet</h3>
-                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      Start building your AI workforce by hiring specialized employees from the marketplace
+                    <h3 className="mb-2 text-xl font-semibold">
+                      No AI Employees Yet
+                    </h3>
+                    <p className="mx-auto mb-6 max-w-md text-muted-foreground">
+                      Start building your AI workforce by hiring specialized
+                      employees from the marketplace
                     </p>
                     <Link to="/marketplace">
-                      <Button size="lg" className="btn-glow gradient-primary text-white">
+                      <Button
+                        size="lg"
+                        className="btn-glow gradient-primary text-white"
+                      >
                         <Plus className="mr-2 h-5 w-5" />
                         Browse Marketplace
                       </Button>
@@ -274,33 +324,40 @@ const WorkforcePage: React.FC = () => {
                           <BentoCard
                             key={rec.id}
                             gradient={true}
-                            className="glass group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300"
+                            className="glass group transition-all duration-300 hover:shadow-lg hover:shadow-primary/10"
                           >
                             <motion.div
                               initial={{ opacity: 0, scale: 0.9 }}
                               animate={{ opacity: 1, scale: 1 }}
                               transition={{ delay: index * 0.1 }}
-                              className="h-full flex flex-col"
+                              className="flex h-full flex-col"
                             >
-                              <div className="flex items-start gap-4 mb-4">
+                              <div className="mb-4 flex items-start gap-4">
                                 <InteractiveHoverCard>
-                                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-muted flex-shrink-0 group-hover:shadow-xl group-hover:shadow-primary/20 transition-all duration-300">
+                                  <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-muted transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20">
                                     {emp?.avatar ? (
-                                      <img src={emp.avatar} alt={emp.role} className="w-full h-full object-cover" />
+                                      <img
+                                        src={emp.avatar}
+                                        alt={emp.role}
+                                        className="h-full w-full object-cover"
+                                      />
                                     ) : (
-                                      <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                                      <div className="flex h-full w-full items-center justify-center bg-primary/10">
                                         <Bot className="h-7 w-7 text-primary" />
                                       </div>
                                     )}
                                   </div>
                                 </InteractiveHoverCard>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="font-semibold text-lg truncate group-hover:text-primary transition-colors">
+                                <div className="min-w-0 flex-1">
+                                  <div className="mb-1 flex items-center gap-2">
+                                    <h3 className="truncate text-lg font-semibold transition-colors group-hover:text-primary">
                                       {emp?.role || rec.role}
                                     </h3>
                                     {emp?.popular && (
-                                      <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800 border-orange-200">
+                                      <Badge
+                                        variant="secondary"
+                                        className="border-orange-200 bg-orange-100 text-xs text-orange-800"
+                                      >
                                         Popular
                                       </Badge>
                                     )}
@@ -311,18 +368,30 @@ const WorkforcePage: React.FC = () => {
                                 </div>
                               </div>
 
-                              <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-grow">
-                                {emp?.specialty || 'AI specialist ready to assist'}
+                              <p className="mb-4 line-clamp-2 flex-grow text-sm text-muted-foreground">
+                                {emp?.specialty ||
+                                  'AI specialist ready to assist'}
                               </p>
 
                               <div className="flex gap-2">
-                                <Link to={`/vibe?employee=${rec.employee_id}`} className="flex-1">
-                                  <Button variant="outline" size="sm" className="w-full group-hover:border-primary/50 transition-colors">
+                                <Link
+                                  to={`/vibe?employee=${rec.employee_id}`}
+                                  className="flex-1"
+                                >
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full transition-colors group-hover:border-primary/50"
+                                  >
                                     <Code className="mr-2 h-4 w-4" />
                                     Build with AI
                                   </Button>
                                 </Link>
-                                <Button variant="ghost" size="sm" className="group-hover:bg-primary/10 transition-colors">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="transition-colors group-hover:bg-primary/10"
+                                >
                                   <Settings className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -332,9 +401,10 @@ const WorkforcePage: React.FC = () => {
                       })}
                     </BentoGrid>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-border">
+                    <div className="flex items-center justify-between border-t border-border pt-4">
                       <p className="text-sm text-muted-foreground">
-                        Showing {purchased.length} {purchased.length === 1 ? 'employee' : 'employees'}
+                        Showing {purchased.length}{' '}
+                        {purchased.length === 1 ? 'employee' : 'employees'}
                       </p>
                       <Link to="/vibe">
                         <Button variant="outline">
@@ -370,29 +440,49 @@ const WorkforcePage: React.FC = () => {
                 ) : totalEmployees > 0 ? (
                   <div className="space-y-6">
                     <div className="glass rounded-2xl p-6">
-                      <h4 className="font-semibold mb-4">Workforce Summary</h4>
-                      <p className="text-muted-foreground leading-relaxed mb-4">
-                        Your AI workforce is {totalEmployees > 5 ? 'performing excellently' : totalEmployees > 2 ? 'performing well' : 'growing steadily'} with <span className="text-foreground font-semibold">{totalEmployees}</span> AI employees ready to assist you.
+                      <h4 className="mb-4 font-semibold">Workforce Summary</h4>
+                      <p className="mb-4 leading-relaxed text-muted-foreground">
+                        Your AI workforce is{' '}
+                        {totalEmployees > 5
+                          ? 'performing excellently'
+                          : totalEmployees > 2
+                            ? 'performing well'
+                            : 'growing steadily'}{' '}
+                        with{' '}
+                        <span className="font-semibold text-foreground">
+                          {totalEmployees}
+                        </span>{' '}
+                        AI employees ready to assist you.
                       </p>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+                      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                         <div className="glass rounded-xl p-4 text-center">
-                          <div className="text-2xl font-bold text-primary mb-1">
+                          <div className="mb-1 text-2xl font-bold text-primary">
                             {totalEmployees}
                           </div>
-                          <div className="text-xs text-muted-foreground">Total Employees</div>
+                          <div className="text-xs text-muted-foreground">
+                            Total Employees
+                          </div>
                         </div>
                         <div className="glass rounded-xl p-4 text-center">
-                          <div className="text-2xl font-bold text-accent mb-1">
+                          <div className="mb-1 text-2xl font-bold text-accent">
                             {activeEmployees}
                           </div>
-                          <div className="text-xs text-muted-foreground">Active Now</div>
+                          <div className="text-xs text-muted-foreground">
+                            Active Now
+                          </div>
                         </div>
                         <div className="glass rounded-xl p-4 text-center">
-                          <div className="text-2xl font-bold text-secondary mb-1">
-                            {purchased.filter(emp => emp.capabilities?.length > 0).length}
+                          <div className="mb-1 text-2xl font-bold text-secondary">
+                            {
+                              purchased.filter(
+                                emp => emp.capabilities?.length > 0
+                              ).length
+                            }
                           </div>
-                          <div className="text-xs text-muted-foreground">Specialists</div>
+                          <div className="text-xs text-muted-foreground">
+                            Specialists
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -413,16 +503,22 @@ const WorkforcePage: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <div className="w-20 h-20 rounded-full bg-muted/20 flex items-center justify-center mx-auto mb-6">
+                  <div className="py-12 text-center">
+                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-muted/20">
                       <BarChart3 className="h-10 w-10 text-muted-foreground" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">No Activity Yet</h3>
-                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      Hire AI employees and start assigning tasks to see performance metrics
+                    <h3 className="mb-2 text-xl font-semibold">
+                      No Activity Yet
+                    </h3>
+                    <p className="mx-auto mb-6 max-w-md text-muted-foreground">
+                      Hire AI employees and start assigning tasks to see
+                      performance metrics
                     </p>
                     <Link to="/marketplace">
-                      <Button size="lg" className="btn-glow gradient-primary text-white">
+                      <Button
+                        size="lg"
+                        className="btn-glow gradient-primary text-white"
+                      >
                         <Plus className="mr-2 h-5 w-5" />
                         Get Started
                       </Button>

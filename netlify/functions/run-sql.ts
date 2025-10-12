@@ -6,7 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async event => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -49,7 +49,6 @@ export const handler: Handler = async (event) => {
         data,
       }),
     };
-
   } catch (error) {
     console.error('[Run SQL] Error:', error);
     return {
@@ -61,4 +60,3 @@ export const handler: Handler = async (event) => {
     };
   }
 };
-

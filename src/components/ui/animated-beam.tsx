@@ -54,7 +54,10 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
 
     const path = `M ${fromX},${fromY} Q ${midX},${midY} ${toX},${toY}`;
     setPathD(path);
-    setSvgDimensions({ width: containerRect.width, height: containerRect.height });
+    setSvgDimensions({
+      width: containerRect.width,
+      height: containerRect.height,
+    });
   };
 
   useEffect(() => {
@@ -69,7 +72,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
       width={svgDimensions.width}
       height={svgDimensions.height}
       xmlns="http://www.w3.org/2000/svg"
-      className={cn('absolute inset-0 pointer-events-none', className)}
+      className={cn('pointer-events-none absolute inset-0', className)}
       viewBox={`0 0 ${svgDimensions.width} ${svgDimensions.height}`}
     >
       <defs>

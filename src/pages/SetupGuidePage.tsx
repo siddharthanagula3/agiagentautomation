@@ -4,20 +4,26 @@
  */
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Database, 
-  Copy, 
-  CheckCircle, 
-  AlertTriangle, 
+import {
+  Database,
+  Copy,
+  CheckCircle,
+  AlertTriangle,
   ExternalLink,
   ArrowLeft,
   Settings,
   Shield,
-  Zap
+  Zap,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -201,26 +207,28 @@ GRANT EXECUTE ON FUNCTION get_user_token_usage_summary(UUID, INTEGER) TO service
   };
 
   return (
-    <div className="min-h-screen pt-24 p-6">
+    <div className="min-h-screen p-6 pt-24">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-strong rounded-3xl p-8 mb-8 relative overflow-hidden"
+        className="glass-strong relative mb-8 overflow-hidden rounded-3xl p-8"
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+        <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
         <div className="relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center">
+              <div className="gradient-primary flex h-16 w-16 items-center justify-center rounded-2xl">
                 <Database className="h-8 w-8 text-white" />
               </div>
               <div>
-                <Badge className="mb-2 glass">
+                <Badge className="glass mb-2">
                   <Settings className="mr-2 h-3 w-3" />
                   Database Setup
                 </Badge>
-                <h1 className="text-4xl font-bold mb-2">Database Setup Guide</h1>
+                <h1 className="mb-2 text-4xl font-bold">
+                  Database Setup Guide
+                </h1>
                 <p className="text-xl text-muted-foreground">
                   Set up your database to enable free AI Employee hiring
                 </p>
@@ -229,7 +237,7 @@ GRANT EXECUTE ON FUNCTION get_user_token_usage_summary(UUID, INTEGER) TO service
 
             <Link to="/marketplace">
               <Button size="lg" variant="outline" className="glass">
-                <ArrowLeft className="h-5 w-5 mr-2" />
+                <ArrowLeft className="mr-2 h-5 w-5" />
                 Back to Marketplace
               </Button>
             </Link>
@@ -247,13 +255,16 @@ GRANT EXECUTE ON FUNCTION get_user_token_usage_summary(UUID, INTEGER) TO service
         <Alert className="glass-strong border-orange-200 bg-orange-50/50">
           <AlertTriangle className="h-4 w-4 text-orange-600" />
           <AlertDescription className="text-orange-800">
-            <strong>Database Setup Required:</strong> The "Failed to hire employee" error occurs because the database tables haven't been created yet. Follow the steps below to set up your database and enable free hiring.
+            <strong>Database Setup Required:</strong> The "Failed to hire
+            employee" error occurs because the database tables haven't been
+            created yet. Follow the steps below to set up your database and
+            enable free hiring.
           </AlertDescription>
         </Alert>
       </motion.div>
 
       {/* Steps */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Step 1 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -263,7 +274,7 @@ GRANT EXECUTE ON FUNCTION get_user_token_usage_summary(UUID, INTEGER) TO service
           <Card className="glass-strong h-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                   <span className="text-sm font-bold text-primary">1</span>
                 </div>
                 Access Supabase Dashboard
@@ -274,18 +285,34 @@ GRANT EXECUTE ON FUNCTION get_user_token_usage_summary(UUID, INTEGER) TO service
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">1. Go to <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">supabase.com/dashboard</a></p>
-                <p className="text-sm text-muted-foreground">2. Select your project</p>
-                <p className="text-sm text-muted-foreground">3. Navigate to the SQL Editor (left sidebar)</p>
+                <p className="text-sm text-muted-foreground">
+                  1. Go to{' '}
+                  <a
+                    href="https://supabase.com/dashboard"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    supabase.com/dashboard
+                  </a>
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  2. Select your project
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  3. Navigate to the SQL Editor (left sidebar)
+                </p>
               </div>
-              
-              <Button 
-                variant="outline" 
+
+              <Button
+                variant="outline"
                 size="sm"
-                onClick={() => window.open('https://supabase.com/dashboard', '_blank')}
+                onClick={() =>
+                  window.open('https://supabase.com/dashboard', '_blank')
+                }
                 className="w-full"
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <ExternalLink className="mr-2 h-4 w-4" />
                 Open Supabase Dashboard
               </Button>
             </CardContent>
@@ -301,7 +328,7 @@ GRANT EXECUTE ON FUNCTION get_user_token_usage_summary(UUID, INTEGER) TO service
           <Card className="glass-strong h-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                   <span className="text-sm font-bold text-primary">2</span>
                 </div>
                 Run SQL Script
@@ -312,24 +339,32 @@ GRANT EXECUTE ON FUNCTION get_user_token_usage_summary(UUID, INTEGER) TO service
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">1. Click "New Query" in SQL Editor</p>
-                <p className="text-sm text-muted-foreground">2. Paste the SQL script (copied below)</p>
-                <p className="text-sm text-muted-foreground">3. Click "Run" to execute</p>
-                <p className="text-sm text-muted-foreground">4. Verify tables are created successfully</p>
+                <p className="text-sm text-muted-foreground">
+                  1. Click "New Query" in SQL Editor
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  2. Paste the SQL script (copied below)
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  3. Click "Run" to execute
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  4. Verify tables are created successfully
+                </p>
               </div>
-              
-              <Button 
+
+              <Button
                 onClick={copyToClipboard}
-                className="w-full gradient-primary text-white"
+                className="gradient-primary w-full text-white"
               >
                 {copied ? (
                   <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <CheckCircle className="mr-2 h-4 w-4" />
                     Copied!
                   </>
                 ) : (
                   <>
-                    <Copy className="h-4 w-4 mr-2" />
+                    <Copy className="mr-2 h-4 w-4" />
                     Copy SQL Script
                   </>
                 )}
@@ -358,16 +393,20 @@ GRANT EXECUTE ON FUNCTION get_user_token_usage_summary(UUID, INTEGER) TO service
           </CardHeader>
           <CardContent>
             <div className="relative">
-              <pre className="bg-muted/50 p-4 rounded-lg overflow-x-auto text-sm font-mono max-h-96 overflow-y-auto">
+              <pre className="max-h-96 overflow-x-auto overflow-y-auto rounded-lg bg-muted/50 p-4 font-mono text-sm">
                 <code>{sqlScript}</code>
               </pre>
               <Button
                 size="sm"
                 variant="outline"
-                className="absolute top-2 right-2"
+                className="absolute right-2 top-2"
                 onClick={copyToClipboard}
               >
-                {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                {copied ? (
+                  <CheckCircle className="h-4 w-4" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </CardContent>
@@ -392,47 +431,57 @@ GRANT EXECUTE ON FUNCTION get_user_token_usage_summary(UUID, INTEGER) TO service
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
                     <Database className="h-4 w-4 text-green-600" />
                   </div>
                   <div>
                     <h4 className="font-semibold">purchased_employees Table</h4>
-                    <p className="text-sm text-muted-foreground">Stores hired AI employees with proper relationships and constraints</p>
+                    <p className="text-sm text-muted-foreground">
+                      Stores hired AI employees with proper relationships and
+                      constraints
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
                     <Zap className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
                     <h4 className="font-semibold">Performance Indexes</h4>
-                    <p className="text-sm text-muted-foreground">Optimized indexes for fast queries on user_id, employee_id, and status</p>
+                    <p className="text-sm text-muted-foreground">
+                      Optimized indexes for fast queries on user_id,
+                      employee_id, and status
+                    </p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-purple-100">
                     <Shield className="h-4 w-4 text-purple-600" />
                   </div>
                   <div>
                     <h4 className="font-semibold">Row Level Security</h4>
-                    <p className="text-sm text-muted-foreground">RLS policies ensure users can only access their own data</p>
+                    <p className="text-sm text-muted-foreground">
+                      RLS policies ensure users can only access their own data
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-orange-100">
                     <Settings className="h-4 w-4 text-orange-600" />
                   </div>
                   <div>
                     <h4 className="font-semibold">Token Usage System</h4>
-                    <p className="text-sm text-muted-foreground">Complete token tracking and billing analytics system</p>
+                    <p className="text-sm text-muted-foreground">
+                      Complete token tracking and billing analytics system
+                    </p>
                   </div>
                 </div>
               </div>
@@ -455,7 +504,8 @@ GRANT EXECUTE ON FUNCTION get_user_token_usage_summary(UUID, INTEGER) TO service
               After Setup
             </CardTitle>
             <CardDescription>
-              Once you've run the SQL script, you can start hiring AI employees for free!
+              Once you've run the SQL script, you can start hiring AI employees
+              for free!
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -477,18 +527,16 @@ GRANT EXECUTE ON FUNCTION get_user_token_usage_summary(UUID, INTEGER) TO service
                 <span>Pro/Max subscription features will work</span>
               </div>
             </div>
-            
+
             <div className="mt-6 flex gap-4">
               <Link to="/marketplace" className="flex-1">
-                <Button className="w-full gradient-primary text-white">
-                  <Zap className="h-4 w-4 mr-2" />
+                <Button className="gradient-primary w-full text-white">
+                  <Zap className="mr-2 h-4 w-4" />
                   Start Hiring AI Employees
                 </Button>
               </Link>
               <Link to="/workforce">
-                <Button variant="outline">
-                  View Workforce
-                </Button>
+                <Button variant="outline">View Workforce</Button>
               </Link>
             </div>
           </CardContent>

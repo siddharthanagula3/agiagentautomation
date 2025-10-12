@@ -82,8 +82,8 @@ const ChatAgentPageChatKit: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-[#0d0e11]">
-        <Loader2 className="w-12 h-12 animate-spin text-purple-600 mb-4" />
+      <div className="flex h-screen flex-col items-center justify-center bg-white dark:bg-[#0d0e11]">
+        <Loader2 className="mb-4 h-12 w-12 animate-spin text-purple-600" />
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Loading AI Employee...
         </p>
@@ -93,17 +93,17 @@ const ChatAgentPageChatKit: React.FC = () => {
 
   if (error || !employee || !workflowId) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-[#0d0e11] px-4">
-        <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+      <div className="flex h-screen flex-col items-center justify-center bg-white px-4 dark:bg-[#0d0e11]">
+        <AlertCircle className="mb-4 h-16 w-16 text-red-500" />
+        <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
           Unable to Load AI Employee
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 text-center mb-4">
+        <p className="mb-4 text-center text-gray-600 dark:text-gray-400">
           {error || 'Please select an AI Employee from your workforce'}
         </p>
         <button
           onClick={() => navigate('/workforce')}
-          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          className="rounded-lg bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
         >
           Back to Workforce
         </button>
@@ -120,7 +120,7 @@ const ChatAgentPageChatKit: React.FC = () => {
         employeeRole={employee.role}
         workflowId={workflowId}
         capabilities={employee.capabilities || []}
-        className="w-full h-full"
+        className="h-full w-full"
       />
     </div>
   );

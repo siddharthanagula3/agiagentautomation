@@ -91,7 +91,7 @@ class MCPToolsService {
    */
   async executeCommand(command: string): Promise<CommandExecution> {
     const startTime = Date.now();
-    
+
     // Simulate command execution
     const result: CommandExecution = {
       command,
@@ -107,9 +107,11 @@ class MCPToolsService {
   /**
    * Search Codebase Tool
    */
-  async searchCodebase(query: string): Promise<Array<{ file: string; line: number; content: string }>> {
+  async searchCodebase(
+    query: string
+  ): Promise<Array<{ file: string; line: number; content: string }>> {
     const results: Array<{ file: string; line: number; content: string }> = [];
-    
+
     for (const [path, content] of this.fileSystem.entries()) {
       const lines = content.split('\n');
       lines.forEach((line, index) => {
@@ -137,27 +139,38 @@ class MCPToolsService {
   /**
    * Create Project Structure Tool
    */
-  async createProject(template: 'react' | 'node' | 'static', name: string): Promise<void> {
+  async createProject(
+    template: 'react' | 'node' | 'static',
+    name: string
+  ): Promise<void> {
     const templates = {
       react: {
-        'package.json': JSON.stringify({
-          name,
-          version: '1.0.0',
-          dependencies: {
-            'react': '^18.2.0',
-            'react-dom': '^18.2.0',
+        'package.json': JSON.stringify(
+          {
+            name,
+            version: '1.0.0',
+            dependencies: {
+              react: '^18.2.0',
+              'react-dom': '^18.2.0',
+            },
           },
-        }, null, 2),
+          null,
+          2
+        ),
         'src/App.tsx': `import React from 'react';\n\nfunction App() {\n  return <div>Hello World</div>;\n}\n\nexport default App;`,
         'src/index.tsx': `import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\n\nReactDOM.createRoot(document.getElementById('root')!).render(<App />);`,
         'index.html': `<!DOCTYPE html>\n<html>\n<head><title>${name}</title></head>\n<body><div id="root"></div></body>\n</html>`,
       },
       node: {
-        'package.json': JSON.stringify({
-          name,
-          version: '1.0.0',
-          main: 'index.js',
-        }, null, 2),
+        'package.json': JSON.stringify(
+          {
+            name,
+            version: '1.0.0',
+            main: 'index.js',
+          },
+          null,
+          2
+        ),
         'index.js': `console.log('Hello from ${name}');`,
       },
       static: {
@@ -186,7 +199,7 @@ class MCPToolsService {
           },
           required: ['path'],
         },
-        execute: async (params) => this.readFile(params.path),
+        execute: async params => this.readFile(params.path),
       },
       {
         name: 'write_file',
@@ -199,7 +212,7 @@ class MCPToolsService {
           },
           required: ['path', 'content'],
         },
-        execute: async (params) => this.writeFile(params.path, params.content),
+        execute: async params => this.writeFile(params.path, params.content),
       },
       {
         name: 'execute_command',
@@ -211,7 +224,7 @@ class MCPToolsService {
           },
           required: ['command'],
         },
-        execute: async (params) => this.executeCommand(params.command),
+        execute: async params => this.executeCommand(params.command),
       },
       {
         name: 'search_codebase',
@@ -223,7 +236,7 @@ class MCPToolsService {
           },
           required: ['query'],
         },
-        execute: async (params) => this.searchCodebase(params.query),
+        execute: async params => this.searchCodebase(params.query),
       },
       {
         name: 'install_package',
@@ -232,11 +245,15 @@ class MCPToolsService {
           type: 'object',
           properties: {
             packageName: { type: 'string', description: 'Package name' },
-            version: { type: 'string', description: 'Package version (optional)' },
+            version: {
+              type: 'string',
+              description: 'Package version (optional)',
+            },
           },
           required: ['packageName'],
         },
-        execute: async (params) => this.installPackage(params.packageName, params.version),
+        execute: async params =>
+          this.installPackage(params.packageName, params.version),
       },
       {
         name: 'create_project',
@@ -249,7 +266,8 @@ class MCPToolsService {
           },
           required: ['template', 'name'],
         },
-        execute: async (params) => this.createProject(params.template, params.name),
+        execute: async params =>
+          this.createProject(params.template, params.name),
       },
     ];
   }
@@ -278,4 +296,3 @@ class MCPToolsService {
 
 export const mcpToolsService = new MCPToolsService();
 export default mcpToolsService;
-

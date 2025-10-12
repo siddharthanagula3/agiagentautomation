@@ -1,11 +1,18 @@
 import { supabase } from '../integrations/supabase/client';
-import type { ToolDefinition, ToolType, IntegrationType } from '../types/ai-employee';
+import type {
+  ToolDefinition,
+  ToolType,
+  IntegrationType,
+} from '../types/ai-employee';
 
 // Tool Invocation Service
 // Handles the execution of tools by AI employees
 class ToolInvocationService {
   private toolRegistry: Map<string, ToolDefinition> = new Map();
-  private integrationHandlers: Map<IntegrationType, (...args: unknown[]) => unknown> = new Map();
+  private integrationHandlers: Map<
+    IntegrationType,
+    (...args: unknown[]) => unknown
+  > = new Map();
 
   constructor() {
     this.initializeIntegrationHandlers();
@@ -14,58 +21,83 @@ class ToolInvocationService {
   // Initialize integration handlers for different tool types
   private initializeIntegrationHandlers() {
     // N8N Workflow Integration
-    this.integrationHandlers.set('n8n_workflow', this.executeN8NWorkflow.bind(this));
-    
+    this.integrationHandlers.set(
+      'n8n_workflow',
+      this.executeN8NWorkflow.bind(this)
+    );
+
     // OpenAI API Integration
-    this.integrationHandlers.set('openai_api', this.executeOpenAIAPI.bind(this));
-    
+    this.integrationHandlers.set(
+      'openai_api',
+      this.executeOpenAIAPI.bind(this)
+    );
+
     // Anthropic API Integration
-    this.integrationHandlers.set('anthropic_api', this.executeAnthropicAPI.bind(this));
-    
+    this.integrationHandlers.set(
+      'anthropic_api',
+      this.executeAnthropicAPI.bind(this)
+    );
+
     // Cursor Agent Integration
-    this.integrationHandlers.set('cursor_agent', this.executeCursorAgent.bind(this));
-    
+    this.integrationHandlers.set(
+      'cursor_agent',
+      this.executeCursorAgent.bind(this)
+    );
+
     // Replit Agent Integration
-    this.integrationHandlers.set('replit_agent', this.executeReplitAgent.bind(this));
-    
+    this.integrationHandlers.set(
+      'replit_agent',
+      this.executeReplitAgent.bind(this)
+    );
+
     // Claude Code Integration
-    this.integrationHandlers.set('claude_code', this.executeClaudeCode.bind(this));
-    
+    this.integrationHandlers.set(
+      'claude_code',
+      this.executeClaudeCode.bind(this)
+    );
+
     // Custom API Integration
-    this.integrationHandlers.set('custom_api', this.executeCustomAPI.bind(this));
-    
+    this.integrationHandlers.set(
+      'custom_api',
+      this.executeCustomAPI.bind(this)
+    );
+
     // Webhook Integration
     this.integrationHandlers.set('webhook', this.executeWebhook.bind(this));
-    
+
     // Database Integration
-    this.integrationHandlers.set('database', this.executeDatabaseOperation.bind(this));
-    
+    this.integrationHandlers.set(
+      'database',
+      this.executeDatabaseOperation.bind(this)
+    );
+
     // File System Integration
-    this.integrationHandlers.set('file_system', this.executeFileSystemOperation.bind(this));
+    this.integrationHandlers.set(
+      'file_system',
+      this.executeFileSystemOperation.bind(this)
+    );
   }
 
   // Register a new tool
   async registerTool(tool: ToolDefinition) {
     this.toolRegistry.set(tool.id, tool);
-    
+
     // Store in database
     try {
-      const { error } = await supabase
-        .from('ai_tools')
-        .upsert({
-          id: tool.id,
-          name: tool.name,
-          type: tool.type,
-          description: tool.description,
-          parameters: tool.parameters,
-          invocation_pattern: tool.invocationPattern,
-          integration_type: tool.integrationType,
-          config: tool.config,
-          is_active: tool.isActive,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
-      
+      const { error } = await supabase.from('ai_tools').upsert({
+        id: tool.id,
+        name: tool.name,
+        type: tool.type,
+        description: tool.description,
+        parameters: tool.parameters,
+        invocation_pattern: tool.invocationPattern,
+        integration_type: tool.integrationType,
+        config: tool.config,
+        is_active: tool.isActive,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+
       if (error) throw error;
       return { success: true, error: null };
     } catch (error: unknown) {
@@ -74,7 +106,11 @@ class ToolInvocationService {
   }
 
   // Execute a tool
-  async executeTool(toolId: string, parameters: Record<string, unknown>, context?: unknown) {
+  async executeTool(
+    toolId: string,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) {
     const tool = this.toolRegistry.get(toolId);
     if (!tool) {
       return { success: false, error: 'Tool not found', result: null };
@@ -94,15 +130,19 @@ class ToolInvocationService {
       // Get the appropriate integration handler
       const handler = this.integrationHandlers.get(tool.integrationType);
       if (!handler) {
-        return { success: false, error: 'Integration handler not found', result: null };
+        return {
+          success: false,
+          error: 'Integration handler not found',
+          result: null,
+        };
       }
 
       // Execute the tool
       const result = await handler(tool, parameters, context);
-      
+
       // Log the execution
       await this.logToolExecution(toolId, parameters, result, context);
-      
+
       return { success: true, error: null, result };
     } catch (error: unknown) {
       return { success: false, error: error.message, result: null };
@@ -110,60 +150,91 @@ class ToolInvocationService {
   }
 
   // Validate tool parameters
-  private validateParameters(tool: ToolDefinition, parameters: Record<string, unknown>) {
+  private validateParameters(
+    tool: ToolDefinition,
+    parameters: Record<string, unknown>
+  ) {
     for (const param of tool.parameters) {
       if (param.required && !(param.name in parameters)) {
-        return { valid: false, error: `Required parameter '${param.name}' is missing` };
+        return {
+          valid: false,
+          error: `Required parameter '${param.name}' is missing`,
+        };
       }
-      
+
       if (param.name in parameters) {
         const value = parameters[param.name];
         const type = typeof value;
-        
+
         if (param.type === 'array' && !Array.isArray(value)) {
-          return { valid: false, error: `Parameter '${param.name}' must be an array` };
+          return {
+            valid: false,
+            error: `Parameter '${param.name}' must be an array`,
+          };
         }
-        
-        if (param.type === 'object' && (type !== 'object' || Array.isArray(value))) {
-          return { valid: false, error: `Parameter '${param.name}' must be an object` };
+
+        if (
+          param.type === 'object' &&
+          (type !== 'object' || Array.isArray(value))
+        ) {
+          return {
+            valid: false,
+            error: `Parameter '${param.name}' must be an object`,
+          };
         }
-        
+
         if (param.type === 'number' && type !== 'number') {
-          return { valid: false, error: `Parameter '${param.name}' must be a number` };
+          return {
+            valid: false,
+            error: `Parameter '${param.name}' must be a number`,
+          };
         }
-        
+
         if (param.type === 'boolean' && type !== 'boolean') {
-          return { valid: false, error: `Parameter '${param.name}' must be a boolean` };
+          return {
+            valid: false,
+            error: `Parameter '${param.name}' must be a boolean`,
+          };
         }
-        
+
         if (param.type === 'string' && type !== 'string') {
-          return { valid: false, error: `Parameter '${param.name}' must be a string` };
+          return {
+            valid: false,
+            error: `Parameter '${param.name}' must be a string`,
+          };
         }
       }
     }
-    
+
     return { valid: true, error: null };
   }
 
   // N8N Workflow Execution
-  private async executeN8NWorkflow(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
+  private async executeN8NWorkflow(
+    tool: ToolDefinition,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) {
     const { n8nWorkflowId, n8nApiKey, n8nBaseUrl } = tool.config;
-    
+
     if (!n8nWorkflowId || !n8nApiKey || !n8nBaseUrl) {
       throw new Error('N8N configuration is incomplete');
     }
 
-    const response = await fetch(`${n8nBaseUrl}/api/v1/workflows/${n8nWorkflowId}/execute`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${n8nApiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        parameters,
-        context: context || {}
-      })
-    });
+    const response = await fetch(
+      `${n8nBaseUrl}/api/v1/workflows/${n8nWorkflowId}/execute`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${n8nApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          parameters,
+          context: context || {},
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`N8N workflow execution failed: ${response.statusText}`);
@@ -173,9 +244,13 @@ class ToolInvocationService {
   }
 
   // OpenAI API Execution
-  private async executeOpenAIAPI(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
+  private async executeOpenAIAPI(
+    tool: ToolDefinition,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) {
     const { apiKey, model, temperature, maxTokens } = tool.config;
-    
+
     if (!apiKey) {
       throw new Error('OpenAI API key is required');
     }
@@ -183,16 +258,16 @@ class ToolInvocationService {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: model || 'gpt-4',
         messages: parameters.messages || [],
         temperature: temperature || 0.7,
         max_tokens: maxTokens || 1000,
-        ...parameters
-      })
+        ...parameters,
+      }),
     });
 
     if (!response.ok) {
@@ -203,9 +278,13 @@ class ToolInvocationService {
   }
 
   // Anthropic API Execution
-  private async executeAnthropicAPI(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
+  private async executeAnthropicAPI(
+    tool: ToolDefinition,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) {
     const { apiKey, model, maxTokens } = tool.config;
-    
+
     if (!apiKey) {
       throw new Error('Anthropic API key is required');
     }
@@ -215,13 +294,13 @@ class ToolInvocationService {
       headers: {
         'x-api-key': apiKey,
         'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
         model: model || 'claude-3-sonnet-20240229',
         max_tokens: maxTokens || 1000,
-        ...parameters
-      })
+        ...parameters,
+      }),
     });
 
     if (!response.ok) {
@@ -232,11 +311,15 @@ class ToolInvocationService {
   }
 
   // Cursor Agent Execution
-  private async executeCursorAgent(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
+  private async executeCursorAgent(
+    tool: ToolDefinition,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) {
     // Cursor Agent integration - this would typically involve
     // sending requests to Cursor's API or using their SDK
     const { cursorApiKey, cursorEndpoint } = tool.config;
-    
+
     if (!cursorApiKey || !cursorEndpoint) {
       throw new Error('Cursor Agent configuration is incomplete');
     }
@@ -244,13 +327,13 @@ class ToolInvocationService {
     const response = await fetch(cursorEndpoint, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${cursorApiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${cursorApiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         ...parameters,
-        context: context || {}
-      })
+        context: context || {},
+      }),
     });
 
     if (!response.ok) {
@@ -261,10 +344,14 @@ class ToolInvocationService {
   }
 
   // Replit Agent Execution
-  private async executeReplitAgent(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
+  private async executeReplitAgent(
+    tool: ToolDefinition,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) {
     // Replit Agent integration
     const { replitApiKey, replitEndpoint } = tool.config;
-    
+
     if (!replitApiKey || !replitEndpoint) {
       throw new Error('Replit Agent configuration is incomplete');
     }
@@ -272,13 +359,13 @@ class ToolInvocationService {
     const response = await fetch(replitEndpoint, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${replitApiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${replitApiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         ...parameters,
-        context: context || {}
-      })
+        context: context || {},
+      }),
     });
 
     if (!response.ok) {
@@ -289,21 +376,29 @@ class ToolInvocationService {
   }
 
   // Claude Code Execution
-  private async executeClaudeCode(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
+  private async executeClaudeCode(
+    tool: ToolDefinition,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) {
     // Claude Code integration - similar to Anthropic but for code-specific tasks
     return this.executeAnthropicAPI(tool, parameters, context);
   }
 
   // Custom API Execution
-  private async executeCustomAPI(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
+  private async executeCustomAPI(
+    tool: ToolDefinition,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) {
     const { apiUrl, apiKey, method = 'POST' } = tool.config;
-    
+
     if (!apiUrl) {
       throw new Error('Custom API URL is required');
     }
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
 
     if (apiKey) {
@@ -315,8 +410,8 @@ class ToolInvocationService {
       headers,
       body: JSON.stringify({
         ...parameters,
-        context: context || {}
-      })
+        context: context || {},
+      }),
     });
 
     if (!response.ok) {
@@ -327,9 +422,13 @@ class ToolInvocationService {
   }
 
   // Webhook Execution
-  private async executeWebhook(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
+  private async executeWebhook(
+    tool: ToolDefinition,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) {
     const { webhookUrl, method = 'POST' } = tool.config;
-    
+
     if (!webhookUrl) {
       throw new Error('Webhook URL is required');
     }
@@ -337,12 +436,12 @@ class ToolInvocationService {
     const response = await fetch(webhookUrl, {
       method,
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         ...parameters,
-        context: context || {}
-      })
+        context: context || {},
+      }),
     });
 
     if (!response.ok) {
@@ -353,9 +452,13 @@ class ToolInvocationService {
   }
 
   // Database Operation Execution
-  private async executeDatabaseOperation(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
+  private async executeDatabaseOperation(
+    tool: ToolDefinition,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) {
     const { operation, table, query } = tool.config;
-    
+
     if (!operation) {
       throw new Error('Database operation is required');
     }
@@ -369,10 +472,16 @@ class ToolInvocationService {
         result = await supabase.from(table).insert(parameters.data);
         break;
       case 'update':
-        result = await supabase.from(table).update(parameters.data).eq(parameters.column, parameters.value);
+        result = await supabase
+          .from(table)
+          .update(parameters.data)
+          .eq(parameters.column, parameters.value);
         break;
       case 'delete':
-        result = await supabase.from(table).delete().eq(parameters.column, parameters.value);
+        result = await supabase
+          .from(table)
+          .delete()
+          .eq(parameters.column, parameters.value);
         break;
       case 'custom':
         result = await supabase.rpc(query, parameters);
@@ -389,20 +498,31 @@ class ToolInvocationService {
   }
 
   // File System Operation Execution
-  private async executeFileSystemOperation(tool: ToolDefinition, parameters: Record<string, unknown>, context?: unknown) {
+  private async executeFileSystemOperation(
+    tool: ToolDefinition,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) {
     const { operation, path } = tool.config;
-    
+
     if (!operation || !path) {
       throw new Error('File system operation and path are required');
     }
 
     // This would typically involve server-side file operations
     // For security reasons, this should be carefully controlled
-    throw new Error('File system operations are not implemented for security reasons');
+    throw new Error(
+      'File system operations are not implemented for security reasons'
+    );
   }
 
   // Log tool execution
-  private async logToolExecution(toolId: string, parameters: Record<string, unknown>, result: unknown, context?: unknown) {
+  private async logToolExecution(
+    toolId: string,
+    parameters: Record<string, unknown>,
+    result: unknown,
+    context?: unknown
+  ) {
     try {
       await supabase.from('tool_executions').insert({
         tool_id: toolId,
@@ -410,7 +530,7 @@ class ToolInvocationService {
         result,
         context,
         executed_at: new Date().toISOString(),
-        success: true
+        success: true,
       });
     } catch (error) {
       console.error('Failed to log tool execution:', error);
@@ -430,7 +550,7 @@ class ToolInvocationService {
         .select('*')
         .eq('id', toolId)
         .single();
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
@@ -446,7 +566,7 @@ class ToolInvocationService {
         .select('*')
         .eq('is_active', true)
         .order('name');
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
@@ -463,7 +583,7 @@ class ToolInvocationService {
         .eq('type', type)
         .eq('is_active', true)
         .order('name');
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
@@ -480,7 +600,7 @@ class ToolInvocationService {
         .eq('integration_type', integrationType)
         .eq('is_active', true)
         .order('name');
-      
+
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {

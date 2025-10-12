@@ -7,7 +7,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,13 +56,17 @@ import {
   Key,
   LogOut,
   Bot,
-  Play
+  Play,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { useAgentMetricsStore } from '@/stores/agent-metrics-store';
 import { backgroundChatService } from '@/services/background-chat-service';
-import settingsService, { UserProfile, UserSettings, APIKey } from '@/services/settings-service';
+import settingsService, {
+  UserProfile,
+  UserSettings,
+  APIKey,
+} from '@/services/settings-service';
 import { InteractiveHoverCard } from '@/components/ui/interactive-hover-card';
 import { Particles } from '@/components/ui/particles';
 
@@ -65,16 +75,16 @@ const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const metricsStore = useAgentMetricsStore();
-  
+
   // Loading states
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Data states
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [apiKeys, setAPIKeys] = useState<APIKey[]>([]);
-  
+
   // UI states
   const [activeSection, setActiveSection] = useState(section || 'profile');
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -101,9 +111,10 @@ const SettingsPage: React.FC = () => {
   const loadAllData = async () => {
     try {
       setIsLoading(true);
-      
+
       // Load profile
-      const { data: profileData, error: profileError } = await settingsService.getProfile();
+      const { data: profileData, error: profileError } =
+        await settingsService.getProfile();
       if (profileError) {
         console.error('Error loading profile:', profileError);
         toast.error('Failed to load profile');
@@ -112,7 +123,8 @@ const SettingsPage: React.FC = () => {
       }
 
       // Load settings
-      const { data: settingsData, error: settingsError } = await settingsService.getSettings();
+      const { data: settingsData, error: settingsError } =
+        await settingsService.getSettings();
       if (settingsError) {
         console.error('Error loading settings:', settingsError);
         toast.error('Failed to load settings');
@@ -121,13 +133,13 @@ const SettingsPage: React.FC = () => {
       }
 
       // Load API keys
-      const { data: keysData, error: keysError } = await settingsService.getAPIKeys();
+      const { data: keysData, error: keysError } =
+        await settingsService.getAPIKeys();
       if (keysError) {
         console.error('Error loading API keys:', keysError);
       } else {
         setAPIKeys(keysData);
       }
-      
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Failed to load settings');
@@ -145,11 +157,11 @@ const SettingsPage: React.FC = () => {
 
   const handleSaveProfile = async () => {
     if (!profile) return;
-    
+
     try {
       setIsSaving(true);
       const { error } = await settingsService.updateProfile(profile);
-      
+
       if (error) {
         toast.error('Failed to save profile');
         console.error('Error saving profile:', error);
@@ -164,7 +176,9 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -183,12 +197,12 @@ const SettingsPage: React.FC = () => {
     try {
       toast.loading('Uploading avatar...');
       const { data: url, error } = await settingsService.uploadAvatar(file);
-      
+
       if (error) {
         toast.error('Failed to upload avatar');
         console.error('Error uploading avatar:', error);
       } else if (url) {
-        setProfile(prev => prev ? { ...prev, avatar_url: url } : null);
+        setProfile(prev => (prev ? { ...prev, avatar_url: url } : null));
         toast.success('Avatar uploaded successfully');
       }
     } catch (error) {
@@ -206,11 +220,11 @@ const SettingsPage: React.FC = () => {
 
   const handleSaveSettings = async () => {
     if (!settings) return;
-    
+
     try {
       setIsSaving(true);
       const { error } = await settingsService.updateSettings(settings);
-      
+
       if (error) {
         toast.error('Failed to save settings');
         console.error('Error saving settings:', error);
@@ -240,7 +254,7 @@ const SettingsPage: React.FC = () => {
     try {
       setIsSaving(true);
       const { error } = await settingsService.changePassword(newPassword);
-      
+
       if (error) {
         toast.error('Failed to change password');
         console.error('Error changing password:', error);
@@ -266,8 +280,9 @@ const SettingsPage: React.FC = () => {
 
     try {
       setIsSaving(true);
-      const { data, error, fullKey } = await settingsService.createAPIKey(newAPIKeyName);
-      
+      const { data, error, fullKey } =
+        await settingsService.createAPIKey(newAPIKeyName);
+
       if (error || !data) {
         toast.error('Failed to generate API key');
         console.error('Error generating API key:', error);
@@ -290,7 +305,7 @@ const SettingsPage: React.FC = () => {
 
     try {
       const { error } = await settingsService.deleteAPIKey(keyToDelete);
-      
+
       if (error) {
         toast.error('Failed to delete API key');
         console.error('Error deleting API key:', error);
@@ -315,10 +330,10 @@ const SettingsPage: React.FC = () => {
   const handleToggle2FA = async (enabled: boolean) => {
     try {
       setIsSaving(true);
-      const { error } = enabled 
+      const { error } = enabled
         ? await settingsService.enable2FA()
         : await settingsService.disable2FA();
-      
+
       if (error) {
         toast.error(`Failed to ${enabled ? 'enable' : 'disable'} 2FA`);
         console.error('Error toggling 2FA:', error);
@@ -336,7 +351,7 @@ const SettingsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
           <span className="text-muted-foreground">Loading settings...</span>
@@ -347,10 +362,10 @@ const SettingsPage: React.FC = () => {
 
   if (!profile || !settings) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-          <p className="text-muted-foreground mb-4">Failed to load settings</p>
+          <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-yellow-500" />
+          <p className="mb-4 text-muted-foreground">Failed to load settings</p>
           <Button onClick={loadAllData} variant="outline">
             Retry
           </Button>
@@ -363,7 +378,7 @@ const SettingsPage: React.FC = () => {
     <div className="relative min-h-screen space-y-6 p-6">
       {/* Subtle Background Particles */}
       <Particles
-        className="absolute inset-0 pointer-events-none opacity-20"
+        className="pointer-events-none absolute inset-0 opacity-20"
         quantity={30}
         ease={80}
         staticity={50}
@@ -377,12 +392,12 @@ const SettingsPage: React.FC = () => {
       >
         <div>
           <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="mt-1 text-muted-foreground">
             Manage your account, preferences, and system configuration
           </p>
         </div>
         <Badge variant="outline" className="border-green-500/50 text-green-400">
-          <CheckCircle className="h-3 w-3 mr-1" />
+          <CheckCircle className="mr-1 h-3 w-3" />
           Real Data
         </Badge>
       </motion.div>
@@ -394,47 +409,53 @@ const SettingsPage: React.FC = () => {
         transition={{ delay: 0.1 }}
         className="relative"
       >
-        <Tabs value={activeSection} onValueChange={(value) => {
-          setActiveSection(value);
-          navigate(`/settings/${value}`, { replace: true });
-        }} className="space-y-6">
+        <Tabs
+          value={activeSection}
+          onValueChange={value => {
+            setActiveSection(value);
+            navigate(`/settings/${value}`, { replace: true });
+          }}
+          className="space-y-6"
+        >
           {/* Glassmorphism Tabs with enhanced styling */}
-          <TabsList className="bg-card/50 backdrop-blur-xl border border-border/50 shadow-lg p-1">
+          <TabsList className="border border-border/50 bg-card/50 p-1 shadow-lg backdrop-blur-xl">
             <TabsTrigger
               value="profile"
-              className="data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm transition-all duration-300 hover:bg-accent/40"
+              className="transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm"
             >
-              <User className="h-4 w-4 mr-2" />
+              <User className="mr-2 h-4 w-4" />
               Profile
             </TabsTrigger>
             <TabsTrigger
               value="notifications"
-              className="data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm transition-all duration-300 hover:bg-accent/40"
+              className="transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm"
             >
-              <Bell className="h-4 w-4 mr-2" />
+              <Bell className="mr-2 h-4 w-4" />
               Notifications
             </TabsTrigger>
             <TabsTrigger
               value="security"
-              className="data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm transition-all duration-300 hover:bg-accent/40"
+              className="transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm"
             >
-              <Shield className="h-4 w-4 mr-2" />
+              <Shield className="mr-2 h-4 w-4" />
               Security
             </TabsTrigger>
             <TabsTrigger
               value="system"
-              className="data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm transition-all duration-300 hover:bg-accent/40"
+              className="transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm"
             >
-              <Settings className="h-4 w-4 mr-2" />
+              <Settings className="mr-2 h-4 w-4" />
               System
             </TabsTrigger>
           </TabsList>
 
           {/* Profile Settings */}
           <TabsContent value="profile" className="space-y-6">
-            <Card className="bg-card border-border">
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="text-foreground">Profile Information</CardTitle>
+                <CardTitle className="text-foreground">
+                  Profile Information
+                </CardTitle>
                 <CardDescription>
                   Update your personal information and preferences
                 </CardDescription>
@@ -443,10 +464,13 @@ const SettingsPage: React.FC = () => {
                 {/* Avatar with 3D Hover Effect */}
                 <div className="flex items-center space-x-4">
                   <InteractiveHoverCard>
-                    <Avatar className="w-20 h-20 ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-300">
+                    <Avatar className="h-20 w-20 ring-2 ring-primary/20 transition-all duration-300 hover:ring-primary/40">
                       <AvatarImage src={profile.avatar_url} />
-                      <AvatarFallback className="bg-accent text-foreground text-lg">
-                        {profile.name?.split(' ').map(n => n[0]).join('') || 'U'}
+                      <AvatarFallback className="bg-accent text-lg text-foreground">
+                        {profile.name
+                          ?.split(' ')
+                          .map(n => n[0])
+                          .join('') || 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </InteractiveHoverCard>
@@ -460,62 +484,82 @@ const SettingsPage: React.FC = () => {
                     />
                     <Button
                       variant="outline"
-                      className="border-border text-foreground hover:text-foreground hover:scale-105 transition-transform duration-200"
-                      onClick={() => document.getElementById('avatar-upload')?.click()}
+                      className="border-border text-foreground transition-transform duration-200 hover:scale-105 hover:text-foreground"
+                      onClick={() =>
+                        document.getElementById('avatar-upload')?.click()
+                      }
                     >
-                      <Camera className="h-4 w-4 mr-2" />
+                      <Camera className="mr-2 h-4 w-4" />
                       Change Photo
                     </Button>
-                    <p className="text-xs text-muted-foreground">JPG, PNG up to 5MB</p>
+                    <p className="text-xs text-muted-foreground">
+                      JPG, PNG up to 5MB
+                    </p>
                   </div>
                 </div>
 
                 {/* Profile Form */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
                     <Label className="text-foreground">Full Name</Label>
                     <Input
                       value={profile.name || ''}
-                      onChange={(e) => handleProfileUpdate('name', e.target.value)}
-                      className="mt-1 bg-background border-border text-foreground"
+                      onChange={e =>
+                        handleProfileUpdate('name', e.target.value)
+                      }
+                      className="mt-1 border-border bg-background text-foreground"
                     />
                   </div>
-                  
+
                   <div>
                     <Label className="text-foreground">Email Address</Label>
                     <Input
                       type="email"
                       value={user?.email || ''}
                       disabled
-                      className="mt-1 bg-muted border-border text-muted-foreground cursor-not-allowed"
+                      className="mt-1 cursor-not-allowed border-border bg-muted text-muted-foreground"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Email cannot be changed
+                    </p>
                   </div>
-                  
+
                   <div>
                     <Label className="text-foreground">Phone Number</Label>
                     <Input
                       value={profile.phone || ''}
-                      onChange={(e) => handleProfileUpdate('phone', e.target.value)}
-                      className="mt-1 bg-background border-border text-foreground"
+                      onChange={e =>
+                        handleProfileUpdate('phone', e.target.value)
+                      }
+                      className="mt-1 border-border bg-background text-foreground"
                       placeholder="+1 (555) 000-0000"
                     />
                   </div>
-                  
+
                   <div>
                     <Label className="text-foreground">Timezone</Label>
-                    <Select 
-                      value={profile.timezone} 
-                      onValueChange={(value) => handleProfileUpdate('timezone', value)}
+                    <Select
+                      value={profile.timezone}
+                      onValueChange={value =>
+                        handleProfileUpdate('timezone', value)
+                      }
                     >
-                      <SelectTrigger className="mt-1 bg-background border-border text-foreground">
+                      <SelectTrigger className="mt-1 border-border bg-background text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-popover border-border">
-                        <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
-                        <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
-                        <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
-                        <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
+                      <SelectContent className="border-border bg-popover">
+                        <SelectItem value="America/New_York">
+                          Eastern Time (ET)
+                        </SelectItem>
+                        <SelectItem value="America/Chicago">
+                          Central Time (CT)
+                        </SelectItem>
+                        <SelectItem value="America/Denver">
+                          Mountain Time (MT)
+                        </SelectItem>
+                        <SelectItem value="America/Los_Angeles">
+                          Pacific Time (PT)
+                        </SelectItem>
                         <SelectItem value="Europe/London">GMT</SelectItem>
                         <SelectItem value="Europe/Paris">CET</SelectItem>
                         <SelectItem value="Asia/Tokyo">JST</SelectItem>
@@ -527,14 +571,16 @@ const SettingsPage: React.FC = () => {
 
                   <div>
                     <Label className="text-foreground">Language</Label>
-                    <Select 
-                      value={profile.language} 
-                      onValueChange={(value) => handleProfileUpdate('language', value)}
+                    <Select
+                      value={profile.language}
+                      onValueChange={value =>
+                        handleProfileUpdate('language', value)
+                      }
                     >
-                      <SelectTrigger className="mt-1 bg-background border-border text-foreground">
+                      <SelectTrigger className="mt-1 border-border bg-background text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-popover border-border">
+                      <SelectContent className="border-border bg-popover">
                         <SelectItem value="en">English</SelectItem>
                         <SelectItem value="es">Español</SelectItem>
                         <SelectItem value="fr">Français</SelectItem>
@@ -545,28 +591,28 @@ const SettingsPage: React.FC = () => {
                     </Select>
                   </div>
                 </div>
-                
+
                 <div>
                   <Label className="text-foreground">Bio</Label>
                   <Textarea
                     value={profile.bio || ''}
-                    onChange={(e) => handleProfileUpdate('bio', e.target.value)}
-                    className="mt-1 bg-background border-border text-foreground"
+                    onChange={e => handleProfileUpdate('bio', e.target.value)}
+                    className="mt-1 border-border bg-background text-foreground"
                     rows={3}
                     placeholder="Tell us about yourself..."
                   />
                 </div>
 
                 <div className="flex justify-end">
-                  <Button 
-                    onClick={handleSaveProfile} 
+                  <Button
+                    onClick={handleSaveProfile}
                     disabled={isSaving}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
                     {isSaving ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
-                      <Save className="h-4 w-4 mr-2" />
+                      <Save className="mr-2 h-4 w-4" />
                     )}
                     Save Profile
                   </Button>
@@ -577,9 +623,11 @@ const SettingsPage: React.FC = () => {
 
           {/* Notification Settings */}
           <TabsContent value="notifications" className="space-y-6">
-            <Card className="bg-card border-border">
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="text-foreground">Notification Preferences</CardTitle>
+                <CardTitle className="text-foreground">
+                  Notification Preferences
+                </CardTitle>
                 <CardDescription>
                   Choose how and when you want to receive notifications
                 </CardDescription>
@@ -587,38 +635,78 @@ const SettingsPage: React.FC = () => {
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   {[
-                    { key: 'email_notifications', label: 'Email Notifications', desc: 'Receive notifications via email' },
-                    { key: 'push_notifications', label: 'Push Notifications', desc: 'Browser push notifications' },
-                    { key: 'workflow_alerts', label: 'Workflow Alerts', desc: 'Alerts when workflows complete or fail' },
-                    { key: 'employee_updates', label: 'Employee Updates', desc: 'Updates about AI employee performance' },
-                    { key: 'system_maintenance', label: 'System Maintenance', desc: 'Scheduled maintenance notifications' },
-                    { key: 'marketing_emails', label: 'Marketing Emails', desc: 'Product updates and offers' },
-                    { key: 'weekly_reports', label: 'Weekly Reports', desc: 'Weekly performance summaries' },
-                    { key: 'instant_alerts', label: 'Instant Alerts', desc: 'Real-time critical alerts' },
+                    {
+                      key: 'email_notifications',
+                      label: 'Email Notifications',
+                      desc: 'Receive notifications via email',
+                    },
+                    {
+                      key: 'push_notifications',
+                      label: 'Push Notifications',
+                      desc: 'Browser push notifications',
+                    },
+                    {
+                      key: 'workflow_alerts',
+                      label: 'Workflow Alerts',
+                      desc: 'Alerts when workflows complete or fail',
+                    },
+                    {
+                      key: 'employee_updates',
+                      label: 'Employee Updates',
+                      desc: 'Updates about AI employee performance',
+                    },
+                    {
+                      key: 'system_maintenance',
+                      label: 'System Maintenance',
+                      desc: 'Scheduled maintenance notifications',
+                    },
+                    {
+                      key: 'marketing_emails',
+                      label: 'Marketing Emails',
+                      desc: 'Product updates and offers',
+                    },
+                    {
+                      key: 'weekly_reports',
+                      label: 'Weekly Reports',
+                      desc: 'Weekly performance summaries',
+                    },
+                    {
+                      key: 'instant_alerts',
+                      label: 'Instant Alerts',
+                      desc: 'Real-time critical alerts',
+                    },
                   ].map(({ key, label, desc }) => (
-                    <div key={key} className="flex items-center justify-between">
+                    <div
+                      key={key}
+                      className="flex items-center justify-between"
+                    >
                       <div>
                         <Label className="text-foreground">{label}</Label>
                         <p className="text-sm text-muted-foreground">{desc}</p>
                       </div>
                       <Switch
                         checked={settings[key as keyof UserSettings] as boolean}
-                        onCheckedChange={(checked) => handleSettingsUpdate(key as keyof UserSettings, checked)}
+                        onCheckedChange={checked =>
+                          handleSettingsUpdate(
+                            key as keyof UserSettings,
+                            checked
+                          )
+                        }
                       />
                     </div>
                   ))}
                 </div>
 
                 <div className="flex justify-end">
-                  <Button 
-                    onClick={handleSaveSettings} 
+                  <Button
+                    onClick={handleSaveSettings}
                     disabled={isSaving}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
                     {isSaving ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
-                      <Save className="h-4 w-4 mr-2" />
+                      <Save className="mr-2 h-4 w-4" />
                     )}
                     Save Preferences
                   </Button>
@@ -629,11 +717,13 @@ const SettingsPage: React.FC = () => {
 
           {/* Security Settings */}
           <TabsContent value="security" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Security Settings */}
-              <Card className="bg-card border-border">
+              <Card className="border-border bg-card">
                 <CardHeader>
-                  <CardTitle className="text-foreground">Security Settings</CardTitle>
+                  <CardTitle className="text-foreground">
+                    Security Settings
+                  </CardTitle>
                   <CardDescription>
                     Manage your account security and authentication
                   </CardDescription>
@@ -641,8 +731,12 @@ const SettingsPage: React.FC = () => {
                 <CardContent className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label className="text-foreground">Two-Factor Authentication</Label>
-                      <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
+                      <Label className="text-foreground">
+                        Two-Factor Authentication
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Add an extra layer of security
+                      </p>
                     </div>
                     <Switch
                       checked={settings.two_factor_enabled}
@@ -650,17 +744,19 @@ const SettingsPage: React.FC = () => {
                       disabled={isSaving}
                     />
                   </div>
-                  
+
                   <div>
                     <Label className="text-foreground">Session Timeout</Label>
-                    <Select 
-                      value={settings.session_timeout.toString()} 
-                      onValueChange={(value) => handleSettingsUpdate('session_timeout', parseInt(value))}
+                    <Select
+                      value={settings.session_timeout.toString()}
+                      onValueChange={value =>
+                        handleSettingsUpdate('session_timeout', parseInt(value))
+                      }
                     >
-                      <SelectTrigger className="mt-1 bg-background border-border text-foreground">
+                      <SelectTrigger className="mt-1 border-border bg-background text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-popover border-border">
+                      <SelectContent className="border-border bg-popover">
                         <SelectItem value="15">15 minutes</SelectItem>
                         <SelectItem value="30">30 minutes</SelectItem>
                         <SelectItem value="60">1 hour</SelectItem>
@@ -669,19 +765,21 @@ const SettingsPage: React.FC = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   {/* Change Password */}
                   <div className="space-y-4 border-t border-border pt-4">
                     <Label className="text-foreground">Change Password</Label>
-                    
+
                     <div>
-                      <Label className="text-muted-foreground text-sm">New Password</Label>
+                      <Label className="text-sm text-muted-foreground">
+                        New Password
+                      </Label>
                       <div className="relative mt-1">
                         <Input
-                          type={showNewPassword ? "text" : "password"}
+                          type={showNewPassword ? 'text' : 'password'}
                           value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          className="bg-background border-border text-foreground pr-10"
+                          onChange={e => setNewPassword(e.target.value)}
+                          className="border-border bg-background pr-10 text-foreground"
                           placeholder="Enter new password"
                         />
                         <button
@@ -689,56 +787,68 @@ const SettingsPage: React.FC = () => {
                           onClick={() => setShowNewPassword(!showNewPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         >
-                          {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showNewPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </div>
-                    
+
                     <div>
-                      <Label className="text-muted-foreground text-sm">Confirm Password</Label>
+                      <Label className="text-sm text-muted-foreground">
+                        Confirm Password
+                      </Label>
                       <div className="relative mt-1">
                         <Input
-                          type={showConfirmPassword ? "text" : "password"}
+                          type={showConfirmPassword ? 'text' : 'password'}
                           value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="bg-background border-border text-foreground pr-10"
+                          onChange={e => setConfirmPassword(e.target.value)}
+                          className="border-border bg-background pr-10 text-foreground"
                           placeholder="Confirm new password"
                         />
                         <button
                           type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         >
-                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </div>
-                    
-                    <Button 
+
+                    <Button
                       onClick={handleChangePassword}
                       disabled={isSaving || !newPassword || !confirmPassword}
                       variant="outline"
                       className="w-full border-border"
                     >
                       {isSaving ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <Key className="h-4 w-4 mr-2" />
+                        <Key className="mr-2 h-4 w-4" />
                       )}
                       Change Password
                     </Button>
                   </div>
 
                   <div className="flex justify-end border-t border-border pt-4">
-                    <Button 
-                      onClick={handleSaveSettings} 
+                    <Button
+                      onClick={handleSaveSettings}
                       disabled={isSaving}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       {isSaving ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
-                        <Save className="h-4 w-4 mr-2" />
+                        <Save className="mr-2 h-4 w-4" />
                       )}
                       Save Security Settings
                     </Button>
@@ -747,21 +857,23 @@ const SettingsPage: React.FC = () => {
               </Card>
 
               {/* API Keys */}
-              <Card className="bg-card border-border">
+              <Card className="border-border bg-card">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-foreground">API Keys</CardTitle>
+                      <CardTitle className="text-foreground">
+                        API Keys
+                      </CardTitle>
                       <CardDescription>
                         Manage API keys for external integrations
                       </CardDescription>
                     </div>
-                    <Button 
+                    <Button
                       onClick={() => setShowAPIKeyDialog(true)}
                       className="bg-green-600 hover:bg-green-700"
                       size="sm"
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="mr-2 h-4 w-4" />
                       New Key
                     </Button>
                   </div>
@@ -769,34 +881,47 @@ const SettingsPage: React.FC = () => {
                 <CardContent>
                   <div className="space-y-3">
                     {apiKeys.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <Key className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                      <div className="py-8 text-center text-muted-foreground">
+                        <Key className="mx-auto mb-2 h-12 w-12 opacity-50" />
                         <p>No API keys yet</p>
-                        <p className="text-sm">Generate your first API key to get started</p>
+                        <p className="text-sm">
+                          Generate your first API key to get started
+                        </p>
                       </div>
                     ) : (
-                      apiKeys.map((apiKey) => (
-                        <div key={apiKey.id} className="flex items-center justify-between p-3 bg-accent/50 rounded-lg border border-border">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-foreground truncate">{apiKey.name}</p>
-                            <p className="text-sm text-muted-foreground font-mono">{apiKey.key_prefix}...</p>
+                      apiKeys.map(apiKey => (
+                        <div
+                          key={apiKey.id}
+                          className="flex items-center justify-between rounded-lg border border-border bg-accent/50 p-3"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-medium text-foreground">
+                              {apiKey.name}
+                            </p>
+                            <p className="font-mono text-sm text-muted-foreground">
+                              {apiKey.key_prefix}...
+                            </p>
                             <p className="text-xs text-muted-foreground">
-                              Created: {new Date(apiKey.created_at).toLocaleDateString()}
-                              {apiKey.last_used_at && ` • Last used: ${new Date(apiKey.last_used_at).toLocaleDateString()}`}
+                              Created:{' '}
+                              {new Date(apiKey.created_at).toLocaleDateString()}
+                              {apiKey.last_used_at &&
+                                ` • Last used: ${new Date(apiKey.last_used_at).toLocaleDateString()}`}
                             </p>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               className="text-muted-foreground hover:text-foreground"
-                              onClick={() => handleCopyAPIKey(apiKey.key_prefix)}
+                              onClick={() =>
+                                handleCopyAPIKey(apiKey.key_prefix)
+                              }
                             >
                               <Copy className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => setKeyToDelete(apiKey.id)}
                               className="text-red-400 hover:text-red-300"
                             >
@@ -814,11 +939,13 @@ const SettingsPage: React.FC = () => {
 
           {/* System Settings */}
           <TabsContent value="system" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* General System Settings */}
-              <Card className="bg-card border-border">
+              <Card className="border-border bg-card">
                 <CardHeader>
-                  <CardTitle className="text-foreground">General Settings</CardTitle>
+                  <CardTitle className="text-foreground">
+                    General Settings
+                  </CardTitle>
                   <CardDescription>
                     Configure system behavior and preferences
                   </CardDescription>
@@ -826,34 +953,56 @@ const SettingsPage: React.FC = () => {
                 <CardContent className="space-y-6">
                   <div>
                     <Label className="text-foreground">Theme</Label>
-                    <Select 
-                      value={settings.theme} 
-                      onValueChange={(value: 'dark' | 'light' | 'auto') => handleSettingsUpdate('theme', value)}
+                    <Select
+                      value={settings.theme}
+                      onValueChange={(value: 'dark' | 'light' | 'auto') =>
+                        handleSettingsUpdate('theme', value)
+                      }
                     >
-                      <SelectTrigger className="mt-1 bg-background border-border text-foreground">
+                      <SelectTrigger className="mt-1 border-border bg-background text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-popover border-border">
+                      <SelectContent className="border-border bg-popover">
                         <SelectItem value="dark">Dark</SelectItem>
                         <SelectItem value="light">Light</SelectItem>
                         <SelectItem value="auto">Auto</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   {[
-                    { key: 'auto_save', label: 'Auto Save', desc: 'Automatically save changes' },
-                    { key: 'debug_mode', label: 'Debug Mode', desc: 'Show detailed error information' },
-                    { key: 'analytics_enabled', label: 'Analytics', desc: 'Enable usage analytics' },
+                    {
+                      key: 'auto_save',
+                      label: 'Auto Save',
+                      desc: 'Automatically save changes',
+                    },
+                    {
+                      key: 'debug_mode',
+                      label: 'Debug Mode',
+                      desc: 'Show detailed error information',
+                    },
+                    {
+                      key: 'analytics_enabled',
+                      label: 'Analytics',
+                      desc: 'Enable usage analytics',
+                    },
                   ].map(({ key, label, desc }) => (
-                    <div key={key} className="flex items-center justify-between">
+                    <div
+                      key={key}
+                      className="flex items-center justify-between"
+                    >
                       <div>
                         <Label className="text-foreground">{label}</Label>
                         <p className="text-sm text-muted-foreground">{desc}</p>
                       </div>
                       <Switch
                         checked={settings[key as keyof UserSettings] as boolean}
-                        onCheckedChange={(checked) => handleSettingsUpdate(key as keyof UserSettings, checked)}
+                        onCheckedChange={checked =>
+                          handleSettingsUpdate(
+                            key as keyof UserSettings,
+                            checked
+                          )
+                        }
                       />
                     </div>
                   ))}
@@ -861,9 +1010,11 @@ const SettingsPage: React.FC = () => {
               </Card>
 
               {/* Advanced Settings */}
-              <Card className="bg-card border-border">
+              <Card className="border-border bg-card">
                 <CardHeader>
-                  <CardTitle className="text-foreground">Advanced Settings</CardTitle>
+                  <CardTitle className="text-foreground">
+                    Advanced Settings
+                  </CardTitle>
                   <CardDescription>
                     Advanced configuration options
                   </CardDescription>
@@ -871,14 +1022,16 @@ const SettingsPage: React.FC = () => {
                 <CardContent className="space-y-6">
                   <div>
                     <Label className="text-foreground">Cache Size</Label>
-                    <Select 
-                      value={settings.cache_size} 
-                      onValueChange={(value) => handleSettingsUpdate('cache_size', value)}
+                    <Select
+                      value={settings.cache_size}
+                      onValueChange={value =>
+                        handleSettingsUpdate('cache_size', value)
+                      }
                     >
-                      <SelectTrigger className="mt-1 bg-background border-border text-foreground">
+                      <SelectTrigger className="mt-1 border-border bg-background text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-popover border-border">
+                      <SelectContent className="border-border bg-popover">
                         <SelectItem value="256MB">256 MB</SelectItem>
                         <SelectItem value="512MB">512 MB</SelectItem>
                         <SelectItem value="1GB">1 GB</SelectItem>
@@ -887,17 +1040,19 @@ const SettingsPage: React.FC = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
                     <Label className="text-foreground">Backup Frequency</Label>
-                    <Select 
-                      value={settings.backup_frequency} 
-                      onValueChange={(value) => handleSettingsUpdate('backup_frequency', value)}
+                    <Select
+                      value={settings.backup_frequency}
+                      onValueChange={value =>
+                        handleSettingsUpdate('backup_frequency', value)
+                      }
                     >
-                      <SelectTrigger className="mt-1 bg-background border-border text-foreground">
+                      <SelectTrigger className="mt-1 border-border bg-background text-foreground">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-popover border-border">
+                      <SelectContent className="border-border bg-popover">
                         <SelectItem value="hourly">Hourly</SelectItem>
                         <SelectItem value="daily">Daily</SelectItem>
                         <SelectItem value="weekly">Weekly</SelectItem>
@@ -905,26 +1060,40 @@ const SettingsPage: React.FC = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
-                    <Label className="text-foreground">Data Retention (days)</Label>
+                    <Label className="text-foreground">
+                      Data Retention (days)
+                    </Label>
                     <Input
                       type="number"
                       value={settings.retention_period}
-                      onChange={(e) => handleSettingsUpdate('retention_period', parseInt(e.target.value) || 30)}
-                      className="mt-1 bg-background border-border text-foreground"
+                      onChange={e =>
+                        handleSettingsUpdate(
+                          'retention_period',
+                          parseInt(e.target.value) || 30
+                        )
+                      }
+                      className="mt-1 border-border bg-background text-foreground"
                       min={1}
                       max={365}
                     />
                   </div>
-                  
+
                   <div>
-                    <Label className="text-foreground">Max Concurrent Jobs</Label>
+                    <Label className="text-foreground">
+                      Max Concurrent Jobs
+                    </Label>
                     <Input
                       type="number"
                       value={settings.max_concurrent_jobs}
-                      onChange={(e) => handleSettingsUpdate('max_concurrent_jobs', parseInt(e.target.value) || 10)}
-                      className="mt-1 bg-background border-border text-foreground"
+                      onChange={e =>
+                        handleSettingsUpdate(
+                          'max_concurrent_jobs',
+                          parseInt(e.target.value) || 10
+                        )
+                      }
+                      className="mt-1 border-border bg-background text-foreground"
                       min={1}
                       max={100}
                     />
@@ -934,9 +1103,9 @@ const SettingsPage: React.FC = () => {
             </div>
 
             {/* Agent & Metrics Settings */}
-            <Card className="bg-card border-border">
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="text-foreground flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-foreground">
                   <Bot className="h-5 w-5 text-primary" />
                   Agent & Metrics
                 </CardTitle>
@@ -946,17 +1115,29 @@ const SettingsPage: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Background Service Status */}
-                <div className="p-4 rounded-lg bg-accent/20 border border-border/50">
-                  <div className="flex items-center justify-between mb-2">
+                <div className="rounded-lg border border-border/50 bg-accent/20 p-4">
+                  <div className="mb-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className={cn(
-                        "w-2 h-2 rounded-full",
-                        metricsStore.isBackgroundServiceRunning ? "bg-green-500 animate-pulse" : "bg-gray-500"
-                      )} />
+                      <div
+                        className={cn(
+                          'h-2 w-2 rounded-full',
+                          metricsStore.isBackgroundServiceRunning
+                            ? 'animate-pulse bg-green-500'
+                            : 'bg-gray-500'
+                        )}
+                      />
                       <span className="font-medium">Background Service</span>
                     </div>
-                    <Badge variant={metricsStore.isBackgroundServiceRunning ? "default" : "outline"}>
-                      {metricsStore.isBackgroundServiceRunning ? "Running" : "Stopped"}
+                    <Badge
+                      variant={
+                        metricsStore.isBackgroundServiceRunning
+                          ? 'default'
+                          : 'outline'
+                      }
+                    >
+                      {metricsStore.isBackgroundServiceRunning
+                        ? 'Running'
+                        : 'Stopped'}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -966,20 +1147,34 @@ const SettingsPage: React.FC = () => {
 
                 {/* Metrics Summary */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                    <p className="text-xs text-muted-foreground">Active Agents</p>
-                    <p className="text-2xl font-bold text-blue-400">{metricsStore.activeAgents}</p>
+                  <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3">
+                    <p className="text-xs text-muted-foreground">
+                      Active Agents
+                    </p>
+                    <p className="text-2xl font-bold text-blue-400">
+                      {metricsStore.activeAgents}
+                    </p>
                   </div>
-                  <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                    <p className="text-xs text-muted-foreground">Completed Tasks</p>
-                    <p className="text-2xl font-bold text-green-400">{metricsStore.completedTasks}</p>
+                  <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-3">
+                    <p className="text-xs text-muted-foreground">
+                      Completed Tasks
+                    </p>
+                    <p className="text-2xl font-bold text-green-400">
+                      {metricsStore.completedTasks}
+                    </p>
                   </div>
-                  <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                    <p className="text-xs text-muted-foreground">Total Tokens</p>
-                    <p className="text-2xl font-bold text-purple-400">{metricsStore.totalTokensUsed.toLocaleString()}</p>
+                  <div className="rounded-lg border border-purple-500/20 bg-purple-500/10 p-3">
+                    <p className="text-xs text-muted-foreground">
+                      Total Tokens
+                    </p>
+                    <p className="text-2xl font-bold text-purple-400">
+                      {metricsStore.totalTokensUsed.toLocaleString()}
+                    </p>
                   </div>
-                  <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                    <p className="text-xs text-muted-foreground">Success Rate</p>
+                  <div className="rounded-lg border border-orange-500/20 bg-orange-500/10 p-3">
+                    <p className="text-xs text-muted-foreground">
+                      Success Rate
+                    </p>
                     <p className="text-2xl font-bold text-orange-400">
                       {metricsStore.getSuccessRate().toFixed(1)}%
                     </p>
@@ -996,7 +1191,7 @@ const SettingsPage: React.FC = () => {
                     }}
                     className="flex-1"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Reset Metrics
                   </Button>
                   <Button
@@ -1014,12 +1209,12 @@ const SettingsPage: React.FC = () => {
                   >
                     {metricsStore.isBackgroundServiceRunning ? (
                       <>
-                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        <AlertTriangle className="mr-2 h-4 w-4" />
                         Stop Service
                       </>
                     ) : (
                       <>
-                        <Play className="h-4 w-4 mr-2" />
+                        <Play className="mr-2 h-4 w-4" />
                         Start Service
                       </>
                     )}
@@ -1035,9 +1230,9 @@ const SettingsPage: React.FC = () => {
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 {isSaving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <Save className="h-4 w-4 mr-2" />
+                  <Save className="mr-2 h-4 w-4" />
                 )}
                 Save System Settings
               </Button>
@@ -1048,7 +1243,7 @@ const SettingsPage: React.FC = () => {
 
       {/* API Key Generation Dialog */}
       <AlertDialog open={showAPIKeyDialog} onOpenChange={setShowAPIKeyDialog}>
-        <AlertDialogContent className="bg-popover border-border">
+        <AlertDialogContent className="border-border bg-popover">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-foreground">
               {generatedAPIKey ? 'API Key Generated' : 'Generate New API Key'}
@@ -1057,17 +1252,17 @@ const SettingsPage: React.FC = () => {
               {generatedAPIKey ? (
                 <div className="space-y-4">
                   <p className="text-yellow-400">
-                    <AlertTriangle className="h-4 w-4 inline mr-2" />
+                    <AlertTriangle className="mr-2 inline h-4 w-4" />
                     Save this key now. You won't be able to see it again!
                   </p>
-                  <div className="bg-background/50 p-3 rounded font-mono text-sm text-green-400 break-all border border-border">
+                  <div className="break-all rounded border border-border bg-background/50 p-3 font-mono text-sm text-green-400">
                     {generatedAPIKey}
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => handleCopyAPIKey(generatedAPIKey)}
                     className="w-full"
                   >
-                    <Copy className="h-4 w-4 mr-2" />
+                    <Copy className="mr-2 h-4 w-4" />
                     Copy to Clipboard
                   </Button>
                 </div>
@@ -1077,9 +1272,9 @@ const SettingsPage: React.FC = () => {
                     <Label className="text-foreground">Key Name</Label>
                     <Input
                       value={newAPIKeyName}
-                      onChange={(e) => setNewAPIKeyName(e.target.value)}
+                      onChange={e => setNewAPIKeyName(e.target.value)}
                       placeholder="e.g., Production API"
-                      className="mt-1 bg-background border-border text-foreground"
+                      className="mt-1 border-border bg-background text-foreground"
                     />
                   </div>
                 </div>
@@ -1088,7 +1283,7 @@ const SettingsPage: React.FC = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             {generatedAPIKey ? (
-              <AlertDialogAction 
+              <AlertDialogAction
                 onClick={() => {
                   setShowAPIKeyDialog(false);
                   setGeneratedAPIKey('');
@@ -1099,18 +1294,18 @@ const SettingsPage: React.FC = () => {
               </AlertDialogAction>
             ) : (
               <>
-                <AlertDialogCancel className="bg-secondary hover:bg-secondary/80 text-foreground border-border">
+                <AlertDialogCancel className="border-border bg-secondary text-foreground hover:bg-secondary/80">
                   Cancel
                 </AlertDialogCancel>
-                <AlertDialogAction 
+                <AlertDialogAction
                   onClick={handleGenerateAPIKey}
                   disabled={isSaving || !newAPIKeyName.trim()}
                   className="bg-green-600 hover:bg-green-700"
                 >
                   {isSaving ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <Key className="h-4 w-4 mr-2" />
+                    <Key className="mr-2 h-4 w-4" />
                   )}
                   Generate Key
                 </AlertDialogAction>
@@ -1121,20 +1316,25 @@ const SettingsPage: React.FC = () => {
       </AlertDialog>
 
       {/* Delete API Key Confirmation */}
-      <AlertDialog open={!!keyToDelete} onOpenChange={() => setKeyToDelete(null)}>
-        <AlertDialogContent className="bg-popover border-border">
+      <AlertDialog
+        open={!!keyToDelete}
+        onOpenChange={() => setKeyToDelete(null)}
+      >
+        <AlertDialogContent className="border-border bg-popover">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground">Delete API Key</AlertDialogTitle>
+            <AlertDialogTitle className="text-foreground">
+              Delete API Key
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-              Are you sure you want to delete this API key? This action cannot be undone.
-              Any applications using this key will stop working.
+              Are you sure you want to delete this API key? This action cannot
+              be undone. Any applications using this key will stop working.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-secondary hover:bg-secondary/80 text-foreground border-border">
+            <AlertDialogCancel className="border-border bg-secondary text-foreground hover:bg-secondary/80">
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDeleteAPIKey}
               className="bg-red-600 hover:bg-red-700"
             >

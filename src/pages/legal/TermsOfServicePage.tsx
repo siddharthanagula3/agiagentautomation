@@ -1,7 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { FileText, CheckCircle2, AlertCircle, Scale, Ban, RefreshCw } from 'lucide-react';
+import { SEOHead } from '@/components/seo/SEOHead';
+import {
+  FileText,
+  CheckCircle2,
+  AlertCircle,
+  Scale,
+  Ban,
+  RefreshCw,
+} from 'lucide-react';
 
 const TermsOfServicePage: React.FC = () => {
   const lastUpdated = 'January 15, 2025';
@@ -12,7 +20,7 @@ const TermsOfServicePage: React.FC = () => {
       title: 'Acceptance of Terms',
       content: `By accessing and using AGI Agent Automation Platform, you accept and agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
 
-These terms apply to all users, including visitors, registered users, and paid subscribers. We reserve the right to modify these terms at any time, and will notify users of significant changes.`
+These terms apply to all users, including visitors, registered users, and paid subscribers. We reserve the right to modify these terms at any time, and will notify users of significant changes.`,
     },
     {
       icon: FileText,
@@ -26,7 +34,7 @@ These terms apply to all users, including visitors, registered users, and paid s
 • API access for enterprise users
 • Customer support and documentation
 
-We strive to maintain 99.9% uptime but do not guarantee uninterrupted service. Scheduled maintenance will be communicated in advance.`
+We strive to maintain 99.9% uptime but do not guarantee uninterrupted service. Scheduled maintenance will be communicated in advance.`,
     },
     {
       icon: Scale,
@@ -42,7 +50,7 @@ We strive to maintain 99.9% uptime but do not guarantee uninterrupted service. S
 • Respect intellectual property rights
 • Not share your account with others
 
-Violation of these terms may result in account suspension or termination.`
+Violation of these terms may result in account suspension or termination.`,
     },
     {
       icon: Ban,
@@ -58,7 +66,7 @@ Violation of these terms may result in account suspension or termination.`
 • Resell our services without authorization
 • Scrape or extract data without permission
 
-We reserve the right to investigate and take action against violations.`
+We reserve the right to investigate and take action against violations.`,
     },
     {
       icon: RefreshCw,
@@ -73,7 +81,7 @@ We reserve the right to investigate and take action against violations.`
 • Enterprise customers have custom billing terms
 • All fees are non-refundable except as required by law
 
-Cancel anytime from your account settings.`
+Cancel anytime from your account settings.`,
     },
     {
       icon: AlertCircle,
@@ -88,15 +96,29 @@ Cancel anytime from your account settings.`
 • Service may be interrupted for maintenance or technical issues
 • Data loss prevention is your responsibility (we provide backups)
 
-Some jurisdictions do not allow liability limitations, so these may not apply to you.`
-    }
+Some jurisdictions do not allow liability limitations, so these may not apply to you.`,
+    },
   ];
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Terms of Service | AGI Agent Automation"
+        description="Terms of Service for AGI Agent Automation platform. Read our terms and conditions for using our AI employee and automation services."
+        keywords={[
+          'terms of service',
+          'terms and conditions',
+          'ai automation terms',
+          'ai employee terms',
+          'platform terms',
+          'service agreement',
+        ]}
+        ogType="website"
+        noindex={true}
+      />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-primary/5 to-transparent">
+      <section className="bg-gradient-to-b from-primary/5 to-transparent px-4 pb-12 pt-32 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -104,17 +126,17 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <Badge className="mb-6 glass px-6 py-2">
+            <Badge className="glass mb-6 px-6 py-2">
               <FileText className="mr-2 h-4 w-4" />
               Terms of Service
             </Badge>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            <h1 className="mb-6 text-5xl font-bold md:text-6xl">
               Terms of Service
             </h1>
-            <p className="text-lg text-muted-foreground mb-4">
+            <p className="mb-4 text-lg text-muted-foreground">
               Last updated: {lastUpdated}
             </p>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
               Please read these terms carefully before using our platform.
             </p>
           </motion.div>
@@ -122,7 +144,7 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
       </section>
 
       {/* Sections */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8">
+      <section className="px-4 py-12 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl space-y-12">
           {sections.map((section, idx) => (
             <motion.div
@@ -131,15 +153,15 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              className="glass p-8 rounded-2xl border border-border/50"
+              className="glass rounded-2xl border border-border/50 p-8"
             >
-              <div className="flex items-start gap-4 mb-4">
-                <div className="p-3 rounded-xl bg-primary/10">
+              <div className="mb-4 flex items-start gap-4">
+                <div className="rounded-xl bg-primary/10 p-3">
                   <section.icon className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold mb-4">{section.title}</h2>
-                  <div className="text-muted-foreground whitespace-pre-line leading-relaxed">
+                  <h2 className="mb-4 text-2xl font-bold">{section.title}</h2>
+                  <div className="whitespace-pre-line leading-relaxed text-muted-foreground">
                     {section.content}
                   </div>
                 </div>
@@ -150,22 +172,24 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
       </section>
 
       {/* Contact Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
+      <section className="bg-muted/30 px-4 py-20 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl font-bold mb-4">Questions About These Terms?</h2>
-            <p className="text-lg text-muted-foreground mb-6">
+            <h2 className="mb-4 text-3xl font-bold">
+              Questions About These Terms?
+            </h2>
+            <p className="mb-6 text-lg text-muted-foreground">
               Contact our legal team for clarification or concerns.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center text-sm">
+            <div className="flex flex-col justify-center gap-4 text-sm sm:flex-row">
               <div>
                 <strong>Email:</strong> legal@agiworkforce.com
               </div>
-              <div className="hidden sm:block text-muted-foreground">|</div>
+              <div className="hidden text-muted-foreground sm:block">|</div>
               <div>
                 <strong>Support:</strong> support@agiworkforce.com
               </div>

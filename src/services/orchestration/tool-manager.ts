@@ -5,7 +5,14 @@
 
 import { AgentType } from '../reasoning/task-decomposer';
 
-export type ToolCategory = 'code' | 'data' | 'automation' | 'search' | 'file' | 'system' | 'ai';
+export type ToolCategory =
+  | 'code'
+  | 'data'
+  | 'automation'
+  | 'search'
+  | 'file'
+  | 'system'
+  | 'ai';
 
 export interface Tool {
   id: string;
@@ -78,13 +85,13 @@ export class ToolManager {
       successfulExecutions: 0,
       failedExecutions: 0,
       totalCost: 0,
-      averageExecutionTime: 0
+      averageExecutionTime: 0,
     });
 
     if (tool.rateLimit) {
       this.rateLimitTracking.set(tool.id, {
         requests: [],
-        limit: tool.rateLimit
+        limit: tool.rateLimit,
       });
     }
 
@@ -108,7 +115,7 @@ export class ToolManager {
         executionTime: 0,
         cost: 0,
         toolId,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
 
@@ -120,7 +127,7 @@ export class ToolManager {
         executionTime: 0,
         cost: 0,
         toolId,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
 
@@ -133,7 +140,7 @@ export class ToolManager {
         executionTime: 0,
         cost: 0,
         toolId,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
 
@@ -147,7 +154,7 @@ export class ToolManager {
           executionTime: 0,
           cost: 0,
           toolId,
-          timestamp: new Date()
+          timestamp: new Date(),
         };
       }
     }
@@ -158,7 +165,7 @@ export class ToolManager {
 
     try {
       console.log(`🔧 Executing tool: ${tool.name}...`);
-      
+
       const toolResult = await tool.execute(params);
       const executionTime = Date.now() - startTime;
       const cost = tool.estimateCost(params);
@@ -169,22 +176,21 @@ export class ToolManager {
         executionTime,
         cost,
         toolId,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Update stats
       this.updateStats(toolId, true, executionTime, cost);
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
+
       result = {
         success: false,
         error: (error as Error).message,
         executionTime,
         cost: 0,
         toolId,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Update stats
@@ -215,8 +221,8 @@ export class ToolManager {
    * Get tools by category
    */
   getToolsByCategory(category: ToolCategory): Tool[] {
-    return Array.from(this.tools.values()).filter(tool =>
-      tool.category === category
+    return Array.from(this.tools.values()).filter(
+      tool => tool.category === category
     );
   }
 
@@ -281,7 +287,7 @@ export class ToolManager {
         // Integration with filesystem API
         return { content: 'file content', path: params.path };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.path) {
           return { valid: false, errors: ['Path is required'] };
         }
@@ -289,7 +295,12 @@ export class ToolManager {
       },
       estimateCost: () => 0.01,
       requiredPermissions: ['file:read'],
-      supportedAgents: ['claude-code', 'cursor-agent', 'replit-agent', 'mcp-tool']
+      supportedAgents: [
+        'claude-code',
+        'cursor-agent',
+        'replit-agent',
+        'mcp-tool',
+      ],
     });
 
     this.registerTool({
@@ -301,7 +312,7 @@ export class ToolManager {
         // Integration with filesystem API
         return { success: true, path: params.path };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.path || !params.content) {
           return { valid: false, errors: ['Path and content are required'] };
         }
@@ -309,7 +320,7 @@ export class ToolManager {
       },
       estimateCost: () => 0.02,
       requiredPermissions: ['file:write'],
-      supportedAgents: ['cursor-agent', 'replit-agent', 'mcp-tool']
+      supportedAgents: ['cursor-agent', 'replit-agent', 'mcp-tool'],
     });
 
     // Web Search Tools
@@ -322,7 +333,7 @@ export class ToolManager {
         // Integration with search API
         return { results: [], query: params.query };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.query) {
           return { valid: false, errors: ['Query is required'] };
         }
@@ -331,7 +342,7 @@ export class ToolManager {
       estimateCost: () => 0.05,
       requiredPermissions: ['web:search'],
       supportedAgents: ['gemini-cli', 'web-search', 'claude-code'],
-      rateLimit: { maxRequests: 100, windowMs: 60000 }
+      rateLimit: { maxRequests: 100, windowMs: 60000 },
     });
 
     this.registerTool({
@@ -343,7 +354,7 @@ export class ToolManager {
         // Integration with fetch API
         return { content: '', url: params.url };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.url) {
           return { valid: false, errors: ['URL is required'] };
         }
@@ -351,7 +362,12 @@ export class ToolManager {
       },
       estimateCost: () => 0.03,
       requiredPermissions: ['web:fetch'],
-      supportedAgents: ['gemini-cli', 'web-search', 'claude-code', 'puppeteer-agent']
+      supportedAgents: [
+        'gemini-cli',
+        'web-search',
+        'claude-code',
+        'puppeteer-agent',
+      ],
     });
 
     // Code Tools
@@ -364,7 +380,7 @@ export class ToolManager {
         // Integration with code analysis
         return { issues: [], suggestions: [] };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.code) {
           return { valid: false, errors: ['Code is required'] };
         }
@@ -372,7 +388,7 @@ export class ToolManager {
       },
       estimateCost: () => 0.1,
       requiredPermissions: ['code:analyze'],
-      supportedAgents: ['claude-code', 'cursor-agent']
+      supportedAgents: ['claude-code', 'cursor-agent'],
     });
 
     this.registerTool({
@@ -384,7 +400,7 @@ export class ToolManager {
         // Integration with code generation
         return { code: '', language: params.language };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.prompt) {
           return { valid: false, errors: ['Prompt is required'] };
         }
@@ -392,7 +408,7 @@ export class ToolManager {
       },
       estimateCost: () => 0.15,
       requiredPermissions: ['code:generate'],
-      supportedAgents: ['claude-code', 'cursor-agent', 'replit-agent']
+      supportedAgents: ['claude-code', 'cursor-agent', 'replit-agent'],
     });
 
     // Testing Tools
@@ -405,7 +421,7 @@ export class ToolManager {
         // Integration with test runner
         return { passed: 0, failed: 0, results: [] };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.testPath) {
           return { valid: false, errors: ['Test path is required'] };
         }
@@ -413,7 +429,7 @@ export class ToolManager {
       },
       estimateCost: () => 0.05,
       requiredPermissions: ['code:test'],
-      supportedAgents: ['claude-code', 'replit-agent']
+      supportedAgents: ['claude-code', 'replit-agent'],
     });
 
     this.registerTool({
@@ -425,7 +441,7 @@ export class ToolManager {
         // Integration with test generation
         return { tests: '' };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.code) {
           return { valid: false, errors: ['Code is required'] };
         }
@@ -433,7 +449,7 @@ export class ToolManager {
       },
       estimateCost: () => 0.1,
       requiredPermissions: ['code:test'],
-      supportedAgents: ['claude-code']
+      supportedAgents: ['claude-code'],
     });
 
     // System Tools
@@ -446,7 +462,7 @@ export class ToolManager {
         // Integration with system execution
         return { output: '', exitCode: 0 };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.command) {
           return { valid: false, errors: ['Command is required'] };
         }
@@ -454,7 +470,7 @@ export class ToolManager {
       },
       estimateCost: () => 0.01,
       requiredPermissions: ['system:execute'],
-      supportedAgents: ['bash-executor', 'replit-agent']
+      supportedAgents: ['bash-executor', 'replit-agent'],
     });
 
     // Automation Tools
@@ -467,7 +483,7 @@ export class ToolManager {
         // Integration with Puppeteer
         return { success: true, data: {} };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.action) {
           return { valid: false, errors: ['Action is required'] };
         }
@@ -475,7 +491,7 @@ export class ToolManager {
       },
       estimateCost: () => 0.2,
       requiredPermissions: ['automation:browser'],
-      supportedAgents: ['puppeteer-agent']
+      supportedAgents: ['puppeteer-agent'],
     });
 
     // Data Tools
@@ -488,7 +504,7 @@ export class ToolManager {
         // Integration with data processing
         return { processedData: {} };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.data || !params.operation) {
           return { valid: false, errors: ['Data and operation are required'] };
         }
@@ -496,7 +512,7 @@ export class ToolManager {
       },
       estimateCost: () => 0.05,
       requiredPermissions: ['data:process'],
-      supportedAgents: ['claude-code', 'gemini-cli']
+      supportedAgents: ['claude-code', 'gemini-cli'],
     });
 
     this.registerTool({
@@ -508,7 +524,7 @@ export class ToolManager {
         // Integration with data analysis
         return { insights: [], statistics: {} };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.data) {
           return { valid: false, errors: ['Data is required'] };
         }
@@ -516,7 +532,7 @@ export class ToolManager {
       },
       estimateCost: () => 0.08,
       requiredPermissions: ['data:analyze'],
-      supportedAgents: ['gemini-cli', 'claude-code']
+      supportedAgents: ['gemini-cli', 'claude-code'],
     });
 
     // AI Tools
@@ -529,7 +545,7 @@ export class ToolManager {
         // Integration with content generation
         return { content: '' };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.prompt) {
           return { valid: false, errors: ['Prompt is required'] };
         }
@@ -537,7 +553,7 @@ export class ToolManager {
       },
       estimateCost: () => 0.1,
       requiredPermissions: ['ai:generate'],
-      supportedAgents: ['gemini-cli', 'claude-code']
+      supportedAgents: ['gemini-cli', 'claude-code'],
     });
 
     this.registerTool({
@@ -549,7 +565,7 @@ export class ToolManager {
         // Integration with documentation generation
         return { documentation: '' };
       },
-      validate: (params) => {
+      validate: params => {
         if (!params.code) {
           return { valid: false, errors: ['Code is required'] };
         }
@@ -557,7 +573,7 @@ export class ToolManager {
       },
       estimateCost: () => 0.1,
       requiredPermissions: ['ai:generate'],
-      supportedAgents: ['claude-code']
+      supportedAgents: ['claude-code'],
     });
 
     console.log(`✅ Registered ${this.tools.size} built-in tools`);
@@ -612,7 +628,8 @@ export class ToolManager {
 
     // Update moving average for execution time
     stats.averageExecutionTime =
-      (stats.averageExecutionTime * (stats.totalExecutions - 1) + executionTime) /
+      (stats.averageExecutionTime * (stats.totalExecutions - 1) +
+        executionTime) /
       stats.totalExecutions;
 
     this.usageStats.set(toolId, stats);
@@ -661,6 +678,8 @@ export function registerCustomTool(tool: Tool): void {
   toolManager.registerTool(tool);
 }
 
-export function getToolStats(toolId?: string): ToolUsageStats | Map<string, ToolUsageStats> {
+export function getToolStats(
+  toolId?: string
+): ToolUsageStats | Map<string, ToolUsageStats> {
   return toolManager.getUsageStats(toolId);
 }

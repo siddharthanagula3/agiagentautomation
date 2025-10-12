@@ -26,7 +26,10 @@ interface TokenUsage {
   plan: 'free' | 'pro' | 'enterprise';
 }
 
-export const TokenUsageWarning: React.FC<TokenUsageWarningProps> = ({ provider, className = '' }) => {
+export const TokenUsageWarning: React.FC<TokenUsageWarningProps> = ({
+  provider,
+  className = '',
+}) => {
   const { user } = useAuthStore();
   const [usage, setUsage] = useState<TokenUsage | null>(null);
   const [isDismissed, setIsDismissed] = useState(false);
@@ -58,7 +61,10 @@ export const TokenUsageWarning: React.FC<TokenUsageWarningProps> = ({ provider, 
         .select('*')
         .eq('user_id', user.id)
         .eq('llm_provider', provider)
-        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()); // Last 30 days
+        .gte(
+          'created_at',
+          new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+        ); // Last 30 days
 
       if (usageError) {
         console.error('Error fetching token usage:', usageError);
@@ -66,28 +72,38 @@ export const TokenUsageWarning: React.FC<TokenUsageWarningProps> = ({ provider, 
       }
 
       // Calculate total tokens used
-      const tokensUsed = usageData?.reduce((sum, record) => sum + (record.total_tokens || 0), 0) || 0;
+      const tokensUsed =
+        usageData?.reduce(
+          (sum, record) => sum + (record.total_tokens || 0),
+          0
+        ) || 0;
 
       // Get token limits based on plan
       const tokenLimits = {
-        free: 250000,    // 250K per LLM
-        pro: 2500000,    // 2.5M per LLM
-        enterprise: 10000000 // 10M per LLM
+        free: 250000, // 250K per LLM
+        pro: 2500000, // 2.5M per LLM
+        enterprise: 10000000, // 10M per LLM
       };
 
-      const tokenLimit = tokenLimits[plan as keyof typeof tokenLimits] || tokenLimits.free;
+      const tokenLimit =
+        tokenLimits[plan as keyof typeof tokenLimits] || tokenLimits.free;
       // Ensure percentage is calculated correctly and handle edge cases
-      const percentageUsed = tokenLimit > 0 ? Math.min(Math.max((tokensUsed / tokenLimit) * 100, 0), 100) : 0;
+      const percentageUsed =
+        tokenLimit > 0
+          ? Math.min(Math.max((tokensUsed / tokenLimit) * 100, 0), 100)
+          : 0;
 
       const usageInfo = {
         provider,
         tokensUsed,
         tokenLimit,
         percentageUsed,
-        plan: plan as 'free' | 'pro' | 'enterprise'
+        plan: plan as 'free' | 'pro' | 'enterprise',
       };
 
-      console.log('Token usage data:', usageInfo);
+      if (import.meta.env.DEV) {
+        console.log('Token usage data:', usageInfo);
+      }
       setUsage(usageInfo);
     } catch (error) {
       console.error('Error fetching token usage:', error);
@@ -99,7 +115,7 @@ export const TokenUsageWarning: React.FC<TokenUsageWarningProps> = ({ provider, 
   useEffect(() => {
     if (user) {
       fetchTokenUsage();
-      
+
       // Refresh usage every 30 seconds
       const interval = setInterval(fetchTokenUsage, 30000);
       return () => clearInterval(interval);
@@ -132,7 +148,7 @@ export const TokenUsageWarning: React.FC<TokenUsageWarningProps> = ({ provider, 
       return (
         <Button size="sm" asChild>
           <Link to="/pricing">
-            <Crown className="w-4 h-4 mr-2" />
+            <Crown className="mr-2 h-4 w-4" />
             Upgrade to Pro
           </Link>
         </Button>
@@ -142,7 +158,7 @@ export const TokenUsageWarning: React.FC<TokenUsageWarningProps> = ({ provider, 
       return (
         <Button size="sm" asChild>
           <Link to="/pricing">
-            <Crown className="w-4 h-4 mr-2" />
+            <Crown className="mr-2 h-4 w-4" />
             Upgrade to Enterprise
           </Link>
         </Button>
@@ -161,17 +177,15 @@ export const TokenUsageWarning: React.FC<TokenUsageWarningProps> = ({ provider, 
       >
         <Alert variant={getWarningColor()}>
           <AlertTriangle className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between w-full">
+          <AlertDescription className="flex w-full items-center justify-between">
             <div className="flex items-center space-x-4">
               <div>
                 <p className="font-medium">{getWarningMessage()}</p>
-                <div className="flex items-center space-x-2 mt-2">
-                  <Progress 
-                    value={usage.percentageUsed} 
-                    className="w-32 h-2" 
-                  />
+                <div className="mt-2 flex items-center space-x-2">
+                  <Progress value={usage.percentageUsed} className="h-2 w-32" />
                   <span className="text-sm text-muted-foreground">
-                    {usage.tokensUsed.toLocaleString()} / {usage.tokenLimit.toLocaleString()}
+                    {usage.tokensUsed.toLocaleString()} /{' '}
+                    {usage.tokenLimit.toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -183,7 +197,7 @@ export const TokenUsageWarning: React.FC<TokenUsageWarningProps> = ({ provider, 
                 size="sm"
                 onClick={() => setIsDismissed(true)}
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </AlertDescription>

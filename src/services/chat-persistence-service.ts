@@ -4,7 +4,7 @@
  * Integrates with Supabase for data persistence
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase-client';
 
 export interface ChatSession {
   id: string;
@@ -48,7 +48,7 @@ export class ChatPersistenceService {
       sessions: [],
       messages: new Map(),
       contextWindows: new Map(),
-      lastSync: new Date()
+      lastSync: new Date(),
     };
 
     this.initializeSupabase();
@@ -75,7 +75,7 @@ export class ChatPersistenceService {
       return;
     }
 
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    this.supabase = supabase;
   }
 
   /**
@@ -116,7 +116,12 @@ export class ChatPersistenceService {
   /**
    * Create new chat session
    */
-  async createSession(userId: string, employeeId: string, role: string, provider: string): Promise<ChatSession> {
+  async createSession(
+    userId: string,
+    employeeId: string,
+    role: string,
+    provider: string
+  ): Promise<ChatSession> {
     const session: ChatSession = {
       id: `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       userId,
@@ -125,7 +130,7 @@ export class ChatPersistenceService {
       provider,
       createdAt: new Date(),
       updatedAt: new Date(),
-      isActive: true
+      isActive: true,
     };
 
     this.state.sessions.push(session);
@@ -135,19 +140,17 @@ export class ChatPersistenceService {
     // Save to server if online
     if (this.isOnline && this.supabase) {
       try {
-        await this.supabase
-          .from('chat_sessions')
-          .insert({
-            id: session.id,
-            user_id: userId,
-            employee_id: employeeId,
-            role,
-            provider,
-            title: session.title,
-            created_at: session.createdAt.toISOString(),
-            updated_at: session.updatedAt.toISOString(),
-            is_active: session.isActive
-          });
+        await this.supabase.from('chat_sessions').insert({
+          id: session.id,
+          user_id: userId,
+          employee_id: employeeId,
+          role,
+          provider,
+          title: session.title,
+          created_at: session.createdAt.toISOString(),
+          updated_at: session.updatedAt.toISOString(),
+          is_active: session.isActive,
+        });
       } catch (error) {
         console.error('Failed to save session to server:', error);
         // Continue with local storage
@@ -161,14 +164,19 @@ export class ChatPersistenceService {
   /**
    * Add message to session
    */
-  async addMessage(sessionId: string, role: 'user' | 'assistant' | 'system' | 'tool', content: string, metadata?: any): Promise<ChatMessage> {
+  async addMessage(
+    sessionId: string,
+    role: 'user' | 'assistant' | 'system' | 'tool',
+    content: string,
+    metadata?: any
+  ): Promise<ChatMessage> {
     const message: ChatMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       sessionId,
       role,
       content,
       timestamp: new Date(),
-      metadata
+      metadata,
     };
 
     const messages = this.state.messages.get(sessionId) || [];
@@ -184,16 +192,14 @@ export class ChatPersistenceService {
     // Save to server if online
     if (this.isOnline && this.supabase) {
       try {
-        await this.supabase
-          .from('chat_messages')
-          .insert({
-            id: message.id,
-            session_id: sessionId,
-            role: message.role,
-            content: message.content,
-            created_at: message.timestamp.toISOString(),
-            metadata: message.metadata
-          });
+        await this.supabase.from('chat_messages').insert({
+          id: message.id,
+          session_id: sessionId,
+          role: message.role,
+          content: message.content,
+          created_at: message.timestamp.toISOString(),
+          metadata: message.metadata,
+        });
       } catch (error) {
         console.error('Failed to save message to server:', error);
         // Continue with local storage
@@ -271,11 +277,8 @@ export class ChatPersistenceService {
 
     if (this.isOnline && this.supabase) {
       try {
-        await this.supabase
-          .from('chat_sessions')
-          .delete()
-          .eq('id', sessionId);
-        
+        await this.supabase.from('chat_sessions').delete().eq('id', sessionId);
+
         await this.supabase
           .from('chat_messages')
           .delete()
@@ -312,19 +315,17 @@ export class ChatPersistenceService {
     try {
       // Sync sessions
       for (const session of this.state.sessions) {
-        const { error } = await this.supabase
-          .from('chat_sessions')
-          .upsert({
-            id: session.id,
-            user_id: session.userId,
-            employee_id: session.employeeId,
-            role: session.role,
-            provider: session.provider,
-            title: session.title,
-            created_at: session.createdAt.toISOString(),
-            updated_at: session.updatedAt.toISOString(),
-            is_active: session.isActive
-          });
+        const { error } = await this.supabase.from('chat_sessions').upsert({
+          id: session.id,
+          user_id: session.userId,
+          employee_id: session.employeeId,
+          role: session.role,
+          provider: session.provider,
+          title: session.title,
+          created_at: session.createdAt.toISOString(),
+          updated_at: session.updatedAt.toISOString(),
+          is_active: session.isActive,
+        });
 
         if (error) {
           console.error('Failed to sync session:', error);
@@ -334,16 +335,14 @@ export class ChatPersistenceService {
       // Sync messages
       for (const [sessionId, messages] of this.state.messages) {
         for (const message of messages) {
-          const { error } = await this.supabase
-            .from('chat_messages')
-            .upsert({
-              id: message.id,
-              session_id: message.sessionId,
-              role: message.role,
-              content: message.content,
-              created_at: message.timestamp.toISOString(),
-              metadata: message.metadata
-            });
+          const { error } = await this.supabase.from('chat_messages').upsert({
+            id: message.id,
+            session_id: message.sessionId,
+            role: message.role,
+            content: message.content,
+            created_at: message.timestamp.toISOString(),
+            metadata: message.metadata,
+          });
 
           if (error) {
             console.error('Failed to sync message:', error);
@@ -385,7 +384,7 @@ export class ChatPersistenceService {
         title: s.title,
         createdAt: new Date(s.created_at),
         updatedAt: new Date(s.updated_at),
-        isActive: s.is_active
+        isActive: s.is_active,
       }));
 
       // Load messages for each session
@@ -401,14 +400,17 @@ export class ChatPersistenceService {
           continue;
         }
 
-        this.state.messages.set(session.id, messages.map(m => ({
-          id: m.id,
-          sessionId: m.session_id,
-          role: m.role,
-          content: m.content,
-          timestamp: new Date(m.created_at),
-          metadata: m.metadata
-        })));
+        this.state.messages.set(
+          session.id,
+          messages.map(m => ({
+            id: m.id,
+            sessionId: m.session_id,
+            role: m.role,
+            content: m.content,
+            timestamp: new Date(m.created_at),
+            metadata: m.metadata,
+          }))
+        );
       }
 
       this.state.lastSync = new Date();
@@ -427,7 +429,7 @@ export class ChatPersistenceService {
         activeSessionId: this.state.activeSessionId,
         messages: Array.from(this.state.messages.entries()),
         contextWindows: Array.from(this.state.contextWindows.entries()),
-        lastSync: this.state.lastSync
+        lastSync: this.state.lastSync,
       };
       localStorage.setItem('chat-persistence-state', JSON.stringify(data));
     } catch (error) {
@@ -463,7 +465,7 @@ export class ChatPersistenceService {
     this.state.contextWindows.clear();
     this.state.activeSessionId = undefined;
     this.state.lastSync = new Date();
-    
+
     localStorage.removeItem('chat-persistence-state');
   }
 
@@ -478,9 +480,12 @@ export class ChatPersistenceService {
   } {
     return {
       totalSessions: this.state.sessions.length,
-      totalMessages: Array.from(this.state.messages.values()).reduce((sum, msgs) => sum + msgs.length, 0),
+      totalMessages: Array.from(this.state.messages.values()).reduce(
+        (sum, msgs) => sum + msgs.length,
+        0
+      ),
       lastSync: this.state.lastSync,
-      isOnline: this.isOnline
+      isOnline: this.isOnline,
     };
   }
 

@@ -373,13 +373,13 @@ export const DATABASE_SCHEMA = {
     
     CREATE POLICY "System can insert analytics events" ON analytics_events
       FOR INSERT WITH CHECK (true);
-  `
+  `,
 };
 
 // Function to create all tables
 export const createAllTables = async (supabase: any) => {
   const tables = Object.values(DATABASE_SCHEMA);
-  
+
   for (const tableSQL of tables) {
     try {
       const { error } = await supabase.rpc('exec_sql', { sql: tableSQL });
@@ -392,7 +392,7 @@ export const createAllTables = async (supabase: any) => {
       throw error;
     }
   }
-  
+
   console.log('All database tables created successfully');
 };
 
@@ -406,9 +406,9 @@ export const createIndexes = async (supabase: any) => {
     `CREATE INDEX CONCURRENTLY idx_tool_executions_parameters ON tool_executions USING GIN(parameters);`,
     `CREATE INDEX CONCURRENTLY idx_chat_messages_metadata ON chat_messages USING GIN(metadata);`,
     `CREATE INDEX CONCURRENTLY idx_workflows_steps ON workflows USING GIN(steps);`,
-    `CREATE INDEX CONCURRENTLY idx_analytics_events_data ON analytics_events USING GIN(event_data);`
+    `CREATE INDEX CONCURRENTLY idx_analytics_events_data ON analytics_events USING GIN(event_data);`,
   ];
-  
+
   for (const indexSQL of indexQueries) {
     try {
       const { error } = await supabase.rpc('exec_sql', { sql: indexSQL });
@@ -427,18 +427,18 @@ export const setupRLSPolicies = async (supabase: any) => {
     // Additional security policies
     `CREATE POLICY "Users can only access their own data" ON users
       FOR ALL USING (auth.uid() = id);`,
-    
+
     `CREATE POLICY "Employees can be viewed by all authenticated users" ON ai_employees
       FOR SELECT USING (auth.role() = 'authenticated');`,
-    
+
     `CREATE POLICY "Tool executions are viewable by job owners" ON tool_executions
       FOR SELECT USING (
         job_id IN (
           SELECT id FROM jobs WHERE user_id = auth.uid()
         )
-      );`
+      );`,
   ];
-  
+
   for (const policySQL of policies) {
     try {
       const { error } = await supabase.rpc('exec_sql', { sql: policySQL });

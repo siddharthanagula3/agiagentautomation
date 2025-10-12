@@ -27,24 +27,29 @@ interface ChatMessageProps {
   employeeName: string;
 }
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ message, employeeName }) => {
+export const ChatMessage: React.FC<ChatMessageProps> = ({
+  message,
+  employeeName,
+}) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       className={cn(
-        "flex",
+        'flex',
         message.type === 'user' ? 'justify-end' : 'justify-start'
       )}
     >
-      <div className={cn(
-        "max-w-[80%] rounded-lg p-4",
-        message.type === 'user' 
-          ? "bg-primary text-primary-foreground" 
-          : "bg-muted"
-      )}>
-        <div className="flex items-center space-x-2 mb-2">
+      <div
+        className={cn(
+          'max-w-[80%] rounded-lg p-4',
+          message.type === 'user'
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-muted'
+        )}
+      >
+        <div className="mb-2 flex items-center space-x-2">
           {message.type === 'user' ? (
             <User className="h-4 w-4" />
           ) : (
@@ -59,34 +64,38 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, employeeName 
             </Badge>
           )}
         </div>
-        
+
         <div className="whitespace-pre-wrap">{message.content}</div>
-        
+
         {/* Tool Calls */}
         {message.toolCalls && message.toolCalls.length > 0 && (
           <div className="mt-3 space-y-2">
             <p className="text-sm font-medium">Tools Used:</p>
             {message.toolCalls.map((toolCall, index) => (
-              <div key={index} className="bg-background rounded p-2 text-sm">
+              <div key={index} className="rounded bg-background p-2 text-sm">
                 <div className="flex items-center space-x-2">
                   <Wrench className="h-3 w-3" />
                   <span className="font-medium">{toolCall.tool}</span>
-                  <Badge 
-                    variant={toolCall.status === 'completed' ? 'default' : 'destructive'}
+                  <Badge
+                    variant={
+                      toolCall.status === 'completed'
+                        ? 'default'
+                        : 'destructive'
+                    }
                     className="text-xs"
                   >
                     {toolCall.status}
                   </Badge>
                 </div>
                 {toolCall.error && (
-                  <p className="text-red-500 text-xs mt-1">{toolCall.error}</p>
+                  <p className="mt-1 text-xs text-red-500">{toolCall.error}</p>
                 )}
               </div>
             ))}
           </div>
         )}
-        
-        <div className="text-xs text-muted-foreground mt-2">
+
+        <div className="mt-2 text-xs text-muted-foreground">
           {message.timestamp.toLocaleTimeString()}
         </div>
       </div>

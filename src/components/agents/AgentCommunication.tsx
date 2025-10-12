@@ -9,11 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  MessageSquare, 
-  Bot, 
-  Clock, 
-  CheckCircle, 
+import {
+  MessageSquare,
+  Bot,
+  Clock,
+  CheckCircle,
   AlertCircle,
   ArrowRight,
   Users,
@@ -22,10 +22,14 @@ import {
   Send,
   Reply,
   ThumbsUp,
-  ThumbsDown
+  ThumbsDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { interAgentService, type AgentMessage, type AgentDelegation } from '@/services/inter-agent-service';
+import {
+  interAgentService,
+  type AgentMessage,
+  type AgentDelegation,
+} from '@/services/inter-agent-service';
 
 interface AgentCommunicationProps {
   agentId: string;
@@ -36,21 +40,27 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
   agentId,
   className,
 }) => {
-  const [activeTab, setActiveTab] = useState<'messages' | 'delegations'>('messages');
+  const [activeTab, setActiveTab] = useState<'messages' | 'delegations'>(
+    'messages'
+  );
   const [newMessage, setNewMessage] = useState('');
   const [selectedAgent, setSelectedAgent] = useState<string>('');
-  
+
   const queryClient = useQueryClient();
 
   // Fetch messages
-  const { data: messages = [], isLoading: messagesLoading } = useQuery<AgentMessage[]>({
+  const { data: messages = [], isLoading: messagesLoading } = useQuery<
+    AgentMessage[]
+  >({
     queryKey: ['agent-messages', agentId],
     queryFn: () => interAgentService.getMessagesForAgent(agentId),
     refetchInterval: 5000, // Refetch every 5 seconds
   });
 
   // Fetch delegations
-  const { data: delegations = [], isLoading: delegationsLoading } = useQuery<AgentDelegation[]>({
+  const { data: delegations = [], isLoading: delegationsLoading } = useQuery<
+    AgentDelegation[]
+  >({
     queryKey: ['agent-delegations', agentId],
     queryFn: () => interAgentService.getDelegationsForAgent(agentId),
     refetchInterval: 5000,
@@ -77,11 +87,23 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
 
   // Respond to delegation mutation
   const respondToDelegationMutation = useMutation({
-    mutationFn: async ({ delegationId, response }: { delegationId: string; response: 'accepted' | 'rejected' }) => {
-      return interAgentService.respondToDelegation(delegationId, response, agentId);
+    mutationFn: async ({
+      delegationId,
+      response,
+    }: {
+      delegationId: string;
+      response: 'accepted' | 'rejected';
+    }) => {
+      return interAgentService.respondToDelegation(
+        delegationId,
+        response,
+        agentId
+      );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agent-delegations', agentId] });
+      queryClient.invalidateQueries({
+        queryKey: ['agent-delegations', agentId],
+      });
     },
   });
 
@@ -111,7 +133,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
       case 'rejected':
         return <AlertCircle className="h-4 w-4 text-red-600" />;
       case 'in_progress':
-        return <Zap className="h-4 w-4 text-blue-600 animate-pulse" />;
+        return <Zap className="h-4 w-4 animate-pulse text-blue-600" />;
       case 'completed':
         return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'failed':
@@ -151,14 +173,17 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
 
   const handleSendMessage = () => {
     if (!newMessage.trim() || !selectedAgent) return;
-    
+
     sendMessageMutation.mutate({
       content: newMessage,
       toAgentId: selectedAgent,
     });
   };
 
-  const handleRespondToDelegation = (delegationId: string, response: 'accepted' | 'rejected') => {
+  const handleRespondToDelegation = (
+    delegationId: string,
+    response: 'accepted' | 'rejected'
+  ) => {
     respondToDelegationMutation.mutate({ delegationId, response });
   };
 
@@ -174,21 +199,21 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
         </div>
         <div className="flex items-center space-x-2">
           <Badge variant="outline">
-            <Bot className="h-3 w-3 mr-1" />
+            <Bot className="mr-1 h-3 w-3" />
             Agent ID: {agentId}
           </Badge>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 bg-muted p-1 rounded-lg">
+      <div className="flex space-x-1 rounded-lg bg-muted p-1">
         <Button
           variant={activeTab === 'messages' ? 'default' : 'ghost'}
           size="sm"
           onClick={() => setActiveTab('messages')}
           className="flex-1"
         >
-          <MessageSquare className="h-4 w-4 mr-2" />
+          <MessageSquare className="mr-2 h-4 w-4" />
           Messages ({messages.length})
         </Button>
         <Button
@@ -197,7 +222,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
           onClick={() => setActiveTab('delegations')}
           className="flex-1"
         >
-          <Workflow className="h-4 w-4 mr-2" />
+          <Workflow className="mr-2 h-4 w-4" />
           Delegations ({delegations.length})
         </Button>
       </div>
@@ -216,8 +241,8 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                   <label className="text-sm font-medium">To Agent</label>
                   <select
                     value={selectedAgent}
-                    onChange={(e) => setSelectedAgent(e.target.value)}
-                    className="w-full mt-1 px-3 py-2 border rounded-md"
+                    onChange={e => setSelectedAgent(e.target.value)}
+                    className="mt-1 w-full rounded-md border px-3 py-2"
                   >
                     <option value="">Select an agent</option>
                     <option value="agent-1">Alex Developer</option>
@@ -228,7 +253,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                 </div>
                 <div>
                   <label className="text-sm font-medium">Priority</label>
-                  <select className="w-full mt-1 px-3 py-2 border rounded-md">
+                  <select className="mt-1 w-full rounded-md border px-3 py-2">
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
@@ -240,20 +265,24 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                 <label className="text-sm font-medium">Message</label>
                 <textarea
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={e => setNewMessage(e.target.value)}
                   placeholder="Type your message..."
-                  className="w-full mt-1 px-3 py-2 border rounded-md min-h-[100px]"
+                  className="mt-1 min-h-[100px] w-full rounded-md border px-3 py-2"
                 />
               </div>
               <Button
                 onClick={handleSendMessage}
-                disabled={!newMessage.trim() || !selectedAgent || sendMessageMutation.isPending}
+                disabled={
+                  !newMessage.trim() ||
+                  !selectedAgent ||
+                  sendMessageMutation.isPending
+                }
                 className="w-full"
               >
                 {sendMessageMutation.isPending ? (
-                  <Clock className="h-4 w-4 mr-2 animate-spin" />
+                  <Clock className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <Send className="h-4 w-4 mr-2" />
+                  <Send className="mr-2 h-4 w-4" />
                 )}
                 Send Message
               </Button>
@@ -270,15 +299,15 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                 <div className="space-y-4">
                   {Array.from({ length: 3 }).map((_, i) => (
                     <div key={i} className="animate-pulse">
-                      <div className="h-4 bg-muted rounded w-1/4 mb-2"></div>
-                      <div className="h-3 bg-muted rounded w-1/2"></div>
+                      <div className="mb-2 h-4 w-1/4 rounded bg-muted"></div>
+                      <div className="h-3 w-1/2 rounded bg-muted"></div>
                     </div>
                   ))}
                 </div>
               ) : messages.length === 0 ? (
-                <div className="text-center py-8">
-                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Messages</h3>
+                <div className="py-8 text-center">
+                  <MessageSquare className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                  <h3 className="mb-2 text-lg font-semibold">No Messages</h3>
                   <p className="text-muted-foreground">
                     No messages received yet.
                   </p>
@@ -286,21 +315,26 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
               ) : (
                 <ScrollArea className="h-[400px]">
                   <div className="space-y-4">
-                    {messages.map((message) => (
+                    {messages.map(message => (
                       <div
                         key={message.id}
-                        className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-muted/50"
+                        className="flex items-start space-x-3 rounded-lg border p-4 hover:bg-muted/50"
                       >
-                        <div className="flex-shrink-0 mt-1">
+                        <div className="mt-1 flex-shrink-0">
                           {getMessageIcon(message.messageType)}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-2 flex items-center justify-between">
                             <div className="flex items-center space-x-2">
                               <span className="text-sm font-medium">
                                 From: {message.fromAgentId}
                               </span>
-                              <Badge className={cn('text-xs', getPriorityColor(message.priority))}>
+                              <Badge
+                                className={cn(
+                                  'text-xs',
+                                  getPriorityColor(message.priority)
+                                )}
+                              >
                                 {message.priority}
                               </Badge>
                               <Badge variant="outline" className="text-xs">
@@ -314,7 +348,9 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                               </span>
                             </div>
                           </div>
-                          <p className="text-sm text-foreground mb-2">{message.content}</p>
+                          <p className="mb-2 text-sm text-foreground">
+                            {message.content}
+                          </p>
                           {message.taskId && (
                             <div className="text-xs text-muted-foreground">
                               Task ID: {message.taskId}
@@ -343,35 +379,42 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                 <div className="space-y-4">
                   {Array.from({ length: 3 }).map((_, i) => (
                     <div key={i} className="animate-pulse">
-                      <div className="h-4 bg-muted rounded w-1/4 mb-2"></div>
-                      <div className="h-3 bg-muted rounded w-1/2"></div>
+                      <div className="mb-2 h-4 w-1/4 rounded bg-muted"></div>
+                      <div className="h-3 w-1/2 rounded bg-muted"></div>
                     </div>
                   ))}
                 </div>
               ) : delegations.length === 0 ? (
-                <div className="text-center py-8">
-                  <Workflow className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Delegations</h3>
+                <div className="py-8 text-center">
+                  <Workflow className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                  <h3 className="mb-2 text-lg font-semibold">No Delegations</h3>
                   <p className="text-muted-foreground">
                     No task delegations received yet.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {delegations.map((delegation) => (
+                  {delegations.map(delegation => (
                     <div
                       key={delegation.id}
-                      className="p-4 border rounded-lg hover:bg-muted/50"
+                      className="rounded-lg border p-4 hover:bg-muted/50"
                     >
-                      <div className="flex items-start justify-between mb-4">
+                      <div className="mb-4 flex items-start justify-between">
                         <div>
-                          <h4 className="font-semibold">{delegation.task.title}</h4>
+                          <h4 className="font-semibold">
+                            {delegation.task.title}
+                          </h4>
                           <p className="text-sm text-muted-foreground">
                             From: {delegation.delegatorId}
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Badge className={cn('text-xs', getPriorityColor(delegation.task.priority))}>
+                          <Badge
+                            className={cn(
+                              'text-xs',
+                              getPriorityColor(delegation.task.priority)
+                            )}
+                          >
                             {delegation.task.priority}
                           </Badge>
                           <Badge variant="outline" className="text-xs">
@@ -379,60 +422,80 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                           </Badge>
                         </div>
                       </div>
-                      
-                      <p className="text-sm text-foreground mb-4">{delegation.task.description}</p>
-                      
-                      <div className="space-y-2 mb-4">
+
+                      <p className="mb-4 text-sm text-foreground">
+                        {delegation.task.description}
+                      </p>
+
+                      <div className="mb-4 space-y-2">
                         <div>
-                          <span className="text-sm font-medium">Requirements:</span>
-                          <ul className="text-sm text-muted-foreground ml-4">
+                          <span className="text-sm font-medium">
+                            Requirements:
+                          </span>
+                          <ul className="ml-4 text-sm text-muted-foreground">
                             {delegation.task.requirements.map((req, index) => (
                               <li key={index}>• {req}</li>
                             ))}
                           </ul>
                         </div>
                         <div>
-                          <span className="text-sm font-medium">Expected Output:</span>
-                          <p className="text-sm text-muted-foreground ml-4">
+                          <span className="text-sm font-medium">
+                            Expected Output:
+                          </span>
+                          <p className="ml-4 text-sm text-muted-foreground">
                             {delegation.task.expectedOutput}
                           </p>
                         </div>
                         {delegation.task.deadline && (
                           <div>
-                            <span className="text-sm font-medium">Deadline:</span>
-                            <span className="text-sm text-muted-foreground ml-2">
+                            <span className="text-sm font-medium">
+                              Deadline:
+                            </span>
+                            <span className="ml-2 text-sm text-muted-foreground">
                               {delegation.task.deadline.toLocaleDateString()}
                             </span>
                           </div>
                         )}
                       </div>
-                      
+
                       {delegation.status === 'pending' && (
                         <div className="flex space-x-2">
                           <Button
                             size="sm"
-                            onClick={() => handleRespondToDelegation(delegation.id, 'accepted')}
+                            onClick={() =>
+                              handleRespondToDelegation(
+                                delegation.id,
+                                'accepted'
+                              )
+                            }
                             disabled={respondToDelegationMutation.isPending}
                           >
-                            <ThumbsUp className="h-4 w-4 mr-1" />
+                            <ThumbsUp className="mr-1 h-4 w-4" />
                             Accept
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleRespondToDelegation(delegation.id, 'rejected')}
+                            onClick={() =>
+                              handleRespondToDelegation(
+                                delegation.id,
+                                'rejected'
+                              )
+                            }
                             disabled={respondToDelegationMutation.isPending}
                           >
-                            <ThumbsDown className="h-4 w-4 mr-1" />
+                            <ThumbsDown className="mr-1 h-4 w-4" />
                             Reject
                           </Button>
                         </div>
                       )}
-                      
+
                       {delegation.result && (
-                        <div className="mt-4 p-3 bg-muted rounded">
-                          <h5 className="text-sm font-medium mb-2">Result:</h5>
-                          <p className="text-sm text-foreground">{delegation.result.output}</p>
+                        <div className="mt-4 rounded bg-muted p-3">
+                          <h5 className="mb-2 text-sm font-medium">Result:</h5>
+                          <p className="text-sm text-foreground">
+                            {delegation.result.output}
+                          </p>
                         </div>
                       )}
                     </div>

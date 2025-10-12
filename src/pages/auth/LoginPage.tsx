@@ -3,7 +3,13 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../components/ui/card';
 import { useAuthStore } from '../../stores/unified-auth-store';
 import {
   Bot,
@@ -13,7 +19,7 @@ import {
   EyeOff,
   ArrowRight,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Particles } from '../../components/ui/particles';
@@ -23,28 +29,35 @@ const LoginPage: React.FC = () => {
   const { login, isLoading, error, isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Check if we're in demo mode
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  const isDemoMode = !supabaseUrl || !supabaseKey || supabaseUrl.includes('your-project-url') || supabaseKey.includes('your-anon-key');
-  
+  const isDemoMode =
+    !supabaseUrl ||
+    !supabaseKey ||
+    supabaseUrl.includes('your-project-url') ||
+    supabaseKey.includes('your-anon-key');
+
   const [formData, setFormData] = useState({
     email: isDemoMode ? 'demo@example.com' : '',
-    password: isDemoMode ? 'demo123' : ''
+    password: isDemoMode ? 'demo123' : '',
   });
   const [showPassword, setShowPassword] = useState(false);
 
   // **KEY FIX: Add redirect logic after successful authentication**
   useEffect(() => {
-    console.log('LoginPage: Auth state changed:', { isAuthenticated, user: user?.email });
-    
+    console.log('LoginPage: Auth state changed:', {
+      isAuthenticated,
+      user: user?.email,
+    });
+
     if (isAuthenticated && user) {
       console.log('✅ LoginPage: User authenticated, redirecting to dashboard');
-      
+
       // Get the intended destination from location state, or default to dashboard
       const from = (location.state as any)?.from?.pathname || '/dashboard';
-      
+
       // Small delay to ensure auth state is fully settled
       setTimeout(() => {
         navigate(from, { replace: true });
@@ -55,7 +68,7 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('LoginPage: Attempting login...');
-    
+
     try {
       await login({ email: formData.email, password: formData.password });
       console.log('LoginPage: Login function completed');
@@ -68,9 +81,9 @@ const LoginPage: React.FC = () => {
     console.log('LoginPage: Demo login triggered');
     setFormData({
       email: 'demo@example.com',
-      password: 'demo123'
+      password: 'demo123',
     });
-    
+
     // Trigger login immediately with demo credentials
     try {
       await login({ email: 'demo@example.com', password: 'demo123' });
@@ -82,16 +95,16 @@ const LoginPage: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   // Don't render login form if user is already authenticated
   if (isAuthenticated && user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-purple-500/5 flex items-center justify-center p-4">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/5 to-purple-500/5 p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
           <p className="text-muted-foreground">Redirecting to dashboard...</p>
         </div>
       </div>
@@ -99,7 +112,7 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
       {/* Enhanced background with particles and spotlight */}
       <Particles className="absolute inset-0" quantity={60} />
       <Spotlight className="absolute inset-0" />
@@ -110,38 +123,38 @@ const LoginPage: React.FC = () => {
           animate={{
             y: [0, -30, 0],
             x: [0, 20, 0],
-            scale: [1, 1.1, 1]
+            scale: [1, 1.1, 1],
           }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-20 left-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute left-20 top-20 h-96 w-96 rounded-full bg-primary/20 blur-3xl"
         />
         <motion.div
           animate={{
             y: [0, 30, 0],
             x: [0, -20, 0],
-            scale: [1, 1.15, 1]
+            scale: [1, 1.15, 1],
           }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-20 right-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl"
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute bottom-20 right-20 h-96 w-96 rounded-full bg-accent/20 blur-3xl"
         />
       </div>
 
       <motion.div
-        className="w-full max-w-md relative z-10"
+        className="relative z-10 w-full max-w-md"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="border border-border/50 backdrop-blur-xl bg-background/60 shadow-2xl">
-          <CardHeader className="space-y-1 text-center pb-8">
+        <Card className="border border-border/50 bg-background/60 shadow-2xl backdrop-blur-xl">
+          <CardHeader className="space-y-1 pb-8 text-center">
             <motion.div
-              className="flex justify-center mb-4"
+              className="mb-4 flex justify-center"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+              transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
             >
               <motion.div
-                className="p-3 bg-primary/10 rounded-full"
+                className="rounded-full bg-primary/10 p-3"
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.6 }}
               >
@@ -153,19 +166,21 @@ const LoginPage: React.FC = () => {
               Sign in to your AGI Agent Automation account
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent className="space-y-6">
             {/* Demo Mode Banner */}
             {isDemoMode && (
-              <div className="flex items-center space-x-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300">
+              <div className="flex items-center space-x-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
                 <CheckCircle className="h-4 w-4" />
-                <span className="text-sm">Demo Mode - Using demo credentials</span>
+                <span className="text-sm">
+                  Demo Mode - Using demo credentials
+                </span>
               </div>
             )}
-            
+
             <form id="login-form" onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="flex items-center space-x-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
+                <div className="flex items-center space-x-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-destructive">
                   <AlertCircle className="h-4 w-4" />
                   <span className="text-sm">{error}</span>
                 </div>
@@ -196,7 +211,7 @@ const LoginPage: React.FC = () => {
                   <Input
                     id="password"
                     name="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={handleChange}
@@ -210,12 +225,16 @@ const LoginPage: React.FC = () => {
                     className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
                     disabled={isLoading}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end mb-4">
+              <div className="mb-4 flex items-center justify-end">
                 <Link
                   to="/auth/forgot-password"
                   className="text-sm text-primary hover:underline"
@@ -224,14 +243,10 @@ const LoginPage: React.FC = () => {
                 </Link>
               </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
                     Signing in...
                   </>
                 ) : (
@@ -256,10 +271,10 @@ const LoginPage: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                
-                <Button 
+
+                <Button
                   onClick={handleDemoLogin}
-                  variant="outline" 
+                  variant="outline"
                   className="w-full"
                   disabled={isLoading}
                 >
@@ -270,10 +285,12 @@ const LoginPage: React.FC = () => {
             )}
 
             <div className="text-center text-sm">
-              <span className="text-muted-foreground">Don't have an account? </span>
-              <Link 
-                to="/auth/register" 
-                className="text-primary hover:underline font-medium"
+              <span className="text-muted-foreground">
+                Don't have an account?{' '}
+              </span>
+              <Link
+                to="/auth/register"
+                className="font-medium text-primary hover:underline"
               >
                 Sign up
               </Link>

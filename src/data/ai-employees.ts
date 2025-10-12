@@ -3,6 +3,8 @@
  * Defines all available AI employees, their specializations, and API integrations
  */
 
+import { getFallbackAvatar } from '@/utils/avatar-utils';
+
 export type AIProvider = 'chatgpt' | 'claude' | 'gemini' | 'perplexity';
 
 export interface AIEmployee {
@@ -30,31 +32,53 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     name: 'Software Architect',
     role: 'Software Architect',
     category: 'Engineering',
-    description: 'Design scalable system architectures and lead technical decisions',
+    description:
+      'Design scalable system architectures and lead technical decisions',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=software-architect',
-    skills: ['System Design', 'Architecture', 'Scalability', 'Cloud Infrastructure'],
+    avatar: getFallbackAvatar('software-architect'),
+    skills: [
+      'System Design',
+      'Architecture',
+      'Scalability',
+      'Cloud Infrastructure',
+    ],
     specialty: 'System architecture and technical leadership',
     fitLevel: 'excellent',
     popular: true,
-    defaultTools: ['code_interpreter', 'web_search', 'create_visualization', 'analyze_file']
+    defaultTools: [
+      'code_interpreter',
+      'web_search',
+      'create_visualization',
+      'analyze_file',
+    ],
   },
   {
     id: 'emp-002',
     name: 'Solutions Architect',
     role: 'Solutions Architect',
     category: 'Engineering',
-    description: 'Create end-to-end technical solutions for complex business problems',
+    description:
+      'Create end-to-end technical solutions for complex business problems',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=solutions-architect',
-    skills: ['Solution Design', 'Technical Strategy', 'Integration', 'Best Practices'],
+    avatar: getFallbackAvatar('solutions-architect'),
+    skills: [
+      'Solution Design',
+      'Technical Strategy',
+      'Integration',
+      'Best Practices',
+    ],
     specialty: 'Enterprise solution architecture',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'create_visualization', 'api_call', 'analyze_file']
+    defaultTools: [
+      'web_search',
+      'create_visualization',
+      'api_call',
+      'analyze_file',
+    ],
   },
   {
     id: 'emp-003',
@@ -65,26 +89,32 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=backend-engineer',
+    avatar: getFallbackAvatar('backend-engineer'),
     skills: ['Node.js', 'Python', 'Databases', 'API Design', 'Microservices'],
     specialty: 'Backend development and API design',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'api_call', 'web_search', 'analyze_file']
+    defaultTools: [
+      'code_interpreter',
+      'api_call',
+      'web_search',
+      'analyze_file',
+    ],
   },
   {
     id: 'emp-004',
     name: 'Frontend Engineer',
     role: 'Frontend Engineer',
     category: 'Engineering',
-    description: 'Create beautiful, responsive user interfaces with modern frameworks',
+    description:
+      'Create beautiful, responsive user interfaces with modern frameworks',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=frontend-engineer',
+    avatar: getFallbackAvatar('frontend-engineer'),
     skills: ['React', 'TypeScript', 'CSS', 'UI/UX', 'Performance'],
     specialty: 'Modern frontend development',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-005',
@@ -95,11 +125,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=fullstack-engineer',
+    avatar: getFallbackAvatar('fullstack-engineer'),
     skills: ['React', 'Node.js', 'Databases', 'DevOps', 'Full Stack'],
     specialty: 'End-to-end application development',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'api_call', 'web_search', 'analyze_file']
+    defaultTools: [
+      'code_interpreter',
+      'api_call',
+      'web_search',
+      'analyze_file',
+    ],
   },
 
   // Product Management - ChatGPT for communication
@@ -108,7 +143,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     name: 'Product Manager',
     role: 'Product Manager',
     category: 'Product',
-    description: 'Define product strategy, roadmaps, and drive feature development',
+    description:
+      'Define product strategy, roadmaps, and drive feature development',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
@@ -117,22 +153,29 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     specialty: 'Product strategy and execution',
     fitLevel: 'excellent',
     popular: true,
-    defaultTools: ['web_search', 'create_visualization', 'analyze_file']
+    defaultTools: ['web_search', 'create_visualization', 'analyze_file'],
   },
   {
     id: 'emp-007',
     name: 'Technical Product Manager',
     role: 'Technical Product Manager',
     category: 'Product',
-    description: 'Bridge technical and business requirements for complex products',
+    description:
+      'Bridge technical and business requirements for complex products',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=technical-product-manager',
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=technical-product-manager',
     skills: ['Technical Requirements', 'API Strategy', 'Developer Experience'],
     specialty: 'Technical product management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'api_call', 'analyze_file', 'create_visualization']
+    defaultTools: [
+      'web_search',
+      'api_call',
+      'analyze_file',
+      'create_visualization',
+    ],
   },
 
   // AI, Data Science & Analytics - Claude for analysis
@@ -141,7 +184,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     name: 'Data Scientist',
     role: 'Data Scientist',
     category: 'AI & Data',
-    description: 'Analyze data, build ML models, and derive actionable insights',
+    description:
+      'Analyze data, build ML models, and derive actionable insights',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
@@ -150,7 +194,12 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     specialty: 'Data science and ML engineering',
     fitLevel: 'excellent',
     popular: true,
-    defaultTools: ['code_interpreter', 'analyze_file', 'create_visualization', 'web_search']
+    defaultTools: [
+      'code_interpreter',
+      'analyze_file',
+      'create_visualization',
+      'web_search',
+    ],
   },
   {
     id: 'emp-009',
@@ -162,10 +211,21 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ai-engineer',
-    skills: ['Deep Learning', 'PyTorch', 'TensorFlow', 'NLP', 'Computer Vision'],
+    skills: [
+      'Deep Learning',
+      'PyTorch',
+      'TensorFlow',
+      'NLP',
+      'Computer Vision',
+    ],
     specialty: 'AI/ML system development',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'analyze_file', 'web_search', 'api_call']
+    defaultTools: [
+      'code_interpreter',
+      'analyze_file',
+      'web_search',
+      'api_call',
+    ],
   },
   {
     id: 'emp-010',
@@ -180,7 +240,12 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['SQL', 'Tableau', 'Power BI', 'Data Analysis', 'Reporting'],
     specialty: 'Business intelligence and analytics',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search', 'code_interpreter']
+    defaultTools: [
+      'analyze_file',
+      'create_visualization',
+      'web_search',
+      'code_interpreter',
+    ],
   },
 
   // IT, Security & Operations
@@ -189,7 +254,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     name: 'DevOps Engineer',
     role: 'DevOps Engineer',
     category: 'IT & Operations',
-    description: 'Automate deployments, manage infrastructure, and ensure reliability',
+    description:
+      'Automate deployments, manage infrastructure, and ensure reliability',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
@@ -197,22 +263,38 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['Docker', 'Kubernetes', 'CI/CD', 'AWS', 'Terraform'],
     specialty: 'DevOps and infrastructure automation',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'api_call', 'web_search', 'analyze_file']
+    defaultTools: [
+      'code_interpreter',
+      'api_call',
+      'web_search',
+      'analyze_file',
+    ],
   },
   {
     id: 'emp-012',
     name: 'Security Analyst',
     role: 'Security Analyst',
     category: 'IT & Operations',
-    description: 'Identify vulnerabilities, monitor threats, and secure systems',
+    description:
+      'Identify vulnerabilities, monitor threats, and secure systems',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=security-analyst',
-    skills: ['Security Audits', 'Penetration Testing', 'Compliance', 'Risk Assessment'],
+    skills: [
+      'Security Audits',
+      'Penetration Testing',
+      'Compliance',
+      'Risk Assessment',
+    ],
     specialty: 'Cybersecurity and threat analysis',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'code_interpreter', 'api_call']
+    defaultTools: [
+      'web_search',
+      'analyze_file',
+      'code_interpreter',
+      'api_call',
+    ],
   },
 
   // Marketing & Growth - ChatGPT for content
@@ -221,23 +303,26 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     name: 'Content Marketing Manager',
     role: 'Content Marketing Manager',
     category: 'Marketing',
-    description: 'Create compelling content that drives engagement and conversions',
+    description:
+      'Create compelling content that drives engagement and conversions',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=content-marketing-manager',
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=content-marketing-manager',
     skills: ['Content Strategy', 'Copywriting', 'SEO', 'Social Media'],
     specialty: 'Content marketing and strategy',
     fitLevel: 'excellent',
     popular: true,
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-014',
     name: 'SEO Manager',
     role: 'SEO Manager',
     category: 'Marketing',
-    description: 'Optimize websites for search engines and drive organic traffic',
+    description:
+      'Optimize websites for search engines and drive organic traffic',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
@@ -245,7 +330,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['SEO', 'Keyword Research', 'Technical SEO', 'Link Building'],
     specialty: 'Search engine optimization',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'api_call']
+    defaultTools: ['web_search', 'analyze_file', 'api_call'],
   },
 
   // Creative & Design - Gemini for visual
@@ -259,11 +344,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ui-ux-designer',
-    skills: ['Figma', 'User Research', 'Wireframing', 'Prototyping', 'Design Systems'],
+    skills: [
+      'Figma',
+      'User Research',
+      'Wireframing',
+      'Prototyping',
+      'Design Systems',
+    ],
     specialty: 'User interface and experience design',
     fitLevel: 'good',
     popular: true,
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-016',
@@ -274,11 +365,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'gemini',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=video-content-creator',
-    skills: ['Video Strategy', 'Scripting', 'Storyboarding', 'Content Planning'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=video-content-creator',
+    skills: [
+      'Video Strategy',
+      'Scripting',
+      'Storyboarding',
+      'Content Planning',
+    ],
     specialty: 'Video content creation and strategy',
     fitLevel: 'good',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // Research - Perplexity
@@ -292,10 +389,15 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=research-analyst',
-    skills: ['Market Research', 'Competitive Analysis', 'Data Gathering', 'Report Writing'],
+    skills: [
+      'Market Research',
+      'Competitive Analysis',
+      'Data Gathering',
+      'Report Writing',
+    ],
     specialty: 'Research and competitive intelligence',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
 
   // Customer Support - ChatGPT
@@ -308,11 +410,12 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=customer-support-specialist',
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=customer-support-specialist',
     skills: ['Customer Service', 'Problem Solving', 'Communication', 'CRM'],
     specialty: 'Customer support and success',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // QA & Testing - Claude
@@ -326,10 +429,20 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=qa-engineer',
-    skills: ['Test Automation', 'QA Processes', 'Bug Tracking', 'Quality Assurance'],
+    skills: [
+      'Test Automation',
+      'QA Processes',
+      'Bug Tracking',
+      'Quality Assurance',
+    ],
     specialty: 'Quality assurance and testing',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file', 'api_call']
+    defaultTools: [
+      'code_interpreter',
+      'web_search',
+      'analyze_file',
+      'api_call',
+    ],
   },
 
   // Technical Writing - ChatGPT
@@ -346,7 +459,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['Technical Writing', 'Documentation', 'API Docs', 'User Guides'],
     specialty: 'Technical documentation and content',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'code_interpreter', 'analyze_file']
+    defaultTools: ['web_search', 'code_interpreter', 'analyze_file'],
   },
 
   // Executive Leadership - Claude for strategic thinking
@@ -359,11 +472,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 20,
     originalPrice: 40,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=chief-executive-officer',
-    skills: ['Strategic Planning', 'Leadership', 'Business Development', 'Decision Making'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=chief-executive-officer',
+    skills: [
+      'Strategic Planning',
+      'Leadership',
+      'Business Development',
+      'Decision Making',
+    ],
     specialty: 'Executive leadership and strategic direction',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'create_visualization', 'analyze_file']
+    defaultTools: ['web_search', 'create_visualization', 'analyze_file'],
   },
   {
     id: 'emp-022',
@@ -374,11 +493,22 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 20,
     originalPrice: 40,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=chief-technology-officer',
-    skills: ['Technology Strategy', 'Innovation', 'Architecture', 'Team Leadership'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=chief-technology-officer',
+    skills: [
+      'Technology Strategy',
+      'Innovation',
+      'Architecture',
+      'Team Leadership',
+    ],
     specialty: 'Technology leadership and innovation',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'code_interpreter', 'create_visualization', 'analyze_file']
+    defaultTools: [
+      'web_search',
+      'code_interpreter',
+      'create_visualization',
+      'analyze_file',
+    ],
   },
   {
     id: 'emp-023',
@@ -389,11 +519,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 20,
     originalPrice: 40,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=chief-operating-officer',
-    skills: ['Operations Management', 'Process Optimization', 'Team Building', 'Performance'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=chief-operating-officer',
+    skills: [
+      'Operations Management',
+      'Process Optimization',
+      'Team Building',
+      'Performance',
+    ],
     specialty: 'Operational excellence and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'create_visualization', 'analyze_file']
+    defaultTools: ['web_search', 'create_visualization', 'analyze_file'],
   },
   {
     id: 'emp-024',
@@ -404,11 +540,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 20,
     originalPrice: 40,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=chief-financial-officer',
-    skills: ['Financial Planning', 'Budgeting', 'Risk Management', 'Investment Strategy'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=chief-financial-officer',
+    skills: [
+      'Financial Planning',
+      'Budgeting',
+      'Risk Management',
+      'Investment Strategy',
+    ],
     specialty: 'Financial leadership and strategy',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'create_visualization', 'analyze_file']
+    defaultTools: ['web_search', 'create_visualization', 'analyze_file'],
   },
 
   // Specialized Engineering Roles
@@ -421,11 +563,12 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mobile-app-developer',
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=mobile-app-developer',
     skills: ['React Native', 'Flutter', 'iOS', 'Android', 'Mobile UX'],
     specialty: 'Mobile application development',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-026',
@@ -436,11 +579,12 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=blockchain-engineer',
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=blockchain-engineer',
     skills: ['Solidity', 'Web3', 'DeFi', 'Smart Contracts', 'Ethereum'],
     specialty: 'Blockchain and Web3 development',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-027',
@@ -451,11 +595,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=cloud-solutions-architect',
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=cloud-solutions-architect',
     skills: ['AWS', 'Azure', 'GCP', 'Kubernetes', 'Serverless'],
     specialty: 'Cloud architecture and migration',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'api_call', 'analyze_file']
+    defaultTools: [
+      'code_interpreter',
+      'web_search',
+      'api_call',
+      'analyze_file',
+    ],
   },
   {
     id: 'emp-028',
@@ -470,7 +620,12 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['MLOps', 'Model Deployment', 'ML Infrastructure', 'A/B Testing'],
     specialty: 'Machine learning engineering and deployment',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'api_call', 'analyze_file']
+    defaultTools: [
+      'code_interpreter',
+      'web_search',
+      'api_call',
+      'analyze_file',
+    ],
   },
 
   // Business Development & Sales
@@ -483,11 +638,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=business-development-manager',
-    skills: ['Partnership Development', 'Market Analysis', 'Negotiation', 'Strategy'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=business-development-manager',
+    skills: [
+      'Partnership Development',
+      'Market Analysis',
+      'Negotiation',
+      'Strategy',
+    ],
     specialty: 'Business development and partnerships',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
   {
     id: 'emp-030',
@@ -499,10 +660,15 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sales-manager',
-    skills: ['Sales Strategy', 'CRM Management', 'Team Leadership', 'Revenue Growth'],
+    skills: [
+      'Sales Strategy',
+      'CRM Management',
+      'Team Leadership',
+      'Revenue Growth',
+    ],
     specialty: 'Sales leadership and revenue generation',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-031',
@@ -514,10 +680,15 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=account-manager',
-    skills: ['Client Relations', 'Account Management', 'Customer Success', 'Retention'],
+    skills: [
+      'Client Relations',
+      'Account Management',
+      'Customer Success',
+      'Retention',
+    ],
     specialty: 'Client relationship management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // Finance & Accounting
@@ -534,7 +705,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['Financial Analysis', 'Forecasting', 'Budgeting', 'Excel', 'SQL'],
     specialty: 'Financial analysis and forecasting',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
   {
     id: 'emp-033',
@@ -545,11 +716,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=accounting-manager',
-    skills: ['GAAP', 'Financial Reporting', 'Tax Compliance', 'Audit', 'QuickBooks'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=accounting-manager',
+    skills: [
+      'GAAP',
+      'Financial Reporting',
+      'Tax Compliance',
+      'Audit',
+      'QuickBooks',
+    ],
     specialty: 'Accounting and financial compliance',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
 
   // Human Resources
@@ -563,10 +741,15 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=hr-manager',
-    skills: ['Recruitment', 'Employee Relations', 'HR Policies', 'Performance Management'],
+    skills: [
+      'Recruitment',
+      'Employee Relations',
+      'HR Policies',
+      'Performance Management',
+    ],
     specialty: 'Human resources management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-035',
@@ -577,11 +760,12 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=talent-acquisition-specialist',
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=talent-acquisition-specialist',
     skills: ['Recruiting', 'Sourcing', 'Interviewing', 'Candidate Assessment'],
     specialty: 'Talent acquisition and recruitment',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // Legal & Compliance
@@ -598,7 +782,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['Contract Law', 'Corporate Law', 'Compliance', 'Risk Management'],
     specialty: 'Legal counsel and compliance',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-037',
@@ -609,11 +793,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=compliance-officer',
-    skills: ['Regulatory Compliance', 'Risk Assessment', 'Policy Development', 'Auditing'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=compliance-officer',
+    skills: [
+      'Regulatory Compliance',
+      'Risk Assessment',
+      'Policy Development',
+      'Auditing',
+    ],
     specialty: 'Compliance and risk management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // Operations & Project Management
@@ -626,11 +816,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=operations-manager',
-    skills: ['Process Optimization', 'Operations Management', 'Efficiency', 'Team Coordination'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=operations-manager',
+    skills: [
+      'Process Optimization',
+      'Operations Management',
+      'Efficiency',
+      'Team Coordination',
+    ],
     specialty: 'Operations optimization and management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'create_visualization', 'analyze_file']
+    defaultTools: ['web_search', 'create_visualization', 'analyze_file'],
   },
   {
     id: 'emp-039',
@@ -642,10 +838,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=project-manager',
-    skills: ['Project Management', 'Agile', 'Scrum', 'Team Leadership', 'Timeline Management'],
+    skills: [
+      'Project Management',
+      'Agile',
+      'Scrum',
+      'Team Leadership',
+      'Timeline Management',
+    ],
     specialty: 'Project management and delivery',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'create_visualization', 'analyze_file']
+    defaultTools: ['web_search', 'create_visualization', 'analyze_file'],
   },
   {
     id: 'emp-040',
@@ -657,10 +859,15 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=program-manager',
-    skills: ['Program Management', 'Strategic Planning', 'Stakeholder Management', 'Risk Management'],
+    skills: [
+      'Program Management',
+      'Strategic Planning',
+      'Stakeholder Management',
+      'Risk Management',
+    ],
     specialty: 'Program management and strategic execution',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'create_visualization', 'analyze_file']
+    defaultTools: ['web_search', 'create_visualization', 'analyze_file'],
   },
 
   // Specialized Marketing Roles
@@ -669,15 +876,22 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     name: 'Growth Marketing Manager',
     role: 'Growth Marketing Manager',
     category: 'Marketing',
-    description: 'Drive user acquisition and growth through data-driven marketing',
+    description:
+      'Drive user acquisition and growth through data-driven marketing',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=growth-marketing-manager',
-    skills: ['Growth Hacking', 'A/B Testing', 'Funnel Optimization', 'User Acquisition'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=growth-marketing-manager',
+    skills: [
+      'Growth Hacking',
+      'A/B Testing',
+      'Funnel Optimization',
+      'User Acquisition',
+    ],
     specialty: 'Growth marketing and user acquisition',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
   {
     id: 'emp-042',
@@ -688,11 +902,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=performance-marketing-manager',
-    skills: ['Google Ads', 'Facebook Ads', 'Analytics', 'ROI Optimization', 'Campaign Management'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=performance-marketing-manager',
+    skills: [
+      'Google Ads',
+      'Facebook Ads',
+      'Analytics',
+      'ROI Optimization',
+      'Campaign Management',
+    ],
     specialty: 'Performance marketing and paid advertising',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
   {
     id: 'emp-043',
@@ -704,10 +925,15 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=brand-manager',
-    skills: ['Brand Strategy', 'Brand Identity', 'Market Positioning', 'Brand Guidelines'],
+    skills: [
+      'Brand Strategy',
+      'Brand Identity',
+      'Market Positioning',
+      'Brand Guidelines',
+    ],
     specialty: 'Brand management and strategy',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // Additional Creative Roles
@@ -721,10 +947,15 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=graphic-designer',
-    skills: ['Adobe Creative Suite', 'Brand Design', 'Print Design', 'Digital Design'],
+    skills: [
+      'Adobe Creative Suite',
+      'Brand Design',
+      'Print Design',
+      'Digital Design',
+    ],
     specialty: 'Graphic design and visual branding',
     fitLevel: 'good',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-045',
@@ -736,10 +967,15 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=copywriter',
-    skills: ['Copywriting', 'Content Strategy', 'Email Marketing', 'Sales Copy'],
+    skills: [
+      'Copywriting',
+      'Content Strategy',
+      'Email Marketing',
+      'Sales Copy',
+    ],
     specialty: 'Copywriting and content creation',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-046',
@@ -751,10 +987,15 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=brand-strategist',
-    skills: ['Brand Strategy', 'Market Research', 'Consumer Insights', 'Brand Positioning'],
+    skills: [
+      'Brand Strategy',
+      'Market Research',
+      'Consumer Insights',
+      'Brand Positioning',
+    ],
     specialty: 'Brand strategy and positioning',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
 
   // Specialized Data Roles
@@ -768,10 +1009,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=data-engineer',
-    skills: ['Data Pipelines', 'ETL', 'Big Data', 'Apache Spark', 'Data Warehousing'],
+    skills: [
+      'Data Pipelines',
+      'ETL',
+      'Big Data',
+      'Apache Spark',
+      'Data Warehousing',
+    ],
     specialty: 'Data engineering and infrastructure',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-048',
@@ -782,11 +1029,23 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=analytics-engineer',
-    skills: ['SQL', 'dbt', 'Data Modeling', 'Analytics', 'Business Intelligence'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=analytics-engineer',
+    skills: [
+      'SQL',
+      'dbt',
+      'Data Modeling',
+      'Analytics',
+      'Business Intelligence',
+    ],
     specialty: 'Analytics engineering and data modeling',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'analyze_file', 'create_visualization', 'web_search']
+    defaultTools: [
+      'code_interpreter',
+      'analyze_file',
+      'create_visualization',
+      'web_search',
+    ],
   },
   {
     id: 'emp-049',
@@ -798,10 +1057,21 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=mlops-engineer',
-    skills: ['MLOps', 'Model Deployment', 'Docker', 'Kubernetes', 'ML Infrastructure'],
+    skills: [
+      'MLOps',
+      'Model Deployment',
+      'Docker',
+      'Kubernetes',
+      'ML Infrastructure',
+    ],
     specialty: 'Machine learning operations and deployment',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'api_call', 'analyze_file']
+    defaultTools: [
+      'code_interpreter',
+      'web_search',
+      'api_call',
+      'analyze_file',
+    ],
   },
 
   // Additional Support & Customer Success
@@ -814,11 +1084,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=customer-success-manager',
-    skills: ['Customer Success', 'Account Management', 'Retention', 'Upselling'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=customer-success-manager',
+    skills: [
+      'Customer Success',
+      'Account Management',
+      'Retention',
+      'Upselling',
+    ],
     specialty: 'Customer success and retention',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-051',
@@ -829,11 +1105,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=technical-support-engineer',
-    skills: ['Technical Support', 'Troubleshooting', 'API Support', 'Documentation'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=technical-support-engineer',
+    skills: [
+      'Technical Support',
+      'Troubleshooting',
+      'API Support',
+      'Documentation',
+    ],
     specialty: 'Technical support and troubleshooting',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'code_interpreter', 'analyze_file']
+    defaultTools: ['web_search', 'code_interpreter', 'analyze_file'],
   },
 
   // Specialized Technical Roles
@@ -850,7 +1132,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['Unity', 'Unreal Engine', 'C#', 'Game Design', '3D Graphics'],
     specialty: 'Game development and interactive experiences',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-053',
@@ -865,7 +1147,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['Unity', 'ARCore', 'ARKit', 'WebXR', '3D Modeling'],
     specialty: 'Augmented and virtual reality development',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-054',
@@ -877,10 +1159,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=iot-engineer',
-    skills: ['Embedded Systems', 'Arduino', 'Raspberry Pi', 'MQTT', 'Sensor Networks'],
+    skills: [
+      'Embedded Systems',
+      'Arduino',
+      'Raspberry Pi',
+      'MQTT',
+      'Sensor Networks',
+    ],
     specialty: 'Internet of Things and embedded systems',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-055',
@@ -891,11 +1179,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=cybersecurity-engineer',
-    skills: ['Security Architecture', 'Penetration Testing', 'Incident Response', 'Compliance'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=cybersecurity-engineer',
+    skills: [
+      'Security Architecture',
+      'Penetration Testing',
+      'Incident Response',
+      'Compliance',
+    ],
     specialty: 'Cybersecurity and threat protection',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'code_interpreter', 'analyze_file']
+    defaultTools: ['web_search', 'code_interpreter', 'analyze_file'],
   },
 
   // Industry-Specific Roles
@@ -908,11 +1202,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=healthcare-data-analyst',
-    skills: ['Healthcare Analytics', 'HIPAA Compliance', 'Clinical Data', 'Medical Research'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=healthcare-data-analyst',
+    skills: [
+      'Healthcare Analytics',
+      'HIPAA Compliance',
+      'Clinical Data',
+      'Medical Research',
+    ],
     specialty: 'Healthcare data analysis and insights',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
   {
     id: 'emp-057',
@@ -923,11 +1223,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=fintech-specialist',
-    skills: ['Blockchain', 'Digital Payments', 'Regulatory Compliance', 'Financial APIs'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=fintech-specialist',
+    skills: [
+      'Blockchain',
+      'Digital Payments',
+      'Regulatory Compliance',
+      'Financial APIs',
+    ],
     specialty: 'Financial technology innovation',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-058',
@@ -938,11 +1244,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ecommerce-specialist',
-    skills: ['Shopify', 'WooCommerce', 'Conversion Optimization', 'Digital Marketing'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=ecommerce-specialist',
+    skills: [
+      'Shopify',
+      'WooCommerce',
+      'Conversion Optimization',
+      'Digital Marketing',
+    ],
     specialty: 'E-commerce strategy and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
 
   // Consulting & Advisory Roles
@@ -951,30 +1263,44 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     name: 'Strategy Consultant',
     role: 'Strategy Consultant',
     category: 'Consulting',
-    description: 'Provide strategic guidance and business transformation advice',
+    description:
+      'Provide strategic guidance and business transformation advice',
     provider: 'claude',
     price: 20,
     originalPrice: 40,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=strategy-consultant',
-    skills: ['Strategic Planning', 'Business Analysis', 'Market Research', 'Change Management'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=strategy-consultant',
+    skills: [
+      'Strategic Planning',
+      'Business Analysis',
+      'Market Research',
+      'Change Management',
+    ],
     specialty: 'Strategic consulting and business transformation',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'create_visualization', 'analyze_file']
+    defaultTools: ['web_search', 'create_visualization', 'analyze_file'],
   },
   {
     id: 'emp-060',
     name: 'Digital Transformation Specialist',
     role: 'Digital Transformation Specialist',
     category: 'Consulting',
-    description: 'Guide organizations through digital transformation initiatives',
+    description:
+      'Guide organizations through digital transformation initiatives',
     provider: 'claude',
     price: 20,
     originalPrice: 40,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=digital-transformation-specialist',
-    skills: ['Digital Strategy', 'Process Automation', 'Technology Integration', 'Change Management'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=digital-transformation-specialist',
+    skills: [
+      'Digital Strategy',
+      'Process Automation',
+      'Technology Integration',
+      'Change Management',
+    ],
     specialty: 'Digital transformation and modernization',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'create_visualization', 'analyze_file']
+    defaultTools: ['web_search', 'create_visualization', 'analyze_file'],
   },
   {
     id: 'emp-061',
@@ -985,11 +1311,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=innovation-manager',
-    skills: ['Innovation Strategy', 'Design Thinking', 'R&D Management', 'Technology Scouting'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=innovation-manager',
+    skills: [
+      'Innovation Strategy',
+      'Design Thinking',
+      'R&D Management',
+      'Technology Scouting',
+    ],
     specialty: 'Innovation management and creative solutions',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'create_visualization', 'analyze_file']
+    defaultTools: ['web_search', 'create_visualization', 'analyze_file'],
   },
 
   // Communication & Media Roles
@@ -1002,11 +1334,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=social-media-manager',
-    skills: ['Social Media Strategy', 'Content Creation', 'Community Management', 'Analytics'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=social-media-manager',
+    skills: [
+      'Social Media Strategy',
+      'Content Creation',
+      'Community Management',
+      'Analytics',
+    ],
     specialty: 'Social media management and engagement',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-063',
@@ -1018,25 +1356,37 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=pr-specialist',
-    skills: ['Public Relations', 'Media Relations', 'Crisis Management', 'Brand Reputation'],
+    skills: [
+      'Public Relations',
+      'Media Relations',
+      'Crisis Management',
+      'Brand Reputation',
+    ],
     specialty: 'Public relations and reputation management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-064',
     name: 'Content Strategist',
     role: 'Content Strategist',
     category: 'Marketing',
-    description: 'Develop comprehensive content strategies and editorial calendars',
+    description:
+      'Develop comprehensive content strategies and editorial calendars',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=content-strategist',
-    skills: ['Content Strategy', 'Editorial Planning', 'Content Marketing', 'SEO'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=content-strategist',
+    skills: [
+      'Content Strategy',
+      'Editorial Planning',
+      'Content Marketing',
+      'SEO',
+    ],
     specialty: 'Content strategy and editorial management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
 
   // Education & Training Roles
@@ -1050,10 +1400,15 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=learning-designer',
-    skills: ['Instructional Design', 'E-learning', 'Curriculum Development', 'Learning Analytics'],
+    skills: [
+      'Instructional Design',
+      'E-learning',
+      'Curriculum Development',
+      'Learning Analytics',
+    ],
     specialty: 'Educational content and learning design',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
   {
     id: 'emp-066',
@@ -1064,11 +1419,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=training-specialist',
-    skills: ['Training Development', 'Workshop Design', 'Skills Assessment', 'Learning Management'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=training-specialist',
+    skills: [
+      'Training Development',
+      'Workshop Design',
+      'Skills Assessment',
+      'Learning Management',
+    ],
     specialty: 'Professional training and development',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-067',
@@ -1079,11 +1440,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=educational-technology-specialist',
-    skills: ['EdTech Integration', 'Learning Management Systems', 'Digital Tools', 'Online Learning'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=educational-technology-specialist',
+    skills: [
+      'EdTech Integration',
+      'Learning Management Systems',
+      'Digital Tools',
+      'Online Learning',
+    ],
     specialty: 'Educational technology integration',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'code_interpreter', 'analyze_file']
+    defaultTools: ['web_search', 'code_interpreter', 'analyze_file'],
   },
 
   // Sustainability & Environmental Roles
@@ -1097,10 +1464,15 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=esg-analyst',
-    skills: ['ESG Reporting', 'Sustainability Metrics', 'Climate Risk', 'Impact Assessment'],
+    skills: [
+      'ESG Reporting',
+      'Sustainability Metrics',
+      'Climate Risk',
+      'Impact Assessment',
+    ],
     specialty: 'ESG analysis and sustainability reporting',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
   {
     id: 'emp-069',
@@ -1111,11 +1483,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=green-tech-specialist',
-    skills: ['Renewable Energy', 'Carbon Footprint', 'Sustainable Design', 'Clean Technology'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=green-tech-specialist',
+    skills: [
+      'Renewable Energy',
+      'Carbon Footprint',
+      'Sustainable Design',
+      'Clean Technology',
+    ],
     specialty: 'Green technology and sustainability solutions',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'code_interpreter', 'analyze_file']
+    defaultTools: ['web_search', 'code_interpreter', 'analyze_file'],
   },
   {
     id: 'emp-070',
@@ -1126,11 +1504,22 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=climate-data-scientist',
-    skills: ['Climate Modeling', 'Environmental Data', 'Statistical Analysis', 'Predictive Modeling'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=climate-data-scientist',
+    skills: [
+      'Climate Modeling',
+      'Environmental Data',
+      'Statistical Analysis',
+      'Predictive Modeling',
+    ],
     specialty: 'Climate data analysis and environmental insights',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'analyze_file', 'create_visualization', 'web_search']
+    defaultTools: [
+      'code_interpreter',
+      'analyze_file',
+      'create_visualization',
+      'web_search',
+    ],
   },
 
   // Advanced Technical Roles
@@ -1143,11 +1532,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 20,
     originalPrice: 40,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=quantum-computing-researcher',
-    skills: ['Quantum Algorithms', 'Quantum Machine Learning', 'Qiskit', 'Quantum Cryptography'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=quantum-computing-researcher',
+    skills: [
+      'Quantum Algorithms',
+      'Quantum Machine Learning',
+      'Qiskit',
+      'Quantum Cryptography',
+    ],
     specialty: 'Quantum computing research and development',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-072',
@@ -1162,7 +1557,7 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     skills: ['ROS', 'Computer Vision', 'Motion Planning', 'Automation Systems'],
     specialty: 'Robotics and automation engineering',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-073',
@@ -1173,11 +1568,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=edge-computing-specialist',
-    skills: ['Edge Computing', 'Real-time Processing', 'Distributed Systems', 'IoT Integration'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=edge-computing-specialist',
+    skills: [
+      'Edge Computing',
+      'Real-time Processing',
+      'Distributed Systems',
+      'IoT Integration',
+    ],
     specialty: 'Edge computing and real-time processing',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
 
   // Specialized Business Roles
@@ -1190,11 +1591,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 20,
     originalPrice: 40,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=venture-capital-analyst',
-    skills: ['Investment Analysis', 'Startup Valuation', 'Market Research', 'Due Diligence'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=venture-capital-analyst',
+    skills: [
+      'Investment Analysis',
+      'Startup Valuation',
+      'Market Research',
+      'Due Diligence',
+    ],
     specialty: 'Venture capital and investment analysis',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
   {
     id: 'emp-075',
@@ -1205,11 +1612,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=supply-chain-analyst',
-    skills: ['Supply Chain Optimization', 'Logistics', 'Inventory Management', 'Demand Forecasting'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=supply-chain-analyst',
+    skills: [
+      'Supply Chain Optimization',
+      'Logistics',
+      'Inventory Management',
+      'Demand Forecasting',
+    ],
     specialty: 'Supply chain optimization and logistics',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
   {
     id: 'emp-076',
@@ -1220,11 +1633,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=risk-management-specialist',
-    skills: ['Risk Assessment', 'Financial Modeling', 'Compliance', 'Insurance'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=risk-management-specialist',
+    skills: [
+      'Risk Assessment',
+      'Financial Modeling',
+      'Compliance',
+      'Insurance',
+    ],
     specialty: 'Risk management and mitigation strategies',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
 
   // Easily Automatable Roles - Data Entry & Processing
@@ -1237,12 +1656,19 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=data-entry-specialist',
-    skills: ['Data Input', 'Data Validation', 'Excel', 'Database Management', 'OCR'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=data-entry-specialist',
+    skills: [
+      'Data Input',
+      'Data Validation',
+      'Excel',
+      'Database Management',
+      'OCR',
+    ],
     specialty: 'Data entry and processing automation',
     fitLevel: 'excellent',
     popular: true,
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
   {
     id: 'emp-078',
@@ -1253,11 +1679,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=email-marketing-specialist',
-    skills: ['Email Campaigns', 'Automation', 'A/B Testing', 'List Management', 'Analytics'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=email-marketing-specialist',
+    skills: [
+      'Email Campaigns',
+      'Automation',
+      'A/B Testing',
+      'List Management',
+      'Analytics',
+    ],
     specialty: 'Email marketing automation and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-079',
@@ -1268,26 +1701,39 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=social-media-scheduler',
-    skills: ['Social Media Automation', 'Content Scheduling', 'Platform Management', 'Analytics'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=social-media-scheduler',
+    skills: [
+      'Social Media Automation',
+      'Content Scheduling',
+      'Platform Management',
+      'Analytics',
+    ],
     specialty: 'Social media automation and scheduling',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-080',
     name: 'Content Creator',
     role: 'Content Creator',
     category: 'Creative',
-    description: 'Generate high-quality content for blogs, social media, and marketing',
+    description:
+      'Generate high-quality content for blogs, social media, and marketing',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=content-creator',
-    skills: ['Content Writing', 'Blog Posts', 'Social Media Content', 'SEO Writing', 'Copywriting'],
+    skills: [
+      'Content Writing',
+      'Blog Posts',
+      'Social Media Content',
+      'SEO Writing',
+      'Copywriting',
+    ],
     specialty: 'Automated content creation and writing',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // Repetitive Work Automation
@@ -1300,11 +1746,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=qa-tester',
-    skills: ['Automated Testing', 'Test Scripts', 'Bug Tracking', 'Regression Testing', 'API Testing'],
+    avatar: getFallbackAvatar('qa-tester'),
+    skills: [
+      'Automated Testing',
+      'Test Scripts',
+      'Bug Tracking',
+      'Regression Testing',
+      'API Testing',
+    ],
     specialty: 'Automated quality assurance and testing',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-082',
@@ -1315,11 +1767,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=customer-support-bot',
-    skills: ['Chatbot Development', 'FAQ Automation', 'Ticket Routing', 'Response Templates', 'Sentiment Analysis'],
+    avatar: getFallbackAvatar('customer-support-bot'),
+    skills: [
+      'Chatbot Development',
+      'FAQ Automation',
+      'Ticket Routing',
+      'Response Templates',
+      'Sentiment Analysis',
+    ],
     specialty: 'Automated customer support and chatbot management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-083',
@@ -1330,11 +1788,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=documentation-generator',
-    skills: ['Auto Documentation', 'API Docs', 'Code Comments', 'User Manuals', 'Technical Writing'],
+    avatar: getFallbackAvatar('documentation-generator'),
+    skills: [
+      'Auto Documentation',
+      'API Docs',
+      'Code Comments',
+      'User Manuals',
+      'Technical Writing',
+    ],
     specialty: 'Automated documentation generation and maintenance',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-084',
@@ -1345,11 +1809,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=translation-specialist',
-    skills: ['Multi-language Translation', 'Localization', 'Cultural Adaptation', 'Language Detection', 'Proofreading'],
+    avatar: getFallbackAvatar('translation-specialist'),
+    skills: [
+      'Multi-language Translation',
+      'Localization',
+      'Cultural Adaptation',
+      'Language Detection',
+      'Proofreading',
+    ],
     specialty: 'Automated translation and localization services',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // LLM-Optimized Roles
@@ -1358,46 +1828,68 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     name: 'Content Writer',
     role: 'Content Writer',
     category: 'Creative',
-    description: 'Generate engaging written content for various platforms and purposes',
+    description:
+      'Generate engaging written content for various platforms and purposes',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=content-writer',
-    skills: ['Article Writing', 'Blog Posts', 'Marketing Copy', 'SEO Content', 'Creative Writing'],
+    avatar: getFallbackAvatar('content-writer'),
+    skills: [
+      'Article Writing',
+      'Blog Posts',
+      'Marketing Copy',
+      'SEO Content',
+      'Creative Writing',
+    ],
     specialty: 'Automated content writing and copy generation',
     fitLevel: 'excellent',
     popular: true,
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-086',
     name: 'Research Assistant',
     role: 'Research Assistant',
     category: 'Research',
-    description: 'Conduct comprehensive research and compile findings automatically',
+    description:
+      'Conduct comprehensive research and compile findings automatically',
     provider: 'perplexity',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=research-assistant',
-    skills: ['Information Gathering', 'Fact Checking', 'Report Compilation', 'Source Verification', 'Data Synthesis'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=research-assistant',
+    skills: [
+      'Information Gathering',
+      'Fact Checking',
+      'Report Compilation',
+      'Source Verification',
+      'Data Synthesis',
+    ],
     specialty: 'Automated research and information gathering',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
   {
     id: 'emp-087',
     name: 'Code Reviewer',
     role: 'Code Reviewer',
     category: 'Engineering',
-    description: 'Automatically review code for quality, security, and best practices',
+    description:
+      'Automatically review code for quality, security, and best practices',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=code-reviewer',
-    skills: ['Code Analysis', 'Security Scanning', 'Best Practices', 'Performance Review', 'Bug Detection'],
+    skills: [
+      'Code Analysis',
+      'Security Scanning',
+      'Best Practices',
+      'Performance Review',
+      'Bug Detection',
+    ],
     specialty: 'Automated code review and quality analysis',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-088',
@@ -1409,10 +1901,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=data-processor',
-    skills: ['Data Cleaning', 'Data Transformation', 'ETL Processes', 'Data Validation', 'Format Conversion'],
+    skills: [
+      'Data Cleaning',
+      'Data Transformation',
+      'ETL Processes',
+      'Data Validation',
+      'Format Conversion',
+    ],
     specialty: 'Automated data processing and cleaning',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'analyze_file', 'web_search']
+    defaultTools: ['code_interpreter', 'analyze_file', 'web_search'],
   },
 
   // Specialized Automation Roles
@@ -1425,26 +1923,41 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=process-automation-specialist',
-    skills: ['Workflow Automation', 'RPA', 'Process Mapping', 'Integration', 'Monitoring'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=process-automation-specialist',
+    skills: [
+      'Workflow Automation',
+      'RPA',
+      'Process Mapping',
+      'Integration',
+      'Monitoring',
+    ],
     specialty: 'Business process automation and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-090',
     name: 'Workflow Optimizer',
     role: 'Workflow Optimizer',
     category: 'Operations',
-    description: 'Analyze and optimize existing workflows for maximum efficiency',
+    description:
+      'Analyze and optimize existing workflows for maximum efficiency',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=workflow-optimizer',
-    skills: ['Workflow Analysis', 'Process Improvement', 'Efficiency Metrics', 'Bottleneck Identification', 'Automation Design'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=workflow-optimizer',
+    skills: [
+      'Workflow Analysis',
+      'Process Improvement',
+      'Efficiency Metrics',
+      'Bottleneck Identification',
+      'Automation Design',
+    ],
     specialty: 'Workflow optimization and efficiency improvement',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
   {
     id: 'emp-091',
@@ -1455,11 +1968,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=task-automation-engineer',
-    skills: ['Task Automation', 'Script Development', 'Scheduling', 'Monitoring', 'Error Handling'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=task-automation-engineer',
+    skills: [
+      'Task Automation',
+      'Script Development',
+      'Scheduling',
+      'Monitoring',
+      'Error Handling',
+    ],
     specialty: 'Task automation and routine operation optimization',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-092',
@@ -1471,10 +1991,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=report-generator',
-    skills: ['Report Automation', 'Data Visualization', 'Dashboard Creation', 'Scheduled Reports', 'Analytics'],
+    skills: [
+      'Report Automation',
+      'Data Visualization',
+      'Dashboard Creation',
+      'Scheduled Reports',
+      'Analytics',
+    ],
     specialty: 'Automated report generation and analytics',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
 
   // Additional LLM-Optimized Roles
@@ -1488,10 +2014,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=email-responder',
-    skills: ['Email Automation', 'Response Templates', 'Priority Classification', 'Follow-up Management', 'Sentiment Analysis'],
+    skills: [
+      'Email Automation',
+      'Response Templates',
+      'Priority Classification',
+      'Follow-up Management',
+      'Sentiment Analysis',
+    ],
     specialty: 'Automated email management and response',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-094',
@@ -1503,10 +2035,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=meeting-scheduler',
-    skills: ['Calendar Management', 'Scheduling Automation', 'Time Zone Handling', 'Conflict Resolution', 'Reminder Systems'],
+    skills: [
+      'Calendar Management',
+      'Scheduling Automation',
+      'Time Zone Handling',
+      'Conflict Resolution',
+      'Reminder Systems',
+    ],
     specialty: 'Automated meeting scheduling and calendar management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-095',
@@ -1518,10 +2056,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=form-processor',
-    skills: ['Form Validation', 'Data Extraction', 'Submission Processing', 'Error Handling', 'Notification Systems'],
+    skills: [
+      'Form Validation',
+      'Data Extraction',
+      'Submission Processing',
+      'Error Handling',
+      'Notification Systems',
+    ],
     specialty: 'Automated form processing and validation',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
   {
     id: 'emp-096',
@@ -1533,10 +2077,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=invoice-processor',
-    skills: ['Invoice Processing', 'Data Extraction', 'Payment Tracking', 'Compliance Checking', 'Financial Records'],
+    skills: [
+      'Invoice Processing',
+      'Data Extraction',
+      'Payment Tracking',
+      'Compliance Checking',
+      'Financial Records',
+    ],
     specialty: 'Automated invoice processing and billing management',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
 
   // Content and Media Automation
@@ -1545,15 +2095,23 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     name: 'Video Script Writer',
     role: 'Video Script Writer',
     category: 'Creative',
-    description: 'Generate scripts for videos, presentations, and multimedia content',
+    description:
+      'Generate scripts for videos, presentations, and multimedia content',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=video-script-writer',
-    skills: ['Script Writing', 'Storytelling', 'Video Production', 'Presentation Scripts', 'Content Planning'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=video-script-writer',
+    skills: [
+      'Script Writing',
+      'Storytelling',
+      'Video Production',
+      'Presentation Scripts',
+      'Content Planning',
+    ],
     specialty: 'Automated video script and presentation writing',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-098',
@@ -1564,26 +2122,40 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=seo-content-optimizer',
-    skills: ['SEO Optimization', 'Keyword Research', 'Content Analysis', 'Ranking Improvement', 'Meta Tags'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=seo-content-optimizer',
+    skills: [
+      'SEO Optimization',
+      'Keyword Research',
+      'Content Analysis',
+      'Ranking Improvement',
+      'Meta Tags',
+    ],
     specialty: 'Automated SEO content optimization and analysis',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-099',
     name: 'Newsletter Writer',
     role: 'Newsletter Writer',
     category: 'Marketing',
-    description: 'Create engaging newsletters and email campaigns automatically',
+    description:
+      'Create engaging newsletters and email campaigns automatically',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=newsletter-writer',
-    skills: ['Newsletter Creation', 'Email Campaigns', 'Content Curation', 'Template Design', 'Audience Engagement'],
+    skills: [
+      'Newsletter Creation',
+      'Email Campaigns',
+      'Content Curation',
+      'Template Design',
+      'Audience Engagement',
+    ],
     specialty: 'Automated newsletter and email campaign creation',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-100',
@@ -1594,11 +2166,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=product-description-writer',
-    skills: ['Product Copy', 'Marketing Descriptions', 'E-commerce Content', 'Feature Highlighting', 'Persuasive Writing'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=product-description-writer',
+    skills: [
+      'Product Copy',
+      'Marketing Descriptions',
+      'E-commerce Content',
+      'Feature Highlighting',
+      'Persuasive Writing',
+    ],
     specialty: 'Automated product description and marketing copy generation',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // Advanced Automation Roles
@@ -1611,11 +2190,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=database-administrator',
-    skills: ['Database Optimization', 'Query Performance', 'Backup Management', 'Security Monitoring', 'Index Management'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=database-administrator',
+    skills: [
+      'Database Optimization',
+      'Query Performance',
+      'Backup Management',
+      'Security Monitoring',
+      'Index Management',
+    ],
     specialty: 'Automated database administration and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-102',
@@ -1627,10 +2213,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=system-monitor',
-    skills: ['System Monitoring', 'Performance Analysis', 'Alert Management', 'Log Analysis', 'Incident Response'],
+    skills: [
+      'System Monitoring',
+      'Performance Analysis',
+      'Alert Management',
+      'Log Analysis',
+      'Incident Response',
+    ],
     specialty: 'Automated system monitoring and alerting',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-103',
@@ -1642,10 +2234,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=backup-specialist',
-    skills: ['Backup Automation', 'Disaster Recovery', 'Data Protection', 'Storage Management', 'Recovery Testing'],
+    skills: [
+      'Backup Automation',
+      'Disaster Recovery',
+      'Data Protection',
+      'Storage Management',
+      'Recovery Testing',
+    ],
     specialty: 'Automated backup and disaster recovery management',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-104',
@@ -1657,10 +2255,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=security-scanner',
-    skills: ['Vulnerability Scanning', 'Threat Detection', 'Security Analysis', 'Compliance Checking', 'Risk Assessment'],
+    skills: [
+      'Vulnerability Scanning',
+      'Threat Detection',
+      'Security Analysis',
+      'Compliance Checking',
+      'Risk Assessment',
+    ],
     specialty: 'Automated security scanning and threat detection',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'code_interpreter', 'analyze_file']
+    defaultTools: ['web_search', 'code_interpreter', 'analyze_file'],
   },
 
   // Final Automation Roles
@@ -1674,10 +2278,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=lead-qualifier',
-    skills: ['Lead Scoring', 'Qualification Criteria', 'CRM Management', 'Follow-up Automation', 'Conversion Tracking'],
+    skills: [
+      'Lead Scoring',
+      'Qualification Criteria',
+      'CRM Management',
+      'Follow-up Automation',
+      'Conversion Tracking',
+    ],
     specialty: 'Automated lead qualification and scoring',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-106',
@@ -1688,11 +2298,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=appointment-setter',
-    skills: ['Appointment Scheduling', 'Calendar Management', 'Follow-up Automation', 'CRM Integration', 'Reminder Systems'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=appointment-setter',
+    skills: [
+      'Appointment Scheduling',
+      'Calendar Management',
+      'Follow-up Automation',
+      'CRM Integration',
+      'Reminder Systems',
+    ],
     specialty: 'Automated appointment scheduling and follow-up management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // Additional Highly Automatable Roles
@@ -1706,10 +2323,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=survey-creator',
-    skills: ['Survey Design', 'Question Creation', 'Response Analysis', 'Data Collection', 'Report Generation'],
+    skills: [
+      'Survey Design',
+      'Question Creation',
+      'Response Analysis',
+      'Data Collection',
+      'Report Generation',
+    ],
     specialty: 'Automated survey creation and analysis',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
   {
     id: 'emp-108',
@@ -1721,10 +2344,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=calendar-manager',
-    skills: ['Calendar Optimization', 'Meeting Coordination', 'Time Blocking', 'Conflict Resolution', 'Scheduling Analytics'],
+    skills: [
+      'Calendar Optimization',
+      'Meeting Coordination',
+      'Time Blocking',
+      'Conflict Resolution',
+      'Scheduling Analytics',
+    ],
     specialty: 'Automated calendar management and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-109',
@@ -1736,10 +2365,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=expense-tracker',
-    skills: ['Expense Categorization', 'Receipt Processing', 'Budget Monitoring', 'Financial Reporting', 'Compliance Checking'],
+    skills: [
+      'Expense Categorization',
+      'Receipt Processing',
+      'Budget Monitoring',
+      'Financial Reporting',
+      'Compliance Checking',
+    ],
     specialty: 'Automated expense tracking and financial management',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
   {
     id: 'emp-110',
@@ -1751,10 +2386,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=inventory-manager',
-    skills: ['Stock Tracking', 'Reorder Automation', 'Inventory Analysis', 'Demand Forecasting', 'Supply Chain Management'],
+    skills: [
+      'Stock Tracking',
+      'Reorder Automation',
+      'Inventory Analysis',
+      'Demand Forecasting',
+      'Supply Chain Management',
+    ],
     specialty: 'Automated inventory management and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
 
   // Content Generation & Marketing Automation
@@ -1768,10 +2409,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=blog-writer',
-    skills: ['Article Writing', 'SEO Optimization', 'Content Research', 'Topic Generation', 'Publishing Automation'],
+    skills: [
+      'Article Writing',
+      'SEO Optimization',
+      'Content Research',
+      'Topic Generation',
+      'Publishing Automation',
+    ],
     specialty: 'Automated blog writing and content generation',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-112',
@@ -1782,11 +2429,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=social-media-poster',
-    skills: ['Content Scheduling', 'Platform Management', 'Hashtag Optimization', 'Engagement Tracking', 'Cross-platform Posting'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=social-media-poster',
+    skills: [
+      'Content Scheduling',
+      'Platform Management',
+      'Hashtag Optimization',
+      'Engagement Tracking',
+      'Cross-platform Posting',
+    ],
     specialty: 'Automated social media posting and management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-113',
@@ -1797,11 +2451,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=press-release-writer',
-    skills: ['Press Release Writing', 'Media Relations', 'Announcement Creation', 'Distribution Management', 'Media Monitoring'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=press-release-writer',
+    skills: [
+      'Press Release Writing',
+      'Media Relations',
+      'Announcement Creation',
+      'Distribution Management',
+      'Media Monitoring',
+    ],
     specialty: 'Automated press release writing and media management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-114',
@@ -1813,10 +2474,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ad-copy-writer',
-    skills: ['Ad Copy Creation', 'A/B Testing', 'Platform Optimization', 'Conversion Writing', 'Campaign Management'],
+    skills: [
+      'Ad Copy Creation',
+      'A/B Testing',
+      'Platform Optimization',
+      'Conversion Writing',
+      'Campaign Management',
+    ],
     specialty: 'Automated advertising copy creation and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // Data Processing & Analysis Automation
@@ -1830,10 +2497,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=data-validator',
-    skills: ['Data Validation', 'Error Detection', 'Data Cleaning', 'Quality Assurance', 'Format Standardization'],
+    skills: [
+      'Data Validation',
+      'Error Detection',
+      'Data Cleaning',
+      'Quality Assurance',
+      'Format Standardization',
+    ],
     specialty: 'Automated data validation and quality assurance',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'analyze_file', 'web_search']
+    defaultTools: ['code_interpreter', 'analyze_file', 'web_search'],
   },
   {
     id: 'emp-116',
@@ -1845,10 +2518,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=report-analyzer',
-    skills: ['Report Analysis', 'Insight Extraction', 'Trend Identification', 'Summary Generation', 'Data Interpretation'],
+    skills: [
+      'Report Analysis',
+      'Insight Extraction',
+      'Trend Identification',
+      'Summary Generation',
+      'Data Interpretation',
+    ],
     specialty: 'Automated report analysis and insight extraction',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
   {
     id: 'emp-117',
@@ -1860,10 +2539,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=chart-generator',
-    skills: ['Data Visualization', 'Chart Creation', 'Graph Design', 'Dashboard Building', 'Visual Analytics'],
+    skills: [
+      'Data Visualization',
+      'Chart Creation',
+      'Graph Design',
+      'Dashboard Building',
+      'Visual Analytics',
+    ],
     specialty: 'Automated chart and visualization generation',
     fitLevel: 'excellent',
-    defaultTools: ['create_visualization', 'analyze_file', 'web_search']
+    defaultTools: ['create_visualization', 'analyze_file', 'web_search'],
   },
   {
     id: 'emp-118',
@@ -1875,10 +2560,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=trend-analyzer',
-    skills: ['Trend Analysis', 'Pattern Recognition', 'Market Research', 'Predictive Analytics', 'Statistical Analysis'],
+    skills: [
+      'Trend Analysis',
+      'Pattern Recognition',
+      'Market Research',
+      'Predictive Analytics',
+      'Statistical Analysis',
+    ],
     specialty: 'Automated trend analysis and pattern recognition',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
 
   // Customer Service & Support Automation
@@ -1892,10 +2583,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=faq-generator',
-    skills: ['FAQ Creation', 'Question Analysis', 'Answer Generation', 'Content Maintenance', 'User Experience Optimization'],
+    skills: [
+      'FAQ Creation',
+      'Question Analysis',
+      'Answer Generation',
+      'Content Maintenance',
+      'User Experience Optimization',
+    ],
     specialty: 'Automated FAQ generation and maintenance',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-120',
@@ -1907,10 +2604,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ticket-classifier',
-    skills: ['Ticket Classification', 'Priority Assessment', 'Routing Automation', 'Category Management', 'Response Optimization'],
+    skills: [
+      'Ticket Classification',
+      'Priority Assessment',
+      'Routing Automation',
+      'Category Management',
+      'Response Optimization',
+    ],
     specialty: 'Automated ticket classification and routing',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
   {
     id: 'emp-121',
@@ -1921,26 +2624,41 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=response-generator',
-    skills: ['Response Generation', 'Template Creation', 'Personalization', 'Context Analysis', 'Quality Assurance'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=response-generator',
+    skills: [
+      'Response Generation',
+      'Template Creation',
+      'Personalization',
+      'Context Analysis',
+      'Quality Assurance',
+    ],
     specialty: 'Automated customer response generation',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-122',
     name: 'Satisfaction Surveyor',
     role: 'Satisfaction Surveyor',
     category: 'Support',
-    description: 'Automatically conduct customer satisfaction surveys and analysis',
+    description:
+      'Automatically conduct customer satisfaction surveys and analysis',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=satisfaction-surveyor',
-    skills: ['Survey Creation', 'Response Analysis', 'Satisfaction Metrics', 'Feedback Processing', 'Improvement Recommendations'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=satisfaction-surveyor',
+    skills: [
+      'Survey Creation',
+      'Response Analysis',
+      'Satisfaction Metrics',
+      'Feedback Processing',
+      'Improvement Recommendations',
+    ],
     specialty: 'Automated customer satisfaction measurement and analysis',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
 
   // HR & Recruitment Automation
@@ -1954,10 +2672,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=resume-parser',
-    skills: ['Resume Parsing', 'Skill Extraction', 'Experience Analysis', 'Qualification Matching', 'Candidate Scoring'],
+    skills: [
+      'Resume Parsing',
+      'Skill Extraction',
+      'Experience Analysis',
+      'Qualification Matching',
+      'Candidate Scoring',
+    ],
     specialty: 'Automated resume parsing and candidate analysis',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
   {
     id: 'emp-124',
@@ -1968,11 +2692,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=job-description-writer',
-    skills: ['Job Description Creation', 'Requirement Analysis', 'Skill Mapping', 'Compensation Research', 'Compliance Checking'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=job-description-writer',
+    skills: [
+      'Job Description Creation',
+      'Requirement Analysis',
+      'Skill Mapping',
+      'Compensation Research',
+      'Compliance Checking',
+    ],
     specialty: 'Automated job description writing and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-125',
@@ -1983,11 +2714,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=interview-scheduler',
-    skills: ['Interview Coordination', 'Calendar Management', 'Candidate Communication', 'Panel Scheduling', 'Reminder Systems'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=interview-scheduler',
+    skills: [
+      'Interview Coordination',
+      'Calendar Management',
+      'Candidate Communication',
+      'Panel Scheduling',
+      'Reminder Systems',
+    ],
     specialty: 'Automated interview scheduling and coordination',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-126',
@@ -1998,11 +2736,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=onboarding-coordinator',
-    skills: ['Onboarding Automation', 'Document Management', 'Process Tracking', 'Welcome Communications', 'Compliance Documentation'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=onboarding-coordinator',
+    skills: [
+      'Onboarding Automation',
+      'Document Management',
+      'Process Tracking',
+      'Welcome Communications',
+      'Compliance Documentation',
+    ],
     specialty: 'Automated employee onboarding and documentation',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // Financial & Accounting Automation
@@ -2016,10 +2761,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=invoice-generator',
-    skills: ['Invoice Creation', 'Billing Automation', 'Payment Tracking', 'Tax Calculation', 'Client Communication'],
+    skills: [
+      'Invoice Creation',
+      'Billing Automation',
+      'Payment Tracking',
+      'Tax Calculation',
+      'Client Communication',
+    ],
     specialty: 'Automated invoice generation and billing management',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
   {
     id: 'emp-128',
@@ -2031,10 +2782,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=budget-tracker',
-    skills: ['Budget Monitoring', 'Expense Tracking', 'Variance Analysis', 'Alert Management', 'Financial Reporting'],
+    skills: [
+      'Budget Monitoring',
+      'Expense Tracking',
+      'Variance Analysis',
+      'Alert Management',
+      'Financial Reporting',
+    ],
     specialty: 'Automated budget tracking and financial monitoring',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
   {
     id: 'emp-129',
@@ -2046,10 +2803,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=tax-preparer',
-    skills: ['Tax Preparation', 'Compliance Checking', 'Deduction Analysis', 'Filing Automation', 'Regulatory Updates'],
+    skills: [
+      'Tax Preparation',
+      'Compliance Checking',
+      'Deduction Analysis',
+      'Filing Automation',
+      'Regulatory Updates',
+    ],
     specialty: 'Automated tax preparation and compliance management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-130',
@@ -2061,10 +2824,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=payroll-processor',
-    skills: ['Payroll Calculation', 'Tax Withholding', 'Benefit Deductions', 'Payment Processing', 'Compliance Management'],
+    skills: [
+      'Payroll Calculation',
+      'Tax Withholding',
+      'Benefit Deductions',
+      'Payment Processing',
+      'Compliance Management',
+    ],
     specialty: 'Automated payroll processing and employee payment management',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
 
   // Operations & Logistics Automation
@@ -2078,10 +2847,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=route-optimizer',
-    skills: ['Route Planning', 'Logistics Optimization', 'Delivery Scheduling', 'Cost Analysis', 'Performance Tracking'],
+    skills: [
+      'Route Planning',
+      'Logistics Optimization',
+      'Delivery Scheduling',
+      'Cost Analysis',
+      'Performance Tracking',
+    ],
     specialty: 'Automated route optimization and logistics management',
     fitLevel: 'excellent',
-    defaultTools: ['create_visualization', 'analyze_file', 'web_search']
+    defaultTools: ['create_visualization', 'analyze_file', 'web_search'],
   },
   {
     id: 'emp-132',
@@ -2093,10 +2868,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=order-processor',
-    skills: ['Order Management', 'Fulfillment Automation', 'Inventory Integration', 'Shipping Coordination', 'Customer Communication'],
+    skills: [
+      'Order Management',
+      'Fulfillment Automation',
+      'Inventory Integration',
+      'Shipping Coordination',
+      'Customer Communication',
+    ],
     specialty: 'Automated order processing and fulfillment management',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
   {
     id: 'emp-133',
@@ -2108,10 +2889,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=quality-inspector',
-    skills: ['Quality Control', 'Defect Detection', 'Standards Compliance', 'Process Monitoring', 'Improvement Recommendations'],
+    skills: [
+      'Quality Control',
+      'Defect Detection',
+      'Standards Compliance',
+      'Process Monitoring',
+      'Improvement Recommendations',
+    ],
     specialty: 'Automated quality control and inspection management',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
   {
     id: 'emp-134',
@@ -2122,11 +2909,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=maintenance-scheduler',
-    skills: ['Maintenance Planning', 'Equipment Tracking', 'Preventive Scheduling', 'Resource Allocation', 'Performance Monitoring'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=maintenance-scheduler',
+    skills: [
+      'Maintenance Planning',
+      'Equipment Tracking',
+      'Preventive Scheduling',
+      'Resource Allocation',
+      'Performance Monitoring',
+    ],
     specialty: 'Automated maintenance scheduling and equipment management',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
 
   // Advanced AI & Machine Learning Roles
@@ -2140,10 +2934,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=model-trainer',
-    skills: ['Model Training', 'Hyperparameter Tuning', 'Performance Optimization', 'Data Preprocessing', 'Model Validation'],
+    skills: [
+      'Model Training',
+      'Hyperparameter Tuning',
+      'Performance Optimization',
+      'Data Preprocessing',
+      'Model Validation',
+    ],
     specialty: 'Automated machine learning model training and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'analyze_file', 'web_search']
+    defaultTools: ['code_interpreter', 'analyze_file', 'web_search'],
   },
   {
     id: 'emp-136',
@@ -2155,10 +2955,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=feature-engineer',
-    skills: ['Feature Engineering', 'Data Transformation', 'Feature Selection', 'Dimensionality Reduction', 'Model Performance'],
+    skills: [
+      'Feature Engineering',
+      'Data Transformation',
+      'Feature Selection',
+      'Dimensionality Reduction',
+      'Model Performance',
+    ],
     specialty: 'Automated feature engineering and data transformation',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'analyze_file', 'web_search']
+    defaultTools: ['code_interpreter', 'analyze_file', 'web_search'],
   },
   {
     id: 'emp-137',
@@ -2170,10 +2976,21 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=anomaly-detector',
-    skills: ['Anomaly Detection', 'Outlier Analysis', 'Pattern Recognition', 'Alert Generation', 'Statistical Analysis'],
+    skills: [
+      'Anomaly Detection',
+      'Outlier Analysis',
+      'Pattern Recognition',
+      'Alert Generation',
+      'Statistical Analysis',
+    ],
     specialty: 'Automated anomaly detection and outlier analysis',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'analyze_file', 'create_visualization', 'web_search']
+    defaultTools: [
+      'code_interpreter',
+      'analyze_file',
+      'create_visualization',
+      'web_search',
+    ],
   },
   {
     id: 'emp-138',
@@ -2184,11 +3001,23 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=predictive-analyst',
-    skills: ['Predictive Modeling', 'Forecasting', 'Time Series Analysis', 'Risk Assessment', 'Scenario Planning'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=predictive-analyst',
+    skills: [
+      'Predictive Modeling',
+      'Forecasting',
+      'Time Series Analysis',
+      'Risk Assessment',
+      'Scenario Planning',
+    ],
     specialty: 'Automated predictive analysis and forecasting',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'analyze_file', 'create_visualization', 'web_search']
+    defaultTools: [
+      'code_interpreter',
+      'analyze_file',
+      'create_visualization',
+      'web_search',
+    ],
   },
 
   // Communication & Collaboration Automation
@@ -2201,11 +3030,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=meeting-transcriber',
-    skills: ['Audio Transcription', 'Meeting Summarization', 'Action Item Extraction', 'Key Point Identification', 'Follow-up Generation'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=meeting-transcriber',
+    skills: [
+      'Audio Transcription',
+      'Meeting Summarization',
+      'Action Item Extraction',
+      'Key Point Identification',
+      'Follow-up Generation',
+    ],
     specialty: 'Automated meeting transcription and summarization',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-140',
@@ -2217,10 +3053,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=email-summarizer',
-    skills: ['Email Analysis', 'Content Summarization', 'Priority Classification', 'Response Suggestions', 'Thread Management'],
+    skills: [
+      'Email Analysis',
+      'Content Summarization',
+      'Priority Classification',
+      'Response Suggestions',
+      'Thread Management',
+    ],
     specialty: 'Automated email summarization and prioritization',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-141',
@@ -2231,11 +3073,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=document-summarizer',
-    skills: ['Document Analysis', 'Content Summarization', 'Key Point Extraction', 'Report Generation', 'Information Synthesis'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=document-summarizer',
+    skills: [
+      'Document Analysis',
+      'Content Summarization',
+      'Key Point Extraction',
+      'Report Generation',
+      'Information Synthesis',
+    ],
     specialty: 'Automated document summarization and analysis',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
   {
     id: 'emp-142',
@@ -2246,11 +3095,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=knowledge-base-manager',
-    skills: ['Content Management', 'Information Organization', 'Search Optimization', 'Update Automation', 'Quality Assurance'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=knowledge-base-manager',
+    skills: [
+      'Content Management',
+      'Information Organization',
+      'Search Optimization',
+      'Update Automation',
+      'Quality Assurance',
+    ],
     specialty: 'Automated knowledge base management and maintenance',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
 
   // Specialized Automation Roles
@@ -2263,11 +3119,18 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=compliance-monitor',
-    skills: ['Regulatory Monitoring', 'Compliance Checking', 'Risk Assessment', 'Policy Updates', 'Audit Preparation'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=compliance-monitor',
+    skills: [
+      'Regulatory Monitoring',
+      'Compliance Checking',
+      'Risk Assessment',
+      'Policy Updates',
+      'Audit Preparation',
+    ],
     specialty: 'Automated compliance monitoring and risk management',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file']
+    defaultTools: ['web_search', 'analyze_file'],
   },
   {
     id: 'emp-144',
@@ -2279,10 +3142,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=contract-analyzer',
-    skills: ['Contract Analysis', 'Clause Identification', 'Risk Assessment', 'Terms Extraction', 'Compliance Checking'],
+    skills: [
+      'Contract Analysis',
+      'Clause Identification',
+      'Risk Assessment',
+      'Terms Extraction',
+      'Compliance Checking',
+    ],
     specialty: 'Automated contract analysis and legal document review',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'web_search']
+    defaultTools: ['analyze_file', 'web_search'],
   },
   {
     id: 'emp-145',
@@ -2294,25 +3163,38 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=patent-researcher',
-    skills: ['Patent Research', 'IP Analysis', 'Prior Art Search', 'Innovation Tracking', 'Competitive Intelligence'],
+    skills: [
+      'Patent Research',
+      'IP Analysis',
+      'Prior Art Search',
+      'Innovation Tracking',
+      'Competitive Intelligence',
+    ],
     specialty: 'Automated patent research and intellectual property analysis',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
   {
     id: 'emp-146',
     name: 'Market Researcher',
     role: 'Market Researcher',
     category: 'Research',
-    description: 'Automatically conduct market research and competitive analysis',
+    description:
+      'Automatically conduct market research and competitive analysis',
     provider: 'perplexity',
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=market-researcher',
-    skills: ['Market Analysis', 'Competitive Intelligence', 'Trend Research', 'Consumer Insights', 'Industry Reports'],
+    skills: [
+      'Market Analysis',
+      'Competitive Intelligence',
+      'Trend Research',
+      'Consumer Insights',
+      'Industry Reports',
+    ],
     specialty: 'Automated market research and competitive analysis',
     fitLevel: 'excellent',
-    defaultTools: ['web_search', 'analyze_file', 'create_visualization']
+    defaultTools: ['web_search', 'analyze_file', 'create_visualization'],
   },
 
   // Final Automation & Efficiency Roles
@@ -2326,25 +3208,39 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=workflow-designer',
-    skills: ['Workflow Design', 'Process Mapping', 'Automation Planning', 'Integration Design', 'Efficiency Optimization'],
+    skills: [
+      'Workflow Design',
+      'Process Mapping',
+      'Automation Planning',
+      'Integration Design',
+      'Efficiency Optimization',
+    ],
     specialty: 'Automated workflow design and process optimization',
     fitLevel: 'excellent',
-    defaultTools: ['create_visualization', 'web_search', 'analyze_file']
+    defaultTools: ['create_visualization', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-148',
     name: 'Performance Monitor',
     role: 'Performance Monitor',
     category: 'Analytics',
-    description: 'Automatically monitor and analyze system and business performance',
+    description:
+      'Automatically monitor and analyze system and business performance',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=performance-monitor',
-    skills: ['Performance Tracking', 'KPI Monitoring', 'Alert Management', 'Trend Analysis', 'Optimization Recommendations'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=performance-monitor',
+    skills: [
+      'Performance Tracking',
+      'KPI Monitoring',
+      'Alert Management',
+      'Trend Analysis',
+      'Optimization Recommendations',
+    ],
     specialty: 'Automated performance monitoring and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
   {
     id: 'emp-149',
@@ -2355,26 +3251,41 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=integration-specialist',
-    skills: ['API Integration', 'System Connectivity', 'Data Synchronization', 'Workflow Automation', 'Error Handling'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=integration-specialist',
+    skills: [
+      'API Integration',
+      'System Connectivity',
+      'Data Synchronization',
+      'Workflow Automation',
+      'Error Handling',
+    ],
     specialty: 'Automated system integration and API management',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-150',
     name: 'Efficiency Optimizer',
     role: 'Efficiency Optimizer',
     category: 'Operations',
-    description: 'Continuously optimize business processes for maximum efficiency',
+    description:
+      'Continuously optimize business processes for maximum efficiency',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=efficiency-optimizer',
-    skills: ['Process Optimization', 'Efficiency Analysis', 'Bottleneck Identification', 'Automation Recommendations', 'Performance Improvement'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=efficiency-optimizer',
+    skills: [
+      'Process Optimization',
+      'Efficiency Analysis',
+      'Bottleneck Identification',
+      'Automation Recommendations',
+      'Performance Improvement',
+    ],
     specialty: 'Automated efficiency optimization and process improvement',
     fitLevel: 'excellent',
-    defaultTools: ['analyze_file', 'create_visualization', 'web_search']
+    defaultTools: ['analyze_file', 'create_visualization', 'web_search'],
   },
 
   // Critical Development & Orchestration Roles
@@ -2383,16 +3294,29 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     name: 'System Orchestrator',
     role: 'System Orchestrator',
     category: 'Engineering',
-    description: 'Coordinates multi-agent workflows and manages task delegation',
+    description:
+      'Coordinates multi-agent workflows and manages task delegation',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=system-orchestrator',
-    skills: ['Multi-Agent Coordination', 'Task Delegation', 'Workflow Management', 'Agent Communication', 'Process Optimization'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=system-orchestrator',
+    skills: [
+      'Multi-Agent Coordination',
+      'Task Delegation',
+      'Workflow Management',
+      'Agent Communication',
+      'Process Optimization',
+    ],
     specialty: 'Multi-agent orchestration and workflow coordination',
     fitLevel: 'excellent',
     popular: true,
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file', 'api_call']
+    defaultTools: [
+      'code_interpreter',
+      'web_search',
+      'analyze_file',
+      'api_call',
+    ],
   },
   {
     id: 'emp-152',
@@ -2404,10 +3328,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=code-executor',
-    skills: ['Code Execution', 'Sandbox Management', 'Runtime Testing', 'Error Handling', 'Output Validation'],
+    skills: [
+      'Code Execution',
+      'Sandbox Management',
+      'Runtime Testing',
+      'Error Handling',
+      'Output Validation',
+    ],
     specialty: 'Safe code execution and validation',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'analyze_file', 'web_search']
+    defaultTools: ['code_interpreter', 'analyze_file', 'web_search'],
   },
   {
     id: 'emp-153',
@@ -2418,56 +3348,85 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=dependency-manager',
-    skills: ['Package Management', 'Version Control', 'Dependency Resolution', 'Conflict Detection', 'Security Audits'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=dependency-manager',
+    skills: [
+      'Package Management',
+      'Version Control',
+      'Dependency Resolution',
+      'Conflict Detection',
+      'Security Audits',
+    ],
     specialty: 'Dependency management and package optimization',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-154',
     name: 'Code Optimizer',
     role: 'Code Optimizer',
     category: 'Engineering',
-    description: 'Optimizes code for performance, efficiency, and best practices',
+    description:
+      'Optimizes code for performance, efficiency, and best practices',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=code-optimizer',
-    skills: ['Performance Optimization', 'Code Refactoring', 'Algorithmic Efficiency', 'Memory Management', 'Best Practices'],
+    skills: [
+      'Performance Optimization',
+      'Code Refactoring',
+      'Algorithmic Efficiency',
+      'Memory Management',
+      'Best Practices',
+    ],
     specialty: 'Code optimization and performance improvement',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-155',
     name: 'Deployment Specialist',
     role: 'Deployment Specialist',
     category: 'Engineering',
-    description: 'Handles code deployment to various platforms and environments',
+    description:
+      'Handles code deployment to various platforms and environments',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=deployment-specialist',
-    skills: ['Deployment Automation', 'Platform Integration', 'Environment Management', 'Rollback Strategies', 'Health Checks'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=deployment-specialist',
+    skills: [
+      'Deployment Automation',
+      'Platform Integration',
+      'Environment Management',
+      'Rollback Strategies',
+      'Health Checks',
+    ],
     specialty: 'Automated deployment and release management',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'api_call', 'web_search']
+    defaultTools: ['code_interpreter', 'api_call', 'web_search'],
   },
   {
     id: 'emp-156',
     name: 'Network Engineer',
     role: 'Network Engineer',
     category: 'IT & Operations',
-    description: 'Manages networking, CDN, DNS, and infrastructure connectivity',
+    description:
+      'Manages networking, CDN, DNS, and infrastructure connectivity',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=network-engineer',
-    skills: ['Network Architecture', 'CDN Configuration', 'DNS Management', 'Load Balancing', 'Network Security'],
+    skills: [
+      'Network Architecture',
+      'CDN Configuration',
+      'DNS Management',
+      'Load Balancing',
+      'Network Security',
+    ],
     specialty: 'Network engineering and infrastructure',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-157',
@@ -2478,26 +3437,41 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=accessibility-specialist',
-    skills: ['WCAG Compliance', 'Screen Reader Testing', 'Keyboard Navigation', 'ARIA Labels', 'Color Contrast'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=accessibility-specialist',
+    skills: [
+      'WCAG Compliance',
+      'Screen Reader Testing',
+      'Keyboard Navigation',
+      'ARIA Labels',
+      'Color Contrast',
+    ],
     specialty: 'Web accessibility and inclusive design',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-158',
     name: 'Localization Manager',
     role: 'Localization Manager',
     category: 'Language',
-    description: 'Manages internationalization and localization of applications',
+    description:
+      'Manages internationalization and localization of applications',
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=localization-manager',
-    skills: ['i18n Implementation', 'Translation Management', 'Cultural Adaptation', 'Multi-language Support', 'RTL Support'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=localization-manager',
+    skills: [
+      'i18n Implementation',
+      'Translation Management',
+      'Cultural Adaptation',
+      'Multi-language Support',
+      'RTL Support',
+    ],
     specialty: 'Internationalization and localization management',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-159',
@@ -2508,26 +3482,46 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=api-documentation-specialist',
-    skills: ['OpenAPI/Swagger', 'API Design', 'Documentation Generation', 'Interactive Docs', 'Code Examples'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=api-documentation-specialist',
+    skills: [
+      'OpenAPI/Swagger',
+      'API Design',
+      'Documentation Generation',
+      'Interactive Docs',
+      'Code Examples',
+    ],
     specialty: 'API documentation and specification',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-160',
     name: 'Performance Testing Engineer',
     role: 'Performance Testing Engineer',
     category: 'Engineering',
-    description: 'Conducts load testing, stress testing, and performance benchmarking',
+    description:
+      'Conducts load testing, stress testing, and performance benchmarking',
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=performance-testing-engineer',
-    skills: ['Load Testing', 'Stress Testing', 'Benchmarking', 'Performance Metrics', 'Bottleneck Analysis'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=performance-testing-engineer',
+    skills: [
+      'Load Testing',
+      'Stress Testing',
+      'Benchmarking',
+      'Performance Metrics',
+      'Bottleneck Analysis',
+    ],
     specialty: 'Performance testing and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file', 'create_visualization']
+    defaultTools: [
+      'code_interpreter',
+      'web_search',
+      'analyze_file',
+      'create_visualization',
+    ],
   },
   {
     id: 'emp-161',
@@ -2538,11 +3532,23 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=observability-engineer',
-    skills: ['Metrics Collection', 'Distributed Tracing', 'Log Aggregation', 'Alerting', 'Performance Monitoring'],
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=observability-engineer',
+    skills: [
+      'Metrics Collection',
+      'Distributed Tracing',
+      'Log Aggregation',
+      'Alerting',
+      'Performance Monitoring',
+    ],
     specialty: 'Observability and system monitoring',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file', 'create_visualization']
+    defaultTools: [
+      'code_interpreter',
+      'web_search',
+      'analyze_file',
+      'create_visualization',
+    ],
   },
   {
     id: 'emp-162',
@@ -2554,10 +3560,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=build-engineer',
-    skills: ['Build Optimization', 'Webpack/Vite', 'Bundle Analysis', 'Asset Optimization', 'Tree Shaking'],
+    skills: [
+      'Build Optimization',
+      'Webpack/Vite',
+      'Bundle Analysis',
+      'Asset Optimization',
+      'Tree Shaking',
+    ],
     specialty: 'Build optimization and bundling',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-163',
@@ -2569,10 +3581,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=error-handler',
-    skills: ['Error Handling', 'Exception Management', 'Logging Strategies', 'Recovery Procedures', 'Fault Tolerance'],
+    skills: [
+      'Error Handling',
+      'Exception Management',
+      'Logging Strategies',
+      'Recovery Procedures',
+      'Fault Tolerance',
+    ],
     specialty: 'Error handling and system resilience',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-164',
@@ -2584,10 +3602,16 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=state-manager',
-    skills: ['State Management', 'Redux/Zustand', 'Data Flow', 'Cache Management', 'Reactive Programming'],
+    skills: [
+      'State Management',
+      'Redux/Zustand',
+      'Data Flow',
+      'Cache Management',
+      'Reactive Programming',
+    ],
     specialty: 'Application state management and architecture',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'analyze_file']
+    defaultTools: ['code_interpreter', 'web_search', 'analyze_file'],
   },
   {
     id: 'emp-165',
@@ -2599,11 +3623,17 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     price: 10,
     originalPrice: 20,
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=schema-designer',
-    skills: ['Schema Design', 'Data Modeling', 'Normalization', 'Relationship Mapping', 'Index Optimization'],
+    skills: [
+      'Schema Design',
+      'Data Modeling',
+      'Normalization',
+      'Relationship Mapping',
+      'Index Optimization',
+    ],
     specialty: 'Database schema design and optimization',
     fitLevel: 'excellent',
-    defaultTools: ['code_interpreter', 'web_search', 'create_visualization']
-  }
+    defaultTools: ['code_interpreter', 'web_search', 'create_visualization'],
+  },
 ];
 
 // Helper functions
@@ -2622,49 +3652,141 @@ export const getEmployeeById = (id: string): AIEmployee | undefined => {
 
 export const categories = [
   { id: 'all', label: 'All Employees', count: AI_EMPLOYEES.length },
-  { id: 'Executive', label: 'Executive Leadership', count: AI_EMPLOYEES.filter(e => e.category === 'Executive').length },
-  { id: 'Engineering', label: 'Engineering & Tech', count: AI_EMPLOYEES.filter(e => e.category === 'Engineering').length },
-  { id: 'Product', label: 'Product Management', count: AI_EMPLOYEES.filter(e => e.category === 'Product').length },
-  { id: 'AI & Data', label: 'AI & Data Science', count: AI_EMPLOYEES.filter(e => e.category === 'AI & Data').length },
-  { id: 'IT & Operations', label: 'IT & Operations', count: AI_EMPLOYEES.filter(e => e.category === 'IT & Operations').length },
-  { id: 'Business', label: 'Business & Sales', count: AI_EMPLOYEES.filter(e => e.category === 'Business').length },
-  { id: 'Finance', label: 'Finance & Accounting', count: AI_EMPLOYEES.filter(e => e.category === 'Finance').length },
-  { id: 'Human Resources', label: 'Human Resources', count: AI_EMPLOYEES.filter(e => e.category === 'Human Resources').length },
-  { id: 'Legal', label: 'Legal & Compliance', count: AI_EMPLOYEES.filter(e => e.category === 'Legal').length },
-  { id: 'Operations', label: 'Operations & PM', count: AI_EMPLOYEES.filter(e => e.category === 'Operations').length },
-  { id: 'Marketing', label: 'Marketing & Growth', count: AI_EMPLOYEES.filter(e => e.category === 'Marketing').length },
-  { id: 'Design', label: 'Design & Creative', count: AI_EMPLOYEES.filter(e => e.category === 'Design' || e.category === 'Creative').length },
-  { id: 'Research', label: 'Research & Analysis', count: AI_EMPLOYEES.filter(e => e.category === 'Research').length },
-  { id: 'Support', label: 'Customer Success', count: AI_EMPLOYEES.filter(e => e.category === 'Support').length },
-  { id: 'Documentation', label: 'Documentation', count: AI_EMPLOYEES.filter(e => e.category === 'Documentation').length },
-  { id: 'Consulting', label: 'Consulting & Advisory', count: AI_EMPLOYEES.filter(e => e.category === 'Consulting').length },
-  { id: 'Education', label: 'Education & Training', count: AI_EMPLOYEES.filter(e => e.category === 'Education').length },
-  { id: 'Sustainability', label: 'Sustainability & ESG', count: AI_EMPLOYEES.filter(e => e.category === 'Sustainability').length },
-  { id: 'Automation', label: 'Automation & RPA', count: AI_EMPLOYEES.filter(e => e.category === 'Automation').length },
-  { id: 'Language', label: 'Language & Translation', count: AI_EMPLOYEES.filter(e => e.category === 'Language').length },
-  { id: 'Analytics', label: 'Analytics & Reporting', count: AI_EMPLOYEES.filter(e => e.category === 'Analytics').length },
-  { id: 'Sales', label: 'Sales & Lead Generation', count: AI_EMPLOYEES.filter(e => e.category === 'Sales').length },
+  {
+    id: 'Executive',
+    label: 'Executive Leadership',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Executive').length,
+  },
+  {
+    id: 'Engineering',
+    label: 'Engineering & Tech',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Engineering').length,
+  },
+  {
+    id: 'Product',
+    label: 'Product Management',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Product').length,
+  },
+  {
+    id: 'AI & Data',
+    label: 'AI & Data Science',
+    count: AI_EMPLOYEES.filter(e => e.category === 'AI & Data').length,
+  },
+  {
+    id: 'IT & Operations',
+    label: 'IT & Operations',
+    count: AI_EMPLOYEES.filter(e => e.category === 'IT & Operations').length,
+  },
+  {
+    id: 'Business',
+    label: 'Business & Sales',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Business').length,
+  },
+  {
+    id: 'Finance',
+    label: 'Finance & Accounting',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Finance').length,
+  },
+  {
+    id: 'Human Resources',
+    label: 'Human Resources',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Human Resources').length,
+  },
+  {
+    id: 'Legal',
+    label: 'Legal & Compliance',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Legal').length,
+  },
+  {
+    id: 'Operations',
+    label: 'Operations & PM',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Operations').length,
+  },
+  {
+    id: 'Marketing',
+    label: 'Marketing & Growth',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Marketing').length,
+  },
+  {
+    id: 'Design',
+    label: 'Design & Creative',
+    count: AI_EMPLOYEES.filter(
+      e => e.category === 'Design' || e.category === 'Creative'
+    ).length,
+  },
+  {
+    id: 'Research',
+    label: 'Research & Analysis',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Research').length,
+  },
+  {
+    id: 'Support',
+    label: 'Customer Success',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Support').length,
+  },
+  {
+    id: 'Documentation',
+    label: 'Documentation',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Documentation').length,
+  },
+  {
+    id: 'Consulting',
+    label: 'Consulting & Advisory',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Consulting').length,
+  },
+  {
+    id: 'Education',
+    label: 'Education & Training',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Education').length,
+  },
+  {
+    id: 'Sustainability',
+    label: 'Sustainability & ESG',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Sustainability').length,
+  },
+  {
+    id: 'Automation',
+    label: 'Automation & RPA',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Automation').length,
+  },
+  {
+    id: 'Language',
+    label: 'Language & Translation',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Language').length,
+  },
+  {
+    id: 'Analytics',
+    label: 'Analytics & Reporting',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Analytics').length,
+  },
+  {
+    id: 'Sales',
+    label: 'Sales & Lead Generation',
+    count: AI_EMPLOYEES.filter(e => e.category === 'Sales').length,
+  },
 ];
 
 export const providerInfo = {
   chatgpt: {
     name: 'ChatGPT',
-    description: 'Best for general assistance, content creation, and customer communication',
-    color: 'green'
+    description:
+      'Best for general assistance, content creation, and customer communication',
+    color: 'green',
   },
   claude: {
     name: 'Claude',
     description: 'Excellent for coding, complex analysis, and technical tasks',
-    color: 'purple'
+    color: 'purple',
   },
   gemini: {
     name: 'Gemini',
     description: 'Ideal for image generation, video content, and creative work',
-    color: 'blue'
+    color: 'blue',
   },
   perplexity: {
     name: 'Perplexity',
-    description: 'Perfect for research, fact-checking, and information gathering',
-    color: 'orange'
-  }
+    description:
+      'Perfect for research, fact-checking, and information gathering',
+    color: 'orange',
+  },
 };

@@ -4,7 +4,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase-client';
 
 // Environment variables
 const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || '';
@@ -12,12 +12,14 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Initialize clients
-const anthropic = ANTHROPIC_API_KEY ? new Anthropic({
-  apiKey: ANTHROPIC_API_KEY,
-  dangerouslyAllowBrowser: true, // Allow browser usage for client-side
-}) : null;
+const anthropic = ANTHROPIC_API_KEY
+  ? new Anthropic({
+      apiKey: ANTHROPIC_API_KEY,
+      dangerouslyAllowBrowser: true, // Allow browser usage for client-side
+    })
+  : null;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Using centralized Supabase client
 
 export interface AnthropicMessage {
   role: 'user' | 'assistant' | 'system';
@@ -45,7 +47,12 @@ export interface AnthropicResponse {
 }
 
 export interface AnthropicConfig {
-  model: 'claude-3-5-sonnet-20241022' | 'claude-3-5-haiku-20241022' | 'claude-3-opus-20240229' | 'claude-3-sonnet-20240229' | 'claude-3-haiku-20240307';
+  model:
+    | 'claude-3-5-sonnet-20241022'
+    | 'claude-3-5-haiku-20241022'
+    | 'claude-3-opus-20240229'
+    | 'claude-3-sonnet-20240229'
+    | 'claude-3-haiku-20240307';
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
@@ -73,7 +80,7 @@ export class AnthropicProvider {
       temperature: 0.7,
       systemPrompt: 'You are a helpful AI assistant.',
       tools: [],
-      ...config
+      ...config,
     };
   }
 
@@ -131,8 +138,8 @@ export class AnthropicProvider {
             model: this.config.model,
             usage,
             responseId: response.id,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
       }
 
@@ -145,13 +152,12 @@ export class AnthropicProvider {
         metadata: {
           responseId: response.id,
           stopReason: response.stop_reason,
-          usage: response.usage
-        }
+          usage: response.usage,
+        },
       };
-
     } catch (error) {
       console.error('[Anthropic Provider] Error:', error);
-      
+
       if (error instanceof Anthropic.APIError) {
         throw new AnthropicError(
           `Anthropic API error: ${error.message}`,
@@ -159,7 +165,7 @@ export class AnthropicProvider {
           error.status === 429 || error.status === 503
         );
       }
-      
+
       throw new AnthropicError(
         `Anthropic request failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'REQUEST_FAILED',
@@ -232,14 +238,13 @@ export class AnthropicProvider {
             provider: 'anthropic',
             model: this.config.model,
             usage,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
       }
-
     } catch (error) {
       console.error('[Anthropic Provider] Streaming error:', error);
-      
+
       if (error instanceof Anthropic.APIError) {
         throw new AnthropicError(
           `Anthropic API error: ${error.message}`,
@@ -247,7 +252,7 @@ export class AnthropicProvider {
           error.status === 429 || error.status === 503
         );
       }
-      
+
       throw new AnthropicError(
         `Anthropic streaming failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'STREAMING_FAILED',
@@ -259,19 +264,23 @@ export class AnthropicProvider {
   /**
    * Convert our message format to Anthropic format
    */
-  private convertMessagesToAnthropic(messages: AnthropicMessage[]): Anthropic.Messages.MessageParam[] {
+  private convertMessagesToAnthropic(
+    messages: AnthropicMessage[]
+  ): Anthropic.Messages.MessageParam[] {
     return messages
       .filter(msg => msg.role !== 'system') // System messages are handled separately
       .map(msg => ({
         role: msg.role as 'user' | 'assistant',
-        content: msg.content
+        content: msg.content,
       }));
   }
 
   /**
    * Extract content from Anthropic response
    */
-  private extractContentFromResponse(response: Anthropic.Messages.Message): string {
+  private extractContentFromResponse(
+    response: Anthropic.Messages.Message
+  ): string {
     if (response.content && response.content.length > 0) {
       return response.content
         .filter(block => block.type === 'text')
@@ -293,7 +302,7 @@ export class AnthropicProvider {
       return {
         inputTokens: response.usage.input_tokens,
         outputTokens: response.usage.output_tokens,
-        totalTokens: response.usage.input_tokens + response.usage.output_tokens
+        totalTokens: response.usage.input_tokens + response.usage.output_tokens,
       };
     }
     return { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
@@ -310,22 +319,23 @@ export class AnthropicProvider {
     metadata: Record<string, any>;
   }): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('agent_messages')
-        .insert({
-          session_id: message.sessionId,
-          user_id: message.userId,
-          role: message.role,
-          content: message.content,
-          metadata: message.metadata,
-          created_at: new Date().toISOString()
-        });
+      const { error } = await supabase.from('agent_messages').insert({
+        session_id: message.sessionId,
+        user_id: message.userId,
+        role: message.role,
+        content: message.content,
+        metadata: message.metadata,
+        created_at: new Date().toISOString(),
+      });
 
       if (error) {
         console.error('[Anthropic Provider] Error saving message:', error);
       }
     } catch (error) {
-      console.error('[Anthropic Provider] Unexpected error saving message:', error);
+      console.error(
+        '[Anthropic Provider] Unexpected error saving message:',
+        error
+      );
     }
   }
 
@@ -359,7 +369,7 @@ export class AnthropicProvider {
       'claude-3-5-haiku-20241022',
       'claude-3-opus-20240229',
       'claude-3-sonnet-20240229',
-      'claude-3-haiku-20240307'
+      'claude-3-haiku-20240307',
     ];
   }
 }

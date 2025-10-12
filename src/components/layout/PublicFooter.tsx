@@ -1,6 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Bot, Sparkles, Mail, MessageSquare, Github, Twitter, Linkedin } from 'lucide-react';
+import {
+  Bot,
+  Sparkles,
+  Mail,
+  MessageSquare,
+  Github,
+  Twitter,
+  Linkedin,
+} from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { motion } from 'framer-motion';
@@ -42,37 +50,39 @@ const PublicFooter: React.FC = () => {
   ];
 
   return (
-    <footer className="relative bg-card border-t border-border">
+    <footer className="relative border-t border-border bg-card">
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-primary/5 pointer-events-none"></div>
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-primary/5"></div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         {/* Top Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 mb-12">
+        <div className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-6">
           {/* Brand Column */}
           <div className="lg:col-span-2">
-            <Link to="/" className="flex items-center space-x-3 mb-6 group">
-              <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Link to="/" className="group mb-6 flex items-center space-x-3">
+              <div className="gradient-primary flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110">
                 <Sparkles className="h-6 w-6 text-white" />
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold">AI Workforce</span>
-                <span className="text-xs text-muted-foreground">Powered by AGI</span>
+                <span className="text-xs text-muted-foreground">
+                  Powered by AGI
+                </span>
               </div>
             </Link>
-            <p className="text-muted-foreground mb-6 leading-relaxed">
-              Build your billion-dollar company with AI that thinks, plans, and executes. 
-              From natural language to complete results.
+            <p className="mb-6 leading-relaxed text-muted-foreground">
+              Build your billion-dollar company with AI that thinks, plans, and
+              executes. From natural language to complete results.
             </p>
             <div className="flex items-center gap-3">
-              {socialLinks.map((social) => (
+              {socialLinks.map(social => (
                 <a
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="w-10 h-10 rounded-lg glass flex items-center justify-center hover:bg-primary/10 transition-colors group"
+                  className="glass group flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-primary/10"
                 >
-                  <span className="text-muted-foreground group-hover:text-primary transition-colors">
+                  <span className="text-muted-foreground transition-colors group-hover:text-primary">
                     {social.icon}
                   </span>
                 </a>
@@ -83,23 +93,23 @@ const PublicFooter: React.FC = () => {
           {/* Links Columns */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">
+              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">
                 {category}
               </h3>
               <ul className="space-y-3">
-                {links.map((link) => (
+                {links.map(link => (
                   <li key={link.label}>
                     {link.href.startsWith('#') ? (
                       <a
                         href={link.href}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                       >
                         {link.label}
                       </a>
                     ) : (
                       <Link
                         to={link.href}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                       >
                         {link.label}
                       </Link>
@@ -116,25 +126,26 @@ const PublicFooter: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass-strong rounded-2xl p-8 mb-12"
+          className="glass-strong mb-12 rounded-2xl p-8"
         >
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex-1">
-              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold">
                 <Mail className="h-5 w-5 text-primary" />
                 Stay Updated
               </h3>
               <p className="text-sm text-muted-foreground">
-                Get the latest updates on AI workforce automation and platform features.
+                Get the latest updates on AI workforce automation and platform
+                features.
               </p>
             </div>
-            <div className="flex gap-2 w-full md:w-auto">
+            <div className="flex w-full gap-2 md:w-auto">
               <Input
                 type="email"
                 placeholder="Enter your email"
                 className="glass md:w-64"
               />
-              <Button className="gradient-primary text-white whitespace-nowrap">
+              <Button className="gradient-primary whitespace-nowrap text-white">
                 Subscribe
               </Button>
             </div>
@@ -142,18 +153,28 @@ const PublicFooter: React.FC = () => {
         </motion.div>
 
         {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-border">
-          <p className="text-sm text-muted-foreground text-center md:text-left">
-            © {currentYear} AGI Workforce. All rights reserved. Built with AI for the AI age.
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
+          <p className="text-center text-sm text-muted-foreground md:text-left">
+            © {currentYear} AGI Workforce. All rights reserved. Built with AI
+            for the AI age.
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/privacy-policy" className="hover:text-foreground transition-colors">
+            <Link
+              to="/privacy-policy"
+              className="transition-colors hover:text-foreground"
+            >
               Privacy
             </Link>
-            <Link to="/terms-of-service" className="hover:text-foreground transition-colors">
+            <Link
+              to="/terms-of-service"
+              className="transition-colors hover:text-foreground"
+            >
               Terms
             </Link>
-            <Link to="/help" className="hover:text-foreground transition-colors">
+            <Link
+              to="/help"
+              className="transition-colors hover:text-foreground"
+            >
               Support
             </Link>
           </div>

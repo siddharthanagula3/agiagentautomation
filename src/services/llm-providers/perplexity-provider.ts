@@ -4,7 +4,7 @@
  */
 
 import { Perplexity } from '@perplexity-ai/perplexity_ai';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase-client';
 
 // Environment variables
 const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY || '';
@@ -12,12 +12,14 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Initialize clients
-const perplexity = PERPLEXITY_API_KEY ? new Perplexity({
-  apiKey: PERPLEXITY_API_KEY,
-  dangerouslyAllowBrowser: true, // Allow browser usage for client-side
-}) : null;
+const perplexity = PERPLEXITY_API_KEY
+  ? new Perplexity({
+      apiKey: PERPLEXITY_API_KEY,
+      dangerouslyAllowBrowser: true, // Allow browser usage for client-side
+    })
+  : null;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Using centralized Supabase client
 
 export interface PerplexityMessage {
   role: 'user' | 'assistant' | 'system';
@@ -45,7 +47,10 @@ export interface PerplexityResponse {
 }
 
 export interface PerplexityConfig {
-  model: 'llama-3.1-sonar-small-128k-online' | 'llama-3.1-sonar-large-128k-online' | 'llama-3.1-sonar-huge-128k-online';
+  model:
+    | 'llama-3.1-sonar-small-128k-online'
+    | 'llama-3.1-sonar-large-128k-online'
+    | 'llama-3.1-sonar-huge-128k-online';
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
@@ -72,10 +77,11 @@ export class PerplexityProvider {
       model: 'llama-3.1-sonar-small-128k-online',
       maxTokens: 4000,
       temperature: 0.7,
-      systemPrompt: 'You are a helpful AI assistant with access to real-time web search.',
+      systemPrompt:
+        'You are a helpful AI assistant with access to real-time web search.',
       searchDomain: undefined,
       searchRecencyFilter: undefined,
-      ...config
+      ...config,
     };
   }
 
@@ -104,12 +110,14 @@ export class PerplexityProvider {
         messages: [
           {
             role: 'system' as const,
-            content: this.config.systemPrompt || 'You are a helpful AI assistant with access to real-time web search.'
+            content:
+              this.config.systemPrompt ||
+              'You are a helpful AI assistant with access to real-time web search.',
           },
           {
             role: 'user' as const,
-            content: prompt
-          }
+            content: prompt,
+          },
         ],
         max_tokens: this.config.maxTokens,
         temperature: this.config.temperature,
@@ -143,8 +151,8 @@ export class PerplexityProvider {
             usage,
             searchDomain: this.config.searchDomain,
             searchRecencyFilter: this.config.searchRecencyFilter,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
       }
 
@@ -157,30 +165,35 @@ export class PerplexityProvider {
         metadata: {
           finishReason: response.choices[0]?.finish_reason,
           usage: response.usage,
-          citations: this.extractCitationsFromResponse(response)
-        }
+          citations: this.extractCitationsFromResponse(response),
+        },
       };
-
     } catch (error) {
       console.error('[Perplexity Provider] Error:', error);
-      
+
       if (error instanceof Error) {
         // Check for specific Perplexity API errors
-        if (error.message.includes('API_KEY_INVALID') || error.message.includes('401')) {
+        if (
+          error.message.includes('API_KEY_INVALID') ||
+          error.message.includes('401')
+        ) {
           throw new PerplexityError(
             'Invalid Perplexity API key. Please check your VITE_PERPLEXITY_API_KEY.',
             'INVALID_API_KEY'
           );
         }
-        
-        if (error.message.includes('QUOTA_EXCEEDED') || error.message.includes('429')) {
+
+        if (
+          error.message.includes('QUOTA_EXCEEDED') ||
+          error.message.includes('429')
+        ) {
           throw new PerplexityError(
             'Perplexity API quota exceeded. Please try again later.',
             'QUOTA_EXCEEDED',
             true
           );
         }
-        
+
         if (error.message.includes('RATE_LIMIT')) {
           throw new PerplexityError(
             'Rate limit exceeded. Please try again later.',
@@ -189,7 +202,7 @@ export class PerplexityProvider {
           );
         }
       }
-      
+
       throw new PerplexityError(
         `Perplexity request failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'REQUEST_FAILED',
@@ -223,12 +236,14 @@ export class PerplexityProvider {
         messages: [
           {
             role: 'system' as const,
-            content: this.config.systemPrompt || 'You are a helpful AI assistant with access to real-time web search.'
+            content:
+              this.config.systemPrompt ||
+              'You are a helpful AI assistant with access to real-time web search.',
           },
           {
             role: 'user' as const,
-            content: prompt
-          }
+            content: prompt,
+          },
         ],
         max_tokens: this.config.maxTokens,
         temperature: this.config.temperature,
@@ -255,7 +270,7 @@ export class PerplexityProvider {
           fullContent += content;
           yield { content, done: false };
         }
-        
+
         if (chunk.choices[0]?.finish_reason) {
           usage = chunk.usage;
           yield { content: '', done: true, usage };
@@ -275,23 +290,28 @@ export class PerplexityProvider {
             usage,
             searchDomain: this.config.searchDomain,
             searchRecencyFilter: this.config.searchRecencyFilter,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
       }
-
     } catch (error) {
       console.error('[Perplexity Provider] Streaming error:', error);
-      
+
       if (error instanceof Error) {
-        if (error.message.includes('API_KEY_INVALID') || error.message.includes('401')) {
+        if (
+          error.message.includes('API_KEY_INVALID') ||
+          error.message.includes('401')
+        ) {
           throw new PerplexityError(
             'Invalid Perplexity API key. Please check your VITE_PERPLEXITY_API_KEY.',
             'INVALID_API_KEY'
           );
         }
-        
-        if (error.message.includes('QUOTA_EXCEEDED') || error.message.includes('429')) {
+
+        if (
+          error.message.includes('QUOTA_EXCEEDED') ||
+          error.message.includes('429')
+        ) {
           throw new PerplexityError(
             'Perplexity API quota exceeded. Please try again later.',
             'QUOTA_EXCEEDED',
@@ -299,7 +319,7 @@ export class PerplexityProvider {
           );
         }
       }
-      
+
       throw new PerplexityError(
         `Perplexity streaming failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'STREAMING_FAILED',
@@ -314,14 +334,12 @@ export class PerplexityProvider {
   private convertMessagesToPerplexity(messages: PerplexityMessage[]): string {
     // For Perplexity, we typically send the last user message as the prompt
     // since it's designed for single-turn interactions with web search
-    const lastUserMessage = messages
-      .filter(msg => msg.role === 'user')
-      .pop();
-    
+    const lastUserMessage = messages.filter(msg => msg.role === 'user').pop();
+
     if (!lastUserMessage) {
       throw new PerplexityError('No user message found', 'NO_USER_MESSAGE');
     }
-    
+
     return lastUserMessage.content;
   }
 
@@ -344,7 +362,7 @@ export class PerplexityProvider {
       return {
         promptTokens: response.usage.prompt_tokens || 0,
         completionTokens: response.usage.completion_tokens || 0,
-        totalTokens: response.usage.total_tokens || 0
+        totalTokens: response.usage.total_tokens || 0,
       };
     }
     return { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
@@ -370,22 +388,23 @@ export class PerplexityProvider {
     metadata: Record<string, any>;
   }): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('agent_messages')
-        .insert({
-          session_id: message.sessionId,
-          user_id: message.userId,
-          role: message.role,
-          content: message.content,
-          metadata: message.metadata,
-          created_at: new Date().toISOString()
-        });
+      const { error } = await supabase.from('agent_messages').insert({
+        session_id: message.sessionId,
+        user_id: message.userId,
+        role: message.role,
+        content: message.content,
+        metadata: message.metadata,
+        created_at: new Date().toISOString(),
+      });
 
       if (error) {
         console.error('[Perplexity Provider] Error saving message:', error);
       }
     } catch (error) {
-      console.error('[Perplexity Provider] Unexpected error saving message:', error);
+      console.error(
+        '[Perplexity Provider] Unexpected error saving message:',
+        error
+      );
     }
   }
 
@@ -417,7 +436,7 @@ export class PerplexityProvider {
     return [
       'llama-3.1-sonar-small-128k-online',
       'llama-3.1-sonar-large-128k-online',
-      'llama-3.1-sonar-huge-128k-online'
+      'llama-3.1-sonar-huge-128k-online',
     ];
   }
 }

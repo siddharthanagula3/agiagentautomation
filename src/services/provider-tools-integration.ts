@@ -9,11 +9,14 @@ export interface ToolDefinition {
   description: string;
   parameters: {
     type: 'object';
-    properties: Record<string, {
-      type: string;
-      description: string;
-      enum?: string[];
-    }>;
+    properties: Record<
+      string,
+      {
+        type: string;
+        description: string;
+        enum?: string[];
+      }
+    >;
     required: string[];
   };
 }
@@ -34,25 +37,42 @@ export const OPENAI_TOOLS: ToolDefinition[] = [
         language: {
           type: 'string',
           description: 'Programming language to use',
-          enum: ['javascript', 'typescript', 'python', 'java', 'csharp', 'go', 'rust']
+          enum: [
+            'javascript',
+            'typescript',
+            'python',
+            'java',
+            'csharp',
+            'go',
+            'rust',
+          ],
         },
         requirements: {
           type: 'string',
-          description: 'Functional requirements and specifications'
+          description: 'Functional requirements and specifications',
         },
         framework: {
           type: 'string',
           description: 'Framework or library to use',
-          enum: ['react', 'vue', 'angular', 'express', 'django', 'flask', 'spring', 'none']
+          enum: [
+            'react',
+            'vue',
+            'angular',
+            'express',
+            'django',
+            'flask',
+            'spring',
+            'none',
+          ],
         },
         include_tests: {
           type: 'string',
           description: 'Whether to include unit tests',
-          enum: ['true', 'false']
-        }
+          enum: ['true', 'false'],
+        },
       },
-      required: ['language', 'requirements']
-    }
+      required: ['language', 'requirements'],
+    },
   },
   {
     name: 'analyze_code',
@@ -62,20 +82,26 @@ export const OPENAI_TOOLS: ToolDefinition[] = [
       properties: {
         code: {
           type: 'string',
-          description: 'Code to analyze'
+          description: 'Code to analyze',
         },
         focus: {
           type: 'string',
           description: 'Analysis focus area',
-          enum: ['security', 'performance', 'maintainability', 'best_practices', 'all']
+          enum: [
+            'security',
+            'performance',
+            'maintainability',
+            'best_practices',
+            'all',
+          ],
         },
         language: {
           type: 'string',
-          description: 'Programming language of the code'
-        }
+          description: 'Programming language of the code',
+        },
       },
-      required: ['code', 'focus']
-    }
+      required: ['code', 'focus'],
+    },
   },
   {
     name: 'create_api',
@@ -85,25 +111,25 @@ export const OPENAI_TOOLS: ToolDefinition[] = [
       properties: {
         endpoint: {
           type: 'string',
-          description: 'API endpoint path'
+          description: 'API endpoint path',
         },
         method: {
           type: 'string',
           description: 'HTTP method',
-          enum: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+          enum: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
         },
         functionality: {
           type: 'string',
-          description: 'What the API should do'
+          description: 'What the API should do',
         },
         authentication: {
           type: 'string',
           description: 'Authentication method',
-          enum: ['none', 'jwt', 'oauth', 'api_key', 'session']
-        }
+          enum: ['none', 'jwt', 'oauth', 'api_key', 'session'],
+        },
       },
-      required: ['endpoint', 'method', 'functionality']
-    }
+      required: ['endpoint', 'method', 'functionality'],
+    },
   },
   {
     name: 'web_search',
@@ -113,22 +139,22 @@ export const OPENAI_TOOLS: ToolDefinition[] = [
       properties: {
         query: {
           type: 'string',
-          description: 'Search query'
+          description: 'Search query',
         },
         focus: {
           type: 'string',
           description: 'Search focus area',
-          enum: ['technical', 'business', 'academic', 'news', 'general']
+          enum: ['technical', 'business', 'academic', 'news', 'general'],
         },
         max_results: {
           type: 'string',
           description: 'Maximum number of results',
-          enum: ['5', '10', '15', '20']
-        }
+          enum: ['5', '10', '15', '20'],
+        },
       },
-      required: ['query']
-    }
-  }
+      required: ['query'],
+    },
+  },
 ];
 
 // Anthropic Tool Use Format
@@ -141,23 +167,23 @@ export const ANTHROPIC_TOOLS: ToolDefinition[] = [
       properties: {
         language: {
           type: 'string',
-          description: 'Programming language to use'
+          description: 'Programming language to use',
         },
         requirements: {
           type: 'string',
-          description: 'Functional requirements and specifications'
+          description: 'Functional requirements and specifications',
         },
         framework: {
           type: 'string',
-          description: 'Framework or library to use'
+          description: 'Framework or library to use',
         },
         include_tests: {
           type: 'string',
-          description: 'Whether to include unit tests'
-        }
+          description: 'Whether to include unit tests',
+        },
       },
-      required: ['language', 'requirements']
-    }
+      required: ['language', 'requirements'],
+    },
   },
   {
     name: 'analyze_code',
@@ -167,19 +193,19 @@ export const ANTHROPIC_TOOLS: ToolDefinition[] = [
       properties: {
         code: {
           type: 'string',
-          description: 'Code to analyze'
+          description: 'Code to analyze',
         },
         focus: {
           type: 'string',
-          description: 'Analysis focus area'
+          description: 'Analysis focus area',
         },
         language: {
           type: 'string',
-          description: 'Programming language of the code'
-        }
+          description: 'Programming language of the code',
+        },
       },
-      required: ['code', 'focus']
-    }
+      required: ['code', 'focus'],
+    },
   },
   {
     name: 'web_search',
@@ -189,16 +215,16 @@ export const ANTHROPIC_TOOLS: ToolDefinition[] = [
       properties: {
         query: {
           type: 'string',
-          description: 'Search query'
+          description: 'Search query',
         },
         focus: {
           type: 'string',
-          description: 'Search focus area'
-        }
+          description: 'Search focus area',
+        },
       },
-      required: ['query']
-    }
-  }
+      required: ['query'],
+    },
+  },
 ];
 
 // Google Gemini Tools (using function calling)
@@ -211,23 +237,23 @@ export const GOOGLE_TOOLS: ToolDefinition[] = [
       properties: {
         language: {
           type: 'string',
-          description: 'Programming language to use'
+          description: 'Programming language to use',
         },
         requirements: {
           type: 'string',
-          description: 'Functional requirements and specifications'
+          description: 'Functional requirements and specifications',
         },
         framework: {
           type: 'string',
-          description: 'Framework or library to use'
+          description: 'Framework or library to use',
         },
         include_tests: {
           type: 'string',
-          description: 'Whether to include unit tests'
-        }
+          description: 'Whether to include unit tests',
+        },
       },
-      required: ['language', 'requirements']
-    }
+      required: ['language', 'requirements'],
+    },
   },
   {
     name: 'analyze_code',
@@ -237,19 +263,19 @@ export const GOOGLE_TOOLS: ToolDefinition[] = [
       properties: {
         code: {
           type: 'string',
-          description: 'Code to analyze'
+          description: 'Code to analyze',
         },
         focus: {
           type: 'string',
-          description: 'Analysis focus area'
+          description: 'Analysis focus area',
         },
         language: {
           type: 'string',
-          description: 'Programming language of the code'
-        }
+          description: 'Programming language of the code',
+        },
       },
-      required: ['code', 'focus']
-    }
+      required: ['code', 'focus'],
+    },
   },
   {
     name: 'analyze_image',
@@ -259,16 +285,22 @@ export const GOOGLE_TOOLS: ToolDefinition[] = [
       properties: {
         image_data: {
           type: 'string',
-          description: 'Base64 encoded image data'
+          description: 'Base64 encoded image data',
         },
         analysis_type: {
           type: 'string',
           description: 'Type of analysis to perform',
-          enum: ['code_screenshot', 'architecture_diagram', 'ui_mockup', 'data_visualization', 'general']
-        }
+          enum: [
+            'code_screenshot',
+            'architecture_diagram',
+            'ui_mockup',
+            'data_visualization',
+            'general',
+          ],
+        },
       },
-      required: ['image_data', 'analysis_type']
-    }
+      required: ['image_data', 'analysis_type'],
+    },
   },
   {
     name: 'web_search',
@@ -278,16 +310,16 @@ export const GOOGLE_TOOLS: ToolDefinition[] = [
       properties: {
         query: {
           type: 'string',
-          description: 'Search query'
+          description: 'Search query',
         },
         focus: {
           type: 'string',
-          description: 'Search focus area'
-        }
+          description: 'Search focus area',
+        },
       },
-      required: ['query']
-    }
-  }
+      required: ['query'],
+    },
+  },
 ];
 
 // Perplexity Tools (web search focused)
@@ -300,26 +332,26 @@ export const PERPLEXITY_TOOLS: ToolDefinition[] = [
       properties: {
         query: {
           type: 'string',
-          description: 'Search query'
+          description: 'Search query',
         },
         focus: {
           type: 'string',
           description: 'Search focus area',
-          enum: ['technical', 'business', 'academic', 'news', 'general']
+          enum: ['technical', 'business', 'academic', 'news', 'general'],
         },
         include_citations: {
           type: 'string',
           description: 'Whether to include source citations',
-          enum: ['true', 'false']
+          enum: ['true', 'false'],
         },
         max_results: {
           type: 'string',
           description: 'Maximum number of results',
-          enum: ['5', '10', '15', '20']
-        }
+          enum: ['5', '10', '15', '20'],
+        },
       },
-      required: ['query']
-    }
+      required: ['query'],
+    },
   },
   {
     name: 'research_topic',
@@ -329,21 +361,21 @@ export const PERPLEXITY_TOOLS: ToolDefinition[] = [
       properties: {
         topic: {
           type: 'string',
-          description: 'Topic to research'
+          description: 'Topic to research',
         },
         depth: {
           type: 'string',
           description: 'Research depth',
-          enum: ['overview', 'detailed', 'comprehensive']
+          enum: ['overview', 'detailed', 'comprehensive'],
         },
         include_trends: {
           type: 'string',
           description: 'Include current trends and updates',
-          enum: ['true', 'false']
-        }
+          enum: ['true', 'false'],
+        },
       },
-      required: ['topic']
-    }
+      required: ['topic'],
+    },
   },
   {
     name: 'competitive_analysis',
@@ -353,27 +385,33 @@ export const PERPLEXITY_TOOLS: ToolDefinition[] = [
       properties: {
         company: {
           type: 'string',
-          description: 'Company or product to analyze'
+          description: 'Company or product to analyze',
         },
         market: {
           type: 'string',
-          description: 'Market or industry focus'
+          description: 'Market or industry focus',
         },
         analysis_type: {
           type: 'string',
           description: 'Type of analysis',
-          enum: ['competitors', 'market_share', 'trends', 'pricing', 'features']
-        }
+          enum: [
+            'competitors',
+            'market_share',
+            'trends',
+            'pricing',
+            'features',
+          ],
+        },
       },
-      required: ['company', 'market']
-    }
-  }
+      required: ['company', 'market'],
+    },
+  },
 ];
 
 // Tool execution functions
 export class ToolExecutor {
   private static instance: ToolExecutor;
-  
+
   static getInstance(): ToolExecutor {
     if (!ToolExecutor.instance) {
       ToolExecutor.instance = new ToolExecutor();
@@ -383,7 +421,7 @@ export class ToolExecutor {
 
   async executeTool(toolCall: ToolCall): Promise<any> {
     const { tool, parameters } = toolCall;
-    
+
     switch (tool) {
       case 'generate_code':
         return this.generateCode(parameters);
@@ -406,7 +444,7 @@ export class ToolExecutor {
 
   private async generateCode(parameters: any): Promise<any> {
     const { language, requirements, framework, include_tests } = parameters;
-    
+
     // Simulate code generation
     const code = `// Generated ${language} code
 // Requirements: ${requirements}
@@ -420,32 +458,32 @@ ${include_tests === 'true' ? this.getTestTemplate(language) : ''}`;
       language,
       framework,
       includes_tests: include_tests === 'true',
-      explanation: `Generated ${language} code based on your requirements. The code follows best practices and includes proper error handling.`
+      explanation: `Generated ${language} code based on your requirements. The code follows best practices and includes proper error handling.`,
     };
   }
 
   private async analyzeCode(parameters: any): Promise<any> {
     const { code, focus, language } = parameters;
-    
+
     // Simulate code analysis
     const analysis = {
       focus,
       language,
       issues: this.identifyIssues(code, focus),
       recommendations: this.getRecommendations(focus),
-      score: this.calculateScore(code, focus)
+      score: this.calculateScore(code, focus),
     };
 
     return {
       analysis,
       summary: `Code analysis complete. Found ${analysis.issues.length} issues in the ${focus} category.`,
-      recommendations: analysis.recommendations
+      recommendations: analysis.recommendations,
     };
   }
 
   private async createApi(parameters: any): Promise<any> {
     const { endpoint, method, functionality, authentication } = parameters;
-    
+
     const apiCode = `// ${method} ${endpoint}
 // Functionality: ${functionality}
 // Authentication: ${authentication}
@@ -463,76 +501,80 @@ app.${method.toLowerCase()}('${endpoint}', ${authentication !== 'none' ? 'authen
       endpoint,
       method,
       code: apiCode,
-      documentation: this.generateApiDocs(endpoint, method, functionality)
+      documentation: this.generateApiDocs(endpoint, method, functionality),
     };
   }
 
   private async webSearch(parameters: any): Promise<any> {
     const { query, focus, max_results } = parameters;
-    
+
     // Simulate web search
     const results = [
       {
         title: `Search Result 1 for: ${query}`,
         url: 'https://example.com/result1',
         snippet: `This is a relevant result about ${query} in the ${focus} category.`,
-        relevance: 0.95
+        relevance: 0.95,
       },
       {
         title: `Search Result 2 for: ${query}`,
         url: 'https://example.com/result2',
         snippet: `Another relevant result about ${query} with current information.`,
-        relevance: 0.87
-      }
+        relevance: 0.87,
+      },
     ];
 
     return {
       query,
       results: results.slice(0, parseInt(max_results || '5')),
       total_results: results.length,
-      search_time: '0.45s'
+      search_time: '0.45s',
     };
   }
 
   private async analyzeImage(parameters: any): Promise<any> {
     const { image_data, analysis_type } = parameters;
-    
+
     // Simulate image analysis
     return {
       analysis_type,
       description: `Analyzed image for ${analysis_type}. Found technical content and provided detailed analysis.`,
       confidence: 0.92,
-      details: this.getImageAnalysisDetails(analysis_type)
+      details: this.getImageAnalysisDetails(analysis_type),
     };
   }
 
   private async researchTopic(parameters: any): Promise<any> {
     const { topic, depth, include_trends } = parameters;
-    
+
     return {
       topic,
       depth,
       summary: `Comprehensive research on ${topic} with ${depth} analysis.`,
       key_points: this.getResearchPoints(topic),
       trends: include_trends === 'true' ? this.getTrends(topic) : null,
-      sources: this.getSources(topic)
+      sources: this.getSources(topic),
     };
   }
 
   private async competitiveAnalysis(parameters: any): Promise<any> {
     const { company, market, analysis_type } = parameters;
-    
+
     return {
       company,
       market,
       analysis_type,
       findings: this.getCompetitiveFindings(company, market, analysis_type),
-      recommendations: this.getCompetitiveRecommendations(company, market)
+      recommendations: this.getCompetitiveRecommendations(company, market),
     };
   }
 
   // Helper methods
-  private getCodeTemplate(language: string, framework: string, requirements: string): string {
+  private getCodeTemplate(
+    language: string,
+    framework: string,
+    requirements: string
+  ): string {
     const templates = {
       javascript: `function ${this.getFunctionName(requirements)}() {
   // Implementation based on: ${requirements}
@@ -544,10 +586,12 @@ app.${method.toLowerCase()}('${endpoint}', ${authentication !== 'none' ? 'authen
       typescript: `function ${this.getFunctionName(requirements)}(): string {
   // Implementation based on: ${requirements}
   return result;
-}`
+}`,
     };
-    
-    return templates[language as keyof typeof templates] || templates.javascript;
+
+    return (
+      templates[language as keyof typeof templates] || templates.javascript
+    );
   }
 
   private getTestTemplate(language: string): string {
@@ -563,32 +607,66 @@ app.${method.toLowerCase()}('${endpoint}', ${authentication !== 'none' ? 'authen
   test('should work correctly', () => {
     expect(result).toBeDefined();
   });
-});`
+});`,
     };
-    
-    return testTemplates[language as keyof typeof testTemplates] || testTemplates.javascript;
+
+    return (
+      testTemplates[language as keyof typeof testTemplates] ||
+      testTemplates.javascript
+    );
   }
 
   private identifyIssues(code: string, focus: string): string[] {
     const issues = {
-      security: ['Potential SQL injection', 'Missing input validation', 'Insecure authentication'],
+      security: [
+        'Potential SQL injection',
+        'Missing input validation',
+        'Insecure authentication',
+      ],
       performance: ['Inefficient loops', 'Missing caching', 'Memory leaks'],
-      maintainability: ['Complex functions', 'Missing documentation', 'Code duplication'],
-      best_practices: ['Inconsistent naming', 'Missing error handling', 'Poor structure']
+      maintainability: [
+        'Complex functions',
+        'Missing documentation',
+        'Code duplication',
+      ],
+      best_practices: [
+        'Inconsistent naming',
+        'Missing error handling',
+        'Poor structure',
+      ],
     };
-    
+
     return issues[focus as keyof typeof issues] || issues.best_practices;
   }
 
   private getRecommendations(focus: string): string[] {
     const recommendations = {
-      security: ['Implement input validation', 'Use parameterized queries', 'Add authentication checks'],
-      performance: ['Optimize database queries', 'Implement caching', 'Use async operations'],
-      maintainability: ['Break down complex functions', 'Add comprehensive documentation', 'Remove code duplication'],
-      best_practices: ['Follow naming conventions', 'Add error handling', 'Improve code structure']
+      security: [
+        'Implement input validation',
+        'Use parameterized queries',
+        'Add authentication checks',
+      ],
+      performance: [
+        'Optimize database queries',
+        'Implement caching',
+        'Use async operations',
+      ],
+      maintainability: [
+        'Break down complex functions',
+        'Add comprehensive documentation',
+        'Remove code duplication',
+      ],
+      best_practices: [
+        'Follow naming conventions',
+        'Add error handling',
+        'Improve code structure',
+      ],
     };
-    
-    return recommendations[focus as keyof typeof recommendations] || recommendations.best_practices;
+
+    return (
+      recommendations[focus as keyof typeof recommendations] ||
+      recommendations.best_practices
+    );
   }
 
   private calculateScore(code: string, focus: string): number {
@@ -597,10 +675,17 @@ app.${method.toLowerCase()}('${endpoint}', ${authentication !== 'none' ? 'authen
   }
 
   private getFunctionName(requirements: string): string {
-    return requirements.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 20);
+    return requirements
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '_')
+      .substring(0, 20);
   }
 
-  private generateApiDocs(endpoint: string, method: string, functionality: string): string {
+  private generateApiDocs(
+    endpoint: string,
+    method: string,
+    functionality: string
+  ): string {
     return `## ${method} ${endpoint}
 
 **Description:** ${functionality}
@@ -619,13 +704,17 @@ app.${method.toLowerCase()}('${endpoint}', ${authentication !== 'none' ? 'authen
 
   private getImageAnalysisDetails(analysisType: string): string {
     const details = {
-      code_screenshot: 'Detected code structure, syntax highlighting, and programming patterns',
-      architecture_diagram: 'Identified system components, data flow, and relationships',
-      ui_mockup: 'Analyzed user interface elements, layout, and design patterns',
-      data_visualization: 'Interpreted charts, graphs, and data representations',
-      general: 'Provided general image analysis and description'
+      code_screenshot:
+        'Detected code structure, syntax highlighting, and programming patterns',
+      architecture_diagram:
+        'Identified system components, data flow, and relationships',
+      ui_mockup:
+        'Analyzed user interface elements, layout, and design patterns',
+      data_visualization:
+        'Interpreted charts, graphs, and data representations',
+      general: 'Provided general image analysis and description',
     };
-    
+
     return details[analysisType as keyof typeof details] || details.general;
   }
 
@@ -633,7 +722,7 @@ app.${method.toLowerCase()}('${endpoint}', ${authentication !== 'none' ? 'authen
     return [
       `Key insight 1 about ${topic}`,
       `Important finding 2 regarding ${topic}`,
-      `Critical point 3 for ${topic}`
+      `Critical point 3 for ${topic}`,
     ];
   }
 
@@ -641,7 +730,7 @@ app.${method.toLowerCase()}('${endpoint}', ${authentication !== 'none' ? 'authen
     return [
       `Current trend 1 in ${topic}`,
       `Emerging trend 2 for ${topic}`,
-      `Future trend 3 in ${topic}`
+      `Future trend 3 in ${topic}`,
     ];
   }
 
@@ -649,36 +738,45 @@ app.${method.toLowerCase()}('${endpoint}', ${authentication !== 'none' ? 'authen
     return [
       `https://source1.com/${topic}`,
       `https://source2.com/${topic}`,
-      `https://source3.com/${topic}`
+      `https://source3.com/${topic}`,
     ];
   }
 
-  private getCompetitiveFindings(company: string, market: string, analysisType: string): string[] {
+  private getCompetitiveFindings(
+    company: string,
+    market: string,
+    analysisType: string
+  ): string[] {
     return [
       `${company} has strong presence in ${market}`,
       `Key differentiators in ${analysisType}`,
-      `Market positioning and strategy`
+      `Market positioning and strategy`,
     ];
   }
 
-  private getCompetitiveRecommendations(company: string, market: string): string[] {
+  private getCompetitiveRecommendations(
+    company: string,
+    market: string
+  ): string[] {
     return [
       `Improve ${company}'s position in ${market}`,
       `Focus on key differentiators`,
-      `Develop competitive advantages`
+      `Develop competitive advantages`,
     ];
   }
 }
 
 // Function to get tools for a specific provider
-export function getToolsForProvider(provider: 'openai' | 'anthropic' | 'google' | 'perplexity'): ToolDefinition[] {
+export function getToolsForProvider(
+  provider: 'openai' | 'anthropic' | 'google' | 'perplexity'
+): ToolDefinition[] {
   const toolMap = {
     openai: OPENAI_TOOLS,
     anthropic: ANTHROPIC_TOOLS,
     google: GOOGLE_TOOLS,
-    perplexity: PERPLEXITY_TOOLS
+    perplexity: PERPLEXITY_TOOLS,
   };
-  
+
   return toolMap[provider];
 }
 
@@ -689,8 +787,8 @@ export function formatToolsForOpenAI(tools: ToolDefinition[]): any[] {
     function: {
       name: tool.name,
       description: tool.description,
-      parameters: tool.parameters
-    }
+      parameters: tool.parameters,
+    },
   }));
 }
 
@@ -699,18 +797,20 @@ export function formatToolsForAnthropic(tools: ToolDefinition[]): any[] {
   return tools.map(tool => ({
     name: tool.name,
     description: tool.description,
-    input_schema: tool.parameters
+    input_schema: tool.parameters,
   }));
 }
 
 // Function to format tools for Google API
 export function formatToolsForGoogle(tools: ToolDefinition[]): any[] {
   return tools.map(tool => ({
-    function_declarations: [{
-      name: tool.name,
-      description: tool.description,
-      parameters: tool.parameters
-    }]
+    function_declarations: [
+      {
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.parameters,
+      },
+    ],
   }));
 }
 
@@ -721,7 +821,7 @@ export function formatToolsForPerplexity(tools: ToolDefinition[]): any[] {
     function: {
       name: tool.name,
       description: tool.description,
-      parameters: tool.parameters
-    }
+      parameters: tool.parameters,
+    },
   }));
 }

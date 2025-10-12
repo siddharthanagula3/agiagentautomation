@@ -1,5 +1,10 @@
 import { create } from 'zustand';
-import { authService, AuthUser, LoginData, RegisterData } from '@/services/auth-service';
+import {
+  authService,
+  AuthUser,
+  LoginData,
+  RegisterData,
+} from '@/services/auth-service';
 import { logger } from '@/lib/logger';
 
 interface AuthState {
@@ -8,11 +13,31 @@ interface AuthState {
   error: string | null;
   isAuthenticated: boolean;
   initialized: boolean;
-  login: (loginData: LoginData) => Promise<{ success: boolean; error: string | null }>;
-  register: (registerData: RegisterData) => Promise<{ success: boolean; error: string | null }>;
+  login: (
+    loginData: LoginData
+  ) => Promise<{ success: boolean; error: string | null }>;
+  register: (
+    registerData: RegisterData
+  ) => Promise<{ success: boolean; error: string | null }>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
   initialize: () => Promise<void>;
+  updateUser: (user: AuthUser) => void;
+  setError: (error: string | null) => void;
+  reset: () => void;
+  resetPassword: (
+    email: string
+  ) => Promise<{ success: boolean; error: string | null }>;
+  updatePassword: (
+    newPassword: string
+  ) => Promise<{ success: boolean; error: string | null }>;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<{ success: boolean; error: string | null }>;
+  updateProfile: (
+    updates: Partial<AuthUser>
+  ) => Promise<{ success: boolean; error: string | null }>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -30,8 +55,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       // Add timeout to prevent hanging on invalid tokens
-      const timeoutPromise = new Promise<{ user: null; error: string }>((_, reject) =>
-        setTimeout(() => reject(new Error('Auth initialization timeout')), 5000)
+      const timeoutPromise = new Promise<{ user: null; error: string }>(
+        (_, reject) =>
+          setTimeout(
+            () => reject(new Error('Auth initialization timeout')),
+            5000
+          )
       );
 
       const authPromise = authService.getCurrentUser();
@@ -64,7 +93,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  login: async (loginData) => {
+  login: async loginData => {
     set({ isLoading: true, error: null });
     try {
       const { user, error } = await authService.login(loginData);
@@ -81,7 +110,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  register: async (registerData) => {
+  register: async registerData => {
     set({ isLoading: true, error: null });
     try {
       const { user, error } = await authService.register(registerData);
@@ -107,14 +136,97 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   fetchUser: async () => {
     set({ isLoading: true });
     try {
-        const { user, error } = await authService.getCurrentUser();
-        if (error) {
-            set({ user: null, isAuthenticated: false, isLoading: false });
-        } else {
-            set({ user, isAuthenticated: !!user, isLoading: false });
-        }
-    } catch (error) {
+      const { user, error } = await authService.getCurrentUser();
+      if (error) {
         set({ user: null, isAuthenticated: false, isLoading: false });
+      } else {
+        set({ user, isAuthenticated: !!user, isLoading: false });
+      }
+    } catch (error) {
+      set({ user: null, isAuthenticated: false, isLoading: false });
+    }
+  },
+
+  updateUser: (user: AuthUser) => {
+    set({ user, isAuthenticated: !!user });
+  },
+
+  setError: (error: string | null) => {
+    set({ error });
+  },
+
+  reset: () => {
+    set({ user: null, isAuthenticated: false, error: null, isLoading: false, initialized: false });
+  },
+
+  resetPassword: async (email: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { error } = await authService.resetPassword(email);
+      if (error) {
+        set({ error, isLoading: false });
+        return { success: false, error };
+      }
+      set({ isLoading: false });
+      return { success: true, error: null };
+    } catch (err) {
+      const error = (err as Error).message;
+      set({ error, isLoading: false });
+      return { success: false, error };
+    }
+  },
+
+  updatePassword: async (newPassword: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { error } = await authService.updatePassword(newPassword);
+      if (error) {
+        set({ error, isLoading: false });
+        return { success: false, error };
+      }
+      set({ isLoading: false });
+      return { success: true, error: null };
+    } catch (err) {
+      const error = (err as Error).message;
+      set({ error, isLoading: false });
+      return { success: false, error };
+    }
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { error } = await authService.changePassword(
+        currentPassword,
+        newPassword
+      );
+      if (error) {
+        set({ error, isLoading: false });
+        return { success: false, error };
+      }
+      set({ isLoading: false });
+      return { success: true, error: null };
+    } catch (err) {
+      const error = (err as Error).message;
+      set({ error, isLoading: false });
+      return { success: false, error };
+    }
+  },
+
+  updateProfile: async (updates: Partial<AuthUser>) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { user, error } = await authService.updateProfile(updates);
+      if (error) {
+        set({ error, isLoading: false });
+        return { success: false, error };
+      }
+      set({ user, isAuthenticated: !!user, isLoading: false });
+      return { success: true, error: null };
+    } catch (err) {
+      const error = (err as Error).message;
+      set({ error, isLoading: false });
+      return { success: false, error };
     }
   },
 }));

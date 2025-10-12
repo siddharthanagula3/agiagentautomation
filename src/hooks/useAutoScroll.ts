@@ -5,7 +5,10 @@ interface UseAutoScrollOptions {
   content?: React.ReactNode;
 }
 
-export function useAutoScroll({ smooth = false, content }: UseAutoScrollOptions = {}) {
+export function useAutoScroll({
+  smooth = false,
+  content,
+}: UseAutoScrollOptions = {}) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);

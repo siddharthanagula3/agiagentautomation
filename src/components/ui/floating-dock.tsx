@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from './tooltip';
 
 interface FloatingDockProps {
   items: {
@@ -13,14 +18,17 @@ interface FloatingDockProps {
   className?: string;
 }
 
-export const FloatingDock: React.FC<FloatingDockProps> = ({ items, className }) => {
+export const FloatingDock: React.FC<FloatingDockProps> = ({
+  items,
+  className,
+}) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
     <TooltipProvider>
       <motion.div
         className={cn(
-          "flex items-end gap-4 px-6 py-4 rounded-2xl bg-background/80 backdrop-blur-xl border border-border/50 shadow-2xl",
+          'flex items-end gap-4 rounded-2xl border border-border/50 bg-background/80 px-6 py-4 shadow-2xl backdrop-blur-xl',
           className
         )}
         initial={{ y: 100, opacity: 0 }}
@@ -48,10 +56,23 @@ interface DockItemProps {
   setHoveredIndex: (index: number | null) => void;
 }
 
-const DockItem: React.FC<DockItemProps> = ({ item, index, hoveredIndex, setHoveredIndex }) => {
+const DockItem: React.FC<DockItemProps> = ({
+  item,
+  index,
+  hoveredIndex,
+  setHoveredIndex,
+}) => {
   const distance = hoveredIndex !== null ? Math.abs(hoveredIndex - index) : 3;
-  const scale = useTransform(useMotionValue(distance), [0, 1, 2, 3], [1.4, 1.2, 1.1, 1]);
-  const y = useTransform(useMotionValue(distance), [0, 1, 2, 3], [-20, -10, -5, 0]);
+  const scale = useTransform(
+    useMotionValue(distance),
+    [0, 1, 2, 3],
+    [1.4, 1.2, 1.1, 1]
+  );
+  const y = useTransform(
+    useMotionValue(distance),
+    [0, 1, 2, 3],
+    [-20, -10, -5, 0]
+  );
 
   const scaleSpring = useSpring(scale, { stiffness: 300, damping: 20 });
   const ySpring = useSpring(y, { stiffness: 300, damping: 20 });
@@ -60,7 +81,7 @@ const DockItem: React.FC<DockItemProps> = ({ item, index, hoveredIndex, setHover
     <Tooltip>
       <TooltipTrigger asChild>
         <motion.button
-          className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
+          className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors hover:bg-primary/20"
           style={{ scale: scaleSpring, y: ySpring }}
           onMouseEnter={() => setHoveredIndex(index)}
           onMouseLeave={() => setHoveredIndex(null)}

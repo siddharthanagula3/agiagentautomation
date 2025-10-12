@@ -31,9 +31,7 @@ export class CursorAgent {
   private onProgress?: (update: ProgressUpdate) => void;
 
   constructor() {
-    this.genAI = new GoogleGenerativeAI(
-      import.meta.env.VITE_GOOGLE_AI_API_KEY
-    );
+    this.genAI = new GoogleGenerativeAI(import.meta.env.VITE_GOOGLE_AI_API_KEY);
   }
 
   setProgressCallback(callback: (update: ProgressUpdate) => void) {
@@ -45,11 +43,11 @@ export class CursorAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 10,
-        message: 'Initializing Cursor AI...'
+        message: 'Initializing Cursor AI...',
       });
 
-      const model = this.genAI.getGenerativeModel({ 
-        model: 'gemini-2.0-flash-exp'
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-2.0-flash-exp',
       });
 
       const prompt = this.buildPrompt(task);
@@ -57,11 +55,11 @@ export class CursorAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 30,
-        message: 'Analyzing code context...'
+        message: 'Analyzing code context...',
       });
 
       const result = await model.generateContentStream(prompt);
-      
+
       let fullResponse = '';
       let inputTokens = 0;
       let outputTokens = 0;
@@ -69,17 +67,17 @@ export class CursorAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 50,
-        message: 'Generating code suggestions...'
+        message: 'Generating code suggestions...',
       });
 
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();
         fullResponse += chunkText;
-        
+
         this.emitProgress({
           taskId: task.id,
           progress: 50 + (fullResponse.length / 1000) * 30,
-          message: 'Processing suggestions...'
+          message: 'Processing suggestions...',
         });
       }
 
@@ -92,7 +90,7 @@ export class CursorAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 90,
-        message: 'Finalizing code...'
+        message: 'Finalizing code...',
       });
 
       const cost = this.calculateCost(inputTokens, outputTokens);
@@ -100,7 +98,7 @@ export class CursorAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 100,
-        message: 'Code generation completed'
+        message: 'Code generation completed',
       });
 
       return {
@@ -109,19 +107,19 @@ export class CursorAgent {
         cost,
         tokensUsed: {
           input: inputTokens,
-          output: outputTokens
-        }
+          output: outputTokens,
+        },
       };
     } catch (error) {
       this.emitProgress({
         taskId: task.id,
         progress: 0,
-        message: `Error: ${error.message}`
+        message: `Error: ${error.message}`,
       });
 
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -167,7 +165,7 @@ Task: ${task.description}`;
   private calculateCost(inputTokens: number, outputTokens: number): number {
     // Gemini 2.0 Flash pricing: $0.075/M input, $0.30/M output tokens
     const inputCost = (inputTokens / 1000000) * 0.075;
-    const outputCost = (outputTokens / 1000000) * 0.30;
+    const outputCost = (outputTokens / 1000000) * 0.3;
     return inputCost + outputCost;
   }
 
@@ -178,19 +176,15 @@ Task: ${task.description}`;
   }
 
   async getAvailableModels(): Promise<string[]> {
-    return [
-      'gemini-2.0-flash-exp',
-      'gemini-1.5-pro',
-      'gemini-1.5-flash'
-    ];
+    return ['gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash'];
   }
 
   async validateApiKey(): Promise<boolean> {
     try {
-      const model = this.genAI.getGenerativeModel({ 
-        model: 'gemini-1.5-flash'
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
       });
-      
+
       await model.generateContent('test');
       return true;
     } catch (error) {

@@ -4,10 +4,30 @@
  * Provides a consistent interface for all AI models
  */
 
-import { anthropicProvider, AnthropicProvider, AnthropicMessage, AnthropicResponse } from './anthropic-provider';
-import { openaiProvider, OpenAIProvider, OpenAIMessage, OpenAIResponse } from './openai-provider';
-import { googleProvider, GoogleProvider, GoogleMessage, GoogleResponse } from './google-provider';
-import { perplexityProvider, PerplexityProvider, PerplexityMessage, PerplexityResponse } from './perplexity-provider';
+import {
+  anthropicProvider,
+  AnthropicProvider,
+  AnthropicMessage,
+  AnthropicResponse,
+} from './anthropic-provider';
+import {
+  openaiProvider,
+  OpenAIProvider,
+  OpenAIMessage,
+  OpenAIResponse,
+} from './openai-provider';
+import {
+  googleProvider,
+  GoogleProvider,
+  GoogleMessage,
+  GoogleResponse,
+} from './google-provider';
+import {
+  perplexityProvider,
+  PerplexityProvider,
+  PerplexityMessage,
+  PerplexityResponse,
+} from './perplexity-provider';
 
 export type LLMProvider = 'anthropic' | 'openai' | 'google' | 'perplexity';
 
@@ -83,7 +103,7 @@ export class UnifiedLLMService {
       maxTokens: 4000,
       temperature: 0.7,
       systemPrompt: 'You are a helpful AI assistant.',
-      ...config
+      ...config,
     };
 
     // Initialize providers
@@ -115,7 +135,10 @@ export class UnifiedLLMService {
 
     try {
       // Convert messages to provider-specific format
-      const providerMessages = this.convertMessagesToProvider(messages, targetProvider);
+      const providerMessages = this.convertMessagesToProvider(
+        messages,
+        targetProvider
+      );
 
       // Update provider config
       this.updateProviderConfig(targetProvider);
@@ -161,14 +184,16 @@ export class UnifiedLLMService {
 
       // Convert response to unified format
       return this.convertResponseToUnified(response, targetProvider);
-
     } catch (error) {
-      console.error(`[Unified LLM Service] Error with ${targetProvider}:`, error);
-      
+      console.error(
+        `[Unified LLM Service] Error with ${targetProvider}:`,
+        error
+      );
+
       if (error instanceof UnifiedLLMError) {
         throw error;
       }
-      
+
       throw new UnifiedLLMError(
         `Provider ${targetProvider} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'PROVIDER_ERROR',
@@ -186,7 +211,12 @@ export class UnifiedLLMService {
     sessionId?: string,
     userId?: string,
     provider?: LLMProvider
-  ): AsyncGenerator<{ content: string; done: boolean; usage?: any; provider: LLMProvider }> {
+  ): AsyncGenerator<{
+    content: string;
+    done: boolean;
+    usage?: any;
+    provider: LLMProvider;
+  }> {
     const targetProvider = provider || this.config.provider;
     const providerInstance = this.providers.get(targetProvider);
 
@@ -200,13 +230,20 @@ export class UnifiedLLMService {
 
     try {
       // Convert messages to provider-specific format
-      const providerMessages = this.convertMessagesToProvider(messages, targetProvider);
+      const providerMessages = this.convertMessagesToProvider(
+        messages,
+        targetProvider
+      );
 
       // Update provider config
       this.updateProviderConfig(targetProvider);
 
       // Stream message using provider
-      let stream: AsyncGenerator<{ content: string; done: boolean; usage?: any }>;
+      let stream: AsyncGenerator<{
+        content: string;
+        done: boolean;
+        usage?: any;
+      }>;
       switch (targetProvider) {
         case 'anthropic':
           stream = (providerInstance as AnthropicProvider).streamMessage(
@@ -248,14 +285,16 @@ export class UnifiedLLMService {
       for await (const chunk of stream) {
         yield { ...chunk, provider: targetProvider };
       }
-
     } catch (error) {
-      console.error(`[Unified LLM Service] Streaming error with ${targetProvider}:`, error);
-      
+      console.error(
+        `[Unified LLM Service] Streaming error with ${targetProvider}:`,
+        error
+      );
+
       if (error instanceof UnifiedLLMError) {
         throw error;
       }
-      
+
       throw new UnifiedLLMError(
         `Provider ${targetProvider} streaming failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         'PROVIDER_STREAMING_ERROR',
@@ -268,21 +307,27 @@ export class UnifiedLLMService {
   /**
    * Convert unified messages to provider-specific format
    */
-  private convertMessagesToProvider(messages: UnifiedMessage[], provider: LLMProvider): any[] {
+  private convertMessagesToProvider(
+    messages: UnifiedMessage[],
+    provider: LLMProvider
+  ): any[] {
     return messages.map(msg => ({
       role: msg.role,
       content: msg.content,
       metadata: {
         ...msg.metadata,
-        provider
-      }
+        provider,
+      },
     }));
   }
 
   /**
    * Convert provider response to unified format
    */
-  private convertResponseToUnified(response: any, provider: LLMProvider): UnifiedResponse {
+  private convertResponseToUnified(
+    response: any,
+    provider: LLMProvider
+  ): UnifiedResponse {
     // Normalize usage information
     let usage;
     if (response.usage) {
@@ -290,13 +335,13 @@ export class UnifiedLLMService {
         usage = {
           promptTokens: response.usage.inputTokens,
           completionTokens: response.usage.outputTokens,
-          totalTokens: response.usage.totalTokens
+          totalTokens: response.usage.totalTokens,
         };
       } else {
         usage = {
           promptTokens: response.usage.promptTokens || 0,
           completionTokens: response.usage.completionTokens || 0,
-          totalTokens: response.usage.totalTokens || 0
+          totalTokens: response.usage.totalTokens || 0,
         };
       }
     }
@@ -310,8 +355,8 @@ export class UnifiedLLMService {
       userId: response.userId,
       metadata: {
         ...response.metadata,
-        provider
-      }
+        provider,
+      },
     };
   }
 
@@ -326,7 +371,7 @@ export class UnifiedLLMService {
       model: this.config.model,
       maxTokens: this.config.maxTokens,
       temperature: this.config.temperature,
-      systemPrompt: this.config.systemPrompt
+      systemPrompt: this.config.systemPrompt,
     };
 
     switch (provider) {
@@ -334,21 +379,21 @@ export class UnifiedLLMService {
         (providerInstance as AnthropicProvider).updateConfig({
           ...baseConfig,
           model: this.config.model as any,
-          tools: this.config.anthropic?.tools
+          tools: this.config.anthropic?.tools,
         });
         break;
       case 'openai':
         (providerInstance as OpenAIProvider).updateConfig({
           ...baseConfig,
           model: this.config.model as any,
-          tools: this.config.openai?.tools
+          tools: this.config.openai?.tools,
         });
         break;
       case 'google':
         (providerInstance as GoogleProvider).updateConfig({
           ...baseConfig,
           model: this.config.model as any,
-          tools: this.config.google?.tools
+          tools: this.config.google?.tools,
         });
         break;
       case 'perplexity':
@@ -356,7 +401,7 @@ export class UnifiedLLMService {
           ...baseConfig,
           model: this.config.model as any,
           searchDomain: this.config.perplexity?.searchDomain,
-          searchRecencyFilter: this.config.perplexity?.searchRecencyFilter
+          searchRecencyFilter: this.config.perplexity?.searchRecencyFilter,
         });
         break;
     }
@@ -401,7 +446,7 @@ export class UnifiedLLMService {
    * Get all configured providers
    */
   getConfiguredProviders(): LLMProvider[] {
-    return Array.from(this.providers.keys()).filter(provider => 
+    return Array.from(this.providers.keys()).filter(provider =>
       this.isProviderConfigured(provider)
     );
   }

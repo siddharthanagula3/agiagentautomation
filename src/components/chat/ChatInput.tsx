@@ -32,7 +32,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       <div className="flex space-x-2">
         <Input
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
           onKeyPress={handleKeyPress}
           disabled={isLoading || disabled}

@@ -53,7 +53,7 @@ class MemoryStorage implements CacheStorage {
   private data = new Map<string, CacheEntry>();
 
   async get<T = unknown>(key: string): Promise<CacheEntry<T> | null> {
-    return this.data.get(key) as CacheEntry<T> || null;
+    return (this.data.get(key) as CacheEntry<T>) || null;
   }
 
   async set<T = unknown>(key: string, entry: CacheEntry<T>): Promise<void> {
@@ -201,17 +201,22 @@ class IndexedDBBackend implements CacheStorage {
 
       const request = indexedDB.open(this.dbName, this.version);
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         if (!db.objectStoreNames.contains(this.storeName)) {
-          const store = db.createObjectStore(this.storeName, { keyPath: 'key' });
+          const store = db.createObjectStore(this.storeName, {
+            keyPath: 'key',
+          });
           store.createIndex('timestamp', 'timestamp', { unique: false });
-          store.createIndex('tags', 'tags', { unique: false, multiEntry: true });
+          store.createIndex('tags', 'tags', {
+            unique: false,
+            multiEntry: true,
+          });
         }
       };
 
-      request.onsuccess = (event) => {
+      request.onsuccess = event => {
         this.db = (event.target as IDBOpenDBRequest).result;
         resolve(this.db);
       };
@@ -261,7 +266,7 @@ class IndexedDBBackend implements CacheStorage {
       const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
 
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         const getRequest = store.get(key);
         getRequest.onsuccess = () => {
           const existed = !!getRequest.result;
@@ -397,7 +402,11 @@ export class Cache {
   }
 
   // Set item in cache
-  async set<T = unknown>(key: string, data: T, options: CacheOptions = {}): Promise<void> {
+  async set<T = unknown>(
+    key: string,
+    data: T,
+    options: CacheOptions = {}
+  ): Promise<void> {
     try {
       const entry: CacheEntry<T> = {
         key,
@@ -446,11 +455,13 @@ export class Cache {
   }
 
   // Get multiple items
-  async getMany<T = unknown>(keys: string[]): Promise<Record<string, T | null>> {
+  async getMany<T = unknown>(
+    keys: string[]
+  ): Promise<Record<string, T | null>> {
     const results: Record<string, T | null> = {};
 
     await Promise.all(
-      keys.map(async (key) => {
+      keys.map(async key => {
         results[key] = await this.get<T>(key);
       })
     );
@@ -459,11 +470,12 @@ export class Cache {
   }
 
   // Set multiple items
-  async setMany<T = unknown>(items: Record<string, T>, options: CacheOptions = {}): Promise<void> {
+  async setMany<T = unknown>(
+    items: Record<string, T>,
+    options: CacheOptions = {}
+  ): Promise<void> {
     await Promise.all(
-      Object.entries(items).map(([key, data]) =>
-        this.set(key, data, options)
-      )
+      Object.entries(items).map(([key, data]) => this.set(key, data, options))
     );
   }
 
@@ -738,50 +750,48 @@ export const useCache = <T = unknown>(
   fetcher: () => Promise<T>,
   options: UseCacheOptions = {}
 ) => {
-  const {
-    cache = memoryCache,
-    ttl,
-    tags,
-    enabled = true,
-  } = options;
+  const { cache = memoryCache, ttl, tags, enabled = true } = options;
 
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchData = useCallback(async (forceRefresh = false) => {
-    if (!enabled) return;
+  const fetchData = useCallback(
+    async (forceRefresh = false) => {
+      if (!enabled) return;
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
-      // Try to get from cache first
-      if (!forceRefresh) {
-        const cached = await cache.get<T>(key);
-        if (cached !== null) {
-          setData(cached);
-          setLoading(false);
-          return cached;
+      try {
+        // Try to get from cache first
+        if (!forceRefresh) {
+          const cached = await cache.get<T>(key);
+          if (cached !== null) {
+            setData(cached);
+            setLoading(false);
+            return cached;
+          }
         }
+
+        // Fetch fresh data
+        const freshData = await fetcher();
+
+        // Cache the result
+        await cache.set(key, freshData, { ttl, tags });
+
+        setData(freshData);
+        setLoading(false);
+        return freshData;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Fetch failed');
+        setError(error);
+        setLoading(false);
+        throw error;
       }
-
-      // Fetch fresh data
-      const freshData = await fetcher();
-
-      // Cache the result
-      await cache.set(key, freshData, { ttl, tags });
-
-      setData(freshData);
-      setLoading(false);
-      return freshData;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Fetch failed');
-      setError(error);
-      setLoading(false);
-      throw error;
-    }
-  }, [key, fetcher, cache, ttl, tags, enabled]);
+    },
+    [key, fetcher, cache, ttl, tags, enabled]
+  );
 
   const invalidate = useCallback(async () => {
     await cache.delete(key);

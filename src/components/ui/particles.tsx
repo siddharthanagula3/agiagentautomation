@@ -14,7 +14,7 @@ export const Particles: React.FC<ParticlesProps> = ({
   quantity = 50,
   staticity = 50,
   ease = 50,
-  refresh = false
+  refresh = false,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -76,7 +76,7 @@ export const Particles: React.FC<ParticlesProps> = ({
       if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach((particle) => {
+      particles.forEach(particle => {
         particle.update();
         particle.draw();
       });

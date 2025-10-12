@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { aiEmployeeService } from '../services/ai-employee-service';
 import { toolInvocationService } from '../services/tool-invocation-service';
-import type { 
-  AIEmployee, 
-  EmployeeCategory, 
-  EmployeeStatus, 
+import type {
+  AIEmployee,
+  EmployeeCategory,
+  EmployeeStatus,
   JobAssignment,
   ToolDefinition,
-  WorkflowDefinition
+  WorkflowDefinition,
 } from '../types/ai-employee';
 
 interface AIEmployeeState {
@@ -32,15 +32,31 @@ interface AIEmployeeState {
   // Actions
   loadEmployees: (filters?: unknown) => Promise<void>;
   loadEmployee: (id: string) => Promise<void>;
-  createEmployee: (employee: Omit<AIEmployee, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  createEmployee: (
+    employee: Omit<AIEmployee, 'id' | 'createdAt' | 'updatedAt'>
+  ) => Promise<void>;
   updateEmployee: (id: string, updates: Partial<AIEmployee>) => Promise<void>;
   deleteEmployee: (id: string) => Promise<void>;
-  assignEmployeeToJob: (employeeId: string, jobId: string, priority?: number) => Promise<void>;
-  updateEmployeeStatus: (employeeId: string, status: EmployeeStatus) => Promise<void>;
-  updateEmployeePerformance: (employeeId: string, performance: unknown) => Promise<void>;
+  assignEmployeeToJob: (
+    employeeId: string,
+    jobId: string,
+    priority?: number
+  ) => Promise<void>;
+  updateEmployeeStatus: (
+    employeeId: string,
+    status: EmployeeStatus
+  ) => Promise<void>;
+  updateEmployeePerformance: (
+    employeeId: string,
+    performance: unknown
+  ) => Promise<void>;
   loadEmployeeTools: (employeeId: string) => Promise<void>;
   loadEmployeeWorkflows: (employeeId: string) => Promise<void>;
-  executeTool: (toolId: string, parameters: Record<string, unknown>, context?: unknown) => Promise<void>;
+  executeTool: (
+    toolId: string,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) => Promise<void>;
   searchEmployees: (query: string) => Promise<void>;
   setFilters: (filters: unknown) => void;
   clearFilters: () => void;
@@ -64,24 +80,27 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   // Load all employees
   loadEmployees: async (filters = {}) => {
     set({ isLoading: true, error: null });
-    
+
     try {
       const { data, error } = await aiEmployeeService.getEmployees(filters);
-      
+
       if (error) {
         set({ error, isLoading: false });
         return;
       }
 
-      const employeesMap = (data || []).reduce((acc, employee) => {
-        acc[employee.id] = employee;
-        return acc;
-      }, {} as Record<string, AIEmployee>);
+      const employeesMap = (data || []).reduce(
+        (acc, employee) => {
+          acc[employee.id] = employee;
+          return acc;
+        },
+        {} as Record<string, AIEmployee>
+      );
 
-      set({ 
-        employees: employeesMap, 
-        isLoading: false, 
-        lastUpdateAt: new Date() 
+      set({
+        employees: employeesMap,
+        isLoading: false,
+        lastUpdateAt: new Date(),
       });
     } catch (error: unknown) {
       set({ error: error.message, isLoading: false });
@@ -91,21 +110,21 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   // Load specific employee
   loadEmployee: async (id: string) => {
     set({ isLoading: true, error: null });
-    
+
     try {
       const { data, error } = await aiEmployeeService.getEmployee(id);
-      
+
       if (error) {
         set({ error, isLoading: false });
         return;
       }
 
       if (data) {
-        set((state) => ({
+        set(state => ({
           employees: { ...state.employees, [data.id]: data },
           selectedEmployee: data,
           isLoading: false,
-          lastUpdateAt: new Date()
+          lastUpdateAt: new Date(),
         }));
       }
     } catch (error: unknown) {
@@ -114,22 +133,22 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   },
 
   // Create new employee
-  createEmployee: async (employee) => {
+  createEmployee: async employee => {
     set({ isLoading: true, error: null });
-    
+
     try {
       const { data, error } = await aiEmployeeService.createEmployee(employee);
-      
+
       if (error) {
         set({ error, isLoading: false });
         return;
       }
 
       if (data) {
-        set((state) => ({
+        set(state => ({
           employees: { ...state.employees, [data.id]: data },
           isLoading: false,
-          lastUpdateAt: new Date()
+          lastUpdateAt: new Date(),
         }));
       }
     } catch (error: unknown) {
@@ -140,21 +159,25 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   // Update employee
   updateEmployee: async (id: string, updates) => {
     set({ isLoading: true, error: null });
-    
+
     try {
-      const { data, error } = await aiEmployeeService.updateEmployee(id, updates);
-      
+      const { data, error } = await aiEmployeeService.updateEmployee(
+        id,
+        updates
+      );
+
       if (error) {
         set({ error, isLoading: false });
         return;
       }
 
       if (data) {
-        set((state) => ({
+        set(state => ({
           employees: { ...state.employees, [id]: data },
-          selectedEmployee: state.selectedEmployee?.id === id ? data : state.selectedEmployee,
+          selectedEmployee:
+            state.selectedEmployee?.id === id ? data : state.selectedEmployee,
           isLoading: false,
-          lastUpdateAt: new Date()
+          lastUpdateAt: new Date(),
         }));
       }
     } catch (error: unknown) {
@@ -165,24 +188,25 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   // Delete employee
   deleteEmployee: async (id: string) => {
     set({ isLoading: true, error: null });
-    
+
     try {
       const { error } = await aiEmployeeService.deleteEmployee(id);
-      
+
       if (error) {
         set({ error, isLoading: false });
         return;
       }
 
-      set((state) => {
+      set(state => {
         const newEmployees = { ...state.employees };
         delete newEmployees[id];
-        
+
         return {
           employees: newEmployees,
-          selectedEmployee: state.selectedEmployee?.id === id ? null : state.selectedEmployee,
+          selectedEmployee:
+            state.selectedEmployee?.id === id ? null : state.selectedEmployee,
           isLoading: false,
-          lastUpdateAt: new Date()
+          lastUpdateAt: new Date(),
         };
       });
     } catch (error: unknown) {
@@ -191,22 +215,30 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   },
 
   // Assign employee to job
-  assignEmployeeToJob: async (employeeId: string, jobId: string, priority = 1) => {
+  assignEmployeeToJob: async (
+    employeeId: string,
+    jobId: string,
+    priority = 1
+  ) => {
     set({ isLoading: true, error: null });
-    
+
     try {
-      const { data, error } = await aiEmployeeService.assignEmployeeToJob(employeeId, jobId, priority);
-      
+      const { data, error } = await aiEmployeeService.assignEmployeeToJob(
+        employeeId,
+        jobId,
+        priority
+      );
+
       if (error) {
         set({ error, isLoading: false });
         return;
       }
 
       if (data) {
-        set((state) => ({
+        set(state => ({
           assignments: { ...state.assignments, [data.id]: data },
           isLoading: false,
-          lastUpdateAt: new Date()
+          lastUpdateAt: new Date(),
         }));
       }
     } catch (error: unknown) {
@@ -224,7 +256,10 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   },
 
   // Update employee performance
-  updateEmployeePerformance: async (employeeId: string, performance: unknown) => {
+  updateEmployeePerformance: async (
+    employeeId: string,
+    performance: unknown
+  ) => {
     try {
       await get().updateEmployee(employeeId, { performance });
     } catch (error: unknown) {
@@ -235,22 +270,26 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   // Load employee tools
   loadEmployeeTools: async (employeeId: string) => {
     try {
-      const { data, error } = await aiEmployeeService.getEmployeeTools(employeeId);
-      
+      const { data, error } =
+        await aiEmployeeService.getEmployeeTools(employeeId);
+
       if (error) {
         set({ error });
         return;
       }
 
       if (data) {
-        const toolsMap = (data || []).reduce((acc, tool) => {
-          acc[tool.id] = tool;
-          return acc;
-        }, {} as Record<string, ToolDefinition>);
+        const toolsMap = (data || []).reduce(
+          (acc, tool) => {
+            acc[tool.id] = tool;
+            return acc;
+          },
+          {} as Record<string, ToolDefinition>
+        );
 
-        set((state) => ({
+        set(state => ({
           tools: { ...state.tools, ...toolsMap },
-          lastUpdateAt: new Date()
+          lastUpdateAt: new Date(),
         }));
       }
     } catch (error: unknown) {
@@ -261,22 +300,26 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   // Load employee workflows
   loadEmployeeWorkflows: async (employeeId: string) => {
     try {
-      const { data, error } = await aiEmployeeService.getEmployeeWorkflows(employeeId);
-      
+      const { data, error } =
+        await aiEmployeeService.getEmployeeWorkflows(employeeId);
+
       if (error) {
         set({ error });
         return;
       }
 
       if (data) {
-        const workflowsMap = (data || []).reduce((acc, workflow) => {
-          acc[workflow.id] = workflow;
-          return acc;
-        }, {} as Record<string, WorkflowDefinition>);
+        const workflowsMap = (data || []).reduce(
+          (acc, workflow) => {
+            acc[workflow.id] = workflow;
+            return acc;
+          },
+          {} as Record<string, WorkflowDefinition>
+        );
 
-        set((state) => ({
+        set(state => ({
           workflows: { ...state.workflows, ...workflowsMap },
-          lastUpdateAt: new Date()
+          lastUpdateAt: new Date(),
         }));
       }
     } catch (error: unknown) {
@@ -285,22 +328,26 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   },
 
   // Execute tool
-  executeTool: async (toolId: string, parameters: Record<string, unknown>, context?: unknown) => {
+  executeTool: async (
+    toolId: string,
+    parameters: Record<string, unknown>,
+    context?: unknown
+  ) => {
     set({ isLoading: true, error: null });
-    
+
     try {
-      const { success, error, result } = await toolInvocationService.executeTool(toolId, parameters, context);
-      
+      const { success, error, result } =
+        await toolInvocationService.executeTool(toolId, parameters, context);
+
       if (!success) {
         set({ error, isLoading: false });
         return;
       }
 
       set({ isLoading: false, lastUpdateAt: new Date() });
-      
+
       // You might want to update the employee's performance based on tool execution
       // This would depend on your specific requirements
-      
     } catch (error: unknown) {
       set({ error: error.message, isLoading: false });
     }
@@ -309,24 +356,30 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   // Search employees
   searchEmployees: async (query: string) => {
     set({ isLoading: true, error: null });
-    
+
     try {
-      const { data, error } = await aiEmployeeService.searchEmployeesBySkills([query], 20);
-      
+      const { data, error } = await aiEmployeeService.searchEmployeesBySkills(
+        [query],
+        20
+      );
+
       if (error) {
         set({ error, isLoading: false });
         return;
       }
 
-      const employeesMap = (data || []).reduce((acc, employee) => {
-        acc[employee.id] = employee;
-        return acc;
-      }, {} as Record<string, AIEmployee>);
+      const employeesMap = (data || []).reduce(
+        (acc, employee) => {
+          acc[employee.id] = employee;
+          return acc;
+        },
+        {} as Record<string, AIEmployee>
+      );
 
-      set({ 
-        employees: employeesMap, 
-        isLoading: false, 
-        lastUpdateAt: new Date() 
+      set({
+        employees: employeesMap,
+        isLoading: false,
+        lastUpdateAt: new Date(),
       });
     } catch (error: unknown) {
       set({ error: error.message, isLoading: false });
@@ -334,7 +387,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   },
 
   // Set filters
-  setFilters: (filters) => {
+  setFilters: filters => {
     set({ filters });
   },
 
@@ -344,7 +397,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   },
 
   // Set selected employee
-  setSelectedEmployee: (employee) => {
+  setSelectedEmployee: employee => {
     set({ selectedEmployee: employee });
   },
 
@@ -357,17 +410,22 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   // Clear error
   clearError: () => {
     set({ error: null });
-  }
+  },
 }));
 
 // Selectors for common use cases
-export const useEmployees = () => useAIEmployeeStore(state => Object.values(state.employees));
-export const useAvailableEmployees = () => useAIEmployeeStore(state => 
-  Object.values(state.employees).filter(emp => emp.status === 'available')
-);
-export const useEmployeesByCategory = (category: EmployeeCategory) => useAIEmployeeStore(state => 
-  Object.values(state.employees).filter(emp => emp.category === category)
-);
-export const useSelectedEmployee = () => useAIEmployeeStore(state => state.selectedEmployee);
-export const useEmployeeLoading = () => useAIEmployeeStore(state => state.isLoading);
+export const useEmployees = () =>
+  useAIEmployeeStore(state => Object.values(state.employees));
+export const useAvailableEmployees = () =>
+  useAIEmployeeStore(state =>
+    Object.values(state.employees).filter(emp => emp.status === 'available')
+  );
+export const useEmployeesByCategory = (category: EmployeeCategory) =>
+  useAIEmployeeStore(state =>
+    Object.values(state.employees).filter(emp => emp.category === category)
+  );
+export const useSelectedEmployee = () =>
+  useAIEmployeeStore(state => state.selectedEmployee);
+export const useEmployeeLoading = () =>
+  useAIEmployeeStore(state => state.isLoading);
 export const useEmployeeError = () => useAIEmployeeStore(state => state.error);

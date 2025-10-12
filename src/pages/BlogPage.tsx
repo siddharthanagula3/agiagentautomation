@@ -1,200 +1,222 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Calendar, Clock, ArrowRight, Search, TrendingUp, Zap, Brain, Users, Rocket, Building2 } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  ArrowRight,
+  Search,
+  TrendingUp,
+  Zap,
+  Brain,
+  Users,
+  Rocket,
+  Building2,
+  Loader2,
+  AlertCircle,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Particles } from '@/components/ui/particles';
+import { supabase } from '@/lib/supabase-client';
+import { toast } from 'sonner';
 
 interface BlogPost {
-  id: number;
+  id: string;
   title: string;
+  slug: string;
   excerpt: string;
-  category: string;
-  date: string;
-  readTime: string;
+  content: string;
+  image_url: string;
+  published: boolean;
+  featured: boolean;
+  published_at: string;
+  created_at: string;
+  updated_at: string;
   author: {
-    name: string;
-    avatar: string;
+    id: string;
+    display_name: string;
+    avatar_emoji: string;
+    avatar_url?: string;
   };
-  image: string;
-  featured?: boolean;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+}
+
+interface BlogCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  icon?: string;
 }
 
 const BlogPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
 
-  const categories = [
-    { name: 'All', icon: TrendingUp },
-    { name: 'AI Automation', icon: Zap },
-    { name: 'Productivity', icon: Rocket },
-    { name: 'Case Studies', icon: Building2 },
-    { name: 'AI Insights', icon: Brain },
-    { name: 'Team Management', icon: Users }
-  ];
+  const categoryIcons: Record<string, any> = {
+    'ai-automation': Zap,
+    productivity: Rocket,
+    'case-studies': Building2,
+    'ai-insights': Brain,
+    'team-management': Users,
+    default: TrendingUp,
+  };
 
-  const blogPosts: BlogPost[] = [
-    {
-      id: 1,
-      title: 'How AI Employees Are Transforming Modern Workplaces',
-      excerpt: 'Discover how businesses are leveraging AI employees to automate repetitive tasks, boost productivity, and scale operations without traditional hiring constraints.',
-      category: 'AI Automation',
-      date: '2024-10-02',
-      readTime: '8 min read',
-      author: {
-        name: 'Siddhartha Nagula',
-        avatar: '👨‍💻'
-      },
-      image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=500&fit=crop',
-      featured: true
-    },
-    {
-      id: 2,
-      title: '10 Ways AI Workflows Save Your Team 20 Hours Per Week',
-      excerpt: 'Learn the practical strategies top companies use to implement AI-driven workflows that eliminate bottlenecks and reclaim valuable time.',
-      category: 'Productivity',
-      date: '2024-09-28',
-      readTime: '6 min read',
-      author: {
-        name: 'Siddhartha Nagula',
-        avatar: '👨‍💻'
-      },
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop'
-    },
-    {
-      id: 3,
-      title: 'Case Study: How StartupX Scaled to 100 Customers with 3 Employees',
-      excerpt: 'A deep dive into how a lean startup used AI employees to handle customer support, sales outreach, and operations at scale.',
-      category: 'Case Studies',
-      date: '2024-09-22',
-      readTime: '10 min read',
-      author: {
-        name: 'Siddhartha Nagula',
-        avatar: '👨‍💻'
-      },
-      image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=500&fit=crop'
-    },
-    {
-      id: 4,
-      title: 'The Future of Work: AI Collaboration in 2025',
-      excerpt: 'Explore emerging trends in human-AI collaboration and what it means for your business strategy this year.',
-      category: 'AI Insights',
-      date: '2024-09-15',
-      readTime: '7 min read',
-      author: {
-        name: 'Siddhartha Nagula',
-        avatar: '👨‍💻'
-      },
-      image: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&h=500&fit=crop'
-    },
-    {
-      id: 5,
-      title: 'Building High-Performance Teams with AI Project Managers',
-      excerpt: 'Discover how AI project managers coordinate tasks, predict bottlenecks, and keep your team aligned on goals.',
-      category: 'Team Management',
-      date: '2024-09-08',
-      readTime: '9 min read',
-      author: {
-        name: 'Siddhartha Nagula',
-        avatar: '👨‍💻'
-      },
-      image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=500&fit=crop'
-    },
-    {
-      id: 6,
-      title: 'Automating Customer Support: A Complete Guide',
-      excerpt: 'Step-by-step strategies to implement AI-powered customer support that delights customers and reduces response times.',
-      category: 'AI Automation',
-      date: '2024-09-01',
-      readTime: '12 min read',
-      author: {
-        name: 'Siddhartha Nagula',
-        avatar: '👨‍💻'
-      },
-      image: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=500&fit=crop'
-    },
-    {
-      id: 7,
-      title: 'ROI Analysis: The True Cost Savings of AI Employees',
-      excerpt: 'Hard numbers and real-world data on how AI employees impact your bottom line compared to traditional hiring.',
-      category: 'Case Studies',
-      date: '2024-08-25',
-      readTime: '8 min read',
-      author: {
-        name: 'Siddhartha Nagula',
-        avatar: '👨‍💻'
-      },
-      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop'
-    },
-    {
-      id: 8,
-      title: 'AI Dashboards: Turning Data Into Actionable Insights',
-      excerpt: 'Learn how AI-powered dashboards help you make faster, smarter decisions with real-time analytics and predictions.',
-      category: 'Productivity',
-      date: '2024-08-18',
-      readTime: '6 min read',
-      author: {
-        name: 'Siddhartha Nagula',
-        avatar: '👨‍💻'
-      },
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop'
-    },
-    {
-      id: 9,
-      title: 'Integration Strategies: Connecting Your Entire Tech Stack',
-      excerpt: 'Best practices for integrating AI employees with your existing tools like Slack, Salesforce, and project management platforms.',
-      category: 'AI Automation',
-      date: '2024-08-11',
-      readTime: '7 min read',
-      author: {
-        name: 'Siddhartha Nagula',
-        avatar: '👨‍💻'
-      },
-      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=500&fit=crop'
+  const getCategoryIcon = (slug: string) => {
+    return categoryIcons[slug] || categoryIcons.default;
+  };
+
+  // Fetch blog posts from Supabase function
+  const fetchBlogPosts = async (page = 0, category = 'All', search = '') => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams({
+        limit: '10',
+        offset: (page * 10).toString(),
+      });
+
+      if (category !== 'All') {
+        params.append('category', category);
+      }
+
+      if (search) {
+        params.append('search', search);
+      }
+
+      const { data, error } = await supabase.functions.invoke('blog-posts', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          category: category !== 'All' ? category : undefined,
+          search: search || undefined,
+          limit: 10,
+          offset: page * 10,
+        }),
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      const response = data || { posts: [], count: 0, hasMore: false };
+
+      if (page === 0) {
+        setBlogPosts(response.posts || []);
+      } else {
+        setBlogPosts(prev => [...prev, ...(response.posts || [])]);
+      }
+
+      setHasMore(response.hasMore || false);
+      setCurrentPage(page);
+    } catch (err: any) {
+      console.error('Error fetching blog posts:', err);
+      setError(err.message || 'Failed to fetch blog posts');
+      toast.error('Failed to load blog posts');
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
 
-  const filteredPosts = blogPosts.filter(post => {
-    const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
-    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Fetch categories
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_categories')
+        .select('*')
+        .order('name');
+
+      if (error) {
+        throw error;
+      }
+
+      setCategories(data || []);
+    } catch (err: any) {
+      console.error('Error fetching categories:', err);
+      // Don't show error for categories, just use default ones
+    }
+  };
+
+  // Load initial data
+  useEffect(() => {
+    fetchCategories();
+    fetchBlogPosts(0, selectedCategory, searchQuery);
+  }, []);
+
+  // Refetch when filters change
+  useEffect(() => {
+    fetchBlogPosts(0, selectedCategory, searchQuery);
+  }, [selectedCategory, searchQuery]);
+
+  // Calculate read time based on content length
+  const calculateReadTime = (content: string) => {
+    const wordsPerMinute = 200;
+    const wordCount = content.split(/\s+/).length;
+    const minutes = Math.ceil(wordCount / wordsPerMinute);
+    return `${minutes} min read`;
+  };
 
   const featuredPost = blogPosts.find(post => post.featured);
-  const regularPosts = filteredPosts.filter(post => !post.featured);
+  const regularPosts = blogPosts.filter(post => !post.featured);
+
+  const loadMorePosts = () => {
+    if (!isLoading && hasMore) {
+      fetchBlogPosts(currentPage + 1, selectedCategory, searchQuery);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <Particles className="absolute inset-0 -z-10" quantity={50} staticity={30} />
+      <Particles
+        className="absolute inset-0 -z-10"
+        quantity={50}
+        staticity={30}
+      />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+      <section className="px-4 pb-16 pt-32 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto mb-12"
+            className="mx-auto mb-12 max-w-3xl text-center"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary">
+            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
               The AI Automation Blog
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              Insights, strategies, and stories about the future of work with AI employees
+            <p className="mb-8 text-xl text-muted-foreground">
+              Insights, strategies, and stories about the future of work with AI
+              employees
             </p>
 
             {/* Search Bar */}
-            <div className="relative max-w-xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+            <div className="relative mx-auto max-w-xl">
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                size={20}
+              />
               <Input
                 type="text"
                 placeholder="Search articles..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-12 bg-background/60 backdrop-blur-xl border-border/40"
+                onChange={e => setSearchQuery(e.target.value)}
+                className="h-12 border-border/40 bg-background/60 pl-12 backdrop-blur-xl"
               />
             </div>
           </motion.div>
@@ -204,34 +226,56 @@ const BlogPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="flex flex-wrap gap-3 justify-center mb-16"
+            className="mb-16 flex flex-wrap justify-center gap-3"
           >
-            {categories.map((category, idx) => (
-              <motion.button
-                key={category.name}
-                onClick={() => setSelectedCategory(category.name)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  selectedCategory === category.name
-                    ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg scale-105'
-                    : 'bg-background/60 backdrop-blur-xl border border-border/40 text-foreground/80 hover:border-primary/50'
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-              >
-                <category.icon size={16} />
-                {category.name}
-              </motion.button>
-            ))}
+            {/* All Categories Button */}
+            <motion.button
+              onClick={() => setSelectedCategory('All')}
+              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                selectedCategory === 'All'
+                  ? 'scale-105 bg-gradient-to-r from-primary to-accent text-white shadow-lg'
+                  : 'border border-border/40 bg-background/60 text-foreground/80 backdrop-blur-xl hover:border-primary/50'
+              }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0 }}
+            >
+              <TrendingUp size={16} />
+              All
+            </motion.button>
+
+            {/* Dynamic Categories */}
+            {categories.map((category, idx) => {
+              const IconComponent = getCategoryIcon(category.slug);
+              return (
+                <motion.button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.slug)}
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                    selectedCategory === category.slug
+                      ? 'scale-105 bg-gradient-to-r from-primary to-accent text-white shadow-lg'
+                      : 'border border-border/40 bg-background/60 text-foreground/80 backdrop-blur-xl hover:border-primary/50'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: (idx + 1) * 0.05 }}
+                >
+                  <IconComponent size={16} />
+                  {category.name}
+                </motion.button>
+              );
+            })}
           </motion.div>
         </div>
       </section>
 
       {/* Featured Post */}
       {featuredPost && selectedCategory === 'All' && !searchQuery && (
-        <section className="pb-16 px-4 sm:px-6 lg:px-8">
+        <section className="px-4 pb-16 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-7xl">
             <FeaturedPostCard post={featuredPost} />
           </div>
@@ -239,45 +283,103 @@ const BlogPage: React.FC = () => {
       )}
 
       {/* Blog Grid */}
-      <section className="pb-24 px-4 sm:px-6 lg:px-8">
+      <section className="px-4 pb-24 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
-          {regularPosts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {regularPosts.map((post, idx) => (
-                <BlogPostCard key={post.id} post={post} index={idx} />
-              ))}
-            </div>
+          {error ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="py-16 text-center"
+            >
+              <AlertCircle className="mx-auto mb-4 h-16 w-16 text-red-500" />
+              <p className="mb-4 text-xl text-red-500">
+                Failed to load blog posts
+              </p>
+              <p className="mb-6 text-muted-foreground">{error}</p>
+              <Button
+                onClick={() => fetchBlogPosts(0, selectedCategory, searchQuery)}
+              >
+                Try Again
+              </Button>
+            </motion.div>
+          ) : isLoading && blogPosts.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="py-16 text-center"
+            >
+              <Loader2 className="mx-auto mb-4 h-16 w-16 animate-spin text-primary" />
+              <p className="text-xl text-muted-foreground">
+                Loading blog posts...
+              </p>
+            </motion.div>
+          ) : regularPosts.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {regularPosts.map((post, idx) => (
+                  <BlogPostCard key={post.id} post={post} index={idx} />
+                ))}
+              </div>
+
+              {/* Load More Button */}
+              {hasMore && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-12 text-center"
+                >
+                  <Button
+                    onClick={loadMorePosts}
+                    disabled={isLoading}
+                    variant="outline"
+                    size="lg"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      'Load More Posts'
+                    )}
+                  </Button>
+                </motion.div>
+              )}
+            </>
           ) : (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-16"
+              className="py-16 text-center"
             >
-              <p className="text-xl text-muted-foreground">No articles found matching your criteria.</p>
+              <p className="text-xl text-muted-foreground">
+                No articles found matching your criteria.
+              </p>
             </motion.div>
           )}
         </div>
       </section>
 
       {/* Newsletter CTA */}
-      <section className="pb-24 px-4 sm:px-6 lg:px-8">
+      <section className="px-4 pb-24 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 backdrop-blur-xl border border-border/40 p-12"
+            className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-12 backdrop-blur-xl"
           >
             <div className="text-center">
-              <h2 className="text-3xl font-bold mb-4">Never Miss an Update</h2>
-              <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Get the latest insights on AI automation, productivity tips, and case studies delivered to your inbox every week.
+              <h2 className="mb-4 text-3xl font-bold">Never Miss an Update</h2>
+              <p className="mx-auto mb-8 max-w-2xl text-muted-foreground">
+                Get the latest insights on AI automation, productivity tips, and
+                case studies delivered to your inbox every week.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <div className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row">
                 <Input
                   type="email"
                   placeholder="Enter your email"
-                  className="h-12 bg-background/60 backdrop-blur-xl border-border/40"
+                  className="h-12 border-border/40 bg-background/60 backdrop-blur-xl"
                 />
                 <Button className="h-12 bg-gradient-to-r from-primary to-accent">
                   Subscribe
@@ -295,57 +397,77 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
 
+  const calculateReadTime = (content: string) => {
+    const wordsPerMinute = 200;
+    const wordCount = content.split(/\s+/).length;
+    const minutes = Math.ceil(wordCount / wordsPerMinute);
+    return `${minutes} min read`;
+  };
+
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6 }}
-      className="relative overflow-hidden rounded-3xl bg-background/60 backdrop-blur-xl border border-border/40 hover:border-primary/50 transition-all group"
+      className="group relative cursor-pointer overflow-hidden rounded-3xl border border-border/40 bg-background/60 backdrop-blur-xl transition-all hover:border-primary/50"
+      onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
     >
-      <div className="grid md:grid-cols-2 gap-0">
-        <div className="relative h-64 md:h-full overflow-hidden">
+      <div className="grid gap-0 md:grid-cols-2">
+        <div className="relative h-64 overflow-hidden md:h-full">
           <img
-            src={post.image}
+            src={
+              post.image_url ||
+              'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=500&fit=crop'
+            }
             alt={post.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
-          <div className="absolute top-4 left-4">
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-primary to-accent text-white">
+          <div className="absolute left-4 top-4">
+            <span className="rounded-full bg-gradient-to-r from-primary to-accent px-3 py-1 text-xs font-medium text-white">
               Featured
             </span>
           </div>
         </div>
-        <div className="p-8 md:p-12 flex flex-col justify-center">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-            <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
-              {post.category}
+        <div className="flex flex-col justify-center p-8 md:p-12">
+          <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              {post.category.name}
             </span>
             <div className="flex items-center gap-1">
               <Calendar size={14} />
-              {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              {new Date(post.published_at).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </div>
           </div>
-          <h2 className="text-3xl font-bold mb-4 group-hover:text-primary transition-colors">
+          <h2 className="mb-4 text-3xl font-bold transition-colors group-hover:text-primary">
             {post.title}
           </h2>
-          <p className="text-muted-foreground mb-6 line-clamp-3">
+          <p className="mb-6 line-clamp-3 text-muted-foreground">
             {post.excerpt}
           </p>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">{post.author.avatar}</span>
+              <span className="text-2xl">{post.author.avatar_emoji}</span>
               <div>
-                <div className="text-sm font-medium">{post.author.name}</div>
-                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                <div className="text-sm font-medium">
+                  {post.author.display_name}
+                </div>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock size={12} />
-                  {post.readTime}
+                  {calculateReadTime(post.content)}
                 </div>
               </div>
             </div>
             <Button variant="ghost" className="group-hover:bg-primary/10">
               Read More
-              <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight
+                size={16}
+                className="ml-2 transition-transform group-hover:translate-x-1"
+              />
             </Button>
           </div>
         </div>
@@ -354,9 +476,19 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
   );
 };
 
-const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({ post, index }) => {
+const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
+  post,
+  index,
+}) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
+
+  const calculateReadTime = (content: string) => {
+    const wordsPerMinute = 200;
+    const wordCount = content.split(/\s+/).length;
+    const minutes = Math.ceil(wordCount / wordsPerMinute);
+    return `${minutes} min read`;
+  };
 
   return (
     <motion.div
@@ -364,41 +496,53 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({ post, index
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="relative overflow-hidden rounded-2xl bg-background/60 backdrop-blur-xl border border-border/40 hover:border-primary/50 transition-all group cursor-pointer"
+      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border/40 bg-background/60 backdrop-blur-xl transition-all hover:border-primary/50"
       whileHover={{ y: -8 }}
+      onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
     >
       <div className="relative h-48 overflow-hidden">
         <img
-          src={post.image}
+          src={
+            post.image_url ||
+            'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop'
+          }
           alt={post.title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
-        <div className="absolute top-3 left-3">
-          <span className="px-2 py-1 rounded-full bg-background/80 backdrop-blur-xl text-xs font-medium text-foreground">
-            {post.category}
+        <div className="absolute left-3 top-3">
+          <span className="rounded-full bg-background/80 px-2 py-1 text-xs font-medium text-foreground backdrop-blur-xl">
+            {post.category.name}
           </span>
         </div>
       </div>
       <div className="p-6">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+        <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
           <Calendar size={12} />
-          {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          {new Date(post.published_at).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+          })}
           <span>•</span>
           <Clock size={12} />
-          {post.readTime}
+          {calculateReadTime(post.content)}
         </div>
-        <h3 className="text-xl font-bold mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+        <h3 className="mb-3 line-clamp-2 text-xl font-bold transition-colors group-hover:text-primary">
           {post.title}
         </h3>
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+        <p className="mb-4 line-clamp-3 text-sm text-muted-foreground">
           {post.excerpt}
         </p>
-        <div className="flex items-center justify-between pt-4 border-t border-border/40">
+        <div className="flex items-center justify-between border-t border-border/40 pt-4">
           <div className="flex items-center gap-2">
-            <span className="text-xl">{post.author.avatar}</span>
-            <span className="text-sm font-medium">{post.author.name}</span>
+            <span className="text-xl">{post.author.avatar_emoji}</span>
+            <span className="text-sm font-medium">
+              {post.author.display_name}
+            </span>
           </div>
-          <ArrowRight size={18} className="text-primary group-hover:translate-x-1 transition-transform" />
+          <ArrowRight
+            size={18}
+            className="text-primary transition-transform group-hover:translate-x-1"
+          />
         </div>
       </div>
     </motion.div>

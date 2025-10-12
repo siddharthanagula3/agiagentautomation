@@ -24,11 +24,11 @@ class CacheService {
   private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
   private readonly CLEANUP_INTERVAL = 60 * 1000; // 1 minute
   private cleanupTimer?: NodeJS.Timeout;
-  
+
   constructor() {
     this.startCleanupTimer();
   }
-  
+
   /**
    * Get value from cache
    */
@@ -44,7 +44,7 @@ class CacheService {
         this.memoryCache.delete(key);
       }
     }
-    
+
     // Try persistent cache
     try {
       const { data, error } = await supabase
@@ -52,33 +52,33 @@ class CacheService {
         .select('*')
         .eq('cache_key', key)
         .single();
-      
+
       if (error || !data) {
         return null;
       }
-      
+
       const entry = data as any;
       const expiresAt = new Date(entry.expires_at);
-      
+
       if (new Date() < expiresAt) {
         // Cache hit - update access count
         await supabase
           .from('cache_entries')
           .update({
             accessed_count: entry.accessed_count + 1,
-            last_accessed_at: new Date().toISOString()
+            last_accessed_at: new Date().toISOString(),
           })
           .eq('cache_key', key);
-        
+
         // Store in memory for faster access
         this.memoryCache.set(key, {
           key,
           value: entry.cache_value,
           expiresAt,
           createdAt: new Date(entry.created_at),
-          accessCount: entry.accessed_count + 1
+          accessCount: entry.accessed_count + 1,
         });
-        
+
         return entry.cache_value as T;
       } else {
         // Expired - remove from persistent cache
@@ -90,7 +90,7 @@ class CacheService {
       return null;
     }
   }
-  
+
   /**
    * Set value in cache
    */
@@ -102,57 +102,52 @@ class CacheService {
     const {
       ttl = this.DEFAULT_TTL,
       persistent = false,
-      refreshOnAccess = false
+      refreshOnAccess = false,
     } = options;
-    
+
     const expiresAt = new Date(Date.now() + ttl);
     const entry: CacheEntry<T> = {
       key,
       value,
       expiresAt,
       createdAt: new Date(),
-      accessCount: 0
+      accessCount: 0,
     };
-    
+
     // Always store in memory
     this.memoryCache.set(key, entry);
-    
+
     // Optionally store in persistent cache
     if (persistent) {
       try {
-        await supabase
-          .from('cache_entries')
-          .upsert({
-            cache_key: key,
-            cache_value: value,
-            expires_at: expiresAt.toISOString(),
-            accessed_count: 0,
-            last_accessed_at: new Date().toISOString()
-          });
+        await supabase.from('cache_entries').upsert({
+          cache_key: key,
+          cache_value: value,
+          expires_at: expiresAt.toISOString(),
+          accessed_count: 0,
+          last_accessed_at: new Date().toISOString(),
+        });
       } catch (error) {
         console.error('[Cache] Error setting persistent cache:', error);
       }
     }
   }
-  
+
   /**
    * Delete value from cache
    */
   async delete(key: string): Promise<void> {
     // Remove from memory
     this.memoryCache.delete(key);
-    
+
     // Remove from persistent cache
     try {
-      await supabase
-        .from('cache_entries')
-        .delete()
-        .eq('cache_key', key);
+      await supabase.from('cache_entries').delete().eq('cache_key', key);
     } catch (error) {
       console.error('[Cache] Error deleting from persistent cache:', error);
     }
   }
-  
+
   /**
    * Clear all cache (or by pattern)
    */
@@ -160,7 +155,7 @@ class CacheService {
     if (!pattern) {
       // Clear all memory cache
       this.memoryCache.clear();
-      
+
       // Clear all persistent cache
       try {
         await supabase
@@ -173,17 +168,17 @@ class CacheService {
     } else {
       // Clear by pattern (e.g., "user:*" or "*:stats")
       const keysToDelete: string[] = [];
-      
+
       // Check memory cache
       for (const key of this.memoryCache.keys()) {
         if (this.matchPattern(key, pattern)) {
           keysToDelete.push(key);
         }
       }
-      
+
       // Delete from memory
       keysToDelete.forEach(key => this.memoryCache.delete(key));
-      
+
       // Delete from persistent cache (using SQL LIKE)
       try {
         const likePattern = pattern.replace(/\*/g, '%');
@@ -192,11 +187,14 @@ class CacheService {
           .delete()
           .like('cache_key', likePattern);
       } catch (error) {
-        console.error('[Cache] Error clearing persistent cache by pattern:', error);
+        console.error(
+          '[Cache] Error clearing persistent cache by pattern:',
+          error
+        );
       }
     }
   }
-  
+
   /**
    * Check if key exists in cache
    */
@@ -204,26 +202,29 @@ class CacheService {
     const value = await this.get(key);
     return value !== null;
   }
-  
+
   /**
    * Get cache statistics
    */
   getCacheStats() {
     const memorySize = this.memoryCache.size;
     const entries = Array.from(this.memoryCache.values());
-    
+
     const stats = {
       memorySize,
       totalAccesses: entries.reduce((sum, entry) => sum + entry.accessCount, 0),
-      averageAccessCount: memorySize > 0 
-        ? entries.reduce((sum, entry) => sum + entry.accessCount, 0) / memorySize
-        : 0,
-      expiredCount: entries.filter(entry => new Date() >= entry.expiresAt).length
+      averageAccessCount:
+        memorySize > 0
+          ? entries.reduce((sum, entry) => sum + entry.accessCount, 0) /
+            memorySize
+          : 0,
+      expiredCount: entries.filter(entry => new Date() >= entry.expiresAt)
+        .length,
     };
-    
+
     return stats;
   }
-  
+
   /**
    * Wrap a function with caching
    */
@@ -236,32 +237,32 @@ class CacheService {
     }
   ): T {
     const { keyGenerator, ttl, persistent } = options;
-    
+
     return (async (...args: Parameters<T>) => {
       const key = keyGenerator(...args);
-      
+
       // Check cache first
       const cached = await this.get(key);
       if (cached !== null) {
         return cached;
       }
-      
+
       // Execute function
       const result = await fn(...args);
-      
+
       // Cache result
       await this.set(key, result, { ttl, persistent });
-      
+
       return result;
     }) as T;
   }
-  
+
   /**
    * Batch get multiple keys
    */
   async getMany<T = any>(keys: string[]): Promise<Map<string, T>> {
     const results = new Map<string, T>();
-    
+
     // Try to get from memory first
     const missingKeys: string[] = [];
     for (const key of keys) {
@@ -272,7 +273,7 @@ class CacheService {
         missingKeys.push(key);
       }
     }
-    
+
     // Fetch missing keys from persistent cache
     if (missingKeys.length > 0) {
       try {
@@ -280,20 +281,20 @@ class CacheService {
           .from('cache_entries')
           .select('*')
           .in('cache_key', missingKeys);
-        
+
         if (!error && data) {
           for (const entry of data) {
             const expiresAt = new Date(entry.expires_at);
             if (new Date() < expiresAt) {
               results.set(entry.cache_key, entry.cache_value as T);
-              
+
               // Store in memory
               this.memoryCache.set(entry.cache_key, {
                 key: entry.cache_key,
                 value: entry.cache_value,
                 expiresAt,
                 createdAt: new Date(entry.created_at),
-                accessCount: entry.accessed_count
+                accessCount: entry.accessed_count,
               });
             }
           }
@@ -302,10 +303,10 @@ class CacheService {
         console.error('[Cache] Error in batch get:', error);
       }
     }
-    
+
     return results;
   }
-  
+
   /**
    * Batch set multiple key-value pairs
    */
@@ -313,13 +314,10 @@ class CacheService {
     entries: Array<{ key: string; value: T }>,
     options: CacheOptions = {}
   ): Promise<void> {
-    const {
-      ttl = this.DEFAULT_TTL,
-      persistent = false
-    } = options;
-    
+    const { ttl = this.DEFAULT_TTL, persistent = false } = options;
+
     const expiresAt = new Date(Date.now() + ttl);
-    
+
     // Set in memory
     for (const { key, value } of entries) {
       this.memoryCache.set(key, {
@@ -327,10 +325,10 @@ class CacheService {
         value,
         expiresAt,
         createdAt: new Date(),
-        accessCount: 0
+        accessCount: 0,
       });
     }
-    
+
     // Set in persistent cache if needed
     if (persistent) {
       try {
@@ -339,18 +337,16 @@ class CacheService {
           cache_value: value,
           expires_at: expiresAt.toISOString(),
           accessed_count: 0,
-          last_accessed_at: new Date().toISOString()
+          last_accessed_at: new Date().toISOString(),
         }));
-        
-        await supabase
-          .from('cache_entries')
-          .upsert(rows);
+
+        await supabase.from('cache_entries').upsert(rows);
       } catch (error) {
         console.error('[Cache] Error in batch set:', error);
       }
     }
   }
-  
+
   /**
    * Invalidate cache by tags
    */
@@ -360,41 +356,46 @@ class CacheService {
       await this.clear(`*:${tag}:*`);
     }
   }
-  
+
   // Private methods
-  
+
   private startCleanupTimer(): void {
     this.cleanupTimer = setInterval(() => {
       this.cleanup();
     }, this.CLEANUP_INTERVAL);
   }
-  
+
   private cleanup(): void {
     const now = new Date();
     const keysToDelete: string[] = [];
-    
+
     // Find expired entries
     for (const [key, entry] of this.memoryCache.entries()) {
       if (now >= entry.expiresAt) {
         keysToDelete.push(key);
       }
     }
-    
+
     // Delete expired entries
     keysToDelete.forEach(key => this.memoryCache.delete(key));
-    
+
     if (keysToDelete.length > 0) {
       console.log(`[Cache] Cleaned up ${keysToDelete.length} expired entries`);
     }
   }
-  
+
   private matchPattern(str: string, pattern: string): boolean {
     const regex = new RegExp(
-      '^' + pattern.split('*').map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$'
+      '^' +
+        pattern
+          .split('*')
+          .map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+          .join('.*') +
+        '$'
     );
     return regex.test(str);
   }
-  
+
   /**
    * Stop cleanup timer (for cleanup)
    */
@@ -418,7 +419,8 @@ export const CacheKeys = {
   userEmployees: (userId: string) => `user:employees:${userId}`,
   chatMessages: (sessionId: string) => `chat:messages:${sessionId}`,
   workflowStats: (workflowId: string) => `workflow:stats:${workflowId}`,
-  analyticsMetrics: (userId: string, period: string) => `analytics:metrics:${userId}:${period}`,
+  analyticsMetrics: (userId: string, period: string) =>
+    `analytics:metrics:${userId}:${period}`,
   automationOverview: (userId: string) => `automation:overview:${userId}`,
   userSettings: (userId: string) => `user:settings:${userId}`,
   apiUsage: (userId: string, period: string) => `api:usage:${userId}:${period}`,
@@ -428,9 +430,9 @@ export const CacheKeys = {
  * Cache TTL presets (in milliseconds)
  */
 export const CacheTTL = {
-  SHORT: 30 * 1000,        // 30 seconds
-  MEDIUM: 5 * 60 * 1000,   // 5 minutes
-  LONG: 30 * 60 * 1000,    // 30 minutes
-  HOUR: 60 * 60 * 1000,    // 1 hour
-  DAY: 24 * 60 * 60 * 1000 // 24 hours
+  SHORT: 30 * 1000, // 30 seconds
+  MEDIUM: 5 * 60 * 1000, // 5 minutes
+  LONG: 30 * 60 * 1000, // 30 minutes
+  HOUR: 60 * 60 * 1000, // 1 hour
+  DAY: 24 * 60 * 60 * 1000, // 24 hours
 };

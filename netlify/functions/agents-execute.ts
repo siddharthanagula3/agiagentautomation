@@ -26,7 +26,7 @@ interface ExecuteRequest {
   streaming?: boolean;
 }
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async event => {
   // Handle CORS
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -51,7 +51,14 @@ export const handler: Handler = async (event) => {
   }
 
   try {
-    const { conversationId, userId, message, threadId, assistantId, streaming }: ExecuteRequest = JSON.parse(event.body || '{}');
+    const {
+      conversationId,
+      userId,
+      message,
+      threadId,
+      assistantId,
+      streaming,
+    }: ExecuteRequest = JSON.parse(event.body || '{}');
 
     if (!conversationId || !userId || !message || !threadId || !assistantId) {
       return {
@@ -76,8 +83,11 @@ export const handler: Handler = async (event) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
     if (authError || !user || user.id !== userId) {
       return {
         statusCode: 401,
@@ -120,7 +130,10 @@ export const handler: Handler = async (event) => {
 
     // Poll for completion (for non-streaming)
     let runStatus = run;
-    while (runStatus.status === 'queued' || runStatus.status === 'in_progress') {
+    while (
+      runStatus.status === 'queued' ||
+      runStatus.status === 'in_progress'
+    ) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
     }
@@ -163,7 +176,7 @@ export const handler: Handler = async (event) => {
       // Update conversation last activity
       await supabase
         .from('conversations')
-        .update({ 
+        .update({
           updated_at: new Date().toISOString(),
         })
         .eq('id', conversationId);
@@ -183,7 +196,9 @@ export const handler: Handler = async (event) => {
         }),
       };
     } else if (runStatus.status === 'failed') {
-      throw new Error(`Run failed: ${runStatus.last_error?.message || 'Unknown error'}`);
+      throw new Error(
+        `Run failed: ${runStatus.last_error?.message || 'Unknown error'}`
+      );
     } else if (runStatus.status === 'requires_action') {
       // Handle tool calls (for future enhancement)
       return {
@@ -202,7 +217,6 @@ export const handler: Handler = async (event) => {
     } else {
       throw new Error(`Unexpected run status: ${runStatus.status}`);
     }
-
   } catch (error) {
     console.error('Agents execute error:', error);
     return {
@@ -210,11 +224,10 @@ export const handler: Handler = async (event) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       }),
     };
   }
 };
-

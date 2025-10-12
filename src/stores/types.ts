@@ -131,7 +131,7 @@ export interface EmployeeCapabilities {
     schedule: Array<{
       day: number; // 0-6 (Sunday-Saturday)
       start: string; // HH:MM format
-      end: string;   // HH:MM format
+      end: string; // HH:MM format
     }>;
   };
 }
@@ -161,7 +161,13 @@ export interface EmployeePricing {
 // Workforce & Job Types
 // ========================================
 
-export type JobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'paused' | 'cancelled';
+export type JobStatus =
+  | 'queued'
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'paused'
+  | 'cancelled';
 export type JobPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type WorkerStatus = 'idle' | 'working' | 'offline' | 'maintenance';
 
@@ -241,14 +247,17 @@ export interface NotificationSettings {
     push: boolean;
     sms: boolean;
   };
-  categories: Record<NotificationCategory, {
-    enabled: boolean;
-    channels: NotificationSettings['channels'];
-  }>;
+  categories: Record<
+    NotificationCategory,
+    {
+      enabled: boolean;
+      channels: NotificationSettings['channels'];
+    }
+  >;
   quietHours: {
     enabled: boolean;
     start: string; // HH:MM
-    end: string;   // HH:MM
+    end: string; // HH:MM
     timezone: string;
   };
 }
@@ -285,7 +294,13 @@ export interface LayoutConfig {
 // File & Upload Types
 // ========================================
 
-export type FileType = 'image' | 'document' | 'audio' | 'video' | 'code' | 'data';
+export type FileType =
+  | 'image'
+  | 'document'
+  | 'audio'
+  | 'video'
+  | 'code'
+  | 'data';
 
 export interface FileUpload {
   id: string;

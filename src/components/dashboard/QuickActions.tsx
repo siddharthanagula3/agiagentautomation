@@ -6,16 +6,16 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Plus, 
-  Bot, 
-  Users, 
-  Workflow, 
-  BarChart3, 
+import {
+  Plus,
+  Bot,
+  Users,
+  Workflow,
+  BarChart3,
   Settings,
   Zap,
   FileText,
-  Database
+  Database,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -100,47 +100,49 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
     <Card className={cn('', className)}>
       <CardHeader>
         <CardTitle className="flex items-center">
-          <Zap className="h-5 w-5 mr-2" />
+          <Zap className="mr-2 h-5 w-5" />
           Quick Actions
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {actions.map((action) => {
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {actions.map(action => {
             const Icon = action.icon;
             return (
               <Button
                 key={action.id}
                 variant={action.variant || 'outline'}
                 className={cn(
-                  'h-auto p-4 flex flex-col items-start space-y-2',
-                  action.disabled && 'opacity-50 cursor-not-allowed'
+                  'flex h-auto flex-col items-start space-y-2 p-4',
+                  action.disabled && 'cursor-not-allowed opacity-50'
                 )}
                 onClick={() => !action.disabled && handleAction(action)}
                 disabled={action.disabled}
               >
-                <div className="flex items-center space-x-2 w-full">
+                <div className="flex w-full items-center space-x-2">
                   <Icon className="h-4 w-4" />
-                  <span className="font-medium text-sm">{action.title}</span>
+                  <span className="text-sm font-medium">{action.title}</span>
                 </div>
-                <p className="text-xs text-muted-foreground text-left">
+                <p className="text-left text-xs text-muted-foreground">
                   {action.description}
                 </p>
               </Button>
             );
           })}
         </div>
-        
-        <div className="mt-6 pt-4 border-t">
+
+        <div className="mt-6 border-t pt-4">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-sm font-medium">Need help getting started?</h4>
+              <h4 className="text-sm font-medium">
+                Need help getting started?
+              </h4>
               <p className="text-xs text-muted-foreground">
                 Check out our guides and tutorials
               </p>
             </div>
             <Button variant="ghost" size="sm">
-              <Settings className="h-4 w-4 mr-1" />
+              <Settings className="mr-1 h-4 w-4" />
               Help
             </Button>
           </div>

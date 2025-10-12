@@ -6,10 +6,11 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(async req => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -29,11 +30,13 @@ serve(async (req) => {
 
     let query = supabase
       .from('blog_posts')
-      .select(`
+      .select(
+        `
         *,
         author:blog_authors(id, display_name, avatar_emoji),
         category:blog_categories(id, name, slug)
-      `)
+      `
+      )
       .eq('published', true)
       .order('published_at', { ascending: false });
 
@@ -59,7 +62,10 @@ serve(async (req) => {
       console.error('Error fetching blog posts:', error);
       return new Response(
         JSON.stringify({ error: 'Failed to fetch blog posts' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
       );
     }
 
@@ -67,16 +73,18 @@ serve(async (req) => {
       JSON.stringify({
         posts: posts || [],
         count: count || 0,
-        hasMore: (offset + limit) < (count || 0)
+        hasMore: offset + limit < (count || 0),
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
     );
-
   } catch (error) {
     console.error('Error in blog-posts function:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });

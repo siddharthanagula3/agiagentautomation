@@ -15,7 +15,14 @@ export interface WorkforceExecution {
   id: string;
   user_id: string;
   input_text: string;
-  status: 'pending' | 'planning' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
+  status:
+    | 'pending'
+    | 'planning'
+    | 'running'
+    | 'paused'
+    | 'completed'
+    | 'failed'
+    | 'cancelled';
   intent_type?: string;
   domain?: string;
   complexity?: string;
@@ -96,7 +103,7 @@ export async function createExecution(
         completed_tasks: 0,
         failed_tasks: 0,
         estimated_time: plan.estimatedTotalTime,
-        estimated_cost: 0 // Will be calculated
+        estimated_cost: 0, // Will be calculated
       })
       .select()
       .single();
@@ -134,21 +141,28 @@ export async function updateExecutionStatus(
   try {
     const updateData: any = {
       status,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
 
     if (status === 'running' && !updates) {
       updateData.started_at = new Date().toISOString();
     }
 
-    if (status === 'completed' || status === 'failed' || status === 'cancelled') {
+    if (
+      status === 'completed' ||
+      status === 'failed' ||
+      status === 'cancelled'
+    ) {
       updateData.completed_at = new Date().toISOString();
     }
 
     if (updates) {
-      if (updates.completedTasks !== undefined) updateData.completed_tasks = updates.completedTasks;
-      if (updates.failedTasks !== undefined) updateData.failed_tasks = updates.failedTasks;
-      if (updates.actualCost !== undefined) updateData.actual_cost = updates.actualCost;
+      if (updates.completedTasks !== undefined)
+        updateData.completed_tasks = updates.completedTasks;
+      if (updates.failedTasks !== undefined)
+        updateData.failed_tasks = updates.failedTasks;
+      if (updates.actualCost !== undefined)
+        updateData.actual_cost = updates.actualCost;
       if (updates.errorMessage) updateData.error_message = updates.errorMessage;
     }
 
@@ -172,7 +186,9 @@ export async function updateExecutionStatus(
 /**
  * Get execution by ID
  */
-export async function getExecution(executionId: string): Promise<WorkforceExecution | null> {
+export async function getExecution(
+  executionId: string
+): Promise<WorkforceExecution | null> {
   try {
     const { data, error } = await supabase
       .from('workforce_executions')
@@ -222,7 +238,9 @@ export async function getUserExecutions(
 /**
  * Get active executions for a user
  */
-export async function getActiveExecutions(userId: string): Promise<WorkforceExecution[]> {
+export async function getActiveExecutions(
+  userId: string
+): Promise<WorkforceExecution[]> {
   try {
     const { data, error } = await supabase
       .from('workforce_executions')
@@ -268,12 +286,10 @@ export async function createExecutionTasks(
       assigned_agent: task.requiredAgent,
       dependencies: task.dependencies,
       retry_count: task.retryCount,
-      estimated_time: task.estimatedTime
+      estimated_time: task.estimatedTime,
     }));
 
-    const { error } = await supabase
-      .from('workforce_tasks')
-      .insert(taskData);
+    const { error } = await supabase.from('workforce_tasks').insert(taskData);
 
     if (error) {
       console.error('Error creating execution tasks:', error);
@@ -303,7 +319,7 @@ export async function updateTaskStatus(
 ): Promise<boolean> {
   try {
     const updateData: any = {
-      status
+      status,
     };
 
     if (status === 'in_progress') {
@@ -317,8 +333,10 @@ export async function updateTaskStatus(
     if (updates) {
       if (updates.result !== undefined) updateData.result = updates.result;
       if (updates.errorMessage) updateData.error_message = updates.errorMessage;
-      if (updates.retryCount !== undefined) updateData.retry_count = updates.retryCount;
-      if (updates.actualTime !== undefined) updateData.actual_time = updates.actualTime;
+      if (updates.retryCount !== undefined)
+        updateData.retry_count = updates.retryCount;
+      if (updates.actualTime !== undefined)
+        updateData.actual_time = updates.actualTime;
     }
 
     const { error } = await supabase
@@ -342,7 +360,9 @@ export async function updateTaskStatus(
 /**
  * Get tasks for an execution
  */
-export async function getExecutionTasks(executionId: string): Promise<WorkforceTask[]> {
+export async function getExecutionTasks(
+  executionId: string
+): Promise<WorkforceTask[]> {
   try {
     const { data, error } = await supabase
       .from('workforce_tasks')
@@ -380,18 +400,16 @@ export async function trackAPIUsage(
   sessionId?: string
 ): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('api_usage')
-      .insert({
-        user_id: userId,
-        provider,
-        model,
-        operation_type: operationType,
-        tokens_used: tokensUsed,
-        cost,
-        execution_id: executionId,
-        session_id: sessionId
-      });
+    const { error } = await supabase.from('api_usage').insert({
+      user_id: userId,
+      provider,
+      model,
+      operation_type: operationType,
+      tokens_used: tokensUsed,
+      cost,
+      execution_id: executionId,
+      session_id: sessionId,
+    });
 
     if (error) {
       console.error('Error tracking API usage:', error);
@@ -417,10 +435,7 @@ export async function getUserAPIUsage(
   endDate?: Date
 ): Promise<APIUsage[]> {
   try {
-    let query = supabase
-      .from('api_usage')
-      .select('*')
-      .eq('user_id', userId);
+    let query = supabase.from('api_usage').select('*').eq('user_id', userId);
 
     if (startDate) {
       query = query.gte('created_at', startDate.toISOString());
@@ -430,7 +445,9 @@ export async function getUserAPIUsage(
       query = query.lte('created_at', endDate.toISOString());
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error } = await query.order('created_at', {
+      ascending: false,
+    });
 
     if (error) {
       console.error('Error getting API usage:', error);
@@ -478,7 +495,7 @@ export async function getAPIUsageSummary(
     const summary = {
       totalCost: 0,
       totalTokens: 0,
-      byProvider: {} as Record<string, { cost: number; tokens: number }>
+      byProvider: {} as Record<string, { cost: number; tokens: number }>,
     };
 
     usage.forEach(record => {
@@ -499,7 +516,7 @@ export async function getAPIUsageSummary(
     return {
       totalCost: 0,
       totalTokens: 0,
-      byProvider: {}
+      byProvider: {},
     };
   }
 }
@@ -511,7 +528,10 @@ export async function getAPIUsageSummary(
 /**
  * Update subscription token usage
  */
-async function updateSubscriptionUsage(userId: string, tokensUsed: number): Promise<boolean> {
+async function updateSubscriptionUsage(
+  userId: string,
+  tokensUsed: number
+): Promise<boolean> {
   try {
     const { data: subscription } = await supabase
       .from('user_subscriptions')
@@ -529,7 +549,7 @@ async function updateSubscriptionUsage(userId: string, tokensUsed: number): Prom
       .from('user_subscriptions')
       .update({
         used_tokens: newUsedTokens,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('user_id', userId);
 
@@ -600,7 +620,7 @@ export async function getDashboardStats(userId: string): Promise<{
         totalWorkflows: 0,
         totalExecutions: 0,
         successRate: 0,
-        totalCost: 0
+        totalCost: 0,
       };
     }
 
@@ -608,7 +628,8 @@ export async function getDashboardStats(userId: string): Promise<{
     const completedTasks = data.total_completed_tasks || 0;
     const failedTasks = data.total_failed_tasks || 0;
     const totalTasks = completedTasks + failedTasks;
-    const successRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+    const successRate =
+      totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
     return {
       activeEmployees: data.active_employees || 0,
@@ -617,7 +638,7 @@ export async function getDashboardStats(userId: string): Promise<{
       totalWorkflows: data.total_executions || 0,
       totalExecutions: data.total_executions || 0,
       successRate: Math.round(successRate),
-      totalCost: data.total_spent || 0
+      totalCost: data.total_spent || 0,
     };
   } catch (error) {
     console.error('Exception getting dashboard stats:', error);
@@ -628,7 +649,7 @@ export async function getDashboardStats(userId: string): Promise<{
       totalWorkflows: 0,
       totalExecutions: 0,
       successRate: 0,
-      totalCost: 0
+      totalCost: 0,
     };
   }
 }
@@ -671,23 +692,23 @@ export const workforceService = {
   getExecution,
   getUserExecutions,
   getActiveExecutions,
-  
+
   // Tasks
   createExecutionTasks,
   updateTaskStatus,
   getExecutionTasks,
-  
+
   // API Usage
   trackAPIUsage,
   getUserAPIUsage,
   getAPIUsageSummary,
-  
+
   // Subscription
   getUserSubscription,
-  
+
   // Dashboard
   getDashboardStats,
-  getRecentActivity
+  getRecentActivity,
 };
 
 export default workforceService;

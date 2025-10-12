@@ -101,7 +101,7 @@ import {
   Upload,
   Monitor,
   Smartphone,
-  Tablet
+  Tablet,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -136,7 +136,13 @@ interface ChatMessage {
   senderId: string;
   senderName: string;
   senderRole?: string;
-  status?: 'sending' | 'delivered' | 'read' | 'processing' | 'completed' | 'error';
+  status?:
+    | 'sending'
+    | 'delivered'
+    | 'read'
+    | 'processing'
+    | 'completed'
+    | 'error';
   attachments?: MessageAttachment[];
   toolExecution?: ToolExecution;
   workflowUpdate?: WorkflowUpdate;
@@ -217,7 +223,10 @@ interface MultiTabChatInterfaceProps {
   enableFileAttachments?: boolean;
   enableToolExecution?: boolean;
   onTabChange?: (tabId: string) => void;
-  onMessageSend?: (tabId: string, message: Omit<ChatMessage, 'id' | 'timestamp'>) => void;
+  onMessageSend?: (
+    tabId: string,
+    message: Omit<ChatMessage, 'id' | 'timestamp'>
+  ) => void;
   onTabCreate?: (tab: Omit<ChatTab, 'id'>) => void;
   onTabClose?: (tabId: string) => void;
 }
@@ -234,23 +243,31 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
   onTabChange,
   onMessageSend,
   onTabCreate,
-  onTabClose
+  onTabClose,
 }) => {
   // State management
   const [tabs, setTabs] = useState<ChatTab[]>(initialTabs);
-  const [activeTabId, setActiveTabId] = useState<string>(initialTabs[0]?.id || '');
-  const [messages, setMessages] = useState<Map<string, ChatMessage[]>>(new Map());
+  const [activeTabId, setActiveTabId] = useState<string>(
+    initialTabs[0]?.id || ''
+  );
+  const [messages, setMessages] = useState<Map<string, ChatMessage[]>>(
+    new Map()
+  );
   const [messageInput, setMessageInput] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
+  const [selectedMessages, setSelectedMessages] = useState<Set<string>>(
+    new Set()
+  );
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [mutedTabs, setMutedTabs] = useState<Set<string>>(new Set());
   const [showNewTabDialog, setShowNewTabDialog] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState<Set<string>>(new Set());
-  const [threadMessages, setThreadMessages] = useState<Map<string, ChatMessage[]>>(new Map());
+  const [threadMessages, setThreadMessages] = useState<
+    Map<string, ChatMessage[]>
+  >(new Map());
   const [activeThread, setActiveThread] = useState<string | null>(null);
 
   // Refs
@@ -273,13 +290,17 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
       return [] as ChatMessage[];
     },
     enabled: !!activeTabId,
-    staleTime: 30 * 1000
+    staleTime: 30 * 1000,
   });
 
   // Update messages when loaded (prevent infinite loop by using a ref)
   const loadedMessagesRef = useRef<ChatMessage[] | null>(null);
   useEffect(() => {
-    if (loadedMessages && activeTabId && loadedMessages !== loadedMessagesRef.current) {
+    if (
+      loadedMessages &&
+      activeTabId &&
+      loadedMessages !== loadedMessagesRef.current
+    ) {
       loadedMessagesRef.current = loadedMessages;
       setMessages(prev => new Map(prev.set(activeTabId, loadedMessages)));
     }
@@ -315,7 +336,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
     // Capture current values to avoid closure issues
     const currentInput = messageInput;
     const currentTabId = activeTabId;
-    
+
     if (!currentInput.trim() || !currentTabId) return;
 
     const newMessage: ChatMessage = {
@@ -325,11 +346,19 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
       timestamp: new Date(),
       senderId: 'user-1',
       senderName: 'You',
-      status: 'sending'
+      status: 'sending',
     };
 
     // Add message optimistically
-    setMessages(prev => new Map(prev.set(currentTabId, [...(prev.get(currentTabId) || []), newMessage])));
+    setMessages(
+      prev =>
+        new Map(
+          prev.set(currentTabId, [
+            ...(prev.get(currentTabId) || []),
+            newMessage,
+          ])
+        )
+    );
     setMessageInput('');
 
     // Notify parent
@@ -338,32 +367,44 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
     try {
       // Simulate sending
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       // Update status
       setMessages(prev => {
         const tabMessages = prev.get(currentTabId) || [];
         const updatedMessages = tabMessages.map(msg =>
-          msg.id === newMessage.id ? { ...msg, status: 'delivered' as const } : msg
+          msg.id === newMessage.id
+            ? { ...msg, status: 'delivered' as const }
+            : msg
         );
         return new Map(prev.set(currentTabId, updatedMessages));
       });
 
       // Simulate AI response after a delay
-      setTimeout(() => {
-        const aiResponse: ChatMessage = {
-          id: `ai-${Date.now()}`,
-          type: 'assistant',
-          content: generateAIResponse(currentInput),
-          timestamp: new Date(),
-          senderId: 'ai-assistant',
-          senderName: 'AI Assistant',
-          senderRole: 'General Assistant',
-          status: 'delivered'
-        };
+      setTimeout(
+        () => {
+          const aiResponse: ChatMessage = {
+            id: `ai-${Date.now()}`,
+            type: 'assistant',
+            content: generateAIResponse(currentInput),
+            timestamp: new Date(),
+            senderId: 'ai-assistant',
+            senderName: 'AI Assistant',
+            senderRole: 'General Assistant',
+            status: 'delivered',
+          };
 
-        setMessages(prev => new Map(prev.set(currentTabId, [...(prev.get(currentTabId) || []), aiResponse])));
-      }, 1000 + Math.random() * 2000);
-
+          setMessages(
+            prev =>
+              new Map(
+                prev.set(currentTabId, [
+                  ...(prev.get(currentTabId) || []),
+                  aiResponse,
+                ])
+              )
+          );
+        },
+        1000 + Math.random() * 2000
+      );
     } catch (error) {
       // Handle error
       setMessages(prev => {
@@ -381,164 +422,203 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
     return '';
   };
 
-  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  }, [handleSendMessage]);
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+      }
+    },
+    [handleSendMessage]
+  );
 
   // Tab management
-  const handleTabChange = useCallback((tabId: string) => {
-    setActiveTabId(tabId);
-    onTabChange?.(tabId);
-    
-    // Mark messages as read
-    setTabs(prev => prev.map(tab =>
-      tab.id === tabId ? { ...tab, unreadCount: 0 } : tab
-    ));
-  }, [onTabChange]);
+  const handleTabChange = useCallback(
+    (tabId: string) => {
+      setActiveTabId(tabId);
+      onTabChange?.(tabId);
 
-  const handleTabClose = useCallback((tabId: string) => {
-    if (tabs.length <= 1) return;
-    
-    setTabs(prev => prev.filter(tab => tab.id !== tabId));
-    setMessages(prev => {
-      const newMessages = new Map(prev);
-      newMessages.delete(tabId);
-      return newMessages;
-    });
-    
-    if (activeTabId === tabId) {
-      const remainingTabs = tabs.filter(tab => tab.id !== tabId);
-      setActiveTabId(remainingTabs[0]?.id || '');
-    }
-    
-    onTabClose?.(tabId);
-  }, [tabs, activeTabId, onTabClose]);
-
-  const handleNewTab = useCallback((tabData: Omit<ChatTab, 'id'>) => {
-    if (tabs.length >= maxTabs) {
-      toast.error(`Maximum ${maxTabs} tabs allowed`);
-      return;
-    }
-
-    const newTab: ChatTab = {
-      ...tabData,
-      id: `tab-${Date.now()}`
-    };
-
-    setTabs(prev => [...prev, newTab]);
-    setActiveTabId(newTab.id);
-    setShowNewTabDialog(false);
-    onTabCreate?.(tabData);
-  }, [tabs, maxTabs, onTabCreate]);
-
-  // Message actions
-  const handleMessageEdit = useCallback((messageId: string, newContent: string) => {
-    const currentTabId = activeTabId;
-    setMessages(prev => {
-      const tabMessages = prev.get(currentTabId) || [];
-      const updatedMessages = tabMessages.map(msg =>
-        msg.id === messageId 
-          ? { 
-              ...msg, 
-              content: newContent,
-              metadata: { 
-                ...msg.metadata, 
-                edited: true, 
-                editedAt: new Date() 
-              }
-            }
-          : msg
+      // Mark messages as read
+      setTabs(prev =>
+        prev.map(tab => (tab.id === tabId ? { ...tab, unreadCount: 0 } : tab))
       );
-      return new Map(prev.set(currentTabId, updatedMessages));
-    });
-  }, [activeTabId]);
+    },
+    [onTabChange]
+  );
 
-  const handleMessageDelete = useCallback((messageId: string) => {
-    const currentTabId = activeTabId;
-    setMessages(prev => {
-      const tabMessages = prev.get(currentTabId) || [];
-      const updatedMessages = tabMessages.filter(msg => msg.id !== messageId);
-      return new Map(prev.set(currentTabId, updatedMessages));
-    });
-  }, [activeTabId]);
+  const handleTabClose = useCallback(
+    (tabId: string) => {
+      if (tabs.length <= 1) return;
 
-  const handleMessageReaction = useCallback((messageId: string, emoji: string) => {
-    const currentTabId = activeTabId;
-    setMessages(prev => {
-      const tabMessages = prev.get(currentTabId) || [];
-      const updatedMessages = tabMessages.map(msg => {
-        if (msg.id === messageId) {
-          const reactions = msg.metadata?.reactions || [];
-          const existingReaction = reactions.find(r => r.emoji === emoji && r.userId === 'user-1');
-          
-          if (existingReaction) {
-            // Remove reaction
-            return {
-              ...msg,
-              metadata: {
-                ...msg.metadata,
-                reactions: reactions.filter(r => !(r.emoji === emoji && r.userId === 'user-1'))
-              }
-            };
-          } else {
-            // Add reaction
-            return {
-              ...msg,
-              metadata: {
-                ...msg.metadata,
-                reactions: [
-                  ...reactions,
-                  { emoji, userId: 'user-1', userName: 'You', timestamp: new Date() }
-                ]
-              }
-            };
-          }
-        }
-        return msg;
+      setTabs(prev => prev.filter(tab => tab.id !== tabId));
+      setMessages(prev => {
+        const newMessages = new Map(prev);
+        newMessages.delete(tabId);
+        return newMessages;
       });
-      return new Map(prev.set(currentTabId, updatedMessages));
-    });
-  }, [activeTabId]);
 
-  const handleFileDrop = useCallback((files: FileList) => {
-    if (!enableFileAttachments) return;
-    
-    Array.from(files).forEach(file => {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        toast.error(`File ${file.name} is too large (max 10MB)`);
+      if (activeTabId === tabId) {
+        const remainingTabs = tabs.filter(tab => tab.id !== tabId);
+        setActiveTabId(remainingTabs[0]?.id || '');
+      }
+
+      onTabClose?.(tabId);
+    },
+    [tabs, activeTabId, onTabClose]
+  );
+
+  const handleNewTab = useCallback(
+    (tabData: Omit<ChatTab, 'id'>) => {
+      if (tabs.length >= maxTabs) {
+        toast.error(`Maximum ${maxTabs} tabs allowed`);
         return;
       }
 
-      const attachment: MessageAttachment = {
-        id: `file-${Date.now()}`,
-        name: file.name,
-        type: file.type.startsWith('image/') ? 'image' : 'file',
-        url: URL.createObjectURL(file),
-        size: file.size
+      const newTab: ChatTab = {
+        ...tabData,
+        id: `tab-${Date.now()}`,
       };
 
-      const message: ChatMessage = {
-        id: `msg-${Date.now()}`,
-        type: 'user',
-        content: `Uploaded ${file.name}`,
-        timestamp: new Date(),
-        senderId: 'user-1',
-        senderName: 'You',
-        status: 'delivered',
-        attachments: [attachment]
-      };
+      setTabs(prev => [...prev, newTab]);
+      setActiveTabId(newTab.id);
+      setShowNewTabDialog(false);
+      onTabCreate?.(tabData);
+    },
+    [tabs, maxTabs, onTabCreate]
+  );
 
-      setMessages(prev => new Map(prev.set(activeTabId, [...(prev.get(activeTabId) || []), message])));
-    });
-  }, [activeTabId, enableFileAttachments]);
+  // Message actions
+  const handleMessageEdit = useCallback(
+    (messageId: string, newContent: string) => {
+      const currentTabId = activeTabId;
+      setMessages(prev => {
+        const tabMessages = prev.get(currentTabId) || [];
+        const updatedMessages = tabMessages.map(msg =>
+          msg.id === messageId
+            ? {
+                ...msg,
+                content: newContent,
+                metadata: {
+                  ...msg.metadata,
+                  edited: true,
+                  editedAt: new Date(),
+                },
+              }
+            : msg
+        );
+        return new Map(prev.set(currentTabId, updatedMessages));
+      });
+    },
+    [activeTabId]
+  );
+
+  const handleMessageDelete = useCallback(
+    (messageId: string) => {
+      const currentTabId = activeTabId;
+      setMessages(prev => {
+        const tabMessages = prev.get(currentTabId) || [];
+        const updatedMessages = tabMessages.filter(msg => msg.id !== messageId);
+        return new Map(prev.set(currentTabId, updatedMessages));
+      });
+    },
+    [activeTabId]
+  );
+
+  const handleMessageReaction = useCallback(
+    (messageId: string, emoji: string) => {
+      const currentTabId = activeTabId;
+      setMessages(prev => {
+        const tabMessages = prev.get(currentTabId) || [];
+        const updatedMessages = tabMessages.map(msg => {
+          if (msg.id === messageId) {
+            const reactions = msg.metadata?.reactions || [];
+            const existingReaction = reactions.find(
+              r => r.emoji === emoji && r.userId === 'user-1'
+            );
+
+            if (existingReaction) {
+              // Remove reaction
+              return {
+                ...msg,
+                metadata: {
+                  ...msg.metadata,
+                  reactions: reactions.filter(
+                    r => !(r.emoji === emoji && r.userId === 'user-1')
+                  ),
+                },
+              };
+            } else {
+              // Add reaction
+              return {
+                ...msg,
+                metadata: {
+                  ...msg.metadata,
+                  reactions: [
+                    ...reactions,
+                    {
+                      emoji,
+                      userId: 'user-1',
+                      userName: 'You',
+                      timestamp: new Date(),
+                    },
+                  ],
+                },
+              };
+            }
+          }
+          return msg;
+        });
+        return new Map(prev.set(currentTabId, updatedMessages));
+      });
+    },
+    [activeTabId]
+  );
+
+  const handleFileDrop = useCallback(
+    (files: FileList) => {
+      if (!enableFileAttachments) return;
+
+      Array.from(files).forEach(file => {
+        if (file.size > 10 * 1024 * 1024) {
+          // 10MB limit
+          toast.error(`File ${file.name} is too large (max 10MB)`);
+          return;
+        }
+
+        const attachment: MessageAttachment = {
+          id: `file-${Date.now()}`,
+          name: file.name,
+          type: file.type.startsWith('image/') ? 'image' : 'file',
+          url: URL.createObjectURL(file),
+          size: file.size,
+        };
+
+        const message: ChatMessage = {
+          id: `msg-${Date.now()}`,
+          type: 'user',
+          content: `Uploaded ${file.name}`,
+          timestamp: new Date(),
+          senderId: 'user-1',
+          senderName: 'You',
+          status: 'delivered',
+          attachments: [attachment],
+        };
+
+        setMessages(
+          prev =>
+            new Map(
+              prev.set(activeTabId, [...(prev.get(activeTabId) || []), message])
+            )
+        );
+      });
+    },
+    [activeTabId, enableFileAttachments]
+  );
 
   // Voice recording
   const toggleRecording = useCallback(() => {
     if (!enableVoiceMessages) return;
-    
+
     setIsRecording(!isRecording);
     if (!isRecording) {
       toast.info('Recording started...');
@@ -549,71 +629,82 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
   }, [isRecording, enableVoiceMessages]);
 
   return (
-    <div className={cn(
-      "flex flex-col h-full bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-xl overflow-hidden",
-      isFullscreen && "fixed inset-0 z-50 rounded-none border-0",
-      className
-    )}>
+    <div
+      className={cn(
+        'flex h-full flex-col overflow-hidden rounded-xl border border-slate-700/50 bg-slate-900/50 backdrop-blur-xl',
+        isFullscreen && 'fixed inset-0 z-50 rounded-none border-0',
+        className
+      )}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-700/50 bg-slate-800/30">
-        <div className="flex items-center space-x-4 flex-1">
+      <div className="flex items-center justify-between border-b border-slate-700/50 bg-slate-800/30 p-4">
+        <div className="flex flex-1 items-center space-x-4">
           {/* Tab Navigation */}
-          <div className="flex items-center space-x-1 max-w-2xl overflow-x-auto">
-            {tabs.map((tab) => (
+          <div className="flex max-w-2xl items-center space-x-1 overflow-x-auto">
+            {tabs.map(tab => (
               <motion.button
                 key={tab.id}
                 layout
                 onClick={() => handleTabChange(tab.id)}
                 className={cn(
-                  "relative flex items-center space-x-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 whitespace-nowrap group",
+                  'group relative flex items-center space-x-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm transition-all duration-200',
                   activeTabId === tab.id
-                    ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
-                    : "text-slate-400 hover:text-white hover:bg-slate-700/50",
-                  tab.isPinned && "border-l-2 border-l-yellow-500"
+                    ? 'border border-blue-500/30 bg-blue-500/20 text-blue-400'
+                    : 'text-slate-400 hover:bg-slate-700/50 hover:text-white',
+                  tab.isPinned && 'border-l-2 border-l-yellow-500'
                 )}
               >
                 {tab.type === 'individual' && <Bot className="h-4 w-4" />}
                 {tab.type === 'team' && <Users className="h-4 w-4" />}
                 {tab.type === 'workflow' && <Zap className="h-4 w-4" />}
-                
+
                 <span className="max-w-32 truncate">{tab.title}</span>
-                
+
                 {tab.unreadCount > 0 && (
-                  <Badge className="h-5 w-5 p-0 text-xs bg-red-500 text-white flex items-center justify-center">
+                  <Badge className="flex h-5 w-5 items-center justify-center bg-red-500 p-0 text-xs text-white">
                     {tab.unreadCount > 99 ? '99+' : tab.unreadCount}
                   </Badge>
                 )}
-                
+
                 {tab.isTyping && (
                   <div className="flex space-x-1">
-                    <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <div
+                      className="h-1 w-1 animate-bounce rounded-full bg-blue-400"
+                      style={{ animationDelay: '0ms' }}
+                    />
+                    <div
+                      className="h-1 w-1 animate-bounce rounded-full bg-blue-400"
+                      style={{ animationDelay: '150ms' }}
+                    />
+                    <div
+                      className="h-1 w-1 animate-bounce rounded-full bg-blue-400"
+                      style={{ animationDelay: '300ms' }}
+                    />
                   </div>
                 )}
-                
+
                 {tabs.length > 1 && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       handleTabClose(tab.id);
                     }}
-                    className="w-4 h-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-4 w-4 p-0 opacity-0 transition-opacity group-hover:opacity-100"
                   >
                     <X className="h-3 w-3" />
                   </Button>
                 )}
               </motion.button>
             ))}
-            
+
             {allowTabCreation && tabs.length < maxTabs && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowNewTabDialog(true)}
-                className="text-slate-400 hover:text-white px-2"
+                className="px-2 text-slate-400 hover:text-white"
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -630,8 +721,8 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
                 size="sm"
                 onClick={() => setShowSearch(!showSearch)}
                 className={cn(
-                  "text-slate-400 hover:text-white",
-                  showSearch && "text-blue-400"
+                  'text-slate-400 hover:text-white',
+                  showSearch && 'text-blue-400'
                 )}
               >
                 <Search className="h-4 w-4" />
@@ -648,31 +739,44 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
                 onClick={() => setIsFullscreen(!isFullscreen)}
                 className="text-slate-400 hover:text-white"
               >
-                {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                {isFullscreen ? (
+                  <Minimize2 className="h-4 w-4" />
+                ) : (
+                  <Maximize2 className="h-4 w-4" />
+                )}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</TooltipContent>
+            <TooltipContent>
+              {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+            </TooltipContent>
           </Tooltip>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-400 hover:text-white"
+              >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-slate-800 border-slate-700" align="end">
+            <DropdownMenuContent
+              className="border-slate-700 bg-slate-800"
+              align="end"
+            >
               <DropdownMenuLabel>Chat Options</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-slate-700" />
               <DropdownMenuItem className="text-slate-300">
-                <Bookmark className="h-4 w-4 mr-2" />
+                <Bookmark className="mr-2 h-4 w-4" />
                 View Bookmarks
               </DropdownMenuItem>
               <DropdownMenuItem className="text-slate-300">
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="mr-2 h-4 w-4" />
                 Export Chat
               </DropdownMenuItem>
               <DropdownMenuItem className="text-slate-300">
-                <Settings className="h-4 w-4 mr-2" />
+                <Settings className="mr-2 h-4 w-4" />
                 Settings
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -687,22 +791,22 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="border-b border-slate-700/50 bg-slate-800/30 overflow-hidden"
+            className="overflow-hidden border-b border-slate-700/50 bg-slate-800/30"
           >
             <div className="p-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-slate-400" />
                 <Input
                   placeholder="Search messages..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-slate-700/30 border-slate-600/30 text-white placeholder:text-slate-400"
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="border-slate-600/30 bg-slate-700/30 pl-10 text-white placeholder:text-slate-400"
                 />
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowSearch(false)}
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 w-6 h-6 p-0 text-slate-400 hover:text-white"
+                  className="absolute right-1 top-1/2 h-6 w-6 -translate-y-1/2 transform p-0 text-slate-400 hover:text-white"
                 >
                   <X className="h-3 w-3" />
                 </Button>
@@ -713,46 +817,52 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
       </AnimatePresence>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
         {/* Messages Area */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex flex-1 flex-col">
           {/* Messages List */}
           <ScrollArea className="flex-1 p-4">
             {messagesLoading ? (
               <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="flex space-x-3 animate-pulse">
-                    <div className="w-8 h-8 bg-slate-700 rounded-full" />
+                  <div key={i} className="flex animate-pulse space-x-3">
+                    <div className="h-8 w-8 rounded-full bg-slate-700" />
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-slate-700 rounded w-1/4" />
-                      <div className="h-16 bg-slate-700 rounded" />
+                      <div className="h-4 w-1/4 rounded bg-slate-700" />
+                      <div className="h-16 rounded bg-slate-700" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : activeMessages.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
+              <div className="flex h-full items-center justify-center">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-700/50">
                     <MessageSquare className="h-8 w-8 text-slate-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Start a conversation</h3>
-                  <p className="text-slate-400">Send a message to begin chatting with AI employees</p>
+                  <h3 className="mb-2 text-lg font-semibold text-white">
+                    Start a conversation
+                  </h3>
+                  <p className="text-slate-400">
+                    Send a message to begin chatting with AI employees
+                  </p>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
-                {activeMessages.map((message) => (
+                {activeMessages.map(message => (
                   <MessageComponent
                     key={message.id}
                     message={message}
                     onEdit={handleMessageEdit}
                     onDelete={handleMessageDelete}
                     onReaction={handleMessageReaction}
-                    onPin={(messageId) => setPinnedMessages(prev => new Set(prev.add(messageId)))}
+                    onPin={messageId =>
+                      setPinnedMessages(prev => new Set(prev.add(messageId)))
+                    }
                     isPinned={pinnedMessages.has(message.id)}
                     isSelected={selectedMessages.has(message.id)}
-                    onSelect={(messageId) => {
+                    onSelect={messageId => {
                       setSelectedMessages(prev => {
                         const newSelection = new Set(prev);
                         if (newSelection.has(messageId)) {
@@ -771,29 +881,29 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
           </ScrollArea>
 
           {/* Message Input */}
-          <div className="p-4 border-t border-slate-700/50 bg-slate-800/30">
+          <div className="border-t border-slate-700/50 bg-slate-800/30 p-4">
             <div className="flex items-end space-x-3">
-              <div className="flex-1 relative">
+              <div className="relative flex-1">
                 <Textarea
                   ref={inputRef}
                   placeholder={`Message ${activeTab?.title || 'AI Employee'}...`}
                   value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
+                  onChange={e => setMessageInput(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="min-h-[44px] max-h-32 resize-none bg-slate-700/30 border-slate-600/30 text-white placeholder:text-slate-400 pr-24"
+                  className="max-h-32 min-h-[44px] resize-none border-slate-600/30 bg-slate-700/30 pr-24 text-white placeholder:text-slate-400"
                   disabled={!activeTabId}
-                  onDrop={(e) => {
+                  onDrop={e => {
                     e.preventDefault();
                     const files = e.dataTransfer.files;
                     if (files.length > 0) {
                       handleFileDrop(files);
                     }
                   }}
-                  onDragOver={(e) => e.preventDefault()}
+                  onDragOver={e => e.preventDefault()}
                 />
-                
+
                 {/* Input Actions */}
-                <div className="absolute right-2 bottom-2 flex items-center space-x-1">
+                <div className="absolute bottom-2 right-2 flex items-center space-x-1">
                   {enableFileAttachments && (
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -801,7 +911,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
                           variant="ghost"
                           size="sm"
                           onClick={() => fileInputRef.current?.click()}
-                          className="w-8 h-8 p-0 text-slate-400 hover:text-white"
+                          className="h-8 w-8 p-0 text-slate-400 hover:text-white"
                         >
                           <Paperclip className="h-4 w-4" />
                         </Button>
@@ -809,7 +919,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
                       <TooltipContent>Attach File</TooltipContent>
                     </Tooltip>
                   )}
-                  
+
                   {enableVoiceMessages && (
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -818,34 +928,42 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
                           size="sm"
                           onClick={toggleRecording}
                           className={cn(
-                            "w-8 h-8 p-0",
-                            isRecording ? "text-red-400 hover:text-red-300" : "text-slate-400 hover:text-white"
+                            'h-8 w-8 p-0',
+                            isRecording
+                              ? 'text-red-400 hover:text-red-300'
+                              : 'text-slate-400 hover:text-white'
                           )}
                         >
-                          {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                          {isRecording ? (
+                            <MicOff className="h-4 w-4" />
+                          ) : (
+                            <Mic className="h-4 w-4" />
+                          )}
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>{isRecording ? 'Stop Recording' : 'Voice Message'}</TooltipContent>
+                      <TooltipContent>
+                        {isRecording ? 'Stop Recording' : 'Voice Message'}
+                      </TooltipContent>
                     </Tooltip>
                   )}
                 </div>
               </div>
-              
+
               <Button
                 onClick={handleSendMessage}
                 disabled={!messageInput.trim() || !activeTabId}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white h-11"
+                className="h-11 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
               >
                 <Send className="h-4 w-4" />
               </Button>
             </div>
-            
+
             {/* Input Hints */}
-            <div className="flex items-center justify-between mt-2 text-xs text-slate-500">
+            <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
               <span>Press Enter to send, Shift+Enter for new line</span>
               {activeTab?.type === 'individual' && (
                 <span className="flex items-center space-x-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full" />
+                  <div className="h-2 w-2 rounded-full bg-green-400" />
                   <span>{activeTab.participants[0]?.name} is online</span>
                 </span>
               )}
@@ -860,7 +978,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
               initial={{ width: 0, opacity: 0 }}
               animate={{ width: 280, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
-              className="border-l border-slate-700/50 bg-slate-800/30 overflow-hidden"
+              className="overflow-hidden border-l border-slate-700/50 bg-slate-800/30"
             >
               <ParticipantsPanel tab={activeTab} />
             </motion.div>
@@ -874,7 +992,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
         type="file"
         multiple
         className="hidden"
-        onChange={(e) => {
+        onChange={e => {
           if (e.target.files) {
             handleFileDrop(e.target.files);
           }
@@ -883,14 +1001,17 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
 
       {/* New Tab Dialog */}
       <Dialog open={showNewTabDialog} onOpenChange={setShowNewTabDialog}>
-        <DialogContent className="bg-slate-800 border-slate-700">
+        <DialogContent className="border-slate-700 bg-slate-800">
           <DialogHeader>
             <DialogTitle className="text-white">Create New Chat</DialogTitle>
             <DialogDescription className="text-slate-400">
               Start a new conversation with an AI employee or team
             </DialogDescription>
           </DialogHeader>
-          <NewTabForm onSubmit={handleNewTab} onCancel={() => setShowNewTabDialog(false)} />
+          <NewTabForm
+            onSubmit={handleNewTab}
+            onCancel={() => setShowNewTabDialog(false)}
+          />
         </DialogContent>
       </Dialog>
     </div>
@@ -917,7 +1038,7 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
   onPin,
   isPinned,
   isSelected,
-  onSelect
+  onSelect,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message.content);
@@ -925,13 +1046,16 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
 
   const isUser = message.type === 'user';
   const reactions = message.metadata?.reactions || [];
-  const groupedReactions = reactions.reduce((acc, reaction) => {
-    if (!acc[reaction.emoji]) {
-      acc[reaction.emoji] = [];
-    }
-    acc[reaction.emoji].push(reaction);
-    return acc;
-  }, {} as Record<string, typeof reactions>);
+  const groupedReactions = reactions.reduce(
+    (acc, reaction) => {
+      if (!acc[reaction.emoji]) {
+        acc[reaction.emoji] = [];
+      }
+      acc[reaction.emoji].push(reaction);
+      return acc;
+    },
+    {} as Record<string, typeof reactions>
+  );
 
   const handleSaveEdit = () => {
     onEdit(message.id, editContent);
@@ -945,28 +1069,53 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "group relative p-3 rounded-lg transition-all duration-200",
-        isSelected && "bg-blue-500/10 border border-blue-500/30",
-        isPinned && "border-l-4 border-l-yellow-500",
-        isUser ? "ml-12 bg-blue-500/10" : "mr-12 bg-slate-800/50"
+        'group relative rounded-lg p-3 transition-all duration-200',
+        isSelected && 'border border-blue-500/30 bg-blue-500/10',
+        isPinned && 'border-l-4 border-l-yellow-500',
+        isUser ? 'ml-12 bg-blue-500/10' : 'mr-12 bg-slate-800/50'
       )}
     >
-      <div className={cn("flex space-x-3", isUser && "flex-row-reverse space-x-reverse")}>
+      <div
+        className={cn(
+          'flex space-x-3',
+          isUser && 'flex-row-reverse space-x-reverse'
+        )}
+      >
         {/* Avatar */}
-        <Avatar className="w-8 h-8 flex-shrink-0">
-          <AvatarImage src={message.type === 'user' ? undefined : `/avatars/${message.senderId}.png`} />
-          <AvatarFallback className="bg-slate-700 text-slate-300 text-xs">
-            {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+        <Avatar className="h-8 w-8 flex-shrink-0">
+          <AvatarImage
+            src={
+              message.type === 'user'
+                ? undefined
+                : `/avatars/${message.senderId}.png`
+            }
+          />
+          <AvatarFallback className="bg-slate-700 text-xs text-slate-300">
+            {isUser ? (
+              <User className="h-4 w-4" />
+            ) : (
+              <Bot className="h-4 w-4" />
+            )}
           </AvatarFallback>
         </Avatar>
 
         {/* Message Content */}
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           {/* Header */}
-          <div className={cn("flex items-center space-x-2 mb-1", isUser && "flex-row-reverse space-x-reverse")}>
-            <span className="text-sm font-medium text-white">{message.senderName}</span>
+          <div
+            className={cn(
+              'mb-1 flex items-center space-x-2',
+              isUser && 'flex-row-reverse space-x-reverse'
+            )}
+          >
+            <span className="text-sm font-medium text-white">
+              {message.senderName}
+            </span>
             {message.senderRole && (
-              <Badge variant="outline" className="text-xs border-slate-600 text-slate-400">
+              <Badge
+                variant="outline"
+                className="border-slate-600 text-xs text-slate-400"
+              >
                 {message.senderRole}
               </Badge>
             )}
@@ -983,13 +1132,21 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
             <div className="space-y-2">
               <Textarea
                 value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                className="bg-slate-700/30 border-slate-600/30 text-white"
+                onChange={e => setEditContent(e.target.value)}
+                className="border-slate-600/30 bg-slate-700/30 text-white"
                 autoFocus
               />
               <div className="flex items-center space-x-2">
-                <Button size="sm" onClick={handleSaveEdit}>Save</Button>
-                <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
+                <Button size="sm" onClick={handleSaveEdit}>
+                  Save
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsEditing(false)}
+                >
+                  Cancel
+                </Button>
               </div>
             </div>
           ) : (
@@ -1005,43 +1162,56 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
               )}
 
               {/* Text Content */}
-              <div className="text-slate-300 whitespace-pre-wrap break-words">
+              <div className="whitespace-pre-wrap break-words text-slate-300">
                 {message.content}
               </div>
 
               {/* Attachments */}
               {message.attachments && message.attachments.length > 0 && (
                 <div className="mt-2 space-y-2">
-                  {message.attachments.map((attachment) => (
-                    <AttachmentComponent key={attachment.id} attachment={attachment} />
+                  {message.attachments.map(attachment => (
+                    <AttachmentComponent
+                      key={attachment.id}
+                      attachment={attachment}
+                    />
                   ))}
                 </div>
               )}
 
               {/* Status */}
               {message.status && (
-                <div className="flex items-center space-x-1 mt-1">
-                  {message.status === 'sending' && <Loader2 className="h-3 w-3 animate-spin text-slate-400" />}
-                  {message.status === 'delivered' && <CheckCircle className="h-3 w-3 text-green-400" />}
-                  {message.status === 'error' && <AlertCircle className="h-3 w-3 text-red-400" />}
-                  {message.status === 'processing' && <Clock className="h-3 w-3 text-yellow-400" />}
+                <div className="mt-1 flex items-center space-x-1">
+                  {message.status === 'sending' && (
+                    <Loader2 className="h-3 w-3 animate-spin text-slate-400" />
+                  )}
+                  {message.status === 'delivered' && (
+                    <CheckCircle className="h-3 w-3 text-green-400" />
+                  )}
+                  {message.status === 'error' && (
+                    <AlertCircle className="h-3 w-3 text-red-400" />
+                  )}
+                  {message.status === 'processing' && (
+                    <Clock className="h-3 w-3 text-yellow-400" />
+                  )}
                 </div>
               )}
 
               {/* Reactions */}
               {Object.keys(groupedReactions).length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {Object.entries(groupedReactions).map(([emoji, reactionList]) => (
-                    <Button
-                      key={emoji}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onReaction(message.id, emoji)}
-                      className="h-6 px-2 text-xs bg-slate-700/50 hover:bg-slate-700"
-                    >
-                      {emoji} {reactionList.length}
-                    </Button>
-                  ))}
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {Object.entries(groupedReactions).map(
+                    ([emoji, reactionList]) => (
+                      <Button
+                        key={emoji}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onReaction(message.id, emoji)}
+                        className="h-6 bg-slate-700/50 px-2 text-xs hover:bg-slate-700"
+                      >
+                        {emoji} {reactionList.length}
+                      </Button>
+                    )
+                  )}
                 </div>
               )}
             </>
@@ -1049,37 +1219,61 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
         </div>
 
         {/* Message Actions */}
-        <div className={cn(
-          "flex items-start space-x-1 opacity-0 group-hover:opacity-100 transition-opacity",
-          isUser && "flex-row-reverse space-x-reverse"
-        )}>
+        <div
+          className={cn(
+            'flex items-start space-x-1 opacity-0 transition-opacity group-hover:opacity-100',
+            isUser && 'flex-row-reverse space-x-reverse'
+          )}
+        >
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="w-6 h-6 p-0 text-slate-400 hover:text-white">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 text-slate-400 hover:text-white"
+              >
                 <MoreHorizontal className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-slate-800 border-slate-700" align={isUser ? "end" : "start"}>
-              <DropdownMenuItem onClick={() => onSelect(message.id)} className="text-slate-300">
-                <CheckCircle className="h-4 w-4 mr-2" />
+            <DropdownMenuContent
+              className="border-slate-700 bg-slate-800"
+              align={isUser ? 'end' : 'start'}
+            >
+              <DropdownMenuItem
+                onClick={() => onSelect(message.id)}
+                className="text-slate-300"
+              >
+                <CheckCircle className="mr-2 h-4 w-4" />
                 Select
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onPin(message.id)} className="text-slate-300">
-                <BookmarkPlus className="h-4 w-4 mr-2" />
+              <DropdownMenuItem
+                onClick={() => onPin(message.id)}
+                className="text-slate-300"
+              >
+                <BookmarkPlus className="mr-2 h-4 w-4" />
                 {isPinned ? 'Unpin' : 'Pin'}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowReactions(!showReactions)} className="text-slate-300">
-                <Star className="h-4 w-4 mr-2" />
+              <DropdownMenuItem
+                onClick={() => setShowReactions(!showReactions)}
+                className="text-slate-300"
+              >
+                <Star className="mr-2 h-4 w-4" />
                 React
               </DropdownMenuItem>
               {isUser && (
                 <>
-                  <DropdownMenuItem onClick={() => setIsEditing(true)} className="text-slate-300">
-                    <Edit3 className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem
+                    onClick={() => setIsEditing(true)}
+                    className="text-slate-300"
+                  >
+                    <Edit3 className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onDelete(message.id)} className="text-red-400">
-                    <Trash2 className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem
+                    onClick={() => onDelete(message.id)}
+                    className="text-red-400"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Delete
                   </DropdownMenuItem>
                 </>
@@ -1094,9 +1288,9 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="absolute top-0 right-8 bg-slate-800 border border-slate-700 rounded-lg p-1 flex space-x-1 shadow-lg z-10"
+                className="absolute right-8 top-0 z-10 flex space-x-1 rounded-lg border border-slate-700 bg-slate-800 p-1 shadow-lg"
               >
-                {quickReactions.map((emoji) => (
+                {quickReactions.map(emoji => (
                   <Button
                     key={emoji}
                     variant="ghost"
@@ -1105,7 +1299,7 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
                       onReaction(message.id, emoji);
                       setShowReactions(false);
                     }}
-                    className="w-8 h-8 p-0 text-lg hover:bg-slate-700"
+                    className="h-8 w-8 p-0 text-lg hover:bg-slate-700"
                   >
                     {emoji}
                   </Button>
@@ -1124,34 +1318,46 @@ interface ToolExecutionComponentProps {
   execution: ToolExecution;
 }
 
-const ToolExecutionComponent: React.FC<ToolExecutionComponentProps> = ({ execution }) => {
+const ToolExecutionComponent: React.FC<ToolExecutionComponentProps> = ({
+  execution,
+}) => {
   const [showLogs, setShowLogs] = useState(false);
 
   const getStatusIcon = () => {
     switch (execution.status) {
-      case 'queued': return <Clock className="h-4 w-4 text-yellow-400" />;
-      case 'running': return <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />;
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-400" />;
-      case 'failed': return <AlertCircle className="h-4 w-4 text-red-400" />;
+      case 'queued':
+        return <Clock className="h-4 w-4 text-yellow-400" />;
+      case 'running':
+        return <Loader2 className="h-4 w-4 animate-spin text-blue-400" />;
+      case 'completed':
+        return <CheckCircle className="h-4 w-4 text-green-400" />;
+      case 'failed':
+        return <AlertCircle className="h-4 w-4 text-red-400" />;
     }
   };
 
   const getStatusColor = () => {
     switch (execution.status) {
-      case 'queued': return 'border-yellow-500/30 bg-yellow-500/10';
-      case 'running': return 'border-blue-500/30 bg-blue-500/10';
-      case 'completed': return 'border-green-500/30 bg-green-500/10';
-      case 'failed': return 'border-red-500/30 bg-red-500/10';
+      case 'queued':
+        return 'border-yellow-500/30 bg-yellow-500/10';
+      case 'running':
+        return 'border-blue-500/30 bg-blue-500/10';
+      case 'completed':
+        return 'border-green-500/30 bg-green-500/10';
+      case 'failed':
+        return 'border-red-500/30 bg-red-500/10';
     }
   };
 
   return (
-    <Card className={cn("border-2 mb-3", getStatusColor())}>
+    <Card className={cn('mb-3 border-2', getStatusColor())}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {getStatusIcon()}
-            <CardTitle className="text-sm text-white">{execution.toolName}</CardTitle>
+            <CardTitle className="text-sm text-white">
+              {execution.toolName}
+            </CardTitle>
           </div>
           <Badge variant="outline" className="text-xs">
             {execution.status}
@@ -1172,30 +1378,37 @@ const ToolExecutionComponent: React.FC<ToolExecutionComponentProps> = ({ executi
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div>
             <span className="text-slate-500">Started:</span>
-            <p className="text-slate-300">{execution.startTime.toLocaleTimeString()}</p>
+            <p className="text-slate-300">
+              {execution.startTime.toLocaleTimeString()}
+            </p>
           </div>
           {execution.endTime && (
             <div>
               <span className="text-slate-500">Duration:</span>
               <p className="text-slate-300">
-                {Math.round((execution.endTime.getTime() - execution.startTime.getTime()) / 1000)}s
+                {Math.round(
+                  (execution.endTime.getTime() -
+                    execution.startTime.getTime()) /
+                    1000
+                )}
+                s
               </p>
             </div>
           )}
         </div>
 
         {execution.output && (
-          <div className="bg-slate-700/30 rounded-lg p-3">
-            <div className="text-xs text-slate-400 mb-2">Output:</div>
-            <pre className="text-xs text-slate-300 whitespace-pre-wrap overflow-x-auto">
+          <div className="rounded-lg bg-slate-700/30 p-3">
+            <div className="mb-2 text-xs text-slate-400">Output:</div>
+            <pre className="overflow-x-auto whitespace-pre-wrap text-xs text-slate-300">
               {JSON.stringify(execution.output, null, 2)}
             </pre>
           </div>
         )}
 
         {execution.error && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-            <div className="text-xs text-red-400 mb-1">Error:</div>
+          <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3">
+            <div className="mb-1 text-xs text-red-400">Error:</div>
             <p className="text-xs text-red-300">{execution.error}</p>
           </div>
         )}
@@ -1206,7 +1419,7 @@ const ToolExecutionComponent: React.FC<ToolExecutionComponentProps> = ({ executi
               variant="ghost"
               size="sm"
               onClick={() => setShowLogs(!showLogs)}
-              className="text-slate-400 hover:text-white text-xs"
+              className="text-xs text-slate-400 hover:text-white"
             >
               {showLogs ? 'Hide' : 'Show'} Logs ({execution.logs.length})
             </Button>
@@ -1216,22 +1429,29 @@ const ToolExecutionComponent: React.FC<ToolExecutionComponentProps> = ({ executi
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  className="mt-2 bg-slate-800/50 rounded-lg p-3 max-h-32 overflow-y-auto"
+                  className="mt-2 max-h-32 overflow-y-auto rounded-lg bg-slate-800/50 p-3"
                 >
                   <div className="space-y-1">
                     {execution.logs.map((log, index) => (
-                      <div key={index} className="flex items-start space-x-2 text-xs">
-                        <span className="text-slate-500 w-16 flex-shrink-0">
+                      <div
+                        key={index}
+                        className="flex items-start space-x-2 text-xs"
+                      >
+                        <span className="w-16 flex-shrink-0 text-slate-500">
                           {log.timestamp.toLocaleTimeString()}
                         </span>
-                        <div className={cn(
-                          "w-2 h-2 rounded-full mt-1.5 flex-shrink-0",
-                          log.level === 'error' && "bg-red-500",
-                          log.level === 'warning' && "bg-yellow-500",
-                          log.level === 'info' && "bg-blue-500",
-                          log.level === 'debug' && "bg-slate-500"
-                        )} />
-                        <span className="text-slate-300 flex-1">{log.message}</span>
+                        <div
+                          className={cn(
+                            'mt-1.5 h-2 w-2 flex-shrink-0 rounded-full',
+                            log.level === 'error' && 'bg-red-500',
+                            log.level === 'warning' && 'bg-yellow-500',
+                            log.level === 'info' && 'bg-blue-500',
+                            log.level === 'debug' && 'bg-slate-500'
+                          )}
+                        />
+                        <span className="flex-1 text-slate-300">
+                          {log.message}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -1250,34 +1470,48 @@ interface WorkflowUpdateComponentProps {
   update: WorkflowUpdate;
 }
 
-const WorkflowUpdateComponent: React.FC<WorkflowUpdateComponentProps> = ({ update }) => {
+const WorkflowUpdateComponent: React.FC<WorkflowUpdateComponentProps> = ({
+  update,
+}) => {
   const getStatusIcon = () => {
     switch (update.status) {
-      case 'started': return <PlayCircle className="h-4 w-4 text-blue-400" />;
-      case 'step_completed': return <CheckCircle className="h-4 w-4 text-green-400" />;
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-400" />;
-      case 'failed': return <AlertCircle className="h-4 w-4 text-red-400" />;
-      case 'paused': return <PauseCircle className="h-4 w-4 text-yellow-400" />;
+      case 'started':
+        return <PlayCircle className="h-4 w-4 text-blue-400" />;
+      case 'step_completed':
+        return <CheckCircle className="h-4 w-4 text-green-400" />;
+      case 'completed':
+        return <CheckCircle className="h-4 w-4 text-green-400" />;
+      case 'failed':
+        return <AlertCircle className="h-4 w-4 text-red-400" />;
+      case 'paused':
+        return <PauseCircle className="h-4 w-4 text-yellow-400" />;
     }
   };
 
   const getStatusColor = () => {
     switch (update.status) {
-      case 'started': return 'border-blue-500/30 bg-blue-500/10';
-      case 'step_completed': return 'border-green-500/30 bg-green-500/10';
-      case 'completed': return 'border-green-500/30 bg-green-500/10';
-      case 'failed': return 'border-red-500/30 bg-red-500/10';
-      case 'paused': return 'border-yellow-500/30 bg-yellow-500/10';
+      case 'started':
+        return 'border-blue-500/30 bg-blue-500/10';
+      case 'step_completed':
+        return 'border-green-500/30 bg-green-500/10';
+      case 'completed':
+        return 'border-green-500/30 bg-green-500/10';
+      case 'failed':
+        return 'border-red-500/30 bg-red-500/10';
+      case 'paused':
+        return 'border-yellow-500/30 bg-yellow-500/10';
     }
   };
 
   return (
-    <Card className={cn("border-2 mb-3", getStatusColor())}>
+    <Card className={cn('mb-3 border-2', getStatusColor())}>
       <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
+        <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {getStatusIcon()}
-            <span className="text-sm font-medium text-white">{update.workflowName}</span>
+            <span className="text-sm font-medium text-white">
+              {update.workflowName}
+            </span>
           </div>
           <Badge variant="outline" className="text-xs">
             {update.status.replace('_', ' ')}
@@ -1285,12 +1519,13 @@ const WorkflowUpdateComponent: React.FC<WorkflowUpdateComponentProps> = ({ updat
         </div>
 
         {update.details && (
-          <p className="text-sm text-slate-300 mb-3">{update.details}</p>
+          <p className="mb-3 text-sm text-slate-300">{update.details}</p>
         )}
 
         {update.currentStep && (
-          <div className="text-xs text-slate-400 mb-2">
-            Current Step: <span className="text-slate-300">{update.currentStep}</span>
+          <div className="mb-2 text-xs text-slate-400">
+            Current Step:{' '}
+            <span className="text-slate-300">{update.currentStep}</span>
           </div>
         )}
 
@@ -1298,11 +1533,13 @@ const WorkflowUpdateComponent: React.FC<WorkflowUpdateComponentProps> = ({ updat
           <div className="space-y-1">
             <div className="flex justify-between text-xs text-slate-400">
               <span>Progress</span>
-              <span>{update.completedSteps}/{update.totalSteps} steps</span>
+              <span>
+                {update.completedSteps}/{update.totalSteps} steps
+              </span>
             </div>
-            <Progress 
-              value={(update.completedSteps / update.totalSteps) * 100} 
-              className="h-2" 
+            <Progress
+              value={(update.completedSteps / update.totalSteps) * 100}
+              className="h-2"
             />
           </div>
         )}
@@ -1316,14 +1553,21 @@ interface AttachmentComponentProps {
   attachment: MessageAttachment;
 }
 
-const AttachmentComponent: React.FC<AttachmentComponentProps> = ({ attachment }) => {
+const AttachmentComponent: React.FC<AttachmentComponentProps> = ({
+  attachment,
+}) => {
   const getFileIcon = () => {
     switch (attachment.type) {
-      case 'image': return <Image className="h-4 w-4" />;
-      case 'code': return <Code className="h-4 w-4" />;
-      case 'document': return <FileText className="h-4 w-4" />;
-      case 'data': return <BarChart3 className="h-4 w-4" />;
-      default: return <File className="h-4 w-4" />;
+      case 'image':
+        return <Image className="h-4 w-4" />;
+      case 'code':
+        return <Code className="h-4 w-4" />;
+      case 'document':
+        return <FileText className="h-4 w-4" />;
+      case 'data':
+        return <BarChart3 className="h-4 w-4" />;
+      default:
+        return <File className="h-4 w-4" />;
     }
   };
 
@@ -1336,34 +1580,38 @@ const AttachmentComponent: React.FC<AttachmentComponentProps> = ({ attachment })
   };
 
   return (
-    <Card className="bg-slate-700/30 border-slate-600/30">
+    <Card className="border-slate-600/30 bg-slate-700/30">
       <CardContent className="p-3">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-slate-600/30 rounded-lg flex items-center justify-center">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-600/30">
             {getFileIcon()}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{attachment.name}</p>
-            <p className="text-xs text-slate-400">{formatFileSize(attachment.size)}</p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-white">
+              {attachment.name}
+            </p>
+            <p className="text-xs text-slate-400">
+              {formatFileSize(attachment.size)}
+            </p>
           </div>
           <Button
             variant="ghost"
             size="sm"
             asChild
-            className="text-slate-400 hover:text-white flex-shrink-0"
+            className="flex-shrink-0 text-slate-400 hover:text-white"
           >
             <a href={attachment.url} download={attachment.name}>
               <Download className="h-4 w-4" />
             </a>
           </Button>
         </div>
-        
+
         {attachment.type === 'image' && attachment.preview && (
           <div className="mt-3">
             <img
               src={attachment.preview}
               alt={attachment.name}
-              className="max-w-full h-auto rounded-lg"
+              className="h-auto max-w-full rounded-lg"
               style={{ maxHeight: '200px' }}
             />
           </div>
@@ -1380,41 +1628,58 @@ interface ParticipantsPanelProps {
 
 const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({ tab }) => {
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-4 border-b border-slate-700/50">
+    <div className="flex h-full flex-col">
+      <div className="border-b border-slate-700/50 p-4">
         <h3 className="text-sm font-semibold text-white">Participants</h3>
-        <p className="text-xs text-slate-400 mt-1">{tab.participants.length} members</p>
+        <p className="mt-1 text-xs text-slate-400">
+          {tab.participants.length} members
+        </p>
       </div>
-      
+
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-3">
-          {tab.participants.map((participant) => (
+          {tab.participants.map(participant => (
             <div key={participant.id} className="flex items-center space-x-3">
               <div className="relative">
-                <Avatar className="w-8 h-8">
+                <Avatar className="h-8 w-8">
                   <AvatarImage src={participant.avatar} />
-                  <AvatarFallback className="bg-slate-700 text-slate-300 text-xs">
-                    {participant.type === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                  <AvatarFallback className="bg-slate-700 text-xs text-slate-300">
+                    {participant.type === 'user' ? (
+                      <User className="h-4 w-4" />
+                    ) : (
+                      <Bot className="h-4 w-4" />
+                    )}
                   </AvatarFallback>
                 </Avatar>
-                <div className={cn(
-                  "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-800",
-                  participant.status === 'online' && "bg-green-400",
-                  participant.status === 'away' && "bg-yellow-400",
-                  participant.status === 'busy' && "bg-red-400",
-                  participant.status === 'offline' && "bg-slate-500"
-                )} />
+                <div
+                  className={cn(
+                    'absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-slate-800',
+                    participant.status === 'online' && 'bg-green-400',
+                    participant.status === 'away' && 'bg-yellow-400',
+                    participant.status === 'busy' && 'bg-red-400',
+                    participant.status === 'offline' && 'bg-slate-500'
+                  )}
+                />
               </div>
-              
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{participant.name}</p>
-                <p className="text-xs text-slate-400 truncate">{participant.role}</p>
+
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-white">
+                  {participant.name}
+                </p>
+                <p className="truncate text-xs text-slate-400">
+                  {participant.role}
+                </p>
               </div>
-              
-              <Badge variant="outline" className={cn(
-                "text-xs",
-                participant.type === 'ai_employee' ? "border-purple-500/30 text-purple-400" : "border-blue-500/30 text-blue-400"
-              )}>
+
+              <Badge
+                variant="outline"
+                className={cn(
+                  'text-xs',
+                  participant.type === 'ai_employee'
+                    ? 'border-purple-500/30 text-purple-400'
+                    : 'border-blue-500/30 text-blue-400'
+                )}
+              >
                 {participant.type === 'ai_employee' ? 'AI' : 'Human'}
               </Badge>
             </div>
@@ -1437,12 +1702,12 @@ const NewTabForm: React.FC<NewTabFormProps> = ({ onSubmit, onCancel }) => {
     type: 'individual' as 'individual' | 'team' | 'workflow',
     employeeId: '',
     teamId: '',
-    workflowId: ''
+    workflowId: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const newTab: Omit<ChatTab, 'id'> = {
       title: formData.title,
       type: formData.type,
@@ -1453,47 +1718,51 @@ const NewTabForm: React.FC<NewTabFormProps> = ({ onSubmit, onCancel }) => {
           name: 'You',
           role: 'User',
           type: 'user',
-          status: 'online'
+          status: 'online',
         },
         {
           id: formData.employeeId || 'ai-assistant',
           name: formData.title || 'AI Assistant',
           role: 'Assistant',
           type: 'ai_employee',
-          status: 'online'
-        }
+          status: 'online',
+        },
       ],
       ...(formData.employeeId && { employeeId: formData.employeeId }),
       ...(formData.teamId && { teamId: formData.teamId }),
-      ...(formData.workflowId && { workflowId: formData.workflowId })
+      ...(formData.workflowId && { workflowId: formData.workflowId }),
     };
 
     onSubmit(newTab);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
       <div>
         <Label className="text-slate-300">Chat Title</Label>
         <Input
           value={formData.title}
-          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          onChange={e =>
+            setFormData(prev => ({ ...prev, title: e.target.value }))
+          }
           placeholder="Enter chat title..."
-          className="mt-1 bg-slate-700/30 border-slate-600/30 text-white"
+          className="mt-1 border-slate-600/30 bg-slate-700/30 text-white"
           required
         />
       </div>
-      
+
       <div>
         <Label className="text-slate-300">Chat Type</Label>
-        <Select 
-          value={formData.type} 
-          onValueChange={(value: any) => setFormData(prev => ({ ...prev, type: value }))}
+        <Select
+          value={formData.type}
+          onValueChange={(value: any) =>
+            setFormData(prev => ({ ...prev, type: value }))
+          }
         >
-          <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
+          <SelectTrigger className="mt-1 border-slate-600/30 bg-slate-700/30 text-white">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-slate-800 border-slate-700">
+          <SelectContent className="border-slate-700 bg-slate-800">
             <SelectItem value="individual">Individual AI Employee</SelectItem>
             <SelectItem value="team">Team Chat</SelectItem>
             <SelectItem value="workflow">Workflow Discussion</SelectItem>
@@ -1504,14 +1773,16 @@ const NewTabForm: React.FC<NewTabFormProps> = ({ onSubmit, onCancel }) => {
       {formData.type === 'individual' && (
         <div>
           <Label className="text-slate-300">AI Employee</Label>
-          <Select 
-            value={formData.employeeId} 
-            onValueChange={(value) => setFormData(prev => ({ ...prev, employeeId: value }))}
+          <Select
+            value={formData.employeeId}
+            onValueChange={value =>
+              setFormData(prev => ({ ...prev, employeeId: value }))
+            }
           >
-            <SelectTrigger className="mt-1 bg-slate-700/30 border-slate-600/30 text-white">
+            <SelectTrigger className="mt-1 border-slate-600/30 bg-slate-700/30 text-white">
               <SelectValue placeholder="Select an AI employee..." />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-700">
+            <SelectContent className="border-slate-700 bg-slate-800">
               <SelectItem value="ai-analyst">Data Analyst AI</SelectItem>
               <SelectItem value="ai-developer">Software Engineer AI</SelectItem>
               <SelectItem value="ai-designer">UX Designer AI</SelectItem>
@@ -1520,7 +1791,7 @@ const NewTabForm: React.FC<NewTabFormProps> = ({ onSubmit, onCancel }) => {
           </Select>
         </div>
       )}
-      
+
       <div className="flex justify-end space-x-2 pt-4">
         <Button type="button" variant="ghost" onClick={onCancel}>
           Cancel

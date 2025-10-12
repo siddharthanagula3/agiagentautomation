@@ -37,7 +37,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
     'hiring ai employees',
     'ai employee platform',
     'automation platform',
-    'ai agents for business'
+    'ai agents for business',
   ],
   canonical,
   ogType = 'website',
@@ -47,8 +47,12 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   noindex = false,
 }) => {
   const siteUrl = 'https://agiagentautomation.com';
-  const fullTitle = title.includes('AGI Agent Automation') ? title : `${title} | AGI Agent Automation`;
-  const canonicalUrl = canonical || (typeof window !== 'undefined' ? window.location.href : siteUrl);
+  const fullTitle = title.includes('AGI Agent Automation')
+    ? title
+    : `${title} | AGI Agent Automation`;
+  const canonicalUrl =
+    canonical ||
+    (typeof window !== 'undefined' ? window.location.href : siteUrl);
 
   // Default Organization Schema
   const organizationSchema = {
@@ -58,7 +62,8 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
     legalName: 'AGI Agent Automation LLC',
     url: siteUrl,
     logo: `${siteUrl}/logo.png`,
-    description: 'Leading AI Employee and Automation Platform - Hire 165+ specialized AI agents for business automation',
+    description:
+      'Leading AI Employee and Automation Platform - Hire 165+ specialized AI agents for business automation',
     address: {
       '@type': 'PostalAddress',
       addressCountry: 'US',
@@ -120,14 +125,19 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       <title>{fullTitle}</title>
       <meta name="title" content={fullTitle} />
       <meta name="description" content={description} />
-      {keywords.length > 0 && <meta name="keywords" content={keywords.join(', ')} />}
+      {keywords.length > 0 && (
+        <meta name="keywords" content={keywords.join(', ')} />
+      )}
       <link rel="canonical" href={canonicalUrl} />
 
       {/* Robots */}
       {noindex ? (
         <meta name="robots" content="noindex, nofollow" />
       ) : (
-        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <meta
+          name="robots"
+          content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+        />
       )}
 
       {/* Open Graph / Facebook */}
@@ -145,13 +155,23 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       {article && (
         <>
           {article.publishedTime && (
-            <meta property="article:published_time" content={article.publishedTime} />
+            <meta
+              property="article:published_time"
+              content={article.publishedTime}
+            />
           )}
           {article.modifiedTime && (
-            <meta property="article:modified_time" content={article.modifiedTime} />
+            <meta
+              property="article:modified_time"
+              content={article.modifiedTime}
+            />
           )}
-          {article.author && <meta property="article:author" content={article.author} />}
-          {article.section && <meta property="article:section" content={article.section} />}
+          {article.author && (
+            <meta property="article:author" content={article.author} />
+          )}
+          {article.section && (
+            <meta property="article:section" content={article.section} />
+          )}
           {article.tags?.map((tag, index) => (
             <meta key={index} property="article:tag" content={tag} />
           ))}
@@ -173,9 +193,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       <meta name="apple-mobile-web-app-title" content="AGI Agent" />
 
       {/* Schema.org JSON-LD */}
-      <script type="application/ld+json">
-        {JSON.stringify(allSchemas)}
-      </script>
+      <script type="application/ld+json">{JSON.stringify(allSchemas)}</script>
 
       {/* Geo Tags */}
       <meta name="geo.region" content="US" />

@@ -47,12 +47,12 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import DOMPurify from 'dompurify';
-import { 
-  unifiedLLMService, 
-  UnifiedMessage, 
-  UnifiedResponse, 
+import {
+  unifiedLLMService,
+  UnifiedMessage,
+  UnifiedResponse,
   LLMProvider,
-  UnifiedLLMError 
+  UnifiedLLMError,
 } from '@/services/llm-providers/unified-llm-service';
 
 interface ChatKitInterfaceProps {
@@ -107,37 +107,40 @@ const ChatKitButton: React.FC<{
   loading?: boolean;
   onClick?: () => void;
   className?: string;
-}> = ({ 
-  children, 
-  variant = 'primary', 
-  size = 'md', 
-  disabled = false, 
+}> = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  disabled = false,
   loading = false,
   onClick,
-  className 
+  className,
 }) => {
-  const baseClasses = "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
-  
+  const baseClasses =
+    'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2';
+
   const variants = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-sm",
-    secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500",
-    ghost: "text-gray-600 hover:bg-gray-100 focus:ring-gray-500",
-    destructive: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+    primary:
+      'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-sm',
+    secondary:
+      'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500',
+    ghost: 'text-gray-600 hover:bg-gray-100 focus:ring-gray-500',
+    destructive: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
   };
-  
+
   const sizes = {
-    sm: "px-3 py-1.5 text-sm",
-    md: "px-4 py-2 text-sm",
-    lg: "px-6 py-3 text-base"
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-sm',
+    lg: 'px-6 py-3 text-base',
   };
-  
+
   return (
     <button
       className={cn(baseClasses, variants[variant], sizes[size], className)}
       disabled={disabled || loading}
       onClick={onClick}
     >
-      {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       {children}
     </button>
   );
@@ -150,15 +153,15 @@ const ChatKitCard: React.FC<{
   gradient?: boolean;
 }> = ({ children, className, hover = false, gradient = false }) => {
   return (
-    <Card className={cn(
-      "border border-gray-200 bg-white shadow-sm",
-      hover && "hover:shadow-md transition-shadow duration-200",
-      gradient && "bg-gradient-to-br from-blue-50 to-indigo-50",
-      className
-    )}>
-      <CardContent className="p-4">
-        {children}
-      </CardContent>
+    <Card
+      className={cn(
+        'border border-gray-200 bg-white shadow-sm',
+        hover && 'transition-shadow duration-200 hover:shadow-md',
+        gradient && 'bg-gradient-to-br from-blue-50 to-indigo-50',
+        className
+      )}
+    >
+      <CardContent className="p-4">{children}</CardContent>
     </Card>
   );
 };
@@ -172,11 +175,18 @@ const ChatKitIcon: React.FC<{
   const sizes = {
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
-    lg: 'w-6 h-6'
+    lg: 'w-6 h-6',
   };
-  
+
   return (
-    <div className={cn("flex items-center justify-center", sizes[size], color, className)}>
+    <div
+      className={cn(
+        'flex items-center justify-center',
+        sizes[size],
+        color,
+        className
+      )}
+    >
       {icon}
     </div>
   );
@@ -208,7 +218,7 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
         id: 'chatgpt',
         provider: 'openai',
         name: 'ChatGPT',
-        icon: <Brain className="w-4 h-4" />,
+        icon: <Brain className="h-4 w-4" />,
         color: 'bg-green-500',
         description: 'OpenAI GPT models with advanced reasoning',
         configured: unifiedLLMService.isProviderConfigured('openai'),
@@ -219,7 +229,7 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
         id: 'claude',
         provider: 'anthropic',
         name: 'Claude',
-        icon: <Sparkles className="w-4 h-4" />,
+        icon: <Sparkles className="h-4 w-4" />,
         color: 'bg-orange-500',
         description: 'Anthropic Claude with safety and helpfulness',
         configured: unifiedLLMService.isProviderConfigured('anthropic'),
@@ -230,7 +240,7 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
         id: 'gemini',
         provider: 'google',
         name: 'Gemini',
-        icon: <Globe className="w-4 h-4" />,
+        icon: <Globe className="h-4 w-4" />,
         color: 'bg-blue-500',
         description: 'Google Gemini with multimodal capabilities',
         configured: unifiedLLMService.isProviderConfigured('google'),
@@ -241,7 +251,7 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
         id: 'perplexity',
         provider: 'perplexity',
         name: 'Perplexity',
-        icon: <Search className="w-4 h-4" />,
+        icon: <Search className="h-4 w-4" />,
         color: 'bg-purple-500',
         description: 'Perplexity with real-time web search',
         configured: unifiedLLMService.isProviderConfigured('perplexity'),
@@ -284,9 +294,9 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
     };
 
     // Add user message to current tab
-    setTabs(prevTabs => 
-      prevTabs.map(tab => 
-        tab.id === activeTab 
+    setTabs(prevTabs =>
+      prevTabs.map(tab =>
+        tab.id === activeTab
           ? { ...tab, messages: [...tab.messages, userMessage] }
           : tab
       )
@@ -296,11 +306,9 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
     setIsLoading(true);
 
     // Set streaming state
-    setTabs(prevTabs => 
-      prevTabs.map(tab => 
-        tab.id === activeTab 
-          ? { ...tab, isStreaming: true }
-          : tab
+    setTabs(prevTabs =>
+      prevTabs.map(tab =>
+        tab.id === activeTab ? { ...tab, isStreaming: true } : tab
       )
     );
 
@@ -332,7 +340,10 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
       ];
 
       // Generate system prompt based on employee role
-      const systemPrompt = generateSystemPrompt(employeeRole, currentTab.provider);
+      const systemPrompt = generateSystemPrompt(
+        employeeRole,
+        currentTab.provider
+      );
 
       // Update unified service config
       unifiedLLMService.updateConfig({
@@ -359,9 +370,9 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
       };
 
       // Add empty assistant message
-      setTabs(prevTabs => 
-        prevTabs.map(tab => 
-          tab.id === activeTab 
+      setTabs(prevTabs =>
+        prevTabs.map(tab =>
+          tab.id === activeTab
             ? { ...tab, messages: [...tab.messages, assistantMessage] }
             : tab
         )
@@ -376,15 +387,15 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
       )) {
         if (chunk.content) {
           assistantContent += chunk.content;
-          
+
           // Update assistant message content
-          setTabs(prevTabs => 
-            prevTabs.map(tab => 
-              tab.id === activeTab 
+          setTabs(prevTabs =>
+            prevTabs.map(tab =>
+              tab.id === activeTab
                 ? {
                     ...tab,
-                    messages: tab.messages.map(msg => 
-                      msg.id === assistantMessage.id 
+                    messages: tab.messages.map(msg =>
+                      msg.id === assistantMessage.id
                         ? { ...msg, content: assistantContent }
                         : msg
                     ),
@@ -396,20 +407,20 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
 
         if (chunk.done) {
           // Update final message with usage info
-          setTabs(prevTabs => 
-            prevTabs.map(tab => 
-              tab.id === activeTab 
+          setTabs(prevTabs =>
+            prevTabs.map(tab =>
+              tab.id === activeTab
                 ? {
                     ...tab,
-                    messages: tab.messages.map(msg => 
-                      msg.id === assistantMessage.id 
-                        ? { 
-                            ...msg, 
+                    messages: tab.messages.map(msg =>
+                      msg.id === assistantMessage.id
+                        ? {
+                            ...msg,
                             content: assistantContent,
                             metadata: {
                               ...msg.metadata,
                               usage: chunk.usage,
-                            }
+                            },
                           }
                         : msg
                     ),
@@ -420,8 +431,8 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
                       metadata: {
                         ...assistantMessage.metadata,
                         usage: chunk.usage,
-                      }
-                    }
+                      },
+                    },
                   }
                 : tab
             )
@@ -429,10 +440,9 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
           break;
         }
       }
-
     } catch (error) {
       console.error('[ChatKit Interface] Error:', error);
-      
+
       // Add error message
       const errorMessage: ChatMessage = {
         id: `msg-${Date.now() + 2}`,
@@ -450,11 +460,11 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
         },
       };
 
-      setTabs(prevTabs => 
-        prevTabs.map(tab => 
-          tab.id === activeTab 
-            ? { 
-                ...tab, 
+      setTabs(prevTabs =>
+        prevTabs.map(tab =>
+          tab.id === activeTab
+            ? {
+                ...tab,
                 messages: [...tab.messages, errorMessage],
                 isStreaming: false,
               }
@@ -466,35 +476,51 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
         onError(error);
       }
 
-      toast.error(`Error with ${currentTab.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(
+        `Error with ${currentTab.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   // Generate system prompt based on employee role and provider
-  const generateSystemPrompt = (role: string, provider: LLMProvider): string => {
+  const generateSystemPrompt = (
+    role: string,
+    provider: LLMProvider
+  ): string => {
     const basePrompt = `You are a professional ${role} AI assistant. You are part of an AI workforce and should provide expert assistance in your field.`;
-    
+
     const roleSpecificPrompts = {
-      'Product Manager': 'Focus on product strategy, roadmap planning, feature prioritization, and stakeholder communication.',
-      'Data Scientist': 'Provide insights on data analysis, machine learning, statistical modeling, and data-driven decision making.',
-      'Software Architect': 'Help with system design, architecture patterns, scalability, and technical decision making.',
-      'Video Content Creator': 'Assist with script writing, video planning, content strategy, and creative direction.',
-      'Marketing Specialist': 'Focus on marketing strategy, campaign planning, content creation, and brand positioning.',
-      'Customer Support': 'Provide excellent customer service, problem-solving, and support best practices.'
+      'Product Manager':
+        'Focus on product strategy, roadmap planning, feature prioritization, and stakeholder communication.',
+      'Data Scientist':
+        'Provide insights on data analysis, machine learning, statistical modeling, and data-driven decision making.',
+      'Software Architect':
+        'Help with system design, architecture patterns, scalability, and technical decision making.',
+      'Video Content Creator':
+        'Assist with script writing, video planning, content strategy, and creative direction.',
+      'Marketing Specialist':
+        'Focus on marketing strategy, campaign planning, content creation, and brand positioning.',
+      'Customer Support':
+        'Provide excellent customer service, problem-solving, and support best practices.',
     };
 
     const providerSpecificPrompts = {
-      'openai': 'Use your advanced reasoning capabilities to provide detailed, well-structured responses.',
-      'anthropic': 'Focus on being helpful, harmless, and honest in your responses.',
-      'google': 'Leverage your multimodal capabilities when relevant and provide comprehensive insights.',
-      'perplexity': 'Use real-time web search to provide current, accurate information and cite your sources.'
+      openai:
+        'Use your advanced reasoning capabilities to provide detailed, well-structured responses.',
+      anthropic:
+        'Focus on being helpful, harmless, and honest in your responses.',
+      google:
+        'Leverage your multimodal capabilities when relevant and provide comprehensive insights.',
+      perplexity:
+        'Use real-time web search to provide current, accurate information and cite your sources.',
     };
 
-    const specificPrompt = roleSpecificPrompts[role as keyof typeof roleSpecificPrompts] || 
+    const specificPrompt =
+      roleSpecificPrompts[role as keyof typeof roleSpecificPrompts] ||
       'Provide professional assistance and expertise in your field.';
-    
+
     const providerPrompt = providerSpecificPrompts[provider] || '';
 
     return `${basePrompt}\n\n${specificPrompt}\n\n${providerPrompt}\n\nAlways be helpful, professional, and provide actionable advice.`;
@@ -503,10 +529,10 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
   // Get default model for provider
   const getDefaultModel = (provider: LLMProvider): string => {
     const models = {
-      'openai': 'gpt-4o-mini',
-      'anthropic': 'claude-3-5-sonnet-20241022',
-      'google': 'gemini-1.5-flash',
-      'perplexity': 'llama-3.1-sonar-small-128k-online'
+      openai: 'gpt-4o-mini',
+      anthropic: 'claude-3-5-sonnet-20241022',
+      google: 'gemini-1.5-flash',
+      perplexity: 'llama-3.1-sonar-small-128k-online',
     };
     return models[provider];
   };
@@ -520,28 +546,33 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
   };
 
   // Handle feedback
-  const handleFeedback = (messageId: string, feedback: 'thumbs_up' | 'thumbs_down') => {
-    setTabs(prevTabs => 
-      prevTabs.map(tab => 
-        tab.id === activeTab 
+  const handleFeedback = (
+    messageId: string,
+    feedback: 'thumbs_up' | 'thumbs_down'
+  ) => {
+    setTabs(prevTabs =>
+      prevTabs.map(tab =>
+        tab.id === activeTab
           ? {
               ...tab,
-              messages: tab.messages.map(msg => 
-                msg.id === messageId 
-                  ? { 
-                      ...msg, 
-                      metadata: { 
-                        ...msg.metadata, 
-                        feedback 
-                      } 
+              messages: tab.messages.map(msg =>
+                msg.id === messageId
+                  ? {
+                      ...msg,
+                      metadata: {
+                        ...msg.metadata,
+                        feedback,
+                      },
                     }
                   : msg
-              )
+              ),
             }
           : tab
       )
     );
-    toast.success(`Feedback recorded: ${feedback === 'thumbs_up' ? '👍' : '👎'}`);
+    toast.success(
+      `Feedback recorded: ${feedback === 'thumbs_up' ? '👍' : '👎'}`
+    );
   };
 
   // Copy message content
@@ -574,40 +605,44 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className={cn(
-          "flex gap-3 p-4",
-          isUser ? "justify-end" : "justify-start"
+          'flex gap-3 p-4',
+          isUser ? 'justify-end' : 'justify-start'
         )}
       >
         {!isUser && (
-          <div className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center text-white",
-            currentTab?.color || "bg-gray-500"
-          )}>
+          <div
+            className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-full text-white',
+              currentTab?.color || 'bg-gray-500'
+            )}
+          >
             {currentTab?.icon}
           </div>
         )}
-        
-        <div className={cn(
-          "max-w-[80%] rounded-lg p-3",
-          isUser 
-            ? "bg-blue-600 text-white" 
-            : isError 
-              ? "bg-red-50 text-red-800 border border-red-200"
-              : "bg-gray-50 text-gray-900"
-        )}>
-          <div 
+
+        <div
+          className={cn(
+            'max-w-[80%] rounded-lg p-3',
+            isUser
+              ? 'bg-blue-600 text-white'
+              : isError
+                ? 'border border-red-200 bg-red-50 text-red-800'
+                : 'bg-gray-50 text-gray-900'
+          )}
+        >
+          <div
             className="prose prose-sm max-w-none"
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(message.content)
+              __html: DOMPurify.sanitize(message.content),
             }}
           />
-          
+
           {message.metadata?.usage && (
             <div className="mt-2 text-xs text-gray-500">
               Tokens: {message.metadata.usage.totalTokens || 'N/A'}
             </div>
           )}
-          
+
           {isError && (
             <div className="mt-2 text-xs text-red-600">
               Error: {message.metadata?.error}
@@ -621,22 +656,22 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
                 size="sm"
                 onClick={() => handleFeedback(message.id, 'thumbs_up')}
                 className={cn(
-                  "p-1",
-                  message.metadata?.feedback === 'thumbs_up' && "text-green-600"
+                  'p-1',
+                  message.metadata?.feedback === 'thumbs_up' && 'text-green-600'
                 )}
               >
-                <ThumbsUp className="w-4 h-4" />
+                <ThumbsUp className="h-4 w-4" />
               </ChatKitButton>
               <ChatKitButton
                 variant="ghost"
                 size="sm"
                 onClick={() => handleFeedback(message.id, 'thumbs_down')}
                 className={cn(
-                  "p-1",
-                  message.metadata?.feedback === 'thumbs_down' && "text-red-600"
+                  'p-1',
+                  message.metadata?.feedback === 'thumbs_down' && 'text-red-600'
                 )}
               >
-                <ThumbsDown className="w-4 h-4" />
+                <ThumbsDown className="h-4 w-4" />
               </ChatKitButton>
               <ChatKitButton
                 variant="ghost"
@@ -644,15 +679,15 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
                 onClick={() => copyToClipboard(message.content)}
                 className="p-1"
               >
-                <Copy className="w-4 h-4" />
+                <Copy className="h-4 w-4" />
               </ChatKitButton>
             </div>
           )}
         </div>
 
         {isUser && (
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
-            <MessageSquare className="w-4 h-4" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white">
+            <MessageSquare className="h-4 w-4" />
           </div>
         )}
       </motion.div>
@@ -660,30 +695,30 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
   };
 
   return (
-    <div className={cn("flex flex-col h-full bg-white", className)}>
+    <div className={cn('flex h-full flex-col bg-white', className)}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between border-b border-gray-200 p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-            <Bot className="w-5 h-5 text-white" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
+            <Bot className="h-5 w-5 text-white" />
           </div>
           <div>
             <h2 className="font-semibold text-gray-900">{employeeName}</h2>
             <p className="text-sm text-gray-600">{employeeRole}</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <ChatKitButton
             variant="secondary"
             size="sm"
             onClick={() => setShowPromptOptimizer(!showPromptOptimizer)}
           >
-            <Zap className="w-4 h-4 mr-2" />
+            <Zap className="mr-2 h-4 w-4" />
             Optimize
           </ChatKitButton>
           <Badge variant="outline" className="text-xs">
-            <Star className="w-3 h-3 mr-1" />
+            <Star className="mr-1 h-3 w-3" />
             AI Employee
           </Badge>
         </div>
@@ -691,16 +726,16 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
 
       {/* Prompt Optimizer */}
       {showPromptOptimizer && (
-        <div className="p-4 border-b border-gray-200 bg-blue-50">
+        <div className="border-b border-gray-200 bg-blue-50 p-4">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-blue-600" />
+              <Zap className="h-4 w-4 text-blue-600" />
               <h3 className="font-medium text-blue-900">Prompt Optimizer</h3>
             </div>
             <Textarea
               placeholder="Enter your prompt to optimize..."
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={e => setInputValue(e.target.value)}
               className="min-h-[80px]"
             />
             <div className="flex gap-2">
@@ -710,7 +745,7 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
                 onClick={() => optimizePrompt(inputValue)}
                 disabled={!inputValue.trim()}
               >
-                <Zap className="w-4 h-4 mr-2" />
+                <Zap className="mr-2 h-4 w-4" />
                 Optimize Prompt
               </ChatKitButton>
               <ChatKitButton
@@ -722,8 +757,10 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
               </ChatKitButton>
             </div>
             {optimizedPrompt && (
-              <div className="p-3 bg-white rounded-lg border border-blue-200">
-                <h4 className="font-medium text-blue-900 mb-2">Optimized Prompt:</h4>
+              <div className="rounded-lg border border-blue-200 bg-white p-3">
+                <h4 className="mb-2 font-medium text-blue-900">
+                  Optimized Prompt:
+                </h4>
                 <p className="text-sm text-gray-700">{optimizedPrompt}</p>
               </div>
             )}
@@ -732,12 +769,16 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
       )}
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="flex flex-1 flex-col"
+      >
         <div className="border-b border-gray-200">
           <TabsList className="grid w-full grid-cols-4 bg-white">
-            {tabs.map((tab) => (
-              <TabsTrigger 
-                key={tab.id} 
+            {tabs.map(tab => (
+              <TabsTrigger
+                key={tab.id}
                 value={tab.id}
                 className="flex items-center gap-2 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
                 disabled={!tab.configured}
@@ -745,10 +786,10 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
                 {tab.icon}
                 <span className="hidden sm:inline">{tab.name}</span>
                 {!tab.configured && (
-                  <AlertCircle className="w-3 h-3 text-red-500" />
+                  <AlertCircle className="h-3 w-3 text-red-500" />
                 )}
                 {tab.isStreaming && (
-                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <Loader2 className="h-3 w-3 animate-spin" />
                 )}
               </TabsTrigger>
             ))}
@@ -756,37 +797,53 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
         </div>
 
         {/* Tab Content */}
-        {tabs.map((tab) => (
-          <TabsContent key={tab.id} value={tab.id} className="flex-1 flex flex-col m-0">
+        {tabs.map(tab => (
+          <TabsContent
+            key={tab.id}
+            value={tab.id}
+            className="m-0 flex flex-1 flex-col"
+          >
             {!tab.configured ? (
-              <div className="flex-1 flex items-center justify-center p-8">
-                <ChatKitCard className="text-center max-w-md">
-                  <ChatKitIcon icon={<AlertCircle />} size="lg" color="text-red-500" className="mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">{tab.name} Not Configured</h3>
-                  <p className="text-gray-600 mb-4">
-                    Please configure your {tab.name} API key to use this provider.
+              <div className="flex flex-1 items-center justify-center p-8">
+                <ChatKitCard className="max-w-md text-center">
+                  <ChatKitIcon
+                    icon={<AlertCircle />}
+                    size="lg"
+                    color="text-red-500"
+                    className="mx-auto mb-4"
+                  />
+                  <h3 className="mb-2 text-lg font-semibold">
+                    {tab.name} Not Configured
+                  </h3>
+                  <p className="mb-4 text-gray-600">
+                    Please configure your {tab.name} API key to use this
+                    provider.
                   </p>
                   <ChatKitButton variant="primary" size="sm">
-                    <Settings className="w-4 h-4 mr-2" />
+                    <Settings className="mr-2 h-4 w-4" />
                     Configure
                   </ChatKitButton>
                 </ChatKitCard>
               </div>
             ) : (
-              <div className="flex-1 flex flex-col">
+              <div className="flex flex-1 flex-col">
                 {/* Messages */}
                 <ScrollArea className="flex-1">
                   <div className="space-y-4 p-4">
                     {tab.messages.length === 0 ? (
-                      <div className="text-center py-8">
-                        <ChatKitCard gradient className="max-w-md mx-auto">
-                          <div className={cn(
-                            "w-16 h-16 rounded-full flex items-center justify-center text-white mx-auto mb-4",
-                            tab.color
-                          )}>
+                      <div className="py-8 text-center">
+                        <ChatKitCard gradient className="mx-auto max-w-md">
+                          <div
+                            className={cn(
+                              'mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full text-white',
+                              tab.color
+                            )}
+                          >
                             {tab.icon}
                           </div>
-                          <h3 className="text-lg font-semibold mb-2">Start a conversation with {tab.name}</h3>
+                          <h3 className="mb-2 text-lg font-semibold">
+                            Start a conversation with {tab.name}
+                          </h3>
                           <p className="text-gray-600">{tab.description}</p>
                         </ChatKitCard>
                       </div>
@@ -795,14 +852,16 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
                     )}
                     {tab.isStreaming && (
                       <div className="flex gap-3 p-4">
-                        <div className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center text-white",
-                          tab.color
-                        )}>
+                        <div
+                          className={cn(
+                            'flex h-8 w-8 items-center justify-center rounded-full text-white',
+                            tab.color
+                          )}
+                        >
                           {tab.icon}
                         </div>
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                        <div className="rounded-lg bg-gray-50 p-3">
+                          <Loader2 className="h-4 w-4 animate-spin" />
                         </div>
                       </div>
                     )}
@@ -811,12 +870,12 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
                 </ScrollArea>
 
                 {/* Input */}
-                <div className="p-4 border-t border-gray-200 bg-white">
+                <div className="border-t border-gray-200 bg-white p-4">
                   <div className="flex gap-2">
-                    <div className="flex-1 relative">
+                    <div className="relative flex-1">
                       <Input
                         value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
+                        onChange={e => setInputValue(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder={`Message ${tab.name}...`}
                         disabled={isLoading || tab.isStreaming}
@@ -828,17 +887,19 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
                         className="absolute right-1 top-1/2 -translate-y-1/2 p-1"
                         disabled={isLoading || tab.isStreaming}
                       >
-                        <Paperclip className="w-4 h-4" />
+                        <Paperclip className="h-4 w-4" />
                       </Button>
                     </div>
                     <ChatKitButton
                       variant="primary"
                       size="md"
                       onClick={handleSendMessage}
-                      disabled={!inputValue.trim() || isLoading || tab.isStreaming}
+                      disabled={
+                        !inputValue.trim() || isLoading || tab.isStreaming
+                      }
                       loading={isLoading || tab.isStreaming}
                     >
-                      <Send className="w-4 h-4" />
+                      <Send className="h-4 w-4" />
                     </ChatKitButton>
                   </div>
                 </div>

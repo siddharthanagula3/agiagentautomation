@@ -1,0 +1,17 @@
+{
+  "name": "supabase-edge-functions-tests",
+  "version": "1.0.0",
+  "description": "Test suite for Supabase Edge Functions",
+  "main": "test-edge-functions.js",
+  "scripts": {
+    "test": "node test-edge-functions.js",
+    "test:watch": "nodemon test-edge-functions.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

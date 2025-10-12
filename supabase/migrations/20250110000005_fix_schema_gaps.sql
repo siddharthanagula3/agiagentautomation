@@ -136,28 +136,17 @@ END $$;
 -- SUCCESS MESSAGE
 -- ================================================================
 
-DO $$
-BEGIN
-    RAISE NOTICE ' ';
-    RAISE NOTICE '========================================';
-    RAISE NOTICE '✅ SCHEMA GAP FIX COMPLETE!';
-    RAISE NOTICE '========================================';
-    RAISE NOTICE ' ';
-    RAISE NOTICE '📊 Changes Applied:';
-    RAISE NOTICE '  ✓ purchased_employees table created';
-    RAISE NOTICE '  ✓ RLS policies configured';
-    RAISE NOTICE '  ✓ Performance indexes added';
-    RAISE NOTICE '  ✓ users billing columns added';
-    RAISE NOTICE ' ';
-    RAISE NOTICE '🎯 Expected Impact:';
-    RAISE NOTICE '  • 6 pages fixed (workforce, chat, vibe, etc.)';
-    RAISE NOTICE '  • 3 billing pages fixed (settings, billing)';
-    RAISE NOTICE '  • E2E pass rate: 80% → 95%+';
-    RAISE NOTICE ' ';
-    RAISE NOTICE '🔐 Free hiring now enabled!';
-    RAISE NOTICE '  • Users can hire AI employees instantly';
-    RAISE NOTICE '  • No payment required';
-    RAISE NOTICE '  • Secure RLS policies active';
-    RAISE NOTICE ' ';
-    RAISE NOTICE '========================================';
-END $$;
+-- Schema gap fix complete!
+-- Changes Applied:
+--   - purchased_employees table created
+--   - RLS policies configured
+--   - Performance indexes added
+--   - users billing columns added
+-- Expected Impact:
+--   - 6 pages fixed (workforce, chat, vibe, etc.)
+--   - 3 billing pages fixed (settings, billing)
+--   - E2E pass rate: 80% to 95%+
+-- Free hiring now enabled!
+--   - Users can hire AI employees instantly
+--   - No payment required
+--   - Secure RLS policies active

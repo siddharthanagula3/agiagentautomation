@@ -6,7 +6,10 @@
 
 import { AI_EMPLOYEES, type AIEmployee } from '@/data/ai-employees';
 import { mcpToolsService, type MCPTool } from './mcp-tools-service';
-import { UnifiedLLMService, type LLMProvider } from './llm-providers/unified-llm-service';
+import {
+  UnifiedLLMService,
+  type LLMProvider,
+} from './llm-providers/unified-llm-service';
 
 export interface AgentCapability {
   employeeId: string;
@@ -38,7 +41,14 @@ export interface AgentCommunication {
   id: string;
   from: string;
   to: string;
-  type: 'request' | 'response' | 'handoff' | 'collaboration' | 'status' | 'error' | 'completion';
+  type:
+    | 'request'
+    | 'response'
+    | 'handoff'
+    | 'collaboration'
+    | 'status'
+    | 'error'
+    | 'completion';
   message: string;
   timestamp: Date;
   metadata?: Record<string, any>;
@@ -60,7 +70,14 @@ export interface OrchestrationPlan {
 
 export interface AgentStatus {
   agentName: string;
-  status: 'idle' | 'analyzing' | 'working' | 'waiting' | 'completed' | 'blocked' | 'error';
+  status:
+    | 'idle'
+    | 'analyzing'
+    | 'working'
+    | 'waiting'
+    | 'completed'
+    | 'blocked'
+    | 'error';
   currentTask?: string;
   progress: number; // 0-100
   toolsUsing?: string[];
@@ -71,23 +88,32 @@ export interface AgentStatus {
 // Build capability map from all AI employees
 const buildCapabilityMap = (): Record<string, AgentCapability> => {
   const capabilities: Record<string, AgentCapability> = {};
-  
+
   AI_EMPLOYEES.forEach(emp => {
     const key = emp.role.toLowerCase().replace(/\s+/g, '-');
-    
+
     // Determine specialization from role and category
     const specialization = [
       ...emp.skills.map(s => s.toLowerCase()),
       emp.category.toLowerCase(),
       emp.role.toLowerCase(),
     ];
-    
+
     // Determine if can delegate (leadership roles)
     const canDelegate = [
-      'architect', 'manager', 'ceo', 'cto', 'coo', 'cfo', 
-      'director', 'lead', 'head', 'orchestrator', 'coordinator'
+      'architect',
+      'manager',
+      'ceo',
+      'cto',
+      'coo',
+      'cfo',
+      'director',
+      'lead',
+      'head',
+      'orchestrator',
+      'coordinator',
     ].some(title => emp.role.toLowerCase().includes(title));
-    
+
     // Determine priority (1-10)
     let priority = 5;
     if (emp.role.includes('Chief')) priority = 10;
@@ -95,7 +121,7 @@ const buildCapabilityMap = (): Record<string, AgentCapability> => {
     else if (emp.role.includes('Manager')) priority = 8;
     else if (emp.role.includes('Lead')) priority = 7;
     else if (emp.role.includes('Senior')) priority = 6;
-    
+
     capabilities[key] = {
       employeeId: emp.id,
       employeeName: emp.name,
@@ -108,7 +134,7 @@ const buildCapabilityMap = (): Record<string, AgentCapability> => {
       priority,
     };
   });
-  
+
   return capabilities;
 };
 
@@ -118,31 +144,31 @@ class MultiAgentOrchestrator {
   private activePlans: Map<string, OrchestrationPlan> = new Map();
   private agentStatuses: Map<string, AgentStatus> = new Map();
   private llmService: UnifiedLLMService;
-  
+
   /**
    * Analyze user intent and create an orchestration plan
    */
   async analyzeIntent(userRequest: string): Promise<OrchestrationPlan> {
     console.log('[Orchestrator] Analyzing user request:', userRequest);
-    
+
     // Determine complexity
     const complexity = this.determineComplexity(userRequest);
-    
+
     // Determine intent
     const intent = this.extractIntent(userRequest);
-    
+
     // Select appropriate agents
     const requiredAgents = this.selectAgents(userRequest, intent, complexity);
-    
+
     // Break down into tasks
     const tasks = this.createTasks(userRequest, requiredAgents, complexity);
-    
+
     // Determine execution strategy
     const executionStrategy = this.determineStrategy(tasks, complexity);
-    
+
     // Estimate duration
     const estimatedDuration = this.estimateDuration(tasks, executionStrategy);
-    
+
     const plan: OrchestrationPlan = {
       id: `plan-${Date.now()}`,
       userRequest,
@@ -156,11 +182,11 @@ class MultiAgentOrchestrator {
       totalPhases: this.calculatePhases(tasks),
       isComplete: false,
     };
-    
+
     this.activePlans.set(plan.id, plan);
     return plan;
   }
-  
+
   /**
    * Execute the orchestration plan with continuous execution
    */
@@ -170,19 +196,19 @@ class MultiAgentOrchestrator {
     onStatusUpdate: (status: AgentStatus) => void
   ): Promise<Map<string, any>> {
     console.log('[Orchestrator] Starting plan execution:', plan.id);
-    
+
     const results = new Map<string, any>();
     let iterationCount = 0;
     const MAX_ITERATIONS = 100; // Prevent infinite loops
-    
+
     // CONTINUOUS EXECUTION LOOP
     while (!plan.isComplete && iterationCount < MAX_ITERATIONS) {
       iterationCount++;
       console.log(`[Orchestrator] Iteration ${iterationCount}`);
-      
+
       // Get next executable tasks
       const nextTasks = this.getExecutableTasks(plan);
-      
+
       if (nextTasks.length === 0) {
         // Check if all tasks are complete
         const allComplete = plan.tasks.every(t => t.status === 'completed');
@@ -191,47 +217,61 @@ class MultiAgentOrchestrator {
           this.sendCompletion(plan, onCommunication);
           break;
         }
-        
+
         // Check for blocked tasks
-        const blockedTasks = plan.tasks.filter(t => 
-          t.status === 'pending' && !this.canExecute(t, plan)
+        const blockedTasks = plan.tasks.filter(
+          t => t.status === 'pending' && !this.canExecute(t, plan)
         );
-        
+
         if (blockedTasks.length > 0) {
           // Try to unblock by creating helper tasks
           await this.unblockTasks(blockedTasks, plan, onCommunication);
         } else {
           // No tasks left and not complete - something went wrong
-          console.warn('[Orchestrator] No executable tasks but plan not complete');
+          console.warn(
+            '[Orchestrator] No executable tasks but plan not complete'
+          );
           break;
         }
       }
-      
+
       // Execute tasks based on strategy
       if (plan.executionStrategy === 'parallel') {
         await Promise.all(
-          nextTasks.map(task => 
-            this.executeTask(task, plan, onCommunication, onStatusUpdate, results)
+          nextTasks.map(task =>
+            this.executeTask(
+              task,
+              plan,
+              onCommunication,
+              onStatusUpdate,
+              results
+            )
           )
         );
       } else {
         for (const task of nextTasks) {
-          await this.executeTask(task, plan, onCommunication, onStatusUpdate, results);
+          await this.executeTask(
+            task,
+            plan,
+            onCommunication,
+            onStatusUpdate,
+            results
+          );
         }
       }
-      
+
       // Small delay to allow UI updates
       await new Promise(resolve => setTimeout(resolve, 500));
     }
-    
+
     if (iterationCount >= MAX_ITERATIONS) {
       console.warn('[Orchestrator] Max iterations reached');
     }
-    
+
     console.log('[Orchestrator] Plan execution complete');
     return results;
   }
-  
+
   /**
    * Execute a single task
    */
@@ -243,44 +283,52 @@ class MultiAgentOrchestrator {
     results: Map<string, any>
   ): Promise<void> {
     if (task.status !== 'pending') return;
-    
+
     task.status = 'in_progress';
     task.startTime = new Date();
-    
+
     const agentName = task.assignedTo;
-    
+
     // Send handoff communication if appropriate
     if (this.isHandoff(task, plan)) {
       this.sendHandoff(task, plan, onCommunication);
     }
-    
+
     // Get provider for this agent
     const agentKey = agentName.toLowerCase().replace(/\s+/g, '-');
     const capability = EMPLOYEE_CAPABILITIES[agentKey];
     const provider = this.mapProviderToLLM(capability?.provider || 'claude');
-    
+
     // Execute task with real LLM
     try {
-      const result = await this.executeAgentTask(task, agentName, provider, onStatusUpdate);
-      
+      const result = await this.executeAgentTask(
+        task,
+        agentName,
+        provider,
+        onStatusUpdate
+      );
+
       // Mark complete
       task.status = 'completed';
       task.endTime = new Date();
       task.result = result;
       results.set(task.id, { success: true, output: result });
-      
+
       // Update agent status
-      this.updateAgentStatus(agentName, {
+      this.updateAgentStatus(
         agentName,
-        status: 'completed',
-        currentTask: task.description,
-        progress: 100,
-        output: result,
-      }, onStatusUpdate);
-      
+        {
+          agentName,
+          status: 'completed',
+          currentTask: task.description,
+          progress: 100,
+          output: result,
+        },
+        onStatusUpdate
+      );
+
       // Send completion communication
       this.sendTaskCompletion(task, onCommunication);
-      
     } catch (error) {
       // Mark failed
       task.status = 'failed';
@@ -288,45 +336,51 @@ class MultiAgentOrchestrator {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       task.result = errorMsg;
       results.set(task.id, { success: false, output: errorMsg });
-      
+
       // Update agent status
-      this.updateAgentStatus(agentName, {
+      this.updateAgentStatus(
         agentName,
-        status: 'failed',
-        currentTask: task.description,
-        progress: 0,
-        output: errorMsg,
-      }, onStatusUpdate);
-      
+        {
+          agentName,
+          status: 'failed',
+          currentTask: task.description,
+          progress: 0,
+          output: errorMsg,
+        },
+        onStatusUpdate
+      );
+
       // Optionally retry or delegate to another agent
       if (task.retryCount < task.maxRetries) {
         task.retryCount++;
         task.status = 'pending'; // Reset for retry
-        console.log(`[Orchestrator] Retrying task ${task.id}, attempt ${task.retryCount}/${task.maxRetries}`);
+        console.log(
+          `[Orchestrator] Retrying task ${task.id}, attempt ${task.retryCount}/${task.maxRetries}`
+        );
       }
     }
-    
+
     // Move to next phase if needed
     this.updatePhase(plan);
   }
-  
+
   /**
    * Get next executable tasks based on dependencies
    */
   private getExecutableTasks(plan: OrchestrationPlan): AgentTask[] {
     return plan.tasks.filter(task => {
       if (task.status !== 'pending') return false;
-      
+
       // Check if all dependencies are complete
       const dependenciesMet = task.dependencies.every(depId => {
         const depTask = plan.tasks.find(t => t.id === depId);
         return depTask?.status === 'completed';
       });
-      
+
       return dependenciesMet;
     });
   }
-  
+
   /**
    * Check if a task can be executed
    */
@@ -336,7 +390,7 @@ class MultiAgentOrchestrator {
       return depTask?.status === 'completed';
     });
   }
-  
+
   /**
    * Try to unblock stuck tasks
    */
@@ -345,15 +399,18 @@ class MultiAgentOrchestrator {
     plan: OrchestrationPlan,
     onCommunication: (comm: AgentCommunication) => void
   ): Promise<void> {
-    console.log('[Orchestrator] Attempting to unblock tasks:', blockedTasks.length);
-    
+    console.log(
+      '[Orchestrator] Attempting to unblock tasks:',
+      blockedTasks.length
+    );
+
     for (const task of blockedTasks) {
       // Find which dependency is blocking
       const blockingDeps = task.dependencies.filter(depId => {
         const depTask = plan.tasks.find(t => t.id === depId);
         return depTask?.status !== 'completed';
       });
-      
+
       if (blockingDeps.length > 0) {
         // Send communication about blocking
         onCommunication({
@@ -367,24 +424,27 @@ class MultiAgentOrchestrator {
       }
     }
   }
-  
+
   /**
    * Determine task complexity
    */
-  private determineComplexity(userRequest: string): OrchestrationPlan['complexity'] {
+  private determineComplexity(
+    userRequest: string
+  ): OrchestrationPlan['complexity'] {
     const lowerRequest = userRequest.toLowerCase();
-    
+
     // Very complex indicators
     if (
       (lowerRequest.includes('full') && lowerRequest.includes('stack')) ||
-      (lowerRequest.includes('complete') && lowerRequest.includes('application')) ||
+      (lowerRequest.includes('complete') &&
+        lowerRequest.includes('application')) ||
       lowerRequest.includes('microservices') ||
       lowerRequest.includes('enterprise') ||
       lowerRequest.split(' ').length > 30
     ) {
       return 'very_complex';
     }
-    
+
     // Complex indicators
     if (
       lowerRequest.includes('integrate') ||
@@ -395,7 +455,7 @@ class MultiAgentOrchestrator {
     ) {
       return 'complex';
     }
-    
+
     // Moderate indicators
     if (
       lowerRequest.includes('create') ||
@@ -405,16 +465,16 @@ class MultiAgentOrchestrator {
     ) {
       return 'moderate';
     }
-    
+
     return 'simple';
   }
-  
+
   /**
    * Extract intent from user request
    */
   private extractIntent(userRequest: string): string {
     const lowerRequest = userRequest.toLowerCase();
-    
+
     if (lowerRequest.includes('build') || lowerRequest.includes('create')) {
       return 'Build new application/feature';
     }
@@ -436,116 +496,175 @@ class MultiAgentOrchestrator {
     if (lowerRequest.includes('design')) {
       return 'Design architecture/UI';
     }
-    
+
     return 'General assistance';
   }
-  
+
   /**
    * Select appropriate agents for the task
    */
-  private selectAgents(userRequest: string, intent: string, complexity: OrchestrationPlan['complexity']): string[] {
+  private selectAgents(
+    userRequest: string,
+    intent: string,
+    complexity: OrchestrationPlan['complexity']
+  ): string[] {
     const lowerRequest = userRequest.toLowerCase();
     const selectedAgents: string[] = [];
-    
+
     // Always start with System Orchestrator for complex tasks
     if (complexity === 'complex' || complexity === 'very_complex') {
       selectedAgents.push('System Orchestrator');
     }
-    
+
     // Software architecture
     if (complexity !== 'simple') {
       selectedAgents.push('Software Architect');
     }
-    
+
     // Frontend development
-    if (lowerRequest.includes('ui') || lowerRequest.includes('frontend') || lowerRequest.includes('react') || lowerRequest.includes('interface')) {
+    if (
+      lowerRequest.includes('ui') ||
+      lowerRequest.includes('frontend') ||
+      lowerRequest.includes('react') ||
+      lowerRequest.includes('interface')
+    ) {
       selectedAgents.push('Frontend Engineer');
       if (lowerRequest.includes('design')) {
         selectedAgents.push('UI/UX Designer');
       }
     }
-    
+
     // Backend development
-    if (lowerRequest.includes('api') || lowerRequest.includes('backend') || lowerRequest.includes('server') || lowerRequest.includes('database')) {
+    if (
+      lowerRequest.includes('api') ||
+      lowerRequest.includes('backend') ||
+      lowerRequest.includes('server') ||
+      lowerRequest.includes('database')
+    ) {
       selectedAgents.push('Backend Engineer');
-      if (lowerRequest.includes('database') || lowerRequest.includes('schema')) {
+      if (
+        lowerRequest.includes('database') ||
+        lowerRequest.includes('schema')
+      ) {
         selectedAgents.push('Schema Designer');
       }
     }
-    
+
     // Full-stack
     if (lowerRequest.includes('full') && lowerRequest.includes('stack')) {
-      if (!selectedAgents.includes('Frontend Engineer')) selectedAgents.push('Frontend Engineer');
-      if (!selectedAgents.includes('Backend Engineer')) selectedAgents.push('Backend Engineer');
+      if (!selectedAgents.includes('Frontend Engineer'))
+        selectedAgents.push('Frontend Engineer');
+      if (!selectedAgents.includes('Backend Engineer'))
+        selectedAgents.push('Backend Engineer');
       selectedAgents.push('Full-Stack Engineer');
     }
-    
+
     // DevOps & Deployment
-    if (lowerRequest.includes('deploy') || lowerRequest.includes('docker') || lowerRequest.includes('kubernetes') || lowerRequest.includes('ci/cd')) {
+    if (
+      lowerRequest.includes('deploy') ||
+      lowerRequest.includes('docker') ||
+      lowerRequest.includes('kubernetes') ||
+      lowerRequest.includes('ci/cd')
+    ) {
       selectedAgents.push('DevOps Engineer');
       selectedAgents.push('Deployment Specialist');
     }
-    
+
     // Testing & QA
-    if (lowerRequest.includes('test') || lowerRequest.includes('qa') || lowerRequest.includes('quality')) {
+    if (
+      lowerRequest.includes('test') ||
+      lowerRequest.includes('qa') ||
+      lowerRequest.includes('quality')
+    ) {
       selectedAgents.push('QA Engineer');
       selectedAgents.push('Performance Testing Engineer');
     }
-    
+
     // Security
-    if (lowerRequest.includes('security') || lowerRequest.includes('auth') || lowerRequest.includes('authentication')) {
+    if (
+      lowerRequest.includes('security') ||
+      lowerRequest.includes('auth') ||
+      lowerRequest.includes('authentication')
+    ) {
       selectedAgents.push('Security Analyst');
       selectedAgents.push('Cybersecurity Engineer');
     }
-    
+
     // Documentation
-    if (lowerRequest.includes('document') || lowerRequest.includes('readme') || lowerRequest.includes('docs')) {
+    if (
+      lowerRequest.includes('document') ||
+      lowerRequest.includes('readme') ||
+      lowerRequest.includes('docs')
+    ) {
       selectedAgents.push('Technical Writer');
       if (lowerRequest.includes('api')) {
         selectedAgents.push('API Documentation Specialist');
       }
     }
-    
+
     // Data & Analytics
-    if (lowerRequest.includes('data') || lowerRequest.includes('analytics') || lowerRequest.includes('ml') || lowerRequest.includes('ai')) {
+    if (
+      lowerRequest.includes('data') ||
+      lowerRequest.includes('analytics') ||
+      lowerRequest.includes('ml') ||
+      lowerRequest.includes('ai')
+    ) {
       selectedAgents.push('Data Engineer');
-      if (lowerRequest.includes('ml') || lowerRequest.includes('machine learning')) {
+      if (
+        lowerRequest.includes('ml') ||
+        lowerRequest.includes('machine learning')
+      ) {
         selectedAgents.push('ML Engineer');
       }
     }
-    
+
     // Mobile
-    if (lowerRequest.includes('mobile') || lowerRequest.includes('ios') || lowerRequest.includes('android')) {
+    if (
+      lowerRequest.includes('mobile') ||
+      lowerRequest.includes('ios') ||
+      lowerRequest.includes('android')
+    ) {
       selectedAgents.push('Mobile App Developer');
     }
-    
+
     // Default: if nothing selected, use versatile agents
     if (selectedAgents.length === 0) {
       selectedAgents.push('Full-Stack Engineer');
     }
-    
+
     // Add supporting roles for complex tasks
     if (complexity === 'very_complex') {
-      if (!selectedAgents.includes('Code Reviewer')) selectedAgents.push('Code Reviewer');
-      if (!selectedAgents.includes('Error Handler')) selectedAgents.push('Error Handler');
+      if (!selectedAgents.includes('Code Reviewer'))
+        selectedAgents.push('Code Reviewer');
+      if (!selectedAgents.includes('Error Handler'))
+        selectedAgents.push('Error Handler');
     }
-    
+
     return [...new Set(selectedAgents)]; // Remove duplicates
   }
-  
+
   /**
    * Create tasks from requirements
    */
-  private createTasks(userRequest: string, requiredAgents: string[], complexity: OrchestrationPlan['complexity']): AgentTask[] {
+  private createTasks(
+    userRequest: string,
+    requiredAgents: string[],
+    complexity: OrchestrationPlan['complexity']
+  ): AgentTask[] {
     const tasks: AgentTask[] = [];
     let taskId = 1;
-    
+
     // Phase 1: Planning & Design
-    if (requiredAgents.includes('Software Architect') || requiredAgents.includes('System Orchestrator')) {
+    if (
+      requiredAgents.includes('Software Architect') ||
+      requiredAgents.includes('System Orchestrator')
+    ) {
       tasks.push({
         id: `task-${taskId++}`,
         description: 'Analyze requirements and create architecture plan',
-        assignedTo: requiredAgents.includes('System Orchestrator') ? 'System Orchestrator' : 'Software Architect',
+        assignedTo: requiredAgents.includes('System Orchestrator')
+          ? 'System Orchestrator'
+          : 'Software Architect',
         status: 'pending',
         priority: 'critical',
         dependencies: [],
@@ -553,7 +672,7 @@ class MultiAgentOrchestrator {
         maxRetries: 3,
       });
     }
-    
+
     // Phase 2: Frontend Development
     if (requiredAgents.includes('Frontend Engineer')) {
       tasks.push({
@@ -567,7 +686,7 @@ class MultiAgentOrchestrator {
         maxRetries: 3,
       });
     }
-    
+
     // Phase 3: Backend Development
     if (requiredAgents.includes('Backend Engineer')) {
       tasks.push({
@@ -581,13 +700,17 @@ class MultiAgentOrchestrator {
         maxRetries: 3,
       });
     }
-    
+
     // Phase 4: Integration
     if (requiredAgents.includes('Full-Stack Engineer')) {
-      const frontendTask = tasks.find(t => t.assignedTo === 'Frontend Engineer');
+      const frontendTask = tasks.find(
+        t => t.assignedTo === 'Frontend Engineer'
+      );
       const backendTask = tasks.find(t => t.assignedTo === 'Backend Engineer');
-      const deps = [frontendTask?.id, backendTask?.id].filter(Boolean) as string[];
-      
+      const deps = [frontendTask?.id, backendTask?.id].filter(
+        Boolean
+      ) as string[];
+
       tasks.push({
         id: `task-${taskId++}`,
         description: 'Integrate frontend and backend',
@@ -599,13 +722,13 @@ class MultiAgentOrchestrator {
         maxRetries: 3,
       });
     }
-    
+
     // Phase 5: Testing
     if (requiredAgents.includes('QA Engineer')) {
-      const implementationTasks = tasks.filter(t => 
-        t.assignedTo.includes('Engineer') && t.assignedTo !== 'QA Engineer'
+      const implementationTasks = tasks.filter(
+        t => t.assignedTo.includes('Engineer') && t.assignedTo !== 'QA Engineer'
       );
-      
+
       tasks.push({
         id: `task-${taskId++}`,
         description: 'Test application and verify quality',
@@ -617,7 +740,7 @@ class MultiAgentOrchestrator {
         maxRetries: 3,
       });
     }
-    
+
     // Phase 6: Deployment
     if (requiredAgents.includes('DevOps Engineer')) {
       tasks.push({
@@ -631,7 +754,7 @@ class MultiAgentOrchestrator {
         maxRetries: 3,
       });
     }
-    
+
     // Phase 7: Documentation
     if (requiredAgents.includes('Technical Writer')) {
       tasks.push({
@@ -645,58 +768,66 @@ class MultiAgentOrchestrator {
         maxRetries: 3,
       });
     }
-    
+
     return tasks;
   }
-  
+
   /**
    * Determine execution strategy
    */
-  private determineStrategy(tasks: AgentTask[], complexity: OrchestrationPlan['complexity']): OrchestrationPlan['executionStrategy'] {
+  private determineStrategy(
+    tasks: AgentTask[],
+    complexity: OrchestrationPlan['complexity']
+  ): OrchestrationPlan['executionStrategy'] {
     if (complexity === 'simple') return 'sequential';
     if (complexity === 'very_complex') return 'recursive';
-    
+
     // Check if tasks can be parallelized
-    const hasIndependentTasks = tasks.some(task => task.dependencies.length === 0);
+    const hasIndependentTasks = tasks.some(
+      task => task.dependencies.length === 0
+    );
     if (hasIndependentTasks && tasks.length > 3) {
       return 'hybrid';
     }
-    
+
     return 'sequential';
   }
-  
+
   /**
    * Estimate duration in seconds
    */
-  private estimateDuration(tasks: AgentTask[], strategy: OrchestrationPlan['executionStrategy']): number {
+  private estimateDuration(
+    tasks: AgentTask[],
+    strategy: OrchestrationPlan['executionStrategy']
+  ): number {
     const avgTaskDuration = 5; // seconds
-    
+
     if (strategy === 'parallel') {
       return avgTaskDuration * 2; // Tasks run in parallel
     }
     if (strategy === 'sequential') {
       return tasks.length * avgTaskDuration;
     }
-    
+
     // Hybrid/recursive
-    return (tasks.length * avgTaskDuration) * 0.6; // Some parallelization
+    return tasks.length * avgTaskDuration * 0.6; // Some parallelization
   }
-  
+
   /**
    * Calculate total phases
    */
   private calculatePhases(tasks: AgentTask[]): number {
     // Group tasks by priority/dependencies
     const phases = new Set<number>();
-    
+
     tasks.forEach(task => {
       const phase = task.dependencies.length + 1;
       phases.add(phase);
     });
-    
+
     return phases.size;
   }
-  
+
   /**
    * Get tools for an agent
    */
@@ -705,25 +836,29 @@ class MultiAgentOrchestrator {
     const capability = EMPLOYEE_CAPABILITIES[key];
     return capability?.tools || ['code_interpreter', 'web_search'];
   }
-  
+
   /**
    * Check if this is a handoff between agents
    */
   private isHandoff(task: AgentTask, plan: OrchestrationPlan): boolean {
     const taskIndex = plan.tasks.findIndex(t => t.id === task.id);
     if (taskIndex === 0) return false;
-    
+
     const prevTask = plan.tasks[taskIndex - 1];
     return prevTask.assignedTo !== task.assignedTo;
   }
-  
+
   /**
    * Send handoff communication
    */
-  private sendHandoff(task: AgentTask, plan: OrchestrationPlan, onCommunication: (comm: AgentCommunication) => void): void {
+  private sendHandoff(
+    task: AgentTask,
+    plan: OrchestrationPlan,
+    onCommunication: (comm: AgentCommunication) => void
+  ): void {
     const taskIndex = plan.tasks.findIndex(t => t.id === task.id);
     const prevTask = plan.tasks[taskIndex - 1];
-    
+
     onCommunication({
       id: `comm-${Date.now()}`,
       from: prevTask.assignedTo,
@@ -733,11 +868,14 @@ class MultiAgentOrchestrator {
       timestamp: new Date(),
     });
   }
-  
+
   /**
    * Send task completion communication
    */
-  private sendTaskCompletion(task: AgentTask, onCommunication: (comm: AgentCommunication) => void): void {
+  private sendTaskCompletion(
+    task: AgentTask,
+    onCommunication: (comm: AgentCommunication) => void
+  ): void {
     onCommunication({
       id: `comm-${Date.now()}`,
       from: task.assignedTo,
@@ -747,11 +885,14 @@ class MultiAgentOrchestrator {
       timestamp: new Date(),
     });
   }
-  
+
   /**
    * Send plan completion
    */
-  private sendCompletion(plan: OrchestrationPlan, onCommunication: (comm: AgentCommunication) => void): void {
+  private sendCompletion(
+    plan: OrchestrationPlan,
+    onCommunication: (comm: AgentCommunication) => void
+  ): void {
     onCommunication({
       id: `comm-${Date.now()}`,
       from: 'System',
@@ -761,73 +902,88 @@ class MultiAgentOrchestrator {
       timestamp: new Date(),
     });
   }
-  
+
   /**
    * Update agent status
    */
-  private updateAgentStatus(agentName: string, status: AgentStatus, onStatusUpdate: (status: AgentStatus) => void): void {
+  private updateAgentStatus(
+    agentName: string,
+    status: AgentStatus,
+    onStatusUpdate: (status: AgentStatus) => void
+  ): void {
     this.agentStatuses.set(agentName, status);
     onStatusUpdate(status);
   }
-  
+
   /**
    * Update plan phase
    */
   private updatePhase(plan: OrchestrationPlan): void {
-    const completedTasks = plan.tasks.filter(t => t.status === 'completed').length;
+    const completedTasks = plan.tasks.filter(
+      t => t.status === 'completed'
+    ).length;
     const totalTasks = plan.tasks.length;
-    
-    plan.currentPhase = Math.ceil((completedTasks / totalTasks) * plan.totalPhases);
+
+    plan.currentPhase = Math.ceil(
+      (completedTasks / totalTasks) * plan.totalPhases
+    );
   }
-  
+
   /**
    * Initialize the orchestrator with LLM service
    */
   constructor() {
     this.llmService = new UnifiedLLMService();
   }
-  
+
   /**
    * Map AI employee provider to LLM provider enum
    */
   private mapProviderToLLM(provider: string): LLMProvider {
     const providerMap: Record<string, LLMProvider> = {
-      'chatgpt': 'openai',
-      'openai': 'openai',
-      'claude': 'anthropic',
-      'anthropic': 'anthropic',
-      'gemini': 'google',
-      'google': 'google',
-      'perplexity': 'perplexity',
+      chatgpt: 'openai',
+      openai: 'openai',
+      claude: 'anthropic',
+      anthropic: 'anthropic',
+      gemini: 'google',
+      google: 'google',
+      perplexity: 'perplexity',
     };
-    
+
     return providerMap[provider.toLowerCase()] || 'anthropic'; // Default to Anthropic (Claude)
   }
-  
+
   /**
    * Execute agent task using real LLM API calls
    */
   private async executeAgentTask(
-    task: AgentTask, 
-    agentName: string, 
+    task: AgentTask,
+    agentName: string,
     provider: LLMProvider,
     onStatusUpdate: (status: AgentStatus) => void
   ): Promise<string> {
-    console.log(`[Orchestrator] ${agentName} executing task:`, task.description);
-    
+    console.log(
+      `[Orchestrator] ${agentName} executing task:`,
+      task.description
+    );
+
     // Update status: starting
-    this.updateAgentStatus(agentName, {
+    this.updateAgentStatus(
       agentName,
-      status: 'working',
-      currentTask: task.description,
-      progress: 0,
-      toolsUsing: this.getAgentTools(agentName),
-    }, onStatusUpdate);
-    
+      {
+        agentName,
+        status: 'working',
+        currentTask: task.description,
+        progress: 0,
+        toolsUsing: this.getAgentTools(agentName),
+      },
+      onStatusUpdate
+    );
+
     // Get agent capability to create specialized prompt
     const agentKey = agentName.toLowerCase().replace(/\s+/g, '-');
     const capability = EMPLOYEE_CAPABILITIES[agentKey];
-    
+
     // Create enhanced system prompt following Cursor, Bolt.new, v0, and Copilot best practices
     const systemPrompt = `<role>
 You are ${agentName}, a world-class ${capability?.role || 'specialist'} AI agent in a collaborative multi-agent workforce.
@@ -891,7 +1047,7 @@ ${capability?.tools.map(t => `- ${t}`).join('\n') || '- Standard reasoning tools
 - Create clear artifacts for handoffs to other specialists
 - Think comprehensively about edge cases and error handling
 </success_criteria>`;
-    
+
     // Prepare messages for LLM with planning instructions (OpenAI, Anthropic, Google best practices)
     const userPrompt = `<task>
 ${task.description}
@@ -931,12 +1087,12 @@ Provide your complete, production-ready implementation following this structure.
 
     const messages = [
       { role: 'system' as const, content: systemPrompt },
-      { role: 'user' as const, content: userPrompt }
+      { role: 'user' as const, content: userPrompt },
     ];
-    
+
     let fullResponse = '';
     let progress = 0;
-    
+
     try {
       // Stream the response from LLM
       const stream = this.llmService.streamMessage(
@@ -945,48 +1101,62 @@ Provide your complete, production-ready implementation following this structure.
         undefined, // userId - will be added when auth is integrated
         provider
       );
-      
+
       for await (const chunk of stream) {
         if (!chunk.done && chunk.content) {
           fullResponse += chunk.content;
           progress = Math.min(95, progress + 5);
-          
+
           // Update progress
-          this.updateAgentStatus(agentName, {
+          this.updateAgentStatus(
             agentName,
-            status: 'working',
-            currentTask: task.description,
-            progress,
-            toolsUsing: this.getAgentTools(agentName),
-          }, onStatusUpdate);
+            {
+              agentName,
+              status: 'working',
+              currentTask: task.description,
+              progress,
+              toolsUsing: this.getAgentTools(agentName),
+            },
+            onStatusUpdate
+          );
         }
-        
+
         if (chunk.done) {
           // Task complete
-          this.updateAgentStatus(agentName, {
+          this.updateAgentStatus(
             agentName,
-            status: 'completed',
-            currentTask: task.description,
-            progress: 100,
-            output: fullResponse,
-          }, onStatusUpdate);
+            {
+              agentName,
+              status: 'completed',
+              currentTask: task.description,
+              progress: 100,
+              output: fullResponse,
+            },
+            onStatusUpdate
+          );
         }
       }
-      
+
       return fullResponse;
-      
     } catch (error) {
-      console.error(`[Orchestrator] Error executing task for ${agentName}:`, error);
-      
+      console.error(
+        `[Orchestrator] Error executing task for ${agentName}:`,
+        error
+      );
+
       // Update status: failed
-      this.updateAgentStatus(agentName, {
+      this.updateAgentStatus(
         agentName,
-        status: 'failed',
-        currentTask: task.description,
-        progress: 0,
-        output: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      }, onStatusUpdate);
-      
+        {
+          agentName,
+          status: 'failed',
+          currentTask: task.description,
+          progress: 0,
+          output: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        },
+        onStatusUpdate
+      );
+
       throw error;
     }
   }

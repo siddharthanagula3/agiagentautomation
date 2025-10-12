@@ -56,7 +56,11 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { useTheme } from '@/components/theme-provider';
 import { listPurchasedEmployees } from '@/services/supabase-employees';
-import { getChatGPTAIEmployeePrompt, getStarterPromptsForRole, getGreetingMessageForRole } from '@/prompts/chatgpt-ai-employee-prompts';
+import {
+  getChatGPTAIEmployeePrompt,
+  getStarterPromptsForRole,
+  getGreetingMessageForRole,
+} from '@/prompts/chatgpt-ai-employee-prompts';
 
 // ChatKit Theme Configuration
 interface ChatKitTheme {
@@ -98,7 +102,17 @@ interface ChatKitTheme {
 // ChatKit Widget Configuration
 interface ChatKitWidget {
   id: string;
-  type: 'button' | 'input' | 'select' | 'checkbox' | 'radio' | 'slider' | 'file' | 'image' | 'card' | 'progress';
+  type:
+    | 'button'
+    | 'input'
+    | 'select'
+    | 'checkbox'
+    | 'radio'
+    | 'slider'
+    | 'file'
+    | 'image'
+    | 'card'
+    | 'progress';
   label: string;
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
@@ -186,23 +200,26 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
   const { user } = useAuthStore();
   const { theme, setTheme } = useTheme();
   const chatkitRef = useRef<any>(null);
-  
+
   const [employees, setEmployees] = useState<PurchasedEmployee[]>([]);
-  const [selectedEmployee, setSelectedEmployee] = useState<PurchasedEmployee | null>(null);
+  const [selectedEmployee, setSelectedEmployee] =
+    useState<PurchasedEmployee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isSessionActive, setIsSessionActive] = useState(false);
-  
+
   // Theme customization state
   const [customTheme, setCustomTheme] = useState<ChatKitTheme | null>(null);
   const [showThemeCustomizer, setShowThemeCustomizer] = useState(false);
-  const [themePreset, setThemePreset] = useState<'light' | 'dark' | 'auto' | 'custom'>('auto');
-  
+  const [themePreset, setThemePreset] = useState<
+    'light' | 'dark' | 'auto' | 'custom'
+  >('auto');
+
   // Widget state
   const [widgets, setWidgets] = useState<ChatKitWidget[]>([]);
   const [showWidgetPanel, setShowWidgetPanel] = useState(false);
-  
+
   // Actions state
   const [actions, setActions] = useState<ChatKitAction[]>([]);
   const [showActionsPanel, setShowActionsPanel] = useState(false);
@@ -325,7 +342,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         setIsLoading(true);
         const data = await listPurchasedEmployees(user.id);
         setEmployees(data);
-        
+
         if (data.length > 0 && !selectedEmployee) {
           setSelectedEmployee(data[0]);
         }
@@ -361,7 +378,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         id: 'quick-action',
         type: 'button',
         label: 'Quick Action',
-        onAction: (value) => handleWidgetAction('quick-action', value),
+        onAction: value => handleWidgetAction('quick-action', value),
       },
       {
         id: 'priority-selector',
@@ -373,19 +390,22 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
           { value: 'high', label: 'High Priority' },
           { value: 'urgent', label: 'Urgent' },
         ],
-        onAction: (value) => handleWidgetAction('priority-selector', value),
+        onAction: value => handleWidgetAction('priority-selector', value),
       },
       {
         id: 'progress-slider',
         type: 'slider',
         label: 'Task Progress',
         validation: { min: 0, max: 100 },
-        onAction: (value) => handleWidgetAction('progress-slider', value),
+        onAction: value => handleWidgetAction('progress-slider', value),
       },
     ];
 
     // Add role-specific widgets
-    if (selectedEmployee.role.includes('Engineer') || selectedEmployee.role.includes('Developer')) {
+    if (
+      selectedEmployee.role.includes('Engineer') ||
+      selectedEmployee.role.includes('Developer')
+    ) {
       roleWidgets.push({
         id: 'code-language',
         type: 'select',
@@ -398,11 +418,14 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
           { value: 'csharp', label: 'C#' },
           { value: 'go', label: 'Go' },
         ],
-        onAction: (value) => handleWidgetAction('code-language', value),
+        onAction: value => handleWidgetAction('code-language', value),
       });
     }
 
-    if (selectedEmployee.role.includes('Marketing') || selectedEmployee.role.includes('Creative')) {
+    if (
+      selectedEmployee.role.includes('Marketing') ||
+      selectedEmployee.role.includes('Creative')
+    ) {
       roleWidgets.push({
         id: 'content-type',
         type: 'select',
@@ -414,7 +437,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
           { value: 'ad', label: 'Advertisement' },
           { value: 'video', label: 'Video Script' },
         ],
-        onAction: (value) => handleWidgetAction('content-type', value),
+        onAction: value => handleWidgetAction('content-type', value),
       });
     }
 
@@ -433,7 +456,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         icon: 'Bookmark',
         type: 'secondary',
         enabled: true,
-        handler: async (context) => {
+        handler: async context => {
           toast.success('Conversation saved successfully');
           return { success: true };
         },
@@ -445,7 +468,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         icon: 'Download',
         type: 'secondary',
         enabled: true,
-        handler: async (context) => {
+        handler: async context => {
           toast.success('Chat exported successfully');
           return { success: true };
         },
@@ -457,7 +480,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         icon: 'Share',
         type: 'secondary',
         enabled: true,
-        handler: async (context) => {
+        handler: async context => {
           toast.success('Conversation shared successfully');
           return { success: true };
         },
@@ -465,7 +488,10 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
     ];
 
     // Add role-specific actions
-    if (selectedEmployee.role.includes('Engineer') || selectedEmployee.role.includes('Developer')) {
+    if (
+      selectedEmployee.role.includes('Engineer') ||
+      selectedEmployee.role.includes('Developer')
+    ) {
       roleActions.push({
         id: 'generate-code',
         name: 'Generate Code',
@@ -473,14 +499,17 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         icon: 'Code',
         type: 'primary',
         enabled: true,
-        handler: async (context) => {
+        handler: async context => {
           toast.success('Code generation started');
           return { success: true };
         },
       });
     }
 
-    if (selectedEmployee.role.includes('Marketing') || selectedEmployee.role.includes('Creative')) {
+    if (
+      selectedEmployee.role.includes('Marketing') ||
+      selectedEmployee.role.includes('Creative')
+    ) {
       roleActions.push({
         id: 'create-content',
         name: 'Create Content',
@@ -488,7 +517,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         icon: 'FileText',
         type: 'primary',
         enabled: true,
-        handler: async (context) => {
+        handler: async context => {
           toast.success('Content creation started');
           return { success: true };
         },
@@ -598,10 +627,10 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-screen bg-gray-50">
-        <div className="flex-1 flex items-center justify-center">
+      <div className="flex h-screen flex-col bg-gray-50">
+        <div className="flex flex-1 items-center justify-center">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+            <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-blue-600" />
             <p className="text-gray-600">Loading AI agents...</p>
           </div>
         </div>
@@ -611,15 +640,17 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
 
   if (error) {
     return (
-      <div className="flex flex-col h-screen bg-gray-50">
-        <div className="flex-1 flex items-center justify-center">
-          <Card className="max-w-md mx-auto">
+      <div className="flex h-screen flex-col bg-gray-50">
+        <div className="flex flex-1 items-center justify-center">
+          <Card className="mx-auto max-w-md">
             <CardContent className="p-6 text-center">
-              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-lg font-semibold mb-2">Error Loading Agents</h2>
-              <p className="text-gray-600 mb-4">{error}</p>
+              <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
+              <h2 className="mb-2 text-lg font-semibold">
+                Error Loading Agents
+              </h2>
+              <p className="mb-4 text-gray-600">{error}</p>
               <Button onClick={() => window.location.reload()}>
-                <RotateCcw className="w-4 h-4 mr-2" />
+                <RotateCcw className="mr-2 h-4 w-4" />
                 Retry
               </Button>
             </CardContent>
@@ -631,17 +662,18 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
 
   if (employees.length === 0) {
     return (
-      <div className="flex flex-col h-screen bg-gray-50">
-        <div className="flex-1 flex items-center justify-center">
-          <Card className="max-w-md mx-auto">
+      <div className="flex h-screen flex-col bg-gray-50">
+        <div className="flex flex-1 items-center justify-center">
+          <Card className="mx-auto max-w-md">
             <CardContent className="p-6 text-center">
-              <Bot className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-lg font-semibold mb-2">No AI Agents Found</h2>
-              <p className="text-gray-600 mb-4">
-                You need to purchase AI employees from the marketplace to start using the advanced ChatKit interface.
+              <Bot className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+              <h2 className="mb-2 text-lg font-semibold">No AI Agents Found</h2>
+              <p className="mb-4 text-gray-600">
+                You need to purchase AI employees from the marketplace to start
+                using the advanced ChatKit interface.
               </p>
-              <Button onClick={() => window.location.href = '/marketplace'}>
-                <ShoppingCart className="w-4 h-4 mr-2" />
+              <Button onClick={() => (window.location.href = '/marketplace')}>
+                <ShoppingCart className="mr-2 h-4 w-4" />
                 Browse Marketplace
               </Button>
             </CardContent>
@@ -652,9 +684,9 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
   }
 
   return (
-    <div className={cn("flex flex-col h-screen bg-gray-50", className)}>
+    <div className={cn('flex h-screen flex-col bg-gray-50', className)}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="border-b border-gray-200 bg-white px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
@@ -663,18 +695,20 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
               onClick={() => window.history.back()}
               className="flex items-center gap-2"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
-            
+
             <div className="h-6 w-px bg-gray-300" />
-            
+
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-600">
+                <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">Advanced ChatKit AI Assistant</h1>
+                <h1 className="text-xl font-semibold text-gray-900">
+                  Advanced ChatKit AI Assistant
+                </h1>
                 <p className="text-sm text-gray-600">
                   ChatGPT-powered AI Employee with themes, widgets & actions
                 </p>
@@ -689,30 +723,30 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
               onClick={() => setShowThemeCustomizer(!showThemeCustomizer)}
               className="flex items-center gap-2"
             >
-              <Palette className="w-4 h-4" />
+              <Palette className="h-4 w-4" />
               Themes
             </Button>
-            
+
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowWidgetPanel(!showWidgetPanel)}
               className="flex items-center gap-2"
             >
-              <Zap className="w-4 h-4" />
+              <Zap className="h-4 w-4" />
               Widgets
             </Button>
-            
+
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowActionsPanel(!showActionsPanel)}
               className="flex items-center gap-2"
             >
-              <Target className="w-4 h-4" />
+              <Target className="h-4 w-4" />
               Actions
             </Button>
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -724,12 +758,12 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
               }}
               className="flex items-center gap-2"
             >
-              <Users className="w-4 h-4" />
+              <Users className="h-4 w-4" />
               Switch Agent
             </Button>
-            
+
             <Badge variant="outline" className="flex items-center gap-1">
-              <Star className="w-3 h-3" />
+              <Star className="h-3 w-3" />
               Advanced
             </Badge>
           </div>
@@ -738,15 +772,15 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
 
       {/* Theme Customizer Panel */}
       {showThemeCustomizer && (
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="border-b border-gray-200 bg-white px-6 py-4">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <Label htmlFor="theme-preset">Theme Preset:</Label>
               <select
                 id="theme-preset"
                 value={themePreset}
-                onChange={(e) => setThemePreset(e.target.value as any)}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+                onChange={e => setThemePreset(e.target.value as any)}
+                className="rounded-md border border-gray-300 px-3 py-1 text-sm"
               >
                 <option value="auto">Auto</option>
                 <option value="light">Light</option>
@@ -755,7 +789,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
                 <option value="custom">Custom</option>
               </select>
             </div>
-            
+
             {themePreset === 'custom' && (
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
@@ -763,15 +797,18 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
                   <input
                     type="color"
                     value={customTheme?.colors.primary || '#3b82f6'}
-                    onChange={(e) => {
+                    onChange={e => {
                       if (customTheme) {
                         setCustomTheme({
                           ...customTheme,
-                          colors: { ...customTheme.colors, primary: e.target.value }
+                          colors: {
+                            ...customTheme.colors,
+                            primary: e.target.value,
+                          },
                         });
                       }
                     }}
-                    className="w-8 h-8 rounded border border-gray-300"
+                    className="h-8 w-8 rounded border border-gray-300"
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -779,15 +816,18 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
                   <input
                     type="color"
                     value={customTheme?.colors.background || '#ffffff'}
-                    onChange={(e) => {
+                    onChange={e => {
                       if (customTheme) {
                         setCustomTheme({
                           ...customTheme,
-                          colors: { ...customTheme.colors, background: e.target.value }
+                          colors: {
+                            ...customTheme.colors,
+                            background: e.target.value,
+                          },
                         });
                       }
                     }}
-                    className="w-8 h-8 rounded border border-gray-300"
+                    className="h-8 w-8 rounded border border-gray-300"
                   />
                 </div>
               </div>
@@ -798,15 +838,21 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
 
       {/* Widget Panel */}
       {showWidgetPanel && (
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="border-b border-gray-200 bg-white px-6 py-4">
           <div className="flex items-center gap-4">
             <h3 className="font-medium text-gray-900">Available Widgets:</h3>
             <div className="flex flex-wrap gap-2">
-              {widgets.map((widget) => (
-                <Badge key={widget.id} variant="secondary" className="flex items-center gap-1">
-                  {widget.type === 'button' && <Play className="w-3 h-3" />}
-                  {widget.type === 'select' && <Search className="w-3 h-3" />}
-                  {widget.type === 'slider' && <MoreHorizontal className="w-3 h-3" />}
+              {widgets.map(widget => (
+                <Badge
+                  key={widget.id}
+                  variant="secondary"
+                  className="flex items-center gap-1"
+                >
+                  {widget.type === 'button' && <Play className="h-3 w-3" />}
+                  {widget.type === 'select' && <Search className="h-3 w-3" />}
+                  {widget.type === 'slider' && (
+                    <MoreHorizontal className="h-3 w-3" />
+                  )}
                   {widget.label}
                 </Badge>
               ))}
@@ -817,21 +863,27 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
 
       {/* Actions Panel */}
       {showActionsPanel && (
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="border-b border-gray-200 bg-white px-6 py-4">
           <div className="flex items-center gap-4">
             <h3 className="font-medium text-gray-900">Available Actions:</h3>
             <div className="flex flex-wrap gap-2">
-              {actions.map((action) => (
-                <Badge 
-                  key={action.id} 
+              {actions.map(action => (
+                <Badge
+                  key={action.id}
                   variant={action.type === 'primary' ? 'default' : 'secondary'}
                   className="flex items-center gap-1"
                 >
-                  {action.icon === 'Bookmark' && <Bookmark className="w-3 h-3" />}
-                  {action.icon === 'Download' && <Download className="w-3 h-3" />}
-                  {action.icon === 'Share' && <Share className="w-3 h-3" />}
-                  {action.icon === 'Code' && <Code className="w-3 h-3" />}
-                  {action.icon === 'FileText' && <FileText className="w-3 h-3" />}
+                  {action.icon === 'Bookmark' && (
+                    <Bookmark className="h-3 w-3" />
+                  )}
+                  {action.icon === 'Download' && (
+                    <Download className="h-3 w-3" />
+                  )}
+                  {action.icon === 'Share' && <Share className="h-3 w-3" />}
+                  {action.icon === 'Code' && <Code className="h-3 w-3" />}
+                  {action.icon === 'FileText' && (
+                    <FileText className="h-3 w-3" />
+                  )}
                   {action.name}
                 </Badge>
               ))}
@@ -841,38 +893,54 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex">
+      <div className="flex flex-1">
         {/* Sidebar */}
-        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+        <div className="flex w-80 flex-col border-r border-gray-200 bg-white">
           {/* Agent Info */}
           {selectedEmployee && (
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center">
-                  <Bot className="w-6 h-6 text-white" />
+            <div className="border-b border-gray-200 p-6">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-purple-400 to-pink-500">
+                  <Bot className="h-6 w-6 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{selectedEmployee.name}</h3>
-                  <p className="text-sm text-gray-600">{selectedEmployee.role}</p>
+                  <h3 className="font-semibold text-gray-900">
+                    {selectedEmployee.name}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {selectedEmployee.role}
+                  </p>
                 </div>
               </div>
-              
-              <p className="text-sm text-gray-600 mb-4">{selectedEmployee.description}</p>
-              
+
+              <p className="mb-4 text-sm text-gray-600">
+                {selectedEmployee.description}
+              </p>
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Status</span>
-                  <Badge variant={selectedEmployee.status === 'active' ? 'default' : 'secondary'}>
+                  <Badge
+                    variant={
+                      selectedEmployee.status === 'active'
+                        ? 'default'
+                        : 'secondary'
+                    }
+                  >
                     {selectedEmployee.status}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Messages</span>
-                  <span className="font-medium">{selectedEmployee?.usage_stats?.messages_sent ?? 0}</span>
+                  <span className="font-medium">
+                    {selectedEmployee?.usage_stats?.messages_sent ?? 0}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Sessions</span>
-                  <span className="font-medium">{selectedEmployee?.usage_stats?.total_sessions ?? 0}</span>
+                  <span className="font-medium">
+                    {selectedEmployee?.usage_stats?.total_sessions ?? 0}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Widgets</span>
@@ -888,21 +956,23 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
 
           {/* Capabilities */}
           {selectedEmployee && (
-            <div className="p-6 flex-1">
-              <h4 className="font-medium text-gray-900 mb-3">Capabilities</h4>
+            <div className="flex-1 p-6">
+              <h4 className="mb-3 font-medium text-gray-900">Capabilities</h4>
               <div className="flex flex-wrap gap-2">
-                {(selectedEmployee.capabilities || []).map((capability, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {capability}
-                  </Badge>
-                ))}
+                {(selectedEmployee.capabilities || []).map(
+                  (capability, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {capability}
+                    </Badge>
+                  )
+                )}
               </div>
             </div>
           )}
         </div>
 
         {/* ChatKit Interface */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex flex-1 flex-col">
           {chatKitConfig ? (
             <div className="flex-1">
               <openai-chatkit
@@ -926,22 +996,27 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
               />
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-1 items-center justify-center">
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center mx-auto mb-4">
-                  <MessageSquare className="w-8 h-8 text-white" />
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-purple-400 to-pink-500">
+                  <MessageSquare className="h-8 w-8 text-white" />
                 </div>
-                <h2 className="text-xl font-semibold mb-2">Select an AI Agent</h2>
-                <p className="text-gray-600 mb-4">
+                <h2 className="mb-2 text-xl font-semibold">
+                  Select an AI Agent
+                </h2>
+                <p className="mb-4 text-gray-600">
                   Choose an AI agent to start an advanced ChatKit conversation
                 </p>
-                <Button onClick={() => {
-                  const selector = document.getElementById('employee-selector');
-                  if (selector) {
-                    selector.style.display = 'block';
-                  }
-                }}>
-                  <Users className="w-4 h-4 mr-2" />
+                <Button
+                  onClick={() => {
+                    const selector =
+                      document.getElementById('employee-selector');
+                    if (selector) {
+                      selector.style.display = 'block';
+                    }
+                  }}
+                >
+                  <Users className="mr-2 h-4 w-4" />
                   Select Agent
                 </Button>
               </div>
@@ -953,17 +1028,17 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
       {/* Employee Selector (Hidden by default) */}
       <div
         id="employee-selector"
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
         style={{ display: 'none' }}
-        onClick={(e) => {
+        onClick={e => {
           if (e.target === e.currentTarget) {
             e.currentTarget.style.display = 'none';
           }
         }}
       >
-        <Card className="max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <Card className="mx-4 max-h-[80vh] w-full max-w-2xl overflow-y-auto">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Select AI Agent</h2>
               <Button
                 variant="ghost"
@@ -978,18 +1053,20 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
                 ×
               </Button>
             </div>
-            
+
             <div className="grid gap-4">
-              {employees.map((employee) => (
+              {employees.map(employee => (
                 <Card
                   key={employee.id}
                   className={cn(
-                    "cursor-pointer transition-all duration-200 hover:shadow-md",
-                    selectedEmployee?.id === employee.id && "ring-2 ring-purple-500"
+                    'cursor-pointer transition-all duration-200 hover:shadow-md',
+                    selectedEmployee?.id === employee.id &&
+                      'ring-2 ring-purple-500'
                   )}
                   onClick={() => {
                     handleEmployeeSelect(employee);
-                    const selector = document.getElementById('employee-selector');
+                    const selector =
+                      document.getElementById('employee-selector');
                     if (selector) {
                       selector.style.display = 'none';
                     }
@@ -997,20 +1074,24 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center">
-                        <Bot className="w-6 h-6 text-white" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-purple-400 to-pink-500">
+                        <Bot className="h-6 w-6 text-white" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{employee.name}</h3>
+                        <h3 className="font-semibold text-gray-900">
+                          {employee.name}
+                        </h3>
                         <p className="text-sm text-gray-600">{employee.role}</p>
-                        <p className="text-xs text-gray-500 mt-1">{employee.description}</p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          {employee.description}
+                        </p>
                       </div>
                       <div className="text-right">
                         <Badge variant="outline" className="mb-2">
                           {employee.status}
                         </Badge>
                         <div className="text-xs text-gray-500">
-                          {(employee?.usage_stats?.messages_sent ?? 0)} messages
+                          {employee?.usage_stats?.messages_sent ?? 0} messages
                         </div>
                       </div>
                     </div>

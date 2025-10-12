@@ -61,13 +61,20 @@ class ToolExecutorService {
           type: 'object',
           properties: {
             query: { type: 'string', description: 'Search query' },
-            maxResults: { type: 'number', description: 'Maximum number of results', default: 5 },
+            maxResults: {
+              type: 'number',
+              description: 'Maximum number of results',
+              default: 5,
+            },
           },
           required: ['query'],
         },
       },
-      async (params) => {
-        return await this.executeWebSearch(params.query, params.maxResults || 5);
+      async params => {
+        return await this.executeWebSearch(
+          params.query,
+          params.maxResults || 5
+        );
       }
     );
 
@@ -81,13 +88,17 @@ class ToolExecutorService {
         inputSchema: {
           type: 'object',
           properties: {
-            language: { type: 'string', enum: ['python', 'javascript', 'typescript'], description: 'Programming language' },
+            language: {
+              type: 'string',
+              enum: ['python', 'javascript', 'typescript'],
+              description: 'Programming language',
+            },
             code: { type: 'string', description: 'Code to execute' },
           },
           required: ['language', 'code'],
         },
       },
-      async (params) => {
+      async params => {
         return await this.executeCode(params.language, params.code);
       }
     );
@@ -103,12 +114,16 @@ class ToolExecutorService {
           type: 'object',
           properties: {
             fileUrl: { type: 'string', description: 'URL or path to file' },
-            analysisType: { type: 'string', enum: ['text', 'data', 'image'], description: 'Type of analysis' },
+            analysisType: {
+              type: 'string',
+              enum: ['text', 'data', 'image'],
+              description: 'Type of analysis',
+            },
           },
           required: ['fileUrl', 'analysisType'],
         },
       },
-      async (params) => {
+      async params => {
         return await this.analyzeFile(params.fileUrl, params.analysisType);
       }
     );
@@ -124,14 +139,22 @@ class ToolExecutorService {
           type: 'object',
           properties: {
             data: { type: 'array', description: 'Data to visualize' },
-            chartType: { type: 'string', enum: ['line', 'bar', 'pie', 'scatter'], description: 'Chart type' },
+            chartType: {
+              type: 'string',
+              enum: ['line', 'bar', 'pie', 'scatter'],
+              description: 'Chart type',
+            },
             title: { type: 'string', description: 'Chart title' },
           },
           required: ['data', 'chartType'],
         },
       },
-      async (params) => {
-        return await this.createVisualization(params.data, params.chartType, params.title);
+      async params => {
+        return await this.createVisualization(
+          params.data,
+          params.chartType,
+          params.title
+        );
       }
     );
 
@@ -146,15 +169,24 @@ class ToolExecutorService {
           type: 'object',
           properties: {
             url: { type: 'string', description: 'API endpoint URL' },
-            method: { type: 'string', enum: ['GET', 'POST', 'PUT', 'DELETE'], description: 'HTTP method' },
+            method: {
+              type: 'string',
+              enum: ['GET', 'POST', 'PUT', 'DELETE'],
+              description: 'HTTP method',
+            },
             headers: { type: 'object', description: 'Request headers' },
             body: { type: 'object', description: 'Request body' },
           },
           required: ['url', 'method'],
         },
       },
-      async (params) => {
-        return await this.makeAPICall(params.url, params.method, params.headers, params.body);
+      async params => {
+        return await this.makeAPICall(
+          params.url,
+          params.method,
+          params.headers,
+          params.body
+        );
       }
     );
 
@@ -169,12 +201,15 @@ class ToolExecutorService {
           type: 'object',
           properties: {
             query: { type: 'string', description: 'SQL query' },
-            database: { type: 'string', description: 'Database connection string' },
+            database: {
+              type: 'string',
+              description: 'Database connection string',
+            },
           },
           required: ['query'],
         },
       },
-      async (params) => {
+      async params => {
         return await this.queryDatabase(params.query, params.database);
       }
     );
@@ -190,14 +225,22 @@ class ToolExecutorService {
           type: 'object',
           properties: {
             prompt: { type: 'string', description: 'Image generation prompt' },
-            size: { type: 'string', enum: ['256x256', '512x512', '1024x1024'], description: 'Image size' },
+            size: {
+              type: 'string',
+              enum: ['256x256', '512x512', '1024x1024'],
+              description: 'Image size',
+            },
             style: { type: 'string', description: 'Art style' },
           },
           required: ['prompt'],
         },
       },
-      async (params) => {
-        return await this.generateImage(params.prompt, params.size, params.style);
+      async params => {
+        return await this.generateImage(
+          params.prompt,
+          params.size,
+          params.style
+        );
       }
     );
 
@@ -212,14 +255,22 @@ class ToolExecutorService {
           type: 'object',
           properties: {
             documentUrl: { type: 'string', description: 'Document URL' },
-            operation: { type: 'string', enum: ['extract_text', 'summarize', 'qa'], description: 'Processing operation' },
+            operation: {
+              type: 'string',
+              enum: ['extract_text', 'summarize', 'qa'],
+              description: 'Processing operation',
+            },
             query: { type: 'string', description: 'Query for Q&A operation' },
           },
           required: ['documentUrl', 'operation'],
         },
       },
-      async (params) => {
-        return await this.processDocument(params.documentUrl, params.operation, params.query);
+      async params => {
+        return await this.processDocument(
+          params.documentUrl,
+          params.operation,
+          params.query
+        );
       }
     );
   }
@@ -307,8 +358,9 @@ class ToolExecutorService {
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+
       log('error', `Execution failed: ${errorMessage}`, { error });
 
       return {
@@ -354,7 +406,9 @@ class ToolExecutorService {
           throw new Error(`Parameter '${name}' must be a string`);
         }
         if (enumValues && !enumValues.includes(value)) {
-          throw new Error(`Parameter '${name}' must be one of: ${enumValues.join(', ')}`);
+          throw new Error(
+            `Parameter '${name}' must be one of: ${enumValues.join(', ')}`
+          );
         }
         break;
       case 'number':
@@ -387,10 +441,13 @@ class ToolExecutorService {
   /**
    * Web Search Implementation
    */
-  private async executeWebSearch(query: string, maxResults: number): Promise<any> {
+  private async executeWebSearch(
+    query: string,
+    maxResults: number
+  ): Promise<any> {
     // TODO: Integrate with actual search API (Google, Bing, or Perplexity)
     console.log('Executing web search:', query);
-    
+
     // Simulated response
     return {
       query,
@@ -410,7 +467,7 @@ class ToolExecutorService {
   private async executeCode(language: string, code: string): Promise<any> {
     // TODO: Implement sandboxed code execution
     console.log('Executing code:', language, code);
-    
+
     return {
       output: 'Code execution result',
       errors: [],
@@ -421,10 +478,13 @@ class ToolExecutorService {
   /**
    * File Analysis Implementation
    */
-  private async analyzeFile(fileUrl: string, analysisType: string): Promise<any> {
+  private async analyzeFile(
+    fileUrl: string,
+    analysisType: string
+  ): Promise<any> {
     // TODO: Implement file analysis
     console.log('Analyzing file:', fileUrl, analysisType);
-    
+
     return {
       fileType: 'pdf',
       pageCount: 10,
@@ -435,10 +495,14 @@ class ToolExecutorService {
   /**
    * Data Visualization Implementation
    */
-  private async createVisualization(data: any[], chartType: string, title?: string): Promise<any> {
+  private async createVisualization(
+    data: any[],
+    chartType: string,
+    title?: string
+  ): Promise<any> {
     // TODO: Implement visualization generation
     console.log('Creating visualization:', chartType);
-    
+
     return {
       chartUrl: 'https://example.com/chart.png',
       chartType,
@@ -449,7 +513,12 @@ class ToolExecutorService {
   /**
    * API Call Implementation
    */
-  private async makeAPICall(url: string, method: string, headers?: any, body?: any): Promise<any> {
+  private async makeAPICall(
+    url: string,
+    method: string,
+    headers?: any,
+    body?: any
+  ): Promise<any> {
     try {
       const response = await fetch(url, {
         method,
@@ -476,7 +545,7 @@ class ToolExecutorService {
   private async queryDatabase(query: string, database?: string): Promise<any> {
     // TODO: Implement database querying (Supabase)
     console.log('Querying database:', query);
-    
+
     return {
       rows: [],
       rowCount: 0,
@@ -486,10 +555,14 @@ class ToolExecutorService {
   /**
    * Image Generation Implementation
    */
-  private async generateImage(prompt: string, size?: string, style?: string): Promise<any> {
+  private async generateImage(
+    prompt: string,
+    size?: string,
+    style?: string
+  ): Promise<any> {
     // TODO: Integrate with DALL-E or other image generation API
     console.log('Generating image:', prompt);
-    
+
     return {
       imageUrl: 'https://example.com/generated-image.png',
       prompt,
@@ -500,10 +573,14 @@ class ToolExecutorService {
   /**
    * Document Processing Implementation
    */
-  private async processDocument(documentUrl: string, operation: string, query?: string): Promise<any> {
+  private async processDocument(
+    documentUrl: string,
+    operation: string,
+    query?: string
+  ): Promise<any> {
     // TODO: Implement document processing
     console.log('Processing document:', documentUrl, operation);
-    
+
     return {
       operation,
       result: 'Processed result...',

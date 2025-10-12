@@ -31,9 +31,7 @@ export class ReplitAgent {
   private onProgress?: (update: ProgressUpdate) => void;
 
   constructor() {
-    this.genAI = new GoogleGenerativeAI(
-      import.meta.env.VITE_GOOGLE_AI_API_KEY
-    );
+    this.genAI = new GoogleGenerativeAI(import.meta.env.VITE_GOOGLE_AI_API_KEY);
   }
 
   setProgressCallback(callback: (update: ProgressUpdate) => void) {
@@ -45,11 +43,11 @@ export class ReplitAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 10,
-        message: 'Initializing Replit environment...'
+        message: 'Initializing Replit environment...',
       });
 
-      const model = this.genAI.getGenerativeModel({ 
-        model: 'gemini-2.0-flash-exp'
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-2.0-flash-exp',
       });
 
       const prompt = this.buildPrompt(task);
@@ -57,11 +55,11 @@ export class ReplitAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 30,
-        message: 'Setting up development environment...'
+        message: 'Setting up development environment...',
       });
 
       const result = await model.generateContentStream(prompt);
-      
+
       let fullResponse = '';
       let inputTokens = 0;
       let outputTokens = 0;
@@ -69,17 +67,17 @@ export class ReplitAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 50,
-        message: 'Generating code and setup instructions...'
+        message: 'Generating code and setup instructions...',
       });
 
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();
         fullResponse += chunkText;
-        
+
         this.emitProgress({
           taskId: task.id,
           progress: 50 + (fullResponse.length / 1000) * 30,
-          message: 'Processing development solution...'
+          message: 'Processing development solution...',
         });
       }
 
@@ -92,7 +90,7 @@ export class ReplitAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 90,
-        message: 'Finalizing development setup...'
+        message: 'Finalizing development setup...',
       });
 
       const cost = this.calculateCost(inputTokens, outputTokens);
@@ -100,7 +98,7 @@ export class ReplitAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 100,
-        message: 'Development environment ready'
+        message: 'Development environment ready',
       });
 
       return {
@@ -109,19 +107,19 @@ export class ReplitAgent {
         cost,
         tokensUsed: {
           input: inputTokens,
-          output: outputTokens
-        }
+          output: outputTokens,
+        },
       };
     } catch (error) {
       this.emitProgress({
         taskId: task.id,
         progress: 0,
-        message: `Error: ${error.message}`
+        message: `Error: ${error.message}`,
       });
 
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -170,7 +168,7 @@ Format with clear sections and code blocks.`;
   private calculateCost(inputTokens: number, outputTokens: number): number {
     // Gemini 2.0 Flash pricing: $0.075/M input, $0.30/M output tokens
     const inputCost = (inputTokens / 1000000) * 0.075;
-    const outputCost = (outputTokens / 1000000) * 0.30;
+    const outputCost = (outputTokens / 1000000) * 0.3;
     return inputCost + outputCost;
   }
 
@@ -181,19 +179,15 @@ Format with clear sections and code blocks.`;
   }
 
   async getAvailableModels(): Promise<string[]> {
-    return [
-      'gemini-2.0-flash-exp',
-      'gemini-1.5-pro',
-      'gemini-1.5-flash'
-    ];
+    return ['gemini-2.0-flash-exp', 'gemini-1.5-pro', 'gemini-1.5-flash'];
   }
 
   async validateApiKey(): Promise<boolean> {
     try {
-      const model = this.genAI.getGenerativeModel({ 
-        model: 'gemini-1.5-flash'
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
       });
-      
+
       await model.generateContent('test');
       return true;
     } catch (error) {

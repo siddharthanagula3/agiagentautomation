@@ -85,9 +85,9 @@ export const handler: Handler = async (
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           error: 'Rate limit exceeded',
-          message: 'Too many requests to this domain. Please try again later.'
+          message: 'Too many requests to this domain. Please try again later.',
         }),
       };
     }
@@ -103,9 +103,9 @@ export const handler: Handler = async (
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           error: 'Access denied by robots.txt',
-          message: 'This website does not allow automated access.'
+          message: 'This website does not allow automated access.',
         }),
       };
     }
@@ -129,13 +129,12 @@ export const handler: Handler = async (
         content: pageContent.content,
         summary: pageContent.summary,
         metadata: pageContent.metadata,
-        fetchedAt: pageContent.fetchedAt
+        fetchedAt: pageContent.fetchedAt,
       }),
     };
-
   } catch (error) {
     console.error('[Fetch Page] Error:', error);
-    
+
     return {
       statusCode: 500,
       headers: {
@@ -144,7 +143,7 @@ export const handler: Handler = async (
       },
       body: JSON.stringify({
         error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       }),
     };
   }
@@ -162,12 +161,13 @@ function checkRateLimit(domain: string): boolean {
     // Reset or initialize rate limit
     rateLimitStore.set(key, {
       count: 1,
-      resetTime: now + 60000 // 1 minute window
+      resetTime: now + 60000, // 1 minute window
     });
     return true;
   }
 
-  if (limit.count >= 10) { // 10 requests per minute
+  if (limit.count >= 10) {
+    // 10 requests per minute
     return false;
   }
 
@@ -181,13 +181,13 @@ function checkRateLimit(domain: string): boolean {
 async function checkRobotsTxt(url: URL): Promise<boolean> {
   try {
     const robotsUrl = `${url.protocol}//${url.hostname}/robots.txt`;
-    
+
     const response = await fetch(robotsUrl, {
       method: 'GET',
       headers: {
         'User-Agent': 'AI-Agent-Fetcher/1.0 (https://your-domain.com)',
       },
-      signal: AbortSignal.timeout(5000) // 5 second timeout
+      signal: AbortSignal.timeout(5000), // 5 second timeout
     });
 
     if (!response.ok) {
@@ -197,7 +197,6 @@ async function checkRobotsTxt(url: URL): Promise<boolean> {
 
     const robotsText = await response.text();
     return parseRobotsTxt(robotsText, url.pathname);
-
   } catch (error) {
     console.warn('[Fetch Page] Error checking robots.txt:', error);
     // If we can't check robots.txt, assume access is allowed
@@ -216,11 +215,14 @@ function parseRobotsTxt(robotsText: string, path: string): boolean {
 
   for (const line of lines) {
     const trimmedLine = line.trim().toLowerCase();
-    
+
     if (trimmedLine.startsWith('user-agent:')) {
       const userAgent = trimmedLine.substring(11).trim();
       currentUserAgent = userAgent;
-      isRelevantSection = userAgent === '*' || userAgent.includes('ai') || userAgent.includes('bot');
+      isRelevantSection =
+        userAgent === '*' ||
+        userAgent.includes('ai') ||
+        userAgent.includes('bot');
     } else if (trimmedLine.startsWith('disallow:') && isRelevantSection) {
       const disallowedPath = trimmedLine.substring(9).trim();
       if (disallowedPath) {
@@ -248,12 +250,13 @@ async function fetchPageContent(url: URL): Promise<any> {
       method: 'GET',
       headers: {
         'User-Agent': 'AI-Agent-Fetcher/1.0 (https://your-domain.com)',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        Accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
         'Accept-Encoding': 'gzip, deflate',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
       },
-      signal: AbortSignal.timeout(10000) // 10 second timeout
+      signal: AbortSignal.timeout(10000), // 10 second timeout
     });
 
     if (!response.ok) {
@@ -275,18 +278,17 @@ async function fetchPageContent(url: URL): Promise<any> {
         wordCount: extractedContent.content.split(/\s+/).length,
         language: extractedContent.language,
         lastModified: response.headers.get('last-modified'),
-        contentType: response.headers.get('content-type')
+        contentType: response.headers.get('content-type'),
       },
-      fetchedAt: new Date().toISOString()
+      fetchedAt: new Date().toISOString(),
     };
-
   } catch (error) {
     console.error('[Fetch Page] Error fetching content:', error);
     return {
       success: false,
       url: url.toString(),
       error: error instanceof Error ? error.message : 'Unknown error',
-      fetchedAt: new Date().toISOString()
+      fetchedAt: new Date().toISOString(),
     };
   }
 }
@@ -296,28 +298,41 @@ async function fetchPageContent(url: URL): Promise<any> {
  */
 function sanitizeHtml(html: string): string {
   // Remove script tags and their content
-  let sanitized = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  
+  let sanitized = html.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    ''
+  );
+
   // Remove style tags and their content
-  sanitized = sanitized.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
-  
+  sanitized = sanitized.replace(
+    /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi,
+    ''
+  );
+
   // Remove comments
   sanitized = sanitized.replace(/<!--[\s\S]*?-->/g, '');
-  
+
   // Remove noscript tags
-  sanitized = sanitized.replace(/<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi, '');
-  
+  sanitized = sanitized.replace(
+    /<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi,
+    ''
+  );
+
   // Remove potentially dangerous attributes
   sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
   sanitized = sanitized.replace(/\s*javascript:/gi, '');
-  
+
   return sanitized;
 }
 
 /**
  * Extract main content from HTML
  */
-function extractMainContent(html: string): { title: string; content: string; language: string } {
+function extractMainContent(html: string): {
+  title: string;
+  content: string;
+  language: string;
+} {
   // Extract title
   const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
   const title = titleMatch ? titleMatch[1].trim() : 'Untitled';
@@ -343,7 +358,7 @@ function extractMainContent(html: string): { title: string; content: string; lan
     /menu/i,
     /navigation/i,
     /footer/i,
-    /sidebar/i
+    /sidebar/i,
   ];
 
   for (const pattern of unwantedPatterns) {
@@ -358,7 +373,7 @@ function extractMainContent(html: string): { title: string; content: string; lan
   return {
     title,
     content,
-    language
+    language,
   };
 }
 
@@ -368,7 +383,7 @@ function extractMainContent(html: string): { title: string; content: string; lan
 function generateSummary(content: string): string {
   const words = content.split(/\s+/);
   const sentences = content.split(/[.!?]+/);
-  
+
   if (sentences.length <= 3) {
     return content;
   }
@@ -383,19 +398,20 @@ function generateSummary(content: string): string {
  */
 async function logFetchOperation(url: string, success: boolean): Promise<void> {
   try {
-    const { error } = await supabase
-      .from('web_fetch_logs')
-      .insert({
-        url,
-        success,
-        timestamp: new Date().toISOString(),
-        user_agent: 'AI-Agent-Fetcher/1.0'
-      });
+    const { error } = await supabase.from('web_fetch_logs').insert({
+      url,
+      success,
+      timestamp: new Date().toISOString(),
+      user_agent: 'AI-Agent-Fetcher/1.0',
+    });
 
     if (error) {
       console.error('[Fetch Page] Error logging fetch operation:', error);
     }
   } catch (error) {
-    console.error('[Fetch Page] Unexpected error logging fetch operation:', error);
+    console.error(
+      '[Fetch Page] Unexpected error logging fetch operation:',
+      error
+    );
   }
 }

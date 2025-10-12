@@ -18,7 +18,7 @@ import {
   Webhook,
   ChevronDown,
   Check,
-  X
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -35,7 +35,10 @@ interface ToolsPanelProps {
   onToolsChange: (tools: string[]) => void;
 }
 
-const ToolsPanel: React.FC<ToolsPanelProps> = ({ selectedTools, onToolsChange }) => {
+const ToolsPanel: React.FC<ToolsPanelProps> = ({
+  selectedTools,
+  onToolsChange,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const availableTools: Tool[] = [
@@ -44,36 +47,36 @@ const ToolsPanel: React.FC<ToolsPanelProps> = ({ selectedTools, onToolsChange })
       name: 'Web Search',
       description: 'Search the web for current information',
       icon: Search,
-      enabled: true
+      enabled: true,
     },
     {
       id: 'code_interpreter',
       name: 'Code Interpreter',
       description: 'Execute code in sandbox',
       icon: Code,
-      enabled: true
+      enabled: true,
     },
     {
       id: 'analyze_file',
       name: 'File Analysis',
       description: 'Analyze uploaded files',
       icon: FileText,
-      enabled: true
+      enabled: true,
     },
     {
       id: 'create_visualization',
       name: 'Data Visualization',
       description: 'Create charts and graphs',
       icon: BarChart3,
-      enabled: true
+      enabled: true,
     },
     {
       id: 'api_call',
       name: 'API Calls',
       description: 'Make HTTP requests',
       icon: Webhook,
-      enabled: true
-    }
+      enabled: true,
+    },
   ];
 
   const toggleTool = (toolId: string) => {
@@ -99,8 +102,8 @@ const ToolsPanel: React.FC<ToolsPanelProps> = ({ selectedTools, onToolsChange })
           variant="outline"
           size="sm"
           className={cn(
-            "gap-2 transition-all",
-            selectedTools.length > 0 && "border-primary/50 bg-primary/5"
+            'gap-2 transition-all',
+            selectedTools.length > 0 && 'border-primary/50 bg-primary/5'
           )}
         >
           <Wrench className="h-4 w-4" />
@@ -110,16 +113,18 @@ const ToolsPanel: React.FC<ToolsPanelProps> = ({ selectedTools, onToolsChange })
               {selectedTools.length}
             </Badge>
           )}
-          <ChevronDown className={cn(
-            "h-3 w-3 transition-transform",
-            isOpen && "rotate-180"
-          )} />
+          <ChevronDown
+            className={cn(
+              'h-3 w-3 transition-transform',
+              isOpen && 'rotate-180'
+            )}
+          />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="start">
         <div className="border-b border-border/40 p-3">
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="font-semibold text-sm">Available Tools</h4>
+          <div className="mb-2 flex items-center justify-between">
+            <h4 className="text-sm font-semibold">Available Tools</h4>
             <Button
               variant="ghost"
               size="sm"
@@ -156,45 +161,49 @@ const ToolsPanel: React.FC<ToolsPanelProps> = ({ selectedTools, onToolsChange })
               >
                 <Card
                   className={cn(
-                    "p-3 mb-2 cursor-pointer transition-all border",
+                    'mb-2 cursor-pointer border p-3 transition-all',
                     selectedTools.includes(tool.id)
-                      ? "border-primary/50 bg-primary/5"
-                      : "border-border/40 hover:border-border"
+                      ? 'border-primary/50 bg-primary/5'
+                      : 'border-border/40 hover:border-border'
                   )}
                   onClick={() => toggleTool(tool.id)}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className={cn(
-                        "p-2 rounded-lg transition-colors",
-                        selectedTools.includes(tool.id)
-                          ? "bg-primary/20"
-                          : "bg-accent"
-                      )}>
-                        <tool.icon className={cn(
-                          "h-4 w-4",
+                    <div className="flex flex-1 items-start gap-3">
+                      <div
+                        className={cn(
+                          'rounded-lg p-2 transition-colors',
                           selectedTools.includes(tool.id)
-                            ? "text-primary"
-                            : "text-muted-foreground"
-                        )} />
+                            ? 'bg-primary/20'
+                            : 'bg-accent'
+                        )}
+                      >
+                        <tool.icon
+                          className={cn(
+                            'h-4 w-4',
+                            selectedTools.includes(tool.id)
+                              ? 'text-primary'
+                              : 'text-muted-foreground'
+                          )}
+                        />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h5 className="text-sm font-medium truncate">
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex items-center gap-2">
+                          <h5 className="truncate text-sm font-medium">
                             {tool.name}
                           </h5>
                           {selectedTools.includes(tool.id) && (
-                            <Check className="h-3 w-3 text-primary flex-shrink-0" />
+                            <Check className="h-3 w-3 flex-shrink-0 text-primary" />
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
+                        <p className="line-clamp-2 text-xs text-muted-foreground">
                           {tool.description}
                         </p>
                       </div>
                     </div>
                     <Switch
                       checked={selectedTools.includes(tool.id)}
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         toggleTool(tool.id);
                       }}
@@ -206,8 +215,8 @@ const ToolsPanel: React.FC<ToolsPanelProps> = ({ selectedTools, onToolsChange })
           </AnimatePresence>
         </div>
 
-        <div className="border-t border-border/40 p-3 bg-muted/30">
-          <p className="text-xs text-muted-foreground text-center">
+        <div className="border-t border-border/40 bg-muted/30 p-3">
+          <p className="text-center text-xs text-muted-foreground">
             Selected tools will be available in your conversation
           </p>
         </div>

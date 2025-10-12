@@ -12,7 +12,10 @@ interface CreateSessionRequest {
   employeeName: string;
 }
 
-const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
+const handler: Handler = async (
+  event: HandlerEvent,
+  context: HandlerContext
+) => {
   // Enable CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -35,9 +38,12 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
   }
 
   try {
-    const { employeeId, workflowId, userId, employeeName }: CreateSessionRequest = JSON.parse(
-      event.body || '{}'
-    );
+    const {
+      employeeId,
+      workflowId,
+      userId,
+      employeeName,
+    }: CreateSessionRequest = JSON.parse(event.body || '{}');
 
     // Validate required fields
     if (!employeeId || !workflowId || !userId) {
@@ -51,7 +57,7 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
     }
 
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-    
+
     if (!OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY not configured');
       return {
@@ -62,27 +68,30 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
     }
 
     // Create ChatKit session with OpenAI API
-    const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        workflow_id: workflowId,
-        metadata: {
-          employee_id: employeeId,
-          employee_name: employeeName,
-          user_id: userId,
-          created_at: new Date().toISOString(),
+    const response = await fetch(
+      'https://api.openai.com/v1/realtime/sessions',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
         },
-      }),
-    });
+        body: JSON.stringify({
+          workflow_id: workflowId,
+          metadata: {
+            employee_id: employeeId,
+            employee_name: employeeName,
+            user_id: userId,
+            created_at: new Date().toISOString(),
+          },
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('OpenAI API Error:', response.status, errorData);
-      
+
       return {
         statusCode: response.status,
         headers,
@@ -121,4 +130,3 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
 };
 
 export { handler };
-

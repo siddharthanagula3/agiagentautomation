@@ -4,14 +4,24 @@
  * Enables continuous agent execution even when user navigates away
  */
 
-import { useAgentMetricsStore, type ChatSession } from '@/stores/agent-metrics-store';
-import { multiAgentOrchestrator, type AgentCommunication, type AgentStatus } from './multi-agent-orchestrator';
+import {
+  useAgentMetricsStore,
+  type ChatSession,
+} from '@/stores/agent-metrics-store';
+import {
+  multiAgentOrchestrator,
+  type AgentCommunication,
+  type AgentStatus,
+} from './multi-agent-orchestrator';
 
 class BackgroundChatService {
-  private activeSessions: Map<string, {
-    session: ChatSession;
-    abort: AbortController;
-  }> = new Map();
+  private activeSessions: Map<
+    string,
+    {
+      session: ChatSession;
+      abort: AbortController;
+    }
+  > = new Map();
 
   private cleanupInterval: NodeJS.Timeout | null = null;
 
@@ -30,9 +40,12 @@ class BackgroundChatService {
     metricsStore.setBackgroundServiceRunning(true);
 
     // Cleanup old sessions every 5 minutes
-    this.cleanupInterval = setInterval(() => {
-      this.cleanupOldSessions();
-    }, 5 * 60 * 1000);
+    this.cleanupInterval = setInterval(
+      () => {
+        this.cleanupOldSessions();
+      },
+      5 * 60 * 1000
+    );
 
     // Resume any in-progress sessions
     this.resumeActiveSessions();
@@ -47,7 +60,7 @@ class BackgroundChatService {
     console.log('[BackgroundChatService] Stopping...');
 
     // Abort all active sessions
-    this.activeSessions.forEach((sessionData) => {
+    this.activeSessions.forEach(sessionData => {
       sessionData.abort.abort();
     });
     this.activeSessions.clear();
@@ -72,7 +85,7 @@ class BackgroundChatService {
     onError?: (error: Error) => void
   ): Promise<void> {
     const metricsStore = useAgentMetricsStore.getState();
-    const session = metricsStore.currentSessions.find((s) => s.id === sessionId);
+    const session = metricsStore.currentSessions.find(s => s.id === sessionId);
 
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
@@ -82,7 +95,9 @@ class BackgroundChatService {
     this.activeSessions.set(sessionId, { session, abort });
 
     try {
-      console.log(`[BackgroundChatService] Executing task for session ${sessionId}`);
+      console.log(
+        `[BackgroundChatService] Executing task for session ${sessionId}`
+      );
 
       // Analyze intent
       const plan = await multiAgentOrchestrator.analyzeIntent(userRequest);
@@ -135,12 +150,18 @@ class BackgroundChatService {
         onComplete(resultMessage);
       }
 
-      console.log(`[BackgroundChatService] Task completed for session ${sessionId}`);
+      console.log(
+        `[BackgroundChatService] Task completed for session ${sessionId}`
+      );
     } catch (error) {
-      console.error(`[BackgroundChatService] Error in session ${sessionId}:`, error);
+      console.error(
+        `[BackgroundChatService] Error in session ${sessionId}:`,
+        error
+      );
 
       if (!abort.signal.aborted) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
         metricsStore.endSession(sessionId, 'failed', errorMessage);
 
         if (onError) {
@@ -187,9 +208,11 @@ class BackgroundChatService {
    */
   private resumeActiveSessions() {
     const metricsStore = useAgentMetricsStore.getState();
-    const activeSessions = metricsStore.currentSessions.filter((s) => s.isActive);
+    const activeSessions = metricsStore.currentSessions.filter(s => s.isActive);
 
-    console.log(`[BackgroundChatService] Found ${activeSessions.length} active sessions to resume`);
+    console.log(
+      `[BackgroundChatService] Found ${activeSessions.length} active sessions to resume`
+    );
 
     // For now, we don't auto-resume sessions
     // In a production app, you might want to save session state and resume
@@ -205,20 +228,28 @@ class BackgroundChatService {
 
     let cleanedCount = 0;
 
-    metricsStore.currentSessions.forEach((session) => {
+    metricsStore.currentSessions.forEach(session => {
       if (session.isActive) {
         const inactiveTime = now - new Date(session.lastActivity).getTime();
 
         if (inactiveTime > maxInactiveTime) {
-          console.log(`[BackgroundChatService] Cleaning up inactive session ${session.id}`);
-          metricsStore.endSession(session.id, 'failed', 'Session timeout due to inactivity');
+          console.log(
+            `[BackgroundChatService] Cleaning up inactive session ${session.id}`
+          );
+          metricsStore.endSession(
+            session.id,
+            'failed',
+            'Session timeout due to inactivity'
+          );
           cleanedCount++;
         }
       }
     });
 
     if (cleanedCount > 0) {
-      console.log(`[BackgroundChatService] Cleaned up ${cleanedCount} inactive sessions`);
+      console.log(
+        `[BackgroundChatService] Cleaned up ${cleanedCount} inactive sessions`
+      );
     }
   }
 }

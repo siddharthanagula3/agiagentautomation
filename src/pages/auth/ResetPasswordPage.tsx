@@ -3,16 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { supabase } from '../../integrations/supabase/client';
 import {
-  Bot,
-  Lock,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  CheckCircle
-} from 'lucide-react';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../components/ui/card';
+import { authService } from '@/services/auth-service';
+import { Bot, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Particles } from '../../components/ui/particles';
 import { Spotlight } from '../../components/ui/spotlight';
@@ -21,7 +20,7 @@ const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -46,9 +45,7 @@ const ResetPasswordPage: React.FC = () => {
     }
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: formData.password
-      });
+      const { error } = await authService.updatePassword(formData.password);
 
       if (error) {
         setError(error.message);
@@ -56,7 +53,10 @@ const ResetPasswordPage: React.FC = () => {
         // Success! Redirect to login
         setTimeout(() => {
           navigate('/auth/login', {
-            state: { message: 'Password reset successful! Please login with your new password.' }
+            state: {
+              message:
+                'Password reset successful! Please login with your new password.',
+            },
           });
         }, 1500);
       }
@@ -70,12 +70,12 @@ const ResetPasswordPage: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
       {/* Enhanced background with particles and spotlight */}
       <Particles className="absolute inset-0" quantity={60} />
       <Spotlight className="absolute inset-0" />
@@ -86,54 +86,54 @@ const ResetPasswordPage: React.FC = () => {
           animate={{
             y: [0, -30, 0],
             x: [0, 20, 0],
-            scale: [1, 1.1, 1]
+            scale: [1, 1.1, 1],
           }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-20 left-20 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute left-20 top-20 h-96 w-96 rounded-full bg-primary/20 blur-3xl"
         />
         <motion.div
           animate={{
             y: [0, 30, 0],
             x: [0, -20, 0],
-            scale: [1, 1.15, 1]
+            scale: [1, 1.15, 1],
           }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-20 right-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl"
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute bottom-20 right-20 h-96 w-96 rounded-full bg-accent/20 blur-3xl"
         />
       </div>
 
       <motion.div
-        className="w-full max-w-md relative z-10"
+        className="relative z-10 w-full max-w-md"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="border border-border/50 backdrop-blur-xl bg-background/60 shadow-2xl">
-          <CardHeader className="space-y-1 text-center pb-8">
+        <Card className="border border-border/50 bg-background/60 shadow-2xl backdrop-blur-xl">
+          <CardHeader className="space-y-1 pb-8 text-center">
             <motion.div
-              className="flex justify-center mb-4"
+              className="mb-4 flex justify-center"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+              transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
             >
               <motion.div
-                className="p-3 bg-primary/10 rounded-full"
+                className="rounded-full bg-primary/10 p-3"
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.6 }}
               >
                 <Bot className="h-8 w-8 text-primary" />
               </motion.div>
             </motion.div>
-            <CardTitle className="text-2xl font-bold">Create New Password</CardTitle>
-            <CardDescription>
-              Enter your new password below
-            </CardDescription>
+            <CardTitle className="text-2xl font-bold">
+              Create New Password
+            </CardTitle>
+            <CardDescription>Enter your new password below</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="flex items-center space-x-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
+                <div className="flex items-center space-x-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-destructive">
                   <AlertCircle className="h-4 w-4" />
                   <span className="text-sm">{error}</span>
                 </div>
@@ -146,7 +146,7 @@ const ResetPasswordPage: React.FC = () => {
                   <Input
                     id="password"
                     name="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Enter new password"
                     value={formData.password}
                     onChange={handleChange}
@@ -161,7 +161,11 @@ const ResetPasswordPage: React.FC = () => {
                     className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
                     disabled={isLoading}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -176,7 +180,7 @@ const ResetPasswordPage: React.FC = () => {
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={showConfirmPassword ? 'text' : 'password'}
                     placeholder="Confirm new password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
@@ -190,19 +194,19 @@ const ResetPasswordPage: React.FC = () => {
                     className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
                     disabled={isLoading}
                   >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
                     Updating password...
                   </>
                 ) : (

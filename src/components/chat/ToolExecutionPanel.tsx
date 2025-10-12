@@ -16,7 +16,10 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { ToolExecutionResult, ExecutionLog } from '@/services/tool-executor-service';
+import type {
+  ToolExecutionResult,
+  ExecutionLog,
+} from '@/services/tool-executor-service';
 
 interface ToolExecutionPanelProps {
   execution: ToolExecutionResult;
@@ -37,7 +40,8 @@ export const ToolExecutionPanel: React.FC<ToolExecutionPanelProps> = ({
   };
 
   const getStatusColor = () => {
-    if (execution.success) return 'bg-green-500/10 text-green-500 border-green-500/30';
+    if (execution.success)
+      return 'bg-green-500/10 text-green-500 border-green-500/30';
     return 'bg-red-500/10 text-red-500 border-red-500/30';
   };
 
@@ -67,11 +71,14 @@ export const ToolExecutionPanel: React.FC<ToolExecutionPanelProps> = ({
             {getStatusIcon()}
             <div>
               <CardTitle className="text-base">{toolName}</CardTitle>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline" className={cn('text-xs', getStatusColor())}>
+              <div className="mt-1 flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className={cn('text-xs', getStatusColor())}
+                >
                   {execution.success ? 'Success' : 'Failed'}
                 </Badge>
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   {formatExecutionTime(execution.executionTime)}
                 </span>
@@ -85,8 +92,8 @@ export const ToolExecutionPanel: React.FC<ToolExecutionPanelProps> = ({
         {/* Output */}
         {execution.success && execution.output && (
           <div className="mb-4">
-            <h4 className="text-sm font-semibold mb-2">Output:</h4>
-            <pre className="p-3 bg-muted rounded-lg text-xs overflow-auto">
+            <h4 className="mb-2 text-sm font-semibold">Output:</h4>
+            <pre className="overflow-auto rounded-lg bg-muted p-3 text-xs">
               {typeof execution.output === 'string'
                 ? execution.output
                 : JSON.stringify(execution.output, null, 2)}
@@ -97,8 +104,8 @@ export const ToolExecutionPanel: React.FC<ToolExecutionPanelProps> = ({
         {/* Error */}
         {!execution.success && execution.error && (
           <div className="mb-4">
-            <h4 className="text-sm font-semibold mb-2 text-red-500">Error:</h4>
-            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-sm">
+            <h4 className="mb-2 text-sm font-semibold text-red-500">Error:</h4>
+            <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm">
               {execution.error}
             </div>
           </div>
@@ -107,15 +114,15 @@ export const ToolExecutionPanel: React.FC<ToolExecutionPanelProps> = ({
         {/* Execution Logs */}
         {execution.logs && execution.logs.length > 0 && (
           <div>
-            <h4 className="text-sm font-semibold mb-2">Execution Logs:</h4>
+            <h4 className="mb-2 text-sm font-semibold">Execution Logs:</h4>
             <ScrollArea className="h-[200px] rounded-lg border bg-muted/50">
-              <div className="p-3 space-y-2">
+              <div className="space-y-2 p-3">
                 {execution.logs.map((log, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-2 text-xs font-mono"
+                    className="flex items-start gap-2 font-mono text-xs"
                   >
-                    <span className="text-muted-foreground flex-shrink-0">
+                    <span className="flex-shrink-0 text-muted-foreground">
                       {log.timestamp.toLocaleTimeString()}
                     </span>
                     {getLogIcon(log.level)}
@@ -151,8 +158,8 @@ export const ToolExecutionList: React.FC<ToolExecutionListProps> = ({
 }) => {
   if (executions.length === 0) {
     return (
-      <div className={cn('text-center py-8', className)}>
-        <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+      <div className={cn('py-8 text-center', className)}>
+        <Zap className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
         <p className="text-sm text-muted-foreground">No tool executions yet</p>
       </div>
     );
@@ -160,7 +167,7 @@ export const ToolExecutionList: React.FC<ToolExecutionListProps> = ({
 
   return (
     <div className={cn('space-y-4', className)}>
-      {executions.map((execution) => (
+      {executions.map(execution => (
         <ToolExecutionPanel
           key={execution.id}
           toolName={execution.toolName}
@@ -193,21 +200,23 @@ export const StreamingToolExecution: React.FC<StreamingToolExecutionProps> = ({
     <Card className={cn('border-2 border-blue-500/30', className)}>
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
-          <Loader2 className="h-5 w-5 text-blue-500 animate-spin flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <div className="font-semibold text-sm">{toolName}</div>
+          <Loader2 className="h-5 w-5 flex-shrink-0 animate-spin text-blue-500" />
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold">{toolName}</div>
             {currentStep && (
-              <div className="text-xs text-muted-foreground mt-1">{currentStep}</div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                {currentStep}
+              </div>
             )}
             {progress !== undefined && (
               <div className="mt-2">
-                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                   <div
                     className="h-full bg-blue-500 transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">
+                <div className="mt-1 text-xs text-muted-foreground">
                   {progress.toFixed(0)}% complete
                 </div>
               </div>

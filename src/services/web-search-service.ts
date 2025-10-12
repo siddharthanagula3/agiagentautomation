@@ -27,7 +27,9 @@ export interface SearchResponse {
 /**
  * Search using Perplexity API (recommended)
  */
-export async function searchWithPerplexity(query: string): Promise<SearchResponse> {
+export async function searchWithPerplexity(
+  query: string
+): Promise<SearchResponse> {
   if (!PERPLEXITY_API_KEY) {
     throw new Error('Perplexity API key not configured');
   }
@@ -37,14 +39,15 @@ export async function searchWithPerplexity(query: string): Promise<SearchRespons
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+        Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
       },
       body: JSON.stringify({
         model: 'llama-3.1-sonar-large-128k-online',
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful assistant that provides accurate, cited information from the web. Always cite your sources.',
+            content:
+              'You are a helpful assistant that provides accurate, cited information from the web. Always cite your sources.',
           },
           {
             role: 'user',
@@ -65,17 +68,21 @@ export async function searchWithPerplexity(query: string): Promise<SearchRespons
 
     // Extract citations/sources from the response
     const citationRegex = /\[(\d+)\]/g;
-    const citations = Array.from(answer.matchAll(citationRegex), m => parseInt(m[1]));
+    const citations = Array.from(answer.matchAll(citationRegex), m =>
+      parseInt(m[1])
+    );
     const sources = data.citations || [];
 
     // Parse results
-    const results: SearchResult[] = sources.map((source: any, index: number) => ({
-      title: source.title || `Source ${index + 1}`,
-      url: source.url,
-      snippet: source.snippet || '',
-      source: new URL(source.url).hostname,
-      publishedDate: source.publishedDate,
-    }));
+    const results: SearchResult[] = sources.map(
+      (source: any, index: number) => ({
+        title: source.title || `Source ${index + 1}`,
+        url: source.url,
+        snippet: source.snippet || '',
+        source: new URL(source.url).hostname,
+        publishedDate: source.publishedDate,
+      })
+    );
 
     return {
       query,
@@ -93,7 +100,10 @@ export async function searchWithPerplexity(query: string): Promise<SearchRespons
 /**
  * Search using Google Custom Search API (fallback)
  */
-export async function searchWithGoogle(query: string, maxResults: number = 10): Promise<SearchResponse> {
+export async function searchWithGoogle(
+  query: string,
+  maxResults: number = 10
+): Promise<SearchResponse> {
   if (!GOOGLE_API_KEY || !GOOGLE_CX) {
     throw new Error('Google Search API credentials not configured');
   }
@@ -136,7 +146,10 @@ export async function searchWithGoogle(query: string, maxResults: number = 10): 
 /**
  * Search using DuckDuckGo (free, no API key required)
  */
-export async function searchWithDuckDuckGo(query: string, maxResults: number = 10): Promise<SearchResponse> {
+export async function searchWithDuckDuckGo(
+  query: string,
+  maxResults: number = 10
+): Promise<SearchResponse> {
   try {
     // Using DuckDuckGo's instant answer API
     const url = new URL('https://api.duckduckgo.com/');
@@ -210,13 +223,13 @@ export async function webSearch(
             return await searchWithPerplexity(query);
           }
           break;
-        
+
         case 'google':
           if (GOOGLE_API_KEY && GOOGLE_CX) {
             return await searchWithGoogle(query, maxResults);
           }
           break;
-        
+
         case 'duckduckgo':
           return await searchWithDuckDuckGo(query, maxResults);
       }
@@ -247,17 +260,16 @@ export async function searchAndSummarize(
   // If no answer, generate one using AI
   try {
     const { sendAIMessage } = await import('./ai-chat-service');
-    
+
     const context = searchResponse.results
       .map((r, i) => `[${i + 1}] ${r.title}\n${r.snippet}\nSource: ${r.url}`)
       .join('\n\n');
 
     const prompt = `Based on the following search results, provide a comprehensive answer to the query: "${query}"\n\nSearch Results:\n${context}\n\nProvide a well-structured answer and cite your sources using [1], [2], etc.`;
 
-    const aiResponse = await sendAIMessage(
-      aiProvider,
-      [{ role: 'user', content: prompt }]
-    );
+    const aiResponse = await sendAIMessage(aiProvider, [
+      { role: 'user', content: prompt },
+    ]);
 
     return {
       ...searchResponse,
@@ -282,7 +294,7 @@ export function isWebSearchConfigured(): boolean {
  */
 export function getAvailableSearchProviders(): string[] {
   const providers: string[] = [];
-  
+
   if (PERPLEXITY_API_KEY) providers.push('perplexity');
   if (GOOGLE_API_KEY && GOOGLE_CX) providers.push('google');
   providers.push('duckduckgo'); // Always available

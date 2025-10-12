@@ -79,7 +79,7 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
         const ChatKit = await loadChatKit();
 
         // Generate starter prompts from capabilities
-        const starterPrompts = capabilities.slice(0, 5).map((cap) => ({
+        const starterPrompts = capabilities.slice(0, 5).map(cap => ({
           icon: 'sparkles',
           label: cap,
           prompt: `Help me with ${cap}`,
@@ -105,18 +105,21 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
         const options = {
           api: {
             createSession: async () => {
-              const response = await fetch('/.netlify/functions/create-chatkit-session', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  employeeId,
-                  workflowId,
-                  userId: user.id,
-                  employeeName,
-                }),
-              });
+              const response = await fetch(
+                '/.netlify/functions/create-chatkit-session',
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    employeeId,
+                    workflowId,
+                    userId: user.id,
+                    employeeName,
+                  }),
+                }
+              );
 
               if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
@@ -183,7 +186,15 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
         chatKitInstance.destroy();
       }
     };
-  }, [user, workflowId, employeeId, employeeName, employeeRole, capabilities, actualTheme]);
+  }, [
+    user,
+    workflowId,
+    employeeId,
+    employeeName,
+    employeeRole,
+    capabilities,
+    actualTheme,
+  ]);
 
   // Update theme when it changes
   useEffect(() => {
@@ -196,7 +207,9 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
 
   if (error) {
     return (
-      <div className={`flex items-center justify-center h-full p-6 ${className}`}>
+      <div
+        className={`flex h-full items-center justify-center p-6 ${className}`}
+      >
         <Alert variant="destructive" className="max-w-md">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
@@ -207,8 +220,10 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
 
   if (isLoading) {
     return (
-      <div className={`flex flex-col items-center justify-center h-full gap-4 ${className}`}>
-        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+      <div
+        className={`flex h-full flex-col items-center justify-center gap-4 ${className}`}
+      >
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Connecting to {employeeName}...
         </p>
@@ -219,7 +234,7 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full ${className}`}
+      className={`h-full w-full ${className}`}
       style={{
         minHeight: '500px',
       }}

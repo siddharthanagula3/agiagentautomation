@@ -22,7 +22,7 @@ import {
   HelpCircle,
   Newspaper,
   Shield,
-  FileCode
+  FileCode,
 } from 'lucide-react';
 
 const Header: React.FC = () => {
@@ -33,24 +33,79 @@ const Header: React.FC = () => {
 
   // Product (matches footer Product)
   const productMenu = [
-    { label: 'AI Marketplace', path: '/marketplace', icon: Bot, description: 'Browse specialized AI employees' },
-    { label: 'AI Chat', path: '/features/ai-chat', icon: MessageSquare, description: 'Intelligent conversations' },
-    { label: 'AI Workflows', path: '/features/ai-workflows', icon: Workflow, description: 'Automated processes' },
+    {
+      label: 'AI Marketplace',
+      path: '/marketplace',
+      icon: Bot,
+      description: 'Browse specialized AI employees',
+    },
+    {
+      label: 'AI Chat',
+      path: '/features/ai-chat',
+      icon: MessageSquare,
+      description: 'Intelligent conversations',
+    },
+    {
+      label: 'AI Workflows',
+      path: '/features/ai-workflows',
+      icon: Workflow,
+      description: 'Automated processes',
+    },
   ];
 
   // Company (matches footer Company)
   const companyMenu = [
-    { label: 'About Us', path: '/about', icon: Building2, description: 'Learn about our mission' },
-    { label: 'Careers', path: '/careers', icon: Briefcase, description: 'Join our team' },
-    { label: 'Blog', path: '/blog', icon: Newspaper, description: 'Latest insights & updates' },
-    { label: 'Contact', path: '/contact-sales', icon: Lightbulb, description: 'Get in touch with us' },
+    {
+      label: 'About Us',
+      path: '/about',
+      icon: Building2,
+      description: 'Learn about our mission',
+    },
+    {
+      label: 'Careers',
+      path: '/careers',
+      icon: Briefcase,
+      description: 'Join our team',
+    },
+    {
+      label: 'Blog',
+      path: '/blog',
+      icon: Newspaper,
+      description: 'Latest insights & updates',
+    },
+    {
+      label: 'Contact',
+      path: '/contact-sales',
+      icon: Lightbulb,
+      description: 'Get in touch with us',
+    },
   ];
 
   const resourcesMenu = [
-    { label: 'Documentation', path: '/documentation', icon: BookOpen, description: 'Product guides and docs' },
-    { label: 'API Reference', path: '/api-reference', icon: FileCode, description: 'Endpoints and examples' },
-    { label: 'Help Center', path: '/help', icon: HelpCircle, description: 'Get support' },
-    { label: 'Security', path: '/security', icon: Shield, description: 'Security practices and posture' },
+    {
+      label: 'Documentation',
+      path: '/documentation',
+      icon: BookOpen,
+      description: 'Product guides and docs',
+    },
+    {
+      label: 'API Reference',
+      path: '/api-reference',
+      icon: FileCode,
+      description: 'Endpoints and examples',
+    },
+    {
+      label: 'Help Center',
+      path: '/help',
+      icon: HelpCircle,
+      description: 'Get support',
+    },
+    {
+      label: 'Security',
+      path: '/security',
+      icon: Shield,
+      description: 'Security practices and posture',
+    },
   ];
 
   const handleDropdownToggle = (menu: string) => {
@@ -64,11 +119,11 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/40">
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to="/" className="group flex items-center gap-2">
             <motion.div
               className="text-2xl"
               whileHover={{ rotate: 360 }}
@@ -76,13 +131,13 @@ const Header: React.FC = () => {
             >
               🤖
             </motion.div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary">
+            <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-xl font-bold text-transparent">
               AGI Workforce
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden items-center gap-8 lg:flex">
             {/* Product */}
             <DropdownMenu
               label="Product"
@@ -113,19 +168,19 @@ const Header: React.FC = () => {
             {/* Pricing Quick Link */}
             <button
               onClick={() => handleNavigation('/pricing')}
-              className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+              className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
             >
               Pricing
             </button>
           </div>
 
           {/* CTA Buttons */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden items-center gap-3 lg:flex">
             <ThemeToggle />
             {user ? (
               <Button
                 onClick={() => navigate('/dashboard')}
-                className="text-sm font-medium bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                className="bg-gradient-to-r from-primary to-accent text-sm font-medium hover:opacity-90"
               >
                 Go to Dashboard
               </Button>
@@ -140,7 +195,7 @@ const Header: React.FC = () => {
                 </Button>
                 <Button
                   onClick={() => navigate('/register')}
-                  className="text-sm font-medium bg-gradient-to-r from-primary to-accent hover:opacity-90"
+                  className="bg-gradient-to-r from-primary to-accent text-sm font-medium hover:opacity-90"
                 >
                   Get Started Free
                 </Button>
@@ -150,7 +205,7 @@ const Header: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="lg:hidden p-2 text-foreground/80 hover:text-foreground"
+            className="p-2 text-foreground/80 hover:text-foreground lg:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -164,9 +219,9 @@ const Header: React.FC = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden overflow-hidden"
+              className="overflow-hidden lg:hidden"
             >
-              <div className="py-4 space-y-4">
+              <div className="space-y-4 py-4">
                 {/* Mobile Product */}
                 <MobileDropdown
                   label="Product"
@@ -190,14 +245,16 @@ const Header: React.FC = () => {
 
                 <button
                   onClick={() => handleNavigation('/pricing')}
-                  className="block w-full text-left px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors"
+                  className="block w-full rounded-lg px-4 py-2 text-left text-sm font-medium text-foreground/80 transition-colors hover:bg-accent/10 hover:text-foreground"
                 >
                   Pricing
                 </button>
 
                 <div className="flex flex-col gap-2 px-4 pt-2">
                   <div className="flex items-center justify-between py-2">
-                    <span className="text-sm font-medium text-foreground/80">Theme</span>
+                    <span className="text-sm font-medium text-foreground/80">
+                      Theme
+                    </span>
                     <ThemeToggle />
                   </div>
                   {user ? (
@@ -249,12 +306,18 @@ interface DropdownMenuProps {
   onNavigate: (path: string) => void;
 }
 
-const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, items, isActive, onToggle, onNavigate }) => {
+const DropdownMenu: React.FC<DropdownMenuProps> = ({
+  label,
+  items,
+  isActive,
+  onToggle,
+  onNavigate,
+}) => {
   return (
     <div className="relative">
       <button
         onClick={onToggle}
-        className="flex items-center gap-1 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+        className="flex items-center gap-1 text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
       >
         {label}
         <motion.div
@@ -272,26 +335,26 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ label, items, isActive, onT
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 mt-2 w-72 backdrop-blur-xl bg-background/95 border border-border/40 rounded-xl shadow-2xl overflow-hidden"
+            className="absolute left-0 top-full mt-2 w-72 overflow-hidden rounded-xl border border-border/40 bg-background/95 shadow-2xl backdrop-blur-xl"
           >
             <div className="p-2">
               {items.map((item, idx) => (
                 <motion.button
                   key={item.path}
                   onClick={() => onNavigate(item.path)}
-                  className="w-full flex items-start gap-3 p-3 rounded-lg hover:bg-accent/10 transition-colors group"
+                  className="group flex w-full items-start gap-3 rounded-lg p-3 transition-colors hover:bg-accent/10"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.05 }}
                 >
-                  <div className="mt-0.5 p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 group-hover:from-primary/30 group-hover:to-accent/30 transition-colors">
+                  <div className="mt-0.5 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 p-2 transition-colors group-hover:from-primary/30 group-hover:to-accent/30">
                     <item.icon size={18} className="text-primary" />
                   </div>
                   <div className="flex-1 text-left">
-                    <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                    <div className="text-sm font-medium text-foreground transition-colors group-hover:text-primary">
                       {item.label}
                     </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
+                    <div className="mt-0.5 text-xs text-muted-foreground">
                       {item.description}
                     </div>
                   </div>
@@ -311,14 +374,18 @@ interface MobileDropdownProps {
   onNavigate: (path: string) => void;
 }
 
-const MobileDropdown: React.FC<MobileDropdownProps> = ({ label, items, onNavigate }) => {
+const MobileDropdown: React.FC<MobileDropdownProps> = ({
+  label,
+  items,
+  onNavigate,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors"
+        className="flex w-full items-center justify-between rounded-lg px-4 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent/10 hover:text-foreground"
       >
         {label}
         <motion.div
@@ -337,12 +404,12 @@ const MobileDropdown: React.FC<MobileDropdownProps> = ({ label, items, onNavigat
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="pl-4 mt-1 space-y-1">
-              {items.map((item) => (
+            <div className="mt-1 space-y-1 pl-4">
+              {items.map(item => (
                 <button
                   key={item.path}
                   onClick={() => onNavigate(item.path)}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors"
+                  className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-foreground/70 transition-colors hover:bg-accent/10 hover:text-foreground"
                 >
                   <item.icon size={16} className="text-primary" />
                   {item.label}

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/unified-auth-store';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import LoadingSpinner from '../ui/isLoading-spinner';
 
 const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +12,7 @@ const RegisterForm: React.FC = () => {
     confirmPassword: '',
     firstName: '',
     lastName: '',
-    company: ''
+    company: '',
   });
 
   const { register, isLoading } = useAuthStore();
@@ -64,7 +65,7 @@ const RegisterForm: React.FC = () => {
         password: formData.password,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        company: formData.company || undefined
+        company: formData.company || undefined,
       });
       navigate('/dashboard');
     } catch (err) {
@@ -76,7 +77,7 @@ const RegisterForm: React.FC = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     // Clear password errors when user types
@@ -87,8 +88,8 @@ const RegisterForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Create your account
@@ -205,17 +206,19 @@ const RegisterForm: React.FC = () => {
           </div>
 
           {passwordErrors.length > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
-              <ul className="list-disc list-inside space-y-1">
+            <div className="rounded border border-yellow-200 bg-yellow-50 px-4 py-3 text-yellow-700">
+              <ul className="list-inside list-disc space-y-1">
                 {passwordErrors.map((error, index) => (
-                  <li key={index} className="text-sm">{error}</li>
+                  <li key={index} className="text-sm">
+                    {error}
+                  </li>
                 ))}
               </ul>
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-red-700">
               {error}
             </div>
           )}
@@ -223,24 +226,23 @@ const RegisterForm: React.FC = () => {
           <div>
             <Button
               type="submit"
-              disabled={isisLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading}
+              className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isisLoading ? (
-                <isLoadingSpinner size="sm" />
-              ) : (
-                'Create Account'
-              )}
+              {isLoading ? <LoadingSpinner size="sm" /> : 'Create Account'}
             </Button>
           </div>
 
-          <div className="text-xs text-gray-500 text-center">
+          <div className="text-center text-xs text-gray-500">
             By creating an account, you agree to our{' '}
             <Link to="/terms" className="text-indigo-600 hover:text-indigo-500">
               Terms of Service
             </Link>{' '}
             and{' '}
-            <Link to="/privacy" className="text-indigo-600 hover:text-indigo-500">
+            <Link
+              to="/privacy"
+              className="text-indigo-600 hover:text-indigo-500"
+            >
               Privacy Policy
             </Link>
           </div>

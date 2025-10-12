@@ -20,16 +20,51 @@ export interface SanitizeOptions {
 export class SecurityManager {
   private static defaultSanitizeConfig: DOMPurify.Config = {
     ALLOWED_TAGS: [
-      'a', 'b', 'strong', 'i', 'em', 'u', 'span', 'div', 'p', 'br',
-      'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-      'blockquote', 'code', 'pre', 'img', 'table', 'thead', 'tbody',
-      'tr', 'td', 'th'
+      'a',
+      'b',
+      'strong',
+      'i',
+      'em',
+      'u',
+      'span',
+      'div',
+      'p',
+      'br',
+      'ul',
+      'ol',
+      'li',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'blockquote',
+      'code',
+      'pre',
+      'img',
+      'table',
+      'thead',
+      'tbody',
+      'tr',
+      'td',
+      'th',
     ],
     ALLOWED_ATTR: [
-      'href', 'title', 'alt', 'src', 'class', 'id', 'target',
-      'rel', 'width', 'height', 'style'
+      'href',
+      'title',
+      'alt',
+      'src',
+      'class',
+      'id',
+      'target',
+      'rel',
+      'width',
+      'height',
+      'style',
     ],
-    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
+    ALLOWED_URI_REGEXP:
+      /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
     FORBID_TAGS: ['script', 'object', 'embed', 'form', 'input', 'textarea'],
     FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
     KEEP_CONTENT: true,
@@ -39,16 +74,15 @@ export class SecurityManager {
   };
 
   // Sanitize HTML content to prevent XSS
-  static sanitizeHtml(
-    html: string,
-    options: SanitizeOptions = {}
-  ): string {
+  static sanitizeHtml(html: string, options: SanitizeOptions = {}): string {
     if (!html) return '';
 
     const config: DOMPurify.Config = {
       ...this.defaultSanitizeConfig,
       ...(options.allowedTags && { ALLOWED_TAGS: options.allowedTags }),
-      ...(options.allowedAttributes && { ALLOWED_ATTR: options.allowedAttributes }),
+      ...(options.allowedAttributes && {
+        ALLOWED_ATTR: options.allowedAttributes,
+      }),
     };
 
     return DOMPurify.sanitize(html, config);
@@ -113,7 +147,11 @@ export class SecurityManager {
   }
 
   // Deep sanitize object recursively
-  private static deepSanitize(obj: unknown, maxDepth: number, currentDepth = 0): unknown {
+  private static deepSanitize(
+    obj: unknown,
+    maxDepth: number,
+    currentDepth = 0
+  ): unknown {
     if (currentDepth >= maxDepth) {
       return null;
     }
@@ -127,7 +165,9 @@ export class SecurityManager {
     }
 
     if (Array.isArray(obj)) {
-      return obj.map(item => this.deepSanitize(item, maxDepth, currentDepth + 1));
+      return obj.map(item =>
+        this.deepSanitize(item, maxDepth, currentDepth + 1)
+      );
     }
 
     if (typeof obj === 'object') {
@@ -136,7 +176,11 @@ export class SecurityManager {
         // Sanitize object keys as well
         const cleanKey = this.sanitizeText(key);
         if (cleanKey) {
-          sanitized[cleanKey] = this.deepSanitize(value, maxDepth, currentDepth + 1);
+          sanitized[cleanKey] = this.deepSanitize(
+            value,
+            maxDepth,
+            currentDepth + 1
+          );
         }
       }
       return sanitized;
@@ -201,19 +245,31 @@ export class SecurityManager {
 
   // Generate secure random string
   static generateSecureId(length: number = 32): string {
-    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+    if (
+      typeof window !== 'undefined' &&
+      window.crypto &&
+      window.crypto.getRandomValues
+    ) {
       const array = new Uint8Array(length);
       window.crypto.getRandomValues(array);
-      return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+      return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join(
+        ''
+      );
     }
 
     // Fallback for older browsers
-    return Array.from({ length }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    return Array.from({ length }, () =>
+      Math.floor(Math.random() * 16).toString(16)
+    ).join('');
   }
 
   // Hash sensitive data (client-side hashing for non-security-critical use)
   static async hashString(input: string): Promise<string> {
-    if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
+    if (
+      typeof window !== 'undefined' &&
+      window.crypto &&
+      window.crypto.subtle
+    ) {
       const encoder = new TextEncoder();
       const data = encoder.encode(input);
       const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
@@ -225,7 +281,7 @@ export class SecurityManager {
     let hash = 0;
     for (let i = 0; i < input.length; i++) {
       const char = input.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return hash.toString(16);
@@ -353,7 +409,9 @@ export class CSPManager {
 
   static removeSource(directive: string, source: string): void {
     if (this.policies[directive]) {
-      this.policies[directive] = this.policies[directive].filter(s => s !== source);
+      this.policies[directive] = this.policies[directive].filter(
+        s => s !== source
+      );
     }
   }
 
@@ -367,7 +425,9 @@ export class CSPManager {
     if (typeof document === 'undefined') return;
 
     // Remove existing CSP meta tag
-    const existing = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+    const existing = document.querySelector(
+      'meta[http-equiv="Content-Security-Policy"]'
+    );
     if (existing) {
       existing.remove();
     }
@@ -546,7 +606,8 @@ export class SecurityHeaderValidator {
       }
     });
 
-    const score = (present.length / Object.keys(this.recommendedHeaders).length) * 100;
+    const score =
+      (present.length / Object.keys(this.recommendedHeaders).length) * 100;
 
     return { score, missing, present };
   }
@@ -560,10 +621,7 @@ export class SecurityHeaderValidator {
 // Export all security utilities
 // ========================================
 
-export {
-  SecurityManager as Security,
-  CSPManager as CSP,
-};
+export { SecurityManager as Security, CSPManager as CSP };
 
 // Create default instance
 export const securityManager = new SecurityManager();

@@ -13,7 +13,10 @@ interface TimeLeft {
   seconds: number;
 }
 
-export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDate, className = '' }) => {
+export const CountdownTimer: React.FC<CountdownTimerProps> = ({
+  targetDate,
+  className = '',
+}) => {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft());
 
   function calculateTimeLeft(): TimeLeft {
@@ -23,7 +26,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDate, clas
       const totalSeconds = Math.floor(difference / 1000);
       const totalMinutes = Math.floor(totalSeconds / 60);
       const totalHours = Math.floor(totalMinutes / 60);
-      
+
       return {
         totalHours: totalHours,
         minutes: totalMinutes % 60,
@@ -60,23 +63,25 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDate, clas
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
-              className="flex flex-col items-center justify-center min-w-[60px] p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30"
+              className="flex min-w-[60px] flex-col items-center justify-center rounded-lg border border-primary/30 bg-gradient-to-br from-primary/20 to-accent/20 p-2"
             >
               <motion.div
                 key={block.value}
                 initial={{ y: -10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.3 }}
-                className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent"
+                className="bg-gradient-to-r from-primary to-accent bg-clip-text text-2xl font-bold text-transparent"
               >
                 {block.value.toString().padStart(2, '0')}
               </motion.div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+              <div className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
                 {block.label}
               </div>
             </motion.div>
             {index < timeBlocks.length - 1 && (
-              <div className="flex items-center text-2xl font-bold text-primary">:</div>
+              <div className="flex items-center text-2xl font-bold text-primary">
+                :
+              </div>
             )}
           </React.Fragment>
         ))}
@@ -96,6 +101,8 @@ export const getOneMonthFromNow = (): Date => {
 export const createDiscountEndDate = (): Date => {
   // Set to 99 hours, 59 minutes, 59 seconds from now
   const now = new Date();
-  const targetTime = new Date(now.getTime() + (99 * 60 * 60 * 1000) + (59 * 60 * 1000) + (59 * 1000));
+  const targetTime = new Date(
+    now.getTime() + 99 * 60 * 60 * 1000 + 59 * 60 * 1000 + 59 * 1000
+  );
   return targetTime;
 };

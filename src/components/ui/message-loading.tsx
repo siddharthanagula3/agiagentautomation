@@ -45,6 +45,3 @@ function MessageLoading() {
 }
 
 export { MessageLoading };
-
-
-

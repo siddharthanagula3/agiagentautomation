@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { realtimeService } from '../services/realtimeService';
-import { useAuth } from '../stores/unified-auth-store';
+import { useAuthStore } from '../stores/unified-auth-store';
 
 export interface RealtimeCallbacks {
   onJobUpdate?: (job: unknown) => void;
@@ -61,6 +61,6 @@ export const useRealtime = (callbacks: RealtimeCallbacks = {}) => {
     isConnected: realtimeService.getConnectionStatus().connected,
     channels: realtimeService.getConnectionStatus().channels,
     reconnect: () => realtimeService.reconnect(user?.id || ''),
-    cleanup: () => realtimeService.cleanup()
+    cleanup: () => realtimeService.cleanup(),
   };
 };

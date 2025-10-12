@@ -7,7 +7,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/unified-auth-store';
 import { useAgentMetricsStore } from '@/stores/agent-metrics-store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { BentoGrid, BentoCard } from '@/components/ui/bento-grid';
@@ -29,36 +35,51 @@ import {
   CheckCircle2,
   Play,
   TrendingDown,
-  Activity
+  Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion, useSpring, useMotionValue, useTransform, animate } from 'framer-motion';
+import {
+  motion,
+  useSpring,
+  useMotionValue,
+  useTransform,
+  animate,
+} from 'framer-motion';
+import { DashboardLoading, SkeletonCard, SkeletonText } from '@/components/ui/premium-loading';
 
 interface DashboardHomePageProps {
   className?: string;
 }
 
 // Animated Counter Component
-const AnimatedCounter: React.FC<{ value: number; format?: (val: number) => string }> = ({ value, format }) => {
+const AnimatedCounter: React.FC<{
+  value: number;
+  format?: (val: number) => string;
+}> = ({ value, format }) => {
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
     const controls = animate(0, value, {
       duration: 1.5,
-      ease: "easeOut",
-      onUpdate: (latest) => setDisplayValue(latest),
+      ease: 'easeOut',
+      onUpdate: latest => setDisplayValue(latest),
     });
 
     return () => controls.stop();
   }, [value]);
 
-  return <span>{format ? format(displayValue) : Math.round(displayValue)}</span>;
+  return (
+    <span>{format ? format(displayValue) : Math.round(displayValue)}</span>
+  );
 };
 
-export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className }) => {
+export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({
+  className,
+}) => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const metricsStore = useAgentMetricsStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   // Get live metrics from store
   const stats = {
@@ -111,13 +132,24 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
   ];
 
   // Get recent activity from metrics store
-  const recentActivity = metricsStore.recentActivity.length > 0
-    ? metricsStore.recentActivity.slice(0, 10).map((activity) => ({
-        type: activity.type.includes('failed') || activity.type.includes('error') ? 'error' : 'info',
-        message: activity.message,
-        time: getTimeAgo(activity.timestamp),
-      }))
-    : [{ type: 'info' as const, message: 'Welcome to your AI Workforce! Start by asking AI to help with a task.', time: 'Just now' }];
+  const recentActivity =
+    metricsStore.recentActivity.length > 0
+      ? metricsStore.recentActivity.slice(0, 10).map(activity => ({
+          type:
+            activity.type.includes('failed') || activity.type.includes('error')
+              ? 'error'
+              : 'info',
+          message: activity.message,
+          time: getTimeAgo(activity.timestamp),
+        }))
+      : [
+          {
+            type: 'info' as const,
+            message:
+              'Welcome to your AI Workforce! Start by asking AI to help with a task.',
+            time: 'Just now',
+          },
+        ];
 
   // Helper to format time ago
   function getTimeAgo(date: Date): string {
@@ -128,32 +160,45 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
     return `${Math.floor(seconds / 86400)}d ago`;
   }
 
+  // Simulate loading for better UX
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <DashboardLoading className="min-h-screen" />;
+  }
+
   return (
-    <div className={cn("min-h-screen p-6 space-y-6", className)}>
+    <div className={cn('min-h-screen space-y-6 p-6', className)}>
       {/* Welcome Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="glass-strong rounded-3xl p-8 relative overflow-hidden"
+        className="glass-strong relative overflow-hidden rounded-3xl p-8"
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+        <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
         <div className="relative z-10">
           <div className="flex items-start justify-between">
             <div>
-              <Badge className="mb-4 glass">
+              <Badge className="glass mb-4">
                 <Sparkles className="mr-2 h-3 w-3" />
                 AI Workforce Dashboard
               </Badge>
-              <h1 className="text-4xl font-bold mb-2">
+              <h1 className="mb-2 text-4xl font-bold">
                 Welcome back{user?.name ? `, ${user.name}` : ''}! 👋
               </h1>
               <p className="text-xl text-muted-foreground">
                 Your AI workforce is ready. Just ask what you need.
               </p>
             </div>
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="btn-glow gradient-primary text-white"
               onClick={() => navigate('/chat')}
             >
@@ -165,13 +210,13 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
       </motion.div>
 
       {/* Stats Grid - Enhanced with BentoGrid */}
-      <BentoGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <BentoGrid className="grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <BentoCard
           gradient={true}
           className="glass-strong"
           icon={<Brain className="h-6 w-6 text-primary" />}
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <Badge variant="secondary" className="text-xs">
               {stats.activeWorkingAgents > 0 ? (
                 <>
@@ -186,14 +231,16 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
               )}
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">AI Workforce</p>
+          <p className="mb-1 text-sm text-muted-foreground">AI Workforce</p>
           <InteractiveHoverCard>
             <p className="text-3xl font-bold">
               <AnimatedCounter value={stats.activeEmployees} />
             </p>
           </InteractiveHoverCard>
-          <p className="text-xs text-muted-foreground mt-2">
-            {stats.activeEmployees > 0 ? `${stats.activeEmployees} agents ready` : 'Deploy agents to start'}
+          <p className="mt-2 text-xs text-muted-foreground">
+            {stats.activeEmployees > 0
+              ? `${stats.activeEmployees} agents ready`
+              : 'Deploy agents to start'}
           </p>
         </BentoCard>
 
@@ -202,7 +249,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
           className="glass-strong"
           icon={<Target className="h-6 w-6 text-accent" />}
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <Badge variant="secondary" className="text-xs">
               {stats.activeSessions > 0 ? (
                 <>
@@ -214,17 +261,19 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
               )}
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Tasks Completed</p>
+          <p className="mb-1 text-sm text-muted-foreground">Tasks Completed</p>
           <InteractiveHoverCard>
             <p className="text-3xl font-bold">
               <AnimatedCounter
                 value={stats.completedTasks}
-                format={(val) => Math.round(val).toLocaleString()}
+                format={val => Math.round(val).toLocaleString()}
               />
             </p>
           </InteractiveHoverCard>
-          <p className="text-xs text-muted-foreground mt-2">
-            {stats.totalTasks > 0 ? `${stats.totalTasks} total tasks` : 'Start your first task'}
+          <p className="mt-2 text-xs text-muted-foreground">
+            {stats.totalTasks > 0
+              ? `${stats.totalTasks} total tasks`
+              : 'Start your first task'}
           </p>
         </BentoCard>
 
@@ -233,22 +282,22 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
           className="glass-strong"
           icon={<Zap className="h-6 w-6 text-secondary" />}
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <Badge variant="secondary" className="text-xs">
               <Clock className="mr-1 h-3 w-3" />
               Free tier
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Tokens Used</p>
+          <p className="mb-1 text-sm text-muted-foreground">Tokens Used</p>
           <InteractiveHoverCard>
             <p className="text-3xl font-bold">
               <AnimatedCounter
                 value={stats.tokensUsed}
-                format={(val) => Math.round(val).toLocaleString()}
+                format={val => Math.round(val).toLocaleString()}
               />
             </p>
           </InteractiveHoverCard>
-          <p className="text-xs text-muted-foreground mt-2">
+          <p className="mt-2 text-xs text-muted-foreground">
             5,000 free monthly
           </p>
         </BentoCard>
@@ -258,13 +307,17 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
           className="glass-strong"
           icon={<CheckCircle2 className="h-6 w-6 text-success" />}
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <Badge variant="secondary" className="text-xs">
-              {stats.successRate >= 90 ? <TrendingUp className="mr-1 h-3 w-3" /> : <TrendingDown className="mr-1 h-3 w-3" />}
+              {stats.successRate >= 90 ? (
+                <TrendingUp className="mr-1 h-3 w-3" />
+              ) : (
+                <TrendingDown className="mr-1 h-3 w-3" />
+              )}
               {stats.totalTasks > 0 ? 'Tracking' : 'N/A'}
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Success Rate</p>
+          <p className="mb-1 text-sm text-muted-foreground">Success Rate</p>
           <InteractiveHoverCard>
             <p className="text-3xl font-bold">
               {stats.totalTasks > 0 ? (
@@ -276,8 +329,10 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
               )}
             </p>
           </InteractiveHoverCard>
-          <p className="text-xs text-muted-foreground mt-2">
-            {stats.totalTasks > 0 ? `${metricsStore.completedTasks} completed` : 'Complete tasks to track'}
+          <p className="mt-2 text-xs text-muted-foreground">
+            {stats.totalTasks > 0
+              ? `${metricsStore.completedTasks} completed`
+              : 'Complete tasks to track'}
           </p>
         </BentoCard>
       </BentoGrid>
@@ -289,14 +344,16 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
         transition={{ duration: 0.5, delay: 0.5 }}
       >
         <div className="mb-6">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="mb-2 flex items-center gap-3">
             <Rocket className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-bold">Quick Actions</h2>
           </div>
-          <p className="text-muted-foreground">Start working with your AI workforce</p>
+          <p className="text-muted-foreground">
+            Start working with your AI workforce
+          </p>
         </div>
 
-        <BentoGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <BentoGrid className="grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {quickActions.map((action, index) => {
             const IconComponent = action.icon;
             const isFirst = index === 0;
@@ -308,19 +365,21 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
                 className="cursor-pointer"
                 onClick={action.action}
               >
-                <div className={cn(
-                  "w-14 h-14 rounded-xl mb-4 flex items-center justify-center",
-                  action.bgColor
-                )}>
-                  <IconComponent className={cn("h-7 w-7", action.iconColor)} />
+                <div
+                  className={cn(
+                    'mb-4 flex h-14 w-14 items-center justify-center rounded-xl',
+                    action.bgColor
+                  )}
+                >
+                  <IconComponent className={cn('h-7 w-7', action.iconColor)} />
                 </div>
-                <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                <h3 className="mb-2 text-lg font-semibold transition-colors group-hover:text-primary">
                   {action.title}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {action.description}
                 </p>
-                <ArrowRight className="h-5 w-5 text-primary mt-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="mt-4 h-5 w-5 text-primary transition-transform group-hover:translate-x-1" />
               </BentoCard>
             );
           })}
@@ -349,43 +408,53 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
                 {
                   step: '1',
                   title: 'Tell AI What You Need',
-                  description: 'Just describe your task in plain English. No technical knowledge required.',
+                  description:
+                    'Just describe your task in plain English. No technical knowledge required.',
                   action: 'Start Chat',
                   route: '/chat',
-                  color: 'primary'
+                  color: 'primary',
                 },
                 {
                   step: '2',
                   title: 'Watch It Think & Execute',
-                  description: 'AI reasons through the problem and implements every step automatically.',
+                  description:
+                    'AI reasons through the problem and implements every step automatically.',
                   action: 'See Examples',
                   route: '/demo',
-                  color: 'accent'
+                  color: 'accent',
                 },
                 {
                   step: '3',
                   title: 'Get Your Results',
-                  description: 'Receive complete, ready-to-use outputs. From idea to execution in minutes.',
+                  description:
+                    'Receive complete, ready-to-use outputs. From idea to execution in minutes.',
                   action: 'View Analytics',
                   route: '/analytics',
-                  color: 'secondary'
-                }
+                  color: 'secondary',
+                },
               ].map((item, index) => (
                 <div
                   key={index}
-                  className="glass rounded-2xl p-6 flex items-start gap-4 card-hover"
+                  className="glass card-hover flex items-start gap-4 rounded-2xl p-6"
                 >
-                  <div className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center font-bold flex-shrink-0",
-                    item.color === 'primary' && "bg-primary text-primary-foreground",
-                    item.color === 'accent' && "bg-accent text-accent-foreground",
-                    item.color === 'secondary' && "bg-secondary text-secondary-foreground"
-                  )}>
+                  <div
+                    className={cn(
+                      'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full font-bold',
+                      item.color === 'primary' &&
+                        'bg-primary text-primary-foreground',
+                      item.color === 'accent' &&
+                        'bg-accent text-accent-foreground',
+                      item.color === 'secondary' &&
+                        'bg-secondary text-secondary-foreground'
+                    )}
+                  >
                     {item.step}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                    <p className="text-muted-foreground text-sm mb-4">{item.description}</p>
+                    <h3 className="mb-2 text-lg font-semibold">{item.title}</h3>
+                    <p className="mb-4 text-sm text-muted-foreground">
+                      {item.description}
+                    </p>
                     <Button
                       variant="outline"
                       size="sm"
@@ -411,33 +480,38 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({ className 
         <Card className="glass-strong">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Your latest interactions and updates</CardDescription>
+            <CardDescription>
+              Your latest interactions and updates
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {recentActivity.map((activity, index) => (
                 <div
                   key={index}
-                  className="glass rounded-xl p-4 flex items-start gap-4"
+                  className="glass flex items-start gap-4 rounded-xl p-4"
                 >
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
                     <Brain className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm">{activity.message}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {activity.time}
+                    </p>
                   </div>
                 </div>
               ))}
 
               {/* Empty State */}
-              <div className="text-center py-12">
-                <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center mx-auto mb-4">
+              <div className="py-12 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted/20">
                   <MessageSquare className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">No Activity Yet</h3>
-                <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-                  Your activity feed will appear here once you start working with your AI workforce
+                <h3 className="mb-2 text-lg font-semibold">No Activity Yet</h3>
+                <p className="mx-auto mb-4 max-w-md text-muted-foreground">
+                  Your activity feed will appear here once you start working
+                  with your AI workforce
                 </p>
                 <Button
                   className="btn-glow gradient-primary text-white"

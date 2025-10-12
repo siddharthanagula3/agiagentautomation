@@ -3,7 +3,12 @@
  * Handles payment processing, subscriptions, and billing management
  */
 
-import { loadStripe, Stripe, StripeElements, StripeElementsOptions } from '@stripe/stripe-js';
+import {
+  loadStripe,
+  Stripe,
+  StripeElements,
+  StripeElementsOptions,
+} from '@stripe/stripe-js';
 import { apiClient } from './api';
 import { APIResponse } from '@/stores/query-client';
 
@@ -15,7 +20,14 @@ export interface PaymentIntent {
   id: string;
   amount: number;
   currency: string;
-  status: 'requires_payment_method' | 'requires_confirmation' | 'requires_action' | 'processing' | 'requires_capture' | 'canceled' | 'succeeded';
+  status:
+    | 'requires_payment_method'
+    | 'requires_confirmation'
+    | 'requires_action'
+    | 'processing'
+    | 'requires_capture'
+    | 'canceled'
+    | 'succeeded';
   client_secret: string;
   metadata?: Record<string, string>;
 }
@@ -47,7 +59,14 @@ export interface PaymentMethod {
 
 export interface Subscription {
   id: string;
-  status: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid';
+  status:
+    | 'incomplete'
+    | 'incomplete_expired'
+    | 'trialing'
+    | 'active'
+    | 'past_due'
+    | 'canceled'
+    | 'unpaid';
   current_period_start: number;
   current_period_end: number;
   trial_start?: number;
@@ -243,7 +262,8 @@ export class StripeService {
   }) {
     if (!this.stripe) throw new Error('Stripe not initialized');
 
-    const { error, paymentMethod } = await this.stripe.createPaymentMethod(params);
+    const { error, paymentMethod } =
+      await this.stripe.createPaymentMethod(params);
 
     if (error) {
       throw new Error(error.message);
@@ -320,7 +340,10 @@ export class PaymentAPI {
     employeeId?: string;
     metadata?: Record<string, string>;
   }): Promise<APIResponse<PaymentIntent>> {
-    return apiClient.post<PaymentIntent>('/payments/create-payment-intent', params);
+    return apiClient.post<PaymentIntent>(
+      '/payments/create-payment-intent',
+      params
+    );
   }
 
   // Create Setup Intent (for saving payment methods)
@@ -328,7 +351,10 @@ export class PaymentAPI {
     customer?: string;
     metadata?: Record<string, string>;
   }): Promise<APIResponse<{ client_secret: string }>> {
-    return apiClient.post<{ client_secret: string }>('/payments/create-setup-intent', params);
+    return apiClient.post<{ client_secret: string }>(
+      '/payments/create-setup-intent',
+      params
+    );
   }
 
   // Create Checkout Session
@@ -343,7 +369,10 @@ export class PaymentAPI {
     customer_email?: string;
     metadata?: Record<string, string>;
   }): Promise<APIResponse<CheckoutSession>> {
-    return apiClient.post<CheckoutSession>('/payments/create-checkout-session', params);
+    return apiClient.post<CheckoutSession>(
+      '/payments/create-checkout-session',
+      params
+    );
   }
 
   // Get Customer
@@ -373,21 +402,27 @@ export class PaymentAPI {
   }
 
   // Attach Payment Method
-  static async attachPaymentMethod(paymentMethodId: string): Promise<APIResponse<PaymentMethod>> {
+  static async attachPaymentMethod(
+    paymentMethodId: string
+  ): Promise<APIResponse<PaymentMethod>> {
     return apiClient.post<PaymentMethod>('/payments/attach-payment-method', {
       payment_method_id: paymentMethodId,
     });
   }
 
   // Detach Payment Method
-  static async detachPaymentMethod(paymentMethodId: string): Promise<APIResponse<PaymentMethod>> {
+  static async detachPaymentMethod(
+    paymentMethodId: string
+  ): Promise<APIResponse<PaymentMethod>> {
     return apiClient.post<PaymentMethod>('/payments/detach-payment-method', {
       payment_method_id: paymentMethodId,
     });
   }
 
   // Set Default Payment Method
-  static async setDefaultPaymentMethod(paymentMethodId: string): Promise<APIResponse<Customer>> {
+  static async setDefaultPaymentMethod(
+    paymentMethodId: string
+  ): Promise<APIResponse<Customer>> {
     return apiClient.post<Customer>('/payments/set-default-payment-method', {
       payment_method_id: paymentMethodId,
     });
@@ -405,7 +440,10 @@ export class PaymentAPI {
     trial_period_days?: number;
     metadata?: Record<string, string>;
   }): Promise<APIResponse<Subscription>> {
-    return apiClient.post<Subscription>('/payments/create-subscription', params);
+    return apiClient.post<Subscription>(
+      '/payments/create-subscription',
+      params
+    );
   }
 
   // Update Subscription
@@ -422,7 +460,10 @@ export class PaymentAPI {
     cancel_at_period_end?: boolean;
     cancellation_reason?: string;
   }): Promise<APIResponse<Subscription>> {
-    return apiClient.post<Subscription>('/payments/cancel-subscription', params);
+    return apiClient.post<Subscription>(
+      '/payments/cancel-subscription',
+      params
+    );
   }
 
   // Resume Subscription
@@ -435,7 +476,10 @@ export class PaymentAPI {
     limit?: number;
     starting_after?: string;
   }): Promise<APIResponse<{ invoices: Invoice[]; has_more: boolean }>> {
-    return apiClient.get<{ invoices: Invoice[]; has_more: boolean }>('/payments/invoices', params);
+    return apiClient.get<{ invoices: Invoice[]; has_more: boolean }>(
+      '/payments/invoices',
+      params
+    );
   }
 
   // Get Products and Prices
@@ -457,15 +501,17 @@ export class PaymentAPI {
     subscription_item_id?: string;
     period_start?: number;
     period_end?: number;
-  }): Promise<APIResponse<{
-    total_usage: number;
-    period_start: number;
-    period_end: number;
-    line_items: Array<{
-      period: { start: number; end: number };
-      quantity: number;
-    }>;
-  }>> {
+  }): Promise<
+    APIResponse<{
+      total_usage: number;
+      period_start: number;
+      period_end: number;
+      line_items: Array<{
+        period: { start: number; end: number };
+        quantity: number;
+      }>;
+    }>
+  > {
     return apiClient.get('/payments/usage-summary', params);
   }
 }
@@ -574,7 +620,9 @@ export const useSubscription = () => {
       const response = await PaymentAPI.getSubscription();
       setSubscription(response.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch subscription');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch subscription'
+      );
     } finally {
       setLoading(false);
     }
@@ -593,7 +641,9 @@ export const useSubscription = () => {
       setSubscription(response.data);
       return response.data;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create subscription');
+      setError(
+        err instanceof Error ? err.message : 'Failed to create subscription'
+      );
       throw err;
     } finally {
       setLoading(false);
@@ -609,7 +659,9 @@ export const useSubscription = () => {
       setSubscription(response.data);
       return response.data;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to cancel subscription');
+      setError(
+        err instanceof Error ? err.message : 'Failed to cancel subscription'
+      );
       throw err;
     } finally {
       setLoading(false);
@@ -623,7 +675,9 @@ export const useSubscription = () => {
       setSubscription(response.data);
       return response.data;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to resume subscription');
+      setError(
+        err instanceof Error ? err.message : 'Failed to resume subscription'
+      );
       throw err;
     } finally {
       setLoading(false);
@@ -657,7 +711,9 @@ export const usePaymentMethods = () => {
       const response = await PaymentAPI.getPaymentMethods();
       setPaymentMethods(response.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch payment methods');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch payment methods'
+      );
     } finally {
       setLoading(false);
     }
@@ -668,7 +724,9 @@ export const usePaymentMethods = () => {
       await PaymentAPI.attachPaymentMethod(paymentMethodId);
       await fetchPaymentMethods(); // Refresh list
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to attach payment method');
+      setError(
+        err instanceof Error ? err.message : 'Failed to attach payment method'
+      );
       throw err;
     }
   };
@@ -678,7 +736,9 @@ export const usePaymentMethods = () => {
       await PaymentAPI.detachPaymentMethod(paymentMethodId);
       await fetchPaymentMethods(); // Refresh list
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to detach payment method');
+      setError(
+        err instanceof Error ? err.message : 'Failed to detach payment method'
+      );
       throw err;
     }
   };
@@ -688,7 +748,11 @@ export const usePaymentMethods = () => {
       await PaymentAPI.setDefaultPaymentMethod(paymentMethodId);
       await fetchPaymentMethods(); // Refresh list
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to set default payment method');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to set default payment method'
+      );
       throw err;
     }
   };

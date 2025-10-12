@@ -55,7 +55,11 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { openAIAgentsService, type Message, type UserContext } from '@/services/openai-agents-service';
+import {
+  openAIAgentsService,
+  type Message,
+  type UserContext,
+} from '@/services/openai-agents-service';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -136,7 +140,9 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollAreaRef.current) {
-      const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollElement = scrollAreaRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]'
+      );
       if (scrollElement) {
         scrollElement.scrollTop = scrollElement.scrollHeight;
       }
@@ -146,7 +152,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
   // Handle message submission
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    
+
     if (!input.trim() || isLoading || isStreaming) return;
 
     const userMessage = input.trim();
@@ -189,8 +195,12 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
         setMessages(prev => [...prev, tempAssistantMessage]);
 
         // Stream the response
-        const stream = openAIAgentsService.streamMessage(sessionId, userMessage, context);
-        
+        const stream = openAIAgentsService.streamMessage(
+          sessionId,
+          userMessage,
+          context
+        );
+
         for await (const chunk of stream) {
           fullResponse += chunk;
           setMessages(prev => {
@@ -205,7 +215,11 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
         setIsStreaming(false);
       } else {
         // Non-streaming response
-        const response = await openAIAgentsService.sendMessage(sessionId, userMessage, context);
+        const response = await openAIAgentsService.sendMessage(
+          sessionId,
+          userMessage,
+          context
+        );
         setMessages(prev => [...prev, response]);
       }
     } catch (error) {
@@ -246,8 +260,10 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
   // Handle regeneration
   const handleRegenerate = async () => {
     if (messages.length < 2) return;
-    
-    const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
+
+    const lastUserMessage = [...messages]
+      .reverse()
+      .find(m => m.role === 'user');
     if (!lastUserMessage) return;
 
     // Remove last assistant message
@@ -304,17 +320,26 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
   };
 
   return (
-    <div className={cn('flex flex-col h-full bg-gray-50 dark:bg-[#0d0e11]', className)}>
+    <div
+      className={cn(
+        'flex h-full flex-col bg-gray-50 dark:bg-[#0d0e11]',
+        className
+      )}
+    >
       {/* Header */}
-      <div className="bg-white dark:bg-[#171717] border-b border-gray-200 dark:border-gray-800 px-4 py-3">
+      <div className="border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-[#171717]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-600">
+              <Bot className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">{agentName}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{agentRole}</p>
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                {agentName}
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {agentRole}
+              </p>
             </div>
           </div>
 
@@ -329,7 +354,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                   return (
                     <SelectItem key={topic.value} value={topic.value}>
                       <div className="flex items-center gap-2">
-                        <Icon className="w-4 h-4" />
+                        <Icon className="h-4 w-4" />
                         {topic.label}
                       </div>
                     </SelectItem>
@@ -343,7 +368,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
               size="icon"
               onClick={() => setShowSettings(true)}
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -351,13 +376,15 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
 
       {/* Messages Area */}
       <ScrollArea ref={scrollAreaRef} className="flex-1 px-4 py-4">
-        <div className="space-y-4 max-w-3xl mx-auto">
+        <div className="mx-auto max-w-3xl space-y-4">
           {messages.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-8 h-8 text-white" />
+            <div className="py-8 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-purple-400 to-pink-500">
+                <Sparkles className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Start a Conversation</h3>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                Start a Conversation
+              </h3>
               <p className="text-gray-600 dark:text-gray-400">
                 Ask {agentName} anything. They're ready to help!
               </p>
@@ -375,9 +402,9 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                 )}
               >
                 {message.role === 'assistant' && (
-                  <Avatar className="w-8 h-8 flex-shrink-0">
+                  <Avatar className="h-8 w-8 flex-shrink-0">
                     <AvatarFallback className="bg-gradient-to-r from-purple-500 to-pink-600">
-                      <Bot className="w-4 h-4 text-white" />
+                      <Bot className="h-4 w-4 text-white" />
                     </AvatarFallback>
                   </Avatar>
                 )}
@@ -387,7 +414,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                     'max-w-xl rounded-lg px-4 py-3',
                     message.role === 'user'
                       ? 'bg-purple-600 text-white'
-                      : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                      : 'border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
                   )}
                 >
                   {message.role === 'assistant' ? (
@@ -400,8 +427,16 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                           'dark:prose-invert'
                         )}
                         components={{
-                          code({ node, inline, className, children, ...props }) {
-                            const match = /language-(\w+)/.exec(className || '');
+                          code({
+                            node,
+                            inline,
+                            className,
+                            children,
+                            ...props
+                          }) {
+                            const match = /language-(\w+)/.exec(
+                              className || ''
+                            );
                             return !inline && match ? (
                               <SyntaxHighlighter
                                 language={match[1]}
@@ -412,7 +447,10 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                                 {String(children).replace(/\n$/, '')}
                               </SyntaxHighlighter>
                             ) : (
-                              <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm text-gray-900 dark:text-gray-100" {...props}>
+                              <code
+                                className="rounded bg-gray-100 px-1 py-0.5 text-sm text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+                                {...props}
+                              >
                                 {children}
                               </code>
                             );
@@ -423,97 +461,130 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                       </ReactMarkdown>
 
                       {/* Tool executions */}
-                      {message.metadata?.toolsUsed && message.metadata.toolsUsed.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Wrench className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                            <span className="text-sm text-gray-600 dark:text-gray-400">Tools Used:</span>
-                          </div>
-                          <div className="space-y-2">
-                            {message.metadata.toolsUsed.map((tool, toolIndex) => {
-                              const Icon = getToolIcon(tool);
-                              const toolExecution = toolExecutions.find(te => te.name === tool);
-                              const isExpanded = expandedTools.has(`${message.id}-${tool}`);
+                      {message.metadata?.toolsUsed &&
+                        message.metadata.toolsUsed.length > 0 && (
+                          <div className="mt-3 border-t border-gray-200 pt-3 dark:border-gray-700">
+                            <div className="mb-2 flex items-center gap-2">
+                              <Wrench className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                Tools Used:
+                              </span>
+                            </div>
+                            <div className="space-y-2">
+                              {message.metadata.toolsUsed.map(
+                                (tool, toolIndex) => {
+                                  const Icon = getToolIcon(tool);
+                                  const toolExecution = toolExecutions.find(
+                                    te => te.name === tool
+                                  );
+                                  const isExpanded = expandedTools.has(
+                                    `${message.id}-${tool}`
+                                  );
 
-                              return (
-                                <div
-                                  key={toolIndex}
-                                  className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2"
-                                >
-                                  <button
-                                    onClick={() => toggleToolExpansion(`${message.id}-${tool}`)}
-                                    className="flex items-center gap-2 w-full text-left"
-                                  >
-                                    {isExpanded ? (
-                                      <ChevronDown className="w-3 h-3 text-gray-500" />
-                                    ) : (
-                                      <ChevronRight className="w-3 h-3 text-gray-500" />
-                                    )}
-                                    <Icon className="w-4 h-4 text-gray-500" />
-                                    <span className="text-sm font-medium capitalize">
-                                      {tool.replace('_', ' ')}
-                                    </span>
-                                    {toolExecution && (
-                                      <Badge
-                                        variant="outline"
-                                        className={cn(
-                                          'text-xs ml-auto',
-                                          getToolStatusColor(toolExecution.status)
-                                        )}
+                                  return (
+                                    <div
+                                      key={toolIndex}
+                                      className="rounded-lg bg-gray-50 p-2 dark:bg-gray-800/50"
+                                    >
+                                      <button
+                                        onClick={() =>
+                                          toggleToolExpansion(
+                                            `${message.id}-${tool}`
+                                          )
+                                        }
+                                        className="flex w-full items-center gap-2 text-left"
                                       >
-                                        {toolExecution.status}
-                                      </Badge>
-                                    )}
-                                  </button>
+                                        {isExpanded ? (
+                                          <ChevronDown className="h-3 w-3 text-gray-500" />
+                                        ) : (
+                                          <ChevronRight className="h-3 w-3 text-gray-500" />
+                                        )}
+                                        <Icon className="h-4 w-4 text-gray-500" />
+                                        <span className="text-sm font-medium capitalize">
+                                          {tool.replace('_', ' ')}
+                                        </span>
+                                        {toolExecution && (
+                                          <Badge
+                                            variant="outline"
+                                            className={cn(
+                                              'ml-auto text-xs',
+                                              getToolStatusColor(
+                                                toolExecution.status
+                                              )
+                                            )}
+                                          >
+                                            {toolExecution.status}
+                                          </Badge>
+                                        )}
+                                      </button>
 
-                                  {isExpanded && toolExecution && (
-                                    <div className="mt-2 pl-9 space-y-2">
-                                      {toolExecution.input && (
-                                        <div className="text-xs">
-                                          <span className="font-medium text-gray-600 dark:text-gray-400">Input:</span>
-                                          <pre className="mt-1 bg-white dark:bg-gray-900 p-2 rounded border border-gray-200 dark:border-gray-700 overflow-x-auto text-gray-900 dark:text-gray-100">
-                                            {JSON.stringify(toolExecution.input, null, 2)}
-                                          </pre>
-                                        </div>
-                                      )}
-                                      {toolExecution.output && (
-                                        <div className="text-xs">
-                                          <span className="font-medium text-gray-600 dark:text-gray-400">Output:</span>
-                                          <pre className="mt-1 bg-white dark:bg-gray-900 p-2 rounded border border-gray-200 dark:border-gray-700 overflow-x-auto text-gray-900 dark:text-gray-100">
-                                            {JSON.stringify(toolExecution.output, null, 2)}
-                                          </pre>
-                                        </div>
-                                      )}
-                                      {toolExecution.error && (
-                                        <div className="text-xs">
-                                          <span className="font-medium text-red-600">Error:</span>
-                                          <p className="mt-1 text-red-500">{toolExecution.error}</p>
+                                      {isExpanded && toolExecution && (
+                                        <div className="mt-2 space-y-2 pl-9">
+                                          {toolExecution.input && (
+                                            <div className="text-xs">
+                                              <span className="font-medium text-gray-600 dark:text-gray-400">
+                                                Input:
+                                              </span>
+                                              <pre className="mt-1 overflow-x-auto rounded border border-gray-200 bg-white p-2 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                                                {JSON.stringify(
+                                                  toolExecution.input,
+                                                  null,
+                                                  2
+                                                )}
+                                              </pre>
+                                            </div>
+                                          )}
+                                          {toolExecution.output && (
+                                            <div className="text-xs">
+                                              <span className="font-medium text-gray-600 dark:text-gray-400">
+                                                Output:
+                                              </span>
+                                              <pre className="mt-1 overflow-x-auto rounded border border-gray-200 bg-white p-2 text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                                                {JSON.stringify(
+                                                  toolExecution.output,
+                                                  null,
+                                                  2
+                                                )}
+                                              </pre>
+                                            </div>
+                                          )}
+                                          {toolExecution.error && (
+                                            <div className="text-xs">
+                                              <span className="font-medium text-red-600">
+                                                Error:
+                                              </span>
+                                              <p className="mt-1 text-red-500">
+                                                {toolExecution.error}
+                                              </p>
+                                            </div>
+                                          )}
                                         </div>
                                       )}
                                     </div>
-                                  )}
-                                </div>
-                              );
-                            })}
+                                  );
+                                }
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                      <div className="flex items-center gap-2 mt-3">
+                      <div className="mt-3 flex items-center gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => copyToClipboard(message.id, message.content)}
+                          onClick={() =>
+                            copyToClipboard(message.id, message.content)
+                          }
                           className="h-7 text-xs"
                         >
                           {copiedMessageId === message.id ? (
                             <>
-                              <Check className="w-3 h-3 mr-1" />
+                              <Check className="mr-1 h-3 w-3" />
                               Copied
                             </>
                           ) : (
                             <>
-                              <Copy className="w-3 h-3 mr-1" />
+                              <Copy className="mr-1 h-3 w-3" />
                               Copy
                             </>
                           )}
@@ -526,7 +597,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                             onClick={handleRegenerate}
                             className="h-7 text-xs"
                           >
-                            <RefreshCw className="w-3 h-3 mr-1" />
+                            <RefreshCw className="mr-1 h-3 w-3" />
                             Regenerate
                           </Button>
                         )}
@@ -538,9 +609,9 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                 </div>
 
                 {message.role === 'user' && (
-                  <Avatar className="w-8 h-8 flex-shrink-0">
+                  <Avatar className="h-8 w-8 flex-shrink-0">
                     <AvatarFallback className="bg-gray-200 dark:bg-gray-700">
-                      <User className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                      <User className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                     </AvatarFallback>
                   </Avatar>
                 )}
@@ -550,7 +621,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
 
           {isStreaming && (
             <div className="flex items-center gap-2 text-gray-500">
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               <span className="text-sm">Agent is thinking...</span>
               <Button
                 variant="ghost"
@@ -558,7 +629,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                 onClick={handleStopStreaming}
                 className="ml-2"
               >
-                <Square className="w-3 h-3 mr-1" />
+                <Square className="mr-1 h-3 w-3" />
                 Stop
               </Button>
             </div>
@@ -567,12 +638,12 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
       </ScrollArea>
 
       {/* Input Area */}
-      <div className="bg-white dark:bg-[#171717] border-t border-gray-200 dark:border-gray-800 px-4 py-4">
-        <form onSubmit={handleSubmit} className="flex gap-3 max-w-3xl mx-auto">
+      <div className="border-t border-gray-200 bg-white px-4 py-4 dark:border-gray-800 dark:bg-[#171717]">
+        <form onSubmit={handleSubmit} className="mx-auto flex max-w-3xl gap-3">
           <Input
             ref={inputRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={e => setInput(e.target.value)}
             placeholder={`Ask ${agentName} anything...`}
             disabled={isLoading || isStreaming}
             className="flex-1"
@@ -583,15 +654,15 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
             className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
           >
             {isLoading || isStreaming ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Send className="w-4 h-4" />
+              <Send className="h-4 w-4" />
             )}
           </Button>
         </form>
 
         {/* Capabilities */}
-        <div className="flex flex-wrap gap-2 mt-3 max-w-3xl mx-auto">
+        <div className="mx-auto mt-3 flex max-w-3xl flex-wrap gap-2">
           {agentCapabilities.slice(0, 5).map((capability, index) => (
             <Badge key={index} variant="secondary" className="text-xs">
               {capability}
@@ -614,15 +685,15 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
               Configure {agentName}'s behavior and capabilities
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div>
-              <h4 className="text-sm font-medium mb-2">Model</h4>
+              <h4 className="mb-2 text-sm font-medium">Model</h4>
               <Badge>GPT-4o</Badge>
             </div>
 
             <div>
-              <h4 className="text-sm font-medium mb-2">Capabilities</h4>
+              <h4 className="mb-2 text-sm font-medium">Capabilities</h4>
               <div className="flex flex-wrap gap-2">
                 {agentCapabilities.map((capability, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">
@@ -633,7 +704,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
             </div>
 
             <div>
-              <h4 className="text-sm font-medium mb-2">Session Info</h4>
+              <h4 className="mb-2 text-sm font-medium">Session Info</h4>
               <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                 <p>Session ID: {sessionId}</p>
                 <p>Messages: {messages.length}</p>
@@ -642,10 +713,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowSettings(false)}
-            >
+            <Button variant="outline" onClick={() => setShowSettings(false)}>
               Close
             </Button>
             <Button

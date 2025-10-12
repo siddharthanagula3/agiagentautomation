@@ -49,7 +49,7 @@ class ArtifactService {
     language?: string
   ): Artifact {
     const id = `artifact-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const artifact: Artifact = {
       id,
       type,
@@ -74,7 +74,7 @@ class ArtifactService {
    */
   updateArtifact(update: ArtifactUpdate): Artifact {
     const artifact = this.artifacts.get(update.id);
-    
+
     if (!artifact) {
       throw new Error(`Artifact ${update.id} not found`);
     }
@@ -113,11 +113,14 @@ class ArtifactService {
   /**
    * Subscribe to artifact updates
    */
-  subscribe(artifactId: string, callback: (artifact: Artifact) => void): () => void {
+  subscribe(
+    artifactId: string,
+    callback: (artifact: Artifact) => void
+  ): () => void {
     if (!this.callbacks.has(artifactId)) {
       this.callbacks.set(artifactId, new Set());
     }
-    
+
     this.callbacks.get(artifactId)!.add(callback);
 
     // Return unsubscribe function
@@ -183,19 +186,19 @@ class ArtifactService {
     switch (artifact.type) {
       case 'html':
         return this.generateHTMLPreview(artifact.content);
-      
+
       case 'react':
         return this.generateReactPreview(artifact.content);
-      
+
       case 'svg':
         return `data:image/svg+xml;base64,${btoa(artifact.content)}`;
-      
+
       case 'chart':
         return this.generateChartPreview(artifact.content);
-      
+
       case 'mermaid':
         return this.generateMermaidPreview(artifact.content);
-      
+
       default:
         return '';
     }
@@ -241,7 +244,7 @@ class ArtifactService {
   private sanitizeHTML(html: string): string {
     // Basic sanitization - in production, use DOMPurify
     const doc = new DOMParser().parseFromString(html, 'text/html');
-    
+
     // Remove script tags
     const scripts = doc.querySelectorAll('script');
     scripts.forEach(script => script.remove());

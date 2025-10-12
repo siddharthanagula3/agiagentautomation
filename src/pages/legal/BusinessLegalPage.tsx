@@ -8,12 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Shield, 
-  FileText, 
-  CheckCircle, 
-  AlertCircle, 
-  Clock, 
+import {
+  Shield,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  Clock,
   Star,
   Globe,
   Users,
@@ -24,14 +24,20 @@ import {
   Upload,
   Eye,
   Edit,
-  Save
+  Save,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LegalDocument {
   id: string;
   title: string;
-  type: 'patent' | 'trademark' | 'copyright' | 'privacy' | 'terms' | 'compliance';
+  type:
+    | 'patent'
+    | 'trademark'
+    | 'copyright'
+    | 'privacy'
+    | 'terms'
+    | 'compliance';
   status: 'draft' | 'review' | 'filed' | 'approved' | 'rejected';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   description: string;
@@ -44,7 +50,13 @@ interface LegalDocument {
 interface O1VisaDocument {
   id: string;
   title: string;
-  category: 'achievements' | 'publications' | 'awards' | 'media' | 'testimonials' | 'business';
+  category:
+    | 'achievements'
+    | 'publications'
+    | 'awards'
+    | 'media'
+    | 'testimonials'
+    | 'business';
   description: string;
   date: Date;
   evidence: string[];
@@ -56,19 +68,28 @@ interface BusinessLegalPageProps {
   className?: string;
 }
 
-export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className }) => {
-  const [activeTab, setActiveTab] = useState<'o1-visa' | 'legal' | 'business' | 'compliance'>('o1-visa');
+export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
+  className,
+}) => {
+  const [activeTab, setActiveTab] = useState<
+    'o1-visa' | 'legal' | 'business' | 'compliance'
+  >('o1-visa');
   const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
 
-// Data is loaded dynamically; removed mock placeholders
+  // Data is loaded dynamically; removed mock placeholders
   const o1Documents: O1VisaDocument[] = [
     {
       id: '1',
       title: 'AGI Agent Automation Platform Launch',
       category: 'achievements',
-      description: 'Successfully launched a revolutionary AI workforce automation platform',
+      description:
+        'Successfully launched a revolutionary AI workforce automation platform',
       date: new Date('2024-01-15'),
-      evidence: ['platform-demo.mp4', 'user-testimonials.pdf', 'media-coverage.pdf'],
+      evidence: [
+        'platform-demo.mp4',
+        'user-testimonials.pdf',
+        'media-coverage.pdf',
+      ],
       status: 'approved',
       importance: 'critical',
     },
@@ -76,7 +97,8 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
       id: '2',
       title: 'Innovation in AI Workforce Management',
       category: 'achievements',
-      description: 'Developed unique inter-agent communication system for AI employees',
+      description:
+        'Developed unique inter-agent communication system for AI employees',
       date: new Date('2024-02-20'),
       evidence: ['technical-specification.pdf', 'patent-application.pdf'],
       status: 'approved',
@@ -86,7 +108,8 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
       id: '3',
       title: 'TechCrunch Feature Article',
       category: 'media',
-      description: 'Featured in TechCrunch for innovative AI automation approach',
+      description:
+        'Featured in TechCrunch for innovative AI automation approach',
       date: new Date('2024-03-10'),
       evidence: ['techcrunch-article.pdf', 'social-media-mentions.pdf'],
       status: 'approved',
@@ -96,7 +119,8 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
       id: '4',
       title: 'AI Innovation Award 2024',
       category: 'awards',
-      description: 'Received recognition for outstanding contribution to AI automation',
+      description:
+        'Received recognition for outstanding contribution to AI automation',
       date: new Date('2024-04-05'),
       evidence: ['award-certificate.pdf', 'award-ceremony-photos.pdf'],
       status: 'approved',
@@ -106,7 +130,8 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
       id: '5',
       title: 'Industry Expert Testimonials',
       category: 'testimonials',
-      description: 'Collected testimonials from industry leaders and AI experts',
+      description:
+        'Collected testimonials from industry leaders and AI experts',
       date: new Date('2024-05-01'),
       evidence: ['expert-testimonials.pdf', 'linkedin-recommendations.pdf'],
       status: 'approved',
@@ -114,7 +139,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
     },
   ];
 
-// Legal documents should be fetched from backend/service
+  // Legal documents should be fetched from backend/service
   const legalDocuments: LegalDocument[] = [
     {
       id: '1',
@@ -122,7 +147,8 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
       type: 'patent',
       status: 'filed',
       priority: 'high',
-      description: 'Patent for inter-agent communication system in AI workforce management',
+      description:
+        'Patent for inter-agent communication system in AI workforce management',
       dueDate: new Date('2024-12-31'),
       documents: ['patent-application.pdf', 'technical-drawings.pdf'],
       notes: 'Filed with USPTO, awaiting examination',
@@ -269,40 +295,45 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
 
   const calculateProgress = (documents: O1VisaDocument[] | LegalDocument[]) => {
     const total = documents.length;
-    const completed = documents.filter(doc => 
-      'status' in doc ? doc.status === 'approved' || doc.status === 'filed' : 
-      'status' in doc ? doc.status === 'approved' : false
+    const completed = documents.filter(doc =>
+      'status' in doc
+        ? doc.status === 'approved' || doc.status === 'filed'
+        : 'status' in doc
+          ? doc.status === 'approved'
+          : false
     ).length;
     return total > 0 ? (completed / total) * 100 : 0;
   };
 
   return (
-    <div className={cn('p-6 space-y-6', className)}>
+    <div className={cn('space-y-6 p-6', className)}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Business & Legal</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Business & Legal
+          </h1>
           <p className="text-muted-foreground">
             Manage O-1 visa documentation, legal compliance, and business growth
           </p>
         </div>
         <div className="flex items-center space-x-2">
           <Badge variant="outline">
-            <Shield className="h-3 w-3 mr-1" />
+            <Shield className="mr-1 h-3 w-3" />
             Legal Dashboard
           </Badge>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 bg-muted p-1 rounded-lg">
+      <div className="flex space-x-1 rounded-lg bg-muted p-1">
         <Button
           variant={activeTab === 'o1-visa' ? 'default' : 'ghost'}
           size="sm"
           onClick={() => setActiveTab('o1-visa')}
           className="flex-1"
         >
-          <Award className="h-4 w-4 mr-2" />
+          <Award className="mr-2 h-4 w-4" />
           O-1 Visa Documentation
         </Button>
         <Button
@@ -311,7 +342,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
           onClick={() => setActiveTab('legal')}
           className="flex-1"
         >
-          <FileText className="h-4 w-4 mr-2" />
+          <FileText className="mr-2 h-4 w-4" />
           Legal Documents
         </Button>
         <Button
@@ -320,7 +351,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
           onClick={() => setActiveTab('business')}
           className="flex-1"
         >
-          <DollarSign className="h-4 w-4 mr-2" />
+          <DollarSign className="mr-2 h-4 w-4" />
           Business Growth
         </Button>
         <Button
@@ -329,7 +360,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
           onClick={() => setActiveTab('compliance')}
           className="flex-1"
         >
-          <CheckCircle className="h-4 w-4 mr-2" />
+          <CheckCircle className="mr-2 h-4 w-4" />
           Compliance
         </Button>
       </div>
@@ -341,7 +372,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Award className="h-5 w-5 mr-2" />
+                <Award className="mr-2 h-5 w-5" />
                 O-1 Visa Documentation Progress
               </CardTitle>
             </CardHeader>
@@ -353,18 +384,27 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
                     {Math.round(calculateProgress(o1Documents))}% Complete
                   </span>
                 </div>
-                <Progress value={calculateProgress(o1Documents)} className="h-2" />
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <Progress
+                  value={calculateProgress(o1Documents)}
+                  className="h-2"
+                />
+
+                <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
-                      {o1Documents.filter(doc => doc.status === 'approved').length}
+                      {
+                        o1Documents.filter(doc => doc.status === 'approved')
+                          .length
+                      }
                     </div>
                     <div className="text-muted-foreground">Approved</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-600">
-                      {o1Documents.filter(doc => doc.status === 'review').length}
+                      {
+                        o1Documents.filter(doc => doc.status === 'review')
+                          .length
+                      }
                     </div>
                     <div className="text-muted-foreground">In Review</div>
                   </div>
@@ -387,24 +427,41 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
 
           {/* Documents List */}
           <div className="grid gap-4">
-            {o1Documents.map((document) => (
-              <Card key={document.id} className="hover:shadow-lg transition-shadow">
+            {o1Documents.map(document => (
+              <Card
+                key={document.id}
+                className="transition-shadow hover:shadow-lg"
+              >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
+                      <div className="mb-2 flex items-center space-x-3">
                         {getCategoryIcon(document.category)}
-                        <h3 className="text-lg font-semibold">{document.title}</h3>
-                        <Badge className={cn('text-xs', getStatusColor(document.status))}>
+                        <h3 className="text-lg font-semibold">
+                          {document.title}
+                        </h3>
+                        <Badge
+                          className={cn(
+                            'text-xs',
+                            getStatusColor(document.status)
+                          )}
+                        >
                           {document.status}
                         </Badge>
-                        <Badge className={cn('text-xs', getPriorityColor(document.importance))}>
+                        <Badge
+                          className={cn(
+                            'text-xs',
+                            getPriorityColor(document.importance)
+                          )}
+                        >
                           {document.importance}
                         </Badge>
                       </div>
-                      
-                      <p className="text-muted-foreground mb-3">{document.description}</p>
-                      
+
+                      <p className="mb-3 text-muted-foreground">
+                        {document.description}
+                      </p>
+
                       <div className="flex items-center space-x-4 text-sm">
                         <div className="flex items-center space-x-1">
                           <Clock className="h-4 w-4" />
@@ -415,13 +472,19 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
                           <span>{document.evidence.length} files</span>
                         </div>
                       </div>
-                      
+
                       {document.evidence.length > 0 && (
                         <div className="mt-3">
-                          <span className="text-sm font-medium">Evidence Files:</span>
-                          <div className="flex flex-wrap gap-1 mt-1">
+                          <span className="text-sm font-medium">
+                            Evidence Files:
+                          </span>
+                          <div className="mt-1 flex flex-wrap gap-1">
                             {document.evidence.map((file, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
+                              <Badge
+                                key={index}
+                                variant="outline"
+                                className="text-xs"
+                              >
                                 {file}
                               </Badge>
                             ))}
@@ -429,8 +492,8 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
                         </div>
                       )}
                     </div>
-                    
-                    <div className="flex items-center space-x-2 ml-4">
+
+                    <div className="ml-4 flex items-center space-x-2">
                       <Button variant="outline" size="sm">
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -456,7 +519,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <FileText className="h-5 w-5 mr-2" />
+                <FileText className="mr-2 h-5 w-5" />
                 Legal Documents Status
               </CardTitle>
             </CardHeader>
@@ -468,24 +531,36 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
                     {Math.round(calculateProgress(legalDocuments))}% Complete
                   </span>
                 </div>
-                <Progress value={calculateProgress(legalDocuments)} className="h-2" />
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <Progress
+                  value={calculateProgress(legalDocuments)}
+                  className="h-2"
+                />
+
+                <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
-                      {legalDocuments.filter(doc => doc.status === 'filed').length}
+                      {
+                        legalDocuments.filter(doc => doc.status === 'filed')
+                          .length
+                      }
                     </div>
                     <div className="text-muted-foreground">Filed</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-600">
-                      {legalDocuments.filter(doc => doc.status === 'review').length}
+                      {
+                        legalDocuments.filter(doc => doc.status === 'review')
+                          .length
+                      }
                     </div>
                     <div className="text-muted-foreground">In Review</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">
-                      {legalDocuments.filter(doc => doc.status === 'draft').length}
+                      {
+                        legalDocuments.filter(doc => doc.status === 'draft')
+                          .length
+                      }
                     </div>
                     <div className="text-muted-foreground">Draft</div>
                   </div>
@@ -502,24 +577,41 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
 
           {/* Documents List */}
           <div className="grid gap-4">
-            {legalDocuments.map((document) => (
-              <Card key={document.id} className="hover:shadow-lg transition-shadow">
+            {legalDocuments.map(document => (
+              <Card
+                key={document.id}
+                className="transition-shadow hover:shadow-lg"
+              >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
+                      <div className="mb-2 flex items-center space-x-3">
                         {getTypeIcon(document.type)}
-                        <h3 className="text-lg font-semibold">{document.title}</h3>
-                        <Badge className={cn('text-xs', getStatusColor(document.status))}>
+                        <h3 className="text-lg font-semibold">
+                          {document.title}
+                        </h3>
+                        <Badge
+                          className={cn(
+                            'text-xs',
+                            getStatusColor(document.status)
+                          )}
+                        >
                           {document.status}
                         </Badge>
-                        <Badge className={cn('text-xs', getPriorityColor(document.priority))}>
+                        <Badge
+                          className={cn(
+                            'text-xs',
+                            getPriorityColor(document.priority)
+                          )}
+                        >
                           {document.priority}
                         </Badge>
                       </div>
-                      
-                      <p className="text-muted-foreground mb-3">{document.description}</p>
-                      
+
+                      <p className="mb-3 text-muted-foreground">
+                        {document.description}
+                      </p>
+
                       <div className="flex items-center space-x-4 text-sm">
                         {document.dueDate && (
                           <div className="flex items-center space-x-1">
@@ -532,16 +624,18 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
                           <span>{document.documents.length} files</span>
                         </div>
                       </div>
-                      
+
                       {document.notes && (
-                        <div className="mt-3 p-3 bg-muted/50 rounded">
+                        <div className="mt-3 rounded bg-muted/50 p-3">
                           <span className="text-sm font-medium">Notes:</span>
-                          <p className="text-sm text-muted-foreground mt-1">{document.notes}</p>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            {document.notes}
+                          </p>
                         </div>
                       )}
                     </div>
-                    
-                    <div className="flex items-center space-x-2 ml-4">
+
+                    <div className="ml-4 flex items-center space-x-2">
                       <Button variant="outline" size="sm">
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -566,12 +660,12 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <DollarSign className="h-5 w-5 mr-2" />
+                <DollarSign className="mr-2 h-5 w-5" />
                 Business Growth Metrics
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-600">$125K</div>
                   <div className="text-muted-foreground">Revenue</div>
@@ -600,19 +694,23 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({ className 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <CheckCircle className="h-5 w-5 mr-2" />
+                <CheckCircle className="mr-2 h-5 w-5" />
                 Compliance Status
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Overall Compliance</span>
-                  <span className="text-sm text-muted-foreground">85% Complete</span>
+                  <span className="text-sm font-medium">
+                    Overall Compliance
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    85% Complete
+                  </span>
                 </div>
                 <Progress value={85} className="h-2" />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <CheckCircle className="h-4 w-4 text-green-600" />

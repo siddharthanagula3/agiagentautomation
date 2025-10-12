@@ -5,7 +5,13 @@
 
 import { AgentType } from '../reasoning/task-decomposer';
 
-export type MessageType = 'request' | 'response' | 'error' | 'status' | 'broadcast' | 'handoff';
+export type MessageType =
+  | 'request'
+  | 'response'
+  | 'error'
+  | 'status'
+  | 'broadcast'
+  | 'handoff';
 export type MessagePriority = 'urgent' | 'high' | 'normal' | 'low';
 
 export interface AgentMessage {
@@ -55,11 +61,11 @@ export class AgentCommunicator {
         error: 0,
         status: 0,
         broadcast: 0,
-        handoff: 0
+        handoff: 0,
       },
       messagesByAgent: {} as Record<AgentType, number>,
       averageResponseTime: 0,
-      failedMessages: 0
+      failedMessages: 0,
     };
 
     this.startMessageProcessor();
@@ -82,7 +88,7 @@ export class AgentCommunicator {
       type: 'request',
       priority,
       payload: request,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     // Store pending request for tracking
@@ -97,7 +103,7 @@ export class AgentCommunicator {
         resolve,
         reject,
         timeoutId,
-        sentAt: Date.now()
+        sentAt: Date.now(),
       });
     });
 
@@ -115,8 +121,10 @@ export class AgentCommunicator {
     originalMessageId: string,
     response: any
   ): Promise<void> {
-    const originalMessage = this.messageHistory.find(m => m.id === originalMessageId);
-    
+    const originalMessage = this.messageHistory.find(
+      m => m.id === originalMessageId
+    );
+
     if (!originalMessage) {
       throw new Error(`Original message ${originalMessageId} not found`);
     }
@@ -130,7 +138,7 @@ export class AgentCommunicator {
       payload: response,
       timestamp: new Date(),
       replyTo: originalMessageId,
-      correlationId: originalMessage.correlationId || originalMessageId
+      correlationId: originalMessage.correlationId || originalMessageId,
     };
 
     await this.queueMessage(message);
@@ -164,10 +172,10 @@ export class AgentCommunicator {
       payload: {
         error: error.message,
         stack: error.stack,
-        name: error.name
+        name: error.name,
       },
       timestamp: new Date(),
-      replyTo: originalMessageId
+      replyTo: originalMessageId,
     };
 
     await this.queueMessage(message);
@@ -187,10 +195,7 @@ export class AgentCommunicator {
   /**
    * Send a status update
    */
-  async sendStatus(
-    from: AgentType,
-    status: AgentStatus
-  ): Promise<void> {
+  async sendStatus(from: AgentType, status: AgentStatus): Promise<void> {
     const message: AgentMessage = {
       id: this.generateMessageId(),
       from,
@@ -198,7 +203,7 @@ export class AgentCommunicator {
       type: 'status',
       priority: 'normal',
       payload: status,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     await this.queueMessage(message);
@@ -219,7 +224,7 @@ export class AgentCommunicator {
       type: 'broadcast',
       priority,
       payload,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     await this.queueMessage(message);
@@ -243,9 +248,9 @@ export class AgentCommunicator {
       payload: {
         task: taskData,
         reason,
-        handoffTime: new Date()
+        handoffTime: new Date(),
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     await this.queueMessage(message);
@@ -262,7 +267,7 @@ export class AgentCommunicator {
     const handlerObj: MessageHandler = {
       agent,
       handler,
-      messageTypes
+      messageTypes,
     };
 
     if (!this.handlers.has(agent)) {
@@ -288,7 +293,7 @@ export class AgentCommunicator {
    */
   addListener(listener: MessageListener): () => void {
     this.listeners.add(listener);
-    
+
     // Return unsubscribe function
     return () => {
       this.listeners.delete(listener);
@@ -301,16 +306,16 @@ export class AgentCommunicator {
   private async queueMessage(message: AgentMessage): Promise<void> {
     // Add to queue
     this.messageQueue.push(message);
-    
+
     // Add to history
     this.messageHistory.push(message);
-    
+
     // Update stats
     this.stats.totalMessages++;
     this.stats.messagesByType[message.type]++;
-    
+
     if (message.from !== 'system' && message.from !== 'user') {
-      this.stats.messagesByAgent[message.from] = 
+      this.stats.messagesByAgent[message.from] =
         (this.stats.messagesByAgent[message.from] || 0) + 1;
     }
 
@@ -323,7 +328,7 @@ export class AgentCommunicator {
         urgent: 4,
         high: 3,
         normal: 2,
-        low: 1
+        low: 1,
       };
       return priorityOrder[b.priority] - priorityOrder[a.priority];
     });
@@ -358,7 +363,7 @@ export class AgentCommunicator {
       }
     } catch (error) {
       console.error('Error processing message:', error);
-      
+
       // Send error response if this was a request
       if (message.type === 'request' && message.from !== 'user') {
         await this.sendError(
@@ -402,8 +407,8 @@ export class AgentCommunicator {
    */
   private updateResponseTime(responseTime: number): void {
     const totalResponses = this.stats.messagesByType.response;
-    this.stats.averageResponseTime = 
-      (this.stats.averageResponseTime * (totalResponses - 1) + responseTime) / 
+    this.stats.averageResponseTime =
+      (this.stats.averageResponseTime * (totalResponses - 1) + responseTime) /
       totalResponses;
   }
 
@@ -424,14 +429,12 @@ export class AgentCommunicator {
   /**
    * Get message history
    */
-  getHistory(
-    filter?: {
-      from?: AgentType | 'system' | 'user';
-      to?: AgentType | 'all' | 'user';
-      type?: MessageType;
-      since?: Date;
-    }
-  ): AgentMessage[] {
+  getHistory(filter?: {
+    from?: AgentType | 'system' | 'user';
+    to?: AgentType | 'all' | 'user';
+    type?: MessageType;
+    since?: Date;
+  }): AgentMessage[] {
     let history = [...this.messageHistory];
 
     if (filter) {

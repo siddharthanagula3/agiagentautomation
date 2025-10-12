@@ -49,13 +49,16 @@ export interface NewsletterData {
 }
 
 export async function subscribeToNewsletter(data: NewsletterData) {
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/newsletter-subscribe`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await fetch(
+    `${SUPABASE_URL}/functions/v1/newsletter-subscribe`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json();
@@ -108,7 +111,9 @@ export async function getBlogPosts(params: BlogPostsParams = {}) {
   if (params.offset) queryParams.set('offset', params.offset.toString());
   if (params.featured) queryParams.set('featured', 'true');
 
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/blog-posts?${queryParams}`);
+  const response = await fetch(
+    `${SUPABASE_URL}/functions/v1/blog-posts?${queryParams}`
+  );
 
   if (!response.ok) {
     const error = await response.json();
@@ -162,14 +167,20 @@ export async function getResources(type?: string) {
   return data;
 }
 
-export async function trackResourceDownload(resourceId: string, userEmail?: string) {
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/resource-download`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ resourceId, userEmail }),
-  });
+export async function trackResourceDownload(
+  resourceId: string,
+  userEmail?: string
+) {
+  const response = await fetch(
+    `${SUPABASE_URL}/functions/v1/resource-download`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ resourceId, userEmail }),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json();
@@ -251,10 +262,12 @@ export async function getSupportCategories() {
 export async function getHelpArticles(categorySlug?: string) {
   let query = supabase
     .from('help_articles')
-    .select(`
+    .select(
+      `
       *,
       category:support_categories(*)
-    `)
+    `
+    )
     .eq('published', true);
 
   if (categorySlug) {
@@ -311,10 +324,12 @@ export async function createSupportTicket(ticket: SupportTicket) {
 export async function getUserTickets() {
   const { data, error } = await supabase
     .from('support_tickets')
-    .select(`
+    .select(
+      `
       *,
       category:support_categories(*)
-    `)
+    `
+    )
     .order('created_at', { ascending: false });
 
   if (error) throw error;

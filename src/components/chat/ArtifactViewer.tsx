@@ -17,7 +17,7 @@ import {
   Sparkles,
   Eye,
   EyeOff,
-  Share2
+  Share2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -32,7 +32,7 @@ interface ArtifactViewerProps {
 export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
   artifact,
   onClose,
-  className
+  className,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showRaw, setShowRaw] = useState(false);
@@ -91,7 +91,7 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
   const renderPreview = () => {
     if (showRaw) {
       return (
-        <pre className="text-sm font-mono whitespace-pre-wrap bg-background/50 p-4 rounded-lg border overflow-auto">
+        <pre className="overflow-auto whitespace-pre-wrap rounded-lg border bg-background/50 p-4 font-mono text-sm">
           {artifact.content}
         </pre>
       );
@@ -100,10 +100,10 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
     switch (artifact.type) {
       case 'html':
         return (
-          <div className="border rounded-lg overflow-hidden bg-white">
+          <div className="overflow-hidden rounded-lg border bg-white">
             <iframe
               srcDoc={artifact.content}
-              className="w-full h-full min-h-[400px]"
+              className="h-full min-h-[400px] w-full"
               sandbox="allow-scripts"
               title={artifact.title}
             />
@@ -112,41 +112,47 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
 
       case 'svg':
         return (
-          <div className="flex items-center justify-center p-8 bg-white rounded-lg border">
+          <div className="flex items-center justify-center rounded-lg border bg-white p-8">
             <div dangerouslySetInnerHTML={{ __html: artifact.content }} />
           </div>
         );
 
       case 'markdown':
         return (
-          <div className="prose prose-sm max-w-none dark:prose-invert bg-background/50 p-4 rounded-lg border">
-            <div dangerouslySetInnerHTML={{
-              __html: artifact.content
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.+?)\*/g, '<em>$1</em>')
-                .replace(/`(.+?)`/g, '<code>$1</code>')
-                .replace(/^#\s+(.+)$/gm, '<h1>$1</h1>')
-                .replace(/^##\s+(.+)$/gm, '<h2>$1</h2>')
-                .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
-                .replace(/\n/g, '<br />')
-            }} />
+          <div className="prose prose-sm dark:prose-invert max-w-none rounded-lg border bg-background/50 p-4">
+            <div
+              dangerouslySetInnerHTML={{
+                __html: artifact.content
+                  .replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                  .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                  .replace(/`(.+?)`/g, '<code>$1</code>')
+                  .replace(/^#\s+(.+)$/gm, '<h1>$1</h1>')
+                  .replace(/^##\s+(.+)$/gm, '<h2>$1</h2>')
+                  .replace(/^###\s+(.+)$/gm, '<h3>$1</h3>')
+                  .replace(/\n/g, '<br />'),
+              }}
+            />
           </div>
         );
 
       case 'json':
         try {
-          const formatted = JSON.stringify(JSON.parse(artifact.content), null, 2);
+          const formatted = JSON.stringify(
+            JSON.parse(artifact.content),
+            null,
+            2
+          );
           return (
-            <pre className="text-sm font-mono whitespace-pre-wrap bg-background/50 p-4 rounded-lg border overflow-auto">
+            <pre className="overflow-auto whitespace-pre-wrap rounded-lg border bg-background/50 p-4 font-mono text-sm">
               {formatted}
             </pre>
           );
         } catch {
           return (
-            <pre className="text-sm font-mono whitespace-pre-wrap bg-background/50 p-4 rounded-lg border overflow-auto">
+            <pre className="overflow-auto whitespace-pre-wrap rounded-lg border bg-background/50 p-4 font-mono text-sm">
               {artifact.content}
             </pre>
           );
@@ -154,25 +160,25 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
 
       case 'code':
         return (
-          <pre className="text-sm font-mono whitespace-pre-wrap bg-background/50 p-4 rounded-lg border overflow-auto">
+          <pre className="overflow-auto whitespace-pre-wrap rounded-lg border bg-background/50 p-4 font-mono text-sm">
             <code>{artifact.content}</code>
           </pre>
         );
 
       case 'chart':
         return (
-          <div className="p-4 bg-background/50 rounded-lg border">
+          <div className="rounded-lg border bg-background/50 p-4">
             <div className="text-center text-muted-foreground">
-              <BarChart3 className="h-16 w-16 mx-auto mb-4 opacity-50" />
+              <BarChart3 className="mx-auto mb-4 h-16 w-16 opacity-50" />
               <p>Chart visualization would render here</p>
-              <p className="text-xs mt-1">Using Chart.js or Recharts</p>
+              <p className="mt-1 text-xs">Using Chart.js or Recharts</p>
             </div>
           </div>
         );
 
       default:
         return (
-          <pre className="text-sm font-mono whitespace-pre-wrap bg-background/50 p-4 rounded-lg border overflow-auto">
+          <pre className="overflow-auto whitespace-pre-wrap rounded-lg border bg-background/50 p-4 font-mono text-sm">
             {artifact.content}
           </pre>
         );
@@ -186,13 +192,13 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
       exit={{ opacity: 0, scale: 0.95 }}
       className={cn('my-3', className)}
     >
-      <Card className="border-2 border-primary/50 overflow-hidden">
+      <Card className="overflow-hidden border-2 border-primary/50">
         {/* Header */}
-        <div className="p-4 bg-gradient-to-r from-primary/10 to-accent/10 border-b border-border/50">
+        <div className="border-b border-border/50 bg-gradient-to-r from-primary/10 to-accent/10 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <motion.div
-                className="p-2 rounded-lg bg-primary/20"
+                className="rounded-lg bg-primary/20 p-2"
                 whileHover={{ scale: 1.1, rotate: 360 }}
                 transition={{ duration: 0.3 }}
               >
@@ -200,7 +206,7 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
               </motion.div>
               <div>
                 <h4 className="font-semibold">{artifact.title}</h4>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="mt-1 flex items-center gap-2">
                   <Badge variant="outline" className="text-xs">
                     {artifact.type}
                   </Badge>
@@ -222,28 +228,20 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
               >
                 {showRaw ? (
                   <>
-                    <Eye className="h-4 w-4 mr-1" />
+                    <Eye className="mr-1 h-4 w-4" />
                     Preview
                   </>
                 ) : (
                   <>
-                    <EyeOff className="h-4 w-4 mr-1" />
+                    <EyeOff className="mr-1 h-4 w-4" />
                     Raw
                   </>
                 )}
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopy}
-              >
+              <Button variant="ghost" size="sm" onClick={handleCopy}>
                 <Copy className="h-4 w-4" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDownload}
-              >
+              <Button variant="ghost" size="sm" onClick={handleDownload}>
                 <Download className="h-4 w-4" />
               </Button>
               <Button
@@ -258,11 +256,7 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
                 )}
               </Button>
               {onClose && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onClose}
-                >
+                <Button variant="ghost" size="sm" onClick={onClose}>
                   ×
                 </Button>
               )}
@@ -271,10 +265,12 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
         </div>
 
         {/* Content */}
-        <div className={cn(
-          'p-4 transition-all duration-300 overflow-auto',
-          isExpanded ? 'max-h-[800px]' : 'max-h-[400px]'
-        )}>
+        <div
+          className={cn(
+            'overflow-auto p-4 transition-all duration-300',
+            isExpanded ? 'max-h-[800px]' : 'max-h-[400px]'
+          )}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={showRaw ? 'raw' : 'preview'}
@@ -290,7 +286,7 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
 
         {/* Footer */}
         {artifact.metadata && Object.keys(artifact.metadata).length > 0 && (
-          <div className="p-3 bg-muted/30 border-t border-border/50">
+          <div className="border-t border-border/50 bg-muted/30 p-3">
             <div className="flex flex-wrap gap-2">
               {Object.entries(artifact.metadata).map(([key, value]) => (
                 <Badge key={key} variant="secondary" className="text-xs">
@@ -315,10 +311,15 @@ interface ArtifactGalleryProps {
 export const ArtifactGallery: React.FC<ArtifactGalleryProps> = ({
   artifacts,
   onSelectArtifact,
-  className
+  className,
 }) => {
   return (
-    <div className={cn('grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4', className)}>
+    <div
+      className={cn(
+        'grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3',
+        className
+      )}
+    >
       {artifacts.map((artifact, idx) => (
         <motion.div
           key={artifact.id}
@@ -327,21 +328,29 @@ export const ArtifactGallery: React.FC<ArtifactGalleryProps> = ({
           transition={{ delay: idx * 0.1 }}
         >
           <Card
-            className="p-4 cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all group"
+            className="group cursor-pointer p-4 transition-all hover:border-primary/50 hover:shadow-lg"
             onClick={() => onSelectArtifact?.(artifact)}
           >
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                {artifact.type === 'code' && <Code className="h-5 w-5 text-primary" />}
-                {artifact.type === 'html' && <FileText className="h-5 w-5 text-primary" />}
-                {(artifact.type === 'svg' || artifact.type === 'image') && <ImageIcon className="h-5 w-5 text-primary" />}
-                {artifact.type === 'chart' && <BarChart3 className="h-5 w-5 text-primary" />}
+              <div className="rounded-lg bg-primary/10 p-2 transition-colors group-hover:bg-primary/20">
+                {artifact.type === 'code' && (
+                  <Code className="h-5 w-5 text-primary" />
+                )}
+                {artifact.type === 'html' && (
+                  <FileText className="h-5 w-5 text-primary" />
+                )}
+                {(artifact.type === 'svg' || artifact.type === 'image') && (
+                  <ImageIcon className="h-5 w-5 text-primary" />
+                )}
+                {artifact.type === 'chart' && (
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                )}
               </div>
-              <div className="flex-1 min-w-0">
-                <h5 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
+              <div className="min-w-0 flex-1">
+                <h5 className="truncate text-sm font-semibold transition-colors group-hover:text-primary">
                   {artifact.title}
                 </h5>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="mt-1 flex items-center gap-2">
                   <Badge variant="outline" className="text-xs">
                     {artifact.type}
                   </Badge>
@@ -352,7 +361,7 @@ export const ArtifactGallery: React.FC<ArtifactGalleryProps> = ({
                   )}
                 </div>
               </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
           </Card>
         </motion.div>

@@ -39,11 +39,17 @@ class AuthService {
     try {
       // Add timeout to prevent hanging on invalid tokens
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Auth timeout - possible invalid token')), 3000)
+        setTimeout(
+          () => reject(new Error('Auth timeout - possible invalid token')),
+          3000
+        )
       );
 
       const authPromise = supabase.auth.getUser();
-      const { data: { user }, error } = await Promise.race([authPromise, timeoutPromise]);
+      const {
+        data: { user },
+        error,
+      } = await Promise.race([authPromise, timeoutPromise]);
 
       if (error) {
         return { user: null, error: error.message };
@@ -96,7 +102,8 @@ class AuthService {
       const authUser: AuthUser = {
         id: data.user.id,
         email: data.user.email || '',
-        name: data.user.user_metadata?.full_name || data.user.user_metadata?.name,
+        name:
+          data.user.user_metadata?.full_name || data.user.user_metadata?.name,
         avatar: data.user.user_metadata?.avatar_url,
         role: data.user.user_metadata?.role || 'user',
         plan: data.user.user_metadata?.plan || 'free',
@@ -187,8 +194,80 @@ class AuthService {
       return { error: error.message || 'Password update failed' };
     }
   }
+
+  async updateProfile(updates: Partial<AuthUser>): Promise<AuthResponse> {
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        data: {
+          full_name: updates.name,
+          name: updates.name,
+          avatar_url: updates.avatar,
+          ...updates.user_metadata,
+        },
+      });
+
+      if (error) {
+        return { user: null, error: error.message };
+      }
+
+      if (!data.user) {
+        return { user: null, error: 'Profile update failed' };
+      }
+
+      const authUser: AuthUser = {
+        id: data.user.id,
+        email: data.user.email || '',
+        name:
+          data.user.user_metadata?.full_name || data.user.user_metadata?.name,
+        avatar: data.user.user_metadata?.avatar_url,
+        role: data.user.user_metadata?.role || 'user',
+        plan: data.user.user_metadata?.plan || 'free',
+        user_metadata: data.user.user_metadata,
+      };
+
+      return { user: authUser, error: null };
+    } catch (error: any) {
+      return { user: null, error: error.message || 'Profile update failed' };
+    }
+  }
+
+  async changePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Promise<{ error: string | null }> {
+    try {
+      // First verify current password by attempting to sign in
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user?.email) {
+        return { error: 'No user found' };
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        return { error: 'Current password is incorrect' };
+      }
+
+      // If current password is correct, update to new password
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        return { error: error.message };
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      return { error: error.message || 'Password change failed' };
+    }
+  }
 }
 
 export const authService = new AuthService();
 export default authService;
-

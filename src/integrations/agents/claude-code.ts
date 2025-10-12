@@ -31,7 +31,7 @@ export class ClaudeCodeAgent {
 
   constructor() {
     this.client = new Anthropic({
-      apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY
+      apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
     });
   }
 
@@ -44,7 +44,7 @@ export class ClaudeCodeAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 10,
-        message: 'Initializing Claude...'
+        message: 'Initializing Claude...',
       });
 
       const systemPrompt = this.buildSystemPrompt(task);
@@ -53,18 +53,20 @@ export class ClaudeCodeAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 30,
-        message: 'Sending request to Claude...'
+        message: 'Sending request to Claude...',
       });
 
       const response = await this.client.messages.create({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 4096,
         system: systemPrompt,
-        messages: [{
-          role: 'user',
-          content: userPrompt
-        }],
-        stream: true
+        messages: [
+          {
+            role: 'user',
+            content: userPrompt,
+          },
+        ],
+        stream: true,
       });
 
       let fullResponse = '';
@@ -74,17 +76,17 @@ export class ClaudeCodeAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 50,
-        message: 'Generating code...'
+        message: 'Generating code...',
       });
 
       for await (const chunk of response) {
         if (chunk.type === 'content_block_delta') {
           fullResponse += chunk.delta.text;
-          
+
           this.emitProgress({
             taskId: task.id,
             progress: 50 + (fullResponse.length / 1000) * 30,
-            message: 'Generating code...'
+            message: 'Generating code...',
           });
         }
       }
@@ -98,7 +100,7 @@ export class ClaudeCodeAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 90,
-        message: 'Finalizing response...'
+        message: 'Finalizing response...',
       });
 
       const cost = this.calculateCost(inputTokens, outputTokens);
@@ -106,7 +108,7 @@ export class ClaudeCodeAgent {
       this.emitProgress({
         taskId: task.id,
         progress: 100,
-        message: 'Task completed successfully'
+        message: 'Task completed successfully',
       });
 
       return {
@@ -115,19 +117,19 @@ export class ClaudeCodeAgent {
         cost,
         tokensUsed: {
           input: inputTokens,
-          output: outputTokens
-        }
+          output: outputTokens,
+        },
       };
     } catch (error) {
       this.emitProgress({
         taskId: task.id,
         progress: 0,
-        message: `Error: ${error.message}`
+        message: `Error: ${error.message}`,
       });
 
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -155,17 +157,17 @@ Please provide:
 
   private buildUserPrompt(task: Task): string {
     let prompt = `Task: ${task.description}\n\n`;
-    
+
     if (task.code) {
       prompt += `Existing code:\n\`\`\`${task.language || 'text'}\n${task.code}\n\`\`\`\n\n`;
     }
-    
+
     if (task.requirements && task.requirements.length > 0) {
       prompt += `Requirements:\n${task.requirements.map(req => `- ${req}`).join('\n')}\n\n`;
     }
-    
+
     prompt += `Please provide the complete solution with code and explanation.`;
-    
+
     return prompt;
   }
 
@@ -186,7 +188,7 @@ Please provide:
     return [
       'claude-3-5-sonnet-20241022',
       'claude-3-5-haiku-20241022',
-      'claude-3-opus-20240229'
+      'claude-3-opus-20240229',
     ];
   }
 
@@ -195,7 +197,7 @@ Please provide:
       await this.client.messages.create({
         model: 'claude-3-5-haiku-20241022',
         max_tokens: 1,
-        messages: [{ role: 'user', content: 'test' }]
+        messages: [{ role: 'user', content: 'test' }],
       });
       return true;
     } catch (error) {

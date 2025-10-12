@@ -3,10 +3,29 @@
  * Creates dependency graphs and execution plans
  */
 
-import { UserIntent, IntentType, DomainType, ComplexityLevel } from './nlp-processor';
+import {
+  UserIntent,
+  IntentType,
+  DomainType,
+  ComplexityLevel,
+} from './nlp-processor';
 
-export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'failed' | 'blocked' | 'skipped';
-export type AgentType = 'claude-code' | 'cursor-agent' | 'replit-agent' | 'gemini-cli' | 'web-search' | 'bash-executor' | 'puppeteer-agent' | 'mcp-tool';
+export type TaskStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'completed'
+  | 'failed'
+  | 'blocked'
+  | 'skipped';
+export type AgentType =
+  | 'claude-code'
+  | 'cursor-agent'
+  | 'replit-agent'
+  | 'gemini-cli'
+  | 'web-search'
+  | 'bash-executor'
+  | 'puppeteer-agent'
+  | 'mcp-tool';
 export type TaskPriority = 'critical' | 'high' | 'medium' | 'low';
 
 export interface Task {
@@ -62,19 +81,19 @@ export class TaskDecomposer {
 
     // Generate tasks based on intent and complexity
     const tasks = await this.generateTasks(intent);
-    
+
     // Add dependencies between tasks
     const tasksWithDeps = this.addDependencies(tasks, intent);
-    
+
     // Create dependency graph
     const graph = this.createDependencyGraph(tasksWithDeps);
-    
+
     // Calculate execution order
     const executionOrder = this.calculateExecutionOrder(graph);
-    
+
     // Find critical path
     const criticalPath = this.findCriticalPath(graph);
-    
+
     // Estimate total time
     const estimatedTotalTime = this.estimateTotalTime(tasks, graph);
 
@@ -83,7 +102,7 @@ export class TaskDecomposer {
       graph,
       estimatedTotalTime,
       criticalPath,
-      executionOrder
+      executionOrder,
     };
   }
 
@@ -95,17 +114,19 @@ export class TaskDecomposer {
 
     // Always start with a research/planning task for non-simple tasks
     if (intent.complexity !== 'simple') {
-      tasks.push(this.createTask({
-        title: 'Research and Planning',
-        description: `Research best approaches for: ${intent.requirements.join(', ')}`,
-        type: 'research',
-        domain: intent.domain,
-        agent: 'gemini-cli',
-        tools: ['web-search', 'web-fetch'],
-        estimatedTime: intent.complexity === 'expert' ? 10 : 5,
-        priority: 'high',
-        complexity: intent.complexity
-      }));
+      tasks.push(
+        this.createTask({
+          title: 'Research and Planning',
+          description: `Research best approaches for: ${intent.requirements.join(', ')}`,
+          type: 'research',
+          domain: intent.domain,
+          agent: 'gemini-cli',
+          tools: ['web-search', 'web-fetch'],
+          estimatedTime: intent.complexity === 'expert' ? 10 : 5,
+          priority: 'high',
+          complexity: intent.complexity,
+        })
+      );
     }
 
     // Generate domain-specific tasks
@@ -134,32 +155,36 @@ export class TaskDecomposer {
 
     // Always add a validation/testing task for medium+ complexity
     if (intent.complexity !== 'simple') {
-      tasks.push(this.createTask({
-        title: 'Validation and Testing',
-        description: 'Validate the completed work and run tests',
-        type: 'test',
-        domain: intent.domain,
-        agent: 'claude-code',
-        tools: ['test-runner', 'code-analyzer'],
-        estimatedTime: 5,
-        priority: 'high',
-        complexity: intent.complexity
-      }));
+      tasks.push(
+        this.createTask({
+          title: 'Validation and Testing',
+          description: 'Validate the completed work and run tests',
+          type: 'test',
+          domain: intent.domain,
+          agent: 'claude-code',
+          tools: ['test-runner', 'code-analyzer'],
+          estimatedTime: 5,
+          priority: 'high',
+          complexity: intent.complexity,
+        })
+      );
     }
 
     // Add final review task for complex work
     if (intent.complexity === 'complex' || intent.complexity === 'expert') {
-      tasks.push(this.createTask({
-        title: 'Final Review and Documentation',
-        description: 'Review all work and create documentation',
-        type: 'analyze',
-        domain: intent.domain,
-        agent: 'claude-code',
-        tools: ['document-generator'],
-        estimatedTime: 5,
-        priority: 'medium',
-        complexity: intent.complexity
-      }));
+      tasks.push(
+        this.createTask({
+          title: 'Final Review and Documentation',
+          description: 'Review all work and create documentation',
+          type: 'analyze',
+          domain: intent.domain,
+          agent: 'claude-code',
+          tools: ['document-generator'],
+          estimatedTime: 5,
+          priority: 'medium',
+          complexity: intent.complexity,
+        })
+      );
     }
 
     return tasks;
@@ -183,7 +208,7 @@ export class TaskDecomposer {
             tools: ['code-analyzer'],
             estimatedTime: 10,
             priority: 'high',
-            complexity: intent.complexity
+            complexity: intent.complexity,
           }),
           this.createTask({
             title: 'Implement Core Functionality',
@@ -194,7 +219,7 @@ export class TaskDecomposer {
             tools: ['file-editor', 'code-generator'],
             estimatedTime: 20,
             priority: 'critical',
-            complexity: intent.complexity
+            complexity: intent.complexity,
           }),
           this.createTask({
             title: 'Write Tests',
@@ -205,7 +230,7 @@ export class TaskDecomposer {
             tools: ['test-generator'],
             estimatedTime: 10,
             priority: 'high',
-            complexity: intent.complexity
+            complexity: intent.complexity,
           })
         );
         break;
@@ -221,7 +246,7 @@ export class TaskDecomposer {
             tools: ['code-analyzer', 'file-reader'],
             estimatedTime: 5,
             priority: 'high',
-            complexity: intent.complexity
+            complexity: intent.complexity,
           }),
           this.createTask({
             title: 'Make Modifications',
@@ -232,7 +257,7 @@ export class TaskDecomposer {
             tools: ['file-editor'],
             estimatedTime: 10,
             priority: 'critical',
-            complexity: intent.complexity
+            complexity: intent.complexity,
           })
         );
         break;
@@ -248,7 +273,7 @@ export class TaskDecomposer {
             tools: ['code-analyzer', 'test-runner'],
             estimatedTime: 5,
             priority: 'critical',
-            complexity: intent.complexity
+            complexity: intent.complexity,
           }),
           this.createTask({
             title: 'Fix Bug',
@@ -259,7 +284,7 @@ export class TaskDecomposer {
             tools: ['file-editor'],
             estimatedTime: 10,
             priority: 'critical',
-            complexity: intent.complexity
+            complexity: intent.complexity,
           }),
           this.createTask({
             title: 'Verify Fix',
@@ -270,7 +295,7 @@ export class TaskDecomposer {
             tools: ['test-runner'],
             estimatedTime: 5,
             priority: 'high',
-            complexity: intent.complexity
+            complexity: intent.complexity,
           })
         );
         break;
@@ -295,7 +320,7 @@ export class TaskDecomposer {
         tools: ['web-search', 'file-reader'],
         estimatedTime: 5,
         priority: 'high',
-        complexity: intent.complexity
+        complexity: intent.complexity,
       }),
       this.createTask({
         title: 'Data Processing',
@@ -306,7 +331,7 @@ export class TaskDecomposer {
         tools: ['data-processor'],
         estimatedTime: 10,
         priority: 'high',
-        complexity: intent.complexity
+        complexity: intent.complexity,
       }),
       this.createTask({
         title: 'Generate Insights',
@@ -317,7 +342,7 @@ export class TaskDecomposer {
         tools: ['analyzer'],
         estimatedTime: 10,
         priority: 'medium',
-        complexity: intent.complexity
+        complexity: intent.complexity,
       })
     );
 
@@ -338,7 +363,7 @@ export class TaskDecomposer {
         tools: ['design-generator'],
         estimatedTime: 10,
         priority: 'high',
-        complexity: intent.complexity
+        complexity: intent.complexity,
       }),
       this.createTask({
         title: 'Implement Design',
@@ -349,8 +374,8 @@ export class TaskDecomposer {
         tools: ['file-editor'],
         estimatedTime: 15,
         priority: 'high',
-        complexity: intent.complexity
-      })
+        complexity: intent.complexity,
+      }),
     ];
   }
 
@@ -368,7 +393,7 @@ export class TaskDecomposer {
         tools: ['workflow-analyzer'],
         estimatedTime: 5,
         priority: 'high',
-        complexity: intent.complexity
+        complexity: intent.complexity,
       }),
       this.createTask({
         title: 'Implement Automation',
@@ -379,7 +404,7 @@ export class TaskDecomposer {
         tools: ['script-generator', 'bash-executor'],
         estimatedTime: 15,
         priority: 'critical',
-        complexity: intent.complexity
+        complexity: intent.complexity,
       }),
       this.createTask({
         title: 'Test Automation',
@@ -390,8 +415,8 @@ export class TaskDecomposer {
         tools: ['test-runner'],
         estimatedTime: 10,
         priority: 'high',
-        complexity: intent.complexity
-      })
+        complexity: intent.complexity,
+      }),
     ];
   }
 
@@ -409,7 +434,7 @@ export class TaskDecomposer {
         tools: ['docker', 'kubernetes'],
         estimatedTime: 15,
         priority: 'critical',
-        complexity: intent.complexity
+        complexity: intent.complexity,
       }),
       this.createTask({
         title: 'Deploy Application',
@@ -420,8 +445,8 @@ export class TaskDecomposer {
         tools: ['deployment-manager'],
         estimatedTime: 10,
         priority: 'critical',
-        complexity: intent.complexity
-      })
+        complexity: intent.complexity,
+      }),
     ];
   }
 
@@ -439,7 +464,7 @@ export class TaskDecomposer {
         tools: ['test-generator'],
         estimatedTime: 10,
         priority: 'high',
-        complexity: intent.complexity
+        complexity: intent.complexity,
       }),
       this.createTask({
         title: 'Run Tests',
@@ -450,7 +475,7 @@ export class TaskDecomposer {
         tools: ['test-runner'],
         estimatedTime: 5,
         priority: 'high',
-        complexity: intent.complexity
+        complexity: intent.complexity,
       }),
       this.createTask({
         title: 'Analyze Coverage',
@@ -461,8 +486,8 @@ export class TaskDecomposer {
         tools: ['coverage-analyzer'],
         estimatedTime: 5,
         priority: 'medium',
-        complexity: intent.complexity
-      })
+        complexity: intent.complexity,
+      }),
     ];
   }
 
@@ -476,12 +501,12 @@ export class TaskDecomposer {
         description: intent.requirements.join('; '),
         type: intent.type,
         domain: intent.domain,
-        agent: intent.suggestedAgents[0] as AgentType || 'claude-code',
+        agent: (intent.suggestedAgents[0] as AgentType) || 'claude-code',
         tools: ['generic-tool'],
         estimatedTime: 15,
         priority: 'critical',
-        complexity: intent.complexity
-      })
+        complexity: intent.complexity,
+      }),
     ];
   }
 
@@ -516,7 +541,7 @@ export class TaskDecomposer {
       context: {},
       retryCount: 0,
       maxRetries: 3,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -536,7 +561,7 @@ export class TaskDecomposer {
       if (!nextTask.dependencies.includes(currentTask.id)) {
         nextTask.dependencies.push(currentTask.id);
       }
-      
+
       // Current task has next task as dependent
       if (!currentTask.dependents.includes(nextTask.id)) {
         currentTask.dependents.push(nextTask.id);
@@ -547,8 +572,8 @@ export class TaskDecomposer {
     tasksWithDeps.forEach(task => {
       // Testing tasks depend on implementation tasks
       if (task.type === 'test') {
-        const implTasks = tasksWithDeps.filter(t => 
-          t.type === 'create' || t.type === 'modify'
+        const implTasks = tasksWithDeps.filter(
+          t => t.type === 'create' || t.type === 'modify'
         );
         implTasks.forEach(implTask => {
           if (!task.dependencies.includes(implTask.id)) {
@@ -559,7 +584,10 @@ export class TaskDecomposer {
       }
 
       // Review tasks depend on all other tasks
-      if (task.title.includes('Review') || task.title.includes('Documentation')) {
+      if (
+        task.title.includes('Review') ||
+        task.title.includes('Documentation')
+      ) {
         tasksWithDeps.forEach(t => {
           if (t.id !== task.id && !task.dependencies.includes(t.id)) {
             task.dependencies.push(t.id);
@@ -591,14 +619,18 @@ export class TaskDecomposer {
     let level = 0;
 
     while (visited.size < tasks.length) {
-      const levelTasks = tasks.filter(task => 
-        !visited.has(task.id) && 
-        task.dependencies.every(dep => visited.has(dep))
+      const levelTasks = tasks.filter(
+        task =>
+          !visited.has(task.id) &&
+          task.dependencies.every(dep => visited.has(dep))
       );
 
       if (levelTasks.length === 0) break; // Circular dependency
 
-      levels.set(level, levelTasks.map(t => t.id));
+      levels.set(
+        level,
+        levelTasks.map(t => t.id)
+      );
       levelTasks.forEach(task => visited.add(task.id));
       level++;
     }
@@ -614,16 +646,16 @@ export class TaskDecomposer {
 
     // Execute level by level (tasks in same level can run in parallel)
     const sortedLevels = Array.from(graph.levels.keys()).sort((a, b) => a - b);
-    
+
     sortedLevels.forEach(level => {
       const taskIds = graph.levels.get(level) || [];
-      
+
       // Sort by priority within each level
       const priorityOrder: Record<TaskPriority, number> = {
         critical: 4,
         high: 3,
         medium: 2,
-        low: 1
+        low: 1,
       };
 
       const sortedTasks = taskIds.sort((a, b) => {
@@ -649,8 +681,11 @@ export class TaskDecomposer {
     graph.nodes.forEach((task, taskId) => {
       if (task.dependencies.length === 0) {
         const path = this.findLongestPathFrom(taskId, graph);
-        const pathTime = path.reduce((sum, id) => sum + graph.nodes.get(id)!.estimatedTime, 0);
-        
+        const pathTime = path.reduce(
+          (sum, id) => sum + graph.nodes.get(id)!.estimatedTime,
+          0
+        );
+
         if (pathTime > longestTime) {
           longestTime = pathTime;
           longestPath = path;
@@ -664,9 +699,12 @@ export class TaskDecomposer {
   /**
    * Find longest path from a given task
    */
-  private findLongestPathFrom(taskId: string, graph: DependencyGraph): string[] {
+  private findLongestPathFrom(
+    taskId: string,
+    graph: DependencyGraph
+  ): string[] {
     const task = graph.nodes.get(taskId)!;
-    
+
     if (task.dependents.length === 0) {
       return [taskId];
     }
@@ -676,8 +714,11 @@ export class TaskDecomposer {
 
     task.dependents.forEach(depId => {
       const path = this.findLongestPathFrom(depId, graph);
-      const pathTime = path.reduce((sum, id) => sum + graph.nodes.get(id)!.estimatedTime, 0);
-      
+      const pathTime = path.reduce(
+        (sum, id) => sum + graph.nodes.get(id)!.estimatedTime,
+        0
+      );
+
       if (pathTime > longestTime) {
         longestTime = pathTime;
         longestPath = path;
@@ -695,7 +736,7 @@ export class TaskDecomposer {
 
     // Sum up time for each level (parallel tasks count as one)
     const sortedLevels = Array.from(graph.levels.keys()).sort((a, b) => a - b);
-    
+
     sortedLevels.forEach(level => {
       const taskIds = graph.levels.get(level) || [];
       const maxTimeInLevel = Math.max(
@@ -718,10 +759,11 @@ export class TaskDecomposer {
         critical: 4,
         high: 3,
         medium: 2,
-        low: 1
+        low: 1,
       };
 
-      const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+      const priorityDiff =
+        priorityOrder[b.priority] - priorityOrder[a.priority];
       if (priorityDiff !== 0) return priorityDiff;
 
       // Tasks with fewer dependencies first

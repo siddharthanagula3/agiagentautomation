@@ -27,9 +27,10 @@ export const SECURITY_CONFIG = {
     rateLimitWindow: 15 * 60 * 1000, // 15 minutes
     maxRequestsPerWindow: 1000,
     enableCsrf: true,
-    corsOrigins: import.meta.env.MODE === 'production'
-      ? ['https://yourdomain.com']
-      : ['http://localhost:8080'],
+    corsOrigins:
+      import.meta.env.MODE === 'production'
+        ? ['https://yourdomain.com']
+        : ['http://localhost:8080'],
   },
 
   // Content Security Policy
@@ -42,27 +43,15 @@ export const SECURITY_CONFIG = {
       'https://connect.facebook.net',
       'https://www.google-analytics.com',
     ],
-    styleSrc: [
-      "'self'",
-      "'unsafe-inline'",
-      'https://fonts.googleapis.com',
-    ],
-    imgSrc: [
-      "'self'",
-      'data:',
-      'https:',
-      'blob:',
-    ],
+    styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+    imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
     connectSrc: [
       "'self'",
       'https://api.stripe.com',
       'wss://localhost:*',
       import.meta.env.VITE_API_URL || 'http://localhost:8000',
     ],
-    fontSrc: [
-      "'self'",
-      'https://fonts.gstatic.com',
-    ],
+    fontSrc: ["'self'", 'https://fonts.gstatic.com'],
     objectSrc: ["'none'"],
     baseUri: ["'self'"],
     formAction: ["'self'"],
@@ -72,18 +61,36 @@ export const SECURITY_CONFIG = {
   // Data sanitization
   sanitization: {
     allowedTags: [
-      'b', 'i', 'em', 'strong', 'u', 'br', 'p', 'div', 'span',
-      'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-      'ul', 'ol', 'li', 'blockquote', 'code', 'pre',
+      'b',
+      'i',
+      'em',
+      'strong',
+      'u',
+      'br',
+      'p',
+      'div',
+      'span',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'ul',
+      'ol',
+      'li',
+      'blockquote',
+      'code',
+      'pre',
     ],
     allowedAttributes: {
-      'a': ['href', 'title'],
-      'img': ['src', 'alt', 'title', 'width', 'height'],
-      'div': ['class'],
-      'span': ['class'],
-      'p': ['class'],
-      'code': ['class'],
-      'pre': ['class'],
+      a: ['href', 'title'],
+      img: ['src', 'alt', 'title', 'width', 'height'],
+      div: ['class'],
+      span: ['class'],
+      p: ['class'],
+      code: ['class'],
+      pre: ['class'],
     },
     allowedSchemes: ['http', 'https', 'mailto', 'tel'],
   },
@@ -102,8 +109,15 @@ export const SECURITY_CONFIG = {
       'text/csv',
     ],
     allowedExtensions: [
-      '.jpg', '.jpeg', '.png', '.gif', '.webp',
-      '.pdf', '.txt', '.json', '.csv',
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.pdf',
+      '.txt',
+      '.json',
+      '.csv',
     ],
     quarantinePath: '/tmp/uploads/quarantine',
     scanForMalware: true,
@@ -196,9 +210,7 @@ export const PERMISSIONS = {
 } as const;
 
 export const ROLE_PERMISSIONS = {
-  [USER_ROLES.GUEST]: [
-    PERMISSIONS['marketplace.browse'],
-  ],
+  [USER_ROLES.GUEST]: [PERMISSIONS['marketplace.browse']],
   [USER_ROLES.USER]: [
     PERMISSIONS['chat.send'],
     PERMISSIONS['workforce.view'],

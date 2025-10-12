@@ -35,42 +35,43 @@ export class CodeExecutorTool {
       if (!this.clientId || !this.clientSecret) {
         return {
           success: false,
-          error: 'JDoodle API credentials not configured'
+          error: 'JDoodle API credentials not configured',
         };
       }
 
       const languageMap: Record<string, string> = {
-        'javascript': 'nodejs',
-        'python': 'python3',
-        'java': 'java',
-        'cpp': 'cpp',
-        'c': 'c',
-        'php': 'php',
-        'ruby': 'ruby',
-        'go': 'go',
-        'rust': 'rust',
-        'typescript': 'nodejs'
+        javascript: 'nodejs',
+        python: 'python3',
+        java: 'java',
+        cpp: 'cpp',
+        c: 'c',
+        php: 'php',
+        ruby: 'ruby',
+        go: 'go',
+        rust: 'rust',
+        typescript: 'nodejs',
       };
 
-      const jdoodleLanguage = languageMap[params.language.toLowerCase()] || 'nodejs';
-      
+      const jdoodleLanguage =
+        languageMap[params.language.toLowerCase()] || 'nodejs';
+
       const requestBody = {
         clientId: this.clientId,
         clientSecret: this.clientSecret,
         script: params.code,
         language: jdoodleLanguage,
         versionIndex: '0',
-        stdin: params.input || ''
+        stdin: params.input || '',
       };
 
       const startTime = Date.now();
-      
+
       const response = await fetch(this.sandboxUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
       });
 
       const executionTime = Date.now() - startTime;
@@ -80,24 +81,24 @@ export class CodeExecutorTool {
       }
 
       const result = await response.json();
-      
+
       const executionResult: ExecutionResult = {
         output: result.output || '',
         error: result.error || undefined,
         exitCode: result.statusCode || 0,
         executionTime: executionTime,
-        memoryUsed: result.memory || undefined
+        memoryUsed: result.memory || undefined,
       };
 
       return {
         success: true,
         data: executionResult,
-        cost: 0.01 // Approximate cost per execution
+        cost: 0.01, // Approximate cost per execution
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -113,7 +114,7 @@ export class CodeExecutorTool {
       'ruby',
       'go',
       'rust',
-      'typescript'
+      'typescript',
     ];
   }
 
@@ -125,9 +126,9 @@ export class CodeExecutorTool {
 
       const testResult = await this.execute({
         code: 'console.log("test");',
-        language: 'javascript'
+        language: 'javascript',
       });
-      
+
       return testResult.success;
     } catch (error) {
       return false;

@@ -27,13 +27,18 @@ export const handler: Handler = async (event: HandlerEvent) => {
   }
 
   try {
-    const { userId, userEmail, billingPeriod = 'monthly', plan = 'pro' } = JSON.parse(event.body || '{}');
+    const {
+      userId,
+      userEmail,
+      billingPeriod = 'monthly',
+      plan = 'pro',
+    } = JSON.parse(event.body || '{}');
 
     if (!userId || !userEmail) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ 
-          error: 'Missing required fields: userId, userEmail' 
+        body: JSON.stringify({
+          error: 'Missing required fields: userId, userEmail',
         }),
       };
     }
@@ -41,8 +46,8 @@ export const handler: Handler = async (event: HandlerEvent) => {
     if (!['pro', 'max'].includes(plan)) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ 
-          error: 'Invalid plan. Must be "pro" or "max"' 
+        body: JSON.stringify({
+          error: 'Invalid plan. Must be "pro" or "max"',
         }),
       };
     }
@@ -63,7 +68,10 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
     if (existingCustomers.data.length > 0) {
       customer = existingCustomers.data[0];
-      console.log(`[${plan.toUpperCase()} Subscription] Found existing customer:`, customer.id);
+      console.log(
+        `[${plan.toUpperCase()} Subscription] Found existing customer:`,
+        customer.id
+      );
     } else {
       customer = await stripe.customers.create({
         email: userEmail,
@@ -71,7 +79,10 @@ export const handler: Handler = async (event: HandlerEvent) => {
           userId,
         },
       });
-      console.log(`[${plan.toUpperCase()} Subscription] Created new customer:`, customer.id);
+      console.log(
+        `[${plan.toUpperCase()} Subscription] Created new customer:`,
+        customer.id
+      );
     }
 
     // Determine price based on billing period and plan
@@ -124,7 +135,10 @@ export const handler: Handler = async (event: HandlerEvent) => {
       cancel_url: `${process.env.URL || 'http://localhost:5173'}/billing?canceled=true`,
     });
 
-    console.log(`[${plan.toUpperCase()} Subscription] Session created:`, session.id);
+    console.log(
+      `[${plan.toUpperCase()} Subscription] Session created:`,
+      session.id
+    );
 
     return {
       statusCode: 200,
@@ -147,4 +161,3 @@ export const handler: Handler = async (event: HandlerEvent) => {
     };
   }
 };
-

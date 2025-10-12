@@ -55,13 +55,13 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import DOMPurify from 'dompurify';
-import { 
-  agentSDKService, 
-  type AgentMessage, 
-  type AgentResponse, 
+import {
+  agentSDKService,
+  type AgentMessage,
+  type AgentResponse,
   type AgentSession,
   type AgentTool,
-  AgentError 
+  AgentError,
 } from '@/services/agent-sdk-service';
 
 interface AgentSDKChatInterfaceProps {
@@ -81,7 +81,7 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
   employeeName,
   className,
   onSessionCreated,
-  onError
+  onError,
 }) => {
   // State management
   const [session, setSession] = useState<AgentSession | null>(null);
@@ -104,7 +104,7 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
     const initializeSession = async () => {
       try {
         setIsLoading(true);
-        
+
         // Create new agent session
         const newSession = await agentSDKService.createSession(
           userId,
@@ -117,13 +117,13 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
             maxTokens: 4000,
             streaming: true,
             tools: getDefaultTools(employeeRole),
-            systemPrompt: generateSystemPrompt(employeeRole, employeeName)
+            systemPrompt: generateSystemPrompt(employeeRole, employeeName),
           }
         );
 
         setSession(newSession);
         setMessages(newSession.messages);
-        
+
         // Add welcome message
         const welcomeMessage: AgentMessage = {
           id: `welcome-${Date.now()}`,
@@ -134,8 +134,8 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
             provider: 'openai',
             model: 'gpt-4o-mini',
             sessionId: newSession.id,
-            userId
-          }
+            userId,
+          },
         };
 
         setMessages([welcomeMessage]);
@@ -144,10 +144,13 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
         toast.success(`Connected to ${employeeName}`);
       } catch (error) {
         console.error('[Agent SDK Chat] Session initialization error:', error);
-        const agentError = error instanceof AgentError ? error : new AgentError(
-          'Failed to initialize chat session',
-          'SESSION_INIT_ERROR'
-        );
+        const agentError =
+          error instanceof AgentError
+            ? error
+            : new AgentError(
+                'Failed to initialize chat session',
+                'SESSION_INIT_ERROR'
+              );
         onError?.(agentError);
         toast.error('Failed to initialize chat session');
       } finally {
@@ -156,7 +159,14 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
     };
 
     initializeSession();
-  }, [userId, employeeId, employeeRole, employeeName, onSessionCreated, onError]);
+  }, [
+    userId,
+    employeeId,
+    employeeRole,
+    employeeName,
+    onSessionCreated,
+    onError,
+  ]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -175,8 +185,8 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
       metadata: {
         sessionId: session.id,
         userId,
-        attachments: attachments.length
-      }
+        attachments: attachments.length,
+      },
     };
 
     // Add user message immediately
@@ -205,27 +215,26 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
           sessionId: session.id,
           userId,
           tools: response.tools?.map(t => t.name),
-          webhook: response.webhook?.url
-        }
+          webhook: response.webhook?.url,
+        },
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-      
+
       // Show tool execution results if any
       if (response.tools && response.tools.length > 0) {
         toast.success(`Executed ${response.tools.length} tool(s)`);
       }
-
     } catch (error) {
       console.error('[Agent SDK Chat] Message sending error:', error);
-      
-      const agentError = error instanceof AgentError ? error : new AgentError(
-        'Failed to send message',
-        'MESSAGE_SEND_ERROR'
-      );
-      
+
+      const agentError =
+        error instanceof AgentError
+          ? error
+          : new AgentError('Failed to send message', 'MESSAGE_SEND_ERROR');
+
       onError?.(agentError);
-      
+
       // Add error message
       const errorMessage: AgentMessage = {
         id: `error-${Date.now()}`,
@@ -235,8 +244,8 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
         metadata: {
           sessionId: session.id,
           userId,
-          error: true
-        }
+          error: true,
+        },
       };
 
       setMessages(prev => [...prev, errorMessage]);
@@ -271,106 +280,124 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
   const formatMessageContent = (content: string) => {
     // Sanitize HTML content
     const sanitized = DOMPurify.sanitize(content);
-    
+
     // Convert markdown-like formatting to HTML
     return sanitized
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm">$1</code>')
+      .replace(
+        /`(.*?)`/g,
+        '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm">$1</code>'
+      )
       .replace(/\n/g, '<br>');
   };
 
   // Get message icon
   const getMessageIcon = (message: AgentMessage) => {
     if (message.metadata?.error) {
-      return <XCircle className="w-5 h-5 text-red-500" />;
+      return <XCircle className="h-5 w-5 text-red-500" />;
     }
-    
+
     if (message.role === 'user') {
-      return <User className="w-5 h-5 text-blue-500" />;
+      return <User className="h-5 w-5 text-blue-500" />;
     }
-    
-    return <Bot className="w-5 h-5 text-green-500" />;
+
+    return <Bot className="h-5 w-5 text-green-500" />;
   };
 
   // Get message status
   const getMessageStatus = (message: AgentMessage) => {
     if (message.metadata?.error) {
-      return <Badge variant="destructive" className="text-xs">Error</Badge>;
+      return (
+        <Badge variant="destructive" className="text-xs">
+          Error
+        </Badge>
+      );
     }
-    
+
     if (message.metadata?.tools?.length) {
-      return <Badge variant="secondary" className="text-xs">
-        <Wrench className="w-3 h-3 mr-1" />
-        {message.metadata.tools.length} tool(s)
-      </Badge>;
+      return (
+        <Badge variant="secondary" className="text-xs">
+          <Wrench className="mr-1 h-3 w-3" />
+          {message.metadata.tools.length} tool(s)
+        </Badge>
+      );
     }
-    
+
     if (message.metadata?.webhook) {
-      return <Badge variant="outline" className="text-xs">
-        <Webhook className="w-3 h-3 mr-1" />
-        Webhook
-      </Badge>;
+      return (
+        <Badge variant="outline" className="text-xs">
+          <Webhook className="mr-1 h-3 w-3" />
+          Webhook
+        </Badge>
+      );
     }
-    
-    return <CheckCircle className="w-4 h-4 text-green-500" />;
+
+    return <CheckCircle className="h-4 w-4 text-green-500" />;
   };
 
   if (isLoading && !session) {
     return (
-      <Card className={cn("w-full h-[600px] flex items-center justify-center", className)}>
+      <Card
+        className={cn(
+          'flex h-[600px] w-full items-center justify-center',
+          className
+        )}
+      >
         <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-          <p className="text-sm text-gray-600">Initializing chat with {employeeName}...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <p className="text-sm text-gray-600">
+            Initializing chat with {employeeName}...
+          </p>
         </div>
       </Card>
     );
   }
 
   return (
-    <Card className={cn("w-full h-[600px] flex flex-col", className)}>
+    <Card className={cn('flex h-[600px] w-full flex-col', className)}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center justify-between border-b p-4">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-            <Bot className="w-5 h-5 text-white" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600">
+            <Bot className="h-5 w-5 text-white" />
           </div>
           <div>
             <h3 className="font-semibold text-gray-900">{employeeName}</h3>
             <p className="text-sm text-gray-600">{employeeRole}</p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           {isTyping && (
             <Badge variant="outline" className="text-xs">
-              <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+              <Loader2 className="mr-1 h-3 w-3 animate-spin" />
               Typing...
             </Badge>
           )}
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm">
-                <MoreVertical className="w-4 h-4" />
+                <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setShowSettings(true)}>
-                <Settings className="w-4 h-4 mr-2" />
+                <Settings className="mr-2 h-4 w-4" />
                 Settings
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Download className="w-4 h-4 mr-2" />
+                <Download className="mr-2 h-4 w-4" />
                 Export Chat
               </DropdownMenuItem>
               <DropdownMenuItem>
-                <Share2 className="w-4 h-4 mr-2" />
+                <Share2 className="mr-2 h-4 w-4" />
                 Share Session
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-red-600">
-                <Trash2 className="w-4 h-4 mr-2" />
+                <Trash2 className="mr-2 h-4 w-4" />
                 Clear Chat
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -382,55 +409,51 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
           <AnimatePresence>
-            {messages.map((message) => (
+            {messages.map(message => (
               <motion.div
                 key={message.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 className={cn(
-                  "flex items-start space-x-3",
+                  'flex items-start space-x-3',
                   message.role === 'user' ? 'justify-end' : 'justify-start'
                 )}
               >
                 {message.role !== 'user' && (
-                  <div className="flex-shrink-0">
-                    {getMessageIcon(message)}
-                  </div>
+                  <div className="flex-shrink-0">{getMessageIcon(message)}</div>
                 )}
-                
+
                 <div
                   className={cn(
-                    "max-w-[80%] rounded-lg px-4 py-2",
+                    'max-w-[80%] rounded-lg px-4 py-2',
                     message.role === 'user'
-                      ? "bg-blue-500 text-white"
+                      ? 'bg-blue-500 text-white'
                       : message.metadata?.error
-                      ? "bg-red-50 text-red-900 border border-red-200"
-                      : "bg-gray-100 text-gray-900"
+                        ? 'border border-red-200 bg-red-50 text-red-900'
+                        : 'bg-gray-100 text-gray-900'
                   )}
                 >
                   <div
                     className="prose prose-sm max-w-none"
                     dangerouslySetInnerHTML={{
-                      __html: formatMessageContent(message.content)
+                      __html: formatMessageContent(message.content),
                     }}
                   />
-                  
-                  <div className="flex items-center justify-between mt-2 text-xs opacity-70">
+
+                  <div className="mt-2 flex items-center justify-between text-xs opacity-70">
                     <span>{message.timestamp.toLocaleTimeString()}</span>
                     {getMessageStatus(message)}
                   </div>
                 </div>
-                
+
                 {message.role === 'user' && (
-                  <div className="flex-shrink-0">
-                    {getMessageIcon(message)}
-                  </div>
+                  <div className="flex-shrink-0">{getMessageIcon(message)}</div>
                 )}
               </motion.div>
             ))}
           </AnimatePresence>
-          
+
           {/* Streaming response */}
           {streamingResponse && (
             <motion.div
@@ -439,9 +462,9 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
               className="flex items-start space-x-3"
             >
               <div className="flex-shrink-0">
-                <Bot className="w-5 h-5 text-green-500" />
+                <Bot className="h-5 w-5 text-green-500" />
               </div>
-              <div className="max-w-[80%] rounded-lg px-4 py-2 bg-gray-100 text-gray-900">
+              <div className="max-w-[80%] rounded-lg bg-gray-100 px-4 py-2 text-gray-900">
                 <div className="prose prose-sm max-w-none">
                   {streamingResponse}
                   <span className="animate-pulse">|</span>
@@ -449,18 +472,18 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
               </div>
             </motion.div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
 
       {/* Attachments */}
       {attachments.length > 0 && (
-        <div className="px-4 py-2 border-t bg-gray-50">
+        <div className="border-t bg-gray-50 px-4 py-2">
           <div className="flex flex-wrap gap-2">
             {attachments.map((file, index) => (
               <Badge key={index} variant="secondary" className="text-xs">
-                <FileText className="w-3 h-3 mr-1" />
+                <FileText className="mr-1 h-3 w-3" />
                 {file.name}
                 <Button
                   variant="ghost"
@@ -468,7 +491,7 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
                   className="ml-1 h-auto p-0"
                   onClick={() => removeAttachment(index)}
                 >
-                  <XCircle className="w-3 h-3" />
+                  <XCircle className="h-3 w-3" />
                 </Button>
               </Badge>
             ))}
@@ -477,20 +500,20 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
       )}
 
       {/* Input */}
-      <div className="p-4 border-t">
+      <div className="border-t p-4">
         <div className="flex items-end space-x-2">
           <div className="flex-1">
             <Textarea
               ref={textareaRef}
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={e => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={`Message ${employeeName}...`}
-              className="min-h-[60px] max-h-[120px] resize-none"
+              className="max-h-[120px] min-h-[60px] resize-none"
               disabled={isLoading}
             />
           </div>
-          
+
           <div className="flex flex-col space-y-2">
             <input
               ref={fileInputRef}
@@ -499,25 +522,25 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
               onChange={handleFileAttachment}
               className="hidden"
             />
-            
+
             <Button
               variant="ghost"
               size="sm"
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
             >
-              <Paperclip className="w-4 h-4" />
+              <Paperclip className="h-4 w-4" />
             </Button>
-            
+
             <Button
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isLoading}
               className="bg-blue-500 hover:bg-blue-600"
             >
               {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Send className="w-4 h-4" />
+                <Send className="h-4 w-4" />
               )}
             </Button>
           </div>
@@ -533,21 +556,23 @@ export const AgentSDKChatInterface: React.FC<AgentSDKChatInterfaceProps> = ({
               Configure your chat experience with {employeeName}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium">Model</label>
               <p className="text-sm text-gray-600">{session?.config.model}</p>
             </div>
-            
+
             <div>
               <label className="text-sm font-medium">Temperature</label>
-              <p className="text-sm text-gray-600">{session?.config.temperature}</p>
+              <p className="text-sm text-gray-600">
+                {session?.config.temperature}
+              </p>
             </div>
-            
+
             <div>
               <label className="text-sm font-medium">Available Tools</label>
-              <div className="flex flex-wrap gap-1 mt-1">
+              <div className="mt-1 flex flex-wrap gap-1">
                 {session?.config.tools.map((tool, index) => (
                   <Badge key={index} variant="outline" className="text-xs">
                     {tool.name}
@@ -576,11 +601,14 @@ function getDefaultTools(employeeRole: string): AgentTool[] {
         type: 'object',
         properties: {
           query: { type: 'string', description: 'Search query' },
-          max_results: { type: 'number', description: 'Maximum number of results' }
+          max_results: {
+            type: 'number',
+            description: 'Maximum number of results',
+          },
         },
-        required: ['query']
-      }
-    }
+        required: ['query'],
+      },
+    },
   ];
 
   const roleSpecificTools: Record<string, AgentTool[]> = {
@@ -594,11 +622,11 @@ function getDefaultTools(employeeRole: string): AgentTool[] {
           type: 'object',
           properties: {
             market: { type: 'string', description: 'Market to analyze' },
-            timeframe: { type: 'string', description: 'Analysis timeframe' }
+            timeframe: { type: 'string', description: 'Analysis timeframe' },
           },
-          required: ['market']
-        }
-      }
+          required: ['market'],
+        },
+      },
     ],
     'Data Scientist': [
       {
@@ -610,11 +638,11 @@ function getDefaultTools(employeeRole: string): AgentTool[] {
           type: 'object',
           properties: {
             data: { type: 'string', description: 'Data to analyze' },
-            analysis_type: { type: 'string', description: 'Type of analysis' }
+            analysis_type: { type: 'string', description: 'Type of analysis' },
           },
-          required: ['data']
-        }
-      }
+          required: ['data'],
+        },
+      },
     ],
     'Software Architect': [
       {
@@ -626,12 +654,12 @@ function getDefaultTools(employeeRole: string): AgentTool[] {
           type: 'object',
           properties: {
             code: { type: 'string', description: 'Code to analyze' },
-            language: { type: 'string', description: 'Programming language' }
+            language: { type: 'string', description: 'Programming language' },
           },
-          required: ['code', 'language']
-        }
-      }
-    ]
+          required: ['code', 'language'],
+        },
+      },
+    ],
   };
 
   return [...baseTools, ...(roleSpecificTools[employeeRole] || [])];
@@ -640,7 +668,10 @@ function getDefaultTools(employeeRole: string): AgentTool[] {
 /**
  * Generate system prompt for employee role
  */
-function generateSystemPrompt(employeeRole: string, employeeName: string): string {
+function generateSystemPrompt(
+  employeeRole: string,
+  employeeName: string
+): string {
   return `You are ${employeeName}, a professional ${employeeRole} AI assistant. You are part of an AI workforce and should provide expert assistance in your field. 
 
 Guidelines:

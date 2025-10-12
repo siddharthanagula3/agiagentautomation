@@ -34,7 +34,7 @@ interface SessionResponse {
   error?: string;
 }
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async event => {
   // Handle CORS
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -59,7 +59,14 @@ export const handler: Handler = async (event) => {
   }
 
   try {
-    const { userId, employeeId, employeeName, employeeRole, capabilities, sessionId }: SessionRequest = JSON.parse(event.body || '{}');
+    const {
+      userId,
+      employeeId,
+      employeeName,
+      employeeRole,
+      capabilities,
+      sessionId,
+    }: SessionRequest = JSON.parse(event.body || '{}');
 
     if (!userId || !employeeId || !employeeName) {
       return {
@@ -84,8 +91,11 @@ export const handler: Handler = async (event) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
     if (authError || !user || user.id !== userId) {
       return {
         statusCode: 401,
@@ -136,10 +146,7 @@ ${capabilities.map(cap => `- ${cap}`).join('\n')}
 Respond naturally and professionally. Use your tools when needed to help the user achieve their goals.
 Always be helpful, accurate, and concise.`,
       model: 'gpt-4o',
-      tools: [
-        { type: 'code_interpreter' },
-        { type: 'file_search' },
-      ],
+      tools: [{ type: 'code_interpreter' }, { type: 'file_search' }],
     });
 
     // Create OpenAI Thread
@@ -196,7 +203,6 @@ Always be helpful, accurate, and concise.`,
       },
       body: JSON.stringify(response),
     };
-
   } catch (error) {
     console.error('Session creation error:', error);
     return {
@@ -204,11 +210,10 @@ Always be helpful, accurate, and concise.`,
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       }),
     };
   }
 };
-

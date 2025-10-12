@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
+import ScrollToTop from '@/components/ScrollToTop';
 import { PublicLayout } from './layouts/PublicLayout';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
@@ -69,6 +70,7 @@ function App() {
     <ThemeProvider>
       <TooltipProvider>
         <div className="min-h-screen bg-background">
+          <ScrollToTop />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<PublicLayout />}>

@@ -18,7 +18,7 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   animation = 'pulse',
 }) => {
   const baseClasses = 'bg-gray-200 dark:bg-gray-700';
-  
+
   const variantClasses = {
     text: 'h-4 rounded',
     rectangular: 'rounded-md',
@@ -53,7 +53,8 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
     width: width || (variant === 'text' ? '100%' : undefined),
     height: height || (variant === 'text' ? '1rem' : undefined),
     ...(animation === 'wave' && {
-      background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
+      background:
+        'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
       backgroundSize: '200% 100%',
     }),
   };
@@ -85,8 +86,10 @@ export const SkeletonText: React.FC<{ lines?: number; className?: string }> = ({
   </div>
 );
 
-export const SkeletonCard: React.FC<{ className?: string }> = ({ className }) => (
-  <div className={cn('p-6 space-y-4', className)}>
+export const SkeletonCard: React.FC<{ className?: string }> = ({
+  className,
+}) => (
+  <div className={cn('space-y-4 p-6', className)}>
     <SkeletonLoader variant="rectangular" height="200px" />
     <div className="space-y-2">
       <SkeletonLoader variant="text" width="80%" />
@@ -95,10 +98,10 @@ export const SkeletonCard: React.FC<{ className?: string }> = ({ className }) =>
   </div>
 );
 
-export const SkeletonAvatar: React.FC<{ size?: 'sm' | 'md' | 'lg'; className?: string }> = ({
-  size = 'md',
-  className,
-}) => {
+export const SkeletonAvatar: React.FC<{
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+}> = ({ size = 'md', className }) => {
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-12 h-12',
@@ -113,11 +116,11 @@ export const SkeletonAvatar: React.FC<{ size?: 'sm' | 'md' | 'lg'; className?: s
   );
 };
 
-export const SkeletonTable: React.FC<{ rows?: number; columns?: number; className?: string }> = ({
-  rows = 5,
-  columns = 4,
-  className,
-}) => (
+export const SkeletonTable: React.FC<{
+  rows?: number;
+  columns?: number;
+  className?: string;
+}> = ({ rows = 5, columns = 4, className }) => (
   <div className={cn('space-y-3', className)}>
     {/* Header */}
     <div className="flex space-x-4">

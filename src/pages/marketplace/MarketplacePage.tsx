@@ -36,6 +36,11 @@ import {
   type AIEmployee as BaseAIEmployee,
 } from '@/data/ai-employees';
 import { useAuthStore } from '@/stores/unified-auth-store';
+import {
+  purchaseEmployee,
+  isEmployeePurchased,
+  listPurchasedEmployees,
+} from '@/services/supabase-employees';
 
 interface AIEmployee extends BaseAIEmployee {
   isHired: boolean;
@@ -73,11 +78,26 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
 
+  // Fetch purchased employees to check which are already hired
+  const { data: purchasedEmployees = [] } = useQuery({
+    queryKey: ['purchased-employees', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      return await listPurchasedEmployees(user.id);
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const purchasedEmployeeIds = new Set(
+    purchasedEmployees.map(emp => emp.employee_id)
+  );
+
   // Transform base AI employees data for marketplace display
   const transformEmployeeData = (baseEmployee: BaseAIEmployee): AIEmployee => {
     return {
       ...baseEmployee,
-      isHired: false, // This would be fetched from user's hired employees
+      isHired: purchasedEmployeeIds.has(baseEmployee.id), // Check if already hired
       rating: 4.5 + Math.random() * 0.5, // Mock rating
       reviews: Math.floor(Math.random() * 100) + 10, // Mock reviews
       successRate: 85 + Math.floor(Math.random() * 15), // Mock success rate
@@ -92,7 +112,13 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
   // Fetch AI employees
   const { data: employees = [], isLoading } = useQuery<AIEmployee[]>({
-    queryKey: ['marketplace-employees', searchQuery, selectedCategory, sortBy],
+    queryKey: [
+      'marketplace-employees',
+      searchQuery,
+      selectedCategory,
+      sortBy,
+      purchasedEmployeeIds.size,
+    ],
     queryFn: async () => {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -156,15 +182,22 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         throw new Error('You must be logged in to hire employees');
       }
 
-      // Simulate API call - in production, this would save to Supabase
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Check if already hired
+      const alreadyHired = await isEmployeePurchased(user.id, employeeId);
+      if (alreadyHired) {
+        throw new Error('Employee already hired');
+      }
 
-      // Here you would typically:
-      // 1. Save the hire to the database
-      // 2. Update user's workforce
-      // 3. Handle payment if required
+      // Find the employee data
+      const employee = AI_EMPLOYEES.find(emp => emp.id === employeeId);
+      if (!employee) {
+        throw new Error('Employee not found');
+      }
 
-      return { success: true, employeeId, userId: user.id };
+      // Hire the employee using the real service
+      const result = await purchaseEmployee(user.id, employee);
+
+      return { success: true, employeeId, userId: user.id, result };
     },
     onSuccess: data => {
       // Update the query cache to mark employee as hired
@@ -176,8 +209,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           )
       );
 
-      // In production, you would also update the workforce store here
-      // workforceStore.addEmployee(employeeData);
+      // Refresh the purchased employees list
+      queryClient.invalidateQueries({ queryKey: ['purchased-employees'] });
     },
   });
 
@@ -194,8 +227,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       setTimeout(() => {
         navigate(`/chat?employee=${employeeId}`);
       }, 1500);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to hire employee');
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to hire employee';
+      toast.error(errorMessage);
     }
   };
 

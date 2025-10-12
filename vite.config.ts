@@ -11,11 +11,14 @@ export default defineConfig(({ mode }) => {
   const apiUrl =
     process.env.VITE_API_URL || (isDev ? 'http://localhost:8000' : '');
   const wsUrl = process.env.VITE_WS_URL || (isDev ? 'ws://localhost:8000' : '');
-  
+
   // Local development URLs
-  const supabaseUrl = process.env.VITE_SUPABASE_URL || (isDev ? 'http://localhost:54321' : '');
+  const supabaseUrl =
+    process.env.VITE_SUPABASE_URL || (isDev ? 'http://localhost:54321' : '');
   const netlifyFunctionsUrl = isDev ? 'http://localhost:8888' : '';
-  const stripeWebhookUrl = isDev ? 'http://localhost:8888/.netlify/functions/stripe-webhook' : '';
+  const stripeWebhookUrl = isDev
+    ? 'http://localhost:8888/.netlify/functions/stripe-webhook'
+    : '';
 
   return {
     server: {
@@ -58,7 +61,7 @@ export default defineConfig(({ mode }) => {
               target: supabaseUrl,
               changeOrigin: true,
               secure: false,
-              rewrite: (path) => path.replace(/^\/supabase/, ''),
+              rewrite: path => path.replace(/^\/supabase/, ''),
             },
             // Netlify Functions local development proxy
             '/.netlify/functions': {

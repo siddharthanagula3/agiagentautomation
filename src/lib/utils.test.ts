@@ -25,12 +25,9 @@ describe('Utils', () => {
     it('should handle complex conditional logic', () => {
       const isActive = true;
       const isDisabled = false;
-      expect(cn(
-        'base',
-        isActive && 'active',
-        isDisabled && 'disabled',
-        'always'
-      )).toBe('base active always');
+      expect(
+        cn('base', isActive && 'active', isDisabled && 'disabled', 'always')
+      ).toBe('base active always');
     });
 
     it('should handle Tailwind class conflicts', () => {
@@ -44,11 +41,13 @@ describe('Utils', () => {
     });
 
     it('should handle objects with boolean values', () => {
-      expect(cn({
-        'class1': true,
-        'class2': false,
-        'class3': true
-      })).toBe('class1 class3');
+      expect(
+        cn({
+          class1: true,
+          class2: false,
+          class3: true,
+        })
+      ).toBe('class1 class3');
     });
   });
 });

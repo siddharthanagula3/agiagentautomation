@@ -24,7 +24,7 @@ describe('Unified Auth Store', () => {
 
   it('should initialize with default state', () => {
     const { result } = renderHook(() => useAuthStore());
-    
+
     expect(result.current.user).toBeNull();
     expect(result.current.isLoading).toBe(false); // Reset function sets loading to false
     expect(result.current.error).toBeNull();

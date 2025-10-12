@@ -4,15 +4,16 @@
  */
 
 // Fallback avatar URLs for when DiceBear API is unavailable
+// Using robot/AI-themed avatars instead of human faces
 const FALLBACK_AVATARS = [
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1521119989659-a83eee488004?w=100&h=100&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face',
+  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-1&backgroundColor=6366f1&eyes=bulging&mouth=smile',
+  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-2&backgroundColor=8b5cf6&eyes=bulging&mouth=smile',
+  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-3&backgroundColor=06b6d4&eyes=bulging&mouth=smile',
+  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-4&backgroundColor=10b981&eyes=bulging&mouth=smile',
+  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-5&backgroundColor=f59e0b&eyes=bulging&mouth=smile',
+  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-6&backgroundColor=ef4444&eyes=bulging&mouth=smile',
+  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-7&backgroundColor=ec4899&eyes=bulging&mouth=smile',
+  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-8&backgroundColor=84cc16&eyes=bulging&mouth=smile',
 ];
 
 /**
@@ -46,8 +47,8 @@ export function getAvatarUrl(
     return getFallbackAvatar(seed);
   }
 
-  // Use DiceBear API with fallback
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+  // Use DiceBear API with bottts style for AI employees
+  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}&backgroundColor=6366f1&eyes=bulging&mouth=smile`;
 }
 
 /**
@@ -80,8 +81,13 @@ export function isDiceBearUrl(url: string): boolean {
  * @returns Fallback avatar URL
  */
 export function getFallbackForDiceBear(diceBearUrl: string): string {
-  // Extract seed from DiceBear URL
-  const url = new URL(diceBearUrl);
-  const seed = url.searchParams.get('seed') || 'default';
-  return getFallbackAvatar(seed);
+  try {
+    // Extract seed from DiceBear URL
+    const url = new URL(diceBearUrl);
+    const seed = url.searchParams.get('seed') || 'default';
+    return getFallbackAvatar(seed);
+  } catch (error) {
+    // Handle malformed URLs by returning a fallback
+    return getFallbackAvatar('default');
+  }
 }

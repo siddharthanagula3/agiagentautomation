@@ -194,7 +194,7 @@ const LandingPage: React.FC = () => {
       setActiveEmployee(prev => (prev + 1) % displayedEmployees.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [displayedEmployees.length]);
 
   return (
     <div className="min-h-screen">
@@ -727,6 +727,232 @@ const LandingPage: React.FC = () => {
                 className="absolute -bottom-4 -left-4 h-32 w-32 rounded-2xl bg-gradient-to-br from-accent to-secondary opacity-80 shadow-xl"
               />
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="relative overflow-hidden py-20">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-16 text-center"
+          >
+            <Badge className="glass mb-4 px-4 py-2">
+              <Star className="mr-2 h-4 w-4" />
+              Testimonials
+            </Badge>
+            <h2 className="mb-6 text-5xl font-bold md:text-6xl">
+              Loved by 10,000+ Companies
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              See how businesses are transforming with AI employees
+            </p>
+          </motion.div>
+
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                name: 'Sarah Chen',
+                role: 'CTO, TechFlow',
+                company: 'TechFlow',
+                avatar: '👩‍💼',
+                content:
+                  'AGI Agent Automation reduced our development time by 70%. Our AI employees handle complex coding tasks while our team focuses on strategy. Game-changing platform.',
+                rating: 5,
+                metric: '70% faster development',
+              },
+              {
+                name: 'Marcus Rodriguez',
+                role: 'CEO, GrowthCo',
+                company: 'GrowthCo',
+                avatar: '👨‍💼',
+                content:
+                  'We hired 15 AI employees for marketing and sales. Our conversion rates increased by 150% in just 3 months. The ROI is incredible.',
+                rating: 5,
+                metric: '150% conversion increase',
+              },
+              {
+                name: 'Emily Watson',
+                role: 'Operations Director, ScaleUp',
+                company: 'ScaleUp',
+                avatar: '👩‍🔬',
+                content:
+                  "Our AI employees handle customer support 24/7 with 98% satisfaction rates. We've saved $200K annually while improving service quality.",
+                rating: 5,
+                metric: '$200K annual savings',
+              },
+            ].map((testimonial, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className="glass group rounded-2xl border border-border/50 p-8 transition-all duration-300 hover:border-primary/50"
+              >
+                <div className="mb-6 flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl">
+                    {testimonial.avatar}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{testimonial.name}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {testimonial.role}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mb-4 flex">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                    />
+                  ))}
+                </div>
+
+                <blockquote className="mb-6 text-muted-foreground">
+                  "{testimonial.content}"
+                </blockquote>
+
+                <div className="rounded-lg bg-primary/10 px-4 py-2 text-center">
+                  <span className="text-sm font-semibold text-primary">
+                    {testimonial.metric}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Use Cases Section */}
+      <section className="relative overflow-hidden py-20">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-16 text-center"
+          >
+            <Badge className="glass mb-4 px-4 py-2">
+              <Target className="mr-2 h-4 w-4" />
+              Use Cases
+            </Badge>
+            <h2 className="mb-6 text-5xl font-bold md:text-6xl">
+              How Teams Use AI Employees
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Real workflows from successful implementations
+            </p>
+          </motion.div>
+
+          <div className="grid gap-8 lg:grid-cols-2">
+            {[
+              {
+                title: 'E-commerce Automation',
+                description:
+                  'Complete order processing, inventory management, and customer support',
+                steps: [
+                  'AI employee receives order notification',
+                  'Validates inventory and processes payment',
+                  'Updates inventory and triggers fulfillment',
+                  'Sends confirmation and tracking info',
+                  'Handles customer inquiries 24/7',
+                ],
+                icon: <ShoppingCart className="h-8 w-8" />,
+                gradient: 'from-blue-500 to-purple-500',
+                result: '95% automation rate, 24/7 operation',
+              },
+              {
+                title: 'Content Marketing Pipeline',
+                description:
+                  'End-to-end content creation, SEO optimization, and distribution',
+                steps: [
+                  'AI employee researches trending topics',
+                  'Creates SEO-optimized content',
+                  'Generates social media posts',
+                  'Schedules across platforms',
+                  'Analyzes performance and optimizes',
+                ],
+                icon: <FileText className="h-8 w-8" />,
+                gradient: 'from-green-500 to-teal-500',
+                result: '300% content output increase',
+              },
+              {
+                title: 'Customer Support Excellence',
+                description:
+                  'Intelligent ticket routing, resolution, and escalation',
+                steps: [
+                  'AI employee analyzes incoming tickets',
+                  'Routes to appropriate specialist',
+                  'Provides instant responses for common issues',
+                  'Escalates complex cases to humans',
+                  'Follows up and ensures resolution',
+                ],
+                icon: <MessageSquare className="h-8 w-8" />,
+                gradient: 'from-orange-500 to-red-500',
+                result: '98% satisfaction, 50% faster resolution',
+              },
+              {
+                title: 'Data Analysis & Reporting',
+                description:
+                  'Automated data collection, analysis, and business intelligence',
+                steps: [
+                  'AI employee collects data from multiple sources',
+                  'Cleans and validates data quality',
+                  'Performs statistical analysis',
+                  'Generates insights and recommendations',
+                  'Creates executive dashboards',
+                ],
+                icon: <BarChart3 className="h-8 w-8" />,
+                gradient: 'from-purple-500 to-pink-500',
+                result: 'Real-time insights, 80% time savings',
+              },
+            ].map((useCase, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className="glass group rounded-2xl border border-border/50 p-8 transition-all duration-300 hover:border-primary/50"
+              >
+                <div
+                  className={`mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r ${useCase.gradient} text-white`}
+                >
+                  {useCase.icon}
+                </div>
+
+                <h3 className="mb-3 text-2xl font-bold">{useCase.title}</h3>
+                <p className="mb-6 text-muted-foreground">
+                  {useCase.description}
+                </p>
+
+                <div className="mb-6 space-y-3">
+                  {useCase.steps.map((step, stepIdx) => (
+                    <div key={stepIdx} className="flex items-start gap-3">
+                      <div className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                        {stepIdx + 1}
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {step}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 px-4 py-3 text-center">
+                  <span className="text-sm font-semibold text-primary">
+                    {useCase.result}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>

@@ -100,6 +100,7 @@ VITE_WS_URL=ws://localhost:8000
 ## 🏠 Local Development Setup
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - Docker (for Supabase local development)
 - Git
@@ -107,6 +108,7 @@ VITE_WS_URL=ws://localhost:8000
 ### Complete Local Development Environment
 
 #### 1. Supabase Local Development
+
 ```bash
 # Start Supabase local instance
 supabase start
@@ -119,6 +121,7 @@ supabase start
 ```
 
 #### 2. Netlify Functions Local Development
+
 ```bash
 # Start Netlify functions locally
 netlify dev
@@ -127,6 +130,7 @@ netlify dev
 ```
 
 #### 3. Stripe CLI Setup
+
 ```bash
 # Install Stripe CLI: https://stripe.com/docs/stripe-cli
 # Forward webhooks to local development
@@ -134,6 +138,7 @@ stripe listen --forward-to localhost:8888/.netlify/functions/stripe-webhook
 ```
 
 #### 4. Environment Configuration for Local Development
+
 Create a `.env` file with these values for local development:
 
 ```env
@@ -162,11 +167,13 @@ VITE_PERPLEXITY_API_KEY=your_perplexity_api_key_here
 ```
 
 #### 5. Start Development Server
+
 ```bash
 npm run dev
 ```
 
 #### 6. Access the Application
+
 - **Frontend**: http://localhost:8080
 - **Supabase Studio**: http://localhost:54323
 - **Netlify Functions**: http://localhost:8888
@@ -175,6 +182,7 @@ npm run dev
 ### Testing the Integration
 
 #### Test Supabase Edge Functions
+
 ```bash
 # Test blog posts function
 curl -X GET "http://localhost:54321/functions/v1/blog-posts"
@@ -186,6 +194,7 @@ curl -X POST "http://localhost:54321/functions/v1/contact-form" \
 ```
 
 #### Test Netlify Functions
+
 ```bash
 # Test Stripe subscription creation
 curl -X POST "https://agiagentautomation.com/.netlify/functions/create-pro-subscription" \
@@ -194,6 +203,7 @@ curl -X POST "https://agiagentautomation.com/.netlify/functions/create-pro-subsc
 ```
 
 #### Test Stripe Integration
+
 ```bash
 # List webhook endpoints
 stripe webhook_endpoints list

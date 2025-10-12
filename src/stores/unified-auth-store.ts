@@ -156,7 +156,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   reset: () => {
-    set({ user: null, isAuthenticated: false, error: null, isLoading: false, initialized: false });
+    set({
+      user: null,
+      isAuthenticated: false,
+      error: null,
+      isLoading: false,
+      initialized: false,
+    });
   },
 
   resetPassword: async (email: string) => {

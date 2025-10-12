@@ -235,12 +235,61 @@ npm run preview
 
 ## 🧪 Testing
 
-The application includes comprehensive TestSprite integration for automated testing:
+The application includes comprehensive testing with multiple frameworks:
+
+### Unit & Integration Tests (Vitest)
 
 ```bash
-# Run TestSprite tests
-npm run test:testsprite
+# Run unit tests
+npm run test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with UI
+npm run test:ui
 ```
+
+### End-to-End Tests (Playwright)
+
+```bash
+# Run E2E tests
+npm run e2e
+
+# Run E2E tests in headed mode
+npm run e2e:headed
+
+# Run E2E tests in debug mode
+npm run e2e:debug
+```
+
+### Code Quality
+
+```bash
+# Run linting
+npm run lint
+
+# Run type checking
+npm run type-check
+
+# Check code formatting
+npm run format:check
+
+# Fix code formatting
+npm run format
+```
+
+### Test Coverage
+
+The project maintains comprehensive test coverage:
+
+- **Unit Tests**: Critical components and utilities
+- **Integration Tests**: Service layer and API interactions
+- **E2E Tests**: Complete user journeys and workflows
+- **Security Tests**: Authentication and authorization flows
 
 ## 📁 Project Structure
 
@@ -260,19 +309,47 @@ src/
 
 ### Available Scripts
 
+#### Development
+
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run build:prod` - Production build with optimizations
 - `npm run preview` - Preview production build
+
+#### Testing
+
+- `npm run test` - Run unit tests
+- `npm run test:coverage` - Run tests with coverage
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:ui` - Run tests with UI
+- `npm run e2e` - Run E2E tests
+- `npm run e2e:headed` - Run E2E tests in headed mode
+- `npm run e2e:debug` - Run E2E tests in debug mode
+
+#### Code Quality
+
 - `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint issues
 - `npm run type-check` - Run TypeScript type checking
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
 
-### Code Quality
+#### Database & Backend
 
-- **ESLint** for code linting
-- **TypeScript** for type safety
-- **Prettier** for code formatting
-- **Husky** for git hooks
+- `npm run db:reset` - Reset local database
+- `npm run db:migrate` - Run database migrations
+- `npm run functions:serve` - Serve Netlify functions locally
+
+### Code Quality & Automation
+
+- **ESLint** for code linting with React and TypeScript rules
+- **TypeScript** for type safety and better development experience
+- **Prettier** for consistent code formatting
+- **Husky** for git hooks and pre-commit checks
+- **lint-staged** for running linters on staged files only
+- **Vitest** for fast unit and integration testing
+- **Playwright** for reliable end-to-end testing
+- **GitHub Actions** for comprehensive CI/CD pipeline
 
 ## 🗄️ Local Development with Supabase
 
@@ -594,6 +671,8 @@ STRIPE_WEBHOOK_ENDPOINT_SECRET=whsec_your_webhook_secret
 3. **Rotate API keys** regularly
 4. **Monitor API usage** for unusual activity
 5. **Use HTTPS** in production
+6. **Regular security audits** with automated scanning
+7. **Row Level Security** policies for data isolation
 
 ### Security Features
 
@@ -601,6 +680,52 @@ STRIPE_WEBHOOK_ENDPOINT_SECRET=whsec_your_webhook_secret
 - **JWT-based authentication** with secure token handling
 - **Input validation** and sanitization
 - **CORS configuration** for API security
+- **Rate limiting** on webhook endpoints
+- **Audit logging** for all critical operations
+- **Automated security scanning** in CI/CD pipeline
+- **Secret detection** with TruffleHog
+- **Dependency vulnerability scanning** with npm audit and Snyk
+
+### Security Audit Report
+
+A comprehensive RLS audit has been completed and documented in `RLS_AUDIT_REPORT.md`. All tables now have proper Row Level Security policies implemented.
+
+## 🚀 CI/CD Pipeline
+
+### Automated Testing & Deployment
+
+The project includes a comprehensive GitHub Actions workflow that runs on every push and pull request:
+
+#### Test Jobs
+
+- **Unit & Integration Tests** - Vitest with coverage reporting
+- **End-to-End Tests** - Playwright across multiple browsers (Chrome, Firefox, Safari)
+- **Code Quality** - ESLint, Prettier, and TypeScript checks
+- **Security Audit** - npm audit, Snyk scanning, and secret detection
+
+#### Build & Deploy Jobs
+
+- **Build Verification** - Production build with size analysis
+- **Performance Testing** - Lighthouse CI for performance metrics
+- **Database Testing** - Migration and schema validation
+- **Multi-browser Testing** - Cross-browser compatibility checks
+
+#### Security Features
+
+- **Daily Security Scans** - Automated vulnerability scanning
+- **Secret Detection** - Prevents accidental secret commits
+- **Dependency Updates** - Automated security updates
+- **Audit Trail** - Complete logging of all CI/CD activities
+
+### Pipeline Status
+
+All critical jobs must pass before deployment:
+
+- ✅ Unit tests with >80% coverage
+- ✅ E2E tests across all browsers
+- ✅ Security scans with no high/critical vulnerabilities
+- ✅ Performance benchmarks met
+- ✅ Code quality standards maintained
 
 ## 🤝 Contributing
 
@@ -632,6 +757,14 @@ For support and questions:
 - ✅ **Type Safety** - Proper TypeScript definitions throughout
 - ✅ **Security** - Environment variable management and API key protection
 - ✅ **Performance** - Optimized builds and code splitting
+- ✅ **Comprehensive Testing** - Unit, integration, and E2E test suites
+- ✅ **Code Quality** - Automated linting, formatting, and pre-commit hooks
+- ✅ **CI/CD Pipeline** - GitHub Actions with multi-browser testing
+- ✅ **Security Hardening** - Enhanced Stripe webhook security and RLS policies
+- ✅ **Database Security** - Complete Row Level Security audit and fixes
+- ✅ **AI Employee Marketplace** - Fixed hiring functionality with real Supabase integration
+- ✅ **Dynamic Blog System** - Full blog functionality with content generation
+- ✅ **Premium UI/UX** - Enhanced landing page with testimonials and use cases
 
 ---
 

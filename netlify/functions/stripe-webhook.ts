@@ -1,20 +1,58 @@
 import { Handler, HandlerEvent } from '@netlify/functions';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
-// Enhanced logging utility
+// Enhanced logging utility with structured logging
 const logger = {
-  info: (message: string, data?: any) => {
-    console.log(
-      `[Stripe Webhook] ${message}`,
-      data ? JSON.stringify(data, null, 2) : ''
-    );
+  info: (message: string, data?: unknown) => {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      level: 'INFO',
+      service: 'stripe-webhook',
+      message,
+      data: data ? JSON.stringify(data, null, 2) : undefined,
+    };
+    console.log(JSON.stringify(logEntry));
   },
-  error: (message: string, error?: any) => {
-    console.error(`[Stripe Webhook] ${message}`, error);
+  error: (message: string, error?: unknown) => {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      level: 'ERROR',
+      service: 'stripe-webhook',
+      message,
+      error:
+        error instanceof Error
+          ? {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+            }
+          : error,
+    };
+    console.error(JSON.stringify(logEntry));
   },
-  warn: (message: string, data?: any) => {
-    console.warn(`[Stripe Webhook] ${message}`, data);
+  warn: (message: string, data?: unknown) => {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      level: 'WARN',
+      service: 'stripe-webhook',
+      message,
+      data: data ? JSON.stringify(data, null, 2) : undefined,
+    };
+    console.warn(JSON.stringify(logEntry));
+  },
+  debug: (message: string, data?: unknown) => {
+    if (process.env.NODE_ENV === 'development') {
+      const logEntry = {
+        timestamp: new Date().toISOString(),
+        level: 'DEBUG',
+        service: 'stripe-webhook',
+        message,
+        data: data ? JSON.stringify(data, null, 2) : undefined,
+      };
+      console.log(JSON.stringify(logEntry));
+    }
   },
 };
 
@@ -61,6 +99,11 @@ try {
 // Webhook event processing registry for idempotency
 const processedEvents = new Set<string>();
 
+// Rate limiting registry
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 100; // Max requests per minute per IP
+
 // Helper function to check if event was already processed
 function isEventProcessed(eventId: string): boolean {
   return processedEvents.has(eventId);
@@ -78,32 +121,180 @@ function markEventProcessed(eventId: string): void {
   }
 }
 
+// Rate limiting function
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const clientData = rateLimitMap.get(ip);
+
+  if (!clientData || now > clientData.resetTime) {
+    // Reset or initialize
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+
+  if (clientData.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false;
+  }
+
+  clientData.count++;
+  return true;
+}
+
+// Clean up rate limit map periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, data] of rateLimitMap.entries()) {
+    if (now > data.resetTime) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, RATE_LIMIT_WINDOW);
+
+// Security headers
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+  'Content-Security-Policy': "default-src 'none'",
+};
+
+// Maximum payload size (1MB)
+const MAX_PAYLOAD_SIZE = 1024 * 1024;
+
+// Validate payload size
+function validatePayloadSize(body: string): boolean {
+  const size = Buffer.byteLength(body, 'utf8');
+  return size <= MAX_PAYLOAD_SIZE;
+}
+
+// Audit trail function
+async function logAuditTrail(
+  requestId: string,
+  eventId: string,
+  eventType: string,
+  action: string,
+  details: Record<string, unknown>
+): Promise<void> {
+  try {
+    const auditEntry = {
+      request_id: requestId,
+      event_id: eventId,
+      event_type: eventType,
+      action,
+      details: JSON.stringify(details),
+      timestamp: new Date().toISOString(),
+    };
+
+    const { error } = await supabase
+      .from('webhook_audit_log')
+      .insert(auditEntry);
+
+    if (error) {
+      logger.warn('Failed to log audit trail', { requestId, error });
+    }
+  } catch (error) {
+    logger.warn('Audit trail logging failed', { requestId, error });
+  }
+}
+
 export const handler: Handler = async (event: HandlerEvent) => {
   const startTime = Date.now();
+  const requestId = crypto.randomUUID();
 
   try {
+    // Extract client IP for rate limiting
+    const clientIP =
+      event.headers['x-forwarded-for'] ||
+      event.headers['x-real-ip'] ||
+      event.headers['client-ip'] ||
+      'unknown';
+
+    logger.info(`Webhook request started`, {
+      requestId,
+      clientIP,
+      userAgent: event.headers['user-agent'],
+      timestamp: new Date().toISOString(),
+    });
+
+    // Rate limiting check
+    if (!checkRateLimit(clientIP)) {
+      logger.warn(`Rate limit exceeded for IP: ${clientIP}`, { requestId });
+      return {
+        statusCode: 429,
+        headers: {
+          ...SECURITY_HEADERS,
+          'Retry-After': '60',
+        },
+        body: JSON.stringify({
+          error: 'Rate limit exceeded',
+          retryAfter: 60,
+        }),
+      };
+    }
+
+    // Validate request method
+    if (event.httpMethod !== 'POST') {
+      logger.error(`Invalid HTTP method: ${event.httpMethod}`, { requestId });
+      return {
+        statusCode: 405,
+        headers: SECURITY_HEADERS,
+        body: JSON.stringify({ error: 'Method not allowed' }),
+      };
+    }
+
     // Validate request
     if (!event.body) {
-      logger.error('No request body provided');
+      logger.error('No request body provided', { requestId });
       return {
         statusCode: 400,
+        headers: SECURITY_HEADERS,
         body: JSON.stringify({ error: 'No request body provided' }),
+      };
+    }
+
+    // Validate payload size
+    if (!validatePayloadSize(event.body)) {
+      logger.error('Payload size exceeds maximum allowed size', {
+        requestId,
+        size: Buffer.byteLength(event.body, 'utf8'),
+        maxSize: MAX_PAYLOAD_SIZE,
+      });
+      return {
+        statusCode: 413,
+        headers: SECURITY_HEADERS,
+        body: JSON.stringify({ error: 'Payload too large' }),
+      };
+    }
+
+    // Validate content type
+    const contentType = event.headers['content-type'];
+    if (!contentType || !contentType.includes('application/json')) {
+      logger.error(`Invalid content type: ${contentType}`, { requestId });
+      return {
+        statusCode: 400,
+        headers: SECURITY_HEADERS,
+        body: JSON.stringify({ error: 'Invalid content type' }),
       };
     }
 
     const sig = event.headers['stripe-signature'];
     if (!sig) {
-      logger.error('No signature provided');
+      logger.error('No signature provided', { requestId });
       return {
         statusCode: 400,
+        headers: SECURITY_HEADERS,
         body: JSON.stringify({ error: 'No signature provided' }),
       };
     }
 
     if (!process.env.STRIPE_WEBHOOK_SECRET) {
-      logger.error('STRIPE_WEBHOOK_SECRET environment variable is required');
+      logger.error('STRIPE_WEBHOOK_SECRET environment variable is required', {
+        requestId,
+      });
       return {
         statusCode: 500,
+        headers: SECURITY_HEADERS,
         body: JSON.stringify({ error: 'Webhook secret not configured' }),
       };
     }
@@ -117,9 +308,10 @@ export const handler: Handler = async (event: HandlerEvent) => {
         process.env.STRIPE_WEBHOOK_SECRET
       );
     } catch (err) {
-      logger.error('Signature verification failed:', err);
+      logger.error('Signature verification failed:', { requestId, error: err });
       return {
         statusCode: 400,
+        headers: SECURITY_HEADERS,
         body: JSON.stringify({
           error: `Webhook signature verification failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
         }),
@@ -128,71 +320,127 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
     // Check for idempotency
     if (isEventProcessed(stripeEvent.id)) {
-      logger.info(`Event ${stripeEvent.id} already processed, skipping`);
+      logger.info(`Event ${stripeEvent.id} already processed, skipping`, {
+        requestId,
+      });
       return {
         statusCode: 200,
+        headers: SECURITY_HEADERS,
         body: JSON.stringify({
           received: true,
           message: 'Event already processed',
+          requestId,
         }),
       };
     }
 
     logger.info(`Processing event: ${stripeEvent.type}`, {
+      requestId,
       eventId: stripeEvent.id,
       created: stripeEvent.created,
     });
 
+    // Log audit trail for event processing start
+    await logAuditTrail(
+      requestId,
+      stripeEvent.id,
+      stripeEvent.type,
+      'processing_started',
+      {
+        eventType: stripeEvent.type,
+        eventId: stripeEvent.id,
+        created: stripeEvent.created,
+      }
+    );
+
     // Process the event
     try {
-      await processStripeEvent(stripeEvent);
+      await processStripeEvent(stripeEvent, requestId);
 
       // Mark event as processed only after successful processing
       markEventProcessed(stripeEvent.id);
 
       const processingTime = Date.now() - startTime;
       logger.info(`Event ${stripeEvent.id} processed successfully`, {
+        requestId,
         processingTime: `${processingTime}ms`,
       });
 
+      // Log audit trail for successful processing
+      await logAuditTrail(
+        requestId,
+        stripeEvent.id,
+        stripeEvent.type,
+        'processing_completed',
+        {
+          processingTime: `${processingTime}ms`,
+          success: true,
+        }
+      );
+
       return {
         statusCode: 200,
+        headers: SECURITY_HEADERS,
         body: JSON.stringify({
           received: true,
           eventId: stripeEvent.id,
           processingTime: `${processingTime}ms`,
+          requestId,
         }),
       };
     } catch (processingError) {
-      logger.error(
-        `Failed to process event ${stripeEvent.id}:`,
-        processingError
+      logger.error(`Failed to process event ${stripeEvent.id}:`, {
+        requestId,
+        error: processingError,
+      });
+
+      // Log audit trail for failed processing
+      await logAuditTrail(
+        requestId,
+        stripeEvent.id,
+        stripeEvent.type,
+        'processing_failed',
+        {
+          error:
+            processingError instanceof Error
+              ? processingError.message
+              : 'Unknown error',
+          success: false,
+        }
       );
+
       return {
         statusCode: 500,
+        headers: SECURITY_HEADERS,
         body: JSON.stringify({
           error: `Event processing failed: ${processingError instanceof Error ? processingError.message : 'Unknown error'}`,
           eventId: stripeEvent.id,
+          requestId,
         }),
       };
     }
   } catch (error) {
-    logger.error('Webhook handler error:', error);
+    logger.error('Webhook handler error:', { requestId, error });
     return {
       statusCode: 500,
+      headers: SECURITY_HEADERS,
       body: JSON.stringify({
         error: `Webhook processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        requestId,
       }),
     };
   }
 };
 
 // Separate function for processing Stripe events
-async function processStripeEvent(stripeEvent: Stripe.Event): Promise<void> {
+async function processStripeEvent(
+  stripeEvent: Stripe.Event,
+  requestId: string
+): Promise<void> {
   switch (stripeEvent.type) {
     case 'checkout.session.completed': {
       const session = stripeEvent.data.object as Stripe.Checkout.Session;
-      logger.info('Checkout completed', { sessionId: session.id });
+      logger.info('Checkout completed', { requestId, sessionId: session.id });
 
       const {
         userId,
@@ -230,7 +478,7 @@ async function processStripeEvent(stripeEvent: Stripe.Event): Promise<void> {
         // Update user's plan and Stripe info with retry logic
         let retryCount = 0;
         const maxRetries = 3;
-        let userUpdateError: any = null;
+        let userUpdateError: Error | null = null;
 
         while (retryCount < maxRetries) {
           try {
@@ -428,7 +676,7 @@ async function processStripeEvent(stripeEvent: Stripe.Event): Promise<void> {
         // Downgrade user to free plan with retry logic
         let retryCount = 0;
         const maxRetries = 3;
-        let userUpdateError: any = null;
+        let userUpdateError: Error | null = null;
 
         while (retryCount < maxRetries) {
           try {

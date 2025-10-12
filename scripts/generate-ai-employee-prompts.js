@@ -17,7 +17,9 @@ const aiEmployeesPath = path.join(__dirname, '../src/data/ai-employees.ts');
 const aiEmployeesContent = fs.readFileSync(aiEmployeesPath, 'utf8');
 
 // Extract the AI_EMPLOYEES array using a simple regex approach
-const arrayMatch = aiEmployeesContent.match(/export const AI_EMPLOYEES: AIEmployee\[\] = \[([\s\S]*?)\];/);
+const arrayMatch = aiEmployeesContent.match(
+  /export const AI_EMPLOYEES: AIEmployee\[\] = \[([\s\S]*?)\];/
+);
 if (!arrayMatch) {
   console.error('Could not find AI_EMPLOYEES array');
   process.exit(1);
@@ -28,7 +30,7 @@ const arrayContent = arrayMatch[1];
 
 // System prompt templates for different categories
 const systemPromptTemplates = {
-  'Engineering': {
+  Engineering: {
     basePrompt: `You are a {role} with expertise in {specialty}.
 
 CORE COMPETENCIES:
@@ -80,17 +82,32 @@ When you need to perform an action, use the appropriate tool by calling:
 IMPORTANT: Always use tools when asked to perform actions, don't just describe what you would do. Be specific about your approach and provide working, production-ready solutions.`,
 
     coreSkills: [
-      'System Design', 'Architecture', 'Scalability', 'Cloud Infrastructure',
-      'API Development', 'Database Design', 'DevOps', 'Security',
-      'Performance Optimization', 'Code Review', 'Testing', 'Documentation'
+      'System Design',
+      'Architecture',
+      'Scalability',
+      'Cloud Infrastructure',
+      'API Development',
+      'Database Design',
+      'DevOps',
+      'Security',
+      'Performance Optimization',
+      'Code Review',
+      'Testing',
+      'Documentation',
     ],
     technicalSkills: [
-      'Programming Languages', 'Frameworks', 'Cloud Platforms', 'Databases',
-      'Version Control', 'CI/CD', 'Monitoring', 'Debugging'
-    ]
+      'Programming Languages',
+      'Frameworks',
+      'Cloud Platforms',
+      'Databases',
+      'Version Control',
+      'CI/CD',
+      'Monitoring',
+      'Debugging',
+    ],
   },
 
-  'Marketing': {
+  Marketing: {
     basePrompt: `You are a {role} with expertise in {specialty}.
 
 CORE COMPETENCIES:
@@ -142,16 +159,28 @@ When you need to perform an action, use the appropriate tool by calling:
 IMPORTANT: Always use tools when asked to perform actions. Provide data-driven insights and actionable recommendations.`,
 
     coreSkills: [
-      'Campaign Strategy', 'Brand Management', 'Content Marketing', 'Digital Marketing',
-      'Social Media', 'Email Marketing', 'SEO/SEM', 'Analytics', 'A/B Testing'
+      'Campaign Strategy',
+      'Brand Management',
+      'Content Marketing',
+      'Digital Marketing',
+      'Social Media',
+      'Email Marketing',
+      'SEO/SEM',
+      'Analytics',
+      'A/B Testing',
     ],
     marketingSkills: [
-      'Market Research', 'Customer Segmentation', 'Lead Generation', 'Conversion Optimization',
-      'Marketing Automation', 'Performance Analysis', 'Budget Management'
-    ]
+      'Market Research',
+      'Customer Segmentation',
+      'Lead Generation',
+      'Conversion Optimization',
+      'Marketing Automation',
+      'Performance Analysis',
+      'Budget Management',
+    ],
   },
 
-  'Design': {
+  Design: {
     basePrompt: `You are a {role} with expertise in {specialty}.
 
 CORE COMPETENCIES:
@@ -203,16 +232,28 @@ When you need to perform an action, use the appropriate tool by calling:
 IMPORTANT: Always use tools when asked to perform actions. Create beautiful, functional designs that solve real user problems.`,
 
     coreSkills: [
-      'User Experience Design', 'User Interface Design', 'Visual Design', 'Prototyping',
-      'User Research', 'Information Architecture', 'Interaction Design', 'Design Systems'
+      'User Experience Design',
+      'User Interface Design',
+      'Visual Design',
+      'Prototyping',
+      'User Research',
+      'Information Architecture',
+      'Interaction Design',
+      'Design Systems',
     ],
     designSkills: [
-      'Wireframing', 'Mockups', 'User Testing', 'Accessibility', 'Responsive Design',
-      'Design Tools', 'Animation', 'Brand Design'
-    ]
+      'Wireframing',
+      'Mockups',
+      'User Testing',
+      'Accessibility',
+      'Responsive Design',
+      'Design Tools',
+      'Animation',
+      'Brand Design',
+    ],
   },
 
-  'Sales': {
+  Sales: {
     basePrompt: `You are a {role} with expertise in {specialty}.
 
 CORE COMPETENCIES:
@@ -264,16 +305,29 @@ When you need to perform an action, use the appropriate tool by calling:
 IMPORTANT: Always use tools when asked to perform actions. Focus on building genuine relationships and solving customer problems.`,
 
     coreSkills: [
-      'Lead Generation', 'Prospecting', 'Qualification', 'Presentation', 'Negotiation',
-      'Closing', 'Account Management', 'CRM Management', 'Sales Analytics'
+      'Lead Generation',
+      'Prospecting',
+      'Qualification',
+      'Presentation',
+      'Negotiation',
+      'Closing',
+      'Account Management',
+      'CRM Management',
+      'Sales Analytics',
     ],
     salesSkills: [
-      'Cold Outreach', 'Discovery Calls', 'Product Demos', 'Objection Handling',
-      'Contract Negotiation', 'Upselling', 'Cross-selling', 'Customer Success'
-    ]
+      'Cold Outreach',
+      'Discovery Calls',
+      'Product Demos',
+      'Objection Handling',
+      'Contract Negotiation',
+      'Upselling',
+      'Cross-selling',
+      'Customer Success',
+    ],
   },
 
-  'Support': {
+  Support: {
     basePrompt: `You are a {role} with expertise in {specialty}.
 
 CORE COMPETENCIES:
@@ -325,16 +379,27 @@ When you need to perform an action, use the appropriate tool by calling:
 IMPORTANT: Always use tools when asked to perform actions. Focus on providing exceptional customer service and solving problems efficiently.`,
 
     coreSkills: [
-      'Customer Service', 'Problem Solving', 'Technical Support', 'Communication',
-      'Product Knowledge', 'Issue Resolution', 'Documentation', 'Training'
+      'Customer Service',
+      'Problem Solving',
+      'Technical Support',
+      'Communication',
+      'Product Knowledge',
+      'Issue Resolution',
+      'Documentation',
+      'Training',
     ],
     supportSkills: [
-      'Troubleshooting', 'Case Management', 'Knowledge Base', 'Escalation',
-      'Customer Education', 'Feedback Collection', 'Process Improvement'
-    ]
+      'Troubleshooting',
+      'Case Management',
+      'Knowledge Base',
+      'Escalation',
+      'Customer Education',
+      'Feedback Collection',
+      'Process Improvement',
+    ],
   },
 
-  'Analytics': {
+  Analytics: {
     basePrompt: `You are a {role} with expertise in {specialty}.
 
 CORE COMPETENCIES:
@@ -386,16 +451,28 @@ When you need to perform an action, use the appropriate tool by calling:
 IMPORTANT: Always use tools when asked to perform actions. Provide data-driven insights that help make better business decisions.`,
 
     coreSkills: [
-      'Statistical Analysis', 'Data Visualization', 'Business Intelligence', 'Reporting',
-      'Data Mining', 'Predictive Analytics', 'A/B Testing', 'Dashboard Creation'
+      'Statistical Analysis',
+      'Data Visualization',
+      'Business Intelligence',
+      'Reporting',
+      'Data Mining',
+      'Predictive Analytics',
+      'A/B Testing',
+      'Dashboard Creation',
     ],
     analyticsSkills: [
-      'SQL', 'Python/R', 'Excel', 'Tableau', 'Power BI', 'Google Analytics',
-      'Data Modeling', 'KPI Development'
-    ]
+      'SQL',
+      'Python/R',
+      'Excel',
+      'Tableau',
+      'Power BI',
+      'Google Analytics',
+      'Data Modeling',
+      'KPI Development',
+    ],
   },
 
-  'Creative': {
+  Creative: {
     basePrompt: `You are a {role} with expertise in {specialty}.
 
 CORE COMPETENCIES:
@@ -447,16 +524,28 @@ When you need to perform an action, use the appropriate tool by calling:
 IMPORTANT: Always use tools when asked to perform actions. Create compelling, brand-consistent creative work that engages audiences.`,
 
     coreSkills: [
-      'Creative Strategy', 'Visual Design', 'Content Creation', 'Brand Development',
-      'Campaign Development', 'Art Direction', 'Creative Writing', 'Concept Development'
+      'Creative Strategy',
+      'Visual Design',
+      'Content Creation',
+      'Brand Development',
+      'Campaign Development',
+      'Art Direction',
+      'Creative Writing',
+      'Concept Development',
     ],
     creativeSkills: [
-      'Adobe Creative Suite', 'Video Production', 'Photography', 'Copywriting',
-      'Storytelling', 'Typography', 'Color Theory', 'Layout Design'
-    ]
+      'Adobe Creative Suite',
+      'Video Production',
+      'Photography',
+      'Copywriting',
+      'Storytelling',
+      'Typography',
+      'Color Theory',
+      'Layout Design',
+    ],
   },
 
-  'Business': {
+  Business: {
     basePrompt: `You are a {role} with expertise in {specialty}.
 
 CORE COMPETENCIES:
@@ -508,14 +597,26 @@ When you need to perform an action, use the appropriate tool by calling:
 IMPORTANT: Always use tools when asked to perform actions. Provide strategic insights and recommendations that drive business success.`,
 
     coreSkills: [
-      'Strategic Planning', 'Business Analysis', 'Market Research', 'Financial Analysis',
-      'Operations Management', 'Project Management', 'Stakeholder Management', 'Risk Assessment'
+      'Strategic Planning',
+      'Business Analysis',
+      'Market Research',
+      'Financial Analysis',
+      'Operations Management',
+      'Project Management',
+      'Stakeholder Management',
+      'Risk Assessment',
     ],
     businessSkills: [
-      'Business Modeling', 'Process Improvement', 'Change Management', 'Performance Metrics',
-      'Budget Management', 'Vendor Management', 'Compliance', 'Reporting'
-    ]
-  }
+      'Business Modeling',
+      'Process Improvement',
+      'Change Management',
+      'Performance Metrics',
+      'Budget Management',
+      'Vendor Management',
+      'Compliance',
+      'Reporting',
+    ],
+  },
 };
 
 // Default template for categories not specifically defined
@@ -570,38 +671,82 @@ When you need to perform an action, use the appropriate tool by calling:
 
 IMPORTANT: Always use tools when asked to perform actions. Be professional, thorough, and focused on delivering excellent results.`,
 
-  coreSkills: ['Professional Expertise', 'Communication', 'Problem Solving', 'Time Management'],
-  specializedSkills: ['Industry Knowledge', 'Best Practices', 'Quality Assurance', 'Continuous Improvement']
+  coreSkills: [
+    'Professional Expertise',
+    'Communication',
+    'Problem Solving',
+    'Time Management',
+  ],
+  specializedSkills: [
+    'Industry Knowledge',
+    'Best Practices',
+    'Quality Assurance',
+    'Continuous Improvement',
+  ],
 };
 
 // Function to generate system prompt for an AI employee
 function generateSystemPrompt(employee) {
   const category = employee.category;
   const template = systemPromptTemplates[category] || defaultTemplate;
-  
+
   // Get skills based on category
   const coreSkills = template.coreSkills || defaultTemplate.coreSkills;
-  const specializedSkills = template[`${category.toLowerCase()}Skills`] || template.specializedSkills || defaultTemplate.specializedSkills;
-  
+  const specializedSkills =
+    template[`${category.toLowerCase()}Skills`] ||
+    template.specializedSkills ||
+    defaultTemplate.specializedSkills;
+
   // Format tools
-  const tools = employee.defaultTools ? employee.defaultTools.map(tool => `- ${tool}: Use this tool for relevant tasks`).join('\n') : '- web_search: Search for information\n- analyze_file: Analyze documents and files';
-  
+  const tools = employee.defaultTools
+    ? employee.defaultTools
+        .map(tool => `- ${tool}: Use this tool for relevant tasks`)
+        .join('\n')
+    : '- web_search: Search for information\n- analyze_file: Analyze documents and files';
+
   // Replace placeholders in the template
   let prompt = template.basePrompt
     .replace(/{role}/g, employee.role)
     .replace(/{specialty}/g, employee.specialty || employee.description)
     .replace(/{coreSkills}/g, coreSkills.map(skill => `- ${skill}`).join('\n'))
-    .replace(/{technicalSkills}/g, specializedSkills.map(skill => `- ${skill}`).join('\n'))
-    .replace(/{marketingSkills}/g, specializedSkills.map(skill => `- ${skill}`).join('\n'))
-    .replace(/{designSkills}/g, specializedSkills.map(skill => `- ${skill}`).join('\n'))
-    .replace(/{salesSkills}/g, specializedSkills.map(skill => `- ${skill}`).join('\n'))
-    .replace(/{supportSkills}/g, specializedSkills.map(skill => `- ${skill}`).join('\n'))
-    .replace(/{analyticsSkills}/g, specializedSkills.map(skill => `- ${skill}`).join('\n'))
-    .replace(/{creativeSkills}/g, specializedSkills.map(skill => `- ${skill}`).join('\n'))
-    .replace(/{businessSkills}/g, specializedSkills.map(skill => `- ${skill}`).join('\n'))
-    .replace(/{specializedSkills}/g, specializedSkills.map(skill => `- ${skill}`).join('\n'))
+    .replace(
+      /{technicalSkills}/g,
+      specializedSkills.map(skill => `- ${skill}`).join('\n')
+    )
+    .replace(
+      /{marketingSkills}/g,
+      specializedSkills.map(skill => `- ${skill}`).join('\n')
+    )
+    .replace(
+      /{designSkills}/g,
+      specializedSkills.map(skill => `- ${skill}`).join('\n')
+    )
+    .replace(
+      /{salesSkills}/g,
+      specializedSkills.map(skill => `- ${skill}`).join('\n')
+    )
+    .replace(
+      /{supportSkills}/g,
+      specializedSkills.map(skill => `- ${skill}`).join('\n')
+    )
+    .replace(
+      /{analyticsSkills}/g,
+      specializedSkills.map(skill => `- ${skill}`).join('\n')
+    )
+    .replace(
+      /{creativeSkills}/g,
+      specializedSkills.map(skill => `- ${skill}`).join('\n')
+    )
+    .replace(
+      /{businessSkills}/g,
+      specializedSkills.map(skill => `- ${skill}`).join('\n')
+    )
+    .replace(
+      /{specializedSkills}/g,
+      specializedSkills.map(skill => `- ${skill}`).join('\n')
+    )
     .replace(/{tools}/g, tools);
-  
+
   return prompt;
 }
 
@@ -610,48 +755,65 @@ function generateCapabilities(employee) {
   return {
     coreSkills: employee.skills || [],
     technicalSkills: employee.skills || [],
-    softSkills: ['Communication', 'Problem Solving', 'Time Management', 'Collaboration'],
-    availableTools: (employee.defaultTools || ['web_search', 'analyze_file']).map(tool => ({
+    softSkills: [
+      'Communication',
+      'Problem Solving',
+      'Time Management',
+      'Collaboration',
+    ],
+    availableTools: (
+      employee.defaultTools || ['web_search', 'analyze_file']
+    ).map(tool => ({
       id: tool,
       name: tool.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
       description: `Use this tool for ${tool.replace(/_/g, ' ')} tasks`,
-      category: 'general'
+      category: 'general',
     })),
-    toolProficiency: (employee.defaultTools || ['web_search', 'analyze_file']).reduce((acc, tool) => {
+    toolProficiency: (
+      employee.defaultTools || ['web_search', 'analyze_file']
+    ).reduce((acc, tool) => {
       acc[tool] = 85;
       return acc;
     }, {}),
     autonomyLevel: 'semi-autonomous',
-    decisionMaking: [{
-      type: 'professional_decision',
-      description: 'Make decisions based on professional expertise',
-      confidence: 85,
-      criteria: ['quality', 'efficiency', 'best_practices']
-    }],
+    decisionMaking: [
+      {
+        type: 'professional_decision',
+        description: 'Make decisions based on professional expertise',
+        confidence: 85,
+        criteria: ['quality', 'efficiency', 'best_practices'],
+      },
+    ],
     canCollaborate: true,
-    collaborationProtocols: [{
-      name: 'task_collaboration',
-      description: 'Collaborate on tasks and projects',
-      steps: ['plan_task', 'execute_task', 'review_results'],
-      triggers: ['task_assigned']
-    }],
-    communicationChannels: [{
-      type: 'direct',
-      name: 'Chat',
-      description: 'Direct communication for task coordination',
-      participants: ['team_members']
-    }]
+    collaborationProtocols: [
+      {
+        name: 'task_collaboration',
+        description: 'Collaborate on tasks and projects',
+        steps: ['plan_task', 'execute_task', 'review_results'],
+        triggers: ['task_assigned'],
+      },
+    ],
+    communicationChannels: [
+      {
+        type: 'direct',
+        name: 'Chat',
+        description: 'Direct communication for task coordination',
+        participants: ['team_members'],
+      },
+    ],
   };
 }
 
 // Function to generate tools JSON
 function generateTools(employee) {
-  return (employee.defaultTools || ['web_search', 'analyze_file']).map(tool => ({
-    id: tool,
-    name: tool.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-    description: `Use this tool for ${tool.replace(/_/g, ' ')} tasks`,
-    category: 'general'
-  }));
+  return (employee.defaultTools || ['web_search', 'analyze_file']).map(
+    tool => ({
+      id: tool,
+      name: tool.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      description: `Use this tool for ${tool.replace(/_/g, ' ')} tasks`,
+      category: 'general',
+    })
+  );
 }
 
 // Function to generate performance JSON
@@ -664,7 +826,7 @@ function generatePerformance() {
     errorRate: 0,
     userSatisfaction: 0,
     costEfficiency: 0,
-    lastUpdated: new Date().toISOString()
+    lastUpdated: new Date().toISOString(),
   };
 }
 
@@ -676,11 +838,11 @@ function generateAvailability() {
       start: '09:00',
       end: '17:00',
       days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
-      breaks: []
+      breaks: [],
     },
     maxConcurrentTasks: 3,
     autoAcceptTasks: true,
-    priorityLevel: 'medium'
+    priorityLevel: 'medium',
   };
 }
 
@@ -691,7 +853,7 @@ function generateCost(employee) {
     perTaskCost: 1,
     perToolExecutionCost: 0.01,
     currency: 'USD',
-    billingPeriod: 'hourly'
+    billingPeriod: 'hourly',
   };
 }
 
@@ -703,7 +865,7 @@ function generateMetadata(employee) {
     certifications: [],
     provider: employee.provider || 'claude',
     fitLevel: employee.fitLevel || 'good',
-    popular: employee.popular || false
+    popular: employee.popular || false,
   };
 }
 
@@ -718,14 +880,25 @@ const sampleEmployees = [
     name: 'Software Architect',
     role: 'Software Architect',
     category: 'Engineering',
-    description: 'Design scalable system architectures and lead technical decisions',
+    description:
+      'Design scalable system architectures and lead technical decisions',
     provider: 'claude',
     price: 10,
-    skills: ['System Design', 'Architecture', 'Scalability', 'Cloud Infrastructure'],
+    skills: [
+      'System Design',
+      'Architecture',
+      'Scalability',
+      'Cloud Infrastructure',
+    ],
     specialty: 'System architecture and technical leadership',
     fitLevel: 'excellent',
     popular: true,
-    defaultTools: ['code_interpreter', 'web_search', 'create_visualization', 'analyze_file']
+    defaultTools: [
+      'code_interpreter',
+      'web_search',
+      'create_visualization',
+      'analyze_file',
+    ],
   },
   {
     id: 'emp-002',
@@ -735,12 +908,17 @@ const sampleEmployees = [
     description: 'Develop and execute comprehensive marketing strategies',
     provider: 'chatgpt',
     price: 10,
-    skills: ['Campaign Strategy', 'Brand Management', 'Content Marketing', 'Digital Marketing'],
+    skills: [
+      'Campaign Strategy',
+      'Brand Management',
+      'Content Marketing',
+      'Digital Marketing',
+    ],
     specialty: 'Marketing strategy and campaign management',
     fitLevel: 'excellent',
     popular: true,
-    defaultTools: ['web_search', 'create_visualization', 'analyze_file']
-  }
+    defaultTools: ['web_search', 'create_visualization', 'analyze_file'],
+  },
 ];
 
 // Generate SQL insert statements
@@ -755,7 +933,7 @@ sampleEmployees.forEach(employee => {
   const availability = generateAvailability();
   const cost = generateCost(employee);
   const metadata = generateMetadata(employee);
-  
+
   const sql = `INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
 ('${employee.id}', '${employee.name}', '${employee.role}', '${employee.category}', '${employee.category}', 'senior', 'available',
 '${JSON.stringify(capabilities).replace(/'/g, "''")}',
@@ -765,13 +943,16 @@ sampleEmployees.forEach(employee => {
 '${JSON.stringify(availability).replace(/'/g, "''")}',
 '${JSON.stringify(cost).replace(/'/g, "''")}',
 '${JSON.stringify(metadata).replace(/'/g, "''")}');`;
-  
+
   sqlStatements.push(sql);
   employeeCount++;
 });
 
 // Write the SQL file
-const outputPath = path.join(__dirname, '../supabase/migrations/20250110000007_add_all_ai_employees.sql');
+const outputPath = path.join(
+  __dirname,
+  '../supabase/migrations/20250110000007_add_all_ai_employees.sql'
+);
 const sqlContent = `-- ================================================================
 -- Add All 165 AI Employees with System Prompts
 -- ================================================================
@@ -809,7 +990,9 @@ fs.writeFileSync(outputPath, sqlContent);
 
 console.log(`✅ Generated system prompts for ${employeeCount} AI employees`);
 console.log(`📁 SQL migration file created: ${outputPath}`);
-console.log('🎯 Next step: Run the migration to add all AI employees to the database');
+console.log(
+  '🎯 Next step: Run the migration to add all AI employees to the database'
+);
 
 // TODO: In a full implementation, we would:
 // 1. Parse the complete AI_EMPLOYEES array from the TypeScript file

@@ -2,10 +2,10 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Core Functionality', () => {
   test.beforeEach(async ({ page }) => {
-    // Login before each test
+    // Login before each test with production credentials
     await page.goto('/auth/login');
-    await page.fill('input[name="email"]', 'test@example.com');
-    await page.fill('input[name="password"]', 'password123');
+    await page.fill('input[name="email"]', 'siddharthanagula3@gmail.com');
+    await page.fill('input[name="password"]', 'Sid@1234');
     await page.click('button[type="submit"]');
     await expect(page).toHaveURL(/.*\/dashboard/, { timeout: 10000 });
   });
@@ -25,10 +25,14 @@ test.describe('Core Functionality', () => {
     await expect(page).toHaveURL(/.*\/workforce/);
 
     // Wait for AI employees to load
-    await expect(page.locator('[data-testid="ai-employee-card"]').first()).toBeVisible();
+    await expect(
+      page.locator('[data-testid="ai-employee-card"]').first()
+    ).toBeVisible();
 
     // Click hire button on first AI employee
-    await page.click('[data-testid="ai-employee-card"]:first-child [data-testid="hire-button"]');
+    await page.click(
+      '[data-testid="ai-employee-card"]:first-child [data-testid="hire-button"]'
+    );
 
     // Should show confirmation or success message
     await expect(page.locator('text=Successfully hired')).toBeVisible();
@@ -69,7 +73,7 @@ test.describe('Core Functionality', () => {
 
     // Create new chat tab
     await page.click('[data-testid="new-chat-button"]');
-    
+
     // Should see new tab
     await expect(page.locator('[data-testid="chat-tab"]').nth(1)).toBeVisible();
 
@@ -85,7 +89,9 @@ test.describe('Core Functionality', () => {
 
     // Should see marketplace content
     await expect(page.locator('text=AI Employee Marketplace')).toBeVisible();
-    await expect(page.locator('[data-testid="ai-employee-card"]')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="ai-employee-card"]')
+    ).toBeVisible();
   });
 
   test('should filter AI employees by category', async ({ page }) => {
@@ -96,7 +102,9 @@ test.describe('Core Functionality', () => {
     await page.click('[data-testid="category-filter"]:first-child');
 
     // Should see filtered results
-    await expect(page.locator('[data-testid="ai-employee-card"]')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="ai-employee-card"]')
+    ).toBeVisible();
   });
 
   test('should view AI employee details', async ({ page }) => {
@@ -107,7 +115,9 @@ test.describe('Core Functionality', () => {
     await page.click('[data-testid="ai-employee-card"]:first-child');
 
     // Should see detailed view or modal
-    await expect(page.locator('[data-testid="employee-details"]')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="employee-details"]')
+    ).toBeVisible();
   });
 
   test('should handle dashboard navigation', async ({ page }) => {
@@ -125,9 +135,10 @@ test.describe('Core Functionality', () => {
   test('should display user profile information', async ({ page }) => {
     // Click on user menu
     await page.click('[data-testid="user-menu"]');
-    
+
     // Should see profile information
-    await expect(page.locator('text=Test User')).toBeVisible();
-    await expect(page.locator('text=test@example.com')).toBeVisible();
+    await expect(
+      page.locator('text=siddharthanagula3@gmail.com')
+    ).toBeVisible();
   });
 });

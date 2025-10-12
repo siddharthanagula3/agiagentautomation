@@ -104,8 +104,20 @@ When you need to perform an action, use the appropriate tool by calling:
 
 IMPORTANT: Always use tools when asked to perform actions. Be proactive, persistent, and deliver results with minimal clarification. Focus on achieving objectives efficiently and effectively.`,
 
-    coreSkills: ['Strategic Thinking', 'Data Analysis', 'Project Management', 'Communication', 'Problem Solving'],
-    specializedSkills: ['Market Research', 'Campaign Optimization', 'Performance Analysis', 'Stakeholder Management', 'Process Improvement']
+    coreSkills: [
+      'Strategic Thinking',
+      'Data Analysis',
+      'Project Management',
+      'Communication',
+      'Problem Solving',
+    ],
+    specializedSkills: [
+      'Market Research',
+      'Campaign Optimization',
+      'Performance Analysis',
+      'Stakeholder Management',
+      'Process Improvement',
+    ],
   },
 
   // Claude - Based on Anthropic Claude Cookbooks
@@ -200,8 +212,26 @@ When you need to perform an action, use the appropriate tool by calling:
 
 IMPORTANT: Always use tools when asked to perform actions. Be systematic, thorough, and focused on delivering excellent technical solutions. Use apply_patch for all code modifications.`,
 
-    coreSkills: ['System Design', 'Architecture', 'Scalability', 'Cloud Infrastructure', 'API Development', 'Database Design', 'DevOps', 'Security'],
-    technicalSkills: ['Programming Languages', 'Frameworks', 'Cloud Platforms', 'Databases', 'Version Control', 'CI/CD', 'Monitoring', 'Debugging']
+    coreSkills: [
+      'System Design',
+      'Architecture',
+      'Scalability',
+      'Cloud Infrastructure',
+      'API Development',
+      'Database Design',
+      'DevOps',
+      'Security',
+    ],
+    technicalSkills: [
+      'Programming Languages',
+      'Frameworks',
+      'Cloud Platforms',
+      'Databases',
+      'Version Control',
+      'CI/CD',
+      'Monitoring',
+      'Debugging',
+    ],
   },
 
   // Gemini - Based on Google Gemini API Documentation
@@ -290,8 +320,21 @@ When you need to perform an action, use the appropriate tool by calling:
 
 IMPORTANT: Always use tools when asked to perform actions. Create compelling, brand-consistent creative work that engages audiences across multiple media formats. Leverage your multimodal capabilities to deliver exceptional creative solutions.`,
 
-    coreSkills: ['Creative Strategy', 'Visual Design', 'Content Creation', 'Brand Development', 'Multimodal Production'],
-    creativeSkills: ['Image Generation', 'Video Analysis', 'Creative Writing', 'Visual Storytelling', 'Brand Design', 'Content Strategy']
+    coreSkills: [
+      'Creative Strategy',
+      'Visual Design',
+      'Content Creation',
+      'Brand Development',
+      'Multimodal Production',
+    ],
+    creativeSkills: [
+      'Image Generation',
+      'Video Analysis',
+      'Creative Writing',
+      'Visual Storytelling',
+      'Brand Design',
+      'Content Strategy',
+    ],
   },
 
   // Perplexity - Based on research and real-time data capabilities
@@ -372,49 +415,206 @@ When you need to perform an action, use the appropriate tool by calling:
 
 IMPORTANT: Always use tools when asked to perform actions. Provide data-driven insights that help make better business decisions. Always cite your sources and ensure information accuracy.`,
 
-    coreSkills: ['Statistical Analysis', 'Data Visualization', 'Business Intelligence', 'Market Research', 'Competitive Analysis'],
-    researchSkills: ['Real-time Data Gathering', 'Source Citation', 'Trend Analysis', 'Market Intelligence', 'Evidence-based Reporting']
-  }
+    coreSkills: [
+      'Statistical Analysis',
+      'Data Visualization',
+      'Business Intelligence',
+      'Market Research',
+      'Competitive Analysis',
+    ],
+    researchSkills: [
+      'Real-time Data Gathering',
+      'Source Citation',
+      'Trend Analysis',
+      'Market Intelligence',
+      'Evidence-based Reporting',
+    ],
+  },
 };
 
 // Category-specific skill mappings
 const categorySkills = {
-  'Engineering': {
-    coreSkills: ['System Design', 'Architecture', 'Scalability', 'Cloud Infrastructure', 'API Development', 'Database Design', 'DevOps', 'Security'],
-    technicalSkills: ['Programming Languages', 'Frameworks', 'Cloud Platforms', 'Databases', 'Version Control', 'CI/CD', 'Monitoring', 'Debugging']
+  Engineering: {
+    coreSkills: [
+      'System Design',
+      'Architecture',
+      'Scalability',
+      'Cloud Infrastructure',
+      'API Development',
+      'Database Design',
+      'DevOps',
+      'Security',
+    ],
+    technicalSkills: [
+      'Programming Languages',
+      'Frameworks',
+      'Cloud Platforms',
+      'Databases',
+      'Version Control',
+      'CI/CD',
+      'Monitoring',
+      'Debugging',
+    ],
   },
-  'Marketing': {
-    coreSkills: ['Campaign Strategy', 'Brand Management', 'Content Marketing', 'Digital Marketing', 'Social Media', 'Email Marketing', 'SEO/SEM', 'Analytics'],
-    specializedSkills: ['Market Research', 'Customer Segmentation', 'Lead Generation', 'Conversion Optimization', 'Marketing Automation', 'Performance Analysis']
+  Marketing: {
+    coreSkills: [
+      'Campaign Strategy',
+      'Brand Management',
+      'Content Marketing',
+      'Digital Marketing',
+      'Social Media',
+      'Email Marketing',
+      'SEO/SEM',
+      'Analytics',
+    ],
+    specializedSkills: [
+      'Market Research',
+      'Customer Segmentation',
+      'Lead Generation',
+      'Conversion Optimization',
+      'Marketing Automation',
+      'Performance Analysis',
+    ],
   },
-  'Design': {
-    coreSkills: ['User Experience Design', 'User Interface Design', 'Visual Design', 'Prototyping', 'User Research', 'Information Architecture', 'Interaction Design'],
-    creativeSkills: ['Wireframing', 'Mockups', 'User Testing', 'Accessibility', 'Responsive Design', 'Design Tools', 'Animation', 'Brand Design']
+  Design: {
+    coreSkills: [
+      'User Experience Design',
+      'User Interface Design',
+      'Visual Design',
+      'Prototyping',
+      'User Research',
+      'Information Architecture',
+      'Interaction Design',
+    ],
+    creativeSkills: [
+      'Wireframing',
+      'Mockups',
+      'User Testing',
+      'Accessibility',
+      'Responsive Design',
+      'Design Tools',
+      'Animation',
+      'Brand Design',
+    ],
   },
-  'Sales': {
-    coreSkills: ['Lead Generation', 'Prospecting', 'Qualification', 'Presentation', 'Negotiation', 'Closing', 'Account Management', 'CRM Management'],
-    specializedSkills: ['Cold Outreach', 'Discovery Calls', 'Product Demos', 'Objection Handling', 'Contract Negotiation', 'Upselling', 'Cross-selling']
+  Sales: {
+    coreSkills: [
+      'Lead Generation',
+      'Prospecting',
+      'Qualification',
+      'Presentation',
+      'Negotiation',
+      'Closing',
+      'Account Management',
+      'CRM Management',
+    ],
+    specializedSkills: [
+      'Cold Outreach',
+      'Discovery Calls',
+      'Product Demos',
+      'Objection Handling',
+      'Contract Negotiation',
+      'Upselling',
+      'Cross-selling',
+    ],
   },
-  'Analytics': {
-    coreSkills: ['Statistical Analysis', 'Data Visualization', 'Business Intelligence', 'Reporting', 'Data Mining', 'Predictive Analytics', 'A/B Testing'],
-    researchSkills: ['SQL', 'Python/R', 'Excel', 'Tableau', 'Power BI', 'Google Analytics', 'Data Modeling', 'KPI Development']
+  Analytics: {
+    coreSkills: [
+      'Statistical Analysis',
+      'Data Visualization',
+      'Business Intelligence',
+      'Reporting',
+      'Data Mining',
+      'Predictive Analytics',
+      'A/B Testing',
+    ],
+    researchSkills: [
+      'SQL',
+      'Python/R',
+      'Excel',
+      'Tableau',
+      'Power BI',
+      'Google Analytics',
+      'Data Modeling',
+      'KPI Development',
+    ],
   },
-  'Support': {
-    coreSkills: ['Customer Service', 'Problem Solving', 'Technical Support', 'Communication', 'Product Knowledge', 'Issue Resolution', 'Documentation'],
-    specializedSkills: ['Troubleshooting', 'Case Management', 'Knowledge Base', 'Escalation', 'Customer Education', 'Feedback Collection']
+  Support: {
+    coreSkills: [
+      'Customer Service',
+      'Problem Solving',
+      'Technical Support',
+      'Communication',
+      'Product Knowledge',
+      'Issue Resolution',
+      'Documentation',
+    ],
+    specializedSkills: [
+      'Troubleshooting',
+      'Case Management',
+      'Knowledge Base',
+      'Escalation',
+      'Customer Education',
+      'Feedback Collection',
+    ],
   },
-  'Business': {
-    coreSkills: ['Strategic Planning', 'Business Analysis', 'Market Research', 'Financial Analysis', 'Operations Management', 'Project Management'],
-    specializedSkills: ['Business Modeling', 'Process Improvement', 'Change Management', 'Performance Metrics', 'Budget Management', 'Vendor Management']
+  Business: {
+    coreSkills: [
+      'Strategic Planning',
+      'Business Analysis',
+      'Market Research',
+      'Financial Analysis',
+      'Operations Management',
+      'Project Management',
+    ],
+    specializedSkills: [
+      'Business Modeling',
+      'Process Improvement',
+      'Change Management',
+      'Performance Metrics',
+      'Budget Management',
+      'Vendor Management',
+    ],
   },
-  'Creative': {
-    coreSkills: ['Creative Strategy', 'Visual Design', 'Content Creation', 'Brand Development', 'Campaign Development', 'Art Direction', 'Creative Writing'],
-    creativeSkills: ['Adobe Creative Suite', 'Video Production', 'Photography', 'Copywriting', 'Storytelling', 'Typography', 'Color Theory', 'Layout Design']
+  Creative: {
+    coreSkills: [
+      'Creative Strategy',
+      'Visual Design',
+      'Content Creation',
+      'Brand Development',
+      'Campaign Development',
+      'Art Direction',
+      'Creative Writing',
+    ],
+    creativeSkills: [
+      'Adobe Creative Suite',
+      'Video Production',
+      'Photography',
+      'Copywriting',
+      'Storytelling',
+      'Typography',
+      'Color Theory',
+      'Layout Design',
+    ],
   },
-  'Research': {
-    coreSkills: ['Market Research', 'Competitive Analysis', 'Data Gathering', 'Report Writing', 'Trend Analysis', 'Strategic Research'],
-    researchSkills: ['Survey Design', 'Data Analysis', 'Source Verification', 'Industry Analysis', 'User Research', 'Usability Testing']
-  }
+  Research: {
+    coreSkills: [
+      'Market Research',
+      'Competitive Analysis',
+      'Data Gathering',
+      'Report Writing',
+      'Trend Analysis',
+      'Strategic Research',
+    ],
+    researchSkills: [
+      'Survey Design',
+      'Data Analysis',
+      'Source Verification',
+      'Industry Analysis',
+      'User Research',
+      'Usability Testing',
+    ],
+  },
 };
 
 // Function to generate provider-specific system prompt
@@ -422,31 +622,57 @@ function generateProviderSpecificPrompt(employee) {
   const provider = employee.provider;
   const category = employee.category;
   const template = providerTemplates[provider];
-  
+
   if (!template) {
     console.warn(`No template found for provider: ${provider}`);
     return generateDefaultPrompt(employee);
   }
-  
+
   // Get category-specific skills
-  const categorySkillSet = categorySkills[category] || categorySkills['Business'];
-  
+  const categorySkillSet =
+    categorySkills[category] || categorySkills['Business'];
+
   // Format tools
-  const tools = employee.defaultTools ? 
-    employee.defaultTools.map(tool => `- ${tool}: Use this tool for relevant tasks`).join('\n') : 
-    '- web_search: Search for information\n- analyze_file: Analyze documents and files';
-  
+  const tools = employee.defaultTools
+    ? employee.defaultTools
+        .map(tool => `- ${tool}: Use this tool for relevant tasks`)
+        .join('\n')
+    : '- web_search: Search for information\n- analyze_file: Analyze documents and files';
+
   // Replace placeholders in the template
   let prompt = template.basePrompt
     .replace(/{role}/g, employee.role)
     .replace(/{specialty}/g, employee.specialty || employee.description)
-    .replace(/{coreSkills}/g, categorySkillSet.coreSkills.map(skill => `- ${skill}`).join('\n'))
-    .replace(/{technicalSkills}/g, (categorySkillSet.technicalSkills || []).map(skill => `- ${skill}`).join('\n'))
-    .replace(/{specializedSkills}/g, (categorySkillSet.specializedSkills || []).map(skill => `- ${skill}`).join('\n'))
-    .replace(/{creativeSkills}/g, (categorySkillSet.creativeSkills || []).map(skill => `- ${skill}`).join('\n'))
-    .replace(/{researchSkills}/g, (categorySkillSet.researchSkills || []).map(skill => `- ${skill}`).join('\n'))
+    .replace(
+      /{coreSkills}/g,
+      categorySkillSet.coreSkills.map(skill => `- ${skill}`).join('\n')
+    )
+    .replace(
+      /{technicalSkills}/g,
+      (categorySkillSet.technicalSkills || [])
+        .map(skill => `- ${skill}`)
+        .join('\n')
+    )
+    .replace(
+      /{specializedSkills}/g,
+      (categorySkillSet.specializedSkills || [])
+        .map(skill => `- ${skill}`)
+        .join('\n')
+    )
+    .replace(
+      /{creativeSkills}/g,
+      (categorySkillSet.creativeSkills || [])
+        .map(skill => `- ${skill}`)
+        .join('\n')
+    )
+    .replace(
+      /{researchSkills}/g,
+      (categorySkillSet.researchSkills || [])
+        .map(skill => `- ${skill}`)
+        .join('\n')
+    )
     .replace(/{tools}/g, tools);
-  
+
   return prompt;
 }
 
@@ -489,56 +715,85 @@ IMPORTANT: Always use tools when asked to perform actions. Be professional, thor
 // Function to generate capabilities JSON
 function generateCapabilities(employee) {
   const category = employee.category;
-  const categorySkillSet = categorySkills[category] || categorySkills['Business'];
-  
+  const categorySkillSet =
+    categorySkills[category] || categorySkills['Business'];
+
   return {
     coreSkills: employee.skills || [],
     technicalSkills: categorySkillSet.technicalSkills || [],
     specializedSkills: categorySkillSet.specializedSkills || [],
     creativeSkills: categorySkillSet.creativeSkills || [],
     researchSkills: categorySkillSet.researchSkills || [],
-    softSkills: ['Communication', 'Problem Solving', 'Time Management', 'Collaboration'],
-    availableTools: (employee.defaultTools || ['web_search', 'analyze_file']).map(tool => ({
+    softSkills: [
+      'Communication',
+      'Problem Solving',
+      'Time Management',
+      'Collaboration',
+    ],
+    availableTools: (
+      employee.defaultTools || ['web_search', 'analyze_file']
+    ).map(tool => ({
       id: tool,
       name: tool.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
       description: `Use this tool for ${tool.replace(/_/g, ' ')} tasks`,
-      category: 'general'
+      category: 'general',
     })),
-    toolProficiency: (employee.defaultTools || ['web_search', 'analyze_file']).reduce((acc, tool) => {
+    toolProficiency: (
+      employee.defaultTools || ['web_search', 'analyze_file']
+    ).reduce((acc, tool) => {
       acc[tool] = 90; // Higher proficiency for provider-optimized prompts
       return acc;
     }, {}),
-    autonomyLevel: employee.provider === 'chatgpt' ? 'fully-autonomous' : 'semi-autonomous',
-    decisionMaking: [{
-      type: 'professional_decision',
-      description: 'Make decisions based on professional expertise and provider strengths',
-      confidence: 90,
-      criteria: ['quality', 'efficiency', 'best_practices', 'provider_optimization']
-    }],
+    autonomyLevel:
+      employee.provider === 'chatgpt' ? 'fully-autonomous' : 'semi-autonomous',
+    decisionMaking: [
+      {
+        type: 'professional_decision',
+        description:
+          'Make decisions based on professional expertise and provider strengths',
+        confidence: 90,
+        criteria: [
+          'quality',
+          'efficiency',
+          'best_practices',
+          'provider_optimization',
+        ],
+      },
+    ],
     canCollaborate: true,
-    collaborationProtocols: [{
-      name: 'provider_optimized_collaboration',
-      description: 'Collaborate using provider-specific best practices',
-      steps: ['analyze_requirements', 'execute_with_provider_strengths', 'deliver_optimized_results'],
-      triggers: ['task_assigned']
-    }],
-    communicationChannels: [{
-      type: 'direct',
-      name: 'Chat',
-      description: 'Direct communication optimized for provider capabilities',
-      participants: ['team_members']
-    }]
+    collaborationProtocols: [
+      {
+        name: 'provider_optimized_collaboration',
+        description: 'Collaborate using provider-specific best practices',
+        steps: [
+          'analyze_requirements',
+          'execute_with_provider_strengths',
+          'deliver_optimized_results',
+        ],
+        triggers: ['task_assigned'],
+      },
+    ],
+    communicationChannels: [
+      {
+        type: 'direct',
+        name: 'Chat',
+        description: 'Direct communication optimized for provider capabilities',
+        participants: ['team_members'],
+      },
+    ],
   };
 }
 
 // Function to generate tools JSON
 function generateTools(employee) {
-  return (employee.defaultTools || ['web_search', 'analyze_file']).map(tool => ({
-    id: tool,
-    name: tool.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-    description: `Use this tool for ${tool.replace(/_/g, ' ')} tasks`,
-    category: 'general'
-  }));
+  return (employee.defaultTools || ['web_search', 'analyze_file']).map(
+    tool => ({
+      id: tool,
+      name: tool.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      description: `Use this tool for ${tool.replace(/_/g, ' ')} tasks`,
+      category: 'general',
+    })
+  );
 }
 
 // Function to generate performance JSON
@@ -551,7 +806,7 @@ function generatePerformance() {
     errorRate: 0,
     userSatisfaction: 0,
     costEfficiency: 0,
-    lastUpdated: new Date().toISOString()
+    lastUpdated: new Date().toISOString(),
   };
 }
 
@@ -563,11 +818,11 @@ function generateAvailability() {
       start: '09:00',
       end: '17:00',
       days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
-      breaks: []
+      breaks: [],
     },
     maxConcurrentTasks: 3,
     autoAcceptTasks: true,
-    priorityLevel: 'high'
+    priorityLevel: 'high',
   };
 }
 
@@ -578,83 +833,85 @@ function generateCost(employee) {
     perTaskCost: 1,
     perToolExecutionCost: 0.01,
     currency: 'USD',
-    billingPeriod: 'hourly'
+    billingPeriod: 'hourly',
   };
 }
 
 // Function to generate senior-level certifications based on category
 function generateSeniorCertifications(category) {
   const certificationMap = {
-    'Engineering': [
+    Engineering: [
       'AWS Solutions Architect Professional',
       'Google Cloud Professional Architect',
       'Microsoft Azure Solutions Architect Expert',
       'Certified Kubernetes Administrator (CKA)',
-      'Certified Information Security Manager (CISM)'
+      'Certified Information Security Manager (CISM)',
     ],
-    'Marketing': [
+    Marketing: [
       'Google Analytics Certified',
       'HubSpot Content Marketing Certified',
       'Facebook Blueprint Certified',
       'Google Ads Certified',
-      'Salesforce Marketing Cloud Certified'
+      'Salesforce Marketing Cloud Certified',
     ],
-    'Design': [
+    Design: [
       'Adobe Certified Expert (ACE)',
       'Google UX Design Certificate',
       'Certified Usability Analyst (CUA)',
       'Interaction Design Foundation Certificate',
-      'Design Thinking Certificate'
+      'Design Thinking Certificate',
     ],
-    'Sales': [
+    Sales: [
       'Salesforce Certified Administrator',
       'HubSpot Sales Software Certified',
       'Certified Sales Professional (CSP)',
       'Strategic Selling Certified',
-      'Challenger Sale Certified'
+      'Challenger Sale Certified',
     ],
-    'Analytics': [
+    Analytics: [
       'Google Analytics Certified',
       'Tableau Desktop Certified Professional',
       'Microsoft Power BI Data Analyst',
       'Certified Analytics Professional (CAP)',
-      'SAS Certified Advanced Analytics Professional'
+      'SAS Certified Advanced Analytics Professional',
     ],
-    'Support': [
+    Support: [
       'ITIL Foundation Certified',
       'Certified Customer Service Professional',
       'Zendesk Support Administrator',
       'ServiceNow Certified System Administrator',
-      'CompTIA Customer Service+'
+      'CompTIA Customer Service+',
     ],
-    'Business': [
+    Business: [
       'Project Management Professional (PMP)',
       'Certified Business Analysis Professional (CBAP)',
       'Six Sigma Black Belt',
       'Certified Scrum Master (CSM)',
-      'Agile Certified Practitioner (PMI-ACP)'
+      'Agile Certified Practitioner (PMI-ACP)',
     ],
-    'Creative': [
+    Creative: [
       'Adobe Certified Expert (ACE)',
       'Google Creative Certificate',
       'Canva Design School Certified',
       'Figma Design System Certified',
-      'Creative Director Certification'
+      'Creative Director Certification',
     ],
-    'Research': [
+    Research: [
       'Certified Research Professional',
       'Google Analytics Certified',
       'Market Research Society Certified',
       'Data Analysis Certificate',
-      'User Research Certificate'
-    ]
+      'User Research Certificate',
+    ],
   };
-  
-  return certificationMap[category] || [
-    'Professional Certification',
-    'Industry Expert Certification',
-    'Advanced Skills Certification'
-  ];
+
+  return (
+    certificationMap[category] || [
+      'Professional Certification',
+      'Industry Expert Certification',
+      'Advanced Skills Certification',
+    ]
+  );
 }
 
 // Function to generate metadata JSON
@@ -667,12 +924,14 @@ function generateMetadata(employee) {
     fitLevel: employee.fitLevel || 'excellent',
     popular: employee.popular || false,
     providerOptimized: true,
-    agenticCapabilities: employee.provider === 'chatgpt' ? 'high_eagerness' : 'balanced',
-    multimodalCapabilities: employee.provider === 'gemini' ? ['text', 'image', 'video'] : ['text'],
+    agenticCapabilities:
+      employee.provider === 'chatgpt' ? 'high_eagerness' : 'balanced',
+    multimodalCapabilities:
+      employee.provider === 'gemini' ? ['text', 'image', 'video'] : ['text'],
     seniorityLevel: 'principal',
     leadershipExperience: true,
     mentoringCapability: true,
-    strategicThinking: true
+    strategicThinking: true,
   };
 }
 
@@ -680,39 +939,55 @@ function generateMetadata(employee) {
 function parseAIEmployees() {
   const aiEmployeesPath = path.join(__dirname, '../src/data/ai-employees.ts');
   const content = fs.readFileSync(aiEmployeesPath, 'utf8');
-  
+
   // Extract the AI_EMPLOYEES array using regex
-  const arrayMatch = content.match(/export const AI_EMPLOYEES: AIEmployee\[\] = \[([\s\S]*?)\];/);
+  const arrayMatch = content.match(
+    /export const AI_EMPLOYEES: AIEmployee\[\] = \[([\s\S]*?)\];/
+  );
   if (!arrayMatch) {
     throw new Error('Could not find AI_EMPLOYEES array in the TypeScript file');
   }
-  
+
   // This is a simplified parser - in a real implementation, we'd use a proper TypeScript parser
   // For now, we'll create a comprehensive list based on the patterns we see
   const employees = [];
-  
+
   // Extract employee data using regex patterns
-  const employeeMatches = content.matchAll(/{\s*id:\s*'([^']+)',\s*name:\s*'([^']+)',\s*role:\s*'([^']+)',\s*category:\s*'([^']+)',\s*description:\s*'([^']+)',\s*provider:\s*'([^']+)',\s*price:\s*(\d+),/g);
-  
+  const employeeMatches = content.matchAll(
+    /{\s*id:\s*'([^']+)',\s*name:\s*'([^']+)',\s*role:\s*'([^']+)',\s*category:\s*'([^']+)',\s*description:\s*'([^']+)',\s*provider:\s*'([^']+)',\s*price:\s*(\d+),/g
+  );
+
   for (const match of employeeMatches) {
     const [, id, name, role, category, description, provider, price] = match;
-    
+
     // Extract skills (simplified - would need more sophisticated parsing)
-    const skillsMatch = content.match(new RegExp(`id:\\s*'${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'[\\s\\S]*?skills:\\s*\\[([\\s\\S]*?)\\]`));
-    const skills = skillsMatch ? 
-      skillsMatch[1].match(/'([^']+)'/g)?.map(s => s.replace(/'/g, '')) || [] : 
-      ['Professional Skills'];
-    
+    const skillsMatch = content.match(
+      new RegExp(
+        `id:\\s*'${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'[\\s\\S]*?skills:\\s*\\[([\\s\\S]*?)\\]`
+      )
+    );
+    const skills = skillsMatch
+      ? skillsMatch[1].match(/'([^']+)'/g)?.map(s => s.replace(/'/g, '')) || []
+      : ['Professional Skills'];
+
     // Extract specialty
-    const specialtyMatch = content.match(new RegExp(`id:\\s*'${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'[\\s\\S]*?specialty:\\s*'([^']+)'`));
+    const specialtyMatch = content.match(
+      new RegExp(
+        `id:\\s*'${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'[\\s\\S]*?specialty:\\s*'([^']+)'`
+      )
+    );
     const specialty = specialtyMatch ? specialtyMatch[1] : description;
-    
+
     // Extract default tools
-    const toolsMatch = content.match(new RegExp(`id:\\s*'${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'[\\s\\S]*?defaultTools:\\s*\\[([\\s\\S]*?)\\]`));
-    const defaultTools = toolsMatch ? 
-      toolsMatch[1].match(/'([^']+)'/g)?.map(t => t.replace(/'/g, '')) || [] : 
-      ['web_search', 'analyze_file'];
-    
+    const toolsMatch = content.match(
+      new RegExp(
+        `id:\\s*'${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'[\\s\\S]*?defaultTools:\\s*\\[([\\s\\S]*?)\\]`
+      )
+    );
+    const defaultTools = toolsMatch
+      ? toolsMatch[1].match(/'([^']+)'/g)?.map(t => t.replace(/'/g, '')) || []
+      : ['web_search', 'analyze_file'];
+
     employees.push({
       id,
       name,
@@ -725,36 +1000,40 @@ function parseAIEmployees() {
       specialty,
       defaultTools,
       fitLevel: 'excellent',
-      popular: false
+      popular: false,
     });
   }
-  
+
   return employees;
 }
 
 // Main execution
-console.log('🚀 Starting Provider-Specific AI Employee System Prompt Generation...');
+console.log(
+  '🚀 Starting Provider-Specific AI Employee System Prompt Generation...'
+);
 
 try {
   // Parse all AI employees
   const allEmployees = parseAIEmployees();
-  console.log(`📊 Parsed ${allEmployees.length} AI employees from frontend data`);
-  
+  console.log(
+    `📊 Parsed ${allEmployees.length} AI employees from frontend data`
+  );
+
   // Group by provider for statistics
   const providerStats = allEmployees.reduce((acc, emp) => {
     acc[emp.provider] = (acc[emp.provider] || 0) + 1;
     return acc;
   }, {});
-  
+
   console.log('📈 Provider Distribution:');
   Object.entries(providerStats).forEach(([provider, count]) => {
     console.log(`  - ${provider}: ${count} employees`);
   });
-  
+
   // Generate SQL insert statements for all employees
   let sqlStatements = [];
   let employeeCount = 0;
-  
+
   allEmployees.forEach((employee, index) => {
     const systemPrompt = generateProviderSpecificPrompt(employee);
     const capabilities = generateCapabilities(employee);
@@ -763,10 +1042,10 @@ try {
     const availability = generateAvailability();
     const cost = generateCost(employee);
     const metadata = generateMetadata(employee);
-    
+
     // Generate UUID for database
     const uuid = `550e8400-e29b-41d4-a716-44665544${String(index + 100).padStart(4, '0')}`;
-    
+
     const sql = `INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
 ('${uuid}', '${employee.name}', '${employee.role}', '${employee.category}', '${employee.category}', 'principal', 'available',
 '${JSON.stringify(capabilities).replace(/'/g, "''")}',
@@ -776,13 +1055,16 @@ try {
 '${JSON.stringify(availability).replace(/'/g, "''")}',
 '${JSON.stringify(cost).replace(/'/g, "''")}',
 '${JSON.stringify(metadata).replace(/'/g, "''")}');`;
-    
+
     sqlStatements.push(sql);
     employeeCount++;
   });
-  
+
   // Write the comprehensive SQL file
-  const outputPath = path.join(__dirname, '../supabase/migrations/20250110000009_provider_optimized_ai_employees.sql');
+  const outputPath = path.join(
+    __dirname,
+    '../supabase/migrations/20250110000009_provider_optimized_ai_employees.sql'
+  );
   const sqlContent = `-- ================================================================
 -- Provider-Optimized AI Employees with Advanced System Prompts
 -- ================================================================
@@ -829,18 +1111,33 @@ BEGIN
 END $$;`;
 
   fs.writeFileSync(outputPath, sqlContent);
-  
-  console.log(`✅ Generated provider-optimized system prompts for ${employeeCount} AI employees`);
+
+  console.log(
+    `✅ Generated provider-optimized system prompts for ${employeeCount} AI employees`
+  );
   console.log(`📁 SQL migration file created: ${outputPath}`);
-  console.log('🎯 Next step: Run the migration to add all provider-optimized AI employees to the database');
+  console.log(
+    '🎯 Next step: Run the migration to add all provider-optimized AI employees to the database'
+  );
   console.log('📊 Provider-specific optimizations applied:');
-  console.log('  - ChatGPT: High eagerness, persistent execution, minimal clarification');
-  console.log('  - Claude: Technical reasoning, apply_patch workflows, systematic exploration');
-  console.log('  - Gemini: Multimodal capabilities, image/video generation, creative workflows');
-  console.log('  - Perplexity: Real-time research, source citation, data-driven insights');
-  console.log('🏆 All employees enhanced with 15+ years experience and principal-level expertise');
-  console.log('🎓 Senior certifications and leadership capabilities added to all employees');
-  
+  console.log(
+    '  - ChatGPT: High eagerness, persistent execution, minimal clarification'
+  );
+  console.log(
+    '  - Claude: Technical reasoning, apply_patch workflows, systematic exploration'
+  );
+  console.log(
+    '  - Gemini: Multimodal capabilities, image/video generation, creative workflows'
+  );
+  console.log(
+    '  - Perplexity: Real-time research, source citation, data-driven insights'
+  );
+  console.log(
+    '🏆 All employees enhanced with 15+ years experience and principal-level expertise'
+  );
+  console.log(
+    '🎓 Senior certifications and leadership capabilities added to all employees'
+  );
 } catch (error) {
   console.error('❌ Error generating provider-specific prompts:', error);
   process.exit(1);

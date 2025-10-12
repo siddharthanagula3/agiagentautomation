@@ -106,7 +106,7 @@ const SettingsPage: React.FC = () => {
     if (section && section !== activeSection) {
       setActiveSection(section);
     }
-  }, [section]);
+  }, [section, activeSection]);
 
   const loadAllData = async () => {
     try {
@@ -149,7 +149,10 @@ const SettingsPage: React.FC = () => {
   };
 
   // Profile handlers
-  const handleProfileUpdate = (field: keyof UserProfile, value: any) => {
+  const handleProfileUpdate = (
+    field: keyof UserProfile,
+    value: string | number | boolean
+  ) => {
     if (profile) {
       setProfile({ ...profile, [field]: value });
     }
@@ -212,7 +215,10 @@ const SettingsPage: React.FC = () => {
   };
 
   // Settings handlers
-  const handleSettingsUpdate = (field: keyof UserSettings, value: any) => {
+  const handleSettingsUpdate = (
+    field: keyof UserSettings,
+    value: string | number | boolean
+  ) => {
     if (settings) {
       setSettings({ ...settings, [field]: value });
     }
@@ -539,7 +545,7 @@ const SettingsPage: React.FC = () => {
                   <div>
                     <Label className="text-foreground">Timezone</Label>
                     <Select
-                      value={profile.timezone}
+                      value={profile.timezone || 'America/New_York'}
                       onValueChange={value =>
                         handleProfileUpdate('timezone', value)
                       }
@@ -572,7 +578,7 @@ const SettingsPage: React.FC = () => {
                   <div>
                     <Label className="text-foreground">Language</Label>
                     <Select
-                      value={profile.language}
+                      value={profile.language || 'en'}
                       onValueChange={value =>
                         handleProfileUpdate('language', value)
                       }
@@ -739,7 +745,7 @@ const SettingsPage: React.FC = () => {
                       </p>
                     </div>
                     <Switch
-                      checked={settings.two_factor_enabled}
+                      checked={settings.two_factor_enabled || false}
                       onCheckedChange={handleToggle2FA}
                       disabled={isSaving}
                     />
@@ -748,7 +754,7 @@ const SettingsPage: React.FC = () => {
                   <div>
                     <Label className="text-foreground">Session Timeout</Label>
                     <Select
-                      value={settings.session_timeout.toString()}
+                      value={settings.session_timeout?.toString() || '60'}
                       onValueChange={value =>
                         handleSettingsUpdate('session_timeout', parseInt(value))
                       }
@@ -954,7 +960,7 @@ const SettingsPage: React.FC = () => {
                   <div>
                     <Label className="text-foreground">Theme</Label>
                     <Select
-                      value={settings.theme}
+                      value={settings.theme || 'dark'}
                       onValueChange={(value: 'dark' | 'light' | 'auto') =>
                         handleSettingsUpdate('theme', value)
                       }
@@ -1023,7 +1029,7 @@ const SettingsPage: React.FC = () => {
                   <div>
                     <Label className="text-foreground">Cache Size</Label>
                     <Select
-                      value={settings.cache_size}
+                      value={settings.cache_size || '1GB'}
                       onValueChange={value =>
                         handleSettingsUpdate('cache_size', value)
                       }
@@ -1044,7 +1050,7 @@ const SettingsPage: React.FC = () => {
                   <div>
                     <Label className="text-foreground">Backup Frequency</Label>
                     <Select
-                      value={settings.backup_frequency}
+                      value={settings.backup_frequency || 'daily'}
                       onValueChange={value =>
                         handleSettingsUpdate('backup_frequency', value)
                       }
@@ -1067,7 +1073,7 @@ const SettingsPage: React.FC = () => {
                     </Label>
                     <Input
                       type="number"
-                      value={settings.retention_period}
+                      value={settings.retention_period || 30}
                       onChange={e =>
                         handleSettingsUpdate(
                           'retention_period',
@@ -1086,7 +1092,7 @@ const SettingsPage: React.FC = () => {
                     </Label>
                     <Input
                       type="number"
-                      value={settings.max_concurrent_jobs}
+                      value={settings.max_concurrent_jobs || 10}
                       onChange={e =>
                         handleSettingsUpdate(
                           'max_concurrent_jobs',

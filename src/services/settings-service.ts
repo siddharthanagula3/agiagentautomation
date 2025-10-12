@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/lib/supabase-client';
+import { authService } from './auth-service';
 
 export interface UserProfile {
   id: string;
@@ -33,18 +34,16 @@ export interface APIKey {
 class SettingsService {
   async getUserProfile(): Promise<UserProfile | null> {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return null;
+      const { user, error } = await authService.getCurrentUser();
+      if (error || !user) return null;
 
       return {
         id: user.id,
-        email: user.email || '',
-        name: user.user_metadata?.full_name || user.user_metadata?.name,
-        avatar: user.user_metadata?.avatar_url,
-        role: user.user_metadata?.role || 'user',
-        plan: user.user_metadata?.plan || 'free',
+        email: user.email,
+        name: user.name,
+        avatar: user.avatar,
+        role: user.role,
+        plan: user.plan,
       };
     } catch (error) {
       console.error('Error getting user profile:', error);
@@ -68,26 +67,26 @@ class SettingsService {
       }
 
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      return { success: false, error: errorMessage };
     }
   }
 
   async getUserSettings(): Promise<UserSettings> {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return {};
+      const { user, error } = await authService.getCurrentUser();
+      if (error || !user) return {};
 
-      const { data, error } = await supabase
+      const { data, error: dbError } = await supabase
         .from('user_settings')
         .select('*')
         .eq('id', user.id)
         .single();
 
-      if (error) {
-        console.error('Error loading user settings:', error);
+      if (dbError) {
+        console.error('Error loading user settings:', dbError);
         return {};
       }
 
@@ -108,10 +107,8 @@ class SettingsService {
     settings: UserSettings
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
+      const { user, error: authError } = await authService.getCurrentUser();
+      if (authError || !user) {
         return { success: false, error: 'User not authenticated' };
       }
 
@@ -131,7 +128,7 @@ class SettingsService {
       }
 
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating user settings:', error);
       return { success: false, error: error.message };
     }
@@ -142,7 +139,7 @@ class SettingsService {
     try {
       const profile = await this.getUserProfile();
       return { data: profile };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: null, error: error.message };
     }
   }
@@ -151,7 +148,7 @@ class SettingsService {
     try {
       const settings = await this.getUserSettings();
       return { data: settings };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: {}, error: error.message };
     }
   }
@@ -160,7 +157,7 @@ class SettingsService {
     try {
       // For now, return empty array - API keys are stored in localStorage
       return { data: [] };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: [], error: error.message };
     }
   }
@@ -169,7 +166,7 @@ class SettingsService {
     try {
       // For now, return a placeholder - implement file upload to Supabase Storage
       return { data: URL.createObjectURL(file), error: undefined };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: '', error: error.message };
     }
   }
@@ -185,7 +182,7 @@ class SettingsService {
       }
 
       return {};
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { error: error.message };
     }
   }
@@ -208,7 +205,7 @@ class SettingsService {
       };
 
       return { data: apiKey, fullKey: key };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { data: {} as APIKey, error: error.message };
     }
   }
@@ -217,7 +214,7 @@ class SettingsService {
     try {
       // For now, just return success - implement actual deletion
       return {};
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { error: error.message };
     }
   }
@@ -226,7 +223,7 @@ class SettingsService {
     try {
       // For now, just return success - implement 2FA
       return {};
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { error: error.message };
     }
   }
@@ -235,7 +232,7 @@ class SettingsService {
     try {
       // For now, just return success - implement 2FA
       return {};
-    } catch (error: any) {
+    } catch (error: unknown) {
       return { error: error.message };
     }
   }

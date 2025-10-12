@@ -60,9 +60,9 @@ test.describe('User Onboarding Flow', () => {
     await page.click('text=Sign In');
     await expect(page).toHaveURL(/.*\/auth\/login/);
 
-    // Fill login form
-    await page.fill('input[name="email"]', 'test@example.com');
-    await page.fill('input[name="password"]', 'password123');
+    // Fill login form with production credentials
+    await page.fill('input[name="email"]', 'siddharthanagula3@gmail.com');
+    await page.fill('input[name="password"]', 'Sid@1234');
 
     // Submit login
     await page.click('button[type="submit"]');
@@ -86,10 +86,10 @@ test.describe('User Onboarding Flow', () => {
   });
 
   test('should complete logout flow', async ({ page }) => {
-    // First login (assuming user exists)
+    // First login with production credentials
     await page.click('text=Sign In');
-    await page.fill('input[name="email"]', 'test@example.com');
-    await page.fill('input[name="password"]', 'password123');
+    await page.fill('input[name="email"]', 'siddharthanagula3@gmail.com');
+    await page.fill('input[name="password"]', 'Sid@1234');
     await page.click('button[type="submit"]');
 
     // Wait for dashboard
@@ -112,7 +112,7 @@ test.describe('User Onboarding Flow', () => {
     await expect(page).toHaveURL(/.*\/auth\/forgot-password/);
 
     // Fill email for password reset
-    await page.fill('input[name="email"]', 'test@example.com');
+    await page.fill('input[name="email"]', 'siddharthanagula3@gmail.com');
     await page.click('button[type="submit"]');
 
     // Should show success message

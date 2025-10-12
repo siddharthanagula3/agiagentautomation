@@ -75,11 +75,11 @@ describe('Button Component', () => {
   it('handles keyboard events', () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick}>Keyboard</Button>);
-    
+
     const button = screen.getByRole('button');
     fireEvent.keyDown(button, { key: 'Enter' });
     fireEvent.keyDown(button, { key: ' ' });
-    
+
     // Note: Button component should handle Enter and Space keys
     // This test verifies the component can receive keyboard events
     expect(button).toBeInTheDocument();
@@ -103,20 +103,20 @@ describe('Button Component', () => {
   it('combines multiple props correctly', () => {
     const handleClick = vi.fn();
     render(
-      <Button 
-        variant="destructive" 
-        size="lg" 
+      <Button
+        variant="destructive"
+        size="lg"
         className="custom-class"
         onClick={handleClick}
       >
         Combined Props
       </Button>
     );
-    
+
     const button = screen.getByRole('button');
     expect(button).toHaveClass('bg-destructive', 'h-11', 'custom-class');
     expect(button).toHaveTextContent('Combined Props');
-    
+
     fireEvent.click(button);
     expect(handleClick).toHaveBeenCalledTimes(1);
   });

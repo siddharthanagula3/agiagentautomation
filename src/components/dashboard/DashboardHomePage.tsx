@@ -45,7 +45,11 @@ import {
   useTransform,
   animate,
 } from 'framer-motion';
-import { DashboardLoading, SkeletonCard, SkeletonText } from '@/components/ui/premium-loading';
+import {
+  DashboardLoading,
+  SkeletonCard,
+  SkeletonText,
+} from '@/components/ui/premium-loading';
 
 interface DashboardHomePageProps {
   className?: string;

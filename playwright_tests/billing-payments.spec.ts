@@ -2,10 +2,10 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Billing & Payments', () => {
   test.beforeEach(async ({ page }) => {
-    // Login before each test
+    // Login before each test with production credentials
     await page.goto('/auth/login');
-    await page.fill('input[name="email"]', 'test@example.com');
-    await page.fill('input[name="password"]', 'password123');
+    await page.fill('input[name="email"]', 'siddharthanagula3@gmail.com');
+    await page.fill('input[name="password"]', 'Sid@1234');
     await page.click('button[type="submit"]');
     await expect(page).toHaveURL(/.*\/dashboard/, { timeout: 10000 });
   });
@@ -24,11 +24,15 @@ test.describe('Billing & Payments', () => {
     await page.goto('/pricing');
 
     // Click on a pricing plan
-    await page.click('[data-testid="pricing-plan"]:first-child [data-testid="select-plan-button"]');
+    await page.click(
+      '[data-testid="pricing-plan"]:first-child [data-testid="select-plan-button"]'
+    );
 
     // Should redirect to Stripe checkout or show subscription form
     // Note: In test environment, this might redirect to a test page
-    await expect(page).toHaveURL(/.*\/checkout|.*\/subscribe/, { timeout: 10000 });
+    await expect(page).toHaveURL(/.*\/checkout|.*\/subscribe/, {
+      timeout: 10000,
+    });
   });
 
   test('should access billing management', async ({ page }) => {
@@ -56,7 +60,9 @@ test.describe('Billing & Payments', () => {
     await page.goto('/billing');
 
     // Should see current subscription status
-    await expect(page.locator('[data-testid="subscription-status"]')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="subscription-status"]')
+    ).toBeVisible();
   });
 
   test('should view usage statistics', async ({ page }) => {
@@ -83,12 +89,16 @@ test.describe('Billing & Payments', () => {
     await page.goto('/billing');
 
     // Click cancel subscription button if available
-    const cancelButton = page.locator('[data-testid="cancel-subscription-button"]');
+    const cancelButton = page.locator(
+      '[data-testid="cancel-subscription-button"]'
+    );
     if (await cancelButton.isVisible()) {
       await cancelButton.click();
-      
+
       // Should show confirmation dialog
-      await expect(page.locator('[data-testid="cancel-confirmation"]')).toBeVisible();
+      await expect(
+        page.locator('[data-testid="cancel-confirmation"]')
+      ).toBeVisible();
     }
   });
 
@@ -104,10 +114,12 @@ test.describe('Billing & Payments', () => {
     await page.goto('/billing');
 
     // Click manage payment methods
-    const paymentMethodsButton = page.locator('[data-testid="payment-methods-button"]');
+    const paymentMethodsButton = page.locator(
+      '[data-testid="payment-methods-button"]'
+    );
     if (await paymentMethodsButton.isVisible()) {
       await paymentMethodsButton.click();
-      
+
       // Should redirect to payment methods management
       await expect(page).toHaveURL(/.*\/payment-methods/, { timeout: 5000 });
     }
@@ -118,7 +130,7 @@ test.describe('Billing & Payments', () => {
 
     // Check for any billing-related notifications
     const notifications = page.locator('[data-testid="billing-notification"]');
-    if (await notifications.count() > 0) {
+    if ((await notifications.count()) > 0) {
       await expect(notifications.first()).toBeVisible();
     }
   });
@@ -130,15 +142,15 @@ test.describe('Billing & Payments', () => {
     // Try to hire more employees than free tier allows
     const hireButtons = page.locator('[data-testid="hire-button"]');
     const buttonCount = await hireButtons.count();
-    
+
     if (buttonCount > 0) {
       // Click hire button
       await hireButtons.first().click();
-      
+
       // Should either hire successfully or show upgrade prompt
       const upgradePrompt = page.locator('[data-testid="upgrade-prompt"]');
       const successMessage = page.locator('[data-testid="hire-success"]');
-      
+
       await expect(upgradePrompt.or(successMessage)).toBeVisible();
     }
   });

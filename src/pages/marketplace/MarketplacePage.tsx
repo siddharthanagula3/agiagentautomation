@@ -43,6 +43,12 @@ import {
 } from '@/services/supabase-employees';
 import { useBusinessMetrics } from '@/hooks/useAnalytics';
 
+// Helper function to check if employee is hired using local storage
+const isEmployeeHiredLocally = (userId: string, employeeId: string): boolean => {
+  const hiredEmployees = JSON.parse(localStorage.getItem('hired_employees') || '[]');
+  return hiredEmployees.some((h: any) => h.employee_id === employeeId && h.user_id === userId);
+};
+
 interface AIEmployee extends BaseAIEmployee {
   isHired: boolean;
   rating: number;
@@ -89,12 +95,15 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     });
   }, [trackMarketplaceView, selectedCategory, searchQuery, sortBy, viewMode]);
 
-  // Fetch purchased employees to check which are already hired
+  // Fetch purchased employees to check which are already hired (using local storage for now)
   const { data: purchasedEmployees = [] } = useQuery({
     queryKey: ['purchased-employees', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      return await listPurchasedEmployees(user.id);
+      
+      // Use local storage instead of database for now
+      const hiredEmployees = JSON.parse(localStorage.getItem('hired_employees') || '[]');
+      return hiredEmployees.filter((h: any) => h.user_id === user.id);
     },
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -186,17 +195,11 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Hire employee mutation
+  // Hire employee mutation - Simplified for immediate hiring without payment
   const hireEmployeeMutation = useMutation({
     mutationFn: async (employeeId: string) => {
       if (!user) {
         throw new Error('You must be logged in to hire employees');
-      }
-
-      // Check if already hired
-      const alreadyHired = await isEmployeePurchased(user.id, employeeId);
-      if (alreadyHired) {
-        throw new Error('Employee already hired');
       }
 
       // Find the employee data
@@ -205,10 +208,31 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         throw new Error('Employee not found');
       }
 
-      // Hire the employee using the real service
-      const result = await purchaseEmployee(user.id, employee);
+      // Check if already hired using local storage
+      const hiredEmployees = JSON.parse(localStorage.getItem('hired_employees') || '[]');
+      const alreadyHired = hiredEmployees.find((h: any) => h.employee_id === employeeId && h.user_id === user.id);
+      
+      if (alreadyHired) {
+        throw new Error('Employee already hired');
+      }
 
-      return { success: true, employeeId, userId: user.id, result };
+      // Create hire record in local storage (bypassing database for now)
+      const hireRecord = {
+        id: `hire_${Date.now()}_${employeeId}`,
+        user_id: user.id,
+        employee_id: employeeId,
+        name: employee.name,
+        provider: employee.provider,
+        role: employee.role,
+        is_active: true,
+        purchased_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      };
+      
+      hiredEmployees.push(hireRecord);
+      localStorage.setItem('hired_employees', JSON.stringify(hiredEmployees));
+
+      return { success: true, employeeId, userId: user.id, result: hireRecord };
     },
     onSuccess: data => {
       // Update the query cache to mark employee as hired

@@ -1,207 +1,177 @@
-import { Helmet } from 'react-helmet-async';
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 
 interface SEOHeadProps {
   title?: string;
   description?: string;
   keywords?: string[];
-  canonical?: string;
-  ogType?: 'website' | 'article';
+  canonicalUrl?: string;
   ogImage?: string;
-  article?: {
-    publishedTime?: string;
-    modifiedTime?: string;
-    author?: string;
-    section?: string;
-    tags?: string[];
-  };
-  schema?: object | object[];
+  ogType?: string;
+  twitterCard?: string;
+  twitterSite?: string;
+  twitterCreator?: string;
+  structuredData?: Record<string, unknown>;
+  robots?: string;
+  author?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+  section?: string;
+  tags?: string[];
   noindex?: boolean;
+  nofollow?: boolean;
 }
 
-export const SEOHead: React.FC<SEOHeadProps> = ({
-  title = 'AGI Agent Automation | #1 AI Employees Platform in USA | Hire 165+ AI Agents',
-  description = 'Hire AI Employees starting at $1/month. 165+ specialized AI agents for automation, customer support, sales, marketing & more. Best AI workforce platform in USA. 24/7 operation, 95% cost savings. Start free trial today!',
+const SEOHead: React.FC<SEOHeadProps> = ({
+  title = 'AGI Agent Automation - AI Workforce Platform',
+  description = 'Transform your business with AI employees. Hire, manage, and scale your AI workforce with our comprehensive automation platform.',
   keywords = [
-    'ai employees',
-    'hire ai employees',
-    'ai agents',
-    'ai automation',
-    'agi agent automation',
-    'cheapest ai employees',
-    'best ai employees usa',
-    'no 1 in usa',
-    'ai workforce',
-    'agi',
-    'asi',
-    'hiring ai employees',
-    'ai employee platform',
-    'automation platform',
-    'ai agents for business',
+    'AI',
+    'automation',
+    'workforce',
+    'artificial intelligence',
+    'AI employees',
+    'business automation',
   ],
-  canonical,
+  canonicalUrl,
+  ogImage = '/og-image.png',
   ogType = 'website',
-  ogImage = 'https://agiagentautomation.com/og-image.jpg',
-  article,
-  schema,
+  twitterCard = 'summary_large_image',
+  twitterSite = '@agiagentautomation',
+  twitterCreator,
+  structuredData,
+  robots,
+  author,
+  publishedTime,
+  modifiedTime,
+  section,
+  tags,
   noindex = false,
+  nofollow = false,
 }) => {
-  const siteUrl = 'https://agiagentautomation.com';
-  const fullTitle = title.includes('AGI Agent Automation')
-    ? title
-    : `${title} | AGI Agent Automation`;
-  const canonicalUrl =
-    canonical ||
-    (typeof window !== 'undefined' ? window.location.href : siteUrl);
+  const baseUrl =
+    import.meta.env.VITE_APP_URL || 'https://agiagentautomation.com';
+  const currentUrl = canonicalUrl || `${baseUrl}${window.location.pathname}`;
 
-  // Default Organization Schema
-  const organizationSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'AGI Agent Automation',
-    legalName: 'AGI Agent Automation LLC',
-    url: siteUrl,
-    logo: `${siteUrl}/logo.png`,
-    description:
-      'Leading AI Employee and Automation Platform - Hire 165+ specialized AI agents for business automation',
-    address: {
-      '@type': 'PostalAddress',
-      addressCountry: 'US',
-      addressRegion: 'USA',
-    },
-    contactPoint: {
-      '@type': 'ContactPoint',
-      contactType: 'Customer Service',
-      email: 'support@agiagentautomation.com',
-      availableLanguage: ['en'],
-    },
-    sameAs: [
-      'https://twitter.com/agiagentauto',
-      'https://linkedin.com/company/agi-agent-automation',
-      'https://github.com/agiagentautomation',
-    ],
-  };
-
-  // Website Schema
-  const websiteSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'AGI Agent Automation',
-    url: siteUrl,
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: `${siteUrl}/search?q={search_term_string}`,
-      'query-input': 'required name=search_term_string',
-    },
-  };
-
-  // Breadcrumb Schema
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: siteUrl,
-      },
-    ],
-  };
-
-  // Combine all schemas
-  const allSchemas = [organizationSchema, websiteSchema, breadcrumbSchema];
-  if (schema) {
-    if (Array.isArray(schema)) {
-      allSchemas.push(...schema);
-    } else {
-      allSchemas.push(schema);
-    }
-  }
+  // Build robots meta content
+  const robotsContent =
+    robots ||
+    (() => {
+      const directives = [];
+      if (noindex) directives.push('noindex');
+      if (nofollow) directives.push('nofollow');
+      if (!noindex && !nofollow) directives.push('index', 'follow');
+      return directives.join(', ');
+    })();
 
   return (
     <Helmet>
-      {/* Primary Meta Tags */}
-      <title>{fullTitle}</title>
-      <meta name="title" content={fullTitle} />
+      {/* Basic Meta Tags */}
+      <title>{title}</title>
       <meta name="description" content={description} />
-      {keywords.length > 0 && (
-        <meta name="keywords" content={keywords.join(', ')} />
-      )}
-      <link rel="canonical" href={canonicalUrl} />
+      <meta name="keywords" content={keywords.join(', ')} />
+      <meta name="author" content={author} />
+      <meta name="robots" content={robotsContent} />
 
-      {/* Robots */}
-      {noindex ? (
-        <meta name="robots" content="noindex, nofollow" />
-      ) : (
-        <meta
-          name="robots"
-          content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
-        />
-      )}
+      {/* Canonical URL */}
+      <link rel="canonical" href={currentUrl} />
 
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={ogType} />
-      <meta property="og:url" content={canonicalUrl} />
-      <meta property="og:title" content={fullTitle} />
+      {/* Open Graph Tags */}
+      <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={ogImage} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
+      <meta property="og:type" content={ogType} />
+      <meta property="og:url" content={currentUrl} />
+      <meta
+        property="og:image"
+        content={ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`}
+      />
       <meta property="og:site_name" content="AGI Agent Automation" />
       <meta property="og:locale" content="en_US" />
 
-      {/* Article specific OG tags */}
-      {article && (
+      {/* Article specific Open Graph tags */}
+      {ogType === 'article' && (
         <>
-          {article.publishedTime && (
-            <meta
-              property="article:published_time"
-              content={article.publishedTime}
-            />
+          {publishedTime && (
+            <meta property="article:published_time" content={publishedTime} />
           )}
-          {article.modifiedTime && (
-            <meta
-              property="article:modified_time"
-              content={article.modifiedTime}
-            />
+          {modifiedTime && (
+            <meta property="article:modified_time" content={modifiedTime} />
           )}
-          {article.author && (
-            <meta property="article:author" content={article.author} />
-          )}
-          {article.section && (
-            <meta property="article:section" content={article.section} />
-          )}
-          {article.tags?.map((tag, index) => (
-            <meta key={index} property="article:tag" content={tag} />
-          ))}
+          {author && <meta property="article:author" content={author} />}
+          {section && <meta property="article:section" content={section} />}
+          {tags &&
+            tags.map((tag, index) => (
+              <meta key={index} property="article:tag" content={tag} />
+            ))}
         </>
       )}
 
-      {/* Twitter */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:url" content={canonicalUrl} />
-      <meta name="twitter:title" content={fullTitle} />
+      {/* Twitter Card Tags */}
+      <meta name="twitter:card" content={twitterCard} />
+      <meta name="twitter:site" content={twitterSite} />
+      {twitterCreator && (
+        <meta name="twitter:creator" content={twitterCreator} />
+      )}
+      <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={ogImage} />
-      <meta name="twitter:creator" content="@agiagentauto" />
+      <meta
+        name="twitter:image"
+        content={ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`}
+      />
 
       {/* Additional Meta Tags */}
-      <meta name="author" content="AGI Agent Automation" />
-      <meta name="publisher" content="AGI Agent Automation" />
-      <meta name="application-name" content="AGI Agent Automation" />
-      <meta name="apple-mobile-web-app-title" content="AGI Agent" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta name="theme-color" content="#3b82f6" />
+      <meta name="msapplication-TileColor" content="#3b82f6" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+      <meta name="apple-mobile-web-app-title" content="AGI Agent Automation" />
 
-      {/* Schema.org JSON-LD */}
-      <script type="application/ld+json">{JSON.stringify(allSchemas)}</script>
+      {/* Structured Data */}
+      {structuredData && (
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      )}
 
-      {/* Geo Tags */}
-      <meta name="geo.region" content="US" />
-      <meta name="geo.placename" content="United States" />
+      {/* Preconnect to external domains for performance */}
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossOrigin="anonymous"
+      />
+      <link rel="preconnect" href="https://api.dicebear.com" />
 
-      {/* Language */}
-      <meta httpEquiv="content-language" content="en-US" />
-      <meta name="language" content="English" />
+      {/* Favicon and App Icons */}
+      <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+      <link
+        rel="apple-touch-icon"
+        sizes="180x180"
+        href="/apple-touch-icon.png"
+      />
+      <link
+        rel="icon"
+        type="image/png"
+        sizes="32x32"
+        href="/favicon-32x32.png"
+      />
+      <link
+        rel="icon"
+        type="image/png"
+        sizes="16x16"
+        href="/favicon-16x16.png"
+      />
+      <link rel="manifest" href="/site.webmanifest" />
+
+      {/* Security Headers */}
+      <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
+      <meta httpEquiv="X-Frame-Options" content="DENY" />
+      <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
+      <meta
+        httpEquiv="Referrer-Policy"
+        content="strict-origin-when-cross-origin"
+      />
     </Helmet>
   );
 };

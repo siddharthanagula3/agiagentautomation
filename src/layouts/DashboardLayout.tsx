@@ -115,11 +115,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
             'fixed inset-y-0 left-0 z-50 w-64 lg:hidden',
             'border-r border-border bg-card backdrop-blur-xl',
             'transform transition-transform duration-300 ease-in-out',
-            'shadow-2xl',
+            'flex flex-col shadow-2xl',
             mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           )}
         >
-          <div className="flex items-center justify-between border-b border-border p-4">
+          <div className="flex flex-shrink-0 items-center justify-between border-b border-border p-4">
             <h2 className="text-lg font-semibold">AGI Platform</h2>
             <Button
               variant="ghost"
@@ -130,8 +130,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
               <X className="h-5 w-5" />
             </Button>
           </div>
-          <div className="flex min-h-0 flex-1 flex-col pt-4">
-            <DashboardSidebar collapsed={false} />
+          <div className="flex-1 overflow-hidden">
+            <DashboardSidebar collapsed={false} className="h-full" />
           </div>
         </aside>
 

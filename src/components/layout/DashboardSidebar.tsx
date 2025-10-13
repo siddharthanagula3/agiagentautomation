@@ -106,7 +106,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
   const toggleGroup = (groupName: string) => {
     if (collapsed) return;
-    setExpandedGroups(prev => {
+    setExpandedGroups((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(groupName)) {
         newSet.delete(groupName);
@@ -120,7 +120,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   const filteredNavigation = React.useMemo(() => {
     if (!searchQuery) return navigation;
     return navigation.filter(
-      item =>
+      (item) =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -343,6 +343,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     <div
       className={cn(
         'glass-strong flex h-full flex-col border-r border-border/50 backdrop-blur-xl',
+        'overflow-hidden', // Ensure proper overflow handling
         className
       )}
     >
@@ -389,7 +390,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               type="text"
               placeholder="Search navigation..."
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className={cn(
                 'w-full rounded-lg py-2.5 pl-10 pr-3',
                 'bg-muted/50 hover:bg-muted/70 focus:bg-muted',

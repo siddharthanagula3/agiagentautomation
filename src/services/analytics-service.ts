@@ -1,5 +1,13 @@
 import { monitoringService } from './monitoring-service';
 
+// Google Analytics 4 integration
+declare global {
+  interface Window {
+    gtag: (...args: any[]) => void;
+    dataLayer: any[];
+  }
+}
+
 interface AnalyticsEvent {
   event: string;
   properties?: Record<string, unknown>;
@@ -15,6 +23,7 @@ interface PageView {
 
 class AnalyticsService {
   private isInitialized = false;
+  private trackingId: string | null = null;
   private sessionStartTime: number;
   private pageViews: PageView[] = [];
   private events: AnalyticsEvent[] = [];
@@ -26,8 +35,14 @@ class AnalyticsService {
   /**
    * Initialize analytics service
    */
-  initialize(): void {
+  initialize(trackingId?: string): void {
     if (this.isInitialized) return;
+
+    this.trackingId = trackingId || import.meta.env.VITE_GA_TRACKING_ID;
+    
+    if (this.trackingId) {
+      this.initializeGoogleAnalytics();
+    }
 
     // Track session start
     this.trackEvent('session_start', {
@@ -64,6 +79,32 @@ class AnalyticsService {
     this.isInitialized = true;
   }
 
+  private initializeGoogleAnalytics(): void {
+    if (!this.trackingId) return;
+
+    // Initialize dataLayer
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function() {
+      window.dataLayer.push(arguments);
+    };
+
+    // Load Google Analytics script
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${this.trackingId}`;
+    document.head.appendChild(script);
+
+    // Configure Google Analytics
+    window.gtag('js', new Date());
+    window.gtag('config', this.trackingId, {
+      page_title: document.title,
+      page_location: window.location.href,
+      send_page_view: false, // We'll handle page views manually
+    });
+
+    console.log(`Google Analytics initialized with tracking ID: ${this.trackingId}`);
+  }
+
   /**
    * Track page view
    */
@@ -76,6 +117,14 @@ class AnalyticsService {
     };
 
     this.pageViews.push(pageView);
+
+    // Track with Google Analytics
+    if (this.trackingId && window.gtag) {
+      window.gtag('config', this.trackingId, {
+        page_title: title,
+        page_location: window.location.origin + path,
+      });
+    }
 
     // Track with monitoring service
     monitoringService.trackEvent('page_view', {
@@ -103,6 +152,11 @@ class AnalyticsService {
     };
 
     this.events.push(analyticsEvent);
+
+    // Track with Google Analytics
+    if (this.trackingId && window.gtag) {
+      window.gtag('event', event, properties);
+    }
 
     // Track with monitoring service
     monitoringService.trackEvent(`analytics_${event}`, properties);

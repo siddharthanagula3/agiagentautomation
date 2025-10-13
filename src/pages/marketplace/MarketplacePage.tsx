@@ -3,7 +3,7 @@
  * Browse, search, and hire specialized AI employees
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,7 @@ import {
   isEmployeePurchased,
   listPurchasedEmployees,
 } from '@/services/supabase-employees';
+import { useBusinessMetrics } from '@/hooks/useAnalytics';
 
 interface AIEmployee extends BaseAIEmployee {
   isHired: boolean;
@@ -77,6 +78,16 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
+  const { trackMarketplaceView, trackEmployeeHire } = useBusinessMetrics();
+
+  // Track marketplace view on component mount
+  useEffect(() => {
+    trackMarketplaceView(undefined, selectedCategory, {
+      searchQuery,
+      sortBy,
+      viewMode,
+    });
+  }, [trackMarketplaceView, selectedCategory, searchQuery, sortBy, viewMode]);
 
   // Fetch purchased employees to check which are already hired
   const { data: purchasedEmployees = [] } = useQuery({
@@ -223,6 +234,17 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
     try {
       await hireEmployeeMutation.mutateAsync(employeeId);
+      
+      // Track successful hire
+      const employee = AI_EMPLOYEES.find(emp => emp.id === employeeId);
+      if (employee) {
+        trackEmployeeHire(employeeId, employee.name, {
+          category: employee.category,
+          skills: employee.skills,
+          price: employee.price,
+        });
+      }
+      
       toast.success('AI Employee hired successfully! Redirecting to chat...');
       setTimeout(() => {
         navigate(`/chat?employee=${employeeId}`);

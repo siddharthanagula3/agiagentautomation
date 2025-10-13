@@ -1,243 +1,880 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+/**
+ * API Reference Page
+ * Comprehensive documentation for the AGI Agent Automation API
+ */
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Particles } from '@/components/ui/particles';
-import { Code, Terminal, Key, Zap, FileJson, Shield } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
+  Code,
+  Copy,
+  Play,
+  Book,
+  Globe,
+  Shield,
+  Zap,
+  Database,
+  Users,
+  Bot,
+  MessageSquare,
+  CreditCard,
+  Settings,
+  FileText,
+  ChevronRight,
+  ExternalLink,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+
+interface APIEndpoint {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  path: string;
+  description: string;
+  parameters?: Array<{
+    name: string;
+    type: string;
+    required: boolean;
+    description: string;
+  }>;
+  requestBody?: {
+    type: string;
+    description: string;
+    schema: any;
+  };
+  responses: Array<{
+    status: number;
+    description: string;
+    schema?: any;
+  }>;
+  examples?: Array<{
+    title: string;
+    request?: string;
+    response?: string;
+  }>;
+}
 
 const APIReferencePage: React.FC = () => {
-  const endpoints = [
-    {
-      method: 'POST',
-      path: '/api/v1/employees',
-      description: 'Create a new AI employee',
-      badge: 'AI Employees',
-    },
-    {
-      method: 'GET',
-      path: '/api/v1/employees',
-      description: 'List all AI employees',
-      badge: 'AI Employees',
-    },
-    {
-      method: 'POST',
-      path: '/api/v1/workflows',
-      description: 'Create a new workflow',
-      badge: 'Workflows',
-    },
-    {
-      method: 'GET',
-      path: '/api/v1/workflows/{id}/execute',
-      description: 'Execute a workflow',
-      badge: 'Workflows',
-    },
-    {
-      method: 'GET',
-      path: '/api/v1/analytics',
-      description: 'Get analytics data',
-      badge: 'Analytics',
-    },
-    {
-      method: 'POST',
-      path: '/api/v1/integrations',
-      description: 'Connect an integration',
-      badge: 'Integrations',
-    },
-  ];
+  const [selectedEndpoint, setSelectedEndpoint] = useState<string>('');
+  const [selectedMethod, setSelectedMethod] = useState<string>('GET');
+  const [selectedPath, setSelectedPath] = useState<string>('');
+  const [requestBody, setRequestBody] = useState<string>('');
+  const [response, setResponse] = useState<string>('');
 
-  const features = [
+  const apiEndpoints: Record<string, APIEndpoint[]> = {
+    'Authentication': [
+      {
+        method: 'POST',
+        path: '/api/auth/login',
+        description: 'Authenticate user and return access token',
+        requestBody: {
+          type: 'application/json',
+          description: 'User credentials',
+          schema: {
+            email: 'string',
+            password: 'string',
+          },
+        },
+        responses: [
+          {
+            status: 200,
+            description: 'Authentication successful',
+            schema: {
+              access_token: 'string',
+              refresh_token: 'string',
+              user: 'object',
+            },
+          },
+          {
+            status: 401,
+            description: 'Invalid credentials',
+          },
+        ],
+        examples: [
+          {
+            title: 'Login Request',
+            request: `{
+  "email": "user@example.com",
+  "password": "password123"
+}`,
+            response: `{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "email": "user@example.com",
+    "name": "John Doe"
+  }
+}`,
+          },
+        ],
+      },
+      {
+        method: 'POST',
+        path: '/api/auth/register',
+        description: 'Register a new user account',
+        requestBody: {
+          type: 'application/json',
+          description: 'User registration data',
+          schema: {
+            email: 'string',
+            password: 'string',
+            name: 'string',
+          },
+        },
+        responses: [
+          {
+            status: 201,
+            description: 'User created successfully',
+          },
+          {
+            status: 400,
+            description: 'Validation error',
+          },
+        ],
+      },
+      {
+        method: 'POST',
+        path: '/api/auth/logout',
+        description: 'Logout user and invalidate tokens',
+        responses: [
+          {
+            status: 200,
+            description: 'Logout successful',
+          },
+        ],
+      },
+    ],
+    'AI Employees': [
+      {
+        method: 'GET',
+        path: '/api/employees',
+        description: 'Get list of available AI employees',
+        parameters: [
+          {
+            name: 'category',
+            type: 'string',
+            required: false,
+            description: 'Filter by employee category',
+          },
+          {
+            name: 'limit',
+            type: 'number',
+            required: false,
+            description: 'Number of employees to return',
+          },
+          {
+            name: 'offset',
+            type: 'number',
+            required: false,
+            description: 'Number of employees to skip',
+          },
+        ],
+        responses: [
+          {
+            status: 200,
+            description: 'List of AI employees',
+            schema: {
+              employees: 'array',
+              total: 'number',
+              limit: 'number',
+              offset: 'number',
+            },
+          },
+        ],
+        examples: [
+          {
+            title: 'Get All Employees',
+            request: 'GET /api/employees',
+            response: `{
+  "employees": [
     {
-      icon: Key,
-      title: 'API Keys',
-      description: 'Secure authentication with API keys and OAuth 2.0',
+      "id": "emp_001",
+      "name": "Alex the Developer",
+      "category": "development",
+      "skills": ["JavaScript", "React", "Node.js"],
+      "price": 29.99,
+      "description": "Expert full-stack developer"
+    }
+  ],
+  "total": 1,
+  "limit": 10,
+  "offset": 0
+}`,
+          },
+        ],
+      },
+    {
+      method: 'POST',
+        path: '/api/employees/purchase',
+        description: 'Purchase an AI employee',
+        requestBody: {
+          type: 'application/json',
+          description: 'Employee purchase data',
+          schema: {
+            employee_id: 'string',
+            payment_method_id: 'string',
+          },
+        },
+        responses: [
+          {
+            status: 200,
+            description: 'Employee purchased successfully',
+          },
+          {
+            status: 400,
+            description: 'Invalid request or employee already purchased',
+          },
+        ],
     },
     {
-      icon: Zap,
-      title: 'Rate Limits',
-      description: '10,000 requests/hour on Pro, unlimited on Enterprise',
+      method: 'GET',
+        path: '/api/employees/purchased',
+        description: 'Get list of purchased AI employees',
+        responses: [
+          {
+            status: 200,
+            description: 'List of purchased employees',
+          },
+        ],
+      },
+    ],
+    'Chat': [
+    {
+      method: 'POST',
+        path: '/api/chat/message',
+        description: 'Send a message to an AI employee',
+        requestBody: {
+          type: 'application/json',
+          description: 'Chat message data',
+          schema: {
+            employee_id: 'string',
+            message: 'string',
+            session_id: 'string',
+          },
+        },
+        responses: [
+          {
+            status: 200,
+            description: 'Message sent and response received',
+            schema: {
+              response: 'string',
+              session_id: 'string',
+              timestamp: 'string',
+            },
+          },
+        ],
+        examples: [
+          {
+            title: 'Send Chat Message',
+            request: `{
+  "employee_id": "emp_001",
+  "message": "Hello, can you help me with React?",
+  "session_id": "session_123"
+}`,
+            response: `{
+  "response": "Hello! I'd be happy to help you with React. What specific aspect would you like to work on?",
+  "session_id": "session_123",
+  "timestamp": "2024-01-10T10:30:00Z"
+}`,
+          },
+        ],
     },
     {
-      icon: FileJson,
-      title: 'JSON',
-      description: 'RESTful API with JSON request/response format',
+      method: 'GET',
+        path: '/api/chat/sessions',
+        description: 'Get chat sessions for a user',
+        responses: [
+          {
+            status: 200,
+            description: 'List of chat sessions',
+          },
+        ],
     },
     {
-      icon: Shield,
-      title: 'Secure',
-      description: 'TLS 1.3 encryption and IP whitelisting available',
+      method: 'GET',
+        path: '/api/chat/sessions/{session_id}/messages',
+        description: 'Get messages for a specific chat session',
+        parameters: [
+          {
+            name: 'session_id',
+            type: 'string',
+            required: true,
+            description: 'Chat session ID',
+          },
+        ],
+        responses: [
+          {
+            status: 200,
+            description: 'List of messages in the session',
+          },
+        ],
+      },
+    ],
+    'Billing': [
+      {
+        method: 'GET',
+        path: '/api/billing/subscription',
+        description: 'Get user subscription details',
+        responses: [
+          {
+            status: 200,
+            description: 'Subscription information',
+            schema: {
+              plan: 'string',
+              status: 'string',
+              current_period_end: 'string',
+              cancel_at_period_end: 'boolean',
+            },
+          },
+        ],
     },
-  ];
+    {
+      method: 'POST',
+        path: '/api/billing/subscription',
+        description: 'Create or update subscription',
+        requestBody: {
+          type: 'application/json',
+          description: 'Subscription data',
+          schema: {
+            plan_id: 'string',
+            payment_method_id: 'string',
+          },
+        },
+        responses: [
+          {
+            status: 200,
+            description: 'Subscription created/updated successfully',
+          },
+        ],
+      },
+      {
+        method: 'DELETE',
+        path: '/api/billing/subscription',
+        description: 'Cancel subscription',
+        responses: [
+          {
+            status: 200,
+            description: 'Subscription cancelled successfully',
+          },
+        ],
+      },
+      {
+        method: 'GET',
+        path: '/api/billing/invoices',
+        description: 'Get billing invoices',
+        responses: [
+          {
+            status: 200,
+            description: 'List of invoices',
+          },
+        ],
+      },
+    ],
+    'User Management': [
+      {
+        method: 'GET',
+        path: '/api/user/profile',
+        description: 'Get user profile information',
+        responses: [
+          {
+            status: 200,
+            description: 'User profile data',
+          },
+        ],
+      },
+      {
+        method: 'PUT',
+        path: '/api/user/profile',
+        description: 'Update user profile',
+        requestBody: {
+          type: 'application/json',
+          description: 'Profile update data',
+          schema: {
+            name: 'string',
+            avatar: 'string',
+          },
+        },
+        responses: [
+          {
+            status: 200,
+            description: 'Profile updated successfully',
+          },
+        ],
+      },
+      {
+        method: 'GET',
+        path: '/api/user/settings',
+        description: 'Get user settings',
+        responses: [
+          {
+            status: 200,
+            description: 'User settings',
+          },
+        ],
+      },
+      {
+        method: 'PUT',
+        path: '/api/user/settings',
+        description: 'Update user settings',
+        requestBody: {
+          type: 'application/json',
+          description: 'Settings update data',
+          schema: {
+            theme: 'string',
+            notifications: 'boolean',
+            language: 'string',
+          },
+        },
+        responses: [
+          {
+            status: 200,
+            description: 'Settings updated successfully',
+          },
+        ],
+      },
+    ],
+  };
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast.success('Code copied to clipboard');
+  };
+
+  const handleTestEndpoint = async () => {
+    if (!selectedPath) return;
+
+    try {
+      // Simulate API call
+      setResponse('Loading...');
+      
+      // In a real implementation, this would make an actual API call
+      setTimeout(() => {
+        setResponse(`{
+  "message": "This is a simulated response",
+  "timestamp": "${new Date().toISOString()}",
+  "method": "${selectedMethod}",
+  "path": "${selectedPath}"
+}`);
+      }, 1000);
+    } catch (error) {
+      setResponse(`Error: ${error}`);
+    }
+  };
+
+  const getMethodColor = (method: string) => {
+    switch (method) {
+      case 'GET': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'POST': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'PUT': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'DELETE': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'PATCH': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <Particles className="absolute inset-0 -z-10" quantity={40} />
-
-      <section className="px-4 pb-20 pt-32 sm:px-6 lg:px-8">
-        <div className="container mx-auto max-w-7xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mx-auto max-w-4xl text-center"
-          >
-            <Badge className="glass mb-6 px-6 py-2">
-              <Code className="mr-2 h-4 w-4" />
-              API Reference
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-4">API Reference</h1>
+          <p className="text-xl text-muted-foreground mb-6">
+            Comprehensive documentation for the AGI Agent Automation API
+          </p>
+          
+          <div className="flex flex-wrap gap-4">
+            <Badge variant="outline" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              REST API
             </Badge>
-            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-7xl">
-              Build with Our API
-            </h1>
-            <p className="mb-8 text-xl text-muted-foreground">
-              Powerful REST API to integrate AGI Agent into your applications
-            </p>
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Button
-                size="lg"
-                asChild
-                className="bg-gradient-to-r from-primary to-accent"
-              >
-                <Link to="/auth/register">Get API Key</Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link to="/documentation">View Docs</Link>
-              </Button>
+            <Badge variant="outline" className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              JWT Authentication
+            </Badge>
+            <Badge variant="outline" className="flex items-center gap-2">
+              <Zap className="w-4 h-4" />
+              Real-time Updates
+            </Badge>
+            <Badge variant="outline" className="flex items-center gap-2">
+              <Database className="w-4 h-4" />
+              Supabase Backend
+            </Badge>
             </div>
-          </motion.div>
         </div>
-      </section>
 
-      <section className="bg-muted/30 px-4 py-20 sm:px-6 lg:px-8">
-        <div className="container mx-auto max-w-7xl">
-          <div className="mb-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-              >
-                <Card className="border-2 border-border/50 p-6 text-center">
-                  <div className="mx-auto mb-4 w-fit rounded-xl bg-primary/10 p-3">
-                    <feature.icon className="h-6 w-6 text-primary" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* API Endpoints List */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Book className="w-5 h-5" />
+                  API Endpoints
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {Object.entries(apiEndpoints).map(([category, endpoints]) => (
+                    <Accordion key={category} type="single" collapsible>
+                      <AccordionItem value={category}>
+                        <AccordionTrigger className="text-sm font-medium">
+                          {category}
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-1 pl-4">
+                            {endpoints.map((endpoint, index) => (
+                              <button
+                                key={index}
+                                onClick={() => {
+                                  setSelectedEndpoint(`${endpoint.method} ${endpoint.path}`);
+                                  setSelectedMethod(endpoint.method);
+                                  setSelectedPath(endpoint.path);
+                                }}
+                                className={cn(
+                                  "w-full text-left p-2 rounded-md text-sm hover:bg-muted transition-colors",
+                                  selectedEndpoint === `${endpoint.method} ${endpoint.path}` && "bg-muted"
+                                )}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Badge className={getMethodColor(endpoint.method)}>
+                                    {endpoint.method}
+                                  </Badge>
+                                  <span className="truncate">{endpoint.path}</span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  ))}
                   </div>
-                  <h3 className="mb-2 font-bold">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {feature.description}
-                  </p>
+              </CardContent>
                 </Card>
-              </motion.div>
-            ))}
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="glass rounded-2xl border border-border/50 p-8"
-          >
-            <div className="mb-6 flex items-center gap-3">
-              <Terminal className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-bold">Getting Started</h2>
+          {/* API Documentation */}
+          <div className="lg:col-span-2">
+            <Tabs defaultValue="documentation" className="space-y-6">
+              <TabsList>
+                <TabsTrigger value="documentation">Documentation</TabsTrigger>
+                <TabsTrigger value="testing">API Testing</TabsTrigger>
+                <TabsTrigger value="examples">Examples</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="documentation" className="space-y-6">
+                {selectedEndpoint ? (
+                  (() => {
+                    const [method, path] = selectedEndpoint.split(' ');
+                    const endpoint = Object.values(apiEndpoints)
+                      .flat()
+                      .find(ep => ep.method === method && ep.path === path);
+                    
+                    if (!endpoint) return null;
+
+                    return (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Badge className={getMethodColor(endpoint.method)}>
+                              {endpoint.method}
+                            </Badge>
+                            <code className="text-lg">{endpoint.path}</code>
+                          </CardTitle>
+                          <p className="text-muted-foreground">{endpoint.description}</p>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          {/* Parameters */}
+                          {endpoint.parameters && endpoint.parameters.length > 0 && (
+                            <div>
+                              <h3 className="text-lg font-semibold mb-3">Parameters</h3>
+                              <div className="space-y-2">
+                                {endpoint.parameters.map((param, index) => (
+                                  <div key={index} className="p-3 border rounded-md">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <code className="text-sm font-mono">{param.name}</code>
+                                      <Badge variant="outline">{param.type}</Badge>
+                                      {param.required && (
+                                        <Badge variant="destructive">Required</Badge>
+                                      )}
             </div>
-            <div className="overflow-x-auto rounded-xl bg-black/50 p-6 font-mono text-sm">
-              <div className="text-green-400"># Install SDK</div>
-              <div className="mb-4 text-white">npm install @agiagent/sdk</div>
-              <div className="text-green-400"># Initialize client</div>
-              <div className="mb-2 text-white">
-                import {'{ AGIAgent }'} from '@agiagent/sdk';
+                                    <p className="text-sm text-muted-foreground">{param.description}</p>
               </div>
-              <div className="mb-4 text-white">
-                const client = new AGIAgent({'{ apiKey: "your_api_key" }'});
+                                ))}
               </div>
-              <div className="text-green-400"># Create an AI employee</div>
-              <div className="text-white">
-                const employee = await client.employees.create({'{'}
               </div>
-              <div className="ml-4 text-white">name: "Sales Agent",</div>
-              <div className="ml-4 text-white">role: "sales",</div>
-              <div className="ml-4 text-white">
-                capabilities: ["lead_qualification", "email"]
+                          )}
+
+                          {/* Request Body */}
+                          {endpoint.requestBody && (
+                            <div>
+                              <h3 className="text-lg font-semibold mb-3">Request Body</h3>
+                              <div className="p-3 border rounded-md">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge variant="outline">{endpoint.requestBody.type}</Badge>
               </div>
-              <div className="text-white">{'});'}</div>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  {endpoint.requestBody.description}
+                                </p>
+                                <pre className="text-sm bg-muted p-3 rounded-md overflow-x-auto">
+                                  <code>{JSON.stringify(endpoint.requestBody.schema, null, 2)}</code>
+                                </pre>
             </div>
-          </motion.div>
         </div>
-      </section>
+                          )}
 
-      <section className="px-4 py-20 sm:px-6 lg:px-8">
-        <div className="container mx-auto max-w-7xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12 text-center"
-          >
-            <h2 className="mb-4 text-4xl font-bold">API Endpoints</h2>
-            <p className="text-xl text-muted-foreground">
-              Core endpoints to build your integration
-            </p>
-          </motion.div>
+                          {/* Responses */}
+                          <div>
+                            <h3 className="text-lg font-semibold mb-3">Responses</h3>
+                            <div className="space-y-2">
+                              {endpoint.responses.map((response, index) => (
+                                <div key={index} className="p-3 border rounded-md">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Badge variant="outline">{response.status}</Badge>
+                                    <span className="text-sm font-medium">{response.description}</span>
+                                  </div>
+                                  {response.schema && (
+                                    <pre className="text-sm bg-muted p-3 rounded-md overflow-x-auto mt-2">
+                                      <code>{JSON.stringify(response.schema, null, 2)}</code>
+                                    </pre>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })()
+                ) : (
+                  <Card>
+                    <CardContent className="py-12 text-center">
+                      <Book className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="text-lg font-semibold mb-2">Select an Endpoint</h3>
+                      <p className="text-muted-foreground">
+                        Choose an API endpoint from the list to view its documentation
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
 
-          <div className="mx-auto max-w-4xl space-y-4">
-            {endpoints.map((endpoint, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.05 }}
-              >
-                <Card className="group cursor-pointer border-2 border-border/50 p-4 transition-all hover:border-primary/50">
-                  <div className="flex flex-col gap-4 md:flex-row md:items-center">
-                    <Badge
-                      variant={
-                        endpoint.method === 'GET' ? 'secondary' : 'default'
-                      }
-                      className="w-fit"
-                    >
-                      {endpoint.method}
-                    </Badge>
-                    <code className="flex-1 font-mono text-sm">
-                      {endpoint.path}
-                    </code>
-                    <Badge variant="outline">{endpoint.badge}</Badge>
+              <TabsContent value="testing" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Play className="w-5 h-5" />
+                      API Testing
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="method">Method</Label>
+                        <Select value={selectedMethod} onValueChange={setSelectedMethod}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="GET">GET</SelectItem>
+                            <SelectItem value="POST">POST</SelectItem>
+                            <SelectItem value="PUT">PUT</SelectItem>
+                            <SelectItem value="DELETE">DELETE</SelectItem>
+                            <SelectItem value="PATCH">PATCH</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="path">Path</Label>
+                        <Input
+                          id="path"
+                          value={selectedPath}
+                          onChange={(e) => setSelectedPath(e.target.value)}
+                          placeholder="/api/endpoint"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="request-body">Request Body (JSON)</Label>
+                      <Textarea
+                        id="request-body"
+                        value={requestBody}
+                        onChange={(e) => setRequestBody(e.target.value)}
+                        placeholder="Enter JSON request body..."
+                        rows={6}
+                      />
+                    </div>
+
+                    <Button onClick={handleTestEndpoint} className="w-full">
+                      <Play className="w-4 h-4 mr-2" />
+                      Test Endpoint
+                    </Button>
+
+                    {response && (
+                      <div>
+                        <Label>Response</Label>
+                        <div className="relative">
+                          <pre className="text-sm bg-muted p-4 rounded-md overflow-x-auto">
+                            <code>{response}</code>
+                          </pre>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="absolute top-2 right-2"
+                            onClick={() => handleCopyCode(response)}
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </div>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {endpoint.description}
-                  </p>
+                    )}
+                  </CardContent>
                 </Card>
-              </motion.div>
-            ))}
+              </TabsContent>
+
+              <TabsContent value="examples" className="space-y-6">
+                {selectedEndpoint ? (
+                  (() => {
+                    const [method, path] = selectedEndpoint.split(' ');
+                    const endpoint = Object.values(apiEndpoints)
+                      .flat()
+                      .find(ep => ep.method === method && ep.path === path);
+                    
+                    if (!endpoint || !endpoint.examples) return null;
+
+                    return (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <FileText className="w-5 h-5" />
+                            Code Examples
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          {endpoint.examples.map((example, index) => (
+                            <div key={index} className="space-y-4">
+                              <h3 className="text-lg font-semibold">{example.title}</h3>
+                              
+                              {example.request && (
+                                <div>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <Label>Request</Label>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleCopyCode(example.request!)}
+                                    >
+                                      <Copy className="w-4 h-4 mr-2" />
+                                      Copy
+                                    </Button>
+                                  </div>
+                                  <pre className="text-sm bg-muted p-4 rounded-md overflow-x-auto">
+                                    <code>{example.request}</code>
+                                  </pre>
+                                </div>
+                              )}
+
+                              {example.response && (
+                                <div>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <Label>Response</Label>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleCopyCode(example.response!)}
+                                    >
+                                      <Copy className="w-4 h-4 mr-2" />
+                                      Copy
+                                    </Button>
+                                  </div>
+                                  <pre className="text-sm bg-muted p-4 rounded-md overflow-x-auto">
+                                    <code>{example.response}</code>
+                                  </pre>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  })()
+                ) : (
+                  <Card>
+                    <CardContent className="py-12 text-center">
+                      <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="text-lg font-semibold mb-2">Select an Endpoint</h3>
+                      <p className="text-muted-foreground">
+                        Choose an API endpoint to view code examples
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
-      </section>
 
-      <section className="bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 px-4 py-20 sm:px-6 lg:px-8">
-        <div className="container mx-auto max-w-4xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="mb-4 text-4xl font-bold">SDKs & Libraries</h2>
-            <p className="mb-8 text-lg text-muted-foreground">
-              Official SDKs for your favorite languages
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Badge className="px-4 py-2 text-base">
-                JavaScript/TypeScript
-              </Badge>
-              <Badge className="px-4 py-2 text-base">Python</Badge>
-              <Badge className="px-4 py-2 text-base">Go</Badge>
-              <Badge className="px-4 py-2 text-base">Ruby</Badge>
-              <Badge className="px-4 py-2 text-base">PHP</Badge>
-              <Badge className="px-4 py-2 text-base">Java</Badge>
+        {/* Quick Start Guide */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5" />
+              Quick Start Guide
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <h3 className="font-semibold">1. Authentication</h3>
+                <p className="text-sm text-muted-foreground">
+                  Get your API key from the dashboard and include it in the Authorization header.
+                </p>
+                <code className="text-xs bg-muted p-2 rounded block">
+                  Authorization: Bearer YOUR_API_KEY
+                </code>
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold">2. Make Requests</h3>
+                <p className="text-sm text-muted-foreground">
+                  Use the endpoints above to interact with AI employees and manage your account.
+                </p>
+                <code className="text-xs bg-muted p-2 rounded block">
+                  curl -H "Authorization: Bearer YOUR_API_KEY" https://api.agiagentautomation.com/employees
+                </code>
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold">3. Handle Responses</h3>
+                <p className="text-sm text-muted-foreground">
+                  All responses are in JSON format with appropriate HTTP status codes.
+                </p>
+                <code className="text-xs bg-muted p-2 rounded block">
+                  {`{ "success": true, "data": {...} }`}
+                </code>
+              </div>
             </div>
-          </motion.div>
+          </CardContent>
+        </Card>
         </div>
-      </section>
     </div>
   );
 };

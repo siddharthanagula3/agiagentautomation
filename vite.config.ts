@@ -133,49 +133,17 @@ export default defineConfig(({ mode }) => {
       },
       rollupOptions: {
         output: {
-          manualChunks: id => {
-            // React and React DOM
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'react-vendor';
-            }
-            // Router
-            if (id.includes('react-router')) {
-              return 'router';
-            }
-            // UI Libraries
-            if (
-              id.includes('@radix-ui') ||
-              id.includes('lucide-react') ||
-              id.includes('framer-motion')
-            ) {
-              return 'ui-vendor';
-            }
-            // Supabase
-            if (id.includes('@supabase')) {
-              return 'supabase';
-            }
-            // State management and utilities
-            if (
-              id.includes('zustand') ||
-              id.includes('immer') ||
-              id.includes('date-fns') ||
-              id.includes('clsx') ||
-              id.includes('tailwind-merge')
-            ) {
-              return 'utils';
-            }
-            // AI/LLM related libraries
-            if (
-              id.includes('openai') ||
-              id.includes('anthropic') ||
-              id.includes('@anthropic-ai')
-            ) {
-              return 'ai-vendor';
-            }
-            // Large third-party libraries
-            if (id.includes('node_modules')) {
-              return 'vendor';
-            }
+          manualChunks: {
+            // Simplified chunking to avoid initialization issues
+            'react-vendor': ['react', 'react-dom', 'react-dom/client'],
+            'router': ['react-router-dom'],
+            'ui-vendor': ['@radix-ui/react-slot', 'lucide-react', 'framer-motion'],
+            'supabase': ['@supabase/supabase-js'],
+            'query': ['@tanstack/react-query'],
+            'utils': ['zustand', 'clsx', 'tailwind-merge'],
+            'ai-vendor': ['openai', '@anthropic-ai/sdk'],
+            'stripe': ['@stripe/stripe-js', '@stripe/react-stripe-js'],
+            'sonner': ['sonner'],
           },
         },
       },
@@ -190,7 +158,7 @@ export default defineConfig(({ mode }) => {
       __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
     },
 
-    // Simplified optimizeDeps
+    // Enhanced optimizeDeps to prevent initialization issues
     optimizeDeps: {
       include: [
         'react',
@@ -199,6 +167,16 @@ export default defineConfig(({ mode }) => {
         'react/jsx-runtime',
         'react-router-dom',
         '@supabase/supabase-js',
+        'sonner',
+        'lucide-react',
+        '@radix-ui/react-slot',
+        'zustand',
+        'clsx',
+        'tailwind-merge',
+      ],
+      exclude: [
+        '@sentry/react',
+        '@sentry/tracing',
       ],
     },
 

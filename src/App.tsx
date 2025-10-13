@@ -141,74 +141,70 @@ const RouteLoadingSpinner = () => (
 );
 
 function App() {
-  // Initialize monitoring service
+  // Initialize services in a controlled manner to prevent initialization conflicts
   useEffect(() => {
-    monitoringService.initialize();
-  }, []);
-
-  // Initialize accessibility service
-  useEffect(() => {
-    accessibilityService.initialize();
-  }, []);
-
-  // Initialize SEO service
-  useEffect(() => {
-    seoService.initialize();
-  }, []);
-
-  // Initialize analytics service
-  useEffect(() => {
-    analyticsService.initialize();
-  }, []);
-
-  // Initialize performance service
-  useEffect(() => {
-    performanceService.initialize({
-      enableImageOptimization: true,
-      enableCodeSplitting: true,
-      enableResourcePreloading: true,
-      enableServiceWorker: true,
-      cacheStrategy: 'moderate',
-    });
-  }, []);
-
-  // Initialize backup service
-  useEffect(() => {
-    backupService.initialize({
-      enableAutomatedBackups: true,
-      backupFrequency: 'daily',
-      retentionDays: 30,
-      enableCloudBackup: true,
-      enableLocalBackup: false,
-      cloudProvider: 'supabase',
-      encryptionEnabled: true,
-    });
-  }, []);
-
-  // Initialize scaling service
-  useEffect(() => {
-    scalingService.initialize({
-      enableLoadBalancing: true,
-      enableCaching: true,
-      enableCDN: true,
-      enableDatabaseOptimization: true,
-      enableResourcePooling: true,
-      maxConcurrentRequests: 100,
-      cacheStrategy: 'moderate',
-      cdnProvider: 'cloudflare',
-    });
-  }, []);
-
-  // Initialize privacy service
-  useEffect(() => {
-    privacyService.initialize({
-      enableConsentManagement: true,
-      enableDataSubjectRequests: true,
-      enableDataRetention: true,
-      enableDataAnonymization: true,
-      retentionPeriodDays: 2555, // 7 years
-      enableAuditLogging: true,
-    });
+    const initializeServices = async () => {
+      try {
+        // Initialize core services first
+        monitoringService.initialize();
+        accessibilityService.initialize();
+        seoService.initialize();
+        
+        // Initialize analytics with a small delay
+        setTimeout(() => {
+          analyticsService.initialize();
+        }, 100);
+        
+        // Initialize performance services with delay
+        setTimeout(() => {
+          performanceService.initialize({
+            enableImageOptimization: true,
+            enableCodeSplitting: true,
+            enableResourcePreloading: true,
+            enableServiceWorker: true,
+            cacheStrategy: 'moderate',
+          });
+        }, 200);
+        
+        // Initialize advanced services with longer delay
+        setTimeout(() => {
+          backupService.initialize({
+            enableAutomatedBackups: true,
+            backupFrequency: 'daily',
+            retentionDays: 30,
+            enableCloudBackup: true,
+            enableLocalBackup: false,
+            cloudProvider: 'supabase',
+            encryptionEnabled: true,
+          });
+          
+          scalingService.initialize({
+            enableLoadBalancing: true,
+            enableCaching: true,
+            enableCDN: true,
+            enableDatabaseOptimization: true,
+            enableResourcePooling: true,
+            maxConcurrentRequests: 100,
+            cacheStrategy: 'moderate',
+            cdnProvider: 'cloudflare',
+          });
+          
+          privacyService.initialize({
+            enableConsentManagement: true,
+            enableDataSubjectRequests: true,
+            enableDataRetention: true,
+            enableDataAnonymization: true,
+            retentionPeriodDays: 2555, // 7 years
+            enableAuditLogging: true,
+          });
+        }, 500);
+        
+      } catch (error) {
+        console.error('Service initialization error:', error);
+      }
+    };
+    
+    initializeServices();
   }, []);
 
   // Monitor page performance

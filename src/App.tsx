@@ -1,69 +1,133 @@
 // src/App.tsx - CLEANED VERSION (Debug components removed)
 
+import { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import ScrollToTop from '@/components/ScrollToTop';
+import { lazyWithRetry } from '@/components/LazyWrapper';
+import { Loader2 } from 'lucide-react';
 import { PublicLayout } from './layouts/PublicLayout';
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
-import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import { DashboardLayout } from './layouts/DashboardLayout';
-import DashboardHomePage from './components/dashboard/DashboardHomePage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';
 
-// Page Components
-import WorkforcePage from './pages/workforce/WorkforcePage';
-import ChatPage from './pages/chat/ChatPage';
-import TabbedLLMChatPage from './pages/chat/TabbedLLMChatPage';
-import ChatAgentPageChatKit from './pages/chat/ChatAgentPageChatKit';
-import VibeCodingPage from './pages/chat/VibeCodingPage';
-import SettingsPage from './pages/settings/SettingsPage';
-import AIConfigurationPage from './pages/settings/AIConfigurationPage';
-import MarketplacePublicPage from './pages/MarketplacePublicPage';
-import BillingPage from './pages/BillingPage';
-import HelpSupportPage from './pages/HelpSupportPage';
-import SetupGuidePage from './pages/SetupGuidePage';
+// Lazy load all page components for better performance
+const LandingPage = lazyWithRetry(() => import('./pages/LandingPage'));
+const LoginPage = lazyWithRetry(() => import('./pages/auth/LoginPage'));
+const RegisterPage = lazyWithRetry(() => import('./pages/auth/RegisterPage'));
+const ForgotPasswordPage = lazyWithRetry(
+  () => import('./pages/auth/ForgotPasswordPage')
+);
+const ResetPasswordPage = lazyWithRetry(
+  () => import('./pages/auth/ResetPasswordPage')
+);
+const DashboardHomePage = lazyWithRetry(
+  () => import('./components/dashboard/DashboardHomePage')
+);
 
-// New Public Pages
-import BlogPage from './pages/BlogPage';
-import ResourcesPage from './pages/ResourcesPage';
-import HelpPage from './pages/HelpPage';
-import PricingPage from './pages/PricingPage';
-import ContactSalesPage from './pages/ContactSalesPage';
-import AboutPage from './pages/AboutPage';
-import CareersPage from './pages/CareersPage';
-import SecurityPage from './pages/SecurityPage';
-import DocumentationPage from './pages/DocumentationPage';
-import APIReferencePage from './pages/APIReferencePage';
-// Legal Pages
-import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage';
-import TermsOfServicePage from './pages/legal/TermsOfServicePage';
-import CookiePolicyPage from './pages/legal/CookiePolicyPage';
+// Lazy load all other page components
+const WorkforcePage = lazyWithRetry(
+  () => import('./pages/workforce/WorkforcePage')
+);
+const ChatPage = lazyWithRetry(() => import('./pages/chat/ChatPage'));
+const TabbedLLMChatPage = lazyWithRetry(
+  () => import('./pages/chat/TabbedLLMChatPage')
+);
+const ChatAgentPageChatKit = lazyWithRetry(
+  () => import('./pages/chat/ChatAgentPageChatKit')
+);
+const VibeCodingPage = lazyWithRetry(
+  () => import('./pages/chat/VibeCodingPage')
+);
+const SettingsPage = lazyWithRetry(
+  () => import('./pages/settings/SettingsPage')
+);
+const AIConfigurationPage = lazyWithRetry(
+  () => import('./pages/settings/AIConfigurationPage')
+);
+const MarketplacePublicPage = lazyWithRetry(
+  () => import('./pages/MarketplacePublicPage')
+);
+const BillingPage = lazyWithRetry(() => import('./pages/BillingPage'));
+const HelpSupportPage = lazyWithRetry(() => import('./pages/HelpSupportPage'));
+const SetupGuidePage = lazyWithRetry(() => import('./pages/SetupGuidePage'));
 
-// Use Cases Pages
-import StartupsPage from './pages/use-cases/StartupsPage';
-import ITServiceProvidersPage from './pages/use-cases/ITServiceProvidersPage';
-import SalesTeamsPage from './pages/use-cases/SalesTeamsPage';
-import ConsultingBusinessesPage from './pages/use-cases/ConsultingBusinessesPage';
+// Lazy load public pages
+const BlogPage = lazyWithRetry(() => import('./pages/BlogPage'));
+const ResourcesPage = lazyWithRetry(() => import('./pages/ResourcesPage'));
+const HelpPage = lazyWithRetry(() => import('./pages/HelpPage'));
+const PricingPage = lazyWithRetry(() => import('./pages/PricingPage'));
+const ContactSalesPage = lazyWithRetry(
+  () => import('./pages/ContactSalesPage')
+);
+const AboutPage = lazyWithRetry(() => import('./pages/AboutPage'));
+const CareersPage = lazyWithRetry(() => import('./pages/CareersPage'));
+const SecurityPage = lazyWithRetry(() => import('./pages/SecurityPage'));
+const DocumentationPage = lazyWithRetry(
+  () => import('./pages/DocumentationPage')
+);
+const APIReferencePage = lazyWithRetry(
+  () => import('./pages/APIReferencePage')
+);
 
-// Features Pages
-import AIChatPage from './pages/features/AIChatPage';
-import AIDashboardsPage from './pages/features/AIDashboardsPage';
-import AIProjectManagerPage from './pages/features/AIProjectManagerPage';
+// Lazy load legal pages
+const PrivacyPolicyPage = lazyWithRetry(
+  () => import('./pages/legal/PrivacyPolicyPage')
+);
+const TermsOfServicePage = lazyWithRetry(
+  () => import('./pages/legal/TermsOfServicePage')
+);
+const CookiePolicyPage = lazyWithRetry(
+  () => import('./pages/legal/CookiePolicyPage')
+);
 
-// Comparison Pages
-import VsChatGPTPage from './pages/comparisons/VsChatGPTPage';
-import VsClaudePage from './pages/comparisons/VsClaudePage';
+// Lazy load use cases pages
+const StartupsPage = lazyWithRetry(
+  () => import('./pages/use-cases/StartupsPage')
+);
+const ITServiceProvidersPage = lazyWithRetry(
+  () => import('./pages/use-cases/ITServiceProvidersPage')
+);
+const SalesTeamsPage = lazyWithRetry(
+  () => import('./pages/use-cases/SalesTeamsPage')
+);
+const ConsultingBusinessesPage = lazyWithRetry(
+  () => import('./pages/use-cases/ConsultingBusinessesPage')
+);
 
-// 404 Page
-import NotFoundPage from './pages/NotFoundPage';
-import BlogPostPage from './pages/BlogPostPage';
+// Lazy load features pages
+const AIChatPage = lazyWithRetry(() => import('./pages/features/AIChatPage'));
+const AIDashboardsPage = lazyWithRetry(
+  () => import('./pages/features/AIDashboardsPage')
+);
+const AIProjectManagerPage = lazyWithRetry(
+  () => import('./pages/features/AIProjectManagerPage')
+);
+
+// Lazy load comparison pages
+const VsChatGPTPage = lazyWithRetry(
+  () => import('./pages/comparisons/VsChatGPTPage')
+);
+const VsClaudePage = lazyWithRetry(
+  () => import('./pages/comparisons/VsClaudePage')
+);
+
+// Lazy load error and blog pages
+const NotFoundPage = lazyWithRetry(() => import('./pages/NotFoundPage'));
+const BlogPostPage = lazyWithRetry(() => import('./pages/BlogPostPage'));
+
+// Loading component for Suspense fallback
+const RouteLoadingSpinner = () => (
+  <div className="flex h-screen items-center justify-center bg-background">
+    <div className="text-center">
+      <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-primary" />
+      <p className="text-sm text-muted-foreground">Loading page...</p>
+    </div>
+  </div>
+);
 
 function App() {
   return (
@@ -71,116 +135,124 @@ function App() {
       <TooltipProvider>
         <div className="min-h-screen bg-background">
           <ScrollToTop />
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<PublicLayout />}>
-              <Route index element={<LandingPage />} />
+          <Suspense fallback={<RouteLoadingSpinner />}>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<PublicLayout />}>
+                <Route index element={<LandingPage />} />
 
-              {/* Marketing Pages */}
-              <Route path="blog" element={<BlogPage />} />
-              <Route path="blog/:slug" element={<BlogPostPage />} />
-              <Route path="resources" element={<ResourcesPage />} />
-              <Route path="help" element={<HelpPage />} />
-              <Route path="pricing" element={<PricingPage />} />
-              <Route path="contact-sales" element={<ContactSalesPage />} />
-              <Route path="about" element={<AboutPage />} />
-              <Route path="careers" element={<CareersPage />} />
-              <Route path="security" element={<SecurityPage />} />
-              <Route path="documentation" element={<DocumentationPage />} />
-              <Route path="api-reference" element={<APIReferencePage />} />
-              <Route path="marketplace" element={<MarketplacePublicPage />} />
-              <Route path="setup-guide" element={<SetupGuidePage />} />
+                {/* Marketing Pages */}
+                <Route path="blog" element={<BlogPage />} />
+                <Route path="blog/:slug" element={<BlogPostPage />} />
+                <Route path="resources" element={<ResourcesPage />} />
+                <Route path="help" element={<HelpPage />} />
+                <Route path="pricing" element={<PricingPage />} />
+                <Route path="contact-sales" element={<ContactSalesPage />} />
+                <Route path="about" element={<AboutPage />} />
+                <Route path="careers" element={<CareersPage />} />
+                <Route path="security" element={<SecurityPage />} />
+                <Route path="documentation" element={<DocumentationPage />} />
+                <Route path="api-reference" element={<APIReferencePage />} />
+                <Route path="marketplace" element={<MarketplacePublicPage />} />
+                <Route path="setup-guide" element={<SetupGuidePage />} />
 
-              {/* Legal Pages */}
-              <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
-              <Route path="terms-of-service" element={<TermsOfServicePage />} />
-              <Route path="cookie-policy" element={<CookiePolicyPage />} />
+                {/* Legal Pages */}
+                <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
+                <Route
+                  path="terms-of-service"
+                  element={<TermsOfServicePage />}
+                />
+                <Route path="cookie-policy" element={<CookiePolicyPage />} />
 
-              {/* Use Cases */}
-              <Route path="use-cases/startups" element={<StartupsPage />} />
+                {/* Use Cases */}
+                <Route path="use-cases/startups" element={<StartupsPage />} />
+                <Route
+                  path="use-cases/it-service-providers"
+                  element={<ITServiceProvidersPage />}
+                />
+                <Route
+                  path="use-cases/sales-teams"
+                  element={<SalesTeamsPage />}
+                />
+                <Route
+                  path="use-cases/consulting-businesses"
+                  element={<ConsultingBusinessesPage />}
+                />
+
+                {/* Features */}
+                <Route path="features/ai-chat" element={<AIChatPage />} />
+                <Route
+                  path="features/ai-dashboards"
+                  element={<AIDashboardsPage />}
+                />
+                <Route
+                  path="features/ai-project-manager"
+                  element={<AIProjectManagerPage />}
+                />
+
+                {/* Comparison Pages */}
+                <Route path="vs-chatgpt" element={<VsChatGPTPage />} />
+                <Route path="vs-claude" element={<VsClaudePage />} />
+                <Route path="chatgpt-alternative" element={<VsChatGPTPage />} />
+                <Route path="claude-alternative" element={<VsClaudePage />} />
+              </Route>
+
+              {/* Auth Routes - Both /auth/* and root level */}
+              <Route path="/auth" element={<AuthLayout />}>
+                <Route path="login" element={<LoginPage />} />
+                <Route path="register" element={<RegisterPage />} />
+                <Route
+                  path="forgot-password"
+                  element={<ForgotPasswordPage />}
+                />
+                <Route path="reset-password" element={<ResetPasswordPage />} />
+              </Route>
+
+              {/* Root level auth routes for convenience */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+              {/* Protected Routes - ALL AT ROOT LEVEL */}
               <Route
-                path="use-cases/it-service-providers"
-                element={<ITServiceProvidersPage />}
-              />
-              <Route
-                path="use-cases/sales-teams"
-                element={<SalesTeamsPage />}
-              />
-              <Route
-                path="use-cases/consulting-businesses"
-                element={<ConsultingBusinessesPage />}
-              />
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                {/* Dashboard Home */}
+                <Route path="dashboard" element={<DashboardHomePage />} />
 
-              {/* Features */}
-              <Route path="features/ai-chat" element={<AIChatPage />} />
-              <Route
-                path="features/ai-dashboards"
-                element={<AIDashboardsPage />}
-              />
-              <Route
-                path="features/ai-project-manager"
-                element={<AIProjectManagerPage />}
-              />
+                {/* Main Features */}
+                <Route path="workforce" element={<WorkforcePage />} />
 
-              {/* Comparison Pages */}
-              <Route path="vs-chatgpt" element={<VsChatGPTPage />} />
-              <Route path="vs-claude" element={<VsClaudePage />} />
-              <Route path="chatgpt-alternative" element={<VsChatGPTPage />} />
-              <Route path="claude-alternative" element={<VsClaudePage />} />
-            </Route>
+                {/* Vibe Coding - Multi-Agent Orchestration */}
+                <Route path="vibe" element={<VibeCodingPage />} />
 
-            {/* Auth Routes - Both /auth/* and root level */}
-            <Route path="/auth" element={<AuthLayout />}>
-              <Route path="login" element={<LoginPage />} />
-              <Route path="register" element={<RegisterPage />} />
-              <Route path="forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="reset-password" element={<ResetPasswordPage />} />
-            </Route>
+                {/* Legacy Chat Routes (for backward compatibility) */}
+                <Route path="chat" element={<ChatPage />} />
+                <Route path="chat/:sessionId" element={<ChatPage />} />
+                <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
+                <Route path="chat-multi" element={<TabbedLLMChatPage />} />
 
-            {/* Root level auth routes for convenience */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
+                {/* Account & System at Root Level */}
+                <Route path="settings" element={<SettingsPage />} />
+                <Route path="settings/:section" element={<SettingsPage />} />
+                <Route
+                  path="settings/ai-configuration"
+                  element={<AIConfigurationPage />}
+                />
+                <Route path="billing" element={<BillingPage />} />
+                <Route path="support" element={<HelpSupportPage />} />
+              </Route>
 
-            {/* Protected Routes - ALL AT ROOT LEVEL */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              {/* Dashboard Home */}
-              <Route path="dashboard" element={<DashboardHomePage />} />
-
-              {/* Main Features */}
-              <Route path="workforce" element={<WorkforcePage />} />
-
-              {/* Vibe Coding - Multi-Agent Orchestration */}
-              <Route path="vibe" element={<VibeCodingPage />} />
-
-              {/* Legacy Chat Routes (for backward compatibility) */}
-              <Route path="chat" element={<ChatPage />} />
-              <Route path="chat/:sessionId" element={<ChatPage />} />
-              <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
-              <Route path="chat-multi" element={<TabbedLLMChatPage />} />
-
-              {/* Account & System at Root Level */}
-              <Route path="settings" element={<SettingsPage />} />
-              <Route path="settings/:section" element={<SettingsPage />} />
-              <Route
-                path="settings/ai-configuration"
-                element={<AIConfigurationPage />}
-              />
-              <Route path="billing" element={<BillingPage />} />
-              <Route path="support" element={<HelpSupportPage />} />
-            </Route>
-
-            {/* 404 Route */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+              {/* 404 Route */}
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
 
           <Toaster
             position="bottom-right"

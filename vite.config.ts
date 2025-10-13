@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig(({ mode }) => {
   // Environment-aware configuration
@@ -82,6 +83,17 @@ export default defineConfig(({ mode }) => {
       react({
         fastRefresh: true,
       }),
+      // Bundle analyzer for production builds
+      ...(isProd
+        ? [
+            visualizer({
+              filename: 'dist/bundle-analysis.html',
+              open: false,
+              gzipSize: true,
+              brotliSize: true,
+            }),
+          ]
+        : []),
     ],
     resolve: {
       alias: {
@@ -108,12 +120,49 @@ export default defineConfig(({ mode }) => {
       },
       rollupOptions: {
         output: {
-          manualChunks: {
-            'react-vendor': ['react', 'react-dom'],
-            router: ['react-router-dom'],
-            ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-            supabase: ['@supabase/supabase-js'],
-            utils: ['zustand', 'immer', 'date-fns'],
+          manualChunks: id => {
+            // React and React DOM
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            // Router
+            if (id.includes('react-router')) {
+              return 'router';
+            }
+            // UI Libraries
+            if (
+              id.includes('@radix-ui') ||
+              id.includes('lucide-react') ||
+              id.includes('framer-motion')
+            ) {
+              return 'ui-vendor';
+            }
+            // Supabase
+            if (id.includes('@supabase')) {
+              return 'supabase';
+            }
+            // State management and utilities
+            if (
+              id.includes('zustand') ||
+              id.includes('immer') ||
+              id.includes('date-fns') ||
+              id.includes('clsx') ||
+              id.includes('tailwind-merge')
+            ) {
+              return 'utils';
+            }
+            // AI/LLM related libraries
+            if (
+              id.includes('openai') ||
+              id.includes('anthropic') ||
+              id.includes('@anthropic-ai')
+            ) {
+              return 'ai-vendor';
+            }
+            // Large third-party libraries
+            if (id.includes('node_modules')) {
+              return 'vendor';
+            }
           },
         },
       },

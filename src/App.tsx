@@ -35,7 +35,7 @@ const ResetPasswordPage = lazyWithRetry(
   () => import('./pages/auth/ResetPasswordPage')
 );
 const DashboardHomePage = lazyWithRetry(
-  () => import('./pages/DashboardHomePage')
+  () => import('./pages/dashboard/DashboardHomePage')
 );
 
 // Lazy load all other page components
@@ -61,8 +61,12 @@ const AIConfigurationPage = lazyWithRetry(
 const MarketplacePublicPage = lazyWithRetry(
   () => import('./pages/MarketplacePublicPage')
 );
-const BillingPage = lazyWithRetry(() => import('./pages/BillingPage'));
-const HelpSupportPage = lazyWithRetry(() => import('./pages/HelpSupportPage'));
+const BillingPage = lazyWithRetry(
+  () => import('./pages/dashboard/BillingPage')
+);
+const HelpSupportPage = lazyWithRetry(
+  () => import('./pages/dashboard/HelpSupportPage')
+);
 const SetupGuidePage = lazyWithRetry(() => import('./pages/SetupGuidePage'));
 
 // Lazy load public pages
@@ -148,12 +152,12 @@ function App() {
         monitoringService.initialize();
         accessibilityService.initialize();
         seoService.initialize();
-        
+
         // Initialize analytics with a small delay
         setTimeout(() => {
           analyticsService.initialize();
         }, 100);
-        
+
         // Initialize performance services with delay
         setTimeout(() => {
           performanceService.initialize({
@@ -164,7 +168,7 @@ function App() {
             cacheStrategy: 'moderate',
           });
         }, 200);
-        
+
         // Initialize advanced services with longer delay
         setTimeout(() => {
           backupService.initialize({
@@ -176,7 +180,7 @@ function App() {
             cloudProvider: 'supabase',
             encryptionEnabled: true,
           });
-          
+
           scalingService.initialize({
             enableLoadBalancing: true,
             enableCaching: true,
@@ -187,7 +191,7 @@ function App() {
             cacheStrategy: 'moderate',
             cdnProvider: 'cloudflare',
           });
-          
+
           privacyService.initialize({
             enableConsentManagement: true,
             enableDataSubjectRequests: true,
@@ -197,12 +201,11 @@ function App() {
             enableAuditLogging: true,
           });
         }, 500);
-        
       } catch (error) {
         console.error('Service initialization error:', error);
       }
     };
-    
+
     initializeServices();
   }, []);
 

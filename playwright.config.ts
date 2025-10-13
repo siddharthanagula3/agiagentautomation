@@ -1,5 +1,27 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Run E2E tests against production as requested
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'https://agiagentautomation.com';
+
+export default defineConfig({
+  timeout: 180000, // 3 minutes per test file
+  expect: { timeout: 15000 },
+  retries: 1,
+  use: {
+    baseURL: BASE_URL,
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+  },
+  projects: [
+    { name: 'Chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'Firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'WebKit', use: { ...devices['Desktop Safari'] } },
+  ],
+});
+
+import { defineConfig, devices } from '@playwright/test';
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv

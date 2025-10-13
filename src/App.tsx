@@ -1,6 +1,6 @@
 // src/App.tsx - CLEANED VERSION (Debug components removed)
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -9,6 +9,9 @@ import { ThemeProvider } from '@/components/theme-provider';
 import ScrollToTop from '@/components/ScrollToTop';
 import { lazyWithRetry } from '@/components/LazyWrapper';
 import { Loader2 } from 'lucide-react';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { monitoringService } from '@/services/monitoring-service';
+import { usePagePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring';
 import { PublicLayout } from './layouts/PublicLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -130,147 +133,172 @@ const RouteLoadingSpinner = () => (
 );
 
 function App() {
+  // Initialize monitoring service
+  useEffect(() => {
+    monitoringService.initialize();
+  }, []);
+
+  // Monitor page performance
+  usePagePerformanceMonitoring();
+
   return (
-    <ThemeProvider>
-      <TooltipProvider>
-        <div className="min-h-screen bg-background">
-          <ScrollToTop />
-          <Suspense fallback={<RouteLoadingSpinner />}>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<PublicLayout />}>
-                <Route index element={<LandingPage />} />
+    <ErrorBoundary>
+      <ThemeProvider>
+        <TooltipProvider>
+          <div className="min-h-screen bg-background">
+            <ScrollToTop />
+            <Suspense fallback={<RouteLoadingSpinner />}>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<PublicLayout />}>
+                  <Route index element={<LandingPage />} />
 
-                {/* Marketing Pages */}
-                <Route path="blog" element={<BlogPage />} />
-                <Route path="blog/:slug" element={<BlogPostPage />} />
-                <Route path="resources" element={<ResourcesPage />} />
-                <Route path="help" element={<HelpPage />} />
-                <Route path="pricing" element={<PricingPage />} />
-                <Route path="contact-sales" element={<ContactSalesPage />} />
-                <Route path="about" element={<AboutPage />} />
-                <Route path="careers" element={<CareersPage />} />
-                <Route path="security" element={<SecurityPage />} />
-                <Route path="documentation" element={<DocumentationPage />} />
-                <Route path="api-reference" element={<APIReferencePage />} />
-                <Route path="marketplace" element={<MarketplacePublicPage />} />
-                <Route path="setup-guide" element={<SetupGuidePage />} />
+                  {/* Marketing Pages */}
+                  <Route path="blog" element={<BlogPage />} />
+                  <Route path="blog/:slug" element={<BlogPostPage />} />
+                  <Route path="resources" element={<ResourcesPage />} />
+                  <Route path="help" element={<HelpPage />} />
+                  <Route path="pricing" element={<PricingPage />} />
+                  <Route path="contact-sales" element={<ContactSalesPage />} />
+                  <Route path="about" element={<AboutPage />} />
+                  <Route path="careers" element={<CareersPage />} />
+                  <Route path="security" element={<SecurityPage />} />
+                  <Route path="documentation" element={<DocumentationPage />} />
+                  <Route path="api-reference" element={<APIReferencePage />} />
+                  <Route
+                    path="marketplace"
+                    element={<MarketplacePublicPage />}
+                  />
+                  <Route path="setup-guide" element={<SetupGuidePage />} />
 
-                {/* Legal Pages */}
-                <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
-                <Route
-                  path="terms-of-service"
-                  element={<TermsOfServicePage />}
-                />
-                <Route path="cookie-policy" element={<CookiePolicyPage />} />
+                  {/* Legal Pages */}
+                  <Route
+                    path="privacy-policy"
+                    element={<PrivacyPolicyPage />}
+                  />
+                  <Route
+                    path="terms-of-service"
+                    element={<TermsOfServicePage />}
+                  />
+                  <Route path="cookie-policy" element={<CookiePolicyPage />} />
 
-                {/* Use Cases */}
-                <Route path="use-cases/startups" element={<StartupsPage />} />
-                <Route
-                  path="use-cases/it-service-providers"
-                  element={<ITServiceProvidersPage />}
-                />
-                <Route
-                  path="use-cases/sales-teams"
-                  element={<SalesTeamsPage />}
-                />
-                <Route
-                  path="use-cases/consulting-businesses"
-                  element={<ConsultingBusinessesPage />}
-                />
+                  {/* Use Cases */}
+                  <Route path="use-cases/startups" element={<StartupsPage />} />
+                  <Route
+                    path="use-cases/it-service-providers"
+                    element={<ITServiceProvidersPage />}
+                  />
+                  <Route
+                    path="use-cases/sales-teams"
+                    element={<SalesTeamsPage />}
+                  />
+                  <Route
+                    path="use-cases/consulting-businesses"
+                    element={<ConsultingBusinessesPage />}
+                  />
 
-                {/* Features */}
-                <Route path="features/ai-chat" element={<AIChatPage />} />
-                <Route
-                  path="features/ai-dashboards"
-                  element={<AIDashboardsPage />}
-                />
-                <Route
-                  path="features/ai-project-manager"
-                  element={<AIProjectManagerPage />}
-                />
+                  {/* Features */}
+                  <Route path="features/ai-chat" element={<AIChatPage />} />
+                  <Route
+                    path="features/ai-dashboards"
+                    element={<AIDashboardsPage />}
+                  />
+                  <Route
+                    path="features/ai-project-manager"
+                    element={<AIProjectManagerPage />}
+                  />
 
-                {/* Comparison Pages */}
-                <Route path="vs-chatgpt" element={<VsChatGPTPage />} />
-                <Route path="vs-claude" element={<VsClaudePage />} />
-                <Route path="chatgpt-alternative" element={<VsChatGPTPage />} />
-                <Route path="claude-alternative" element={<VsClaudePage />} />
-              </Route>
+                  {/* Comparison Pages */}
+                  <Route path="vs-chatgpt" element={<VsChatGPTPage />} />
+                  <Route path="vs-claude" element={<VsClaudePage />} />
+                  <Route
+                    path="chatgpt-alternative"
+                    element={<VsChatGPTPage />}
+                  />
+                  <Route path="claude-alternative" element={<VsClaudePage />} />
+                </Route>
 
-              {/* Auth Routes - Both /auth/* and root level */}
-              <Route path="/auth" element={<AuthLayout />}>
-                <Route path="login" element={<LoginPage />} />
-                <Route path="register" element={<RegisterPage />} />
+                {/* Auth Routes - Both /auth/* and root level */}
+                <Route path="/auth" element={<AuthLayout />}>
+                  <Route path="login" element={<LoginPage />} />
+                  <Route path="register" element={<RegisterPage />} />
+                  <Route
+                    path="forgot-password"
+                    element={<ForgotPasswordPage />}
+                  />
+                  <Route
+                    path="reset-password"
+                    element={<ResetPasswordPage />}
+                  />
+                </Route>
+
+                {/* Root level auth routes for convenience */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
                 <Route
-                  path="forgot-password"
+                  path="/forgot-password"
                   element={<ForgotPasswordPage />}
                 />
-                <Route path="reset-password" element={<ResetPasswordPage />} />
-              </Route>
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-              {/* Root level auth routes for convenience */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-
-              {/* Protected Routes - ALL AT ROOT LEVEL */}
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <DashboardLayout />
-                  </ProtectedRoute>
-                }
-              >
-                {/* Dashboard Home */}
-                <Route path="dashboard" element={<DashboardHomePage />} />
-
-                {/* Main Features */}
-                <Route path="workforce" element={<WorkforcePage />} />
-
-                {/* Vibe Coding - Multi-Agent Orchestration */}
-                <Route path="vibe" element={<VibeCodingPage />} />
-
-                {/* Legacy Chat Routes (for backward compatibility) */}
-                <Route path="chat" element={<ChatPage />} />
-                <Route path="chat/:sessionId" element={<ChatPage />} />
-                <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
-                <Route path="chat-multi" element={<TabbedLLMChatPage />} />
-
-                {/* Account & System at Root Level */}
-                <Route path="settings" element={<SettingsPage />} />
-                <Route path="settings/:section" element={<SettingsPage />} />
+                {/* Protected Routes - ALL AT ROOT LEVEL */}
                 <Route
-                  path="settings/ai-configuration"
-                  element={<AIConfigurationPage />}
-                />
-                <Route path="billing" element={<BillingPage />} />
-                <Route path="support" element={<HelpSupportPage />} />
-              </Route>
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  {/* Dashboard Home */}
+                  <Route path="dashboard" element={<DashboardHomePage />} />
 
-              {/* 404 Route */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
+                  {/* Main Features */}
+                  <Route path="workforce" element={<WorkforcePage />} />
 
-          <Toaster
-            position="bottom-right"
-            theme="dark"
-            className="toaster"
-            toastOptions={{
-              style: {
-                background: '#1F2937',
-                color: '#F9FAFB',
-                border: '1px solid #374151',
-              },
-            }}
-          />
-        </div>
+                  {/* Vibe Coding - Multi-Agent Orchestration */}
+                  <Route path="vibe" element={<VibeCodingPage />} />
 
-        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
-      </TooltipProvider>
-    </ThemeProvider>
+                  {/* Legacy Chat Routes (for backward compatibility) */}
+                  <Route path="chat" element={<ChatPage />} />
+                  <Route path="chat/:sessionId" element={<ChatPage />} />
+                  <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
+                  <Route path="chat-multi" element={<TabbedLLMChatPage />} />
+
+                  {/* Account & System at Root Level */}
+                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="settings/:section" element={<SettingsPage />} />
+                  <Route
+                    path="settings/ai-configuration"
+                    element={<AIConfigurationPage />}
+                  />
+                  <Route path="billing" element={<BillingPage />} />
+                  <Route path="support" element={<HelpSupportPage />} />
+                </Route>
+
+                {/* 404 Route */}
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </Suspense>
+
+            <Toaster
+              position="bottom-right"
+              theme="dark"
+              className="toaster"
+              toastOptions={{
+                style: {
+                  background: '#1F2937',
+                  color: '#F9FAFB',
+                  border: '1px solid #374151',
+                },
+              }}
+            />
+          </div>
+
+          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+        </TooltipProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

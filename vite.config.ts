@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 export default defineConfig(({ mode }) => {
   // Environment-aware configuration
@@ -91,6 +92,18 @@ export default defineConfig(({ mode }) => {
               open: false,
               gzipSize: true,
               brotliSize: true,
+            }),
+            // Sentry plugin for source maps and release tracking
+            sentryVitePlugin({
+              org: 'agi-agent-automation',
+              project: 'agi-agent-automation',
+              authToken: process.env.SENTRY_AUTH_TOKEN,
+              sourcemaps: {
+                assets: './dist/**',
+              },
+              release: {
+                name: process.env.npm_package_version || '1.0.0',
+              },
             }),
           ]
         : []),

@@ -15,7 +15,7 @@ const LoadingSpinner = () => (
 export default LoadingSpinner;
 
 // Lazy wrapper component
-export const lazyWithRetry = <T extends ComponentType<unknown>>(
+export const lazyWithRetry = <T extends ComponentType<Record<string, unknown>>>(
   importFunc: () => Promise<{ default: T }>
 ) => {
   return lazy(() =>

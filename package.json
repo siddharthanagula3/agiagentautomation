@@ -100,6 +100,8 @@
     "@eslint/js": "^9.32.0",
     "@netlify/functions": "^4.2.7",
     "@playwright/test": "^1.56.0",
+    "@sentry/react": "^10.19.0",
+    "@sentry/vite-plugin": "^4.4.0",
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",

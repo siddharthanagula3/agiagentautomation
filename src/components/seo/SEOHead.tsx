@@ -176,4 +176,5 @@ const SEOHead: React.FC<SEOHeadProps> = ({
   );
 };
 
+export { SEOHead };
 export default SEOHead;

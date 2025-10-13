@@ -14,6 +14,11 @@ import { monitoringService } from '@/services/monitoring-service';
 import { usePagePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring';
 import { accessibilityService } from '@/services/accessibility-service';
 import { seoService } from '@/services/seo-service';
+import { analyticsService } from '@/services/analytics-service';
+import { performanceService } from '@/services/performance-service';
+import { backupService } from '@/services/backup-service';
+import { scalingService } from '@/services/scaling-service';
+import { privacyService } from '@/services/privacy-service';
 import SkipLink from '@/components/accessibility/SkipLink';
 import { PublicLayout } from './layouts/PublicLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
@@ -149,6 +154,61 @@ function App() {
   // Initialize SEO service
   useEffect(() => {
     seoService.initialize();
+  }, []);
+
+  // Initialize analytics service
+  useEffect(() => {
+    analyticsService.initialize();
+  }, []);
+
+  // Initialize performance service
+  useEffect(() => {
+    performanceService.initialize({
+      enableImageOptimization: true,
+      enableCodeSplitting: true,
+      enableResourcePreloading: true,
+      enableServiceWorker: true,
+      cacheStrategy: 'moderate',
+    });
+  }, []);
+
+  // Initialize backup service
+  useEffect(() => {
+    backupService.initialize({
+      enableAutomatedBackups: true,
+      backupFrequency: 'daily',
+      retentionDays: 30,
+      enableCloudBackup: true,
+      enableLocalBackup: false,
+      cloudProvider: 'supabase',
+      encryptionEnabled: true,
+    });
+  }, []);
+
+  // Initialize scaling service
+  useEffect(() => {
+    scalingService.initialize({
+      enableLoadBalancing: true,
+      enableCaching: true,
+      enableCDN: true,
+      enableDatabaseOptimization: true,
+      enableResourcePooling: true,
+      maxConcurrentRequests: 100,
+      cacheStrategy: 'moderate',
+      cdnProvider: 'cloudflare',
+    });
+  }, []);
+
+  // Initialize privacy service
+  useEffect(() => {
+    privacyService.initialize({
+      enableConsentManagement: true,
+      enableDataSubjectRequests: true,
+      enableDataRetention: true,
+      enableDataAnonymization: true,
+      retentionPeriodDays: 2555, // 7 years
+      enableAuditLogging: true,
+    });
   }, []);
 
   // Monitor page performance

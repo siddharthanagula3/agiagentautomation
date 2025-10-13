@@ -13,6 +13,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { monitoringService } from '@/services/monitoring-service';
 import { usePagePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring';
 import { accessibilityService } from '@/services/accessibility-service';
+import { seoService } from '@/services/seo-service';
 import SkipLink from '@/components/accessibility/SkipLink';
 import { PublicLayout } from './layouts/PublicLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
@@ -143,6 +144,11 @@ function App() {
   // Initialize accessibility service
   useEffect(() => {
     accessibilityService.initialize();
+  }, []);
+
+  // Initialize SEO service
+  useEffect(() => {
+    seoService.initialize();
   }, []);
 
   // Monitor page performance

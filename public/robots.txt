@@ -1,28 +1,17 @@
-# AGI Agent Automation - Robots.txt
 User-agent: *
 Allow: /
-
-User-agent: GPTBot
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: Claude-Web
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
-
-User-agent: CCBot
-Allow: /
-
-Disallow: /admin
+Disallow: /admin/
 Disallow: /api/
-Disallow: /auth/
+Disallow: /_next/
+Disallow: /private/
+Disallow: /dashboard/
+Disallow: /settings/
+Disallow: /billing/
 
+# Sitemaps
 Sitemap: https://agiagentautomation.com/sitemap.xml
 Sitemap: https://agiagentautomation.com/sitemap-pages.xml
+Sitemap: https://agiagentautomation.com/sitemap-blog.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1

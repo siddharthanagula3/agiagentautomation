@@ -1,5 +1,4 @@
 // src/App.tsx - CLEANED VERSION (Debug components removed)
-
 import { Suspense, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -36,7 +35,7 @@ const ResetPasswordPage = lazyWithRetry(
   () => import('./pages/auth/ResetPasswordPage')
 );
 const DashboardHomePage = lazyWithRetry(
-  () => import('./components/dashboard/DashboardHomePage')
+  () => import('./pages/DashboardHomePage')
 );
 
 // Lazy load all other page components

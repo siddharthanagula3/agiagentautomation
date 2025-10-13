@@ -55,15 +55,10 @@ class SettingsService {
     updates: Partial<UserProfile>
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          full_name: updates.name,
-          avatar_url: updates.avatar,
-        },
-      });
-
+      const { user, error } = await authService.updateProfile(updates);
+      
       if (error) {
-        return { success: false, error: error.message };
+        return { success: false, error };
       }
 
       return { success: true };
@@ -173,12 +168,10 @@ class SettingsService {
 
   async changePassword(newPassword: string): Promise<{ error?: string }> {
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
+      const { error } = await authService.updatePassword(newPassword);
 
       if (error) {
-        return { error: error.message };
+        return { error };
       }
 
       return {};

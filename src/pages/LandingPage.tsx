@@ -186,7 +186,7 @@ const LandingPage: React.FC = () => {
       gemini: 'from-blue-500 to-cyan-500',
       perplexity: 'from-orange-500 to-red-500',
     };
-    return gradients[provider];
+    return gradients[provider] || 'from-gray-500 to-gray-600';
   };
 
   useEffect(() => {
@@ -481,7 +481,7 @@ const LandingPage: React.FC = () => {
                           getProviderGradient(employee.provider)
                         )}
                       >
-                        {providerInfo[employee.provider].name}
+                        {providerInfo[employee.provider]?.name || 'Unknown Provider'}
                       </Badge>
                     </div>
 

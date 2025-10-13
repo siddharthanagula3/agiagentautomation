@@ -64,7 +64,7 @@ interface BackupDashboardProps {
 
 const BackupDashboard: React.FC<BackupDashboardProps> = ({ className }) => {
   const [backups, setBackups] = useState<BackupMetadata[]>([]);
-  const [backupStatus, setBackupStatus] = useState<any>(null);
+  const [backupStatus, setBackupStatus] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedBackup, setSelectedBackup] = useState<string>('');
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);

@@ -12,6 +12,8 @@ import { Loader2 } from 'lucide-react';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { monitoringService } from '@/services/monitoring-service';
 import { usePagePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring';
+import { accessibilityService } from '@/services/accessibility-service';
+import SkipLink from '@/components/accessibility/SkipLink';
 import { PublicLayout } from './layouts/PublicLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -138,6 +140,11 @@ function App() {
     monitoringService.initialize();
   }, []);
 
+  // Initialize accessibility service
+  useEffect(() => {
+    accessibilityService.initialize();
+  }, []);
+
   // Monitor page performance
   usePagePerformanceMonitoring();
 
@@ -147,6 +154,7 @@ function App() {
         <TooltipProvider>
           <div className="min-h-screen bg-background">
             <ScrollToTop />
+            <SkipLink href="#main-content">Skip to main content</SkipLink>
             <Suspense fallback={<RouteLoadingSpinner />}>
               <Routes>
                 {/* Public Routes */}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuthStore } from '../stores/unified-auth-store';
+import { useAuthStore } from '../../stores/unified-auth-store';
 import { useSearchParams } from 'react-router-dom';
 import {
   Card,
@@ -7,17 +7,17 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Progress } from '../components/ui/progress';
-import { supabase } from '../lib/supabase-client';
+} from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
+import { Progress } from '../../components/ui/progress';
+import { supabase } from '../../lib/supabase-client';
 import {
   upgradeToProPlan,
   contactEnterpriseSales,
   openBillingPortal,
   isStripeConfigured,
-} from '../services/stripe-service';
+} from '../../services/stripe-service';
 import { toast } from 'sonner';
 import {
   CreditCard,
@@ -159,7 +159,7 @@ const BillingPage: React.FC = () => {
               { tokens: number; cost: number }
             >();
 
-            usageData.forEach(row => {
+            usageData.forEach((row) => {
               const provider = row.provider.toLowerCase();
               const current = providerMap.get(provider) || {
                 tokens: 0,
@@ -171,7 +171,7 @@ const BillingPage: React.FC = () => {
             });
 
             // Update LLM usage with actual data
-            llmUsage = llmUsage.map(llm => {
+            llmUsage = llmUsage.map((llm) => {
               const providerKey = llm.provider.toLowerCase();
               const usage = providerMap.get(providerKey) || {
                 tokens: 0,
@@ -253,7 +253,7 @@ const BillingPage: React.FC = () => {
       );
 
       if (isPro) {
-        llmUsage = llmUsage.map(llm => ({
+        llmUsage = llmUsage.map((llm) => ({
           ...llm,
           limit: proProviderLimit,
         }));
@@ -1001,7 +1001,7 @@ const BillingPage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {billing?.invoices.map(invoice => (
+              {billing?.invoices.map((invoice) => (
                 <div
                   key={invoice.id}
                   className="flex items-center justify-between rounded-lg border p-4"

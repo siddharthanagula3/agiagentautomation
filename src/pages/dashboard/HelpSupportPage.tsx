@@ -96,7 +96,7 @@ const HelpSupportPage: React.FC = () => {
   ];
 
   const filteredFaqs = faqs.filter(
-    faq =>
+    (faq) =>
       faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
       faq.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
       faq.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -118,7 +118,7 @@ const HelpSupportPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       toast.success('Message sent successfully!');
       setContactForm({ name: '', email: '', subject: '', message: '' });
     } catch (error) {
@@ -151,7 +151,7 @@ const HelpSupportPage: React.FC = () => {
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for help..."
                 className="pl-10"
               />
@@ -371,8 +371,11 @@ const HelpSupportPage: React.FC = () => {
                       </label>
                       <Input
                         value={contactForm.name}
-                        onChange={e =>
-                          setContactForm(p => ({ ...p, name: e.target.value }))
+                        onChange={(e) =>
+                          setContactForm((p) => ({
+                            ...p,
+                            name: e.target.value,
+                          }))
                         }
                         required
                         placeholder="Your name"
@@ -385,8 +388,11 @@ const HelpSupportPage: React.FC = () => {
                       <Input
                         type="email"
                         value={contactForm.email}
-                        onChange={e =>
-                          setContactForm(p => ({ ...p, email: e.target.value }))
+                        onChange={(e) =>
+                          setContactForm((p) => ({
+                            ...p,
+                            email: e.target.value,
+                          }))
                         }
                         required
                         placeholder="your.email@example.com"
@@ -399,8 +405,11 @@ const HelpSupportPage: React.FC = () => {
                     </label>
                     <Input
                       value={contactForm.subject}
-                      onChange={e =>
-                        setContactForm(p => ({ ...p, subject: e.target.value }))
+                      onChange={(e) =>
+                        setContactForm((p) => ({
+                          ...p,
+                          subject: e.target.value,
+                        }))
                       }
                       required
                       placeholder="How can we help?"
@@ -412,8 +421,11 @@ const HelpSupportPage: React.FC = () => {
                     </label>
                     <Textarea
                       value={contactForm.message}
-                      onChange={e =>
-                        setContactForm(p => ({ ...p, message: e.target.value }))
+                      onChange={(e) =>
+                        setContactForm((p) => ({
+                          ...p,
+                          message: e.target.value,
+                        }))
                       }
                       required
                       className="min-h-[150px]"

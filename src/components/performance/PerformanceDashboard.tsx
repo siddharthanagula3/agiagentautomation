@@ -37,15 +37,14 @@ interface PerformanceDashboardProps {
   className?: string;
 }
 
-const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
-  className,
-}) => {
-  const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
+const PerformanceDashboard: React.FC<PerformanceDashboa  const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
   useEffect(() => {
     loadMetrics();
+    startMonitoring();
+  }, [startMonitoring]););
     startMonitoring();
   }, []);
 

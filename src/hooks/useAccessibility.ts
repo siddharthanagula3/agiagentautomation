@@ -1,359 +1,350 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import {
-  FocusManager,
-  ScreenReaderUtils,
-  HighContrastDetector,
-  MotionPreferences,
-  KEYS,
-  ariaHelpers,
-} from '../lib/accessibility';
+import { useEffect, useCallback, useRef } from 'react';
+import { accessibilityService } from '@/services/accessibility-service';
 
-// Hook for managing focus
-export const useFocus = () => {
-  const focusRef = useRef<HTMLElement>(null);
+interface AccessibilityOptions {
+  announceChanges?: boolean;
+  trackInteractions?: boolean;
+  manageFocus?: boolean;
+}
 
-  const setFocus = useCallback((storePrevious = true) => {
-    if (focusRef.current) {
-      focusRef.current.focus();
-    }
-  }, []);
+/**
+ * Hook for accessibility features
+ */
+export const useAccessibility = (options: AccessibilityOptions = {}) => {
+  const {
+    announceChanges = true,
+    trackInteractions = true,
+    manageFocus = true,
+  } = options;
 
-  const restoreFocus = useCallback(() => {
-    if (focusRef.current) {
-      focusRef.current.focus();
-    }
-  }, []);
+  const previousFocusRef = useRef<Element | null>(null);
 
-  return { focusRef, setFocus, restoreFocus };
-};
-
-// Hook for focus trap (useful in modals)
-export const useFocusTrap = () => {
-  const trapRef = useRef<HTMLElement>(null);
-
+  // Initialize accessibility service
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (trapRef.current) {
-        FocusManager.trapFocus(trapRef.current, event);
+    accessibilityService.initialize();
+  }, []);
+
+  // Announce changes to screen readers
+  const announce = useCallback(
+    (message: string) => {
+      if (announceChanges) {
+        accessibilityService.announce(message);
+      }
+    },
+    [announceChanges]
+  );
+
+  // Track user interactions for accessibility analytics
+  const trackInteraction = useCallback(
+    (action: string, target: string, properties?: Record<string, unknown>) => {
+      if (trackInteractions) {
+        // This would integrate with your analytics service
+        console.log('Accessibility interaction:', {
+          action,
+          target,
+          properties,
+        });
+      }
+    },
+    [trackInteractions]
+  );
+
+  // Manage focus for better keyboard navigation
+  const manageFocusRef = useCallback(
+    (element: HTMLElement | null) => {
+      if (manageFocus && element) {
+        previousFocusRef.current = document.activeElement;
+        element.focus();
+      }
+    },
+    [manageFocus]
+  );
+
+  // Restore previous focus
+  const restoreFocus = useCallback(() => {
+    if (manageFocus && previousFocusRef.current) {
+      (previousFocusRef.current as HTMLElement).focus();
+      previousFocusRef.current = null;
+    }
+  }, [manageFocus]);
+
+  // Trap focus within an element
+  const trapFocus = useCallback((container: HTMLElement) => {
+    const focusableElements = container.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstElement = focusableElements[0] as HTMLElement;
+    const lastElement = focusableElements[
+      focusableElements.length - 1
+    ] as HTMLElement;
+
+    const handleTabKey = (e: KeyboardEvent) => {
+      if (e.key === 'Tab') {
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    container.addEventListener('keydown', handleTabKey);
+    firstElement?.focus();
+
+    return () => {
+      container.removeEventListener('keydown', handleTabKey);
+    };
   }, []);
 
-  return trapRef;
+  return {
+    announce,
+    trackInteraction,
+    manageFocusRef,
+    restoreFocus,
+    trapFocus,
+  };
 };
 
-// Hook for high contrast detection
-export const useHighContrast = () => {
-  const [isHighContrast, setIsHighContrast] = useState(false);
-
-  useEffect(() => {
-    setIsHighContrast(HighContrastDetector.isHighContrast());
-    const cleanup =
-      HighContrastDetector.onHighContrastChange(setIsHighContrast);
-    return cleanup;
-  }, []);
-
-  return isHighContrast;
-};
-
-// Hook for motion preferences
-export const useMotionPreferences = () => {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    setPrefersReducedMotion(MotionPreferences.prefersReducedMotion());
-    const cleanup = MotionPreferences.onMotionPreferenceChange(
-      setPrefersReducedMotion
-    );
-    return cleanup;
-  }, []);
-
-  return { prefersReducedMotion };
-};
-
-// Hook for screen reader utilities
-export const useScreenReader = () => {
-  const announce = useCallback((message: string) => {
-    ScreenReaderUtils.announce(message);
-  }, []);
-
-  const announcePolite = useCallback((message: string) => {
-    ScreenReaderUtils.announcePolite(message);
-  }, []);
-
-  const announceAssertive = useCallback((message: string) => {
-    ScreenReaderUtils.announceAssertive(message);
-  }, []);
-
-  return { announce, announcePolite, announceAssertive };
-};
-
-// Hook for generating unique ARIA IDs
-export const useAriaId = (prefix = 'aria') => {
-  const [id] = useState(() => ariaHelpers.generateId(prefix));
-  return id;
-};
-
-// Hook for keyboard navigation
-export const useKeyboardNavigation = (
-  options: {
-    onEnter?: () => void;
-    onSpace?: () => void;
-    onEscape?: () => void;
-    onArrowUp?: () => void;
-    onArrowDown?: () => void;
-    onArrowLeft?: () => void;
-    onArrowRight?: () => void;
-    onHome?: () => void;
-    onEnd?: () => void;
-  } = {}
-) => {
+/**
+ * Hook for keyboard navigation
+ */
+export const useKeyboardNavigation = () => {
   const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent) => {
+    (event: KeyboardEvent, handlers: Record<string, () => void>) => {
+      const handler = handlers[event.key];
+      if (handler) {
+        handler();
+        event.preventDefault();
+      }
+    },
+    []
+  );
+
+  const handleArrowKeys = useCallback(
+    (
+      event: KeyboardEvent,
+      onUp?: () => void,
+      onDown?: () => void,
+      onLeft?: () => void,
+      onRight?: () => void
+    ) => {
       switch (event.key) {
-        case KEYS.ENTER:
+        case 'ArrowUp':
+          onUp?.();
           event.preventDefault();
-          options.onEnter?.();
           break;
-        case KEYS.SPACE:
+        case 'ArrowDown':
+          onDown?.();
           event.preventDefault();
-          options.onSpace?.();
           break;
-        case KEYS.ESCAPE:
+        case 'ArrowLeft':
+          onLeft?.();
           event.preventDefault();
-          options.onEscape?.();
           break;
-        case KEYS.ARROW_UP:
+        case 'ArrowRight':
+          onRight?.();
           event.preventDefault();
-          options.onArrowUp?.();
-          break;
-        case KEYS.ARROW_DOWN:
-          event.preventDefault();
-          options.onArrowDown?.();
-          break;
-        case KEYS.ARROW_LEFT:
-          event.preventDefault();
-          options.onArrowLeft?.();
-          break;
-        case KEYS.ARROW_RIGHT:
-          event.preventDefault();
-          options.onArrowRight?.();
-          break;
-        case KEYS.HOME:
-          event.preventDefault();
-          options.onHome?.();
-          break;
-        case KEYS.END:
-          event.preventDefault();
-          options.onEnd?.();
           break;
       }
     },
-    [options]
+    []
   );
 
-  return { handleKeyDown };
-};
-
-// Hook for list navigation (useful for menus, listboxes)
-export const useListNavigation = (
-  items: unknown[],
-  options?: { loop?: boolean }
-) => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const { loop = true } = options || {};
-
-  const goToNext = useCallback(() => {
-    setActiveIndex(current => {
-      if (current === items.length - 1) {
-        return loop ? 0 : current;
+  const handleEscape = useCallback(
+    (event: KeyboardEvent, onEscape: () => void) => {
+      if (event.key === 'Escape') {
+        onEscape();
+        event.preventDefault();
       }
-      return current + 1;
-    });
-  }, [items.length, loop]);
+    },
+    []
+  );
 
-  const goToPrevious = useCallback(() => {
-    setActiveIndex(current => {
-      if (current === 0) {
-        return loop ? items.length - 1 : current;
+  const handleEnter = useCallback(
+    (event: KeyboardEvent, onEnter: () => void) => {
+      if (event.key === 'Enter') {
+        onEnter();
+        event.preventDefault();
       }
-      return current - 1;
-    });
-  }, [items.length, loop]);
-
-  const goToFirst = useCallback(() => {
-    setActiveIndex(0);
-  }, []);
-
-  const goToLast = useCallback(() => {
-    setActiveIndex(items.length - 1);
-  }, [items.length]);
-
-  const { handleKeyDown } = useKeyboardNavigation({
-    onArrowDown: goToNext,
-    onArrowUp: goToPrevious,
-    onHome: goToFirst,
-    onEnd: goToLast,
-  });
+    },
+    []
+  );
 
   return {
-    activeIndex,
-    setActiveIndex,
-    goToNext,
-    goToPrevious,
-    goToFirst,
-    goToLast,
     handleKeyDown,
+    handleArrowKeys,
+    handleEscape,
+    handleEnter,
   };
 };
 
-// Hook for managing expanded/collapsed state with ARIA
-export const useDisclosure = (initialState = false) => {
-  const [isOpen, setIsOpen] = useState(initialState);
-  const triggerId = useAriaId('disclosure-trigger');
-  const contentId = useAriaId('disclosure-content');
-
-  const open = useCallback(() => setIsOpen(true), []);
-  const close = useCallback(() => setIsOpen(false), []);
-  const toggle = useCallback(() => setIsOpen(prev => !prev), []);
-
-  const getTriggerProps = useCallback(
-    () => ({
-      id: triggerId,
-      'aria-expanded': isOpen,
-      'aria-controls': contentId,
-      onClick: toggle,
-    }),
-    [triggerId, contentId, isOpen, toggle]
+/**
+ * Hook for ARIA attributes management
+ */
+export const useAriaAttributes = () => {
+  const setAriaExpanded = useCallback(
+    (element: HTMLElement, expanded: boolean) => {
+      element.setAttribute('aria-expanded', expanded.toString());
+    },
+    []
   );
 
-  const getContentProps = useCallback(
-    () => ({
-      id: contentId,
-      'aria-labelledby': triggerId,
-      hidden: !isOpen,
-    }),
-    [contentId, triggerId, isOpen]
+  const setAriaSelected = useCallback(
+    (element: HTMLElement, selected: boolean) => {
+      element.setAttribute('aria-selected', selected.toString());
+    },
+    []
   );
 
-  return {
-    isOpen,
-    open,
-    close,
-    toggle,
-    getTriggerProps,
-    getContentProps,
-  };
-};
-
-// Hook for managing modal accessibility
-export const useModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const modalRef = useFocusTrap();
-  const { restoreFocus } = useFocus();
-  const { announce } = useScreenReader();
-
-  const open = useCallback(() => {
-    setIsOpen(true);
-    announce('Modal opened');
-    document.body.style.overflow = 'hidden';
-  }, [announce]);
-
-  const close = useCallback(() => {
-    setIsOpen(false);
-    announce('Modal closed');
-    restoreFocus();
-    document.body.style.overflow = '';
-  }, [announce, restoreFocus]);
-
-  const { handleKeyDown } = useKeyboardNavigation({
-    onEscape: close,
-  });
-
-  useEffect(() => {
-    return () => {
-      document.body.style.overflow = '';
-    };
+  const setAriaHidden = useCallback((element: HTMLElement, hidden: boolean) => {
+    element.setAttribute('aria-hidden', hidden.toString());
   }, []);
 
-  const getModalProps = useCallback(
-    () => ({
-      ref: modalRef,
-      role: 'dialog',
-      'aria-modal': true,
-      onKeyDown: handleKeyDown,
-    }),
-    [modalRef, handleKeyDown]
+  const setAriaLabel = useCallback((element: HTMLElement, label: string) => {
+    element.setAttribute('aria-label', label);
+  }, []);
+
+  const setAriaDescribedBy = useCallback(
+    (element: HTMLElement, describedBy: string) => {
+      element.setAttribute('aria-describedby', describedBy);
+    },
+    []
   );
 
+  const setAriaLabelledBy = useCallback(
+    (element: HTMLElement, labelledBy: string) => {
+      element.setAttribute('aria-labelledby', labelledBy);
+    },
+    []
+  );
+
+  const setAriaLive = useCallback(
+    (element: HTMLElement, live: 'off' | 'polite' | 'assertive') => {
+      element.setAttribute('aria-live', live);
+    },
+    []
+  );
+
+  const setAriaAtomic = useCallback((element: HTMLElement, atomic: boolean) => {
+    element.setAttribute('aria-atomic', atomic.toString());
+  }, []);
+
   return {
-    isOpen,
-    open,
-    close,
-    getModalProps,
+    setAriaExpanded,
+    setAriaSelected,
+    setAriaHidden,
+    setAriaLabel,
+    setAriaDescribedBy,
+    setAriaLabelledBy,
+    setAriaLive,
+    setAriaAtomic,
   };
 };
 
-// Hook for live regions
-export const useLiveRegion = (
-  politeness: 'polite' | 'assertive' = 'polite'
-) => {
-  const [message, setMessage] = useState('');
-  const regionId = useAriaId('live-region');
+/**
+ * Hook for screen reader announcements
+ */
+export const useScreenReaderAnnouncements = () => {
+  const announce = useCallback(
+    (message: string, priority: 'polite' | 'assertive' = 'polite') => {
+      const announcement = document.createElement('div');
+      announcement.setAttribute('aria-live', priority);
+      announcement.setAttribute('aria-atomic', 'true');
+      announcement.className = 'sr-only';
+      announcement.textContent = message;
 
-  const announce = useCallback((msg: string) => {
-    setMessage(msg);
-    setTimeout(() => setMessage(''), 1000);
-  }, []);
+      document.body.appendChild(announcement);
 
-  const getLiveRegionProps = useCallback(
-    () => ({
-      id: regionId,
-      'aria-live': politeness,
-      'aria-atomic': true,
-      className: 'sr-only',
-    }),
-    [regionId, politeness]
+      setTimeout(() => {
+        document.body.removeChild(announcement);
+      }, 1000);
+    },
+    []
+  );
+
+  const announceError = useCallback(
+    (message: string) => {
+      announce(message, 'assertive');
+    },
+    [announce]
+  );
+
+  const announceSuccess = useCallback(
+    (message: string) => {
+      announce(message, 'polite');
+    },
+    [announce]
+  );
+
+  const announceInfo = useCallback(
+    (message: string) => {
+      announce(message, 'polite');
+    },
+    [announce]
   );
 
   return {
-    message,
     announce,
-    getLiveRegionProps,
+    announceError,
+    announceSuccess,
+    announceInfo,
   };
 };
 
-// Hook for skip links
-export const useSkipLink = () => {
-  const skipRef = useRef<HTMLAnchorElement>(null);
+/**
+ * Hook for color contrast checking
+ */
+export const useColorContrast = () => {
+  const checkContrast = useCallback(
+    (foreground: string, background: string): number => {
+      // Simplified contrast ratio calculation
+      // In a real implementation, you'd use a proper color contrast library
+      const getLuminance = (color: string): number => {
+        // Convert hex to RGB
+        const hex = color.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16) / 255;
+        const g = parseInt(hex.substr(2, 2), 16) / 255;
+        const b = parseInt(hex.substr(4, 2), 16) / 255;
 
-  const skipToContent = useCallback((targetId: string) => {
-    const target = document.getElementById(targetId);
-    if (target) {
-      target.focus();
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, []);
+        // Apply gamma correction
+        const [rs, gs, bs] = [r, g, b].map(c =>
+          c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+        );
 
-  const getSkipLinkProps = useCallback(
-    (targetId: string, label: string) => ({
-      ref: skipRef,
-      href: `#${targetId}`,
-      onClick: (e: React.MouseEvent) => {
-        e.preventDefault();
-        skipToContent(targetId);
-      },
-      className: 'skip-link',
-      children: label,
-    }),
-    [skipToContent]
+        return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+      };
+
+      const lum1 = getLuminance(foreground);
+      const lum2 = getLuminance(background);
+
+      const brightest = Math.max(lum1, lum2);
+      const darkest = Math.min(lum1, lum2);
+
+      return (brightest + 0.05) / (darkest + 0.05);
+    },
+    []
+  );
+
+  const isContrastSufficient = useCallback(
+    (
+      foreground: string,
+      background: string,
+      level: 'AA' | 'AAA' = 'AA'
+    ): boolean => {
+      const ratio = checkContrast(foreground, background);
+      return level === 'AA' ? ratio >= 4.5 : ratio >= 7;
+    },
+    [checkContrast]
   );
 
   return {
-    skipToContent,
-    getSkipLinkProps,
+    checkContrast,
+    isContrastSufficient,
   };
 };

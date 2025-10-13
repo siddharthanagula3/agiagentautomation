@@ -205,7 +205,7 @@ const SettingsPage: React.FC = () => {
         toast.error('Failed to upload avatar');
         console.error('Error uploading avatar:', error);
       } else if (url) {
-        setProfile(prev => (prev ? { ...prev, avatar_url: url } : null));
+        setProfile((prev) => (prev ? { ...prev, avatar_url: url } : null));
         toast.success('Avatar uploaded successfully');
       }
     } catch (error) {
@@ -294,7 +294,7 @@ const SettingsPage: React.FC = () => {
         console.error('Error generating API key:', error);
       } else {
         setGeneratedAPIKey(fullKey || '');
-        setAPIKeys(prev => [data, ...prev]);
+        setAPIKeys((prev) => [data, ...prev]);
         toast.success('API key generated successfully');
         setNewAPIKeyName('');
       }
@@ -316,7 +316,7 @@ const SettingsPage: React.FC = () => {
         toast.error('Failed to delete API key');
         console.error('Error deleting API key:', error);
       } else {
-        setAPIKeys(prev => prev.filter(k => k.id !== keyToDelete));
+        setAPIKeys((prev) => prev.filter((k) => k.id !== keyToDelete));
         toast.success('API key deleted successfully');
       }
     } catch (error) {
@@ -417,7 +417,7 @@ const SettingsPage: React.FC = () => {
       >
         <Tabs
           value={activeSection}
-          onValueChange={value => {
+          onValueChange={(value) => {
             setActiveSection(value);
             navigate(`/settings/${value}`, { replace: true });
           }}
@@ -457,174 +457,187 @@ const SettingsPage: React.FC = () => {
 
           {/* Profile Settings */}
           <TabsContent value="profile" className="space-y-6">
-            <Card className="border-border bg-card">
-              <CardHeader>
-                <CardTitle className="text-foreground">
-                  Profile Information
-                </CardTitle>
-                <CardDescription>
-                  Update your personal information and preferences
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Avatar with 3D Hover Effect */}
-                <div className="flex items-center space-x-4">
-                  <InteractiveHoverCard>
-                    <Avatar className="h-20 w-20 ring-2 ring-primary/20 transition-all duration-300 hover:ring-primary/40">
-                      <AvatarImage src={profile.avatar_url} />
-                      <AvatarFallback className="bg-accent text-lg text-foreground">
-                        {profile.name
-                          ?.split(' ')
-                          .map(n => n[0])
-                          .join('') || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                  </InteractiveHoverCard>
-                  <div className="space-y-2">
-                    <input
-                      type="file"
-                      id="avatar-upload"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleAvatarUpload}
+            {!profile ? (
+              <Card className="border-border bg-card">
+                <CardContent className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+                    <p className="text-muted-foreground">Loading profile...</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-border bg-card">
+                <CardHeader>
+                  <CardTitle className="text-foreground">
+                    Profile Information
+                  </CardTitle>
+                  <CardDescription>
+                    Update your personal information and preferences
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Avatar with 3D Hover Effect */}
+                  <div className="flex items-center space-x-4">
+                    <InteractiveHoverCard>
+                      <Avatar className="h-20 w-20 ring-2 ring-primary/20 transition-all duration-300 hover:ring-primary/40">
+                        <AvatarImage src={profile?.avatar_url} />
+                        <AvatarFallback className="bg-accent text-lg text-foreground">
+                          {profile?.name
+                            ?.split(' ')
+                            .map((n) => n[0])
+                            .join('') || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </InteractiveHoverCard>
+                    <div className="space-y-2">
+                      <input
+                        type="file"
+                        id="avatar-upload"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarUpload}
+                      />
+                      <Button
+                        variant="outline"
+                        className="border-border text-foreground transition-transform duration-200 hover:scale-105 hover:text-foreground"
+                        onClick={() =>
+                          document.getElementById('avatar-upload')?.click()
+                        }
+                      >
+                        <Camera className="mr-2 h-4 w-4" />
+                        Change Photo
+                      </Button>
+                      <p className="text-xs text-muted-foreground">
+                        JPG, PNG up to 5MB
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Profile Form */}
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div>
+                      <Label className="text-foreground">Full Name</Label>
+                      <Input
+                        value={profile?.name || ''}
+                        onChange={(e) =>
+                          handleProfileUpdate('name', e.target.value)
+                        }
+                        className="mt-1 border-border bg-background text-foreground"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-foreground">Email Address</Label>
+                      <Input
+                        type="email"
+                        value={user?.email || ''}
+                        disabled
+                        className="mt-1 cursor-not-allowed border-border bg-muted text-muted-foreground"
+                      />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Email cannot be changed
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label className="text-foreground">Phone Number</Label>
+                      <Input
+                        value={profile?.phone || ''}
+                        onChange={(e) =>
+                          handleProfileUpdate('phone', e.target.value)
+                        }
+                        className="mt-1 border-border bg-background text-foreground"
+                        placeholder="+1 (555) 000-0000"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-foreground">Timezone</Label>
+                      <Select
+                        value={profile?.timezone || 'America/New_York'}
+                        onValueChange={(value) =>
+                          handleProfileUpdate('timezone', value)
+                        }
+                      >
+                        <SelectTrigger className="mt-1 border-border bg-background text-foreground">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="border-border bg-popover">
+                          <SelectItem value="America/New_York">
+                            Eastern Time (ET)
+                          </SelectItem>
+                          <SelectItem value="America/Chicago">
+                            Central Time (CT)
+                          </SelectItem>
+                          <SelectItem value="America/Denver">
+                            Mountain Time (MT)
+                          </SelectItem>
+                          <SelectItem value="America/Los_Angeles">
+                            Pacific Time (PT)
+                          </SelectItem>
+                          <SelectItem value="Europe/London">GMT</SelectItem>
+                          <SelectItem value="Europe/Paris">CET</SelectItem>
+                          <SelectItem value="Asia/Tokyo">JST</SelectItem>
+                          <SelectItem value="Asia/Shanghai">CST</SelectItem>
+                          <SelectItem value="Australia/Sydney">AEST</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-foreground">Language</Label>
+                      <Select
+                        value={profile?.language || 'en'}
+                        onValueChange={(value) =>
+                          handleProfileUpdate('language', value)
+                        }
+                      >
+                        <SelectTrigger className="mt-1 border-border bg-background text-foreground">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="border-border bg-popover">
+                          <SelectItem value="en">English</SelectItem>
+                          <SelectItem value="es">Español</SelectItem>
+                          <SelectItem value="fr">Français</SelectItem>
+                          <SelectItem value="de">Deutsch</SelectItem>
+                          <SelectItem value="zh">中文</SelectItem>
+                          <SelectItem value="ja">日本語</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-foreground">Bio</Label>
+                    <Textarea
+                      value={profile?.bio || ''}
+                      onChange={(e) =>
+                        handleProfileUpdate('bio', e.target.value)
+                      }
+                      className="mt-1 border-border bg-background text-foreground"
+                      rows={3}
+                      placeholder="Tell us about yourself..."
                     />
+                  </div>
+
+                  <div className="flex justify-end">
                     <Button
-                      variant="outline"
-                      className="border-border text-foreground transition-transform duration-200 hover:scale-105 hover:text-foreground"
-                      onClick={() =>
-                        document.getElementById('avatar-upload')?.click()
-                      }
+                      onClick={handleSaveProfile}
+                      disabled={isSaving}
+                      className="bg-blue-600 hover:bg-blue-700"
                     >
-                      <Camera className="mr-2 h-4 w-4" />
-                      Change Photo
+                      {isSaving ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Save className="mr-2 h-4 w-4" />
+                      )}
+                      Save Profile
                     </Button>
-                    <p className="text-xs text-muted-foreground">
-                      JPG, PNG up to 5MB
-                    </p>
                   </div>
-                </div>
-
-                {/* Profile Form */}
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div>
-                    <Label className="text-foreground">Full Name</Label>
-                    <Input
-                      value={profile.name || ''}
-                      onChange={e =>
-                        handleProfileUpdate('name', e.target.value)
-                      }
-                      className="mt-1 border-border bg-background text-foreground"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-foreground">Email Address</Label>
-                    <Input
-                      type="email"
-                      value={user?.email || ''}
-                      disabled
-                      className="mt-1 cursor-not-allowed border-border bg-muted text-muted-foreground"
-                    />
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Email cannot be changed
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label className="text-foreground">Phone Number</Label>
-                    <Input
-                      value={profile.phone || ''}
-                      onChange={e =>
-                        handleProfileUpdate('phone', e.target.value)
-                      }
-                      className="mt-1 border-border bg-background text-foreground"
-                      placeholder="+1 (555) 000-0000"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-foreground">Timezone</Label>
-                    <Select
-                      value={profile.timezone || 'America/New_York'}
-                      onValueChange={value =>
-                        handleProfileUpdate('timezone', value)
-                      }
-                    >
-                      <SelectTrigger className="mt-1 border-border bg-background text-foreground">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="border-border bg-popover">
-                        <SelectItem value="America/New_York">
-                          Eastern Time (ET)
-                        </SelectItem>
-                        <SelectItem value="America/Chicago">
-                          Central Time (CT)
-                        </SelectItem>
-                        <SelectItem value="America/Denver">
-                          Mountain Time (MT)
-                        </SelectItem>
-                        <SelectItem value="America/Los_Angeles">
-                          Pacific Time (PT)
-                        </SelectItem>
-                        <SelectItem value="Europe/London">GMT</SelectItem>
-                        <SelectItem value="Europe/Paris">CET</SelectItem>
-                        <SelectItem value="Asia/Tokyo">JST</SelectItem>
-                        <SelectItem value="Asia/Shanghai">CST</SelectItem>
-                        <SelectItem value="Australia/Sydney">AEST</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-foreground">Language</Label>
-                    <Select
-                      value={profile.language || 'en'}
-                      onValueChange={value =>
-                        handleProfileUpdate('language', value)
-                      }
-                    >
-                      <SelectTrigger className="mt-1 border-border bg-background text-foreground">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="border-border bg-popover">
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="es">Español</SelectItem>
-                        <SelectItem value="fr">Français</SelectItem>
-                        <SelectItem value="de">Deutsch</SelectItem>
-                        <SelectItem value="zh">中文</SelectItem>
-                        <SelectItem value="ja">日本語</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-foreground">Bio</Label>
-                  <Textarea
-                    value={profile.bio || ''}
-                    onChange={e => handleProfileUpdate('bio', e.target.value)}
-                    className="mt-1 border-border bg-background text-foreground"
-                    rows={3}
-                    placeholder="Tell us about yourself..."
-                  />
-                </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    onClick={handleSaveProfile}
-                    disabled={isSaving}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    {isSaving ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Save className="mr-2 h-4 w-4" />
-                    )}
-                    Save Profile
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Notification Settings */}
@@ -692,7 +705,7 @@ const SettingsPage: React.FC = () => {
                       </div>
                       <Switch
                         checked={settings[key as keyof UserSettings] as boolean}
-                        onCheckedChange={checked =>
+                        onCheckedChange={(checked) =>
                           handleSettingsUpdate(
                             key as keyof UserSettings,
                             checked
@@ -755,7 +768,7 @@ const SettingsPage: React.FC = () => {
                     <Label className="text-foreground">Session Timeout</Label>
                     <Select
                       value={settings.session_timeout?.toString() || '60'}
-                      onValueChange={value =>
+                      onValueChange={(value) =>
                         handleSettingsUpdate('session_timeout', parseInt(value))
                       }
                     >
@@ -784,7 +797,7 @@ const SettingsPage: React.FC = () => {
                         <Input
                           type={showNewPassword ? 'text' : 'password'}
                           value={newPassword}
-                          onChange={e => setNewPassword(e.target.value)}
+                          onChange={(e) => setNewPassword(e.target.value)}
                           className="border-border bg-background pr-10 text-foreground"
                           placeholder="Enter new password"
                         />
@@ -810,7 +823,7 @@ const SettingsPage: React.FC = () => {
                         <Input
                           type={showConfirmPassword ? 'text' : 'password'}
                           value={confirmPassword}
-                          onChange={e => setConfirmPassword(e.target.value)}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
                           className="border-border bg-background pr-10 text-foreground"
                           placeholder="Confirm new password"
                         />
@@ -895,7 +908,7 @@ const SettingsPage: React.FC = () => {
                         </p>
                       </div>
                     ) : (
-                      apiKeys.map(apiKey => (
+                      apiKeys.map((apiKey) => (
                         <div
                           key={apiKey.id}
                           className="flex items-center justify-between rounded-lg border border-border bg-accent/50 p-3"
@@ -1003,7 +1016,7 @@ const SettingsPage: React.FC = () => {
                       </div>
                       <Switch
                         checked={settings[key as keyof UserSettings] as boolean}
-                        onCheckedChange={checked =>
+                        onCheckedChange={(checked) =>
                           handleSettingsUpdate(
                             key as keyof UserSettings,
                             checked
@@ -1030,7 +1043,7 @@ const SettingsPage: React.FC = () => {
                     <Label className="text-foreground">Cache Size</Label>
                     <Select
                       value={settings.cache_size || '1GB'}
-                      onValueChange={value =>
+                      onValueChange={(value) =>
                         handleSettingsUpdate('cache_size', value)
                       }
                     >
@@ -1051,7 +1064,7 @@ const SettingsPage: React.FC = () => {
                     <Label className="text-foreground">Backup Frequency</Label>
                     <Select
                       value={settings.backup_frequency || 'daily'}
-                      onValueChange={value =>
+                      onValueChange={(value) =>
                         handleSettingsUpdate('backup_frequency', value)
                       }
                     >
@@ -1074,7 +1087,7 @@ const SettingsPage: React.FC = () => {
                     <Input
                       type="number"
                       value={settings.retention_period || 30}
-                      onChange={e =>
+                      onChange={(e) =>
                         handleSettingsUpdate(
                           'retention_period',
                           parseInt(e.target.value) || 30
@@ -1093,7 +1106,7 @@ const SettingsPage: React.FC = () => {
                     <Input
                       type="number"
                       value={settings.max_concurrent_jobs || 10}
-                      onChange={e =>
+                      onChange={(e) =>
                         handleSettingsUpdate(
                           'max_concurrent_jobs',
                           parseInt(e.target.value) || 10
@@ -1278,7 +1291,7 @@ const SettingsPage: React.FC = () => {
                     <Label className="text-foreground">Key Name</Label>
                     <Input
                       value={newAPIKeyName}
-                      onChange={e => setNewAPIKeyName(e.target.value)}
+                      onChange={(e) => setNewAPIKeyName(e.target.value)}
                       placeholder="e.g., Production API"
                       className="mt-1 border-border bg-background text-foreground"
                     />

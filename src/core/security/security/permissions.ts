@@ -4,14 +4,14 @@ export interface PermissionRule {
   userId: string;
   resource: string;
   actions: ('read' | 'write' | 'execute' | 'delete')[];
-  constraints?: Record<string, any>;
+  constraints?: Record<string, unknown>;
   expiresAt?: Date;
 }
 
 export interface PermissionCheck {
   allowed: boolean;
   reason?: string;
-  constraints?: Record<string, any>;
+  constraints?: Record<string, unknown>;
 }
 
 export class PermissionService {
@@ -48,7 +48,7 @@ export class PermissionService {
 
       let allowed = false;
       let reason = 'Permission denied';
-      let constraints: Record<string, any> = {};
+      let constraints: Record<string, unknown> = {};
 
       if (data) {
         const actions = data.actions || [];

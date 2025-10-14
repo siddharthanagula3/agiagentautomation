@@ -141,7 +141,7 @@ export async function storeTokenUsage(
 /**
  * Extract user and session info from request
  */
-export function extractRequestMetadata(event: any): {
+export function extractRequestMetadata(event: { body?: string | null }): {
   userId: string | null;
   sessionId: string | null;
 } {

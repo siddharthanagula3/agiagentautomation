@@ -12,18 +12,18 @@ export interface Tool {
   category: string;
   inputSchema: {
     type: string;
-    properties: Record<string, any>;
+    properties: Record<string, unknown>;
     required: string[];
   };
   outputSchema?: {
     type: string;
-    properties: Record<string, any>;
+    properties: Record<string, unknown>;
   };
 }
 
 export interface ToolExecutionResult {
   success: boolean;
-  output?: any;
+  output?: unknown;
   error?: string;
   executionTime: number;
   logs?: ExecutionLog[];
@@ -33,14 +33,22 @@ export interface ExecutionLog {
   timestamp: Date;
   level: 'info' | 'warning' | 'error' | 'debug';
   message: string;
-  data?: any;
+  data?: unknown;
 }
 
 export type ToolExecutionCallback = (log: ExecutionLog) => void;
+type APICallBody =
+  | Record<string, unknown>
+  | unknown[]
+  | string
+  | number
+  | boolean
+  | null;
 
 class ToolExecutorService {
   private tools: Map<string, Tool> = new Map();
-  private executors: Map<string, (params: any) => Promise<any>> = new Map();
+  private executors: Map<string, (params: unknown) => Promise<unknown>> =
+    new Map();
 
   constructor() {
     this.registerDefaultTools();
@@ -70,7 +78,7 @@ class ToolExecutorService {
           required: ['query'],
         },
       },
-      async params => {
+      async (params) => {
         return await this.executeWebSearch(
           params.query,
           params.maxResults || 5
@@ -98,7 +106,7 @@ class ToolExecutorService {
           required: ['language', 'code'],
         },
       },
-      async params => {
+      async (params) => {
         return await this.executeCode(params.language, params.code);
       }
     );
@@ -123,7 +131,7 @@ class ToolExecutorService {
           required: ['fileUrl', 'analysisType'],
         },
       },
-      async params => {
+      async (params) => {
         return await this.analyzeFile(params.fileUrl, params.analysisType);
       }
     );
@@ -149,7 +157,7 @@ class ToolExecutorService {
           required: ['data', 'chartType'],
         },
       },
-      async params => {
+      async (params) => {
         return await this.createVisualization(
           params.data,
           params.chartType,
@@ -180,7 +188,7 @@ class ToolExecutorService {
           required: ['url', 'method'],
         },
       },
-      async params => {
+      async (params) => {
         return await this.makeAPICall(
           params.url,
           params.method,
@@ -209,7 +217,7 @@ class ToolExecutorService {
           required: ['query'],
         },
       },
-      async params => {
+      async (params) => {
         return await this.queryDatabase(params.query, params.database);
       }
     );
@@ -235,7 +243,7 @@ class ToolExecutorService {
           required: ['prompt'],
         },
       },
-      async params => {
+      async (params) => {
         return await this.generateImage(
           params.prompt,
           params.size,
@@ -265,7 +273,7 @@ class ToolExecutorService {
           required: ['documentUrl', 'operation'],
         },
       },
-      async params => {
+      async (params) => {
         return await this.processDocument(
           params.documentUrl,
           params.operation,
@@ -278,7 +286,7 @@ class ToolExecutorService {
   /**
    * Register a new tool
    */
-  registerTool(tool: Tool, executor: (params: any) => Promise<any>) {
+  registerTool(tool: Tool, executor: (params: unknown) => Promise<unknown>) {
     this.tools.set(tool.id, tool);
     this.executors.set(tool.id, executor);
 
@@ -302,7 +310,9 @@ class ToolExecutorService {
    * Get tools by category
    */
   getToolsByCategory(category: string): Tool[] {
-    return Array.from(this.tools.values()).filter(t => t.category === category);
+    return Array.from(this.tools.values()).filter(
+      (t) => t.category === category
+    );
   }
 
   /**
@@ -310,13 +320,17 @@ class ToolExecutorService {
    */
   async executeTool(
     toolId: string,
-    parameters: any,
+    parameters: Record<string, unknown>,
     onLog?: ToolExecutionCallback
   ): Promise<ToolExecutionResult> {
     const startTime = Date.now();
     const logs: ExecutionLog[] = [];
 
-    const log = (level: ExecutionLog['level'], message: string, data?: any) => {
+    const log = (
+      level: ExecutionLog['level'],
+      message: string,
+      data?: unknown
+    ) => {
       const logEntry: ExecutionLog = {
         timestamp: new Date(),
         level,
@@ -375,7 +389,7 @@ class ToolExecutorService {
   /**
    * Validate parameters against tool schema
    */
-  private validateParameters(tool: Tool, parameters: any) {
+  private validateParameters(tool: Tool, parameters: unknown) {
     const { required, properties } = tool.inputSchema;
 
     // Check required parameters
@@ -397,7 +411,7 @@ class ToolExecutorService {
   /**
    * Validate parameter type
    */
-  private validateType(name: string, value: any, schema: any) {
+  private validateType(name: string, value: unknown, schema: unknown) {
     const { type, enum: enumValues } = schema;
 
     switch (type) {
@@ -444,7 +458,7 @@ class ToolExecutorService {
   private async executeWebSearch(
     query: string,
     maxResults: number
-  ): Promise<any> {
+  ): Promise<unknown> {
     // TODO: Integrate with actual search API (Google, Bing, or Perplexity)
     console.log('Executing web search:', query);
 
@@ -464,7 +478,7 @@ class ToolExecutorService {
   /**
    * Code Execution Implementation
    */
-  private async executeCode(language: string, code: string): Promise<any> {
+  private async executeCode(language: string, code: string): Promise<unknown> {
     // TODO: Implement sandboxed code execution
     console.log('Executing code:', language, code);
 
@@ -481,7 +495,7 @@ class ToolExecutorService {
   private async analyzeFile(
     fileUrl: string,
     analysisType: string
-  ): Promise<any> {
+  ): Promise<unknown> {
     // TODO: Implement file analysis
     console.log('Analyzing file:', fileUrl, analysisType);
 
@@ -496,10 +510,10 @@ class ToolExecutorService {
    * Data Visualization Implementation
    */
   private async createVisualization(
-    data: any[],
+    data: unknown[],
     chartType: string,
     title?: string
-  ): Promise<any> {
+  ): Promise<unknown> {
     // TODO: Implement visualization generation
     console.log('Creating visualization:', chartType);
 
@@ -516,9 +530,9 @@ class ToolExecutorService {
   private async makeAPICall(
     url: string,
     method: string,
-    headers?: any,
-    body?: any
-  ): Promise<any> {
+    headers?: Record<string, string>,
+    body?: APICallBody
+  ): Promise<unknown> {
     try {
       const response = await fetch(url, {
         method,
@@ -542,7 +556,10 @@ class ToolExecutorService {
   /**
    * Database Query Implementation
    */
-  private async queryDatabase(query: string, database?: string): Promise<any> {
+  private async queryDatabase(
+    query: string,
+    database?: string
+  ): Promise<unknown> {
     // TODO: Implement database querying (Supabase)
     console.log('Querying database:', query);
 
@@ -559,7 +576,7 @@ class ToolExecutorService {
     prompt: string,
     size?: string,
     style?: string
-  ): Promise<any> {
+  ): Promise<unknown> {
     // TODO: Integrate with DALL-E or other image generation API
     console.log('Generating image:', prompt);
 
@@ -577,7 +594,7 @@ class ToolExecutorService {
     documentUrl: string,
     operation: string,
     query?: string
-  ): Promise<any> {
+  ): Promise<unknown> {
     // TODO: Implement document processing
     console.log('Processing document:', documentUrl, operation);
 

@@ -53,7 +53,12 @@
       "WebFetch(domain:ai.google.dev)",
       "Bash(npm run test:e2e:full:*)",
       "WebFetch(domain:agiagentautomation.com)",
-      "Bash(if exist nul del /f /q nul)"
+      "Bash(if exist nul del /f /q nul)",
+      "Bash(git mv:*)",
+      "Bash(bash:*)",
+      "Bash(do if [ -d \"$dir\" ])",
+      "Bash(git restore:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

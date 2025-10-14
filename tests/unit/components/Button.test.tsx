@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { Button } from '../ui/button';
+import { Button } from '@shared/ui/button';
 
 describe('Button Component', () => {
   it('renders with default props', () => {

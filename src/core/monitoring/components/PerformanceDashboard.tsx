@@ -3,7 +3,7 @@
  * Displays real-time performance metrics and optimization suggestions
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
@@ -13,7 +13,6 @@ import {
   Zap,
   Clock,
   HardDrive,
-  Wifi,
   AlertTriangle,
   CheckCircle,
   XCircle,
@@ -37,37 +36,122 @@ interface PerformanceDashboardProps {
   className?: string;
 }
 
-const PerformanceDashboard: React.FC<PerformanceDashboa  const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
+const DEFAULT_METRICS: PerformanceMetrics = {
+  lcp: 0,
+  fid: 0,
+  cls: 0,
+  fcp: 0,
+  ttfb: 0,
+  domContentLoaded: 0,
+  loadComplete: 0,
+  firstPaint: 0,
+  firstContentfulPaint: 0,
+};
+
+const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
+  className,
+}) => {
+  const [metrics, setMetrics] = useState<PerformanceMetrics>(DEFAULT_METRICS);
   const [isMonitoring, setIsMonitoring] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
-  useEffect(() => {
-    loadMetrics();
-    startMonitoring();
-  }, [startMonitoring]););
-    startMonitoring();
-  }, []);
+  const sanitizeMetrics = useCallback(
+    (rawMetrics: Record<string, number> | null | undefined) => {
+      const nextMetrics: PerformanceMetrics = { ...DEFAULT_METRICS };
 
-  const loadMetrics = () => {
+      if (!rawMetrics) {
+        return nextMetrics;
+      }
+
+      Object.entries(rawMetrics).forEach(([key, value]) => {
+        if (key in nextMetrics && typeof value === 'number') {
+          nextMetrics[key as keyof PerformanceMetrics] = value;
+        }
+      });
+
+      // Derive additional metrics when possible
+      if (typeof performance !== 'undefined') {
+        const navigation = performance.getEntriesByType('navigation')[0] as
+          | PerformanceNavigationTiming
+          | undefined;
+        if (navigation) {
+          nextMetrics.ttfb = navigation.responseStart - navigation.requestStart;
+          nextMetrics.lcp = Math.max(nextMetrics.lcp, navigation.domComplete);
+        }
+      }
+
+      return nextMetrics;
+    },
+    []
+  );
+
+  const loadMetrics = useCallback(() => {
     const performanceMetrics = performanceService.getPerformanceMetrics();
-    setMetrics(performanceMetrics as any);
-  };
+    setMetrics(sanitizeMetrics(performanceMetrics));
+    setIsLoading(false);
+  }, [sanitizeMetrics]);
 
-  const startMonitoring = () => {
+  const startMonitoring = useCallback(() => {
     setIsMonitoring(true);
-    
-    // Monitor performance every 5 seconds
-    const interval = setInterval(() => {
+    const intervalId = window.setInterval(() => {
       loadMetrics();
     }, 5000);
 
     return () => {
-      clearInterval(interval);
+      window.clearInterval(intervalId);
       setIsMonitoring(false);
     };
-  };
+  }, [loadMetrics]);
 
-  const getPerformanceScore = (metric: number, thresholds: { good: number; poor: number }) => {
+  const suggestionBuilders = useMemo(
+    () => [
+      {
+        condition: (current: PerformanceMetrics) => current.lcp > 2500,
+        message:
+          'Optimize Largest Contentful Paint - consider image optimization and critical CSS.',
+      },
+      {
+        condition: (current: PerformanceMetrics) => current.fid > 100,
+        message:
+          'Reduce First Input Delay - minimize JavaScript execution time.',
+      },
+      {
+        condition: (current: PerformanceMetrics) => current.cls > 0.1,
+        message:
+          'Improve Cumulative Layout Shift - add explicit size attributes to images and ads.',
+      },
+      {
+        condition: (current: PerformanceMetrics) => current.fcp > 1800,
+        message:
+          'Optimize First Contentful Paint - inline critical CSS and optimize fonts.',
+      },
+      {
+        condition: (current: PerformanceMetrics) => current.ttfb > 600,
+        message:
+          'Improve Time to First Byte - optimize server response time and caching.',
+      },
+    ],
+    []
+  );
+
+  useEffect(() => {
+    loadMetrics();
+    const stopMonitoring = startMonitoring();
+    return stopMonitoring;
+  }, [loadMetrics, startMonitoring]);
+
+  useEffect(() => {
+    const nextSuggestions = suggestionBuilders
+      .filter((rule) => rule.condition(metrics))
+      .map((rule) => rule.message);
+    setSuggestions(nextSuggestions);
+  }, [metrics, suggestionBuilders]);
+
+  const getPerformanceScore = (
+    metric: number,
+    thresholds: { good: number; poor: number }
+  ) => {
     if (metric <= thresholds.good) return 'good';
     if (metric <= thresholds.poor) return 'needs-improvement';
     return 'poor';
@@ -75,51 +159,29 @@ const PerformanceDashboard: React.FC<PerformanceDashboa  const [metrics, setMetr
 
   const getScoreColor = (score: string) => {
     switch (score) {
-      case 'good': return 'text-green-600';
-      case 'needs-improvement': return 'text-yellow-600';
-      case 'poor': return 'text-red-600';
-      default: return 'text-gray-600';
+      case 'good':
+        return 'text-green-600';
+      case 'needs-improvement':
+        return 'text-yellow-600';
+      case 'poor':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
     }
   };
 
   const getScoreIcon = (score: string) => {
     switch (score) {
-      case 'good': return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'needs-improvement': return <AlertTriangle className="w-4 h-4 text-yellow-600" />;
-      case 'poor': return <XCircle className="w-4 h-4 text-red-600" />;
-      default: return <Activity className="w-4 h-4 text-gray-600" />;
+      case 'good':
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'needs-improvement':
+        return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+      case 'poor':
+        return <XCircle className="h-4 w-4 text-red-600" />;
+      default:
+        return <Activity className="h-4 w-4 text-gray-600" />;
     }
   };
-
-  const generateSuggestions = () => {
-    const newSuggestions: string[] = [];
-    
-    if (metrics) {
-      if (metrics.lcp > 2500) {
-        newSuggestions.push('Optimize Largest Contentful Paint - consider image optimization and critical CSS');
-      }
-      if (metrics.fid > 100) {
-        newSuggestions.push('Reduce First Input Delay - minimize JavaScript execution time');
-      }
-      if (metrics.cls > 0.1) {
-        newSuggestions.push('Improve Cumulative Layout Shift - add size attributes to images and ads');
-      }
-      if (metrics.fcp > 1800) {
-        newSuggestions.push('Optimize First Contentful Paint - inline critical CSS and optimize fonts');
-      }
-      if (metrics.ttfb > 600) {
-        newSuggestions.push('Improve Time to First Byte - optimize server response time');
-      }
-    }
-    
-    setSuggestions(newSuggestions);
-  };
-
-  useEffect(() => {
-    if (metrics) {
-      generateSuggestions();
-    }
-  }, [metrics]);
 
   const clearCaches = () => {
     performanceService.clearCaches();
@@ -127,19 +189,21 @@ const PerformanceDashboard: React.FC<PerformanceDashboa  const [metrics, setMetr
     loadMetrics();
   };
 
-  if (!metrics) {
+  if (isLoading) {
     return (
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Activity className="w-5 h-5" />
+            <Activity className="h-5 w-5" />
             Performance Dashboard
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading performance metrics...</p>
+          <div className="py-8 text-center">
+            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <p className="text-muted-foreground">
+              Loading performance metrics...
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -152,7 +216,7 @@ const PerformanceDashboard: React.FC<PerformanceDashboa  const [metrics, setMetr
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Activity className="w-5 h-5" />
+              <Activity className="h-5 w-5" />
               Performance Dashboard
             </div>
             <div className="flex items-center gap-2">
@@ -166,112 +230,154 @@ const PerformanceDashboard: React.FC<PerformanceDashboa  const [metrics, setMetr
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Core Web Vitals */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Zap className="w-5 h-5" />
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+              <Zap className="h-5 w-5" />
               Core Web Vitals
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">LCP</span>
-                  {getScoreIcon(getPerformanceScore(metrics.lcp, { good: 2500, poor: 4000 }))}
+                  {getScoreIcon(
+                    getPerformanceScore(metrics.lcp, {
+                      good: 2500,
+                      poor: 4000,
+                    })
+                  )}
                 </div>
-                <div className="text-2xl font-bold">{Math.round(metrics.lcp)}ms</div>
-                <Progress 
-                  value={Math.min((metrics.lcp / 4000) * 100, 100)} 
+                <div className="text-2xl font-bold">
+                  {Math.round(metrics.lcp)}ms
+                </div>
+                <Progress
+                  value={Math.min((metrics.lcp / 4000) * 100, 100)}
                   className="h-2"
                 />
-                <p className="text-xs text-muted-foreground">Largest Contentful Paint</p>
+                <p className="text-xs text-muted-foreground">
+                  Largest Contentful Paint
+                </p>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">FID</span>
-                  {getScoreIcon(getPerformanceScore(metrics.fid, { good: 100, poor: 300 }))}
+                  {getScoreIcon(
+                    getPerformanceScore(metrics.fid, {
+                      good: 100,
+                      poor: 300,
+                    })
+                  )}
                 </div>
-                <div className="text-2xl font-bold">{Math.round(metrics.fid)}ms</div>
-                <Progress 
-                  value={Math.min((metrics.fid / 300) * 100, 100)} 
+                <div className="text-2xl font-bold">
+                  {Math.round(metrics.fid)}ms
+                </div>
+                <Progress
+                  value={Math.min((metrics.fid / 300) * 100, 100)}
                   className="h-2"
                 />
-                <p className="text-xs text-muted-foreground">First Input Delay</p>
+                <p className="text-xs text-muted-foreground">
+                  First Input Delay
+                </p>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">CLS</span>
-                  {getScoreIcon(getPerformanceScore(metrics.cls, { good: 0.1, poor: 0.25 }))}
+                  {getScoreIcon(
+                    getPerformanceScore(metrics.cls, {
+                      good: 0.1,
+                      poor: 0.25,
+                    })
+                  )}
                 </div>
-                <div className="text-2xl font-bold">{metrics.cls.toFixed(3)}</div>
-                <Progress 
-                  value={Math.min((metrics.cls / 0.25) * 100, 100)} 
+                <div className="text-2xl font-bold">
+                  {metrics.cls.toFixed(3)}
+                </div>
+                <Progress
+                  value={Math.min((metrics.cls / 0.25) * 100, 100)}
                   className="h-2"
                 />
-                <p className="text-xs text-muted-foreground">Cumulative Layout Shift</p>
+                <p className="text-xs text-muted-foreground">
+                  Cumulative Layout Shift
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Loading Performance */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5" />
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+              <Clock className="h-5 w-5" />
               Loading Performance
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               <div className="text-center">
-                <div className="text-2xl font-bold">{Math.round(metrics.fcp)}ms</div>
-                <p className="text-xs text-muted-foreground">First Contentful Paint</p>
+                <div className="text-2xl font-bold">
+                  {Math.round(metrics.fcp)}ms
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  First Contentful Paint
+                </p>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{Math.round(metrics.firstPaint)}ms</div>
+                <div className="text-2xl font-bold">
+                  {Math.round(metrics.firstPaint)}ms
+                </div>
                 <p className="text-xs text-muted-foreground">First Paint</p>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{Math.round(metrics.domContentLoaded)}ms</div>
-                <p className="text-xs text-muted-foreground">DOM Content Loaded</p>
+                <div className="text-2xl font-bold">
+                  {Math.round(metrics.domContentLoaded)}ms
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  DOM Content Loaded
+                </p>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{Math.round(metrics.loadComplete)}ms</div>
+                <div className="text-2xl font-bold">
+                  {Math.round(metrics.loadComplete)}ms
+                </div>
                 <p className="text-xs text-muted-foreground">Load Complete</p>
               </div>
             </div>
           </div>
 
-          {/* Optimization Suggestions */}
           {suggestions.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5" />
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+                <AlertTriangle className="h-5 w-5" />
                 Optimization Suggestions
               </h3>
               <div className="space-y-2">
-                {suggestions.map((suggestion, index) => (
-                  <div key={index} className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                    <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-yellow-800 dark:text-yellow-200">{suggestion}</p>
+                {suggestions.map((suggestion) => (
+                  <div
+                    key={suggestion}
+                    className="flex items-start gap-2 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900/20"
+                  >
+                    <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-yellow-600" />
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      {suggestion}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Resource Usage */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <HardDrive className="w-5 h-5" />
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+              <HardDrive className="h-5 w-5" />
               Resource Usage
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-muted rounded-lg">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="rounded-lg bg-muted p-4 text-center">
                 <div className="text-2xl font-bold">Active</div>
                 <p className="text-xs text-muted-foreground">Service Worker</p>
               </div>
-              <div className="text-center p-4 bg-muted rounded-lg">
+              <div className="rounded-lg bg-muted p-4 text-center">
                 <div className="text-2xl font-bold">Enabled</div>
-                <p className="text-xs text-muted-foreground">Image Optimization</p>
+                <p className="text-xs text-muted-foreground">
+                  Image Optimization
+                </p>
               </div>
             </div>
           </div>

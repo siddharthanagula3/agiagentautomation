@@ -65,7 +65,7 @@ const BlogPage: React.FC = () => {
   const [hasMore, setHasMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
 
-  const categoryIcons: Record<string, any> = {
+  const categoryIcons: Record<string, unknown> = {
     'ai-automation': Zap,
     productivity: Rocket,
     'case-studies': Building2,
@@ -124,7 +124,7 @@ const BlogPage: React.FC = () => {
 
       setHasMore(response.hasMore || false);
       setCurrentPage(page);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching blog posts:', err);
       setError(err.message || 'Failed to fetch blog posts');
       toast.error('Failed to load blog posts');
@@ -146,7 +146,7 @@ const BlogPage: React.FC = () => {
       }
 
       setCategories(data || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching categories:', err);
       // Don't show error for categories, just use default ones
     }

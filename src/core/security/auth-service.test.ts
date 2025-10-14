@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { authService } from './auth-service';
 
 // Mock Supabase client
-vi.mock('@/lib/supabase-client', () => ({
+vi.mock('@shared/lib/supabase-client', () => ({
   supabase: {
     auth: {
       getUser: vi.fn(),
@@ -20,7 +20,7 @@ describe('AuthService', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    const { supabase } = await import('@/lib/supabase-client');
+    const { supabase } = await import('@shared/lib/supabase-client');
     mockSupabase = supabase;
   });
 

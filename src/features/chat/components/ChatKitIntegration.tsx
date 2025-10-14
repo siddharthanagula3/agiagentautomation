@@ -41,33 +41,45 @@ import {
   getGreetingMessageForRole,
 } from '@/prompts/chatgpt-ai-employee-prompts';
 
-// Declare the ChatKit web component
+interface ChatKitGlobal {
+  loaded?: boolean;
+}
+
+type ChatKitElementProps = React.HTMLAttributes<HTMLElement> & {
+  workflowId: string;
+  sessionId?: string;
+  theme?: 'light' | 'dark' | 'auto';
+  placeholder?: string;
+  greeting?: string;
+  starterPrompts?: string[];
+  onSessionCreated?: (event: CustomEvent<Record<string, unknown>>) => void;
+  onMessageSent?: (event: CustomEvent<Record<string, unknown>>) => void;
+  onMessageReceived?: (event: CustomEvent<Record<string, unknown>>) => void;
+  onError?: (event: CustomEvent<{ message?: string }>) => void;
+};
+
 declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'openai-chatkit': {
-        workflowId: string;
-        sessionId?: string;
-        theme?: 'light' | 'dark' | 'auto';
-        placeholder?: string;
-        greeting?: string;
-        starterPrompts?: string[];
-        onSessionCreated?: (event: CustomEvent) => void;
-        onMessageSent?: (event: CustomEvent) => void;
-        onMessageReceived?: (event: CustomEvent) => void;
-        onError?: (event: CustomEvent) => void;
-        className?: string;
-        style?: React.CSSProperties;
-      };
-    }
+  interface Window {
+    ChatKit?: ChatKitGlobal;
   }
 }
+
+const OpenAIChatKitElement = React.forwardRef<HTMLElement, ChatKitElementProps>(
+  ({ children, ...rest }, ref) =>
+    React.createElement('openai-chatkit', { ...rest, ref }, children)
+);
+
+OpenAIChatKitElement.displayName = 'OpenAIChatKitElement';
+
+type SessionCreatedDetail = Record<string, unknown>;
+type MessageEventDetail = Record<string, unknown>;
+type ChatKitErrorDetail = { message?: string } & Record<string, unknown>;
 
 // Check if ChatKit is available
 const isChatKitAvailable = () => {
   return (
     typeof window !== 'undefined' &&
-    window.ChatKit &&
+    window.ChatKit !== undefined &&
     window.ChatKit.loaded !== false
   );
 };
@@ -100,7 +112,7 @@ const ChatKitIntegration: React.FC<ChatKitIntegrationProps> = ({
   className,
 }) => {
   const { user } = useAuthStore();
-  const chatkitRef = useRef<any>(null);
+  const chatkitRef = useRef<HTMLElement | null>(null);
 
   const [employees, setEmployees] = useState<PurchasedEmployee[]>([]);
   const [selectedEmployee, setSelectedEmployee] =
@@ -154,21 +166,25 @@ const ChatKitIntegration: React.FC<ChatKitIntegrationProps> = ({
   };
 
   // Handle ChatKit events
-  const handleSessionCreated = (event: CustomEvent) => {
+  const handleSessionCreated = (
+    event: CustomEvent<SessionCreatedDetail>
+  ) => {
     console.log('ChatKit session created:', event.detail);
     setIsSessionActive(true);
     toast.success('Chat session started');
   };
 
-  const handleMessageSent = (event: CustomEvent) => {
+  const handleMessageSent = (event: CustomEvent<MessageEventDetail>) => {
     console.log('Message sent:', event.detail);
   };
 
-  const handleMessageReceived = (event: CustomEvent) => {
+  const handleMessageReceived = (
+    event: CustomEvent<MessageEventDetail>
+  ) => {
     console.log('Message received:', event.detail);
   };
 
-  const handleError = (event: CustomEvent) => {
+  const handleError = (event: CustomEvent<ChatKitErrorDetail>) => {
     console.error('ChatKit error:', event.detail);
     setError(event.detail.message || 'An error occurred');
     toast.error('Chat session error occurred');
@@ -403,7 +419,7 @@ const ChatKitIntegration: React.FC<ChatKitIntegrationProps> = ({
             </div>
           ) : chatKitConfig ? (
             <div className="flex-1">
-              <openai-chatkit
+              <OpenAIChatKitElement
                 ref={chatkitRef}
                 workflowId={chatKitConfig.workflowId}
                 sessionId={chatKitConfig.sessionId}

@@ -68,14 +68,14 @@ export async function searchWithPerplexity(
 
     // Extract citations/sources from the response
     const citationRegex = /\[(\d+)\]/g;
-    const citations = Array.from(answer.matchAll(citationRegex), m =>
+    const citations = Array.from(answer.matchAll(citationRegex), (m) =>
       parseInt(m[1])
     );
     const sources = data.citations || [];
 
     // Parse results
     const results: SearchResult[] = sources.map(
-      (source: any, index: number) => ({
+      (source: unknown, index: number) => ({
         title: source.title || `Source ${index + 1}`,
         url: source.url,
         snippet: source.snippet || '',
@@ -88,7 +88,7 @@ export async function searchWithPerplexity(
       query,
       results,
       answer,
-      sources: sources.map((s: any) => s.url),
+      sources: sources.map((s: unknown) => s.url),
       timestamp: new Date(),
     };
   } catch (error) {
@@ -123,7 +123,7 @@ export async function searchWithGoogle(
 
     const data = await response.json();
 
-    const results: SearchResult[] = (data.items || []).map((item: any) => ({
+    const results: SearchResult[] = (data.items || []).map((item: unknown) => ({
       title: item.title,
       url: item.link,
       snippet: item.snippet,
@@ -274,7 +274,7 @@ export async function searchAndSummarize(
     return {
       ...searchResponse,
       answer: aiResponse.content,
-      sources: searchResponse.results.map(r => r.url),
+      sources: searchResponse.results.map((r) => r.url),
     };
   } catch (error) {
     console.error('Failed to generate AI summary:', error);

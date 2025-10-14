@@ -99,7 +99,7 @@ export interface ChatMessage {
   tasks?: Task[];
   tokenUsage?: TokenUsage;
   isStreaming?: boolean;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 export interface Agent {
@@ -127,7 +127,7 @@ const ModernChatInterface: React.FC = () => {
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAnalytics, setShowAnalytics] = useState(false);
-  const [tokenStats, setTokenStats] = useState<any>(null);
+  const [tokenStats, setTokenStats] = useState<unknown>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);

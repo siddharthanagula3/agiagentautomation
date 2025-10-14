@@ -27,17 +27,23 @@ interface LoadMetrics {
 
 interface CacheEntry {
   key: string;
-  value: any;
+  value: unknown;
   timestamp: number;
   ttl: number;
   hits: number;
+}
+
+interface PerformanceWithMemory extends Performance {
+  memory?: {
+    usedJSHeapSize: number;
+  };
 }
 
 class ScalingService {
   private isInitialized = false;
   private config: ScalingConfig;
   private cache = new Map<string, CacheEntry>();
-  private requestQueue: Array<() => Promise<any>> = [];
+  private requestQueue: Array<() => Promise<unknown>> = [];
   private activeRequests = 0;
   private metrics: LoadMetrics = {
     activeConnections: 0,
@@ -94,9 +100,12 @@ class ScalingService {
    */
   private setupCaching(): void {
     // Clean up expired cache entries every 5 minutes
-    setInterval(() => {
-      this.cleanupExpiredCache();
-    }, 5 * 60 * 1000);
+    setInterval(
+      () => {
+        this.cleanupExpiredCache();
+      },
+      5 * 60 * 1000
+    );
 
     console.log('Caching system initialized');
   }
@@ -144,7 +153,8 @@ class ScalingService {
       requestsPerSecond: Math.random() * 100,
       averageResponseTime: Math.random() * 500,
       errorRate: Math.random() * 0.05,
-      memoryUsage: (performance as any).memory?.usedJSHeapSize || 0,
+      memoryUsage:
+        (performance as PerformanceWithMemory).memory?.usedJSHeapSize || 0,
       cpuUsage: Math.random() * 100,
     };
 
@@ -155,7 +165,7 @@ class ScalingService {
   /**
    * Cache a value
    */
-  cacheValue(key: string, value: any, ttl: number = 300000): void {
+  cacheValue(key: string, value: unknown, ttl: number = 300000): void {
     if (!this.config.enableCaching) return;
 
     const entry: CacheEntry = {
@@ -172,7 +182,7 @@ class ScalingService {
   /**
    * Get a cached value
    */
-  getCachedValue(key: string): any | null {
+  getCachedValue<T = unknown>(key: string): T | null {
     if (!this.config.enableCaching) return null;
 
     const entry = this.cache.get(key);
@@ -186,7 +196,7 @@ class ScalingService {
 
     // Increment hit count
     entry.hits++;
-    return entry.value;
+    return entry.value as T;
   }
 
   /**
@@ -227,10 +237,9 @@ class ScalingService {
     const request = this.requestQueue.shift();
     if (request) {
       this.activeRequests++;
-      request()
-        .finally(() => {
-          this.activeRequests--;
-        });
+      request().finally(() => {
+        this.activeRequests--;
+      });
     }
   }
 
@@ -254,7 +263,8 @@ class ScalingService {
    * Optimize resources based on current load
    */
   private optimizeResources(): void {
-    const { activeConnections, requestsPerSecond, averageResponseTime } = this.metrics;
+    const { activeConnections, requestsPerSecond, averageResponseTime } =
+      this.metrics;
 
     // Adjust cache strategy based on load
     if (requestsPerSecond > 50) {
@@ -267,9 +277,15 @@ class ScalingService {
 
     // Adjust max concurrent requests based on performance
     if (averageResponseTime > 1000) {
-      this.config.maxConcurrentRequests = Math.max(50, this.config.maxConcurrentRequests - 10);
+      this.config.maxConcurrentRequests = Math.max(
+        50,
+        this.config.maxConcurrentRequests - 10
+      );
     } else if (averageResponseTime < 200) {
-      this.config.maxConcurrentRequests = Math.min(200, this.config.maxConcurrentRequests + 10);
+      this.config.maxConcurrentRequests = Math.min(
+        200,
+        this.config.maxConcurrentRequests + 10
+      );
     }
 
     monitoringService.trackEvent('resource_optimization', {
@@ -296,7 +312,7 @@ class ScalingService {
     totalMisses: number;
   } {
     let totalHits = 0;
-    let totalMisses = 0;
+    const totalMisses = 0;
 
     for (const entry of this.cache.values()) {
       totalHits += entry.hits;
@@ -321,10 +337,10 @@ class ScalingService {
     try {
       // In production, this would analyze and optimize database queries
       monitoringService.trackEvent('database_optimization_started');
-      
+
       // Simulate optimization
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       monitoringService.trackEvent('database_optimization_completed');
     } catch (error) {
       monitoringService.captureError(error as Error, {
@@ -350,26 +366,41 @@ class ScalingService {
    */
   getScalingRecommendations(): string[] {
     const recommendations: string[] = [];
-    const { activeConnections, requestsPerSecond, averageResponseTime, errorRate } = this.metrics;
+    const {
+      activeConnections,
+      requestsPerSecond,
+      averageResponseTime,
+      errorRate,
+    } = this.metrics;
 
     if (requestsPerSecond > 100) {
-      recommendations.push('Consider horizontal scaling - high request volume detected');
+      recommendations.push(
+        'Consider horizontal scaling - high request volume detected'
+      );
     }
 
     if (averageResponseTime > 1000) {
-      recommendations.push('Optimize response times - consider caching or database optimization');
+      recommendations.push(
+        'Optimize response times - consider caching or database optimization'
+      );
     }
 
     if (errorRate > 0.01) {
-      recommendations.push('High error rate detected - investigate and fix issues');
+      recommendations.push(
+        'High error rate detected - investigate and fix issues'
+      );
     }
 
     if (activeConnections > this.config.maxConcurrentRequests * 0.8) {
-      recommendations.push('Approaching connection limit - consider increasing max concurrent requests');
+      recommendations.push(
+        'Approaching connection limit - consider increasing max concurrent requests'
+      );
     }
 
     if (this.cache.size > 10000) {
-      recommendations.push('Large cache size - consider implementing cache eviction policy');
+      recommendations.push(
+        'Large cache size - consider implementing cache eviction policy'
+      );
     }
 
     return recommendations;
@@ -380,7 +411,7 @@ class ScalingService {
    */
   autoScale(): void {
     const recommendations = this.getScalingRecommendations();
-    
+
     if (recommendations.length > 0) {
       monitoringService.trackEvent('auto_scaling_triggered', {
         recommendations,

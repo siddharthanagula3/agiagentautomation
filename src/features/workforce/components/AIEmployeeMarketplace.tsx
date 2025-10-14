@@ -247,7 +247,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
       const { data, error } = await aiEmployeeService.getEmployees({
         department: selectedCategory === 'all' ? undefined : selectedCategory,
         available: filters.availability === 'available',
-      } as any);
+      });
       if (error) {
         toast.error('Failed to load employees');
         return [] as AIEmployee[];
@@ -278,7 +278,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
 
   // Filter and sort employees
   const filteredEmployees = useMemo(() => {
-    let filtered = employees.filter(employee => {
+    const filtered = employees.filter(employee => {
       // Category filter
       if (
         selectedCategory !== 'all' &&
@@ -334,7 +334,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
 
     // Sort employees
     filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
+      let aValue: unknown, bValue: unknown;
 
       switch (sortBy) {
         case 'rating':
@@ -535,7 +535,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
               <div className="flex items-center space-x-2">
                 <Select
                   value={sortBy}
-                  onValueChange={(value: any) => setSortBy(value)}
+                  onValueChange={(value: unknown) => setSortBy(value)}
                 >
                   <SelectTrigger className="w-40 border-slate-600/30 bg-slate-700/30 text-slate-300">
                     <SelectValue />
@@ -1590,3 +1590,4 @@ const HireConfirmationDialog: React.FC<HireConfirmationDialogProps> = ({
 };
 
 export default AIEmployeeMarketplace;
+

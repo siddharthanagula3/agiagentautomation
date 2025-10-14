@@ -73,7 +73,7 @@ const VibeCodingPage: React.FC = () => {
         role: data.role,
         provider: data.provider,
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to load employee:', err);
       setError(err.message || 'Failed to load employee details.');
       toast.error('Failed to load employee');

@@ -50,9 +50,14 @@ export const CodeExecutionSandbox: React.FC<CodeExecutionSandboxProps> = ({
   className,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<'output' | 'logs' | 'code'>(
-    'output'
-  );
+  type TabKey = 'output' | 'logs' | 'code';
+  const [activeTab, setActiveTab] = useState<TabKey>('output');
+
+  const handleTabChange = (value: string) => {
+    if (value === 'output' || value === 'logs' || value === 'code') {
+      setActiveTab(value);
+    }
+  };
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(execution.code);
@@ -197,7 +202,7 @@ export const CodeExecutionSandbox: React.FC<CodeExecutionSandboxProps> = ({
         >
           <Tabs
             value={activeTab}
-            onValueChange={v => setActiveTab(v as any)}
+            onValueChange={handleTabChange}
             className="w-full"
           >
             <TabsList className="w-full rounded-none border-b">

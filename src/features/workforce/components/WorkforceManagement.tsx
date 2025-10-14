@@ -314,7 +314,7 @@ export const WorkforceManagement: React.FC<WorkforceManagementProps> = ({
 
   // Handlers
   const handleCreateWorkforce = useCallback(
-    (data: any) => {
+    (data: unknown) => {
       createWorkforceMutation.mutate(data);
     },
     [createWorkforceMutation]
@@ -1189,7 +1189,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ workforces }) => {
 
 // Create Team Dialog Component
 interface CreateTeamDialogProps {
-  onSubmit: (data: any) => void;
+  onSubmit: (data: unknown) => void;
   onCancel: () => void;
   isLoading: boolean;
 }

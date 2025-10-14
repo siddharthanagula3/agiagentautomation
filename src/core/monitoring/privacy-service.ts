@@ -17,11 +17,17 @@ interface ConsentPreferences {
 interface DataSubjectRequest {
   id: string;
   userId: string;
-  type: 'access' | 'rectification' | 'erasure' | 'portability' | 'restriction' | 'objection';
+  type:
+    | 'access'
+    | 'rectification'
+    | 'erasure'
+    | 'portability'
+    | 'restriction'
+    | 'objection';
   status: 'pending' | 'in_progress' | 'completed' | 'rejected';
   requestedAt: Date;
   completedAt?: Date;
-  details: any;
+  details: unknown;
 }
 
 interface PrivacyConfig {
@@ -107,7 +113,7 @@ class PrivacyService {
   saveConsentPreferences(preferences: ConsentPreferences): void {
     this.consentPreferences = preferences;
     localStorage.setItem('privacy_consent', JSON.stringify(preferences));
-    
+
     // Log consent change
     if (this.config.enableAuditLogging) {
       this.logConsentChange(preferences);
@@ -148,7 +154,10 @@ class PrivacyService {
 
     try {
       await this.createDataSubjectRequest(request);
-      monitoringService.trackEvent('data_access_requested', { userId, requestId: request.id });
+      monitoringService.trackEvent('data_access_requested', {
+        userId,
+        requestId: request.id,
+      });
       return request;
     } catch (error) {
       monitoringService.captureError(error as Error, {
@@ -164,7 +173,7 @@ class PrivacyService {
    */
   async requestDataRectification(
     userId: string,
-    dataToRectify: Record<string, any>
+    dataToRectify: Record<string, unknown>
   ): Promise<DataSubjectRequest> {
     const request: DataSubjectRequest = {
       id: this.generateRequestId(),
@@ -180,7 +189,10 @@ class PrivacyService {
 
     try {
       await this.createDataSubjectRequest(request);
-      monitoringService.trackEvent('data_rectification_requested', { userId, requestId: request.id });
+      monitoringService.trackEvent('data_rectification_requested', {
+        userId,
+        requestId: request.id,
+      });
       return request;
     } catch (error) {
       monitoringService.captureError(error as Error, {
@@ -194,7 +206,10 @@ class PrivacyService {
   /**
    * Request data erasure (GDPR Article 17 - Right to be forgotten)
    */
-  async requestDataErasure(userId: string, reason?: string): Promise<DataSubjectRequest> {
+  async requestDataErasure(
+    userId: string,
+    reason?: string
+  ): Promise<DataSubjectRequest> {
     const request: DataSubjectRequest = {
       id: this.generateRequestId(),
       userId,
@@ -209,7 +224,10 @@ class PrivacyService {
 
     try {
       await this.createDataSubjectRequest(request);
-      monitoringService.trackEvent('data_erasure_requested', { userId, requestId: request.id });
+      monitoringService.trackEvent('data_erasure_requested', {
+        userId,
+        requestId: request.id,
+      });
       return request;
     } catch (error) {
       monitoringService.captureError(error as Error, {
@@ -223,7 +241,10 @@ class PrivacyService {
   /**
    * Request data portability (GDPR Article 20)
    */
-  async requestDataPortability(userId: string, format: 'json' | 'csv' = 'json'): Promise<DataSubjectRequest> {
+  async requestDataPortability(
+    userId: string,
+    format: 'json' | 'csv' = 'json'
+  ): Promise<DataSubjectRequest> {
     const request: DataSubjectRequest = {
       id: this.generateRequestId(),
       userId,
@@ -238,7 +259,10 @@ class PrivacyService {
 
     try {
       await this.createDataSubjectRequest(request);
-      monitoringService.trackEvent('data_portability_requested', { userId, requestId: request.id });
+      monitoringService.trackEvent('data_portability_requested', {
+        userId,
+        requestId: request.id,
+      });
       return request;
     } catch (error) {
       monitoringService.captureError(error as Error, {
@@ -252,18 +276,18 @@ class PrivacyService {
   /**
    * Create data subject request in database
    */
-  private async createDataSubjectRequest(request: DataSubjectRequest): Promise<void> {
-    const { error } = await supabase
-      .from('data_subject_requests')
-      .insert({
-        id: request.id,
-        user_id: request.userId,
-        type: request.type,
-        status: request.status,
-        requested_at: request.requestedAt.toISOString(),
-        details: request.details,
-        created_at: new Date().toISOString(),
-      });
+  private async createDataSubjectRequest(
+    request: DataSubjectRequest
+  ): Promise<void> {
+    const { error } = await supabase.from('data_subject_requests').insert({
+      id: request.id,
+      user_id: request.userId,
+      type: request.type,
+      status: request.status,
+      requested_at: request.requestedAt.toISOString(),
+      details: request.details,
+      created_at: new Date().toISOString(),
+    });
 
     if (error) throw error;
   }
@@ -281,7 +305,7 @@ class PrivacyService {
 
       if (error) throw error;
 
-      return data.map(row => ({
+      return data.map((row) => ({
         id: row.id,
         userId: row.user_id,
         type: row.type,
@@ -302,10 +326,14 @@ class PrivacyService {
   /**
    * Process data subject request
    */
-  async processDataSubjectRequest(requestId: string, action: 'approve' | 'reject'): Promise<void> {
+  async processDataSubjectRequest(
+    requestId: string,
+    action: 'approve' | 'reject'
+  ): Promise<void> {
     try {
       const status = action === 'approve' ? 'completed' : 'rejected';
-      const completedAt = action === 'approve' ? new Date().toISOString() : null;
+      const completedAt =
+        action === 'approve' ? new Date().toISOString() : null;
 
       const { error } = await supabase
         .from('data_subject_requests')
@@ -394,10 +422,7 @@ class PrivacyService {
       ];
 
       for (const table of tables) {
-        await supabase
-          .from(table)
-          .delete()
-          .eq('user_id', userId);
+        await supabase.from(table).delete().eq('user_id', userId);
       }
 
       monitoringService.trackEvent('user_data_deleted', { userId });
@@ -415,9 +440,12 @@ class PrivacyService {
    */
   private setupDataRetention(): void {
     // Schedule data retention cleanup
-    setInterval(() => {
-      this.cleanupExpiredData();
-    }, 24 * 60 * 60 * 1000); // Run daily
+    setInterval(
+      () => {
+        this.cleanupExpiredData();
+      },
+      24 * 60 * 60 * 1000
+    ); // Run daily
   }
 
   /**
@@ -426,7 +454,9 @@ class PrivacyService {
   private async cleanupExpiredData(): Promise<void> {
     try {
       const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - this.config.retentionPeriodDays);
+      cutoffDate.setDate(
+        cutoffDate.getDate() - this.config.retentionPeriodDays
+      );
 
       // Clean up old audit logs
       await supabase
@@ -460,16 +490,16 @@ class PrivacyService {
   /**
    * Log consent change
    */
-  private async logConsentChange(preferences: ConsentPreferences): Promise<void> {
+  private async logConsentChange(
+    preferences: ConsentPreferences
+  ): Promise<void> {
     try {
-      await supabase
-        .from('privacy_audit_log')
-        .insert({
-          event_type: 'consent_change',
-          user_id: 'anonymous', // Could be actual user ID if available
-          details: preferences,
-          created_at: new Date().toISOString(),
-        });
+      await supabase.from('privacy_audit_log').insert({
+        event_type: 'consent_change',
+        user_id: 'anonymous', // Could be actual user ID if available
+        details: preferences,
+        created_at: new Date().toISOString(),
+      });
     } catch (error) {
       console.error('Error logging consent change:', error);
     }
@@ -500,9 +530,9 @@ class PrivacyService {
   /**
    * Export user data
    */
-  async exportUserData(userId: string): Promise<any> {
+  async exportUserData(userId: string): Promise<unknown> {
     try {
-      const userData: any = {};
+      const userData: unknown = {};
 
       // Export user profile
       const { data: profile } = await supabase

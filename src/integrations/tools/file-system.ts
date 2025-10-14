@@ -19,6 +19,12 @@ export interface FileSystemParams {
   operation: 'read' | 'write' | 'list' | 'delete';
 }
 
+type FileSystemAccessWindow = typeof window & {
+  showOpenFilePicker?: (options?: unknown) => Promise<FileSystemFileHandle[]>;
+  showSaveFilePicker?: (options?: unknown) => Promise<FileSystemFileHandle>;
+  showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle>;
+};
+
 export class FileSystemTool {
   async execute(params: FileSystemParams): Promise<ToolResult> {
     try {
@@ -49,7 +55,7 @@ export class FileSystemTool {
     try {
       // Use browser File System Access API
       if ('showOpenFilePicker' in window) {
-        const [fileHandle] = await (window as any).showOpenFilePicker({
+        const [fileHandle] = await (window as FileSystemAccessWindow).showOpenFilePicker({
           types: [
             {
               description: 'Text files',
@@ -100,7 +106,7 @@ export class FileSystemTool {
   async writeFile(path: string, content: string): Promise<ToolResult> {
     try {
       if ('showSaveFilePicker' in window) {
-        const fileHandle = await (window as any).showSaveFilePicker({
+        const fileHandle = await (window as FileSystemAccessWindow).showSaveFilePicker({
           suggestedName: path,
           types: [
             {
@@ -170,7 +176,7 @@ export class FileSystemTool {
   async listFiles(directory: string): Promise<ToolResult> {
     try {
       if ('showDirectoryPicker' in window) {
-        const dirHandle = await (window as any).showDirectoryPicker();
+        const dirHandle = await (window as FileSystemAccessWindow).showDirectoryPicker();
         const files: FileResult[] = [];
 
         for await (const [name, handle] of dirHandle.entries()) {

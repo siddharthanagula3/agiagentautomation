@@ -14,7 +14,7 @@ export interface StreamChunk {
 export interface ToolCall {
   id: string;
   name: string;
-  arguments: Record<string, any>;
+  arguments: Record<string, unknown>;
 }
 
 export interface TokenUsage {
@@ -24,6 +24,8 @@ export interface TokenUsage {
 }
 
 export type StreamCallback = (chunk: StreamChunk) => void;
+
+type ErrorResponse = { error?: string } & Record<string, unknown>;
 
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
 const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || '';
@@ -36,7 +38,7 @@ const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY || '';
 export async function streamOpenAI(
   messages: Array<{ role: string; content: string }>,
   onChunk: StreamCallback,
-  tools?: any[],
+  tools?: unknown[],
   model: string = 'gpt-4-turbo-preview'
 ) {
   // In production, use Netlify proxy (non-stream) and emit a single chunk
@@ -47,7 +49,7 @@ export async function streamOpenAI(
       body: JSON.stringify({ model, messages, temperature: 0.7 }),
     });
     if (!response.ok) {
-      const data = await response.json().catch(() => ({}) as any);
+      const data: ErrorResponse = await response.json().catch(() => ({} as ErrorResponse));
       throw new Error(
         data?.error || `OpenAI proxy error: ${response.statusText}`
       );
@@ -139,7 +141,7 @@ export async function streamOpenAI(
 export async function streamAnthropic(
   messages: Array<{ role: string; content: string }>,
   onChunk: StreamCallback,
-  tools?: any[],
+  tools?: unknown[],
   model: string = 'claude-3-5-sonnet-20241022'
 ) {
   const systemMessage = messages.find(m => m.role === 'system');
@@ -159,7 +161,7 @@ export async function streamAnthropic(
       }),
     });
     if (!response.ok) {
-      const data = await response.json().catch(() => ({}) as any);
+      const data: ErrorResponse = await response.json().catch(() => ({} as ErrorResponse));
       throw new Error(
         data?.error || `Anthropic proxy error: ${response.statusText}`
       );
@@ -248,7 +250,7 @@ export async function streamGoogle(
       body: JSON.stringify({ model, messages, temperature: 0.7 }),
     });
     if (!response.ok) {
-      const data = await response.json().catch(() => ({}) as any);
+      const data: ErrorResponse = await response.json().catch(() => ({} as ErrorResponse));
       throw new Error(
         data?.error || `Google proxy error: ${response.statusText}`
       );
@@ -338,7 +340,7 @@ export async function streamAIResponse(
   provider: string,
   messages: Array<{ role: string; content: string }>,
   onChunk: StreamCallback,
-  tools?: any[]
+  tools?: unknown[]
 ): Promise<void> {
   switch (provider.toLowerCase()) {
     case 'chatgpt':

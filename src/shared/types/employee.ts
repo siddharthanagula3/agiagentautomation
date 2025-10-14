@@ -56,7 +56,7 @@ export interface PurchasedEmployee {
     total_sessions: number;
     tokens_used?: number;
   };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface EmployeeSession {
@@ -69,7 +69,7 @@ export interface EmployeeSession {
   ended_at?: string;
   messages_count: number;
   tokens_used?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface EmployeeMessage {
@@ -80,7 +80,7 @@ export interface EmployeeMessage {
   content: string;
   employee_name?: string;
   tools_used?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
 }
 

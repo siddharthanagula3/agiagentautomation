@@ -62,12 +62,27 @@ interface MediaGenerationPanelProps {
   onMediaGenerated?: (result: MediaGenerationResult) => void;
 }
 
+type GenerationTab = 'image' | 'video';
+type ImageStyle = NonNullable<ImageGenerationRequest['style']>;
+type ImageSize = NonNullable<ImageGenerationRequest['size']>;
+type ImageQuality = NonNullable<ImageGenerationRequest['quality']>;
+type ImageAspectRatio = NonNullable<ImageGenerationRequest['aspectRatio']>;
+type VideoStyle = NonNullable<VideoGenerationRequest['style']>;
+type VideoResolution = NonNullable<VideoGenerationRequest['resolution']>;
+type VideoAspectRatio = NonNullable<VideoGenerationRequest['aspectRatio']>;
+
+type ServiceStatus = {
+  nanoBanana: boolean;
+  veo3: boolean;
+  gemini: boolean;
+};
+
 const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
   isOpen,
   onClose,
   onMediaGenerated,
 }) => {
-  const [activeTab, setActiveTab] = useState<'image' | 'video'>('image');
+  const [activeTab, setActiveTab] = useState<GenerationTab>('image');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [currentGeneration, setCurrentGeneration] =
@@ -80,28 +95,38 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
 
   // Image generation state
   const [imagePrompt, setImagePrompt] = useState('');
-  const [imageStyle, setImageStyle] = useState('realistic');
-  const [imageSize, setImageSize] = useState('1024x1024');
-  const [imageQuality, setImageQuality] = useState('standard');
-  const [imageAspectRatio, setImageAspectRatio] = useState('1:1');
+  const [imageStyle, setImageStyle] = useState<ImageStyle>('realistic');
+  const [imageSize, setImageSize] = useState<ImageSize>('1024x1024');
+  const [imageQuality, setImageQuality] = useState<ImageQuality>('standard');
+  const [imageAspectRatio, setImageAspectRatio] = useState<ImageAspectRatio>('1:1');
   const [negativePrompt, setNegativePrompt] = useState('');
   const [imageSeed, setImageSeed] = useState<number | undefined>();
 
   // Video generation state
   const [videoPrompt, setVideoPrompt] = useState('');
-  const [videoStyle, setVideoStyle] = useState('realistic');
-  const [videoResolution, setVideoResolution] = useState('1080p');
+  const [videoStyle, setVideoStyle] = useState<VideoStyle>('realistic');
+  const [videoResolution, setVideoResolution] = useState<VideoResolution>('1080p');
   const [videoDuration, setVideoDuration] = useState(5);
-  const [videoAspectRatio, setVideoAspectRatio] = useState('16:9');
+  const [videoAspectRatio, setVideoAspectRatio] = useState<VideoAspectRatio>('16:9');
   const [videoFps, setVideoFps] = useState(24);
   const [videoSeed, setVideoSeed] = useState<number | undefined>();
 
   // Service availability
-  const [serviceStatus, setServiceStatus] = useState({
+  const [serviceStatus, setServiceStatus] = useState<ServiceStatus>({
     nanoBanana: false,
     veo3: false,
     gemini: false,
   });
+  const imageSizes = imageSizes as ImageSize[];
+  const videoStyles = videoStyles as VideoStyle[];
+  const videoResolutions = (
+    videoResolutions as VideoResolution[]
+  );
+  const handleTabChange = (value: string) => {
+    if (value === 'image' || value === 'video') {
+      setActiveTab(value);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -139,10 +164,10 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
 
       const request: ImageGenerationRequest = {
         prompt: imagePrompt,
-        style: imageStyle as any,
-        size: imageSize as any,
-        quality: imageQuality as any,
-        aspectRatio: imageAspectRatio as any,
+        style: imageStyle,
+        size: imageSize,
+        quality: imageQuality,
+        aspectRatio: imageAspectRatio,
         negativePrompt: negativePrompt || undefined,
         seed: imageSeed,
         steps: 20,
@@ -189,9 +214,9 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
       const request: VideoGenerationRequest = {
         prompt: videoPrompt,
         duration: videoDuration,
-        resolution: videoResolution as any,
-        style: videoStyle as any,
-        aspectRatio: videoAspectRatio as any,
+        resolution: videoResolution,
+        style: videoStyle,
+        aspectRatio: videoAspectRatio,
         fps: videoFps,
         seed: videoSeed,
       };
@@ -313,7 +338,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
           {/* Generation Tabs */}
           <Tabs
             value={activeTab}
-            onValueChange={value => setActiveTab(value as 'image' | 'video')}
+            onValueChange={handleTabChange}
           >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="image">Image Generation</TabsTrigger>
@@ -342,13 +367,12 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Style</label>
-                      <Select value={imageStyle} onValueChange={setImageStyle}>
+                      <Select value={imageStyle} onValueChange={value => setImageStyle(value as ImageStyle)}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {mediaGenerationService
-                            .getImageStyles()
+                          {mediaGenerationService.getImageStyles()
                             .map(style => (
                               <SelectItem key={style} value={style}>
                                 {style.charAt(0).toUpperCase() + style.slice(1)}
@@ -360,7 +384,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Size</label>
-                      <Select value={imageSize} onValueChange={setImageSize}>
+                      <Select value={imageSize} onValueChange={value => setImageSize(value as ImageSize)}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -380,7 +404,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                       <label className="text-sm font-medium">Quality</label>
                       <Select
                         value={imageQuality}
-                        onValueChange={setImageQuality}
+                        onValueChange={value => setImageQuality(value as ImageQuality)}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -398,7 +422,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                       </label>
                       <Select
                         value={imageAspectRatio}
-                        onValueChange={setImageAspectRatio}
+                        onValueChange={value => setImageAspectRatio(value as ImageAspectRatio)}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -478,13 +502,12 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Style</label>
-                      <Select value={videoStyle} onValueChange={setVideoStyle}>
+                      <Select value={videoStyle} onValueChange={value => setVideoStyle(value as VideoStyle)}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {mediaGenerationService
-                            .getVideoStyles()
+                          {mediaGenerationService.getVideoStyles()
                             .map(style => (
                               <SelectItem key={style} value={style}>
                                 {style.charAt(0).toUpperCase() + style.slice(1)}
@@ -498,14 +521,13 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                       <label className="text-sm font-medium">Resolution</label>
                       <Select
                         value={videoResolution}
-                        onValueChange={setVideoResolution}
+                        onValueChange={value => setVideoResolution(value as VideoResolution)}
                       >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {mediaGenerationService
-                            .getVideoResolutions()
+                          {mediaGenerationService.getVideoResolutions()
                             .map(res => (
                               <SelectItem key={res} value={res}>
                                 {res}
@@ -546,7 +568,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                     <label className="text-sm font-medium">Aspect Ratio</label>
                     <Select
                       value={videoAspectRatio}
-                      onValueChange={setVideoAspectRatio}
+                      onValueChange={value => setVideoAspectRatio(value as VideoAspectRatio)}
                     >
                       <SelectTrigger>
                         <SelectValue />

@@ -108,8 +108,10 @@ serve(async req => {
   }
 });
 
+type ChatMessage = { role: 'user' | 'assistant' | 'system'; content: string };
+
 async function callAnthropic(
-  messages: any[],
+  messages: ChatMessage[],
   model = 'claude-3-5-sonnet-20241022'
 ): Promise<string> {
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
@@ -134,13 +136,13 @@ async function callAnthropic(
 }
 
 async function callGemini(
-  messages: any[],
+  messages: ChatMessage[],
   model = 'gemini-2.0-flash'
 ): Promise<string> {
   const apiKey = Deno.env.get('GOOGLE_API_KEY');
   if (!apiKey) throw new Error('Google API key not configured');
 
-  const contents = messages.map((msg: any) => ({
+  const contents = messages.map((msg: ChatMessage) => ({
     role: msg.role === 'assistant' ? 'model' : 'user',
     parts: [{ text: msg.content }],
   }));
@@ -158,7 +160,10 @@ async function callGemini(
   return data.candidates[0].content.parts[0].text;
 }
 
-async function callOpenAI(messages: any[], model = 'gpt-4'): Promise<string> {
+async function callOpenAI(
+  messages: ChatMessage[],
+  model = 'gpt-4'
+): Promise<string> {
   const apiKey = Deno.env.get('OPENAI_API_KEY');
   if (!apiKey) throw new Error('OpenAI API key not configured');
 

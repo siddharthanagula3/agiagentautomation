@@ -16,7 +16,7 @@ export interface ChatSession {
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;
-  contextData?: any;
+  contextData?: unknown;
 }
 
 export interface ChatMessage {
@@ -25,20 +25,20 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system' | 'tool';
   content: string;
   timestamp: Date;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 export interface ChatState {
   sessions: ChatSession[];
   activeSessionId?: string;
   messages: Map<string, ChatMessage[]>;
-  contextWindows: Map<string, any>;
+  contextWindows: Map<string, unknown>;
   lastSync: Date;
 }
 
 export class ChatPersistenceService {
   private static instance: ChatPersistenceService;
-  private supabase: any;
+  private supabase: unknown;
   private state: ChatState;
   private syncInterval: NodeJS.Timeout | null = null;
   private isOnline: boolean = true;
@@ -168,7 +168,7 @@ export class ChatPersistenceService {
     sessionId: string,
     role: 'user' | 'assistant' | 'system' | 'tool',
     content: string,
-    metadata?: any
+    metadata?: unknown
   ): Promise<ChatMessage> {
     const message: ChatMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -294,7 +294,7 @@ export class ChatPersistenceService {
   /**
    * Save context data for session
    */
-  saveContextData(sessionId: string, contextData: any): void {
+  saveContextData(sessionId: string, contextData: unknown): void {
     this.state.contextWindows.set(sessionId, contextData);
     this.saveToLocalStorage();
   }
@@ -302,7 +302,7 @@ export class ChatPersistenceService {
   /**
    * Get context data for session
    */
-  getContextData(sessionId: string): any {
+  getContextData(sessionId: string): unknown {
     return this.state.contextWindows.get(sessionId);
   }
 

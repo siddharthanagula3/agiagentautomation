@@ -9,7 +9,7 @@ export async function testSupabaseConnection() {
   console.log('=== TESTING SUPABASE CONNECTION ===');
 
   try {
-    const supabase = supabaseClient as any;
+    const supabase = supabaseClient;
 
     // Test 1: Check if client exists
     console.log('1. Supabase client:', supabase ? '✅ EXISTS' : '❌ MISSING');
@@ -111,7 +111,9 @@ export async function testSupabaseConnection() {
 }
 
 // Export for use in console
-(window as any).testSupabase = testSupabaseConnection;
+if (typeof window !== 'undefined') {
+  (window as Window & { testSupabase: typeof testSupabaseConnection }).testSupabase = testSupabaseConnection;
+}
 
 console.log(
   '✅ Supabase tester loaded! Run window.testSupabase() in console to test connection.'

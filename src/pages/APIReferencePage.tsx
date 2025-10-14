@@ -58,12 +58,12 @@ interface APIEndpoint {
   requestBody?: {
     type: string;
     description: string;
-    schema: any;
+    schema: unknown;
   };
   responses: Array<{
     status: number;
     description: string;
-    schema?: any;
+    schema?: unknown;
   }>;
   examples?: Array<{
     title: string;

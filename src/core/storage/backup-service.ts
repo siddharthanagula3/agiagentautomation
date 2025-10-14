@@ -34,6 +34,8 @@ interface RestoreOptions {
   dryRun?: boolean;
 }
 
+type BackupTableData = Record<string, unknown[]>;
+
 class BackupService {
   private isInitialized = false;
   private config: BackupConfig;
@@ -186,8 +188,11 @@ class BackupService {
   /**
    * Create backup data
    */
-  private async createBackupData(tables: string[], type: string): Promise<Record<string, any[]>> {
-    const backupData: Record<string, any[]> = {};
+  private async createBackupData(
+    tables: string[],
+    type: string
+  ): Promise<BackupTableData> {
+    const backupData: BackupTableData = {};
 
     for (const table of tables) {
       try {
@@ -210,7 +215,10 @@ class BackupService {
   /**
    * Store backup in cloud
    */
-  private async storeCloudBackup(backupId: string, data: Record<string, any[]>): Promise<string> {
+  private async storeCloudBackup(
+    backupId: string,
+    data: BackupTableData
+  ): Promise<string> {
     const backupData = {
       id: backupId,
       timestamp: new Date().toISOString(),
@@ -235,7 +243,10 @@ class BackupService {
   /**
    * Store backup locally
    */
-  private async storeLocalBackup(backupId: string, data: Record<string, any[]>): Promise<void> {
+  private async storeLocalBackup(
+    backupId: string,
+    data: BackupTableData
+  ): Promise<void> {
     const backupData = {
       id: backupId,
       timestamp: new Date().toISOString(),
@@ -352,7 +363,7 @@ class BackupService {
   /**
    * Load backup data
    */
-  private async loadBackupData(backupId: string): Promise<any> {
+  private async loadBackupData(backupId: string): Promise<unknown> {
     try {
       const { data, error } = await supabase
         .from('backup_storage')
@@ -372,7 +383,7 @@ class BackupService {
   /**
    * Restore table data
    */
-  private async restoreTable(tableName: string, data: any[]): Promise<void> {
+  private async restoreTable(tableName: string, data: unknown[]): Promise<void> {
     try {
       // Clear existing data
       const { error: deleteError } = await supabase
@@ -484,14 +495,14 @@ class BackupService {
   /**
    * Calculate backup size
    */
-  private calculateBackupSize(data: Record<string, any[]>): number {
+  private calculateBackupSize(data: BackupTableData): number {
     return JSON.stringify(data).length;
   }
 
   /**
    * Calculate checksum
    */
-  private calculateChecksum(data: Record<string, any[]>): string {
+  private calculateChecksum(data: BackupTableData): string {
     // Simple checksum - in production, use a proper hash function
     return btoa(JSON.stringify(data)).substr(0, 16);
   }

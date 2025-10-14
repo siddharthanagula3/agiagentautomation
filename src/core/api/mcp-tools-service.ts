@@ -9,10 +9,10 @@ export interface MCPTool {
   description: string;
   parameters: {
     type: string;
-    properties: Record<string, any>;
+    properties: Record<string, unknown>;
     required: string[];
   };
-  execute: (params: any) => Promise<any>;
+  execute: (params: unknown) => Promise<unknown>;
 }
 
 export interface FileOperation {
@@ -35,7 +35,7 @@ export interface Artifact {
   title: string;
   language?: string;
   content: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 class MCPToolsService {
@@ -199,7 +199,7 @@ class MCPToolsService {
           },
           required: ['path'],
         },
-        execute: async params => this.readFile(params.path),
+        execute: async (params) => this.readFile(params.path),
       },
       {
         name: 'write_file',
@@ -212,7 +212,7 @@ class MCPToolsService {
           },
           required: ['path', 'content'],
         },
-        execute: async params => this.writeFile(params.path, params.content),
+        execute: async (params) => this.writeFile(params.path, params.content),
       },
       {
         name: 'execute_command',
@@ -224,7 +224,7 @@ class MCPToolsService {
           },
           required: ['command'],
         },
-        execute: async params => this.executeCommand(params.command),
+        execute: async (params) => this.executeCommand(params.command),
       },
       {
         name: 'search_codebase',
@@ -236,7 +236,7 @@ class MCPToolsService {
           },
           required: ['query'],
         },
-        execute: async params => this.searchCodebase(params.query),
+        execute: async (params) => this.searchCodebase(params.query),
       },
       {
         name: 'install_package',
@@ -252,7 +252,7 @@ class MCPToolsService {
           },
           required: ['packageName'],
         },
-        execute: async params =>
+        execute: async (params) =>
           this.installPackage(params.packageName, params.version),
       },
       {
@@ -266,7 +266,7 @@ class MCPToolsService {
           },
           required: ['template', 'name'],
         },
-        execute: async params =>
+        execute: async (params) =>
           this.createProject(params.template, params.name),
       },
     ];

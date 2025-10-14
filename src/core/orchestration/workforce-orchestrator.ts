@@ -15,7 +15,7 @@ import {
 export interface WorkforceRequest {
   userId: string;
   input: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   permissions?: string[];
 }
 
@@ -274,7 +274,7 @@ export const workforceOrchestrator = new WorkforceOrchestrator();
 export async function executeWorkforce(
   userId: string,
   input: string,
-  context?: Record<string, any>
+  context?: Record<string, unknown>
 ): Promise<WorkforceResponse> {
   return workforceOrchestrator.processRequest({
     userId,

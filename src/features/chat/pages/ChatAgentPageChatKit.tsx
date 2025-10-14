@@ -64,7 +64,7 @@ const ChatAgentPageChatKit: React.FC = () => {
         }
 
         setWorkflowId(workflow);
-      } catch (err: any) {
+      } catch (err) {
         console.error('Load employee error:', err);
         setError(err.message || 'Failed to load AI Employee');
         toast.error(err.message || 'Failed to load AI Employee');

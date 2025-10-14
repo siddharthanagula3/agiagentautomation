@@ -20,11 +20,11 @@ export interface AgentMessage {
   to: AgentType | 'all' | 'user';
   type: MessageType;
   priority: MessagePriority;
-  payload: any;
+  payload: unknown;
   timestamp: Date;
   correlationId?: string; // Links related messages
   replyTo?: string; // Original message ID if this is a response
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface MessageHandler {
@@ -77,10 +77,10 @@ export class AgentCommunicator {
   async sendRequest(
     from: AgentType | 'system' | 'user',
     to: AgentType,
-    request: any,
+    request: unknown,
     priority: MessagePriority = 'normal',
     timeout: number = 30000
-  ): Promise<any> {
+  ): Promise<unknown> {
     const message: AgentMessage = {
       id: this.generateMessageId(),
       from,
@@ -119,10 +119,10 @@ export class AgentCommunicator {
   async sendResponse(
     from: AgentType,
     originalMessageId: string,
-    response: any
+    response: unknown
   ): Promise<void> {
     const originalMessage = this.messageHistory.find(
-      m => m.id === originalMessageId
+      (m) => m.id === originalMessageId
     );
 
     if (!originalMessage) {
@@ -214,7 +214,7 @@ export class AgentCommunicator {
    */
   async broadcastToAll(
     from: AgentType | 'system',
-    payload: any,
+    payload: unknown,
     priority: MessagePriority = 'normal'
   ): Promise<void> {
     const message: AgentMessage = {
@@ -236,7 +236,7 @@ export class AgentCommunicator {
   async handoffTask(
     from: AgentType,
     to: AgentType,
-    taskData: any,
+    taskData: unknown,
     reason: string
   ): Promise<void> {
     const message: AgentMessage = {
@@ -344,8 +344,8 @@ export class AgentCommunicator {
         const allHandlers = Array.from(this.handlers.values()).flat();
         await Promise.all(
           allHandlers
-            .filter(h => h.messageTypes.includes(message.type))
-            .map(h => h.handler(message))
+            .filter((h) => h.messageTypes.includes(message.type))
+            .map((h) => h.handler(message))
         );
         return;
       }
@@ -356,8 +356,8 @@ export class AgentCommunicator {
         if (handlers) {
           await Promise.all(
             handlers
-              .filter(h => h.messageTypes.includes(message.type))
-              .map(h => h.handler(message))
+              .filter((h) => h.messageTypes.includes(message.type))
+              .map((h) => h.handler(message))
           );
         }
       }
@@ -385,7 +385,7 @@ export class AgentCommunicator {
 
       // Process messages in batches
       const batch = this.messageQueue.splice(0, 5);
-      await Promise.all(batch.map(msg => this.processMessage(msg)));
+      await Promise.all(batch.map((msg) => this.processMessage(msg)));
     }, 100); // Process every 100ms
   }
 
@@ -393,7 +393,7 @@ export class AgentCommunicator {
    * Notify all listeners of a new message
    */
   private notifyListeners(message: AgentMessage): void {
-    this.listeners.forEach(listener => {
+    this.listeners.forEach((listener) => {
       try {
         listener(message);
       } catch (error) {
@@ -439,16 +439,16 @@ export class AgentCommunicator {
 
     if (filter) {
       if (filter.from) {
-        history = history.filter(m => m.from === filter.from);
+        history = history.filter((m) => m.from === filter.from);
       }
       if (filter.to) {
-        history = history.filter(m => m.to === filter.to);
+        history = history.filter((m) => m.to === filter.to);
       }
       if (filter.type) {
-        history = history.filter(m => m.type === filter.type);
+        history = history.filter((m) => m.type === filter.type);
       }
       if (filter.since) {
-        history = history.filter(m => m.timestamp >= filter.since!);
+        history = history.filter((m) => m.timestamp >= filter.since!);
       }
     }
 
@@ -467,7 +467,7 @@ export class AgentCommunicator {
    */
   clearOldHistory(olderThan: Date): void {
     this.messageHistory = this.messageHistory.filter(
-      m => m.timestamp >= olderThan
+      (m) => m.timestamp >= olderThan
     );
   }
 
@@ -481,7 +481,7 @@ export class AgentCommunicator {
 
 interface PendingRequest {
   message: AgentMessage;
-  resolve: (value: any) => void;
+  resolve: (value: unknown) => void;
   reject: (error: Error) => void;
   timeoutId: NodeJS.Timeout;
   sentAt: number;
@@ -504,23 +504,23 @@ export const agentCommunicator = new AgentCommunicator();
 export function sendAgentRequest(
   from: AgentType | 'system',
   to: AgentType,
-  request: any,
+  request: unknown,
   priority?: MessagePriority
-): Promise<any> {
+): Promise<unknown> {
   return agentCommunicator.sendRequest(from, to, request, priority);
 }
 
 export function sendAgentResponse(
   from: AgentType,
   originalMessageId: string,
-  response: any
+  response: unknown
 ): Promise<void> {
   return agentCommunicator.sendResponse(from, originalMessageId, response);
 }
 
 export function broadcastMessage(
   from: AgentType | 'system',
-  payload: any,
+  payload: unknown,
   priority?: MessagePriority
 ): Promise<void> {
   return agentCommunicator.broadcastToAll(from, payload, priority);

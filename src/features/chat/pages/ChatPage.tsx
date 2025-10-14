@@ -525,7 +525,7 @@ const ChatPageContent: React.FC = () => {
   // Comprehensive markdown components for ReactMarkdown with theme support
   const markdownComponents = {
     // Headings - All levels
-    h1: ({ children }: any) => (
+    h1: ({ children }: unknown) => (
       <h1
         className={cn(
           'mb-3 border-b pb-1 text-2xl font-bold',
@@ -537,7 +537,7 @@ const ChatPageContent: React.FC = () => {
         {children}
       </h1>
     ),
-    h2: ({ children }: any) => (
+    h2: ({ children }: unknown) => (
       <h2
         className={cn(
           'mb-2 text-xl font-bold',
@@ -547,7 +547,7 @@ const ChatPageContent: React.FC = () => {
         {children}
       </h2>
     ),
-    h3: ({ children }: any) => (
+    h3: ({ children }: unknown) => (
       <h3
         className={cn(
           'mb-2 text-lg font-semibold',
@@ -557,7 +557,7 @@ const ChatPageContent: React.FC = () => {
         {children}
       </h3>
     ),
-    h4: ({ children }: any) => (
+    h4: ({ children }: unknown) => (
       <h4
         className={cn(
           'mb-1 text-base font-semibold',
@@ -567,7 +567,7 @@ const ChatPageContent: React.FC = () => {
         {children}
       </h4>
     ),
-    h5: ({ children }: any) => (
+    h5: ({ children }: unknown) => (
       <h5
         className={cn(
           'mb-1 text-sm font-semibold',
@@ -577,7 +577,7 @@ const ChatPageContent: React.FC = () => {
         {children}
       </h5>
     ),
-    h6: ({ children }: any) => (
+    h6: ({ children }: unknown) => (
       <h6
         className={cn(
           'mb-1 text-xs font-semibold',
@@ -589,7 +589,7 @@ const ChatPageContent: React.FC = () => {
     ),
 
     // Paragraphs
-    p: ({ children }: any) => (
+    p: ({ children }: unknown) => (
       <p
         className={cn(
           'mb-3 leading-relaxed',
@@ -601,19 +601,19 @@ const ChatPageContent: React.FC = () => {
     ),
 
     // Text formatting
-    strong: ({ children }: any) => (
+    strong: ({ children }: unknown) => (
       <strong
         className={cn('font-bold', isDark ? 'text-white' : 'text-gray-900')}
       >
         {children}
       </strong>
     ),
-    em: ({ children }: any) => (
+    em: ({ children }: unknown) => (
       <em className={cn('italic', isDark ? 'text-gray-300' : 'text-gray-600')}>
         {children}
       </em>
     ),
-    del: ({ children }: any) => (
+    del: ({ children }: unknown) => (
       <del
         className={cn(
           'line-through',
@@ -623,12 +623,12 @@ const ChatPageContent: React.FC = () => {
         {children}
       </del>
     ),
-    mark: ({ children }: any) => (
+    mark: ({ children }: unknown) => (
       <mark className="rounded bg-yellow-200 px-1 text-black">{children}</mark>
     ),
 
     // Code blocks and inline code
-    code: ({ children, className, inline }: any) => {
+    code: ({ children, className, inline }: unknown) => {
       if (inline) {
         return (
           <code
@@ -663,7 +663,7 @@ const ChatPageContent: React.FC = () => {
         </pre>
       );
     },
-    pre: ({ children }: any) => (
+    pre: ({ children }: unknown) => (
       <pre
         className={cn(
           'mb-4 overflow-x-auto rounded-lg border p-4',
@@ -675,7 +675,7 @@ const ChatPageContent: React.FC = () => {
     ),
 
     // Lists
-    ul: ({ children }: any) => (
+    ul: ({ children }: unknown) => (
       <ul
         className={cn(
           'mb-3 list-inside list-disc space-y-1',
@@ -685,7 +685,7 @@ const ChatPageContent: React.FC = () => {
         {children}
       </ul>
     ),
-    ol: ({ children }: any) => (
+    ol: ({ children }: unknown) => (
       <ol
         className={cn(
           'mb-3 list-inside list-decimal space-y-1',
@@ -695,24 +695,24 @@ const ChatPageContent: React.FC = () => {
         {children}
       </ol>
     ),
-    li: ({ children }: any) => <li className="mb-1">{children}</li>,
+    li: ({ children }: unknown) => <li className="mb-1">{children}</li>,
 
     // Nested lists
-    'ul ul': ({ children }: any) => (
+    'ul ul': ({ children }: unknown) => (
       <ul className="ml-4 mt-1 list-inside list-disc">{children}</ul>
     ),
-    'ol ol': ({ children }: any) => (
+    'ol ol': ({ children }: unknown) => (
       <ol className="ml-4 mt-1 list-inside list-decimal">{children}</ol>
     ),
-    'ul ol': ({ children }: any) => (
+    'ul ol': ({ children }: unknown) => (
       <ol className="ml-4 mt-1 list-inside list-decimal">{children}</ol>
     ),
-    'ol ul': ({ children }: any) => (
+    'ol ul': ({ children }: unknown) => (
       <ul className="ml-4 mt-1 list-inside list-disc">{children}</ul>
     ),
 
     // Blockquotes
-    blockquote: ({ children }: any) => (
+    blockquote: ({ children }: unknown) => (
       <blockquote
         className={cn(
           'mb-3 rounded-r border-l-4 border-blue-500 py-2 pl-4 italic',
@@ -733,7 +733,7 @@ const ChatPageContent: React.FC = () => {
     ),
 
     // Links
-    a: ({ href, children }: any) => (
+    a: ({ href, children }: unknown) => (
       <a
         href={href}
         className={cn(
@@ -750,7 +750,7 @@ const ChatPageContent: React.FC = () => {
     ),
 
     // Tables
-    table: ({ children }: any) => (
+    table: ({ children }: unknown) => (
       <div className="mb-4 overflow-x-auto">
         <table
           className={cn(
@@ -762,17 +762,17 @@ const ChatPageContent: React.FC = () => {
         </table>
       </div>
     ),
-    thead: ({ children }: any) => (
+    thead: ({ children }: unknown) => (
       <thead className={cn(isDark ? 'bg-gray-800' : 'bg-gray-100')}>
         {children}
       </thead>
     ),
-    tbody: ({ children }: any) => (
+    tbody: ({ children }: unknown) => (
       <tbody className={cn(isDark ? 'bg-gray-900' : 'bg-white')}>
         {children}
       </tbody>
     ),
-    tr: ({ children }: any) => (
+    tr: ({ children }: unknown) => (
       <tr
         className={cn(
           'border-b',
@@ -782,7 +782,7 @@ const ChatPageContent: React.FC = () => {
         {children}
       </tr>
     ),
-    th: ({ children }: any) => (
+    th: ({ children }: unknown) => (
       <th
         className={cn(
           'border-r px-4 py-2 text-left font-semibold',
@@ -794,7 +794,7 @@ const ChatPageContent: React.FC = () => {
         {children}
       </th>
     ),
-    td: ({ children }: any) => (
+    td: ({ children }: unknown) => (
       <td
         className={cn(
           'border-r px-4 py-2',
@@ -808,7 +808,7 @@ const ChatPageContent: React.FC = () => {
     ),
 
     // Task lists (GitHub Flavored Markdown)
-    input: ({ type, checked, ...props }: any) => {
+    input: ({ type, checked, ...props }: unknown) => {
       if (type === 'checkbox') {
         return (
           <input
@@ -824,8 +824,8 @@ const ChatPageContent: React.FC = () => {
     },
 
     // Definition lists
-    dl: ({ children }: any) => <dl className="mb-3">{children}</dl>,
-    dt: ({ children }: any) => (
+    dl: ({ children }: unknown) => <dl className="mb-3">{children}</dl>,
+    dt: ({ children }: unknown) => (
       <dt
         className={cn(
           'mb-1 font-semibold',
@@ -835,7 +835,7 @@ const ChatPageContent: React.FC = () => {
         {children}
       </dt>
     ),
-    dd: ({ children }: any) => (
+    dd: ({ children }: unknown) => (
       <dd
         className={cn('mb-2 ml-4', isDark ? 'text-gray-200' : 'text-gray-700')}
       >
@@ -844,7 +844,7 @@ const ChatPageContent: React.FC = () => {
     ),
 
     // Images
-    img: ({ src, alt, ...props }: any) => (
+    img: ({ src, alt, ...props }: unknown) => (
       <img
         src={src}
         alt={alt}
@@ -860,14 +860,14 @@ const ChatPageContent: React.FC = () => {
     br: () => <br className="mb-1" />,
 
     // Subscript and superscript
-    sub: ({ children }: any) => (
+    sub: ({ children }: unknown) => (
       <sub
         className={cn('text-xs', isDark ? 'text-gray-400' : 'text-gray-500')}
       >
         {children}
       </sub>
     ),
-    sup: ({ children }: any) => (
+    sup: ({ children }: unknown) => (
       <sup
         className={cn('text-xs', isDark ? 'text-gray-400' : 'text-gray-500')}
       >
@@ -876,7 +876,7 @@ const ChatPageContent: React.FC = () => {
     ),
 
     // Keyboard keys
-    kbd: ({ children }: any) => (
+    kbd: ({ children }: unknown) => (
       <kbd
         className={cn(
           'rounded border px-2 py-1 font-mono text-xs',
@@ -890,7 +890,7 @@ const ChatPageContent: React.FC = () => {
     ),
 
     // Abbreviations
-    abbr: ({ title, children }: any) => (
+    abbr: ({ title, children }: unknown) => (
       <abbr
         title={title}
         className={cn(
@@ -903,7 +903,7 @@ const ChatPageContent: React.FC = () => {
     ),
 
     // Citations
-    cite: ({ children }: any) => (
+    cite: ({ children }: unknown) => (
       <cite
         className={cn('italic', isDark ? 'text-gray-400' : 'text-gray-500')}
       >
@@ -912,7 +912,7 @@ const ChatPageContent: React.FC = () => {
     ),
 
     // Small text
-    small: ({ children }: any) => (
+    small: ({ children }: unknown) => (
       <small
         className={cn('text-xs', isDark ? 'text-gray-400' : 'text-gray-500')}
       >
@@ -921,7 +921,7 @@ const ChatPageContent: React.FC = () => {
     ),
 
     // Time
-    time: ({ children }: any) => (
+    time: ({ children }: unknown) => (
       <time className={cn(isDark ? 'text-gray-400' : 'text-gray-500')}>
         {children}
       </time>

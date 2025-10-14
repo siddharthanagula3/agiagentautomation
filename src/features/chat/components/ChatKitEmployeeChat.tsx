@@ -10,6 +10,54 @@ import { Alert, AlertDescription } from '@shared/ui/alert';
 import { useAuthStore } from '@shared/stores/unified-auth-store';
 import { useTheme } from '@shared/components/theme-provider';
 
+interface ChatKitInstance {
+  destroy?: () => void;
+  updateTheme?: (theme: ChatKitOptions['theme']) => void;
+}
+
+type ChatKitConstructor = new (
+  container: HTMLElement,
+  options: ChatKitOptions
+) => ChatKitInstance;
+
+interface ChatKitOptions {
+  api: {
+    createSession: () => Promise<{
+      session_id: string;
+      client_secret: string;
+    }>;
+  };
+  theme: {
+    colorScheme: string;
+    radius: string;
+    density: string;
+    typography: {
+      baseSize: number;
+      fontFamily: string;
+      fontFamilyMono: string;
+    };
+  };
+  composer: {
+    attachments: {
+      enabled: boolean;
+      maxCount: number;
+      maxSize: number;
+    };
+    placeholder: string;
+  };
+  startScreen: {
+    greeting: string;
+    prompts: Array<{ icon: string; label: string; prompt: string }>;
+  };
+  onError: (error: unknown) => void;
+}
+
+declare global {
+  interface Window {
+    ChatKit?: ChatKitConstructor;
+  }
+}
+
 interface ChatKitEmployeeChatProps {
   employeeId: string;
   employeeName: string;
@@ -32,17 +80,18 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
-  const [chatKitInstance, setChatKitInstance] = useState<any>(null);
+  const [chatKitInstance, setChatKitInstance] =
+    useState<ChatKitInstance | null>(null);
 
   useEffect(() => {
     if (!user || !workflowId || !containerRef.current) return;
 
     // Load ChatKit script from CDN
-    const loadChatKit = () => {
+    const loadChatKit = (): Promise<ChatKitConstructor> => {
       return new Promise((resolve, reject) => {
         // Check if already loaded
-        if ((window as any).ChatKit) {
-          resolve((window as any).ChatKit);
+        if (window.ChatKit) {
+          resolve(window.ChatKit);
           return;
         }
 
@@ -54,8 +103,8 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
         script.onload = () => {
           // Wait a bit for module to initialize
           setTimeout(() => {
-            if ((window as any).ChatKit) {
-              resolve((window as any).ChatKit);
+            if (window.ChatKit) {
+              resolve(window.ChatKit);
             } else {
               reject(new Error('ChatKit not available after load'));
             }
@@ -74,6 +123,12 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
       try {
         setIsLoading(true);
         setError('');
+
+        const container = containerRef.current;
+        if (!container) {
+          setError('Chat container not available');
+          return;
+        }
 
         // Load ChatKit from CDN
         const ChatKit = await loadChatKit();
@@ -102,7 +157,7 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
         }
 
         // Configure ChatKit
-        const options = {
+        const options: ChatKitOptions = {
           api: {
             createSession: async () => {
               const response = await fetch(
@@ -157,22 +212,24 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
             greeting: `Hi! I'm ${employeeName}, your ${employeeRole}. How can I help you today?`,
             prompts: starterPrompts,
           },
-          onError: (error: any) => {
+          onError: (error: unknown) => {
             console.error('ChatKit error:', error);
             toast.error('Chat error occurred');
           },
         };
 
         // Initialize ChatKit
-        const chatkit = new ChatKit(containerRef.current, options);
+        const chatkit = new ChatKit(container, options);
         setChatKitInstance(chatkit);
 
         console.log('ChatKit initialized for:', employeeName);
         toast.success(`Connected to ${employeeName}`);
         setIsLoading(false);
-      } catch (err: any) {
+      } catch (err) {
         console.error('ChatKit initialization error:', err);
-        setError(err.message || 'Failed to initialize chat');
+        setError(
+          err instanceof Error ? err.message : 'Failed to initialize chat'
+        );
         toast.error('Failed to connect to AI Employee');
         setIsLoading(false);
       }

@@ -123,7 +123,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
       // Load from localStorage or API
       const stored = localStorage.getItem(`conversation-${employeeId}`);
       if (stored) {
-        return JSON.parse(stored).map((msg: any) => ({
+        return JSON.parse(stored).map((msg: unknown) => ({
           ...msg,
           timestamp: new Date(msg.timestamp),
         }));
@@ -277,7 +277,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
 
   const handleSendMessage = (
     message: string,
-    attachments?: any[],
+    attachments?: unknown[],
     tools?: Tool[]
   ) => {
     if (!message.trim()) return;

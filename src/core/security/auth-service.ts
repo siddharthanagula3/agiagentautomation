@@ -12,7 +12,7 @@ export interface AuthUser {
   avatar?: string;
   role?: string;
   plan?: string;
-  user_metadata?: Record<string, any>;
+  user_metadata?: Record<string, unknown>;
 }
 
 export interface LoginData {
@@ -71,7 +71,7 @@ class AuthService {
       };
 
       return { user: authUser, error: null };
-    } catch (error: any) {
+    } catch (error) {
       // On timeout or error, clear invalid auth data
       if (error.message?.includes('timeout')) {
         try {
@@ -111,7 +111,7 @@ class AuthService {
       };
 
       return { user: authUser, error: null };
-    } catch (error: any) {
+    } catch (error) {
       return { user: null, error: error.message || 'Login failed' };
     }
   }
@@ -150,7 +150,7 @@ class AuthService {
       };
 
       return { user: authUser, error: null };
-    } catch (error: any) {
+    } catch (error) {
       return { user: null, error: error.message || 'Registration failed' };
     }
   }
@@ -162,7 +162,7 @@ class AuthService {
         return { error: error.message };
       }
       return { error: null };
-    } catch (error: any) {
+    } catch (error) {
       return { error: error.message || 'Logout failed' };
     }
   }
@@ -176,7 +176,7 @@ class AuthService {
         return { error: error.message };
       }
       return { error: null };
-    } catch (error: any) {
+    } catch (error) {
       return { error: error.message || 'Password reset failed' };
     }
   }
@@ -190,7 +190,7 @@ class AuthService {
         return { error: error.message };
       }
       return { error: null };
-    } catch (error: any) {
+    } catch (error) {
       return { error: error.message || 'Password update failed' };
     }
   }
@@ -226,7 +226,7 @@ class AuthService {
       };
 
       return { user: authUser, error: null };
-    } catch (error: any) {
+    } catch (error) {
       return { user: null, error: error.message || 'Profile update failed' };
     }
   }
@@ -263,7 +263,7 @@ class AuthService {
       }
 
       return { error: null };
-    } catch (error: any) {
+    } catch (error) {
       return { error: error.message || 'Password change failed' };
     }
   }

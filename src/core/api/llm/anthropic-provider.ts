@@ -43,7 +43,7 @@ export interface AnthropicResponse {
   model: string;
   sessionId?: string;
   userId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AnthropicConfig {
@@ -181,7 +181,15 @@ export class AnthropicProvider {
     messages: AnthropicMessage[],
     sessionId?: string,
     userId?: string
-  ): AsyncGenerator<{ content: string; done: boolean; usage?: any }> {
+  ): AsyncGenerator<{
+    content: string;
+    done: boolean;
+    usage?: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      total_tokens?: number;
+    };
+  }> {
     try {
       if (!ANTHROPIC_API_KEY) {
         throw new AnthropicError(
@@ -214,7 +222,7 @@ export class AnthropicProvider {
       const stream = await anthropic.messages.create(request);
 
       let fullContent = '';
-      let usage: any = null;
+      let usage: unknown = null;
 
       for await (const chunk of stream) {
         if (chunk.type === 'content_block_delta') {
@@ -268,8 +276,8 @@ export class AnthropicProvider {
     messages: AnthropicMessage[]
   ): Anthropic.Messages.MessageParam[] {
     return messages
-      .filter(msg => msg.role !== 'system') // System messages are handled separately
-      .map(msg => ({
+      .filter((msg) => msg.role !== 'system') // System messages are handled separately
+      .map((msg) => ({
         role: msg.role as 'user' | 'assistant',
         content: msg.content,
       }));
@@ -283,8 +291,8 @@ export class AnthropicProvider {
   ): string {
     if (response.content && response.content.length > 0) {
       return response.content
-        .filter(block => block.type === 'text')
-        .map(block => (block as Anthropic.Messages.TextBlock).text)
+        .filter((block) => block.type === 'text')
+        .map((block) => (block as Anthropic.Messages.TextBlock).text)
         .join('');
     }
     return '';
@@ -316,7 +324,7 @@ export class AnthropicProvider {
     userId: string;
     role: string;
     content: string;
-    metadata: Record<string, any>;
+    metadata: Record<string, unknown>;
   }): Promise<void> {
     try {
       const { error } = await supabase.from('agent_messages').insert({

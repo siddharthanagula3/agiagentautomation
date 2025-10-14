@@ -53,7 +53,7 @@ export interface WorkforceTask {
   complexity: string;
   assigned_agent: string;
   dependencies: string[];
-  result?: any;
+  result?: unknown;
   error_message?: string;
   retry_count: number;
   estimated_time?: number;
@@ -75,6 +75,11 @@ export interface APIUsage {
   session_id?: string;
   created_at: string;
 }
+
+export type RecentActivity = {
+  user_id: string;
+  created_at: string;
+} & Record<string, unknown>;
 
 // ================================================
 // WORKFORCE EXECUTIONS
@@ -139,7 +144,7 @@ export async function updateExecutionStatus(
   }
 ): Promise<boolean> {
   try {
-    const updateData: any = {
+    const updateData: unknown = {
       status,
       updated_at: new Date().toISOString(),
     };
@@ -311,14 +316,14 @@ export async function updateTaskStatus(
   taskId: string,
   status: string,
   updates?: {
-    result?: any;
+    result?: unknown;
     errorMessage?: string;
     retryCount?: number;
     actualTime?: number;
   }
 ): Promise<boolean> {
   try {
-    const updateData: any = {
+    const updateData: unknown = {
       status,
     };
 
@@ -568,7 +573,7 @@ async function updateSubscriptionUsage(
 /**
  * Get user subscription
  */
-export async function getUserSubscription(userId: string): Promise<any> {
+export async function getUserSubscription(userId: string): Promise<unknown> {
   try {
     const { data, error } = await supabase
       .from('user_subscriptions')
@@ -660,7 +665,7 @@ export async function getDashboardStats(userId: string): Promise<{
 export async function getRecentActivity(
   userId: string,
   limit: number = 10
-): Promise<any[]> {
+): Promise<RecentActivity[]> {
   try {
     const { data, error } = await supabase
       .from('user_recent_activity')
@@ -674,7 +679,7 @@ export async function getRecentActivity(
       return [];
     }
 
-    return data || [];
+    return (data as RecentActivity[]) || [];
   } catch (error) {
     console.error('Exception getting recent activity:', error);
     return [];

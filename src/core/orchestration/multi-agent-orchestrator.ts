@@ -30,7 +30,7 @@ export interface AgentTask {
   status: 'pending' | 'in_progress' | 'completed' | 'failed';
   priority: 'critical' | 'high' | 'medium' | 'low';
   dependencies: string[]; // other task IDs
-  result?: any;
+  result?: unknown;
   startTime?: Date;
   endTime?: Date;
   retryCount: number;
@@ -51,7 +51,7 @@ export interface AgentCommunication {
     | 'completion';
   message: string;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface OrchestrationPlan {
@@ -82,7 +82,12 @@ export interface AgentStatus {
   progress: number; // 0-100
   toolsUsing?: string[];
   blockedBy?: string;
-  output?: any;
+  output?: unknown;
+}
+
+export interface TaskExecutionRecord {
+  success: boolean;
+  output?: unknown;
 }
 
 // Build capability map from all AI employees
@@ -194,10 +199,10 @@ class MultiAgentOrchestrator {
     plan: OrchestrationPlan,
     onCommunication: (comm: AgentCommunication) => void,
     onStatusUpdate: (status: AgentStatus) => void
-  ): Promise<Map<string, any>> {
+  ): Promise<Map<string, TaskExecutionRecord>> {
     console.log('[Orchestrator] Starting plan execution:', plan.id);
 
-    const results = new Map<string, any>();
+    const results = new Map<string, TaskExecutionRecord>();
     let iterationCount = 0;
     const MAX_ITERATIONS = 100; // Prevent infinite loops
 
@@ -280,7 +285,7 @@ class MultiAgentOrchestrator {
     plan: OrchestrationPlan,
     onCommunication: (comm: AgentCommunication) => void,
     onStatusUpdate: (status: AgentStatus) => void,
-    results: Map<string, any>
+    results: Map<string, TaskExecutionRecord>
   ): Promise<void> {
     if (task.status !== 'pending') return;
 

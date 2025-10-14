@@ -27,7 +27,7 @@ export interface UserIntent {
   domain: DomainType;
   complexity: ComplexityLevel;
   requirements: string[];
-  context: Record<string, any>;
+  context: Record<string, unknown>;
   confidence: number;
   estimatedDuration: number; // in minutes
   suggestedAgents: string[];
@@ -471,7 +471,7 @@ export class NLPProcessor {
     input: string,
     keywords: string[],
     entities: string[]
-  ): Record<string, any> {
+  ): Record<string, unknown> {
     return {
       hasFileReferences: entities.some(e => e.includes('.') || e.includes('/')),
       hasURLReferences: entities.some(e => e.startsWith('http')),

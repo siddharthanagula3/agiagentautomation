@@ -117,7 +117,7 @@ export class UsageTracker {
   }
 
   private groupByAgent(
-    usage: any[]
+    usage: unknown[]
   ): Record<string, { calls: number; tokens: number; cost: number }> {
     const grouped: Record<
       string,
@@ -140,7 +140,7 @@ export class UsageTracker {
   }
 
   private groupByDay(
-    usage: any[]
+    usage: unknown[]
   ): Record<string, { calls: number; tokens: number; cost: number }> {
     const grouped: Record<
       string,

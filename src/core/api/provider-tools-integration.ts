@@ -23,7 +23,7 @@ export interface ToolDefinition {
 
 export interface ToolCall {
   tool: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 // OpenAI Function Calling Tools
@@ -419,7 +419,7 @@ export class ToolExecutor {
     return ToolExecutor.instance;
   }
 
-  async executeTool(toolCall: ToolCall): Promise<any> {
+  async executeTool(toolCall: ToolCall): Promise<unknown> {
     const { tool, parameters } = toolCall;
 
     switch (tool) {
@@ -442,7 +442,7 @@ export class ToolExecutor {
     }
   }
 
-  private async generateCode(parameters: any): Promise<any> {
+  private async generateCode(parameters: unknown): Promise<unknown> {
     const { language, requirements, framework, include_tests } = parameters;
 
     // Simulate code generation
@@ -462,7 +462,7 @@ ${include_tests === 'true' ? this.getTestTemplate(language) : ''}`;
     };
   }
 
-  private async analyzeCode(parameters: any): Promise<any> {
+  private async analyzeCode(parameters: unknown): Promise<unknown> {
     const { code, focus, language } = parameters;
 
     // Simulate code analysis
@@ -481,7 +481,7 @@ ${include_tests === 'true' ? this.getTestTemplate(language) : ''}`;
     };
   }
 
-  private async createApi(parameters: any): Promise<any> {
+  private async createApi(parameters: unknown): Promise<unknown> {
     const { endpoint, method, functionality, authentication } = parameters;
 
     const apiCode = `// ${method} ${endpoint}
@@ -505,7 +505,7 @@ app.${method.toLowerCase()}('${endpoint}', ${authentication !== 'none' ? 'authen
     };
   }
 
-  private async webSearch(parameters: any): Promise<any> {
+  private async webSearch(parameters: unknown): Promise<unknown> {
     const { query, focus, max_results } = parameters;
 
     // Simulate web search
@@ -532,7 +532,7 @@ app.${method.toLowerCase()}('${endpoint}', ${authentication !== 'none' ? 'authen
     };
   }
 
-  private async analyzeImage(parameters: any): Promise<any> {
+  private async analyzeImage(parameters: unknown): Promise<unknown> {
     const { image_data, analysis_type } = parameters;
 
     // Simulate image analysis
@@ -544,7 +544,7 @@ app.${method.toLowerCase()}('${endpoint}', ${authentication !== 'none' ? 'authen
     };
   }
 
-  private async researchTopic(parameters: any): Promise<any> {
+  private async researchTopic(parameters: unknown): Promise<unknown> {
     const { topic, depth, include_trends } = parameters;
 
     return {
@@ -557,7 +557,7 @@ app.${method.toLowerCase()}('${endpoint}', ${authentication !== 'none' ? 'authen
     };
   }
 
-  private async competitiveAnalysis(parameters: any): Promise<any> {
+  private async competitiveAnalysis(parameters: unknown): Promise<unknown> {
     const { company, market, analysis_type } = parameters;
 
     return {
@@ -781,8 +781,8 @@ export function getToolsForProvider(
 }
 
 // Function to format tools for OpenAI API
-export function formatToolsForOpenAI(tools: ToolDefinition[]): any[] {
-  return tools.map(tool => ({
+export function formatToolsForOpenAI(tools: ToolDefinition[]): unknown[] {
+  return tools.map((tool) => ({
     type: 'function',
     function: {
       name: tool.name,
@@ -793,8 +793,8 @@ export function formatToolsForOpenAI(tools: ToolDefinition[]): any[] {
 }
 
 // Function to format tools for Anthropic API
-export function formatToolsForAnthropic(tools: ToolDefinition[]): any[] {
-  return tools.map(tool => ({
+export function formatToolsForAnthropic(tools: ToolDefinition[]): unknown[] {
+  return tools.map((tool) => ({
     name: tool.name,
     description: tool.description,
     input_schema: tool.parameters,
@@ -802,8 +802,8 @@ export function formatToolsForAnthropic(tools: ToolDefinition[]): any[] {
 }
 
 // Function to format tools for Google API
-export function formatToolsForGoogle(tools: ToolDefinition[]): any[] {
-  return tools.map(tool => ({
+export function formatToolsForGoogle(tools: ToolDefinition[]): unknown[] {
+  return tools.map((tool) => ({
     function_declarations: [
       {
         name: tool.name,
@@ -815,8 +815,8 @@ export function formatToolsForGoogle(tools: ToolDefinition[]): any[] {
 }
 
 // Function to format tools for Perplexity API
-export function formatToolsForPerplexity(tools: ToolDefinition[]): any[] {
-  return tools.map(tool => ({
+export function formatToolsForPerplexity(tools: ToolDefinition[]): unknown[] {
+  return tools.map((tool) => ({
     type: 'function',
     function: {
       name: tool.name,

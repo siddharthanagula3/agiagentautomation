@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { useAuthStore } from '@shared/stores/unified-auth-store';
 
 export interface SyncMessage {
@@ -13,7 +14,7 @@ export interface SyncMessage {
   content: string;
   created_at: string;
   updated_at: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SyncConversation {
@@ -26,7 +27,7 @@ export interface SyncConversation {
 }
 
 class ChatSyncService {
-  private subscriptions: Map<string, any> = new Map();
+  private subscriptions: Map<string, RealtimeChannel> = new Map();
   private retryAttempts: Map<string, number> = new Map();
   private maxRetries = 3;
 
@@ -139,7 +140,7 @@ class ChatSyncService {
     conversationId: string,
     role: 'user' | 'assistant' | 'system',
     content: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<SyncMessage> {
     const maxRetries = 3;
     let lastError: Error | null = null;

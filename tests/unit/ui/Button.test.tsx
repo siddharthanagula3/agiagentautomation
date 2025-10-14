@@ -23,13 +23,18 @@ describe('Button Component', () => {
 
   it('renders with different sizes', () => {
     const { rerender } = render(<Button size="sm">Small</Button>);
-    expect(screen.getByRole('button')).toHaveClass('h-9');
+    expect(screen.getByRole('button')).toHaveClass('h-8', 'sm:h-9');
 
     rerender(<Button size="lg">Large</Button>);
-    expect(screen.getByRole('button')).toHaveClass('h-11');
+    expect(screen.getByRole('button')).toHaveClass('h-10', 'sm:h-11');
 
     rerender(<Button size="icon">Icon</Button>);
-    expect(screen.getByRole('button')).toHaveClass('h-10');
+    expect(screen.getByRole('button')).toHaveClass(
+      'h-9',
+      'w-9',
+      'sm:h-10',
+      'sm:w-10'
+    );
   });
 
   it('handles click events', () => {
@@ -114,7 +119,12 @@ describe('Button Component', () => {
     );
 
     const button = screen.getByRole('button');
-    expect(button).toHaveClass('bg-destructive', 'h-11', 'custom-class');
+    expect(button).toHaveClass(
+      'bg-destructive',
+      'h-10',
+      'sm:h-11',
+      'custom-class'
+    );
     expect(button).toHaveTextContent('Combined Props');
 
     fireEvent.click(button);

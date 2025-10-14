@@ -40,13 +40,22 @@ serve(async (req) => {
       });
     }
 
-    // Parse request body
-    const {
-      messages,
-      provider = 'gemini',
-      model,
-      sessionId,
-    } = await req.json();
+    // Parse and validate request body
+    const body = await req.json();
+    const messages = Array.isArray(body?.messages) ? body.messages : [];
+    const provider = (body?.provider ?? 'gemini') as string;
+    const model = (body?.model ?? undefined) as string | undefined;
+    const sessionId = (body?.sessionId ?? undefined) as string | undefined;
+
+    if (!messages.length) {
+      return new Response(
+        JSON.stringify({ error: 'messages array is required' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
+    }
 
     // Check rate limit
     const { data: rateLimitOk } = await supabaseClient.rpc('check_rate_limit', {
@@ -84,7 +93,13 @@ serve(async (req) => {
         response = await callOpenAI(messages, model);
         break;
       default:
-        throw new Error(`Unsupported provider: ${provider}`);
+        return new Response(
+          JSON.stringify({ error: `Unsupported provider: ${provider}` }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 400,
+          }
+        );
     }
 
     // Save message to database if sessionId provided
@@ -100,8 +115,9 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });

@@ -56,28 +56,115 @@ interface HireRecord {
   created_at?: string;
 }
 
-// Safe localStorage access helpers
+// Safe localStorage access helpers with enhanced validation
 const getHiredEmployeesSafe = (): HireRecord[] => {
   try {
-    if (typeof window === 'undefined') return [];
+    if (typeof window === 'undefined') {
+      console.warn('[getHiredEmployeesSafe] ⚠️ Window is undefined (SSR)');
+      return [];
+    }
+
+    // Check if localStorage is available
+    if (!window.localStorage) {
+      console.error('[getHiredEmployeesSafe] ❌ localStorage not available');
+      return [];
+    }
+
     const raw = window.localStorage.getItem('hired_employees');
-    if (!raw) return [];
+    if (!raw) {
+      console.log('[getHiredEmployeesSafe] ℹ️ No hired employees in storage');
+      return [];
+    }
+
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (h) => h && typeof h === 'object' && 'user_id' in h && 'employee_id' in h
-    ) as HireRecord[];
-  } catch {
+    if (!Array.isArray(parsed)) {
+      console.error(
+        '[getHiredEmployeesSafe] ❌ Invalid data format (not array):',
+        parsed
+      );
+      return [];
+    }
+
+    // Validate each record
+    const validated = parsed.filter((h) => {
+      const isValid =
+        h &&
+        typeof h === 'object' &&
+        'user_id' in h &&
+        'employee_id' in h &&
+        typeof h.user_id === 'string' &&
+        typeof h.employee_id === 'string';
+
+      if (!isValid) {
+        console.warn(
+          '[getHiredEmployeesSafe] ⚠️ Invalid record filtered out:',
+          h
+        );
+      }
+
+      return isValid;
+    }) as HireRecord[];
+
+    console.log(
+      '[getHiredEmployeesSafe] ✅ Retrieved records:',
+      validated.length
+    );
+    return validated;
+  } catch (error) {
+    console.error(
+      '[getHiredEmployeesSafe] ❌ Error reading localStorage:',
+      error
+    );
     return [];
   }
 };
 
 const setHiredEmployeesSafe = (entries: HireRecord[]): void => {
   try {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem('hired_employees', JSON.stringify(entries));
-  } catch {
-    // ignore storage errors
+    if (typeof window === 'undefined') {
+      console.warn('[setHiredEmployeesSafe] ⚠️ Window is undefined (SSR)');
+      return;
+    }
+
+    // Check if localStorage is available
+    if (!window.localStorage) {
+      console.error('[setHiredEmployeesSafe] ❌ localStorage not available');
+      throw new Error('localStorage is not available in this browser');
+    }
+
+    // Validate entries before saving
+    if (!Array.isArray(entries)) {
+      console.error('[setHiredEmployeesSafe] ❌ Invalid entries (not array)');
+      throw new Error('Invalid data format');
+    }
+
+    const jsonString = JSON.stringify(entries);
+    console.log(
+      '[setHiredEmployeesSafe] 💾 Saving records:',
+      entries.length,
+      'size:',
+      jsonString.length,
+      'bytes'
+    );
+
+    window.localStorage.setItem('hired_employees', jsonString);
+    console.log('[setHiredEmployeesSafe] ✅ Records saved successfully');
+  } catch (error) {
+    console.error(
+      '[setHiredEmployeesSafe] ❌ Error writing to localStorage:',
+      error
+    );
+
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.name === 'QuotaExceededError') {
+        throw new Error('Storage quota exceeded');
+      } else if (error.message.includes('not available')) {
+        throw new Error('localStorage is disabled in your browser');
+      }
+    }
+
+    throw error;
   }
 };
 
@@ -230,28 +317,66 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   // Hire employee mutation - Simplified for immediate hiring without payment
   const hireEmployeeMutation = useMutation({
     mutationFn: async (employeeId: string) => {
+      console.log(
+        '[MarketplacePage] 🚀 Starting hire process for employee:',
+        employeeId
+      );
+
+      // Validate user authentication
       if (!user) {
+        console.error('[MarketplacePage] ❌ User not authenticated');
         throw new Error('You must be logged in to hire employees');
       }
+
+      console.log('[MarketplacePage] ✅ User authenticated:', {
+        userId: user.id,
+        email: user.email,
+      });
 
       // Find the employee data
       const employee = AI_EMPLOYEES.find((emp) => emp.id === employeeId);
       if (!employee) {
+        console.error('[MarketplacePage] ❌ Employee not found:', employeeId);
         throw new Error('Employee not found');
       }
 
+      console.log('[MarketplacePage] ✅ Employee found:', {
+        id: employee.id,
+        name: employee.name,
+      });
+
       // Check if already hired using local storage
-      const hiredEmployees = getHiredEmployeesSafe();
+      let hiredEmployees: HireRecord[] = [];
+      try {
+        hiredEmployees = getHiredEmployeesSafe();
+        console.log(
+          '[MarketplacePage] 📋 Retrieved hired employees:',
+          hiredEmployees.length
+        );
+      } catch (error) {
+        console.error(
+          '[MarketplacePage] ⚠️ Failed to retrieve hired employees:',
+          error
+        );
+        throw new Error(
+          'Failed to access storage. Please check browser settings.'
+        );
+      }
+
       const alreadyHired = hiredEmployees.find(
         (h) => h.employee_id === employeeId && h.user_id === user.id
       );
 
       if (alreadyHired) {
-        throw new Error('Employee already hired');
+        console.warn(
+          '[MarketplacePage] ⚠️ Employee already hired:',
+          employeeId
+        );
+        throw new Error('You have already hired this employee');
       }
 
       // Create hire record in local storage (bypassing database for now)
-      const hireRecord = {
+      const hireRecord: HireRecord = {
         id: `hire_${Date.now()}_${employeeId}`,
         user_id: user.id,
         employee_id: employeeId,
@@ -263,33 +388,72 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         created_at: new Date().toISOString(),
       };
 
-      hiredEmployees.push(hireRecord);
-      setHiredEmployeesSafe(hiredEmployees);
+      console.log('[MarketplacePage] 📝 Creating hire record:', hireRecord);
 
+      try {
+        hiredEmployees.push(hireRecord);
+        setHiredEmployeesSafe(hiredEmployees);
+        console.log('[MarketplacePage] ✅ Hire record saved successfully');
+      } catch (error) {
+        console.error(
+          '[MarketplacePage] ❌ Failed to save hire record:',
+          error
+        );
+
+        // Check if it's a quota exceeded error
+        if (error instanceof Error && error.name === 'QuotaExceededError') {
+          throw new Error(
+            'Storage quota exceeded. Please clear some browser data and try again.'
+          );
+        }
+
+        throw new Error('Failed to save hire record. Please try again.');
+      }
+
+      console.log('[MarketplacePage] 🎉 Hire process completed successfully');
       return { success: true, employeeId, userId: user.id, result: hireRecord };
     },
     onSuccess: (data) => {
+      console.log(
+        '[MarketplacePage] 🔄 Invalidating query cache after successful hire'
+      );
       // Update the query cache to mark employee as hired
       queryClient.invalidateQueries({ queryKey: ['marketplace-employees'] });
 
       // Refresh the purchased employees list
       queryClient.invalidateQueries({ queryKey: ['purchased-employees'] });
     },
+    onError: (error) => {
+      console.error('[MarketplacePage] ❌ Hire mutation failed:', error);
+    },
   });
 
   const handleHireEmployee = async (employeeId: string) => {
+    console.log(
+      '[handleHireEmployee] 🎯 Attempting to hire employee:',
+      employeeId
+    );
+
     if (!user) {
-      toast.error('Please log in to hire AI employees');
+      console.warn(
+        '[handleHireEmployee] ⚠️ User not authenticated, redirecting to login'
+      );
+      toast.error('Please log in to hire AI employees', {
+        description: 'You need to be signed in to hire AI employees',
+        duration: 4000,
+      });
       navigate('/auth/login');
       return;
     }
 
     try {
+      console.log('[handleHireEmployee] 📤 Calling mutation...');
       await hireEmployeeMutation.mutateAsync(employeeId);
 
       // Track successful hire
       const employee = AI_EMPLOYEES.find((emp) => emp.id === employeeId);
       if (employee) {
+        console.log('[handleHireEmployee] 📊 Tracking hire event');
         trackEmployeeHire(employeeId, employee.name, {
           category: employee.category,
           skills: employee.skills,
@@ -297,18 +461,59 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         });
       }
 
-      toast.success('AI Employee hired successfully! Redirecting to chat...');
+      console.log(
+        '[handleHireEmployee] ✅ Hire successful, showing success message'
+      );
+      toast.success('AI Employee hired successfully!', {
+        description: 'Redirecting to chat...',
+        duration: 3000,
+      });
+
       setTimeout(() => {
+        console.log('[handleHireEmployee] 🔄 Navigating to chat');
         navigate(`/chat?employee=${employeeId}`);
       }, 1500);
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : typeof error === 'string'
-            ? error
-            : 'Failed to hire employee';
-      toast.error(errorMessage || 'Failed to hire employee');
+      console.error('[handleHireEmployee] ❌ Error occurred:', error);
+
+      // Provide specific error messages based on error type
+      let errorTitle = 'Failed to hire employee';
+      let errorDescription = 'Please try again';
+
+      if (error instanceof Error) {
+        const message = error.message.toLowerCase();
+
+        if (
+          message.includes('not authenticated') ||
+          message.includes('logged in')
+        ) {
+          errorTitle = 'Authentication required';
+          errorDescription = 'Please sign in to hire AI employees';
+        } else if (message.includes('already hired')) {
+          errorTitle = 'Already hired';
+          errorDescription =
+            'You have already hired this employee. Check your workforce page.';
+        } else if (message.includes('not found')) {
+          errorTitle = 'Employee not found';
+          errorDescription = 'This AI employee is no longer available';
+        } else if (message.includes('storage') || message.includes('quota')) {
+          errorTitle = 'Storage error';
+          errorDescription =
+            'Unable to save hire data. Try clearing browser cache.';
+        } else {
+          errorTitle = 'Hiring failed';
+          errorDescription = error.message || 'An unexpected error occurred';
+        }
+      }
+
+      console.error('[handleHireEmployee] 📢 Showing error toast:', {
+        errorTitle,
+        errorDescription,
+      });
+      toast.error(errorTitle, {
+        description: errorDescription,
+        duration: 5000,
+      });
     }
   };
 

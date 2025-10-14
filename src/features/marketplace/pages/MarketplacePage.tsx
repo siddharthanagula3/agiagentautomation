@@ -585,26 +585,26 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                     View Details
                   </Button>
 
-                  <Button
-                    onClick={() => handleHireEmployee(employee.id)}
-                    disabled={
-                      employee.isHired || hireEmployeeMutation.isPending
-                    }
-                    size="sm"
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    {employee.isHired ? (
-                      <>
-                        <CheckCircle className="mr-1 h-4 w-4" />
-                        Hired
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="mr-1 h-4 w-4" />
-                        Hire Now
-                      </>
-                    )}
-                  </Button>
+                  {employee.isHired ? (
+                    <Button
+                      onClick={() => navigate(`/chat?employee=${employee.id}`)}
+                      size="sm"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      <CheckCircle className="mr-1 h-4 w-4" />
+                      Open Chat
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => handleHireEmployee(employee.id)}
+                      disabled={hireEmployeeMutation.isPending}
+                      size="sm"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      <Plus className="mr-1 h-4 w-4" />
+                      Hire Now
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>

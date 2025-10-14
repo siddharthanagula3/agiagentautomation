@@ -26,8 +26,6 @@ export async function listPurchasedEmployees(
   const uid = getUserIdOrThrow(userId);
   console.log('[listPurchasedEmployees] 🔍 Fetching for user:', uid);
 
-  const supabase: SupabaseClient<Database> = supabaseClient;
-
   try {
     const { data, error } = await supabase
       .from('purchased_employees')
@@ -87,7 +85,6 @@ export async function isEmployeePurchased(
   employeeId: string
 ): Promise<boolean> {
   const uid = getUserIdOrThrow(userId);
-  const supabase: SupabaseClient<Database> = supabaseClient;
 
   try {
     const { data, error } = await supabase
@@ -146,8 +143,6 @@ export async function purchaseEmployee(
     role: employee.role,
     provider: employee.provider,
   });
-
-  const supabase: SupabaseClient<Database> = supabaseClient;
 
   try {
     // Upsert to avoid duplicates

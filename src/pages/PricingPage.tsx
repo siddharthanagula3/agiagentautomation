@@ -106,7 +106,7 @@ const PricingPage: React.FC = () => {
   async function loadPlans() {
     try {
       const dbPlans = await getPricingPlans();
-      const formattedPlans: PricingPlan[] = dbPlans.map(plan => {
+      const formattedPlans: PricingPlan[] = dbPlans.map((plan) => {
         let price = 'Custom';
         let period = '';
 
@@ -384,7 +384,7 @@ const PricingPage: React.FC = () => {
               <Loader2 className="animate-spin text-primary" size={48} />
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {plans.map((plan, idx) => (
                 <PricingCard
                   key={idx}

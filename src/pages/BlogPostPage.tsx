@@ -263,7 +263,7 @@ const BlogPostPage: React.FC = () => {
                 <img
                   src={post.image_url}
                   alt={post.title}
-                  className="h-64 w-full object-cover md:h-96"
+                  className="h-64 w-full max-w-full object-cover md:h-96"
                 />
               </motion.div>
             </div>

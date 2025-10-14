@@ -216,7 +216,7 @@ const BlogPage: React.FC = () => {
                 placeholder="Search articles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-12 border-border/40 bg-background/60 pl-12 backdrop-blur-xl"
+                className="h-12 w-full border-border/40 bg-background/60 pl-12 backdrop-blur-xl"
               />
             </div>
           </motion.div>
@@ -315,7 +315,7 @@ const BlogPage: React.FC = () => {
             </motion.div>
           ) : regularPosts.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 {regularPosts.map((post, idx) => (
                   <BlogPostCard key={post.id} post={post} index={idx} />
                 ))}

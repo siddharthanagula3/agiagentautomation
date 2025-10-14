@@ -94,12 +94,12 @@ export interface TaskExecutionRecord {
 const buildCapabilityMap = (): Record<string, AgentCapability> => {
   const capabilities: Record<string, AgentCapability> = {};
 
-  AI_EMPLOYEES.forEach(emp => {
+  AI_EMPLOYEES.forEach((emp) => {
     const key = emp.role.toLowerCase().replace(/\s+/g, '-');
 
     // Determine specialization from role and category
     const specialization = [
-      ...emp.skills.map(s => s.toLowerCase()),
+      ...emp.skills.map((s) => s.toLowerCase()),
       emp.category.toLowerCase(),
       emp.role.toLowerCase(),
     ];
@@ -117,7 +117,7 @@ const buildCapabilityMap = (): Record<string, AgentCapability> => {
       'head',
       'orchestrator',
       'coordinator',
-    ].some(title => emp.role.toLowerCase().includes(title));
+    ].some((title) => emp.role.toLowerCase().includes(title));
 
     // Determine priority (1-10)
     let priority = 5;
@@ -216,7 +216,7 @@ class MultiAgentOrchestrator {
 
       if (nextTasks.length === 0) {
         // Check if all tasks are complete
-        const allComplete = plan.tasks.every(t => t.status === 'completed');
+        const allComplete = plan.tasks.every((t) => t.status === 'completed');
         if (allComplete) {
           plan.isComplete = true;
           this.sendCompletion(plan, onCommunication);
@@ -225,7 +225,7 @@ class MultiAgentOrchestrator {
 
         // Check for blocked tasks
         const blockedTasks = plan.tasks.filter(
-          t => t.status === 'pending' && !this.canExecute(t, plan)
+          (t) => t.status === 'pending' && !this.canExecute(t, plan)
         );
 
         if (blockedTasks.length > 0) {
@@ -243,7 +243,7 @@ class MultiAgentOrchestrator {
       // Execute tasks based on strategy
       if (plan.executionStrategy === 'parallel') {
         await Promise.all(
-          nextTasks.map(task =>
+          nextTasks.map((task) =>
             this.executeTask(
               task,
               plan,
@@ -266,7 +266,7 @@ class MultiAgentOrchestrator {
       }
 
       // Small delay to allow UI updates
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     if (iterationCount >= MAX_ITERATIONS) {
@@ -373,12 +373,12 @@ class MultiAgentOrchestrator {
    * Get next executable tasks based on dependencies
    */
   private getExecutableTasks(plan: OrchestrationPlan): AgentTask[] {
-    return plan.tasks.filter(task => {
+    return plan.tasks.filter((task) => {
       if (task.status !== 'pending') return false;
 
       // Check if all dependencies are complete
-      const dependenciesMet = task.dependencies.every(depId => {
-        const depTask = plan.tasks.find(t => t.id === depId);
+      const dependenciesMet = task.dependencies.every((depId) => {
+        const depTask = plan.tasks.find((t) => t.id === depId);
         return depTask?.status === 'completed';
       });
 
@@ -390,8 +390,8 @@ class MultiAgentOrchestrator {
    * Check if a task can be executed
    */
   private canExecute(task: AgentTask, plan: OrchestrationPlan): boolean {
-    return task.dependencies.every(depId => {
-      const depTask = plan.tasks.find(t => t.id === depId);
+    return task.dependencies.every((depId) => {
+      const depTask = plan.tasks.find((t) => t.id === depId);
       return depTask?.status === 'completed';
     });
   }
@@ -411,8 +411,8 @@ class MultiAgentOrchestrator {
 
     for (const task of blockedTasks) {
       // Find which dependency is blocking
-      const blockingDeps = task.dependencies.filter(depId => {
-        const depTask = plan.tasks.find(t => t.id === depId);
+      const blockingDeps = task.dependencies.filter((depId) => {
+        const depTask = plan.tasks.find((t) => t.id === depId);
         return depTask?.status !== 'completed';
       });
 
@@ -709,9 +709,11 @@ class MultiAgentOrchestrator {
     // Phase 4: Integration
     if (requiredAgents.includes('Full-Stack Engineer')) {
       const frontendTask = tasks.find(
-        t => t.assignedTo === 'Frontend Engineer'
+        (t) => t.assignedTo === 'Frontend Engineer'
       );
-      const backendTask = tasks.find(t => t.assignedTo === 'Backend Engineer');
+      const backendTask = tasks.find(
+        (t) => t.assignedTo === 'Backend Engineer'
+      );
       const deps = [frontendTask?.id, backendTask?.id].filter(
         Boolean
       ) as string[];
@@ -731,7 +733,8 @@ class MultiAgentOrchestrator {
     // Phase 5: Testing
     if (requiredAgents.includes('QA Engineer')) {
       const implementationTasks = tasks.filter(
-        t => t.assignedTo.includes('Engineer') && t.assignedTo !== 'QA Engineer'
+        (t) =>
+          t.assignedTo.includes('Engineer') && t.assignedTo !== 'QA Engineer'
       );
 
       tasks.push({
@@ -740,7 +743,7 @@ class MultiAgentOrchestrator {
         assignedTo: 'QA Engineer',
         status: 'pending',
         priority: 'high',
-        dependencies: implementationTasks.map(t => t.id),
+        dependencies: implementationTasks.map((t) => t.id),
         retryCount: 0,
         maxRetries: 3,
       });
@@ -754,7 +757,7 @@ class MultiAgentOrchestrator {
         assignedTo: 'DevOps Engineer',
         status: 'pending',
         priority: 'medium',
-        dependencies: tasks.slice(0, -1).map(t => t.id), // Depends on all previous
+        dependencies: tasks.slice(0, -1).map((t) => t.id), // Depends on all previous
         retryCount: 0,
         maxRetries: 3,
       });
@@ -789,7 +792,7 @@ class MultiAgentOrchestrator {
 
     // Check if tasks can be parallelized
     const hasIndependentTasks = tasks.some(
-      task => task.dependencies.length === 0
+      (task) => task.dependencies.length === 0
     );
     if (hasIndependentTasks && tasks.length > 3) {
       return 'hybrid';
@@ -825,7 +828,7 @@ class MultiAgentOrchestrator {
     // Group tasks by priority/dependencies
     const phases = new Set<number>();
 
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
       const phase = task.dependencies.length + 1;
       phases.add(phase);
     });
@@ -846,7 +849,7 @@ class MultiAgentOrchestrator {
    * Check if this is a handoff between agents
    */
   private isHandoff(task: AgentTask, plan: OrchestrationPlan): boolean {
-    const taskIndex = plan.tasks.findIndex(t => t.id === task.id);
+    const taskIndex = plan.tasks.findIndex((t) => t.id === task.id);
     if (taskIndex === 0) return false;
 
     const prevTask = plan.tasks[taskIndex - 1];
@@ -861,7 +864,7 @@ class MultiAgentOrchestrator {
     plan: OrchestrationPlan,
     onCommunication: (comm: AgentCommunication) => void
   ): void {
-    const taskIndex = plan.tasks.findIndex(t => t.id === task.id);
+    const taskIndex = plan.tasks.findIndex((t) => t.id === task.id);
     const prevTask = plan.tasks[taskIndex - 1];
 
     onCommunication({
@@ -925,7 +928,7 @@ class MultiAgentOrchestrator {
    */
   private updatePhase(plan: OrchestrationPlan): void {
     const completedTasks = plan.tasks.filter(
-      t => t.status === 'completed'
+      (t) => t.status === 'completed'
     ).length;
     const totalTasks = plan.tasks.length;
 
@@ -1003,11 +1006,11 @@ You emulate the expertise of top developers and are always up-to-date with lates
 </identity>
 
 <specializations>
-${capability?.specialization.map(s => `- ${s}`).join('\n') || '- General problem solving'}
+${capability?.specialization.map((s) => `- ${s}`).join('\n') || '- General problem solving'}
 </specializations>
 
 <available_tools>
-${capability?.tools.map(t => `- ${t}`).join('\n') || '- Standard reasoning tools'}
+${capability?.tools.map((t) => `- ${t}`).join('\n') || '- Standard reasoning tools'}
 </available_tools>
 
 <core_principles>

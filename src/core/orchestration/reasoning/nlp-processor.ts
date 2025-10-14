@@ -317,8 +317,8 @@ export class NLPProcessor {
 
     return input
       .split(/\s+/)
-      .filter(word => word.length > 2)
-      .filter(word => !stopWords.has(word))
+      .filter((word) => word.length > 2)
+      .filter((word) => !stopWords.has(word))
       .filter((word, index, self) => self.indexOf(word) === index);
   }
 
@@ -342,7 +342,7 @@ export class NLPProcessor {
     const techRegex =
       /\b(react|vue|angular|node|python|java|typescript|javascript|docker|kubernetes)\b/gi;
     const techMentions = input.match(techRegex) || [];
-    entities.push(...techMentions.map(t => t.toLowerCase()));
+    entities.push(...techMentions.map((t) => t.toLowerCase()));
 
     return [...new Set(entities)];
   }
@@ -363,8 +363,8 @@ export class NLPProcessor {
       }
 
       // Check keywords
-      const intentKeywords = keywords.filter(kw =>
-        patterns.some(p => p.test(kw))
+      const intentKeywords = keywords.filter((kw) =>
+        patterns.some((p) => p.test(kw))
       );
       score += intentKeywords.length * 5;
 
@@ -385,8 +385,8 @@ export class NLPProcessor {
     let bestDomain: DomainType = 'code';
 
     for (const [domain, domainKeywords] of this.domainKeywords) {
-      const matchingKeywords = keywords.filter(kw =>
-        domainKeywords.some(dk => kw.includes(dk) || dk.includes(kw))
+      const matchingKeywords = keywords.filter((kw) =>
+        domainKeywords.some((dk) => kw.includes(dk) || dk.includes(kw))
       );
 
       const score = matchingKeywords.length;
@@ -473,9 +473,11 @@ export class NLPProcessor {
     entities: string[]
   ): Record<string, unknown> {
     return {
-      hasFileReferences: entities.some(e => e.includes('.') || e.includes('/')),
-      hasURLReferences: entities.some(e => e.startsWith('http')),
-      technologiesMentioned: entities.filter(e =>
+      hasFileReferences: entities.some(
+        (e) => e.includes('.') || e.includes('/')
+      ),
+      hasURLReferences: entities.some((e) => e.startsWith('http')),
+      technologiesMentioned: entities.filter((e) =>
         ['react', 'vue', 'node', 'python', 'docker'].includes(e.toLowerCase())
       ),
       wordCount: input.split(/\s+/).length,
@@ -589,8 +591,8 @@ export class NLPProcessor {
     }
 
     const hasVerb =
-      this.intentPatterns.get('create')?.some(p => p.test(input)) ||
-      this.intentPatterns.get('modify')?.some(p => p.test(input));
+      this.intentPatterns.get('create')?.some((p) => p.test(input)) ||
+      this.intentPatterns.get('modify')?.some((p) => p.test(input));
 
     if (!hasVerb) {
       suggestions.push(

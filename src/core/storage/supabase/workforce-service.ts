@@ -278,7 +278,7 @@ export async function createExecutionTasks(
   tasks: Task[]
 ): Promise<boolean> {
   try {
-    const taskData = tasks.map(task => ({
+    const taskData = tasks.map((task) => ({
       execution_id: executionId,
       task_id: task.id,
       title: task.title,
@@ -503,7 +503,7 @@ export async function getAPIUsageSummary(
       byProvider: {} as Record<string, { cost: number; tokens: number }>,
     };
 
-    usage.forEach(record => {
+    usage.forEach((record) => {
       summary.totalCost += record.cost;
       summary.totalTokens += record.tokens_used;
 

@@ -53,7 +53,7 @@ class ChatSyncService {
             table: 'messages',
             filter: `conversation_id=eq.${conversationId}`,
           },
-          payload => {
+          (payload) => {
             console.log('New message received:', payload);
             onMessage(payload.new as SyncMessage);
           }
@@ -66,12 +66,12 @@ class ChatSyncService {
             table: 'messages',
             filter: `conversation_id=eq.${conversationId}`,
           },
-          payload => {
+          (payload) => {
             console.log('Message updated:', payload);
             onMessage(payload.new as SyncMessage);
           }
         )
-        .subscribe(status => {
+        .subscribe((status) => {
           console.log('Subscription status:', status);
           if (status === 'SUBSCRIBED') {
             this.retryAttempts.delete(conversationId);
@@ -169,7 +169,7 @@ class ChatSyncService {
 
         if (attempt < maxRetries - 1) {
           // Wait before retry (exponential backoff)
-          await new Promise(resolve =>
+          await new Promise((resolve) =>
             setTimeout(resolve, Math.pow(2, attempt) * 1000)
           );
         }

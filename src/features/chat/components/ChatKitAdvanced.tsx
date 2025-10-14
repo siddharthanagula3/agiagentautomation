@@ -400,7 +400,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         id: 'quick-action',
         type: 'button',
         label: 'Quick Action',
-        onAction: value => handleWidgetAction('quick-action', value),
+        onAction: (value) => handleWidgetAction('quick-action', value),
       },
       {
         id: 'priority-selector',
@@ -412,14 +412,14 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
           { value: 'high', label: 'High Priority' },
           { value: 'urgent', label: 'Urgent' },
         ],
-        onAction: value => handleWidgetAction('priority-selector', value),
+        onAction: (value) => handleWidgetAction('priority-selector', value),
       },
       {
         id: 'progress-slider',
         type: 'slider',
         label: 'Task Progress',
         validation: { min: 0, max: 100 },
-        onAction: value => handleWidgetAction('progress-slider', value),
+        onAction: (value) => handleWidgetAction('progress-slider', value),
       },
     ];
 
@@ -440,7 +440,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
           { value: 'csharp', label: 'C#' },
           { value: 'go', label: 'Go' },
         ],
-        onAction: value => handleWidgetAction('code-language', value),
+        onAction: (value) => handleWidgetAction('code-language', value),
       });
     }
 
@@ -459,7 +459,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
           { value: 'ad', label: 'Advertisement' },
           { value: 'video', label: 'Video Script' },
         ],
-        onAction: value => handleWidgetAction('content-type', value),
+        onAction: (value) => handleWidgetAction('content-type', value),
       });
     }
 
@@ -478,7 +478,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         icon: 'Bookmark',
         type: 'secondary',
         enabled: true,
-        handler: async context => {
+        handler: async (context) => {
           toast.success('Conversation saved successfully');
           return { success: true };
         },
@@ -490,7 +490,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         icon: 'Download',
         type: 'secondary',
         enabled: true,
-        handler: async context => {
+        handler: async (context) => {
           toast.success('Chat exported successfully');
           return { success: true };
         },
@@ -502,7 +502,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         icon: 'Share',
         type: 'secondary',
         enabled: true,
-        handler: async context => {
+        handler: async (context) => {
           toast.success('Conversation shared successfully');
           return { success: true };
         },
@@ -521,7 +521,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         icon: 'Code',
         type: 'primary',
         enabled: true,
-        handler: async context => {
+        handler: async (context) => {
           toast.success('Code generation started');
           return { success: true };
         },
@@ -539,7 +539,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         icon: 'FileText',
         type: 'primary',
         enabled: true,
-        handler: async context => {
+        handler: async (context) => {
           toast.success('Content creation started');
           return { success: true };
         },
@@ -557,7 +557,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
 
   // Handle action execution
   const handleActionExecution = async (actionId: string, context: unknown) => {
-    const action = actions.find(a => a.id === actionId);
+    const action = actions.find((a) => a.id === actionId);
     if (!action) return;
 
     try {
@@ -607,9 +607,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
     handleWidgetAction(event.detail.widgetId, event.detail.value);
   };
 
-  const handleActionExecuted = (
-    event: CustomEvent<ActionExecutedDetail>
-  ) => {
+  const handleActionExecuted = (event: CustomEvent<ActionExecutedDetail>) => {
     console.log('Action executed:', event.detail);
     handleActionExecution(event.detail.actionId, event.detail.context);
   };
@@ -821,7 +819,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
                   <input
                     type="color"
                     value={customTheme?.colors.primary || '#3b82f6'}
-                    onChange={e => {
+                    onChange={(e) => {
                       if (customTheme) {
                         setCustomTheme({
                           ...customTheme,
@@ -840,7 +838,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
                   <input
                     type="color"
                     value={customTheme?.colors.background || '#ffffff'}
-                    onChange={e => {
+                    onChange={(e) => {
                       if (customTheme) {
                         setCustomTheme({
                           ...customTheme,
@@ -866,7 +864,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
           <div className="flex items-center gap-4">
             <h3 className="font-medium text-gray-900">Available Widgets:</h3>
             <div className="flex flex-wrap gap-2">
-              {widgets.map(widget => (
+              {widgets.map((widget) => (
                 <Badge
                   key={widget.id}
                   variant="secondary"
@@ -891,7 +889,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
           <div className="flex items-center gap-4">
             <h3 className="font-medium text-gray-900">Available Actions:</h3>
             <div className="flex flex-wrap gap-2">
-              {actions.map(action => (
+              {actions.map((action) => (
                 <Badge
                   key={action.id}
                   variant={action.type === 'primary' ? 'default' : 'secondary'}
@@ -1054,7 +1052,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         id="employee-selector"
         className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
         style={{ display: 'none' }}
-        onClick={e => {
+        onClick={(e) => {
           if (e.target === e.currentTarget) {
             e.currentTarget.style.display = 'none';
           }
@@ -1079,7 +1077,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
             </div>
 
             <div className="grid gap-4">
-              {employees.map(employee => (
+              {employees.map((employee) => (
                 <Card
                   key={employee.id}
                   className={cn(

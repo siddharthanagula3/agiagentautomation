@@ -97,11 +97,15 @@ export const useMemoizedValue = <T>(
     const startTime = performance.now();
     const result = factory();
     const endTime = performance.now();
-    
-    monitoringService.trackPerformance('memoized_calculation', endTime - startTime, {
-      deps: deps.length,
-    });
-    
+
+    monitoringService.trackPerformance(
+      'memoized_calculation',
+      endTime - startTime,
+      {
+        deps: deps.length,
+      }
+    );
+
     return result;
   }, deps);
 };
@@ -119,16 +123,20 @@ export const useLazyComponent = <T extends React.ComponentType<unknown>>(
 
   useEffect(() => {
     const startTime = performance.now();
-    
+
     importFunc()
       .then((module) => {
         const endTime = performance.now();
         setComponent(() => module.default);
         setLoading(false);
-        
-        monitoringService.trackPerformance('lazy_component_load', endTime - startTime, {
-          component: module.default.name || 'Unknown',
-        });
+
+        monitoringService.trackPerformance(
+          'lazy_component_load',
+          endTime - startTime,
+          {
+            component: module.default.name || 'Unknown',
+          }
+        );
       })
       .catch((err) => {
         setError(err);
@@ -209,23 +217,27 @@ export const useOptimizedImage = (
 
   useEffect(() => {
     const startTime = performance.now();
-    
+
     const optimized = performanceService.optimizeImage(src, '', options);
     setOptimizedSrc(optimized);
-    
+
     const img = new Image();
     img.onload = () => {
       const endTime = performance.now();
       setLoaded(true);
-      
-      monitoringService.trackPerformance('image_optimization', endTime - startTime, {
-        originalSrc: src,
-        optimizedSrc: optimized,
-        width: options.width,
-        height: options.height,
-      });
+
+      monitoringService.trackPerformance(
+        'image_optimization',
+        endTime - startTime,
+        {
+          originalSrc: src,
+          optimizedSrc: optimized,
+          width: options.width,
+          height: options.height,
+        }
+      );
     };
-    
+
     img.onerror = () => {
       setError(true);
       monitoringService.captureError(
@@ -233,7 +245,7 @@ export const useOptimizedImage = (
         { originalSrc: src, optimizedSrc: optimized }
       );
     };
-    
+
     img.src = optimized;
   }, [src, options.width, options.height, options.quality, options.format]);
 
@@ -246,18 +258,24 @@ export const useOptimizedImage = (
 export const useResourcePreloader = () => {
   const preloadedResources = useRef(new Set<string>());
 
-  const preloadResource = useCallback((
-    href: string,
-    as: 'script' | 'style' | 'image' | 'font' | 'fetch',
-    options: { crossorigin?: 'anonymous' | 'use-credentials'; type?: string } = {}
-  ) => {
-    if (preloadedResources.current.has(href)) {
-      return;
-    }
+  const preloadResource = useCallback(
+    (
+      href: string,
+      as: 'script' | 'style' | 'image' | 'font' | 'fetch',
+      options: {
+        crossorigin?: 'anonymous' | 'use-credentials';
+        type?: string;
+      } = {}
+    ) => {
+      if (preloadedResources.current.has(href)) {
+        return;
+      }
 
-    performanceService.preloadResource({ href, as, ...options });
-    preloadedResources.current.add(href);
-  }, []);
+      performanceService.preloadResource({ href, as, ...options });
+      preloadedResources.current.add(href);
+    },
+    []
+  );
 
   const preloadImage = useCallback((src: string, sizes?: string) => {
     if (preloadedResources.current.has(src)) {
@@ -284,13 +302,14 @@ export const useComponentPerformance = (componentName: string) => {
 
   useEffect(() => {
     const renderTime = performance.now() - renderStartTime.current;
-    
-    if (renderTime > 16) { // Log slow renders (> 16ms)
+
+    if (renderTime > 16) {
+      // Log slow renders (> 16ms)
       monitoringService.trackPerformance('slow_render', renderTime, {
         component: componentName,
       });
     }
-    
+
     trackRender();
   });
 

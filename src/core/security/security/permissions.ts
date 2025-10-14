@@ -111,7 +111,7 @@ export class PermissionService {
       // Update local cache
       const userRules = this.rules.get(rule.userId) || [];
       const existingIndex = userRules.findIndex(
-        r => r.resource === rule.resource
+        (r) => r.resource === rule.resource
       );
 
       if (existingIndex >= 0) {
@@ -143,7 +143,7 @@ export class PermissionService {
 
       // Update local cache
       const userRules = this.rules.get(userId) || [];
-      const filtered = userRules.filter(r => r.resource !== resource);
+      const filtered = userRules.filter((r) => r.resource !== resource);
       this.rules.set(userId, filtered);
 
       // Clear related cache entries

@@ -210,7 +210,7 @@ export const AgentSDKChatUI: React.FC<AgentSDKChatUIProps> = ({
     };
 
     // Add user message immediately
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
     setIsTyping(true);
@@ -247,13 +247,13 @@ export const AgentSDKChatUI: React.FC<AgentSDKChatUIProps> = ({
           model: agentResponse.model,
           sessionId,
           userId,
-          tools: agentResponse.tools?.map(t => t.name),
+          tools: agentResponse.tools?.map((t) => t.name),
           webhook: agentResponse.webhook?.url,
           toolResults: agentResponse.toolResults,
         },
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
 
       // Show tool execution results if any
       if (agentResponse.tools && agentResponse.tools.length > 0) {
@@ -277,7 +277,7 @@ export const AgentSDKChatUI: React.FC<AgentSDKChatUIProps> = ({
         },
       };
 
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
       toast.error('Failed to send message');
     } finally {
       setIsLoading(false);
@@ -297,12 +297,12 @@ export const AgentSDKChatUI: React.FC<AgentSDKChatUIProps> = ({
   // Handle file attachment
   const handleFileAttachment = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setAttachments(prev => [...prev, ...files]);
+    setAttachments((prev) => [...prev, ...files]);
   };
 
   // Remove attachment
   const removeAttachment = (index: number) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Format message content
@@ -444,7 +444,7 @@ export const AgentSDKChatUI: React.FC<AgentSDKChatUIProps> = ({
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
           <AnimatePresence>
-            {messages.map(message => (
+            {messages.map((message) => (
               <motion.div
                 key={message.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -594,7 +594,7 @@ export const AgentSDKChatUI: React.FC<AgentSDKChatUIProps> = ({
             <Textarea
               ref={textareaRef}
               value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
+              onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={`Message ${employeeName}...`}
               className="max-h-[120px] min-h-[60px] resize-none"

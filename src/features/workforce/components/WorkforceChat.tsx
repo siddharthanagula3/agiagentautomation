@@ -25,7 +25,10 @@ import {
   type WorkforceResponse,
   type ExecutionUpdate,
 } from '@core/orchestration/workforce-orchestrator';
-import { Task, TaskStatus } from '@core/orchestration/reasoning/task-decomposer';
+import {
+  Task,
+  TaskStatus,
+} from '@core/orchestration/reasoning/task-decomposer';
 import { Card } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
@@ -91,7 +94,7 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
       timestamp: new Date(),
       data,
     };
-    setMessages(prev => [...prev, message]);
+    setMessages((prev) => [...prev, message]);
   };
 
   // Handle preview
@@ -171,7 +174,7 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
         addMessage('system', `📊 ${update.data.message}`);
 
         if (executionState) {
-          setExecutionState(prev => ({
+          setExecutionState((prev) => ({
             ...prev!,
             status: update.data.status,
           }));
@@ -195,9 +198,9 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
 
         if (executionState) {
           const currentTask = executionState.tasks.find(
-            t => t.id === update.data.task
+            (t) => t.id === update.data.task
           );
-          setExecutionState(prev => ({
+          setExecutionState((prev) => ({
             ...prev!,
             currentTask,
           }));
@@ -208,7 +211,7 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
         addMessage('success', `✅ Completed: ${update.data.title}`);
 
         if (executionState) {
-          setExecutionState(prev => {
+          setExecutionState((prev) => {
             const completed = prev!.completedTasks + 1;
             const progress = (completed / prev!.tasks.length) * 100;
 
@@ -228,7 +231,7 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
         );
 
         if (executionState) {
-          setExecutionState(prev => ({
+          setExecutionState((prev) => ({
             ...prev!,
             failedTasks: prev!.failedTasks + 1,
           }));
@@ -317,7 +320,7 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
             </div>
           )}
 
-          {messages.map(message => (
+          {messages.map((message) => (
             <ChatMessageComponent key={message.id} message={message} />
           ))}
 
@@ -353,8 +356,8 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
         <div className="flex gap-2">
           <Input
             value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyPress={e =>
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) =>
               e.key === 'Enter' && !e.shiftKey && handleExecute()
             }
             placeholder="What would you like me to do?"
@@ -525,7 +528,7 @@ const ExecutionStateCard: React.FC<{
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-slate-400">Tasks</h4>
           <ScrollArea className="h-40">
-            {state.tasks.map(task => (
+            {state.tasks.map((task) => (
               <TaskItem
                 key={task.id}
                 task={task}

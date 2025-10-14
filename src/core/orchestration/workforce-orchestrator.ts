@@ -155,7 +155,7 @@ export class WorkforceOrchestrator {
     );
 
     const agentsBusy = Array.from(agentPool.values()).filter(
-      agent => !agent.available
+      (agent) => !agent.available
     ).length;
 
     return {

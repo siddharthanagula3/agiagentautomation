@@ -26,11 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@shared/ui/dialog';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@shared/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import {
   Search,
@@ -84,6 +80,11 @@ import {
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
 import { aiEmployeeService } from '@core/api/ai-employee-service';
+import { useAuthStore } from '@shared/stores/unified-auth-store';
+import {
+  listPurchasedEmployees,
+  purchaseEmployee,
+} from '@features/workforce/services/supabase-employees';
 
 // Types and Interfaces
 export interface AIEmployee {
@@ -239,6 +240,22 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+
+  const { data: purchasedEmployees = [] } = useQuery({
+    queryKey: ['purchased-employees', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      return await listPurchasedEmployees(user.id);
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const purchasedEmployeeIds = useMemo(
+    () => new Set(purchasedEmployees.map((emp) => emp.employee_id)),
+    [purchasedEmployees]
+  );
 
   // Real API call via service
   const { data: employeesData, isLoading } = useQuery({
@@ -261,24 +278,56 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
 
   const hireMutation = useMutation({
     mutationFn: async (employee: AIEmployee) => {
-      // Simulate hire process
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return { success: true, employeeId: employee.id };
+      if (!user?.id) {
+        throw new Error('AUTH_REQUIRED');
+      }
+
+      const record = await purchaseEmployee(user.id, employee);
+      return record;
     },
-    onSuccess: (data, employee) => {
-      toast.success(`Successfully hired ${employee.name}!`);
-      queryClient.invalidateQueries({ queryKey: ['my-employees'] });
+    onMutate: (employee) => {
+      if (employee) {
+        toast.loading(`Hiring ${employee.name}...`, { id: 'hire-employee' });
+      }
+    },
+    onSuccess: async (_record, employee) => {
+      toast.success(`${employee.name} hired successfully!`, {
+        id: 'hire-employee',
+      });
       setShowHireDialog(false);
       onEmployeeHire?.(employee);
+      await queryClient.invalidateQueries({
+        queryKey: ['purchased-employees', user?.id],
+      });
+      await queryClient.invalidateQueries({ queryKey: ['my-employees'] });
     },
-    onError: () => {
-      toast.error('Failed to hire employee. Please try again.');
+    onError: (error: unknown) => {
+      const message =
+        error instanceof Error ? error.message : 'Failed to hire employee';
+
+      if (message === 'AUTH_REQUIRED') {
+        toast.error('Please sign in to hire an AI employee.', {
+          id: 'hire-employee',
+        });
+      } else if (message.includes('DATABASE_SETUP_REQUIRED')) {
+        toast.error(
+          'Database setup required for hiring. Please complete Supabase setup.',
+          { id: 'hire-employee' }
+        );
+      } else {
+        toast.error(message || 'Failed to hire employee. Please try again.', {
+          id: 'hire-employee',
+        });
+      }
+    },
+    onSettled: () => {
+      toast.dismiss('hire-employee');
     },
   });
 
   // Filter and sort employees
   const filteredEmployees = useMemo(() => {
-    const filtered = employees.filter(employee => {
+    const filtered = employees.filter((employee) => {
       // Category filter
       if (
         selectedCategory !== 'all' &&
@@ -292,10 +341,10 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
         const query = searchQuery.toLowerCase();
         const matchesName = employee.name.toLowerCase().includes(query);
         const matchesRole = employee.role.toLowerCase().includes(query);
-        const matchesSkills = employee.skills.some(skill =>
+        const matchesSkills = employee.skills.some((skill) =>
           skill.name.toLowerCase().includes(query)
         );
-        const matchesSpecialties = employee.specialties.some(specialty =>
+        const matchesSpecialties = employee.specialties.some((specialty) =>
           specialty.toLowerCase().includes(query)
         );
 
@@ -377,19 +426,45 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
     [onEmployeeSelect]
   );
 
-  const handleHireClick = useCallback((employee: AIEmployee) => {
-    setSelectedEmployee(employee);
-    setShowHireDialog(true);
-  }, []);
+  const handleHireClick = useCallback(
+    (employee: AIEmployee) => {
+      if (!user?.id) {
+        toast.error('Please sign in to hire an AI employee.');
+        return;
+      }
+
+      if (purchasedEmployeeIds.has(employee.id)) {
+        toast.info('This AI employee is already part of your team.');
+        return;
+      }
+
+      setSelectedEmployee(employee);
+      setShowHireDialog(true);
+    },
+    [user?.id, purchasedEmployeeIds]
+  );
 
   const handleHireConfirm = useCallback(() => {
-    if (selectedEmployee) {
-      hireMutation.mutate(selectedEmployee);
+    if (!selectedEmployee) {
+      return;
     }
-  }, [selectedEmployee, hireMutation]);
+
+    if (!user?.id) {
+      toast.error('Please sign in to hire an AI employee.');
+      return;
+    }
+
+    if (purchasedEmployeeIds.has(selectedEmployee.id)) {
+      toast.info('This AI employee is already part of your team.');
+      setShowHireDialog(false);
+      return;
+    }
+
+    hireMutation.mutate(selectedEmployee);
+  }, [selectedEmployee, hireMutation, user?.id, purchasedEmployeeIds]);
 
   const toggleFavorite = useCallback((employeeId: string) => {
-    setFavorites(prev => {
+    setFavorites((prev) => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(employeeId)) {
         newFavorites.delete(employeeId);
@@ -482,7 +557,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
         <Card className="border-slate-700/50 bg-slate-800/50 backdrop-blur-xl">
           <CardContent className="p-4">
             <div className="flex flex-wrap gap-2">
-              {employeeCategories.map(category => {
+              {employeeCategories.map((category) => {
                 const IconComponent = category.icon;
                 return (
                   <Button
@@ -526,7 +601,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
                 <Input
                   placeholder="Search by name, role, or skills..."
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="border-slate-600/30 bg-slate-700/30 pl-10 text-white placeholder:text-slate-400"
                 />
               </div>
@@ -665,6 +740,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
                     employee={employee}
                     viewMode={viewMode}
                     isFavorite={favorites.has(employee.id)}
+                    isHired={purchasedEmployeeIds.has(employee.id)}
                     onToggleFavorite={() => toggleFavorite(employee.id)}
                     onClick={() => handleEmployeeClick(employee)}
                     onHire={() => handleHireClick(employee)}
@@ -682,6 +758,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
           {selectedEmployee && (
             <EmployeeDetailsView
               employee={selectedEmployee}
+              isHired={purchasedEmployeeIds.has(selectedEmployee.id)}
               onHire={() => handleHireClick(selectedEmployee)}
               onClose={() => setShowEmployeeDetails(false)}
             />
@@ -695,6 +772,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
           {selectedEmployee && (
             <HireConfirmationDialog
               employee={selectedEmployee}
+              isHired={purchasedEmployeeIds.has(selectedEmployee.id)}
               onConfirm={handleHireConfirm}
               onCancel={() => setShowHireDialog(false)}
               isLoading={hireMutation.isPending}
@@ -711,6 +789,7 @@ interface EmployeeCardProps {
   employee: AIEmployee;
   viewMode: 'grid' | 'list';
   isFavorite: boolean;
+  isHired: boolean;
   onToggleFavorite: () => void;
   onClick: () => void;
   onHire: () => void;
@@ -720,6 +799,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
   employee,
   viewMode,
   isFavorite,
+  isHired,
   onToggleFavorite,
   onClick,
   onHire,
@@ -759,7 +839,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-semibold text-white">
                     {employee.name
                       .split(' ')
-                      .map(n => n[0])
+                      .map((n) => n[0])
                       .join('')}
                   </AvatarFallback>
                 </Avatar>
@@ -817,7 +897,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
             {/* Skills & Pricing */}
             <div className="flex items-center space-x-6">
               <div className="flex max-w-xs flex-wrap gap-1">
-                {employee.skills.slice(0, 3).map(skill => (
+                {employee.skills.slice(0, 3).map((skill) => (
                   <Badge
                     key={skill.id}
                     variant="outline"
@@ -852,7 +932,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={e => {
+                      onClick={(e) => {
                         e.stopPropagation();
                         onToggleFavorite();
                       }}
@@ -872,15 +952,24 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
                 </Tooltip>
 
                 <Button
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
                     onHire();
                   }}
-                  disabled={employee.status !== 'available'}
+                  disabled={isHired || employee.status !== 'available'}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 >
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  Hire Now
+                  {isHired ? (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Hired
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Hire Now
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
@@ -903,7 +992,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 font-semibold text-white">
                   {employee.name
                     .split(' ')
-                    .map(n => n[0])
+                    .map((n) => n[0])
                     .join('')}
                 </AvatarFallback>
               </Avatar>
@@ -930,7 +1019,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               onToggleFavorite();
             }}
@@ -990,7 +1079,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
         {/* Skills */}
         <div className="mb-4">
           <div className="flex flex-wrap gap-1">
-            {employee.skills.slice(0, 3).map(skill => (
+            {employee.skills.slice(0, 3).map((skill) => (
               <Badge
                 key={skill.id}
                 variant="outline"
@@ -1033,7 +1122,7 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
           <Button
             variant="ghost"
             className="flex-1 border border-slate-600 text-slate-400 hover:border-slate-500 hover:text-white"
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               // View profile action
             }}
@@ -1042,15 +1131,24 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
             View Profile
           </Button>
           <Button
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               onHire();
             }}
-            disabled={employee.status !== 'available'}
+            disabled={isHired || employee.status !== 'available'}
             className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50"
           >
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            Hire
+            {isHired ? (
+              <>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Hired
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Hire
+              </>
+            )}
           </Button>
         </div>
       </CardContent>
@@ -1061,12 +1159,14 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
 // Employee Details View Component
 interface EmployeeDetailsViewProps {
   employee: AIEmployee;
+  isHired: boolean;
   onHire: () => void;
   onClose: () => void;
 }
 
 const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
   employee,
+  isHired,
   onHire,
   onClose,
 }) => {
@@ -1103,7 +1203,7 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-2xl font-semibold text-white">
                 {employee.name
                   .split(' ')
-                  .map(n => n[0])
+                  .map((n) => n[0])
                   .join('')}
               </AvatarFallback>
             </Avatar>
@@ -1161,11 +1261,20 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
           <p className="text-slate-400">{employee.availability.workingHours}</p>
           <Button
             onClick={onHire}
-            disabled={employee.status !== 'available'}
+            disabled={isHired || employee.status !== 'available'}
             className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            Hire Now
+            {isHired ? (
+              <>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Already Hired
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Hire Now
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -1300,7 +1409,7 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {employee.skills.map(skill => (
+                {employee.skills.map((skill) => (
                   <div
                     key={skill.id}
                     className="flex items-center justify-between"
@@ -1338,7 +1447,7 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {employee.tools.map(tool => (
+                {employee.tools.map((tool) => (
                   <div
                     key={tool.id}
                     className="flex items-center justify-between"
@@ -1373,7 +1482,7 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {employee.certifications.map(cert => (
+                {employee.certifications.map((cert) => (
                   <div
                     key={cert.id}
                     className="flex items-center justify-between rounded-lg bg-slate-700/30 p-3"
@@ -1408,7 +1517,7 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
 
         <TabsContent value="portfolio" className="space-y-6">
           <div className="grid gap-6">
-            {employee.portfolio.map(item => (
+            {employee.portfolio.map((item) => (
               <Card
                 key={item.id}
                 className="border-slate-700/50 bg-slate-800/50"
@@ -1462,6 +1571,7 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
 // Hire Confirmation Dialog Component
 interface HireConfirmationDialogProps {
   employee: AIEmployee;
+  isHired: boolean;
   onConfirm: () => void;
   onCancel: () => void;
   isLoading: boolean;
@@ -1469,6 +1579,7 @@ interface HireConfirmationDialogProps {
 
 const HireConfirmationDialog: React.FC<HireConfirmationDialogProps> = ({
   employee,
+  isHired,
   onConfirm,
   onCancel,
   isLoading,
@@ -1499,7 +1610,7 @@ const HireConfirmationDialog: React.FC<HireConfirmationDialogProps> = ({
                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 font-semibold text-white">
                   {employee.name
                     .split(' ')
-                    .map(n => n[0])
+                    .map((n) => n[0])
                     .join('')}
                 </AvatarFallback>
               </Avatar>
@@ -1575,14 +1686,19 @@ const HireConfirmationDialog: React.FC<HireConfirmationDialogProps> = ({
         <Button
           onClick={onConfirm}
           className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-          disabled={isLoading}
+          disabled={isLoading || isHired}
         >
-          {isLoading ? (
+          {isHired ? (
+            <>
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Already Hired
+            </>
+          ) : isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <ShoppingCart className="mr-2 h-4 w-4" />
           )}
-          Confirm & Hire
+          {!isHired && 'Confirm & Hire'}
         </Button>
       </div>
     </div>
@@ -1590,4 +1706,3 @@ const HireConfirmationDialog: React.FC<HireConfirmationDialogProps> = ({
 };
 
 export default AIEmployeeMarketplace;
-

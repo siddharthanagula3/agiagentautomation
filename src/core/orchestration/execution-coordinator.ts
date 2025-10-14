@@ -25,7 +25,7 @@ class SimpleEventEmitter {
   emit(event: string, ...args: unknown[]): void {
     const eventListeners = this.listeners.get(event);
     if (eventListeners) {
-      eventListeners.forEach(listener => listener(...args));
+      eventListeners.forEach((listener) => listener(...args));
     }
   }
 
@@ -178,11 +178,11 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
 
         // Execute all tasks in this level in parallel
         const levelTasks = taskIds.map(
-          id => context.plan.tasks.find(t => t.id === id)!
+          (id) => context.plan.tasks.find((t) => t.id === id)!
         );
 
         const results = await Promise.allSettled(
-          levelTasks.map(task => this.executeTask(context, task))
+          levelTasks.map((task) => this.executeTask(context, task))
         );
 
         // Process results and yield updates
@@ -362,7 +362,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
         );
 
         // Wait before retry
-        await new Promise(resolve =>
+        await new Promise((resolve) =>
           setTimeout(resolve, 2000 * task.retryCount)
         );
 
@@ -433,7 +433,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
         throw new Error(`Timeout waiting for agent ${agent.type}`);
       }
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
   }
 
@@ -521,13 +521,13 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
     }
 
     // Find the task in the plan
-    const taskIndex = context.plan.tasks.findIndex(t => t.id === toTaskId);
+    const taskIndex = context.plan.tasks.findIndex((t) => t.id === toTaskId);
     if (taskIndex === -1) {
       throw new Error(`Task ${toTaskId} not found in execution plan`);
     }
 
     // Reset all tasks after this one
-    context.plan.tasks.slice(taskIndex + 1).forEach(task => {
+    context.plan.tasks.slice(taskIndex + 1).forEach((task) => {
       task.status = 'pending';
       task.result = undefined;
       task.error = undefined;
@@ -539,7 +539,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
     // Update completed tasks
     context.completedTasks = context.plan.tasks
       .slice(0, taskIndex + 1)
-      .filter(t => t.status === 'completed');
+      .filter((t) => t.status === 'completed');
 
     // Clear failed tasks
     context.failedTasks = [];
@@ -591,7 +591,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
       'mcp-tool',
     ];
 
-    agentTypes.forEach(type => {
+    agentTypes.forEach((type) => {
       this.agentPool.set(type, {
         type,
         available: true,
@@ -610,7 +610,8 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
     agentCommunicator.addListener((message: AgentMessage) => {
       // Find execution context for this message
       const context = Array.from(this.activeExecutions.values()).find(
-        ctx => ctx.currentTask && message.payload?.taskId === ctx.currentTask.id
+        (ctx) =>
+          ctx.currentTask && message.payload?.taskId === ctx.currentTask.id
       );
 
       if (context) {

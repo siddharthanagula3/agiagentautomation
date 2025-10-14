@@ -173,7 +173,7 @@ const TabbedLLMChatInterface: React.FC<TabbedLLMChatInterfaceProps> = ({
   }, [tabs, scrollToBottom]);
 
   // Get current tab
-  const currentTab = tabs.find(tab => tab.id === activeTab);
+  const currentTab = tabs.find((tab) => tab.id === activeTab);
 
   // Send message
   const handleSendMessage = async () => {
@@ -194,8 +194,8 @@ const TabbedLLMChatInterface: React.FC<TabbedLLMChatInterfaceProps> = ({
     };
 
     // Add user message to current tab
-    setTabs(prevTabs =>
-      prevTabs.map(tab =>
+    setTabs((prevTabs) =>
+      prevTabs.map((tab) =>
         tab.id === activeTab
           ? { ...tab, messages: [...tab.messages, userMessage] }
           : tab
@@ -206,8 +206,8 @@ const TabbedLLMChatInterface: React.FC<TabbedLLMChatInterfaceProps> = ({
     setIsLoading(true);
 
     // Set streaming state
-    setTabs(prevTabs =>
-      prevTabs.map(tab =>
+    setTabs((prevTabs) =>
+      prevTabs.map((tab) =>
         tab.id === activeTab ? { ...tab, isStreaming: true } : tab
       )
     );
@@ -215,7 +215,7 @@ const TabbedLLMChatInterface: React.FC<TabbedLLMChatInterfaceProps> = ({
     try {
       // Convert messages to unified format
       const messages: UnifiedMessage[] = [
-        ...currentTab.messages.map(msg => ({
+        ...currentTab.messages.map((msg) => ({
           role: msg.role,
           content: msg.content,
           metadata: {
@@ -270,8 +270,8 @@ const TabbedLLMChatInterface: React.FC<TabbedLLMChatInterfaceProps> = ({
       };
 
       // Add empty assistant message
-      setTabs(prevTabs =>
-        prevTabs.map(tab =>
+      setTabs((prevTabs) =>
+        prevTabs.map((tab) =>
           tab.id === activeTab
             ? { ...tab, messages: [...tab.messages, assistantMessage] }
             : tab
@@ -289,12 +289,12 @@ const TabbedLLMChatInterface: React.FC<TabbedLLMChatInterfaceProps> = ({
           assistantContent += chunk.content;
 
           // Update assistant message content
-          setTabs(prevTabs =>
-            prevTabs.map(tab =>
+          setTabs((prevTabs) =>
+            prevTabs.map((tab) =>
               tab.id === activeTab
                 ? {
                     ...tab,
-                    messages: tab.messages.map(msg =>
+                    messages: tab.messages.map((msg) =>
                       msg.id === assistantMessage.id
                         ? { ...msg, content: assistantContent }
                         : msg
@@ -307,12 +307,12 @@ const TabbedLLMChatInterface: React.FC<TabbedLLMChatInterfaceProps> = ({
 
         if (chunk.done) {
           // Update final message with usage info
-          setTabs(prevTabs =>
-            prevTabs.map(tab =>
+          setTabs((prevTabs) =>
+            prevTabs.map((tab) =>
               tab.id === activeTab
                 ? {
                     ...tab,
-                    messages: tab.messages.map(msg =>
+                    messages: tab.messages.map((msg) =>
                       msg.id === assistantMessage.id
                         ? {
                             ...msg,
@@ -360,8 +360,8 @@ const TabbedLLMChatInterface: React.FC<TabbedLLMChatInterfaceProps> = ({
         },
       };
 
-      setTabs(prevTabs =>
-        prevTabs.map(tab =>
+      setTabs((prevTabs) =>
+        prevTabs.map((tab) =>
           tab.id === activeTab
             ? {
                 ...tab,
@@ -540,7 +540,7 @@ const TabbedLLMChatInterface: React.FC<TabbedLLMChatInterfaceProps> = ({
       >
         <div className="border-b">
           <TabsList className="grid w-full grid-cols-4">
-            {tabs.map(tab => (
+            {tabs.map((tab) => (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
@@ -561,7 +561,7 @@ const TabbedLLMChatInterface: React.FC<TabbedLLMChatInterfaceProps> = ({
         </div>
 
         {/* Tab Content */}
-        {tabs.map(tab => (
+        {tabs.map((tab) => (
           <TabsContent
             key={tab.id}
             value={tab.id}
@@ -639,7 +639,7 @@ const TabbedLLMChatInterface: React.FC<TabbedLLMChatInterfaceProps> = ({
                   <div className="flex gap-2">
                     <Input
                       value={inputValue}
-                      onChange={e => setInputValue(e.target.value)}
+                      onChange={(e) => setInputValue(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder={`Message ${tab.name}...`}
                       disabled={isLoading || tab.isStreaming}

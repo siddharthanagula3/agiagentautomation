@@ -447,7 +447,9 @@ const StageCard: React.FC<{ stage: unknown; index: number }> = ({
   );
 };
 
-const TestimonialCard: React.FC<{ testimonial: Testimonial }> = ({ testimonial }) => {
+const TestimonialCard: React.FC<{ testimonial: Testimonial }> = ({
+  testimonial,
+}) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
 
@@ -474,16 +476,18 @@ const TestimonialCard: React.FC<{ testimonial: Testimonial }> = ({ testimonial }
           </div>
         </div>
         <div className="flex gap-6">
-          {testimonial.metrics.map((metric: { label: string; value: string }, idx: number) => (
-            <div key={idx} className="text-center">
-              <div className="text-2xl font-bold text-primary">
-                {metric.value}
+          {testimonial.metrics.map(
+            (metric: { label: string; value: string }, idx: number) => (
+              <div key={idx} className="text-center">
+                <div className="text-2xl font-bold text-primary">
+                  {metric.value}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {metric.label}
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">
-                {metric.label}
-              </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </div>
     </motion.div>

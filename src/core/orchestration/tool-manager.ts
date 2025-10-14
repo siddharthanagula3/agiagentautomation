@@ -212,7 +212,7 @@ export class ToolManager {
    * Get available tools for an agent
    */
   getAvailableTools(agent: AgentType): Tool[] {
-    return Array.from(this.tools.values()).filter(tool =>
+    return Array.from(this.tools.values()).filter((tool) =>
       tool.supportedAgents.includes(agent)
     );
   }
@@ -222,7 +222,7 @@ export class ToolManager {
    */
   getToolsByCategory(category: ToolCategory): Tool[] {
     return Array.from(this.tools.values()).filter(
-      tool => tool.category === category
+      (tool) => tool.category === category
     );
   }
 
@@ -260,13 +260,13 @@ export class ToolManager {
 
     if (filter) {
       if (filter.toolId) {
-        history = history.filter(h => h.toolId === filter.toolId);
+        history = history.filter((h) => h.toolId === filter.toolId);
       }
       if (filter.success !== undefined) {
-        history = history.filter(h => h.success === filter.success);
+        history = history.filter((h) => h.success === filter.success);
       }
       if (filter.since) {
-        history = history.filter(h => h.timestamp >= filter.since!);
+        history = history.filter((h) => h.timestamp >= filter.since!);
       }
     }
 
@@ -287,7 +287,7 @@ export class ToolManager {
         // Integration with filesystem API
         return { content: 'file content', path: params.path };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.path) {
           return { valid: false, errors: ['Path is required'] };
         }
@@ -312,7 +312,7 @@ export class ToolManager {
         // Integration with filesystem API
         return { success: true, path: params.path };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.path || !params.content) {
           return { valid: false, errors: ['Path and content are required'] };
         }
@@ -333,7 +333,7 @@ export class ToolManager {
         // Integration with search API
         return { results: [], query: params.query };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.query) {
           return { valid: false, errors: ['Query is required'] };
         }
@@ -354,7 +354,7 @@ export class ToolManager {
         // Integration with fetch API
         return { content: '', url: params.url };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.url) {
           return { valid: false, errors: ['URL is required'] };
         }
@@ -380,7 +380,7 @@ export class ToolManager {
         // Integration with code analysis
         return { issues: [], suggestions: [] };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.code) {
           return { valid: false, errors: ['Code is required'] };
         }
@@ -400,7 +400,7 @@ export class ToolManager {
         // Integration with code generation
         return { code: '', language: params.language };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.prompt) {
           return { valid: false, errors: ['Prompt is required'] };
         }
@@ -421,7 +421,7 @@ export class ToolManager {
         // Integration with test runner
         return { passed: 0, failed: 0, results: [] };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.testPath) {
           return { valid: false, errors: ['Test path is required'] };
         }
@@ -441,7 +441,7 @@ export class ToolManager {
         // Integration with test generation
         return { tests: '' };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.code) {
           return { valid: false, errors: ['Code is required'] };
         }
@@ -462,7 +462,7 @@ export class ToolManager {
         // Integration with system execution
         return { output: '', exitCode: 0 };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.command) {
           return { valid: false, errors: ['Command is required'] };
         }
@@ -483,7 +483,7 @@ export class ToolManager {
         // Integration with Puppeteer
         return { success: true, data: {} };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.action) {
           return { valid: false, errors: ['Action is required'] };
         }
@@ -504,7 +504,7 @@ export class ToolManager {
         // Integration with data processing
         return { processedData: {} };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.data || !params.operation) {
           return { valid: false, errors: ['Data and operation are required'] };
         }
@@ -524,7 +524,7 @@ export class ToolManager {
         // Integration with data analysis
         return { insights: [], statistics: {} };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.data) {
           return { valid: false, errors: ['Data is required'] };
         }
@@ -545,7 +545,7 @@ export class ToolManager {
         // Integration with content generation
         return { content: '' };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.prompt) {
           return { valid: false, errors: ['Prompt is required'] };
         }
@@ -565,7 +565,7 @@ export class ToolManager {
         // Integration with documentation generation
         return { documentation: '' };
       },
-      validate: params => {
+      validate: (params) => {
         if (!params.code) {
           return { valid: false, errors: ['Code is required'] };
         }
@@ -590,7 +590,7 @@ export class ToolManager {
     const windowStart = now - tracker.limit.windowMs;
 
     // Remove old requests
-    tracker.requests = tracker.requests.filter(time => time > windowStart);
+    tracker.requests = tracker.requests.filter((time) => time > windowStart);
 
     return tracker.requests.length < tracker.limit.maxRequests;
   }
@@ -640,7 +640,7 @@ export class ToolManager {
    */
   clearOldHistory(olderThan: Date): void {
     this.executionHistory = this.executionHistory.filter(
-      h => h.timestamp >= olderThan
+      (h) => h.timestamp >= olderThan
     );
   }
 

@@ -112,7 +112,9 @@ export async function testSupabaseConnection() {
 
 // Export for use in console
 if (typeof window !== 'undefined') {
-  (window as Window & { testSupabase: typeof testSupabaseConnection }).testSupabase = testSupabaseConnection;
+  (
+    window as Window & { testSupabase: typeof testSupabaseConnection }
+  ).testSupabase = testSupabaseConnection;
 }
 
 console.log(

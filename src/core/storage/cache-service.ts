@@ -186,7 +186,7 @@ class CacheService {
       }
 
       // Delete from memory
-      keysToDelete.forEach(key => this.memoryCache.delete(key));
+      keysToDelete.forEach((key) => this.memoryCache.delete(key));
 
       // Delete from persistent cache (using SQL LIKE)
       try {
@@ -227,7 +227,7 @@ class CacheService {
           ? entries.reduce((sum, entry) => sum + entry.accessCount, 0) /
             memorySize
           : 0,
-      expiredCount: entries.filter(entry => new Date() >= entry.expiresAt)
+      expiredCount: entries.filter((entry) => new Date() >= entry.expiresAt)
         .length,
     };
 
@@ -386,7 +386,7 @@ class CacheService {
     }
 
     // Delete expired entries
-    keysToDelete.forEach(key => this.memoryCache.delete(key));
+    keysToDelete.forEach((key) => this.memoryCache.delete(key));
 
     if (keysToDelete.length > 0) {
       console.log(`[Cache] Cleaned up ${keysToDelete.length} expired entries`);
@@ -398,7 +398,7 @@ class CacheService {
       '^' +
         pattern
           .split('*')
-          .map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+          .map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
           .join('.*') +
         '$'
     );

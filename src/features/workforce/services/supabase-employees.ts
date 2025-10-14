@@ -201,5 +201,5 @@ export async function purchaseEmployee(
 }
 
 export function getEmployeeById(employeeId: string): AIEmployee | undefined {
-  return AI_EMPLOYEES.find(e => e.id === employeeId);
+  return AI_EMPLOYEES.find((e) => e.id === employeeId);
 }

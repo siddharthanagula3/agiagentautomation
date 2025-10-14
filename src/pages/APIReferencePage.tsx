@@ -80,7 +80,7 @@ const APIReferencePage: React.FC = () => {
   const [response, setResponse] = useState<string>('');
 
   const apiEndpoints: Record<string, APIEndpoint[]> = {
-    'Authentication': [
+    Authentication: [
       {
         method: 'POST',
         path: '/api/auth/login',
@@ -222,8 +222,8 @@ const APIReferencePage: React.FC = () => {
           },
         ],
       },
-    {
-      method: 'POST',
+      {
+        method: 'POST',
         path: '/api/employees/purchase',
         description: 'Purchase an AI employee',
         requestBody: {
@@ -244,9 +244,9 @@ const APIReferencePage: React.FC = () => {
             description: 'Invalid request or employee already purchased',
           },
         ],
-    },
-    {
-      method: 'GET',
+      },
+      {
+        method: 'GET',
         path: '/api/employees/purchased',
         description: 'Get list of purchased AI employees',
         responses: [
@@ -257,9 +257,9 @@ const APIReferencePage: React.FC = () => {
         ],
       },
     ],
-    'Chat': [
-    {
-      method: 'POST',
+    Chat: [
+      {
+        method: 'POST',
         path: '/api/chat/message',
         description: 'Send a message to an AI employee',
         requestBody: {
@@ -297,9 +297,9 @@ const APIReferencePage: React.FC = () => {
 }`,
           },
         ],
-    },
-    {
-      method: 'GET',
+      },
+      {
+        method: 'GET',
         path: '/api/chat/sessions',
         description: 'Get chat sessions for a user',
         responses: [
@@ -308,9 +308,9 @@ const APIReferencePage: React.FC = () => {
             description: 'List of chat sessions',
           },
         ],
-    },
-    {
-      method: 'GET',
+      },
+      {
+        method: 'GET',
         path: '/api/chat/sessions/{session_id}/messages',
         description: 'Get messages for a specific chat session',
         parameters: [
@@ -329,7 +329,7 @@ const APIReferencePage: React.FC = () => {
         ],
       },
     ],
-    'Billing': [
+    Billing: [
       {
         method: 'GET',
         path: '/api/billing/subscription',
@@ -346,9 +346,9 @@ const APIReferencePage: React.FC = () => {
             },
           },
         ],
-    },
-    {
-      method: 'POST',
+      },
+      {
+        method: 'POST',
         path: '/api/billing/subscription',
         description: 'Create or update subscription',
         requestBody: {
@@ -465,7 +465,7 @@ const APIReferencePage: React.FC = () => {
     try {
       // Simulate API call
       setResponse('Loading...');
-      
+
       // In a real implementation, this would make an actual API call
       setTimeout(() => {
         setResponse(`{
@@ -482,12 +482,18 @@ const APIReferencePage: React.FC = () => {
 
   const getMethodColor = (method: string) => {
     switch (method) {
-      case 'GET': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'POST': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'PUT': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'DELETE': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      case 'PATCH': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+      case 'GET':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'POST':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'PUT':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'DELETE':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'PATCH':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
@@ -496,38 +502,38 @@ const APIReferencePage: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">API Reference</h1>
-          <p className="text-xl text-muted-foreground mb-6">
+          <h1 className="mb-4 text-4xl font-bold">API Reference</h1>
+          <p className="mb-6 text-xl text-muted-foreground">
             Comprehensive documentation for the AGI Agent Automation API
           </p>
-          
+
           <div className="flex flex-wrap gap-4">
             <Badge variant="outline" className="flex items-center gap-2">
-              <Globe className="w-4 h-4" />
+              <Globe className="h-4 w-4" />
               REST API
             </Badge>
             <Badge variant="outline" className="flex items-center gap-2">
-              <Shield className="w-4 h-4" />
+              <Shield className="h-4 w-4" />
               JWT Authentication
             </Badge>
             <Badge variant="outline" className="flex items-center gap-2">
-              <Zap className="w-4 h-4" />
+              <Zap className="h-4 w-4" />
               Real-time Updates
             </Badge>
             <Badge variant="outline" className="flex items-center gap-2">
-              <Database className="w-4 h-4" />
+              <Database className="h-4 w-4" />
               Supabase Backend
             </Badge>
-            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* API Endpoints List */}
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Book className="w-5 h-5" />
+                  <Book className="h-5 w-5" />
                   API Endpoints
                 </CardTitle>
               </CardHeader>
@@ -545,20 +551,28 @@ const APIReferencePage: React.FC = () => {
                               <button
                                 key={index}
                                 onClick={() => {
-                                  setSelectedEndpoint(`${endpoint.method} ${endpoint.path}`);
+                                  setSelectedEndpoint(
+                                    `${endpoint.method} ${endpoint.path}`
+                                  );
                                   setSelectedMethod(endpoint.method);
                                   setSelectedPath(endpoint.path);
                                 }}
                                 className={cn(
-                                  "w-full text-left p-2 rounded-md text-sm hover:bg-muted transition-colors",
-                                  selectedEndpoint === `${endpoint.method} ${endpoint.path}` && "bg-muted"
+                                  'w-full rounded-md p-2 text-left text-sm transition-colors hover:bg-muted',
+                                  selectedEndpoint ===
+                                    `${endpoint.method} ${endpoint.path}` &&
+                                    'bg-muted'
                                 )}
                               >
                                 <div className="flex items-center gap-2">
-                                  <Badge className={getMethodColor(endpoint.method)}>
+                                  <Badge
+                                    className={getMethodColor(endpoint.method)}
+                                  >
                                     {endpoint.method}
                                   </Badge>
-                                  <span className="truncate">{endpoint.path}</span>
+                                  <span className="truncate">
+                                    {endpoint.path}
+                                  </span>
                                 </div>
                               </button>
                             ))}
@@ -567,9 +581,9 @@ const APIReferencePage: React.FC = () => {
                       </AccordionItem>
                     </Accordion>
                   ))}
-                  </div>
+                </div>
               </CardContent>
-                </Card>
+            </Card>
           </div>
 
           {/* API Documentation */}
@@ -587,8 +601,8 @@ const APIReferencePage: React.FC = () => {
                     const [method, path] = selectedEndpoint.split(' ');
                     const endpoint = Object.values(apiEndpoints)
                       .flat()
-                      .find(ep => ep.method === method && ep.path === path);
-                    
+                      .find((ep) => ep.method === method && ep.path === path);
+
                     if (!endpoint) return null;
 
                     return (
@@ -600,61 +614,102 @@ const APIReferencePage: React.FC = () => {
                             </Badge>
                             <code className="text-lg">{endpoint.path}</code>
                           </CardTitle>
-                          <p className="text-muted-foreground">{endpoint.description}</p>
+                          <p className="text-muted-foreground">
+                            {endpoint.description}
+                          </p>
                         </CardHeader>
                         <CardContent className="space-y-6">
                           {/* Parameters */}
-                          {endpoint.parameters && endpoint.parameters.length > 0 && (
-                            <div>
-                              <h3 className="text-lg font-semibold mb-3">Parameters</h3>
-                              <div className="space-y-2">
-                                {endpoint.parameters.map((param, index) => (
-                                  <div key={index} className="p-3 border rounded-md">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <code className="text-sm font-mono">{param.name}</code>
-                                      <Badge variant="outline">{param.type}</Badge>
-                                      {param.required && (
-                                        <Badge variant="destructive">Required</Badge>
-                                      )}
-            </div>
-                                    <p className="text-sm text-muted-foreground">{param.description}</p>
-              </div>
-                                ))}
-              </div>
-              </div>
-                          )}
+                          {endpoint.parameters &&
+                            endpoint.parameters.length > 0 && (
+                              <div>
+                                <h3 className="mb-3 text-lg font-semibold">
+                                  Parameters
+                                </h3>
+                                <div className="space-y-2">
+                                  {endpoint.parameters.map((param, index) => (
+                                    <div
+                                      key={index}
+                                      className="rounded-md border p-3"
+                                    >
+                                      <div className="mb-1 flex items-center gap-2">
+                                        <code className="font-mono text-sm">
+                                          {param.name}
+                                        </code>
+                                        <Badge variant="outline">
+                                          {param.type}
+                                        </Badge>
+                                        {param.required && (
+                                          <Badge variant="destructive">
+                                            Required
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <p className="text-sm text-muted-foreground">
+                                        {param.description}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
 
                           {/* Request Body */}
                           {endpoint.requestBody && (
                             <div>
-                              <h3 className="text-lg font-semibold mb-3">Request Body</h3>
-                              <div className="p-3 border rounded-md">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Badge variant="outline">{endpoint.requestBody.type}</Badge>
-              </div>
-                                <p className="text-sm text-muted-foreground mb-2">
+                              <h3 className="mb-3 text-lg font-semibold">
+                                Request Body
+                              </h3>
+                              <div className="rounded-md border p-3">
+                                <div className="mb-2 flex items-center gap-2">
+                                  <Badge variant="outline">
+                                    {endpoint.requestBody.type}
+                                  </Badge>
+                                </div>
+                                <p className="mb-2 text-sm text-muted-foreground">
                                   {endpoint.requestBody.description}
                                 </p>
-                                <pre className="text-sm bg-muted p-3 rounded-md overflow-x-auto">
-                                  <code>{JSON.stringify(endpoint.requestBody.schema, null, 2)}</code>
+                                <pre className="overflow-x-auto rounded-md bg-muted p-3 text-sm">
+                                  <code>
+                                    {JSON.stringify(
+                                      endpoint.requestBody.schema,
+                                      null,
+                                      2
+                                    )}
+                                  </code>
                                 </pre>
-            </div>
-        </div>
+                              </div>
+                            </div>
                           )}
 
                           {/* Responses */}
                           <div>
-                            <h3 className="text-lg font-semibold mb-3">Responses</h3>
+                            <h3 className="mb-3 text-lg font-semibold">
+                              Responses
+                            </h3>
                             <div className="space-y-2">
                               {endpoint.responses.map((response, index) => (
-                                <div key={index} className="p-3 border rounded-md">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <Badge variant="outline">{response.status}</Badge>
-                                    <span className="text-sm font-medium">{response.description}</span>
+                                <div
+                                  key={index}
+                                  className="rounded-md border p-3"
+                                >
+                                  <div className="mb-1 flex items-center gap-2">
+                                    <Badge variant="outline">
+                                      {response.status}
+                                    </Badge>
+                                    <span className="text-sm font-medium">
+                                      {response.description}
+                                    </span>
                                   </div>
                                   {response.schema && (
-                                    <pre className="text-sm bg-muted p-3 rounded-md overflow-x-auto mt-2">
-                                      <code>{JSON.stringify(response.schema, null, 2)}</code>
+                                    <pre className="mt-2 overflow-x-auto rounded-md bg-muted p-3 text-sm">
+                                      <code>
+                                        {JSON.stringify(
+                                          response.schema,
+                                          null,
+                                          2
+                                        )}
+                                      </code>
                                     </pre>
                                   )}
                                 </div>
@@ -668,10 +723,13 @@ const APIReferencePage: React.FC = () => {
                 ) : (
                   <Card>
                     <CardContent className="py-12 text-center">
-                      <Book className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                      <h3 className="text-lg font-semibold mb-2">Select an Endpoint</h3>
+                      <Book className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                      <h3 className="mb-2 text-lg font-semibold">
+                        Select an Endpoint
+                      </h3>
                       <p className="text-muted-foreground">
-                        Choose an API endpoint from the list to view its documentation
+                        Choose an API endpoint from the list to view its
+                        documentation
                       </p>
                     </CardContent>
                   </Card>
@@ -682,15 +740,18 @@ const APIReferencePage: React.FC = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Play className="w-5 h-5" />
+                      <Play className="h-5 w-5" />
                       API Testing
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
                         <Label htmlFor="method">Method</Label>
-                        <Select value={selectedMethod} onValueChange={setSelectedMethod}>
+                        <Select
+                          value={selectedMethod}
+                          onValueChange={setSelectedMethod}
+                        >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
@@ -726,7 +787,7 @@ const APIReferencePage: React.FC = () => {
                     </div>
 
                     <Button onClick={handleTestEndpoint} className="w-full">
-                      <Play className="w-4 h-4 mr-2" />
+                      <Play className="mr-2 h-4 w-4" />
                       Test Endpoint
                     </Button>
 
@@ -734,19 +795,19 @@ const APIReferencePage: React.FC = () => {
                       <div>
                         <Label>Response</Label>
                         <div className="relative">
-                          <pre className="text-sm bg-muted p-4 rounded-md overflow-x-auto">
+                          <pre className="overflow-x-auto rounded-md bg-muted p-4 text-sm">
                             <code>{response}</code>
                           </pre>
                           <Button
                             size="sm"
                             variant="outline"
-                            className="absolute top-2 right-2"
+                            className="absolute right-2 top-2"
                             onClick={() => handleCopyCode(response)}
                           >
-                            <Copy className="w-4 h-4" />
+                            <Copy className="h-4 w-4" />
                           </Button>
                         </div>
-                  </div>
+                      </div>
                     )}
                   </CardContent>
                 </Card>
@@ -758,37 +819,41 @@ const APIReferencePage: React.FC = () => {
                     const [method, path] = selectedEndpoint.split(' ');
                     const endpoint = Object.values(apiEndpoints)
                       .flat()
-                      .find(ep => ep.method === method && ep.path === path);
-                    
+                      .find((ep) => ep.method === method && ep.path === path);
+
                     if (!endpoint || !endpoint.examples) return null;
 
                     return (
                       <Card>
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
-                            <FileText className="w-5 h-5" />
+                            <FileText className="h-5 w-5" />
                             Code Examples
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
                           {endpoint.examples.map((example, index) => (
                             <div key={index} className="space-y-4">
-                              <h3 className="text-lg font-semibold">{example.title}</h3>
-                              
+                              <h3 className="text-lg font-semibold">
+                                {example.title}
+                              </h3>
+
                               {example.request && (
                                 <div>
-                                  <div className="flex items-center justify-between mb-2">
+                                  <div className="mb-2 flex items-center justify-between">
                                     <Label>Request</Label>
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => handleCopyCode(example.request!)}
+                                      onClick={() =>
+                                        handleCopyCode(example.request!)
+                                      }
                                     >
-                                      <Copy className="w-4 h-4 mr-2" />
+                                      <Copy className="mr-2 h-4 w-4" />
                                       Copy
                                     </Button>
                                   </div>
-                                  <pre className="text-sm bg-muted p-4 rounded-md overflow-x-auto">
+                                  <pre className="overflow-x-auto rounded-md bg-muted p-4 text-sm">
                                     <code>{example.request}</code>
                                   </pre>
                                 </div>
@@ -796,18 +861,20 @@ const APIReferencePage: React.FC = () => {
 
                               {example.response && (
                                 <div>
-                                  <div className="flex items-center justify-between mb-2">
+                                  <div className="mb-2 flex items-center justify-between">
                                     <Label>Response</Label>
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => handleCopyCode(example.response!)}
+                                      onClick={() =>
+                                        handleCopyCode(example.response!)
+                                      }
                                     >
-                                      <Copy className="w-4 h-4 mr-2" />
+                                      <Copy className="mr-2 h-4 w-4" />
                                       Copy
                                     </Button>
                                   </div>
-                                  <pre className="text-sm bg-muted p-4 rounded-md overflow-x-auto">
+                                  <pre className="overflow-x-auto rounded-md bg-muted p-4 text-sm">
                                     <code>{example.response}</code>
                                   </pre>
                                 </div>
@@ -821,8 +888,10 @@ const APIReferencePage: React.FC = () => {
                 ) : (
                   <Card>
                     <CardContent className="py-12 text-center">
-                      <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                      <h3 className="text-lg font-semibold mb-2">Select an Endpoint</h3>
+                      <FileText className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                      <h3 className="mb-2 text-lg font-semibold">
+                        Select an Endpoint
+                      </h3>
                       <p className="text-muted-foreground">
                         Choose an API endpoint to view code examples
                       </p>
@@ -838,43 +907,47 @@ const APIReferencePage: React.FC = () => {
         <Card className="mt-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Zap className="w-5 h-5" />
+              <Zap className="h-5 w-5" />
               Quick Start Guide
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               <div className="space-y-2">
                 <h3 className="font-semibold">1. Authentication</h3>
                 <p className="text-sm text-muted-foreground">
-                  Get your API key from the dashboard and include it in the Authorization header.
+                  Get your API key from the dashboard and include it in the
+                  Authorization header.
                 </p>
-                <code className="text-xs bg-muted p-2 rounded block">
+                <code className="block rounded bg-muted p-2 text-xs">
                   Authorization: Bearer YOUR_API_KEY
                 </code>
               </div>
               <div className="space-y-2">
                 <h3 className="font-semibold">2. Make Requests</h3>
                 <p className="text-sm text-muted-foreground">
-                  Use the endpoints above to interact with AI employees and manage your account.
+                  Use the endpoints above to interact with AI employees and
+                  manage your account.
                 </p>
-                <code className="text-xs bg-muted p-2 rounded block">
-                  curl -H "Authorization: Bearer YOUR_API_KEY" https://api.agiagentautomation.com/employees
+                <code className="block rounded bg-muted p-2 text-xs">
+                  curl -H "Authorization: Bearer YOUR_API_KEY"
+                  https://api.agiagentautomation.com/employees
                 </code>
               </div>
               <div className="space-y-2">
                 <h3 className="font-semibold">3. Handle Responses</h3>
                 <p className="text-sm text-muted-foreground">
-                  All responses are in JSON format with appropriate HTTP status codes.
+                  All responses are in JSON format with appropriate HTTP status
+                  codes.
                 </p>
-                <code className="text-xs bg-muted p-2 rounded block">
+                <code className="block rounded bg-muted p-2 text-xs">
                   {`{ "success": true, "data": {...} }`}
                 </code>
               </div>
             </div>
           </CardContent>
         </Card>
-        </div>
+      </div>
     </div>
   );
 };

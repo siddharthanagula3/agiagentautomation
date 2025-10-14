@@ -44,9 +44,16 @@ import {
 import { useBusinessMetrics } from '@shared/hooks/useAnalytics';
 
 // Helper function to check if employee is hired using local storage
-const isEmployeeHiredLocally = (userId: string, employeeId: string): boolean => {
-  const hiredEmployees = JSON.parse(localStorage.getItem('hired_employees') || '[]');
-  return hiredEmployees.some((h: unknown) => h.employee_id === employeeId && h.user_id === userId);
+const isEmployeeHiredLocally = (
+  userId: string,
+  employeeId: string
+): boolean => {
+  const hiredEmployees = JSON.parse(
+    localStorage.getItem('hired_employees') || '[]'
+  );
+  return hiredEmployees.some(
+    (h: unknown) => h.employee_id === employeeId && h.user_id === userId
+  );
 };
 
 interface AIEmployee extends BaseAIEmployee {
@@ -100,9 +107,11 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     queryKey: ['purchased-employees', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
-      
+
       // Use local storage instead of database for now
-      const hiredEmployees = JSON.parse(localStorage.getItem('hired_employees') || '[]');
+      const hiredEmployees = JSON.parse(
+        localStorage.getItem('hired_employees') || '[]'
+      );
       return hiredEmployees.filter((h: unknown) => h.user_id === user.id);
     },
     enabled: !!user?.id,
@@ -110,7 +119,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   });
 
   const purchasedEmployeeIds = new Set(
-    purchasedEmployees.map(emp => emp.employee_id)
+    purchasedEmployees.map((emp) => emp.employee_id)
   );
 
   // Transform base AI employees data for marketplace display
@@ -141,7 +150,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     ],
     queryFn: async () => {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       let filteredEmployees = AI_EMPLOYEES.map(transformEmployeeData);
 
@@ -149,10 +158,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         filteredEmployees = filteredEmployees.filter(
-          emp =>
+          (emp) =>
             emp.name.toLowerCase().includes(query) ||
             emp.role.toLowerCase().includes(query) ||
-            emp.skills.some(skill => skill.toLowerCase().includes(query)) ||
+            emp.skills.some((skill) => skill.toLowerCase().includes(query)) ||
             emp.description.toLowerCase().includes(query)
         );
       }
@@ -160,7 +169,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       // Apply category filter
       if (selectedCategory !== 'all') {
         filteredEmployees = filteredEmployees.filter(
-          emp => emp.category.toLowerCase() === selectedCategory.toLowerCase()
+          (emp) => emp.category.toLowerCase() === selectedCategory.toLowerCase()
         );
       }
 
@@ -203,15 +212,19 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       }
 
       // Find the employee data
-      const employee = AI_EMPLOYEES.find(emp => emp.id === employeeId);
+      const employee = AI_EMPLOYEES.find((emp) => emp.id === employeeId);
       if (!employee) {
         throw new Error('Employee not found');
       }
 
       // Check if already hired using local storage
-      const hiredEmployees = JSON.parse(localStorage.getItem('hired_employees') || '[]');
-      const alreadyHired = hiredEmployees.find((h: unknown) => h.employee_id === employeeId && h.user_id === user.id);
-      
+      const hiredEmployees = JSON.parse(
+        localStorage.getItem('hired_employees') || '[]'
+      );
+      const alreadyHired = hiredEmployees.find(
+        (h: unknown) => h.employee_id === employeeId && h.user_id === user.id
+      );
+
       if (alreadyHired) {
         throw new Error('Employee already hired');
       }
@@ -228,18 +241,18 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         purchased_at: new Date().toISOString(),
         created_at: new Date().toISOString(),
       };
-      
+
       hiredEmployees.push(hireRecord);
       localStorage.setItem('hired_employees', JSON.stringify(hiredEmployees));
 
       return { success: true, employeeId, userId: user.id, result: hireRecord };
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       // Update the query cache to mark employee as hired
       queryClient.setQueryData(
         ['marketplace-employees'],
         (old: AIEmployee[] = []) =>
-          old.map(emp =>
+          old.map((emp) =>
             emp.id === data.employeeId ? { ...emp, isHired: true } : emp
           )
       );
@@ -258,9 +271,9 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
     try {
       await hireEmployeeMutation.mutateAsync(employeeId);
-      
+
       // Track successful hire
-      const employee = AI_EMPLOYEES.find(emp => emp.id === employeeId);
+      const employee = AI_EMPLOYEES.find((emp) => emp.id === employeeId);
       if (employee) {
         trackEmployeeHire(employeeId, employee.name, {
           category: employee.category,
@@ -268,7 +281,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           price: employee.price,
         });
       }
-      
+
       toast.success('AI Employee hired successfully! Redirecting to chat...');
       setTimeout(() => {
         navigate(`/chat?employee=${employeeId}`);
@@ -311,7 +324,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 <Input
                   placeholder="Search employees by name, role, or skills..."
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="border-border bg-background pl-10"
                 />
               </div>
@@ -319,7 +332,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
             {/* Category Filter */}
             <div className="flex gap-2 overflow-x-auto">
-              {categories.map(category => {
+              {categories.map((category) => {
                 const Icon = category.icon;
                 return (
                   <Button
@@ -342,7 +355,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
             <div className="flex gap-2">
               <select
                 value={sortBy}
-                onChange={e => setSortBy(e.target.value)}
+                onChange={(e) => setSortBy(e.target.value)}
                 className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
               >
                 <option value="popular">Most Popular</option>
@@ -433,7 +446,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               : 'grid-cols-1'
           )}
         >
-          {employees.map(employee => (
+          {employees.map((employee) => (
             <Card
               key={employee.id}
               className="border-border bg-card transition-all duration-300 hover:border-primary/50 hover:shadow-lg"
@@ -484,7 +497,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                       Skills
                     </h4>
                     <div className="flex flex-wrap gap-1">
-                      {employee.skills.slice(0, 3).map(skill => (
+                      {employee.skills.slice(0, 3).map((skill) => (
                         <Badge
                           key={skill}
                           variant="secondary"

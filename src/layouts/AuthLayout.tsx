@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/unified-auth-store';
 
 const AuthLayout: React.FC = () => {
   const { isAuthenticated, user, isLoading } = useAuthStore();

@@ -115,7 +115,7 @@ const handler: Handler = async (
         employee_name: employeeName,
       }),
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Create ChatKit session error:', error);
 
     return {
@@ -123,7 +123,7 @@ const handler: Handler = async (
       headers,
       body: JSON.stringify({
         error: 'Internal server error',
-        message: error.message,
+        message: error instanceof Error ? error.message : 'Unknown error',
       }),
     };
   }

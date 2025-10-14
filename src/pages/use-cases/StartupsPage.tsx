@@ -10,11 +10,11 @@ import {
   CheckCircle2,
   ArrowRight,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Particles } from '@/components/ui/particles';
-import { BentoGrid, BentoCard } from '@/components/ui/bento-grid';
+import { Button } from '@shared/ui/button';
+import { Particles } from '@shared/ui/particles';
+import { BentoGrid, BentoCard } from '@shared/ui/bento-grid';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/unified-auth-store';
 
 const StartupsPage: React.FC = () => {
   const navigate = useNavigate();

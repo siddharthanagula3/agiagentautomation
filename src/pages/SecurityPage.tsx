@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { Particles } from '@/components/ui/particles';
+import { Badge } from '@shared/ui/badge';
+import { Card } from '@shared/ui/card';
+import { Particles } from '@shared/ui/particles';
 import {
   Shield,
   Lock,

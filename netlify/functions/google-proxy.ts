@@ -48,17 +48,21 @@ export const handler: Handler = async (event: HandlerEvent) => {
     });
 
     // Convert messages to Gemini format
-    const systemMessage = messages.find((m: any) => m.role === 'system');
+    interface Message { role: string; content: string; }
+    interface Attachment { mimeType: string; dataBase64: string; }
+    interface GeminiPart { text?: string; inline_data?: { mime_type: string; data: string; }; }
+
+    const systemMessage = messages.find((m: Message) => m.role === 'system');
     const conversationMessages = messages.filter(
-      (m: any) => m.role !== 'system'
+      (m: Message) => m.role !== 'system'
     );
 
-    const geminiContents = conversationMessages.map((msg: any) => {
-      const parts: any[] = [{ text: msg.content }];
+    const geminiContents = conversationMessages.map((msg: Message) => {
+      const parts: GeminiPart[] = [{ text: msg.content }];
 
       // Add attachments if this is the last user message
       if (msg.role === 'user' && attachments.length > 0) {
-        attachments.forEach((attachment: any) => {
+        attachments.forEach((attachment: Attachment) => {
           parts.push({
             inline_data: {
               mime_type: attachment.mimeType,
@@ -74,7 +78,13 @@ export const handler: Handler = async (event: HandlerEvent) => {
       };
     });
 
-    const requestBody: any = {
+    interface GeminiRequestBody {
+      contents: unknown[];
+      generationConfig: { temperature: number; maxOutputTokens: number; };
+      systemInstruction?: { parts: Array<{ text: string }>; };
+    }
+
+    const requestBody: GeminiRequestBody = {
       contents: geminiContents,
       generationConfig: {
         temperature,
@@ -145,14 +155,22 @@ export const handler: Handler = async (event: HandlerEvent) => {
     // Normalize response to ensure a plain text content exists for the UI
     let normalizedContent: string | undefined = undefined;
     try {
-      normalizedContent =
-        data.candidates?.[0]?.content?.parts
-          ?.map((p: any) => p.text)
-          .join('') ||
-        data.candidates?.[0]?.content?.parts?.[0]?.text ||
-        data.output_text ||
-        data.content;
-    } catch {}
+      const parts = data.candidates?.[0]?.content?.parts;
+      if (Array.isArray(parts)) {
+        normalizedContent = parts
+          .map((p: { text?: string }) => p.text)
+          .filter(Boolean)
+          .join('');
+      }
+      if (!normalizedContent) {
+        normalizedContent = data.candidates?.[0]?.content?.parts?.[0]?.text ||
+          data.output_text ||
+          data.content;
+      }
+    } catch (err) {
+      // Silently ignore parsing errors
+      console.debug('[Google Proxy] Content normalization error:', err);
+    }
 
     const normalized = {
       ...data,

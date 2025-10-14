@@ -2,70 +2,70 @@
 import { Suspense, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@shared/ui/tooltip';
 import { Toaster } from 'sonner';
-import { ThemeProvider } from '@/components/theme-provider';
-import ScrollToTop from '@/components/ScrollToTop';
-import { lazyWithRetry } from '@/components/LazyWrapper';
+import { ThemeProvider } from '@shared/components/theme-provider';
+import ScrollToTop from '@shared/components/ScrollToTop';
+import { lazyWithRetry } from '@shared/components/LazyWrapper';
 import { Loader2 } from 'lucide-react';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import { monitoringService } from '@/services/monitoring-service';
-import { usePagePerformanceMonitoring } from '@/hooks/usePerformanceMonitoring';
-import { accessibilityService } from '@/services/accessibility-service';
-import { seoService } from '@/services/seo-service';
-import { analyticsService } from '@/services/analytics-service';
-import { performanceService } from '@/services/performance-service';
-import { backupService } from '@/services/backup-service';
-import { scalingService } from '@/services/scaling-service';
-import { privacyService } from '@/services/privacy-service';
-import SkipLink from '@/components/accessibility/SkipLink';
+import ErrorBoundary from '@shared/components/ErrorBoundary';
+import { monitoringService } from '@core/monitoring/monitoring-service';
+import { usePagePerformanceMonitoring } from '@shared/hooks/usePerformanceMonitoring';
+import { accessibilityService } from '@core/monitoring/accessibility-service';
+import { seoService } from '@core/monitoring/seo-service';
+import { analyticsService } from '@core/monitoring/analytics-service';
+import { performanceService } from '@core/monitoring/performance-service';
+import { backupService } from '@core/storage/backup-service';
+import { scalingService } from '@core/monitoring/scaling-service';
+import { privacyService } from '@core/monitoring/privacy-service';
+import SkipLink from '@shared/components/accessibility/SkipLink';
 import { PublicLayout } from './layouts/PublicLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { ProtectedRoute } from '@features/auth/components/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';
 
 // Lazy load all page components for better performance
 const LandingPage = lazyWithRetry(() => import('./pages/LandingPage'));
-const LoginPage = lazyWithRetry(() => import('./pages/auth/LoginPage'));
-const RegisterPage = lazyWithRetry(() => import('./pages/auth/RegisterPage'));
+const LoginPage = lazyWithRetry(() => import('@features/auth/pages/LoginPage'));
+const RegisterPage = lazyWithRetry(() => import('@features/auth/pages/RegisterPage'));
 const ForgotPasswordPage = lazyWithRetry(
-  () => import('./pages/auth/ForgotPasswordPage')
+  () => import('@features/auth/pages/ForgotPasswordPage')
 );
 const ResetPasswordPage = lazyWithRetry(
-  () => import('./pages/auth/ResetPasswordPage')
+  () => import('@features/auth/pages/ResetPasswordPage')
 );
 const DashboardHomePage = lazyWithRetry(
-  () => import('./pages/dashboard/DashboardHomePage')
+  () => import('./pages/DashboardHomePage')
 );
 
 // Lazy load all other page components
 const WorkforcePage = lazyWithRetry(
-  () => import('./pages/workforce/WorkforcePage')
+  () => import('@features/workforce/pages/WorkforcePage')
 );
-const ChatPage = lazyWithRetry(() => import('./pages/chat/ChatPage'));
+const ChatPage = lazyWithRetry(() => import('@features/chat/pages/ChatPage'));
 const TabbedLLMChatPage = lazyWithRetry(
-  () => import('./pages/chat/TabbedLLMChatPage')
+  () => import('@features/chat/pages/TabbedLLMChatPage')
 );
 const ChatAgentPageChatKit = lazyWithRetry(
-  () => import('./pages/chat/ChatAgentPageChatKit')
+  () => import('@features/chat/pages/ChatAgentPageChatKit')
 );
 const VibeCodingPage = lazyWithRetry(
-  () => import('./pages/chat/VibeCodingPage')
+  () => import('@features/chat/pages/VibeCodingPage')
 );
 const SettingsPage = lazyWithRetry(
-  () => import('./pages/settings/SettingsPage')
+  () => import('@features/settings/pages/SettingsPage')
 );
 const AIConfigurationPage = lazyWithRetry(
-  () => import('./pages/settings/AIConfigurationPage')
+  () => import('@features/settings/pages/AIConfigurationPage')
 );
 const MarketplacePublicPage = lazyWithRetry(
   () => import('./pages/MarketplacePublicPage')
 );
 const BillingPage = lazyWithRetry(
-  () => import('./pages/dashboard/BillingPage')
+  () => import('@features/billing/pages/BillingPage')
 );
 const HelpSupportPage = lazyWithRetry(
-  () => import('./pages/dashboard/HelpSupportPage')
+  () => import('./pages/HelpSupportPage')
 );
 const SetupGuidePage = lazyWithRetry(() => import('./pages/SetupGuidePage'));
 

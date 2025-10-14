@@ -5,10 +5,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@shared/ui/card';
+import { Button } from '@shared/ui/button';
+import { Input } from '@shared/ui/input';
+import { Badge } from '@shared/ui/badge';
 import {
   Search,
   CheckCircle,
@@ -22,7 +22,7 @@ import {
   ArrowRight,
   Plus,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 import {
   AI_EMPLOYEES,
   categories,
@@ -31,12 +31,12 @@ import {
   type AIEmployee,
 } from '@/data/ai-employees';
 import { toast } from 'sonner';
-import { useAuthStore } from '@/stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/unified-auth-store';
 import {
   isEmployeePurchased,
   listPurchasedEmployees,
   purchaseEmployee,
-} from '@/services/supabase-employees';
+} from '@features/workforce/services/supabase-employees';
 import { motion, AnimatePresence } from 'framer-motion';
 // Stripe removed - free hiring only
 

@@ -16,10 +16,10 @@ import {
   Loader2,
   AlertCircle,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Particles } from '@/components/ui/particles';
-import { supabase } from '@/lib/supabase-client';
+import { Button } from '@shared/ui/button';
+import { Input } from '@shared/ui/input';
+import { Particles } from '@shared/ui/particles';
+import { supabase } from '@shared/lib/supabase-client';
 import { toast } from 'sonner';
 
 interface BlogPost {

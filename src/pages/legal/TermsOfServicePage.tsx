@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
-import { SEOHead } from '@/components/seo/SEOHead';
+import { Badge } from '@shared/ui/badge';
+import { SEOHead } from '@shared/components/seo/SEOHead';
 import {
   FileText,
   CheckCircle2,

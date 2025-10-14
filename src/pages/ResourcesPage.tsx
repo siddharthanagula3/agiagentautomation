@@ -17,9 +17,9 @@ import {
   Settings,
   PlayCircle,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Particles } from '@/components/ui/particles';
-import { SEOHead } from '@/components/seo/SEOHead';
+import { Button } from '@shared/ui/button';
+import { Particles } from '@shared/ui/particles';
+import { SEOHead } from '@shared/components/seo/SEOHead';
 
 interface Resource {
   id: number;

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { DashboardHeader } from '../components/layout/DashboardHeader';
-import { DashboardSidebar } from '../components/layout/DashboardSidebar';
-import { Button } from '@/components/ui/button';
+import { cn } from '@shared/lib/utils';
+import { DashboardHeader } from '@shared/components/layout/DashboardHeader';
+import { DashboardSidebar } from '@shared/components/layout/DashboardSidebar';
+import { Button } from '@shared/ui/button';
 import { MenuIcon, X } from 'lucide-react';
 
 interface DashboardLayoutProps {

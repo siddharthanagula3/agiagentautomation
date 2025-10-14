@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { PublicHeader } from '../components/layout/PublicHeader';
-import { PublicFooter } from '../components/layout/PublicFooter';
+import { PublicHeader } from '@shared/components/layout/PublicHeader';
+import { PublicFooter } from '@shared/components/layout/PublicFooter';
 
 const PublicLayout: React.FC = () => {
   return (

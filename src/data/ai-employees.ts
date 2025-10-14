@@ -3,7 +3,7 @@
  * Defines all available AI employees, their specializations, and API integrations
  */
 
-import { getFallbackAvatar } from '@/utils/avatar-utils';
+import { getFallbackAvatar } from '@shared/utils/avatar-utils';
 
 export type AIProvider = 'chatgpt' | 'claude' | 'gemini' | 'perplexity';
 

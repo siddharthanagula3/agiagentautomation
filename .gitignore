@@ -93,6 +93,7 @@ node_modules/.vite/
 *.test.ts.snap
 test-results/
 playwright-report/
+testsprite_tests/
 
 # Temporary files
 *.tmp
@@ -127,3 +128,9 @@ docs/drafts/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# AI Assistant files
+.claude/
+.cursor/
+.aider/
+.copilot/

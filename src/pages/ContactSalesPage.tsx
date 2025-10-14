@@ -12,20 +12,20 @@ import {
   Loader2,
   AlertCircle,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@shared/ui/button';
+import { Input } from '@shared/ui/input';
+import { Textarea } from '@shared/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Particles } from '@/components/ui/particles';
-import { submitContactForm } from '@/services/marketing-api';
+} from '@shared/ui/select';
+import { Particles } from '@shared/ui/particles';
+import { submitContactForm } from '@core/api/marketing-api';
 import { toast } from 'sonner';
-import { SEOHead } from '@/components/seo/SEOHead';
+import { SEOHead } from '@shared/components/seo/SEOHead';
 
 const ContactSalesPage: React.FC = () => {
   const [formData, setFormData] = useState({

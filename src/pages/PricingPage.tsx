@@ -4,23 +4,23 @@ import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, X, ArrowRight, Zap, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Particles } from '@/components/ui/particles';
+import { Button } from '@shared/ui/button';
+import { Particles } from '@shared/ui/particles';
 import {
   CountdownTimer,
   createDiscountEndDate,
-} from '@/components/ui/countdown-timer';
+} from '@shared/ui/countdown-timer';
 import {
   getPricingPlans,
   type PricingPlan as DBPricingPlan,
-} from '@/services/marketing-api';
-import { useAuthStore } from '@/stores/unified-auth-store';
-import { SEOHead } from '@/components/seo/SEOHead';
+} from '@core/api/marketing-api';
+import { useAuthStore } from '@shared/stores/unified-auth-store';
+import { SEOHead } from '@shared/components/seo/SEOHead';
 import {
   upgradeToProPlan,
   upgradeToMaxPlan,
   isStripeConfigured,
-} from '@/services/stripe-service';
+} from '@features/billing/services/stripe-service';
 import { toast } from 'sonner';
 
 interface PricingPlan {

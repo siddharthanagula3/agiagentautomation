@@ -14,9 +14,9 @@ import {
   BookOpen,
   User,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/lib/supabase-client';
+import { Button } from '@shared/ui/button';
+import { Badge } from '@shared/ui/badge';
+import { supabase } from '@shared/lib/supabase-client';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -24,7 +24,7 @@ import remarkBreaks from 'remark-breaks';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
-import { SEOHead } from '@/components/seo/SEOHead';
+import { SEOHead } from '@shared/components/seo/SEOHead';
 
 interface BlogPost {
   id: string;

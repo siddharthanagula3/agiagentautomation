@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Card } from '../components/ui/card';
+import { Button } from '@shared/ui/button';
+import { Badge } from '@shared/ui/badge';
+import { Card } from '@shared/ui/card';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '../components/ui/accordion';
+} from '@shared/ui/accordion';
 import {
   ArrowRight,
   Sparkles,
@@ -44,19 +44,19 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { ExpandableChatDemo } from '@/components/ui/expandable-chat-demo';
-import { Particles } from '../components/ui/particles';
-import { Spotlight, MouseSpotlight } from '../components/ui/spotlight';
-import { BentoGrid, BentoCard } from '../components/ui/bento-grid';
-import { InteractiveHoverCard } from '../components/ui/interactive-hover-card';
-import { AnimatedGradientText } from '../components/ui/animated-gradient-text';
+import { cn } from '@shared/lib/utils';
+import { ExpandableChatDemo } from '@shared/ui/expandable-chat-demo';
+import { Particles } from '@shared/ui/particles';
+import { Spotlight, MouseSpotlight } from '@shared/ui/spotlight';
+import { BentoGrid, BentoCard } from '@shared/ui/bento-grid';
+import { InteractiveHoverCard } from '@shared/ui/interactive-hover-card';
+import { AnimatedGradientText } from '@shared/ui/animated-gradient-text';
 import {
   CountdownTimer,
   createDiscountEndDate,
-} from '@/components/ui/countdown-timer';
-import { SEOHead } from '@/components/seo/SEOHead';
-import { useAuthStore } from '@/stores/unified-auth-store';
+} from '@shared/ui/countdown-timer';
+import { SEOHead } from '@shared/components/seo/SEOHead';
+import { useAuthStore } from '@shared/stores/unified-auth-store';
 import {
   AI_EMPLOYEES,
   providerInfo,

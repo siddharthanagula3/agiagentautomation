@@ -421,7 +421,7 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
               'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=500&fit=crop'
             }
             alt={post.title}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+            className="h-full w-full max-w-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
           <div className="absolute left-4 top-4">
             <span className="rounded-full bg-gradient-to-r from-primary to-accent px-3 py-1 text-xs font-medium text-white">
@@ -507,7 +507,7 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
             'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop'
           }
           alt={post.title}
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className="h-full w-full max-w-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute left-3 top-3">
           <span className="rounded-full bg-background/80 px-2 py-1 text-xs font-medium text-foreground backdrop-blur-xl">

@@ -43,17 +43,42 @@ import {
 } from '@features/workforce/services/supabase-employees';
 import { useBusinessMetrics } from '@shared/hooks/useAnalytics';
 
-// Helper function to check if employee is hired using local storage
-const isEmployeeHiredLocally = (
-  userId: string,
-  employeeId: string
-): boolean => {
-  const hiredEmployees = JSON.parse(
-    localStorage.getItem('hired_employees') || '[]'
-  );
-  return hiredEmployees.some(
-    (h: unknown) => h.employee_id === employeeId && h.user_id === userId
-  );
+// Types for locally stored hires
+interface HireRecord {
+  id: string;
+  user_id: string;
+  employee_id: string;
+  name?: string;
+  provider?: string;
+  role?: string;
+  is_active?: boolean;
+  purchased_at?: string;
+  created_at?: string;
+}
+
+// Safe localStorage access helpers
+const getHiredEmployeesSafe = (): HireRecord[] => {
+  try {
+    if (typeof window === 'undefined') return [];
+    const raw = window.localStorage.getItem('hired_employees');
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (h) => h && typeof h === 'object' && 'user_id' in h && 'employee_id' in h
+    ) as HireRecord[];
+  } catch {
+    return [];
+  }
+};
+
+const setHiredEmployeesSafe = (entries: HireRecord[]): void => {
+  try {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem('hired_employees', JSON.stringify(entries));
+  } catch {
+    // ignore storage errors
+  }
 };
 
 interface AIEmployee extends BaseAIEmployee {
@@ -109,10 +134,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       if (!user?.id) return [];
 
       // Use local storage instead of database for now
-      const hiredEmployees = JSON.parse(
-        localStorage.getItem('hired_employees') || '[]'
-      );
-      return hiredEmployees.filter((h: unknown) => h.user_id === user.id);
+      const hiredEmployees = getHiredEmployeesSafe();
+      return hiredEmployees.filter((h) => h.user_id === user.id);
     },
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -218,11 +241,9 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       }
 
       // Check if already hired using local storage
-      const hiredEmployees = JSON.parse(
-        localStorage.getItem('hired_employees') || '[]'
-      );
+      const hiredEmployees = getHiredEmployeesSafe();
       const alreadyHired = hiredEmployees.find(
-        (h: unknown) => h.employee_id === employeeId && h.user_id === user.id
+        (h) => h.employee_id === employeeId && h.user_id === user.id
       );
 
       if (alreadyHired) {
@@ -243,19 +264,13 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       };
 
       hiredEmployees.push(hireRecord);
-      localStorage.setItem('hired_employees', JSON.stringify(hiredEmployees));
+      setHiredEmployeesSafe(hiredEmployees);
 
       return { success: true, employeeId, userId: user.id, result: hireRecord };
     },
     onSuccess: (data) => {
       // Update the query cache to mark employee as hired
-      queryClient.setQueryData(
-        ['marketplace-employees'],
-        (old: AIEmployee[] = []) =>
-          old.map((emp) =>
-            emp.id === data.employeeId ? { ...emp, isHired: true } : emp
-          )
-      );
+      queryClient.invalidateQueries({ queryKey: ['marketplace-employees'] });
 
       // Refresh the purchased employees list
       queryClient.invalidateQueries({ queryKey: ['purchased-employees'] });
@@ -288,8 +303,12 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       }, 1500);
     } catch (error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Failed to hire employee';
-      toast.error(errorMessage);
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+            ? error
+            : 'Failed to hire employee';
+      toast.error(errorMessage || 'Failed to hire employee');
     }
   };
 

@@ -45,12 +45,6 @@ const Header: React.FC = () => {
       icon: MessageSquare,
       description: 'Intelligent conversations',
     },
-    {
-      label: 'AI Workflows',
-      path: '/features/ai-workflows',
-      icon: Workflow,
-      description: 'Automated processes',
-    },
   ];
 
   // Company (matches footer Company)

@@ -9,7 +9,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@features/*": ["./src/features/*"],
-      "@core/*": ["./src/core/*"],
+      "@_core/*": ["./src/_core/*"],
       "@shared/*": ["./src/shared/*"]
     },
     "strict": true,

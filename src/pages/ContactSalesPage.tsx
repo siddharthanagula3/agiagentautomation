@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from '@shared/ui/select';
 import { Particles } from '@shared/ui/particles';
-import { submitContactForm } from '@core/api/marketing-api';
+import { submitContactForm } from '@_core/api/marketing-api';
 import { toast } from 'sonner';
 import { SEOHead } from '@shared/components/seo/SEOHead';
 

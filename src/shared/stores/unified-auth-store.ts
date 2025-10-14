@@ -4,7 +4,7 @@ import {
   AuthUser,
   LoginData,
   RegisterData,
-} from '@core/security/auth-service';
+} from '@_core/security/auth-service';
 import { logger } from '@shared/lib/logger';
 
 interface AuthState {

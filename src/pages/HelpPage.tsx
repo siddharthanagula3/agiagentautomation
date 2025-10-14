@@ -65,15 +65,6 @@ const HelpPage: React.FC = () => {
       href: '/help/billing',
     },
     {
-      id: 3,
-      title: 'AI Workflows',
-      description: 'Create and optimize automated workflows',
-      icon: Workflow,
-      color: 'from-purple-500 to-pink-500',
-      articleCount: 15,
-      href: '/help/workflows',
-    },
-    {
       id: 4,
       title: 'Team Collaboration',
       description: 'Work effectively with AI and human team members',

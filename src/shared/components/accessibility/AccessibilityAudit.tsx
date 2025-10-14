@@ -15,7 +15,7 @@ import { AlertTriangle, CheckCircle, Info, Eye, Download } from 'lucide-react';
 import {
   accessibilityService,
   AccessibilityIssue,
-} from '@core/monitoring/accessibility-service';
+} from '@_core/monitoring/accessibility-service';
 
 interface AccessibilityAuditProps {
   onClose?: () => void;

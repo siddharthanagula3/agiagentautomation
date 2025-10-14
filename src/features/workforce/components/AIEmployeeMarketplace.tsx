@@ -79,7 +79,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
-import { aiEmployeeService } from '@core/api/ai-employee-service';
+import { aiEmployeeService } from '@_core/api/ai-employee-service';
 import { useAuthStore } from '@shared/stores/unified-auth-store';
 import {
   listPurchasedEmployees,

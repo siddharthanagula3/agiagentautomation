@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
-import type { Artifact } from '@core/api/artifact-service';
+import type { Artifact } from '@_core/api/artifact-service';
 
 interface ArtifactViewerProps {
   artifact: Artifact;

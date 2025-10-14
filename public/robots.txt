@@ -1,17 +1,23 @@
 User-agent: *
 Allow: /
-Disallow: /admin/
-Disallow: /api/
-Disallow: /_next/
-Disallow: /private/
-Disallow: /dashboard/
-Disallow: /settings/
-Disallow: /billing/
 
-# Sitemaps
-Sitemap: https://agiagentautomation.com/sitemap.xml
-Sitemap: https://agiagentautomation.com/sitemap-pages.xml
-Sitemap: https://agiagentautomation.com/sitemap-blog.xml
+# Disallow private/authenticated pages
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /billing
+Disallow: /workforce
+Disallow: /chat
+Disallow: /vibe
+Disallow: /support
 
-# Crawl delay (optional)
+# Disallow auth pages
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+
+# Sitemaps (will be generated dynamically)
+Sitemap: /sitemap.xml
+
+# Crawl delay (be nice to servers)
 Crawl-delay: 1

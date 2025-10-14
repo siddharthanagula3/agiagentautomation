@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
-import { accessibilityService } from '@core/monitoring/accessibility-service';
+import { accessibilityService } from '@_core/monitoring/accessibility-service';
 
 interface AccessibilityOptions {
   announceChanges?: boolean;

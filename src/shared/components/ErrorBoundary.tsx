@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@shared/ui/card';
-import { monitoringService } from '@core/monitoring/monitoring-service';
+import { monitoringService } from '@_core/monitoring/monitoring-service';
 
 interface Props {
   children: ReactNode;

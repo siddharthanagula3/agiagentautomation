@@ -4,8 +4,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-// No longer needed - removed Stripe success handling
 import { motion } from 'framer-motion';
 import {
   Card,
@@ -21,13 +19,10 @@ import { BentoGrid, BentoCard } from '@shared/ui/bento-grid';
 import { InteractiveHoverCard } from '@shared/ui/interactive-hover-card';
 import { Particles } from '@shared/ui/particles';
 import { Link } from 'react-router-dom';
-import {
-  listPurchasedEmployees,
-  getEmployeeById,
-} from '@features/workforce/services/supabase-employees';
 import { useAuthStore } from '@shared/stores/unified-auth-store';
-// No longer needed - removed Stripe success handling
-import { toast } from 'sonner';
+import { useWorkforceStore, setupWorkforceSubscription } from '@shared/stores/workforce-store';
+import { AI_EMPLOYEES } from '@/data/ai-employees';
+import { AnimatedAvatar } from '@shared/components/AnimatedAvatar';
 import {
   Users,
   Bot,
@@ -47,24 +42,17 @@ import { cn } from '@shared/lib/utils';
 
 const WorkforcePage: React.FC = () => {
   const { user } = useAuthStore();
-  const userId = user?.id;
+  const { hiredEmployees, isLoading, fetchHiredEmployees } = useWorkforceStore();
 
-  // Removed analytics queries - stats and performance data
+  // Set up real-time subscription and fetch data on mount
+  useEffect(() => {
+    if (user) {
+      setupWorkforceSubscription();
+      fetchHiredEmployees();
+    }
+  }, [user, fetchHiredEmployees]);
 
-  const {
-    data: purchased = [],
-    isLoading: hiresLoading,
-    refetch: refetchPurchased,
-  } = useQuery({
-    queryKey: ['purchased-employees', userId],
-    queryFn: () => listPurchasedEmployees(userId!),
-    enabled: !!userId,
-    refetchInterval: 30000,
-  });
-
-  // No Stripe handling needed - hiring is free and instant
-
-  if (!userId) {
+  if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Card className="glass-strong max-w-md">
@@ -84,15 +72,14 @@ const WorkforcePage: React.FC = () => {
     );
   }
 
-  const isLoading = hiresLoading;
-  const totalEmployees = purchased.length;
-  const activeEmployees = purchased.filter(emp => emp.is_active).length;
+  const totalEmployees = hiredEmployees.length;
+  const activeEmployees = hiredEmployees.filter(emp => emp.is_active).length;
 
   console.log('[WorkforcePage] 📊 Current state:', {
-    userId,
+    userId: user.id,
     totalEmployees,
     activeEmployees,
-    purchased: purchased.map(emp => ({
+    hiredEmployees: hiredEmployees.map(emp => ({
       id: emp.id,
       employee_id: emp.employee_id,
       name: emp.name,
@@ -281,19 +268,19 @@ const WorkforcePage: React.FC = () => {
                     </CardDescription>
                   </div>
                   <Badge variant="outline">
-                    {purchased.length}{' '}
-                    {purchased.length === 1 ? 'Employee' : 'Employees'}
+                    {hiredEmployees.length}{' '}
+                    {hiredEmployees.length === 1 ? 'Employee' : 'Employees'}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
-                {hiresLoading ? (
+                {isLoading ? (
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {[...Array(3)].map((_, i) => (
                       <Skeleton key={i} className="h-32 w-full rounded-2xl" />
                     ))}
                   </div>
-                ) : purchased.length === 0 ? (
+                ) : hiredEmployees.length === 0 ? (
                   <div className="py-16 text-center">
                     <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-muted/20">
                       <Users className="h-10 w-10 text-muted-foreground" />
@@ -318,8 +305,8 @@ const WorkforcePage: React.FC = () => {
                 ) : (
                   <div className="space-y-6">
                     <BentoGrid>
-                      {purchased.map((rec, index) => {
-                        const emp = getEmployeeById(rec.employee_id);
+                      {hiredEmployees.map((rec, index) => {
+                        const emp = AI_EMPLOYEES.find(e => e.id === rec.employee_id);
                         return (
                           <BentoCard
                             key={rec.id}
@@ -334,19 +321,12 @@ const WorkforcePage: React.FC = () => {
                             >
                               <div className="mb-4 flex items-start gap-4">
                                 <InteractiveHoverCard>
-                                  <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-muted transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20">
-                                    {emp?.avatar ? (
-                                      <img
-                                        src={emp.avatar}
-                                        alt={emp.role}
-                                        className="h-full w-full object-cover"
-                                      />
-                                    ) : (
-                                      <div className="flex h-full w-full items-center justify-center bg-primary/10">
-                                        <Bot className="h-7 w-7 text-primary" />
-                                      </div>
-                                    )}
-                                  </div>
+                                  <AnimatedAvatar
+                                    src={emp?.avatar}
+                                    alt={emp?.role || rec.role}
+                                    size="lg"
+                                    className="h-14 w-14 flex-shrink-0 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20"
+                                  />
                                 </InteractiveHoverCard>
                                 <div className="min-w-0 flex-1">
                                   <div className="mb-1 flex items-center gap-2">
@@ -403,8 +383,8 @@ const WorkforcePage: React.FC = () => {
 
                     <div className="flex items-center justify-between border-t border-border pt-4">
                       <p className="text-sm text-muted-foreground">
-                        Showing {purchased.length}{' '}
-                        {purchased.length === 1 ? 'employee' : 'employees'}
+                        Showing {hiredEmployees.length}{' '}
+                        {hiredEmployees.length === 1 ? 'employee' : 'employees'}
                       </p>
                       <Link to="/vibe">
                         <Button variant="outline">
@@ -474,11 +454,7 @@ const WorkforcePage: React.FC = () => {
                         </div>
                         <div className="glass rounded-xl p-4 text-center">
                           <div className="mb-1 text-2xl font-bold text-secondary">
-                            {
-                              purchased.filter(
-                                emp => emp.capabilities?.length > 0
-                              ).length
-                            }
+                            {hiredEmployees.length}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             Specialists

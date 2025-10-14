@@ -4,8 +4,8 @@
  */
 
 import { useEffect, useCallback, useMemo, useRef } from 'react';
-import { performanceService } from '@core/monitoring/performance-service';
-import { monitoringService } from '@core/monitoring/monitoring-service';
+import { performanceService } from '@_core/monitoring/performance-service';
+import { monitoringService } from '@_core/monitoring/monitoring-service';
 
 /**
  * Hook for optimizing component performance

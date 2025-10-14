@@ -41,7 +41,7 @@ export interface GoogleResponse {
   model: string;
   sessionId?: string;
   userId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface GoogleConfig {
@@ -49,7 +49,7 @@ export interface GoogleConfig {
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
-  tools?: any[];
+  tools?: unknown[];
 }
 
 export class GoogleError extends Error {
@@ -198,7 +198,15 @@ export class GoogleProvider {
     messages: GoogleMessage[],
     sessionId?: string,
     userId?: string
-  ): AsyncGenerator<{ content: string; done: boolean; usage?: any }> {
+  ): AsyncGenerator<{
+    content: string;
+    done: boolean;
+    usage?: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      total_tokens?: number;
+    };
+  }> {
     try {
       if (!GOOGLE_API_KEY) {
         throw new GoogleError(
@@ -229,7 +237,7 @@ export class GoogleProvider {
       );
 
       let fullContent = '';
-      let usage: any = null;
+      let usage: unknown = null;
 
       for await (const chunk of result.stream) {
         const chunkText = chunk.text();
@@ -318,7 +326,7 @@ export class GoogleProvider {
   /**
    * Extract usage information from Gemini response
    */
-  private extractUsageFromResponse(result: any): {
+  private extractUsageFromResponse(result: unknown): {
     promptTokens: number;
     completionTokens: number;
     totalTokens: number;
@@ -341,7 +349,7 @@ export class GoogleProvider {
     userId: string;
     role: string;
     content: string;
-    metadata: Record<string, any>;
+    metadata: Record<string, unknown>;
   }): Promise<void> {
     try {
       const { error } = await supabase.from('agent_messages').insert({

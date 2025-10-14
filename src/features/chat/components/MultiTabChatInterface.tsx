@@ -172,8 +172,8 @@ interface ToolExecution {
   startTime: Date;
   endTime?: Date;
   progress?: number;
-  input: Record<string, any>;
-  output?: Record<string, any>;
+  input: Record<string, unknown>;
+  output?: Record<string, unknown>;
   error?: string;
   logs?: ExecutionLog[];
 }
@@ -193,7 +193,7 @@ interface ExecutionLog {
   timestamp: Date;
   level: 'info' | 'warning' | 'error' | 'debug';
   message: string;
-  data?: any;
+  data?: unknown;
 }
 
 interface ChatParticipant {
@@ -1755,7 +1755,7 @@ const NewTabForm: React.FC<NewTabFormProps> = ({ onSubmit, onCancel }) => {
         <Label className="text-slate-300">Chat Type</Label>
         <Select
           value={formData.type}
-          onValueChange={(value: any) =>
+          onValueChange={(value: unknown) =>
             setFormData(prev => ({ ...prev, type: value }))
           }
         >

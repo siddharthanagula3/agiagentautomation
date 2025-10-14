@@ -79,11 +79,11 @@ class PerformanceService {
     link.rel = 'preload';
     link.href = options.href;
     link.as = options.as;
-    
+
     if (options.crossorigin) {
       link.crossOrigin = options.crossorigin;
     }
-    
+
     if (options.type) {
       link.type = options.type;
     }
@@ -118,7 +118,7 @@ class PerformanceService {
     link.rel = 'preload';
     link.href = src;
     link.as = 'image';
-    
+
     if (sizes) {
       link.setAttribute('imagesizes', sizes);
     }
@@ -163,7 +163,7 @@ class PerformanceService {
 
     // Generate optimized image URL (this would typically use a CDN or image service)
     let optimizedSrc = src;
-    
+
     // Add WebP support if browser supports it
     if (format === 'webp' && this.supportsWebP()) {
       optimizedSrc = this.convertToWebP(src, { width, height, quality });
@@ -189,12 +189,12 @@ class PerformanceService {
           if (entry.isIntersecting) {
             const img = entry.target as HTMLImageElement;
             const src = img.dataset.src;
-            
+
             if (src) {
               img.src = src;
               img.removeAttribute('data-src');
               imageObserver.unobserve(img);
-              
+
               monitoringService.trackEvent('image_lazy_loaded', { src });
             }
           }
@@ -298,41 +298,58 @@ class PerformanceService {
     if ('PerformanceObserver' in window) {
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1] as any;
-        
-        monitoringService.trackPerformance('lcp', lastEntry.startTime, {
-          element: lastEntry.element?.tagName,
-          url: lastEntry.url,
-        });
+        const lcpEntry = entries
+          .filter(
+            (entry): entry is LargestContentfulPaint =>
+              entry.entryType === 'largest-contentful-paint'
+          )
+          .pop();
+
+        if (lcpEntry) {
+          monitoringService.trackPerformance('lcp', lcpEntry.startTime, {
+            element: lcpEntry.element?.tagName,
+            url: lcpEntry.url,
+          });
+        }
       });
-      
+
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
 
       // First Input Delay
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        entries.forEach((entry: any) => {
-          monitoringService.trackPerformance('fid', entry.processingStart - entry.startTime, {
-            eventType: entry.name,
-          });
+        entries.forEach((entry) => {
+          if (entry.entryType === 'first-input') {
+            const eventTiming = entry as PerformanceEventTiming;
+            monitoringService.trackPerformance(
+              'fid',
+              eventTiming.processingStart - eventTiming.startTime,
+              {
+                eventType: eventTiming.name,
+              }
+            );
+          }
         });
       });
-      
+
       fidObserver.observe({ entryTypes: ['first-input'] });
 
       // Cumulative Layout Shift
       let clsValue = 0;
       const clsObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        entries.forEach((entry: any) => {
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value;
+        entries.forEach((entry) => {
+          if (entry.entryType === 'layout-shift') {
+            const layoutShift = entry as LayoutShift;
+            if (!layoutShift.hadRecentInput) {
+              clsValue += layoutShift.value;
+            }
           }
         });
-        
+
         monitoringService.trackPerformance('cls', clsValue);
       });
-      
+
       clsObserver.observe({ entryTypes: ['layout-shift'] });
     }
   }
@@ -344,17 +361,22 @@ class PerformanceService {
     if ('PerformanceObserver' in window) {
       const resourceObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        entries.forEach((entry: any) => {
-          if (entry.duration > 1000) { // Log slow resources
-            monitoringService.trackPerformance('slow_resource', entry.duration, {
-              name: entry.name,
-              type: entry.initiatorType,
-              size: entry.transferSize,
-            });
+        entries.forEach((entry) => {
+          if (entry.entryType === 'resource' && entry.duration > 1000) {
+            const resource = entry as PerformanceResourceTiming;
+            monitoringService.trackPerformance(
+              'slow_resource',
+              resource.duration,
+              {
+                name: resource.name,
+                type: resource.initiatorType,
+                size: resource.transferSize,
+              }
+            );
           }
         });
       });
-      
+
       resourceObserver.observe({ entryTypes: ['resource'] });
     }
   }
@@ -366,13 +388,15 @@ class PerformanceService {
     if ('PerformanceObserver' in window) {
       const longTaskObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        entries.forEach((entry: any) => {
-          monitoringService.trackPerformance('long_task', entry.duration, {
-            startTime: entry.startTime,
-          });
+        entries.forEach((entry) => {
+          if (entry.entryType === 'longtask') {
+            monitoringService.trackPerformance('long_task', entry.duration, {
+              startTime: entry.startTime,
+            });
+          }
         });
       });
-      
+
       longTaskObserver.observe({ entryTypes: ['longtask'] });
     }
   }
@@ -397,12 +421,12 @@ class PerformanceService {
     // This is a simplified example - in production, you'd use a CDN or image service
     const { width, height, quality } = options;
     const params = new URLSearchParams();
-    
+
     if (width) params.set('w', width.toString());
     if (height) params.set('h', height.toString());
     if (quality) params.set('q', quality.toString());
     params.set('f', 'webp');
-    
+
     return `${src}?${params.toString()}`;
   }
 
@@ -410,14 +434,19 @@ class PerformanceService {
    * Get performance metrics
    */
   getPerformanceMetrics(): Record<string, number> {
-    const navigation = performance.getEntriesByType('navigation')[0] as any;
+    const navigation = performance.getEntriesByType('navigation')[0] as
+      | PerformanceNavigationTiming
+      | undefined;
     const paint = performance.getEntriesByType('paint');
-    
+
     return {
-      domContentLoaded: navigation?.domContentLoadedEventEnd - navigation?.domContentLoadedEventStart,
+      domContentLoaded:
+        navigation?.domContentLoadedEventEnd -
+        navigation?.domContentLoadedEventStart,
       loadComplete: navigation?.loadEventEnd - navigation?.loadEventStart,
-      firstPaint: paint.find(p => p.name === 'first-paint')?.startTime || 0,
-      firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime || 0,
+      firstPaint: paint.find((p) => p.name === 'first-paint')?.startTime || 0,
+      firstContentfulPaint:
+        paint.find((p) => p.name === 'first-contentful-paint')?.startTime || 0,
     };
   }
 
@@ -427,7 +456,7 @@ class PerformanceService {
   clearCaches(): void {
     this.imageCache.clear();
     this.preloadedResources.clear();
-    
+
     // Clear service worker caches if available
     if ('caches' in window) {
       caches.keys().then((cacheNames) => {

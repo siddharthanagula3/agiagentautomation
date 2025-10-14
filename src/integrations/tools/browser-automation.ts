@@ -1,6 +1,6 @@
 export interface AutomationResult {
   success: boolean;
-  data?: any;
+  data?: unknown;
   screenshots?: string[];
   logs?: string[];
   error?: string;
@@ -199,7 +199,7 @@ export class BrowserAutomationTool {
       } else {
         // Fallback: use browser's built-in screenshot capability
         if (typeof window !== 'undefined' && 'html2canvas' in window) {
-          const html2canvas = (window as any).html2canvas;
+          const html2canvas = (window as { html2canvas?: (element: HTMLElement) => Promise<HTMLCanvasElement> }).html2canvas;
           const canvas = await html2canvas(document.body);
           const screenshot = canvas.toDataURL('image/png');
 

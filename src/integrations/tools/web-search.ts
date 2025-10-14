@@ -64,7 +64,7 @@ export class WebSearchTool {
       const data = await response.json();
 
       const results: SearchResult[] =
-        data.web?.results?.map((result: any) => ({
+        data.web?.results?.map((result: unknown) => ({
           title: result.title,
           url: result.url,
           description: result.description,

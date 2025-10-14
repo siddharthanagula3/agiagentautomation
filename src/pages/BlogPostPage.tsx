@@ -92,7 +92,7 @@ const BlogPostPage: React.FC = () => {
       }
 
       setPost(data as BlogPost);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching blog post:', err);
       setError(err.message || 'Failed to fetch blog post');
       toast.error('Failed to load blog post');

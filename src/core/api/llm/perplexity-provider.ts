@@ -43,7 +43,7 @@ export interface PerplexityResponse {
   model: string;
   sessionId?: string;
   userId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PerplexityConfig {
@@ -218,7 +218,15 @@ export class PerplexityProvider {
     messages: PerplexityMessage[],
     sessionId?: string,
     userId?: string
-  ): AsyncGenerator<{ content: string; done: boolean; usage?: any }> {
+  ): AsyncGenerator<{
+    content: string;
+    done: boolean;
+    usage?: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      total_tokens?: number;
+    };
+  }> {
     try {
       if (!PERPLEXITY_API_KEY) {
         throw new PerplexityError(
@@ -262,7 +270,7 @@ export class PerplexityProvider {
       const stream = await perplexity.chat.completions.create(request);
 
       let fullContent = '';
-      let usage: any = null;
+      let usage: unknown = null;
 
       for await (const chunk of stream) {
         const content = chunk.choices[0]?.delta?.content || '';
@@ -334,7 +342,7 @@ export class PerplexityProvider {
   private convertMessagesToPerplexity(messages: PerplexityMessage[]): string {
     // For Perplexity, we typically send the last user message as the prompt
     // since it's designed for single-turn interactions with web search
-    const lastUserMessage = messages.filter(msg => msg.role === 'user').pop();
+    const lastUserMessage = messages.filter((msg) => msg.role === 'user').pop();
 
     if (!lastUserMessage) {
       throw new PerplexityError('No user message found', 'NO_USER_MESSAGE');
@@ -346,14 +354,14 @@ export class PerplexityProvider {
   /**
    * Extract content from Perplexity response
    */
-  private extractContentFromResponse(response: any): string {
+  private extractContentFromResponse(response: unknown): string {
     return response.choices[0]?.message?.content || '';
   }
 
   /**
    * Extract usage information from Perplexity response
    */
-  private extractUsageFromResponse(response: any): {
+  private extractUsageFromResponse(response: unknown): {
     promptTokens: number;
     completionTokens: number;
     totalTokens: number;
@@ -371,7 +379,7 @@ export class PerplexityProvider {
   /**
    * Extract citations from Perplexity response
    */
-  private extractCitationsFromResponse(response: any): any[] {
+  private extractCitationsFromResponse(response: unknown): unknown[] {
     // Perplexity responses may include citations from web search
     // This would need to be implemented based on the actual response structure
     return response.citations || [];
@@ -385,7 +393,7 @@ export class PerplexityProvider {
     userId: string;
     role: string;
     content: string;
-    metadata: Record<string, any>;
+    metadata: Record<string, unknown>;
   }): Promise<void> {
     try {
       const { error } = await supabase.from('agent_messages').insert({

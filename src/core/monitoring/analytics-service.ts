@@ -3,8 +3,8 @@ import { monitoringService } from '../monitoring/monitoring-service';
 // Google Analytics 4 integration
 declare global {
   interface Window {
-    gtag: (...args: any[]) => void;
-    dataLayer: any[];
+    gtag: (...args: unknown[]) => void;
+    dataLayer: unknown[];
   }
 }
 
@@ -39,7 +39,7 @@ class AnalyticsService {
     if (this.isInitialized) return;
 
     this.trackingId = trackingId || import.meta.env.VITE_GA_TRACKING_ID;
-    
+
     if (this.trackingId) {
       this.initializeGoogleAnalytics();
     }
@@ -84,8 +84,8 @@ class AnalyticsService {
 
     // Initialize dataLayer
     window.dataLayer = window.dataLayer || [];
-    window.gtag = function() {
-      window.dataLayer.push(arguments);
+    window.gtag = (...args: unknown[]) => {
+      window.dataLayer.push(args);
     };
 
     // Load Google Analytics script
@@ -102,7 +102,9 @@ class AnalyticsService {
       send_page_view: false, // We'll handle page views manually
     });
 
-    console.log(`Google Analytics initialized with tracking ID: ${this.trackingId}`);
+    console.log(
+      `Google Analytics initialized with tracking ID: ${this.trackingId}`
+    );
   }
 
   /**
@@ -284,7 +286,7 @@ class AnalyticsService {
     this.trackEvent('user_journey', {
       step,
       stepNumber:
-        this.events.filter(e => e.event === 'user_journey').length + 1,
+        this.events.filter((e) => e.event === 'user_journey').length + 1,
       ...properties,
     });
   }

@@ -19,9 +19,9 @@ export interface Tool {
   name: string;
   description: string;
   category: ToolCategory;
-  execute: (params: any) => Promise<any>;
-  validate: (params: any) => ValidationResult;
-  estimateCost: (params: any) => number;
+  execute: (params: unknown) => Promise<unknown>;
+  validate: (params: unknown) => ValidationResult;
+  estimateCost: (params: unknown) => number;
   requiredPermissions: string[];
   supportedAgents: AgentType[];
   rateLimit?: RateLimit;
@@ -35,7 +35,7 @@ export interface ValidationResult {
 
 export interface ToolExecutionResult {
   success: boolean;
-  result?: any;
+  result?: unknown;
   error?: string;
   executionTime: number;
   cost: number;
@@ -103,7 +103,7 @@ export class ToolManager {
    */
   async executeTool(
     toolId: string,
-    params: any,
+    params: Record<string, unknown>,
     agent: AgentType,
     userId: string
   ): Promise<ToolExecutionResult> {
@@ -500,7 +500,7 @@ export class ToolManager {
       name: 'Data Processor',
       description: 'Process and transform data',
       category: 'data',
-      execute: async (params: { data: any; operation: string }) => {
+      execute: async (params: { data: unknown; operation: string }) => {
         // Integration with data processing
         return { processedData: {} };
       },
@@ -520,7 +520,7 @@ export class ToolManager {
       name: 'Data Analyzer',
       description: 'Analyze data and generate insights',
       category: 'data',
-      execute: async (params: { data: any }) => {
+      execute: async (params: { data: unknown }) => {
         // Integration with data analysis
         return { insights: [], statistics: {} };
       },
@@ -663,7 +663,7 @@ export const toolManager = new ToolManager();
 // Export utility functions
 export function executeTool(
   toolId: string,
-  params: any,
+  params: Record<string, unknown>,
   agent: AgentType,
   userId: string
 ): Promise<ToolExecutionResult> {

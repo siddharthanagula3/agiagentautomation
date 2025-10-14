@@ -105,7 +105,15 @@ const StartupsPage: React.FC = () => {
     },
   ];
 
-  const testimonial = {
+  interface Testimonial {
+    quote: string;
+    author: string;
+    role: string;
+    avatar: string;
+    metrics: Array<{ label: string; value: string }>;
+  }
+
+  const testimonial: Testimonial = {
     quote:
       'We went from 5 employees to serving 500+ customers without hiring more support staff. AI employees handle 90% of our customer inquiries, and our human team focuses on product innovation.',
     author: 'Sarah Chen',
@@ -349,7 +357,7 @@ const StartupsPage: React.FC = () => {
   );
 };
 
-const BenefitCard: React.FC<{ benefit: any; index: number }> = ({
+const BenefitCard: React.FC<{ benefit: unknown; index: number }> = ({
   benefit,
   index,
 }) => {
@@ -381,7 +389,7 @@ const BenefitCard: React.FC<{ benefit: any; index: number }> = ({
   );
 };
 
-const UseCaseCard: React.FC<{ useCase: any; index: number }> = ({
+const UseCaseCard: React.FC<{ useCase: unknown; index: number }> = ({
   useCase,
   index,
 }) => {
@@ -410,7 +418,7 @@ const UseCaseCard: React.FC<{ useCase: any; index: number }> = ({
   );
 };
 
-const StageCard: React.FC<{ stage: any; index: number }> = ({
+const StageCard: React.FC<{ stage: unknown; index: number }> = ({
   stage,
   index,
 }) => {
@@ -439,7 +447,7 @@ const StageCard: React.FC<{ stage: any; index: number }> = ({
   );
 };
 
-const TestimonialCard: React.FC<{ testimonial: any }> = ({ testimonial }) => {
+const TestimonialCard: React.FC<{ testimonial: Testimonial }> = ({ testimonial }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
 
@@ -466,7 +474,7 @@ const TestimonialCard: React.FC<{ testimonial: any }> = ({ testimonial }) => {
           </div>
         </div>
         <div className="flex gap-6">
-          {testimonial.metrics.map((metric: any, idx: number) => (
+          {testimonial.metrics.map((metric: { label: string; value: string }, idx: number) => (
             <div key={idx} className="text-center">
               <div className="text-2xl font-bold text-primary">
                 {metric.value}

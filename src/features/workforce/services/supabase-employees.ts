@@ -1,3 +1,5 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
 import supabaseClient from '@/integrations/supabase/client';
 import { AI_EMPLOYEES, type AIEmployee } from '@/data/ai-employees';
 
@@ -24,7 +26,7 @@ export async function listPurchasedEmployees(
   const uid = getUserIdOrThrow(userId);
   console.log('[listPurchasedEmployees] 🔍 Fetching for user:', uid);
 
-  const supabase = supabaseClient as any;
+  const supabase: SupabaseClient<Database> = supabaseClient;
 
   try {
     const { data, error } = await supabase
@@ -85,7 +87,7 @@ export async function isEmployeePurchased(
   employeeId: string
 ): Promise<boolean> {
   const uid = getUserIdOrThrow(userId);
-  const supabase = supabaseClient as any;
+  const supabase: SupabaseClient<Database> = supabaseClient;
 
   try {
     const { data, error } = await supabase
@@ -145,7 +147,7 @@ export async function purchaseEmployee(
     provider: employee.provider,
   });
 
-  const supabase = supabaseClient as any;
+  const supabase: SupabaseClient<Database> = supabaseClient;
 
   try {
     // Upsert to avoid duplicates

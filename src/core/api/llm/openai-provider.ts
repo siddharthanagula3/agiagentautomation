@@ -43,7 +43,7 @@ export interface OpenAIResponse {
   model: string;
   sessionId?: string;
   userId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface OpenAIConfig {
@@ -176,7 +176,15 @@ export class OpenAIProvider {
     messages: OpenAIMessage[],
     sessionId?: string,
     userId?: string
-  ): AsyncGenerator<{ content: string; done: boolean; usage?: any }> {
+  ): AsyncGenerator<{
+    content: string;
+    done: boolean;
+    usage?: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      total_tokens?: number;
+    };
+  }> {
     try {
       if (!OPENAI_API_KEY) {
         throw new OpenAIError(
@@ -209,7 +217,7 @@ export class OpenAIProvider {
       const stream = await openai.chat.completions.create(request);
 
       let fullContent = '';
-      let usage: any = null;
+      let usage: unknown = null;
 
       for await (const chunk of stream) {
         const content = chunk.choices[0]?.delta?.content || '';
@@ -264,7 +272,7 @@ export class OpenAIProvider {
   private convertMessagesToOpenAI(
     messages: OpenAIMessage[]
   ): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
-    return messages.map(msg => ({
+    return messages.map((msg) => ({
       role: msg.role,
       content: msg.content,
     }));
@@ -307,7 +315,7 @@ export class OpenAIProvider {
     userId: string;
     role: string;
     content: string;
-    metadata: Record<string, any>;
+    metadata: Record<string, unknown>;
   }): Promise<void> {
     try {
       const { error } = await supabase.from('agent_messages').insert({

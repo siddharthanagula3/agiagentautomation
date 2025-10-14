@@ -25,10 +25,16 @@ import { motion } from 'framer-motion';
 import { Particles } from '@shared/ui/particles';
 import { Spotlight } from '@shared/ui/spotlight';
 
+type LocationState = {
+  from?: {
+    pathname: string;
+  };
+};
+
 const LoginPage: React.FC = () => {
   const { login, isLoading, error, isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
-  const location = useLocation();
+  const location = useLocation<LocationState>();
 
   // Check if we're in demo mode
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -56,7 +62,7 @@ const LoginPage: React.FC = () => {
       console.log('✅ LoginPage: User authenticated, redirecting to dashboard');
 
       // Get the intended destination from location state, or default to dashboard
-      const from = (location.state as any)?.from?.pathname || '/dashboard';
+      const from = location.state?.from?.pathname || '/dashboard';
 
       // Small delay to ensure auth state is fully settled
       setTimeout(() => {

@@ -43,8 +43,8 @@ export interface Task {
   requiredTools: string[];
   priority: TaskPriority;
   complexity: ComplexityLevel;
-  context: Record<string, any>;
-  result?: any;
+  context: Record<string, unknown>;
+  result?: unknown;
   error?: string;
   retryCount: number;
   maxRetries: number;

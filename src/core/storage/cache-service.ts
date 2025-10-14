@@ -5,7 +5,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export interface CacheEntry<T = any> {
+export interface CacheEntry<T = unknown> {
   key: string;
   value: T;
   expiresAt: Date;
@@ -19,8 +19,17 @@ export interface CacheOptions {
   refreshOnAccess?: boolean; // Update TTL on access
 }
 
+interface PersistentCacheRow {
+  cache_key: string;
+  cache_value: unknown;
+  expires_at: string;
+  accessed_count: number;
+  last_accessed_at: string;
+  created_at: string;
+}
+
 class CacheService {
-  private memoryCache = new Map<string, CacheEntry>();
+  private memoryCache = new Map<string, CacheEntry<unknown>>();
   private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
   private readonly CLEANUP_INTERVAL = 60 * 1000; // 1 minute
   private cleanupTimer?: NodeJS.Timeout;
@@ -32,7 +41,7 @@ class CacheService {
   /**
    * Get value from cache
    */
-  async get<T = any>(key: string): Promise<T | null> {
+  async get<T = unknown>(key: string): Promise<T | null> {
     // Try memory cache first
     const memoryEntry = this.memoryCache.get(key);
     if (memoryEntry) {
@@ -57,7 +66,7 @@ class CacheService {
         return null;
       }
 
-      const entry = data as any;
+      const entry = data as PersistentCacheRow;
       const expiresAt = new Date(entry.expires_at);
 
       if (new Date() < expiresAt) {
@@ -94,7 +103,7 @@ class CacheService {
   /**
    * Set value in cache
    */
-  async set<T = any>(
+  async set<T = unknown>(
     key: string,
     value: T,
     options: CacheOptions = {}
@@ -228,7 +237,7 @@ class CacheService {
   /**
    * Wrap a function with caching
    */
-  wrap<T extends (...args: any[]) => Promise<any>>(
+  wrap<T extends (...args: unknown[]) => Promise<unknown>>(
     fn: T,
     options: {
       keyGenerator: (...args: Parameters<T>) => string;
@@ -260,7 +269,7 @@ class CacheService {
   /**
    * Batch get multiple keys
    */
-  async getMany<T = any>(keys: string[]): Promise<Map<string, T>> {
+  async getMany<T = unknown>(keys: string[]): Promise<Map<string, T>> {
     const results = new Map<string, T>();
 
     // Try to get from memory first
@@ -283,7 +292,7 @@ class CacheService {
           .in('cache_key', missingKeys);
 
         if (!error && data) {
-          for (const entry of data) {
+          for (const entry of data as PersistentCacheRow[]) {
             const expiresAt = new Date(entry.expires_at);
             if (new Date() < expiresAt) {
               results.set(entry.cache_key, entry.cache_value as T);
@@ -310,7 +319,7 @@ class CacheService {
   /**
    * Batch set multiple key-value pairs
    */
-  async setMany<T = any>(
+  async setMany<T = unknown>(
     entries: Array<{ key: string; value: T }>,
     options: CacheOptions = {}
   ): Promise<void> {

@@ -79,8 +79,8 @@ interface ToolExecution {
   id: string;
   name: string;
   status: 'pending' | 'running' | 'completed' | 'failed';
-  input?: any;
-  output?: any;
+  input?: unknown;
+  output?: unknown;
   error?: string;
   timestamp: Date;
 }

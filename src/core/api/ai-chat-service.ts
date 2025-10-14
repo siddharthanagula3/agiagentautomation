@@ -27,7 +27,7 @@ export async function sendAIMessage(
   try {
     const response = await unifiedLLMService.sendMessage({
       provider,
-      messages: messages.map(msg => ({
+      messages: messages.map((msg) => ({
         role: msg.role,
         content: msg.content,
       })),
@@ -38,8 +38,12 @@ export async function sendAIMessage(
     });
 
     return response.content;
-  } catch (error: any) {
-    throw new Error(error.message || `Failed to send message to ${provider}`);
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : `Failed to send message to ${provider}`;
+    throw new Error(message);
   }
 }
 
@@ -62,7 +66,7 @@ export function getConfiguredProviders(): AIProvider[] {
     'google',
     'perplexity',
   ];
-  return providers.filter(provider => isProviderConfigured(provider));
+  return providers.filter((provider) => isProviderConfigured(provider));
 }
 
 function getDefaultModel(provider: AIProvider): string {

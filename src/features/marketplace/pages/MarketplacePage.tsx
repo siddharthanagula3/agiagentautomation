@@ -46,7 +46,7 @@ import { useBusinessMetrics } from '@shared/hooks/useAnalytics';
 // Helper function to check if employee is hired using local storage
 const isEmployeeHiredLocally = (userId: string, employeeId: string): boolean => {
   const hiredEmployees = JSON.parse(localStorage.getItem('hired_employees') || '[]');
-  return hiredEmployees.some((h: any) => h.employee_id === employeeId && h.user_id === userId);
+  return hiredEmployees.some((h: unknown) => h.employee_id === employeeId && h.user_id === userId);
 };
 
 interface AIEmployee extends BaseAIEmployee {
@@ -103,7 +103,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       
       // Use local storage instead of database for now
       const hiredEmployees = JSON.parse(localStorage.getItem('hired_employees') || '[]');
-      return hiredEmployees.filter((h: any) => h.user_id === user.id);
+      return hiredEmployees.filter((h: unknown) => h.user_id === user.id);
     },
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -210,7 +210,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
       // Check if already hired using local storage
       const hiredEmployees = JSON.parse(localStorage.getItem('hired_employees') || '[]');
-      const alreadyHired = hiredEmployees.find((h: any) => h.employee_id === employeeId && h.user_id === user.id);
+      const alreadyHired = hiredEmployees.find((h: unknown) => h.employee_id === employeeId && h.user_id === user.id);
       
       if (alreadyHired) {
         throw new Error('Employee already hired');

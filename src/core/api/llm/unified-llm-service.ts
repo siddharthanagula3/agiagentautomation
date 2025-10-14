@@ -9,27 +9,67 @@ import {
   AnthropicProvider,
   AnthropicMessage,
   AnthropicResponse,
+  AnthropicConfig,
 } from './anthropic-provider';
 import {
   openaiProvider,
   OpenAIProvider,
   OpenAIMessage,
   OpenAIResponse,
+  OpenAIConfig,
 } from './openai-provider';
 import {
   googleProvider,
   GoogleProvider,
   GoogleMessage,
   GoogleResponse,
+  GoogleConfig,
 } from './google-provider';
 import {
   perplexityProvider,
   PerplexityProvider,
   PerplexityMessage,
   PerplexityResponse,
+  PerplexityConfig,
 } from './perplexity-provider';
 
 export type LLMProvider = 'anthropic' | 'openai' | 'google' | 'perplexity';
+type ProviderInstance =
+  | AnthropicProvider
+  | OpenAIProvider
+  | GoogleProvider
+  | PerplexityProvider;
+
+const ANTHROPIC_MODELS: AnthropicConfig['model'][] =
+  AnthropicProvider.getAvailableModels() as AnthropicConfig['model'][];
+const OPENAI_MODELS: OpenAIConfig['model'][] = [
+  'gpt-4o',
+  'gpt-4o-mini',
+  'gpt-4-turbo',
+  'gpt-3.5-turbo',
+];
+const GOOGLE_MODELS: GoogleConfig['model'][] = [
+  'gemini-1.5-pro',
+  'gemini-1.5-flash',
+  'gemini-1.0-pro',
+];
+const PERPLEXITY_MODELS: PerplexityConfig['model'][] = [
+  'llama-3.1-sonar-small-128k-online',
+  'llama-3.1-sonar-large-128k-online',
+  'llama-3.1-sonar-huge-128k-online',
+];
+
+const isAnthropicModel = (model: string): model is AnthropicConfig['model'] =>
+  ANTHROPIC_MODELS.includes(model as AnthropicConfig['model']);
+
+const isOpenAIModel = (model: string): model is OpenAIConfig['model'] =>
+  OPENAI_MODELS.includes(model as OpenAIConfig['model']);
+
+const isGoogleModel = (model: string): model is GoogleConfig['model'] =>
+  GOOGLE_MODELS.includes(model as GoogleConfig['model']);
+
+const isPerplexityModel = (model: string): model is PerplexityConfig['model'] =>
+  PERPLEXITY_MODELS.includes(model as PerplexityConfig['model']);
 
 export interface UnifiedMessage {
   role: 'user' | 'assistant' | 'system';
@@ -55,7 +95,7 @@ export interface UnifiedResponse {
   provider: LLMProvider;
   sessionId?: string;
   userId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface UnifiedConfig {
@@ -66,13 +106,13 @@ export interface UnifiedConfig {
   systemPrompt?: string;
   // Provider-specific configs
   anthropic?: {
-    tools?: any[];
+    tools?: AnthropicConfig['tools'];
   };
   openai?: {
-    tools?: any[];
+    tools?: OpenAIConfig['tools'];
   };
   google?: {
-    tools?: any[];
+    tools?: GoogleConfig['tools'];
   };
   perplexity?: {
     searchDomain?: string;
@@ -93,7 +133,7 @@ export class UnifiedLLMError extends Error {
 }
 
 export class UnifiedLLMService {
-  private providers: Map<LLMProvider, any> = new Map();
+  private providers: Map<LLMProvider, ProviderInstance> = new Map();
   private config: UnifiedConfig;
 
   constructor(config: Partial<UnifiedConfig> = {}) {
@@ -144,7 +184,7 @@ export class UnifiedLLMService {
       this.updateProviderConfig(targetProvider);
 
       // Send message using provider
-      let response: any;
+      let response: unknown;
       switch (targetProvider) {
         case 'anthropic':
           response = await (providerInstance as AnthropicProvider).sendMessage(
@@ -214,7 +254,7 @@ export class UnifiedLLMService {
   ): AsyncGenerator<{
     content: string;
     done: boolean;
-    usage?: any;
+    usage?: unknown;
     provider: LLMProvider;
   }> {
     const targetProvider = provider || this.config.provider;
@@ -242,7 +282,7 @@ export class UnifiedLLMService {
       let stream: AsyncGenerator<{
         content: string;
         done: boolean;
-        usage?: any;
+        usage?: unknown;
       }>;
       switch (targetProvider) {
         case 'anthropic':
@@ -310,8 +350,8 @@ export class UnifiedLLMService {
   private convertMessagesToProvider(
     messages: UnifiedMessage[],
     provider: LLMProvider
-  ): any[] {
-    return messages.map(msg => ({
+  ): unknown[] {
+    return messages.map((msg) => ({
       role: msg.role,
       content: msg.content,
       metadata: {
@@ -325,7 +365,7 @@ export class UnifiedLLMService {
    * Convert provider response to unified format
    */
   private convertResponseToUnified(
-    response: any,
+    response: unknown,
     provider: LLMProvider
   ): UnifiedResponse {
     // Normalize usage information
@@ -367,42 +407,63 @@ export class UnifiedLLMService {
     const providerInstance = this.providers.get(provider);
     if (!providerInstance) return;
 
-    const baseConfig = {
-      model: this.config.model,
-      maxTokens: this.config.maxTokens,
-      temperature: this.config.temperature,
-      systemPrompt: this.config.systemPrompt,
-    };
-
     switch (provider) {
       case 'anthropic':
-        (providerInstance as AnthropicProvider).updateConfig({
-          ...baseConfig,
-          model: this.config.model as any,
-          tools: this.config.anthropic?.tools,
-        });
+        {
+          const update: Partial<AnthropicConfig> = {
+            maxTokens: this.config.maxTokens,
+            temperature: this.config.temperature,
+            systemPrompt: this.config.systemPrompt,
+            tools: this.config.anthropic?.tools,
+          };
+          if (isAnthropicModel(this.config.model)) {
+            update.model = this.config.model;
+          }
+          (providerInstance as AnthropicProvider).updateConfig(update);
+        }
         break;
       case 'openai':
-        (providerInstance as OpenAIProvider).updateConfig({
-          ...baseConfig,
-          model: this.config.model as any,
-          tools: this.config.openai?.tools,
-        });
+        {
+          const update: Partial<OpenAIConfig> = {
+            maxTokens: this.config.maxTokens,
+            temperature: this.config.temperature,
+            systemPrompt: this.config.systemPrompt,
+            tools: this.config.openai?.tools,
+          };
+          if (isOpenAIModel(this.config.model)) {
+            update.model = this.config.model;
+          }
+          (providerInstance as OpenAIProvider).updateConfig(update);
+        }
         break;
       case 'google':
-        (providerInstance as GoogleProvider).updateConfig({
-          ...baseConfig,
-          model: this.config.model as any,
-          tools: this.config.google?.tools,
-        });
+        {
+          const update: Partial<GoogleConfig> = {
+            maxTokens: this.config.maxTokens,
+            temperature: this.config.temperature,
+            systemPrompt: this.config.systemPrompt,
+            tools: this.config.google?.tools,
+          };
+          if (isGoogleModel(this.config.model)) {
+            update.model = this.config.model;
+          }
+          (providerInstance as GoogleProvider).updateConfig(update);
+        }
         break;
       case 'perplexity':
-        (providerInstance as PerplexityProvider).updateConfig({
-          ...baseConfig,
-          model: this.config.model as any,
-          searchDomain: this.config.perplexity?.searchDomain,
-          searchRecencyFilter: this.config.perplexity?.searchRecencyFilter,
-        });
+        {
+          const update: Partial<PerplexityConfig> = {
+            maxTokens: this.config.maxTokens,
+            temperature: this.config.temperature,
+            systemPrompt: this.config.systemPrompt,
+            searchDomain: this.config.perplexity?.searchDomain,
+            searchRecencyFilter: this.config.perplexity?.searchRecencyFilter,
+          };
+          if (isPerplexityModel(this.config.model)) {
+            update.model = this.config.model;
+          }
+          (providerInstance as PerplexityProvider).updateConfig(update);
+        }
         break;
     }
   }
@@ -446,7 +507,7 @@ export class UnifiedLLMService {
    * Get all configured providers
    */
   getConfiguredProviders(): LLMProvider[] {
-    return Array.from(this.providers.keys()).filter(provider =>
+    return Array.from(this.providers.keys()).filter((provider) =>
       this.isProviderConfigured(provider)
     );
   }
@@ -472,7 +533,9 @@ export class UnifiedLLMService {
   /**
    * Get provider instance
    */
-  getProvider(provider: LLMProvider): any {
+  getProvider(
+    provider: LLMProvider
+  ): AnthropicProvider | GoogleProvider | OpenAIProvider | PerplexityProvider {
     return this.providers.get(provider);
   }
 }

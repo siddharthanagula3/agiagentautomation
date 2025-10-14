@@ -7,7 +7,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from './card';
+} from '@shared/ui/card';
 
 describe('Card Components', () => {
   describe('Card', () => {

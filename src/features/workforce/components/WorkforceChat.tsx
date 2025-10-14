@@ -36,7 +36,7 @@ import { Progress } from '@shared/ui/progress';
 interface WorkforceChatProps {
   userId: string;
   className?: string;
-  onComplete?: (result: any) => void;
+  onComplete?: (result: unknown) => void;
 }
 
 interface ChatMessage {
@@ -44,7 +44,7 @@ interface ChatMessage {
   type: 'user' | 'system' | 'update' | 'error' | 'success';
   content: string;
   timestamp: Date;
-  data?: any;
+  data?: unknown;
 }
 
 interface ExecutionState {
@@ -69,7 +69,7 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
   );
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [preview, setPreview] = useState<any>(null);
+  const [preview, setPreview] = useState<unknown>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -82,7 +82,7 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
   const addMessage = (
     type: ChatMessage['type'],
     content: string,
-    data?: any
+    data?: ChatMessage['data']
   ) => {
     const message: ChatMessage = {
       id: `msg-${Date.now()}`,
@@ -577,7 +577,7 @@ const TaskItem: React.FC<{ task: Task; onRollback: () => void }> = ({
 
 // Preview Card Component
 const PreviewCard: React.FC<{
-  preview: any;
+  preview: unknown;
   onExecute: () => void;
   onCancel: () => void;
 }> = ({ preview, onExecute, onCancel }) => {

@@ -74,7 +74,7 @@ interface AgentMessage {
     sessionId?: string;
     userId?: string;
     error?: boolean;
-    toolResults?: any[];
+    toolResults?: unknown[];
   };
 }
 
@@ -85,8 +85,8 @@ interface AgentSDKChatUIProps {
   employeeRole: string;
   employeeName: string;
   className?: string;
-  onSessionCreated?: (session: any) => void;
-  onError?: (error: any) => void;
+  onSessionCreated?: (session: unknown) => void;
+  onError?: (error: unknown) => void;
 }
 
 export const AgentSDKChatUI: React.FC<AgentSDKChatUIProps> = ({

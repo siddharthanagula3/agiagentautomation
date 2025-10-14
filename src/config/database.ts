@@ -1,6 +1,8 @@
 // Database configuration and schema definitions
 // Based on PRD specifications
 
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 export const DATABASE_SCHEMA = {
   // Users & Authentication
   users: `
@@ -377,7 +379,7 @@ export const DATABASE_SCHEMA = {
 };
 
 // Function to create all tables
-export const createAllTables = async (supabase: any) => {
+export const createAllTables = async (supabase: SupabaseClient) => {
   const tables = Object.values(DATABASE_SCHEMA);
 
   for (const tableSQL of tables) {
@@ -397,7 +399,7 @@ export const createAllTables = async (supabase: any) => {
 };
 
 // Function to create indexes
-export const createIndexes = async (supabase: any) => {
+export const createIndexes = async (supabase: SupabaseClient) => {
   const indexQueries = [
     // Additional performance indexes
     `CREATE INDEX CONCURRENTLY idx_jobs_assigned_to ON jobs USING GIN(assigned_to);`,
@@ -422,7 +424,7 @@ export const createIndexes = async (supabase: any) => {
 };
 
 // Function to set up RLS policies
-export const setupRLSPolicies = async (supabase: any) => {
+export const setupRLSPolicies = async (supabase: SupabaseClient) => {
   const policies = [
     // Additional security policies
     `CREATE POLICY "Users can only access their own data" ON users

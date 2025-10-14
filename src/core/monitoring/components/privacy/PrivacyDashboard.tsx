@@ -26,11 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@shared/ui/dialog';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@shared/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import {
   Shield,
   Eye,
@@ -64,11 +60,17 @@ interface ConsentPreferences {
 interface DataSubjectRequest {
   id: string;
   userId: string;
-  type: 'access' | 'rectification' | 'erasure' | 'portability' | 'restriction' | 'objection';
+  type:
+    | 'access'
+    | 'rectification'
+    | 'erasure'
+    | 'portability'
+    | 'restriction'
+    | 'objection';
   status: 'pending' | 'in_progress' | 'completed' | 'rejected';
   requestedAt: Date;
   completedAt?: Date;
-  details: any;
+  details: unknown;
 }
 
 interface PrivacyDashboardProps {
@@ -76,13 +78,14 @@ interface PrivacyDashboardProps {
 }
 
 const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
-  const [consentPreferences, setConsentPreferences] = useState<ConsentPreferences>({
-    essential: true,
-    analytics: false,
-    marketing: false,
-    personalization: false,
-    thirdParty: false,
-  });
+  const [consentPreferences, setConsentPreferences] =
+    useState<ConsentPreferences>({
+      essential: true,
+      analytics: false,
+      marketing: false,
+      personalization: false,
+      thirdParty: false,
+    });
   const [dataRequests, setDataRequests] = useState<DataSubjectRequest[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
@@ -100,7 +103,7 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
       if (preferences) {
         setConsentPreferences(preferences);
       }
-      
+
       // In a real implementation, you would load data requests from the service
       // const requests = await privacyService.getDataSubjectRequests(userId);
       // setDataRequests(requests);
@@ -112,7 +115,10 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
     }
   };
 
-  const handleConsentChange = (category: keyof ConsentPreferences, value: boolean) => {
+  const handleConsentChange = (
+    category: keyof ConsentPreferences,
+    value: boolean
+  ) => {
     const newPreferences = { ...consentPreferences, [category]: value };
     setConsentPreferences(newPreferences);
     privacyService.saveConsentPreferences(newPreferences);
@@ -127,7 +133,7 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
       // In a real implementation, you would make the actual request
       // await privacyService.requestDataAccess(userId);
       // or other request types based on selectedRequestType
-      
+
       toast.success('Data request submitted successfully');
       setRequestDialogOpen(false);
       setSelectedRequestType('');
@@ -152,8 +158,10 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
       // a.href = url;
       // a.download = 'my-data-export.json';
       // a.click();
-      
-      toast.success('Data export initiated. You will receive an email when ready.');
+
+      toast.success(
+        'Data export initiated. You will receive an email when ready.'
+      );
     } catch (error) {
       console.error('Error exporting data:', error);
       toast.error('Failed to export data');
@@ -163,7 +171,11 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to delete your account? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
@@ -171,8 +183,10 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
     try {
       // In a real implementation, you would delete the actual data
       // await privacyService.deleteUserData(userId);
-      
-      toast.success('Account deletion initiated. You will receive a confirmation email.');
+
+      toast.success(
+        'Account deletion initiated. You will receive a confirmation email.'
+      );
     } catch (error) {
       console.error('Error deleting account:', error);
       toast.error('Failed to delete account');
@@ -183,43 +197,65 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
 
   const getRequestTypeIcon = (type: string) => {
     switch (type) {
-      case 'access': return <Eye className="w-4 h-4" />;
-      case 'rectification': return <FileText className="w-4 h-4" />;
-      case 'erasure': return <Trash2 className="w-4 h-4" />;
-      case 'portability': return <Download className="w-4 h-4" />;
-      default: return <FileText className="w-4 h-4" />;
+      case 'access':
+        return <Eye className="h-4 w-4" />;
+      case 'rectification':
+        return <FileText className="h-4 w-4" />;
+      case 'erasure':
+        return <Trash2 className="h-4 w-4" />;
+      case 'portability':
+        return <Download className="h-4 w-4" />;
+      default:
+        return <FileText className="h-4 w-4" />;
     }
   };
 
   const getRequestTypeDescription = (type: string) => {
     switch (type) {
-      case 'access': return 'Request access to your personal data';
-      case 'rectification': return 'Request correction of inaccurate data';
-      case 'erasure': return 'Request deletion of your personal data';
-      case 'portability': return 'Request a copy of your data';
-      case 'restriction': return 'Request restriction of data processing';
-      case 'objection': return 'Object to data processing';
-      default: return 'Data subject request';
+      case 'access':
+        return 'Request access to your personal data';
+      case 'rectification':
+        return 'Request correction of inaccurate data';
+      case 'erasure':
+        return 'Request deletion of your personal data';
+      case 'portability':
+        return 'Request a copy of your data';
+      case 'restriction':
+        return 'Request restriction of data processing';
+      case 'objection':
+        return 'Object to data processing';
+      default:
+        return 'Data subject request';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'in_progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+      case 'completed':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'in_progress':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'rejected':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'in_progress': return <Clock className="w-4 h-4 text-blue-600" />;
-      case 'pending': return <AlertTriangle className="w-4 h-4 text-yellow-600" />;
-      case 'rejected': return <XCircle className="w-4 h-4 text-red-600" />;
-      default: return <Clock className="w-4 h-4 text-gray-600" />;
+      case 'completed':
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'in_progress':
+        return <Clock className="h-4 w-4 text-blue-600" />;
+      case 'pending':
+        return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+      case 'rejected':
+        return <XCircle className="h-4 w-4 text-red-600" />;
+      default:
+        return <Clock className="h-4 w-4 text-gray-600" />;
     }
   };
 
@@ -228,13 +264,13 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
+            <Shield className="h-5 w-5" />
             Privacy Dashboard
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="py-8 text-center">
+            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             <p className="text-muted-foreground">Loading privacy settings...</p>
           </div>
         </CardContent>
@@ -256,7 +292,7 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5" />
+                <Shield className="h-5 w-5" />
                 Consent Preferences
               </CardTitle>
             </CardHeader>
@@ -265,7 +301,8 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
                 <Shield className="h-4 w-4" />
                 <AlertTitle>Your Privacy Rights</AlertTitle>
                 <AlertDescription>
-                  You have the right to control how your personal data is used. You can update your consent preferences at any time.
+                  You have the right to control how your personal data is used.
+                  You can update your consent preferences at any time.
                 </AlertDescription>
               </Alert>
 
@@ -280,7 +317,9 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
                   <Switch
                     id="essential"
                     checked={consentPreferences.essential}
-                    onCheckedChange={(checked) => handleConsentChange('essential', checked)}
+                    onCheckedChange={(checked) =>
+                      handleConsentChange('essential', checked)
+                    }
                     disabled
                   />
                 </div>
@@ -295,7 +334,9 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
                   <Switch
                     id="analytics"
                     checked={consentPreferences.analytics}
-                    onCheckedChange={(checked) => handleConsentChange('analytics', checked)}
+                    onCheckedChange={(checked) =>
+                      handleConsentChange('analytics', checked)
+                    }
                   />
                 </div>
 
@@ -309,7 +350,9 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
                   <Switch
                     id="marketing"
                     checked={consentPreferences.marketing}
-                    onCheckedChange={(checked) => handleConsentChange('marketing', checked)}
+                    onCheckedChange={(checked) =>
+                      handleConsentChange('marketing', checked)
+                    }
                   />
                 </div>
 
@@ -323,7 +366,9 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
                   <Switch
                     id="personalization"
                     checked={consentPreferences.personalization}
-                    onCheckedChange={(checked) => handleConsentChange('personalization', checked)}
+                    onCheckedChange={(checked) =>
+                      handleConsentChange('personalization', checked)
+                    }
                   />
                 </div>
 
@@ -337,7 +382,9 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
                   <Switch
                     id="thirdParty"
                     checked={consentPreferences.thirdParty}
-                    onCheckedChange={(checked) => handleConsentChange('thirdParty', checked)}
+                    onCheckedChange={(checked) =>
+                      handleConsentChange('thirdParty', checked)
+                    }
                   />
                 </div>
               </div>
@@ -350,13 +397,16 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
+                  <FileText className="h-5 w-5" />
                   Data Subject Requests
                 </div>
-                <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
+                <Dialog
+                  open={requestDialogOpen}
+                  onOpenChange={setRequestDialogOpen}
+                >
                   <DialogTrigger asChild>
                     <Button>
-                      <FileText className="w-4 h-4 mr-2" />
+                      <FileText className="mr-2 h-4 w-4" />
                       New Request
                     </Button>
                   </DialogTrigger>
@@ -370,39 +420,60 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="request-type">Request Type</Label>
-                        <Select value={selectedRequestType} onValueChange={setSelectedRequestType}>
+                        <Select
+                          value={selectedRequestType}
+                          onValueChange={setSelectedRequestType}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Select request type" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="access">Data Access</SelectItem>
-                            <SelectItem value="rectification">Data Rectification</SelectItem>
-                            <SelectItem value="erasure">Data Erasure</SelectItem>
-                            <SelectItem value="portability">Data Portability</SelectItem>
-                            <SelectItem value="restriction">Processing Restriction</SelectItem>
-                            <SelectItem value="objection">Object to Processing</SelectItem>
+                            <SelectItem value="rectification">
+                              Data Rectification
+                            </SelectItem>
+                            <SelectItem value="erasure">
+                              Data Erasure
+                            </SelectItem>
+                            <SelectItem value="portability">
+                              Data Portability
+                            </SelectItem>
+                            <SelectItem value="restriction">
+                              Processing Restriction
+                            </SelectItem>
+                            <SelectItem value="objection">
+                              Object to Processing
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       {selectedRequestType && (
                         <div>
-                          <Label htmlFor="request-details">Additional Details</Label>
+                          <Label htmlFor="request-details">
+                            Additional Details
+                          </Label>
                           <textarea
                             id="request-details"
                             value={requestDetails}
                             onChange={(e) => setRequestDetails(e.target.value)}
                             placeholder="Provide any additional details for your request..."
-                            className="w-full p-2 border rounded-md"
+                            className="w-full rounded-md border p-2"
                             rows={3}
                           />
                         </div>
                       )}
                     </div>
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setRequestDialogOpen(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setRequestDialogOpen(false)}
+                      >
                         Cancel
                       </Button>
-                      <Button onClick={handleDataRequest} disabled={!selectedRequestType || isLoading}>
+                      <Button
+                        onClick={handleDataRequest}
+                        disabled={!selectedRequestType || isLoading}
+                      >
                         {isLoading ? 'Submitting...' : 'Submit Request'}
                       </Button>
                     </DialogFooter>
@@ -412,34 +483,43 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
             </CardHeader>
             <CardContent>
               {dataRequests.length === 0 ? (
-                <div className="text-center py-8">
-                  <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">No data requests found</p>
-                  <p className="text-sm text-muted-foreground">Submit a new request to get started</p>
+                <div className="py-8 text-center">
+                  <FileText className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                  <p className="text-muted-foreground">
+                    No data requests found
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Submit a new request to get started
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {dataRequests.map((request) => (
                     <div
                       key={request.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
+                      className="flex items-center justify-between rounded-lg border p-4"
                     >
                       <div className="flex items-center gap-4">
                         {getRequestTypeIcon(request.type)}
                         <div>
-                          <div className="font-medium capitalize">{request.type}</div>
+                          <div className="font-medium capitalize">
+                            {request.type}
+                          </div>
                           <div className="text-sm text-muted-foreground">
                             {getRequestTypeDescription(request.type)}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            Requested: {request.requestedAt.toLocaleDateString()}
+                            Requested:{' '}
+                            {request.requestedAt.toLocaleDateString()}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge className={getStatusColor(request.status)}>
                           {getStatusIcon(request.status)}
-                          <span className="ml-1 capitalize">{request.status}</span>
+                          <span className="ml-1 capitalize">
+                            {request.status}
+                          </span>
                         </Badge>
                       </div>
                     </div>
@@ -454,7 +534,7 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Download className="w-5 h-5" />
+                <Download className="h-5 w-5" />
                 Data Export & Deletion
               </CardTitle>
             </CardHeader>
@@ -463,12 +543,13 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
                 <Download className="h-4 w-4" />
                 <AlertTitle>Export Your Data</AlertTitle>
                 <AlertDescription>
-                  You can request a copy of all your personal data in a machine-readable format.
+                  You can request a copy of all your personal data in a
+                  machine-readable format.
                 </AlertDescription>
               </Alert>
 
               <div className="space-y-4">
-                <div className="p-4 border rounded-lg">
+                <div className="rounded-lg border p-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-medium">Export All Data</h3>
@@ -477,16 +558,18 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
                       </p>
                     </div>
                     <Button onClick={handleExportData} disabled={isLoading}>
-                      <Download className="w-4 h-4 mr-2" />
+                      <Download className="mr-2 h-4 w-4" />
                       {isLoading ? 'Exporting...' : 'Export Data'}
                     </Button>
                   </div>
                 </div>
 
-                <div className="p-4 border rounded-lg border-red-200 dark:border-red-800">
+                <div className="rounded-lg border border-red-200 p-4 dark:border-red-800">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-medium text-red-600 dark:text-red-400">Delete Account</h3>
+                      <h3 className="font-medium text-red-600 dark:text-red-400">
+                        Delete Account
+                      </h3>
                       <p className="text-sm text-muted-foreground">
                         Permanently delete your account and all associated data
                       </p>
@@ -496,7 +579,7 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
                       onClick={handleDeleteAccount}
                       disabled={isLoading}
                     >
-                      <Trash2 className="w-4 h-4 mr-2" />
+                      <Trash2 className="mr-2 h-4 w-4" />
                       {isLoading ? 'Deleting...' : 'Delete Account'}
                     </Button>
                   </div>
@@ -510,7 +593,7 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Settings className="w-5 h-5" />
+                <Settings className="h-5 w-5" />
                 Privacy Settings
               </CardTitle>
             </CardHeader>
@@ -530,7 +613,8 @@ const PrivacyDashboard: React.FC<PrivacyDashboardProps> = ({ className }) => {
                   <div className="space-y-1">
                     <Label htmlFor="data-retention">Data Retention</Label>
                     <p className="text-sm text-muted-foreground">
-                      Automatically delete old data according to retention policies
+                      Automatically delete old data according to retention
+                      policies
                     </p>
                   </div>
                   <Switch id="data-retention" defaultChecked />

@@ -116,7 +116,7 @@ interface ChatKitWidget {
   label: string;
   placeholder?: string;
   options?: Array<{ value: string; label: string }>;
-  value?: any;
+  value?: unknown;
   disabled?: boolean;
   required?: boolean;
   validation?: {
@@ -126,7 +126,7 @@ interface ChatKitWidget {
     message?: string;
   };
   style?: React.CSSProperties;
-  onAction?: (value: any) => void;
+  onAction?: (value: unknown) => void;
 }
 
 // ChatKit Action Configuration
@@ -137,7 +137,7 @@ interface ChatKitAction {
   icon?: string;
   type: 'primary' | 'secondary' | 'danger' | 'success';
   enabled: boolean;
-  handler: (context: any) => Promise<any>;
+  handler: (context: unknown) => Promise<unknown>;
   confirmation?: {
     title: string;
     message: string;
@@ -146,31 +146,46 @@ interface ChatKitAction {
   };
 }
 
-// Declare the ChatKit web component with enhanced props
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'openai-chatkit': {
-        workflowId: string;
-        sessionId?: string;
-        theme?: string | ChatKitTheme;
-        placeholder?: string;
-        greeting?: string;
-        starterPrompts?: string[];
-        widgets?: ChatKitWidget[];
-        actions?: ChatKitAction[];
-        onSessionCreated?: (event: CustomEvent) => void;
-        onMessageSent?: (event: CustomEvent) => void;
-        onMessageReceived?: (event: CustomEvent) => void;
-        onWidgetAction?: (event: CustomEvent) => void;
-        onActionExecuted?: (event: CustomEvent) => void;
-        onError?: (event: CustomEvent) => void;
-        className?: string;
-        style?: React.CSSProperties;
-      };
-    }
-  }
+type SessionCreatedDetail = Record<string, unknown>;
+type MessageEventDetail = Record<string, unknown>;
+interface WidgetActionDetail {
+  widgetId: string;
+  value: unknown;
 }
+interface ActionExecutedDetail {
+  actionId: string;
+  context: unknown;
+}
+interface ErrorDetail {
+  message?: string;
+  [key: string]: unknown;
+}
+
+type OpenAIChatKitElementProps = React.HTMLAttributes<HTMLElement> & {
+  workflowId: string;
+  sessionId?: string;
+  theme?: string | ChatKitTheme;
+  placeholder?: string;
+  greeting?: string;
+  starterPrompts?: string[];
+  widgets?: ChatKitWidget[];
+  actions?: ChatKitAction[];
+  onSessionCreated?: (event: CustomEvent<SessionCreatedDetail>) => void;
+  onMessageSent?: (event: CustomEvent<MessageEventDetail>) => void;
+  onMessageReceived?: (event: CustomEvent<MessageEventDetail>) => void;
+  onWidgetAction?: (event: CustomEvent<WidgetActionDetail>) => void;
+  onActionExecuted?: (event: CustomEvent<ActionExecutedDetail>) => void;
+  onError?: (event: CustomEvent<ErrorDetail>) => void;
+};
+
+const OpenAIChatKitElement = React.forwardRef<
+  HTMLElement,
+  OpenAIChatKitElementProps
+>(({ children, ...rest }, ref) =>
+  React.createElement('openai-chatkit', { ...rest, ref }, children)
+);
+
+OpenAIChatKitElement.displayName = 'OpenAIChatKitElement';
 
 interface PurchasedEmployee {
   id: string;
@@ -196,10 +211,12 @@ interface ChatKitAdvancedProps {
   className?: string;
 }
 
+type ThemePreset = 'light' | 'dark' | 'auto' | 'custom' | 'purple';
+
 const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
   const { user } = useAuthStore();
   const { theme, setTheme } = useTheme();
-  const chatkitRef = useRef<any>(null);
+  const chatkitRef = useRef<HTMLElement | null>(null);
 
   const [employees, setEmployees] = useState<PurchasedEmployee[]>([]);
   const [selectedEmployee, setSelectedEmployee] =
@@ -212,9 +229,14 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
   // Theme customization state
   const [customTheme, setCustomTheme] = useState<ChatKitTheme | null>(null);
   const [showThemeCustomizer, setShowThemeCustomizer] = useState(false);
-  const [themePreset, setThemePreset] = useState<
-    'light' | 'dark' | 'auto' | 'custom'
-  >('auto');
+  const [themePreset, setThemePreset] = useState<ThemePreset>('auto');
+
+  const handleThemePresetChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value as ThemePreset;
+    setThemePreset(value);
+  };
 
   // Widget state
   const [widgets, setWidgets] = useState<ChatKitWidget[]>([]);
@@ -528,13 +550,13 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
   };
 
   // Handle widget actions
-  const handleWidgetAction = (widgetId: string, value: any) => {
+  const handleWidgetAction = (widgetId: string, value: unknown) => {
     console.log(`Widget action: ${widgetId}`, value);
     toast.success(`Widget action executed: ${widgetId}`);
   };
 
   // Handle action execution
-  const handleActionExecution = async (actionId: string, context: any) => {
+  const handleActionExecution = async (actionId: string, context: unknown) => {
     const action = actions.find(a => a.id === actionId);
     if (!action) return;
 
@@ -566,31 +588,33 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
   };
 
   // Handle ChatKit events
-  const handleSessionCreated = (event: CustomEvent) => {
+  const handleSessionCreated = (event: CustomEvent<SessionCreatedDetail>) => {
     console.log('ChatKit session created:', event.detail);
     setIsSessionActive(true);
     toast.success('Advanced chat session started');
   };
 
-  const handleMessageSent = (event: CustomEvent) => {
+  const handleMessageSent = (event: CustomEvent<MessageEventDetail>) => {
     console.log('Message sent:', event.detail);
   };
 
-  const handleMessageReceived = (event: CustomEvent) => {
+  const handleMessageReceived = (event: CustomEvent<MessageEventDetail>) => {
     console.log('Message received:', event.detail);
   };
 
-  const handleWidgetActionEvent = (event: CustomEvent) => {
+  const handleWidgetActionEvent = (event: CustomEvent<WidgetActionDetail>) => {
     console.log('Widget action:', event.detail);
     handleWidgetAction(event.detail.widgetId, event.detail.value);
   };
 
-  const handleActionExecuted = (event: CustomEvent) => {
+  const handleActionExecuted = (
+    event: CustomEvent<ActionExecutedDetail>
+  ) => {
     console.log('Action executed:', event.detail);
     handleActionExecution(event.detail.actionId, event.detail.context);
   };
 
-  const handleError = (event: CustomEvent) => {
+  const handleError = (event: CustomEvent<ErrorDetail>) => {
     console.error('ChatKit error:', event.detail);
     setError(event.detail.message || 'An error occurred');
     toast.error('Chat session error occurred');
@@ -779,7 +803,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
               <select
                 id="theme-preset"
                 value={themePreset}
-                onChange={e => setThemePreset(e.target.value as any)}
+                onChange={handleThemePresetChange}
                 className="rounded-md border border-gray-300 px-3 py-1 text-sm"
               >
                 <option value="auto">Auto</option>
@@ -975,7 +999,7 @@ const ChatKitAdvanced: React.FC<ChatKitAdvancedProps> = ({ className }) => {
         <div className="flex flex-1 flex-col">
           {chatKitConfig ? (
             <div className="flex-1">
-              <openai-chatkit
+              <OpenAIChatKitElement
                 ref={chatkitRef}
                 workflowId={chatKitConfig.workflowId}
                 sessionId={chatKitConfig.sessionId}

@@ -21,7 +21,7 @@ export interface PromptGuidelines {
   recommendedLength: number;
   keyElements: string[];
   optimizationTips: string[];
-  providerSpecific: Record<string, any>;
+  providerSpecific: Record<string, unknown>;
 }
 
 export class SystemPromptsService {
@@ -394,7 +394,7 @@ export class SystemPromptsService {
 
     // Check for key elements
     const missingElements = guidelines.keyElements.filter(
-      element => !prompt.content.toLowerCase().includes(element.toLowerCase())
+      (element) => !prompt.content.toLowerCase().includes(element.toLowerCase())
     );
 
     if (missingElements.length > 0) {

@@ -59,7 +59,7 @@ interface TabbedLLMChatInterfaceProps {
   employeeRole: string;
   employeeName: string;
   className?: string;
-  onSessionCreated?: (session: any) => void;
+  onSessionCreated?: (session: unknown) => void;
   onError?: (error: UnifiedLLMError) => void;
 }
 
@@ -72,7 +72,7 @@ interface ChatMessage {
   metadata?: {
     provider?: LLMProvider;
     model?: string;
-    usage?: any;
+    usage?: unknown;
     tools?: string[];
     webhook?: string;
     sessionId?: string;

@@ -72,7 +72,7 @@ export interface ToolIntegration {
   type: IntegrationType;
   provider: string;
   version: string;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   isActive: boolean;
   authentication: AuthenticationConfig;
   capabilities: string[];
@@ -96,17 +96,19 @@ export interface ToolExecutionContext {
   priority: 'low' | 'medium' | 'high';
   timeout?: number;
   maxRetries?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ToolExecutionResult {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   executionTime?: number;
   cost?: number;
 }
+
+type ToolParameters = Record<string, unknown>;
 
 // Tool Integration Manager Class
 class ToolIntegrationManager {
@@ -114,7 +116,7 @@ class ToolIntegrationManager {
   private executionQueue: Array<{
     integrationId: string;
     operation: string;
-    parameters: any;
+    parameters: unknown;
     context: ToolExecutionContext;
     resolve: (result: ToolExecutionResult) => void;
     reject: (error: Error) => void;
@@ -194,7 +196,7 @@ class ToolIntegrationManager {
   async executeTool(
     integrationId: string,
     operation: string,
-    parameters: any,
+    parameters: Record<string, unknown>,
     context: ToolExecutionContext
   ): Promise<ToolExecutionResult> {
     return new Promise((resolve, reject) => {
@@ -242,7 +244,7 @@ class ToolIntegrationManager {
   private async executeIntegrationTask(
     integrationId: string,
     operation: string,
-    parameters: any,
+    parameters: Record<string, unknown>,
     context: ToolExecutionContext
   ): Promise<ToolExecutionResult> {
     const integration = this.integrations.get(integrationId);
@@ -298,9 +300,9 @@ class ToolIntegrationManager {
   private async performOperation(
     integration: ToolIntegration,
     operation: string,
-    parameters: any,
+    parameters: Record<string, unknown>,
     context: ToolExecutionContext
-  ): Promise<{ data?: any; metadata?: any; cost?: number }> {
+  ): Promise<{ data?: unknown; metadata?: unknown; cost?: number }> {
     // Simulate different operations based on integration type
     await new Promise(resolve =>
       setTimeout(resolve, Math.random() * 2000 + 500)
@@ -329,8 +331,8 @@ class ToolIntegrationManager {
   private async performAIOperation(
     integration: ToolIntegration,
     operation: string,
-    parameters: any
-  ): Promise<{ data?: any; metadata?: any; cost?: number }> {
+    parameters: ToolParameters
+  ): Promise<{ data?: unknown; metadata?: unknown; cost?: number }> {
     switch (operation) {
       case 'text_completion':
         return {
@@ -363,8 +365,8 @@ class ToolIntegrationManager {
   private async performCommunicationOperation(
     integration: ToolIntegration,
     operation: string,
-    parameters: any
-  ): Promise<{ data?: any; metadata?: any; cost?: number }> {
+    parameters: ToolParameters
+  ): Promise<{ data?: unknown; metadata?: unknown; cost?: number }> {
     switch (operation) {
       case 'send_message':
         return {
@@ -387,8 +389,8 @@ class ToolIntegrationManager {
   private async performAutomationOperation(
     integration: ToolIntegration,
     operation: string,
-    parameters: any
-  ): Promise<{ data?: any; metadata?: any; cost?: number }> {
+    parameters: ToolParameters
+  ): Promise<{ data?: unknown; metadata?: unknown; cost?: number }> {
     switch (operation) {
       case 'trigger_workflow':
         return {
@@ -412,8 +414,8 @@ class ToolIntegrationManager {
   private async performGenericOperation(
     integration: ToolIntegration,
     operation: string,
-    parameters: any
-  ): Promise<{ data?: any; metadata?: any; cost?: number }> {
+    parameters: ToolParameters
+  ): Promise<{ data?: unknown; metadata?: unknown; cost?: number }> {
     switch (operation) {
       case 'test_connection':
         return {

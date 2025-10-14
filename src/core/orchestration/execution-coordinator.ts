@@ -13,23 +13,23 @@ import { agentCommunicator, AgentMessage } from './agent-protocol';
 
 // Simple browser-compatible EventEmitter
 class SimpleEventEmitter {
-  private listeners: Map<string, Function[]> = new Map();
+  private listeners: Map<string, EventListener[]> = new Map();
 
-  on(event: string, listener: Function): void {
+  on(event: string, listener: EventListener): void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, []);
     }
     this.listeners.get(event)!.push(listener);
   }
 
-  emit(event: string, ...args: any[]): void {
+  emit(event: string, ...args: unknown[]): void {
     const eventListeners = this.listeners.get(event);
     if (eventListeners) {
       eventListeners.forEach(listener => listener(...args));
     }
   }
 
-  removeListener(event: string, listener: Function): void {
+  removeListener(event: string, listener: EventListener): void {
     const eventListeners = this.listeners.get(event);
     if (eventListeners) {
       const index = eventListeners.indexOf(listener);
@@ -39,6 +39,8 @@ class SimpleEventEmitter {
     }
   }
 }
+
+type EventListener = (...args: unknown[]) => void;
 
 export type ExecutionStatus =
   | 'pending'
@@ -61,7 +63,7 @@ export interface ExecutionContext {
   startedAt?: Date;
   completedAt?: Date;
   error?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface ExecutionUpdate {
@@ -74,7 +76,7 @@ export interface ExecutionUpdate {
     | 'agent_message';
   executionId: string;
   timestamp: Date;
-  data: any;
+  data: unknown;
 }
 
 export interface ExecutionResult {
@@ -107,7 +109,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
   async execute(
     userId: string,
     plan: ExecutionPlan,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, unknown> = {}
   ): Promise<AsyncGenerator<ExecutionUpdate>> {
     const executionId = this.generateExecutionId();
 
@@ -293,7 +295,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
   private async executeTask(
     context: ExecutionContext,
     task: Task
-  ): Promise<any> {
+  ): Promise<unknown> {
     console.log(
       `🎯 Executing task: ${task.title} with agent: ${task.requiredAgent}`
     );
@@ -388,7 +390,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
     agent: AgentWorker,
     task: Task,
     context: ExecutionContext
-  ): Promise<any> {
+  ): Promise<unknown> {
     // Send request to agent
     const response = await agentCommunicator.sendRequest(
       'system',
@@ -662,7 +664,7 @@ export const executionCoordinator = new ExecutionCoordinator();
 export function startExecution(
   userId: string,
   plan: ExecutionPlan,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<AsyncGenerator<ExecutionUpdate>> {
   return executionCoordinator.execute(userId, plan, metadata);
 }

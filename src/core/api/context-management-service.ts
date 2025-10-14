@@ -26,6 +26,25 @@ export interface ContextWindow {
   provider: string;
 }
 
+export interface PersistedContext {
+  sessionId: string;
+  messages: ContextMessage[];
+  summary?: ContextSummary;
+  totalTokens: number;
+  maxTokens: number;
+  provider: string;
+  exportedAt: Date;
+}
+
+type PersistedContextInput = {
+  sessionId: string;
+  messages?: ContextMessage[];
+  summary?: ContextSummary;
+  totalTokens?: number;
+  maxTokens?: number;
+  provider?: string;
+};
+
 // Token limits for each provider (approximate)
 const TOKEN_LIMITS = {
   openai: {
@@ -161,7 +180,7 @@ export class ContextManagementService {
     // Create summary prompt
     const summaryPrompt = `Please summarize the following conversation, highlighting key points and maintaining context for future interactions:
 
-${messagesToSummarize.map(m => `${m.role}: ${m.content}`).join('\n')}
+${messagesToSummarize.map((m) => `${m.role}: ${m.content}`).join('\n')}
 
 Provide:
 1. A concise summary of the conversation
@@ -280,7 +299,7 @@ Provide:
   /**
    * Export context for persistence
    */
-  exportContext(sessionId: string): any {
+  exportContext(sessionId: string): PersistedContext | null {
     const context = this.contextWindows.get(sessionId);
     if (!context) return null;
 
@@ -298,15 +317,17 @@ Provide:
   /**
    * Import context from persistence
    */
-  importContext(contextData: any): void {
-    if (!contextData || !contextData.sessionId) return;
+  importContext(contextData: PersistedContextInput | null | undefined): void {
+    if (!contextData?.sessionId) {
+      return;
+    }
 
     this.contextWindows.set(contextData.sessionId, {
-      messages: contextData.messages || [],
+      messages: contextData.messages ?? [],
       summary: contextData.summary,
-      totalTokens: contextData.totalTokens || 0,
-      maxTokens: contextData.maxTokens || 4000,
-      provider: contextData.provider || 'unknown',
+      totalTokens: contextData.totalTokens ?? 0,
+      maxTokens: contextData.maxTokens ?? 4000,
+      provider: contextData.provider ?? 'unknown',
     });
   }
 }

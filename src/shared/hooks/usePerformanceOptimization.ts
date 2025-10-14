@@ -69,14 +69,14 @@ export const useDebounce = <T>(value: T, delay: number): T => {
 /**
  * Hook for throttling expensive operations
  */
-export const useThrottle = <T extends (...args: any[]) => any>(
+export const useThrottle = <T extends (...args: unknown[]) => void>(
   callback: T,
   delay: number
 ): T => {
   const lastRun = useRef(Date.now());
 
   return useCallback(
-    ((...args: any[]) => {
+    ((...args: unknown[]) => {
       if (Date.now() - lastRun.current >= delay) {
         callback(...args);
         lastRun.current = Date.now();
@@ -109,7 +109,7 @@ export const useMemoizedValue = <T>(
 /**
  * Hook for lazy loading components
  */
-export const useLazyComponent = <T extends React.ComponentType<any>>(
+export const useLazyComponent = <T extends React.ComponentType<unknown>>(
   importFunc: () => Promise<{ default: T }>,
   fallback?: React.ComponentType
 ) => {

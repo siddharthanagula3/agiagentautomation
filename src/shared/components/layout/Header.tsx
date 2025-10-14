@@ -207,6 +207,9 @@ const Header: React.FC = () => {
           <button
             className="p-2 text-foreground/80 hover:text-foreground lg:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -216,6 +219,9 @@ const Header: React.FC = () => {
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
+              id="mobile-menu"
+              role="dialog"
+              aria-modal="true"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
@@ -405,7 +411,7 @@ const MobileDropdown: React.FC<MobileDropdownProps> = ({
             className="overflow-hidden"
           >
             <div className="mt-1 space-y-1 pl-4">
-              {items.map(item => (
+              {items.map((item) => (
                 <button
                   key={item.path}
                   onClick={() => onNavigate(item.path)}

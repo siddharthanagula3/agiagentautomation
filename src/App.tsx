@@ -9,16 +9,17 @@ import ScrollToTop from '@shared/components/ScrollToTop';
 import { lazyWithRetry } from '@shared/components/LazyWrapper';
 import { Loader2 } from 'lucide-react';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
-import { monitoringService } from '@core/monitoring/monitoring-service';
+import { monitoringService } from '@_core/monitoring/monitoring-service';
 import { usePagePerformanceMonitoring } from '@shared/hooks/usePerformanceMonitoring';
-import { accessibilityService } from '@core/monitoring/accessibility-service';
-import { seoService } from '@core/monitoring/seo-service';
-import { analyticsService } from '@core/monitoring/analytics-service';
-import { performanceService } from '@core/monitoring/performance-service';
-import { backupService } from '@core/storage/backup-service';
-import { scalingService } from '@core/monitoring/scaling-service';
-import { privacyService } from '@core/monitoring/privacy-service';
+import { accessibilityService } from '@_core/monitoring/accessibility-service';
+import { seoService } from '@_core/monitoring/seo-service';
+import { analyticsService } from '@_core/monitoring/analytics-service';
+import { performanceService } from '@_core/monitoring/performance-service';
+import { backupService } from '@_core/storage/backup-service';
+import { scalingService } from '@_core/monitoring/scaling-service';
+import { privacyService } from '@_core/monitoring/privacy-service';
 import SkipLink from '@shared/components/accessibility/SkipLink';
+import { CookieConsent } from '@shared/components/CookieConsent';
 import { PublicLayout } from './layouts/PublicLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { ProtectedRoute } from '@features/auth/components/ProtectedRoute';
@@ -27,7 +28,9 @@ import { AuthLayout } from './layouts/AuthLayout';
 // Lazy load all page components for better performance
 const LandingPage = lazyWithRetry(() => import('./pages/LandingPage'));
 const LoginPage = lazyWithRetry(() => import('@features/auth/pages/LoginPage'));
-const RegisterPage = lazyWithRetry(() => import('@features/auth/pages/RegisterPage'));
+const RegisterPage = lazyWithRetry(
+  () => import('@features/auth/pages/RegisterPage')
+);
 const ForgotPasswordPage = lazyWithRetry(
   () => import('@features/auth/pages/ForgotPasswordPage')
 );
@@ -64,10 +67,7 @@ const MarketplacePublicPage = lazyWithRetry(
 const BillingPage = lazyWithRetry(
   () => import('@features/billing/pages/BillingPage')
 );
-const HelpSupportPage = lazyWithRetry(
-  () => import('./pages/HelpSupportPage')
-);
-const SetupGuidePage = lazyWithRetry(() => import('./pages/SetupGuidePage'));
+const HelpSupportPage = lazyWithRetry(() => import('./pages/HelpSupportPage'));
 
 // Lazy load public pages
 const BlogPage = lazyWithRetry(() => import('./pages/BlogPage'));
@@ -78,13 +78,8 @@ const ContactSalesPage = lazyWithRetry(
   () => import('./pages/ContactSalesPage')
 );
 const AboutPage = lazyWithRetry(() => import('./pages/AboutPage'));
-const CareersPage = lazyWithRetry(() => import('./pages/CareersPage'));
-const SecurityPage = lazyWithRetry(() => import('./pages/SecurityPage'));
 const DocumentationPage = lazyWithRetry(
   () => import('./pages/DocumentationPage')
-);
-const APIReferencePage = lazyWithRetry(
-  () => import('./pages/APIReferencePage')
 );
 
 // Lazy load legal pages
@@ -119,14 +114,6 @@ const AIDashboardsPage = lazyWithRetry(
 );
 const AIProjectManagerPage = lazyWithRetry(
   () => import('./pages/features/AIProjectManagerPage')
-);
-
-// Lazy load comparison pages
-const VsChatGPTPage = lazyWithRetry(
-  () => import('./pages/comparisons/VsChatGPTPage')
-);
-const VsClaudePage = lazyWithRetry(
-  () => import('./pages/comparisons/VsClaudePage')
 );
 
 // Lazy load error and blog pages
@@ -233,15 +220,11 @@ function App() {
                   <Route path="pricing" element={<PricingPage />} />
                   <Route path="contact-sales" element={<ContactSalesPage />} />
                   <Route path="about" element={<AboutPage />} />
-                  <Route path="careers" element={<CareersPage />} />
-                  <Route path="security" element={<SecurityPage />} />
                   <Route path="documentation" element={<DocumentationPage />} />
-                  <Route path="api-reference" element={<APIReferencePage />} />
                   <Route
                     path="marketplace"
                     element={<MarketplacePublicPage />}
                   />
-                  <Route path="setup-guide" element={<SetupGuidePage />} />
 
                   {/* Legal Pages */}
                   <Route
@@ -279,15 +262,6 @@ function App() {
                     path="features/ai-project-manager"
                     element={<AIProjectManagerPage />}
                   />
-
-                  {/* Comparison Pages */}
-                  <Route path="vs-chatgpt" element={<VsChatGPTPage />} />
-                  <Route path="vs-claude" element={<VsClaudePage />} />
-                  <Route
-                    path="chatgpt-alternative"
-                    element={<VsChatGPTPage />}
-                  />
-                  <Route path="claude-alternative" element={<VsClaudePage />} />
                 </Route>
 
                 {/* Auth Routes - Both /auth/* and root level */}
@@ -366,6 +340,9 @@ function App() {
               }}
             />
           </div>
+
+          {/* Cookie Consent Banner */}
+          <CookieConsent />
 
           {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
         </TooltipProvider>

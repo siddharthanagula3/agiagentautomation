@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { analyticsService } from '@core/monitoring/analytics-service';
+import { analyticsService } from '@_core/monitoring/analytics-service';
 
 /**
  * Hook for analytics tracking

@@ -13,7 +13,7 @@ import {
 import {
   getPricingPlans,
   type PricingPlan as DBPricingPlan,
-} from '@core/api/marketing-api';
+} from '@_core/api/marketing-api';
 import { useAuthStore } from '@shared/stores/unified-auth-store';
 import { SEOHead } from '@shared/components/seo/SEOHead';
 import {

@@ -21,7 +21,7 @@ import {
 import type {
   AgentStatus,
   AgentCommunication,
-} from '@core/orchestration/multi-agent-orchestrator';
+} from '@_core/orchestration/multi-agent-orchestrator';
 
 interface Node {
   id: string;

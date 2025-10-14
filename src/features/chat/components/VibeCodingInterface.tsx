@@ -74,13 +74,13 @@ import {
   type Artifact,
   type FileOperation,
   type CommandExecution,
-} from '@core/api/mcp-tools-service';
+} from '@_core/api/mcp-tools-service';
 import {
   multiAgentOrchestrator,
   type AgentCommunication,
   type AgentStatus,
   type OrchestrationPlan,
-} from '@core/orchestration/multi-agent-orchestrator';
+} from '@_core/orchestration/multi-agent-orchestrator';
 import { AgentCollaborationGraph } from './AgentCollaborationGraph';
 import { useAgentMetricsStore } from '@shared/stores/agent-metrics-store';
 

@@ -99,7 +99,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
-import { analyticsService } from '@core/monitoring/analytics-service';
+import { analyticsService } from '@_core/monitoring/analytics-service';
 
 // Types and Interfaces
 export interface AIWorkforce {

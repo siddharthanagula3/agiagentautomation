@@ -58,7 +58,8 @@
       "Bash(bash:*)",
       "Bash(do if [ -d \"$dir\" ])",
       "Bash(git restore:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(wc:*)"
     ],
     "deny": [],
     "ask": []

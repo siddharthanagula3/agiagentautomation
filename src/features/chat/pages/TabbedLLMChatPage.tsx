@@ -47,7 +47,7 @@ import {
   unifiedLLMService,
   LLMProvider,
   UnifiedLLMError,
-} from '@core/api/llm/unified-llm-service';
+} from '@_core/api/llm/unified-llm-service';
 
 interface PurchasedEmployee {
   id: string;

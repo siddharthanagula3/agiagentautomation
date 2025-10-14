@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@shared/ui/card';
-import { authService } from '@core/security/auth-service';
+import { authService } from '@_core/security/auth-service';
 import { Bot, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Particles } from '@shared/ui/particles';

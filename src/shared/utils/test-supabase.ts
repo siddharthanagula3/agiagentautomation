@@ -3,7 +3,7 @@
  * Use this in browser console to test if Supabase is working
  */
 
-import supabaseClient from '@/integrations/supabase/client';
+import { supabase } from '@shared/lib/supabase-client';
 
 export async function testSupabaseConnection() {
   console.log('=== TESTING SUPABASE CONNECTION ===');

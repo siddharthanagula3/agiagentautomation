@@ -19,7 +19,7 @@ import { cn } from '@shared/lib/utils';
 import type {
   ToolExecutionResult,
   ExecutionLog,
-} from '@core/api/tool-executor-service';
+} from '@_core/api/tool-executor-service';
 
 interface ToolExecutionPanelProps {
   execution: ToolExecutionResult;

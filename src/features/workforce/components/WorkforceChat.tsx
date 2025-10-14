@@ -24,11 +24,11 @@ import {
   previewExecution,
   type WorkforceResponse,
   type ExecutionUpdate,
-} from '@core/orchestration/workforce-orchestrator';
+} from '@_core/orchestration/workforce-orchestrator';
 import {
   Task,
   TaskStatus,
-} from '@core/orchestration/reasoning/task-decomposer';
+} from '@_core/orchestration/reasoning/task-decomposer';
 import { Card } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';

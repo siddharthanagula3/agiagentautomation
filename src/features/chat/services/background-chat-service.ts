@@ -12,7 +12,7 @@ import {
   multiAgentOrchestrator,
   type AgentCommunication,
   type AgentStatus,
-} from '@core/orchestration/multi-agent-orchestrator';
+} from '@_core/orchestration/multi-agent-orchestrator';
 
 class BackgroundChatService {
   private activeSessions: Map<

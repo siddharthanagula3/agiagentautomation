@@ -58,13 +58,13 @@ The codebase follows a **feature-based architecture** with strict separation:
 src/
 ├── features/              # Feature modules (self-contained)
 │   ├── auth/             # Login, Register, ProtectedRoute, auth services
-│   ├── chat/             # Chat UI, LLM interactions, streaming
+│   ├── chat/             # Chat UI, LLM interactions, streaming (12 files, consolidated from 31)
 │   ├── workforce/        # AI employee management, marketplace
 │   ├── billing/          # Stripe integration, usage tracking
 │   ├── settings/         # User settings, AI configuration
 │   └── marketplace/      # Public marketplace pages
 │
-├── core/                 # Core infrastructure (DO NOT import from features)
+├── _core/                # Core infrastructure (renamed for AI visibility, DO NOT import from features)
 │   ├── api/             # LLM providers (anthropic, google, openai, perplexity)
 │   │   ├── llm/         # Provider implementations
 │   │   └── ai/          # AI employee executor, service
@@ -91,7 +91,7 @@ src/
 **Path Aliases (use these for imports):**
 
 - `@features/*` → `./src/features/*`
-- `@core/*` → `./src/core/*`
+- `@_core/*` → `./src/_core/*` (renamed from @core for AI visibility)
 - `@shared/*` → `./src/shared/*`
 - `@/*` → `./src/*` (legacy, prefer specific aliases)
 
@@ -99,7 +99,7 @@ src/
 
 #### 1. **LLM Provider Abstraction**
 
-All LLM providers implement a unified interface in `src/core/api/llm/`:
+All LLM providers implement a unified interface in `src/_core/api/llm/`:
 
 - Each provider (anthropic, google, openai, perplexity) exports `sendMessage()` and `streamMessage()`
 - `unified-llm-service.ts` provides a single entry point with provider selection
@@ -108,7 +108,7 @@ All LLM providers implement a unified interface in `src/core/api/llm/`:
 **Example:**
 
 ```typescript
-import { unifiedLLMService } from '@core/api/llm/unified-llm-service';
+import { unifiedLLMService } from '@_core/api/llm/unified-llm-service';
 
 const response = await unifiedLLMService.sendMessage({
   provider: 'openai',
@@ -119,7 +119,7 @@ const response = await unifiedLLMService.sendMessage({
 
 #### 2. **Multi-Agent Orchestration**
 
-Located in `src/core/orchestration/`:
+Located in `src/_core/orchestration/`:
 
 - `multi-agent-orchestrator.ts` - Coordinates multiple AI employees
 - `workforce-orchestrator.ts` - Manages AI workforce tasks
@@ -152,6 +152,14 @@ const { user, signIn, signOut } = useAuthStore();
 
 **Critical:** All database operations must use the centralized Supabase client. Never create new client instances.
 
+## AI-Optimized Documentation
+
+For comprehensive codebase overview optimized for AI context windows:
+
+- **Start here:** `src/_AI_CONTEXT.md` - Single-file architecture overview
+- **Core services:** `src/_core/README.md` - Infrastructure service map
+- **Features:** `src/features/README.md` - Feature module guide
+
 #### 5. **Real-time Features**
 
 - Chat uses Server-Sent Events (SSE) for streaming
@@ -162,18 +170,20 @@ const { user, signIn, signOut } = useAuthStore();
 
 ### Import Rules
 
-1. **Features cannot import from other features** - use `@shared/*` or `@core/*`
-2. **Core cannot import from features** - maintains clean dependency hierarchy
-3. **Shared can import from core** - but not from features
+1. **Features cannot import from other features** - use `@shared/*` or `@_core/*`
+2. **\_core cannot import from features** - maintains clean dependency hierarchy
+3. **Shared can import from \_core** - but not from features
 4. **Use path aliases, not relative imports** beyond adjacent files:
 
    ```typescript
    // ✅ Good
    import { Button } from '@shared/ui/button';
    import { useAuthStore } from '@shared/stores/unified-auth-store';
+   import { unifiedLLMService } from '@_core/api/llm/unified-llm-service';
 
    // ❌ Bad
    import { Button } from '../../../shared/ui/button';
+   import { unifiedLLMService } from '../../../_core/api/llm/unified-llm-service';
    ```
 
 ### Type Safety

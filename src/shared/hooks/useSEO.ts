@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { seoService } from '@core/monitoring/seo-service';
+import { seoService } from '@_core/monitoring/seo-service';
 
 interface SEOOptions {
   title?: string;

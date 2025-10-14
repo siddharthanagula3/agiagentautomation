@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { monitoringService } from '@core/monitoring/monitoring-service';
+import { monitoringService } from '@_core/monitoring/monitoring-service';
 
 interface PerformanceMetrics {
   componentName: string;

@@ -8,7 +8,7 @@ import { persist } from 'zustand/middleware';
 import type {
   AgentStatus,
   AgentCommunication,
-} from '@core/orchestration/multi-agent-orchestrator';
+} from '@_core/orchestration/multi-agent-orchestrator';
 
 export interface ChatSession {
   id: string;

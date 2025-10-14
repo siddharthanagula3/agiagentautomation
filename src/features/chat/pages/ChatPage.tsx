@@ -55,7 +55,7 @@ import {
   isProviderConfigured,
   getConfiguredProviders,
   type AIMessage,
-} from '@core/api/ai-chat-service';
+} from '@_core/api/ai-chat-service';
 import { TokenUsageWarning } from '@features/chat/components/TokenUsageWarning';
 import { ChatErrorBoundary } from '@features/chat/components/ChatErrorBoundary';
 import { useChatState } from '@shared/hooks/useChatState';

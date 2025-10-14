@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { Download, Copy, Code, Eye, Edit, Maximize2, X } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
-import type { Artifact } from '@core/api/artifact-service';
+import type { Artifact } from '@_core/api/artifact-service';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 

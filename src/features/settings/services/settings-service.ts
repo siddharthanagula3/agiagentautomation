@@ -4,7 +4,7 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
-import { authService } from '@core/security/auth-service';
+import { authService } from '@_core/security/auth-service';
 
 export interface UserProfile {
   id: string;

@@ -54,7 +54,7 @@ import {
   type VideoGenerationRequest,
   type MediaGenerationResult,
   type MediaGenerationStats,
-} from '@core/api/media-generation-service';
+} from '@_core/api/media-generation-service';
 
 interface MediaGenerationPanelProps {
   isOpen: boolean;

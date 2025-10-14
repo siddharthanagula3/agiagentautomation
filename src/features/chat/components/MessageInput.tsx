@@ -1,7 +1,7 @@
 import React, { useState, KeyboardEvent } from 'react';
 import { Send, Paperclip, Smile } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Textarea } from '../ui/textarea';
+import { Button } from '@shared/ui/button';
+import { Textarea } from '@shared/ui/textarea';
 
 interface MessageInputProps {
   value: string;
@@ -35,21 +35,21 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
   return (
     <div className="border-t border-border bg-card p-4">
-      <div className="flex items-end space-x-2">
+      <div className="flex flex-col space-y-2 sm:flex-row sm:items-end sm:space-x-2 sm:space-y-0">
         <div className="flex-1">
           <Textarea
             value={value}
-            onChange={e => onChange(e.target.value)}
+            onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={() => setIsComposing(false)}
             placeholder={placeholder}
-            className="max-h-32 min-h-[40px] resize-none"
+            className="max-h-32 min-h-[40px] w-full resize-none"
             disabled={isLoading}
           />
         </div>
 
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center justify-end space-x-1 sm:justify-start">
           <Button variant="ghost" size="sm" className="p-2" title="Attach file">
             <Paperclip className="h-4 w-4" />
           </Button>

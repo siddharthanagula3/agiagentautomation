@@ -377,7 +377,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
     <div className={cn('flex h-screen flex-col bg-background', className)}>
       {/* Header */}
       <div className="border-b bg-card p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center space-x-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-purple-600">
               <Bot className="h-6 w-6 text-white" />
@@ -388,7 +388,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <Badge variant="outline">
+            <Badge variant="outline" className="text-xs">
               {availableTools.length} tools available
             </Badge>
           </div>
@@ -408,7 +408,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
             >
               <div
                 className={cn(
-                  'max-w-[80%] rounded-lg p-4',
+                  'max-w-[90%] rounded-lg p-4 sm:max-w-[80%]',
                   message.type === 'user'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted'
@@ -426,7 +426,9 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
                   {message.status && getStatusIcon(message.status)}
                 </div>
 
-                <div className="whitespace-pre-wrap">{message.content}</div>
+                <div className="overflow-x-auto whitespace-pre-wrap break-words">
+                  {message.content}
+                </div>
 
                 <div className="mt-2 text-xs text-muted-foreground">
                   {message.timestamp.toLocaleTimeString()}

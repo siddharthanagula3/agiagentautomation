@@ -224,7 +224,7 @@ const StartupsPage: React.FC = () => {
                 <img
                   src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=600&fit=crop"
                   alt="Startup team"
-                  className="h-auto w-full rounded-2xl"
+                  className="h-auto w-full max-w-full rounded-2xl"
                 />
               </div>
             </motion.div>

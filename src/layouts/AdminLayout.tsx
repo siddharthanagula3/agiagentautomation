@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { DashboardHeader } from '../components/layout/DashboardHeader';
-import { DashboardSidebar } from '../components/layout/DashboardSidebar';
+import { DashboardHeader } from '@shared/components/layout/DashboardHeader';
+import { DashboardSidebar } from '@shared/components/layout/DashboardSidebar';
 
 const AdminLayout: React.FC = () => {
   return (

@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Particles } from '@/components/ui/particles';
-import { SEOHead } from '@/components/seo/SEOHead';
+import { Button } from '@shared/ui/button';
+import { Badge } from '@shared/ui/badge';
+import { Particles } from '@shared/ui/particles';
+import { SEOHead } from '@shared/components/seo/SEOHead';
 import {
   Target,
   Rocket,

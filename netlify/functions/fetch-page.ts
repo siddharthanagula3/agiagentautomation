@@ -244,7 +244,16 @@ function parseRobotsTxt(robotsText: string, path: string): boolean {
 /**
  * Fetch page content with sanitization
  */
-async function fetchPageContent(url: URL): Promise<any> {
+async function fetchPageContent(url: URL): Promise<{
+  success: boolean;
+  url: string;
+  title?: string;
+  content?: string;
+  summary?: string;
+  metadata?: Record<string, unknown>;
+  fetchedAt: string;
+  error?: string;
+}> {
   try {
     const response = await fetch(url.toString(), {
       method: 'GET',

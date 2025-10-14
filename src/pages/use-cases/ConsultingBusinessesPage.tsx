@@ -10,10 +10,10 @@ import {
   BarChart3,
   Lightbulb,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Particles } from '@/components/ui/particles';
+import { Button } from '@shared/ui/button';
+import { Particles } from '@shared/ui/particles';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/unified-auth-store';
 
 const ConsultingBusinessesPage: React.FC = () => {
   const navigate = useNavigate();

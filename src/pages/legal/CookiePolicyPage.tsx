@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@shared/ui/badge';
 import { Cookie, Settings, BarChart3, Shield } from 'lucide-react';
 
 const CookiePolicyPage: React.FC = () => {

@@ -6,12 +6,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'sonner';
 import AppRouter from './AppRouter';
-import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundary from '@shared/components/ErrorBoundary';
 import './index.css';
 
 // Import Supabase tester for debugging (only in development)
 if (import.meta.env.DEV) {
-  import('./utils/test-supabase');
+  import('@shared/utils/test-supabase');
 }
 
 // Create QueryClient with proper initialization

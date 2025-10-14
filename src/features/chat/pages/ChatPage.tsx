@@ -113,14 +113,14 @@ const ChatPageContent: React.FC = () => {
   const recordedChunksRef = useRef<Blob[]>([]);
 
   // Get active tab data
-  const activeTabData = activeTabs.find(tab => tab.id === selectedTab);
+  const activeTabData = activeTabs.find((tab) => tab.id === selectedTab);
 
   // Generate object URL previews for selected files
   useEffect(() => {
-    const urls = files.map(f => URL.createObjectURL(f));
+    const urls = files.map((f) => URL.createObjectURL(f));
     setFilePreviews(urls);
     return () => {
-      urls.forEach(u => URL.revokeObjectURL(u));
+      urls.forEach((u) => URL.revokeObjectURL(u));
     };
   }, [files]);
 
@@ -179,7 +179,7 @@ const ChatPageContent: React.FC = () => {
 
         console.log('Purchased employees raw data:', rows);
         console.log('Number of employees:', rows.length);
-        const normalized = rows.map(r => ({
+        const normalized = rows.map((r) => ({
           id: r.employee_id,
           name: getEmployeeById(r.employee_id)?.role || '',
           role: getEmployeeById(r.employee_id)?.role || '',
@@ -207,7 +207,7 @@ const ChatPageContent: React.FC = () => {
               role: first.role,
               provider: first.provider,
               isActive: true,
-              messages: msgs.map(m => ({
+              messages: msgs.map((m) => ({
                 id: m.id,
                 role: m.role,
                 content: m.content,
@@ -269,7 +269,7 @@ const ChatPageContent: React.FC = () => {
 
       // Check if tab already exists
       const existingTab = activeTabs.find(
-        tab => tab.employeeId === employee.id
+        (tab) => tab.employeeId === employee.id
       );
       if (existingTab) {
         console.log('Tab already exists, switching to it');
@@ -321,7 +321,7 @@ const ChatPageContent: React.FC = () => {
         ],
       };
 
-      setActiveTabs(prev => [...prev, newTab]);
+      setActiveTabs((prev) => [...prev, newTab]);
       setSelectedTab(newTab.id);
       setIsSelectDialogOpen(false);
       toast.success(`Started chat with ${employee.role}`);
@@ -355,7 +355,7 @@ const ChatPageContent: React.FC = () => {
     // Clear any previous errors
     setError(null);
 
-    const activeTab = activeTabs.find(tab => tab.id === selectedTab);
+    const activeTab = activeTabs.find((tab) => tab.id === selectedTab);
     if (!activeTab) {
       console.error('Active tab not found');
       return;
@@ -372,8 +372,8 @@ const ChatPageContent: React.FC = () => {
     };
 
     // Add user message to UI immediately
-    setActiveTabs(prev =>
-      prev.map(tab => {
+    setActiveTabs((prev) =>
+      prev.map((tab) => {
         if (tab.id === selectedTab) {
           return {
             ...tab,
@@ -409,8 +409,8 @@ const ChatPageContent: React.FC = () => {
 
       // Prepare conversation history for AI
       const conversationHistory: AIMessage[] = activeTab.messages
-        .filter(m => m.role !== 'system')
-        .map(m => ({
+        .filter((m) => m.role !== 'system')
+        .map((m) => ({
           role: m.role,
           content: m.content,
         }));
@@ -466,8 +466,8 @@ const ChatPageContent: React.FC = () => {
         timestamp: new Date(aiMessageRecord.created_at),
       };
 
-      setActiveTabs(prev =>
-        prev.map(tab => {
+      setActiveTabs((prev) =>
+        prev.map((tab) => {
           if (tab.id === selectedTab) {
             return { ...tab, messages: [...tab.messages, aiMessage] };
           }
@@ -488,8 +488,8 @@ const ChatPageContent: React.FC = () => {
         timestamp: new Date(),
       };
 
-      setActiveTabs(prev =>
-        prev.map(tab => {
+      setActiveTabs((prev) =>
+        prev.map((tab) => {
           if (tab.id === selectedTab) {
             return { ...tab, messages: [...tab.messages, errorMessage] };
           }
@@ -512,7 +512,7 @@ const ChatPageContent: React.FC = () => {
   };
 
   const handleCloseTab = (tabId: string) => {
-    setActiveTabs(prev => prev.filter(tab => tab.id !== tabId));
+    setActiveTabs((prev) => prev.filter((tab) => tab.id !== tabId));
     if (selectedTab === tabId) {
       setSelectedTab(activeTabs[0]?.id || null);
     }
@@ -993,7 +993,7 @@ const ChatPageContent: React.FC = () => {
                     </div>
                   ) : (
                     <div className="grid max-h-[400px] gap-3 overflow-y-auto">
-                      {purchasedEmployees.map(employee => {
+                      {purchasedEmployees.map((employee) => {
                         const employeeData = getEmployeeData(employee.id);
                         if (!employeeData) return null;
 
@@ -1097,7 +1097,7 @@ const ChatPageContent: React.FC = () => {
                     Active Chats
                   </h3>
                   <div className="space-y-2">
-                    {activeTabs.map(tab => (
+                    {activeTabs.map((tab) => (
                       <button
                         key={tab.id}
                         onClick={() => setSelectedTab(tab.id)}
@@ -1115,7 +1115,7 @@ const ChatPageContent: React.FC = () => {
                           </span>
                         </div>
                         <button
-                          onClick={e => {
+                          onClick={(e) => {
                             e.stopPropagation();
                             handleCloseTab(tab.id);
                           }}
@@ -1158,7 +1158,7 @@ const ChatPageContent: React.FC = () => {
 
                     {/* Messages */}
                     <div className="mb-4 flex-1 space-y-4 overflow-y-auto">
-                      {activeTabData.messages.map(msg => (
+                      {activeTabData.messages.map((msg) => (
                         <div
                           key={msg.id}
                           className={cn(
@@ -1237,7 +1237,7 @@ const ChatPageContent: React.FC = () => {
                         accept="image/*"
                         multiple
                         className="hidden"
-                        onChange={e =>
+                        onChange={(e) =>
                           setFiles(Array.from(e.target.files || []))
                         }
                       />
@@ -1267,7 +1267,7 @@ const ChatPageContent: React.FC = () => {
                               });
                             const mr = new MediaRecorder(stream);
                             recordedChunksRef.current = [];
-                            mr.ondataavailable = e => {
+                            mr.ondataavailable = (e) => {
                               if (e.data.size > 0)
                                 recordedChunksRef.current.push(e.data);
                             };
@@ -1294,8 +1294,8 @@ const ChatPageContent: React.FC = () => {
                         ref={messageInputRef}
                         type="text"
                         value={message}
-                        onChange={e => setMessage(e.target.value)}
-                        onKeyPress={e =>
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyPress={(e) =>
                           e.key === 'Enter' && !isSending && handleSendMessage()
                         }
                         placeholder={

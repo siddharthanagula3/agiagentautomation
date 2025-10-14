@@ -166,9 +166,7 @@ const ChatKitIntegration: React.FC<ChatKitIntegrationProps> = ({
   };
 
   // Handle ChatKit events
-  const handleSessionCreated = (
-    event: CustomEvent<SessionCreatedDetail>
-  ) => {
+  const handleSessionCreated = (event: CustomEvent<SessionCreatedDetail>) => {
     console.log('ChatKit session created:', event.detail);
     setIsSessionActive(true);
     toast.success('Chat session started');
@@ -178,9 +176,7 @@ const ChatKitIntegration: React.FC<ChatKitIntegrationProps> = ({
     console.log('Message sent:', event.detail);
   };
 
-  const handleMessageReceived = (
-    event: CustomEvent<MessageEventDetail>
-  ) => {
+  const handleMessageReceived = (event: CustomEvent<MessageEventDetail>) => {
     console.log('Message received:', event.detail);
   };
 
@@ -470,7 +466,7 @@ const ChatKitIntegration: React.FC<ChatKitIntegrationProps> = ({
         id="employee-selector"
         className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
         style={{ display: 'none' }}
-        onClick={e => {
+        onClick={(e) => {
           if (e.target === e.currentTarget) {
             e.currentTarget.style.display = 'none';
           }
@@ -495,7 +491,7 @@ const ChatKitIntegration: React.FC<ChatKitIntegrationProps> = ({
             </div>
 
             <div className="grid gap-4">
-              {employees.map(employee => (
+              {employees.map((employee) => (
                 <Card
                   key={employee.id}
                   className={cn(

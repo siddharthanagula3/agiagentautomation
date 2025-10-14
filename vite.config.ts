@@ -63,7 +63,7 @@ export default defineConfig(({ mode }) => {
               target: supabaseUrl,
               changeOrigin: true,
               secure: false,
-              rewrite: path => path.replace(/^\/supabase/, ''),
+              rewrite: (path) => path.replace(/^\/supabase/, ''),
             },
             // Netlify Functions local development proxy
             '/.netlify/functions': {
@@ -139,14 +139,18 @@ export default defineConfig(({ mode }) => {
           manualChunks: {
             // Simplified chunking to avoid initialization issues
             'react-vendor': ['react', 'react-dom', 'react-dom/client'],
-            'router': ['react-router-dom'],
-            'ui-vendor': ['@radix-ui/react-slot', 'lucide-react', 'framer-motion'],
-            'supabase': ['@supabase/supabase-js'],
-            'query': ['@tanstack/react-query'],
-            'utils': ['zustand', 'clsx', 'tailwind-merge'],
+            router: ['react-router-dom'],
+            'ui-vendor': [
+              '@radix-ui/react-slot',
+              'lucide-react',
+              'framer-motion',
+            ],
+            supabase: ['@supabase/supabase-js'],
+            query: ['@tanstack/react-query'],
+            utils: ['zustand', 'clsx', 'tailwind-merge'],
             'ai-vendor': ['openai', '@anthropic-ai/sdk'],
-            'stripe': ['@stripe/stripe-js', '@stripe/react-stripe-js'],
-            'sonner': ['sonner'],
+            stripe: ['@stripe/stripe-js', '@stripe/react-stripe-js'],
+            sonner: ['sonner'],
           },
         },
       },
@@ -177,10 +181,7 @@ export default defineConfig(({ mode }) => {
         'clsx',
         'tailwind-merge',
       ],
-      exclude: [
-        '@sentry/react',
-        '@sentry/tracing',
-      ],
+      exclude: ['@sentry/react', '@sentry/tracing'],
     },
 
     // Simplified ESBuild options

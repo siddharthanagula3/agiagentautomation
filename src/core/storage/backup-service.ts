@@ -78,12 +78,14 @@ class BackupService {
    */
   private startAutomatedBackups(): void {
     const intervalMs = this.getBackupIntervalMs();
-    
+
     this.backupInterval = setInterval(() => {
       this.performBackup('incremental');
     }, intervalMs);
 
-    console.log(`Automated backups scheduled every ${this.config.backupFrequency}`);
+    console.log(
+      `Automated backups scheduled every ${this.config.backupFrequency}`
+    );
   }
 
   /**
@@ -91,20 +93,26 @@ class BackupService {
    */
   private getBackupIntervalMs(): number {
     switch (this.config.backupFrequency) {
-      case 'hourly': return 60 * 60 * 1000;
-      case 'daily': return 24 * 60 * 60 * 1000;
-      case 'weekly': return 7 * 24 * 60 * 60 * 1000;
-      default: return 24 * 60 * 60 * 1000;
+      case 'hourly':
+        return 60 * 60 * 1000;
+      case 'daily':
+        return 24 * 60 * 60 * 1000;
+      case 'weekly':
+        return 7 * 24 * 60 * 60 * 1000;
+      default:
+        return 24 * 60 * 60 * 1000;
     }
   }
 
   /**
    * Perform backup
    */
-  async performBackup(type: 'full' | 'incremental' | 'differential' = 'incremental'): Promise<BackupMetadata> {
+  async performBackup(
+    type: 'full' | 'incremental' | 'differential' = 'incremental'
+  ): Promise<BackupMetadata> {
     const backupId = this.generateBackupId();
     const timestamp = new Date();
-    
+
     const backup: BackupMetadata = {
       id: backupId,
       timestamp,
@@ -118,7 +126,7 @@ class BackupService {
 
     try {
       monitoringService.trackEvent('backup_started', { backupId, type });
-      
+
       // Get list of tables to backup
       const tables = await this.getTablesToBackup();
       backup.tables = tables;
@@ -132,14 +140,14 @@ class BackupService {
       if (this.config.enableCloudBackup) {
         backup.location = await this.storeCloudBackup(backupId, backupData);
       }
-      
+
       if (this.config.enableLocalBackup) {
         await this.storeLocalBackup(backupId, backupData);
       }
 
       // Save backup metadata
       await this.saveBackupMetadata(backup);
-      
+
       backup.status = 'completed';
       this.backups.push(backup);
 
@@ -178,7 +186,7 @@ class BackupService {
 
       if (error) throw error;
 
-      return data.map(row => row.table_name);
+      return data.map((row) => row.table_name);
     } catch (error) {
       console.error('Error getting tables to backup:', error);
       return [];
@@ -196,9 +204,7 @@ class BackupService {
 
     for (const table of tables) {
       try {
-        const { data, error } = await supabase
-          .from(table)
-          .select('*');
+        const { data, error } = await supabase.from(table).select('*');
 
         if (error) throw error;
 
@@ -261,19 +267,17 @@ class BackupService {
    * Save backup metadata
    */
   private async saveBackupMetadata(backup: BackupMetadata): Promise<void> {
-    const { error } = await supabase
-      .from('backup_metadata')
-      .insert({
-        id: backup.id,
-        timestamp: backup.timestamp.toISOString(),
-        type: backup.type,
-        size: backup.size,
-        status: backup.status,
-        tables: backup.tables,
-        checksum: backup.checksum,
-        location: backup.location,
-        created_at: new Date().toISOString(),
-      });
+    const { error } = await supabase.from('backup_metadata').insert({
+      id: backup.id,
+      timestamp: backup.timestamp.toISOString(),
+      type: backup.type,
+      size: backup.size,
+      status: backup.status,
+      tables: backup.tables,
+      checksum: backup.checksum,
+      location: backup.location,
+      created_at: new Date().toISOString(),
+    });
 
     if (error) throw error;
   }
@@ -290,7 +294,7 @@ class BackupService {
 
       if (error) throw error;
 
-      this.backups = data.map(row => ({
+      this.backups = data.map((row) => ({
         id: row.id,
         timestamp: new Date(row.timestamp),
         type: row.type,
@@ -316,7 +320,7 @@ class BackupService {
       monitoringService.trackEvent('restore_started', { backupId, dryRun });
 
       // Find backup
-      const backup = this.backups.find(b => b.id === backupId);
+      const backup = this.backups.find((b) => b.id === backupId);
       if (!backup) {
         throw new Error(`Backup ${backupId} not found`);
       }
@@ -338,7 +342,7 @@ class BackupService {
 
       // Restore tables
       const tablesToRestore = tables || Object.keys(backupData.data);
-      
+
       for (const table of tablesToRestore) {
         if (backupData.data[table]) {
           await this.restoreTable(table, backupData.data[table]);
@@ -349,7 +353,6 @@ class BackupService {
         backupId,
         tables: tablesToRestore,
       });
-
     } catch (error) {
       monitoringService.captureError(error as Error, {
         context: 'restore_operation',
@@ -383,7 +386,10 @@ class BackupService {
   /**
    * Restore table data
    */
-  private async restoreTable(tableName: string, data: unknown[]): Promise<void> {
+  private async restoreTable(
+    tableName: string,
+    data: unknown[]
+  ): Promise<void> {
     try {
       // Clear existing data
       const { error: deleteError } = await supabase
@@ -417,7 +423,7 @@ class BackupService {
     cutoffDate.setDate(cutoffDate.getDate() - this.config.retentionDays);
 
     const oldBackups = this.backups.filter(
-      backup => backup.timestamp < cutoffDate
+      (backup) => backup.timestamp < cutoffDate
     );
 
     for (const backup of oldBackups) {
@@ -436,10 +442,7 @@ class BackupService {
         }
 
         // Delete metadata
-        await supabase
-          .from('backup_metadata')
-          .delete()
-          .eq('id', backup.id);
+        await supabase.from('backup_metadata').delete().eq('id', backup.id);
 
         console.log(`Cleaned up old backup: ${backup.id}`);
       } catch (error) {
@@ -449,7 +452,7 @@ class BackupService {
 
     // Update local backup list
     this.backups = this.backups.filter(
-      backup => backup.timestamp >= cutoffDate
+      (backup) => backup.timestamp >= cutoffDate
     );
   }
 
@@ -471,10 +474,13 @@ class BackupService {
     totalSize: number;
   } {
     const lastBackup = this.backups[0] || null;
-    const nextBackup = this.backupInterval 
+    const nextBackup = this.backupInterval
       ? new Date(Date.now() + this.getBackupIntervalMs())
       : null;
-    const totalSize = this.backups.reduce((sum, backup) => sum + backup.size, 0);
+    const totalSize = this.backups.reduce(
+      (sum, backup) => sum + backup.size,
+      0
+    );
 
     return {
       isEnabled: this.config.enableAutomatedBackups,
@@ -524,7 +530,7 @@ class BackupService {
     try {
       // Create a test backup
       const backup = await this.performBackup('full');
-      
+
       // Test restore (dry run)
       await this.restoreBackup({
         backupId: backup.id,

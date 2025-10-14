@@ -31,11 +31,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@shared/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@shared/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import {
   Plus,
   X,
@@ -278,7 +274,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
   const queryClient = useQueryClient();
 
   // Get active tab
-  const activeTab = tabs.find(tab => tab.id === activeTabId);
+  const activeTab = tabs.find((tab) => tab.id === activeTabId);
   const activeMessages = messages.get(activeTabId) || [];
 
   // Load messages for active tab
@@ -302,7 +298,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
       loadedMessages !== loadedMessagesRef.current
     ) {
       loadedMessagesRef.current = loadedMessages;
-      setMessages(prev => new Map(prev.set(activeTabId, loadedMessages)));
+      setMessages((prev) => new Map(prev.set(activeTabId, loadedMessages)));
     }
   }, [loadedMessages, activeTabId]);
 
@@ -351,7 +347,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
 
     // Add message optimistically
     setMessages(
-      prev =>
+      (prev) =>
         new Map(
           prev.set(currentTabId, [
             ...(prev.get(currentTabId) || []),
@@ -366,12 +362,12 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
 
     try {
       // Simulate sending
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Update status
-      setMessages(prev => {
+      setMessages((prev) => {
         const tabMessages = prev.get(currentTabId) || [];
-        const updatedMessages = tabMessages.map(msg =>
+        const updatedMessages = tabMessages.map((msg) =>
           msg.id === newMessage.id
             ? { ...msg, status: 'delivered' as const }
             : msg
@@ -394,7 +390,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
           };
 
           setMessages(
-            prev =>
+            (prev) =>
               new Map(
                 prev.set(currentTabId, [
                   ...(prev.get(currentTabId) || []),
@@ -407,9 +403,9 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
       );
     } catch (error) {
       // Handle error
-      setMessages(prev => {
+      setMessages((prev) => {
         const tabMessages = prev.get(currentTabId) || [];
-        const updatedMessages = tabMessages.map(msg =>
+        const updatedMessages = tabMessages.map((msg) =>
           msg.id === newMessage.id ? { ...msg, status: 'error' as const } : msg
         );
         return new Map(prev.set(currentTabId, updatedMessages));
@@ -439,8 +435,8 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
       onTabChange?.(tabId);
 
       // Mark messages as read
-      setTabs(prev =>
-        prev.map(tab => (tab.id === tabId ? { ...tab, unreadCount: 0 } : tab))
+      setTabs((prev) =>
+        prev.map((tab) => (tab.id === tabId ? { ...tab, unreadCount: 0 } : tab))
       );
     },
     [onTabChange]
@@ -450,15 +446,15 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
     (tabId: string) => {
       if (tabs.length <= 1) return;
 
-      setTabs(prev => prev.filter(tab => tab.id !== tabId));
-      setMessages(prev => {
+      setTabs((prev) => prev.filter((tab) => tab.id !== tabId));
+      setMessages((prev) => {
         const newMessages = new Map(prev);
         newMessages.delete(tabId);
         return newMessages;
       });
 
       if (activeTabId === tabId) {
-        const remainingTabs = tabs.filter(tab => tab.id !== tabId);
+        const remainingTabs = tabs.filter((tab) => tab.id !== tabId);
         setActiveTabId(remainingTabs[0]?.id || '');
       }
 
@@ -479,7 +475,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
         id: `tab-${Date.now()}`,
       };
 
-      setTabs(prev => [...prev, newTab]);
+      setTabs((prev) => [...prev, newTab]);
       setActiveTabId(newTab.id);
       setShowNewTabDialog(false);
       onTabCreate?.(tabData);
@@ -491,9 +487,9 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
   const handleMessageEdit = useCallback(
     (messageId: string, newContent: string) => {
       const currentTabId = activeTabId;
-      setMessages(prev => {
+      setMessages((prev) => {
         const tabMessages = prev.get(currentTabId) || [];
-        const updatedMessages = tabMessages.map(msg =>
+        const updatedMessages = tabMessages.map((msg) =>
           msg.id === messageId
             ? {
                 ...msg,
@@ -515,9 +511,11 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
   const handleMessageDelete = useCallback(
     (messageId: string) => {
       const currentTabId = activeTabId;
-      setMessages(prev => {
+      setMessages((prev) => {
         const tabMessages = prev.get(currentTabId) || [];
-        const updatedMessages = tabMessages.filter(msg => msg.id !== messageId);
+        const updatedMessages = tabMessages.filter(
+          (msg) => msg.id !== messageId
+        );
         return new Map(prev.set(currentTabId, updatedMessages));
       });
     },
@@ -527,13 +525,13 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
   const handleMessageReaction = useCallback(
     (messageId: string, emoji: string) => {
       const currentTabId = activeTabId;
-      setMessages(prev => {
+      setMessages((prev) => {
         const tabMessages = prev.get(currentTabId) || [];
-        const updatedMessages = tabMessages.map(msg => {
+        const updatedMessages = tabMessages.map((msg) => {
           if (msg.id === messageId) {
             const reactions = msg.metadata?.reactions || [];
             const existingReaction = reactions.find(
-              r => r.emoji === emoji && r.userId === 'user-1'
+              (r) => r.emoji === emoji && r.userId === 'user-1'
             );
 
             if (existingReaction) {
@@ -543,7 +541,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
                 metadata: {
                   ...msg.metadata,
                   reactions: reactions.filter(
-                    r => !(r.emoji === emoji && r.userId === 'user-1')
+                    (r) => !(r.emoji === emoji && r.userId === 'user-1')
                   ),
                 },
               };
@@ -578,7 +576,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
     (files: FileList) => {
       if (!enableFileAttachments) return;
 
-      Array.from(files).forEach(file => {
+      Array.from(files).forEach((file) => {
         if (file.size > 10 * 1024 * 1024) {
           // 10MB limit
           toast.error(`File ${file.name} is too large (max 10MB)`);
@@ -605,7 +603,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
         };
 
         setMessages(
-          prev =>
+          (prev) =>
             new Map(
               prev.set(activeTabId, [...(prev.get(activeTabId) || []), message])
             )
@@ -641,7 +639,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
         <div className="flex flex-1 items-center space-x-4">
           {/* Tab Navigation */}
           <div className="flex max-w-2xl items-center space-x-1 overflow-x-auto">
-            {tabs.map(tab => (
+            {tabs.map((tab) => (
               <motion.button
                 key={tab.id}
                 layout
@@ -687,7 +685,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={e => {
+                    onClick={(e) => {
                       e.stopPropagation();
                       handleTabClose(tab.id);
                     }}
@@ -799,7 +797,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
                 <Input
                   placeholder="Search messages..."
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="border-slate-600/30 bg-slate-700/30 pl-10 text-white placeholder:text-slate-400"
                 />
                 <Button
@@ -850,20 +848,20 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
               </div>
             ) : (
               <div className="space-y-4">
-                {activeMessages.map(message => (
+                {activeMessages.map((message) => (
                   <MessageComponent
                     key={message.id}
                     message={message}
                     onEdit={handleMessageEdit}
                     onDelete={handleMessageDelete}
                     onReaction={handleMessageReaction}
-                    onPin={messageId =>
-                      setPinnedMessages(prev => new Set(prev.add(messageId)))
+                    onPin={(messageId) =>
+                      setPinnedMessages((prev) => new Set(prev.add(messageId)))
                     }
                     isPinned={pinnedMessages.has(message.id)}
                     isSelected={selectedMessages.has(message.id)}
-                    onSelect={messageId => {
-                      setSelectedMessages(prev => {
+                    onSelect={(messageId) => {
+                      setSelectedMessages((prev) => {
                         const newSelection = new Set(prev);
                         if (newSelection.has(messageId)) {
                           newSelection.delete(messageId);
@@ -888,18 +886,18 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
                   ref={inputRef}
                   placeholder={`Message ${activeTab?.title || 'AI Employee'}...`}
                   value={messageInput}
-                  onChange={e => setMessageInput(e.target.value)}
+                  onChange={(e) => setMessageInput(e.target.value)}
                   onKeyPress={handleKeyPress}
                   className="max-h-32 min-h-[44px] resize-none border-slate-600/30 bg-slate-700/30 pr-24 text-white placeholder:text-slate-400"
                   disabled={!activeTabId}
-                  onDrop={e => {
+                  onDrop={(e) => {
                     e.preventDefault();
                     const files = e.dataTransfer.files;
                     if (files.length > 0) {
                       handleFileDrop(files);
                     }
                   }}
-                  onDragOver={e => e.preventDefault()}
+                  onDragOver={(e) => e.preventDefault()}
                 />
 
                 {/* Input Actions */}
@@ -992,7 +990,7 @@ export const MultiTabChatInterface: React.FC<MultiTabChatInterfaceProps> = ({
         type="file"
         multiple
         className="hidden"
-        onChange={e => {
+        onChange={(e) => {
           if (e.target.files) {
             handleFileDrop(e.target.files);
           }
@@ -1132,7 +1130,7 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
             <div className="space-y-2">
               <Textarea
                 value={editContent}
-                onChange={e => setEditContent(e.target.value)}
+                onChange={(e) => setEditContent(e.target.value)}
                 className="border-slate-600/30 bg-slate-700/30 text-white"
                 autoFocus
               />
@@ -1169,7 +1167,7 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
               {/* Attachments */}
               {message.attachments && message.attachments.length > 0 && (
                 <div className="mt-2 space-y-2">
-                  {message.attachments.map(attachment => (
+                  {message.attachments.map((attachment) => (
                     <AttachmentComponent
                       key={attachment.id}
                       attachment={attachment}
@@ -1290,7 +1288,7 @@ const MessageComponent: React.FC<MessageComponentProps> = ({
                 exit={{ opacity: 0, scale: 0.8 }}
                 className="absolute right-8 top-0 z-10 flex space-x-1 rounded-lg border border-slate-700 bg-slate-800 p-1 shadow-lg"
               >
-                {quickReactions.map(emoji => (
+                {quickReactions.map((emoji) => (
                   <Button
                     key={emoji}
                     variant="ghost"
@@ -1638,7 +1636,7 @@ const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({ tab }) => {
 
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-3">
-          {tab.participants.map(participant => (
+          {tab.participants.map((participant) => (
             <div key={participant.id} className="flex items-center space-x-3">
               <div className="relative">
                 <Avatar className="h-8 w-8">
@@ -1742,8 +1740,8 @@ const NewTabForm: React.FC<NewTabFormProps> = ({ onSubmit, onCancel }) => {
         <Label className="text-slate-300">Chat Title</Label>
         <Input
           value={formData.title}
-          onChange={e =>
-            setFormData(prev => ({ ...prev, title: e.target.value }))
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, title: e.target.value }))
           }
           placeholder="Enter chat title..."
           className="mt-1 border-slate-600/30 bg-slate-700/30 text-white"
@@ -1756,7 +1754,7 @@ const NewTabForm: React.FC<NewTabFormProps> = ({ onSubmit, onCancel }) => {
         <Select
           value={formData.type}
           onValueChange={(value: unknown) =>
-            setFormData(prev => ({ ...prev, type: value }))
+            setFormData((prev) => ({ ...prev, type: value }))
           }
         >
           <SelectTrigger className="mt-1 border-slate-600/30 bg-slate-700/30 text-white">
@@ -1775,8 +1773,8 @@ const NewTabForm: React.FC<NewTabFormProps> = ({ onSubmit, onCancel }) => {
           <Label className="text-slate-300">AI Employee</Label>
           <Select
             value={formData.employeeId}
-            onValueChange={value =>
-              setFormData(prev => ({ ...prev, employeeId: value }))
+            onValueChange={(value) =>
+              setFormData((prev) => ({ ...prev, employeeId: value }))
             }
           >
             <SelectTrigger className="mt-1 border-slate-600/30 bg-slate-700/30 text-white">

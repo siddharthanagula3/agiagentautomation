@@ -119,7 +119,7 @@ const BlogPage: React.FC = () => {
       if (page === 0) {
         setBlogPosts(response.posts || []);
       } else {
-        setBlogPosts(prev => [...prev, ...(response.posts || [])]);
+        setBlogPosts((prev) => [...prev, ...(response.posts || [])]);
       }
 
       setHasMore(response.hasMore || false);
@@ -171,8 +171,8 @@ const BlogPage: React.FC = () => {
     return `${minutes} min read`;
   };
 
-  const featuredPost = blogPosts.find(post => post.featured);
-  const regularPosts = blogPosts.filter(post => !post.featured);
+  const featuredPost = blogPosts.find((post) => post.featured);
+  const regularPosts = blogPosts.filter((post) => !post.featured);
 
   const loadMorePosts = () => {
     if (!isLoading && hasMore) {
@@ -215,7 +215,7 @@ const BlogPage: React.FC = () => {
                 type="text"
                 placeholder="Search articles..."
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-12 border-border/40 bg-background/60 pl-12 backdrop-blur-xl"
               />
             </div>

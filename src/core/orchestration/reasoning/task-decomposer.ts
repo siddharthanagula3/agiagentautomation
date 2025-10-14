@@ -550,7 +550,7 @@ export class TaskDecomposer {
    */
   private addDependencies(tasks: Task[], intent: UserIntent): Task[] {
     // Create a copy to avoid mutation
-    const tasksWithDeps = tasks.map(t => ({ ...t }));
+    const tasksWithDeps = tasks.map((t) => ({ ...t }));
 
     // Add logical dependencies
     for (let i = 0; i < tasksWithDeps.length - 1; i++) {
@@ -569,13 +569,13 @@ export class TaskDecomposer {
     }
 
     // Add specific dependencies based on task types
-    tasksWithDeps.forEach(task => {
+    tasksWithDeps.forEach((task) => {
       // Testing tasks depend on implementation tasks
       if (task.type === 'test') {
         const implTasks = tasksWithDeps.filter(
-          t => t.type === 'create' || t.type === 'modify'
+          (t) => t.type === 'create' || t.type === 'modify'
         );
-        implTasks.forEach(implTask => {
+        implTasks.forEach((implTask) => {
           if (!task.dependencies.includes(implTask.id)) {
             task.dependencies.push(implTask.id);
             implTask.dependents.push(task.id);
@@ -588,7 +588,7 @@ export class TaskDecomposer {
         task.title.includes('Review') ||
         task.title.includes('Documentation')
       ) {
-        tasksWithDeps.forEach(t => {
+        tasksWithDeps.forEach((t) => {
           if (t.id !== task.id && !task.dependencies.includes(t.id)) {
             task.dependencies.push(t.id);
             t.dependents.push(task.id);
@@ -609,7 +609,7 @@ export class TaskDecomposer {
     const levels = new Map<number, string[]>();
 
     // Build nodes
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
       nodes.set(task.id, task);
       edges.set(task.id, new Set(task.dependents));
     });
@@ -620,18 +620,18 @@ export class TaskDecomposer {
 
     while (visited.size < tasks.length) {
       const levelTasks = tasks.filter(
-        task =>
+        (task) =>
           !visited.has(task.id) &&
-          task.dependencies.every(dep => visited.has(dep))
+          task.dependencies.every((dep) => visited.has(dep))
       );
 
       if (levelTasks.length === 0) break; // Circular dependency
 
       levels.set(
         level,
-        levelTasks.map(t => t.id)
+        levelTasks.map((t) => t.id)
       );
-      levelTasks.forEach(task => visited.add(task.id));
+      levelTasks.forEach((task) => visited.add(task.id));
       level++;
     }
 
@@ -647,7 +647,7 @@ export class TaskDecomposer {
     // Execute level by level (tasks in same level can run in parallel)
     const sortedLevels = Array.from(graph.levels.keys()).sort((a, b) => a - b);
 
-    sortedLevels.forEach(level => {
+    sortedLevels.forEach((level) => {
       const taskIds = graph.levels.get(level) || [];
 
       // Sort by priority within each level
@@ -712,7 +712,7 @@ export class TaskDecomposer {
     let longestPath: string[] = [];
     let longestTime = 0;
 
-    task.dependents.forEach(depId => {
+    task.dependents.forEach((depId) => {
       const path = this.findLongestPathFrom(depId, graph);
       const pathTime = path.reduce(
         (sum, id) => sum + graph.nodes.get(id)!.estimatedTime,
@@ -737,10 +737,10 @@ export class TaskDecomposer {
     // Sum up time for each level (parallel tasks count as one)
     const sortedLevels = Array.from(graph.levels.keys()).sort((a, b) => a - b);
 
-    sortedLevels.forEach(level => {
+    sortedLevels.forEach((level) => {
       const taskIds = graph.levels.get(level) || [];
       const maxTimeInLevel = Math.max(
-        ...taskIds.map(id => graph.nodes.get(id)!.estimatedTime)
+        ...taskIds.map((id) => graph.nodes.get(id)!.estimatedTime)
       );
       totalTime += maxTimeInLevel;
     });

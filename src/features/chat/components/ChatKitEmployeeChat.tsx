@@ -134,7 +134,7 @@ const ChatKitEmployeeChat: React.FC<ChatKitEmployeeChatProps> = ({
         const ChatKit = await loadChatKit();
 
         // Generate starter prompts from capabilities
-        const starterPrompts = capabilities.slice(0, 5).map(cap => ({
+        const starterPrompts = capabilities.slice(0, 5).map((cap) => ({
           icon: 'sparkles',
           label: cap,
           prompt: `Help me with ${cap}`,

@@ -49,7 +49,9 @@ export async function streamOpenAI(
       body: JSON.stringify({ model, messages, temperature: 0.7 }),
     });
     if (!response.ok) {
-      const data: ErrorResponse = await response.json().catch(() => ({} as ErrorResponse));
+      const data: ErrorResponse = await response
+        .json()
+        .catch(() => ({}) as ErrorResponse);
       throw new Error(
         data?.error || `OpenAI proxy error: ${response.statusText}`
       );
@@ -100,7 +102,7 @@ export async function streamOpenAI(
         break;
       }
       const chunk = decoder.decode(value);
-      const lines = chunk.split('\n').filter(line => line.trim() !== '');
+      const lines = chunk.split('\n').filter((line) => line.trim() !== '');
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const data = line.slice(6);
@@ -144,8 +146,8 @@ export async function streamAnthropic(
   tools?: unknown[],
   model: string = 'claude-3-5-sonnet-20241022'
 ) {
-  const systemMessage = messages.find(m => m.role === 'system');
-  const conversationMessages = messages.filter(m => m.role !== 'system');
+  const systemMessage = messages.find((m) => m.role === 'system');
+  const conversationMessages = messages.filter((m) => m.role !== 'system');
 
   // In production, call Netlify proxy (non-stream) and emit one chunk
   if (import.meta.env.PROD) {
@@ -161,7 +163,9 @@ export async function streamAnthropic(
       }),
     });
     if (!response.ok) {
-      const data: ErrorResponse = await response.json().catch(() => ({} as ErrorResponse));
+      const data: ErrorResponse = await response
+        .json()
+        .catch(() => ({}) as ErrorResponse);
       throw new Error(
         data?.error || `Anthropic proxy error: ${response.statusText}`
       );
@@ -214,7 +218,7 @@ export async function streamAnthropic(
         break;
       }
       const chunk = decoder.decode(value);
-      const lines = chunk.split('\n').filter(line => line.trim() !== '');
+      const lines = chunk.split('\n').filter((line) => line.trim() !== '');
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const data = line.slice(6);
@@ -250,7 +254,9 @@ export async function streamGoogle(
       body: JSON.stringify({ model, messages, temperature: 0.7 }),
     });
     if (!response.ok) {
-      const data: ErrorResponse = await response.json().catch(() => ({} as ErrorResponse));
+      const data: ErrorResponse = await response
+        .json()
+        .catch(() => ({}) as ErrorResponse);
       throw new Error(
         data?.error || `Google proxy error: ${response.statusText}`
       );
@@ -269,12 +275,12 @@ export async function streamGoogle(
   }
 
   const contents = messages
-    .filter(m => m.role !== 'system')
-    .map(m => ({
+    .filter((m) => m.role !== 'system')
+    .map((m) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }],
     }));
-  const systemInstruction = messages.find(m => m.role === 'system')?.content;
+  const systemInstruction = messages.find((m) => m.role === 'system')?.content;
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?key=${GOOGLE_API_KEY}`,

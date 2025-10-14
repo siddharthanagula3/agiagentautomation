@@ -28,11 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@shared/ui/dialog';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@shared/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@shared/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import {
   DropdownMenu,
@@ -299,7 +295,7 @@ export const WorkforceManagement: React.FC<WorkforceManagementProps> = ({
 
   const createWorkforceMutation = useMutation({
     mutationFn: async (workforceData: Partial<AIWorkforce>) => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       return { id: 'new-workforce', ...workforceData };
     },
     onSuccess: () => {
@@ -331,7 +327,7 @@ export const WorkforceManagement: React.FC<WorkforceManagementProps> = ({
         totalMembers: acc.totalMembers + workforce.members.length,
         activeProjects:
           acc.activeProjects +
-          workforce.projects.filter(p => p.status === 'active').length,
+          workforce.projects.filter((p) => p.status === 'active').length,
         totalRevenue: acc.totalRevenue + workforce.performance.totalRevenue,
         avgEfficiency: acc.avgEfficiency + workforce.performance.efficiency,
         avgSatisfaction:
@@ -541,7 +537,7 @@ export const WorkforceManagement: React.FC<WorkforceManagementProps> = ({
                     <Input
                       placeholder="Search teams, projects, or members..."
                       value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       className="border-slate-600/30 bg-slate-700/30 pl-10 text-white placeholder:text-slate-400"
                     />
                   </div>
@@ -774,7 +770,7 @@ const WorkforceCard: React.FC<WorkforceCardProps> = ({
         {/* Team Members */}
         <div className="mb-4 flex items-center space-x-2">
           <div className="flex -space-x-2">
-            {workforce.members.slice(0, 4).map(member => (
+            {workforce.members.slice(0, 4).map((member) => (
               <Avatar
                 key={member.id}
                 className="h-8 w-8 border-2 border-slate-800"
@@ -786,7 +782,7 @@ const WorkforceCard: React.FC<WorkforceCardProps> = ({
                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-xs text-white">
                   {member.employee.name
                     .split(' ')
-                    .map(n => n[0])
+                    .map((n) => n[0])
                     .join('')}
                 </AvatarFallback>
               </Avatar>
@@ -809,7 +805,7 @@ const WorkforceCard: React.FC<WorkforceCardProps> = ({
           <div>
             <p className="text-xs text-slate-400">Projects</p>
             <p className="text-sm font-medium text-white">
-              {workforce.projects.filter(p => p.status === 'active').length}{' '}
+              {workforce.projects.filter((p) => p.status === 'active').length}{' '}
               active
             </p>
           </div>
@@ -942,7 +938,7 @@ const TeamDetailView: React.FC<TeamDetailViewProps> = ({ workforce }) => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {workforce.members.map(member => (
+            {workforce.members.map((member) => (
               <div
                 key={member.id}
                 className="flex items-center justify-between rounded-lg bg-slate-700/30 p-4"
@@ -956,7 +952,7 @@ const TeamDetailView: React.FC<TeamDetailViewProps> = ({ workforce }) => {
                     <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                       {member.employee.name
                         .split(' ')
-                        .map(n => n[0])
+                        .map((n) => n[0])
                         .join('')}
                     </AvatarFallback>
                   </Avatar>
@@ -1028,7 +1024,7 @@ const ProjectManagementView: React.FC<ProjectManagementViewProps> = ({
 
       {/* Projects Grid */}
       <div className="grid gap-6">
-        {workforce.projects.map(project => (
+        {workforce.projects.map((project) => (
           <Card
             key={project.id}
             className="border-slate-700/50 bg-slate-800/50 backdrop-blur-xl"
@@ -1106,7 +1102,7 @@ const ProjectManagementView: React.FC<ProjectManagementViewProps> = ({
                   </div>
 
                   <div className="flex flex-wrap gap-1">
-                    {project.tags.map(tag => (
+                    {project.tags.map((tag) => (
                       <Badge key={tag} variant="secondary" className="text-xs">
                         {tag}
                       </Badge>
@@ -1227,8 +1223,8 @@ const CreateTeamDialog: React.FC<CreateTeamDialogProps> = ({
           <Input
             id="name"
             value={formData.name}
-            onChange={e =>
-              setFormData(prev => ({ ...prev, name: e.target.value }))
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, name: e.target.value }))
             }
             placeholder="e.g., Marketing Team"
             className="mt-2 border-slate-600/30 bg-slate-700/30 text-white placeholder:text-slate-400"
@@ -1243,8 +1239,8 @@ const CreateTeamDialog: React.FC<CreateTeamDialogProps> = ({
           <Textarea
             id="description"
             value={formData.description}
-            onChange={e =>
-              setFormData(prev => ({ ...prev, description: e.target.value }))
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, description: e.target.value }))
             }
             placeholder="Describe the team's purpose and objectives..."
             className="mt-2 min-h-[100px] border-slate-600/30 bg-slate-700/30 text-white placeholder:text-slate-400"
@@ -1257,8 +1253,8 @@ const CreateTeamDialog: React.FC<CreateTeamDialogProps> = ({
           </Label>
           <Select
             value={formData.department}
-            onValueChange={value =>
-              setFormData(prev => ({ ...prev, department: value }))
+            onValueChange={(value) =>
+              setFormData((prev) => ({ ...prev, department: value }))
             }
           >
             <SelectTrigger className="mt-2 border-slate-600/30 bg-slate-700/30 text-slate-300">

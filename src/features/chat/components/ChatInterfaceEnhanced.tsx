@@ -73,7 +73,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
     queryKey: ['tools', employeeId],
     queryFn: async () => {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       return [
         {
           id: '1',
@@ -130,7 +130,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
       }
       return [];
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       if (data.length > 0) {
         setMessages(data);
       } else {
@@ -166,7 +166,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
   const sendMessageMutation = useMutation({
     mutationFn: async (message: string) => {
       // Simulate AI processing
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Generate task plan
       const taskPlan: Task[] = generateTaskPlan(message);
@@ -177,7 +177,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
         taskPlan,
       };
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       const assistantMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         type: 'assistant',
@@ -187,9 +187,9 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
         taskPlan: data.taskPlan,
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     },
-    onError: error => {
+    onError: (error) => {
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
         type: 'assistant',
@@ -197,7 +197,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
         timestamp: new Date(),
         status: 'error',
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     },
   });
 
@@ -290,7 +290,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
 
     // Send to AI
@@ -332,18 +332,18 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
       if (isTaskExecutionPaused) break;
 
       // Update task status to running
-      setCurrentTaskPlan(prev =>
-        prev.map(t =>
+      setCurrentTaskPlan((prev) =>
+        prev.map((t) =>
           t.id === task.id ? { ...t, status: 'running' as const } : t
         )
       );
 
       // Simulate task execution
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Update task status to completed
-      setCurrentTaskPlan(prev =>
-        prev.map(t =>
+      setCurrentTaskPlan((prev) =>
+        prev.map((t) =>
           t.id === task.id
             ? {
                 ...t,
@@ -398,7 +398,7 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
-          {messages.map(message => (
+          {messages.map((message) => (
             <div
               key={message.id}
               className={cn(
@@ -475,8 +475,10 @@ export const ChatInterfaceEnhanced: React.FC<ChatInterfaceEnhancedProps> = ({
         placeholder={`Ask ${employeeName} anything...`}
         showTools={chatInterface.showTools}
         availableTools={availableTools}
-        onToolSelect={tool => {
-          setInputValue(prev => prev + `\n\nPlease use the ${tool.name} tool.`);
+        onToolSelect={(tool) => {
+          setInputValue(
+            (prev) => prev + `\n\nPlease use the ${tool.name} tool.`
+          );
         }}
       />
     </div>

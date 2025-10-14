@@ -167,7 +167,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
       content: userMessage,
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, tempUserMessage]);
+    setMessages((prev) => [...prev, tempUserMessage]);
 
     try {
       // Create user context
@@ -192,7 +192,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
           timestamp: new Date(),
           agentName,
         };
-        setMessages(prev => [...prev, tempAssistantMessage]);
+        setMessages((prev) => [...prev, tempAssistantMessage]);
 
         // Stream the response
         const stream = openAIAgentsService.streamMessage(
@@ -203,7 +203,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
 
         for await (const chunk of stream) {
           fullResponse += chunk;
-          setMessages(prev => {
+          setMessages((prev) => {
             const updated = [...prev];
             const lastMessage = updated[updated.length - 1];
             if (lastMessage.role === 'assistant') {
@@ -220,7 +220,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
           userMessage,
           context
         );
-        setMessages(prev => [...prev, response]);
+        setMessages((prev) => [...prev, response]);
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -246,7 +246,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
 
   // Toggle tool expansion
   const toggleToolExpansion = (toolId: string) => {
-    setExpandedTools(prev => {
+    setExpandedTools((prev) => {
       const next = new Set(prev);
       if (next.has(toolId)) {
         next.delete(toolId);
@@ -263,11 +263,11 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
 
     const lastUserMessage = [...messages]
       .reverse()
-      .find(m => m.role === 'user');
+      .find((m) => m.role === 'user');
     if (!lastUserMessage) return;
 
     // Remove last assistant message
-    setMessages(prev => {
+    setMessages((prev) => {
       const filtered = prev.filter((_, index) => index !== prev.length - 1);
       return filtered;
     });
@@ -349,7 +349,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {conversationTopics.map(topic => {
+                {conversationTopics.map((topic) => {
                   const Icon = topic.icon;
                   return (
                     <SelectItem key={topic.value} value={topic.value}>
@@ -475,7 +475,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
                                 (tool, toolIndex) => {
                                   const Icon = getToolIcon(tool);
                                   const toolExecution = toolExecutions.find(
-                                    te => te.name === tool
+                                    (te) => te.name === tool
                                   );
                                   const isExpanded = expandedTools.has(
                                     `${message.id}-${tool}`
@@ -643,7 +643,7 @@ const AgentChatUI: React.FC<AgentChatUIProps> = ({
           <Input
             ref={inputRef}
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
             placeholder={`Ask ${agentName} anything...`}
             disabled={isLoading || isStreaming}
             className="flex-1"

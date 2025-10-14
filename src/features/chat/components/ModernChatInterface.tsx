@@ -195,13 +195,13 @@ const ModernChatInterface: React.FC = () => {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
 
     try {
       // Simulate AI response with task generation
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const aiResponse: ChatMessage = {
         id: `msg-${Date.now() + 1}`,
@@ -224,11 +224,11 @@ const ModernChatInterface: React.FC = () => {
         },
       };
 
-      setMessages(prev => [...prev, aiResponse]);
+      setMessages((prev) => [...prev, aiResponse]);
 
       // Add generated tasks
       if (aiResponse.tasks) {
-        setTasks(prev => [...prev, ...aiResponse.tasks!]);
+        setTasks((prev) => [...prev, ...aiResponse.tasks!]);
       }
 
       // Update token tracking
@@ -304,8 +304,8 @@ const ModernChatInterface: React.FC = () => {
   };
 
   const handleTaskStatusChange = (taskId: string, status: Task['status']) => {
-    setTasks(prev =>
-      prev.map(task =>
+    setTasks((prev) =>
+      prev.map((task) =>
         task.id === taskId ? { ...task, status, updatedAt: new Date() } : task
       )
     );
@@ -315,18 +315,18 @@ const ModernChatInterface: React.FC = () => {
     taskId: string,
     priority: Task['priority']
   ) => {
-    setTasks(prev =>
-      prev.map(task =>
+    setTasks((prev) =>
+      prev.map((task) =>
         task.id === taskId ? { ...task, priority, updatedAt: new Date() } : task
       )
     );
   };
 
   const handleDeleteTask = (taskId: string) => {
-    setTasks(prev => prev.filter(task => task.id !== taskId));
+    setTasks((prev) => prev.filter((task) => task.id !== taskId));
   };
 
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = tasks.filter((task) => {
     const matchesStatus =
       filterStatus === 'all' || task.status === filterStatus;
     const matchesPriority =
@@ -391,7 +391,7 @@ const ModernChatInterface: React.FC = () => {
               <h1 className="text-xl font-semibold">AI Workspace</h1>
             </div>
             <Badge variant="outline" className="text-xs">
-              {agents.filter(a => a.isActive).length} Agents Active
+              {agents.filter((a) => a.isActive).length} Agents Active
             </Badge>
           </div>
 
@@ -474,14 +474,14 @@ const ModernChatInterface: React.FC = () => {
                     <Input
                       placeholder="Search tasks..."
                       value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       className="h-8"
                     />
 
                     <div className="flex gap-1">
                       <select
                         value={filterStatus}
-                        onChange={e => setFilterStatus(e.target.value)}
+                        onChange={(e) => setFilterStatus(e.target.value)}
                         className="rounded border bg-background px-2 py-1 text-xs"
                       >
                         <option value="all">All Status</option>
@@ -493,7 +493,7 @@ const ModernChatInterface: React.FC = () => {
 
                       <select
                         value={filterPriority}
-                        onChange={e => setFilterPriority(e.target.value)}
+                        onChange={(e) => setFilterPriority(e.target.value)}
                         className="rounded border bg-background px-2 py-1 text-xs"
                       >
                         <option value="all">All Priority</option>
@@ -507,7 +507,7 @@ const ModernChatInterface: React.FC = () => {
                 </div>
 
                 <div className="max-h-96 space-y-2 overflow-y-auto">
-                  {filteredTasks.map(task => (
+                  {filteredTasks.map((task) => (
                     <motion.div
                       key={task.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -517,7 +517,7 @@ const ModernChatInterface: React.FC = () => {
                       <div className="flex items-start gap-3">
                         <Checkbox
                           checked={task.status === 'completed'}
-                          onCheckedChange={checked =>
+                          onCheckedChange={(checked) =>
                             handleTaskStatusChange(
                               task.id,
                               checked ? 'completed' : 'pending'
@@ -601,7 +601,7 @@ const ModernChatInterface: React.FC = () => {
                 <div className="space-y-2">
                   <h3 className="font-medium">AI Agents</h3>
                   <div className="space-y-2">
-                    {agents.map(agent => (
+                    {agents.map((agent) => (
                       <div
                         key={agent.id}
                         className="rounded-lg border bg-background p-3"
@@ -634,7 +634,7 @@ const ModernChatInterface: React.FC = () => {
                         </p>
 
                         <div className="flex flex-wrap gap-1">
-                          {agent.capabilities.slice(0, 3).map(capability => (
+                          {agent.capabilities.slice(0, 3).map((capability) => (
                             <Badge
                               key={capability}
                               variant="secondary"
@@ -663,7 +663,7 @@ const ModernChatInterface: React.FC = () => {
           {/* Messages */}
           <div className="flex-1 space-y-4 overflow-y-auto p-4">
             <AnimatePresence>
-              {messages.map(message => (
+              {messages.map((message) => (
                 <motion.div
                   key={message.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -703,7 +703,7 @@ const ModernChatInterface: React.FC = () => {
                         <div className="text-xs font-medium text-muted-foreground">
                           Generated Tasks:
                         </div>
-                        {message.tasks.map(task => (
+                        {message.tasks.map((task) => (
                           <div
                             key={task.id}
                             className="flex items-center gap-2 rounded bg-background/50 p-2"
@@ -748,8 +748,8 @@ const ModernChatInterface: React.FC = () => {
               <Textarea
                 ref={inputRef}
                 value={inputMessage}
-                onChange={e => setInputMessage(e.target.value)}
-                onKeyDown={e => {
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSendMessage();

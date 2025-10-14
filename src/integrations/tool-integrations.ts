@@ -182,13 +182,13 @@ class ToolIntegrationManager {
 
   getActiveIntegrations(): ToolIntegration[] {
     return this.getAllIntegrations().filter(
-      integration => integration.isActive
+      (integration) => integration.isActive
     );
   }
 
   getIntegrationsByType(type: IntegrationType): ToolIntegration[] {
     return this.getAllIntegrations().filter(
-      integration => integration.type === type
+      (integration) => integration.type === type
     );
   }
 
@@ -304,7 +304,7 @@ class ToolIntegrationManager {
     context: ToolExecutionContext
   ): Promise<{ data?: unknown; metadata?: unknown; cost?: number }> {
     // Simulate different operations based on integration type
-    await new Promise(resolve =>
+    await new Promise((resolve) =>
       setTimeout(resolve, Math.random() * 2000 + 500)
     );
 
@@ -550,7 +550,7 @@ class ToolIntegrationManager {
 
     return {
       totalIntegrations: integrations.length,
-      activeIntegrations: integrations.filter(int => int.isActive).length,
+      activeIntegrations: integrations.filter((int) => int.isActive).length,
       totalRequests,
       successRate:
         totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0,
@@ -566,7 +566,7 @@ class ToolIntegrationManager {
     requests: number;
     costPerRequest: number;
   }> {
-    return this.getAllIntegrations().map(integration => ({
+    return this.getAllIntegrations().map((integration) => ({
       integrationId: integration.id,
       name: integration.name,
       cost: integration.usageStats.totalCost,

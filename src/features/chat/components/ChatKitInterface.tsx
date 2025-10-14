@@ -273,7 +273,7 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
   }, [tabs, scrollToBottom]);
 
   // Get current tab
-  const currentTab = tabs.find(tab => tab.id === activeTab);
+  const currentTab = tabs.find((tab) => tab.id === activeTab);
 
   // Send message
   const handleSendMessage = async () => {
@@ -294,8 +294,8 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
     };
 
     // Add user message to current tab
-    setTabs(prevTabs =>
-      prevTabs.map(tab =>
+    setTabs((prevTabs) =>
+      prevTabs.map((tab) =>
         tab.id === activeTab
           ? { ...tab, messages: [...tab.messages, userMessage] }
           : tab
@@ -306,8 +306,8 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
     setIsLoading(true);
 
     // Set streaming state
-    setTabs(prevTabs =>
-      prevTabs.map(tab =>
+    setTabs((prevTabs) =>
+      prevTabs.map((tab) =>
         tab.id === activeTab ? { ...tab, isStreaming: true } : tab
       )
     );
@@ -315,7 +315,7 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
     try {
       // Convert messages to unified format
       const messages: UnifiedMessage[] = [
-        ...currentTab.messages.map(msg => ({
+        ...currentTab.messages.map((msg) => ({
           role: msg.role,
           content: msg.content,
           metadata: {
@@ -370,8 +370,8 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
       };
 
       // Add empty assistant message
-      setTabs(prevTabs =>
-        prevTabs.map(tab =>
+      setTabs((prevTabs) =>
+        prevTabs.map((tab) =>
           tab.id === activeTab
             ? { ...tab, messages: [...tab.messages, assistantMessage] }
             : tab
@@ -389,12 +389,12 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
           assistantContent += chunk.content;
 
           // Update assistant message content
-          setTabs(prevTabs =>
-            prevTabs.map(tab =>
+          setTabs((prevTabs) =>
+            prevTabs.map((tab) =>
               tab.id === activeTab
                 ? {
                     ...tab,
-                    messages: tab.messages.map(msg =>
+                    messages: tab.messages.map((msg) =>
                       msg.id === assistantMessage.id
                         ? { ...msg, content: assistantContent }
                         : msg
@@ -407,12 +407,12 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
 
         if (chunk.done) {
           // Update final message with usage info
-          setTabs(prevTabs =>
-            prevTabs.map(tab =>
+          setTabs((prevTabs) =>
+            prevTabs.map((tab) =>
               tab.id === activeTab
                 ? {
                     ...tab,
-                    messages: tab.messages.map(msg =>
+                    messages: tab.messages.map((msg) =>
                       msg.id === assistantMessage.id
                         ? {
                             ...msg,
@@ -460,8 +460,8 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
         },
       };
 
-      setTabs(prevTabs =>
-        prevTabs.map(tab =>
+      setTabs((prevTabs) =>
+        prevTabs.map((tab) =>
           tab.id === activeTab
             ? {
                 ...tab,
@@ -550,12 +550,12 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
     messageId: string,
     feedback: 'thumbs_up' | 'thumbs_down'
   ) => {
-    setTabs(prevTabs =>
-      prevTabs.map(tab =>
+    setTabs((prevTabs) =>
+      prevTabs.map((tab) =>
         tab.id === activeTab
           ? {
               ...tab,
-              messages: tab.messages.map(msg =>
+              messages: tab.messages.map((msg) =>
                 msg.id === messageId
                   ? {
                       ...msg,
@@ -735,7 +735,7 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
             <Textarea
               placeholder="Enter your prompt to optimize..."
               value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
+              onChange={(e) => setInputValue(e.target.value)}
               className="min-h-[80px]"
             />
             <div className="flex gap-2">
@@ -776,7 +776,7 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
       >
         <div className="border-b border-gray-200">
           <TabsList className="grid w-full grid-cols-4 bg-white">
-            {tabs.map(tab => (
+            {tabs.map((tab) => (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
@@ -797,7 +797,7 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
         </div>
 
         {/* Tab Content */}
-        {tabs.map(tab => (
+        {tabs.map((tab) => (
           <TabsContent
             key={tab.id}
             value={tab.id}
@@ -875,7 +875,7 @@ const ChatKitInterface: React.FC<ChatKitInterfaceProps> = ({
                     <div className="relative flex-1">
                       <Input
                         value={inputValue}
-                        onChange={e => setInputValue(e.target.value)}
+                        onChange={(e) => setInputValue(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder={`Message ${tab.name}...`}
                         disabled={isLoading || tab.isStreaming}

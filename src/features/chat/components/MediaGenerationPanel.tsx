@@ -98,16 +98,19 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
   const [imageStyle, setImageStyle] = useState<ImageStyle>('realistic');
   const [imageSize, setImageSize] = useState<ImageSize>('1024x1024');
   const [imageQuality, setImageQuality] = useState<ImageQuality>('standard');
-  const [imageAspectRatio, setImageAspectRatio] = useState<ImageAspectRatio>('1:1');
+  const [imageAspectRatio, setImageAspectRatio] =
+    useState<ImageAspectRatio>('1:1');
   const [negativePrompt, setNegativePrompt] = useState('');
   const [imageSeed, setImageSeed] = useState<number | undefined>();
 
   // Video generation state
   const [videoPrompt, setVideoPrompt] = useState('');
   const [videoStyle, setVideoStyle] = useState<VideoStyle>('realistic');
-  const [videoResolution, setVideoResolution] = useState<VideoResolution>('1080p');
+  const [videoResolution, setVideoResolution] =
+    useState<VideoResolution>('1080p');
   const [videoDuration, setVideoDuration] = useState(5);
-  const [videoAspectRatio, setVideoAspectRatio] = useState<VideoAspectRatio>('16:9');
+  const [videoAspectRatio, setVideoAspectRatio] =
+    useState<VideoAspectRatio>('16:9');
   const [videoFps, setVideoFps] = useState(24);
   const [videoSeed, setVideoSeed] = useState<number | undefined>();
 
@@ -119,9 +122,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
   });
   const imageSizes = imageSizes as ImageSize[];
   const videoStyles = videoStyles as VideoStyle[];
-  const videoResolutions = (
-    videoResolutions as VideoResolution[]
-  );
+  const videoResolutions = videoResolutions as VideoResolution[];
   const handleTabChange = (value: string) => {
     if (value === 'image' || value === 'video') {
       setActiveTab(value);
@@ -153,7 +154,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
     try {
       // Simulate progress
       const progressInterval = setInterval(() => {
-        setGenerationProgress(prev => {
+        setGenerationProgress((prev) => {
           if (prev >= 90) {
             clearInterval(progressInterval);
             return prev;
@@ -202,7 +203,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
     try {
       // Simulate progress
       const progressInterval = setInterval(() => {
-        setGenerationProgress(prev => {
+        setGenerationProgress((prev) => {
           if (prev >= 90) {
             clearInterval(progressInterval);
             return prev;
@@ -336,10 +337,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
           </div>
 
           {/* Generation Tabs */}
-          <Tabs
-            value={activeTab}
-            onValueChange={handleTabChange}
-          >
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="image">Image Generation</TabsTrigger>
               <TabsTrigger value="video">Video Generation</TabsTrigger>
@@ -358,7 +356,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                     <label className="text-sm font-medium">Prompt</label>
                     <Textarea
                       value={imagePrompt}
-                      onChange={e => setImagePrompt(e.target.value)}
+                      onChange={(e) => setImagePrompt(e.target.value)}
                       placeholder="Describe the image you want to generate..."
                       className="min-h-[100px]"
                     />
@@ -367,13 +365,19 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Style</label>
-                      <Select value={imageStyle} onValueChange={value => setImageStyle(value as ImageStyle)}>
+                      <Select
+                        value={imageStyle}
+                        onValueChange={(value) =>
+                          setImageStyle(value as ImageStyle)
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {mediaGenerationService.getImageStyles()
-                            .map(style => (
+                          {mediaGenerationService
+                            .getImageStyles()
+                            .map((style) => (
                               <SelectItem key={style} value={style}>
                                 {style.charAt(0).toUpperCase() + style.slice(1)}
                               </SelectItem>
@@ -384,16 +388,23 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Size</label>
-                      <Select value={imageSize} onValueChange={value => setImageSize(value as ImageSize)}>
+                      <Select
+                        value={imageSize}
+                        onValueChange={(value) =>
+                          setImageSize(value as ImageSize)
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {mediaGenerationService.getImageSizes().map(size => (
-                            <SelectItem key={size} value={size}>
-                              {size}
-                            </SelectItem>
-                          ))}
+                          {mediaGenerationService
+                            .getImageSizes()
+                            .map((size) => (
+                              <SelectItem key={size} value={size}>
+                                {size}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -404,7 +415,9 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                       <label className="text-sm font-medium">Quality</label>
                       <Select
                         value={imageQuality}
-                        onValueChange={value => setImageQuality(value as ImageQuality)}
+                        onValueChange={(value) =>
+                          setImageQuality(value as ImageQuality)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -422,7 +435,9 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                       </label>
                       <Select
                         value={imageAspectRatio}
-                        onValueChange={value => setImageAspectRatio(value as ImageAspectRatio)}
+                        onValueChange={(value) =>
+                          setImageAspectRatio(value as ImageAspectRatio)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -444,7 +459,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                     </label>
                     <Input
                       value={negativePrompt}
-                      onChange={e => setNegativePrompt(e.target.value)}
+                      onChange={(e) => setNegativePrompt(e.target.value)}
                       placeholder="What you don't want in the image..."
                     />
                   </div>
@@ -493,7 +508,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                     <label className="text-sm font-medium">Prompt</label>
                     <Textarea
                       value={videoPrompt}
-                      onChange={e => setVideoPrompt(e.target.value)}
+                      onChange={(e) => setVideoPrompt(e.target.value)}
                       placeholder="Describe the video you want to generate..."
                       className="min-h-[100px]"
                     />
@@ -502,13 +517,19 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Style</label>
-                      <Select value={videoStyle} onValueChange={value => setVideoStyle(value as VideoStyle)}>
+                      <Select
+                        value={videoStyle}
+                        onValueChange={(value) =>
+                          setVideoStyle(value as VideoStyle)
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {mediaGenerationService.getVideoStyles()
-                            .map(style => (
+                          {mediaGenerationService
+                            .getVideoStyles()
+                            .map((style) => (
                               <SelectItem key={style} value={style}>
                                 {style.charAt(0).toUpperCase() + style.slice(1)}
                               </SelectItem>
@@ -521,14 +542,17 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                       <label className="text-sm font-medium">Resolution</label>
                       <Select
                         value={videoResolution}
-                        onValueChange={value => setVideoResolution(value as VideoResolution)}
+                        onValueChange={(value) =>
+                          setVideoResolution(value as VideoResolution)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {mediaGenerationService.getVideoResolutions()
-                            .map(res => (
+                          {mediaGenerationService
+                            .getVideoResolutions()
+                            .map((res) => (
                               <SelectItem key={res} value={res}>
                                 {res}
                               </SelectItem>
@@ -546,7 +570,9 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                       <Input
                         type="number"
                         value={videoDuration}
-                        onChange={e => setVideoDuration(Number(e.target.value))}
+                        onChange={(e) =>
+                          setVideoDuration(Number(e.target.value))
+                        }
                         min="1"
                         max="60"
                       />
@@ -557,7 +583,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                       <Input
                         type="number"
                         value={videoFps}
-                        onChange={e => setVideoFps(Number(e.target.value))}
+                        onChange={(e) => setVideoFps(Number(e.target.value))}
                         min="12"
                         max="60"
                       />
@@ -568,7 +594,9 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                     <label className="text-sm font-medium">Aspect Ratio</label>
                     <Select
                       value={videoAspectRatio}
-                      onValueChange={value => setVideoAspectRatio(value as VideoAspectRatio)}
+                      onValueChange={(value) =>
+                        setVideoAspectRatio(value as VideoAspectRatio)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -635,7 +663,7 @@ const MediaGenerationPanel: React.FC<MediaGenerationPanelProps> = ({
                   {generationHistory
                     .slice(-10)
                     .reverse()
-                    .map(result => (
+                    .map((result) => (
                       <motion.div
                         key={result.id}
                         initial={{ opacity: 0, y: 20 }}

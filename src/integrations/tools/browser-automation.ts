@@ -199,7 +199,13 @@ export class BrowserAutomationTool {
       } else {
         // Fallback: use browser's built-in screenshot capability
         if (typeof window !== 'undefined' && 'html2canvas' in window) {
-          const html2canvas = (window as { html2canvas?: (element: HTMLElement) => Promise<HTMLCanvasElement> }).html2canvas;
+          const html2canvas = (
+            window as {
+              html2canvas?: (
+                element: HTMLElement
+              ) => Promise<HTMLCanvasElement>;
+            }
+          ).html2canvas;
           const canvas = await html2canvas(document.body);
           const screenshot = canvas.toDataURL('image/png');
 
@@ -232,7 +238,7 @@ export class BrowserAutomationTool {
     try {
       if (typeof document !== 'undefined') {
         const elements = document.querySelectorAll(selector);
-        const data = Array.from(elements).map(el => ({
+        const data = Array.from(elements).map((el) => ({
           text: el.textContent?.trim(),
           html: el.innerHTML,
           attributes: Array.from(el.attributes).reduce(
@@ -274,7 +280,7 @@ export class BrowserAutomationTool {
       if (typeof document !== 'undefined') {
         const startTime = Date.now();
 
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           const checkElement = () => {
             const element = document.querySelector(selector);
             if (element) {

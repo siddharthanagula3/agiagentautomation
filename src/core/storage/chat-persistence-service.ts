@@ -184,7 +184,7 @@ export class ChatPersistenceService {
     this.state.messages.set(sessionId, messages);
 
     // Update session timestamp
-    const session = this.state.sessions.find(s => s.id === sessionId);
+    const session = this.state.sessions.find((s) => s.id === sessionId);
     if (session) {
       session.updatedAt = new Date();
     }
@@ -221,14 +221,14 @@ export class ChatPersistenceService {
    * Get all sessions for user
    */
   getSessions(userId: string): ChatSession[] {
-    return this.state.sessions.filter(s => s.userId === userId);
+    return this.state.sessions.filter((s) => s.userId === userId);
   }
 
   /**
    * Get active session
    */
   getActiveSession(): ChatSession | undefined {
-    return this.state.sessions.find(s => s.id === this.state.activeSessionId);
+    return this.state.sessions.find((s) => s.id === this.state.activeSessionId);
   }
 
   /**
@@ -243,7 +243,7 @@ export class ChatPersistenceService {
    * Update session title
    */
   async updateSessionTitle(sessionId: string, title: string): Promise<void> {
-    const session = this.state.sessions.find(s => s.id === sessionId);
+    const session = this.state.sessions.find((s) => s.id === sessionId);
     if (session) {
       session.title = title;
       session.updatedAt = new Date();
@@ -267,7 +267,7 @@ export class ChatPersistenceService {
    * Delete session
    */
   async deleteSession(sessionId: string): Promise<void> {
-    this.state.sessions = this.state.sessions.filter(s => s.id !== sessionId);
+    this.state.sessions = this.state.sessions.filter((s) => s.id !== sessionId);
     this.state.messages.delete(sessionId);
     this.state.contextWindows.delete(sessionId);
 
@@ -375,7 +375,7 @@ export class ChatPersistenceService {
         return;
       }
 
-      this.state.sessions = sessions.map(s => ({
+      this.state.sessions = sessions.map((s) => ({
         id: s.id,
         userId: s.user_id,
         employeeId: s.employee_id,
@@ -402,7 +402,7 @@ export class ChatPersistenceService {
 
         this.state.messages.set(
           session.id,
-          messages.map(m => ({
+          messages.map((m) => ({
             id: m.id,
             sessionId: m.session_id,
             role: m.role,

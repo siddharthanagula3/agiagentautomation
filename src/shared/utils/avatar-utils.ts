@@ -1,93 +1,108 @@
 /**
  * Avatar Utilities
- * Handles avatar generation with fallbacks for rate limiting and failures
+ * Handles avatar generation with local emoji-based avatars
+ * No external API dependencies for faster, more reliable loading
  */
 
-// Fallback avatar URLs for when DiceBear API is unavailable
-// Using robot/AI-themed avatars instead of human faces
-const FALLBACK_AVATARS = [
-  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-1&backgroundColor=6366f1&eyes=bulging&mouth=smile',
-  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-2&backgroundColor=8b5cf6&eyes=bulging&mouth=smile',
-  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-3&backgroundColor=06b6d4&eyes=bulging&mouth=smile',
-  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-4&backgroundColor=10b981&eyes=bulging&mouth=smile',
-  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-5&backgroundColor=f59e0b&eyes=bulging&mouth=smile',
-  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-6&backgroundColor=ef4444&eyes=bulging&mouth=smile',
-  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-7&backgroundColor=ec4899&eyes=bulging&mouth=smile',
-  'https://api.dicebear.com/7.x/bottts/svg?seed=robot-8&backgroundColor=84cc16&eyes=bulging&mouth=smile',
+// Emoji-based avatars for AI employees (no external API needed)
+// These work across all browsers and load instantly
+const EMOJI_AVATARS = [
+  '🤖', // Robot face
+  '👨‍💻', // Man technologist
+  '👩‍💻', // Woman technologist
+  '🧑‍💼', // Person in business suit
+  '👨‍🔬', // Man scientist
+  '👩‍🔬', // Woman scientist
+  '🧑‍🎨', // Person artist
+  '👨‍🏫', // Man teacher
+  '👩‍🏫', // Woman teacher
+  '🧑‍🚀', // Person astronaut
+  '👨‍⚕️', // Man health worker
+  '👩‍⚕️', // Woman health worker
+  '🧑‍⚖️', // Person judge
+  '👨‍🌾', // Man farmer
+  '👩‍🌾', // Woman farmer
+  '🧑‍🍳', // Person cook
 ];
 
 /**
- * Get a fallback avatar URL based on a seed string
+ * Get a deterministic emoji avatar based on a seed string
  * @param seed - String to use for consistent avatar selection
- * @returns Fallback avatar URL
+ * @returns Emoji character for avatar
  */
 export function getFallbackAvatar(seed: string): string {
-  // Simple hash function to consistently select the same fallback for the same seed
+  // Simple hash function to consistently select the same emoji for the same seed
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
     const char = seed.charCodeAt(i);
     hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
-  const index = Math.abs(hash) % FALLBACK_AVATARS.length;
-  return FALLBACK_AVATARS[index];
+  const index = Math.abs(hash) % EMOJI_AVATARS.length;
+
+  // Return emoji as data URL SVG for use in img src
+  const emoji = EMOJI_AVATARS[index];
+  return `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect width="100" height="100" fill="hsl(${hash % 360}, 70%, 95%)"/>
+      <text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-size="50">${emoji}</text>
+    </svg>`
+  )}`;
 }
 
 /**
- * Get avatar URL with fallback handling
+ * Get avatar URL (now uses local emoji-based avatars)
  * @param seed - Seed for avatar generation
- * @param useFallback - Whether to use fallback instead of DiceBear
- * @returns Avatar URL
+ * @param useFallback - Unused parameter (kept for compatibility)
+ * @returns Avatar data URL
  */
 export function getAvatarUrl(
   seed: string,
-  useFallback: boolean = false
+  _useFallback: boolean = false
 ): string {
-  if (useFallback) {
-    return getFallbackAvatar(seed);
-  }
-
-  // Use DiceBear API with bottts style for AI employees
-  return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}&backgroundColor=6366f1&eyes=bulging&mouth=smile`;
+  return getFallbackAvatar(seed);
 }
 
 /**
- * Generate avatar URL for AI employee
+ * Generate avatar for AI employee
  * @param employeeName - Name of the AI employee
- * @param useFallback - Whether to use fallback instead of DiceBear
- * @returns Avatar URL
+ * @param useFallback - Unused parameter (kept for compatibility)
+ * @returns Avatar data URL
  */
 export function getAIEmployeeAvatar(
   employeeName: string,
-  useFallback: boolean = false
+  _useFallback: boolean = false
 ): string {
   // Create a consistent seed from the employee name
   const seed = employeeName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-  return getAvatarUrl(seed, useFallback);
+  return getAvatarUrl(seed);
 }
 
 /**
- * Check if an avatar URL is from DiceBear API
+ * Check if an avatar URL is a data URL (emoji-based)
  * @param url - Avatar URL to check
- * @returns True if URL is from DiceBear API
+ * @returns True if URL is a data URL
  */
 export function isDiceBearUrl(url: string): boolean {
+  // Legacy function - now returns false since we don't use DiceBear
   return url.includes('api.dicebear.com');
 }
 
 /**
- * Get fallback URL for a DiceBear URL
- * @param diceBearUrl - Original DiceBear URL
- * @returns Fallback avatar URL
+ * Get fallback avatar (returns emoji-based avatar)
+ * @param originalUrl - Original avatar URL
+ * @returns Emoji-based avatar data URL
  */
-export function getFallbackForDiceBear(diceBearUrl: string): string {
+export function getFallbackForDiceBear(originalUrl: string): string {
   try {
-    // Extract seed from DiceBear URL
-    const url = new URL(diceBearUrl);
-    const seed = url.searchParams.get('seed') || 'default';
-    return getFallbackAvatar(seed);
+    // Try to extract seed from URL
+    if (originalUrl.includes('seed=')) {
+      const url = new URL(originalUrl);
+      const seed = url.searchParams.get('seed') || 'default';
+      return getFallbackAvatar(seed);
+    }
   } catch (error) {
-    // Handle malformed URLs by returning a fallback
-    return getFallbackAvatar('default');
+    // Ignore errors
   }
+  return getFallbackAvatar('default');
 }

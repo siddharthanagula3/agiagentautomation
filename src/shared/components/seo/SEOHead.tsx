@@ -123,7 +123,7 @@ const SEOHead: React.FC<SEOHeadProps> = ({
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta name="theme-color" content="#3b82f6" />
       <meta name="msapplication-TileColor" content="#3b82f6" />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       <meta name="apple-mobile-web-app-title" content="AGI Agent Automation" />
 
@@ -141,7 +141,6 @@ const SEOHead: React.FC<SEOHeadProps> = ({
         href="https://fonts.gstatic.com"
         crossOrigin="anonymous"
       />
-      <link rel="preconnect" href="https://api.dicebear.com" />
 
       {/* Favicon and App Icons */}
       <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -166,7 +165,6 @@ const SEOHead: React.FC<SEOHeadProps> = ({
 
       {/* Security Headers */}
       <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
-      <meta httpEquiv="X-Frame-Options" content="DENY" />
       <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
       <meta
         httpEquiv="Referrer-Policy"

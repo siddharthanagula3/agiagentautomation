@@ -1,0 +1,10 @@
+# Netlify Redirects Configuration
+# Handle 404s and prevent warnings for non-existent resources
+
+# Block access to non-existent resources that cause 404 warnings
+/fonts/inter-var.woff2  /favicon.ico  404
+/css/critical.css       /favicon.ico  404
+/js/critical.js         /favicon.ico  404
+
+# SPA fallback - all other routes serve index.html
+/*  /index.html  200

@@ -100,18 +100,26 @@ export default {
       keyframes: {
         'accordion-down': {
           from: {
-            height: '0',
+            opacity: '0',
+            transform: 'translateY(-4px)',
+            'grid-template-rows': '0fr',
           },
           to: {
-            height: 'var(--radix-accordion-content-height)',
+            opacity: '1',
+            transform: 'translateY(0)',
+            'grid-template-rows': '1fr',
           },
         },
         'accordion-up': {
           from: {
-            height: 'var(--radix-accordion-content-height)',
+            opacity: '1',
+            transform: 'translateY(0)',
+            'grid-template-rows': '1fr',
           },
           to: {
-            height: '0',
+            opacity: '0',
+            transform: 'translateY(-4px)',
+            'grid-template-rows': '0fr',
           },
         },
       },

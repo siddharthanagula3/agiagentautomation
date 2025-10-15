@@ -126,7 +126,7 @@ export const usePagePerformanceMonitoring = () => {
 
         // Get paint metrics
         const paintEntries = performance.getEntriesByType('paint');
-        paintEntries.forEach(entry => {
+        paintEntries.forEach((entry) => {
           if (entry.name === 'first-paint') {
             metrics.firstPaint = entry.startTime;
           } else if (entry.name === 'first-contentful-paint') {

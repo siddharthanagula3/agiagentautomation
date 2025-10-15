@@ -129,7 +129,7 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
       ...initialState,
       isBackgroundServiceRunning: false,
 
-      startSession: sessionData => {
+      startSession: (sessionData) => {
         const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const now = new Date();
 
@@ -144,7 +144,7 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
           tokensUsed: 0,
         };
 
-        set(state => ({
+        set((state) => ({
           totalSessions: state.totalSessions + 1,
           activeSessions: state.activeSessions + 1,
           currentSessions: [...state.currentSessions, newSession],
@@ -159,8 +159,8 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
       },
 
       updateSession: (sessionId, updates) => {
-        set(state => ({
-          currentSessions: state.currentSessions.map(session =>
+        set((state) => ({
+          currentSessions: state.currentSessions.map((session) =>
             session.id === sessionId
               ? { ...session, ...updates, lastActivity: new Date() }
               : session
@@ -169,13 +169,13 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
       },
 
       endSession: (sessionId, status, result) => {
-        const session = get().currentSessions.find(s => s.id === sessionId);
+        const session = get().currentSessions.find((s) => s.id === sessionId);
 
         if (session) {
           const duration = Date.now() - session.startTime.getTime();
 
-          set(state => ({
-            currentSessions: state.currentSessions.map(s =>
+          set((state) => ({
+            currentSessions: state.currentSessions.map((s) =>
               s.id === sessionId ? { ...s, isActive: false, status, result } : s
             ),
             activeSessions: state.activeSessions - 1,
@@ -204,7 +204,7 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
       },
 
       updateAgentStatus: (agentName, status) => {
-        set(state => {
+        set((state) => {
           const newStatuses = new Map(state.agentStatuses);
           const oldStatus = newStatuses.get(agentName);
           newStatuses.set(agentName, status);
@@ -213,7 +213,7 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
           let activeCount = 0;
           let idleCount = 0;
 
-          newStatuses.forEach(s => {
+          newStatuses.forEach((s) => {
             if (s.status === 'working' || s.status === 'analyzing') {
               activeCount++;
             } else if (s.status === 'idle') {
@@ -230,8 +230,8 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
         });
       },
 
-      addCommunication: communication => {
-        set(state => ({
+      addCommunication: (communication) => {
+        set((state) => ({
           agentCommunications: [...state.agentCommunications, communication],
           totalMessagesExchanged: state.totalMessagesExchanged + 1,
         }));
@@ -243,33 +243,33 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
         });
       },
 
-      addActivity: activity => {
+      addActivity: (activity) => {
         const newActivity = {
           ...activity,
           id: `activity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           timestamp: new Date(),
         };
 
-        set(state => ({
+        set((state) => ({
           recentActivity: [newActivity, ...state.recentActivity].slice(0, 50), // Keep last 50
         }));
       },
 
-      incrementTokens: amount => {
-        set(state => ({
+      incrementTokens: (amount) => {
+        set((state) => ({
           totalTokensUsed: state.totalTokensUsed + amount,
         }));
       },
 
       getActiveSessionsCount: () => {
-        return get().currentSessions.filter(s => s.isActive).length;
+        return get().currentSessions.filter((s) => s.isActive).length;
       },
 
       getTodayTasksCount: () => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        return get().currentSessions.filter(s => {
+        return get().currentSessions.filter((s) => {
           const sessionDate = new Date(s.startTime);
           sessionDate.setHours(0, 0, 0, 0);
           return sessionDate.getTime() === today.getTime();
@@ -285,7 +285,7 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
         return (state.completedTasks / total) * 100;
       },
 
-      setBackgroundServiceRunning: running => {
+      setBackgroundServiceRunning: (running) => {
         set({ isBackgroundServiceRunning: running });
       },
 
@@ -298,7 +298,7 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
     }),
     {
       name: 'agent-metrics-storage',
-      partialize: state => ({
+      partialize: (state) => ({
         totalSessions: state.totalSessions,
         completedTasks: state.completedTasks,
         failedTasks: state.failedTasks,

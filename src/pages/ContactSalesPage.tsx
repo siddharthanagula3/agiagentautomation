@@ -82,10 +82,10 @@ const ContactSalesPage: React.FC = () => {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: '' }));
     }
   };
 
@@ -319,7 +319,7 @@ const ContactSalesPage: React.FC = () => {
                     <Input
                       required
                       value={formData.firstName}
-                      onChange={e =>
+                      onChange={(e) =>
                         handleInputChange('firstName', e.target.value)
                       }
                       className={`border-border/40 bg-background/60 ${errors.firstName ? 'border-red-500' : ''}`}
@@ -337,7 +337,7 @@ const ContactSalesPage: React.FC = () => {
                     <Input
                       required
                       value={formData.lastName}
-                      onChange={e =>
+                      onChange={(e) =>
                         handleInputChange('lastName', e.target.value)
                       }
                       className={`border-border/40 bg-background/60 ${errors.lastName ? 'border-red-500' : ''}`}
@@ -358,7 +358,7 @@ const ContactSalesPage: React.FC = () => {
                     type="email"
                     required
                     value={formData.email}
-                    onChange={e => handleInputChange('email', e.target.value)}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
                     className={`border-border/40 bg-background/60 ${errors.email ? 'border-red-500' : ''}`}
                   />
                   {errors.email && (
@@ -373,7 +373,9 @@ const ContactSalesPage: React.FC = () => {
                   <Input
                     required
                     value={formData.company}
-                    onChange={e => handleInputChange('company', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange('company', e.target.value)
+                    }
                     className={`border-border/40 bg-background/60 ${errors.company ? 'border-red-500' : ''}`}
                   />
                   {errors.company && (
@@ -390,7 +392,7 @@ const ContactSalesPage: React.FC = () => {
                   <Input
                     type="tel"
                     value={formData.phone}
-                    onChange={e => handleInputChange('phone', e.target.value)}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
                     className={`border-border/40 bg-background/60 ${errors.phone ? 'border-red-500' : ''}`}
                   />
                   {errors.phone && (
@@ -405,7 +407,7 @@ const ContactSalesPage: React.FC = () => {
                   <select
                     required
                     value={formData.employees}
-                    onChange={e =>
+                    onChange={(e) =>
                       handleInputChange('employees', e.target.value)
                     }
                     className={`h-10 w-full rounded-md border border-border/40 bg-background/60 px-3 ${errors.employees ? 'border-red-500' : ''}`}
@@ -431,7 +433,9 @@ const ContactSalesPage: React.FC = () => {
                   <textarea
                     required
                     value={formData.message}
-                    onChange={e => handleInputChange('message', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange('message', e.target.value)
+                    }
                     rows={4}
                     className={`w-full resize-none rounded-md border border-border/40 bg-background/60 px-3 py-2 ${errors.message ? 'border-red-500' : ''}`}
                   />

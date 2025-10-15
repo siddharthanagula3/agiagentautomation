@@ -96,13 +96,17 @@ export const CookieConsent = () => {
                 </button>
 
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
-                  <div className="flex items-start gap-3 flex-1">
+                  <div className="flex flex-1 items-start gap-3">
                     <Cookie className="mt-1 h-6 w-6 flex-shrink-0 text-primary" />
                     <div>
-                      <h3 className="font-semibold mb-1">We Value Your Privacy</h3>
+                      <h3 className="mb-1 font-semibold">
+                        We Value Your Privacy
+                      </h3>
                       <p className="text-sm text-muted-foreground">
-                        We use cookies to enhance your browsing experience, provide personalized content, 
-                        and analyze our traffic. By clicking "Accept All", you consent to our use of cookies.
+                        We use cookies to enhance your browsing experience,
+                        provide personalized content, and analyze our traffic.
+                        By clicking "Accept All", you consent to our use of
+                        cookies.
                       </p>
                     </div>
                   </div>
@@ -124,10 +128,7 @@ export const CookieConsent = () => {
                     >
                       Necessary Only
                     </Button>
-                    <Button
-                      size="sm"
-                      onClick={acceptAll}
-                    >
+                    <Button size="sm" onClick={acceptAll}>
                       Accept All
                     </Button>
                   </div>
@@ -144,7 +145,8 @@ export const CookieConsent = () => {
           <DialogHeader>
             <DialogTitle>Cookie Preferences</DialogTitle>
             <DialogDescription>
-              Manage your cookie preferences. You can enable or disable different types of cookies below.
+              Manage your cookie preferences. You can enable or disable
+              different types of cookies below.
             </DialogDescription>
           </DialogHeader>
 
@@ -154,7 +156,8 @@ export const CookieConsent = () => {
               <div className="flex-1">
                 <Label className="font-medium">Necessary Cookies</Label>
                 <p className="text-sm text-muted-foreground">
-                  Required for the website to function properly. Cannot be disabled.
+                  Required for the website to function properly. Cannot be
+                  disabled.
                 </p>
               </div>
               <Switch checked={true} disabled />
@@ -197,9 +200,7 @@ export const CookieConsent = () => {
             <Button variant="outline" onClick={() => setShowSettings(false)}>
               Cancel
             </Button>
-            <Button onClick={saveCustom}>
-              Save Preferences
-            </Button>
+            <Button onClick={saveCustom}>Save Preferences</Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -68,21 +68,19 @@ export const HireButton: React.FC<HireButtonProps> = ({
         }
 
         // Insert hire record
-        const { error } = await supabase
-          .from('purchased_employees')
-          .insert({
-            user_id: user.id,
-            employee_id: employeeId,
-            name: employeeName,
-            role: employeeName,
-            provider: 'chatgpt', // Default provider
-            is_active: true,
-          });
+        const { error } = await supabase.from('purchased_employees').insert({
+          user_id: user.id,
+          employee_id: employeeId,
+          name: employeeName,
+          role: employeeName,
+          provider: 'chatgpt', // Default provider
+          is_active: true,
+        });
 
         if (error) {
           // Revert optimistic update on error
           setHired(false);
-          
+
           if (error.code === '23505') {
             // Unique constraint violation - already hired
             toast.info('You have already hired this employee', {
@@ -101,10 +99,10 @@ export const HireButton: React.FC<HireButtonProps> = ({
 
         // Success
         onHired?.();
-        
+
         // Dispatch custom event for workforce sync
         window.dispatchEvent(new CustomEvent('team:refresh'));
-        
+
         toast.success('AI Employee hired successfully!', {
           description: 'Redirecting to chat...',
           duration: 3000,
@@ -114,7 +112,6 @@ export const HireButton: React.FC<HireButtonProps> = ({
         setTimeout(() => {
           navigate(`/chat?employee=${employeeId}`);
         }, 1500);
-
       } catch (error) {
         // Revert optimistic update on error
         setHired(false);
@@ -132,10 +129,7 @@ export const HireButton: React.FC<HireButtonProps> = ({
       <Button
         onClick={() => navigate(`/chat?employee=${employeeId}`)}
         size={size}
-        className={cn(
-          'bg-green-600 text-white hover:bg-green-700',
-          className
-        )}
+        className={cn('bg-green-600 text-white hover:bg-green-700', className)}
       >
         <CheckCircle className="mr-1 h-4 w-4" />
         Open Chat

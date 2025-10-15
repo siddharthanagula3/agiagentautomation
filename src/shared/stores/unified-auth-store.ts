@@ -93,7 +93,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  login: async loginData => {
+  login: async (loginData) => {
     set({ isLoading: true, error: null });
     try {
       const { user, error } = await authService.login(loginData);
@@ -110,7 +110,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  register: async registerData => {
+  register: async (registerData) => {
     set({ isLoading: true, error: null });
     try {
       const { user, error } = await authService.register(registerData);

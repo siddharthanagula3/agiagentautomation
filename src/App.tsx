@@ -55,6 +55,9 @@ const ChatAgentPageChatKit = lazyWithRetry(
 const VibeCodingPage = lazyWithRetry(
   () => import('@features/chat/pages/VibeCodingPage')
 );
+const CompanyHubPage = lazyWithRetry(
+  () => import('@features/chat/pages/CompanyHubPage')
+);
 const SettingsPage = lazyWithRetry(
   () => import('@features/settings/pages/SettingsPage')
 );
@@ -304,6 +307,9 @@ function App() {
 
                   {/* Vibe Coding - Multi-Agent Orchestration */}
                   <Route path="vibe" element={<VibeCodingPage />} />
+
+                  {/* Company Hub - Multi-Agent Workspace */}
+                  <Route path="company-hub" element={<CompanyHubPage />} />
 
                   {/* Legacy Chat Routes (for backward compatibility) */}
                   <Route path="chat" element={<ChatPage />} />

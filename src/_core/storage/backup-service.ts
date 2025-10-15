@@ -267,19 +267,28 @@ class BackupService {
    * Save backup metadata
    */
   private async saveBackupMetadata(backup: BackupMetadata): Promise<void> {
-    const { error } = await supabase.from('backup_metadata').insert({
-      id: backup.id,
-      timestamp: backup.timestamp.toISOString(),
-      type: backup.type,
-      size: backup.size,
-      status: backup.status,
-      tables: backup.tables,
-      checksum: backup.checksum,
-      location: backup.location,
-      created_at: new Date().toISOString(),
-    });
+    try {
+      const { error } = await supabase.from('backup_metadata').insert({
+        id: backup.id,
+        timestamp: backup.timestamp.toISOString(),
+        type: backup.type,
+        size: backup.size,
+        status: backup.status,
+        tables: backup.tables,
+        checksum: backup.checksum,
+        location: backup.location,
+        created_at: new Date().toISOString(),
+      });
 
-    if (error) throw error;
+      if (error) {
+        console.warn(
+          'Could not save backup metadata (table may not exist):',
+          error
+        );
+      }
+    } catch (error) {
+      console.warn('Error saving backup metadata:', error);
+    }
   }
 
   /**
@@ -292,7 +301,38 @@ class BackupService {
         .select('*')
         .order('timestamp', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        const message =
+          typeof error === 'object' && error && 'message' in error
+            ? String((error as { message?: string }).message ?? '')
+            : '';
+        const code =
+          typeof error === 'object' && error && 'code' in error
+            ? String((error as { code?: string }).code ?? '')
+            : '';
+
+        const normalizedMessage = message.toLowerCase();
+        const isMissingTable =
+          code === '42P01' ||
+          normalizedMessage.includes('does not exist') ||
+          normalizedMessage.includes('relation') ||
+          normalizedMessage.includes('table');
+
+        if (isMissingTable) {
+          console.info(
+            'Backup metadata table not found yet; skipping backup history load until the first successful backup runs.'
+          );
+          this.backups = [];
+          return;
+        }
+
+        console.error(
+          'Unexpected Supabase error while loading backup history:',
+          error
+        );
+        this.backups = [];
+        return;
+      }
 
       this.backups = data.map((row) => ({
         id: row.id,
@@ -305,7 +345,10 @@ class BackupService {
         location: row.location,
       }));
     } catch (error) {
-      console.error('Error loading backup history:', error);
+      console.debug(
+        'Backup history could not be loaded (likely due to Supabase connectivity during init).',
+        error
+      );
       this.backups = [];
     }
   }

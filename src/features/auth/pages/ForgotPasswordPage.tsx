@@ -139,7 +139,7 @@ const ForgotPasswordPage: React.FC = () => {
                       type="email"
                       placeholder="Enter your email"
                       value={email}
-                      onChange={e => setEmail(e.target.value)}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="pl-10"
                       required
                       disabled={isLoading}

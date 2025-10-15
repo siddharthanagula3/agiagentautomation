@@ -82,7 +82,7 @@ const AccessibilityAudit: React.FC<AccessibilityAuditProps> = ({ onClose }) => {
 
   const filterIssues = (type: string) => {
     if (!auditResults) return [];
-    return auditResults.issues.filter(issue => issue.type === type);
+    return auditResults.issues.filter((issue) => issue.type === type);
   };
 
   const renderIssueCard = (issue: AccessibilityIssue, index: number) => (

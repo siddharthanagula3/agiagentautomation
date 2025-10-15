@@ -313,7 +313,7 @@ export const useColorContrast = () => {
         const b = parseInt(hex.substr(4, 2), 16) / 255;
 
         // Apply gamma correction
-        const [rs, gs, bs] = [r, g, b].map(c =>
+        const [rs, gs, bs] = [r, g, b].map((c) =>
           c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
         );
 

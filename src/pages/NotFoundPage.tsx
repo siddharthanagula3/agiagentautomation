@@ -39,15 +39,13 @@ const NotFoundPage = () => {
               404
             </h1>
             <div className="relative -mt-8">
-              <h2 className="text-3xl font-bold sm:text-4xl">
-                Page Not Found
-              </h2>
+              <h2 className="text-3xl font-bold sm:text-4xl">Page Not Found</h2>
             </div>
           </div>
 
           <p className="mb-8 text-lg text-muted-foreground">
-            The page you're looking for doesn't exist or has been moved.
-            Let's help you find what you need.
+            The page you're looking for doesn't exist or has been moved. Let's
+            help you find what you need.
           </p>
 
           {/* Search Box */}
@@ -77,7 +75,7 @@ const NotFoundPage = () => {
                 <Link key={link.to} to={link.to}>
                   <Button
                     variant="outline"
-                    className="w-full flex-col gap-2 h-auto py-4"
+                    className="h-auto w-full flex-col gap-2 py-4"
                   >
                     <link.icon className="h-5 w-5" />
                     <span className="text-sm">{link.label}</span>
@@ -101,7 +99,8 @@ const NotFoundPage = () => {
           <div className="mt-12 rounded-lg border bg-card p-6 text-left">
             <h3 className="mb-2 font-semibold">Need More Help?</h3>
             <p className="mb-4 text-sm text-muted-foreground">
-              If you believe this is an error or you need assistance, our support team is here to help.
+              If you believe this is an error or you need assistance, our
+              support team is here to help.
             </p>
             <div className="flex flex-wrap gap-2">
               <Link to="/help">

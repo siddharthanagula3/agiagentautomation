@@ -68,13 +68,13 @@ export const useDashboardStats = () => {
         // Calculate stats
         const totalJobs = jobs?.length || 0;
         const activeJobs =
-          jobs?.filter(job => job.status === 'in_progress').length || 0;
+          jobs?.filter((job) => job.status === 'in_progress').length || 0;
         const completedJobs =
-          jobs?.filter(job => job.status === 'completed').length || 0;
+          jobs?.filter((job) => job.status === 'completed').length || 0;
 
         const totalEmployees = employees?.length || 0;
         const activeEmployees =
-          employees?.filter(emp => emp.status === 'active').length || 0;
+          employees?.filter((emp) => emp.status === 'active').length || 0;
 
         const totalRevenue =
           revenue?.reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
@@ -84,7 +84,7 @@ export const useDashboardStats = () => {
         const currentYear = new Date().getFullYear();
         const monthlyRevenue =
           revenue
-            ?.filter(item => {
+            ?.filter((item) => {
               const itemDate = new Date(item.created_at);
               return (
                 itemDate.getMonth() === currentMonth &&
@@ -98,7 +98,7 @@ export const useDashboardStats = () => {
         const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
         const previousMonthRevenue =
           revenue
-            ?.filter(item => {
+            ?.filter((item) => {
               const itemDate = new Date(item.created_at);
               return (
                 itemDate.getMonth() === previousMonth &&

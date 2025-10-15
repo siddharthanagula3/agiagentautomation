@@ -402,7 +402,7 @@ const MobileDropdown: React.FC<MobileDropdownProps> = ({
             className="overflow-hidden"
           >
             <div className="mt-1 space-y-1 pl-4">
-              {items.map(item => (
+              {items.map((item) => (
                 <button
                   key={item.path}
                   onClick={() => onNavigate(item.path)}

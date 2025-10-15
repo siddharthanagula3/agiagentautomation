@@ -56,7 +56,7 @@ class SettingsService {
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const { user, error } = await authService.updateProfile(updates);
-      
+
       if (error) {
         return { success: false, error };
       }

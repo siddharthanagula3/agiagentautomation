@@ -216,8 +216,8 @@ export const VibeCodingInterface: React.FC<Props> = ({
           '🧠 Analyzing your request and assembling the right AI team...',
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, analysisMsg]);
-      await new Promise(r => setTimeout(r, 800));
+      setMessages((prev) => [...prev, analysisMsg]);
+      await new Promise((r) => setTimeout(r, 800));
 
       const plan = await multiAgentOrchestrator.analyzeIntent(userRequest);
 
@@ -225,18 +225,18 @@ export const VibeCodingInterface: React.FC<Props> = ({
       const agentListMsg: VibeCodingMessage = {
         id: `msg-${Date.now()}-agents`,
         role: 'system',
-        content: `📋 **Execution Plan**: ${plan.intent}\n\n**AI Team Assembled:**\n${plan.requiredAgents.map(a => `• ${a.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`).join('\n')}\n\n**Strategy**: ${plan.executionStrategy} execution\n**Tasks**: ${plan.tasks.length}`,
+        content: `📋 **Execution Plan**: ${plan.intent}\n\n**AI Team Assembled:**\n${plan.requiredAgents.map((a) => `• ${a.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`).join('\n')}\n\n**Strategy**: ${plan.executionStrategy} execution\n**Tasks**: ${plan.tasks.length}`,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, agentListMsg]);
-      await new Promise(r => setTimeout(r, 1000));
+      setMessages((prev) => [...prev, agentListMsg]);
+      await new Promise((r) => setTimeout(r, 1000));
 
       // Step 2: Execute with multi-agent orchestrator
       const communications: AgentCommunication[] = [];
 
       const handleCommunication = (comm: AgentCommunication) => {
         communications.push(comm);
-        setAgentCommunications(prev => [...prev, comm]);
+        setAgentCommunications((prev) => [...prev, comm]);
 
         // Update metrics store
         metricsStore.addCommunication(comm);
@@ -270,14 +270,14 @@ export const VibeCodingInterface: React.FC<Props> = ({
             messageType,
             targetAgent: comm.to !== 'user' ? comm.to : undefined,
           };
-          setMessages(prev => [...prev, commMsg]);
+          setMessages((prev) => [...prev, commMsg]);
           setTypingAgent(null);
         }, 800);
       };
 
       const handleStatusUpdate = (status: AgentStatus) => {
-        setActiveAgents(prev => {
-          const updated = prev.filter(a => a.agentName !== status.agentName);
+        setActiveAgents((prev) => {
+          const updated = prev.filter((a) => a.agentName !== status.agentName);
           return [...updated, status];
         });
 
@@ -299,7 +299,7 @@ export const VibeCodingInterface: React.FC<Props> = ({
             messageType: 'status',
             progress: status.progress,
           };
-          setMessages(prev => [...prev, statusMsg]);
+          setMessages((prev) => [...prev, statusMsg]);
         }
       };
 
@@ -311,7 +311,7 @@ export const VibeCodingInterface: React.FC<Props> = ({
       );
 
       // Convert orchestration plan tasks to PlanSteps for UI
-      const planSteps: PlanStep[] = plan.tasks.map(task => ({
+      const planSteps: PlanStep[] = plan.tasks.map((task) => ({
         id: task.id,
         description: task.description,
         status: task.status,
@@ -333,13 +333,13 @@ export const VibeCodingInterface: React.FC<Props> = ({
               id: `thinking-${taskId}`,
               role: 'assistant',
               agentName:
-                plan.tasks.find(t => t.id === taskId)?.assignedTo ||
+                plan.tasks.find((t) => t.id === taskId)?.assignedTo ||
                 employeeName,
               content: `💭 **Thinking & Planning**\n\n${planMatch[1].trim()}`,
               timestamp: new Date(),
               messageType: 'thinking',
             };
-            setMessages(prev => [...prev, thinkingMsg]);
+            setMessages((prev) => [...prev, thinkingMsg]);
           }
 
           // Extract code blocks
@@ -402,12 +402,12 @@ export default App;`,
       setSelectedArtifact(generatedArtifacts[0]);
 
       // Update plan
-      const updatedPlan = plan.map(step => {
+      const updatedPlan = plan.map((step) => {
         if (step.id === 'step-2') {
           return {
             ...step,
             status: 'completed' as const,
-            substeps: step.substeps?.map(s => ({
+            substeps: step.substeps?.map((s) => ({
               ...s,
               status: 'completed' as const,
             })),
@@ -419,17 +419,17 @@ export default App;`,
         return step;
       });
       setCurrentPlan(updatedPlan);
-      await new Promise(r => setTimeout(r, 1200));
+      await new Promise((r) => setTimeout(r, 1200));
 
       // Step 4: File Operations - Create files from generated artifacts
-      const fileOps: FileOperation[] = generatedArtifacts.map(artifact => ({
+      const fileOps: FileOperation[] = generatedArtifacts.map((artifact) => ({
         type: 'create' as const,
         path: `src/${artifact.title}`,
         content: artifact.content,
       }));
 
       // Add package.json if not already present
-      if (!fileOps.some(op => op.path.includes('package.json'))) {
+      if (!fileOps.some((op) => op.path.includes('package.json'))) {
         fileOps.push({
           type: 'create',
           path: 'package.json',
@@ -458,7 +458,7 @@ export default App;`,
       setFileSystem(new Map(mcpToolsService.getFileSystem()));
 
       // Final message
-      const finalPlan = updatedPlan.map(step => ({
+      const finalPlan = updatedPlan.map((step) => ({
         ...step,
         status: 'completed' as const,
       }));
@@ -472,11 +472,11 @@ export default App;`,
           `✅ Perfect! I've completed your request: "${userRequest}"\n\n` +
           `**Generated Artifacts:**\n` +
           generatedArtifacts
-            .map(a => `- ${a.title} (${a.language})`)
+            .map((a) => `- ${a.title} (${a.language})`)
             .join('\n') +
           '\n\n' +
           `**Files Created:**\n` +
-          fileOps.map(op => `- ${op.path}`).join('\n') +
+          fileOps.map((op) => `- ${op.path}`).join('\n') +
           '\n\n' +
           `**Next Steps:**\n` +
           `- View the code in the Code tab →\n` +
@@ -489,10 +489,10 @@ export default App;`,
         artifacts: generatedArtifacts,
       };
 
-      setMessages(prev => [...prev, finalMsg]);
+      setMessages((prev) => [...prev, finalMsg]);
 
       // Simulate terminal output
-      setTerminalOutput(prev => [
+      setTerminalOutput((prev) => [
         ...prev,
         '$ npm install',
         'Installing dependencies...',
@@ -538,7 +538,7 @@ export default App;`,
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMsg]);
+    setMessages((prev) => [...prev, userMsg]);
     setInput('');
 
     await simulateVibeCoding(input);
@@ -667,7 +667,7 @@ export default App;`,
                 <Textarea
                   ref={textareaRef}
                   value={input}
-                  onChange={e => setInput(e.target.value)}
+                  onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Describe what you want to build... (Cmd+Enter to send)"
                   className="min-h-[80px] resize-none pr-12"
@@ -877,7 +877,7 @@ export default App;`,
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {activeAgents.map(agent => (
+                        {activeAgents.map((agent) => (
                           <AgentStatusCard
                             key={agent.agentName}
                             agent={agent}
@@ -891,7 +891,7 @@ export default App;`,
                               Agent Communications
                             </h4>
                             <div className="space-y-2">
-                              {agentCommunications.slice(-5).map(comm => (
+                              {agentCommunications.slice(-5).map((comm) => (
                                 <div
                                   key={comm.id}
                                   className="rounded-lg bg-accent/30 p-3 text-sm"
@@ -933,7 +933,7 @@ export default App;`,
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {currentPlan.map(step => (
+                        {currentPlan.map((step) => (
                           <PlanStepComponent key={step.id} step={step} />
                         ))}
                       </div>
@@ -946,10 +946,10 @@ export default App;`,
                 <AgentCollaborationGraph
                   agents={activeAgents}
                   communications={agentCommunications}
-                  onAgentClick={agentName => {
+                  onAgentClick={(agentName) => {
                     // Scroll to agent's messages in chat
                     const agentMessages = messages.filter(
-                      m => m.agentName === agentName
+                      (m) => m.agentName === agentName
                     );
                     if (agentMessages.length > 0) {
                       scrollToBottom();
@@ -991,7 +991,7 @@ export default App;`,
                 {/* Agent Cards */}
                 <ScrollArea className="flex-1">
                   <div className="space-y-3 p-4">
-                    {activeAgents.map(agent => (
+                    {activeAgents.map((agent) => (
                       <motion.div
                         key={agent.agentName}
                         initial={{ opacity: 0, x: 20 }}
@@ -1043,7 +1043,7 @@ const AgentTypingIndicator: React.FC<{ agentName: string }> = ({
           {agentName} is typing
         </span>
         <div className="flex gap-1">
-          {[0, 1, 2].map(i => (
+          {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
               className="h-1.5 w-1.5 rounded-full bg-primary"
@@ -1718,12 +1718,12 @@ const MessageBubble: React.FC<{
           {/* Artifacts with Preview */}
           {message.artifacts && message.artifacts.length > 0 && (
             <div className="mt-2 space-y-2">
-              {message.artifacts.map(artifact => (
+              {message.artifacts.map((artifact) => (
                 <CodeArtifactPreview
                   key={artifact.id}
                   artifact={artifact}
                   theme={theme}
-                  onCopy={code => {
+                  onCopy={(code) => {
                     navigator.clipboard.writeText(code);
                     toast.success('Code copied to clipboard!');
                     onArtifactClick(artifact);
@@ -1954,7 +1954,7 @@ const PlanStepComponent: React.FC<{ step: PlanStep; level?: number }> = ({
           {step.description}
         </span>
       </div>
-      {step.substeps?.map(substep => (
+      {step.substeps?.map((substep) => (
         <PlanStepComponent key={substep.id} step={substep} level={level + 1} />
       ))}
     </div>

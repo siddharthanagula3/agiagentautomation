@@ -63,7 +63,7 @@ export const AnimatedAvatar: React.FC<AnimatedAvatarProps> = ({
   // Generate fallback text from alt
   const getFallbackText = () => {
     if (fallback) return fallback;
-    
+
     // Extract initials from alt text
     const words = alt.split(' ');
     if (words.length >= 2) {
@@ -87,11 +87,11 @@ export const AnimatedAvatar: React.FC<AnimatedAvatarProps> = ({
           className="object-cover transition-opacity duration-300"
         />
       )}
-      
+
       {shouldShowFallback && (
-        <AvatarFallback 
+        <AvatarFallback
           className={cn(
-            'bg-gradient-to-br from-primary/20 to-accent/20 text-primary font-semibold',
+            'bg-gradient-to-br from-primary/20 to-accent/20 font-semibold text-primary',
             fallbackSizeClasses[size],
             isLoading && 'animate-pulse'
           )}

@@ -24,7 +24,7 @@ interface WorkforceState {
   hiredEmployees: HiredEmployee[];
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   fetchHiredEmployees: () => Promise<void>;
   addHiredEmployee: (employee: HiredEmployee) => void;
@@ -55,18 +55,21 @@ export const useWorkforceStore = create<WorkforceState>((set, get) => ({
         .eq('is_active', true)
         .order('purchased_at', { ascending: false });
 
-            if (error) {
-        console.error('[WorkforceStore] Error fetching hired employees:', error);
+      if (error) {
+        console.error(
+          '[WorkforceStore] Error fetching hired employees:',
+          error
+        );
         set({ error: error.message, isLoading: false });
         return;
       }
 
       set({ hiredEmployees: data || [], isLoading: false });
-          } catch (error) {
+    } catch (error) {
       console.error('[WorkforceStore] Unexpected error:', error);
-      set({ 
+      set({
         error: error instanceof Error ? error.message : 'Unknown error',
-        isLoading: false 
+        isLoading: false,
       });
     }
   },
@@ -113,13 +116,15 @@ export const setupWorkforceSubscription = () => {
       },
       (payload) => {
         console.log('[WorkforceStore] Real-time update:', payload);
-        
+
         const { eventType, new: newRecord, old: oldRecord } = payload;
-        
+
         switch (eventType) {
           case 'INSERT':
             if (newRecord) {
-              useWorkforceStore.getState().addHiredEmployee(newRecord as HiredEmployee);
+              useWorkforceStore
+                .getState()
+                .addHiredEmployee(newRecord as HiredEmployee);
             }
             break;
           case 'UPDATE':
@@ -127,10 +132,12 @@ export const setupWorkforceSubscription = () => {
             break;
           case 'DELETE':
             if (oldRecord) {
-              useWorkforceStore.getState().removeHiredEmployee(oldRecord.employee_id);
+              useWorkforceStore
+                .getState()
+                .removeHiredEmployee(oldRecord.employee_id);
             }
-                  break;
-              }
+            break;
+        }
       }
     )
     .subscribe();

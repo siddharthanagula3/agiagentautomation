@@ -260,7 +260,7 @@ export const ArtifactRenderer: React.FC<ArtifactRendererProps> = ({
           <div className="flex h-full flex-col gap-2">
             <textarea
               value={editedContent}
-              onChange={e => setEditedContent(e.target.value)}
+              onChange={(e) => setEditedContent(e.target.value)}
               className="flex-1 resize-none rounded-lg border bg-muted p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <div className="flex justify-end gap-2">
@@ -273,7 +273,7 @@ export const ArtifactRenderer: React.FC<ArtifactRendererProps> = ({
         ) : (
           <Tabs
             value={activeTab}
-            onValueChange={v => setActiveTab(v as 'preview' | 'code')}
+            onValueChange={(v) => setActiveTab(v as 'preview' | 'code')}
             className="flex flex-1 flex-col"
           >
             <TabsList className="grid w-full grid-cols-2">

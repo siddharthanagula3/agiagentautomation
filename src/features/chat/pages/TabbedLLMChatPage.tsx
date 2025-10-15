@@ -107,7 +107,7 @@ const TabbedLLMChatPage: React.FC = () => {
           (employee, index) => {
             // Find the AI employee details from the master list
             const aiEmployee = AI_EMPLOYEES.find(
-              emp => emp.id === employee.employee_id
+              (emp) => emp.id === employee.employee_id
             );
 
             return {
@@ -132,7 +132,7 @@ const TabbedLLMChatPage: React.FC = () => {
             0
           ),
           totalTokens: 0,
-          activeEmployees: employeeSessions.filter(s => s.isActive).length,
+          activeEmployees: employeeSessions.filter((s) => s.isActive).length,
         });
       } catch (error) {
         console.error('Error loading data:', error);
@@ -160,7 +160,7 @@ const TabbedLLMChatPage: React.FC = () => {
         isActive: true,
       };
 
-      setChatSessions(prev => [newSession, ...prev]);
+      setChatSessions((prev) => [newSession, ...prev]);
       setActiveSessionId(sessionId);
       setSelectedEmployee(employee);
       setIsSelectDialogOpen(false);
@@ -174,7 +174,7 @@ const TabbedLLMChatPage: React.FC = () => {
 
   // Handle session selection
   const handleSessionSelect = (sessionId: string) => {
-    const session = chatSessions.find(s => s.id === sessionId);
+    const session = chatSessions.find((s) => s.id === sessionId);
     if (session) {
       setActiveSessionId(sessionId);
       setSelectedEmployee({
@@ -189,7 +189,7 @@ const TabbedLLMChatPage: React.FC = () => {
 
   // Handle session deletion
   const handleDeleteSession = (sessionId: string) => {
-    setChatSessions(prev => prev.filter(s => s.id !== sessionId));
+    setChatSessions((prev) => prev.filter((s) => s.id !== sessionId));
     if (activeSessionId === sessionId) {
       setActiveSessionId(null);
       setSelectedEmployee(null);
@@ -236,7 +236,7 @@ const TabbedLLMChatPage: React.FC = () => {
           <Skeleton className="mb-4 h-8 w-32" />
           <Skeleton className="mb-4 h-10 w-full" />
           <div className="space-y-3">
-            {[1, 2, 3].map(i => (
+            {[1, 2, 3].map((i) => (
               <Skeleton key={i} className="h-16 w-full" />
             ))}
           </div>
@@ -332,7 +332,7 @@ const TabbedLLMChatPage: React.FC = () => {
                 </p>
               </div>
             ) : (
-              chatSessions.map(session => (
+              chatSessions.map((session) => (
                 <motion.div
                   key={session.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -405,10 +405,10 @@ const TabbedLLMChatPage: React.FC = () => {
             employeeRole={selectedEmployee.role}
             employeeName={selectedEmployee.name}
             className="flex-1"
-            onSessionCreated={session => {
+            onSessionCreated={(session) => {
               console.log('Session created:', session);
             }}
-            onError={error => {
+            onError={(error) => {
               console.error('Chat error:', error);
               toast.error(`Error: ${error.message}`);
             }}
@@ -446,10 +446,10 @@ const TabbedLLMChatPage: React.FC = () => {
           </DialogHeader>
 
           <div className="grid max-h-96 grid-cols-1 gap-4 overflow-y-auto md:grid-cols-2">
-            {purchasedEmployees.map(employee => {
+            {purchasedEmployees.map((employee) => {
               // Find the AI employee details from the master list
               const aiEmployee = AI_EMPLOYEES.find(
-                emp => emp.id === employee.employee_id
+                (emp) => emp.id === employee.employee_id
               );
 
               return (

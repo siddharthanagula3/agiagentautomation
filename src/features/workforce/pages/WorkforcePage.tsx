@@ -20,7 +20,10 @@ import { InteractiveHoverCard } from '@shared/ui/interactive-hover-card';
 import { Particles } from '@shared/ui/particles';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/unified-auth-store';
-import { useWorkforceStore, setupWorkforceSubscription } from '@shared/stores/workforce-store';
+import {
+  useWorkforceStore,
+  setupWorkforceSubscription,
+} from '@shared/stores/workforce-store';
 import { AI_EMPLOYEES } from '@/data/ai-employees';
 import { AnimatedAvatar } from '@shared/components/AnimatedAvatar';
 import {
@@ -42,7 +45,8 @@ import { cn } from '@shared/lib/utils';
 
 const WorkforcePage: React.FC = () => {
   const { user } = useAuthStore();
-  const { hiredEmployees, isLoading, fetchHiredEmployees } = useWorkforceStore();
+  const { hiredEmployees, isLoading, fetchHiredEmployees } =
+    useWorkforceStore();
 
   // Set up real-time subscription and fetch data on mount
   useEffect(() => {
@@ -73,13 +77,13 @@ const WorkforcePage: React.FC = () => {
   }
 
   const totalEmployees = hiredEmployees.length;
-  const activeEmployees = hiredEmployees.filter(emp => emp.is_active).length;
+  const activeEmployees = hiredEmployees.filter((emp) => emp.is_active).length;
 
   console.log('[WorkforcePage] 📊 Current state:', {
     userId: user.id,
     totalEmployees,
     activeEmployees,
-    hiredEmployees: hiredEmployees.map(emp => ({
+    hiredEmployees: hiredEmployees.map((emp) => ({
       id: emp.id,
       employee_id: emp.employee_id,
       name: emp.name,
@@ -306,7 +310,9 @@ const WorkforcePage: React.FC = () => {
                   <div className="space-y-6">
                     <BentoGrid>
                       {hiredEmployees.map((rec, index) => {
-                        const emp = AI_EMPLOYEES.find(e => e.id === rec.employee_id);
+                        const emp = AI_EMPLOYEES.find(
+                          (e) => e.id === rec.employee_id
+                        );
                         return (
                           <BentoCard
                             key={rec.id}

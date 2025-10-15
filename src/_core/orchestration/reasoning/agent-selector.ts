@@ -62,7 +62,7 @@ export class AgentSelector {
     const compatibleAgents = this.getCompatibleAgents(task);
 
     // Evaluate each agent
-    const evaluations = compatibleAgents.map(agent =>
+    const evaluations = compatibleAgents.map((agent) =>
       this.evaluateAgentFit(task, agent)
     );
 
@@ -71,7 +71,7 @@ export class AgentSelector {
 
     // Select primary and fallback agents
     const primaryAgent = sortedEvaluations[0].agent;
-    const fallbackAgents = sortedEvaluations.slice(1, 4).map(e => e.agent);
+    const fallbackAgents = sortedEvaluations.slice(1, 4).map((e) => e.agent);
 
     // Generate selection reason
     const bestEval = sortedEvaluations[0];
@@ -408,8 +408,8 @@ export class AgentSelector {
     }
 
     // Tool availability (0-10 points)
-    const requiredToolsAvailable = task.requiredTools.filter(tool =>
-      capability.tools.some(t => t.includes(tool) || tool.includes(t))
+    const requiredToolsAvailable = task.requiredTools.filter((tool) =>
+      capability.tools.some((t) => t.includes(tool) || tool.includes(t))
     ).length;
     const toolScore =
       (requiredToolsAvailable / Math.max(task.requiredTools.length, 1)) * 10;
@@ -485,7 +485,7 @@ export class AgentSelector {
 
     // Get all compatible agents except the failed one
     const compatibleAgents = this.getCompatibleAgents(task).filter(
-      agent => agent !== failedAgent
+      (agent) => agent !== failedAgent
     );
 
     if (compatibleAgents.length === 0) {
@@ -494,7 +494,7 @@ export class AgentSelector {
     }
 
     // Evaluate remaining agents
-    const evaluations = compatibleAgents.map(agent =>
+    const evaluations = compatibleAgents.map((agent) =>
       this.evaluateAgentFit(task, agent)
     );
 

@@ -167,7 +167,7 @@ const HelpPage: React.FC = () => {
   ];
 
   const filteredFAQs = faqs.filter(
-    faq =>
+    (faq) =>
       faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
       faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -240,7 +240,7 @@ const HelpPage: React.FC = () => {
                 type="text"
                 placeholder="Search for help articles..."
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-14 border-border/40 bg-background/60 pl-12 text-lg backdrop-blur-xl"
               />
             </div>

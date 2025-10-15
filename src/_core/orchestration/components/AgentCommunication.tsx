@@ -241,7 +241,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                   <label className="text-sm font-medium">To Agent</label>
                   <select
                     value={selectedAgent}
-                    onChange={e => setSelectedAgent(e.target.value)}
+                    onChange={(e) => setSelectedAgent(e.target.value)}
                     className="mt-1 w-full rounded-md border px-3 py-2"
                   >
                     <option value="">Select an agent</option>
@@ -265,7 +265,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                 <label className="text-sm font-medium">Message</label>
                 <textarea
                   value={newMessage}
-                  onChange={e => setNewMessage(e.target.value)}
+                  onChange={(e) => setNewMessage(e.target.value)}
                   placeholder="Type your message..."
                   className="mt-1 min-h-[100px] w-full rounded-md border px-3 py-2"
                 />
@@ -315,7 +315,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
               ) : (
                 <ScrollArea className="h-[400px]">
                   <div className="space-y-4">
-                    {messages.map(message => (
+                    {messages.map((message) => (
                       <div
                         key={message.id}
                         className="flex items-start space-x-3 rounded-lg border p-4 hover:bg-muted/50"
@@ -394,7 +394,7 @@ export const AgentCommunication: React.FC<AgentCommunicationProps> = ({
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {delegations.map(delegation => (
+                  {delegations.map((delegation) => (
                     <div
                       key={delegation.id}
                       className="rounded-lg border p-4 hover:bg-muted/50"

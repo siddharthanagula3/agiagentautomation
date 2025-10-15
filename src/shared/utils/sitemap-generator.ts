@@ -4,7 +4,14 @@
 export interface SitemapEntry {
   path: string;
   priority: number;
-  changefreq: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
+  changefreq:
+    | 'always'
+    | 'hourly'
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'yearly'
+    | 'never';
   lastmod?: string;
 }
 
@@ -26,14 +33,26 @@ export const publicRoutes: SitemapEntry[] = [
 
   // Use Cases
   { path: '/use-cases/startups', priority: 0.6, changefreq: 'monthly' },
-  { path: '/use-cases/it-service-providers', priority: 0.6, changefreq: 'monthly' },
+  {
+    path: '/use-cases/it-service-providers',
+    priority: 0.6,
+    changefreq: 'monthly',
+  },
   { path: '/use-cases/sales-teams', priority: 0.6, changefreq: 'monthly' },
-  { path: '/use-cases/consulting-businesses', priority: 0.6, changefreq: 'monthly' },
+  {
+    path: '/use-cases/consulting-businesses',
+    priority: 0.6,
+    changefreq: 'monthly',
+  },
 
   // Features
   { path: '/features/ai-chat', priority: 0.7, changefreq: 'monthly' },
   { path: '/features/ai-dashboards', priority: 0.7, changefreq: 'monthly' },
-  { path: '/features/ai-project-manager', priority: 0.7, changefreq: 'monthly' },
+  {
+    path: '/features/ai-project-manager',
+    priority: 0.7,
+    changefreq: 'monthly',
+  },
 
   // Legal
   { path: '/privacy-policy', priority: 0.4, changefreq: 'yearly' },

@@ -216,25 +216,9 @@ class PerformanceService {
    * Setup resource preloading for critical resources
    */
   private setupResourcePreloading(): void {
-    // Preload critical fonts
-    this.preloadResource({
-      href: '/fonts/inter-var.woff2',
-      as: 'font',
-      type: 'font/woff2',
-      crossorigin: 'anonymous',
-    });
-
-    // Preload critical CSS
-    this.preloadResource({
-      href: '/css/critical.css',
-      as: 'style',
-    });
-
-    // Preload critical JavaScript
-    this.preloadResource({
-      href: '/js/critical.js',
-      as: 'script',
-    });
+    // Note: Critical resources are loaded via Vite's build process
+    // This method is reserved for future custom preloading needs
+    console.log('Resource preloading setup complete');
   }
 
   /**

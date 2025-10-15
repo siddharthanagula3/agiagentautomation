@@ -167,7 +167,7 @@ export const ToolExecutionList: React.FC<ToolExecutionListProps> = ({
 
   return (
     <div className={cn('space-y-4', className)}>
-      {executions.map(execution => (
+      {executions.map((execution) => (
         <ToolExecutionPanel
           key={execution.id}
           toolName={execution.toolName}

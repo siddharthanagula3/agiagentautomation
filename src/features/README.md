@@ -7,20 +7,24 @@ This directory contains all feature modules. Each module is self-contained with 
 ## Architecture Rules
 
 ### ✅ Features CAN:
+
 - Import from `@shared/*` (shared utilities)
 - Import from `@_core/*` (infrastructure services)
 - Import from their own module
 
 ### ❌ Features CANNOT:
+
 - Import from other feature modules (breaks encapsulation)
 - Be imported by `@_core/*` (prevents circular dependencies)
 
 ## Available Features
 
 ### 1. Authentication (`auth/`)
+
 **Purpose:** User authentication, registration, password reset, route protection
 
 **Files:**
+
 - `components/LoginForm.tsx` - Login UI
 - `components/RegisterForm.tsx` - Registration UI
 - `components/ProtectedRoute.tsx` - **Route guard** (use this!)
@@ -31,6 +35,7 @@ This directory contains all feature modules. Each module is self-contained with 
 - `pages/ResetPasswordPage.tsx` - Password reset form
 
 **Usage:**
+
 ```typescript
 // Protect routes
 import { ProtectedRoute } from '@features/auth/components/ProtectedRoute';
@@ -45,9 +50,11 @@ import { ProtectedRoute } from '@features/auth/components/ProtectedRoute';
 **State:** Uses `unified-auth-store.ts` from `@shared/stores`
 
 ### 2. Chat (`chat/`)
+
 **Purpose:** Chat interfaces for AI employees, LLM interactions, streaming
 
 **Files (12 total, consolidated from 31):**
+
 - `components/VibeCodingInterface.tsx` - Main multi-agent interface
 - `components/TabbedLLMChatInterface.tsx` - Multi-provider tabbed chat
 - `components/AgentSDKChatUI.tsx` - Agent-specific chat
@@ -59,6 +66,7 @@ import { ProtectedRoute } from '@features/auth/components/ProtectedRoute';
 - `services/background-chat-service.ts` - Background chat processing
 
 **Usage:**
+
 ```typescript
 // Main chat interface
 import { VibeCodingInterface } from '@features/chat/components/VibeCodingInterface';
@@ -72,9 +80,11 @@ import { VibeCodingInterface } from '@features/chat/components/VibeCodingInterfa
 **State:** Uses `chat-store.ts` from `@shared/stores`
 
 ### 3. Workforce (`workforce/`)
+
 **Purpose:** AI employee management, marketplace integration
 
 **Files:**
+
 - `components/AIEmployeeCard.tsx` - Employee card UI
 - `components/AIEmployeeChat.tsx` - Employee-specific chat
 - `components/WorkforceTable.tsx` - Table view of workforce
@@ -83,6 +93,7 @@ import { VibeCodingInterface } from '@features/chat/components/VibeCodingInterfa
 - `hooks/useWorkforce.ts` - Workforce state hook
 
 **Usage:**
+
 ```typescript
 import { WorkforcePage } from '@features/workforce/pages/WorkforcePage';
 
@@ -93,29 +104,35 @@ const { employees, hireEmployee, fireEmployee } = useWorkforce();
 **State:** Uses `workforce-store.ts` from `@shared/stores`
 
 ### 4. Marketplace (`marketplace/`)
+
 **Purpose:** Public marketplace for hiring AI employees
 
 **Files:**
+
 - `components/EmployeeCard.tsx` - Marketplace card
 - `components/HireButton.tsx` - Hire action button
 - `pages/MarketplacePage.tsx` - Main marketplace
 
 **Usage:**
+
 ```typescript
 // Browse and hire employees
 const { availableEmployees, hireEmployee } = useMarketplace();
 ```
 
 ### 5. Billing (`billing/`)
+
 **Purpose:** Stripe integration, subscription management, usage tracking
 
 **Files:**
+
 - `pages/BillingPage.tsx` - Billing dashboard
 - `services/stripe-service.ts` - Stripe integration
 - `services/usage-tracker.ts` - Token/usage tracking
 - `components/SubscriptionCard.tsx` - Subscription status
 
 **Usage:**
+
 ```typescript
 import { stripeService } from '@features/billing/services/stripe-service';
 
@@ -123,19 +140,23 @@ await stripeService.createCheckoutSession('pro');
 ```
 
 **Backend:** Netlify Functions in `netlify/functions/`
+
 - `create-pro-subscription.ts`
 - `stripe-webhook.ts`
 
 ### 6. Settings (`settings/`)
+
 **Purpose:** User settings, AI configuration, preferences
 
 **Files:**
+
 - `pages/SettingsPage.tsx` - Main settings page
 - `pages/AIConfigurationPage.tsx` - AI provider settings
 - `components/ProfileSettings.tsx` - User profile
 - `services/settings-service.ts` - Settings persistence
 
 **Usage:**
+
 ```typescript
 // Update user settings
 const { updateSettings, settings } = useSettings();
@@ -158,6 +179,7 @@ const { updateSettings, settings } = useSettings();
 ## Common Patterns
 
 ### Feature Hook
+
 ```typescript
 // features/my-feature/hooks/useMyFeature.ts
 export const useMyFeature = () => {
@@ -165,29 +187,29 @@ export const useMyFeature = () => {
 
   return {
     data: store.data,
-    actions: store.actions
+    actions: store.actions,
   };
 };
 ```
 
 ### Feature Service
+
 ```typescript
 // features/my-feature/services/my-service.ts
 import { supabase } from '@shared/lib/supabase-client';
 
 export const myService = {
   async getData() {
-    const { data, error } = await supabase
-      .from('my_table')
-      .select('*');
+    const { data, error } = await supabase.from('my_table').select('*');
 
     if (error) throw error;
     return data;
-  }
+  },
 };
 ```
 
 ### Feature Page
+
 ```typescript
 // features/my-feature/pages/MyPage.tsx
 import { useMyFeature } from '../hooks/useMyFeature';
@@ -200,6 +222,8 @@ export const MyPage = () => {
 ```
 
 ## Testing Features
+
 Each feature should have:
+
 - Unit tests for services: `tests/unit/features/my-feature/`
 - E2E tests for pages: `tests/e2e/playwright/my-feature.spec.ts`

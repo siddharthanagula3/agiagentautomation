@@ -79,7 +79,7 @@ export const AgentCollaborationGraph: React.FC<
 
       // Count messages for this agent
       const messageCount = communications.filter(
-        c => c.from === agent.agentName || c.to === agent.agentName
+        (c) => c.from === agent.agentName || c.to === agent.agentName
       ).length;
 
       return {
@@ -97,12 +97,12 @@ export const AgentCollaborationGraph: React.FC<
   const edges = useMemo(() => {
     const edgeMap = new Map<string, Edge>();
 
-    communications.forEach(comm => {
+    communications.forEach((comm) => {
       // Skip system messages or user messages
       if (comm.from === 'System' || comm.to === 'user') return;
 
-      const fromNode = nodes.find(n => n.id === comm.from);
-      const toNode = nodes.find(n => n.id === comm.to);
+      const fromNode = nodes.find((n) => n.id === comm.from);
+      const toNode = nodes.find((n) => n.id === comm.to);
 
       if (!fromNode || !toNode) return;
 
@@ -178,13 +178,13 @@ export const AgentCollaborationGraph: React.FC<
 
   // Filter edges for selected agent
   const visibleEdges = selectedAgent
-    ? edges.filter(e => e.from === selectedAgent || e.to === selectedAgent)
+    ? edges.filter((e) => e.from === selectedAgent || e.to === selectedAgent)
     : edges;
 
   // Get related communications for selected agent
   const selectedAgentCommunications = selectedAgent
     ? communications.filter(
-        c => c.from === selectedAgent || c.to === selectedAgent
+        (c) => c.from === selectedAgent || c.to === selectedAgent
       )
     : [];
 
@@ -280,9 +280,9 @@ export const AgentCollaborationGraph: React.FC<
               {/* Edges */}
               <g className="edges">
                 <AnimatePresence>
-                  {visibleEdges.map(edge => {
-                    const fromNode = nodes.find(n => n.id === edge.from);
-                    const toNode = nodes.find(n => n.id === edge.to);
+                  {visibleEdges.map((edge) => {
+                    const fromNode = nodes.find((n) => n.id === edge.from);
+                    const toNode = nodes.find((n) => n.id === edge.to);
 
                     if (!fromNode || !toNode) return null;
 
@@ -353,7 +353,7 @@ export const AgentCollaborationGraph: React.FC<
 
               {/* Nodes */}
               <g className="nodes">
-                {nodes.map(node => {
+                {nodes.map((node) => {
                   const isSelected = selectedAgent === node.id;
                   const isHovered = hoveredAgent === node.id;
                   const nodeSize = isSelected ? 16 : isHovered ? 14 : 12;
@@ -499,7 +499,7 @@ export const AgentCollaborationGraph: React.FC<
                         No communications yet
                       </p>
                     ) : (
-                      selectedAgentCommunications.map(comm => (
+                      selectedAgentCommunications.map((comm) => (
                         <div
                           key={comm.id}
                           className="space-y-1 rounded-lg border border-border/50 bg-accent/30 p-3"

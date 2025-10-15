@@ -27,6 +27,7 @@ import {
   Settings,
   Paperclip,
   Mic,
+  Users,
 } from 'lucide-react';
 import { AI_EMPLOYEES } from '@/data/ai-employees';
 import { toast } from 'sonner';
@@ -1226,6 +1227,30 @@ const ChatPageContent: React.FC = () => {
                         }
                         className="mb-4"
                       />
+                    )}
+
+                    {/* Start Building Button */}
+                    {activeTabData && activeTabData.messages.length > 0 && (
+                      <div className="mb-4">
+                        <Button
+                          onClick={() => {
+                            // Get the last user message as context
+                            const lastUserMessage = activeTabData.messages
+                              .filter((m) => m.role === 'user')
+                              .pop();
+
+                            navigate('/company-hub', {
+                              state: {
+                                taskDescription: lastUserMessage?.content || '',
+                              },
+                            });
+                          }}
+                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        >
+                          <Users className="mr-2 h-4 w-4" />
+                          Start Building with AI Team
+                        </Button>
+                      </div>
                     )}
 
                     {/* Message Input */}

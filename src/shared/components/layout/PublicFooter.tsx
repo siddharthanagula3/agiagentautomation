@@ -74,7 +74,7 @@ const PublicFooter: React.FC = () => {
               executes. From natural language to complete results.
             </p>
             <div className="flex items-center gap-3">
-              {socialLinks.map(social => (
+              {socialLinks.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
@@ -96,7 +96,7 @@ const PublicFooter: React.FC = () => {
                 {category}
               </h3>
               <ul className="space-y-3">
-                {links.map(link => (
+                {links.map((link) => (
                   <li key={link.label}>
                     {link.href.startsWith('#') ? (
                       <a

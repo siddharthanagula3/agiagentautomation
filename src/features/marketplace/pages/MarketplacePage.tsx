@@ -39,7 +39,6 @@ import { useBusinessMetrics } from '@shared/hooks/useAnalytics';
 import { HireButton } from '@shared/components/HireButton';
 import { AnimatedAvatar } from '@shared/components/AnimatedAvatar';
 
-
 interface AIEmployee extends BaseAIEmployee {
   isHired: boolean;
   rating: number;
@@ -180,7 +179,6 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
-
 
   return (
     <div className={cn('space-y-6 p-6', className)}>

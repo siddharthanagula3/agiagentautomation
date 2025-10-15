@@ -60,7 +60,7 @@ class BackgroundChatService {
     console.log('[BackgroundChatService] Stopping...');
 
     // Abort all active sessions
-    this.activeSessions.forEach(sessionData => {
+    this.activeSessions.forEach((sessionData) => {
       sessionData.abort.abort();
     });
     this.activeSessions.clear();
@@ -85,7 +85,9 @@ class BackgroundChatService {
     onError?: (error: Error) => void
   ): Promise<void> {
     const metricsStore = useAgentMetricsStore.getState();
-    const session = metricsStore.currentSessions.find(s => s.id === sessionId);
+    const session = metricsStore.currentSessions.find(
+      (s) => s.id === sessionId
+    );
 
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
@@ -208,7 +210,9 @@ class BackgroundChatService {
    */
   private resumeActiveSessions() {
     const metricsStore = useAgentMetricsStore.getState();
-    const activeSessions = metricsStore.currentSessions.filter(s => s.isActive);
+    const activeSessions = metricsStore.currentSessions.filter(
+      (s) => s.isActive
+    );
 
     console.log(
       `[BackgroundChatService] Found ${activeSessions.length} active sessions to resume`
@@ -228,7 +232,7 @@ class BackgroundChatService {
 
     let cleanedCount = 0;
 
-    metricsStore.currentSessions.forEach(session => {
+    metricsStore.currentSessions.forEach((session) => {
       if (session.isActive) {
         const inactiveTime = now - new Date(session.lastActivity).getTime();
 

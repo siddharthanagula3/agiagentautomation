@@ -3,8 +3,6 @@
  * Defines all available AI employees, their specializations, and API integrations
  */
 
-import { getFallbackAvatar } from '@shared/utils/avatar-utils';
-
 export type AIProvider = 'chatgpt' | 'claude' | 'gemini' | 'perplexity';
 
 export interface AIEmployee {
@@ -37,7 +35,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: getFallbackAvatar('software-architect'),
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=software-architect&accessories=prescription02&accessoriesColor=262e33&clothing=blazerAndShirt&eyebrows=defaultNatural&eyes=default&facialHair=beardLight&facialHairColor=4a312c&hairColor=4a312c&mouth=serious&skinColor=614335&top=shortHairShortWaved',
     skills: [
       'System Design',
       'Architecture',
@@ -64,7 +63,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: getFallbackAvatar('solutions-architect'),
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=solutions-architect&accessories=round&accessoriesColor=3c4f5c&clothing=blazerAndSweater&eyebrows=raisedExcited&eyes=happy&hairColor=724133&mouth=smile&skinColor=d08b5b&top=shortHairShortCurly',
     skills: [
       'Solution Design',
       'Technical Strategy',
@@ -89,7 +89,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: getFallbackAvatar('backend-engineer'),
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=backend-engineer&clothing=hoodie&clothingGraphic=pizza&eyebrows=defaultNatural&eyes=default&hairColor=2c1b18&mouth=serious&skinColor=ae5d29&top=shortHairShortFlat',
     skills: ['Node.js', 'Python', 'Databases', 'API Design', 'Microservices'],
     specialty: 'Backend development and API design',
     fitLevel: 'excellent',
@@ -110,7 +111,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: getFallbackAvatar('frontend-engineer'),
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=frontend-engineer&accessories=wayfarers&accessoriesColor=5199e4&clothing=collarAndSweater&eyebrows=raisedExcitedNatural&eyes=happy&hairColor=f59797&mouth=smile&skinColor=ffdbb4&top=longHairBigHair',
     skills: ['React', 'TypeScript', 'CSS', 'UI/UX', 'Performance'],
     specialty: 'Modern frontend development',
     fitLevel: 'excellent',
@@ -125,7 +127,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: getFallbackAvatar('fullstack-engineer'),
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=fullstack-engineer&accessories=prescription01&accessoriesColor=000000&clothing=shirtVNeck&eyebrows=defaultNatural&eyes=default&facialHair=beardMedium&facialHairColor=58391e&hairColor=58391e&mouth=twinkle&skinColor=edb98a&top=shortHairTheCaesar',
     skills: ['React', 'Node.js', 'Databases', 'DevOps', 'Full Stack'],
     specialty: 'End-to-end application development',
     fitLevel: 'excellent',
@@ -1746,7 +1749,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'claude',
     price: 10,
     originalPrice: 20,
-    avatar: getFallbackAvatar('qa-tester'),
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=qa-tester&accessories=prescription02&accessoriesColor=3c4f5c&clothing=blazerAndShirt&eyebrows=angryNatural&eyes=squint&hairColor=2c1b18&mouth=serious&skinColor=fd9841&top=shortHairSides',
     skills: [
       'Automated Testing',
       'Test Scripts',
@@ -1767,7 +1771,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: getFallbackAvatar('customer-support-bot'),
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=customer-support-bot&clothing=graphicShirt&clothingGraphic=bear&eyebrows=defaultNatural&eyes=hearts&hairColor=a55728&mouth=smile&skinColor=ffdbb4&top=longHairStraight',
     skills: [
       'Chatbot Development',
       'FAQ Automation',
@@ -1788,7 +1793,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: getFallbackAvatar('documentation-generator'),
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=documentation-generator&accessories=prescription01&accessoriesColor=262e33&clothing=blazerAndShirt&eyebrows=defaultNatural&eyes=default&hairColor=4a312c&mouth=default&skinColor=edb98a&top=shortHairDreads01',
     skills: [
       'Auto Documentation',
       'API Docs',
@@ -1809,7 +1815,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: getFallbackAvatar('translation-specialist'),
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=translation-specialist&clothing=blazerAndSweater&eyebrows=defaultNatural&eyes=happy&hairColor=000000&mouth=smile&skinColor=ae5d29&top=hijab',
     skills: [
       'Multi-language Translation',
       'Localization',
@@ -1833,7 +1840,8 @@ export const AI_EMPLOYEES: AIEmployee[] = [
     provider: 'chatgpt',
     price: 10,
     originalPrice: 20,
-    avatar: getFallbackAvatar('content-writer'),
+    avatar:
+      'https://api.dicebear.com/7.x/avataaars/svg?seed=content-writer&accessories=sunglasses&accessoriesColor=000000&clothing=overall&eyebrows=raisedExcitedNatural&eyes=happy&hairColor=c93305&mouth=twinkle&skinColor=ffdbb4&top=longHairCurly',
     skills: [
       'Article Writing',
       'Blog Posts',
@@ -3639,15 +3647,15 @@ export const AI_EMPLOYEES: AIEmployee[] = [
 // Helper functions
 export const getEmployeesByCategory = (category: string): AIEmployee[] => {
   if (category === 'all') return AI_EMPLOYEES;
-  return AI_EMPLOYEES.filter(emp => emp.category === category);
+  return AI_EMPLOYEES.filter((emp) => emp.category === category);
 };
 
 export const getEmployeesByProvider = (provider: AIProvider): AIEmployee[] => {
-  return AI_EMPLOYEES.filter(emp => emp.provider === provider);
+  return AI_EMPLOYEES.filter((emp) => emp.provider === provider);
 };
 
 export const getEmployeeById = (id: string): AIEmployee | undefined => {
-  return AI_EMPLOYEES.find(emp => emp.id === id);
+  return AI_EMPLOYEES.find((emp) => emp.id === id);
 };
 
 export const categories = [
@@ -3655,114 +3663,114 @@ export const categories = [
   {
     id: 'Executive',
     label: 'Executive Leadership',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Executive').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Executive').length,
   },
   {
     id: 'Engineering',
     label: 'Engineering & Tech',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Engineering').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Engineering').length,
   },
   {
     id: 'Product',
     label: 'Product Management',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Product').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Product').length,
   },
   {
     id: 'AI & Data',
     label: 'AI & Data Science',
-    count: AI_EMPLOYEES.filter(e => e.category === 'AI & Data').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'AI & Data').length,
   },
   {
     id: 'IT & Operations',
     label: 'IT & Operations',
-    count: AI_EMPLOYEES.filter(e => e.category === 'IT & Operations').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'IT & Operations').length,
   },
   {
     id: 'Business',
     label: 'Business & Sales',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Business').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Business').length,
   },
   {
     id: 'Finance',
     label: 'Finance & Accounting',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Finance').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Finance').length,
   },
   {
     id: 'Human Resources',
     label: 'Human Resources',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Human Resources').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Human Resources').length,
   },
   {
     id: 'Legal',
     label: 'Legal & Compliance',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Legal').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Legal').length,
   },
   {
     id: 'Operations',
     label: 'Operations & PM',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Operations').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Operations').length,
   },
   {
     id: 'Marketing',
     label: 'Marketing & Growth',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Marketing').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Marketing').length,
   },
   {
     id: 'Design',
     label: 'Design & Creative',
     count: AI_EMPLOYEES.filter(
-      e => e.category === 'Design' || e.category === 'Creative'
+      (e) => e.category === 'Design' || e.category === 'Creative'
     ).length,
   },
   {
     id: 'Research',
     label: 'Research & Analysis',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Research').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Research').length,
   },
   {
     id: 'Support',
     label: 'Customer Success',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Support').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Support').length,
   },
   {
     id: 'Documentation',
     label: 'Documentation',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Documentation').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Documentation').length,
   },
   {
     id: 'Consulting',
     label: 'Consulting & Advisory',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Consulting').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Consulting').length,
   },
   {
     id: 'Education',
     label: 'Education & Training',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Education').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Education').length,
   },
   {
     id: 'Sustainability',
     label: 'Sustainability & ESG',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Sustainability').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Sustainability').length,
   },
   {
     id: 'Automation',
     label: 'Automation & RPA',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Automation').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Automation').length,
   },
   {
     id: 'Language',
     label: 'Language & Translation',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Language').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Language').length,
   },
   {
     id: 'Analytics',
     label: 'Analytics & Reporting',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Analytics').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Analytics').length,
   },
   {
     id: 'Sales',
     label: 'Sales & Lead Generation',
-    count: AI_EMPLOYEES.filter(e => e.category === 'Sales').length,
+    count: AI_EMPLOYEES.filter((e) => e.category === 'Sales').length,
   },
 ];
 

@@ -59,7 +59,10 @@
       "Bash(do if [ -d \"$dir\" ])",
       "Bash(git restore:*)",
       "Bash(npx eslint:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(powershell:*)",
+      "Bash(echo $env:APPDATAClaudeclaude_desktop_config.json)",
+      "Bash(cmd /c:*)"
     ],
     "deny": [],
     "ask": []

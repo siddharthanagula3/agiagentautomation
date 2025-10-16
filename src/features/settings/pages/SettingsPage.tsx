@@ -61,7 +61,7 @@ import {
 import { toast } from 'sonner';
 import { useAuthStore } from '@shared/stores/unified-auth-store';
 import { useAgentMetricsStore } from '@shared/stores/agent-metrics-store';
-import { backgroundChatService } from '@features/chat/services/background-chat-service';
+import { backgroundChatService } from '@features/mission-control/services/background-chat-service';
 import settingsService, {
   UserProfile,
   UserSettings,

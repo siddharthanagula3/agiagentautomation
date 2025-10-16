@@ -62,7 +62,9 @@
       "Bash(wc:*)",
       "Bash(powershell:*)",
       "Bash(echo $env:APPDATAClaudeclaude_desktop_config.json)",
-      "Bash(cmd /c:*)"
+      "Bash(cmd /c:*)",
+      "Bash(echo \"Deleted: $file\")",
+      "Bash(cd:*)"
     ],
     "deny": [],
     "ask": []

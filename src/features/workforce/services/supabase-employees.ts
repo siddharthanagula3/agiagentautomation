@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@shared/types/supabase';
 import { supabase } from '@shared/lib/supabase-client';
-import { AI_EMPLOYEES, type AIEmployee } from '@/data/ai-employees';
+import { AI_EMPLOYEES, type AIEmployee } from '@/data/marketplace-employees';
 
 export interface PurchasedEmployeeRecord {
   id: string; // UUID

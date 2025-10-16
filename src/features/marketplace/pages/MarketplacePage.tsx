@@ -32,7 +32,7 @@ import { cn } from '@shared/lib/utils';
 import {
   AI_EMPLOYEES,
   type AIEmployee as BaseAIEmployee,
-} from '@/data/ai-employees';
+} from '@/data/marketplace-employees';
 import { useAuthStore } from '@shared/stores/unified-auth-store';
 import { useWorkforceStore } from '@shared/stores/workforce-store';
 import { useBusinessMetrics } from '@shared/hooks/useAnalytics';

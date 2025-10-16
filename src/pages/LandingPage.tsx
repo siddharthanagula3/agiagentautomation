@@ -61,7 +61,7 @@ import {
   AI_EMPLOYEES,
   providerInfo,
   type AIProvider,
-} from '@/data/ai-employees';
+} from '@/data/marketplace-employees';
 import { DollarSign } from 'lucide-react';
 
 // Features data
@@ -166,7 +166,7 @@ const LandingPage: React.FC = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setStats(prev => ({
+      setStats((prev) => ({
         tasks: Math.min(prev.tasks + 247, 50000),
         time: Math.min(prev.time + 1.3, 98),
         cost: Math.min(prev.cost + 2.1, 89),
@@ -191,7 +191,7 @@ const LandingPage: React.FC = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveEmployee(prev => (prev + 1) % displayedEmployees.length);
+      setActiveEmployee((prev) => (prev + 1) % displayedEmployees.length);
     }, 4000);
     return () => clearInterval(interval);
   }, [displayedEmployees.length]);
@@ -481,7 +481,8 @@ const LandingPage: React.FC = () => {
                           getProviderGradient(employee.provider)
                         )}
                       >
-                        {providerInfo[employee.provider]?.name || 'Unknown Provider'}
+                        {providerInfo[employee.provider]?.name ||
+                          'Unknown Provider'}
                       </Badge>
                     </div>
 
@@ -493,7 +494,7 @@ const LandingPage: React.FC = () => {
                     {/* Skills */}
                     <div className="mb-4">
                       <div className="flex flex-wrap gap-1">
-                        {employee.skills.slice(0, 4).map(skill => (
+                        {employee.skills.slice(0, 4).map((skill) => (
                           <Badge
                             key={skill}
                             variant="secondary"

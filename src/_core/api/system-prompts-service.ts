@@ -4,6 +4,12 @@
  * Based on official documentation and best practices
  */
 
+import matter from 'gray-matter';
+import type {
+  AIEmployee,
+  AIEmployeeFrontmatter,
+} from '@_core/types/ai-employee';
+
 export interface SystemPrompt {
   id: string;
   name: string;
@@ -422,6 +428,61 @@ export class SystemPromptsService {
       size: this.cache.size,
       entries: Array.from(this.cache.keys()),
     };
+  }
+
+  /**
+   * Get available AI employees from .agi/employees directory
+   * Reads markdown files with frontmatter and returns structured employee data
+   */
+  async getAvailableEmployees(): Promise<AIEmployee[]> {
+    const employees: AIEmployee[] = [];
+
+    try {
+      // In browser environment, we'll use a static list for now
+      // In a real implementation, this would read from the filesystem via a backend API
+      // For the browser, we'll fetch from a known location or use import.meta.glob
+
+      if (typeof window !== 'undefined') {
+        // Browser environment - use import.meta.glob for Vite
+        const employeeFiles = import.meta.glob('/../.agi/employees/*.md', {
+          as: 'raw',
+          eager: false,
+        });
+
+        for (const [path, loader] of Object.entries(employeeFiles)) {
+          try {
+            const content = await (loader as () => Promise<string>)();
+            const parsed = matter(content);
+            const frontmatter = parsed.data as AIEmployeeFrontmatter;
+
+            employees.push({
+              name: frontmatter.name,
+              description: frontmatter.description,
+              tools: frontmatter.tools.split(',').map((t) => t.trim()),
+              model: frontmatter.model || 'inherit',
+              systemPrompt: parsed.content.trim(),
+            });
+          } catch (err) {
+            console.error(`Failed to parse employee file ${path}:`, err);
+          }
+        }
+      }
+
+      return employees;
+    } catch (error) {
+      console.error('Error loading AI employees:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get AI employee by name
+   */
+  async getEmployeeByName(name: string): Promise<AIEmployee | undefined> {
+    const employees = await this.getAvailableEmployees();
+    return employees.find(
+      (emp) => emp.name.toLowerCase() === name.toLowerCase()
+    );
   }
 }
 

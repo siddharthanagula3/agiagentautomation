@@ -10,7 +10,7 @@ import {
   type AgentCommunication,
   type AgentStatus,
 } from './multi-agent-orchestrator';
-import { AI_EMPLOYEES } from '@/data/ai-employees';
+import { AI_EMPLOYEES } from '@/data/marketplace-employees';
 import { listPurchasedEmployees } from '@features/workforce/services/supabase-employees';
 import { tokenLogger } from '@_core/api/token-logger';
 import type {

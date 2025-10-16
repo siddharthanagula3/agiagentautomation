@@ -45,18 +45,11 @@ const DashboardHomePage = lazyWithRetry(
 const WorkforcePage = lazyWithRetry(
   () => import('@features/workforce/pages/WorkforcePage')
 );
-const ChatPage = lazyWithRetry(() => import('@features/chat/pages/ChatPage'));
-const TabbedLLMChatPage = lazyWithRetry(
-  () => import('@features/chat/pages/TabbedLLMChatPage')
+const ChatPage = lazyWithRetry(
+  () => import('@features/mission-control/pages/ChatPageSimplified')
 );
-const ChatAgentPageChatKit = lazyWithRetry(
-  () => import('@features/chat/pages/ChatAgentPageChatKit')
-);
-const VibeCodingPage = lazyWithRetry(
-  () => import('@features/chat/pages/VibeCodingPage')
-);
-const CompanyHubPage = lazyWithRetry(
-  () => import('@features/chat/pages/CompanyHubPage')
+const MissionControlPage = lazyWithRetry(
+  () => import('@features/mission-control/pages/MissionControlPageRefactored')
 );
 const SettingsPage = lazyWithRetry(
   () => import('@features/settings/pages/SettingsPage')
@@ -305,17 +298,18 @@ function App() {
                   {/* Main Features */}
                   <Route path="workforce" element={<WorkforcePage />} />
 
-                  {/* Vibe Coding - Multi-Agent Orchestration */}
-                  <Route path="vibe" element={<VibeCodingPage />} />
-
-                  {/* Company Hub - Multi-Agent Workspace */}
-                  <Route path="company-hub" element={<CompanyHubPage />} />
+                  {/* Mission Control - AI Workforce Command Center */}
+                  <Route
+                    path="mission-control"
+                    element={<MissionControlPage />}
+                  />
 
                   {/* Legacy Chat Routes (for backward compatibility) */}
                   <Route path="chat" element={<ChatPage />} />
                   <Route path="chat/:sessionId" element={<ChatPage />} />
-                  <Route path="chat-agent" element={<ChatAgentPageChatKit />} />
-                  <Route path="chat-multi" element={<TabbedLLMChatPage />} />
+
+                  {/* Legacy route redirects */}
+                  <Route path="company-hub" element={<MissionControlPage />} />
 
                   {/* Account & System at Root Level */}
                   <Route path="settings" element={<SettingsPage />} />

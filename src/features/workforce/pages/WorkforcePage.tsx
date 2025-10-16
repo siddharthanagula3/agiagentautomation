@@ -24,7 +24,7 @@ import {
   useWorkforceStore,
   setupWorkforceSubscription,
 } from '@shared/stores/workforce-store';
-import { AI_EMPLOYEES } from '@/data/ai-employees';
+import { AI_EMPLOYEES } from '@/data/marketplace-employees';
 import { AnimatedAvatar } from '@shared/components/AnimatedAvatar';
 import {
   Users,

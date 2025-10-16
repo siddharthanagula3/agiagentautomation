@@ -4,7 +4,7 @@
  * Runs continuously until task completion
  */
 
-import { AI_EMPLOYEES, type AIEmployee } from '@/data/ai-employees';
+import { AI_EMPLOYEES, type AIEmployee } from '@/data/marketplace-employees';
 import { mcpToolsService, type MCPTool } from './mcp-tools-service';
 import {
   UnifiedLLMService,

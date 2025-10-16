@@ -29,7 +29,7 @@ import {
   providerInfo,
   getEmployeesByCategory,
   type AIEmployee,
-} from '@/data/ai-employees';
+} from '@/data/marketplace-employees';
 import { toast } from 'sonner';
 import { useAuthStore } from '@shared/stores/unified-auth-store';
 import {
@@ -60,7 +60,7 @@ export const MarketplacePublicPage: React.FC = () => {
         }
         const rows = await listPurchasedEmployees(user.id);
         if (!isMounted) return;
-        setPurchasedEmployees(new Set(rows.map(r => r.employee_id)));
+        setPurchasedEmployees(new Set(rows.map((r) => r.employee_id)));
       } catch (err) {
         console.error('Failed to load purchases', err);
       }
@@ -72,9 +72,9 @@ export const MarketplacePublicPage: React.FC = () => {
   }, [user?.id]);
 
   const filteredEmployees = getEmployeesByCategory(selectedCategory).filter(
-    emp =>
+    (emp) =>
       emp.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      emp.skills.some(skill =>
+      emp.skills.some((skill) =>
         skill.toLowerCase().includes(searchQuery.toLowerCase())
       )
   );
@@ -98,7 +98,7 @@ export const MarketplacePublicPage: React.FC = () => {
 
       await purchaseEmployee(user.id, employee);
       const rows = await listPurchasedEmployees(user.id);
-      setPurchasedEmployees(new Set(rows.map(r => r.employee_id)));
+      setPurchasedEmployees(new Set(rows.map((r) => r.employee_id)));
 
       toast.success(`${employee.name} hired successfully! 🎉`, {
         id: 'hire',
@@ -214,7 +214,7 @@ export const MarketplacePublicPage: React.FC = () => {
                   <Input
                     placeholder="Search by role, skills, or specialty..."
                     value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="glass h-12 pl-10 text-base"
                   />
                   {searchQuery && (
@@ -257,7 +257,7 @@ export const MarketplacePublicPage: React.FC = () => {
                   <div className="mt-6 border-t border-border pt-6">
                     <h3 className="mb-3 text-sm font-semibold">Categories</h3>
                     <div className="flex flex-wrap gap-2">
-                      {categories.map(category => (
+                      {categories.map((category) => (
                         <Button
                           key={category.id}
                           variant={
@@ -297,7 +297,7 @@ export const MarketplacePublicPage: React.FC = () => {
           </h2>
           <p className="text-sm text-muted-foreground">
             {selectedCategory !== 'all' &&
-              `In ${categories.find(c => c.id === selectedCategory)?.label}`}
+              `In ${categories.find((c) => c.id === selectedCategory)?.label}`}
             {searchQuery && ` matching "${searchQuery}"`}
           </p>
         </div>
@@ -383,7 +383,7 @@ export const MarketplacePublicPage: React.FC = () => {
                   {/* Skills */}
                   <div className="mb-4">
                     <div className="flex flex-wrap gap-1">
-                      {employee.skills.slice(0, 4).map(skill => (
+                      {employee.skills.slice(0, 4).map((skill) => (
                         <Badge
                           key={skill}
                           variant="secondary"

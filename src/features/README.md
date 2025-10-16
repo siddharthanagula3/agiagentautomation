@@ -49,35 +49,30 @@ import { ProtectedRoute } from '@features/auth/components/ProtectedRoute';
 
 **State:** Uses `unified-auth-store.ts` from `@shared/stores`
 
-### 2. Chat (`chat/`)
+### 2. Mission Control (`mission-control/`)
 
-**Purpose:** Chat interfaces for AI employees, LLM interactions, streaming
+**Purpose:** AI Workforce Mission Control - Deploy and monitor AI employees in real-time
 
-**Files (12 total, consolidated from 31):**
+**Files (5 core components):**
 
-- `components/VibeCodingInterface.tsx` - Main multi-agent interface
-- `components/TabbedLLMChatInterface.tsx` - Multi-provider tabbed chat
-- `components/AgentSDKChatUI.tsx` - Agent-specific chat
-- `components/ChatKitInterface.tsx` - General chat interface
-- `components/ChatMessage.tsx`, `ChatInput.tsx`, `ChatHeader.tsx` - Core UI
-- `pages/ChatPage.tsx` - Standard chat page
-- `pages/VibeCodingPage.tsx` - **Main chat page** (multi-agent)
-- `pages/TabbedLLMChatPage.tsx` - Provider comparison
+- `components/MissionLog.tsx` - Real-time mission activity log
+- `components/AgentStatusPanel.tsx` - Live agent status monitoring
+- `components/ChatMessage.tsx`, `ChatInput.tsx`, `ChatMessageList.tsx` - Core UI
+- `pages/MissionControlPage.tsx` - **Main command center**
+- `pages/ChatPage.tsx` - Individual AI employee chat
 - `services/background-chat-service.ts` - Background chat processing
+- `services/supabase-chat.ts` - Chat persistence
 
 **Usage:**
 
 ```typescript
-// Main chat interface
-import { VibeCodingInterface } from '@features/chat/components/VibeCodingInterface';
+// Mission Control interface
+import { MissionLog } from '@features/mission-control/components/MissionLog';
 
-<VibeCodingInterface
-  selectedEmployee={employee}
-  onTaskComplete={handleComplete}
-/>
+<MissionLog />
 ```
 
-**State:** Uses `chat-store.ts` from `@shared/stores`
+**State:** Uses `company-hub-store.ts` and `chat-store.ts` from `@shared/stores`
 
 ### 3. Workforce (`workforce/`)
 

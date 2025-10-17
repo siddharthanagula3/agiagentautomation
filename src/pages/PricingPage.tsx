@@ -35,56 +35,55 @@ interface PricingPlan {
 
 const FALLBACK_PLANS: PricingPlan[] = [
   {
-    name: 'Pay Per Employee',
-    price: '$1',
-    period: '/employee/month',
-    description: 'Perfect for teams that want flexibility',
+    name: 'Pro',
+    price: '$29',
+    period: '/month',
+    description: 'Perfect for growing teams',
     features: [
-      '$1 per AI employee per month',
-      'Pay-as-you-go after purchase',
-      'No upfront commitment',
-      'Cancel anytime',
-      'Weekly billing',
-      'All AI features included',
-      '24/7 Support',
+      'Up to 10 AI employees',
+      'Advanced workflow automation',
+      'Priority support',
+      'API access',
+      'Custom integrations',
+      'Analytics dashboard',
+      'Team collaboration',
     ],
-    cta: 'Get Started',
+    cta: 'Start Free Trial',
     color: 'from-blue-500 to-cyan-500',
   },
   {
-    name: 'All Access',
-    price: '$19',
+    name: 'Max',
+    price: '$299',
     period: '/month',
-    description: 'Best value - Hire unlimited AI employees',
+    description: 'For businesses that need maximum AI power',
     features: [
-      'Hire ALL AI employees',
-      '$10 bonus credits for first-time users',
-      'Pay-as-you-go after credits',
-      'Weekly billing',
-      'All AI features included',
-      'Priority support',
-      'Advanced analytics',
-      'Custom integrations',
+      'Unlimited AI employees',
+      'All Pro features',
+      'Dedicated account manager',
+      'Custom AI training',
+      'White-label options',
+      'Advanced security',
+      'SLA guarantee',
+      'Phone support',
     ],
     popular: true,
-    cta: 'Get Started',
+    cta: 'Start Free Trial',
     color: 'from-purple-500 to-pink-500',
   },
   {
     name: 'Enterprise',
     price: 'Custom',
     period: '',
-    description: 'Custom pricing for large organizations',
+    description: 'Tailored solutions for large organizations',
     features: [
-      'Unlimited AI employees',
-      'Custom credit packages',
-      'Volume discounts',
-      'Dedicated account manager',
-      'SLA guarantees',
-      'Custom integrations',
-      'Advanced security',
-      'Training & onboarding',
-      '24/7 Priority support',
+      'Everything in Max',
+      'Custom deployment options',
+      'On-premise available',
+      'Custom contracts',
+      'Dedicated infrastructure',
+      'Compliance certifications',
+      'Professional services',
+      'Training programs',
     ],
     cta: 'Contact Sales',
     color: 'from-orange-500 to-red-500',
@@ -106,11 +105,11 @@ const PricingPage: React.FC = () => {
         let price = 'Custom';
         let period = '';
 
-        if (plan.slug === 'pay-per-employee') {
-          price = '$1';
-          period = '/employee/month';
-        } else if (plan.slug === 'all-access') {
-          price = '$19';
+        if (plan.slug === 'pro') {
+          price = '$29';
+          period = '/month';
+        } else if (plan.slug === 'max') {
+          price = '$299';
           period = '/month';
         } else if (plan.slug === 'enterprise') {
           price = 'Custom';
@@ -165,16 +164,6 @@ const PricingPage: React.FC = () => {
       setIsCreatingSubscription(true);
       toast.loading('Creating subscription...');
 
-      // Map plan names to Stripe price IDs
-      let priceId: string;
-      if (planName === 'Pay Per Employee') {
-        priceId = 'price_1SHESN21oG095Q15MXZ3eBfD'; // $1/month Pay Per Employee
-      } else if (planName === 'All Access') {
-        priceId = 'price_1SHESd21oG095Q15kQzHLzVW'; // $19/month All Access
-      } else {
-        throw new Error('Invalid plan selected');
-      }
-
       // Get current user data
       const userData = {
         userId: user?.id || 'anonymous',
@@ -183,10 +172,12 @@ const PricingPage: React.FC = () => {
       };
 
       // Use the proper upgrade function instead
-      if (planName === 'Pay Per Employee') {
+      if (planName === 'Pro') {
         await upgradeToProPlan(userData);
-      } else if (planName === 'All Access') {
+      } else if (planName === 'Max') {
         await upgradeToMaxPlan(userData);
+      } else {
+        throw new Error('Invalid plan selected');
       }
     } catch (error) {
       console.error('Error creating subscription:', error);
@@ -307,15 +298,15 @@ const PricingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="AI Employee Pricing | Starting at $1/month | AGI Agent Automation"
-        description="Affordable AI employee pricing starting at $1/month. Choose from Pay Per Employee, All Access, or Enterprise plans. 14-day free trial. No setup fees. Cancel anytime."
+        title="AI Employee Pricing | Pro $29, Max $299 | AGI Agent Automation"
+        description="Transparent pricing: Pro $29/month, Max $299/month, or Enterprise custom. 14-day free trial. No setup fees. Cancel anytime."
         keywords={[
           'ai employee pricing',
           'ai agents cost',
           'ai automation pricing',
           'hire ai employees price',
           'ai workforce pricing',
-          'cheap ai employees',
+          'ai employees plans',
           'ai employee subscription',
           'ai automation plans',
           'ai agents monthly cost',
@@ -325,15 +316,16 @@ const PricingPage: React.FC = () => {
           '@context': 'https://schema.org',
           '@type': 'Product',
           name: 'AI Employee Platform',
-          description: 'Affordable AI employee platform starting at $1/month',
+          description:
+            'Transparent AI employee platform pricing: Pro $29, Max $299',
           brand: {
             '@type': 'Brand',
             name: 'AGI Agent Automation',
           },
           offers: {
             '@type': 'AggregateOffer',
-            lowPrice: '1',
-            highPrice: '19',
+            lowPrice: '29',
+            highPrice: '299',
             priceCurrency: 'USD',
             offerCount: '3',
           },
@@ -355,11 +347,10 @@ const PricingPage: React.FC = () => {
             className="mx-auto max-w-3xl text-center"
           >
             <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
-              Pay-As-You-Go Pricing
+              Simple, Transparent Pricing
             </h1>
             <p className="mb-8 text-xl text-muted-foreground">
-              Only pay for what you use. $1 per AI employee or $19 for unlimited
-              access with $10 bonus credits for first-time users.
+              Choose Pro ($29/month), Max ($299/month), or Enterprise (Custom).
             </p>
 
             {/* Countdown Timer for Limited Offer */}

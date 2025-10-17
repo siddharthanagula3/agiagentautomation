@@ -51,6 +51,9 @@ const ChatPage = lazyWithRetry(
 const MissionControlPage = lazyWithRetry(
   () => import('@features/mission-control/pages/MissionControlPageRefactored')
 );
+const EnhancedChatPage = lazyWithRetry(
+  () => import('@features/chat/pages/EnhancedChatPage')
+);
 const SettingsPage = lazyWithRetry(
   () => import('@features/settings/pages/SettingsPage')
 );
@@ -296,7 +299,14 @@ function App() {
                   <Route path="dashboard" element={<DashboardHomePage />} />
 
                   {/* Main Features */}
-                  <Route path="workforce" element={<WorkforcePage />} />
+                  <Route
+                    path="workforce"
+                    element={
+                      <ErrorBoundary>
+                        <WorkforcePage />
+                      </ErrorBoundary>
+                    }
+                  />
 
                   {/* Mission Control - AI Workforce Command Center */}
                   <Route
@@ -304,9 +314,12 @@ function App() {
                     element={<MissionControlPage />}
                   />
 
-                  {/* Legacy Chat Routes (for backward compatibility) */}
-                  <Route path="chat" element={<ChatPage />} />
-                  <Route path="chat/:sessionId" element={<ChatPage />} />
+                  {/* Chat */}
+                  <Route path="chat" element={<EnhancedChatPage />} />
+                  <Route
+                    path="chat/:sessionId"
+                    element={<EnhancedChatPage />}
+                  />
 
                   {/* Legacy route redirects */}
                   <Route path="company-hub" element={<MissionControlPage />} />

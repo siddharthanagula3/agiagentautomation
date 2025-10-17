@@ -32,14 +32,15 @@ export const usePerformanceMonitoring = (componentName: string) => {
       timestamp: Date.now(),
     });
 
+    const initialMetrics = metricsRef.current;
+
     return () => {
       // Track component unmount
-      const currentMetrics = metricsRef.current;
-      const mountDuration = performance.now() - currentMetrics.mountTime;
+      const mountDuration = performance.now() - initialMetrics.mountTime;
       monitoringService.trackEvent('component_unmount', {
         component: componentName,
         mountDuration,
-        renderCount: currentMetrics.renderCount,
+        renderCount: initialMetrics.renderCount,
       });
     };
   }, [componentName]);

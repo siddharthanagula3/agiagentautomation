@@ -35,6 +35,58 @@ interface NavigationItem {
   description?: string;
 }
 
+const MAIN_NAVIGATION: NavigationItem[] = [
+  {
+    name: 'Dashboard',
+    href: '/dashboard',
+    icon: LayoutDashboard,
+    description: 'Overview and analytics',
+    badge: 'Beta',
+  },
+  {
+    name: 'AI Workforce',
+    href: '/workforce',
+    icon: Users,
+    description: 'Manage AI employees',
+    badge: 'Beta',
+  },
+  {
+    name: 'Chat',
+    href: '/chat',
+    icon: MessageSquare,
+    description: 'AI communication hub',
+    badge: 'Beta',
+  },
+  {
+    name: 'Marketplace',
+    href: '/marketplace',
+    icon: ShoppingBag,
+    description: 'Hire AI employees',
+    badge: 'Beta',
+  },
+];
+
+const SETTINGS_NAVIGATION: NavigationItem[] = [
+  {
+    name: 'Settings',
+    href: '/settings',
+    icon: Settings,
+    description: 'Account settings',
+  },
+  {
+    name: 'Billing',
+    href: '/billing',
+    icon: CreditCard,
+    description: 'Manage subscription',
+  },
+  {
+    name: 'Support',
+    href: '/support',
+    icon: HelpCircle,
+    description: 'Get help',
+  },
+];
+
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   collapsed = false,
   className,
@@ -42,58 +94,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   const location = useLocation();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
-
-  const navigation: NavigationItem[] = [
-    {
-      name: 'Dashboard',
-      href: '/dashboard',
-      icon: LayoutDashboard,
-      description: 'Overview and analytics',
-      badge: 'Beta',
-    },
-    {
-      name: 'AI Workforce',
-      href: '/workforce',
-      icon: Users,
-      description: 'Manage AI employees',
-      badge: 'Beta',
-    },
-    {
-      name: 'Chat',
-      href: '/chat',
-      icon: MessageSquare,
-      description: 'AI communication hub',
-      badge: 'Beta',
-    },
-    {
-      name: 'Marketplace',
-      href: '/marketplace',
-      icon: ShoppingBag,
-      description: 'Hire AI employees',
-      badge: 'Beta',
-    },
-  ];
-
-  const settingsNavigation: NavigationItem[] = [
-    {
-      name: 'Settings',
-      href: '/settings',
-      icon: Settings,
-      description: 'Account settings',
-    },
-    {
-      name: 'Billing',
-      href: '/billing',
-      icon: CreditCard,
-      description: 'Manage subscription',
-    },
-    {
-      name: 'Support',
-      href: '/support',
-      icon: HelpCircle,
-      description: 'Get help',
-    },
-  ];
+  const navigation = MAIN_NAVIGATION;
+  const settingsNavigation = SETTINGS_NAVIGATION;
 
   const isActiveLink = (href: string) => {
     if (href === '/dashboard') {

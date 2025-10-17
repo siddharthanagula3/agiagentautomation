@@ -1,28 +1,14 @@
 import { Suspense, lazy, ComponentType } from 'react';
-import { Loader2 } from 'lucide-react';
+import { LazyFallback } from './lazy-fallback';
 
-// Loading component - moved to separate component to avoid React refresh warning
-const LoadingSpinner = () => (
-  <div className="flex h-screen items-center justify-center bg-background">
-    <div className="text-center">
-      <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-primary" />
-      <p className="text-sm text-muted-foreground">Loading...</p>
-    </div>
-  </div>
-);
-
-// Export loading spinner as default to avoid React refresh warning
-export default LoadingSpinner;
-
-// Lazy wrapper component
 export const lazyWithRetry = <T extends ComponentType<Record<string, unknown>>>(
   importFunc: () => Promise<{ default: T }>
 ) => {
   return lazy(() =>
-    importFunc().catch(error => {
+    importFunc().catch((error) => {
       console.error('Failed to load component:', error);
       // Retry once after a delay
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         setTimeout(() => {
           importFunc()
             .then(resolve)
@@ -54,7 +40,7 @@ export const withLazyLoading = <P extends object>(
   Component: ComponentType<P>
 ) => {
   return (props: P) => (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<LazyFallback />}>
       <Component {...props} />
     </Suspense>
   );

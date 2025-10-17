@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/unified-auth-store';
-import { useTheme } from '../theme-provider';
+import { useThemeContext } from '@shared/hooks/useThemeContext';
 import { Button } from '@shared/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@shared/ui/avatar';
 import { Badge } from '@shared/ui/badge';
@@ -53,7 +53,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { theme, setTheme, actualTheme } = useTheme();
+  const { theme, setTheme, actualTheme } = useThemeContext();
 
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -64,7 +64,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const location = useLocation();
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -108,13 +108,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   const handleNotificationClick = (notificationId: string) => {
-    setNotifications(prev =>
-      prev.map(n => (n.id === notificationId ? { ...n, read: true } : n))
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
     );
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
   const getNotificationIcon = (type: Notification['type']) => {
@@ -215,7 +215,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               type="text"
               placeholder="Search..."
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setShowSearch(true)}
               className="glass pl-10 pr-20"
             />
@@ -295,7 +295,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                         </p>
                       </div>
                     ) : (
-                      notifications.map(notification => (
+                      notifications.map((notification) => (
                         <button
                           key={notification.id}
                           onClick={() =>

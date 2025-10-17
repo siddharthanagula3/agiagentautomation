@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useState } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@shared/lib/utils';
 
@@ -37,7 +37,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
   const [pathD, setPathD] = useState('');
   const [svgDimensions, setSvgDimensions] = useState({ width: 0, height: 0 });
 
-  const updatePath = () => {
+  const updatePath = useCallback(() => {
     if (!fromRef.current || !toRef.current || !containerRef.current) return;
 
     const containerRect = containerRef.current.getBoundingClientRect();
@@ -58,13 +58,13 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
       width: containerRect.width,
       height: containerRect.height,
     });
-  };
+  }, [containerRef, curvature, fromRef, toRef]);
 
   useEffect(() => {
     updatePath();
     window.addEventListener('resize', updatePath);
     return () => window.removeEventListener('resize', updatePath);
-  }, [fromRef, toRef, containerRef, curvature]);
+  }, [updatePath]);
 
   return (
     <svg

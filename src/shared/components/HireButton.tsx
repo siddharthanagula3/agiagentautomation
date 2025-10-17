@@ -3,7 +3,7 @@
  * Provides instant UI feedback for hiring AI employees
  */
 
-import React, { useState, useTransition } from 'react';
+import React, { useEffect, useState, useTransition } from 'react';
 import { Button } from '@shared/ui/button';
 import { CheckCircle, Plus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -31,14 +31,23 @@ export const HireButton: React.FC<HireButtonProps> = ({
 }) => {
   const [hired, setHired] = useState(initialHired);
   const [isPending, startTransition] = useTransition();
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
+  useEffect(() => {
+    setHired(initialHired);
+  }, [initialHired]);
+
   const hire = async () => {
-    if (hired || isPending) return;
+    // Prevent double-clicks and concurrent executions
+    if (hired || isPending || isProcessing) return;
+
+    setIsProcessing(true);
 
     // Check authentication
     if (!user) {
+      setIsProcessing(false);
       toast.error('Please sign in to hire AI employees', {
         description: 'You need to be signed in to hire AI employees',
         duration: 4000,
@@ -61,6 +70,7 @@ export const HireButton: React.FC<HireButtonProps> = ({
           .single();
 
         if (existingHire) {
+          setIsProcessing(false);
           toast.info('You have already hired this employee', {
             description: 'Check your workforce page to start chatting',
           });
@@ -83,6 +93,7 @@ export const HireButton: React.FC<HireButtonProps> = ({
 
           if (error.code === '23505') {
             // Unique constraint violation - already hired
+            setIsProcessing(false);
             toast.info('You have already hired this employee', {
               description: 'Check your workforce page to start chatting',
             });
@@ -90,6 +101,7 @@ export const HireButton: React.FC<HireButtonProps> = ({
           }
 
           console.error('[HireButton] Insert failed:', error);
+          setIsProcessing(false);
           toast.error('Failed to hire employee', {
             description: 'Please try again or contact support',
             duration: 5000,
@@ -97,29 +109,32 @@ export const HireButton: React.FC<HireButtonProps> = ({
           return;
         }
 
-        // Success
-        onHired?.();
-
         // Dispatch custom event for workforce sync
         window.dispatchEvent(new CustomEvent('team:refresh'));
 
         toast.success('AI Employee hired successfully!', {
-          description: 'Redirecting to chat...',
+          description: 'Redirecting to your workforce...',
           duration: 3000,
         });
 
+        // Call onHired callback after showing toast
+        onHired?.();
+
         // Navigate to chat after a short delay
         setTimeout(() => {
-          navigate(`/chat?employee=${employeeId}`);
+          navigate(`/workforce?employee=${employeeId}`);
         }, 1500);
       } catch (error) {
         // Revert optimistic update on error
         setHired(false);
+        setIsProcessing(false);
         console.error('[HireButton] Unexpected error:', error);
         toast.error('An unexpected error occurred', {
           description: 'Please try again or contact support',
           duration: 5000,
         });
+      } finally {
+        setIsProcessing(false);
       }
     });
   };
@@ -140,7 +155,7 @@ export const HireButton: React.FC<HireButtonProps> = ({
   return (
     <Button
       onClick={hire}
-      disabled={isPending}
+      disabled={isPending || isProcessing}
       size={size}
       className={cn(
         'bg-primary text-primary-foreground hover:bg-primary/90',

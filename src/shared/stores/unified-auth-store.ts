@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import {
   authService,
+  AuthResponse,
   AuthUser,
   LoginData,
   RegisterData,
@@ -54,17 +55,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, initialized: true });
 
     try {
-      // Add timeout to prevent hanging on invalid tokens
-      const timeoutPromise = new Promise<{ user: null; error: string }>(
-        (_, reject) =>
-          setTimeout(
-            () => reject(new Error('Auth initialization timeout')),
-            5000
-          )
+      const timeoutPromise = new Promise<AuthResponse>((resolve) =>
+        setTimeout(
+          () =>
+            resolve({
+              user: null,
+              error: 'Auth initialization timeout',
+            }),
+          5000
+        )
       );
 
-      const authPromise = authService.getCurrentUser();
-      const { user, error } = await Promise.race([authPromise, timeoutPromise]);
+      const result = await Promise.race([
+        authService.getCurrentUser(),
+        timeoutPromise,
+      ]);
+
+      if (!result) {
+        logger.debug('Initialization skipped: empty auth response');
+        set({ user: null, isAuthenticated: false, isLoading: false });
+        return;
+      }
+
+      const { user, error } = result;
 
       if (error) {
         logger.debug('No existing session:', error);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 
@@ -17,9 +17,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   targetDate,
   className = '',
 }) => {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft());
-
-  function calculateTimeLeft(): TimeLeft {
+  const calculateTimeLeft = useCallback((): TimeLeft => {
     const difference = +targetDate - +new Date();
 
     if (difference > 0) {
@@ -35,7 +33,9 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
     }
 
     return { totalHours: 0, minutes: 0, seconds: 0 };
-  }
+  }, [targetDate]);
+
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => calculateTimeLeft());
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -43,7 +43,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [targetDate]);
+  }, [calculateTimeLeft]);
 
   const timeBlocks = [
     { label: 'Hours', value: timeLeft.totalHours },
@@ -88,21 +88,4 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
       </div>
     </div>
   );
-};
-
-// Helper to create a date 1 month from now
-export const getOneMonthFromNow = (): Date => {
-  const date = new Date();
-  date.setMonth(date.getMonth() + 1);
-  return date;
-};
-
-// Helper to create a specific end date (e.g., end of January 2026)
-export const createDiscountEndDate = (): Date => {
-  // Set to 99 hours, 59 minutes, 59 seconds from now
-  const now = new Date();
-  const targetTime = new Date(
-    now.getTime() + 99 * 60 * 60 * 1000 + 59 * 60 * 1000 + 59 * 1000
-  );
-  return targetTime;
 };

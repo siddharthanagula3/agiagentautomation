@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
@@ -79,62 +79,65 @@ const BlogPage: React.FC = () => {
   };
 
   // Fetch blog posts from Supabase function
-  const fetchBlogPosts = async (page = 0, category = 'All', search = '') => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const fetchBlogPosts = useCallback(
+    async (page = 0, category = selectedCategory, search = searchQuery) => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      const params = new URLSearchParams({
-        limit: '10',
-        offset: (page * 10).toString(),
-      });
+        const params = new URLSearchParams({
+          limit: '10',
+          offset: (page * 10).toString(),
+        });
 
-      if (category !== 'All') {
-        params.append('category', category);
+        if (category !== 'All') {
+          params.append('category', category);
+        }
+
+        if (search) {
+          params.append('search', search);
+        }
+
+        const { data, error } = await supabase.functions.invoke('blog-posts', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            category: category !== 'All' ? category : undefined,
+            search: search || undefined,
+            limit: 10,
+            offset: page * 10,
+          }),
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        const response = data || { posts: [], count: 0, hasMore: false };
+
+        if (page === 0) {
+          setBlogPosts(response.posts || []);
+        } else {
+          setBlogPosts((prev) => [...prev, ...(response.posts || [])]);
+        }
+
+        setHasMore(response.hasMore || false);
+        setCurrentPage(page);
+      } catch (err) {
+        console.error('Error fetching blog posts:', err);
+        setError((err as Error).message || 'Failed to fetch blog posts');
+        toast.error('Failed to load blog posts');
+      } finally {
+        setIsLoading(false);
       }
-
-      if (search) {
-        params.append('search', search);
-      }
-
-      const { data, error } = await supabase.functions.invoke('blog-posts', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          category: category !== 'All' ? category : undefined,
-          search: search || undefined,
-          limit: 10,
-          offset: page * 10,
-        }),
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      const response = data || { posts: [], count: 0, hasMore: false };
-
-      if (page === 0) {
-        setBlogPosts(response.posts || []);
-      } else {
-        setBlogPosts((prev) => [...prev, ...(response.posts || [])]);
-      }
-
-      setHasMore(response.hasMore || false);
-      setCurrentPage(page);
-    } catch (err) {
-      console.error('Error fetching blog posts:', err);
-      setError(err.message || 'Failed to fetch blog posts');
-      toast.error('Failed to load blog posts');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [selectedCategory, searchQuery]
+  );
 
   // Fetch categories
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('blog_categories')
@@ -150,18 +153,13 @@ const BlogPage: React.FC = () => {
       console.error('Error fetching categories:', err);
       // Don't show error for categories, just use default ones
     }
-  };
+  }, []);
 
   // Load initial data
   useEffect(() => {
     fetchCategories();
-    fetchBlogPosts(0, selectedCategory, searchQuery);
-  }, []);
-
-  // Refetch when filters change
-  useEffect(() => {
-    fetchBlogPosts(0, selectedCategory, searchQuery);
-  }, [selectedCategory, searchQuery]);
+    fetchBlogPosts(0);
+  }, [fetchCategories, fetchBlogPosts]);
 
   // Calculate read time based on content length
   const calculateReadTime = (content: string) => {

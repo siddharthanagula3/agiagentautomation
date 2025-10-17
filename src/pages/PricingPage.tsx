@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
@@ -6,10 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { Check, X, ArrowRight, Zap, Loader2 } from 'lucide-react';
 import { Button } from '@shared/ui/button';
 import { Particles } from '@shared/ui/particles';
-import {
-  CountdownTimer,
-  createDiscountEndDate,
-} from '@shared/ui/countdown-timer';
+import { CountdownTimer } from '@shared/ui/countdown-timer';
+import { createDiscountEndDate } from '@shared/ui/countdown-utils';
 import {
   getPricingPlans,
   type PricingPlan as DBPricingPlan,
@@ -35,6 +33,64 @@ interface PricingPlan {
   color: string;
 }
 
+const FALLBACK_PLANS: PricingPlan[] = [
+  {
+    name: 'Pay Per Employee',
+    price: '$1',
+    period: '/employee/month',
+    description: 'Perfect for teams that want flexibility',
+    features: [
+      '$1 per AI employee per month',
+      'Pay-as-you-go after purchase',
+      'No upfront commitment',
+      'Cancel anytime',
+      'Weekly billing',
+      'All AI features included',
+      '24/7 Support',
+    ],
+    cta: 'Get Started',
+    color: 'from-blue-500 to-cyan-500',
+  },
+  {
+    name: 'All Access',
+    price: '$19',
+    period: '/month',
+    description: 'Best value - Hire unlimited AI employees',
+    features: [
+      'Hire ALL AI employees',
+      '$10 bonus credits for first-time users',
+      'Pay-as-you-go after credits',
+      'Weekly billing',
+      'All AI features included',
+      'Priority support',
+      'Advanced analytics',
+      'Custom integrations',
+    ],
+    popular: true,
+    cta: 'Get Started',
+    color: 'from-purple-500 to-pink-500',
+  },
+  {
+    name: 'Enterprise',
+    price: 'Custom',
+    period: '',
+    description: 'Custom pricing for large organizations',
+    features: [
+      'Unlimited AI employees',
+      'Custom credit packages',
+      'Volume discounts',
+      'Dedicated account manager',
+      'SLA guarantees',
+      'Custom integrations',
+      'Advanced security',
+      'Training & onboarding',
+      '24/7 Priority support',
+    ],
+    cta: 'Contact Sales',
+    color: 'from-orange-500 to-red-500',
+  },
+];
+
 const PricingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -42,9 +98,50 @@ const PricingPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isCreatingSubscription, setIsCreatingSubscription] = useState(false);
 
+  const loadPlans = useCallback(async () => {
+    try {
+      setLoading(true);
+      const dbPlans = await getPricingPlans();
+      const formattedPlans: PricingPlan[] = dbPlans.map((plan) => {
+        let price = 'Custom';
+        let period = '';
+
+        if (plan.slug === 'pay-per-employee') {
+          price = '$1';
+          period = '/employee/month';
+        } else if (plan.slug === 'all-access') {
+          price = '$19';
+          period = '/month';
+        } else if (plan.slug === 'enterprise') {
+          price = 'Custom';
+          period = '';
+        }
+
+        return {
+          name: plan.name,
+          price,
+          period,
+          description: plan.description,
+          features: plan.features,
+          notIncluded: plan.not_included || [],
+          popular: plan.popular,
+          cta: plan.name === 'Enterprise' ? 'Contact Sales' : 'Get Started',
+          color: plan.color_gradient,
+        };
+      });
+      setPlans(formattedPlans);
+    } catch (error) {
+      console.error('Error loading pricing plans:', error);
+      // Fallback to hardcoded plans if fetch fails
+      setPlans(FALLBACK_PLANS);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadPlans();
-  }, []);
+  }, [loadPlans]);
 
   const handleSelectPlan = async (planName: string) => {
     if (planName === 'Enterprise') {
@@ -102,104 +199,6 @@ const PricingPage: React.FC = () => {
       setIsCreatingSubscription(false);
     }
   };
-
-  async function loadPlans() {
-    try {
-      const dbPlans = await getPricingPlans();
-      const formattedPlans: PricingPlan[] = dbPlans.map((plan) => {
-        let price = 'Custom';
-        let period = '';
-
-        if (plan.slug === 'pay-per-employee') {
-          price = '$1';
-          period = '/employee/month';
-        } else if (plan.slug === 'all-access') {
-          price = '$19';
-          period = '/month';
-        } else if (plan.slug === 'enterprise') {
-          price = 'Custom';
-          period = '';
-        }
-
-        return {
-          name: plan.name,
-          price,
-          period,
-          description: plan.description,
-          features: plan.features,
-          notIncluded: plan.not_included || [],
-          popular: plan.popular,
-          cta: plan.name === 'Enterprise' ? 'Contact Sales' : 'Get Started',
-          color: plan.color_gradient,
-        };
-      });
-      setPlans(formattedPlans);
-    } catch (error) {
-      console.error('Error loading pricing plans:', error);
-      // Fallback to hardcoded plans if fetch fails
-      setPlans(fallbackPlans);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const fallbackPlans: PricingPlan[] = [
-    {
-      name: 'Pay Per Employee',
-      price: '$1',
-      period: '/employee/month',
-      description: 'Perfect for teams that want flexibility',
-      features: [
-        '$1 per AI employee per month',
-        'Pay-as-you-go after purchase',
-        'No upfront commitment',
-        'Cancel anytime',
-        'Weekly billing',
-        'All AI features included',
-        '24/7 Support',
-      ],
-      cta: 'Get Started',
-      color: 'from-blue-500 to-cyan-500',
-    },
-    {
-      name: 'All Access',
-      price: '$19',
-      period: '/month',
-      description: 'Best value - Hire unlimited AI employees',
-      features: [
-        'Hire ALL AI employees',
-        '$10 bonus credits for first-time users',
-        'Pay-as-you-go after credits',
-        'Weekly billing',
-        'All AI features included',
-        'Priority support',
-        'Advanced analytics',
-        'Custom integrations',
-      ],
-      popular: true,
-      cta: 'Get Started',
-      color: 'from-purple-500 to-pink-500',
-    },
-    {
-      name: 'Enterprise',
-      price: 'Custom',
-      period: '',
-      description: 'Custom pricing for large organizations',
-      features: [
-        'Unlimited AI employees',
-        'Custom credit packages',
-        'Volume discounts',
-        'Dedicated account manager',
-        'SLA guarantees',
-        'Custom integrations',
-        'Advanced security',
-        'Training & onboarding',
-        '24/7 Priority support',
-      ],
-      cta: 'Contact Sales',
-      color: 'from-orange-500 to-red-500',
-    },
-  ];
 
   const comparisonFeatures = [
     {

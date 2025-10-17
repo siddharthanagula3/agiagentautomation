@@ -3,7 +3,7 @@
  * Provides React hooks for performance optimizations
  */
 
-import { useEffect, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 import { performanceService } from '@_core/monitoring/performance-service';
 import { monitoringService } from '@_core/monitoring/monitoring-service';
 
@@ -93,6 +93,9 @@ export const useMemoizedValue = <T>(
   factory: () => T,
   deps: React.DependencyList
 ): T => {
+  const depsKey = JSON.stringify(deps);
+  const depsLength = deps.length;
+
   return useMemo(() => {
     const startTime = performance.now();
     const result = factory();
@@ -102,12 +105,13 @@ export const useMemoizedValue = <T>(
       'memoized_calculation',
       endTime - startTime,
       {
-        deps: deps.length,
+        deps: depsLength,
+        depsKey,
       }
     );
 
     return result;
-  }, deps);
+  }, [factory, depsKey, depsLength]);
 };
 
 /**
@@ -247,7 +251,7 @@ export const useOptimizedImage = (
     };
 
     img.src = optimized;
-  }, [src, options.width, options.height, options.quality, options.format]);
+  }, [src, options]);
 
   return { optimizedSrc, loaded, error };
 };
@@ -315,6 +319,3 @@ export const useComponentPerformance = (componentName: string) => {
 
   return { trackRender };
 };
-
-// Import useState for the hooks that need it
-import { useState } from 'react';

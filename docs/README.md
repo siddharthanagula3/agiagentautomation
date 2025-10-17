@@ -13,6 +13,12 @@ A comprehensive AI workforce management platform that enables you to hire, manag
 - **Real-time Analytics**: Monitor performance, costs, and utilization
 - **Autonomous Workflows**: Set up AI-driven automation that runs independently
 
+### New & Updated
+
+- **Updated Pricing Plans**: Pro ($29/mo), Max ($299/mo), Enterprise (Custom)
+- **Enhanced Chat**: Modern chat page at `/chat` with markdown rendering
+- **Workforce Stability**: Error boundary added for `workforce` route
+
 ## 🏗️ Architecture
 
 ### Frontend Stack
@@ -30,6 +36,11 @@ A comprehensive AI workforce management platform that enables you to hire, manag
 - **Netlify Functions** for serverless API endpoints
 - **Stripe** for payment processing
 - **Multiple LLM Providers** (OpenAI, Anthropic, Google, Perplexity)
+
+### Build & Delivery
+
+- **Vite Chunking**: Dedicated `workforce` chunk for stable lazy loading
+- **Netlify Headers**: Explicit JS/MJS content-type headers and SPA redirects
 
 ## 🛠️ Installation
 
@@ -57,8 +68,22 @@ A comprehensive AI workforce management platform that enables you to hire, manag
    ```
 
 4. **Start development server**
+
    ```bash
    npm run dev
+   ```
+
+5. **(Optional) Apply DB migration & generate types**
+
+   ```bash
+   # Apply migrations locally
+   supabase db reset
+
+   # Or just apply the new pricing migration
+   # File already included: supabase/migrations/20251017_update_subscription_plans_pricing.sql
+
+   # Generate TypeScript types from local DB
+   supabase gen types typescript --local > src/shared/types/supabase.ts
    ```
 
 ## 🔐 Environment Variables
@@ -174,7 +199,8 @@ npm run dev
 
 #### 6. Access the Application
 
-- **Frontend**: http://localhost:8080
+- **Frontend (Vite)**: http://localhost:5173
+- **Frontend (via Netlify Dev proxy)**: http://localhost:8080
 - **Supabase Studio**: http://localhost:54323
 - **Netlify Functions**: http://localhost:8888
 - **Database**: postgresql://postgres:postgres@localhost:54322/postgres
@@ -340,6 +366,25 @@ src/
 - `npm run db:migrate` - Run database migrations
 - `npm run functions:serve` - Serve Netlify functions locally
 
+### Database Migration: Update Subscription Plans
+
+This repository includes a migration to align pricing with the new plans:
+
+- File: `supabase/migrations/20251017_update_subscription_plans_pricing.sql`
+- Effect: Renames legacy slugs to `pro`/`max`, sets prices to 29/299, adjusts display order
+
+Apply locally:
+
+```bash
+supabase db reset
+```
+
+Generate/refresh TypeScript types:
+
+```bash
+supabase gen types typescript --local > src/shared/types/supabase.ts
+```
+
 ### Code Quality & Automation
 
 - **ESLint** for code linting with React and TypeScript rules
@@ -395,7 +440,7 @@ src/
 
 4. **Generate TypeScript types**
    ```bash
-   supabase gen types typescript --local > src/types/supabase.ts
+   supabase gen types typescript --local > src/shared/types/supabase.ts
    ```
 
 ### Working with Edge Functions
@@ -765,6 +810,9 @@ For support and questions:
 - ✅ **AI Employee Marketplace** - Fixed hiring functionality with real Supabase integration
 - ✅ **Dynamic Blog System** - Full blog functionality with content generation
 - ✅ **Premium UI/UX** - Enhanced landing page with testimonials and use cases
+- ✅ **Pricing Update** - Pro $29, Max $299, Enterprise custom
+- ✅ **Chat Page** - New `/chat` page with markdown/code rendering
+- ✅ **Workforce Stability** - Error boundary and chunking for reliable load
 
 ---
 

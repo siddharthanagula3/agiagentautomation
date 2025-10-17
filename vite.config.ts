@@ -151,6 +151,7 @@ export default defineConfig(({ mode }) => {
             'ai-vendor': ['openai', '@anthropic-ai/sdk'],
             stripe: ['@stripe/stripe-js', '@stripe/react-stripe-js'],
             sonner: ['sonner'],
+            workforce: ['@/features/workforce/pages/WorkforcePage.tsx'],
           },
         },
       },

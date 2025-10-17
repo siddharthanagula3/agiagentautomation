@@ -16,6 +16,16 @@
   status = 200
 
 [[headers]]
+  for = "/*.js"
+  [headers.values]
+    Content-Type = "application/javascript"
+
+[[headers]]
+  for = "/*.mjs"
+  [headers.values]
+    Content-Type = "application/javascript"
+
+[[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"

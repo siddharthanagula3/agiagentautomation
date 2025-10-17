@@ -51,10 +51,8 @@ import { Spotlight, MouseSpotlight } from '@shared/ui/spotlight';
 import { BentoGrid, BentoCard } from '@shared/ui/bento-grid';
 import { InteractiveHoverCard } from '@shared/ui/interactive-hover-card';
 import { AnimatedGradientText } from '@shared/ui/animated-gradient-text';
-import {
-  CountdownTimer,
-  createDiscountEndDate,
-} from '@shared/ui/countdown-timer';
+import { CountdownTimer } from '@shared/ui/countdown-timer';
+import { createDiscountEndDate } from '@shared/ui/countdown-utils';
 import { SEOHead } from '@shared/components/seo/SEOHead';
 import { useAuthStore } from '@shared/stores/unified-auth-store';
 import {

@@ -64,7 +64,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   React.useEffect(() => {
     if (isRecording) {
       onStartRecording();
-      timerRef.current = setInterval(() => setTime(t => t + 1), 1000);
+      timerRef.current = setInterval(() => setTime((t) => t + 1), 1000);
     } else {
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -275,7 +275,7 @@ const PromptInputTextarea: React.FC<
     <Textarea
       ref={textareaRef}
       value={value}
-      onChange={e => setValue(e.target.value)}
+      onChange={(e) => setValue(e.target.value)}
       onKeyDown={handleKeyDown}
       className={cn(
         'flex min-h-[44px] w-full resize-none rounded-md border-none bg-transparent px-3 py-2.5 text-base text-gray-100 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50',
@@ -372,33 +372,39 @@ export const PromptInputBox = React.forwardRef(
 
     const handleToggleChange = (value: string) => {
       if (value === 'search') {
-        setShowSearch(prev => !prev);
+        setShowSearch((prev) => !prev);
         setShowThink(false);
       } else if (value === 'think') {
-        setShowThink(prev => !prev);
+        setShowThink((prev) => !prev);
         setShowSearch(false);
       }
     };
 
-    const handleCanvasToggle = () => setShowCanvas(prev => !prev);
+    const handleCanvasToggle = () => setShowCanvas((prev) => !prev);
 
-    const isImageFile = (file: File) => file.type.startsWith('image/');
+    const isImageFile = React.useCallback(
+      (file: File) => file.type.startsWith('image/'),
+      []
+    );
 
-    const processFile = (file: File) => {
-      if (!isImageFile(file)) {
-        console.log('Only image files are allowed');
-        return;
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        console.log('File too large (max 10MB)');
-        return;
-      }
-      setFiles([file]);
-      const reader = new FileReader();
-      reader.onload = e =>
-        setFilePreviews({ [file.name]: e.target?.result as string });
-      reader.readAsDataURL(file);
-    };
+    const processFile = React.useCallback(
+      (file: File) => {
+        if (!isImageFile(file)) {
+          console.log('Only image files are allowed');
+          return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+          console.log('File too large (max 10MB)');
+          return;
+        }
+        setFiles([file]);
+        const reader = new FileReader();
+        reader.onload = (e) =>
+          setFilePreviews({ [file.name]: e.target?.result as string });
+        reader.readAsDataURL(file);
+      },
+      [isImageFile]
+    );
 
     const handleDragOver = React.useCallback((e: React.DragEvent) => {
       e.preventDefault();
@@ -410,13 +416,16 @@ export const PromptInputBox = React.forwardRef(
       e.stopPropagation();
     }, []);
 
-    const handleDrop = React.useCallback((e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const files = Array.from(e.dataTransfer.files);
-      const imageFiles = files.filter(file => isImageFile(file));
-      if (imageFiles.length > 0) processFile(imageFiles[0]);
-    }, []);
+    const handleDrop = React.useCallback(
+      (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        const imageFiles = droppedFiles.filter((file) => isImageFile(file));
+        if (imageFiles.length > 0) processFile(imageFiles[0]);
+      },
+      [isImageFile, processFile]
+    );
 
     const handleRemoveFile = (index: number) => {
       const fileToRemove = files[index];
@@ -426,20 +435,23 @@ export const PromptInputBox = React.forwardRef(
 
     const openImageModal = (imageUrl: string) => setSelectedImage(imageUrl);
 
-    const handlePaste = React.useCallback((e: ClipboardEvent) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf('image') !== -1) {
-          const file = items[i].getAsFile();
-          if (file) {
-            e.preventDefault();
-            processFile(file);
-            break;
+    const handlePaste = React.useCallback(
+      (e: ClipboardEvent) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf('image') !== -1) {
+            const file = items[i].getAsFile();
+            if (file) {
+              e.preventDefault();
+              processFile(file);
+              break;
+            }
           }
         }
-      }
-    }, []);
+      },
+      [processFile]
+    );
 
     React.useEffect(() => {
       document.addEventListener('paste', handlePaste);
@@ -506,7 +518,7 @@ export const PromptInputBox = React.forwardRef(
                           className="h-full w-full object-cover"
                         />
                         <button
-                          onClick={e => {
+                          onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveFile(index);
                           }}
@@ -567,7 +579,7 @@ export const PromptInputBox = React.forwardRef(
                     ref={uploadInputRef}
                     type="file"
                     className="hidden"
-                    onChange={e => {
+                    onChange={(e) => {
                       if (e.target.files && e.target.files.length > 0)
                         processFile(e.target.files[0]);
                       if (e.target) e.target.value = '';

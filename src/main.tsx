@@ -9,79 +9,69 @@ import AppRouter from './AppRouter';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
 import './index.css';
 
-// Import Supabase tester for debugging (only in development)
 if (import.meta.env.DEV) {
-  import('@shared/utils/test-supabase');
+  void import('@shared/utils/test-supabase');
 }
 
-// Create QueryClient with proper initialization
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
       retry: 1,
-      refetchOnWindowFocus: false, // Prevent refetch on window focus
+      refetchOnWindowFocus: false,
     },
   },
 });
 
-const Main = () => {
-  return (
-    <StrictMode>
-      <ErrorBoundary>
-        <HelmetProvider>
-          <BrowserRouter
-            future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-          >
-            <QueryClientProvider client={queryClient}>
-              <AppRouter />
-              <Toaster position="top-right" richColors />
-              {import.meta.env.DEV && (
-                <ReactQueryDevtools initialIsOpen={false} />
-              )}
-            </QueryClientProvider>
-          </BrowserRouter>
-        </HelmetProvider>
-      </ErrorBoundary>
-    </StrictMode>
-  );
-};
+export const Main = () => (
+  <StrictMode>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <BrowserRouter
+          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+        >
+          <QueryClientProvider client={queryClient}>
+            <AppRouter />
+            <Toaster position="top-right" richColors />
+            {import.meta.env.DEV && (
+              <ReactQueryDevtools initialIsOpen={false} />
+            )}
+          </QueryClientProvider>
+        </BrowserRouter>
+      </HelmetProvider>
+    </ErrorBoundary>
+  </StrictMode>
+);
 
-// Ensure DOM is ready before rendering
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {
   throw new Error(
-    "Failed to find the root element. Ensure index.html has a div with id='root'"
+    "Failed to find the root element. Ensure index.html has a div with id='root'."
   );
 }
 
-// Add some initial logging for debugging (development only)
 if (import.meta.env.DEV) {
-  console.log('🚀 Starting AGI Agent Automation app...');
+  console.log('Starting AGI Agent Automation app...');
   console.log('Environment:', {
     mode: import.meta.env.MODE,
     dev: import.meta.env.DEV,
-    supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? 'Set ✅' : 'Missing ❌',
+    supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? 'Set' : 'Missing',
     demoMode: import.meta.env.VITE_DEMO_MODE,
   });
 }
 
-// Wrap in try-catch to handle initialization errors
 try {
   const root = createRoot(rootElement);
 
-  // Add timeout to prevent infinite loading
   const renderTimeout = setTimeout(() => {
-    console.warn('⚠️ App initialization taking longer than expected');
-  }, 10000); // Increased to 10 seconds
+    console.warn('App initialization is taking longer than expected');
+  }, 10000);
 
   root.render(<Main />);
 
-  // Clear timeout once app is rendered
   clearTimeout(renderTimeout);
 
-  // Hide the initial loader immediately after render is called
   setTimeout(() => {
     const loader = document.getElementById('initial-loader');
     const errorContainer = document.querySelector('.error-container');
@@ -89,30 +79,32 @@ try {
     if (loader) {
       loader.style.display = 'none';
     }
-    if (errorContainer) {
+    if (errorContainer instanceof HTMLElement) {
       errorContainer.style.display = 'none';
     }
 
-    // Remove loading class and add app-loaded class
     document.body.classList.remove('loading');
     document.body.classList.add('app-loaded');
-  }, 500); // Increased delay to ensure React has started mounting
+  }, 500);
 
   if (import.meta.env.DEV) {
-    console.log('✅ App rendering initiated');
+    console.log('App rendering initiated');
   }
 } catch (error) {
-  console.error('❌ Failed to initialize application:', error);
-  // Display error in the DOM
+  console.error('Failed to initialize application:', error);
+  const errorMessage =
+    error instanceof Error ? error.message : 'Unknown error occurred';
+  const errorName = error instanceof Error ? error.name : 'Unknown';
+  const errorStack =
+    error instanceof Error ? error.stack || 'No stack trace available' : '';
+
   rootElement.innerHTML = `
     <div style="padding: 20px; font-family: monospace; color: red; background: #111; min-height: 100vh;">
-      <h1>🚨 Application Initialization Error</h1>
-      <p><strong>Error:</strong> ${error instanceof Error ? error.message : 'Unknown error occurred'}</p>
-      <p><strong>Type:</strong> ${error instanceof Error ? error.name : 'Unknown'}</p>
+      <h1>Application Initialization Error</h1>
+      <p><strong>Error:</strong> ${errorMessage}</p>
+      <p><strong>Type:</strong> ${errorName}</p>
       <p><strong>Stack:</strong></p>
-      <pre style="background: #222; padding: 10px; border-radius: 4px; overflow: auto;">
-        ${error instanceof Error ? error.stack : 'No stack trace available'}
-      </pre>
+      <pre style="background: #222; padding: 10px; border-radius: 4px; overflow: auto;">${errorStack}</pre>
       <p>Please check the console for more details.</p>
       <button onclick="window.location.reload()" style="background: #007acc; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
         Reload Page

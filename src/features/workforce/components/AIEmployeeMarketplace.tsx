@@ -274,8 +274,6 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
     staleTime: 5 * 60 * 1000,
   });
 
-  const employees = employeesData || [];
-
   const hireMutation = useMutation({
     mutationFn: async (employee: AIEmployee) => {
       if (!user?.id) {
@@ -327,7 +325,8 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
 
   // Filter and sort employees
   const filteredEmployees = useMemo(() => {
-    const filtered = employees.filter((employee) => {
+    const sourceEmployees = employeesData ?? [];
+    const filtered = sourceEmployees.filter((employee) => {
       // Category filter
       if (
         selectedCategory !== 'all' &&
@@ -414,7 +413,14 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
     });
 
     return filtered;
-  }, [employees, selectedCategory, searchQuery, sortBy, sortOrder, filters]);
+  }, [
+    employeesData,
+    selectedCategory,
+    searchQuery,
+    sortBy,
+    sortOrder,
+    filters,
+  ]);
 
   // Handlers
   const handleEmployeeClick = useCallback(

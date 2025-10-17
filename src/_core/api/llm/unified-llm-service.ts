@@ -155,14 +155,55 @@ export class UnifiedLLMService {
 
   /**
    * Send a message using the specified provider
+   * Supports both old object API and new parameter API for backwards compatibility
    */
   async sendMessage(
-    messages: UnifiedMessage[],
+    messagesOrConfig:
+      | UnifiedMessage[]
+      | {
+          provider?: LLMProvider;
+          messages: UnifiedMessage[];
+          model?: string;
+          sessionId?: string;
+          userId?: string;
+          temperature?: number;
+          maxTokens?: number;
+        },
     sessionId?: string,
     userId?: string,
     provider?: LLMProvider
   ): Promise<UnifiedResponse> {
-    const targetProvider = provider || this.config.provider;
+    // Handle both API styles
+    let messages: UnifiedMessage[];
+    let targetProvider: LLMProvider;
+    let actualSessionId: string | undefined;
+    let actualUserId: string | undefined;
+
+    if (Array.isArray(messagesOrConfig)) {
+      // New API: sendMessage(messages, sessionId?, userId?, provider?)
+      messages = messagesOrConfig;
+      targetProvider = provider || this.config.provider;
+      actualSessionId = sessionId;
+      actualUserId = userId;
+    } else {
+      // Old API: sendMessage({ provider, messages, model, ... })
+      messages = messagesOrConfig.messages;
+      targetProvider = messagesOrConfig.provider || this.config.provider;
+      actualSessionId = messagesOrConfig.sessionId || sessionId;
+      actualUserId = messagesOrConfig.userId || userId;
+
+      // Update config if model or other params provided
+      if (messagesOrConfig.model) {
+        this.config.model = messagesOrConfig.model;
+      }
+      if (messagesOrConfig.temperature !== undefined) {
+        this.config.temperature = messagesOrConfig.temperature;
+      }
+      if (messagesOrConfig.maxTokens !== undefined) {
+        this.config.maxTokens = messagesOrConfig.maxTokens;
+      }
+    }
+
     const providerInstance = this.providers.get(targetProvider);
 
     if (!providerInstance) {
@@ -189,29 +230,29 @@ export class UnifiedLLMService {
         case 'anthropic':
           response = await (providerInstance as AnthropicProvider).sendMessage(
             providerMessages as AnthropicMessage[],
-            sessionId,
-            userId
+            actualSessionId,
+            actualUserId
           );
           break;
         case 'openai':
           response = await (providerInstance as OpenAIProvider).sendMessage(
             providerMessages as OpenAIMessage[],
-            sessionId,
-            userId
+            actualSessionId,
+            actualUserId
           );
           break;
         case 'google':
           response = await (providerInstance as GoogleProvider).sendMessage(
             providerMessages as GoogleMessage[],
-            sessionId,
-            userId
+            actualSessionId,
+            actualUserId
           );
           break;
         case 'perplexity':
           response = await (providerInstance as PerplexityProvider).sendMessage(
             providerMessages as PerplexityMessage[],
-            sessionId,
-            userId
+            actualSessionId,
+            actualUserId
           );
           break;
         default:

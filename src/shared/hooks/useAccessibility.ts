@@ -16,7 +16,7 @@ const accessibilityService = {
         document.body.removeChild(announcement);
       }
     }, 1000);
-  }
+  },
 };
 
 interface AccessibilityOptions {

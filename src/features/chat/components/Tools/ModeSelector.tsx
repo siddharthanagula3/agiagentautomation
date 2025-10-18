@@ -1,7 +1,7 @@
 import React from 'react';
-import { Button } from '@shared/ui/button';
+import { Label } from '@shared/ui/label';
 import { Badge } from '@shared/ui/badge';
-import { Users, Code, Search, Zap, Info } from 'lucide-react';
+import { Users, Code, Search, Zap, User } from 'lucide-react';
 import type { ChatMode } from '../../types';
 
 interface ModeSelectorProps {
@@ -10,38 +10,44 @@ interface ModeSelectorProps {
   availableModes: ChatMode[];
 }
 
-const modeConfig = {
+const MODE_CONFIG: Record<
+  ChatMode,
+  {
+    name: string;
+    description: string;
+    icon: React.ReactNode;
+    color: string;
+  }
+> = {
   team: {
-    name: 'Team',
-    description: 'Collaborative AI workforce',
-    icon: Users,
-    color: 'bg-blue-500',
-    features: [
-      'Multi-agent coordination',
-      'Task delegation',
-      'Workflow automation',
-    ],
+    name: 'Team Mode',
+    description: 'Multiple AI employees collaborate',
+    icon: <Users className="h-4 w-4" />,
+    color: 'bg-blue-500/10 text-blue-500',
   },
   engineer: {
-    name: 'Engineer',
-    description: 'Code-focused assistance',
-    icon: Code,
-    color: 'bg-green-500',
-    features: ['Code generation', 'Debugging', 'Architecture planning'],
+    name: 'Engineer Mode',
+    description: 'Single AI engineer for coding',
+    icon: <Code className="h-4 w-4" />,
+    color: 'bg-green-500/10 text-green-500',
   },
   research: {
-    name: 'Research',
-    description: 'Deep analysis and investigation',
-    icon: Search,
-    color: 'bg-purple-500',
-    features: ['Web search', 'Data analysis', 'Report generation'],
+    name: 'Research Mode',
+    description: 'Deep research and analysis',
+    icon: <Search className="h-4 w-4" />,
+    color: 'bg-purple-500/10 text-purple-500',
   },
   race: {
-    name: 'Race',
-    description: 'Fast parallel processing',
-    icon: Zap,
-    color: 'bg-orange-500',
-    features: ['Parallel execution', 'Speed optimization', 'Concurrent tasks'],
+    name: 'Race Mode',
+    description: 'Multiple employees compete',
+    icon: <Zap className="h-4 w-4" />,
+    color: 'bg-orange-500/10 text-orange-500',
+  },
+  solo: {
+    name: 'Solo Mode',
+    description: 'Direct chat with AI',
+    icon: <User className="h-4 w-4" />,
+    color: 'bg-gray-500/10 text-gray-500',
   },
 };
 
@@ -50,81 +56,55 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
   onModeChange,
   availableModes,
 }) => {
-  const currentMode = modeConfig[selectedMode];
-
   return (
     <div className="space-y-4">
-      <div className="flex items-center space-x-2">
-        <Zap className="h-4 w-4" />
-        <h3 className="text-sm font-medium">Chat Mode</h3>
-      </div>
+      <Label className="text-sm font-medium">Chat Mode</Label>
 
-      {/* Mode Selection */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="space-y-2">
         {availableModes.map((mode) => {
-          const config = modeConfig[mode];
-          const Icon = config.icon;
+          const config = MODE_CONFIG[mode];
           const isSelected = selectedMode === mode;
 
           return (
-            <Button
+            <button
               key={mode}
-              variant={isSelected ? 'default' : 'outline'}
               onClick={() => onModeChange(mode)}
-              className={`flex h-auto flex-col items-start space-y-2 p-3 ${
-                isSelected ? 'ring-2 ring-primary' : ''
+              className={`w-full rounded-lg border p-3 text-left transition-all ${
+                isSelected
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-primary/50 hover:bg-accent/50'
               }`}
             >
-              <div className="flex w-full items-center space-x-2">
-                <Icon className="h-4 w-4" />
-                <span className="font-medium">{config.name}</span>
-                {isSelected && (
-                  <Badge variant="secondary" className="ml-auto text-xs">
-                    Active
-                  </Badge>
-                )}
+              <div className="flex items-start gap-3">
+                <div
+                  className={`flex h-8 w-8 items-center justify-center rounded-md ${config.color}`}
+                >
+                  {config.icon}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium">{config.name}</h4>
+                    {isSelected && (
+                      <Badge variant="default" className="text-xs">
+                        Active
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {config.description}
+                  </p>
+                </div>
               </div>
-              <p className="text-left text-xs text-muted-foreground">
-                {config.description}
-              </p>
-            </Button>
+            </button>
           );
         })}
       </div>
 
-      {/* Current Mode Info */}
-      {currentMode && (
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <div className={`h-3 w-3 rounded-full ${currentMode.color}`} />
-            <span className="text-sm font-medium">{currentMode.name} Mode</span>
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            {currentMode.description}
-          </p>
-
-          <div className="space-y-1">
-            <p className="text-xs font-medium">Features:</p>
-            <ul className="space-y-1 text-xs text-muted-foreground">
-              {currentMode.features.map((feature, index) => (
-                <li key={index} className="flex items-center space-x-1">
-                  <span className="h-1 w-1 rounded-full bg-muted-foreground" />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
-
-      {/* Mode Info */}
-      <div className="space-y-1 text-xs text-muted-foreground">
-        <div className="flex items-center space-x-1">
-          <Info className="h-3 w-3" />
-          <span>Switch modes to change AI behavior</span>
-        </div>
-        <p>Each mode optimizes for different types of tasks and workflows.</p>
+      <div className="rounded-lg border border-border bg-muted/50 p-3">
+        <p className="text-xs text-muted-foreground">
+          <strong className="text-foreground">Current:</strong>{' '}
+          {MODE_CONFIG[selectedMode].name}
+        </p>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ A comprehensive AI workforce management platform that enables you to hire, manag
 
 ### New & Updated
 
-- **Updated Pricing Plans**: Pro ($29/mo), Max ($299/mo), Enterprise (Custom)
+- **Current Pricing Plans**: Pro ($29/mo), Max ($299/mo), Enterprise (Custom pricing)
 - **Enhanced Chat**: Modern chat page at `/chat` with markdown rendering
 - **Workforce Stability**: Error boundary added for `workforce` route
 
@@ -33,7 +33,8 @@ A comprehensive AI workforce management platform that enables you to hire, manag
 ### Backend & Services
 
 - **Supabase** for database, authentication, and real-time features
-- **Netlify Functions** for serverless API endpoints
+- **Netlify Functions** for LLM API proxies, Stripe webhooks, and subscription management
+- **Supabase Edge Functions** for contact forms, blog posts, and newsletters
 - **Stripe** for payment processing
 - **Multiple LLM Providers** (OpenAI, Anthropic, Google, Perplexity)
 
@@ -79,8 +80,8 @@ A comprehensive AI workforce management platform that enables you to hire, manag
    # Apply migrations locally
    supabase db reset
 
-   # Or just apply the new pricing migration
-   # File already included: supabase/migrations/20251017_update_subscription_plans_pricing.sql
+   # Apply the latest pricing migration
+   # File: supabase/migrations/20251018000001_add_missing_rls_policies.sql
 
    # Generate TypeScript types from local DB
    supabase gen types typescript --local > src/shared/types/supabase.ts
@@ -733,7 +734,7 @@ STRIPE_WEBHOOK_ENDPOINT_SECRET=whsec_your_webhook_secret
 
 ### Security Audit Report
 
-A comprehensive RLS audit has been completed and documented in `RLS_AUDIT_REPORT.md`. All tables now have proper Row Level Security policies implemented.
+A comprehensive RLS audit has been completed and documented in `RLS_AUDIT_REPORT.md`. RLS policies have been implemented for all tables (see migration `20251018000001_add_missing_rls_policies.sql`).
 
 ## 🚀 CI/CD Pipeline
 
@@ -790,7 +791,7 @@ For support and questions:
 
 - Create an issue in the repository
 - Check the documentation
-- Review the TestSprite test reports
+- Review the test reports in the CI/CD pipeline
 
 ## 🔄 Updates
 

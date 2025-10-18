@@ -426,7 +426,7 @@ supabase functions serve            # Serve edge functions
    - Check browser console for employee loading errors
    - Verify `.agi/employees/*.md` files have correct frontmatter
    - Test `systemPromptsService.getAvailableEmployees()` in console
-   - Check mission-store state in Redux DevTools
+   - Check mission-store state in Browser DevTools (Zustand doesn't use Redux)
 
 4. **Supabase RLS blocking queries:**
    - Verify user is authenticated: `supabase.auth.getUser()`

@@ -130,7 +130,8 @@ docs/drafts/
 /playwright/.auth/
 
 # AI Assistant files
-.claude/
+.claude/settings.local.json
+.claude/*.local.json
 .cursor/
 .aider/
 .copilot/

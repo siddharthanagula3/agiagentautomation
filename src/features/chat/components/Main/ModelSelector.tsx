@@ -1,7 +1,5 @@
 import React from 'react';
-import { Button } from '@shared/ui/button';
 import { Label } from '@shared/ui/label';
-import { Slider } from '@shared/ui/slider';
 import {
   Select,
   SelectContent,
@@ -9,8 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@shared/ui/select';
-import { Badge } from '@shared/ui/badge';
-import { Brain, Zap, Settings, Info } from 'lucide-react';
+import { Slider } from '@shared/ui/slider';
+import { Separator } from '@shared/ui/separator';
 
 interface ModelSelectorProps {
   selectedModel: string;
@@ -19,43 +17,17 @@ interface ModelSelectorProps {
   onTemperatureChange: (temperature: number) => void;
 }
 
-const models = [
-  {
-    id: 'gpt-4-turbo',
-    name: 'GPT-4 Turbo',
-    description: 'Most capable model',
-    icon: Brain,
-  },
-  {
-    id: 'gpt-4',
-    name: 'GPT-4',
-    description: 'High quality responses',
-    icon: Brain,
-  },
+const AVAILABLE_MODELS = [
+  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', description: 'Most capable' },
+  { id: 'gpt-4', name: 'GPT-4', description: 'Balanced performance' },
   {
     id: 'gpt-3.5-turbo',
     name: 'GPT-3.5 Turbo',
     description: 'Fast and efficient',
-    icon: Zap,
   },
-  {
-    id: 'claude-3-opus',
-    name: 'Claude 3 Opus',
-    description: "Anthropic's most capable",
-    icon: Brain,
-  },
-  {
-    id: 'claude-3-sonnet',
-    name: 'Claude 3 Sonnet',
-    description: 'Balanced performance',
-    icon: Brain,
-  },
-  {
-    id: 'claude-3-haiku',
-    name: 'Claude 3 Haiku',
-    description: 'Fast and lightweight',
-    icon: Zap,
-  },
+  { id: 'claude-3-opus', name: 'Claude 3 Opus', description: 'Best reasoning' },
+  { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', description: 'Balanced' },
+  { id: 'claude-3-haiku', name: 'Claude 3 Haiku', description: 'Fastest' },
 ];
 
 export const ModelSelector: React.FC<ModelSelectorProps> = ({
@@ -64,86 +36,64 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   temperature,
   onTemperatureChange,
 }) => {
-  const selectedModelInfo = models.find((m) => m.id === selectedModel);
-
   return (
     <div className="space-y-4">
-      <div className="flex items-center space-x-2">
-        <Settings className="h-4 w-4" />
-        <h3 className="text-sm font-medium">Model Settings</h3>
-      </div>
-
-      {/* Model Selection */}
-      <div className="space-y-2">
-        <Label htmlFor="model-select">Model</Label>
+      <div>
+        <Label
+          htmlFor="model-select"
+          className="mb-2 block text-sm font-medium"
+        >
+          AI Model
+        </Label>
         <Select value={selectedModel} onValueChange={onModelChange}>
-          <SelectTrigger>
+          <SelectTrigger id="model-select">
             <SelectValue placeholder="Select a model" />
           </SelectTrigger>
           <SelectContent>
-            {models.map((model) => {
-              const Icon = model.icon;
-              return (
-                <SelectItem key={model.id} value={model.id}>
-                  <div className="flex items-center space-x-2">
-                    <Icon className="h-4 w-4" />
-                    <div>
-                      <div className="font-medium">{model.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {model.description}
-                      </div>
-                    </div>
-                  </div>
-                </SelectItem>
-              );
-            })}
+            {AVAILABLE_MODELS.map((model) => (
+              <SelectItem key={model.id} value={model.id}>
+                <div className="flex flex-col">
+                  <span className="font-medium">{model.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {model.description}
+                  </span>
+                </div>
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
-
-        {selectedModelInfo && (
-          <div className="flex items-center space-x-2">
-            <Badge variant="secondary" className="text-xs">
-              {selectedModelInfo.name}
-            </Badge>
-            <span className="text-xs text-muted-foreground">
-              {selectedModelInfo.description}
-            </span>
-          </div>
-        )}
       </div>
 
-      {/* Temperature Control */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="temperature-slider">Temperature</Label>
-          <div className="flex items-center space-x-1">
-            <span className="text-xs text-muted-foreground">{temperature}</span>
-            <Info className="h-3 w-3 text-muted-foreground" />
-          </div>
-        </div>
+      <Separator />
 
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <Label htmlFor="temperature-slider" className="text-sm font-medium">
+            Temperature
+          </Label>
+          <span className="text-sm text-muted-foreground">
+            {temperature.toFixed(1)}
+          </span>
+        </div>
         <Slider
-          value={[temperature]}
-          onValueChange={([value]) => onTemperatureChange(value)}
+          id="temperature-slider"
           min={0}
           max={2}
           step={0.1}
+          value={[temperature]}
+          onValueChange={(values) => onTemperatureChange(values[0])}
           className="w-full"
         />
-
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Focused</span>
-          <span>Balanced</span>
+        <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+          <span>Precise</span>
           <span>Creative</span>
         </div>
       </div>
 
-      {/* Model Info */}
-      <div className="space-y-1 text-xs text-muted-foreground">
-        <p>• Higher temperature = more creative responses</p>
-        <p>• Lower temperature = more focused responses</p>
-        <p>• Recommended: 0.7 for most tasks</p>
-      </div>
+      <p className="text-xs text-muted-foreground">
+        Lower temperature makes responses more focused and deterministic. Higher
+        temperature makes them more creative and varied.
+      </p>
     </div>
   );
 };

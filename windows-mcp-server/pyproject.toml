@@ -1,0 +1,9 @@
+[project]
+name = "windows-mcp-server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "windows-mcp>=0.3.2",
+]

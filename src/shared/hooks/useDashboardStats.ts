@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@shared/lib/supabase-client';
-import { useAuthStore } from '@shared/stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/authentication-store';
 
 interface DashboardStats {
   totalJobs: number;

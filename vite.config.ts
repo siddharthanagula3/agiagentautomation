@@ -112,7 +112,7 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, './src'),
         '@features': path.resolve(__dirname, './src/features'),
-        '@_core': path.resolve(__dirname, './src/_core'),
+        '@core': path.resolve(__dirname, './src/core'),
         '@shared': path.resolve(__dirname, './src/shared'),
       },
     },
@@ -151,7 +151,7 @@ export default defineConfig(({ mode }) => {
             'ai-vendor': ['openai', '@anthropic-ai/sdk'],
             stripe: ['@stripe/stripe-js', '@stripe/react-stripe-js'],
             sonner: ['sonner'],
-            workforce: ['@/features/workforce/pages/WorkforcePage.tsx'],
+            workforce: ['@/features/workforce/pages/EmployeeManagement.tsx'],
           },
         },
       },

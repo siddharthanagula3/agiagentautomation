@@ -243,7 +243,7 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS['payment.process'],
   ],
   [USER_ROLES.ADMIN]: [
-    ...Object.values(PERMISSIONS).filter(p => !p.startsWith('admin.')),
+    ...Object.values(PERMISSIONS).filter((p) => !p.startsWith('admin.')),
     PERMISSIONS['admin.users'],
     PERMISSIONS['admin.audit'],
   ],

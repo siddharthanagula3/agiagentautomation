@@ -106,7 +106,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {actions.map(action => {
+          {actions.map((action) => {
             const Icon = action.icon;
             return (
               <Button

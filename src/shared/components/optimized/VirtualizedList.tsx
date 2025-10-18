@@ -29,11 +29,8 @@ function VirtualizedList<T>({
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { visibleItems, totalHeight, offsetY, handleScroll } = useVirtualizedList(
-    items,
-    itemHeight,
-    containerHeight
-  );
+  const { visibleItems, totalHeight, offsetY, handleScroll } =
+    useVirtualizedList(items, itemHeight, containerHeight);
 
   const handleScrollWithCallback = (e: React.UIEvent<HTMLDivElement>) => {
     const newScrollTop = e.currentTarget.scrollTop;

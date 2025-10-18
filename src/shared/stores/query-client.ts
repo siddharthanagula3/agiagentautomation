@@ -34,7 +34,7 @@ export const queryClient = new QueryClient({
       },
 
       // Retry delay (exponential backoff)
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 
       // Refetch on window focus
       refetchOnWindowFocus: false,
@@ -289,7 +289,7 @@ export const apiDelete = <T = unknown>(url: string) =>
 
 // Utility to invalidate related queries
 export const invalidateQueries = (patterns: (keyof typeof queryKeys)[]) => {
-  patterns.forEach(pattern => {
+  patterns.forEach((pattern) => {
     queryClient.invalidateQueries({
       queryKey: [pattern],
       exact: false,

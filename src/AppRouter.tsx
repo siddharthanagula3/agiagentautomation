@@ -1,7 +1,7 @@
 // src/AppRouter.tsx
 
 import { useEffect } from 'react';
-import { useAuthStore } from '@shared/stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/authentication-store';
 import App from './App';
 
 const AppRouter = () => {

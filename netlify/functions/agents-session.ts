@@ -34,7 +34,7 @@ interface SessionResponse {
   error?: string;
 }
 
-export const handler: Handler = async event => {
+export const handler: Handler = async (event) => {
   // Handle CORS
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -141,7 +141,7 @@ export const handler: Handler = async event => {
       instructions: `You are ${employeeName}, a professional ${employeeRole}.
 
 Your capabilities include:
-${capabilities.map(cap => `- ${cap}`).join('\n')}
+${capabilities.map((cap) => `- ${cap}`).join('\n')}
 
 Respond naturally and professionally. Use your tools when needed to help the user achieve their goals.
 Always be helpful, accurate, and concise.`,

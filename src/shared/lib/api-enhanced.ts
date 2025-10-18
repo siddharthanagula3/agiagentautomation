@@ -150,7 +150,7 @@ export class EnhancedAPIClient {
         // Check if we should retry
         if (attempt < this.maxRetries && errorHandlers.shouldRetry(lastError)) {
           const delay = errorHandlers.getRetryDelay(lastError, attempt);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
         }
 
@@ -178,7 +178,7 @@ export class EnhancedAPIClient {
 
         if (attempt < this.maxRetries && errorHandlers.shouldRetry(lastError)) {
           const delay = errorHandlers.getRetryDelay(lastError, attempt);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
         }
 
@@ -206,7 +206,7 @@ export class EnhancedAPIClient {
 
         if (attempt < this.maxRetries && errorHandlers.shouldRetry(lastError)) {
           const delay = errorHandlers.getRetryDelay(lastError, attempt);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
         }
 
@@ -231,7 +231,7 @@ export class EnhancedAPIClient {
 
         if (attempt < this.maxRetries && errorHandlers.shouldRetry(lastError)) {
           const delay = errorHandlers.getRetryDelay(lastError, attempt);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
         }
 

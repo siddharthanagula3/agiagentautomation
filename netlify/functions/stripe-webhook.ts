@@ -117,7 +117,7 @@ function markEventProcessed(eventId: string): void {
     const eventsArray = Array.from(processedEvents);
     eventsArray
       .slice(0, eventsArray.length - 1000)
-      .forEach(id => processedEvents.delete(id));
+      .forEach((id) => processedEvents.delete(id));
   }
 }
 
@@ -504,7 +504,7 @@ async function processStripeEvent(
                   `User update attempt ${retryCount} failed, retrying...`,
                   error
                 );
-                await new Promise(resolve =>
+                await new Promise((resolve) =>
                   setTimeout(resolve, 1000 * retryCount)
                 ); // Exponential backoff
               }
@@ -523,7 +523,7 @@ async function processStripeEvent(
                 `User update attempt ${retryCount} failed with exception, retrying...`,
                 error
               );
-              await new Promise(resolve =>
+              await new Promise((resolve) =>
                 setTimeout(resolve, 1000 * retryCount)
               );
             }
@@ -698,7 +698,7 @@ async function processStripeEvent(
                   `User downgrade attempt ${retryCount} failed, retrying...`,
                   error
                 );
-                await new Promise(resolve =>
+                await new Promise((resolve) =>
                   setTimeout(resolve, 1000 * retryCount)
                 ); // Exponential backoff
               }
@@ -716,7 +716,7 @@ async function processStripeEvent(
                 `User downgrade attempt ${retryCount} failed with exception, retrying...`,
                 error
               );
-              await new Promise(resolve =>
+              await new Promise((resolve) =>
                 setTimeout(resolve, 1000 * retryCount)
               );
             }

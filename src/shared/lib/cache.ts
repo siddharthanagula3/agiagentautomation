@@ -142,7 +142,7 @@ class LocalStorageBackend implements CacheStorage {
           keysToRemove.push(key);
         }
       }
-      keysToRemove.forEach(key => localStorage.removeItem(key));
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
     } catch (error) {
       console.error('LocalStorage clear error:', error);
     }
@@ -201,7 +201,7 @@ class IndexedDBBackend implements CacheStorage {
 
       const request = indexedDB.open(this.dbName, this.version);
 
-      request.onupgradeneeded = event => {
+      request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         if (!db.objectStoreNames.contains(this.storeName)) {
@@ -216,7 +216,7 @@ class IndexedDBBackend implements CacheStorage {
         }
       };
 
-      request.onsuccess = event => {
+      request.onsuccess = (event) => {
         this.db = (event.target as IDBOpenDBRequest).result;
         resolve(this.db);
       };
@@ -266,7 +266,7 @@ class IndexedDBBackend implements CacheStorage {
       const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
 
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         const getRequest = store.get(key);
         getRequest.onsuccess = () => {
           const existed = !!getRequest.result;
@@ -461,7 +461,7 @@ export class Cache {
     const results: Record<string, T | null> = {};
 
     await Promise.all(
-      keys.map(async key => {
+      keys.map(async (key) => {
         results[key] = await this.get<T>(key);
       })
     );
@@ -640,7 +640,7 @@ export class Cache {
     }
 
     this.cleanupTimer = setInterval(() => {
-      this.cleanup().catch(error => {
+      this.cleanup().catch((error) => {
         console.error('Automatic cache cleanup error:', error);
       });
     }, this.config.cleanupInterval);
@@ -688,7 +688,7 @@ export class CacheManager {
 
   async clearAllCaches(): Promise<void> {
     await Promise.all(
-      Array.from(this.caches.values()).map(cache => cache.clear())
+      Array.from(this.caches.values()).map((cache) => cache.clear())
     );
   }
 

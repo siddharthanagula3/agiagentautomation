@@ -91,7 +91,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
       // Store usage in Supabase (non-blocking)
       storeTokenUsage('openai', model, userId, sessionId, tokenUsage).catch(
-        err => {
+        (err) => {
           console.error('[OpenAI Proxy] Failed to store token usage:', err);
         }
       );

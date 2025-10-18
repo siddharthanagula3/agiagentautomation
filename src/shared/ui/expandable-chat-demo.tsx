@@ -43,7 +43,7 @@ export function ExpandableChatDemo() {
     e.preventDefault();
     if (!input.trim()) return;
 
-    setMessages(prev => [
+    setMessages((prev) => [
       ...prev,
       {
         id: prev.length + 1,
@@ -55,7 +55,7 @@ export function ExpandableChatDemo() {
     setIsLoading(true);
 
     setTimeout(() => {
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         {
           id: prev.length + 1,
@@ -91,7 +91,7 @@ export function ExpandableChatDemo() {
 
         <ExpandableChatBody>
           <ChatMessageList>
-            {messages.map(message => (
+            {messages.map((message) => (
               <ChatBubble
                 key={message.id}
                 variant={message.sender === 'user' ? 'sent' : 'received'}
@@ -133,7 +133,7 @@ export function ExpandableChatDemo() {
           >
             <ChatInput
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
               className="min-h-12 resize-none rounded-lg border-0 bg-background p-3 shadow-none focus-visible:ring-0"
             />

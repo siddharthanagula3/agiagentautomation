@@ -268,7 +268,7 @@ jobs:
           echo "Security job: ${{ needs.security.result }}"
           echo "Performance job: ${{ needs.performance.result }}"
           echo "Database job: ${{ needs.database.result }}"
-          
+
           if [[ "${{ needs.test.result }}" != "success" || 
                 "${{ needs.build.result }}" != "success" || 
                 "${{ needs.e2e.result }}" != "success" || 

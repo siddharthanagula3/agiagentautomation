@@ -94,7 +94,7 @@ export function DataTable<TData, TValue>({
                 value={
                   (table.getColumn(searchKey)?.getFilterValue() as string) ?? ''
                 }
-                onChange={event =>
+                onChange={(event) =>
                   table.getColumn(searchKey)?.setFilterValue(event.target.value)
                 }
                 className="pl-8"
@@ -103,13 +103,13 @@ export function DataTable<TData, TValue>({
           )}
 
           {/* Filters */}
-          {filterOptions.map(filter => (
+          {filterOptions.map((filter) => (
             <Select
               key={filter.key}
               value={
                 (table.getColumn(filter.key)?.getFilterValue() as string) ?? ''
               }
-              onValueChange={value =>
+              onValueChange={(value) =>
                 table
                   .getColumn(filter.key)
                   ?.setFilterValue(value === 'all' ? '' : value)
@@ -121,7 +121,7 @@ export function DataTable<TData, TValue>({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All {filter.label}</SelectItem>
-                {filter.options.map(option => (
+                {filter.options.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -141,14 +141,16 @@ export function DataTable<TData, TValue>({
           <DropdownMenuContent align="end">
             {table
               .getAllColumns()
-              .filter(column => column.getCanHide())
-              .map(column => {
+              .filter((column) => column.getCanHide())
+              .map((column) => {
                 return (
                   <DropdownMenuCheckboxItem
                     key={column.id}
                     className="capitalize"
                     checked={column.getIsVisible()}
-                    onCheckedChange={value => column.toggleVisibility(!!value)}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
@@ -162,9 +164,9 @@ export function DataTable<TData, TValue>({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map(headerGroup => (
+            {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map(header => {
+                {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id} className="font-medium">
                       {header.isPlaceholder
@@ -181,13 +183,13 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map(row => (
+              table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
                   className="transition-colors hover:bg-muted/50"
                 >
-                  {row.getVisibleCells().map(cell => (
+                  {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -222,7 +224,7 @@ export function DataTable<TData, TValue>({
             <p className="text-sm font-medium">Rows per page</p>
             <Select
               value={`${table.getState().pagination.pageSize}`}
-              onValueChange={value => {
+              onValueChange={(value) => {
                 table.setPageSize(Number(value));
               }}
             >
@@ -232,7 +234,7 @@ export function DataTable<TData, TValue>({
                 />
               </SelectTrigger>
               <SelectContent side="top">
-                {[10, 20, 30, 40, 50].map(pageSize => (
+                {[10, 20, 30, 40, 50].map((pageSize) => (
                   <SelectItem key={pageSize} value={`${pageSize}`}>
                     {pageSize}
                   </SelectItem>

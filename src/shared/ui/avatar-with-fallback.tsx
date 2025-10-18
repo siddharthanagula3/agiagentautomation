@@ -5,7 +5,10 @@
 
 import React, { useState, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@shared/ui/avatar';
-import { getFallbackForDiceBear, isDiceBearUrl } from '@shared/utils/avatar-utils';
+import {
+  getFallbackForDiceBear,
+  isDiceBearUrl,
+} from '@shared/utils/avatar-utils';
 
 interface AvatarWithFallbackProps {
   src?: string;
@@ -53,7 +56,7 @@ export function AvatarWithFallback({
   const getInitials = (name: string): string => {
     return name
       .split(' ')
-      .map(word => word.charAt(0))
+      .map((word) => word.charAt(0))
       .join('')
       .toUpperCase()
       .slice(0, 2);

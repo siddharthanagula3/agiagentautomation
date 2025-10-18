@@ -73,16 +73,16 @@ const INITIAL_STATE: UserProfileState = {
 export const useUserProfileStore = create<UserProfileStore>()(
   devtools(
     persist(
-      immer(set => ({
+      immer((set) => ({
         ...INITIAL_STATE,
 
         setUser: (user: UserProfile | null) =>
-          set(state => {
+          set((state) => {
             state.user = user;
           }),
 
         updateProfile: (updates: Partial<UserProfile['profile']>) =>
-          set(state => {
+          set((state) => {
             if (state.user) {
               state.user.profile = { ...state.user.profile, ...updates };
               state.user.updatedAt = new Date();
@@ -90,36 +90,36 @@ export const useUserProfileStore = create<UserProfileStore>()(
           }),
 
         updateUser: (updates: Partial<UserProfile>) =>
-          set(state => {
+          set((state) => {
             if (state.user) {
               state.user = { ...state.user, ...updates, updatedAt: new Date() };
             }
           }),
 
         setLoading: (loading: boolean) =>
-          set(state => {
+          set((state) => {
             state.isLoading = loading;
           }),
 
         setError: (error: string | null) =>
-          set(state => {
+          set((state) => {
             state.error = error;
           }),
 
         clearError: () =>
-          set(state => {
+          set((state) => {
             state.error = null;
           }),
 
         reset: () =>
-          set(state => {
+          set((state) => {
             Object.assign(state, INITIAL_STATE);
           }),
       })),
       {
         name: 'agi-user-profile-store',
         version: 1,
-        partialize: state => ({
+        partialize: (state) => ({
           user: state.user,
         }),
       }
@@ -131,11 +131,12 @@ export const useUserProfileStore = create<UserProfileStore>()(
 );
 
 // Selectors for optimized re-renders
-export const useUser = () => useUserProfileStore(state => state.user);
-export const useUserPlan = () => useUserProfileStore(state => state.user?.plan);
+export const useUser = () => useUserProfileStore((state) => state.user);
+export const useUserPlan = () =>
+  useUserProfileStore((state) => state.user?.plan);
 export const useUserUsage = () =>
-  useUserProfileStore(state => state.user?.usage);
+  useUserProfileStore((state) => state.user?.usage);
 export const useUserBilling = () =>
-  useUserProfileStore(state => state.user?.billing);
+  useUserProfileStore((state) => state.user?.billing);
 export const useUserProfile = () =>
-  useUserProfileStore(state => state.user?.profile);
+  useUserProfileStore((state) => state.user?.profile);

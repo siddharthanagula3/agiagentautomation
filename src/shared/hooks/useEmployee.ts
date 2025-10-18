@@ -34,10 +34,10 @@ export const useEmployee = (
   const updateEmployeeMutation = useMutation({
     mutationFn: async (updates: Partial<AIEmployee>) => {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       return { ...employees[employeeId], ...updates };
     },
-    onSuccess: updatedEmployee => {
+    onSuccess: (updatedEmployee) => {
       // Update the cache
       queryClient.setQueryData(['employee', employeeId], updatedEmployee);
     },
@@ -46,7 +46,7 @@ export const useEmployee = (
   const deleteEmployeeMutation = useMutation({
     mutationFn: async () => {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       return true;
     },
     onSuccess: () => {

@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@shared/ui/card';
-import { monitoringService } from '@_core/monitoring/monitoring-service';
+// import { monitoringService } from '@core/monitoring/system-monitor';
 
 interface Props {
   children: ReactNode;
@@ -46,10 +46,10 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error to monitoring service
-    monitoringService.captureError(error, {
-      componentStack: errorInfo.componentStack,
-      errorBoundary: true,
-    });
+    // monitoringService.captureError(error, {
+    //   componentStack: errorInfo.componentStack,
+    //   errorBoundary: true,
+    // });
 
     // Update state with error details
     this.setState({

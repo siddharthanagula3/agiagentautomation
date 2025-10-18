@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuthStore } from '@shared/stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/authentication-store';
 
 interface PermissionGateProps {
   permissions?: string[];
@@ -27,11 +27,11 @@ const PermissionGate: React.FC<PermissionGateProps> = ({
 
   if (permissions.length > 0) {
     if (requireAll) {
-      hasPermissions = permissions.every(permission =>
+      hasPermissions = permissions.every((permission) =>
         checkPermission(permission)
       );
     } else {
-      hasPermissions = permissions.some(permission =>
+      hasPermissions = permissions.some((permission) =>
         checkPermission(permission)
       );
     }
@@ -39,9 +39,9 @@ const PermissionGate: React.FC<PermissionGateProps> = ({
 
   if (roles.length > 0) {
     if (requireAll) {
-      hasRoles = roles.every(role => hasRole(role));
+      hasRoles = roles.every((role) => hasRole(role));
     } else {
-      hasRoles = roles.some(role => hasRole(role));
+      hasRoles = roles.some((role) => hasRole(role));
     }
   }
 

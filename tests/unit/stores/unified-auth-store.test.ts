@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useAuthStore } from '@shared/stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/authentication-store';
 
 // Mock the auth service
-vi.mock('@core/security/auth-service', () => ({
+vi.mock('@core/auth/authentication-manager', () => ({
   authService: {
     getCurrentUser: vi.fn(),
     login: vi.fn(),
@@ -37,7 +37,7 @@ describe('Unified Auth Store', () => {
       name: 'Test User',
     };
 
-    const { authService } = await import('@core/security/auth-service');
+    const { authService } = await import('@core/auth/authentication-manager');
     vi.mocked(authService.login).mockResolvedValue({
       success: true,
       user: mockUser,
@@ -54,7 +54,7 @@ describe('Unified Auth Store', () => {
   });
 
   it('should handle login failure', async () => {
-    const { authService } = await import('@core/security/auth-service');
+    const { authService } = await import('@core/auth/authentication-manager');
     vi.mocked(authService.login).mockResolvedValue({
       success: false,
       user: null,
@@ -77,7 +77,7 @@ describe('Unified Auth Store', () => {
       name: 'New User',
     };
 
-    const { authService } = await import('@core/security/auth-service');
+    const { authService } = await import('@core/auth/authentication-manager');
     vi.mocked(authService.register).mockResolvedValue({
       success: true,
       user: mockUser,
@@ -95,7 +95,7 @@ describe('Unified Auth Store', () => {
   });
 
   it('should handle logout', async () => {
-    const { authService } = await import('@core/security/auth-service');
+    const { authService } = await import('@core/auth/authentication-manager');
     vi.mocked(authService.logout).mockResolvedValue();
 
     await useAuthStore.getState().logout();
@@ -110,7 +110,7 @@ describe('Unified Auth Store', () => {
       name: 'Updated Name',
     };
 
-    const { authService } = await import('@core/security/auth-service');
+    const { authService } = await import('@core/auth/authentication-manager');
     vi.mocked(authService.updateProfile).mockResolvedValue({
       success: true,
       user: mockUser,

@@ -17,7 +17,7 @@ export { useAuthStore } from './authentication-store';
 export { useChatStore } from './chat-store';
 
 // Workforce Store - AI workforce and job management
-export { useWorkforceStore } from './workforce-store';
+export { useEmployeeManagementStore as useWorkforceStore } from './employee-management-store';
 
 // Employee Store - AI employee marketplace
 export { useEmployeeStore } from './ai-employee-store';

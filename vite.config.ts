@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 
@@ -110,20 +111,19 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './src'),
-        '@features': path.resolve(__dirname, './src/features'),
-        '@core': path.resolve(__dirname, './src/core'),
-        '@shared': path.resolve(__dirname, './src/shared'),
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '@features': fileURLToPath(new URL('./src/features', import.meta.url)),
+        '@core': fileURLToPath(new URL('./src/core', import.meta.url)),
+        '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
       },
     },
     build: {
       target: 'es2020',
-      minify: 'terser',
+      minify: 'esbuild',
       sourcemap: true,
       terserOptions: {
         compress: {
-          drop_console:
-            mode === 'production' ? ['log', 'debug', 'info'] : false,
+          drop_console: mode === 'production',
           drop_debugger: true,
           pure_funcs:
             mode === 'production'

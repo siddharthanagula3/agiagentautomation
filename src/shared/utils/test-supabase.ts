@@ -9,7 +9,7 @@ export async function testSupabaseConnection() {
   console.log('=== TESTING SUPABASE CONNECTION ===');
 
   try {
-    const supabase = supabaseClient;
+    const supabaseClient = supabase;
 
     // Test 1: Check if client exists
     console.log('1. Supabase client:', supabase ? '✅ EXISTS' : '❌ MISSING');
@@ -18,7 +18,7 @@ export async function testSupabaseConnection() {
     const {
       data: { user },
       error: authError,
-    } = await supabase.auth.getUser();
+    } = await supabaseClient.auth.getUser();
     console.log(
       '2. Auth user:',
       user ? `✅ ${user.email}` : '❌ Not authenticated'
@@ -32,7 +32,7 @@ export async function testSupabaseConnection() {
 
     // Test 3: Try to read purchased_employees
     console.log('3. Testing purchased_employees table read...');
-    const { data: employees, error: readError } = await supabase
+    const { data: employees, error: readError } = await supabaseClient
       .from('purchased_employees')
       .select('*')
       .eq('user_id', user.id);
@@ -48,7 +48,7 @@ export async function testSupabaseConnection() {
 
     // Test 4: Try to read chat_sessions
     console.log('4. Testing chat_sessions table read...');
-    const { data: sessions, error: sessionsError } = await supabase
+    const { data: sessions, error: sessionsError } = await supabaseClient
       .from('chat_sessions')
       .select('*')
       .eq('user_id', user.id);
@@ -74,7 +74,7 @@ export async function testSupabaseConnection() {
       provider: 'gemini',
     };
 
-    const { data: newSession, error: insertError } = await supabase
+    const { data: newSession, error: insertError } = await supabaseClient
       .from('chat_sessions')
       .insert(testSession)
       .select()
@@ -91,7 +91,7 @@ export async function testSupabaseConnection() {
 
       // Clean up test session
       console.log('6. Cleaning up test session...');
-      const { error: deleteError } = await supabase
+      const { error: deleteError } = await supabaseClient
         .from('chat_sessions')
         .delete()
         .eq('id', newSession.id);

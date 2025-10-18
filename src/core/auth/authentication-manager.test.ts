@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { authService } from './auth-service';
+import { authService } from './authentication-manager';
 
 // Mock Supabase client
 vi.mock('@shared/lib/supabase-client', () => ({

@@ -33,8 +33,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@features/*": ["./src/features/*"],
-      "@core/*": ["./src/_core/*"],
-      "@_core/*": ["./src/_core/*"],
+      "@core/*": ["./src/core/*"],
       "@shared/*": ["./src/shared/*"]
     }
   },

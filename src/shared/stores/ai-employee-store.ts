@@ -120,7 +120,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
       }
 
       if (data) {
-        set(state => ({
+        set((state) => ({
           employees: { ...state.employees, [data.id]: data },
           selectedEmployee: data,
           isLoading: false,
@@ -133,7 +133,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   },
 
   // Create new employee
-  createEmployee: async employee => {
+  createEmployee: async (employee) => {
     set({ isLoading: true, error: null });
 
     try {
@@ -145,7 +145,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
       }
 
       if (data) {
-        set(state => ({
+        set((state) => ({
           employees: { ...state.employees, [data.id]: data },
           isLoading: false,
           lastUpdateAt: new Date(),
@@ -172,7 +172,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
       }
 
       if (data) {
-        set(state => ({
+        set((state) => ({
           employees: { ...state.employees, [id]: data },
           selectedEmployee:
             state.selectedEmployee?.id === id ? data : state.selectedEmployee,
@@ -197,7 +197,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
         return;
       }
 
-      set(state => {
+      set((state) => {
         const newEmployees = { ...state.employees };
         delete newEmployees[id];
 
@@ -235,7 +235,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
       }
 
       if (data) {
-        set(state => ({
+        set((state) => ({
           assignments: { ...state.assignments, [data.id]: data },
           isLoading: false,
           lastUpdateAt: new Date(),
@@ -287,7 +287,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
           {} as Record<string, ToolDefinition>
         );
 
-        set(state => ({
+        set((state) => ({
           tools: { ...state.tools, ...toolsMap },
           lastUpdateAt: new Date(),
         }));
@@ -317,7 +317,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
           {} as Record<string, WorkflowDefinition>
         );
 
-        set(state => ({
+        set((state) => ({
           workflows: { ...state.workflows, ...workflowsMap },
           lastUpdateAt: new Date(),
         }));
@@ -387,7 +387,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   },
 
   // Set filters
-  setFilters: filters => {
+  setFilters: (filters) => {
     set({ filters });
   },
 
@@ -397,7 +397,7 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
   },
 
   // Set selected employee
-  setSelectedEmployee: employee => {
+  setSelectedEmployee: (employee) => {
     set({ selectedEmployee: employee });
   },
 
@@ -415,17 +415,18 @@ export const useAIEmployeeStore = create<AIEmployeeState>((set, get) => ({
 
 // Selectors for common use cases
 export const useEmployees = () =>
-  useAIEmployeeStore(state => Object.values(state.employees));
+  useAIEmployeeStore((state) => Object.values(state.employees));
 export const useAvailableEmployees = () =>
-  useAIEmployeeStore(state =>
-    Object.values(state.employees).filter(emp => emp.status === 'available')
+  useAIEmployeeStore((state) =>
+    Object.values(state.employees).filter((emp) => emp.status === 'available')
   );
 export const useEmployeesByCategory = (category: EmployeeCategory) =>
-  useAIEmployeeStore(state =>
-    Object.values(state.employees).filter(emp => emp.category === category)
+  useAIEmployeeStore((state) =>
+    Object.values(state.employees).filter((emp) => emp.category === category)
   );
 export const useSelectedEmployee = () =>
-  useAIEmployeeStore(state => state.selectedEmployee);
+  useAIEmployeeStore((state) => state.selectedEmployee);
 export const useEmployeeLoading = () =>
-  useAIEmployeeStore(state => state.isLoading);
-export const useEmployeeError = () => useAIEmployeeStore(state => state.error);
+  useAIEmployeeStore((state) => state.isLoading);
+export const useEmployeeError = () =>
+  useAIEmployeeStore((state) => state.error);

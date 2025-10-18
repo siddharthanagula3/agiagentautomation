@@ -4,20 +4,20 @@ import { Routes, Route } from 'react-router-dom';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TooltipProvider } from '@shared/ui/tooltip';
 import { Toaster } from 'sonner';
-import { ThemeProvider } from '@shared/components/theme-provider';
+import { ThemeProvider } from '@shared/components/ThemeProvider';
 import ScrollToTop from '@shared/components/ScrollToTop';
-import { lazyWithRetry } from '@shared/components/LazyWrapper';
+import { lazyWithRetry } from '@shared/components/LazyLoadWrapper';
 import { Loader2 } from 'lucide-react';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
-import { monitoringService } from '@_core/monitoring/monitoring-service';
+import { monitoringService } from '@core/monitoring/system-monitor';
 import { usePagePerformanceMonitoring } from '@shared/hooks/usePerformanceMonitoring';
-import { accessibilityService } from '@_core/monitoring/accessibility-service';
-import { seoService } from '@_core/monitoring/seo-service';
-import { analyticsService } from '@_core/monitoring/analytics-service';
-import { performanceService } from '@_core/monitoring/performance-service';
-import { backupService } from '@_core/storage/backup-service';
-import { scalingService } from '@_core/monitoring/scaling-service';
-import { privacyService } from '@_core/monitoring/privacy-service';
+import { accessibilityService } from '@core/monitoring/accessibility-monitor';
+import { seoService } from '@core/monitoring/seo-optimizer';
+import { analyticsService } from '@core/monitoring/analytics-tracker';
+import { performanceService } from '@core/monitoring/performance-monitor';
+import { backupService } from '@core/storage/backup/database-backup';
+import { scalingService } from '@core/monitoring/scaling-manager';
+import { privacyService } from '@core/monitoring/privacy-compliance';
 import SkipLink from '@shared/components/accessibility/SkipLink';
 import { CookieConsent } from '@shared/components/CookieConsent';
 import { PublicLayout } from './layouts/PublicLayout';
@@ -26,94 +26,90 @@ import { ProtectedRoute } from '@features/auth/components/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';
 
 // Lazy load all page components for better performance
-const LandingPage = lazyWithRetry(() => import('./pages/LandingPage'));
-const LoginPage = lazyWithRetry(() => import('@features/auth/pages/LoginPage'));
+const LandingPage = lazyWithRetry(() => import('./pages/Landing'));
+const LoginPage = lazyWithRetry(() => import('@features/auth/pages/Login'));
 const RegisterPage = lazyWithRetry(
-  () => import('@features/auth/pages/RegisterPage')
+  () => import('@features/auth/pages/Register')
 );
 const ForgotPasswordPage = lazyWithRetry(
-  () => import('@features/auth/pages/ForgotPasswordPage')
+  () => import('@features/auth/pages/ForgotPassword')
 );
 const ResetPasswordPage = lazyWithRetry(
-  () => import('@features/auth/pages/ResetPasswordPage')
+  () => import('@features/auth/pages/ResetPassword')
 );
-const DashboardHomePage = lazyWithRetry(
-  () => import('./pages/DashboardHomePage')
-);
+const DashboardHomePage = lazyWithRetry(() => import('./pages/DashboardHome'));
 
 // Lazy load all other page components
-const WorkforcePage = lazyWithRetry(
-  () => import('@features/workforce/pages/WorkforcePage')
+const EmployeeManagement = lazyWithRetry(
+  () => import('@features/workforce/pages/EmployeeManagement')
 );
 // NEW: Unified MGX-style Chat Interface - replacing all duplicate chat pages
-const ChatPage = lazyWithRetry(() => import('@features/chat/pages/ChatPage'));
+const ChatPage = lazyWithRetry(
+  () => import('@features/chat/pages/ChatInterface')
+);
 const MissionControlPage = lazyWithRetry(
-  () => import('@features/mission-control/pages/MissionControlPageRefactored')
+  () => import('@features/mission-control/pages/MissionControlDashboard')
 );
 const SettingsPage = lazyWithRetry(
-  () => import('@features/settings/pages/SettingsPage')
+  () => import('@features/settings/pages/UserSettings')
 );
 const AIConfigurationPage = lazyWithRetry(
-  () => import('@features/settings/pages/AIConfigurationPage')
+  () => import('@features/settings/pages/AIConfiguration')
 );
 const MarketplacePublicPage = lazyWithRetry(
-  () => import('./pages/MarketplacePublicPage')
+  () => import('./pages/PublicMarketplace')
 );
 const BillingPage = lazyWithRetry(
-  () => import('@features/billing/pages/BillingPage')
+  () => import('@features/billing/pages/BillingDashboard')
 );
-const HelpSupportPage = lazyWithRetry(() => import('./pages/HelpSupportPage'));
+const HelpSupportPage = lazyWithRetry(() => import('./pages/SupportCenter'));
 
 // Lazy load public pages
-const BlogPage = lazyWithRetry(() => import('./pages/BlogPage'));
-const ResourcesPage = lazyWithRetry(() => import('./pages/ResourcesPage'));
-const HelpPage = lazyWithRetry(() => import('./pages/HelpPage'));
-const PricingPage = lazyWithRetry(() => import('./pages/PricingPage'));
-const ContactSalesPage = lazyWithRetry(
-  () => import('./pages/ContactSalesPage')
-);
-const AboutPage = lazyWithRetry(() => import('./pages/AboutPage'));
-const DocumentationPage = lazyWithRetry(
-  () => import('./pages/DocumentationPage')
-);
+const BlogPage = lazyWithRetry(() => import('./pages/BlogList'));
+const ResourcesPage = lazyWithRetry(() => import('./pages/Resources'));
+const HelpPage = lazyWithRetry(() => import('./pages/HelpCenter'));
+const PricingPage = lazyWithRetry(() => import('./pages/Pricing'));
+const ContactSalesPage = lazyWithRetry(() => import('./pages/ContactSales'));
+const AboutPage = lazyWithRetry(() => import('./pages/About'));
+const DocumentationPage = lazyWithRetry(() => import('./pages/Documentation'));
 
 // Lazy load legal pages
 const PrivacyPolicyPage = lazyWithRetry(
-  () => import('./pages/legal/PrivacyPolicyPage')
+  () => import('./pages/legal/PrivacyPolicy')
 );
 const TermsOfServicePage = lazyWithRetry(
-  () => import('./pages/legal/TermsOfServicePage')
+  () => import('./pages/legal/TermsOfService')
 );
 const CookiePolicyPage = lazyWithRetry(
-  () => import('./pages/legal/CookiePolicyPage')
+  () => import('./pages/legal/CookiePolicy')
 );
 
 // Lazy load use cases pages
-const StartupsPage = lazyWithRetry(
-  () => import('./pages/use-cases/StartupsPage')
-);
+const StartupsPage = lazyWithRetry(() => import('./pages/use-cases/Startups'));
 const ITServiceProvidersPage = lazyWithRetry(
-  () => import('./pages/use-cases/ITServiceProvidersPage')
+  () => import('./pages/use-cases/ITServiceProviders')
 );
 const SalesTeamsPage = lazyWithRetry(
-  () => import('./pages/use-cases/SalesTeamsPage')
+  () => import('./pages/use-cases/SalesTeams')
 );
 const ConsultingBusinessesPage = lazyWithRetry(
-  () => import('./pages/use-cases/ConsultingBusinessesPage')
+  () => import('./pages/use-cases/ConsultingBusinesses')
 );
 
 // Lazy load features pages
-const AIChatPage = lazyWithRetry(() => import('./pages/features/AIChatPage'));
+const AIChatPage = lazyWithRetry(
+  () => import('./pages/features/AIChatInterface')
+);
 const AIDashboardsPage = lazyWithRetry(
-  () => import('./pages/features/AIDashboardsPage')
+  () => import('./pages/features/AIDashboards')
 );
 const AIProjectManagerPage = lazyWithRetry(
-  () => import('./pages/features/AIProjectManagerPage')
+  () => import('./pages/features/AIProjectManager')
 );
 
 // Lazy load error and blog pages
-const NotFoundPage = lazyWithRetry(() => import('./pages/NotFoundPage'));
-const BlogPostPage = lazyWithRetry(() => import('./pages/BlogPostPage'));
+const NotFoundPage = lazyWithRetry(() => import('./pages/NotFound'));
+const BlogPostPage = lazyWithRetry(() => import('./pages/BlogPost'));
 
 // Loading component for Suspense fallback
 const RouteLoadingSpinner = () => (
@@ -299,7 +295,7 @@ function App() {
                     path="workforce"
                     element={
                       <ErrorBoundary>
-                        <WorkforcePage />
+                        <EmployeeManagement />
                       </ErrorBoundary>
                     }
                   />

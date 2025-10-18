@@ -100,7 +100,7 @@ export class WebSocketClient {
           resolve();
         };
 
-        this.ws.onclose = event => {
+        this.ws.onclose = (event) => {
           this.cleanup();
           this.handlers.onClose?.(event);
 
@@ -111,14 +111,14 @@ export class WebSocketClient {
           }
         };
 
-        this.ws.onerror = error => {
+        this.ws.onerror = (error) => {
           this.handlers.onError?.(error);
           if (this.status === 'connecting') {
             reject(new Error('WebSocket connection failed'));
           }
         };
 
-        this.ws.onmessage = event => {
+        this.ws.onmessage = (event) => {
           this.handleMessage(event);
         };
       } catch (error) {
@@ -388,7 +388,7 @@ export class WebSocketManager {
   }
 
   disconnectAll(): void {
-    this.connections.forEach(client => client.disconnect());
+    this.connections.forEach((client) => client.disconnect());
     this.connections.clear();
   }
 
@@ -473,7 +473,7 @@ export const useWebSocket = ({
       options.onMessage?.(message);
     });
 
-    client.connect().catch(error => {
+    client.connect().catch((error) => {
       console.error('WebSocket connection failed:', error);
     });
 

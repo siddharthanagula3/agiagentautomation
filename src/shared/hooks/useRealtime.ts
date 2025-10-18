@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { realtimeService } from '../services/realtimeService';
-import { useAuthStore } from '@shared/stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/authentication-store';
 
 export interface RealtimeCallbacks {
   onJobUpdate?: (job: unknown) => void;

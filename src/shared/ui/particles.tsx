@@ -76,7 +76,7 @@ export const Particles: React.FC<ParticlesProps> = ({
       if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach(particle => {
+      particles.forEach((particle) => {
         particle.update();
         particle.draw();
       });

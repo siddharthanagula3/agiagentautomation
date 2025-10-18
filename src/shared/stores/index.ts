@@ -11,7 +11,7 @@
 export { useAppStore, type AppStore } from './app-store';
 
 // Auth Store - Authentication and user management (unified)
-export { useAuthStore } from './unified-auth-store';
+export { useAuthStore } from './authentication-store';
 
 // Chat Store - Chat conversations and messages
 export { useChatStore } from './chat-store';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuthStore } from '@shared/stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/authentication-store';
 
 interface AdminRouteProps {
   children: React.ReactNode;

@@ -115,7 +115,7 @@ const PremiumLoading: React.FC<PremiumLoadingProps> = ({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
-        {[0, 1, 2].map(i => (
+        {[0, 1, 2].map((i) => (
           <motion.div
             key={i}
             className="h-2 w-2 rounded-full bg-primary"

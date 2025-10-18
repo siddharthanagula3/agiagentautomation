@@ -165,7 +165,7 @@ export class SecurityManager {
     }
 
     if (Array.isArray(obj)) {
-      return obj.map(item =>
+      return obj.map((item) =>
         this.deepSanitize(item, maxDepth, currentDepth + 1)
       );
     }
@@ -233,7 +233,7 @@ export class SecurityManager {
       /\.jsp$/i,
     ];
 
-    if (suspiciousPatterns.some(pattern => pattern.test(file.name))) {
+    if (suspiciousPatterns.some((pattern) => pattern.test(file.name))) {
       errors.push('File type not allowed based on extension');
     }
 
@@ -252,9 +252,9 @@ export class SecurityManager {
     ) {
       const array = new Uint8Array(length);
       window.crypto.getRandomValues(array);
-      return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join(
-        ''
-      );
+      return Array.from(array, (byte) =>
+        byte.toString(16).padStart(2, '0')
+      ).join('');
     }
 
     // Fallback for older browsers
@@ -274,7 +274,7 @@ export class SecurityManager {
       const data = encoder.encode(input);
       const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
     }
 
     // Simple fallback hash (not cryptographically secure)
@@ -339,7 +339,7 @@ export class SecurityManager {
       /(.)(.)\1\2/i, // alternating patterns
     ];
 
-    if (weakPatterns.some(pattern => pattern.test(password))) {
+    if (weakPatterns.some((pattern) => pattern.test(password))) {
       feedback.push('Password contains weak patterns');
       score = Math.max(0, score - 1);
     }
@@ -363,7 +363,7 @@ export class SecurityManager {
       const keyRequests = requests.get(key) || [];
 
       // Filter out requests outside the time window
-      const validRequests = keyRequests.filter(time => time > windowStart);
+      const validRequests = keyRequests.filter((time) => time > windowStart);
 
       // Check if limit exceeded
       if (validRequests.length >= maxRequests) {
@@ -410,7 +410,7 @@ export class CSPManager {
   static removeSource(directive: string, source: string): void {
     if (this.policies[directive]) {
       this.policies[directive] = this.policies[directive].filter(
-        s => s !== source
+        (s) => s !== source
       );
     }
   }
@@ -457,7 +457,9 @@ export class SecureStorage {
       // Try to import existing key
       const keyData = localStorage.getItem(this.ENCRYPTION_KEY_NAME);
       if (keyData) {
-        const keyBuffer = Uint8Array.from(atob(keyData), c => c.charCodeAt(0));
+        const keyBuffer = Uint8Array.from(atob(keyData), (c) =>
+          c.charCodeAt(0)
+        );
         return await window.crypto.subtle.importKey(
           'raw',
           keyBuffer,
@@ -598,7 +600,7 @@ export class SecurityHeaderValidator {
     const missing: string[] = [];
     const present: string[] = [];
 
-    Object.keys(this.recommendedHeaders).forEach(header => {
+    Object.keys(this.recommendedHeaders).forEach((header) => {
       if (response.headers.has(header)) {
         present.push(header);
       } else {

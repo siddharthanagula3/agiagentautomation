@@ -4,7 +4,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useAuthStore } from '@shared/stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/authentication-store';
 import { toast } from 'sonner';
 
 export interface ChatMessage {
@@ -48,13 +48,13 @@ export const useChatState = () => {
   // Update state with error handling
   const updateState = useCallback((updater: (prev: ChatState) => ChatState) => {
     try {
-      setState(prev => {
+      setState((prev) => {
         const newState = updater(prev);
         return newState;
       });
     } catch (error) {
       console.error('Error updating chat state:', error);
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         error:
           error instanceof Error ? error.message : 'Unknown error occurred',
@@ -65,7 +65,7 @@ export const useChatState = () => {
   // Add a new tab
   const addTab = useCallback(
     (tab: Omit<ChatTab, 'messages' | 'isActive'>) => {
-      updateState(prev => {
+      updateState((prev) => {
         const newTab: ChatTab = {
           ...tab,
           messages: [],
@@ -73,7 +73,7 @@ export const useChatState = () => {
         };
 
         // Deactivate other tabs
-        const updatedTabs = prev.tabs.map(t => ({ ...t, isActive: false }));
+        const updatedTabs = prev.tabs.map((t) => ({ ...t, isActive: false }));
 
         return {
           ...prev,
@@ -89,8 +89,8 @@ export const useChatState = () => {
   // Remove a tab
   const removeTab = useCallback(
     (tabId: string) => {
-      updateState(prev => {
-        const updatedTabs = prev.tabs.filter(t => t.id !== tabId);
+      updateState((prev) => {
+        const updatedTabs = prev.tabs.filter((t) => t.id !== tabId);
         const newActiveTabId =
           updatedTabs.length > 0 ? updatedTabs[0].id : null;
 
@@ -107,9 +107,9 @@ export const useChatState = () => {
   // Set active tab
   const setActiveTab = useCallback(
     (tabId: string) => {
-      updateState(prev => ({
+      updateState((prev) => ({
         ...prev,
-        tabs: prev.tabs.map(t => ({ ...t, isActive: t.id === tabId })),
+        tabs: prev.tabs.map((t) => ({ ...t, isActive: t.id === tabId })),
         activeTabId: tabId,
       }));
     },
@@ -119,9 +119,9 @@ export const useChatState = () => {
   // Add message to a tab
   const addMessage = useCallback(
     (tabId: string, message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
-      updateState(prev => ({
+      updateState((prev) => ({
         ...prev,
-        tabs: prev.tabs.map(tab =>
+        tabs: prev.tabs.map((tab) =>
           tab.id === tabId
             ? {
                 ...tab,
@@ -144,13 +144,13 @@ export const useChatState = () => {
   // Update message (for streaming)
   const updateMessage = useCallback(
     (tabId: string, messageId: string, updates: Partial<ChatMessage>) => {
-      updateState(prev => ({
+      updateState((prev) => ({
         ...prev,
-        tabs: prev.tabs.map(tab =>
+        tabs: prev.tabs.map((tab) =>
           tab.id === tabId
             ? {
                 ...tab,
-                messages: tab.messages.map(msg =>
+                messages: tab.messages.map((msg) =>
                   msg.id === messageId ? { ...msg, ...updates } : msg
                 ),
               }
@@ -164,7 +164,7 @@ export const useChatState = () => {
   // Set sending state
   const setSending = useCallback(
     (isSending: boolean) => {
-      updateState(prev => ({ ...prev, isSending }));
+      updateState((prev) => ({ ...prev, isSending }));
     },
     [updateState]
   );
@@ -172,18 +172,18 @@ export const useChatState = () => {
   // Set error
   const setError = useCallback(
     (error: string | null) => {
-      updateState(prev => ({ ...prev, error }));
+      updateState((prev) => ({ ...prev, error }));
     },
     [updateState]
   );
 
   // Clear error
   const clearError = useCallback(() => {
-    updateState(prev => ({ ...prev, error: null }));
+    updateState((prev) => ({ ...prev, error: null }));
   }, [updateState]);
 
   // Get active tab
-  const activeTab = state.tabs.find(t => t.id === state.activeTabId) || null;
+  const activeTab = state.tabs.find((t) => t.id === state.activeTabId) || null;
 
   // Get active tab messages
   const activeMessages = activeTab?.messages || [];

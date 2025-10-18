@@ -73,53 +73,181 @@ stripe listen --forward-to localhost:8888/.netlify/functions/stripe-webhook
 
 ```
 src/
-├── _core/                          # Core business logic
-│   ├── api/                        # API services and integrations
-│   │   ├── llm/                   # LLM provider implementations
-│   │   │   ├── unified-llm-service.ts      # Main LLM interface
-│   │   │   ├── anthropic-provider.ts
-│   │   │   ├── openai-provider.ts
-│   │   │   └── google-provider.ts
-│   │   ├── system-prompts-service.ts       # System prompts + employee loader
-│   │   └── ai-employee-service.ts          # Employee management
-│   ├── orchestration/              # Multi-agent orchestration
-│   │   ├── workforce-orchestrator-refactored.ts  # Main orchestrator
-│   │   ├── tool-manager.ts                       # Tool execution
-│   │   └── reasoning/                            # Planning & delegation
-│   ├── security/                   # Authentication & authorization
-│   │   └── auth-service.ts         # Supabase auth wrapper
-│   ├── storage/                    # Data persistence
-│   │   └── supabase/               # Supabase services
-│   └── types/                      # Core type definitions
-│       └── ai-employee.ts          # AIEmployee interface
+├── core/                           # Core business logic
+│   ├── ai/                        # AI services and orchestration
+│   │   ├── llm/                   # Language model providers
+│   │   │   ├── unified-language-model.ts    # Main LLM interface
+│   │   │   └── providers/                   # Provider implementations
+│   │   │       ├── anthropic-claude.ts
+│   │   │       ├── openai-gpt.ts
+│   │   │       ├── google-gemini.ts
+│   │   │       └── perplexity-ai.ts
+│   │   ├── employees/              # AI employee management
+│   │   │   ├── employee-executor.ts          # Employee execution
+│   │   │   ├── employee-management.ts       # Employee CRUD
+│   │   │   ├── employee-coordinator.ts      # Employee coordination
+│   │   │   └── prompt-management.ts         # System prompts + employee loader
+│   │   ├── orchestration/         # Multi-agent orchestration
+│   │   │   ├── workforce-orchestrator.ts    # Main orchestrator
+│   │   │   ├── multi-agent-coordinator.ts  # Multi-agent coordination
+│   │   │   ├── agent-collaboration-manager.ts  # Agent collaboration
+│   │   │   ├── task-execution-coordinator.ts    # Task execution
+│   │   │   ├── agent-communication-protocol.ts  # Communication protocol
+│   │   │   └── reasoning/                    # Planning & delegation
+│   │   │       ├── employee-selection.ts
+│   │   │       ├── natural-language-processor.ts
+│   │   │       └── task-breakdown.ts
+│   │   └── tools/                 # Tool management
+│   │       ├── model-context-protocol-tools.ts
+│   │       ├── tool-execution-engine.ts
+│   │       ├── tool-invocation-handler.ts
+│   │       └── tool-registry-manager.ts
+│   ├── auth/                      # Authentication & authorization
+│   │   ├── authentication-manager.ts       # Auth service
+│   │   ├── authentication-manager.test.ts  # Auth tests
+│   │   └── user-permissions.ts             # User permissions
+│   ├── integrations/              # External integrations
+│   │   ├── chat-completion-handler.ts      # AI chat service
+│   │   ├── artifact-generation.ts          # Artifact generation
+│   │   ├── conversation-context-manager.ts # Context management
+│   │   ├── marketing-endpoints.ts          # Marketing API
+│   │   ├── model-context-protocol.ts       # MCP service
+│   │   ├── media-generation-handler.ts    # Media generation
+│   │   ├── external-data-fetcher.ts        # Real data service
+│   │   ├── token-usage-tracker.ts          # Token tracking
+│   │   └── web-search-handler.ts          # Web search
+│   ├── monitoring/                # System monitoring
+│   │   ├── accessibility-monitor.ts        # Accessibility monitoring
+│   │   ├── analytics-tracker.ts           # Analytics tracking
+│   │   ├── system-monitor.ts              # System monitoring
+│   │   ├── performance-monitor.ts         # Performance monitoring
+│   │   ├── privacy-compliance.ts          # Privacy compliance
+│   │   ├── scaling-manager.ts            # Scaling management
+│   │   └── seo-optimizer.ts              # SEO optimization
+│   └── storage/                   # Data persistence
+│       ├── database/              # Database services
+│       ├── cache/                 # Cache management
+│       │   └── cache-manager.ts
+│       ├── backup/                # Backup services
+│       │   └── database-backup.ts
+│       ├── chat/                  # Chat persistence
+│       │   ├── chat-history-persistence.ts
+│       │   └── chat-synchronization.ts
+│       └── supabase/             # Supabase services
+│           └── workforce-database.ts
 │
-├── features/                       # Feature modules
-│   ├── mission-control/            # Mission control UI
+├── features/                      # Feature modules
+│   ├── auth/                      # Authentication features
+│   │   ├── pages/
+│   │   │   ├── Login.tsx
+│   │   │   ├── Register.tsx
+│   │   │   ├── ForgotPassword.tsx
+│   │   │   └── ResetPassword.tsx
+│   │   └── components/
+│   ├── billing/                  # Billing features
+│   │   ├── pages/
+│   │   │   └── BillingDashboard.tsx
+│   │   └── services/
+│   │       ├── stripe-payments.ts
+│   │       ├── credit-tracking.ts
+│   │       └── usage-monitor.ts
+│   ├── chat/                     # Chat features
+│   │   ├── pages/
+│   │   │   └── ChatInterface.tsx
+│   │   ├── services/
+│   │   │   ├── conversation-export.ts
+│   │   │   ├── conversation-storage.ts
+│   │   │   ├── streaming-response-handler.ts
+│   │   │   └── tool-execution-handler.ts
+│   │   └── hooks/
+│   │       ├── use-chat-interface.ts
+│   │       ├── use-conversation-history.ts
+│   │       ├── use-export-conversation.ts
+│   │       └── use-tool-integration.ts
+│   ├── mission-control/          # Mission control UI
 │   │   ├── components/
-│   │   │   ├── WorkforceStatusPanel.tsx    # Real-time employee status
-│   │   │   ├── MissionLogEnhanced.tsx      # Task plan + activity feed
-│   │   │   └── StandardChat.tsx            # Simple 1:1 chat
+│   │   │   ├── EmployeeStatusPanel.tsx    # Real-time employee status
+│   │   │   ├── ActivityLog.tsx             # Task plan + activity feed
+│   │   │   ├── BasicChatInterface.tsx      # Simple 1:1 chat
+│   │   │   ├── MessageInput.tsx
+│   │   │   ├── MessageDisplay.tsx
+│   │   │   ├── MessageList.tsx
+│   │   │   └── EmployeeMonitorPanel.tsx
+│   │   ├── pages/
+│   │   │   └── MissionControlDashboard.tsx  # Main orchestration UI
+│   │   └── services/
+│   │       ├── background-conversation-handler.ts
+│   │       ├── message-streaming.ts
+│   │       └── chat-database-connector.ts
+│   ├── workforce/                # Employee hiring & management
+│   │   ├── pages/
+│   │   │   └── EmployeeManagement.tsx
+│   │   ├── components/
+│   │   │   ├── EmployeeChatInterface.tsx
+│   │   │   ├── EmployeeMarketplace.tsx
+│   │   │   ├── TeamChatInterface.tsx
+│   │   │   └── EmployeeManagementPanel.tsx
+│   │   └── services/
+│   │       └── employee-database.ts
+│   ├── marketplace/              # AI employee marketplace
 │   │   └── pages/
-│   │       ├── MissionControlPageRefactored.tsx  # Main orchestration UI
-│   │       └── ChatPageSimplified.tsx            # Simple chat interface
-│   ├── workforce/                  # Employee hiring & management
-│   ├── marketplace/                # AI employee marketplace
-│   ├── billing/                    # Stripe integration
-│   └── settings/                   # User settings
+│   │       └── EmployeeMarketplace.tsx
+│   └── settings/                 # User settings
+│       ├── pages/
+│       │   ├── AIConfiguration.tsx
+│       │   └── UserSettings.tsx
+│       └── services/
+│           └── user-preferences.ts
 │
-├── shared/                         # Shared utilities
-│   ├── stores/                     # Zustand state stores
-│   │   ├── mission-store.ts        # Mission control state (CRITICAL)
-│   │   ├── workforce-store.ts      # Hired employees state
-│   │   └── unified-auth-store.ts   # Authentication state
-│   ├── hooks/                      # React hooks
-│   ├── lib/                        # Utility libraries
-│   │   ├── supabase-client.ts      # Supabase singleton
-│   │   └── utils.ts                # Common utilities
-│   └── types/                      # Shared type definitions
+├── shared/                        # Shared utilities
+│   ├── stores/                    # Zustand state stores
+│   │   ├── mission-control-store.ts       # Mission control state (CRITICAL)
+│   │   ├── employee-management-store.ts   # Hired employees state
+│   │   ├── authentication-store.ts        # Authentication state
+│   │   ├── employee-metrics-store.ts      # Employee metrics
+│   │   └── multi-agent-workspace-store.ts # Multi-agent workspace
+│   ├── hooks/                     # React hooks
+│   ├── lib/                       # Utility libraries
+│   │   ├── supabase-client.ts     # Supabase singleton
+│   │   └── utils.ts               # Common utilities
+│   ├── types/                     # Shared type definitions
+│   └── components/                # Shared components
+│       ├── LazyLoadingFallback.tsx
+│       ├── LazyLoadWrapper.tsx
+│       ├── ThemeConstants.ts
+│       ├── ThemeContext.ts
+│       └── ThemeProvider.tsx
 │
-└── .agi/                           # AI employee definitions
-    └── employees/                  # Employee markdown files
+├── pages/                         # Page components
+│   ├── About.tsx
+│   ├── BlogList.tsx
+│   ├── BlogPost.tsx
+│   ├── ContactSales.tsx
+│   ├── DashboardHome.tsx
+│   ├── Documentation.tsx
+│   ├── HelpCenter.tsx
+│   ├── SupportCenter.tsx
+│   ├── Landing.tsx
+│   ├── PublicMarketplace.tsx
+│   ├── NotFound.tsx
+│   ├── Pricing.tsx
+│   ├── Resources.tsx
+│   ├── features/
+│   │   ├── AIChatInterface.tsx
+│   │   ├── AIDashboards.tsx
+│   │   └── AIProjectManager.tsx
+│   ├── use-cases/
+│   │   ├── ConsultingBusinesses.tsx
+│   │   ├── ITServiceProviders.tsx
+│   │   ├── SalesTeams.tsx
+│   │   └── Startups.tsx
+│   └── legal/
+│       ├── CookiePolicy.tsx
+│       ├── PrivacyPolicy.tsx
+│       └── TermsOfService.tsx
+│
+└── .agi/                          # AI employee definitions
+    └── employees/                 # Employee markdown files
         ├── code-reviewer.md
         └── debugger.md
 ```
@@ -129,7 +257,7 @@ src/
 ```typescript
 "@/*"          → "./src/*"
 "@features/*"  → "./src/features/*"
-"@_core/*"     → "./src/_core/*"
+"@core/*"      → "./src/core/*"
 "@shared/*"    → "./src/shared/*"
 ```
 
@@ -139,7 +267,7 @@ Always use path aliases for imports. Never use relative paths across feature bou
 
 ### 1. Mission Store (Real-Time State)
 
-Located: `src/shared/stores/mission-store.ts`
+Located: `src/shared/stores/mission-control-store.ts`
 
 The mission store is the **single source of truth** for all mission control operations. It uses Zustand with Immer middleware for immutable updates.
 
@@ -163,7 +291,7 @@ startMission(id) / completeMission() / failMission(error);
 
 ### 2. Workforce Orchestrator
 
-Located: `src/_core/orchestration/workforce-orchestrator-refactored.ts`
+Located: `src/core/ai/orchestration/workforce-orchestrator.ts`
 
 Implements the three-stage execution pattern:
 
@@ -185,7 +313,7 @@ await executeTasks(tasks, originalInput);
 
 The orchestrator:
 
-- Loads employees from `.agi/employees/` via `systemPromptsService.getAvailableEmployees()`
+- Loads employees from `.agi/employees/` via `promptManagement.getAvailableEmployees()`
 - Matches tasks to employees based on description keywords and tool requirements
 - Updates mission-store in real-time at each stage
 - Handles errors gracefully with fallback strategies
@@ -212,9 +340,9 @@ You are a [role description].
 **Loading Employees:**
 
 ```typescript
-import { systemPromptsService } from '@_core/api/system-prompts-service';
+import { promptManagement } from '@core/ai/employees/prompt-management';
 
-const employees = await systemPromptsService.getAvailableEmployees();
+const employees = await promptManagement.getAvailableEmployees();
 // Returns: AIEmployee[] with { name, description, tools[], model, systemPrompt }
 ```
 
@@ -383,7 +511,7 @@ The orchestrator is critical infrastructure. When modifying:
 4. **Test with real LLM calls** - the orchestrator's prompt engineering is critical
 5. **Consider parallel execution** - tasks can run concurrently if they don't depend on each other
 
-Key file: `src/_core/orchestration/workforce-orchestrator-refactored.ts`
+Key file: `src/core/ai/orchestration/workforce-orchestrator.ts`
 
 ### Working with Supabase
 
@@ -425,8 +553,8 @@ supabase functions serve            # Serve edge functions
 3. **Mission orchestration not working:**
    - Check browser console for employee loading errors
    - Verify `.agi/employees/*.md` files have correct frontmatter
-   - Test `systemPromptsService.getAvailableEmployees()` in console
-   - Check mission-store state in Browser DevTools (Zustand doesn't use Redux)
+   - Test `promptManagement.getAvailableEmployees()` in console
+   - Check mission-control-store state in Browser DevTools (Zustand doesn't use Redux)
 
 4. **Supabase RLS blocking queries:**
    - Verify user is authenticated: `supabase.auth.getUser()`
@@ -490,9 +618,9 @@ npm run build:prod              # Creates optimized build in dist/
 ## Key Principles
 
 1. **Type Safety First:** All code must pass TypeScript strict mode checks
-2. **Path Aliases Always:** Use `@features/`, `@_core/`, `@shared/` - never relative paths across modules
+2. **Path Aliases Always:** Use `@features/`, `@core/`, `@shared/` - never relative paths across modules
 3. **Immutable State:** Use Immer middleware in Zustand stores for safe updates
 4. **Error Boundaries:** Wrap async operations in try-catch, surface errors to users
-5. **Real-Time Updates:** Mission store updates trigger immediate UI re-renders
+5. **Real-Time Updates:** Mission control store updates trigger immediate UI re-renders
 6. **File-Based Configuration:** Prefer configuration files over hardcoded values
 7. **Test Coverage:** Write tests for all business logic and critical paths

@@ -95,7 +95,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
               <p>No recent activity</p>
             </div>
           ) : (
-            activities.map(activity => (
+            activities.map((activity) => (
               <div key={activity.id} className="flex items-start space-x-4">
                 <div className="flex-shrink-0">
                   {getTypeIcon(activity.type)}

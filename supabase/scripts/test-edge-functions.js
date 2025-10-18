@@ -402,8 +402,8 @@ async function runAllTests() {
   if (testResults.failed > 0) {
     console.log('\n❌ Failed Tests:');
     testResults.details
-      .filter(test => !test.passed)
-      .forEach(test => console.log(`   - ${test.testName}: ${test.error}`));
+      .filter((test) => !test.passed)
+      .forEach((test) => console.log(`   - ${test.testName}: ${test.error}`));
   }
 
   console.log('\n📋 Next Steps:');

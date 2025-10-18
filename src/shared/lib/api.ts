@@ -3,7 +3,11 @@
  * Centralized API client with authentication, error handling, and type safety
  */
 
-import { APIResponse, APIError, APIException } from '@shared/stores/query-client';
+import {
+  APIResponse,
+  APIError,
+  APIException,
+} from '@shared/stores/query-client';
 
 // ========================================
 // API Configuration
@@ -98,7 +102,7 @@ export class APIClient {
       }
 
       const delay = this.config.retryDelay * Math.pow(2, attempt - 1);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
 
       return this.retryRequest(requestFn, attempt + 1);
     }
@@ -292,7 +296,7 @@ export class APIClient {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {
-            value.forEach(v => searchParams.append(key, String(v)));
+            value.forEach((v) => searchParams.append(key, String(v)));
           } else {
             searchParams.append(key, String(value));
           }
@@ -378,7 +382,7 @@ export class APIClient {
 
       // Track upload progress
       if (onProgress) {
-        xhr.upload.addEventListener('progress', event => {
+        xhr.upload.addEventListener('progress', (event) => {
           if (event.lengthComputable) {
             const progress = (event.loaded / event.total) * 100;
             onProgress(progress);
@@ -395,7 +399,7 @@ export class APIClient {
               xhr
                 .getAllResponseHeaders()
                 .split('\r\n')
-                .filter(line => line.trim())
+                .filter((line) => line.trim())
                 .reduce(
                   (headers, line) => {
                     const [key, value] = line.split(': ');
@@ -630,7 +634,7 @@ export const buildQueryString = (params: Record<string, unknown>): string => {
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       if (Array.isArray(value)) {
-        value.forEach(v => searchParams.append(key, String(v)));
+        value.forEach((v) => searchParams.append(key, String(v)));
       } else {
         searchParams.append(key, String(value));
       }
@@ -664,7 +668,7 @@ export const createMockResponse = <T>(
   data: T,
   delay = 1000
 ): Promise<APIResponse<T>> => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
         data,

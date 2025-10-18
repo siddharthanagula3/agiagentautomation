@@ -295,7 +295,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
 
   const calculateProgress = (documents: O1VisaDocument[] | LegalDocument[]) => {
     const total = documents.length;
-    const completed = documents.filter(doc =>
+    const completed = documents.filter((doc) =>
       'status' in doc
         ? doc.status === 'approved' || doc.status === 'filed'
         : 'status' in doc
@@ -393,7 +393,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
                       {
-                        o1Documents.filter(doc => doc.status === 'approved')
+                        o1Documents.filter((doc) => doc.status === 'approved')
                           .length
                       }
                     </div>
@@ -402,7 +402,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-600">
                       {
-                        o1Documents.filter(doc => doc.status === 'review')
+                        o1Documents.filter((doc) => doc.status === 'review')
                           .length
                       }
                     </div>
@@ -410,7 +410,10 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">
-                      {o1Documents.filter(doc => doc.status === 'draft').length}
+                      {
+                        o1Documents.filter((doc) => doc.status === 'draft')
+                          .length
+                      }
                     </div>
                     <div className="text-muted-foreground">Draft</div>
                   </div>
@@ -427,7 +430,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
 
           {/* Documents List */}
           <div className="grid gap-4">
-            {o1Documents.map(document => (
+            {o1Documents.map((document) => (
               <Card
                 key={document.id}
                 className="transition-shadow hover:shadow-lg"
@@ -540,7 +543,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">
                       {
-                        legalDocuments.filter(doc => doc.status === 'filed')
+                        legalDocuments.filter((doc) => doc.status === 'filed')
                           .length
                       }
                     </div>
@@ -549,7 +552,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-600">
                       {
-                        legalDocuments.filter(doc => doc.status === 'review')
+                        legalDocuments.filter((doc) => doc.status === 'review')
                           .length
                       }
                     </div>
@@ -558,7 +561,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">
                       {
-                        legalDocuments.filter(doc => doc.status === 'draft')
+                        legalDocuments.filter((doc) => doc.status === 'draft')
                           .length
                       }
                     </div>
@@ -577,7 +580,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
 
           {/* Documents List */}
           <div className="grid gap-4">
-            {legalDocuments.map(document => (
+            {legalDocuments.map((document) => (
               <Card
                 key={document.id}
                 className="transition-shadow hover:shadow-lg"

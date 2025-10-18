@@ -34,13 +34,20 @@ function getAIEmployeeAvatar(employeeName) {
 }
 
 // Read marketplace-employees.ts
-const filePath = join(__dirname, '..', 'src', 'data', 'marketplace-employees.ts');
+const filePath = join(
+  __dirname,
+  '..',
+  'src',
+  'data',
+  'marketplace-employees.ts'
+);
 let content = readFileSync(filePath, 'utf-8');
 
 console.log('🔧 Fixing employee avatar URLs...');
 
 // Extract all employee objects and fix their avatars
-const employeePattern = /{\s*id:\s*'([^']+)',\s*name:\s*'([^']+)',[\s\S]*?avatar:\s*'([^']+)',/g;
+const employeePattern =
+  /{\s*id:\s*'([^']+)',\s*name:\s*'([^']+)',[\s\S]*?avatar:\s*'([^']+)',/g;
 let match;
 let fixedCount = 0;
 
@@ -51,7 +58,7 @@ while ((match = employeePattern.exec(content)) !== null) {
     id: match[1],
     name: match[2],
     oldAvatar: match[3],
-    index: match.index
+    index: match.index,
   });
 }
 
@@ -66,7 +73,10 @@ matches.reverse().forEach(({ fullMatch, name, oldAvatar, index }) => {
     `avatar: '${newAvatar}'`
   );
 
-  content = content.substring(0, index) + updatedMatch + content.substring(index + fullMatch.length);
+  content =
+    content.substring(0, index) +
+    updatedMatch +
+    content.substring(index + fullMatch.length);
   fixedCount++;
 
   console.log(`✓ Fixed: ${name}`);
@@ -77,4 +87,6 @@ writeFileSync(filePath, content, 'utf-8');
 
 console.log(`\n✅ Successfully fixed ${fixedCount} employee avatars!`);
 console.log('📝 Updated: src/data/marketplace-employees.ts');
-console.log('\n🎨 New avatar format: DiceBear bottts style with clean parameters');
+console.log(
+  '\n🎨 New avatar format: DiceBear bottts style with clean parameters'
+);

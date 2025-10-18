@@ -48,9 +48,18 @@ export const handler: Handler = async (event: HandlerEvent) => {
     });
 
     // Convert messages to Gemini format
-    interface Message { role: string; content: string; }
-    interface Attachment { mimeType: string; dataBase64: string; }
-    interface GeminiPart { text?: string; inline_data?: { mime_type: string; data: string; }; }
+    interface Message {
+      role: string;
+      content: string;
+    }
+    interface Attachment {
+      mimeType: string;
+      dataBase64: string;
+    }
+    interface GeminiPart {
+      text?: string;
+      inline_data?: { mime_type: string; data: string };
+    }
 
     const systemMessage = messages.find((m: Message) => m.role === 'system');
     const conversationMessages = messages.filter(
@@ -80,8 +89,8 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
     interface GeminiRequestBody {
       contents: unknown[];
-      generationConfig: { temperature: number; maxOutputTokens: number; };
-      systemInstruction?: { parts: Array<{ text: string }>; };
+      generationConfig: { temperature: number; maxOutputTokens: number };
+      systemInstruction?: { parts: Array<{ text: string }> };
     }
 
     const requestBody: GeminiRequestBody = {
@@ -138,7 +147,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
       // Store usage in Supabase (non-blocking)
       storeTokenUsage('google', model, userId, sessionId, tokenUsage).catch(
-        err => {
+        (err) => {
           console.error('[Google Proxy] Failed to store token usage:', err);
         }
       );
@@ -163,7 +172,8 @@ export const handler: Handler = async (event: HandlerEvent) => {
           .join('');
       }
       if (!normalizedContent) {
-        normalizedContent = data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        normalizedContent =
+          data.candidates?.[0]?.content?.parts?.[0]?.text ||
           data.output_text ||
           data.content;
       }

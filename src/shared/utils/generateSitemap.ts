@@ -26,7 +26,7 @@ export function generateSitemap(entries: SitemapEntry[]): string {
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
 ${entries
   .map(
-    entry => `  <url>
+    (entry) => `  <url>
     <loc>${siteUrl}${entry.url}</loc>
     ${entry.lastmod ? `<lastmod>${entry.lastmod}</lastmod>` : ''}
     ${entry.changefreq ? `<changefreq>${entry.changefreq}</changefreq>` : ''}
@@ -94,7 +94,7 @@ export const staticPages: SitemapEntry[] = [
 export function generateBlogSitemap(
   posts: Array<{ slug: string; updated_at: string }>
 ): string {
-  const entries: SitemapEntry[] = posts.map(post => ({
+  const entries: SitemapEntry[] = posts.map((post) => ({
     url: `/blog/${post.slug}`,
     lastmod: new Date(post.updated_at).toISOString(),
     changefreq: 'weekly' as const,

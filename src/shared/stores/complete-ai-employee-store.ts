@@ -295,7 +295,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           }
         },
 
-        createEmployee: async employee => {
+        createEmployee: async (employee) => {
           set({ loading: true, error: null });
 
           try {
@@ -350,7 +350,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           }
         },
 
-        deleteEmployee: async id => {
+        deleteEmployee: async (id) => {
           set({ loading: true, error: null });
 
           try {
@@ -377,7 +377,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           }
         },
 
-        selectEmployee: employee => {
+        selectEmployee: (employee) => {
           set({ selectedEmployee: employee });
         },
 
@@ -411,7 +411,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           }
         },
 
-        loadHiredEmployees: async userId => {
+        loadHiredEmployees: async (userId) => {
           set({ loading: true, error: null });
 
           try {
@@ -463,7 +463,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           }
         },
 
-        endChatSession: async sessionId => {
+        endChatSession: async (sessionId) => {
           set({ loading: true, error: null });
 
           try {
@@ -555,7 +555,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           }
         },
 
-        clearChatMessages: employeeId => {
+        clearChatMessages: (employeeId) => {
           set({
             chatMessages: { ...get().chatMessages, [employeeId]: [] },
           });
@@ -610,7 +610,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           }
         },
 
-        loadToolExecutions: async employeeId => {
+        loadToolExecutions: async (employeeId) => {
           set({ loading: true, error: null });
 
           try {
@@ -621,7 +621,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           }
         },
 
-        clearToolExecutions: employeeId => {
+        clearToolExecutions: (employeeId) => {
           set({
             executionHistory: { ...get().executionHistory, [employeeId]: [] },
           });
@@ -667,7 +667,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           }
         },
 
-        loadPerformanceHistory: async employeeId => {
+        loadPerformanceHistory: async (employeeId) => {
           set({ loading: true, error: null });
 
           try {
@@ -724,7 +724,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           }
         },
 
-        loadTrainingRecords: async employeeId => {
+        loadTrainingRecords: async (employeeId) => {
           set({ loading: true, error: null });
 
           try {
@@ -790,7 +790,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           }
         },
 
-        loadJobAssignments: async employeeId => {
+        loadJobAssignments: async (employeeId) => {
           set({ loading: true, error: null });
 
           try {
@@ -802,27 +802,27 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
         },
 
         // Search and Filtering
-        setSearchFilters: filters => {
+        setSearchFilters: (filters) => {
           set({ searchFilters: filters });
         },
 
-        setSearchTerm: term => {
+        setSearchTerm: (term) => {
           set({ searchFilters: { ...get().searchFilters, searchTerm: term } });
         },
 
-        setSelectedCategory: category => {
+        setSelectedCategory: (category) => {
           set({ selectedCategory: category });
         },
 
-        setSortBy: sortBy => {
+        setSortBy: (sortBy) => {
           set({ sortBy });
         },
 
-        setSortOrder: order => {
+        setSortOrder: (order) => {
           set({ sortOrder: order });
         },
 
-        setViewMode: mode => {
+        setViewMode: (mode) => {
           set({ viewMode: mode });
         },
 
@@ -892,7 +892,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
           return subscriptionId;
         },
 
-        unsubscribe: subscriptionId => {
+        unsubscribe: (subscriptionId) => {
           completeAIEmployeeService.unsubscribe(subscriptionId);
 
           const { [subscriptionId]: removed, ...remaining } =
@@ -901,23 +901,23 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
         },
 
         // Notifications
-        addNotification: notification => {
+        addNotification: (notification) => {
           set({
             notifications: [...get().notifications, notification],
           });
         },
 
-        removeNotification: notificationId => {
+        removeNotification: (notificationId) => {
           set({
             notifications: get().notifications.filter(
-              n => n.id !== notificationId
+              (n) => n.id !== notificationId
             ),
           });
         },
 
-        markNotificationAsRead: notificationId => {
+        markNotificationAsRead: (notificationId) => {
           set({
-            notifications: get().notifications.map(n =>
+            notifications: get().notifications.map((n) =>
               n.id === notificationId ? { ...n, isRead: true } : n
             ),
           });
@@ -928,15 +928,15 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
         },
 
         // Error Handling
-        addError: error => {
+        addError: (error) => {
           set({
             errors: [...get().errors, error],
           });
         },
 
-        removeError: errorId => {
+        removeError: (errorId) => {
           set({
-            errors: get().errors.filter(e => e.id !== errorId),
+            errors: get().errors.filter((e) => e.id !== errorId),
           });
         },
 
@@ -945,11 +945,11 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
         },
 
         // Utility
-        setLoading: loading => {
+        setLoading: (loading) => {
           set({ loading });
         },
 
-        setError: error => {
+        setError: (error) => {
           set({ error });
         },
 
@@ -985,7 +985,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
       }),
       {
         name: 'ai-employee-store',
-        partialize: state => ({
+        partialize: (state) => ({
           selectedCategory: state.selectedCategory,
           viewMode: state.viewMode,
           sortBy: state.sortBy,
@@ -1002,7 +1002,7 @@ export const useCompleteAIEmployeeStore = create<AIEmployeeState>()(
 
 // Selectors for common use cases
 export const useEmployeeData = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     employees: state.employees,
     hiredEmployees: state.hiredEmployees,
     selectedEmployee: state.selectedEmployee,
@@ -1011,7 +1011,7 @@ export const useEmployeeData = () =>
   }));
 
 export const useEmployeeActions = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     loadEmployees: state.loadEmployees,
     loadEmployee: state.loadEmployee,
     createEmployee: state.createEmployee,
@@ -1023,7 +1023,7 @@ export const useEmployeeActions = () =>
   }));
 
 export const useChatData = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     chatMessages: state.chatMessages,
     activeSessions: state.activeSessions,
     currentSession: state.currentSession,
@@ -1032,7 +1032,7 @@ export const useChatData = () =>
   }));
 
 export const useChatActions = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     sendMessage: state.sendMessage,
     loadChatMessages: state.loadChatMessages,
     clearChatMessages: state.clearChatMessages,
@@ -1041,7 +1041,7 @@ export const useChatActions = () =>
   }));
 
 export const useToolData = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     availableTools: state.availableTools,
     toolExecutions: state.toolExecutions,
     currentToolCalls: state.currentToolCalls,
@@ -1051,14 +1051,14 @@ export const useToolData = () =>
   }));
 
 export const useToolActions = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     executeTool: state.executeTool,
     loadToolExecutions: state.loadToolExecutions,
     clearToolExecutions: state.clearToolExecutions,
   }));
 
 export const useSearchData = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     searchFilters: state.searchFilters,
     searchResults: state.searchResults,
     searchLoading: state.searchLoading,
@@ -1069,7 +1069,7 @@ export const useSearchData = () =>
   }));
 
 export const useSearchActions = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     setSearchFilters: state.setSearchFilters,
     setSearchTerm: state.setSearchTerm,
     setSelectedCategory: state.setSelectedCategory,
@@ -1079,7 +1079,7 @@ export const useSearchActions = () =>
   }));
 
 export const useAnalyticsData = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     employeeAnalytics: state.employeeAnalytics,
     performanceHistory: state.performanceHistory,
     trainingRecords: state.trainingRecords,
@@ -1088,7 +1088,7 @@ export const useAnalyticsData = () =>
   }));
 
 export const useAnalyticsActions = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     updateEmployeePerformance: state.updateEmployeePerformance,
     loadPerformanceHistory: state.loadPerformanceHistory,
     loadAnalytics: state.loadAnalytics,
@@ -1098,7 +1098,7 @@ export const useAnalyticsActions = () =>
   }));
 
 export const useNotificationData = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     notifications: state.notifications,
     errors: state.errors,
     loading: state.loading,
@@ -1106,7 +1106,7 @@ export const useNotificationData = () =>
   }));
 
 export const useNotificationActions = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     addNotification: state.addNotification,
     removeNotification: state.removeNotification,
     markNotificationAsRead: state.markNotificationAsRead,
@@ -1117,14 +1117,14 @@ export const useNotificationActions = () =>
   }));
 
 export const useRealtimeData = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     subscriptions: state.subscriptions,
     loading: state.loading,
     error: state.error,
   }));
 
 export const useRealtimeActions = () =>
-  useCompleteAIEmployeeStore(state => ({
+  useCompleteAIEmployeeStore((state) => ({
     subscribeToEmployeeUpdates: state.subscribeToEmployeeUpdates,
     subscribeToChatMessages: state.subscribeToChatMessages,
     subscribeToToolExecutions: state.subscribeToToolExecutions,

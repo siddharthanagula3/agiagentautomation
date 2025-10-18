@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuthStore } from '@shared/stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/authentication-store';
 import { useThemeContext } from '@shared/hooks/useThemeContext';
 import { Button } from '@shared/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@shared/ui/avatar';

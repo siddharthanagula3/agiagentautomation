@@ -26,7 +26,7 @@ interface ExecuteRequest {
   streaming?: boolean;
 }
 
-export const handler: Handler = async event => {
+export const handler: Handler = async (event) => {
   // Handle CORS
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -134,7 +134,7 @@ export const handler: Handler = async event => {
       runStatus.status === 'queued' ||
       runStatus.status === 'in_progress'
     ) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
     }
 

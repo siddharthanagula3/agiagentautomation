@@ -8,7 +8,7 @@ import { Button } from '@shared/ui/button';
 import { CheckCircle, Plus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@shared/stores/unified-auth-store';
+import { useAuthStore } from '@shared/stores/authentication-store';
 import { supabase } from '@shared/lib/supabase-client';
 import { cn } from '@shared/lib/utils';
 

@@ -28,7 +28,7 @@ export const AccessibilitySettings: React.FC = () => {
           <input
             type="checkbox"
             checked={settings.prefersReducedMotion}
-            onChange={e =>
+            onChange={(e) =>
               updateSettings({ prefersReducedMotion: e.target.checked })
             }
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -49,7 +49,9 @@ export const AccessibilitySettings: React.FC = () => {
           <input
             type="checkbox"
             checked={settings.isHighContrast}
-            onChange={e => updateSettings({ isHighContrast: e.target.checked })}
+            onChange={(e) =>
+              updateSettings({ isHighContrast: e.target.checked })
+            }
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
           <span className="text-sm text-gray-700">High contrast mode</span>
@@ -65,7 +67,7 @@ export const AccessibilitySettings: React.FC = () => {
           <select
             id="font-size"
             value={settings.fontSize}
-            onChange={e =>
+            onChange={(e) =>
               updateSettings({
                 fontSize: e.target
                   .value as AccessibilitySettingsType['fontSize'],
@@ -91,7 +93,7 @@ export const AccessibilitySettings: React.FC = () => {
           <input
             type="checkbox"
             checked={settings.showFocusIndicators}
-            onChange={e =>
+            onChange={(e) =>
               updateSettings({ showFocusIndicators: e.target.checked })
             }
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -103,7 +105,7 @@ export const AccessibilitySettings: React.FC = () => {
           <input
             type="checkbox"
             checked={settings.announcePageChanges}
-            onChange={e =>
+            onChange={(e) =>
               updateSettings({ announcePageChanges: e.target.checked })
             }
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -122,7 +124,7 @@ export const AccessibilitySettings: React.FC = () => {
           <input
             type="checkbox"
             checked={settings.respectSystemPreferences}
-            onChange={e =>
+            onChange={(e) =>
               updateSettings({ respectSystemPreferences: e.target.checked })
             }
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"

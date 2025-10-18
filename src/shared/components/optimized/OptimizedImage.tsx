@@ -7,7 +7,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@shared/lib/utils';
 import { useOptimizedImage } from '@shared/hooks/usePerformanceOptimization';
 
-interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface OptimizedImageProps
+  extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
   width?: number;
@@ -88,16 +89,13 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   return (
     <div
       ref={imgRef}
-      className={cn(
-        'relative overflow-hidden',
-        className
-      )}
+      className={cn('relative overflow-hidden', className)}
       style={{ width, height }}
     >
       {/* Placeholder */}
       {showPlaceholder && (
         <div
-          className="absolute inset-0 bg-muted animate-pulse"
+          className="absolute inset-0 animate-pulse bg-muted"
           style={{
             backgroundImage: placeholder ? `url(${placeholder})` : undefined,
             backgroundSize: 'cover',
@@ -128,7 +126,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       {/* Loading Spinner */}
       {!isLoaded && !hasError && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       )}
 
@@ -136,9 +134,9 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       {hasError && !fallback && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted">
           <div className="text-center text-muted-foreground">
-            <div className="w-8 h-8 mx-auto mb-2 opacity-50">
+            <div className="mx-auto mb-2 h-8 w-8 opacity-50">
               <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
               </svg>
             </div>
             <p className="text-xs">Failed to load</p>

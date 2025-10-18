@@ -16,7 +16,7 @@ export { default as IntegrationSettingsPanel } from './components/automation/Int
 export { default as WorkforceManagement } from './components/employees/WorkforceManagement';
 
 // Page Components
-export { default as WorkforcePage } from './pages/workforce/WorkforcePage';
+// export { default as WorkforcePage } from './pages/workforce/WorkforcePage'; // Removed
 export { default as ChatPage } from './pages/chat/ChatPage';
 export { default as AutomationPage } from './pages/automation/AutomationPage';
 export { default as IntegrationsPage } from './pages/integrations/IntegrationsPage';

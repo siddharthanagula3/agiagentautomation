@@ -93,7 +93,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
       // Store usage in Supabase (non-blocking)
       storeTokenUsage('anthropic', model, userId, sessionId, tokenUsage).catch(
-        err => {
+        (err) => {
           console.error('[Anthropic Proxy] Failed to store token usage:', err);
         }
       );

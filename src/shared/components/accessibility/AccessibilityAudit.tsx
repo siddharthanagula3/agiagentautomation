@@ -36,11 +36,12 @@ const accessibilityService = {
         message: 'Consider adding a skip link for keyboard navigation',
         wcagLevel: 'AA',
         wcagGuideline: '2.4.1',
-        suggestion: 'Add a skip link at the beginning of the page'
-      }
-    ]
+        suggestion: 'Add a skip link at the beginning of the page',
+      },
+    ],
   }),
-  generateReport: () => '# Accessibility Audit Report\n\nScore: 95%\n\nAll checks passed!'
+  generateReport: () =>
+    '# Accessibility Audit Report\n\nScore: 95%\n\nAll checks passed!',
 };
 
 interface AccessibilityAuditProps {

@@ -23,20 +23,38 @@ const NotFoundPage = lazyWithRetry(() => import('./pages/NotFound'));
 
 // === AUTH PAGES ===
 const LoginPage = lazyWithRetry(() => import('@features/auth/pages/Login'));
-const RegisterPage = lazyWithRetry(() => import('@features/auth/pages/Register'));
-const ForgotPasswordPage = lazyWithRetry(() => import('@features/auth/pages/ForgotPassword'));
-const ResetPasswordPage = lazyWithRetry(() => import('@features/auth/pages/ResetPassword'));
+const RegisterPage = lazyWithRetry(
+  () => import('@features/auth/pages/Register')
+);
+const ForgotPasswordPage = lazyWithRetry(
+  () => import('@features/auth/pages/ForgotPassword')
+);
+const ResetPasswordPage = lazyWithRetry(
+  () => import('@features/auth/pages/ResetPassword')
+);
 
 // === DASHBOARD PAGES ===
 const DashboardHomePage = lazyWithRetry(() => import('./pages/DashboardHome'));
-const ChatPage = lazyWithRetry(() => import('@features/chat/pages/ChatInterface'));
-const SettingsPage = lazyWithRetry(() => import('@features/settings/pages/UserSettings'));
-const AIConfigurationPage = lazyWithRetry(() => import('@features/settings/pages/AIConfiguration'));
+const ChatPage = lazyWithRetry(
+  () => import('@features/chat/pages/ChatInterface')
+);
+const SettingsPage = lazyWithRetry(
+  () => import('@features/settings/pages/UserSettings')
+);
+const AIConfigurationPage = lazyWithRetry(
+  () => import('@features/settings/pages/AIConfiguration')
+);
 
 // === OPTIONAL FEATURES (Comment out to disable) ===
-const EmployeeManagement = lazyWithRetry(() => import('@features/workforce/pages/EmployeeManagement'));
-const MissionControlPage = lazyWithRetry(() => import('@features/mission-control/pages/MissionControlDashboard'));
-const BillingPage = lazyWithRetry(() => import('@features/billing/pages/BillingDashboard'));
+const EmployeeManagement = lazyWithRetry(
+  () => import('@features/workforce/pages/EmployeeManagement')
+);
+const MissionControlPage = lazyWithRetry(
+  () => import('@features/mission-control/pages/MissionControlDashboard')
+);
+const BillingPage = lazyWithRetry(
+  () => import('@features/billing/pages/BillingDashboard')
+);
 
 // Loading component for Suspense fallback
 const RouteLoadingSpinner = () => (
@@ -75,14 +93,23 @@ function App() {
                 <Route path="/auth" element={<AuthLayout />}>
                   <Route path="login" element={<LoginPage />} />
                   <Route path="register" element={<RegisterPage />} />
-                  <Route path="forgot-password" element={<ForgotPasswordPage />} />
-                  <Route path="reset-password" element={<ResetPasswordPage />} />
+                  <Route
+                    path="forgot-password"
+                    element={<ForgotPasswordPage />}
+                  />
+                  <Route
+                    path="reset-password"
+                    element={<ResetPasswordPage />}
+                  />
                 </Route>
 
                 {/* Root level auth routes for convenience */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route
+                  path="/forgot-password"
+                  element={<ForgotPasswordPage />}
+                />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                 {/* ===== PROTECTED ROUTES (Requires Login) ===== */}
@@ -102,14 +129,27 @@ function App() {
                   <Route path="chat/:sessionId" element={<ChatPage />} />
 
                   {/* Optional Features - Comment out to disable */}
-                  <Route path="workforce" element={<ErrorBoundary><EmployeeManagement /></ErrorBoundary>} />
-                  <Route path="mission-control" element={<MissionControlPage />} />
+                  <Route
+                    path="workforce"
+                    element={
+                      <ErrorBoundary>
+                        <EmployeeManagement />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="mission-control"
+                    element={<MissionControlPage />}
+                  />
                   <Route path="company-hub" element={<MissionControlPage />} />
 
                   {/* Settings */}
                   <Route path="settings" element={<SettingsPage />} />
                   <Route path="settings/:section" element={<SettingsPage />} />
-                  <Route path="settings/ai-configuration" element={<AIConfigurationPage />} />
+                  <Route
+                    path="settings/ai-configuration"
+                    element={<AIConfigurationPage />}
+                  />
 
                   {/* Billing */}
                   <Route path="billing" element={<BillingPage />} />

@@ -93,7 +93,7 @@ jobs:
         run: |
           echo "Quality check: ${{ needs.quality.result }}"
           echo "Build check: ${{ needs.build.result }}"
-          
+
           if [[ "${{ needs.quality.result }}" == "success" && "${{ needs.build.result }}" == "success" ]]; then
             echo "✅ All critical checks passed!"
             exit 0

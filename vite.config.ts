@@ -119,7 +119,7 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'es2020',
       minify: 'terser',
-      sourcemap: mode === 'production' ? false : true,
+      sourcemap: true,
       terserOptions: {
         compress: {
           drop_console:

@@ -197,14 +197,14 @@ const PricingPage: React.FC = () => {
       features: [
         {
           name: 'Number of AI employees',
-          starter: 'Pay per employee',
+          starter: 'Up to 10',
           pro: 'Unlimited',
           enterprise: 'Unlimited',
         },
         {
           name: 'Pricing model',
-          starter: '$1/employee/month',
-          pro: '$19/month flat',
+          starter: '$29/month',
+          pro: '$299/month',
           enterprise: 'Custom',
         },
         {
@@ -408,12 +408,8 @@ const PricingPage: React.FC = () => {
                   <th className="px-6 py-4 text-left font-semibold">
                     Features
                   </th>
-                  <th className="px-6 py-4 text-center font-semibold">
-                    Pay Per Employee
-                  </th>
-                  <th className="px-6 py-4 text-center font-semibold">
-                    All Access
-                  </th>
+                  <th className="px-6 py-4 text-center font-semibold">Pro</th>
+                  <th className="px-6 py-4 text-center font-semibold">Max</th>
                   <th className="px-6 py-4 text-center font-semibold">
                     Enterprise
                   </th>

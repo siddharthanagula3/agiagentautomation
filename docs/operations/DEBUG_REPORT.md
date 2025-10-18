@@ -22,7 +22,7 @@
 ## Outstanding / Follow-up Items
 
 - Audit generated Netlify bundles (`.netlify/functions-serve`) for unused `eslint-disable` directives or expand ignore list per environment.
-- `npm audit --production` reports moderate `prismjs` vulnerability via `react-syntax-highlighter`; remediation requires upgrading major versions.
+- `npm audit --production` reports moderate `prismjs` vulnerability via `react-syntax-highlighter`; remediation requires upgrading major versions. **Known issue** - tracked in tech debt backlog.
 - Critical flows still pending deep validation: workforce pagination + avatar fallbacks, settings form (debounce + optimistic rollback), Stripe upgrade + webhook simulation, chat tool streaming & abort handling, countdown banner persistence.
 - Add coverage for new Hire button behaviours (unit + Playwright flow: hire → workforce state → reload persistence).
 

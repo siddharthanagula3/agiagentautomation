@@ -4,6 +4,7 @@ import { Separator } from '@shared/ui/separator';
 import { useChat } from '../hooks/useChat';
 import { useChatHistory } from '../hooks/useChatHistory';
 import { useTools } from '../hooks/useTools';
+import { useExport } from '../hooks/useExport';
 import { ChatSidebar } from '../components/Sidebar/ChatSidebar';
 import { ChatHeader } from '../components/Main/ChatHeader';
 import { MessageList } from '../components/Main/MessageList';
@@ -11,6 +12,15 @@ import { ChatComposer } from '../components/Composer/ChatComposer';
 import { ModelSelector } from '../components/Main/ModelSelector';
 import { ModeSelector } from '../components/Tools/ModeSelector';
 import type { ChatSession, ChatMessage, ChatMode } from '../types';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@shared/ui/dropdown-menu';
+import { Button } from '@shared/ui/button';
+import { FileText, FileJson, FileCode, Download } from 'lucide-react';
 
 const ChatPage: React.FC = () => {
   const { sessionId } = useParams<{ sessionId?: string }>();
@@ -40,6 +50,17 @@ const ChatPage: React.FC = () => {
 
   const { availableTools, executeTool, activeTool, toolResults } = useTools();
 
+  const {
+    exportAsMarkdown,
+    exportAsJSON,
+    exportAsHTML,
+    exportAsText,
+    copyToClipboard,
+    generateShareLink,
+    shareLink,
+    isExporting,
+  } = useExport();
+
   // Local state
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,8 +76,9 @@ const ChatPage: React.FC = () => {
   // Create new session if none exists
   useEffect(() => {
     if (!currentSession && !sessionId) {
-      const newSession = createSession('New Chat');
-      navigate(`/chat/${newSession.id}`);
+      createSession('New Chat').then((session) => {
+        navigate(`/chat/${session.id}`);
+      });
     }
   }, [currentSession, sessionId, createSession, navigate]);
 
@@ -78,8 +100,9 @@ const ChatPage: React.FC = () => {
   };
 
   const handleNewChat = () => {
-    const newSession = createSession('New Chat');
-    navigate(`/chat/${newSession.id}`);
+    createSession('New Chat').then((session) => {
+      navigate(`/chat/${session.id}`);
+    });
   };
 
   const handleSessionSelect = (session: ChatSession) => {
@@ -106,6 +129,37 @@ const ChatPage: React.FC = () => {
     } catch (error) {
       console.error('Tool execution failed:', error);
     }
+  };
+
+  const handleExport = async (
+    format: 'markdown' | 'json' | 'html' | 'text'
+  ) => {
+    if (!currentSession) return;
+
+    switch (format) {
+      case 'markdown':
+        await exportAsMarkdown(currentSession, messages);
+        break;
+      case 'json':
+        await exportAsJSON(currentSession, messages);
+        break;
+      case 'html':
+        await exportAsHTML(currentSession, messages);
+        break;
+      case 'text':
+        await exportAsText(currentSession, messages);
+        break;
+    }
+  };
+
+  const handleShare = async () => {
+    if (!currentSession) return;
+    await generateShareLink(currentSession.id);
+  };
+
+  const handleCopyToClipboard = async () => {
+    if (!currentSession) return;
+    await copyToClipboard(currentSession, messages, 'markdown');
   };
 
   return (
@@ -135,12 +189,8 @@ const ChatPage: React.FC = () => {
           onRename={(title) =>
             currentSession && handleSessionRename(currentSession.id, title)
           }
-          onShare={() => {
-            /* TODO: Implement share */
-          }}
-          onExport={() => {
-            /* TODO: Implement export */
-          }}
+          onShare={handleShare}
+          onExport={() => handleExport('markdown')}
           onSettings={() => {
             /* TODO: Implement settings */
           }}
@@ -192,8 +242,54 @@ const ChatPage: React.FC = () => {
             <ModeSelector
               selectedMode={selectedMode}
               onModeChange={setSelectedMode}
-              availableModes={['team', 'engineer', 'research', 'race']}
+              availableModes={['team', 'engineer', 'research', 'race', 'solo']}
             />
+
+            {/* Export Options */}
+            {currentSession && messages.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Export Chat</h3>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        disabled={isExporting}
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Export
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuItem
+                        onClick={() => handleExport('markdown')}
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        Markdown (.md)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleExport('html')}>
+                        <FileCode className="mr-2 h-4 w-4" />
+                        HTML (.html)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleExport('json')}>
+                        <FileJson className="mr-2 h-4 w-4" />
+                        JSON (.json)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleExport('text')}>
+                        <FileText className="mr-2 h-4 w-4" />
+                        Plain Text (.txt)
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleCopyToClipboard}>
+                        Copy to Clipboard
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -1,7 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
-import { unifiedLLMService } from '@_core/api/llm/unified-llm-service';
-import type { ChatMessage, ChatMode, ToolCall } from '../types';
+import { supabase } from '@shared/lib/supabase-client';
+import { chatPersistenceService } from '../services/chat-persistence.service';
+import { chatStreamingService } from '../services/chat-streaming.service';
+import type { ChatMessage, ChatMode, StreamingUpdate } from '../types';
 
 interface SendMessageParams {
   content: string;
@@ -16,6 +18,33 @@ export const useChat = (sessionId?: string) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [streamingContent, setStreamingContent] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
+
+  // Get current user
+  const getCurrentUser = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user;
+  };
+
+  // Load messages from database
+  const loadMessages = useCallback(async (sid: string) => {
+    try {
+      setIsLoading(true);
+      const loadedMessages =
+        await chatPersistenceService.getSessionMessages(sid);
+      setMessages(loadedMessages);
+      setError(null);
+    } catch (error) {
+      console.error('Failed to load messages:', error);
+      setError('Failed to load messages');
+      toast.error('Failed to load chat history');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   // Load messages for the current session
   useEffect(() => {
@@ -24,16 +53,7 @@ export const useChat = (sessionId?: string) => {
     }
   }, [sessionId, loadMessages]);
 
-  const loadMessages = useCallback(async (sessionId: string) => {
-    try {
-      // TODO: Implement message loading from database
-      setMessages([]);
-    } catch (error) {
-      console.error('Failed to load messages:', error);
-      setError('Failed to load messages');
-    }
-  }, []);
-
+  // Send message with streaming
   const sendMessage = useCallback(
     async ({
       content,
@@ -47,33 +67,49 @@ export const useChat = (sessionId?: string) => {
 
       setIsLoading(true);
       setError(null);
+      setIsStreaming(true);
+      setStreamingContent('');
 
-      // Add user message
-      const userMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: 'user',
-        content,
-        attachments: attachments?.map((file) => ({
-          id: crypto.randomUUID(),
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          url: URL.createObjectURL(file),
-        })),
-        createdAt: new Date(),
-        metadata: {
-          mode,
-          model,
-          temperature,
-        },
-      };
-
-      setMessages((prev) => [...prev, userMessage]);
+      const user = await getCurrentUser();
+      if (!user) {
+        toast.error('You must be logged in to send messages');
+        setIsLoading(false);
+        return;
+      }
 
       try {
-        // Create assistant message placeholder
-        const assistantMessage: ChatMessage = {
+        // Create user message
+        const userMessage: ChatMessage = {
           id: crypto.randomUUID(),
+          role: 'user',
+          content,
+          attachments: attachments?.map((file) => ({
+            id: crypto.randomUUID(),
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            url: URL.createObjectURL(file),
+          })),
+          createdAt: new Date(),
+          metadata: {
+            mode,
+            model,
+            temperature,
+          },
+        };
+
+        // Add to UI immediately
+        setMessages((prev) => [...prev, userMessage]);
+
+        // Save to database
+        if (sessionId) {
+          await chatPersistenceService.saveMessage(sessionId, 'user', content);
+        }
+
+        // Create assistant message placeholder
+        const assistantMessageId = crypto.randomUUID();
+        const assistantMessage: ChatMessage = {
+          id: assistantMessageId,
           role: 'assistant',
           content: '',
           createdAt: new Date(),
@@ -86,51 +122,102 @@ export const useChat = (sessionId?: string) => {
 
         setMessages((prev) => [...prev, assistantMessage]);
 
-        // Send to LLM service
-        const response = await unifiedLLMService.sendMessage(
-          [
-            ...messages.map((msg) => ({
-              role: msg.role,
-              content: msg.content,
-            })),
-            { role: 'user', content },
-          ],
-          sessionId,
-          undefined, // userId
-          'openai' // provider
-        );
+        // Stream the response
+        const conversationHistory = [
+          ...messages.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+          { role: 'user', content },
+        ];
 
-        // Update assistant message with response
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === assistantMessage.id
-              ? { ...msg, content: response.content }
-              : msg
-          )
-        );
+        let fullResponse = '';
 
-        // TODO: Save messages to database
-        // TODO: Handle tool calls if present
+        // Use streaming service
+        for await (const update of chatStreamingService.streamMessage(
+          conversationHistory,
+          {
+            sessionId,
+            userId: user.id,
+            provider: 'openai',
+          }
+        )) {
+          if (update.type === 'content' && update.content) {
+            fullResponse += update.content;
+            setStreamingContent(fullResponse);
+
+            // Update the assistant message in real-time
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantMessageId
+                  ? { ...msg, content: fullResponse }
+                  : msg
+              )
+            );
+          } else if (update.type === 'error') {
+            throw new Error(update.error);
+          }
+        }
+
+        // Save assistant response to database
+        if (sessionId && fullResponse) {
+          await chatPersistenceService.saveMessage(
+            sessionId,
+            'assistant',
+            fullResponse
+          );
+        }
       } catch (error) {
         const err = error as { message?: string };
         setError(err.message || 'Failed to send message');
-        toast({
-          title: 'Failed to send message',
-          description: err.message || 'Unknown error',
-          variant: 'destructive',
-        });
+        toast.error(err.message || 'Failed to send message');
+
+        // Remove the placeholder assistant message on error
+        setMessages((prev) =>
+          prev.filter((msg) => msg.content !== '' || msg.role !== 'assistant')
+        );
       } finally {
         setIsLoading(false);
+        setIsStreaming(false);
+        setStreamingContent('');
       }
     },
     [messages, sessionId]
   );
 
-  const regenerateMessage = useCallback(async (messageId: string) => {
-    // TODO: Implement message regeneration
-    console.log('Regenerate message:', messageId);
-  }, []);
+  // Regenerate last assistant message
+  const regenerateMessage = useCallback(
+    async (messageId: string) => {
+      const messageIndex = messages.findIndex((msg) => msg.id === messageId);
+      if (messageIndex === -1) return;
 
+      // Find the user message before this assistant message
+      const userMessageIndex = messageIndex - 1;
+      if (userMessageIndex < 0) return;
+
+      const userMessage = messages[userMessageIndex];
+      if (userMessage.role !== 'user') return;
+
+      // Remove the old assistant message
+      setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+
+      // Delete from database
+      if (sessionId) {
+        await chatPersistenceService.deleteMessage(messageId);
+      }
+
+      // Resend with same parameters
+      await sendMessage({
+        content: userMessage.content,
+        mode: userMessage.metadata?.mode as ChatMode,
+        model: userMessage.metadata?.model as string,
+        temperature: userMessage.metadata?.temperature as number,
+      });
+    },
+    [messages, sendMessage, sessionId]
+  );
+
+  // Edit a message
   const editMessage = useCallback(
     async (messageId: string, newContent: string) => {
       setMessages((prev) =>
@@ -145,14 +232,33 @@ export const useChat = (sessionId?: string) => {
             : msg
         )
       );
+
+      // TODO: Update in database
+      toast.success('Message updated');
     },
     []
   );
 
-  const deleteMessage = useCallback(async (messageId: string) => {
-    setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
-  }, []);
+  // Delete a message
+  const deleteMessage = useCallback(
+    async (messageId: string) => {
+      setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
 
+      // Delete from database
+      if (sessionId) {
+        try {
+          await chatPersistenceService.deleteMessage(messageId);
+          toast.success('Message deleted');
+        } catch (error) {
+          console.error('Failed to delete message:', error);
+          toast.error('Failed to delete message');
+        }
+      }
+    },
+    [sessionId]
+  );
+
+  // Clear all messages
   const clearMessages = useCallback(() => {
     setMessages([]);
   }, []);
@@ -161,6 +267,8 @@ export const useChat = (sessionId?: string) => {
     messages,
     isLoading,
     error,
+    streamingContent,
+    isStreaming,
     sendMessage,
     regenerateMessage,
     editMessage,

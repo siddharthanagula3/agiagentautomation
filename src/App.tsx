@@ -45,14 +45,10 @@ const DashboardHomePage = lazyWithRetry(
 const WorkforcePage = lazyWithRetry(
   () => import('@features/workforce/pages/WorkforcePage')
 );
-const ChatPage = lazyWithRetry(
-  () => import('@features/mission-control/pages/ChatPageSimplified')
-);
+// NEW: Unified MGX-style Chat Interface - replacing all duplicate chat pages
+const ChatPage = lazyWithRetry(() => import('@features/chat/pages/ChatPage'));
 const MissionControlPage = lazyWithRetry(
   () => import('@features/mission-control/pages/MissionControlPageRefactored')
-);
-const EnhancedChatPage = lazyWithRetry(
-  () => import('@features/chat/pages/EnhancedChatPage')
 );
 const SettingsPage = lazyWithRetry(
   () => import('@features/settings/pages/SettingsPage')
@@ -314,12 +310,9 @@ function App() {
                     element={<MissionControlPage />}
                   />
 
-                  {/* Chat */}
-                  <Route path="chat" element={<EnhancedChatPage />} />
-                  <Route
-                    path="chat/:sessionId"
-                    element={<EnhancedChatPage />}
-                  />
+                  {/* Chat - Unified MGX-style interface with mode switching */}
+                  <Route path="chat" element={<ChatPage />} />
+                  <Route path="chat/:sessionId" element={<ChatPage />} />
 
                   {/* Legacy route redirects */}
                   <Route path="company-hub" element={<MissionControlPage />} />

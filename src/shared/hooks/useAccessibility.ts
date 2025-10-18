@@ -1,5 +1,23 @@
 import { useEffect, useCallback, useRef } from 'react';
-import { accessibilityService } from '@core/monitoring/accessibility-monitor';
+
+// Mock accessibility service since monitoring was archived
+const accessibilityService = {
+  initialize: () => {},
+  announce: (message: string) => {
+    // Simple screen reader announcement
+    const announcement = document.createElement('div');
+    announcement.setAttribute('aria-live', 'polite');
+    announcement.setAttribute('aria-atomic', 'true');
+    announcement.className = 'sr-only';
+    announcement.textContent = message;
+    document.body.appendChild(announcement);
+    setTimeout(() => {
+      if (document.body.contains(announcement)) {
+        document.body.removeChild(announcement);
+      }
+    }, 1000);
+  }
+};
 
 interface AccessibilityOptions {
   announceChanges?: boolean;

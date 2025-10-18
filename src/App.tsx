@@ -1,4 +1,4 @@
-// src/App.tsx - CLEANED VERSION (Debug components removed)
+// src/App.tsx - CLEANED VERSION
 import { Suspense, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -9,15 +9,6 @@ import ScrollToTop from '@shared/components/ScrollToTop';
 import { lazyWithRetry } from '@shared/components/LazyLoadWrapper';
 import { Loader2 } from 'lucide-react';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
-import { monitoringService } from '@core/monitoring/system-monitor';
-import { usePagePerformanceMonitoring } from '@shared/hooks/usePerformanceMonitoring';
-import { accessibilityService } from '@core/monitoring/accessibility-monitor';
-import { seoService } from '@core/monitoring/seo-optimizer';
-import { analyticsService } from '@core/monitoring/analytics-tracker';
-import { performanceService } from '@core/monitoring/performance-monitor';
-import { backupService } from '@core/storage/backup/database-backup';
-import { scalingService } from '@core/monitoring/scaling-manager';
-import { privacyService } from '@core/monitoring/privacy-compliance';
 import SkipLink from '@shared/components/accessibility/SkipLink';
 import { CookieConsent } from '@shared/components/CookieConsent';
 import { PublicLayout } from './layouts/PublicLayout';
@@ -25,91 +16,27 @@ import { DashboardLayout } from './layouts/DashboardLayout';
 import { ProtectedRoute } from '@features/auth/components/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';
 
-// Lazy load all page components for better performance
+// === CORE PAGES ===
 const LandingPage = lazyWithRetry(() => import('./pages/Landing'));
-const LoginPage = lazyWithRetry(() => import('@features/auth/pages/Login'));
-const RegisterPage = lazyWithRetry(
-  () => import('@features/auth/pages/Register')
-);
-const ForgotPasswordPage = lazyWithRetry(
-  () => import('@features/auth/pages/ForgotPassword')
-);
-const ResetPasswordPage = lazyWithRetry(
-  () => import('@features/auth/pages/ResetPassword')
-);
-const DashboardHomePage = lazyWithRetry(() => import('./pages/DashboardHome'));
-
-// Lazy load all other page components
-const EmployeeManagement = lazyWithRetry(
-  () => import('@features/workforce/pages/EmployeeManagement')
-);
-// NEW: Unified MGX-style Chat Interface - replacing all duplicate chat pages
-const ChatPage = lazyWithRetry(
-  () => import('@features/chat/pages/ChatInterface')
-);
-const MissionControlPage = lazyWithRetry(
-  () => import('@features/mission-control/pages/MissionControlDashboard')
-);
-const SettingsPage = lazyWithRetry(
-  () => import('@features/settings/pages/UserSettings')
-);
-const AIConfigurationPage = lazyWithRetry(
-  () => import('@features/settings/pages/AIConfiguration')
-);
-const MarketplacePublicPage = lazyWithRetry(
-  () => import('./pages/PublicMarketplace')
-);
-const BillingPage = lazyWithRetry(
-  () => import('@features/billing/pages/BillingDashboard')
-);
-const HelpSupportPage = lazyWithRetry(() => import('./pages/SupportCenter'));
-
-// Lazy load public pages
-const BlogPage = lazyWithRetry(() => import('./pages/BlogList'));
-const ResourcesPage = lazyWithRetry(() => import('./pages/Resources'));
-const HelpPage = lazyWithRetry(() => import('./pages/HelpCenter'));
 const PricingPage = lazyWithRetry(() => import('./pages/Pricing'));
-const ContactSalesPage = lazyWithRetry(() => import('./pages/ContactSales'));
-const AboutPage = lazyWithRetry(() => import('./pages/About'));
-const DocumentationPage = lazyWithRetry(() => import('./pages/Documentation'));
-
-// Lazy load legal pages
-const PrivacyPolicyPage = lazyWithRetry(
-  () => import('./pages/legal/PrivacyPolicy')
-);
-const TermsOfServicePage = lazyWithRetry(
-  () => import('./pages/legal/TermsOfService')
-);
-const CookiePolicyPage = lazyWithRetry(
-  () => import('./pages/legal/CookiePolicy')
-);
-
-// Lazy load use cases pages
-const StartupsPage = lazyWithRetry(() => import('./pages/use-cases/Startups'));
-const ITServiceProvidersPage = lazyWithRetry(
-  () => import('./pages/use-cases/ITServiceProviders')
-);
-const SalesTeamsPage = lazyWithRetry(
-  () => import('./pages/use-cases/SalesTeams')
-);
-const ConsultingBusinessesPage = lazyWithRetry(
-  () => import('./pages/use-cases/ConsultingBusinesses')
-);
-
-// Lazy load features pages
-const AIChatPage = lazyWithRetry(
-  () => import('./pages/features/AIChatInterface')
-);
-const AIDashboardsPage = lazyWithRetry(
-  () => import('./pages/features/AIDashboards')
-);
-const AIProjectManagerPage = lazyWithRetry(
-  () => import('./pages/features/AIProjectManager')
-);
-
-// Lazy load error and blog pages
 const NotFoundPage = lazyWithRetry(() => import('./pages/NotFound'));
-const BlogPostPage = lazyWithRetry(() => import('./pages/BlogPost'));
+
+// === AUTH PAGES ===
+const LoginPage = lazyWithRetry(() => import('@features/auth/pages/Login'));
+const RegisterPage = lazyWithRetry(() => import('@features/auth/pages/Register'));
+const ForgotPasswordPage = lazyWithRetry(() => import('@features/auth/pages/ForgotPassword'));
+const ResetPasswordPage = lazyWithRetry(() => import('@features/auth/pages/ResetPassword'));
+
+// === DASHBOARD PAGES ===
+const DashboardHomePage = lazyWithRetry(() => import('./pages/DashboardHome'));
+const ChatPage = lazyWithRetry(() => import('@features/chat/pages/ChatInterface'));
+const SettingsPage = lazyWithRetry(() => import('@features/settings/pages/UserSettings'));
+const AIConfigurationPage = lazyWithRetry(() => import('@features/settings/pages/AIConfiguration'));
+
+// === OPTIONAL FEATURES (Comment out to disable) ===
+const EmployeeManagement = lazyWithRetry(() => import('@features/workforce/pages/EmployeeManagement'));
+const MissionControlPage = lazyWithRetry(() => import('@features/mission-control/pages/MissionControlDashboard'));
+const BillingPage = lazyWithRetry(() => import('@features/billing/pages/BillingDashboard'));
 
 // Loading component for Suspense fallback
 const RouteLoadingSpinner = () => (
@@ -122,73 +49,12 @@ const RouteLoadingSpinner = () => (
 );
 
 function App() {
-  // Initialize services in a controlled manner to prevent initialization conflicts
+  // Simple initialization
   useEffect(() => {
-    const initializeServices = async () => {
-      try {
-        // Initialize core services first
-        monitoringService.initialize();
-        accessibilityService.initialize();
-        seoService.initialize();
-
-        // Initialize analytics with a small delay
-        setTimeout(() => {
-          analyticsService.initialize();
-        }, 100);
-
-        // Initialize performance services with delay
-        setTimeout(() => {
-          performanceService.initialize({
-            enableImageOptimization: true,
-            enableCodeSplitting: true,
-            enableResourcePreloading: true,
-            enableServiceWorker: true,
-            cacheStrategy: 'moderate',
-          });
-        }, 200);
-
-        // Initialize advanced services with longer delay
-        setTimeout(() => {
-          backupService.initialize({
-            enableAutomatedBackups: true,
-            backupFrequency: 'daily',
-            retentionDays: 30,
-            enableCloudBackup: true,
-            enableLocalBackup: false,
-            cloudProvider: 'supabase',
-            encryptionEnabled: true,
-          });
-
-          scalingService.initialize({
-            enableLoadBalancing: true,
-            enableCaching: true,
-            enableCDN: true,
-            enableDatabaseOptimization: true,
-            enableResourcePooling: true,
-            maxConcurrentRequests: 100,
-            cacheStrategy: 'moderate',
-            cdnProvider: 'cloudflare',
-          });
-
-          privacyService.initialize({
-            enableConsentManagement: true,
-            enableDataSubjectRequests: true,
-            enableDataRetention: true,
-            enableDataAnonymization: true,
-            retentionPeriodDays: 2555, // 7 years
-            enableAuditLogging: true,
-          });
-        }, 500);
-      } catch (error) {
-        console.error('Service initialization error:', error);
-      }
-    };
-
-    initializeServices();
+    if (import.meta.env.DEV) {
+      console.log('✓ App initialized successfully');
+    }
   }, []);
-
-  // Monitor page performance
-  usePagePerformanceMonitoring();
 
   return (
     <ErrorBoundary>
@@ -199,86 +65,27 @@ function App() {
             <SkipLink href="#main-content">Skip to main content</SkipLink>
             <Suspense fallback={<RouteLoadingSpinner />}>
               <Routes>
-                {/* Public Routes */}
+                {/* ===== PUBLIC ROUTES ===== */}
                 <Route path="/" element={<PublicLayout />}>
                   <Route index element={<LandingPage />} />
-
-                  {/* Marketing Pages */}
-                  <Route path="blog" element={<BlogPage />} />
-                  <Route path="blog/:slug" element={<BlogPostPage />} />
-                  <Route path="resources" element={<ResourcesPage />} />
-                  <Route path="help" element={<HelpPage />} />
                   <Route path="pricing" element={<PricingPage />} />
-                  <Route path="contact-sales" element={<ContactSalesPage />} />
-                  <Route path="about" element={<AboutPage />} />
-                  <Route path="documentation" element={<DocumentationPage />} />
-                  <Route
-                    path="marketplace"
-                    element={<MarketplacePublicPage />}
-                  />
-
-                  {/* Legal Pages */}
-                  <Route
-                    path="privacy-policy"
-                    element={<PrivacyPolicyPage />}
-                  />
-                  <Route
-                    path="terms-of-service"
-                    element={<TermsOfServicePage />}
-                  />
-                  <Route path="cookie-policy" element={<CookiePolicyPage />} />
-
-                  {/* Use Cases */}
-                  <Route path="use-cases/startups" element={<StartupsPage />} />
-                  <Route
-                    path="use-cases/it-service-providers"
-                    element={<ITServiceProvidersPage />}
-                  />
-                  <Route
-                    path="use-cases/sales-teams"
-                    element={<SalesTeamsPage />}
-                  />
-                  <Route
-                    path="use-cases/consulting-businesses"
-                    element={<ConsultingBusinessesPage />}
-                  />
-
-                  {/* Features */}
-                  <Route path="features/ai-chat" element={<AIChatPage />} />
-                  <Route
-                    path="features/ai-dashboards"
-                    element={<AIDashboardsPage />}
-                  />
-                  <Route
-                    path="features/ai-project-manager"
-                    element={<AIProjectManagerPage />}
-                  />
                 </Route>
 
-                {/* Auth Routes - Both /auth/* and root level */}
+                {/* ===== AUTH ROUTES ===== */}
                 <Route path="/auth" element={<AuthLayout />}>
                   <Route path="login" element={<LoginPage />} />
                   <Route path="register" element={<RegisterPage />} />
-                  <Route
-                    path="forgot-password"
-                    element={<ForgotPasswordPage />}
-                  />
-                  <Route
-                    path="reset-password"
-                    element={<ResetPasswordPage />}
-                  />
+                  <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="reset-password" element={<ResetPasswordPage />} />
                 </Route>
 
                 {/* Root level auth routes for convenience */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route
-                  path="/forgot-password"
-                  element={<ForgotPasswordPage />}
-                />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-                {/* Protected Routes - ALL AT ROOT LEVEL */}
+                {/* ===== PROTECTED ROUTES (Requires Login) ===== */}
                 <Route
                   path="/"
                   element={
@@ -287,48 +94,33 @@ function App() {
                     </ProtectedRoute>
                   }
                 >
-                  {/* Dashboard Home */}
+                  {/* Dashboard */}
                   <Route path="dashboard" element={<DashboardHomePage />} />
 
-                  {/* Main Features */}
-                  <Route
-                    path="workforce"
-                    element={
-                      <ErrorBoundary>
-                        <EmployeeManagement />
-                      </ErrorBoundary>
-                    }
-                  />
-
-                  {/* Mission Control - AI Workforce Command Center */}
-                  <Route
-                    path="mission-control"
-                    element={<MissionControlPage />}
-                  />
-
-                  {/* Chat - Unified MGX-style interface with mode switching */}
+                  {/* Chat Interface - Main Feature */}
                   <Route path="chat" element={<ChatPage />} />
                   <Route path="chat/:sessionId" element={<ChatPage />} />
 
-                  {/* Legacy route redirects */}
+                  {/* Optional Features - Comment out to disable */}
+                  <Route path="workforce" element={<ErrorBoundary><EmployeeManagement /></ErrorBoundary>} />
+                  <Route path="mission-control" element={<MissionControlPage />} />
                   <Route path="company-hub" element={<MissionControlPage />} />
 
-                  {/* Account & System at Root Level */}
+                  {/* Settings */}
                   <Route path="settings" element={<SettingsPage />} />
                   <Route path="settings/:section" element={<SettingsPage />} />
-                  <Route
-                    path="settings/ai-configuration"
-                    element={<AIConfigurationPage />}
-                  />
+                  <Route path="settings/ai-configuration" element={<AIConfigurationPage />} />
+
+                  {/* Billing */}
                   <Route path="billing" element={<BillingPage />} />
-                  <Route path="support" element={<HelpSupportPage />} />
                 </Route>
 
-                {/* 404 Route */}
+                {/* ===== 404 ROUTE ===== */}
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>
 
+            {/* Toaster for notifications */}
             <Toaster
               position="bottom-right"
               theme="dark"
@@ -346,6 +138,7 @@ function App() {
           {/* Cookie Consent Banner */}
           <CookieConsent />
 
+          {/* React Query Dev Tools (dev only) */}
           {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
         </TooltipProvider>
       </ThemeProvider>

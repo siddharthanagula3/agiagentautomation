@@ -8,10 +8,7 @@ import { Button } from '@shared/ui/button';
 import { Particles } from '@shared/ui/particles';
 import { CountdownTimer } from '@shared/ui/countdown-timer';
 import { createDiscountEndDate } from '@shared/ui/countdown-utils';
-import {
-  getPricingPlans,
-  type PricingPlan as DBPricingPlan,
-} from '@core/integrations/marketing-endpoints';
+// Marketing endpoints archived - using fallback data
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { SEOHead } from '@shared/components/seo/SEOHead';
 import {
@@ -100,35 +97,8 @@ const PricingPage: React.FC = () => {
   const loadPlans = useCallback(async () => {
     try {
       setLoading(true);
-      const dbPlans = await getPricingPlans();
-      const formattedPlans: PricingPlan[] = dbPlans.map((plan) => {
-        let price = 'Custom';
-        let period = '';
-
-        if (plan.slug === 'pro') {
-          price = '$29';
-          period = '/month';
-        } else if (plan.slug === 'max') {
-          price = '$299';
-          period = '/month';
-        } else if (plan.slug === 'enterprise') {
-          price = 'Custom';
-          period = '';
-        }
-
-        return {
-          name: plan.name,
-          price,
-          period,
-          description: plan.description,
-          features: plan.features,
-          notIncluded: plan.not_included || [],
-          popular: plan.popular,
-          cta: plan.name === 'Enterprise' ? 'Contact Sales' : 'Get Started',
-          color: plan.color_gradient,
-        };
-      });
-      setPlans(formattedPlans);
+      // Use fallback plans since marketing endpoints were archived
+      setPlans(FALLBACK_PLANS);
     } catch (error) {
       console.error('Error loading pricing plans:', error);
       // Fallback to hardcoded plans if fetch fails

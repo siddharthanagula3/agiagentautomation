@@ -1,6 +1,6 @@
 import React, { useState, useRef, KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@shared/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import {
   Plus,
@@ -25,6 +25,7 @@ interface ChatInputProps {
   onSelectEmployee: (employeeId: string) => void;
   onDeselectEmployee: (employeeId: string) => void;
   isStreaming?: boolean;
+  onStop?: () => void;
   placeholder?: string;
 }
 
@@ -35,12 +36,13 @@ export function ChatInput({
   onSelectEmployee,
   onDeselectEmployee,
   isStreaming = false,
+  onStop,
   placeholder = 'Ask anything',
 }: ChatInputProps) {
   const [message, setMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [showEmployeeSelector, setShowEmployeeSelector] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = () => {
     if (message.trim() && !isStreaming) {
@@ -49,7 +51,7 @@ export function ChatInput({
     }
   };
 
-  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
@@ -126,32 +128,39 @@ export function ChatInput({
 
         {/* Main Input */}
         <div className="relative flex-1">
-          <Input
+          <Textarea
             ref={inputRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
             disabled={isStreaming}
-            className={cn(
-              'resize-none pr-12',
-              isStreaming && 'cursor-not-allowed opacity-50'
-            )}
+            rows={1}
+            className={cn('min-h-[44px] max-h-40 resize-y pr-16',
+              isStreaming && 'cursor-not-allowed opacity-50')}
           />
 
           {/* Send Button */}
-          <Button
-            onClick={handleSubmit}
-            disabled={!message.trim() || isStreaming}
-            size="sm"
-            className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 transform p-0"
-          >
-            {isStreaming ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
+          {isStreaming ? (
+            <Button
+              onClick={onStop}
+              size="sm"
+              variant="secondary"
+              className="absolute right-2 top-1/2 h-8 -translate-y-1/2 transform px-2"
+            >
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              Stop
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              disabled={!message.trim()}
+              size="sm"
+              className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 transform p-0"
+            >
               <Send className="h-4 w-4" />
-            )}
-          </Button>
+            </Button>
+          )}
         </div>
 
         {/* Right Controls */}

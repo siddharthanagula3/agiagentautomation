@@ -12,6 +12,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ThemeToggle } from '@shared/ui/theme-toggle';
 
 interface ChatTopBarProps {
   sessionTitle: string;
@@ -131,6 +132,8 @@ export function ChatTopBar({
 
       {/* Right Section */}
       <div className="flex items-center space-x-2">
+        {/* Theme Toggle */}
+        <ThemeToggle />
         {/* Help Button */}
         <Button
           variant="ghost"

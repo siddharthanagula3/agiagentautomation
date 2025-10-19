@@ -15,7 +15,7 @@ export function ChatLayout({
   sidebarOpen = true,
 }: ChatLayoutProps) {
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen bg-background text-foreground">
       {/* Collapsible Sidebar */}
       <aside
         className={cn(
@@ -28,10 +28,10 @@ export function ChatLayout({
 
       {/* Main Chat Area */}
       <main className="flex min-w-0 flex-1 flex-col">
-        {/* Top bar with employee avatars + dashboard nav */}
+        {/* Top bar */}
         {topBar}
 
-        {/* Message area with ScrollArea */}
+        {/* Message area */}
         <div className="flex flex-1 flex-col">{children}</div>
       </main>
     </div>

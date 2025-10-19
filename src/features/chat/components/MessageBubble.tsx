@@ -84,17 +84,19 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         {/* Message Bubble */}
         <div
           className={cn(
-            'group relative rounded-2xl px-4 py-3 shadow-sm',
+            // ChatGPT-like: assistant has no bubble, user has subtle surface
             isUser
-              ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
-              : 'border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
+              ? 'rounded-xl border border-border/50 bg-muted/30 px-4 py-3'
+              : 'px-1'
           )}
         >
           {/* Content - Markdown support */}
-          <div className={cn(
-            'prose prose-sm max-w-none',
-            isUser ? 'prose-invert' : 'dark:prose-invert'
-          )}>
+          <div
+            className={cn(
+              'prose prose-sm max-w-none dark:prose-invert',
+              isUser && 'prose-invert'
+            )}
+          >
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
               rehypePlugins={[rehypeHighlight]}
@@ -107,23 +109,22 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           </div>
 
           {/* Copy Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCopy}
-            className={cn(
-              'absolute right-2 top-2 h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100',
-              isUser
-                ? 'text-white hover:bg-white/20'
-                : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700'
-            )}
-          >
-            {copied ? (
-              <Check className="h-3 w-3" />
-            ) : (
-              <Copy className="h-3 w-3" />
-            )}
-          </Button>
+          <div className="mt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopy}
+              className={cn(
+                'h-6 w-6 p-0 text-muted-foreground',
+                isUser
+                  ? 'hover:bg-foreground/10'
+                  : 'hover:bg-muted'
+              )}
+              title="Copy message"
+            >
+              {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+            </Button>
+          </div>
         </div>
 
         {/* Timestamp */}

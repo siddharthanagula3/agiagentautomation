@@ -71,7 +71,7 @@ export function ChatInput({
     .map((emp) => emp.name);
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+    <div className="rounded-2xl border border-border/60 bg-muted/20 p-3 shadow-sm">
       {/* Employee Selection */}
       {selectedEmployees.length > 0 && (
         <div className="mb-3 flex items-center space-x-2">
@@ -87,13 +87,13 @@ export function ChatInput({
       )}
 
       {/* Input Area */}
-      <div className="flex items-end space-x-3">
+      <div className="flex items-end gap-2">
         {/* Left Controls */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
-            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="p-2 text-muted-foreground hover:bg-muted rounded-md"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -101,7 +101,7 @@ export function ChatInput({
           <Button
             variant="ghost"
             size="sm"
-            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="p-2 text-muted-foreground hover:bg-muted rounded-md"
             onClick={() => setShowEmployeeSelector(!showEmployeeSelector)}
           >
             <Users className="h-4 w-4" />
@@ -110,12 +110,7 @@ export function ChatInput({
           <Button
             variant="ghost"
             size="sm"
-            className={cn(
-              'p-2',
-              isRecording
-                ? 'text-red-500 hover:text-red-700'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-            )}
+            className={cn('p-2 rounded-md hover:bg-muted', isRecording ? 'text-red-500' : 'text-muted-foreground')}
             onClick={() => setIsRecording(!isRecording)}
           >
             {isRecording ? (
@@ -136,8 +131,10 @@ export function ChatInput({
             placeholder={placeholder}
             disabled={isStreaming}
             rows={1}
-            className={cn('min-h-[44px] max-h-40 resize-y pr-16',
-              isStreaming && 'cursor-not-allowed opacity-50')}
+            className={cn(
+              'min-h-[44px] max-h-40 resize-y pr-16 rounded-xl bg-background ring-1 ring-border focus-visible:ring-2',
+              isStreaming && 'cursor-not-allowed opacity-50'
+            )}
           />
 
           {/* Send Button */}
@@ -146,7 +143,7 @@ export function ChatInput({
               onClick={onStop}
               size="sm"
               variant="secondary"
-              className="absolute right-2 top-1/2 h-8 -translate-y-1/2 transform px-2"
+              className="absolute right-2 top-1/2 h-8 -translate-y-1/2 transform rounded-md px-2"
             >
               <Loader2 className="mr-1 h-4 w-4 animate-spin" />
               Stop
@@ -156,7 +153,7 @@ export function ChatInput({
               onClick={handleSubmit}
               disabled={!message.trim()}
               size="sm"
-              className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 transform p-0"
+              className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 transform rounded-md p-0"
             >
               <Send className="h-4 w-4" />
             </Button>
@@ -164,11 +161,11 @@ export function ChatInput({
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
-            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="p-2 rounded-md text-muted-foreground hover:bg-muted"
           >
             <User className="h-4 w-4" />
           </Button>
@@ -177,7 +174,7 @@ export function ChatInput({
 
       {/* Employee Selector Dropdown */}
       {showEmployeeSelector && (
-        <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-700">
+        <div className="mt-3 rounded-lg border border-border/60 bg-muted/30 p-3">
           <div className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
             Select AI Employees
           </div>

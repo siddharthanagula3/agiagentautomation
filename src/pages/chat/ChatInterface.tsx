@@ -313,9 +313,9 @@ export function ChatInterface() {
         onToggleMode={handleToggleMode}
       />
 
-      {/* Messages Area */}
+      {/* Messages Area (ChatGPT-like centered column) */}
       <ScrollArea className="chat-scroll-area flex-1">
-        <div className="space-y-4 p-4">
+        <div className="mx-auto w-full max-w-3xl px-4 py-6 space-y-6">
           {/* Messages */}
           {messages.map((message) => (
             <MessageBubble key={message.id} message={message} />
@@ -371,22 +371,27 @@ export function ChatInterface() {
             );
           })}
 
-          {/* Auto-scroll anchor */}
+          {/* Bottom spacer and auto-scroll anchor */}
+          <div className="h-24" />
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
 
-      {/* Chat Input */}
-      <ChatInput
-        onSubmit={handleSendMessage}
-        selectedEmployees={activeEmployees}
-        availableEmployees={employees}
-        onSelectEmployee={handleSelectEmployee}
-        onDeselectEmployee={handleDeselectEmployee}
-        isStreaming={isStreamingResponse}
-        onStop={stopGeneration}
-        placeholder="Ask anything"
-      />
+      {/* Chat Input (sticky bottom, centered) */}
+      <div className="sticky bottom-0 z-10 w-full border-t bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="mx-auto w-full max-w-3xl px-4 py-4">
+          <ChatInput
+            onSubmit={handleSendMessage}
+            selectedEmployees={activeEmployees}
+            availableEmployees={employees}
+            onSelectEmployee={handleSelectEmployee}
+            onDeselectEmployee={handleDeselectEmployee}
+            isStreaming={isStreamingResponse}
+            onStop={stopGeneration}
+            placeholder="Message"
+          />
+        </div>
+      </div>
     </ChatLayout>
   );
 }

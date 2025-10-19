@@ -129,6 +129,41 @@ export interface ChatState {
   // Real-time state
   typingIndicator: boolean;
   lastActivity: Date | null;
+
+  // MGX-style interface state
+  sidebarOpen: boolean;
+  activeEmployees: string[];
+  workingProcesses: Map<string, WorkingProcess>;
+  currentCheckpoint: string | null;
+  checkpointHistory: Checkpoint[];
+}
+
+export interface WorkingProcess {
+  employeeId: string;
+  steps: ProcessStep[];
+  currentStep: number;
+  status: 'idle' | 'working' | 'completed' | 'error';
+  totalSteps: number;
+}
+
+export interface ProcessStep {
+  id: string;
+  description: string;
+  type: 'thinking' | 'writing' | 'executing' | 'reading' | 'analyzing';
+  details?: string;
+  timestamp: Date;
+  status: 'pending' | 'active' | 'completed' | 'error';
+  filePath?: string;
+  command?: string;
+  output?: string;
+}
+
+export interface Checkpoint {
+  id: string;
+  sessionId: string;
+  messageCount: number;
+  timestamp: Date;
+  label: string;
 }
 
 export interface ChatActions {
@@ -182,6 +217,14 @@ export interface ChatActions {
   importConversations: (data: Conversation[]) => void;
   clearHistory: () => void;
   setError: (error: string | null) => void;
+
+  // MGX-style interface actions
+  toggleSidebar: () => void;
+  selectEmployee: (employeeId: string) => void;
+  deselectEmployee: (employeeId: string) => void;
+  updateWorkingProcess: (employeeId: string, process: WorkingProcess) => void;
+  saveCheckpoint: (checkpoint: Checkpoint) => void;
+  restoreCheckpoint: (checkpointId: string) => void;
 }
 
 export interface ChatStore extends ChatState, ChatActions {}
@@ -244,6 +287,12 @@ const INITIAL_STATE: ChatState = {
   showArchived: false,
   typingIndicator: false,
   lastActivity: null,
+  // MGX-style interface state
+  sidebarOpen: true,
+  activeEmployees: [],
+  workingProcesses: new Map(),
+  currentCheckpoint: null,
+  checkpointHistory: [],
 };
 
 export const useChatStore = create<ChatStore>()(
@@ -610,6 +659,48 @@ export const useChatStore = create<ChatStore>()(
         setError: (error: string | null) =>
           set((state) => {
             state.error = error;
+          }),
+
+        // MGX-style interface actions
+        toggleSidebar: () =>
+          set((state) => {
+            state.sidebarOpen = !state.sidebarOpen;
+          }),
+
+        selectEmployee: (employeeId: string) =>
+          set((state) => {
+            if (!state.activeEmployees.includes(employeeId)) {
+              state.activeEmployees.push(employeeId);
+            }
+          }),
+
+        deselectEmployee: (employeeId: string) =>
+          set((state) => {
+            state.activeEmployees = state.activeEmployees.filter(
+              (id) => id !== employeeId
+            );
+          }),
+
+        updateWorkingProcess: (employeeId: string, process: WorkingProcess) =>
+          set((state) => {
+            state.workingProcesses.set(employeeId, process);
+          }),
+
+        saveCheckpoint: (checkpoint: Checkpoint) =>
+          set((state) => {
+            state.checkpointHistory.push(checkpoint);
+            state.currentCheckpoint = checkpoint.id;
+          }),
+
+        restoreCheckpoint: (checkpointId: string) =>
+          set((state) => {
+            const checkpoint = state.checkpointHistory.find(
+              (cp) => cp.id === checkpointId
+            );
+            if (checkpoint) {
+              state.currentCheckpoint = checkpointId;
+              // Additional logic to restore conversation state would go here
+            }
           }),
       })),
       {

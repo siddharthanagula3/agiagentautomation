@@ -2,15 +2,15 @@ import React, { useState, useRef, KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Plus, 
-  Send, 
-  Mic, 
-  MicOff, 
-  Users, 
+import {
+  Plus,
+  Send,
+  Mic,
+  MicOff,
+  Users,
   User,
   ChevronDown,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -35,7 +35,7 @@ export function ChatInput({
   onSelectEmployee,
   onDeselectEmployee,
   isStreaming = false,
-  placeholder = "Ask anything"
+  placeholder = 'Ask anything',
 }: ChatInputProps) {
   const [message, setMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -65,15 +65,17 @@ export function ChatInput({
   };
 
   const selectedEmployeeNames = availableEmployees
-    .filter(emp => selectedEmployees.includes(emp.id))
-    .map(emp => emp.name);
+    .filter((emp) => selectedEmployees.includes(emp.id))
+    .map((emp) => emp.name);
 
   return (
-    <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+    <div className="border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
       {/* Employee Selection */}
       {selectedEmployees.length > 0 && (
         <div className="mb-3 flex items-center space-x-2">
-          <span className="text-sm text-gray-600 dark:text-gray-400">Working with:</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            Working with:
+          </span>
           {selectedEmployeeNames.map((name, index) => (
             <Badge key={index} variant="secondary" className="text-xs">
               {name}
@@ -93,7 +95,7 @@ export function ChatInput({
           >
             <Plus className="h-4 w-4" />
           </Button>
-          
+
           <Button
             variant="ghost"
             size="sm"
@@ -102,24 +104,28 @@ export function ChatInput({
           >
             <Users className="h-4 w-4" />
           </Button>
-          
+
           <Button
             variant="ghost"
             size="sm"
             className={cn(
-              "p-2",
-              isRecording 
-                ? "text-red-500 hover:text-red-700" 
-                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              'p-2',
+              isRecording
+                ? 'text-red-500 hover:text-red-700'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             )}
             onClick={() => setIsRecording(!isRecording)}
           >
-            {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            {isRecording ? (
+              <MicOff className="h-4 w-4" />
+            ) : (
+              <Mic className="h-4 w-4" />
+            )}
           </Button>
         </div>
 
         {/* Main Input */}
-        <div className="flex-1 relative">
+        <div className="relative flex-1">
           <Input
             ref={inputRef}
             value={message}
@@ -128,17 +134,17 @@ export function ChatInput({
             placeholder={placeholder}
             disabled={isStreaming}
             className={cn(
-              "pr-12 resize-none",
-              isStreaming && "opacity-50 cursor-not-allowed"
+              'resize-none pr-12',
+              isStreaming && 'cursor-not-allowed opacity-50'
             )}
           />
-          
+
           {/* Send Button */}
           <Button
             onClick={handleSubmit}
             disabled={!message.trim() || isStreaming}
             size="sm"
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+            className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 transform p-0"
           >
             {isStreaming ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -162,15 +168,19 @@ export function ChatInput({
 
       {/* Employee Selector Dropdown */}
       {showEmployeeSelector && (
-        <div className="mt-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700">
-          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-700">
+          <div className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
             Select AI Employees
           </div>
           <div className="flex flex-wrap gap-2">
             {availableEmployees.map((employee) => (
               <Button
                 key={employee.id}
-                variant={selectedEmployees.includes(employee.id) ? "default" : "outline"}
+                variant={
+                  selectedEmployees.includes(employee.id)
+                    ? 'default'
+                    : 'outline'
+                }
                 size="sm"
                 onClick={() => handleEmployeeToggle(employee.id)}
                 className="text-xs"
@@ -184,15 +194,15 @@ export function ChatInput({
 
       {/* Status Messages */}
       {isStreaming && (
-        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center">
-          <Loader2 className="h-3 w-3 animate-spin mr-1" />
+        <div className="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
+          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
           AI Employees are working...
         </div>
       )}
-      
+
       {isRecording && (
-        <div className="mt-2 text-xs text-red-500 flex items-center">
-          <Mic className="h-3 w-3 mr-1" />
+        <div className="mt-2 flex items-center text-xs text-red-500">
+          <Mic className="mr-1 h-3 w-3" />
           Recording... Click to stop
         </div>
       )}

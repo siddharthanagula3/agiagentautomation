@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  ArrowLeft, 
-  Settings, 
-  HelpCircle, 
-  Edit3, 
-  Check, 
+import {
+  ArrowLeft,
+  Settings,
+  HelpCircle,
+  Edit3,
+  Check,
   X,
-  BarChart3
+  BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +28,7 @@ export function ChatTopBar({
   onRestoreCheckpoint,
   onUpdateTitle,
   hasCheckpoints = false,
-  checkpointCount = 0
+  checkpointCount = 0,
 }: ChatTopBarProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitle, setEditTitle] = useState(sessionTitle);
@@ -59,7 +59,7 @@ export function ChatTopBar({
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+    <div className="flex items-center justify-between border-b border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
       {/* Left Section */}
       <div className="flex items-center space-x-4">
         {/* Back Button */}
@@ -68,9 +68,9 @@ export function ChatTopBar({
             variant="ghost"
             size="sm"
             onClick={onRestoreCheckpoint}
-            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+            className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <ArrowLeft className="mr-1 h-4 w-4" />
             Back
           </Button>
         )}
@@ -106,14 +106,14 @@ export function ChatTopBar({
             </div>
           ) : (
             <div className="flex items-center space-x-2">
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white truncate max-w-xs">
+              <h1 className="max-w-xs truncate text-lg font-semibold text-gray-900 dark:text-white">
                 {sessionTitle}
               </h1>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleTitleEdit}
-                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100"
               >
                 <Edit3 className="h-3 w-3" />
               </Button>
@@ -136,9 +136,9 @@ export function ChatTopBar({
           variant="ghost"
           size="sm"
           onClick={() => window.open('https://docs.mgx.dev/', '_blank')}
-          className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
         >
-          <HelpCircle className="h-4 w-4 mr-1" />
+          <HelpCircle className="mr-1 h-4 w-4" />
           Docs
         </Button>
 
@@ -146,7 +146,7 @@ export function ChatTopBar({
         <Button
           variant="ghost"
           size="sm"
-          className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
         >
           <Settings className="h-4 w-4" />
         </Button>
@@ -154,9 +154,9 @@ export function ChatTopBar({
         {/* Dashboard Button */}
         <Button
           onClick={onNavigateToDashboard}
-          className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
+          className="bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600"
         >
-          <BarChart3 className="h-4 w-4 mr-2" />
+          <BarChart3 className="mr-2 h-4 w-4" />
           Dashboard
         </Button>
       </div>

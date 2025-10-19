@@ -522,6 +522,10 @@ export const useChatStore = create<ChatStore>()(
             const words = fullResponse.split(' ');
 
             for (let i = 0; i < words.length; i++) {
+              // Allow user to stop generation
+              if (!get().isStreamingResponse) {
+                break;
+              }
               await new Promise((resolve) => setTimeout(resolve, 50));
               currentContent += (i > 0 ? ' ' : '') + words[i];
 
@@ -538,7 +542,7 @@ export const useChatStore = create<ChatStore>()(
               });
             }
 
-            // Complete the streaming
+            // Complete or stop the streaming
             set((state) => {
               for (const conversation of Object.values(state.conversations)) {
                 const message = conversation.messages.find(
@@ -546,7 +550,7 @@ export const useChatStore = create<ChatStore>()(
                 );
                 if (message) {
                   message.isStreaming = false;
-                  message.streamingComplete = true;
+                  message.streamingComplete = get().isStreamingResponse;
                   message.metadata = {
                     model: options.model || state.selectedModel,
                     tokensUsed: words.length * 1.3, // Rough estimate

@@ -1,0 +1,308 @@
+/* MGX-Style Chat Interface Custom Styles */
+
+/* Custom Scrollbar */
+.chat-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+}
+
+.chat-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+/* Dark mode scrollbar */
+.dark .chat-scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.3);
+}
+
+.dark .chat-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 0.5);
+}
+
+/* Sidebar Animation */
+.sidebar-transition {
+  transition: width 0.3s ease-in-out;
+}
+
+/* Message Bubble Animations */
+.message-bubble {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Working Process Animations */
+.working-process {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Employee Avatar Hover Effects */
+.employee-avatar {
+  transition: all 0.2s ease-in-out;
+}
+
+.employee-avatar:hover {
+  transform: scale(1.1);
+}
+
+.employee-avatar.selected {
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+}
+
+/* Input Field Focus States */
+.chat-input:focus {
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  border-color: rgb(139, 92, 246);
+}
+
+/* Streaming Animation */
+.streaming-dot {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Working Process Step Animations */
+.process-step {
+  transition: all 0.3s ease-in-out;
+}
+
+.process-step.active {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+  border-left: 3px solid rgb(59, 130, 246);
+}
+
+.process-step.completed {
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+  border-left: 3px solid rgb(34, 197, 94);
+}
+
+.process-step.error {
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+  border-left: 3px solid rgb(239, 68, 68);
+}
+
+/* Employee Work Stream Animations */
+.work-stream-item {
+  animation: slideInFromLeft 0.4s ease-out;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Status Indicator Animations */
+.status-indicator {
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* Gradient Backgrounds */
+.gradient-bg-purple {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-bg-blue {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-bg-green {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.gradient-bg-orange {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+/* Message Typing Animation */
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+}
+
+.typing-indicator span {
+  height: 4px;
+  width: 4px;
+  background: currentColor;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 1px;
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes typing {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chat-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar-mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .sidebar-mobile.open {
+    transform: translateX(0);
+  }
+}
+
+/* Loading States */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Dark mode loading skeleton */
+.dark .loading-skeleton {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+}
+
+/* Custom Focus Rings */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+}
+
+/* Smooth Transitions */
+.smooth-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover Effects */
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* Employee Status Colors */
+.status-idle {
+  color: #6b7280;
+  background-color: #f3f4f6;
+}
+
+.status-working {
+  color: #059669;
+  background-color: #d1fae5;
+}
+
+.status-thinking {
+  color: #d97706;
+  background-color: #fef3c7;
+}
+
+.status-error {
+  color: #dc2626;
+  background-color: #fee2e2;
+}
+
+/* Dark mode status colors */
+.dark .status-idle {
+  color: #9ca3af;
+  background-color: #374151;
+}
+
+.dark .status-working {
+  color: #10b981;
+  background-color: #064e3b;
+}
+
+.dark .status-thinking {
+  color: #f59e0b;
+  background-color: #451a03;
+}
+
+.dark .status-error {
+  color: #ef4444;
+  background-color: #7f1d1d;
+}

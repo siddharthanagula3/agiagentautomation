@@ -3,6 +3,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, User, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import remarkBreaks from 'remark-breaks';
+import rehypeHighlight from 'rehype-highlight';
 
 interface Message {
   id: string;
@@ -85,9 +90,17 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               : 'border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
           )}
         >
-          {/* Content */}
-          <div className="whitespace-pre-wrap text-sm leading-relaxed">
-            {message.content}
+          {/* Content - Markdown support */}
+          <div className={cn(
+            'prose prose-sm max-w-none',
+            isUser ? 'prose-invert' : 'dark:prose-invert'
+          )}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
+              rehypePlugins={[rehypeHighlight]}
+            >
+              {message.content}
+            </ReactMarkdown>
             {message.isStreaming && (
               <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-current" />
             )}

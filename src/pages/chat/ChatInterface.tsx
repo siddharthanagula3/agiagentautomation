@@ -46,6 +46,9 @@ export function ChatInterface() {
     addMessage,
     setActiveConversation,
     updateConversation,
+    sendMessage,
+    isStreamingResponse,
+    stopGeneration,
   } = useChatStore();
 
   const { user } = useAuthStore();
@@ -131,13 +134,8 @@ export function ChatInterface() {
 
   const handleSendMessage = async (content: string) => {
     if (!activeConversationId) return;
-
-    // Add user message
-    addMessage(activeConversationId, {
-      conversationId: activeConversationId,
-      role: 'user',
-      content,
-    });
+    // Use store streaming pipeline for realistic assistant responses
+    await sendMessage(activeConversationId, content);
 
     // Simulate AI response with working process
     if (activeEmployees.length > 0) {
@@ -385,7 +383,8 @@ export function ChatInterface() {
         availableEmployees={employees}
         onSelectEmployee={handleSelectEmployee}
         onDeselectEmployee={handleDeselectEmployee}
-        isStreaming={false}
+        isStreaming={isStreamingResponse}
+        onStop={stopGeneration}
         placeholder="Ask anything"
       />
     </ChatLayout>

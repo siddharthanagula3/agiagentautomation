@@ -50,7 +50,8 @@ class EmployeeService {
     try {
       const { data, error } = await supabase
         .from('purchased_employees')
-        .select(`
+        .select(
+          `
           *,
           ai_employees (
             id,
@@ -65,7 +66,8 @@ class EmployeeService {
             created_at,
             updated_at
           )
-        `)
+        `
+        )
         .eq('user_id', userId);
 
       if (error) {
@@ -73,21 +75,23 @@ class EmployeeService {
         return [];
       }
 
-      const rows = (data as SupabasePurchasedEmployeeRow[] | null);
-      return rows?.map((pe) => ({
-        id: pe.ai_employees.id,
-        name: pe.ai_employees.name,
-        description: pe.ai_employees.description,
-        avatar: pe.ai_employees.avatar,
-        color: pe.ai_employees.color,
-        tools: pe.ai_employees.tools || [],
-        model: pe.ai_employees.model,
-        systemPrompt: pe.ai_employees.system_prompt,
-        isActive: pe.ai_employees.is_active,
-        status: 'idle' as const,
-        createdAt: new Date(pe.ai_employees.created_at),
-        updatedAt: new Date(pe.ai_employees.updated_at),
-      })) || [];
+      const rows = data as SupabasePurchasedEmployeeRow[] | null;
+      return (
+        rows?.map((pe) => ({
+          id: pe.ai_employees.id,
+          name: pe.ai_employees.name,
+          description: pe.ai_employees.description,
+          avatar: pe.ai_employees.avatar,
+          color: pe.ai_employees.color,
+          tools: pe.ai_employees.tools || [],
+          model: pe.ai_employees.model,
+          systemPrompt: pe.ai_employees.system_prompt,
+          isActive: pe.ai_employees.is_active,
+          status: 'idle' as const,
+          createdAt: new Date(pe.ai_employees.created_at),
+          updatedAt: new Date(pe.ai_employees.updated_at),
+        })) || []
+      );
     } catch (error) {
       console.error('Error in getPurchasedEmployees:', error);
       return [];
@@ -146,21 +150,23 @@ class EmployeeService {
         return [];
       }
 
-      const rows = (data as SupabaseAiEmployeeRow[] | null);
-      return rows?.map((emp) => ({
-        id: emp.id,
-        name: emp.name,
-        description: emp.description,
-        avatar: emp.avatar,
-        color: emp.color,
-        tools: emp.tools || [],
-        model: emp.model,
-        systemPrompt: emp.system_prompt,
-        isActive: emp.is_active,
-        status: 'idle' as const,
-        createdAt: new Date(emp.created_at),
-        updatedAt: new Date(emp.updated_at),
-      })) || [];
+      const rows = data as SupabaseAiEmployeeRow[] | null;
+      return (
+        rows?.map((emp) => ({
+          id: emp.id,
+          name: emp.name,
+          description: emp.description,
+          avatar: emp.avatar,
+          color: emp.color,
+          tools: emp.tools || [],
+          model: emp.model,
+          systemPrompt: emp.system_prompt,
+          isActive: emp.is_active,
+          status: 'idle' as const,
+          createdAt: new Date(emp.created_at),
+          updatedAt: new Date(emp.updated_at),
+        })) || []
+      );
     } catch (error) {
       console.error('Error in getAvailableEmployees:', error);
       return [];
@@ -172,12 +178,10 @@ class EmployeeService {
    */
   async purchaseEmployee(userId: string, employeeId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('purchased_employees')
-        .insert({
-          user_id: userId,
-          employee_id: employeeId,
-        });
+      const { error } = await supabase.from('purchased_employees').insert({
+        user_id: userId,
+        employee_id: employeeId,
+      });
 
       if (error) {
         console.error('Error purchasing employee:', error);
@@ -195,7 +199,7 @@ class EmployeeService {
    * Update employee status
    */
   async updateEmployeeStatus(
-    employeeId: string, 
+    employeeId: string,
     status: 'idle' | 'working' | 'thinking'
   ): Promise<boolean> {
     try {

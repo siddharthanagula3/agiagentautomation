@@ -2,20 +2,25 @@ import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Bot, 
-  FileText, 
-  Terminal, 
-  Code, 
+import {
+  Bot,
+  FileText,
+  Terminal,
+  Code,
   Database,
   Globe,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface WorkStreamItem {
   id: string;
-  type: 'file_write' | 'command_exec' | 'code_analysis' | 'web_search' | 'thinking';
+  type:
+    | 'file_write'
+    | 'command_exec'
+    | 'code_analysis'
+    | 'web_search'
+    | 'thinking';
   content: string;
   timestamp: Date;
   status: 'active' | 'completed' | 'error';
@@ -40,7 +45,7 @@ export function EmployeeWorkStream({
   employeeAvatar,
   employeeColor,
   workItems,
-  isActive
+  isActive,
 }: EmployeeWorkStreamProps) {
   const getItemIcon = (type: WorkStreamItem['type']) => {
     switch (type) {
@@ -73,25 +78,32 @@ export function EmployeeWorkStream({
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
   };
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+    <div className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="border-b border-gray-200 p-4 dark:border-gray-700">
         <div className="flex items-center space-x-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={employeeAvatar} />
-            <AvatarFallback 
-              className="text-white font-semibold text-xs"
+            <AvatarFallback
+              className="text-xs font-semibold text-white"
               style={{ backgroundColor: employeeColor || '#6366f1' }}
             >
-              {employeeName.split(' ').map(n => n[0]).join('')}
+              {employeeName
+                .split(' ')
+                .map((n) => n[0])
+                .join('')}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <div className="font-medium text-sm text-gray-900 dark:text-white">
+            <div className="text-sm font-medium text-gray-900 dark:text-white">
               {employeeName}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -101,7 +113,7 @@ export function EmployeeWorkStream({
           {isActive && (
             <div className="flex items-center space-x-2">
               <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-              <span className="text-xs text-blue-600 font-medium">Active</span>
+              <span className="text-xs font-medium text-blue-600">Active</span>
             </div>
           )}
         </div>
@@ -109,10 +121,10 @@ export function EmployeeWorkStream({
 
       {/* Work Stream */}
       <ScrollArea className="max-h-64">
-        <div className="p-4 space-y-3">
+        <div className="space-y-3 p-4">
           {workItems.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              <Bot className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <div className="py-8 text-center text-gray-500 dark:text-gray-400">
+              <Bot className="mx-auto mb-2 h-8 w-8 opacity-50" />
               <p className="text-sm">No work activity yet</p>
             </div>
           ) : (
@@ -120,59 +132,62 @@ export function EmployeeWorkStream({
               <div
                 key={item.id}
                 className={cn(
-                  "flex items-start space-x-3 p-3 rounded-lg transition-all duration-200",
+                  'flex items-start space-x-3 rounded-lg p-3 transition-all duration-200',
                   getItemColor(item.type),
-                  item.status === 'active' && "ring-2 ring-blue-500 ring-opacity-50"
+                  item.status === 'active' &&
+                    'ring-2 ring-blue-500 ring-opacity-50'
                 )}
               >
-                <div className="flex-shrink-0 mt-0.5">
+                <div className="mt-0.5 flex-shrink-0">
                   {getItemIcon(item.type)}
                 </div>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-1">
+
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center space-x-2">
                     <span className="text-sm font-medium">{item.content}</span>
-                    <Badge 
-                      variant="outline" 
+                    <Badge
+                      variant="outline"
                       className={cn(
-                        "text-xs",
-                        item.status === 'active' && "border-blue-500 text-blue-600",
-                        item.status === 'completed' && "border-green-500 text-green-600",
-                        item.status === 'error' && "border-red-500 text-red-600"
+                        'text-xs',
+                        item.status === 'active' &&
+                          'border-blue-500 text-blue-600',
+                        item.status === 'completed' &&
+                          'border-green-500 text-green-600',
+                        item.status === 'error' && 'border-red-500 text-red-600'
                       )}
                     >
                       {item.status}
                     </Badge>
                   </div>
-                  
+
                   {item.filePath && (
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mb-1 flex items-center">
-                      <FileText className="h-3 w-3 mr-1" />
+                    <div className="mb-1 flex items-center text-xs text-gray-600 dark:text-gray-400">
+                      <FileText className="mr-1 h-3 w-3" />
                       {item.filePath}
                     </div>
                   )}
-                  
+
                   {item.command && (
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mb-1 flex items-center">
-                      <Terminal className="h-3 w-3 mr-1" />
+                    <div className="mb-1 flex items-center text-xs text-gray-600 dark:text-gray-400">
+                      <Terminal className="mr-1 h-3 w-3" />
                       {item.command}
                     </div>
                   )}
-                  
+
                   {item.details && (
-                    <div className="text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 p-2 rounded mt-2 font-mono">
+                    <div className="mt-2 rounded bg-gray-100 p-2 font-mono text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                       {item.details}
                     </div>
                   )}
-                  
+
                   {item.output && (
-                    <div className="text-xs text-gray-700 dark:text-gray-300 bg-gray-900 dark:bg-gray-900 text-green-400 p-2 rounded mt-2 font-mono">
-                      <Terminal className="h-3 w-3 inline mr-1" />
+                    <div className="mt-2 rounded bg-gray-900 p-2 font-mono text-xs text-gray-700 text-green-400 dark:bg-gray-900 dark:text-gray-300">
+                      <Terminal className="mr-1 inline h-3 w-3" />
                       {item.output}
                     </div>
                   )}
-                  
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+
+                  <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     {formatTime(item.timestamp)}
                   </div>
                 </div>
@@ -184,7 +199,7 @@ export function EmployeeWorkStream({
 
       {/* Footer */}
       {isActive && (
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20">
+        <div className="border-t border-gray-200 bg-blue-50 p-3 dark:border-gray-700 dark:bg-blue-900/20">
           <div className="flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>{employeeName} is working...</span>

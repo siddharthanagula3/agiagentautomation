@@ -27,7 +27,7 @@ export function ChatInterface() {
   const { sessionId } = useParams();
   // Bottom anchor to auto-scroll like ChatGPT
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   // Store hooks
   const {
     conversations,
@@ -61,7 +61,8 @@ export function ChatInterface() {
     const loadEmployees = async () => {
       if (user?.id) {
         try {
-          const purchasedEmployees = await employeeService.getPurchasedEmployees(user.id);
+          const purchasedEmployees =
+            await employeeService.getPurchasedEmployees(user.id);
           setEmployees(purchasedEmployees);
         } catch (error) {
           console.error('Error loading employees:', error);
@@ -83,25 +84,39 @@ export function ChatInterface() {
       const newSessionId = createConversation('New Chat');
       navigate(`/chat/${newSessionId}`, { replace: true });
     }
-  }, [sessionId, conversations, createConversation, setActiveConversation, navigate]);
+  }, [
+    sessionId,
+    conversations,
+    createConversation,
+    setActiveConversation,
+    navigate,
+  ]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [conversations[activeConversationId || '']?.messages?.length, activeConversationId]);
+  }, [
+    conversations[activeConversationId || '']?.messages?.length,
+    activeConversationId,
+  ]);
 
   // Get current conversation
-  const currentConversation = activeConversationId ? conversations[activeConversationId] : null;
+  const currentConversation = activeConversationId
+    ? conversations[activeConversationId]
+    : null;
   const messages = currentConversation?.messages || [];
 
   // Get chat sessions for sidebar
-  const chatSessions: ChatSession[] = Object.values(conversations).map(conv => ({
-    id: conv.id,
-    title: conv.title,
-    lastMessage: conv.messages[conv.messages.length - 1]?.content || 'No messages yet',
-    timestamp: conv.metadata.updatedAt,
-    unreadCount: 0,
-  })).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  const chatSessions: ChatSession[] = Object.values(conversations)
+    .map((conv) => ({
+      id: conv.id,
+      title: conv.title,
+      lastMessage:
+        conv.messages[conv.messages.length - 1]?.content || 'No messages yet',
+      timestamp: conv.metadata.updatedAt,
+      unreadCount: 0,
+    }))
+    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
   // Event handlers
   const handleNewChat = () => {
@@ -127,8 +142,8 @@ export function ChatInterface() {
     // Simulate AI response with working process
     if (activeEmployees.length > 0) {
       const employeeId = activeEmployees[0];
-      const employee = employees.find(emp => emp.id === employeeId);
-      
+      const employee = employees.find((emp) => emp.id === employeeId);
+
       if (employee) {
         // Create working process
         const workingProcess = {
@@ -165,7 +180,8 @@ export function ChatInterface() {
             ...workingProcess,
             steps: workingProcess.steps.map((step, index) => ({
               ...step,
-              status: index === 0 ? 'completed' as const : 'active' as const,
+              status:
+                index === 0 ? ('completed' as const) : ('active' as const),
             })),
             currentStep: 2,
           };
@@ -175,7 +191,7 @@ export function ChatInterface() {
         setTimeout(() => {
           const completedProcess = {
             ...workingProcess,
-            steps: workingProcess.steps.map(step => ({
+            steps: workingProcess.steps.map((step) => ({
               ...step,
               status: 'completed' as const,
             })),
@@ -202,7 +218,7 @@ export function ChatInterface() {
   const handleSelectEmployee = (employeeId: string) => {
     if (mode === 'single') {
       // Clear other selections
-      activeEmployees.forEach(id => deselectEmployee(id));
+      activeEmployees.forEach((id) => deselectEmployee(id));
     }
     selectEmployee(employeeId);
   };
@@ -215,7 +231,7 @@ export function ChatInterface() {
     setMode(mode === 'single' ? 'multi' : 'single');
     if (mode === 'single' && activeEmployees.length > 1) {
       // Keep only the first employee in single mode
-      activeEmployees.slice(1).forEach(id => deselectEmployee(id));
+      activeEmployees.slice(1).forEach((id) => deselectEmployee(id));
     }
   };
 
@@ -243,10 +259,12 @@ export function ChatInterface() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading AI Employees...</p>
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-purple-500"></div>
+          <p className="text-gray-600 dark:text-gray-400">
+            Loading AI Employees...
+          </p>
         </div>
       </div>
     );
@@ -263,12 +281,16 @@ export function ChatInterface() {
           currentSessionId={activeConversationId || undefined}
           onNewChat={handleNewChat}
           onSelectSession={handleSelectSession}
-          user={user ? {
-            name: user.user_metadata?.full_name || user.email || 'User',
-            email: user.email || '',
-            avatar: user.user_metadata?.avatar_url,
-            plan: 'Free',
-          } : undefined}
+          user={
+            user
+              ? {
+                  name: user.user_metadata?.full_name || user.email || 'User',
+                  email: user.email || '',
+                  avatar: user.user_metadata?.avatar_url,
+                  plan: 'Free',
+                }
+              : undefined
+          }
         />
       }
       topBar={
@@ -294,8 +316,8 @@ export function ChatInterface() {
       />
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 chat-scroll-area">
-        <div className="p-4 space-y-4">
+      <ScrollArea className="chat-scroll-area flex-1">
+        <div className="space-y-4 p-4">
           {/* Messages */}
           {messages.map((message) => (
             <MessageBubble key={message.id} message={message} />
@@ -308,26 +330,27 @@ export function ChatInterface() {
 
           {/* Employee Work Streams */}
           {activeEmployees.map((employeeId) => {
-            const employee = employees.find(emp => emp.id === employeeId);
+            const employee = employees.find((emp) => emp.id === employeeId);
             const process = workingProcesses.get(employeeId);
             if (!employee) return null;
 
             // Map process steps into work stream items for rich display
             const mapWorkItemStatus = (
               s: 'pending' | 'active' | 'completed' | 'error'
-            ): 'active' | 'completed' | 'error' => (s === 'pending' ? 'active' : s);
+            ): 'active' | 'completed' | 'error' =>
+              s === 'pending' ? 'active' : s;
             const workItems = (process?.steps || []).map((step) => ({
               id: step.id,
               type:
                 step.type === 'writing'
                   ? ('file_write' as const)
                   : step.type === 'executing'
-                  ? ('command_exec' as const)
-                  : step.type === 'analyzing'
-                  ? ('code_analysis' as const)
-                  : step.type === 'reading'
-                  ? ('web_search' as const)
-                  : ('thinking' as const),
+                    ? ('command_exec' as const)
+                    : step.type === 'analyzing'
+                      ? ('code_analysis' as const)
+                      : step.type === 'reading'
+                        ? ('web_search' as const)
+                        : ('thinking' as const),
               content: step.description,
               timestamp: step.timestamp,
               status: mapWorkItemStatus(step.status),

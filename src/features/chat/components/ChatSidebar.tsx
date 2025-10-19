@@ -4,15 +4,15 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  Plus, 
-  Search, 
-  MessageSquare, 
-  Settings, 
+import {
+  Plus,
+  Search,
+  MessageSquare,
+  Settings,
   HelpCircle,
   ChevronLeft,
   ChevronRight,
-  User
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -46,47 +46,49 @@ export function ChatSidebar({
   currentSessionId,
   onNewChat,
   onSelectSession,
-  user
+  user,
 }: ChatSidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredSessions = sessions.filter(session =>
-    session.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    session.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredSessions = sessions.filter(
+    (session) =>
+      session.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      session.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-800">
+    <div className="flex h-full flex-col bg-white dark:bg-gray-800">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="border-b border-gray-200 p-4 dark:border-gray-700">
         <div className="flex items-center justify-between">
           {isOpen && (
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">MGX</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-purple-500 to-blue-500">
+                <span className="text-sm font-bold text-white">MGX</span>
               </div>
-              <span className="font-semibold text-gray-900 dark:text-white">AI Employees</span>
+              <span className="font-semibold text-gray-900 dark:text-white">
+                AI Employees
+              </span>
             </div>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggle}
-            className="p-2"
-          >
-            {isOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          <Button variant="ghost" size="sm" onClick={onToggle} className="p-2">
+            {isOpen ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </div>
 
       {/* New Chat Button */}
       <div className="p-4">
-        <Button 
+        <Button
           onClick={onNewChat}
-          className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
+          className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          {isOpen && "New Chat"}
+          <Plus className="mr-2 h-4 w-4" />
+          {isOpen && 'New Chat'}
         </Button>
       </div>
 
@@ -94,7 +96,7 @@ export function ChatSidebar({
       {isOpen && (
         <div className="px-4 pb-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
             <Input
               placeholder="Search chats..."
               value={searchQuery}
@@ -109,7 +111,7 @@ export function ChatSidebar({
       <ScrollArea className="flex-1 px-4">
         <div className="space-y-2">
           {isOpen && (
-            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Recent Chats
             </div>
           )}
@@ -118,21 +120,21 @@ export function ChatSidebar({
               key={session.id}
               onClick={() => onSelectSession(session.id)}
               className={cn(
-                "p-3 rounded-lg cursor-pointer transition-colors",
+                'cursor-pointer rounded-lg p-3 transition-colors',
                 currentSessionId === session.id
-                  ? "bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-700"
+                  ? 'border border-purple-200 bg-purple-50 dark:border-purple-700 dark:bg-purple-900/20'
+                  : 'hover:bg-gray-50 dark:hover:bg-gray-700'
               )}
             >
               {isOpen ? (
                 <div>
-                  <div className="font-medium text-sm text-gray-900 dark:text-white truncate">
+                  <div className="truncate text-sm font-medium text-gray-900 dark:text-white">
                     {session.title}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">
+                  <div className="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
                     {session.lastMessage}
                   </div>
-                  <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  <div className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                     {session.timestamp.toLocaleTimeString()}
                   </div>
                 </div>
@@ -154,11 +156,14 @@ export function ChatSidebar({
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user.avatar} />
                   <AvatarFallback>
-                    {user.name.split(' ').map(n => n[0]).join('')}
+                    {user.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium text-gray-900 dark:text-white">
                     {user.name}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -174,7 +179,10 @@ export function ChatSidebar({
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user.avatar} />
                   <AvatarFallback>
-                    {user.name.split(' ').map(n => n[0]).join('')}
+                    {user.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -185,14 +193,14 @@ export function ChatSidebar({
 
       {/* Help & Documentation */}
       {isOpen && (
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="border-t border-gray-200 p-4 dark:border-gray-700">
           <Button
             variant="ghost"
             size="sm"
             className="w-full justify-start text-gray-600 dark:text-gray-400"
             onClick={() => window.open('https://docs.mgx.dev/', '_blank')}
           >
-            <HelpCircle className="h-4 w-4 mr-2" />
+            <HelpCircle className="mr-2 h-4 w-4" />
             Documentation
           </Button>
         </div>

@@ -35,9 +35,7 @@ const ResetPasswordPage = lazyWithRetry(
 
 // === DASHBOARD PAGES ===
 const DashboardHomePage = lazyWithRetry(() => import('./pages/DashboardHome'));
-const ChatPage = lazyWithRetry(
-  () => import('./pages/chat/ChatInterface')
-);
+const ChatPage = lazyWithRetry(() => import('./pages/chat/ChatInterface'));
 const SettingsPage = lazyWithRetry(
   () => import('@features/settings/pages/UserSettings')
 );

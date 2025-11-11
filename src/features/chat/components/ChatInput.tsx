@@ -1,7 +1,7 @@
 import React, { useState, useRef, KeyboardEvent } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/ui/button';
 import { Textarea } from '@shared/ui/textarea';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/shared/components/ui/badge';
 import {
   Plus,
   Send,

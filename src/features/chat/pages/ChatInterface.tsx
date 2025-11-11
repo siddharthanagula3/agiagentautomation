@@ -21,6 +21,7 @@ import {
 } from '@shared/ui/dropdown-menu';
 import { Button } from '@shared/ui/button';
 import { FileText, FileJson, FileCode, Download } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const ChatPage: React.FC = () => {
   const { sessionId } = useParams<{ sessionId?: string }>();
@@ -62,11 +63,20 @@ const ChatPage: React.FC = () => {
   } = useExport();
 
   // Local state
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    // Persist sidebar state in localStorage
+    const stored = localStorage.getItem('chat-sidebar-open');
+    return stored !== null ? JSON.parse(stored) : true;
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMode, setSelectedMode] = useState<ChatMode>('team');
   const [selectedModel, setSelectedModel] = useState('gpt-4-turbo');
   const [temperature, setTemperature] = useState(0.7);
+
+  // Persist sidebar state
+  useEffect(() => {
+    localStorage.setItem('chat-sidebar-open', JSON.stringify(sidebarOpen));
+  }, [sidebarOpen]);
 
   // Load sessions on mount
   useEffect(() => {
@@ -164,26 +174,32 @@ const ChatPage: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Sidebar */}
+      {/* Sidebar - Collapsible with smooth transition */}
       <div
-        className={`${sidebarOpen ? 'w-80' : 'w-0'} border-r border-border bg-card/50 backdrop-blur-sm transition-all duration-300`}
+        className={cn(
+          'border-r border-border bg-card/50 backdrop-blur-sm transition-all duration-300 ease-in-out',
+          sidebarOpen ? 'w-80 md:w-80' : 'w-0',
+          'overflow-hidden' // Prevent content overflow when collapsed
+        )}
       >
-        <ChatSidebar
-          sessions={sessions}
-          currentSession={currentSession}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onNewChat={handleNewChat}
-          onSessionSelect={handleSessionSelect}
-          onSessionRename={handleSessionRename}
-          onSessionDelete={handleSessionDelete}
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        />
+        {sidebarOpen && (
+          <ChatSidebar
+            sessions={sessions}
+            currentSession={currentSession}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onNewChat={handleNewChat}
+            onSessionSelect={handleSessionSelect}
+            onSessionRename={handleSessionRename}
+            onSessionDelete={handleSessionDelete}
+            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          />
+        )}
       </div>
 
-      {/* Main Chat Area */}
-      <div className="flex flex-1 flex-col">
-        {/* Header */}
+      {/* Main Chat Area - Optimized for full screen usage */}
+      <div className="flex flex-1 flex-col min-w-0">
+        {/* Header - Compact and clean */}
         <ChatHeader
           session={currentSession}
           onRename={(title) =>
@@ -197,7 +213,7 @@ const ChatPage: React.FC = () => {
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         />
 
-        {/* Message List */}
+        {/* Message List - Maximum vertical space */}
         <div className="flex-1 overflow-hidden">
           <MessageList
             messages={messages}
@@ -211,88 +227,22 @@ const ChatPage: React.FC = () => {
           />
         </div>
 
-        {/* Composer */}
-        <div className="border-t border-border bg-card/50 p-4 backdrop-blur-sm">
-          <ChatComposer
-            onSendMessage={handleSendMessage}
-            isLoading={isLoading}
-            availableTools={availableTools}
-            onToolToggle={(toolId) => {
-              /* TODO: Implement tool toggle */
-            }}
-            selectedMode={selectedMode}
-            onModeChange={setSelectedMode}
-          />
-        </div>
-      </div>
-
-      {/* Model & Settings Panel (Optional) */}
-      {selectedMode === 'team' && (
-        <div className="w-80 border-l border-border bg-card/50 p-4 backdrop-blur-sm">
-          <div className="space-y-4">
-            <ModelSelector
-              selectedModel={selectedModel}
-              onModelChange={setSelectedModel}
-              temperature={temperature}
-              onTemperatureChange={setTemperature}
-            />
-
-            <Separator />
-
-            <ModeSelector
+        {/* Composer - Sticky at bottom with backdrop */}
+        <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="mx-auto max-w-4xl p-4">
+            <ChatComposer
+              onSendMessage={handleSendMessage}
+              isLoading={isLoading}
+              availableTools={availableTools}
+              onToolToggle={(toolId) => {
+                /* TODO: Implement tool toggle */
+              }}
               selectedMode={selectedMode}
               onModeChange={setSelectedMode}
-              availableModes={['team', 'engineer', 'research', 'race', 'solo']}
             />
-
-            {/* Export Options */}
-            {currentSession && messages.length > 0 && (
-              <>
-                <Separator />
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Export Chat</h3>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        disabled={isExporting}
-                      >
-                        <Download className="mr-2 h-4 w-4" />
-                        Export
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
-                      <DropdownMenuItem
-                        onClick={() => handleExport('markdown')}
-                      >
-                        <FileText className="mr-2 h-4 w-4" />
-                        Markdown (.md)
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleExport('html')}>
-                        <FileCode className="mr-2 h-4 w-4" />
-                        HTML (.html)
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleExport('json')}>
-                        <FileJson className="mr-2 h-4 w-4" />
-                        JSON (.json)
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleExport('text')}>
-                        <FileText className="mr-2 h-4 w-4" />
-                        Plain Text (.txt)
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleCopyToClipboard}>
-                        Copy to Clipboard
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </>
-            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

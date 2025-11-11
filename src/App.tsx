@@ -20,6 +20,18 @@ import { AuthLayout } from './layouts/AuthLayout';
 const LandingPage = lazyWithRetry(() => import('./pages/Landing'));
 const PricingPage = lazyWithRetry(() => import('./pages/Pricing'));
 const NotFoundPage = lazyWithRetry(() => import('./pages/NotFound'));
+const PublicMarketplacePage = lazyWithRetry(
+  () => import('./pages/PublicMarketplace')
+);
+const AboutPage = lazyWithRetry(() => import('./pages/About'));
+const CareersPage = lazyWithRetry(() => import('./pages/Careers'));
+const BlogListPage = lazyWithRetry(() => import('./pages/BlogList'));
+const BlogPostPage = lazyWithRetry(() => import('./pages/BlogPost'));
+const ContactSalesPage = lazyWithRetry(() => import('./pages/ContactSales'));
+const HelpCenterPage = lazyWithRetry(() => import('./pages/HelpCenter'));
+const DocumentationPage = lazyWithRetry(() => import('./pages/Documentation'));
+const ApiReferencePage = lazyWithRetry(() => import('./pages/ApiReference'));
+const SecurityPage = lazyWithRetry(() => import('./pages/Security'));
 
 // === AUTH PAGES ===
 const LoginPage = lazyWithRetry(() => import('@features/auth/pages/Login'));
@@ -85,6 +97,16 @@ function App() {
                 <Route path="/" element={<PublicLayout />}>
                   <Route index element={<LandingPage />} />
                   <Route path="pricing" element={<PricingPage />} />
+                  <Route path="marketplace" element={<PublicMarketplacePage />} />
+                  <Route path="about" element={<AboutPage />} />
+                  <Route path="careers" element={<CareersPage />} />
+                  <Route path="blog" element={<BlogListPage />} />
+                  <Route path="blog/:slug" element={<BlogPostPage />} />
+                  <Route path="contact-sales" element={<ContactSalesPage />} />
+                  <Route path="help" element={<HelpCenterPage />} />
+                  <Route path="documentation" element={<DocumentationPage />} />
+                  <Route path="api-reference" element={<ApiReferencePage />} />
+                  <Route path="security" element={<SecurityPage />} />
                 </Route>
 
                 {/* ===== AUTH ROUTES ===== */}

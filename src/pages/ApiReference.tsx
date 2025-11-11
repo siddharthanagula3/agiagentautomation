@@ -20,5 +20,3 @@ const ApiReference: React.FC = () => {
 };
 
 export default ApiReference;
-
-

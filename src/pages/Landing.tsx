@@ -51,8 +51,6 @@ import { Spotlight, MouseSpotlight } from '@shared/ui/spotlight';
 import { BentoGrid, BentoCard } from '@shared/ui/bento-grid';
 import { InteractiveHoverCard } from '@shared/ui/interactive-hover-card';
 import { AnimatedGradientText } from '@shared/ui/animated-gradient-text';
-import { CountdownTimer } from '@shared/ui/countdown-timer';
-import { createDiscountEndDate } from '@shared/ui/countdown-utils';
 import { SEOHead } from '@shared/components/seo/SEOHead';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import {
@@ -280,18 +278,7 @@ const LandingPage: React.FC = () => {
               - just instant expertise across every function.
             </p>
 
-            {/* Limited Time Offer Text */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="mb-8"
-            >
-              <div className="flex items-center justify-center gap-4 text-lg font-semibold text-muted-foreground">
-                <span>Limited time offer ends in</span>
-                <CountdownTimer targetDate={createDiscountEndDate()} />
-              </div>
-            </motion.div>
+            {/* Limited Time Offer timer removed per request */}
 
             <div className="mb-16 flex flex-col justify-center gap-4 sm:flex-row">
               <motion.div

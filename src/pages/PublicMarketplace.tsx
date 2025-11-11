@@ -39,10 +39,14 @@ import {
 } from '@features/workforce/services/employee-database';
 import { motion, AnimatePresence } from 'framer-motion';
 // Stripe removed - free hiring only
+import { CountdownTimer } from '@shared/ui/countdown-timer';
 
 export const MarketplacePublicPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const [discountEnd] = useState<Date>(
+    () => new Date(Date.now() + 15 * 60 * 1000)
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [purchasedEmployees, setPurchasedEmployees] = useState<Set<string>>(
@@ -175,15 +179,19 @@ export const MarketplacePublicPage: React.FC = () => {
                   Hire Your AI Workforce
                 </h1>
                 <p className="text-xl text-muted-foreground">
-                  Specialized AI employees for $0 per month •{' '}
-                  {AI_EMPLOYEES.length} available
+                  Specialized AI employees for{' '}
+                  <span className="bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text font-extrabold text-transparent">
+                    FREE
+                  </span>{' '}
+                  per month • {AI_EMPLOYEES.length} available
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="whitespace-nowrap text-sm font-medium text-muted-foreground">
-                Limited time offer ends in
+              {/* Countdown Banner */}
+              <div className="glass rounded-xl border border-primary/30 p-3">
+                <CountdownTimer targetDate={discountEnd} />
               </div>
               <Button
                 onClick={() => navigate('/workforce')}
@@ -437,13 +445,14 @@ export const MarketplacePublicPage: React.FC = () => {
                       {/* Right column: Offers (right-aligned on desktop) */}
                       <div className="flex flex-col items-end text-right sm:items-end">
                         <div className="mb-1">
-                          <Badge className="animate-pulse border-0 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-xs text-white">
+                          <Badge className="border-0 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-xs text-white shadow">
                             <Sparkles className="mr-1 h-3 w-3" />
                             Limited time offer
                           </Badge>
                         </div>
-                        <div className="text-xs italic text-muted-foreground">
-                          🎉 Introductory offer
+                        <div className="text-xs font-semibold text-foreground">
+                          Hire now for{' '}
+                          <span className="text-green-600">FREE</span>
                         </div>
                       </div>
                     </div>

@@ -5,6 +5,9 @@ import { Clock } from 'lucide-react';
 interface CountdownTimerProps {
   targetDate: Date;
   className?: string;
+  showHours?: boolean;
+  showLabel?: boolean;
+  labelText?: string;
 }
 
 interface TimeLeft {
@@ -16,6 +19,9 @@ interface TimeLeft {
 export const CountdownTimer: React.FC<CountdownTimerProps> = ({
   targetDate,
   className = '',
+  showHours = true,
+  showLabel = true,
+  labelText = 'Limited Time Offer Ends In:',
 }) => {
   const calculateTimeLeft = useCallback((): TimeLeft => {
     const difference = +targetDate - +new Date();
@@ -45,18 +51,28 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
     return () => clearInterval(timer);
   }, [calculateTimeLeft]);
 
-  const timeBlocks = [
-    { label: 'Hours', value: timeLeft.totalHours },
-    { label: 'Minutes', value: timeLeft.minutes },
-    { label: 'Seconds', value: timeLeft.seconds },
-  ];
+  const timeBlocks = showHours
+    ? [
+        { label: 'Hours', value: timeLeft.totalHours },
+        { label: 'Minutes', value: timeLeft.minutes },
+        { label: 'Seconds', value: timeLeft.seconds },
+      ]
+    : [
+        {
+          label: 'Minutes',
+          value: timeLeft.totalHours * 60 + timeLeft.minutes,
+        },
+        { label: 'Seconds', value: timeLeft.seconds },
+      ];
 
   return (
     <div className={`flex items-center justify-center gap-4 ${className}`}>
-      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-        <Clock className="h-4 w-4" />
-        <span>Limited Time Offer Ends In:</span>
-      </div>
+      {showLabel && (
+        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <Clock className="h-4 w-4" />
+          <span>{labelText}</span>
+        </div>
+      )}
       <div className="flex gap-2">
         {timeBlocks.map((block, index) => (
           <React.Fragment key={block.label}>

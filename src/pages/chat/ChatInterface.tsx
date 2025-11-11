@@ -8,7 +8,7 @@ import { MessageBubble } from '@/features/chat/components/MessageBubble';
 import { WorkingProcess } from '@/features/chat/components/WorkingProcess';
 import { EmployeeWorkStream } from '@/features/chat/components/EmployeeWorkStream';
 import { ChatInput } from '@/features/chat/components/ChatInput';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { useChatStore } from '@/shared/stores/chat-store';
 import { employeeService, AIEmployee } from '@/services/employeeService';
 import { useAuthStore } from '@/shared/stores/authentication-store';

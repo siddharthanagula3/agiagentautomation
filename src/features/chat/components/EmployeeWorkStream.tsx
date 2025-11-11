@@ -1,7 +1,7 @@
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
+import { Badge } from '@/shared/components/ui/badge';
+import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import {
   Bot,
   FileText,

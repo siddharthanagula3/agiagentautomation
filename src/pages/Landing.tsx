@@ -109,34 +109,34 @@ const features = [
 // FAQ data
 const faqs = [
   {
+    question: 'How much money will I save compared to hiring humans?',
+    answer:
+      'Massive savings! A human developer costs $100K+/year ($8,333/month) plus benefits. Our AI developers cost just $29/month - that\'s a 99.7% cost reduction. For a team of 10, you save over $1M/year while getting 24/7 productivity with zero downtime, no sick days, and instant expertise.',
+  },
+  {
     question: 'How quickly can I get started?',
     answer:
-      'You can create your first AI employee in under 2 minutes. Simply sign up, choose from our marketplace, and start delegating tasks immediately. No technical knowledge required.',
+      'Hire your first AI employee in under 60 seconds! No interviews, no onboarding, no training. Simply sign up, select from 165+ specialized AI employees in our marketplace, and start delegating tasks immediately in natural language. It\'s literally faster than sending an email.',
   },
   {
     question: 'What tasks can AI employees handle?',
     answer:
-      'AI employees can handle a wide range of tasks including coding, design, data analysis, content creation, customer support, marketing, and much more. Each AI employee specializes in specific domains with expert-level capabilities.',
+      'Everything from software development, design, data analysis, content creation, customer support, to marketing and sales. Each AI employee has expert-level capabilities in their specialty - better than hiring a junior, at 1/100th the cost of a senior employee. They collaborate seamlessly to solve complex multi-step projects.',
   },
   {
-    question: 'How much does it cost?',
+    question: 'How does pricing work for token usage?',
     answer:
-      'We offer a free forever plan to get started. Paid plans start at $29/month per AI employee with volume discounts. Enterprise plans available with custom pricing and SLAs.',
+      'Ultra-competitive! We charge market rates for API usage - the same as OpenAI, Anthropic, and Google directly. Plans start at $19/month with generous token allowances. You get full cost transparency with real-time usage tracking. Most customers save 95%+ vs hiring human employees while getting superior 24/7 output.',
   },
   {
     question: 'Is my data secure?',
     answer:
-      'Absolutely. We use bank-level encryption, are SOC 2 compliant, and GDPR ready. Your data is isolated, encrypted at rest and in transit, and never used to train models without explicit permission.',
+      'Bank-level security guaranteed. We\'re SOC 2 compliant, GDPR ready with end-to-end encryption. Your data is completely isolated and never used to train models. Built on Supabase with enterprise-grade infrastructure. More secure than having human contractors with USB drives.',
   },
   {
     question: 'Can I customize AI employees?',
     answer:
-      'Yes! You can customize skills, workflows, integrations, and behavior. Advanced users can even create custom AI employees from scratch using our visual workflow builder.',
-  },
-  {
-    question: 'What kind of support do you offer?',
-    answer:
-      'We offer 24/7 email support for all plans, priority support for paid plans, and dedicated success managers for enterprise customers. Comprehensive documentation and video tutorials available.',
+      'Absolutely! Customize skills, workflows, integrations, and behavior to match your exact needs. Advanced users can create entirely custom AI employees from scratch. It\'s like training a human employee, except it takes 5 minutes instead of 3 months.',
   },
 ];
 
@@ -270,12 +270,17 @@ const LandingPage: React.FC = () => {
             </h1>
 
             <p className="mx-auto mb-8 max-w-4xl text-xl leading-relaxed text-muted-foreground md:text-2xl">
-              Build your dream team of AI employees who work 24/7.
+              Replace $100K+/year human employees with
+              <span className="font-bold text-primary">
+                {' '}
+                $19/month AI employees
+              </span>
+              .
               <span className="font-semibold text-foreground">
                 {' '}
-                No hiring, no training, no overhead
-              </span>{' '}
-              - just instant expertise across every function.
+                Save 99%+ on costs
+              </span>
+              , get 24/7 productivity, zero downtime. Just tell them what you need in natural language - they handle everything.
             </p>
 
             {/* Limited Time Offer timer removed per request */}

@@ -34,30 +34,30 @@ const SalesTeamsPage: React.FC = () => {
   const benefits = [
     {
       icon: Target,
-      title: '3x More Qualified Leads',
+      title: '99.7% Cost Savings',
       description:
-        'AI employees analyze and score leads automatically, ensuring your team focuses on high-value prospects.',
+        'Human SDR: $80K/year + $30K benefits + 20% commission = $120K+/year. AI SDR: $228/year. That\'s $119,772 saved per rep.',
       color: 'from-green-500 to-emerald-500',
     },
     {
       icon: Mail,
-      title: 'Personalized Outreach at Scale',
+      title: 'Unlimited Personalized Outreach',
       description:
-        'Send thousands of personalized emails, follow-ups, and messages that actually convert.',
+        'Send thousands of personalized emails, LinkedIn messages, and follow-ups 24/7. No fatigue, no weekends off, no burnout.',
       color: 'from-blue-500 to-cyan-500',
     },
     {
       icon: BarChart3,
-      title: '50% Higher Conversion Rates',
+      title: '3x More Pipeline for 1/100th Cost',
       description:
-        'AI predicts deal closure probability, suggests next-best actions, and automates pipeline management.',
+        'AI qualifies leads, scores prospects, predicts deal closure, and manages pipeline—freeing your closers to focus on revenue.',
       color: 'from-purple-500 to-pink-500',
     },
     {
       icon: Zap,
-      title: 'Zero Manual Data Entry',
+      title: 'Instant Hiring, Zero Turnover',
       description:
-        'Automatically update CRM, log calls, track interactions, and generate reports.',
+        'Hire in 60 seconds vs 90 days. No recruiting fees, no ramp time, no resignations. Tell them what you need in natural language—they start working.',
       color: 'from-orange-500 to-red-500',
     },
   ];
@@ -127,11 +127,15 @@ const SalesTeamsPage: React.FC = () => {
                 For Sales Teams
               </div>
               <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
-                Close More Deals with AI Sales Reps
+                Replace $80K+ Sales Reps with $19/Month AI
               </h1>
+              <p className="mb-4 text-2xl font-semibold text-foreground">
+                Save 99.7% • Work 24/7 • No Commission Needed
+              </p>
               <p className="mb-8 text-xl text-muted-foreground">
-                Automate lead qualification, outreach, follow-ups, and CRM
-                management. Your human reps focus on closing deals.
+                Automate lead qualification, personalized outreach, follow-ups, and CRM
+                management. AI sales reps work around the clock for less than a coffee subscription.
+                Your human closers focus only on hot deals.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Button
@@ -277,13 +281,16 @@ const SalesTeamsPage: React.FC = () => {
             className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-12 text-center text-white"
           >
             <h2 className="mb-4 text-4xl font-bold">
-              Ready to Hit Your Sales Targets?
+              Save $119K+ Per Sales Rep Starting Today
             </h2>
+            <p className="mb-2 text-2xl font-semibold opacity-95">
+              Free Forever Plan • $19/month Pro • No Credit Card Required
+            </p>
             <p className="mb-8 text-xl opacity-90">
-              Join 2,000+ sales teams using AI to crush their quotas
+              Hire your first AI SDR in 60 seconds. Join 2,000+ sales teams saving millions on payroll.
             </p>
             <Button size="lg" variant="secondary" onClick={handleStartTrial}>
-              {user ? 'Go to Dashboard' : 'Start Free Trial'}
+              {user ? 'Go to Dashboard' : 'Start Free Forever'}
             </Button>
           </motion.div>
         </div>

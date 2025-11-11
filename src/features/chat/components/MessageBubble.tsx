@@ -93,7 +93,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           {/* Content - Markdown support */}
           <div
             className={cn(
-              'prose prose-sm max-w-none dark:prose-invert',
+              'prose prose-sm dark:prose-invert max-w-none',
               isUser && 'prose-invert'
             )}
           >
@@ -116,13 +116,15 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               onClick={handleCopy}
               className={cn(
                 'h-6 w-6 p-0 text-muted-foreground',
-                isUser
-                  ? 'hover:bg-foreground/10'
-                  : 'hover:bg-muted'
+                isUser ? 'hover:bg-foreground/10' : 'hover:bg-muted'
               )}
               title="Copy message"
             >
-              {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              {copied ? (
+                <Check className="h-3 w-3" />
+              ) : (
+                <Copy className="h-3 w-3" />
+              )}
             </Button>
           </div>
         </div>

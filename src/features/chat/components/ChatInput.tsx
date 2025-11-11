@@ -93,7 +93,7 @@ export function ChatInput({
           <Button
             variant="ghost"
             size="sm"
-            className="p-2 text-muted-foreground hover:bg-muted rounded-md"
+            className="rounded-md p-2 text-muted-foreground hover:bg-muted"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -101,7 +101,7 @@ export function ChatInput({
           <Button
             variant="ghost"
             size="sm"
-            className="p-2 text-muted-foreground hover:bg-muted rounded-md"
+            className="rounded-md p-2 text-muted-foreground hover:bg-muted"
             onClick={() => setShowEmployeeSelector(!showEmployeeSelector)}
           >
             <Users className="h-4 w-4" />
@@ -110,7 +110,10 @@ export function ChatInput({
           <Button
             variant="ghost"
             size="sm"
-            className={cn('p-2 rounded-md hover:bg-muted', isRecording ? 'text-red-500' : 'text-muted-foreground')}
+            className={cn(
+              'rounded-md p-2 hover:bg-muted',
+              isRecording ? 'text-red-500' : 'text-muted-foreground'
+            )}
             onClick={() => setIsRecording(!isRecording)}
           >
             {isRecording ? (
@@ -132,7 +135,7 @@ export function ChatInput({
             disabled={isStreaming}
             rows={1}
             className={cn(
-              'min-h-[44px] max-h-40 resize-y pr-16 rounded-xl bg-background ring-1 ring-border focus-visible:ring-2',
+              'max-h-40 min-h-[44px] resize-y rounded-xl bg-background pr-16 ring-1 ring-border focus-visible:ring-2',
               isStreaming && 'cursor-not-allowed opacity-50'
             )}
           />
@@ -165,7 +168,7 @@ export function ChatInput({
           <Button
             variant="ghost"
             size="sm"
-            className="p-2 rounded-md text-muted-foreground hover:bg-muted"
+            className="rounded-md p-2 text-muted-foreground hover:bg-muted"
           >
             <User className="h-4 w-4" />
           </Button>

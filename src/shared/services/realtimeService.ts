@@ -6,7 +6,10 @@ type Unsubscribe = () => void;
 export interface RealtimeService {
   connect: () => void;
   disconnect: () => void;
-  subscribe: (channel: string, handler: (...args: unknown[]) => void) => Unsubscribe;
+  subscribe: (
+    channel: string,
+    handler: (...args: unknown[]) => void
+  ) => Unsubscribe;
   publish: (channel: string, payload: unknown) => void;
 }
 
@@ -25,4 +28,3 @@ export const realtimeService: RealtimeService = {
     // no-op
   },
 };
-

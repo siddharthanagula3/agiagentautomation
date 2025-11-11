@@ -18,6 +18,7 @@ import {
   openBillingPortal,
   isStripeConfigured,
 } from '@features/billing/services/stripe-payments';
+import { buyTokenPack } from '@features/billing/services/token-pack-purchase';
 import { toast } from 'sonner';
 import {
   CreditCard,
@@ -356,6 +357,7 @@ const BillingPage: React.FC = () => {
     const success = searchParams.get('success');
     const sessionId = searchParams.get('session_id');
     const action = searchParams.get('action');
+    const tokensParam = searchParams.get('tokens');
 
     // Show buy tokens section if action=buy-tokens
     if (action === 'buy-tokens') {
@@ -367,11 +369,26 @@ const BillingPage: React.FC = () => {
       }, 100);
     }
 
-    if (success === 'true' && sessionId && user) {
-      console.log('[Billing] Payment successful, refreshing billing data...');
+    // Handle successful token purchase
+    if (success === 'true' && tokensParam && user) {
+      const tokens = parseInt(tokensParam, 10);
+      console.log('[Billing] Token purchase successful:', tokens.toLocaleString());
+      toast.success(
+        `Success! ${tokens.toLocaleString()} tokens added to your account.`,
+        { duration: 5000 }
+      );
+
+      // Refresh billing data
+      setTimeout(() => {
+        loadBilling();
+      }, 2000);
+    }
+    // Handle successful subscription upgrade
+    else if (success === 'true' && sessionId && user) {
+      console.log('[Billing] Subscription upgrade successful');
       toast.success('Payment successful! Your subscription has been upgraded.');
 
-      // Wait a moment for webhook to process, then refresh
+      // Refresh billing data
       setTimeout(() => {
         loadBilling();
       }, 2000);
@@ -451,16 +468,27 @@ const BillingPage: React.FC = () => {
       return;
     }
 
-    toast.info(`Purchasing ${pack.name}...`);
+    try {
+      toast.loading(`Redirecting to checkout for ${pack.name}...`);
 
-    // In production, this would create a Stripe checkout session for token packs
-    // For now, show a placeholder message
-    toast.success(
-      `Token pack purchase coming soon! ${pack.tokens.toLocaleString()} tokens for $${pack.price}`
-    );
+      await buyTokenPack({
+        userId: user.id,
+        userEmail: user.email || '',
+        packId: pack.id,
+        tokens: pack.tokens,
+        price: pack.price,
+      });
 
-    // TODO: Implement Stripe checkout for token packs
-    // Similar to upgradeToProPlan but for one-time purchases
+      // User will be redirected to Stripe checkout
+      // On success, they'll return to /billing?success=true&tokens=X
+    } catch (error) {
+      console.error('[Buy Token Pack] Error:', error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to start checkout. Please try again.'
+      );
+    }
   };
 
   const formatDate = (dateString: string) => {

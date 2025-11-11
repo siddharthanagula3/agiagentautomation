@@ -1,36 +1,135 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@shared/ui/button';
 import { Textarea } from '@shared/ui/textarea';
 import { Badge } from '@shared/ui/badge';
-import { Send, Paperclip, X, Loader2 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@shared/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@shared/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@shared/ui/tooltip';
+import {
+  Send,
+  Paperclip,
+  X,
+  Loader2,
+  Sparkles,
+  Users,
+  Plus,
+  ChevronDown,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { ChatMode, Tool } from '../../types';
 
-interface ChatComposerProps {
-  onSendMessage: (content: string, attachments?: File[]) => Promise<void>;
-  isLoading: boolean;
-  availableTools: Tool[];
-  onToolToggle: (toolId: string) => void;
-  selectedMode: ChatMode;
-  onModeChange: (mode: ChatMode) => void;
+interface AIEmployee {
+  id: string;
+  name: string;
+  description: string;
+  avatar?: string;
+  color: string;
+  status?: 'idle' | 'working' | 'thinking';
 }
+
+interface Model {
+  id: string;
+  name: string;
+  description: string;
+  provider: 'openai' | 'anthropic' | 'google' | 'perplexity';
+  recommended?: 'coding' | 'general' | 'creative';
+}
+
+interface ChatComposerProps {
+  onSendMessage: (content: string, options?: {
+    attachments?: File[];
+    model?: string;
+    employees?: string[];
+  }) => Promise<void>;
+  isLoading: boolean;
+  availableTools?: Tool[];
+  onToolToggle?: (toolId: string) => void;
+  selectedMode?: ChatMode;
+  onModeChange?: (mode: ChatMode) => void;
+  availableEmployees?: AIEmployee[];
+  availableModels?: Model[];
+}
+
+const DEFAULT_MODELS: Model[] = [
+  {
+    id: 'gpt-4o',
+    name: 'GPT-4o',
+    description: 'Best for general tasks',
+    provider: 'openai',
+    recommended: 'general',
+  },
+  {
+    id: 'claude-3-5-sonnet',
+    name: 'Claude 3.5 Sonnet',
+    description: 'Best for coding & analysis',
+    provider: 'anthropic',
+    recommended: 'coding',
+  },
+  {
+    id: 'gemini-1.5-pro',
+    name: 'Gemini 1.5 Pro',
+    description: 'Best for creative tasks',
+    provider: 'google',
+    recommended: 'creative',
+  },
+];
+
+const DEFAULT_EMPLOYEES: AIEmployee[] = [
+  {
+    id: 'auto',
+    name: 'Auto-Select',
+    description: 'Let AI choose the best employees',
+    color: '#6366f1',
+  },
+];
 
 export const ChatComposer: React.FC<ChatComposerProps> = ({
   onSendMessage,
   isLoading,
-  availableTools,
-  onToolToggle,
-  selectedMode,
-  onModeChange,
+  selectedMode = 'team',
+  availableEmployees = DEFAULT_EMPLOYEES,
+  availableModels = DEFAULT_MODELS,
 }) => {
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODELS[1].id);
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>(['auto']);
+  const [textareaHeight, setTextareaHeight] = useState(80);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '80px';
+      const scrollHeight = textareaRef.current.scrollHeight;
+      const newHeight = Math.min(Math.max(scrollHeight, 80), 200);
+      textareaRef.current.style.height = `${newHeight}px`;
+      setTextareaHeight(newHeight);
+    }
+  }, [message]);
 
   const handleSubmit = async () => {
     if (!message.trim() && attachments.length === 0) return;
 
     try {
-      await onSendMessage(message, attachments);
+      await onSendMessage(message, {
+        attachments,
+        model: selectedModel,
+        employees: selectedEmployees,
+      });
       setMessage('');
       setAttachments([]);
     } catch (error) {
@@ -39,7 +138,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
       handleSubmit();
     }
@@ -54,28 +153,170 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
     setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const toggleEmployee = (employeeId: string) => {
+    if (employeeId === 'auto') {
+      setSelectedEmployees(['auto']);
+    } else {
+      setSelectedEmployees((prev) => {
+        const filtered = prev.filter((id) => id !== 'auto');
+        if (filtered.includes(employeeId)) {
+          return filtered.filter((id) => id !== employeeId);
+        } else {
+          return [...filtered, employeeId];
+        }
+      });
+    }
+  };
+
+  const selectedModel_ = availableModels.find((m) => m.id === selectedModel) || availableModels[0];
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-3 rounded-lg border border-border bg-background p-4 shadow-sm">
+      {/* Top Bar: Model + Employee Selection */}
+      <div className="flex items-center gap-2">
+        {/* Model Selector */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-2 text-xs"
+              disabled={isLoading}
+            >
+              <Sparkles className="h-3 w-3" />
+              <span className="hidden sm:inline">{selectedModel_.name}</span>
+              <span className="sm:hidden">{selectedModel_.provider}</span>
+              <ChevronDown className="h-3 w-3 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-64">
+            <DropdownMenuLabel className="text-xs">Select AI Model</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {availableModels.map((model) => (
+              <DropdownMenuItem
+                key={model.id}
+                onClick={() => setSelectedModel(model.id)}
+                className="flex flex-col items-start gap-1 p-3"
+              >
+                <div className="flex w-full items-center justify-between">
+                  <span className="font-medium">{model.name}</span>
+                  {model.recommended && (
+                    <Badge variant="secondary" className="text-[10px]">
+                      {model.recommended}
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {model.description}
+                </span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Employee Selector - Avatar Chips */}
+        <div className="flex flex-1 items-center gap-2 overflow-x-auto">
+          <TooltipProvider delayDuration={200}>
+            {availableEmployees.map((employee) => {
+              const isSelected = selectedEmployees.includes(employee.id);
+              return (
+                <Tooltip key={employee.id}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => toggleEmployee(employee.id)}
+                      className={cn(
+                        'group relative flex-shrink-0 transition-all duration-200',
+                        isSelected
+                          ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                          : 'opacity-60 hover:opacity-100'
+                      )}
+                      disabled={isLoading}
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={employee.avatar} />
+                        <AvatarFallback
+                          className="text-xs font-semibold text-white"
+                          style={{ backgroundColor: employee.color }}
+                        >
+                          {employee.id === 'auto'
+                            ? '✨'
+                            : employee.name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      {employee.status && employee.status !== 'idle' && (
+                        <div
+                          className={cn(
+                            'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background',
+                            employee.status === 'working' && 'bg-green-500',
+                            employee.status === 'thinking' && 'bg-yellow-500 animate-pulse'
+                          )}
+                        />
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="text-center">
+                      <div className="font-medium">{employee.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {employee.description}
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+
+            {/* Add Employee Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => {
+                    /* TODO: Navigate to marketplace */
+                  }}
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/30 transition-colors hover:border-primary hover:bg-muted"
+                  disabled={isLoading}
+                >
+                  <Plus className="h-3 w-3 text-muted-foreground" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div>Hire more AI employees</div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
+        {/* Team Mode Indicator */}
+        {selectedEmployees.length > 1 && !selectedEmployees.includes('auto') && (
+          <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+            <Users className="h-3 w-3" />
+            Team
+          </Badge>
+        )}
+      </div>
+
       {/* Attachments Preview */}
       {attachments.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 rounded-md border border-border bg-muted/30 p-2">
           {attachments.map((file, index) => (
             <Badge
               key={index}
               variant="secondary"
-              className="flex items-center gap-2 px-3 py-1"
+              className="flex items-center gap-2 px-3 py-1.5"
             >
+              <Paperclip className="h-3 w-3" />
               <span className="max-w-[200px] truncate text-xs">
                 {file.name}
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-4 w-4 p-0"
+              <button
                 onClick={() => removeAttachment(index)}
+                className="hover:text-destructive"
               >
                 <X className="h-3 w-3" />
-              </Button>
+              </button>
             </Badge>
           ))}
         </div>
@@ -85,11 +326,13 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
       <div className="flex items-end gap-2">
         <div className="relative flex-1">
           <Textarea
+            ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={`Message AI ${selectedMode === 'team' ? 'Team' : 'Employee'}...`}
-            className="max-h-[200px] min-h-[80px] resize-none pr-12"
+            placeholder={`Message ${selectedEmployees.includes('auto') ? 'AI Team' : selectedEmployees.length > 1 ? `${selectedEmployees.length} employees` : 'AI'}...`}
+            className="min-h-[80px] resize-none pr-12 scrollbar-thin"
+            style={{ height: `${textareaHeight}px` }}
             disabled={isLoading}
           />
 
@@ -107,6 +350,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             className="absolute bottom-2 right-2 h-8 w-8 p-0"
             onClick={() => fileInputRef.current?.click()}
             disabled={isLoading}
+            title="Attach files"
           >
             <Paperclip className="h-4 w-4" />
           </Button>
@@ -116,19 +360,28 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
           onClick={handleSubmit}
           disabled={isLoading || (!message.trim() && attachments.length === 0)}
           className="h-[80px] px-6"
+          style={{ height: `${textareaHeight}px` }}
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
-            <Send className="h-4 w-4" />
+            <Send className="h-5 w-5" />
           )}
         </Button>
       </div>
 
       {/* Helper Text */}
-      <p className="px-1 text-xs text-muted-foreground">
-        Press Enter to send, Shift + Enter for new line
-      </p>
+      <div className="flex items-center justify-between px-1 text-xs text-muted-foreground">
+        <span>
+          Press <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">Enter</kbd> to send,{' '}
+          <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">Shift+Enter</kbd> for new line
+        </span>
+        {message.length > 0 && (
+          <span className="text-muted-foreground/70">
+            {message.length} characters
+          </span>
+        )}
+      </div>
     </div>
   );
 };

@@ -16,6 +16,7 @@ import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';
 import type { Components } from 'react-markdown';
 import { EmployeeWorkStream } from './EmployeeWorkStream';
+import { TokenUsageDisplay } from './TokenUsageDisplay';
 
 interface Message {
   id: string;
@@ -32,6 +33,12 @@ interface Message {
     documentTitle?: string;
     hasWorkStream?: boolean;
     workStreamData?: any;
+    // Token tracking metadata
+    tokensUsed?: number;
+    inputTokens?: number;
+    outputTokens?: number;
+    model?: string;
+    cost?: number;
   };
 }
 
@@ -330,8 +337,20 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className={cn('mt-2 flex items-center gap-1', isUser ? 'justify-end' : 'justify-start')}>
+          {/* Action Buttons & Token Usage */}
+          <div className={cn('mt-2 flex items-center gap-2', isUser ? 'justify-end' : 'justify-between')}>
+            {/* Token Usage Display (for assistant messages) */}
+            {!isUser && message.metadata?.tokensUsed && (
+              <TokenUsageDisplay
+                tokensUsed={message.metadata.tokensUsed}
+                inputTokens={message.metadata.inputTokens}
+                outputTokens={message.metadata.outputTokens}
+                model={message.metadata.model}
+                cost={message.metadata.cost}
+              />
+            )}
+
+            {/* Copy Button */}
             <Button
               variant="ghost"
               size="sm"

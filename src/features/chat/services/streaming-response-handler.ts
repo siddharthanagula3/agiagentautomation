@@ -1,5 +1,6 @@
-// Streaming service - handles real-time streaming responses from LLM
+// Streaming service - handles real-time streaming responses from LLM with token tracking
 import { unifiedLLMService } from '@core/ai/llm/unified-language-model';
+import { tokenLogger } from '@core/integrations/token-usage-tracker';
 import type { StreamingUpdate } from '../types';
 
 export class ChatStreamingService {
@@ -24,13 +25,46 @@ export class ChatStreamingService {
       let fullContent = '';
 
       // Use the unified LLM service's streaming capability
-      // Note: This is a simplified version - you may need to adapt based on your LLM service implementation
       const response = await unifiedLLMService.sendMessage(
         messages,
         sessionId,
         userId,
         provider
       );
+
+      // Extract token usage from response (CRITICAL FOR BILLING!)
+      const tokensUsed = response.usage?.totalTokens || 0;
+      const inputTokens = response.usage?.promptTokens || 0;
+      const outputTokens = response.usage?.completionTokens || 0;
+      const model = response.model || options.model || 'gpt-4o';
+
+      // Log token usage to database immediately
+      if (tokensUsed > 0 && userId) {
+        try {
+          await tokenLogger.logTokenUsage(
+            model,
+            tokensUsed,
+            userId,
+            sessionId,
+            'chat-assistant',
+            'Chat Assistant',
+            inputTokens,
+            outputTokens,
+            'Chat conversation'
+          );
+
+          console.log(
+            `[TokenTracking] ✅ Logged ${tokensUsed} tokens (${inputTokens} in, ${outputTokens} out) for session ${sessionId}`
+          );
+        } catch (error) {
+          console.error('[TokenTracking] ❌ Failed to log token usage:', error);
+          // Don't throw - continue even if logging fails
+        }
+      } else {
+        console.warn(
+          `[TokenTracking] ⚠️ No tokens logged: tokensUsed=${tokensUsed}, userId=${userId}`
+        );
+      }
 
       // If the service doesn't support streaming, simulate it
       if (typeof response.content === 'string') {
@@ -53,9 +87,17 @@ export class ChatStreamingService {
         }
       }
 
-      // Send completion update
+      // Send completion update with token information
+      const cost = tokenLogger.calculateCost(model, inputTokens, outputTokens);
       const doneUpdate: StreamingUpdate = {
         type: 'done',
+        metadata: {
+          tokensUsed,
+          inputTokens,
+          outputTokens,
+          model,
+          cost,
+        },
       };
       yield doneUpdate;
       if (onUpdate) onUpdate(doneUpdate);
@@ -81,18 +123,21 @@ export class ChatStreamingService {
       userId?: string;
       provider?: 'openai' | 'anthropic' | 'google';
       onChunk: (chunk: string) => void;
-      onComplete: () => void;
+      onComplete: (metadata?: { tokensUsed?: number; cost?: number }) => void;
       onError: (error: Error) => void;
     }
   ): Promise<void> {
     const { onChunk, onComplete, onError, ...streamOptions } = options;
 
     try {
+      let metadata: { tokensUsed?: number; cost?: number } | undefined;
+
       for await (const update of this.streamMessage(messages, streamOptions)) {
         if (update.type === 'content' && update.content) {
           onChunk(update.content);
         } else if (update.type === 'done') {
-          onComplete();
+          metadata = update.metadata;
+          onComplete(metadata);
         } else if (update.type === 'error') {
           throw new Error(update.error);
         }

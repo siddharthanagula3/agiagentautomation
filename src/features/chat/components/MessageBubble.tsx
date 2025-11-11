@@ -6,7 +6,7 @@ import {
 } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
-import { Copy, Check, User, Bot, FileText, Download, ChevronDown, ChevronUp } from 'lucide-react';
+import { User, Bot, FileText, Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -17,6 +17,7 @@ import rehypeRaw from 'rehype-raw';
 import type { Components } from 'react-markdown';
 import { EmployeeWorkStream } from './EmployeeWorkStream';
 import { TokenUsageDisplay } from './TokenUsageDisplay';
+import { MessageActions } from './MessageActions';
 
 interface Message {
   id: string;
@@ -28,11 +29,13 @@ interface Message {
   employeeAvatar?: string;
   employeeColor?: string;
   isStreaming?: boolean;
+  reactions?: Array<{ type: string; userId: string }>;
   metadata?: {
     isDocument?: boolean;
     documentTitle?: string;
     hasWorkStream?: boolean;
     workStreamData?: any;
+    isPinned?: boolean;
     // Token tracking metadata
     tokensUsed?: number;
     inputTokens?: number;
@@ -44,6 +47,11 @@ interface Message {
 
 interface MessageBubbleProps {
   message: Message;
+  onEdit?: (messageId: string) => void;
+  onRegenerate?: (messageId: string) => void;
+  onDelete?: (messageId: string) => void;
+  onPin?: (messageId: string) => void;
+  onReact?: (messageId: string, reactionType: 'up' | 'down' | 'helpful') => void;
 }
 
 // Custom code block component with copy button
@@ -137,19 +145,19 @@ const markdownComponents: Components = {
   ),
 };
 
-export function MessageBubble({ message }: MessageBubbleProps) {
-  const [copied, setCopied] = useState(false);
+export function MessageBubble({
+  message,
+  onEdit,
+  onRegenerate,
+  onDelete,
+  onPin,
+  onReact,
+}: MessageBubbleProps) {
   const [documentExpanded, setDocumentExpanded] = useState(false);
   const [workStreamExpanded, setWorkStreamExpanded] = useState(true);
   const isUser = message.role === 'user';
   const isDocument = message.metadata?.isDocument;
   const hasWorkStream = message.metadata?.hasWorkStream;
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(message.content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const handleExportDocument = () => {
     const blob = new Blob([message.content], { type: 'text/markdown' });
@@ -350,20 +358,20 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               />
             )}
 
-            {/* Copy Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleCopy}
-              className="h-7 w-7 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-              title="Copy message"
-            >
-              {copied ? (
-                <Check className="h-3 w-3 text-green-600" />
-              ) : (
-                <Copy className="h-3 w-3" />
-              )}
-            </Button>
+            {/* Message Actions */}
+            <MessageActions
+              messageId={message.id}
+              content={message.content}
+              isUser={isUser}
+              isPinned={message.metadata?.isPinned}
+              reactions={message.reactions}
+              onEdit={onEdit}
+              onRegenerate={onRegenerate}
+              onDelete={onDelete}
+              onPin={onPin}
+              onReact={onReact}
+              className="opacity-0 transition-opacity group-hover:opacity-100"
+            />
           </div>
 
           {/* Timestamp for user messages */}

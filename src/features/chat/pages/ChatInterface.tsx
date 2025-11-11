@@ -22,6 +22,7 @@ import {
 import { Button } from '@shared/ui/button';
 import { FileText, FileJson, FileCode, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { UsageWarningBanner, useUsageMonitoring } from '../components/UsageWarningBanner';
 
 const ChatPage: React.FC = () => {
   const { sessionId } = useParams<{ sessionId?: string }>();
@@ -172,6 +173,9 @@ const ChatPage: React.FC = () => {
     await copyToClipboard(currentSession, messages, 'markdown');
   };
 
+  // Monitor token usage for warnings
+  const { usageData } = useUsageMonitoring(currentSession?.userId || null);
+
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar - Collapsible with smooth transition */}
@@ -212,6 +216,13 @@ const ChatPage: React.FC = () => {
           }}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         />
+
+        {/* Usage Warning Banner */}
+        {usageData.length > 0 && (
+          <div className="border-b border-border px-4 py-2">
+            <UsageWarningBanner usageData={usageData} />
+          </div>
+        )}
 
         {/* Message List - Maximum vertical space */}
         <div className="flex-1 overflow-hidden">

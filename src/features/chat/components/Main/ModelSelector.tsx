@@ -26,130 +26,179 @@ interface ModelSelectorProps {
   onTemperatureChange: (temperature: number) => void;
 }
 
-const AVAILABLE_MODELS: ModelInfo[] = [
-  // Kimi K2 Thinking - NEW #1 (Nov 6, 2025) - OPEN-SOURCE & FREE - DEFAULT
-  {
-    id: 'kimi-k2-thinking',
-    name: 'Kimi K2 Thinking ⭐',
-    provider: 'Moonshot AI',
-    description: '#1 Reasoning Model (Nov 6). Beats GPT-5 & Claude 4.5. 71.3% SWE-bench, 256K context, FREE',
-    specialty: 'Reasoning Champion',
-    isDefault: true,
-  },
+/**
+ * ============================================================================
+ * AVAILABLE LLM MODELS - Easy to Update Monthly
+ * ============================================================================
+ *
+ * To add a new model (when providers release updates):
+ * 1. Copy an existing model object
+ * 2. Update the id, name, description
+ * 3. Set isDefault: true on your preferred default model (only one!)
+ * 4. Save and the UI automatically updates
+ *
+ * Model Types:
+ * - Thinking Models: For complex reasoning, coding, research (slower, more expensive)
+ * - Standard Models: For general chat, quick tasks (faster, cheaper) ⭐ DEFAULT
+ *
+ * Last Updated: November 2025
+ */
 
-  // Claude - Best thinking models from Anthropic
-  {
-    id: 'claude-sonnet-4.5-thinking',
-    name: 'Claude Sonnet 4.5 Thinking',
-    provider: 'Anthropic',
-    description: 'Advanced reasoning mode with extended thought process. 200K context',
-    specialty: 'Deep Reasoning',
-  },
+const AVAILABLE_MODELS: ModelInfo[] = [
+  // ========================================================================
+  // RECOMMENDED FOR GENERAL USE (Fast & Cost-Effective)
+  // ========================================================================
+
+  // Claude Sonnet 4.5 - Best all-around for general tasks - DEFAULT
   {
     id: 'claude-sonnet-4.5',
-    name: 'Claude Sonnet 4.5',
+    name: 'Claude Sonnet 4.5 ⭐',
     provider: 'Anthropic',
-    description: 'Standard mode - fast responses with solid reasoning',
-    specialty: 'Balanced',
-  },
-  {
-    id: 'claude-3-opus',
-    name: 'Claude 3 Opus',
-    provider: 'Anthropic',
-    description: 'Maximum intelligence for deep analysis and research',
-    specialty: 'Deep Analysis',
-  },
-  {
-    id: 'claude-3-5-sonnet',
-    name: 'Claude 3.5 Sonnet',
-    provider: 'Anthropic',
-    description: 'Previous generation - still excellent for coding',
-    specialty: 'Legacy Coding',
-  },
-  {
-    id: 'claude-3-haiku',
-    name: 'Claude 3 Haiku',
-    provider: 'Anthropic',
-    description: 'Fastest Claude model for quick tasks',
-    specialty: 'Speed',
+    description: 'Best for general chat, coding, writing. Fast responses with excellent quality',
+    specialty: 'General + Coding',
+    isDefault: true, // ⭐ This is the default model for new chats
   },
 
-  // OpenAI - GPT-5 with Thinking modes
-  {
-    id: 'gpt-5-thinking',
-    name: 'GPT-5 Thinking',
-    provider: 'OpenAI',
-    description: 'Extended reasoning mode. 41.7% on Humanity\'s Last Exam. OpenAI ecosystem integration',
-    specialty: 'Advanced Thinking',
-  },
+  // GPT-5 - Best from OpenAI for general use
   {
     id: 'gpt-5',
     name: 'GPT-5',
     provider: 'OpenAI',
-    description: 'Latest flagship (Aug 2025). Fast responses with strong capabilities',
+    description: 'Latest OpenAI flagship (Aug 2025). Excellent for general tasks & ecosystem',
     specialty: 'All-Purpose',
   },
-  {
-    id: 'gpt-5-codex',
-    name: 'GPT-5 Codex',
-    provider: 'OpenAI',
-    description: 'Specialized coding variant optimized for software engineering',
-    specialty: 'Coding',
-  },
-  {
-    id: 'gpt-4o',
-    name: 'GPT-4o',
-    provider: 'OpenAI',
-    description: 'Previous gen - still powerful for general tasks',
-    specialty: 'Legacy',
-  },
 
-  // Google Gemini - Advanced thinking & multimodal
-  {
-    id: 'gemini-2.5-pro-thinking',
-    name: 'Gemini 2.5 Pro Thinking',
-    provider: 'Google',
-    description: 'Advanced reasoning with multimodal support. Google ecosystem integration',
-    specialty: 'Multimodal Thinking',
-  },
-  {
-    id: 'gemini-2.5-pro',
-    name: 'Gemini 2.5 Pro',
-    provider: 'Google',
-    description: '#1 on LMArena. Fast multimodal processing',
-    specialty: 'Multimodal',
-  },
+  // Gemini 2.5 Flash - Fastest for quick tasks
   {
     id: 'gemini-2.5-flash',
     name: 'Gemini 2.5 Flash',
     provider: 'Google',
-    description: 'Ultra-fast at 372 tokens/sec for high-volume tasks',
-    specialty: 'Speed',
+    description: 'Ultra-fast at 372 tokens/sec. Perfect for quick responses & high volume',
+    specialty: 'Ultra Speed',
   },
 
-  // Perplexity - Best for research & real-time info
+  // ========================================================================
+  // THINKING MODELS (For Complex Reasoning - Slower but Smarter)
+  // ========================================================================
+
+  // Kimi K2 Thinking - #1 for complex reasoning (Free & Open-Source!)
   {
-    id: 'perplexity-sonar',
-    name: 'Perplexity Sonar',
-    provider: 'Perplexity',
-    description: 'Real-time web search with source citations (10x faster than Gemini 2.0)',
-    specialty: 'Research',
+    id: 'kimi-k2-thinking',
+    name: 'Kimi K2 Thinking',
+    provider: 'Moonshot AI',
+    description: '#1 Reasoning (Nov 6). 71.3% SWE-bench, 44.9% Humanity\'s Exam. 256K context, FREE',
+    specialty: 'Advanced Reasoning',
   },
+
+  // Claude Sonnet 4.5 Thinking - Best from Anthropic
+  {
+    id: 'claude-sonnet-4.5-thinking',
+    name: 'Claude Sonnet 4.5 Thinking',
+    provider: 'Anthropic',
+    description: 'Extended reasoning mode for complex problems. 200K context',
+    specialty: 'Deep Reasoning',
+  },
+
+  // GPT-5 Thinking - Best from OpenAI
+  {
+    id: 'gpt-5-thinking',
+    name: 'GPT-5 Thinking',
+    provider: 'OpenAI',
+    description: 'Extended reasoning mode. 41.7% Humanity\'s Exam. Best for OpenAI ecosystem',
+    specialty: 'Advanced Thinking',
+  },
+
+  // Gemini 2.5 Pro Thinking - Best for multimodal reasoning
+  {
+    id: 'gemini-2.5-pro-thinking',
+    name: 'Gemini 2.5 Pro Thinking',
+    provider: 'Google',
+    description: 'Advanced reasoning with images/video support. Google ecosystem',
+    specialty: 'Multimodal Reasoning',
+  },
+
+  // ========================================================================
+  // SPECIALIZED MODELS
+  // ========================================================================
+
+  // Coding Specialists
+  {
+    id: 'gpt-5-codex',
+    name: 'GPT-5 Codex',
+    provider: 'OpenAI',
+    description: 'Optimized for software engineering, code generation, debugging',
+    specialty: 'Coding Specialist',
+  },
+
+  // Multimodal
+  {
+    id: 'gemini-2.5-pro',
+    name: 'Gemini 2.5 Pro',
+    provider: 'Google',
+    description: '#1 on LMArena. Best for images, video, audio processing',
+    specialty: 'Multimodal',
+  },
+
+  // Research & Real-time Data
   {
     id: 'perplexity-sonar-pro',
     name: 'Perplexity Sonar Pro',
     provider: 'Perplexity',
-    description: 'Advanced research with cutting-edge accuracy',
-    specialty: 'Deep Research',
+    description: 'Real-time web search with citations. Perfect for current events & research',
+    specialty: 'Research + Web',
   },
 
-  // xAI Grok - Best for real-time reasoning
+  {
+    id: 'perplexity-sonar',
+    name: 'Perplexity Sonar',
+    provider: 'Perplexity',
+    description: 'Fast web search (10x faster than competitors). Good for quick fact-checking',
+    specialty: 'Quick Research',
+  },
+
+  // Real-time Reasoning
   {
     id: 'grok-3',
     name: 'Grok 3',
     provider: 'xAI',
-    description: 'Cutting-edge reasoning with real-time data access',
+    description: 'Real-time data access with cutting-edge reasoning',
     specialty: 'Real-time',
+  },
+
+  // ========================================================================
+  // LEGACY MODELS (Previous Generations - Still Good)
+  // ========================================================================
+
+  {
+    id: 'claude-3-opus',
+    name: 'Claude 3 Opus',
+    provider: 'Anthropic',
+    description: 'Previous gen flagship - still excellent for analysis',
+    specialty: 'Legacy Premium',
+  },
+
+  {
+    id: 'claude-3-5-sonnet',
+    name: 'Claude 3.5 Sonnet',
+    provider: 'Anthropic',
+    description: 'Previous gen - reliable for coding',
+    specialty: 'Legacy Coding',
+  },
+
+  {
+    id: 'claude-3-haiku',
+    name: 'Claude 3 Haiku',
+    provider: 'Anthropic',
+    description: 'Budget-friendly Claude for simple tasks',
+    specialty: 'Budget',
+  },
+
+  {
+    id: 'gpt-4o',
+    name: 'GPT-4o',
+    provider: 'OpenAI',
+    description: 'Previous gen OpenAI - still solid for general use',
+    specialty: 'Legacy',
   },
 ];
 
@@ -159,13 +208,24 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   temperature,
   onTemperatureChange,
 }) => {
-  // Group models by provider
-  const moonshotModels = AVAILABLE_MODELS.filter((m) => m.provider === 'Moonshot AI');
-  const anthropicModels = AVAILABLE_MODELS.filter((m) => m.provider === 'Anthropic');
-  const openaiModels = AVAILABLE_MODELS.filter((m) => m.provider === 'OpenAI');
-  const geminiModels = AVAILABLE_MODELS.filter((m) => m.provider === 'Google');
-  const perplexityModels = AVAILABLE_MODELS.filter((m) => m.provider === 'Perplexity');
-  const grokModels = AVAILABLE_MODELS.filter((m) => m.provider === 'xAI');
+  // Group models by use case (easier for users to choose)
+  const generalModels = AVAILABLE_MODELS.filter((m) =>
+    ['claude-sonnet-4.5', 'gpt-5', 'gemini-2.5-flash'].includes(m.id)
+  );
+
+  const thinkingModels = AVAILABLE_MODELS.filter((m) =>
+    m.specialty.toLowerCase().includes('reasoning') ||
+    m.specialty.toLowerCase().includes('thinking') ||
+    m.id.includes('thinking')
+  );
+
+  const specializedModels = AVAILABLE_MODELS.filter((m) =>
+    ['gpt-5-codex', 'gemini-2.5-pro', 'perplexity-sonar-pro', 'perplexity-sonar', 'grok-3'].includes(m.id)
+  );
+
+  const legacyModels = AVAILABLE_MODELS.filter((m) =>
+    m.specialty.toLowerCase().includes('legacy') || m.specialty.toLowerCase().includes('budget')
+  );
 
   return (
     <div className="space-y-4">
@@ -192,38 +252,56 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
             </SelectValue>
           </SelectTrigger>
           <SelectContent className="max-h-[400px]">
-            {/* Moonshot AI Models - NEW #1 */}
-            {moonshotModels.length > 0 && (
-              <>
-                <div className="px-2 py-1.5 text-xs font-semibold text-primary">
-                  ⭐ Moonshot AI (#1 Reasoning - Nov 6, 2025)
+            {/* GENERAL USE - Recommended for most tasks */}
+            <div className="px-2 py-1.5 text-xs font-semibold text-primary">
+              ⭐ Recommended (Fast & Cost-Effective)
+            </div>
+            {generalModels.map((model) => (
+              <SelectItem key={model.id} value={model.id}>
+                <div className="flex flex-col gap-1 py-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{model.name}</span>
+                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                      {model.specialty}
+                    </span>
+                  </div>
+                  <span className="text-xs leading-tight text-muted-foreground">
+                    {model.description}
+                  </span>
                 </div>
-                {moonshotModels.map((model) => (
-                  <SelectItem key={model.id} value={model.id}>
-                    <div className="flex flex-col gap-1 py-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{model.name}</span>
-                        <span className="rounded bg-green-500/20 px-1.5 py-0.5 text-[10px] font-medium text-green-600 dark:text-green-400">
-                          {model.specialty}
-                        </span>
-                        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                          FREE & Open-Source
-                        </span>
-                      </div>
-                      <span className="text-xs leading-tight text-muted-foreground">
-                        {model.description}
+              </SelectItem>
+            ))}
+
+            {/* THINKING MODELS - For complex reasoning */}
+            <div className="mt-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+              🧠 Thinking Models (Slower, Advanced Reasoning)
+            </div>
+            {thinkingModels.map((model) => (
+              <SelectItem key={model.id} value={model.id}>
+                <div className="flex flex-col gap-1 py-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{model.name}</span>
+                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                      {model.specialty}
+                    </span>
+                    {model.id === 'kimi-k2-thinking' && (
+                      <span className="rounded bg-green-500/20 px-1.5 py-0.5 text-[10px] font-medium text-green-600 dark:text-green-400">
+                        FREE
                       </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </>
-            )}
+                    )}
+                  </div>
+                  <span className="text-xs leading-tight text-muted-foreground">
+                    {model.description}
+                  </span>
+                </div>
+              </SelectItem>
+            ))}
 
-            {/* Anthropic Models */}
+            {/* SPECIALIZED MODELS */}
             <div className="mt-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-              Anthropic (Deep Reasoning & Coding)
+              🎯 Specialized (Coding, Research, Multimodal)
             </div>
-            {anthropicModels.map((model) => (
+            {specializedModels.map((model) => (
               <SelectItem key={model.id} value={model.id}>
                 <div className="flex flex-col gap-1 py-1">
                   <div className="flex items-center gap-2">
@@ -239,73 +317,13 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
               </SelectItem>
             ))}
 
-            {/* OpenAI Models */}
-            <div className="mt-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-              OpenAI (General Purpose)
-            </div>
-            {openaiModels.map((model) => (
-              <SelectItem key={model.id} value={model.id}>
-                <div className="flex flex-col gap-1 py-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{model.name}</span>
-                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                      {model.specialty}
-                    </span>
-                  </div>
-                  <span className="text-xs leading-tight text-muted-foreground">
-                    {model.description}
-                  </span>
-                </div>
-              </SelectItem>
-            ))}
-
-            {/* Google Gemini Models */}
-            <div className="mt-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-              Google Gemini (Speed & Integration)
-            </div>
-            {geminiModels.map((model) => (
-              <SelectItem key={model.id} value={model.id}>
-                <div className="flex flex-col gap-1 py-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{model.name}</span>
-                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                      {model.specialty}
-                    </span>
-                  </div>
-                  <span className="text-xs leading-tight text-muted-foreground">
-                    {model.description}
-                  </span>
-                </div>
-              </SelectItem>
-            ))}
-
-            {/* Perplexity Models */}
-            <div className="mt-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-              Perplexity (Research & Real-time)
-            </div>
-            {perplexityModels.map((model) => (
-              <SelectItem key={model.id} value={model.id}>
-                <div className="flex flex-col gap-1 py-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{model.name}</span>
-                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                      {model.specialty}
-                    </span>
-                  </div>
-                  <span className="text-xs leading-tight text-muted-foreground">
-                    {model.description}
-                  </span>
-                </div>
-              </SelectItem>
-            ))}
-
-            {/* xAI Grok Models */}
-            {grokModels.length > 0 && (
+            {/* LEGACY MODELS */}
+            {legacyModels.length > 0 && (
               <>
                 <div className="mt-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                  xAI Grok (Real-time Reasoning)
+                  📦 Previous Generations
                 </div>
-                {grokModels.map((model) => (
+                {legacyModels.map((model) => (
                   <SelectItem key={model.id} value={model.id}>
                     <div className="flex flex-col gap-1 py-1">
                       <div className="flex items-center gap-2">
@@ -324,9 +342,11 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
             )}
           </SelectContent>
         </Select>
-        <p className="mt-2 text-xs text-muted-foreground">
-          ⭐ = Recommended default. <span className="font-semibold text-green-600 dark:text-green-400">Kimi K2 Thinking</span> is #1 (Nov 6, 2025):
-          71.3% SWE-bench, 44.9% Humanity's Last Exam. FREE & open-source.
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+          ⭐ <span className="font-semibold text-primary">Claude Sonnet 4.5</span> = Default for general use (fast, high quality).
+          <br />
+          🧠 Use <span className="font-semibold text-green-600 dark:text-green-400">Thinking Models</span> for complex reasoning
+          (Kimi K2 is #1, FREE & open-source).
         </p>
       </div>
 
@@ -366,7 +386,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
 // Helper functions for external use
 export const getDefaultModel = (): string => {
-  return AVAILABLE_MODELS.find((m) => m.isDefault)?.id || 'kimi-k2-thinking';
+  // Returns the model marked as default (Claude Sonnet 4.5 for general use)
+  return AVAILABLE_MODELS.find((m) => m.isDefault)?.id || 'claude-sonnet-4.5';
 };
 
 export const getModelById = (id: string): ModelInfo | undefined => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Avatar,
   AvatarFallback,
@@ -6,7 +6,7 @@ import {
 } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
-import { User, Bot, FileText, Download, ChevronDown, ChevronUp } from 'lucide-react';
+import { User, Bot, FileText, Download, ChevronDown, ChevronUp, Check, Copy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -19,6 +19,9 @@ import { EmployeeWorkStream } from './EmployeeWorkStream';
 import { TokenUsageDisplay } from './TokenUsageDisplay';
 import { MessageActions } from './MessageActions';
 import { ImageAttachmentPreview } from './ImageAttachmentPreview';
+import { ArtifactPreview } from './ArtifactPreview';
+import { extractArtifacts, removeArtifactBlocks } from '../utils/artifact-detector';
+import { useArtifactStore } from '@shared/stores/artifact-store';
 
 interface Attachment {
   id: string;
@@ -170,6 +173,53 @@ export function MessageBubble({
   const isDocument = message.metadata?.isDocument;
   const hasWorkStream = message.metadata?.hasWorkStream;
 
+  // Artifact detection and management
+  const { addArtifact, shareArtifact, setCurrentVersion, getMessageArtifacts } = useArtifactStore();
+
+  // Extract artifacts from message content (only for assistant messages)
+  const artifacts = useMemo(() => {
+    if (isUser) return [];
+
+    // Check if we already have artifacts for this message
+    const existingArtifacts = getMessageArtifacts(message.id);
+    if (existingArtifacts.length > 0) {
+      return existingArtifacts;
+    }
+
+    // Extract new artifacts
+    const newArtifacts = extractArtifacts(message.content);
+
+    // Store artifacts in the store
+    newArtifacts.forEach((artifact) => {
+      addArtifact(message.id, artifact);
+    });
+
+    return newArtifacts;
+  }, [message.id, message.content, isUser, getMessageArtifacts, addArtifact]);
+
+  // Remove artifact code blocks from content to avoid duplication
+  const cleanedContent = useMemo(() => {
+    if (artifacts.length === 0) return message.content;
+    return removeArtifactBlocks(message.content, artifacts);
+  }, [message.content, artifacts]);
+
+  const handleShareArtifact = async (artifactId: string) => {
+    try {
+      const shareId = await shareArtifact(message.id, artifactId);
+      // In production, copy share URL to clipboard
+      const shareUrl = `${window.location.origin}/artifact/${shareId}`;
+      await navigator.clipboard.writeText(shareUrl);
+      // TODO: Show toast notification
+      console.log('Artifact shared:', shareUrl);
+    } catch (error) {
+      console.error('Failed to share artifact:', error);
+    }
+  };
+
+  const handleVersionChange = (artifactId: string, versionIndex: number) => {
+    setCurrentVersion(message.id, artifactId, versionIndex);
+  };
+
   const handleExportDocument = () => {
     const blob = new Blob([message.content], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
@@ -281,7 +331,7 @@ export function MessageBubble({
                       rehypePlugins={[rehypeHighlight, rehypeRaw]}
                       components={markdownComponents}
                     >
-                      {message.content}
+                      {cleanedContent}
                     </ReactMarkdown>
                   </div>
                 </div>
@@ -294,7 +344,7 @@ export function MessageBubble({
                   rehypePlugins={[rehypeHighlight, rehypeRaw]}
                   components={markdownComponents}
                 >
-                  {message.content}
+                  {cleanedContent}
                 </ReactMarkdown>
                 {message.isStreaming && (
                   <span className="ml-1 inline-block h-4 w-2 animate-pulse rounded-sm bg-current" />
@@ -330,6 +380,22 @@ export function MessageBubble({
           {/* Image Attachments */}
           {message.attachments && message.attachments.length > 0 && (
             <ImageAttachmentPreview attachments={message.attachments} />
+          )}
+
+          {/* Artifacts - Live Interactive Previews (Claude Artifacts-like) */}
+          {!isUser && artifacts.length > 0 && (
+            <div className="mt-3 w-full space-y-3">
+              {artifacts.map((artifact) => (
+                <ArtifactPreview
+                  key={artifact.id}
+                  artifact={artifact}
+                  onVersionChange={(versionIndex) =>
+                    handleVersionChange(artifact.id, versionIndex)
+                  }
+                  onShare={() => handleShareArtifact(artifact.id)}
+                />
+              ))}
+            </div>
           )}
 
           {/* Work Stream (Agent Collaboration) */}

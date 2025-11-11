@@ -25,6 +25,8 @@ import { Button } from '@shared/ui/button';
 import { FileText, FileJson, FileCode, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UsageWarningBanner, useUsageMonitoring } from '../components/UsageWarningBanner';
+import { UsageWarningModal } from '../components/UsageWarningModal';
+import { useUsageWarningStore } from '@shared/stores/usage-warning-store';
 
 const ChatPage: React.FC = () => {
   const { sessionId } = useParams<{ sessionId?: string }>();
@@ -81,6 +83,8 @@ const ChatPage: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState('gpt-4-turbo');
   const [temperature, setTemperature] = useState(0.7);
   const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
+  const [warningModalOpen, setWarningModalOpen] = useState(false);
+  const [warningThreshold, setWarningThreshold] = useState<85 | 95>(85);
 
   // Refs
   const composerRef = useRef<HTMLTextAreaElement>(null);
@@ -186,6 +190,37 @@ const ChatPage: React.FC = () => {
 
   // Monitor token usage for warnings
   const { usageData } = useUsageMonitoring(currentSession?.userId || null);
+
+  // Usage warning system
+  const {
+    updateUsage,
+    shouldShowWarning,
+    markWarningShown,
+    usagePercentage,
+    currentUsage,
+    totalLimit,
+  } = useUsageWarningStore();
+
+  // Check for usage warnings and show modal
+  React.useEffect(() => {
+    if (usageData.length > 0) {
+      const totalUsed = usageData.reduce((sum, d) => sum + d.tokensUsed, 0);
+      const limit = 50000; // This should come from user's subscription plan
+
+      updateUsage(totalUsed, limit);
+
+      // Check for 95% warning first (more critical)
+      if (shouldShowWarning(95)) {
+        setWarningThreshold(95);
+        setWarningModalOpen(true);
+        markWarningShown(95);
+      } else if (shouldShowWarning(85)) {
+        setWarningThreshold(85);
+        setWarningModalOpen(true);
+        markWarningShown(85);
+      }
+    }
+  }, [usageData, updateUsage, shouldShowWarning, markWarningShown]);
 
   // Keyboard shortcuts
   const handleCopyLastMessage = () => {
@@ -312,6 +347,16 @@ const ChatPage: React.FC = () => {
         open={shortcutsDialogOpen}
         onOpenChange={setShortcutsDialogOpen}
         shortcuts={shortcuts}
+      />
+
+      {/* Usage Warning Modal - Pops up at 85% and 95% */}
+      <UsageWarningModal
+        open={warningModalOpen}
+        onOpenChange={setWarningModalOpen}
+        threshold={warningThreshold}
+        currentUsage={currentUsage}
+        totalLimit={totalLimit}
+        usagePercentage={usagePercentage}
       />
     </div>
   );

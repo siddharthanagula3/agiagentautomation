@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Separator } from '@shared/ui/separator';
 import { useChat } from '../hooks/use-chat-interface';
 import { useChatHistory } from '../hooks/use-conversation-history';
 import { useTools } from '../hooks/use-tool-integration';
 import { useExport } from '../hooks/use-export-conversation';
+import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts';
 import { ChatSidebar } from '../components/Sidebar/ChatSidebar';
 import { ChatHeader } from '../components/Main/ChatHeader';
 import { MessageList } from '../components/Main/MessageList';
 import { ChatComposer } from '../components/Composer/ChatComposer';
 import { ModelSelector } from '../components/Main/ModelSelector';
 import { ModeSelector } from '../components/Tools/ModeSelector';
+import { KeyboardShortcutsDialog } from '../components/KeyboardShortcutsDialog';
 import type { ChatSession, ChatMessage, ChatMode } from '../types';
 import {
   DropdownMenu,
@@ -78,6 +80,10 @@ const ChatPage: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<ChatMode>('team');
   const [selectedModel, setSelectedModel] = useState('gpt-4-turbo');
   const [temperature, setTemperature] = useState(0.7);
+  const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
+
+  // Refs
+  const composerRef = useRef<HTMLTextAreaElement>(null);
 
   // Persist sidebar state
   useEffect(() => {
@@ -181,6 +187,42 @@ const ChatPage: React.FC = () => {
   // Monitor token usage for warnings
   const { usageData } = useUsageMonitoring(currentSession?.userId || null);
 
+  // Keyboard shortcuts
+  const handleCopyLastMessage = () => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage) {
+      navigator.clipboard.writeText(lastMessage.content);
+    }
+  };
+
+  const handleRegenerateLastMessage = () => {
+    const lastAssistantMessage = [...messages]
+      .reverse()
+      .find((m) => m.role === 'assistant');
+    if (lastAssistantMessage) {
+      regenerateMessage(lastAssistantMessage.id);
+    }
+  };
+
+  const handleFocusComposer = () => {
+    composerRef.current?.focus();
+  };
+
+  const handleShowSearch = () => {
+    // TODO: Implement search modal
+    setSearchQuery('');
+  };
+
+  const { shortcuts } = useKeyboardShortcuts({
+    onNewChat: handleNewChat,
+    onSearch: handleShowSearch,
+    onShowShortcuts: () => setShortcutsDialogOpen(true),
+    onToggleSidebar: () => setSidebarOpen(!sidebarOpen),
+    onFocusComposer: handleFocusComposer,
+    onCopyLastMessage: handleCopyLastMessage,
+    onRegenerateLastMessage: handleRegenerateLastMessage,
+  });
+
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar - Collapsible with smooth transition */}
@@ -264,6 +306,13 @@ const ChatPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Keyboard Shortcuts Dialog */}
+      <KeyboardShortcutsDialog
+        open={shortcutsDialogOpen}
+        onOpenChange={setShortcutsDialogOpen}
+        shortcuts={shortcuts}
+      />
     </div>
   );
 };

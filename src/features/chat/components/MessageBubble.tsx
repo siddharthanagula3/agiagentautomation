@@ -18,6 +18,16 @@ import type { Components } from 'react-markdown';
 import { EmployeeWorkStream } from './EmployeeWorkStream';
 import { TokenUsageDisplay } from './TokenUsageDisplay';
 import { MessageActions } from './MessageActions';
+import { ImageAttachmentPreview } from './ImageAttachmentPreview';
+
+interface Attachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+  thumbnailUrl?: string;
+}
 
 interface Message {
   id: string;
@@ -30,6 +40,7 @@ interface Message {
   employeeColor?: string;
   isStreaming?: boolean;
   reactions?: Array<{ type: string; userId: string }>;
+  attachments?: Attachment[];
   metadata?: {
     isDocument?: boolean;
     documentTitle?: string;
@@ -315,6 +326,11 @@ export function MessageBubble({
               </div>
             )}
           </div>
+
+          {/* Image Attachments */}
+          {message.attachments && message.attachments.length > 0 && (
+            <ImageAttachmentPreview attachments={message.attachments} />
+          )}
 
           {/* Work Stream (Agent Collaboration) */}
           {hasWorkStream && message.metadata?.workStreamData && (

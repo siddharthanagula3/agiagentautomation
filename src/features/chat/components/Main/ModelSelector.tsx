@@ -27,14 +27,30 @@ interface ModelSelectorProps {
 }
 
 const AVAILABLE_MODELS: ModelInfo[] = [
-  // Claude - #1 for coding (Nov 2025 - 77.2% SWE-bench) - DEFAULT
+  // Kimi K2 Thinking - NEW #1 (Nov 6, 2025) - OPEN-SOURCE & FREE - DEFAULT
+  {
+    id: 'kimi-k2-thinking',
+    name: 'Kimi K2 Thinking ⭐',
+    provider: 'Moonshot AI',
+    description: '#1 Reasoning Model (Nov 6). Beats GPT-5 & Claude 4.5. 71.3% SWE-bench, 256K context, FREE',
+    specialty: 'Reasoning Champion',
+    isDefault: true,
+  },
+
+  // Claude - Best thinking models from Anthropic
+  {
+    id: 'claude-sonnet-4.5-thinking',
+    name: 'Claude Sonnet 4.5 Thinking',
+    provider: 'Anthropic',
+    description: 'Advanced reasoning mode with extended thought process. 200K context',
+    specialty: 'Deep Reasoning',
+  },
   {
     id: 'claude-sonnet-4.5',
-    name: 'Claude Sonnet 4.5 ⭐',
+    name: 'Claude Sonnet 4.5',
     provider: 'Anthropic',
-    description: '#1 coding model (77.2% SWE-bench). Best for complex reasoning & 200K context',
-    specialty: 'Coding Champion',
-    isDefault: true,
+    description: 'Standard mode - fast responses with solid reasoning',
+    specialty: 'Balanced',
   },
   {
     id: 'claude-3-opus',
@@ -58,42 +74,49 @@ const AVAILABLE_MODELS: ModelInfo[] = [
     specialty: 'Speed',
   },
 
-  // OpenAI - GPT-5 launched Aug 2025
+  // OpenAI - GPT-5 with Thinking modes
+  {
+    id: 'gpt-5-thinking',
+    name: 'GPT-5 Thinking',
+    provider: 'OpenAI',
+    description: 'Extended reasoning mode. 41.7% on Humanity\'s Last Exam. OpenAI ecosystem integration',
+    specialty: 'Advanced Thinking',
+  },
   {
     id: 'gpt-5',
     name: 'GPT-5',
     provider: 'OpenAI',
-    description: 'Latest flagship (Aug 2025). Best for large-context workflows & OpenAI ecosystem',
+    description: 'Latest flagship (Aug 2025). Fast responses with strong capabilities',
     specialty: 'All-Purpose',
   },
   {
     id: 'gpt-5-codex',
     name: 'GPT-5 Codex',
     provider: 'OpenAI',
-    description: 'Specialized coding variant of GPT-5',
-    specialty: 'OpenAI Coding',
+    description: 'Specialized coding variant optimized for software engineering',
+    specialty: 'Coding',
   },
   {
     id: 'gpt-4o',
     name: 'GPT-4o',
     provider: 'OpenAI',
-    description: 'Previous gen - still powerful for general use',
-    specialty: 'General',
-  },
-  {
-    id: 'gpt-3.5-turbo',
-    name: 'GPT-3.5 Turbo',
-    provider: 'OpenAI',
-    description: 'Budget-friendly for simple tasks',
-    specialty: 'Budget',
+    description: 'Previous gen - still powerful for general tasks',
+    specialty: 'Legacy',
   },
 
-  // Google Gemini - #1 on LMArena for multimodal
+  // Google Gemini - Advanced thinking & multimodal
+  {
+    id: 'gemini-2.5-pro-thinking',
+    name: 'Gemini 2.5 Pro Thinking',
+    provider: 'Google',
+    description: 'Advanced reasoning with multimodal support. Google ecosystem integration',
+    specialty: 'Multimodal Thinking',
+  },
   {
     id: 'gemini-2.5-pro',
     name: 'Gemini 2.5 Pro',
     provider: 'Google',
-    description: '#1 on LMArena. Best for multimodal tasks & Google ecosystem integration',
+    description: '#1 on LMArena. Fast multimodal processing',
     specialty: 'Multimodal',
   },
   {
@@ -101,14 +124,7 @@ const AVAILABLE_MODELS: ModelInfo[] = [
     name: 'Gemini 2.5 Flash',
     provider: 'Google',
     description: 'Ultra-fast at 372 tokens/sec for high-volume tasks',
-    specialty: 'Ultra Speed',
-  },
-  {
-    id: 'gemini-1.5-pro',
-    name: 'Gemini 1.5 Pro',
-    provider: 'Google',
-    description: 'Previous gen - still great for creative content',
-    specialty: 'Creative',
+    specialty: 'Speed',
   },
 
   // Perplexity - Best for research & real-time info
@@ -144,6 +160,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   onTemperatureChange,
 }) => {
   // Group models by provider
+  const moonshotModels = AVAILABLE_MODELS.filter((m) => m.provider === 'Moonshot AI');
   const anthropicModels = AVAILABLE_MODELS.filter((m) => m.provider === 'Anthropic');
   const openaiModels = AVAILABLE_MODELS.filter((m) => m.provider === 'OpenAI');
   const geminiModels = AVAILABLE_MODELS.filter((m) => m.provider === 'Google');
@@ -175,9 +192,36 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
             </SelectValue>
           </SelectTrigger>
           <SelectContent className="max-h-[400px]">
+            {/* Moonshot AI Models - NEW #1 */}
+            {moonshotModels.length > 0 && (
+              <>
+                <div className="px-2 py-1.5 text-xs font-semibold text-primary">
+                  ⭐ Moonshot AI (#1 Reasoning - Nov 6, 2025)
+                </div>
+                {moonshotModels.map((model) => (
+                  <SelectItem key={model.id} value={model.id}>
+                    <div className="flex flex-col gap-1 py-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{model.name}</span>
+                        <span className="rounded bg-green-500/20 px-1.5 py-0.5 text-[10px] font-medium text-green-600 dark:text-green-400">
+                          {model.specialty}
+                        </span>
+                        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                          FREE & Open-Source
+                        </span>
+                      </div>
+                      <span className="text-xs leading-tight text-muted-foreground">
+                        {model.description}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </>
+            )}
+
             {/* Anthropic Models */}
-            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-              Anthropic (Coding & Writing)
+            <div className="mt-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+              Anthropic (Deep Reasoning & Coding)
             </div>
             {anthropicModels.map((model) => (
               <SelectItem key={model.id} value={model.id}>
@@ -281,7 +325,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
           </SelectContent>
         </Select>
         <p className="mt-2 text-xs text-muted-foreground">
-          ⭐ = Recommended default. Claude Sonnet 4.5 is #1 for coding (77.2% SWE-bench Nov 2025).
+          ⭐ = Recommended default. <span className="font-semibold text-green-600 dark:text-green-400">Kimi K2 Thinking</span> is #1 (Nov 6, 2025):
+          71.3% SWE-bench, 44.9% Humanity's Last Exam. FREE & open-source.
         </p>
       </div>
 
@@ -321,7 +366,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
 // Helper functions for external use
 export const getDefaultModel = (): string => {
-  return AVAILABLE_MODELS.find((m) => m.isDefault)?.id || 'claude-sonnet-4.5';
+  return AVAILABLE_MODELS.find((m) => m.isDefault)?.id || 'kimi-k2-thinking';
 };
 
 export const getModelById = (id: string): ModelInfo | undefined => {

@@ -7,10 +7,18 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'sonner';
 import AppRouter from './AppRouter';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
+import { validateAndLogEnvironment, logEnvironmentConfig } from '@shared/utils/env-validation';
 import './index.css';
 
+// Validate environment variables on startup
 if (import.meta.env.DEV) {
+  // In development, log errors but don't throw (allow development without all keys)
+  validateAndLogEnvironment(false);
+  logEnvironmentConfig();
   void import('@shared/utils/test-supabase');
+} else {
+  // In production, throw error if critical variables are missing
+  validateAndLogEnvironment(true);
 }
 
 const queryClient = new QueryClient({

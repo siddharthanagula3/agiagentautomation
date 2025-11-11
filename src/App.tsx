@@ -32,6 +32,9 @@ const HelpCenterPage = lazyWithRetry(() => import('./pages/HelpCenter'));
 const DocumentationPage = lazyWithRetry(() => import('./pages/Documentation'));
 const ApiReferencePage = lazyWithRetry(() => import('./pages/ApiReference'));
 const SecurityPage = lazyWithRetry(() => import('./pages/Security'));
+const ArtifactGalleryPage = lazyWithRetry(
+  () => import('./pages/ArtifactGallery')
+);
 
 // === AUTH PAGES ===
 const LoginPage = lazyWithRetry(() => import('@features/auth/pages/Login'));
@@ -110,6 +113,7 @@ function App() {
                   <Route path="documentation" element={<DocumentationPage />} />
                   <Route path="api-reference" element={<ApiReferencePage />} />
                   <Route path="security" element={<SecurityPage />} />
+                  <Route path="gallery" element={<ArtifactGalleryPage />} />
                 </Route>
 
                 {/* ===== AUTH ROUTES ===== */}

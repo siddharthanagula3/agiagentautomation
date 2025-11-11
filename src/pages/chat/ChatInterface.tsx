@@ -315,7 +315,7 @@ export function ChatInterface() {
 
       {/* Messages Area (ChatGPT-like centered column) */}
       <ScrollArea className="chat-scroll-area flex-1">
-        <div className="mx-auto w-full max-w-3xl px-4 py-6 space-y-6">
+        <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6">
           {/* Messages */}
           {messages.map((message) => (
             <MessageBubble key={message.id} message={message} />

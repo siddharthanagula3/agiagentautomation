@@ -3,7 +3,11 @@ import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { Separator } from '@/shared/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/shared/components/ui/avatar';
 import {
   Plus,
   Search,

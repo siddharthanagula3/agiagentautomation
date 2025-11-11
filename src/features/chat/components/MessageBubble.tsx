@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { Copy, Check, User, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';

@@ -97,7 +97,10 @@ function App() {
                 <Route path="/" element={<PublicLayout />}>
                   <Route index element={<LandingPage />} />
                   <Route path="pricing" element={<PricingPage />} />
-                  <Route path="marketplace" element={<PublicMarketplacePage />} />
+                  <Route
+                    path="marketplace"
+                    element={<PublicMarketplacePage />}
+                  />
                   <Route path="about" element={<AboutPage />} />
                   <Route path="careers" element={<CareersPage />} />
                   <Route path="blog" element={<BlogListPage />} />

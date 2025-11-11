@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/shared/components/ui/avatar';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
 import {

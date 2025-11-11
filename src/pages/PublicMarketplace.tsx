@@ -44,9 +44,25 @@ import { CountdownTimer } from '@shared/ui/countdown-timer';
 export const MarketplacePublicPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const [discountEnd] = useState<Date>(
-    () => new Date(Date.now() + 15 * 60 * 1000)
-  );
+  const [discountEnd, setDiscountEnd] = useState<Date | null>(null);
+  // Initialize persistent 15-minute countdown per user (localStorage)
+  useEffect(() => {
+    const STORAGE_KEY = 'marketplace_offer_deadline';
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const now = Date.now();
+    let endTs: number | null = null;
+    if (saved) {
+      const parsed = parseInt(saved, 10);
+      if (!Number.isNaN(parsed) && parsed > now) {
+        endTs = parsed;
+      }
+    }
+    if (!endTs) {
+      endTs = now + 15 * 60 * 1000;
+      localStorage.setItem(STORAGE_KEY, String(endTs));
+    }
+    setDiscountEnd(new Date(endTs));
+  }, []);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [purchasedEmployees, setPurchasedEmployees] = useState<Set<string>>(
@@ -190,9 +206,15 @@ export const MarketplacePublicPage: React.FC = () => {
 
             <div className="flex items-center gap-4">
               {/* Countdown Banner */}
-              <div className="glass rounded-xl border border-primary/30 p-3">
-                <CountdownTimer targetDate={discountEnd} />
-              </div>
+              {discountEnd && (
+                <div className="glass rounded-xl border border-primary/30 p-3">
+                  <CountdownTimer
+                    targetDate={discountEnd}
+                    showHours={false}
+                    showLabel={false}
+                  />
+                </div>
+              )}
               <Button
                 onClick={() => navigate('/workforce')}
                 size="lg"

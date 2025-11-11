@@ -7,6 +7,7 @@ export type ToolCallStatus = 'pending' | 'running' | 'completed' | 'failed';
 export interface ChatSession {
   id: string;
   title: string;
+  summary?: string;
   createdAt: Date;
   updatedAt: Date;
   messageCount: number;
@@ -14,11 +15,17 @@ export interface ChatSession {
   cost: number;
   isPinned: boolean;
   isArchived: boolean;
+  isStarred?: boolean;
   folder?: string;
   tags: string[];
   sharedLink?: string;
   participants: string[];
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, unknown> & {
+    starred?: boolean;
+    pinned?: boolean;
+    archived?: boolean;
+    tags?: string[];
+  };
 }
 
 export interface ChatMessage {

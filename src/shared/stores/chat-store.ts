@@ -218,6 +218,13 @@ export interface ChatActions {
   clearHistory: () => void;
   setError: (error: string | null) => void;
 
+  // Conversation metadata actions
+  toggleStarConversation: (id: string) => void;
+  togglePinConversation: (id: string) => void;
+  toggleArchiveConversation: (id: string) => void;
+  addConversationTag: (id: string, tag: string) => void;
+  removeConversationTag: (id: string, tag: string) => void;
+
   // MGX-style interface actions
   toggleSidebar: () => void;
   selectEmployee: (employeeId: string) => void;
@@ -663,6 +670,54 @@ export const useChatStore = create<ChatStore>()(
         setError: (error: string | null) =>
           set((state) => {
             state.error = error;
+          }),
+
+        // Conversation metadata actions
+        toggleStarConversation: (id: string) =>
+          set((state) => {
+            if (state.conversations[id]) {
+              state.conversations[id].metadata.starred =
+                !state.conversations[id].metadata.starred;
+              state.conversations[id].metadata.updatedAt = new Date();
+            }
+          }),
+
+        togglePinConversation: (id: string) =>
+          set((state) => {
+            if (state.conversations[id]) {
+              state.conversations[id].metadata.pinned =
+                !state.conversations[id].metadata.pinned;
+              state.conversations[id].metadata.updatedAt = new Date();
+            }
+          }),
+
+        toggleArchiveConversation: (id: string) =>
+          set((state) => {
+            if (state.conversations[id]) {
+              state.conversations[id].metadata.archived =
+                !state.conversations[id].metadata.archived;
+              state.conversations[id].metadata.updatedAt = new Date();
+            }
+          }),
+
+        addConversationTag: (id: string, tag: string) =>
+          set((state) => {
+            if (
+              state.conversations[id] &&
+              !state.conversations[id].metadata.tags.includes(tag)
+            ) {
+              state.conversations[id].metadata.tags.push(tag);
+              state.conversations[id].metadata.updatedAt = new Date();
+            }
+          }),
+
+        removeConversationTag: (id: string, tag: string) =>
+          set((state) => {
+            if (state.conversations[id]) {
+              state.conversations[id].metadata.tags =
+                state.conversations[id].metadata.tags.filter((t) => t !== tag);
+              state.conversations[id].metadata.updatedAt = new Date();
+            }
           }),
 
         // MGX-style interface actions

@@ -48,6 +48,11 @@ const ChatPage: React.FC = () => {
     deleteSession,
     searchSessions,
     loadSessions,
+    toggleStarSession,
+    togglePinSession,
+    toggleArchiveSession,
+    duplicateSession,
+    shareSession,
   } = useChatHistory();
 
   const { availableTools, executeTool, activeTool, toolResults } = useTools();
@@ -196,6 +201,11 @@ const ChatPage: React.FC = () => {
             onSessionSelect={handleSessionSelect}
             onSessionRename={handleSessionRename}
             onSessionDelete={handleSessionDelete}
+            onSessionStar={toggleStarSession}
+            onSessionPin={togglePinSession}
+            onSessionArchive={toggleArchiveSession}
+            onSessionShare={shareSession}
+            onSessionDuplicate={duplicateSession}
             onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           />
         )}

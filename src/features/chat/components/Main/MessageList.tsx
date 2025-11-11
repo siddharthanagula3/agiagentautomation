@@ -1,19 +1,9 @@
 import React from 'react';
 import { ScrollArea } from '@shared/ui/scroll-area';
-import { Button } from '@shared/ui/button';
-import { Badge } from '@shared/ui/badge';
-import {
-  Copy,
-  Edit3,
-  RotateCcw,
-  Trash2,
-  Loader2,
-  Bot,
-  User,
-  CheckCircle,
-  XCircle,
-} from 'lucide-react';
-import type { ChatMessage, ToolCall } from '../../types';
+import { Loader2, Bot } from 'lucide-react';
+import type { ChatMessage } from '../../types';
+import { MessageBubble } from '../MessageBubble';
+import { useChatStore } from '@shared/stores/chat-store';
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -32,143 +22,65 @@ export const MessageList: React.FC<MessageListProps> = ({
   onRegenerate,
   onEdit,
   onDelete,
-  onToolExecute,
-  toolResults,
-  activeTool,
 }) => {
-  const handleCopy = (content: string) => {
-    navigator.clipboard.writeText(content);
+  const reactToMessage = useChatStore((state) => state.reactToMessage);
+  const updateMessage = useChatStore((state) => state.updateMessage);
+
+  const handleEdit = (messageId: string) => {
+    // TODO: Implement edit UI
+    const newContent = prompt('Edit message:');
+    if (newContent) {
+      onEdit(messageId, newContent);
+    }
   };
 
-  const renderMessage = (message: ChatMessage) => {
-    const isUser = message.role === 'user';
-    const isAssistant = message.role === 'assistant';
+  const handlePin = (messageId: string) => {
+    updateMessage(messageId, {
+      metadata: {
+        ...messages.find((m) => m.id === messageId)?.metadata,
+        isPinned: !messages.find((m) => m.id === messageId)?.metadata?.isPinned,
+      },
+    });
+  };
 
-    return (
-      <div
-        key={message.id}
-        className={`flex gap-4 p-4 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
-      >
-        {/* Avatar */}
-        <div className={`flex-shrink-0 ${isUser ? 'ml-4' : 'mr-4'}`}>
-          <div
-            className={`flex h-8 w-8 items-center justify-center rounded-full ${
-              isUser
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground'
-            }`}
-          >
-            {isUser ? (
-              <User className="h-4 w-4" />
-            ) : (
-              <Bot className="h-4 w-4" />
-            )}
-          </div>
-        </div>
-
-        {/* Message Content */}
-        <div
-          className={`min-w-0 flex-1 ${isUser ? 'text-right' : 'text-left'}`}
-        >
-          <div
-            className={`inline-block max-w-[85%] rounded-2xl px-4 py-3 ${
-              isUser
-                ? 'rounded-br-sm bg-primary text-primary-foreground'
-                : 'rounded-bl-sm border border-border bg-card'
-            }`}
-          >
-            <div className="whitespace-pre-wrap break-words">
-              {message.content}
-            </div>
-
-            {/* Attachments */}
-            {message.attachments && message.attachments.length > 0 && (
-              <div className="mt-2 space-y-2">
-                {message.attachments.map((attachment) => (
-                  <div
-                    key={attachment.id}
-                    className="flex items-center space-x-2 text-sm text-muted-foreground"
-                  >
-                    <span>{attachment.name}</span>
-                    <Badge variant="secondary" className="text-xs">
-                      {attachment.type}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Tool Calls */}
-            {message.toolCalls && message.toolCalls.length > 0 && (
-              <div className="mt-2 space-y-2">
-                {message.toolCalls.map((toolCall) => (
-                  <div
-                    key={toolCall.id}
-                    className="flex items-center space-x-2 text-sm"
-                  >
-                    <Badge variant="outline">{toolCall.name}</Badge>
-                    {toolCall.status === 'completed' && (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                    )}
-                    {toolCall.status === 'failed' && (
-                      <XCircle className="h-4 w-4 text-red-500" />
-                    )}
-                    {toolCall.status === 'running' && (
-                      <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Message Actions */}
-          {isAssistant && (
-            <div className="mt-2 flex items-center space-x-2 opacity-0 transition-opacity group-hover:opacity-100">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleCopy(message.content)}
-                className="h-6 px-2 text-xs"
-              >
-                <Copy className="mr-1 h-3 w-3" />
-                Copy
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onRegenerate(message.id)}
-                className="h-6 px-2 text-xs"
-              >
-                <RotateCcw className="mr-1 h-3 w-3" />
-                Regenerate
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onDelete(message.id)}
-                className="h-6 px-2 text-xs text-destructive hover:text-destructive"
-              >
-                <Trash2 className="mr-1 h-3 w-3" />
-                Delete
-              </Button>
-            </div>
-          )}
-
-          {/* Metadata */}
-          <div className="mt-1 text-xs text-muted-foreground">
-            {new Date(message.createdAt).toLocaleTimeString()}
-            {message.isEdited && <span className="ml-2">(edited)</span>}
-          </div>
-        </div>
-      </div>
-    );
+  const handleReact = (
+    messageId: string,
+    reactionType: 'up' | 'down' | 'helpful'
+  ) => {
+    reactToMessage(messageId, reactionType);
   };
 
   return (
     <ScrollArea className="flex-1">
-      <div className="space-y-4">
-        {messages.map(renderMessage)}
+      <div className="space-y-0">
+        {messages.map((message) => (
+          <MessageBubble
+            key={message.id}
+            message={{
+              id: message.id,
+              content: message.content,
+              role: message.role,
+              timestamp: new Date(message.createdAt),
+              employeeId: message.metadata?.employeeId as string | undefined,
+              employeeName: message.metadata?.employeeName as string | undefined,
+              reactions: [],
+              metadata: {
+                tokensUsed: message.metadata?.tokens,
+                inputTokens: message.metadata?.inputTokens as number | undefined,
+                outputTokens:
+                  message.metadata?.outputTokens as number | undefined,
+                model: message.metadata?.model,
+                cost: message.metadata?.cost,
+                isPinned: message.metadata?.isPinned as boolean | undefined,
+              },
+            }}
+            onEdit={handleEdit}
+            onRegenerate={onRegenerate}
+            onDelete={onDelete}
+            onPin={handlePin}
+            onReact={handleReact}
+          />
+        ))}
 
         {/* Loading indicator */}
         {isLoading && (

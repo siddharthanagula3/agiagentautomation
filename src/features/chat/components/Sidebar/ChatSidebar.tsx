@@ -9,11 +9,9 @@ import {
   Search,
   MessageSquare,
   MoreHorizontal,
-  Trash2,
-  Edit3,
-  Pin,
 } from 'lucide-react';
 import type { ChatSession } from '../../types';
+import { ConversationListItem } from '../ConversationListItem';
 
 interface ChatSidebarProps {
   sessions: ChatSession[];
@@ -25,6 +23,11 @@ interface ChatSidebarProps {
   onSessionRename: (sessionId: string, newTitle: string) => void;
   onSessionDelete: (sessionId: string) => void;
   onToggleSidebar: () => void;
+  onSessionStar?: (sessionId: string) => void;
+  onSessionPin?: (sessionId: string) => void;
+  onSessionArchive?: (sessionId: string) => void;
+  onSessionShare?: (sessionId: string) => void;
+  onSessionDuplicate?: (sessionId: string) => void;
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
@@ -37,6 +40,11 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onSessionRename,
   onSessionDelete,
   onToggleSidebar,
+  onSessionStar,
+  onSessionPin,
+  onSessionArchive,
+  onSessionShare,
+  onSessionDuplicate,
 }) => {
   return (
     <div className="flex h-full flex-col bg-card/50 backdrop-blur-sm">
@@ -83,65 +91,27 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
             </div>
           ) : (
             sessions.map((session) => (
-              <div
+              <ConversationListItem
                 key={session.id}
-                className={`group relative cursor-pointer rounded-lg border p-3 transition-all hover:bg-accent ${
-                  currentSession?.id === session.id
-                    ? 'border-primary/20 bg-accent'
-                    : 'border-border hover:border-primary/20'
-                }`}
+                id={session.id}
+                title={session.title}
+                summary={session.summary}
+                updatedAt={new Date(session.updatedAt)}
+                totalMessages={session.messageCount}
+                isActive={currentSession?.id === session.id}
+                isStarred={session.metadata?.starred}
+                isPinned={session.metadata?.pinned}
+                isArchived={session.metadata?.archived}
+                tags={session.metadata?.tags || []}
                 onClick={() => onSessionSelect(session)}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-sm font-medium">
-                      {session.title}
-                    </h3>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {session.messageCount} messages
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(session.updatedAt).toLocaleDateString()}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // TODO: Implement pin functionality
-                      }}
-                    >
-                      <Pin className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // TODO: Implement rename functionality
-                      }}
-                    >
-                      <Edit3 className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSessionDelete(session.id);
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
+                onRename={() => onSessionRename(session.id, session.title)}
+                onDelete={() => onSessionDelete(session.id)}
+                onStar={onSessionStar ? () => onSessionStar(session.id) : undefined}
+                onPin={onSessionPin ? () => onSessionPin(session.id) : undefined}
+                onArchive={onSessionArchive ? () => onSessionArchive(session.id) : undefined}
+                onShare={onSessionShare ? () => onSessionShare(session.id) : undefined}
+                onDuplicate={onSessionDuplicate ? () => onSessionDuplicate(session.id) : undefined}
+              />
             ))
           )}
         </div>

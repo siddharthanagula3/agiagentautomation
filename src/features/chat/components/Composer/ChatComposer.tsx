@@ -26,9 +26,16 @@ import {
   Users,
   Plus,
   ChevronDown,
+  Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ChatMode, Tool } from '../../types';
+import { PromptShortcuts } from '../PromptShortcuts';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@shared/ui/popover';
 
 interface AIEmployee {
   id: string;
@@ -107,6 +114,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODELS[1].id);
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>(['auto']);
   const [textareaHeight, setTextareaHeight] = useState(80);
+  const [showPromptShortcuts, setShowPromptShortcuts] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -168,12 +176,40 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
     }
   };
 
+  const handleSelectPrompt = (prompt: string) => {
+    setMessage(prompt + ' ');
+    setShowPromptShortcuts(false);
+    // Focus on textarea
+    setTimeout(() => {
+      textareaRef.current?.focus();
+    }, 100);
+  };
+
   const selectedModel_ = availableModels.find((m) => m.id === selectedModel) || availableModels[0];
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-background p-4 shadow-sm">
       {/* Top Bar: Model + Employee Selection */}
       <div className="flex items-center gap-2">
+        {/* Prompt Shortcuts Button */}
+        <Popover open={showPromptShortcuts} onOpenChange={setShowPromptShortcuts}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 gap-2 text-xs"
+              disabled={isLoading}
+              title="Quick prompt shortcuts"
+            >
+              <Zap className="h-3.5 w-3.5" />
+              <span className="hidden md:inline">Prompts</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-[400px] p-0">
+            <PromptShortcuts onSelectPrompt={handleSelectPrompt} />
+          </PopoverContent>
+        </Popover>
+
         {/* Model Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

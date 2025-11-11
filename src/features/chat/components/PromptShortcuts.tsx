@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@shared/ui/button';
 import { ScrollArea } from '@shared/ui/scroll-area';
 import {
@@ -13,9 +13,18 @@ import {
   Bug,
   FileCode,
   Zap,
-  X
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@shared/stores/authentication-store';
+import {
+  getUserShortcuts,
+  createUserShortcut,
+  deleteUserShortcut,
+} from '../services/user-shortcuts';
+import { CustomShortcutDialog } from './CustomShortcutDialog';
+import { toast } from 'sonner';
 
 /**
  * Prompt Shortcuts Component
@@ -26,6 +35,7 @@ import { cn } from '@/lib/utils';
  * Features:
  * - One-click prompt insertion
  * - Categorized shortcuts (Coding, Writing, Business, etc.)
+ * - Custom user shortcuts (saved to database)
  * - Keyboard accessible
  * - Minimalist design matching ChatGPT/Claude UX
  */
@@ -36,6 +46,7 @@ export interface PromptShortcut {
   icon: React.ComponentType<{ className?: string }>;
   prompt: string;
   category: 'coding' | 'writing' | 'business' | 'analysis' | 'creative';
+  isCustom?: boolean;
 }
 
 const PROMPT_SHORTCUTS: PromptShortcut[] = [
@@ -132,6 +143,10 @@ interface PromptShortcutsProps {
 
 export function PromptShortcuts({ onSelectPrompt, className }: PromptShortcutsProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [customShortcuts, setCustomShortcuts] = useState<PromptShortcut[]>([]);
+  const [showCustomDialog, setShowCustomDialog] = useState(false);
+  const [isLoadingCustom, setIsLoadingCustom] = useState(false);
+  const { user } = useAuthStore();
 
   const categories = [
     { id: 'coding', label: '💻 Coding', icon: Code },
@@ -140,9 +155,70 @@ export function PromptShortcuts({ onSelectPrompt, className }: PromptShortcutsPr
     { id: 'creative', label: '✨ Creative', icon: Sparkles },
   ];
 
+  // Load custom shortcuts on mount
+  useEffect(() => {
+    if (user) {
+      loadCustomShortcuts();
+    }
+  }, [user]);
+
+  const loadCustomShortcuts = async () => {
+    if (!user) return;
+
+    setIsLoadingCustom(true);
+    try {
+      const shortcuts = await getUserShortcuts(user.id);
+      // Mark as custom and add default icon
+      const customWithIcons = shortcuts.map((s) => ({
+        ...s,
+        icon: Zap,
+        isCustom: true,
+      }));
+      setCustomShortcuts(customWithIcons);
+    } catch (error) {
+      console.error('[Prompt Shortcuts] Error loading custom shortcuts:', error);
+    } finally {
+      setIsLoadingCustom(false);
+    }
+  };
+
+  const handleCreateShortcut = async (shortcut: {
+    label: string;
+    prompt: string;
+    category: 'coding' | 'writing' | 'business' | 'analysis' | 'creative';
+  }) => {
+    if (!user) {
+      toast.error('Please log in to create custom shortcuts');
+      return;
+    }
+
+    const newShortcut = await createUserShortcut(user.id, shortcut);
+    if (newShortcut) {
+      setCustomShortcuts((prev) => [
+        { ...newShortcut, icon: Zap, isCustom: true },
+        ...prev,
+      ]);
+    } else {
+      throw new Error('Failed to create shortcut');
+    }
+  };
+
+  const handleDeleteShortcut = async (shortcutId: string) => {
+    const success = await deleteUserShortcut(shortcutId);
+    if (success) {
+      setCustomShortcuts((prev) => prev.filter((s) => s.id !== shortcutId));
+      toast.success('Shortcut deleted');
+    } else {
+      toast.error('Failed to delete shortcut');
+    }
+  };
+
+  // Combine default + custom shortcuts
+  const allShortcuts = [...PROMPT_SHORTCUTS, ...customShortcuts];
+
   const filteredShortcuts = selectedCategory
-    ? PROMPT_SHORTCUTS.filter((s) => s.category === selectedCategory)
-    : PROMPT_SHORTCUTS;
+    ? allShortcuts.filter((s) => s.category === selectedCategory)
+    : allShortcuts;
 
   return (
     <div className={cn('rounded-xl border border-border bg-card p-4 shadow-lg', className)}>
@@ -180,24 +256,81 @@ export function PromptShortcuts({ onSelectPrompt, className }: PromptShortcutsPr
           {filteredShortcuts.map((shortcut) => {
             const Icon = shortcut.icon;
             return (
-              <Button
+              <div
                 key={shortcut.id}
-                variant="ghost"
-                onClick={() => onSelectPrompt(shortcut.prompt)}
-                className="h-auto justify-start gap-3 px-3 py-2 text-left hover:bg-accent"
+                className="group flex items-center gap-2"
               >
-                <Icon className="h-4 w-4 flex-shrink-0 text-primary" />
-                <span className="text-sm font-medium">{shortcut.label}</span>
-              </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => onSelectPrompt(shortcut.prompt)}
+                  className="h-auto flex-1 justify-start gap-3 px-3 py-2 text-left hover:bg-accent"
+                >
+                  <Icon className="h-4 w-4 flex-shrink-0 text-primary" />
+                  <span className="text-sm font-medium">{shortcut.label}</span>
+                  {shortcut.isCustom && (
+                    <span className="ml-auto text-xs text-muted-foreground">Custom</span>
+                  )}
+                </Button>
+                {shortcut.isCustom && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteShortcut(shortcut.id)}
+                    className="h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+                    title="Delete shortcut"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </Button>
+                )}
+              </div>
             );
           })}
+
+          {isLoadingCustom && (
+            <div className="py-4 text-center text-sm text-muted-foreground">
+              Loading your custom shortcuts...
+            </div>
+          )}
+
+          {filteredShortcuts.length === 0 && !isLoadingCustom && (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              No shortcuts in this category.
+              {user && ' Create your first custom shortcut below!'}
+            </div>
+          )}
         </div>
       </ScrollArea>
 
+      {/* Create Custom Shortcut Button */}
+      {user && (
+        <div className="mt-4 border-t border-border pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowCustomDialog(true)}
+            className="w-full gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Create Custom Shortcut
+          </Button>
+        </div>
+      )}
+
       <div className="mt-3 rounded-lg bg-muted/50 p-2 text-xs text-muted-foreground">
-        💡 <span className="font-medium">Tip:</span> These prompts save you time by providing
-        common starting points. Click one, then add your specific details.
+        💡 <span className="font-medium">Tip:</span>{' '}
+        {user
+          ? 'Create custom shortcuts for your frequently used prompts!'
+          : 'Log in to save custom prompts!'}
       </div>
+
+      {/* Custom Shortcut Dialog */}
+      {user && (
+        <CustomShortcutDialog
+          open={showCustomDialog}
+          onOpenChange={setShowCustomDialog}
+          onSave={handleCreateShortcut}
+        />
+      )}
     </div>
   );
 }

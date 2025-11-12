@@ -1160,7 +1160,7 @@ const BillingPage: React.FC = () => {
                   >
                     Yearly
                     <Badge variant="secondary" className="ml-1 text-xs">
-                      Save 17%
+                      Save 14%
                     </Badge>
                   </button>
                 </div>
@@ -1184,7 +1184,10 @@ const BillingPage: React.FC = () => {
                           /year
                         </span>
                         <div className="text-sm text-green-600 dark:text-green-400">
-                          $24.99/month (Save 14% off monthly)
+                          Save $40 (14% off monthly)
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          $24.99/month when billed yearly
                         </div>
                       </>
                     ) : (

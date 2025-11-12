@@ -20,10 +20,13 @@ import {
   ArrowRight,
   AlertCircle,
   CheckCircle,
+  Shield,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Particles } from '@shared/ui/particles';
 import { Spotlight } from '@shared/ui/spotlight';
+import { checkRateLimit, resetRateLimit } from '@core/auth/rate-limiter';
+import { toast } from 'sonner';
 
 type LocationState = {
   from?: {
@@ -75,11 +78,31 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     console.log('LoginPage: Attempting login...');
 
+    // SECURITY: Check rate limit before attempting login
+    const rateLimitResult = await checkRateLimit('LOGIN', formData.email);
+    if (!rateLimitResult.allowed) {
+      const message = `Too many login attempts. Please try again in ${rateLimitResult.retryAfter} seconds.`;
+      console.warn('LoginPage: Rate limit exceeded:', message);
+      toast.error(message, {
+        icon: <Shield className="h-4 w-4" />,
+        duration: 5000,
+      });
+      return;
+    }
+
     try {
       await login({ email: formData.email, password: formData.password });
       console.log('LoginPage: Login function completed');
+
+      // SECURITY: Reset rate limit on successful login
+      resetRateLimit('LOGIN', formData.email);
     } catch (err) {
       console.error('LoginPage: Login failed:', err);
+      // Rate limit counter incremented automatically
+      const remaining = rateLimitResult.remaining - 1;
+      if (remaining <= 2 && remaining > 0) {
+        toast.warning(`Login failed. ${remaining} attempts remaining before temporary lockout.`);
+      }
     }
   };
 

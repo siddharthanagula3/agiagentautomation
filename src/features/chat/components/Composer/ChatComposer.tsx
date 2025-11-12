@@ -71,6 +71,13 @@ interface ChatComposerProps {
 
 const DEFAULT_MODELS: Model[] = [
   {
+    id: 'gpt-5-thinking',
+    name: 'GPT-5 Thinking',
+    description: 'Advanced reasoning and complex problem solving',
+    provider: 'openai',
+    recommended: 'general',
+  },
+  {
     id: 'gpt-4o',
     name: 'GPT-4o',
     description: 'Best for general tasks',
@@ -78,11 +85,25 @@ const DEFAULT_MODELS: Model[] = [
     recommended: 'general',
   },
   {
+    id: 'claude-sonnet-4-5-thinking',
+    name: 'Claude Sonnet 4.5 Thinking',
+    description: 'Extended reasoning for complex coding tasks',
+    provider: 'anthropic',
+    recommended: 'coding',
+  },
+  {
     id: 'claude-3-5-sonnet',
     name: 'Claude 3.5 Sonnet',
     description: 'Best for coding & analysis',
     provider: 'anthropic',
     recommended: 'coding',
+  },
+  {
+    id: 'gemini-2-5-pro',
+    name: 'Gemini 2.5 Pro',
+    description: 'Advanced multimodal AI for creative tasks',
+    provider: 'google',
+    recommended: 'creative',
   },
   {
     id: 'gemini-1.5-pro',
@@ -112,7 +133,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   const navigate = useNavigate();
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
-  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODELS[1].id);
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODELS[2].id); // Claude Sonnet 4.5 Thinking
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([
     'auto',
   ]);

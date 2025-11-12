@@ -37,6 +37,17 @@ import {
   estimateTokensForRequest,
   deductTokens,
 } from '@core/billing/token-enforcement-service';
+import {
+  checkUserInput,
+  logInjectionAttempt,
+} from '@core/security/prompt-injection-detector';
+import {
+  checkApiAbuse,
+  trackRequestStart,
+  trackRequestEnd,
+  REQUEST_LIMITS,
+} from '@core/security/api-abuse-prevention';
+import { isFeatureEnabled } from '@core/security/gradual-rollout';
 
 export type LLMProvider = 'anthropic' | 'openai' | 'google' | 'perplexity';
 type ProviderInstance =
@@ -220,6 +231,84 @@ export class UnifiedLLMService {
     }
 
     try {
+      // SECURITY LAYER 1: Prompt Injection Detection
+      if (actualUserId && isFeatureEnabled('prompt_injection_detection', actualUserId)) {
+        for (const message of messages) {
+          if (message.role === 'user') {
+            const injectionCheck = checkUserInput(message.content);
+
+            if (!injectionCheck.allowed) {
+              // Log the attempt
+              await logInjectionAttempt(actualUserId, message.content, {
+                isSafe: false,
+                riskLevel: injectionCheck.riskLevel,
+                detectedPatterns: [],
+                confidence: 1.0,
+              });
+
+              throw new UnifiedLLMError(
+                injectionCheck.reason || 'Input blocked due to security concerns',
+                'PROMPT_INJECTION_DETECTED',
+                targetProvider,
+                false
+              );
+            }
+
+            // Use sanitized input if provided
+            if (injectionCheck.sanitizedInput) {
+              message.content = injectionCheck.sanitizedInput;
+            }
+          }
+        }
+      }
+
+      // SECURITY LAYER 2: API Abuse Prevention
+      if (actualUserId && isFeatureEnabled('api_abuse_prevention', actualUserId)) {
+        const totalInputLength = messages.reduce(
+          (sum, msg) => sum + msg.content.length,
+          0
+        );
+
+        const abuseCheck = await checkApiAbuse(
+          actualUserId,
+          this.config.model,
+          totalInputLength
+        );
+
+        if (!abuseCheck.allowed) {
+          throw new UnifiedLLMError(
+            abuseCheck.reason || 'API request blocked',
+            'API_ABUSE_DETECTED',
+            targetProvider,
+            false
+          );
+        }
+      }
+
+      // SECURITY LAYER 3: Request Size Validation
+      const totalMessageLength = messages.reduce(
+        (sum, msg) => sum + msg.content.length,
+        0
+      );
+
+      if (totalMessageLength > REQUEST_LIMITS.maxTotalConversationLength) {
+        throw new UnifiedLLMError(
+          `Conversation too long (${totalMessageLength} chars, max ${REQUEST_LIMITS.maxTotalConversationLength})`,
+          'REQUEST_TOO_LARGE',
+          targetProvider,
+          false
+        );
+      }
+
+      if (messages.length > REQUEST_LIMITS.maxMessagesInConversation) {
+        throw new UnifiedLLMError(
+          `Too many messages (${messages.length}, max ${REQUEST_LIMITS.maxMessagesInConversation})`,
+          'TOO_MANY_MESSAGES',
+          targetProvider,
+          false
+        );
+      }
+
       // CRITICAL: Check token sufficiency BEFORE making API call
       if (actualUserId) {
         const messageLength = messages.reduce(
@@ -241,6 +330,14 @@ export class UnifiedLLMService {
             false
           );
         }
+      }
+
+      // Track request start (for concurrent request limiting)
+      if (actualUserId) {
+        const estimatedTokens = estimateTokensForRequest(
+          messages.reduce((sum, msg) => sum + msg.content.length, 0)
+        );
+        trackRequestStart(actualUserId, this.config.model, estimatedTokens);
       }
 
       // Convert messages to provider-specific format
@@ -319,8 +416,18 @@ export class UnifiedLLMService {
         }
       }
 
+      // Track request completion (for concurrent limiting)
+      if (actualUserId) {
+        trackRequestEnd(actualUserId);
+      }
+
       return unifiedResponse;
     } catch (error) {
+      // Track request end even on error
+      if (actualUserId) {
+        trackRequestEnd(actualUserId);
+      }
+
       console.error(
         `[Unified LLM Service] Error with ${targetProvider}:`,
         error

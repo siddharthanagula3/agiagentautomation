@@ -157,15 +157,22 @@ const ChatPage: React.FC = () => {
     }
   }, [currentSession, sessionId, createSession, navigate]);
 
-  const handleSendMessage = async (content: string, attachments?: File[]) => {
+  const handleSendMessage = async (
+    content: string,
+    options?: {
+      attachments?: File[];
+      model?: string;
+      employees?: string[];
+    }
+  ) => {
     if (!content.trim()) return;
 
     try {
       await sendMessage({
         content,
-        attachments,
+        attachments: options?.attachments,
         mode: selectedMode,
-        model: selectedModel,
+        model: options?.model || selectedModel,
         temperature,
         tools: availableTools,
       });

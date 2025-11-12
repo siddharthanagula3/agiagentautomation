@@ -12,6 +12,7 @@ import {
   Maximize2,
   ExternalLink,
   History,
+  Shield,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { ScrollArea } from '@shared/ui/scroll-area';
@@ -22,6 +23,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@shared/ui/dropdown-menu';
+import { sanitizeArtifact, sanitizeSVG, hasXSSRisk } from '@shared/utils/html-sanitizer';
+import { Alert, AlertDescription } from '@shared/ui/alert';
 
 export interface ArtifactVersion {
   id: string;
@@ -72,6 +75,7 @@ export function ArtifactPreview({
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview');
   const [copied, setCopied] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [securityWarning, setSecurityWarning] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -81,6 +85,14 @@ export function ArtifactPreview({
         ? artifact.versions[artifact.currentVersion].content
         : artifact.content;
 
+    // SECURITY: Check for XSS risks and show warning
+    if (hasXSSRisk(content)) {
+      setSecurityWarning(true);
+    }
+
+    // SECURITY: Sanitize content based on artifact type
+    const sanitizedContent = sanitizeArtifact(content, artifact.type);
+
     switch (artifact.type) {
       case 'html':
         return `
@@ -89,6 +101,7 @@ export function ArtifactPreview({
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https:;">
     <style>
       body {
         margin: 0;
@@ -98,7 +111,7 @@ export function ArtifactPreview({
     </style>
   </head>
   <body>
-    ${content}
+    ${sanitizedContent}
   </body>
 </html>`;
 
@@ -110,6 +123,7 @@ export function ArtifactPreview({
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https:;">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -117,17 +131,20 @@ export function ArtifactPreview({
   <body>
     <div id="root"></div>
     <script type="text/babel">
-      ${content}
+      ${sanitizedContent}
     </script>
   </body>
 </html>`;
 
-      case 'svg':
+      case 'svg': {
+        // SVG has additional sanitization via sanitizeSVG
+        const sanitizedSVG = sanitizeSVG(content);
         return `
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">
     <style>
       body {
         margin: 0;
@@ -140,9 +157,10 @@ export function ArtifactPreview({
     </style>
   </head>
   <body>
-    ${content}
+    ${sanitizedSVG}
   </body>
 </html>`;
+      }
 
       case 'mermaid':
         return `
@@ -422,6 +440,17 @@ export function ArtifactPreview({
           )}
         </div>
       </div>
+
+      {/* Security Warning */}
+      {securityWarning && (
+        <Alert className="m-4 border-yellow-500 bg-yellow-50">
+          <Shield className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-800">
+            <strong>Security Notice:</strong> This artifact contains potentially risky content.
+            It has been sanitized for your protection, but some functionality may be limited.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Preview/Code Tabs */}
       <Tabs

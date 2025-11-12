@@ -109,17 +109,42 @@ try {
   const errorStack =
     error instanceof Error ? error.stack || 'No stack trace available' : '';
 
-  rootElement.innerHTML = `
-    <div style="padding: 20px; font-family: monospace; color: red; background: #111; min-height: 100vh;">
-      <h1>Application Initialization Error</h1>
-      <p><strong>Error:</strong> ${errorMessage}</p>
-      <p><strong>Type:</strong> ${errorName}</p>
-      <p><strong>Stack:</strong></p>
-      <pre style="background: #222; padding: 10px; border-radius: 4px; overflow: auto;">${errorStack}</pre>
-      <p>Please check the console for more details.</p>
-      <button onclick="window.location.reload()" style="background: #007acc; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
-        Reload Page
-      </button>
-    </div>
-  `;
+  // Create error display using DOM API to prevent XSS
+  const errorContainer = document.createElement('div');
+  errorContainer.style.cssText = 'padding: 20px; font-family: monospace; color: red; background: #111; min-height: 100vh;';
+
+  const title = document.createElement('h1');
+  title.textContent = 'Application Initialization Error';
+  errorContainer.appendChild(title);
+
+  const errorPara = document.createElement('p');
+  errorPara.innerHTML = '<strong>Error:</strong> ';
+  errorPara.appendChild(document.createTextNode(errorMessage));
+  errorContainer.appendChild(errorPara);
+
+  const typePara = document.createElement('p');
+  typePara.innerHTML = '<strong>Type:</strong> ';
+  typePara.appendChild(document.createTextNode(errorName));
+  errorContainer.appendChild(typePara);
+
+  const stackLabel = document.createElement('p');
+  stackLabel.innerHTML = '<strong>Stack:</strong>';
+  errorContainer.appendChild(stackLabel);
+
+  const stackPre = document.createElement('pre');
+  stackPre.style.cssText = 'background: #222; padding: 10px; border-radius: 4px; overflow: auto;';
+  stackPre.textContent = errorStack;
+  errorContainer.appendChild(stackPre);
+
+  const helpPara = document.createElement('p');
+  helpPara.textContent = 'Please check the console for more details.';
+  errorContainer.appendChild(helpPara);
+
+  const reloadButton = document.createElement('button');
+  reloadButton.textContent = 'Reload Page';
+  reloadButton.style.cssText = 'background: #007acc; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;';
+  reloadButton.addEventListener('click', () => window.location.reload());
+  errorContainer.appendChild(reloadButton);
+
+  rootElement.appendChild(errorContainer);
 }

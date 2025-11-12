@@ -3,7 +3,7 @@
  * Tracks LLM token usage across all providers with granular billing
  */
 
-import { UsageTracker } from '@features/billing/services/usage-tracker';
+import { UsageTracker } from '@features/billing/services/usage-monitor';
 import type { LLMProvider } from './llm/unified-llm-service';
 
 export interface TokenLogEntry {

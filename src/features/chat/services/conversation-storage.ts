@@ -447,7 +447,7 @@ export class ChatPersistenceService {
       tokenCount: 0,
       cost: 0,
       isPinned: dbSession.is_pinned ?? false,
-      isArchived: dbSession.is_archived ?? (!dbSession.is_active ?? false),
+      isArchived: dbSession.is_archived ?? !dbSession.is_active,
       isStarred: dbSession.is_starred ?? false,
       sharedLink: dbSession.shared_link || undefined,
       tags: metadataTags,

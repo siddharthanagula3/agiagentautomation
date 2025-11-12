@@ -32,6 +32,11 @@ import {
   PerplexityResponse,
   PerplexityConfig,
 } from './providers/perplexity-ai';
+import {
+  canUserMakeRequest,
+  estimateTokensForRequest,
+  deductTokens,
+} from '@core/billing/token-enforcement-service';
 
 export type LLMProvider = 'anthropic' | 'openai' | 'google' | 'perplexity';
 type ProviderInstance =
@@ -215,6 +220,29 @@ export class UnifiedLLMService {
     }
 
     try {
+      // CRITICAL: Check token sufficiency BEFORE making API call
+      if (actualUserId) {
+        const messageLength = messages.reduce(
+          (sum, msg) => sum + msg.content.length,
+          0
+        );
+        const estimatedTokens = estimateTokensForRequest(messageLength);
+
+        const permission = await canUserMakeRequest(
+          actualUserId,
+          estimatedTokens
+        );
+
+        if (!permission.allowed) {
+          throw new UnifiedLLMError(
+            permission.reason || 'Insufficient tokens',
+            'INSUFFICIENT_TOKENS',
+            targetProvider,
+            false
+          );
+        }
+      }
+
       // Convert messages to provider-specific format
       const providerMessages = this.convertMessagesToProvider(
         messages,
@@ -264,7 +292,34 @@ export class UnifiedLLMService {
       }
 
       // Convert response to unified format
-      return this.convertResponseToUnified(response, targetProvider);
+      const unifiedResponse = this.convertResponseToUnified(
+        response,
+        targetProvider
+      );
+
+      // CRITICAL: Deduct tokens AFTER successful API call
+      if (actualUserId && unifiedResponse.usage) {
+        const deductionResult = await deductTokens(actualUserId, {
+          provider: targetProvider,
+          model: unifiedResponse.model,
+          inputTokens: unifiedResponse.usage.promptTokens,
+          outputTokens: unifiedResponse.usage.completionTokens,
+          totalTokens: unifiedResponse.usage.totalTokens,
+          sessionId: actualSessionId,
+          feature: 'chat',
+        });
+
+        if (!deductionResult.success) {
+          console.error(
+            '[Unified LLM Service] Token deduction failed:',
+            deductionResult.error
+          );
+          // Don't throw - user already received response
+          // Log for audit purposes
+        }
+      }
+
+      return unifiedResponse;
     } catch (error) {
       console.error(
         `[Unified LLM Service] Error with ${targetProvider}:`,

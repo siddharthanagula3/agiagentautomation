@@ -98,8 +98,10 @@ export async function createUserShortcut(
 
 /**
  * Update an existing custom shortcut
+ * SECURITY: Must verify user owns the shortcut
  */
 export async function updateUserShortcut(
+  userId: string,
   shortcutId: string,
   updates: {
     label?: string;
@@ -108,13 +110,15 @@ export async function updateUserShortcut(
   }
 ): Promise<boolean> {
   try {
+    // SECURITY: Add user_id check to prevent unauthorized updates
     const { error } = await supabase
       .from('user_shortcuts')
       .update({
         ...updates,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', shortcutId);
+      .eq('id', shortcutId)
+      .eq('user_id', userId); // Only update if user owns the shortcut
 
     if (error) {
       console.error('[User Shortcuts] Error updating shortcut:', error);
@@ -130,13 +134,19 @@ export async function updateUserShortcut(
 
 /**
  * Delete a custom shortcut
+ * SECURITY: Must verify user owns the shortcut
  */
-export async function deleteUserShortcut(shortcutId: string): Promise<boolean> {
+export async function deleteUserShortcut(
+  userId: string,
+  shortcutId: string
+): Promise<boolean> {
   try {
+    // SECURITY: Add user_id check to prevent unauthorized deletion
     const { error } = await supabase
       .from('user_shortcuts')
       .delete()
-      .eq('id', shortcutId);
+      .eq('id', shortcutId)
+      .eq('user_id', userId); // Only delete if user owns the shortcut
 
     if (error) {
       console.error('[User Shortcuts] Error deleting shortcut:', error);

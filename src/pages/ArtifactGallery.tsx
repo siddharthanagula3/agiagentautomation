@@ -110,14 +110,20 @@ const ArtifactGalleryPage: React.FC = () => {
 
       if (error) {
         console.error('[Artifact Gallery] Error loading artifacts:', error);
-        // Show demo data for development
-        setArtifacts(DEMO_ARTIFACTS);
+        // FIXED: Don't silently fall back to demo data
+        // Show empty state instead to indicate the feature needs setup
+        setArtifacts([]);
       } else {
-        setArtifacts(
+        const mappedArtifacts =
           data?.map((artifact: DatabaseArtifact) => ({
             id: artifact.id,
             title: artifact.title,
-            type: artifact.type,
+            type: artifact.type as
+              | 'html'
+              | 'react'
+              | 'svg'
+              | 'mermaid'
+              | 'code',
             description: artifact.description,
             content: artifact.content,
             language: artifact.language,
@@ -127,12 +133,14 @@ const ArtifactGalleryPage: React.FC = () => {
             likes: artifact.likes || 0,
             createdAt: artifact.created_at,
             tags: artifact.tags || [],
-          })) || []
-        );
+          })) || [];
+
+        setArtifacts(mappedArtifacts);
       }
     } catch (error) {
       console.error('[Artifact Gallery] Error:', error);
-      setArtifacts(DEMO_ARTIFACTS);
+      // FIXED: Show empty state on error, not demo data
+      setArtifacts([]);
     } finally {
       setIsLoading(false);
     }

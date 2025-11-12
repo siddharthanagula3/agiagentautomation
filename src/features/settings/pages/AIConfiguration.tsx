@@ -126,11 +126,13 @@ const AIConfigurationPage: React.FC = () => {
     const initialConfigs: Record<string, ProviderConfig> = {};
 
     Object.entries(PROVIDER_CONFIGS).forEach(([key, config]) => {
-      const apiKey = localStorage.getItem(`api_key_${key.toLowerCase()}`) || '';
+      // SECURITY: Never read API keys from localStorage
+      // API keys should only be configured via environment variables
+      const apiKey = '';
       initialConfigs[key] = {
         ...config,
         apiKey,
-        isConfigured: !!apiKey,
+        isConfigured: !!import.meta.env[`VITE_${key.toUpperCase()}_API_KEY`],
       };
     });
 
@@ -147,8 +149,13 @@ const AIConfigurationPage: React.FC = () => {
       },
     }));
 
-    // Save to localStorage
-    localStorage.setItem(`api_key_${provider.toLowerCase()}`, apiKey);
+    // SECURITY: API keys should NOT be saved to localStorage
+    // Instead, show a warning that environment variables must be updated
+    if (apiKey) {
+      toast.error(
+        'API keys cannot be saved from the UI for security reasons. Please update your .env file instead.'
+      );
+    }
   };
 
   const handleTestProvider = async (provider: string) => {

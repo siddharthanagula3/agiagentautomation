@@ -72,9 +72,9 @@ export function ConversationListItem({
   return (
     <div
       className={cn(
-        'group relative flex flex-col gap-1 rounded-lg p-3 transition-all cursor-pointer',
+        'group relative flex cursor-pointer flex-col gap-1 rounded-lg p-3 transition-all',
         isActive
-          ? 'bg-primary/10 border-l-2 border-primary'
+          ? 'border-l-2 border-primary bg-primary/10'
           : 'hover:bg-muted/50',
         isPinned && 'border-l-2 border-yellow-500',
         isArchived && 'opacity-60'
@@ -85,18 +85,15 @@ export function ConversationListItem({
     >
       {/* Header Row */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           <MessageSquare className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
 
-          <span
-            className="text-sm font-medium truncate"
-            title={title}
-          >
+          <span className="truncate text-sm font-medium" title={title}>
             {title}
           </span>
 
           {/* Indicators */}
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex flex-shrink-0 items-center gap-1">
             {isPinned && (
               <Pin className="h-3 w-3 fill-yellow-500 text-yellow-500" />
             )}
@@ -116,8 +113,10 @@ export function ConversationListItem({
               variant="ghost"
               size="sm"
               className={cn(
-                'h-6 w-6 p-0 flex-shrink-0',
-                showActions || isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                'h-6 w-6 flex-shrink-0 p-0',
+                showActions || isActive
+                  ? 'opacity-100'
+                  : 'opacity-0 group-hover:opacity-100'
               )}
               onClick={(e) => e.stopPropagation()}
             >
@@ -127,15 +126,35 @@ export function ConversationListItem({
 
           <DropdownMenuContent align="end" className="w-48">
             {onStar && (
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onStar(); }}>
-                <Star className={cn('mr-2 h-4 w-4', isStarred && 'fill-current text-yellow-500')} />
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStar();
+                }}
+              >
+                <Star
+                  className={cn(
+                    'mr-2 h-4 w-4',
+                    isStarred && 'fill-current text-yellow-500'
+                  )}
+                />
                 {isStarred ? 'Unstar' : 'Star'}
               </DropdownMenuItem>
             )}
 
             {onPin && (
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onPin(); }}>
-                <Pin className={cn('mr-2 h-4 w-4', isPinned && 'fill-current text-yellow-500')} />
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPin();
+                }}
+              >
+                <Pin
+                  className={cn(
+                    'mr-2 h-4 w-4',
+                    isPinned && 'fill-current text-yellow-500'
+                  )}
+                />
                 {isPinned ? 'Unpin' : 'Pin to top'}
               </DropdownMenuItem>
             )}
@@ -143,21 +162,36 @@ export function ConversationListItem({
             <DropdownMenuSeparator />
 
             {onRename && (
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRename(); }}>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRename();
+                }}
+              >
                 <Edit className="mr-2 h-4 w-4" />
                 Rename
               </DropdownMenuItem>
             )}
 
             {onShare && (
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onShare(); }}>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShare();
+                }}
+              >
                 <Share2 className="mr-2 h-4 w-4" />
                 Share
               </DropdownMenuItem>
             )}
 
             {onDuplicate && (
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDuplicate(); }}>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDuplicate();
+                }}
+              >
                 <Copy className="mr-2 h-4 w-4" />
                 Duplicate
               </DropdownMenuItem>
@@ -166,7 +200,12 @@ export function ConversationListItem({
             <DropdownMenuSeparator />
 
             {onArchive && (
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onArchive(); }}>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onArchive();
+                }}
+              >
                 <Archive className="mr-2 h-4 w-4" />
                 {isArchived ? 'Unarchive' : 'Archive'}
               </DropdownMenuItem>
@@ -190,13 +229,11 @@ export function ConversationListItem({
 
       {/* Summary */}
       {summary && (
-        <p className="text-xs text-muted-foreground truncate pl-6">
-          {summary}
-        </p>
+        <p className="truncate pl-6 text-xs text-muted-foreground">{summary}</p>
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground pl-6">
+      <div className="flex items-center justify-between pl-6 text-xs text-muted-foreground">
         <span>{totalMessages} messages</span>
         <span title={updatedAt.toLocaleString()}>
           {formatDistanceToNow(updatedAt, { addSuffix: true })}

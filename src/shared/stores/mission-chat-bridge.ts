@@ -85,7 +85,9 @@ export function useMissionChatBridge(conversationId: string | null) {
   const activeEmployees = useMissionStore((state) => state.activeEmployees);
   const addMessage = useChatStore((state) => state.addMessage);
   const updateMessage = useChatStore((state) => state.updateMessage);
-  const updateWorkingProcess = useChatStore((state) => state.updateWorkingProcess);
+  const updateWorkingProcess = useChatStore(
+    (state) => state.updateWorkingProcess
+  );
 
   // Sync mission messages to chat
   useEffect(() => {
@@ -115,13 +117,14 @@ export function useMissionChatBridge(conversationId: string | null) {
           status: index === employee.log.length - 1 ? 'active' : 'completed',
         })),
         currentStep: employee.log.length - 1,
-        status: employee.status === 'thinking' || employee.status === 'using_tool'
-          ? 'working'
-          : employee.status === 'error'
-            ? 'error'
-            : employee.status === 'idle'
-              ? 'idle'
-              : 'working',
+        status:
+          employee.status === 'thinking' || employee.status === 'using_tool'
+            ? 'working'
+            : employee.status === 'error'
+              ? 'error'
+              : employee.status === 'idle'
+                ? 'idle'
+                : 'working',
         totalSteps: employee.log.length,
       });
     });
@@ -138,7 +141,9 @@ export function useMissionChatBridge(conversationId: string | null) {
 /**
  * Determine step type from log entry text
  */
-function determineStepType(logEntry: string): 'thinking' | 'writing' | 'executing' | 'reading' | 'analyzing' {
+function determineStepType(
+  logEntry: string
+): 'thinking' | 'writing' | 'executing' | 'reading' | 'analyzing' {
   const lower = logEntry.toLowerCase();
 
   if (lower.includes('writing') || lower.includes('creating file')) {
@@ -193,7 +198,9 @@ export function useMissionProgress() {
   const missionPlan = useMissionStore((state) => state.missionPlan);
   const missionStatus = useMissionStore((state) => state.missionStatus);
 
-  const completedTasks = missionPlan.filter((t) => t.status === 'completed').length;
+  const completedTasks = missionPlan.filter(
+    (t) => t.status === 'completed'
+  ).length;
   const totalTasks = missionPlan.length;
   const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 

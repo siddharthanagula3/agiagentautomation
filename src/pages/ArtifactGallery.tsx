@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { Badge } from '@shared/ui/badge';
@@ -56,7 +62,9 @@ const ArtifactGalleryPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'trending'>('recent');
+  const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'trending'>(
+    'recent'
+  );
 
   useEffect(() => {
     loadPublicArtifacts();
@@ -66,9 +74,7 @@ const ArtifactGalleryPage: React.FC = () => {
     try {
       setIsLoading(true);
 
-      let query = supabase
-        .from('public_artifacts')
-        .select('*');
+      let query = supabase.from('public_artifacts').select('*');
 
       // Filter by type
       if (selectedType !== 'all') {
@@ -121,10 +127,13 @@ const ArtifactGalleryPage: React.FC = () => {
     }
   };
 
-  const filteredArtifacts = artifacts.filter((artifact) =>
-    artifact.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    artifact.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    artifact.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredArtifacts = artifacts.filter(
+    (artifact) =>
+      artifact.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      artifact.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      artifact.tags.some((tag) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase())
+      )
   );
 
   const getTypeIcon = (type: string) => {
@@ -165,7 +174,8 @@ const ArtifactGalleryPage: React.FC = () => {
           <div className="mb-6">
             <h1 className="mb-2 text-4xl font-bold">Artifact Gallery</h1>
             <p className="text-lg text-muted-foreground">
-              Discover and explore interactive artifacts created by the community
+              Discover and explore interactive artifacts created by the
+              community
             </p>
           </div>
 
@@ -217,7 +227,9 @@ const ArtifactGalleryPage: React.FC = () => {
         {isLoading ? (
           <div className="flex h-64 items-center justify-center">
             <div className="text-center">
-              <div className="mb-4 text-lg font-medium">Loading artifacts...</div>
+              <div className="mb-4 text-lg font-medium">
+                Loading artifacts...
+              </div>
               <div className="text-sm text-muted-foreground">
                 Fetching amazing community creations
               </div>
@@ -256,7 +268,10 @@ const ArtifactGalleryPage: React.FC = () => {
                       </div>
                       <Badge
                         variant="secondary"
-                        className={cn('ml-2 flex items-center gap-1', getTypeColor(artifact.type))}
+                        className={cn(
+                          'ml-2 flex items-center gap-1',
+                          getTypeColor(artifact.type)
+                        )}
                       >
                         <TypeIcon className="h-3 w-3" />
                         {artifact.type}
@@ -273,7 +288,9 @@ const ArtifactGalleryPage: React.FC = () => {
                       <span>{artifact.author}</span>
                       <span>•</span>
                       <Calendar className="h-3 w-3" />
-                      <span>{new Date(artifact.createdAt).toLocaleDateString()}</span>
+                      <span>
+                        {new Date(artifact.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </CardHeader>
 
@@ -282,7 +299,11 @@ const ArtifactGalleryPage: React.FC = () => {
                     {artifact.tags.length > 0 && (
                       <div className="mb-4 flex flex-wrap gap-2">
                         {artifact.tags.slice(0, 3).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             {tag}
                           </Badge>
                         ))}
@@ -317,8 +338,9 @@ const ArtifactGalleryPage: React.FC = () => {
         <div className="mt-12 rounded-lg border border-primary/30 bg-primary/5 p-6 text-center">
           <h3 className="mb-2 text-lg font-semibold">✨ Gallery Coming Soon</h3>
           <p className="text-sm text-muted-foreground">
-            The Artifact Gallery is currently in development. Soon you'll be able to share your
-            creations with the community and discover amazing artifacts from other users!
+            The Artifact Gallery is currently in development. Soon you'll be
+            able to share your creations with the community and discover amazing
+            artifacts from other users!
           </p>
         </div>
       </div>

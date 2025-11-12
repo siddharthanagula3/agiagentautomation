@@ -27,7 +27,9 @@ interface UseKeyboardShortcutsOptions {
   enabled?: boolean;
 }
 
-export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) {
+export function useKeyboardShortcuts(
+  options: UseKeyboardShortcutsOptions = {}
+) {
   const {
     onNewChat,
     onSearch,

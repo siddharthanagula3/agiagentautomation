@@ -48,7 +48,10 @@ export async function buyTokenPack(params: BuyTokenPackParams): Promise<void> {
 
     const data = await response.json();
 
-    console.log('[Buy Token Pack] ✅ Checkout session created:', data.sessionId);
+    console.log(
+      '[Buy Token Pack] ✅ Checkout session created:',
+      data.sessionId
+    );
 
     // Redirect to Stripe checkout
     if (data.url) {

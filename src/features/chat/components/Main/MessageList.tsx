@@ -62,13 +62,18 @@ export const MessageList: React.FC<MessageListProps> = ({
               role: message.role,
               timestamp: new Date(message.createdAt),
               employeeId: message.metadata?.employeeId as string | undefined,
-              employeeName: message.metadata?.employeeName as string | undefined,
+              employeeName: message.metadata?.employeeName as
+                | string
+                | undefined,
               reactions: [],
               metadata: {
                 tokensUsed: message.metadata?.tokens,
-                inputTokens: message.metadata?.inputTokens as number | undefined,
-                outputTokens:
-                  message.metadata?.outputTokens as number | undefined,
+                inputTokens: message.metadata?.inputTokens as
+                  | number
+                  | undefined,
+                outputTokens: message.metadata?.outputTokens as
+                  | number
+                  | undefined,
                 model: message.metadata?.model,
                 cost: message.metadata?.cost,
                 isPinned: message.metadata?.isPinned as boolean | undefined,

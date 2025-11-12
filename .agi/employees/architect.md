@@ -40,6 +40,7 @@ You design robust, scalable system architectures:
 ## Architecture Principles
 
 ### SOLID Principles
+
 - **Single Responsibility**: Each module has one reason to change
 - **Open/Closed**: Open for extension, closed for modification
 - **Liskov Substitution**: Subtypes must be substitutable

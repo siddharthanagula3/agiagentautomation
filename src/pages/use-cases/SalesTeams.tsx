@@ -36,7 +36,7 @@ const SalesTeamsPage: React.FC = () => {
       icon: Target,
       title: '99.7% Cost Savings',
       description:
-        'Human SDR: $80K/year + $30K benefits + 20% commission = $120K+/year. AI SDR: $228/year. That\'s $119,772 saved per rep.',
+        "Human SDR: $80K/year + $30K benefits + 20% commission = $120K+/year. AI SDR: $228/year. That's $119,772 saved per rep.",
       color: 'from-green-500 to-emerald-500',
     },
     {
@@ -133,9 +133,10 @@ const SalesTeamsPage: React.FC = () => {
                 Save 99.7% • Work 24/7 • No Commission Needed
               </p>
               <p className="mb-8 text-xl text-muted-foreground">
-                Automate lead qualification, personalized outreach, follow-ups, and CRM
-                management. AI sales reps work around the clock for less than a coffee subscription.
-                Your human closers focus only on hot deals.
+                Automate lead qualification, personalized outreach, follow-ups,
+                and CRM management. AI sales reps work around the clock for less
+                than a coffee subscription. Your human closers focus only on hot
+                deals.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Button
@@ -287,7 +288,8 @@ const SalesTeamsPage: React.FC = () => {
               Free Forever Plan • $19/month Pro • No Credit Card Required
             </p>
             <p className="mb-8 text-xl opacity-90">
-              Hire your first AI SDR in 60 seconds. Join 2,000+ sales teams saving millions on payroll.
+              Hire your first AI SDR in 60 seconds. Join 2,000+ sales teams
+              saving millions on payroll.
             </p>
             <Button size="lg" variant="secondary" onClick={handleStartTrial}>
               {user ? 'Go to Dashboard' : 'Start Free Forever'}

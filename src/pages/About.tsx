@@ -34,17 +34,20 @@ const AboutPage: React.FC = () => {
     {
       icon: Zap,
       title: 'Instant Results',
-      description: 'Hire in 60 seconds, not 60 days. Natural language interface—no coding required',
+      description:
+        'Hire in 60 seconds, not 60 days. Natural language interface—no coding required',
     },
     {
       icon: Heart,
       title: 'Transparent Pricing',
-      description: 'Market-rate tokens. No hidden fees. Free Forever plan to start.',
+      description:
+        'Market-rate tokens. No hidden fees. Free Forever plan to start.',
     },
     {
       icon: Award,
       title: 'Enterprise Security',
-      description: 'Supabase-powered infrastructure with SOC 2 compliance and end-to-end encryption',
+      description:
+        'Supabase-powered infrastructure with SOC 2 compliance and end-to-end encryption',
     },
   ];
 
@@ -100,7 +103,8 @@ const AboutPage: React.FC = () => {
           mainEntity: {
             '@type': 'Organization',
             name: 'AGI Agent Automation',
-            description: 'Complete Workforce Replacement Platform - AI Employees at 1/100th the cost',
+            description:
+              'Complete Workforce Replacement Platform - AI Employees at 1/100th the cost',
             foundingDate: '2024',
             numberOfEmployees: '50+',
             location: {
@@ -133,11 +137,13 @@ const AboutPage: React.FC = () => {
               Replacing $100K Employees with $19/Month AI
             </h1>
             <p className="mb-8 text-xl leading-relaxed text-muted-foreground">
-              We're on a mission to make world-class talent accessible to every business.
-              No more $100K salaries, benefits, or sick days. Just{' '}
-              <span className="font-bold text-primary">24/7 AI employees</span> at{' '}
+              We're on a mission to make world-class talent accessible to every
+              business. No more $100K salaries, benefits, or sick days. Just{' '}
+              <span className="font-bold text-primary">24/7 AI employees</span>{' '}
+              at{' '}
               <span className="font-bold text-primary">1/100th the cost</span>.
-              Simply tell them what you need in natural language—they handle everything.
+              Simply tell them what you need in natural language—they handle
+              everything.
             </p>
           </motion.div>
 
@@ -185,24 +191,25 @@ const AboutPage: React.FC = () => {
                 End the $100K Employee Era
               </h2>
               <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
-                We believe the old workforce model is broken. Why pay $100,000+/year
-                for a human employee who works 40 hours/week when you can hire an
-                AI employee for $19/month that works 24/7, never gets sick, and
-                delivers expert-level work instantly?
+                We believe the old workforce model is broken. Why pay
+                $100,000+/year for a human employee who works 40 hours/week when
+                you can hire an AI employee for $19/month that works 24/7, never
+                gets sick, and delivers expert-level work instantly?
               </p>
               <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
                 Our platform makes it possible to{' '}
                 <span className="font-semibold text-foreground">
                   hire specialized AI employees in under 60 seconds
                 </span>
-                —no interviews, no onboarding, no training. Just tell them what you
-                need in natural language via our chat interface, and watch them work.
+                —no interviews, no onboarding, no training. Just tell them what
+                you need in natural language via our chat interface, and watch
+                them work.
               </p>
               <p className="text-lg leading-relaxed text-muted-foreground">
-                From solo founders to Fortune 500 enterprises, we're enabling businesses
-                to save 99%+ on payroll while getting better results. Powered by
-                Supabase for bank-level security and the world's best LLMs for
-                unmatched intelligence.
+                From solo founders to Fortune 500 enterprises, we're enabling
+                businesses to save 99%+ on payroll while getting better results.
+                Powered by Supabase for bank-level security and the world's best
+                LLMs for unmatched intelligence.
               </p>
             </div>
             <div className="relative">
@@ -294,8 +301,9 @@ const AboutPage: React.FC = () => {
               Start Free Forever • Upgrade to $19/month
             </p>
             <p className="mb-8 text-xl text-muted-foreground">
-              Hire your first AI employee in under 60 seconds. No credit card required.
-              Just tell them what you need in natural language—they handle everything.
+              Hire your first AI employee in under 60 seconds. No credit card
+              required. Just tell them what you need in natural language—they
+              handle everything.
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button

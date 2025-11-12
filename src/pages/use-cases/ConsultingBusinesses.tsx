@@ -132,9 +132,10 @@ const ConsultingBusinessesPage: React.FC = () => {
                 Save 99.8% • Serve 3x More Clients • Boost Margins 60%
               </p>
               <p className="mb-8 text-xl text-muted-foreground">
-                Junior analysts cost $120K+/year. AI employees do research, data analysis, reports,
-                and client comms for $19/month. Keep senior partners billable while AI handles the grunt work.
-                Tell them what you need in natural language—they deliver.
+                Junior analysts cost $120K+/year. AI employees do research, data
+                analysis, reports, and client comms for $19/month. Keep senior
+                partners billable while AI handles the grunt work. Tell them
+                what you need in natural language—they deliver.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Button

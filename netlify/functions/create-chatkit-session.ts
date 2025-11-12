@@ -4,6 +4,7 @@
  */
 
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import { getApiHeaders, handleCorsPreflightRequest } from './_shared/cors';
 
 interface CreateSessionRequest {
   employeeId: string;
@@ -16,17 +17,13 @@ const handler: Handler = async (
   event: HandlerEvent,
   context: HandlerContext
 ) => {
-  // Enable CORS
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json',
-  };
+  // Get secure CORS headers
+  const origin = event.headers.origin;
+  const headers = getApiHeaders(origin);
 
   // Handle preflight
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
+    return handleCorsPreflightRequest(origin);
   }
 
   if (event.httpMethod !== 'POST') {
@@ -89,7 +86,10 @@ const handler: Handler = async (
     );
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = await response.json().catch((err) => {
+        console.error('[ChatKit] Failed to parse OpenAI error response:', err);
+        return {};
+      });
       console.error('OpenAI API Error:', response.status, errorData);
 
       return {

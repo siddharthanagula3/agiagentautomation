@@ -2,7 +2,7 @@
  * Help & Support Page - Documentation, FAQs, and support resources
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Card,
@@ -37,8 +37,11 @@ import {
   Users,
   Settings,
   CreditCard,
+  Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { supportService, FAQ as FAQType } from '@features/support/services/support-service';
+import { useAuthStore } from '@shared/stores/authentication-store';
 
 interface FAQItem {
   category: string;
@@ -47,14 +50,17 @@ interface FAQItem {
 }
 
 const HelpSupportPage: React.FC = () => {
+  const { user } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [contactForm, setContactForm] = useState({
     name: '',
-    email: '',
+    email: user?.email || '',
     subject: '',
     message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingFAQs, setIsLoadingFAQs] = useState(true);
+  const [faqs, setFaqs] = useState<FAQItem[]>([]);
 
   const faqs: FAQItem[] = [
     {
@@ -115,14 +121,38 @@ const HelpSupportPage: React.FC = () => {
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!contactForm.name || !contactForm.email || !contactForm.subject || !contactForm.message) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      toast.success('Message sent successfully!');
-      setContactForm({ name: '', email: '', subject: '', message: '' });
+      const { data, error } = await supportService.submitTicket({
+        name: contactForm.name,
+        email: contactForm.email,
+        subject: contactForm.subject,
+        message: contactForm.message,
+      });
+
+      if (error) {
+        console.error('Error submitting ticket:', error);
+        toast.error('Failed to send message. Please try again.');
+        return;
+      }
+
+      toast.success('Message sent successfully! We\'ll get back to you soon.');
+      setContactForm({
+        name: '',
+        email: user?.email || '',
+        subject: '',
+        message: '',
+      });
     } catch (error) {
-      toast.error('Failed to send message.');
+      console.error('Error submitting ticket:', error);
+      toast.error('Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -182,7 +212,14 @@ const HelpSupportPage: React.FC = () => {
           </TabsList>
 
           <TabsContent value="faq" className="space-y-6">
-            {Object.entries(faqsByCategory).length === 0 ? (
+            {isLoadingFAQs ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Loader2 className="mx-auto mb-4 h-16 w-16 animate-spin text-primary" />
+                  <p className="text-muted-foreground">Loading FAQs...</p>
+                </CardContent>
+              </Card>
+            ) : Object.entries(faqsByCategory).length === 0 ? (
               <Card>
                 <CardContent className="p-12 text-center">
                   <HelpCircle className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />

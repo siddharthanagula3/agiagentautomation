@@ -111,12 +111,12 @@ const faqs = [
   {
     question: 'How much money will I save compared to hiring humans?',
     answer:
-      'Massive savings! A human developer costs $100K+/year ($8,333/month) plus benefits. Our AI developers cost just $29/month - that\'s a 99.7% cost reduction. For a team of 10, you save over $1M/year while getting 24/7 productivity with zero downtime, no sick days, and instant expertise.',
+      "Massive savings! A human developer costs $100K+/year ($8,333/month) plus benefits. Our AI developers cost just $29/month - that's a 99.7% cost reduction. For a team of 10, you save over $1M/year while getting 24/7 productivity with zero downtime, no sick days, and instant expertise.",
   },
   {
     question: 'How quickly can I get started?',
     answer:
-      'Hire your first AI employee in under 60 seconds! No interviews, no onboarding, no training. Simply sign up, select from 165+ specialized AI employees in our marketplace, and start delegating tasks immediately in natural language. It\'s literally faster than sending an email.',
+      "Hire your first AI employee in under 60 seconds! No interviews, no onboarding, no training. Simply sign up, select from 165+ specialized AI employees in our marketplace, and start delegating tasks immediately in natural language. It's literally faster than sending an email.",
   },
   {
     question: 'What tasks can AI employees handle?',
@@ -131,12 +131,12 @@ const faqs = [
   {
     question: 'Is my data secure?',
     answer:
-      'Bank-level security guaranteed. We\'re SOC 2 compliant, GDPR ready with end-to-end encryption. Your data is completely isolated and never used to train models. Built on Supabase with enterprise-grade infrastructure. More secure than having human contractors with USB drives.',
+      "Bank-level security guaranteed. We're SOC 2 compliant, GDPR ready with end-to-end encryption. Your data is completely isolated and never used to train models. Built on Supabase with enterprise-grade infrastructure. More secure than having human contractors with USB drives.",
   },
   {
     question: 'Can I customize AI employees?',
     answer:
-      'Absolutely! Customize skills, workflows, integrations, and behavior to match your exact needs. Advanced users can create entirely custom AI employees from scratch. It\'s like training a human employee, except it takes 5 minutes instead of 3 months.',
+      "Absolutely! Customize skills, workflows, integrations, and behavior to match your exact needs. Advanced users can create entirely custom AI employees from scratch. It's like training a human employee, except it takes 5 minutes instead of 3 months.",
   },
 ];
 
@@ -280,7 +280,8 @@ const LandingPage: React.FC = () => {
                 {' '}
                 Save 99%+ on costs
               </span>
-              , get 24/7 productivity, zero downtime. Just tell them what you need in natural language - they handle everything.
+              , get 24/7 productivity, zero downtime. Just tell them what you
+              need in natural language - they handle everything.
             </p>
 
             {/* Limited Time Offer timer removed per request */}

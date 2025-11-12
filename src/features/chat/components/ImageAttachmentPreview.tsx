@@ -93,7 +93,10 @@ export function ImageAttachmentPreview({
               {/* Image info */}
               <div className="flex items-center justify-between gap-2 p-2">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-medium" title={attachment.name}>
+                  <p
+                    className="truncate text-xs font-medium"
+                    title={attachment.name}
+                  >
                     {attachment.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -135,7 +138,10 @@ export function ImageAttachmentPreview({
       </div>
 
       {/* Lightbox Dialog */}
-      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+      <Dialog
+        open={!!selectedImage}
+        onOpenChange={() => setSelectedImage(null)}
+      >
         <DialogContent className="max-w-5xl">
           <DialogTitle className="sr-only">Image Preview</DialogTitle>
           {selectedImage && (

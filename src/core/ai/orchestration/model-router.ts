@@ -172,7 +172,11 @@ export class ModelRouter {
     }
 
     // Video generation keywords
-    if (/\b(video|animation|movie|generate video|create video)\b/i.test(lowerInput)) {
+    if (
+      /\b(video|animation|movie|generate video|create video)\b/i.test(
+        lowerInput
+      )
+    ) {
       return 'video-generation';
     }
 
@@ -276,9 +280,8 @@ export class ModelRouter {
    */
   getDefaultModel(): ModelInfo {
     return (
-      AVAILABLE_MODELS.find(
-        (m) => m.model === 'claude-3-5-sonnet-20241022'
-      ) || AVAILABLE_MODELS[0]
+      AVAILABLE_MODELS.find((m) => m.model === 'claude-3-5-sonnet-20241022') ||
+      AVAILABLE_MODELS[0]
     );
   }
 }

@@ -31,11 +31,7 @@ import {
 import { cn } from '@/lib/utils';
 import type { ChatMode, Tool } from '../../types';
 import { PromptShortcuts } from '../PromptShortcuts';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@shared/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
 
 interface AIEmployee {
   id: string;
@@ -55,11 +51,14 @@ interface Model {
 }
 
 interface ChatComposerProps {
-  onSendMessage: (content: string, options?: {
-    attachments?: File[];
-    model?: string;
-    employees?: string[];
-  }) => Promise<void>;
+  onSendMessage: (
+    content: string,
+    options?: {
+      attachments?: File[];
+      model?: string;
+      employees?: string[];
+    }
+  ) => Promise<void>;
   isLoading: boolean;
   availableTools?: Tool[];
   onToolToggle?: (toolId: string) => void;
@@ -112,7 +111,9 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODELS[1].id);
-  const [selectedEmployees, setSelectedEmployees] = useState<string[]>(['auto']);
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([
+    'auto',
+  ]);
   const [textareaHeight, setTextareaHeight] = useState(80);
   const [showPromptShortcuts, setShowPromptShortcuts] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -185,14 +186,18 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
     }, 100);
   };
 
-  const selectedModel_ = availableModels.find((m) => m.id === selectedModel) || availableModels[0];
+  const selectedModel_ =
+    availableModels.find((m) => m.id === selectedModel) || availableModels[0];
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-background p-4 shadow-sm">
       {/* Top Bar: Model + Employee Selection */}
       <div className="flex items-center gap-2">
         {/* Prompt Shortcuts Button */}
-        <Popover open={showPromptShortcuts} onOpenChange={setShowPromptShortcuts}>
+        <Popover
+          open={showPromptShortcuts}
+          onOpenChange={setShowPromptShortcuts}
+        >
           <PopoverTrigger asChild>
             <Button
               variant="ghost"
@@ -226,7 +231,9 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-64">
-            <DropdownMenuLabel className="text-xs">Select AI Model</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-xs">
+              Select AI Model
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             {availableModels.map((model) => (
               <DropdownMenuItem
@@ -287,7 +294,8 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
                           className={cn(
                             'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background',
                             employee.status === 'working' && 'bg-green-500',
-                            employee.status === 'thinking' && 'bg-yellow-500 animate-pulse'
+                            employee.status === 'thinking' &&
+                              'animate-pulse bg-yellow-500'
                           )}
                         />
                       )}
@@ -326,12 +334,16 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
         </div>
 
         {/* Team Mode Indicator */}
-        {selectedEmployees.length > 1 && !selectedEmployees.includes('auto') && (
-          <Badge variant="secondary" className="flex items-center gap-1 text-xs">
-            <Users className="h-3 w-3" />
-            Team
-          </Badge>
-        )}
+        {selectedEmployees.length > 1 &&
+          !selectedEmployees.includes('auto') && (
+            <Badge
+              variant="secondary"
+              className="flex items-center gap-1 text-xs"
+            >
+              <Users className="h-3 w-3" />
+              Team
+            </Badge>
+          )}
       </div>
 
       {/* Attachments Preview */}
@@ -367,7 +379,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Message ${selectedEmployees.includes('auto') ? 'AI Team' : selectedEmployees.length > 1 ? `${selectedEmployees.length} employees` : 'AI'}...`}
-            className="min-h-[80px] resize-none pr-12 scrollbar-thin"
+            className="scrollbar-thin min-h-[80px] resize-none pr-12"
             style={{ height: `${textareaHeight}px` }}
             disabled={isLoading}
           />
@@ -409,8 +421,15 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
       {/* Helper Text */}
       <div className="flex items-center justify-between px-1 text-xs text-muted-foreground">
         <span>
-          Press <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">Enter</kbd> to send,{' '}
-          <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">Shift+Enter</kbd> for new line
+          Press{' '}
+          <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
+            Enter
+          </kbd>{' '}
+          to send,{' '}
+          <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
+            Shift+Enter
+          </kbd>{' '}
+          for new line
         </span>
         {message.length > 0 && (
           <span className="text-muted-foreground/70">

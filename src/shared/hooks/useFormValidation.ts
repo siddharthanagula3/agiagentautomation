@@ -210,7 +210,8 @@ export function useAsyncValidation<T>(
         }
         return isValid;
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Validation error';
+        const message =
+          error instanceof Error ? error.message : 'Validation error';
         setValidationError(message);
         return false;
       } finally {
@@ -234,7 +235,9 @@ export function createFieldProps<T>(
 ) {
   return {
     value: value ?? '',
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    onChange: (
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
       setValue(field, e.target.value);
     },
     error: !!error,

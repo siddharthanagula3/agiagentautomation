@@ -6,7 +6,16 @@ import {
 } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
-import { User, Bot, FileText, Download, ChevronDown, ChevronUp, Check, Copy } from 'lucide-react';
+import {
+  User,
+  Bot,
+  FileText,
+  Download,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  Copy,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -20,7 +29,10 @@ import { TokenUsageDisplay } from './TokenUsageDisplay';
 import { MessageActions } from './MessageActions';
 import { ImageAttachmentPreview } from './ImageAttachmentPreview';
 import { ArtifactPreview } from './ArtifactPreview';
-import { extractArtifacts, removeArtifactBlocks } from '../utils/artifact-detector';
+import {
+  extractArtifacts,
+  removeArtifactBlocks,
+} from '../utils/artifact-detector';
 import { useArtifactStore } from '@shared/stores/artifact-store';
 
 interface Attachment {
@@ -65,7 +77,10 @@ interface MessageBubbleProps {
   onRegenerate?: (messageId: string) => void;
   onDelete?: (messageId: string) => void;
   onPin?: (messageId: string) => void;
-  onReact?: (messageId: string, reactionType: 'up' | 'down' | 'helpful') => void;
+  onReact?: (
+    messageId: string,
+    reactionType: 'up' | 'down' | 'helpful'
+  ) => void;
 }
 
 // Custom code block component with copy button
@@ -89,7 +104,11 @@ const CodeBlock = ({
   };
 
   if (!match) {
-    return <code className={className} {...props}>{children}</code>;
+    return (
+      <code className={className} {...props}>
+        {children}
+      </code>
+    );
   }
 
   return (
@@ -174,7 +193,8 @@ export function MessageBubble({
   const hasWorkStream = message.metadata?.hasWorkStream;
 
   // Artifact detection and management
-  const { addArtifact, shareArtifact, setCurrentVersion, getMessageArtifacts } = useArtifactStore();
+  const { addArtifact, shareArtifact, setCurrentVersion, getMessageArtifacts } =
+    useArtifactStore();
 
   // Extract artifacts from message content (only for assistant messages)
   const artifacts = useMemo(() => {
@@ -245,7 +265,7 @@ export function MessageBubble({
         className={cn(
           'flex gap-3 px-4 py-6',
           isUser ? 'justify-end' : 'justify-start',
-          !isUser && 'hover:bg-muted/30 transition-colors'
+          !isUser && 'transition-colors hover:bg-muted/30'
         )}
       >
         {/* Avatar - only show for assistant messages */}
@@ -256,7 +276,9 @@ export function MessageBubble({
                 <AvatarImage src={message.employeeAvatar} />
                 <AvatarFallback
                   className="text-xs font-semibold text-white"
-                  style={{ backgroundColor: message.employeeColor || '#6366f1' }}
+                  style={{
+                    backgroundColor: message.employeeColor || '#6366f1',
+                  }}
                 >
                   {message.employeeName
                     ?.split(' ')
@@ -284,7 +306,9 @@ export function MessageBubble({
             <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
               <span>{message.employeeName}</span>
               <span className="text-muted-foreground/50">•</span>
-              <span className="text-muted-foreground/70">{formatTime(message.timestamp)}</span>
+              <span className="text-muted-foreground/70">
+                {formatTime(message.timestamp)}
+              </span>
             </div>
           )}
 
@@ -320,10 +344,7 @@ export function MessageBubble({
           >
             {/* Document View (scrollable, expandable) */}
             {isDocument ? (
-              <ScrollArea
-                className="w-full"
-                style={{ maxHeight }}
-              >
+              <ScrollArea className="w-full" style={{ maxHeight }}>
                 <div className="px-4 py-3">
                   <div className="prose prose-sm dark:prose-invert max-w-none">
                     <ReactMarkdown
@@ -338,7 +359,12 @@ export function MessageBubble({
               </ScrollArea>
             ) : (
               /* Regular Message Content */
-              <div className={cn('prose prose-sm dark:prose-invert max-w-none', !isUser && 'prose-p:leading-relaxed')}>
+              <div
+                className={cn(
+                  'prose prose-sm dark:prose-invert max-w-none',
+                  !isUser && 'prose-p:leading-relaxed'
+                )}
+              >
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
                   rehypePlugins={[rehypeHighlight, rehypeRaw]}
@@ -428,7 +454,12 @@ export function MessageBubble({
           )}
 
           {/* Action Buttons & Token Usage */}
-          <div className={cn('mt-2 flex items-center gap-2', isUser ? 'justify-end' : 'justify-between')}>
+          <div
+            className={cn(
+              'mt-2 flex items-center gap-2',
+              isUser ? 'justify-end' : 'justify-between'
+            )}
+          >
             {/* Token Usage Display (for assistant messages) */}
             {!isUser && message.metadata?.tokensUsed && (
               <TokenUsageDisplay

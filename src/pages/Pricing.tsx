@@ -344,8 +344,11 @@ const PricingPage: React.FC = () => {
               Save 99.8% on Payroll Costs
             </p>
             <p className="mb-8 text-xl text-muted-foreground">
-              Free Forever plan • Pro $19/month • Business $99/month • Enterprise Custom<br />
-              Token costs at market rates - same as OpenAI, Anthropic, Google direct
+              Free Forever plan • Pro $19/month • Business $99/month •
+              Enterprise Custom
+              <br />
+              Token costs at market rates - same as OpenAI, Anthropic, Google
+              direct
             </p>
 
             {/* Countdown Timer for Limited Offer */}

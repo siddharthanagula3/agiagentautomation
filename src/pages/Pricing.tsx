@@ -50,7 +50,7 @@ const FALLBACK_PLANS: PricingPlan[] = [
   },
   {
     name: 'Pro',
-    price: '$19',
+    price: '$29',
     period: '/month',
     description: 'Replace your first employee - save $99K+/year!',
     features: [
@@ -193,8 +193,8 @@ const PricingPage: React.FC = () => {
         },
         {
           name: 'Pricing model',
-          starter: '$29/month',
-          pro: '$299/month',
+          starter: 'Free',
+          pro: '$29/month ($24.99/month yearly)',
           enterprise: 'Custom',
         },
         {
@@ -289,7 +289,7 @@ const PricingPage: React.FC = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="AI Employee Pricing | Free Forever to $99/mo | Save 99% vs Human Employees"
-        description="Replace $100K/year employees with $19/month AI employees. Free Forever plan available. Token costs at market rates. Save 99%+ on payroll. Start in 60 seconds!"
+        description="Replace $100K/year employees with $29/month AI employees. Free Forever plan available. Token costs at market rates. Save 99%+ on payroll. Start in 60 seconds!"
         keywords={[
           'ai employee pricing',
           'cheapest ai employees',
@@ -338,13 +338,13 @@ const PricingPage: React.FC = () => {
             className="mx-auto max-w-3xl text-center"
           >
             <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
-              Replace $100K Employees with $19/Month AI
+              Replace $100K Employees with $29/Month AI
             </h1>
             <p className="mb-4 text-2xl font-semibold text-foreground">
               Save 99.8% on Payroll Costs
             </p>
             <p className="mb-8 text-xl text-muted-foreground">
-              Free Forever plan • Pro $19/month • Business $99/month •
+              Free Forever plan • Pro $29/month ($24.99/month if billed yearly) • Business $99/month •
               Enterprise Custom
               <br />
               Token costs at market rates - same as OpenAI, Anthropic, Google

@@ -126,14 +126,14 @@ const ConsultingBusinessesPage: React.FC = () => {
                 For Consulting Businesses
               </div>
               <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
-                Replace $120K Consultants with $19/Month AI
+                Replace $120K Consultants with $29/Month AI ($24.99/month if billed yearly)
               </h1>
               <p className="mb-4 text-2xl font-semibold text-foreground">
                 Save 99.8% • Serve 3x More Clients • Boost Margins 60%
               </p>
               <p className="mb-8 text-xl text-muted-foreground">
                 Junior analysts cost $120K+/year. AI employees do research, data
-                analysis, reports, and client comms for $19/month. Keep senior
+                analysis, reports, and client comms for $29/month ($24.99/month if billed yearly). Keep senior
                 partners billable while AI handles the grunt work. Tell them
                 what you need in natural language—they deliver.
               </p>

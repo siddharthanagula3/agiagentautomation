@@ -1107,7 +1107,7 @@ const BillingPage: React.FC = () => {
                       💡 Better Value: Upgrade to Pro
                     </h4>
                     <p className="mb-3 text-sm text-muted-foreground">
-                      Get 10M tokens/month for $29 - Better value than buying
+                      Get 10M tokens/month for $29/month ($24.99/month if billed yearly) - Better value than buying
                       token packs if you use AI regularly
                     </p>
                     <Button
@@ -1179,17 +1179,17 @@ const BillingPage: React.FC = () => {
                   <div className="text-2xl font-bold">
                     {billingPeriod === 'yearly' ? (
                       <>
-                        $200
+                        $299.88
                         <span className="text-sm text-muted-foreground">
                           /year
                         </span>
                         <div className="text-sm text-green-600 dark:text-green-400">
-                          Save $40 (17% off)
+                          $24.99/month (Save 14% off monthly)
                         </div>
                       </>
                     ) : (
                       <>
-                        $20
+                        $29
                         <span className="text-sm text-muted-foreground">
                           /month
                         </span>

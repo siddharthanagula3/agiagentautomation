@@ -37,7 +37,7 @@ const ChatPage: React.FC = () => {
 
   // Chat state management
   const {
-    messages,
+    messages: rawMessages,
     isLoading,
     error,
     sendMessage,
@@ -46,6 +46,32 @@ const ChatPage: React.FC = () => {
     deleteMessage,
     clearMessages,
   } = useChat(sessionId);
+
+  // Defensive: Ensure all message timestamps are valid Date objects
+  const messages = React.useMemo(() => {
+    return rawMessages.map((msg) => {
+      let createdAt: Date;
+      
+      if (msg.createdAt instanceof Date) {
+        createdAt = msg.createdAt;
+      } else if (typeof msg.createdAt === 'string' || typeof msg.createdAt === 'number') {
+        createdAt = new Date(msg.createdAt);
+      } else {
+        createdAt = new Date();
+      }
+      
+      // Validate date - if invalid, use current date
+      if (isNaN(createdAt.getTime())) {
+        console.warn('Invalid createdAt for message in ChatInterface:', msg.id, msg.createdAt);
+        createdAt = new Date();
+      }
+      
+      return {
+        ...msg,
+        createdAt,
+      };
+    });
+  }, [rawMessages]);
 
   const {
     sessions,

@@ -85,7 +85,10 @@ const ArtifactGalleryPage: React.FC = () => {
     try {
       setIsLoading(true);
 
-      let query = supabase.from('public_artifacts').select('*');
+      let query = supabase
+        .from('public_artifacts')
+        .select('*')
+        .eq('is_public', true); // Only show public artifacts
 
       // Filter by type
       if (selectedType !== 'all') {

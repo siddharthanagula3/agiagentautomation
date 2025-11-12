@@ -85,14 +85,25 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
               <p className="text-xs">Start a new conversation</p>
             </div>
           ) : (
-            sessions.map((session) => (
-              <ConversationListItem
-                key={session.id}
-                id={session.id}
-                title={session.title}
-                summary={session.summary}
-                updatedAt={new Date(session.updatedAt)}
-                totalMessages={session.messageCount}
+            sessions.map((session) => {
+              // Safely convert updatedAt to Date object
+              const updatedAt = session.updatedAt instanceof Date
+                ? session.updatedAt
+                : new Date(session.updatedAt || Date.now());
+              
+              // Validate date
+              const safeUpdatedAt = isNaN(updatedAt.getTime()) 
+                ? new Date() 
+                : updatedAt;
+
+              return (
+                <ConversationListItem
+                  key={session.id}
+                  id={session.id}
+                  title={session.title}
+                  summary={session.summary}
+                  updatedAt={safeUpdatedAt}
+                  totalMessages={session.messageCount}
                 isActive={currentSession?.id === session.id}
                 isStarred={session.metadata?.starred}
                 isPinned={session.metadata?.pinned}
@@ -121,7 +132,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     : undefined
                 }
               />
-            ))
+              );
+            })
           )}
         </div>
       </ScrollArea>

@@ -49,14 +49,25 @@ const TOKEN_PRICING: Record<
   string,
   { input: number; output: number; provider: LLMProvider }
 > = {
-  // OpenAI
+  // OpenAI - Latest Models (November 2024+)
+  'gpt-5-thinking': { input: 15.0, output: 45.0, provider: 'openai' },
   'gpt-4o': { input: 5.0, output: 15.0, provider: 'openai' },
   'gpt-4o-mini': { input: 0.15, output: 0.6, provider: 'openai' },
   'gpt-4-turbo': { input: 10.0, output: 30.0, provider: 'openai' },
   'gpt-3.5-turbo': { input: 0.5, output: 1.5, provider: 'openai' },
 
-  // Anthropic
+  // Anthropic - Latest Models (November 2024+)
+  'claude-sonnet-4-5-thinking': {
+    input: 4.0,
+    output: 20.0,
+    provider: 'anthropic',
+  },
   'claude-3-5-sonnet-20241022': {
+    input: 3.0,
+    output: 15.0,
+    provider: 'anthropic',
+  },
+  'claude-3-5-sonnet': {
     input: 3.0,
     output: 15.0,
     provider: 'anthropic',
@@ -82,7 +93,8 @@ const TOKEN_PRICING: Record<
     provider: 'anthropic',
   },
 
-  // Google
+  // Google - Latest Models (November 2024+)
+  'gemini-2-5-pro': { input: 5.0, output: 15.0, provider: 'google' },
   'gemini-1.5-pro': { input: 3.5, output: 10.5, provider: 'google' },
   'gemini-1.5-flash': { input: 0.075, output: 0.3, provider: 'google' },
   'gemini-1.0-pro': { input: 0.5, output: 1.5, provider: 'google' },

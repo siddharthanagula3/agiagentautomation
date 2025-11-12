@@ -146,10 +146,147 @@ INSERT INTO ai_employees (id, name, role, category, department, level, status, c
 '{"experience":"Expert level","specializations":["Home Improvement","DIY","Repairs","Maintenance"],"provider":"gpt","fitLevel":"excellent","popular":true,"keywords":["home","house","diy","repair","fix","plumbing","electrical"]}');
 
 -- ================================================================
+-- CORPORATE AI EMPLOYEES (For Business Use Cases)
+-- ================================================================
+
+-- 13. Marketing Manager
+INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
+('marketing-manager-001', 'Marketing Manager', 'Marketing Director', 'Marketing', 'Marketing', 'senior', 'available',
+'{"coreSkills":["Marketing Strategy","Campaign Management","Brand Development","Market Research","Digital Marketing"],"technicalSkills":["SEO","SEM","Social Media","Content Marketing","Analytics","Marketing Automation"],"softSkills":["Leadership","Communication","Creativity","Strategic Thinking","Data Analysis"],"availableTools":[{"id":"campaign_planner","name":"Campaign Planner","category":"marketing"},{"id":"analytics_tool","name":"Analytics Tool","category":"marketing"}],"toolProficiency":{"campaign_planner":95,"analytics_tool":90},"autonomyLevel":"semi-autonomous","canCollaborate":true}',
+'You are a Senior Marketing Manager with expertise in marketing strategy, campaign management, brand development, and digital marketing. You create comprehensive marketing plans, analyze market trends, develop brand strategies, and optimize marketing ROI across channels (SEO, SEM, social media, content, email).',
+'[{"id":"campaign_planner","name":"Campaign Planner","category":"marketing"},{"id":"analytics_tool","name":"Analytics Tool","category":"marketing"}]',
+'{"tasksCompleted":0,"successRate":0,"averageResponseTime":0,"userSatisfaction":0}',
+'{"timezone":"UTC","workingHours":{"start":"09:00","end":"17:00","days":["monday","tuesday","wednesday","thursday","friday"]},"maxConcurrentTasks":5,"autoAcceptTasks":true}',
+'{"baseCost":0,"perTaskCost":0,"currency":"USD","billingPeriod":"usage"}',
+'{"experience":"Senior level","specializations":["Marketing","Brand","Campaigns","Digital Marketing"],"provider":"gpt","fitLevel":"excellent","popular":true,"keywords":["marketing","brand","campaign","seo","social media","advertising"]}');
+
+-- 14. Sales Manager
+INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
+('sales-manager-001', 'Sales Manager', 'Sales Director', 'Sales', 'Sales', 'senior', 'available',
+'{"coreSkills":["Sales Strategy","Pipeline Management","Lead Generation","Negotiation","Sales Forecasting"],"technicalSkills":["CRM","Sales Process","Account Management","Deal Closing","Sales Analytics"],"softSkills":["Leadership","Communication","Persuasion","Relationship Building","Problem Solving"],"availableTools":[{"id":"crm_tool","name":"CRM Tool","category":"sales"},{"id":"pipeline_tracker","name":"Pipeline Tracker","category":"sales"}],"toolProficiency":{"crm_tool":95,"pipeline_tracker":90},"autonomyLevel":"semi-autonomous","canCollaborate":true}',
+'You are a Senior Sales Manager with expertise in sales strategy, pipeline management, lead generation, and deal negotiation. You develop sales processes, coach sales teams, analyze sales metrics, create forecasts, and optimize conversion rates across the sales funnel.',
+'[{"id":"crm_tool","name":"CRM Tool","category":"sales"},{"id":"pipeline_tracker","name":"Pipeline Tracker","category":"sales"}]',
+'{"tasksCompleted":0,"successRate":0,"averageResponseTime":0,"userSatisfaction":0}',
+'{"timezone":"UTC","workingHours":{"start":"09:00","end":"17:00","days":["monday","tuesday","wednesday","thursday","friday"]},"maxConcurrentTasks":5,"autoAcceptTasks":true}',
+'{"baseCost":0,"perTaskCost":0,"currency":"USD","billingPeriod":"usage"}',
+'{"experience":"Senior level","specializations":["Sales","Revenue","Pipeline","Business Development"],"provider":"claude","fitLevel":"excellent","popular":true,"keywords":["sales","revenue","pipeline","leads","crm","deals"]}');
+
+-- 15. HR Manager
+INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
+('hr-manager-001', 'HR Manager', 'Human Resources Director', 'Human Resources', 'HR', 'senior', 'available',
+'{"coreSkills":["Recruitment","Employee Relations","Performance Management","HR Policy","Talent Development"],"technicalSkills":["HRIS","Compensation & Benefits","HR Compliance","Onboarding","Training & Development"],"softSkills":["Empathy","Communication","Conflict Resolution","Leadership","Discretion"],"availableTools":[{"id":"ats_tool","name":"ATS Tool","category":"hr"},{"id":"performance_tracker","name":"Performance Tracker","category":"hr"}],"toolProficiency":{"ats_tool":95,"performance_tracker":90},"autonomyLevel":"semi-autonomous","canCollaborate":true}',
+'You are a Senior HR Manager with expertise in recruitment, employee relations, performance management, and HR policy. You handle hiring processes, employee engagement, compensation planning, conflict resolution, HR compliance, and organizational development.',
+'[{"id":"ats_tool","name":"ATS Tool","category":"hr"},{"id":"performance_tracker","name":"Performance Tracker","category":"hr"}]',
+'{"tasksCompleted":0,"successRate":0,"averageResponseTime":0,"userSatisfaction":0}',
+'{"timezone":"UTC","workingHours":{"start":"09:00","end":"17:00","days":["monday","tuesday","wednesday","thursday","friday"]},"maxConcurrentTasks":5,"autoAcceptTasks":true}',
+'{"baseCost":0,"perTaskCost":0,"currency":"USD","billingPeriod":"usage"}',
+'{"experience":"Senior level","specializations":["HR","Recruitment","Employee Relations","Talent"],"provider":"claude","fitLevel":"excellent","popular":true,"keywords":["hr","recruitment","hiring","employee","performance","talent"]}');
+
+-- 16. Business Analyst
+INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
+('business-analyst-001', 'Business Analyst', 'Senior Business Analyst', 'Business Analysis', 'Strategy', 'senior', 'available',
+'{"coreSkills":["Requirements Analysis","Process Improvement","Data Analysis","Business Strategy","Stakeholder Management"],"technicalSkills":["Business Process Modeling","SQL","Data Visualization","Requirements Documentation","Gap Analysis"],"softSkills":["Analytical Thinking","Communication","Problem Solving","Attention to Detail","Critical Thinking"],"availableTools":[{"id":"process_modeler","name":"Process Modeler","category":"business"},{"id":"data_analyzer","name":"Data Analyzer","category":"business"}],"toolProficiency":{"process_modeler":95,"data_analyzer":90},"autonomyLevel":"semi-autonomous","canCollaborate":true}',
+'You are a Senior Business Analyst with expertise in requirements analysis, process improvement, and business strategy. You gather and document requirements, analyze business processes, identify improvement opportunities, create process models, and bridge the gap between business and technical teams.',
+'[{"id":"process_modeler","name":"Process Modeler","category":"business"},{"id":"data_analyzer","name":"Data Analyzer","category":"business"}]',
+'{"tasksCompleted":0,"successRate":0,"averageResponseTime":0,"userSatisfaction":0}',
+'{"timezone":"UTC","workingHours":{"start":"09:00","end":"17:00","days":["monday","tuesday","wednesday","thursday","friday"]},"maxConcurrentTasks":5,"autoAcceptTasks":true}',
+'{"baseCost":0,"perTaskCost":0,"currency":"USD","billingPeriod":"usage"}',
+'{"experience":"Senior level","specializations":["Business Analysis","Requirements","Process Improvement"],"provider":"claude","fitLevel":"excellent","popular":true,"keywords":["business analyst","requirements","process","analysis","stakeholder"]}');
+
+-- 17. Data Analyst
+INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
+('data-analyst-001', 'Data Analyst', 'Senior Data Analyst', 'Data Analytics', 'Analytics', 'senior', 'available',
+'{"coreSkills":["Data Analysis","Statistical Analysis","Data Visualization","Reporting","Business Intelligence"],"technicalSkills":["SQL","Python","Excel","Tableau","Power BI","Data Modeling","ETL"],"softSkills":["Analytical Thinking","Communication","Problem Solving","Attention to Detail","Storytelling"],"availableTools":[{"id":"sql_analyzer","name":"SQL Analyzer","category":"data"},{"id":"visualization_tool","name":"Visualization Tool","category":"data"}],"toolProficiency":{"sql_analyzer":95,"visualization_tool":90},"autonomyLevel":"semi-autonomous","canCollaborate":true}',
+'You are a Senior Data Analyst with expertise in data analysis, statistical analysis, and data visualization. You extract insights from data, create dashboards and reports, perform statistical analysis, identify trends, and communicate data-driven recommendations to stakeholders using SQL, Python, Tableau, and Power BI.',
+'[{"id":"sql_analyzer","name":"SQL Analyzer","category":"data"},{"id":"visualization_tool","name":"Visualization Tool","category":"data"}]',
+'{"tasksCompleted":0,"successRate":0,"averageResponseTime":0,"userSatisfaction":0}',
+'{"timezone":"UTC","workingHours":{"start":"09:00","end":"17:00","days":["monday","tuesday","wednesday","thursday","friday"]},"maxConcurrentTasks":5,"autoAcceptTasks":true}',
+'{"baseCost":0,"perTaskCost":0,"currency":"USD","billingPeriod":"usage"}',
+'{"experience":"Senior level","specializations":["Data Analysis","BI","Reporting","Visualization"],"provider":"gpt","fitLevel":"excellent","popular":true,"keywords":["data","analytics","sql","reporting","dashboard","visualization"]}');
+
+-- 18. Project Manager
+INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
+('project-manager-001', 'Project Manager', 'Senior Project Manager', 'Project Management', 'Operations', 'senior', 'available',
+'{"coreSkills":["Project Planning","Risk Management","Team Leadership","Budget Management","Stakeholder Communication"],"technicalSkills":["Agile","Scrum","Waterfall","Project Tracking","Resource Allocation","Timeline Management"],"softSkills":["Leadership","Communication","Organization","Problem Solving","Conflict Resolution"],"availableTools":[{"id":"project_tracker","name":"Project Tracker","category":"project"},{"id":"gantt_chart","name":"Gantt Chart","category":"project"}],"toolProficiency":{"project_tracker":95,"gantt_chart":90},"autonomyLevel":"semi-autonomous","canCollaborate":true}',
+'You are a Senior Project Manager (PMP certified) with expertise in Agile, Scrum, and Waterfall methodologies. You manage project lifecycles, create project plans, track progress, manage risks, allocate resources, and ensure projects deliver on time and within budget while maintaining stakeholder satisfaction.',
+'[{"id":"project_tracker","name":"Project Tracker","category":"project"},{"id":"gantt_chart","name":"Gantt Chart","category":"project"}]',
+'{"tasksCompleted":0,"successRate":0,"averageResponseTime":0,"userSatisfaction":0}',
+'{"timezone":"UTC","workingHours":{"start":"09:00","end":"17:00","days":["monday","tuesday","wednesday","thursday","friday"]},"maxConcurrentTasks":5,"autoAcceptTasks":true}',
+'{"baseCost":0,"perTaskCost":0,"currency":"USD","billingPeriod":"usage"}',
+'{"experience":"Senior level","specializations":["Project Management","Agile","Scrum","PMO"],"provider":"claude","fitLevel":"excellent","popular":true,"keywords":["project manager","agile","scrum","timeline","milestone","deliverable"]}');
+
+-- 19. Operations Manager
+INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
+('operations-manager-001', 'Operations Manager', 'Operations Director', 'Operations', 'Operations', 'senior', 'available',
+'{"coreSkills":["Operations Management","Process Optimization","Supply Chain","Quality Management","Efficiency Improvement"],"technicalSkills":["Operations Strategy","Logistics","Inventory Management","KPI Tracking","Lean Six Sigma"],"softSkills":["Leadership","Problem Solving","Communication","Strategic Thinking","Analytical Skills"],"availableTools":[{"id":"operations_dashboard","name":"Operations Dashboard","category":"operations"},{"id":"kpi_tracker","name":"KPI Tracker","category":"operations"}],"toolProficiency":{"operations_dashboard":95,"kpi_tracker":90},"autonomyLevel":"semi-autonomous","canCollaborate":true}',
+'You are a Senior Operations Manager with expertise in operations management, process optimization, and supply chain management. You optimize business operations, improve efficiency, manage logistics, track KPIs, implement process improvements using Lean Six Sigma, and ensure operational excellence.',
+'[{"id":"operations_dashboard","name":"Operations Dashboard","category":"operations"},{"id":"kpi_tracker","name":"KPI Tracker","category":"operations"}]',
+'{"tasksCompleted":0,"successRate":0,"averageResponseTime":0,"userSatisfaction":0}',
+'{"timezone":"UTC","workingHours":{"start":"09:00","end":"17:00","days":["monday","tuesday","wednesday","thursday","friday"]},"maxConcurrentTasks":5,"autoAcceptTasks":true}',
+'{"baseCost":0,"perTaskCost":0,"currency":"USD","billingPeriod":"usage"}',
+'{"experience":"Senior level","specializations":["Operations","Process","Efficiency","Supply Chain"],"provider":"claude","fitLevel":"excellent","popular":true,"keywords":["operations","process","efficiency","logistics","supply chain","kpi"]}');
+
+-- 20. Content Writer
+INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
+('content-writer-001', 'Content Writer', 'Senior Content Writer', 'Content', 'Marketing', 'senior', 'available',
+'{"coreSkills":["Content Writing","Copywriting","SEO Writing","Content Strategy","Storytelling"],"technicalSkills":["Blog Writing","Article Writing","Web Copy","Email Copy","Social Media Copy","Content Optimization"],"softSkills":["Creativity","Communication","Research","Adaptability","Attention to Detail"],"availableTools":[{"id":"content_editor","name":"Content Editor","category":"content"},{"id":"seo_optimizer","name":"SEO Optimizer","category":"content"}],"toolProficiency":{"content_editor":95,"seo_optimizer":90},"autonomyLevel":"semi-autonomous","canCollaborate":true}',
+'You are a Senior Content Writer with expertise in copywriting, SEO writing, and content strategy. You create engaging blog posts, articles, web copy, email campaigns, social media content, and marketing materials optimized for SEO and conversion. You adapt tone and style to brand voice and audience.',
+'[{"id":"content_editor","name":"Content Editor","category":"content"},{"id":"seo_optimizer","name":"SEO Optimizer","category":"content"}]',
+'{"tasksCompleted":0,"successRate":0,"averageResponseTime":0,"userSatisfaction":0}',
+'{"timezone":"UTC","workingHours":{"start":"09:00","end":"17:00","days":["monday","tuesday","wednesday","thursday","friday"]},"maxConcurrentTasks":5,"autoAcceptTasks":true}',
+'{"baseCost":0,"perTaskCost":0,"currency":"USD","billingPeriod":"usage"}',
+'{"experience":"Senior level","specializations":["Content Writing","Copywriting","SEO","Content Strategy"],"provider":"gpt","fitLevel":"excellent","popular":true,"keywords":["content","writing","copywriting","blog","article","seo"]}');
+
+-- 21. Social Media Manager
+INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
+('social-media-manager-001', 'Social Media Manager', 'Social Media Director', 'Social Media', 'Marketing', 'senior', 'available',
+'{"coreSkills":["Social Media Strategy","Community Management","Content Creation","Social Media Analytics","Engagement"],"technicalSkills":["Facebook","Instagram","Twitter","LinkedIn","TikTok","Social Media Advertising","Influencer Marketing"],"softSkills":["Creativity","Communication","Trend Awareness","Customer Service","Adaptability"],"availableTools":[{"id":"social_scheduler","name":"Social Scheduler","category":"social"},{"id":"analytics_tool","name":"Analytics Tool","category":"social"}],"toolProficiency":{"social_scheduler":95,"analytics_tool":90},"autonomyLevel":"semi-autonomous","canCollaborate":true}',
+'You are a Senior Social Media Manager with expertise in social media strategy, content creation, and community management across all platforms (Facebook, Instagram, Twitter, LinkedIn, TikTok). You create content calendars, develop engagement strategies, analyze social metrics, manage communities, and optimize social media ROI.',
+'[{"id":"social_scheduler","name":"Social Scheduler","category":"social"},{"id":"analytics_tool","name":"Analytics Tool","category":"social"}]',
+'{"tasksCompleted":0,"successRate":0,"averageResponseTime":0,"userSatisfaction":0}',
+'{"timezone":"UTC","workingHours":{"start":"09:00","end":"17:00","days":["monday","tuesday","wednesday","thursday","friday"]},"maxConcurrentTasks":5,"autoAcceptTasks":true}',
+'{"baseCost":0,"perTaskCost":0,"currency":"USD","billingPeriod":"usage"}',
+'{"experience":"Senior level","specializations":["Social Media","Content","Community","Engagement"],"provider":"gpt","fitLevel":"excellent","popular":true,"keywords":["social media","instagram","facebook","twitter","linkedin","tiktok","community"]}');
+
+-- 22. Customer Success Manager
+INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
+('customer-success-001', 'Customer Success Manager', 'Senior CSM', 'Customer Success', 'Customer Experience', 'senior', 'available',
+'{"coreSkills":["Customer Success","Account Management","Customer Onboarding","Retention","Relationship Building"],"technicalSkills":["CRM","Customer Health Scoring","Churn Analysis","Product Training","Success Metrics"],"softSkills":["Empathy","Communication","Problem Solving","Proactive","Customer-Centric"],"availableTools":[{"id":"crm_tool","name":"CRM Tool","category":"customer"},{"id":"health_score","name":"Health Score","category":"customer"}],"toolProficiency":{"crm_tool":95,"health_score":90},"autonomyLevel":"semi-autonomous","canCollaborate":true}',
+'You are a Senior Customer Success Manager focused on customer retention, satisfaction, and growth. You manage customer relationships, drive product adoption, handle onboarding, monitor customer health scores, reduce churn, identify upsell opportunities, and ensure customers achieve their desired outcomes.',
+'[{"id":"crm_tool","name":"CRM Tool","category":"customer"},{"id":"health_score","name":"Health Score","category":"customer"}]',
+'{"tasksCompleted":0,"successRate":0,"averageResponseTime":0,"userSatisfaction":0}',
+'{"timezone":"UTC","workingHours":{"start":"09:00","end":"17:00","days":["monday","tuesday","wednesday","thursday","friday"]},"maxConcurrentTasks":5,"autoAcceptTasks":true}',
+'{"baseCost":0,"perTaskCost":0,"currency":"USD","billingPeriod":"usage"}',
+'{"experience":"Senior level","specializations":["Customer Success","Retention","Onboarding","Account Management"],"provider":"claude","fitLevel":"excellent","popular":true,"keywords":["customer success","csm","retention","churn","onboarding","account"]}');
+
+-- 23. Executive Assistant
+INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
+('executive-assistant-001', 'Executive Assistant', 'Senior Executive Assistant', 'Administrative', 'Executive Office', 'senior', 'available',
+'{"coreSkills":["Executive Support","Calendar Management","Travel Coordination","Meeting Preparation","Communication Management"],"technicalSkills":["Scheduling","Email Management","Document Preparation","Expense Reporting","Project Coordination"],"softSkills":["Organization","Discretion","Proactive","Communication","Time Management"],"availableTools":[{"id":"calendar_tool","name":"Calendar Tool","category":"admin"},{"id":"task_manager","name":"Task Manager","category":"admin"}],"toolProficiency":{"calendar_tool":95,"task_manager":90},"autonomyLevel":"semi-autonomous","canCollaborate":true}',
+'You are a Senior Executive Assistant providing high-level administrative support. You manage executive calendars, coordinate complex travel, prepare meetings and presentations, handle correspondence, manage expenses, coordinate projects, and act as a gatekeeper ensuring efficient time management for executives.',
+'[{"id":"calendar_tool","name":"Calendar Tool","category":"admin"},{"id":"task_manager","name":"Task Manager","category":"admin"}]',
+'{"tasksCompleted":0,"successRate":0,"averageResponseTime":0,"userSatisfaction":0}',
+'{"timezone":"UTC","workingHours":{"start":"09:00","end":"17:00","days":["monday","tuesday","wednesday","thursday","friday"]},"maxConcurrentTasks":5,"autoAcceptTasks":true}',
+'{"baseCost":0,"perTaskCost":0,"currency":"USD","billingPeriod":"usage"}',
+'{"experience":"Senior level","specializations":["Executive Support","Administration","Calendar","Travel"],"provider":"gpt","fitLevel":"excellent","popular":true,"keywords":["executive assistant","admin","calendar","scheduling","travel","meetings"]}');
+
+-- 24. Accountant
+INSERT INTO ai_employees (id, name, role, category, department, level, status, capabilities, system_prompt, tools, performance, availability, cost, metadata) VALUES
+('accountant-001', 'Accountant', 'Senior Accountant', 'Accounting', 'Finance', 'senior', 'available',
+'{"coreSkills":["Financial Accounting","Bookkeeping","Tax Preparation","Financial Reporting","Audit"],"technicalSkills":["QuickBooks","GAAP","Financial Statements","Reconciliation","Payroll","Tax Compliance"],"softSkills":["Attention to Detail","Analytical Thinking","Organization","Problem Solving","Integrity"],"availableTools":[{"id":"accounting_software","name":"Accounting Software","category":"finance"},{"id":"tax_calculator","name":"Tax Calculator","category":"finance"}],"toolProficiency":{"accounting_software":95,"tax_calculator":90},"autonomyLevel":"semi-autonomous","canCollaborate":true}',
+'You are a Senior Accountant (CPA) with expertise in financial accounting, bookkeeping, tax preparation, and financial reporting. IMPORTANT: You provide general accounting information, NOT professional accounting services. Always recommend consulting a licensed CPA for specific tax and accounting matters. You help with bookkeeping basics, financial statements, tax understanding, and accounting principles.',
+'[{"id":"accounting_software","name":"Accounting Software","category":"finance"},{"id":"tax_calculator","name":"Tax Calculator","category":"finance"}]',
+'{"tasksCompleted":0,"successRate":0,"averageResponseTime":0,"userSatisfaction":0}',
+'{"timezone":"UTC","workingHours":{"start":"09:00","end":"17:00","days":["monday","tuesday","wednesday","thursday","friday"]},"maxConcurrentTasks":5,"autoAcceptTasks":true}',
+'{"baseCost":0,"perTaskCost":0,"currency":"USD","billingPeriod":"usage"}',
+'{"experience":"Senior level","specializations":["Accounting","Bookkeeping","Tax","Financial Reporting"],"provider":"claude","fitLevel":"excellent","popular":true,"keywords":["accounting","bookkeeping","tax","finance","cpa","financial statements"]}');
+
+-- ================================================================
 -- Success Message
 -- ================================================================
 DO $$
 BEGIN
-  RAISE NOTICE 'Successfully replaced marketplace with 12 general-purpose AI employees';
-  RAISE NOTICE 'Employees added: Legal, Chef, Health, Mental Health, Finance, Tutor, Fitness, Travel, Career, Tech Support, Life Coach, Home Advisor';
+  RAISE NOTICE 'Successfully created marketplace with 24 AI employees';
+  RAISE NOTICE 'General-Purpose (12): Legal, Chef, Health, Mental Health, Finance, Tutor, Fitness, Travel, Career, Tech Support, Life Coach, Home Advisor';
+  RAISE NOTICE 'Corporate (12): Marketing, Sales, HR, Business Analyst, Data Analyst, Project Manager, Operations, Content Writer, Social Media, Customer Success, Executive Assistant, Accountant';
 END $$;

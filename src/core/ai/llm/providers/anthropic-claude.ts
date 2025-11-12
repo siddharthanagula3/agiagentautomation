@@ -6,18 +6,18 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { supabase } from '@shared/lib/supabase-client';
 
-// Environment variables
-const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || '';
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// SECURITY WARNING: Client-side API initialization is disabled
+// All API calls should go through Netlify proxy functions instead
+// Environment variables with VITE_ prefix are exposed to the browser (security risk)
 
-// Initialize clients
-const anthropic = ANTHROPIC_API_KEY
-  ? new Anthropic({
-      apiKey: ANTHROPIC_API_KEY,
-      dangerouslyAllowBrowser: true, // Allow browser usage for client-side
-    })
-  : null;
+// DEPRECATED: Direct client-side initialization (security risk)
+// const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || '';
+
+// Initialize clients - DISABLED for security
+const anthropic = null; // Client-side SDK disabled - use Netlify proxy instead
+
+// TODO: Refactor all provider calls to use Netlify proxy functions
+// Proxy endpoints: /.netlify/functions/anthropic-proxy
 
 // Using centralized Supabase client
 

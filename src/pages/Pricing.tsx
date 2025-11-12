@@ -32,38 +32,57 @@ interface PricingPlan {
 
 const FALLBACK_PLANS: PricingPlan[] = [
   {
+    name: 'Starter',
+    price: 'Free',
+    period: 'Forever',
+    description: 'Try AI employees risk-free - perfect for testing',
+    features: [
+      'Up to 3 AI employees',
+      '50K tokens/month included ($10 value)',
+      'All core features',
+      'Community support',
+      'Natural language chat interface',
+      '100+ pre-trained employee templates',
+      'Real-time cost tracking',
+    ],
+    cta: 'Start Free Now',
+    color: 'from-gray-500 to-gray-600',
+  },
+  {
     name: 'Pro',
-    price: '$29',
+    price: '$19',
     period: '/month',
-    description: 'Perfect for growing teams',
+    description: 'Replace your first employee - save $99K+/year!',
     features: [
       'Up to 10 AI employees',
+      '500K tokens/month included ($100 value)',
+      'Priority support (24/7)',
       'Advanced workflow automation',
-      'Priority support',
       'API access',
       'Custom integrations',
       'Analytics dashboard',
-      'Team collaboration',
+      'Pay-as-you-go beyond included tokens',
     ],
-    cta: 'Start Free Trial',
+    popular: true,
+    cta: 'Start 14-Day Free Trial',
     color: 'from-blue-500 to-cyan-500',
   },
   {
-    name: 'Max',
-    price: '$299',
+    name: 'Business',
+    price: '$99',
     period: '/month',
-    description: 'For businesses that need maximum AI power',
+    description: 'Replace your entire team - save $1M+/year!',
     features: [
       'Unlimited AI employees',
-      'All Pro features',
-      'Dedicated account manager',
-      'Custom AI training',
+      '5M tokens/month included ($1,000 value)',
+      'Everything in Pro',
+      'Dedicated success manager',
+      'Custom AI employee training',
       'White-label options',
-      'Advanced security',
-      'SLA guarantee',
-      'Phone support',
+      'Advanced security features',
+      'SLA guarantee (99.9% uptime)',
+      'Volume token discounts (20% off)',
     ],
-    popular: true,
     cta: 'Start Free Trial',
     color: 'from-purple-500 to-pink-500',
   },
@@ -71,16 +90,17 @@ const FALLBACK_PLANS: PricingPlan[] = [
     name: 'Enterprise',
     price: 'Custom',
     period: '',
-    description: 'Tailored solutions for large organizations',
+    description: 'Fortune 500 solution - unlimited scale & savings',
     features: [
-      'Everything in Max',
-      'Custom deployment options',
-      'On-premise available',
-      'Custom contracts',
+      'Everything in Business',
+      'Custom token packages',
+      'On-premise deployment available',
+      'Custom contracts & SLAs',
       'Dedicated infrastructure',
-      'Compliance certifications',
-      'Professional services',
-      'Training programs',
+      'Compliance certifications (SOC 2, HIPAA)',
+      'Professional services team',
+      'Training & onboarding programs',
+      'Volume discounts up to 50% off',
     ],
     cta: 'Contact Sales',
     color: 'from-orange-500 to-red-500',
@@ -268,18 +288,19 @@ const PricingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="AI Employee Pricing | Pro $29, Max $299 | AGI Agent Automation"
-        description="Transparent pricing: Pro $29/month, Max $299/month, or Enterprise custom. 14-day free trial. No setup fees. Cancel anytime."
+        title="AI Employee Pricing | Free Forever to $99/mo | Save 99% vs Human Employees"
+        description="Replace $100K/year employees with $19/month AI employees. Free Forever plan available. Token costs at market rates. Save 99%+ on payroll. Start in 60 seconds!"
         keywords={[
           'ai employee pricing',
+          'cheapest ai employees',
           'ai agents cost',
-          'ai automation pricing',
-          'hire ai employees price',
-          'ai workforce pricing',
-          'ai employees plans',
+          'replace human employees with ai',
+          'ai workforce savings',
+          'ai employees free trial',
           'ai employee subscription',
-          'ai automation plans',
-          'ai agents monthly cost',
+          'save money ai employees',
+          'ai automation cost savings',
+          'competitive ai pricing',
         ]}
         ogType="website"
         schema={{
@@ -287,17 +308,17 @@ const PricingPage: React.FC = () => {
           '@type': 'Product',
           name: 'AI Employee Platform',
           description:
-            'Transparent AI employee platform pricing: Pro $29, Max $299',
+            'Replace human employees with AI employees. Save 99%+ on costs. Free Forever to $99/month.',
           brand: {
             '@type': 'Brand',
             name: 'AGI Agent Automation',
           },
           offers: {
             '@type': 'AggregateOffer',
-            lowPrice: '29',
-            highPrice: '299',
+            lowPrice: '0',
+            highPrice: '99',
             priceCurrency: 'USD',
-            offerCount: '3',
+            offerCount: '4',
           },
         }}
       />
@@ -317,10 +338,14 @@ const PricingPage: React.FC = () => {
             className="mx-auto max-w-3xl text-center"
           >
             <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
-              Simple, Transparent Pricing
+              Replace $100K Employees with $19/Month AI
             </h1>
+            <p className="mb-4 text-2xl font-semibold text-foreground">
+              Save 99.8% on Payroll Costs
+            </p>
             <p className="mb-8 text-xl text-muted-foreground">
-              Choose Pro ($29/month), Max ($299/month), or Enterprise (Custom).
+              Free Forever plan • Pro $19/month • Business $99/month • Enterprise Custom<br />
+              Token costs at market rates - same as OpenAI, Anthropic, Google direct
             </p>
 
             {/* Countdown Timer for Limited Offer */}

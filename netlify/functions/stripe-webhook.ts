@@ -543,6 +543,90 @@ async function processStripeEvent(
         break;
       }
 
+      // Handle Token Pack Purchase
+      if (session.metadata?.type === 'token_pack_purchase' && userId) {
+        const tokens = parseInt(session.metadata.tokens || '0', 10);
+        const packId = session.metadata.packId;
+
+        logger.info('Processing token pack purchase', {
+          requestId,
+          userId,
+          tokens,
+          packId,
+          sessionId: session.id,
+        });
+
+        if (tokens > 0) {
+          try {
+            // Use the database function to safely update token balance
+            const { data, error } = await supabase.rpc(
+              'update_user_token_balance',
+              {
+                p_user_id: userId,
+                p_tokens: tokens,
+                p_transaction_type: 'purchase',
+                p_transaction_id: session.id,
+                p_description: `Purchased ${(tokens / 1000000).toFixed(1)}M token pack`,
+                p_metadata: {
+                  packId,
+                  sessionId: session.id,
+                  amountPaid: session.amount_total,
+                  currency: session.currency,
+                },
+              }
+            );
+
+            if (error) {
+              logger.error('Failed to update user token balance:', {
+                requestId,
+                userId,
+                tokens,
+                error,
+              });
+              throw error;
+            }
+
+            logger.info('Successfully added tokens to user balance', {
+              requestId,
+              userId,
+              tokens,
+              newBalance: data,
+            });
+
+            // Log audit trail
+            await logAuditTrail(
+              requestId,
+              stripeEvent.id,
+              'token_pack_purchase',
+              'tokens_added',
+              {
+                userId,
+                tokens,
+                packId,
+                sessionId: session.id,
+                newBalance: data,
+              }
+            );
+          } catch (error) {
+            logger.error('Error processing token pack purchase:', {
+              requestId,
+              userId,
+              tokens,
+              error,
+            });
+            throw error;
+          }
+        } else {
+          logger.warn('Invalid token amount in purchase', {
+            requestId,
+            userId,
+            tokens,
+          });
+        }
+
+        break;
+      }
+
       // AI Employee purchases are now free - no Stripe handling needed
       logger.info('Checkout session completed (not a subscription)');
       break;

@@ -18,6 +18,7 @@ import {
   openBillingPortal,
   isStripeConfigured,
 } from '@features/billing/services/stripe-payments';
+import { buyTokenPack } from '@features/billing/services/token-pack-purchase';
 import { toast } from 'sonner';
 import {
   CreditCard,
@@ -78,6 +79,46 @@ interface BillingInfo {
   }[];
 }
 
+interface TokenPack {
+  id: string;
+  name: string;
+  tokens: number;
+  price: number;
+  popular?: boolean;
+  savings?: string;
+}
+
+const TOKEN_PACKS: TokenPack[] = [
+  {
+    id: 'pack_500k',
+    name: 'Starter Pack',
+    tokens: 500000,
+    price: 10,
+  },
+  {
+    id: 'pack_1.5m',
+    name: 'Popular Pack',
+    tokens: 1500000,
+    price: 25,
+    popular: true,
+    savings: 'Save 17%',
+  },
+  {
+    id: 'pack_5m',
+    name: 'Power Pack',
+    tokens: 5000000,
+    price: 75,
+    savings: 'Save 25%',
+  },
+  {
+    id: 'pack_10m',
+    name: 'Enterprise Pack',
+    tokens: 10000000,
+    price: 130,
+    savings: 'Save 35%',
+  },
+];
+
 const BillingPage: React.FC = () => {
   const { user } = useAuthStore();
   const [searchParams] = useSearchParams();
@@ -90,6 +131,7 @@ const BillingPage: React.FC = () => {
   );
   const [isManagingBilling, setIsManagingBilling] = useState(false);
   const [stripeCustomerId, setStripeCustomerId] = useState<string | null>(null);
+  const [showBuyTokens, setShowBuyTokens] = useState(false);
 
   const loadBilling = useCallback(async () => {
     try {
@@ -314,12 +356,39 @@ const BillingPage: React.FC = () => {
   useEffect(() => {
     const success = searchParams.get('success');
     const sessionId = searchParams.get('session_id');
+    const action = searchParams.get('action');
+    const tokensParam = searchParams.get('tokens');
 
-    if (success === 'true' && sessionId && user) {
-      console.log('[Billing] Payment successful, refreshing billing data...');
+    // Show buy tokens section if action=buy-tokens
+    if (action === 'buy-tokens') {
+      setShowBuyTokens(true);
+      // Scroll to buy tokens section
+      setTimeout(() => {
+        const element = document.getElementById('buy-tokens-section');
+        element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+
+    // Handle successful token purchase
+    if (success === 'true' && tokensParam && user) {
+      const tokens = parseInt(tokensParam, 10);
+      console.log('[Billing] Token purchase successful:', tokens.toLocaleString());
+      toast.success(
+        `Success! ${tokens.toLocaleString()} tokens added to your account.`,
+        { duration: 5000 }
+      );
+
+      // Refresh billing data
+      setTimeout(() => {
+        loadBilling();
+      }, 2000);
+    }
+    // Handle successful subscription upgrade
+    else if (success === 'true' && sessionId && user) {
+      console.log('[Billing] Subscription upgrade successful');
       toast.success('Payment successful! Your subscription has been upgraded.');
 
-      // Wait a moment for webhook to process, then refresh
+      // Refresh billing data
       setTimeout(() => {
         loadBilling();
       }, 2000);
@@ -391,6 +460,35 @@ const BillingPage: React.FC = () => {
   const handleDownloadInvoice = (invoiceId: string) => {
     console.log(`Downloading invoice ${invoiceId}`);
     // In real implementation, this would download the invoice
+  };
+
+  const handleBuyTokenPack = async (pack: TokenPack) => {
+    if (!user) {
+      toast.error('Please log in to purchase tokens');
+      return;
+    }
+
+    try {
+      toast.loading(`Redirecting to checkout for ${pack.name}...`);
+
+      await buyTokenPack({
+        userId: user.id,
+        userEmail: user.email || '',
+        packId: pack.id,
+        tokens: pack.tokens,
+        price: pack.price,
+      });
+
+      // User will be redirected to Stripe checkout
+      // On success, they'll return to /billing?success=true&tokens=X
+    } catch (error) {
+      console.error('[Buy Token Pack] Error:', error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to start checkout. Please try again.'
+      );
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -815,6 +913,187 @@ const BillingPage: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Buy More Tokens Section */}
+      {(showBuyTokens ||
+        (billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.85)) && (
+        <Card id="buy-tokens-section" className="border-2 border-primary/50">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-6 w-6 text-primary" />
+                  Buy More Tokens
+                </CardTitle>
+                <CardDescription>
+                  Purchase additional tokens to keep your AI employees working without interruption
+                </CardDescription>
+              </div>
+              {showBuyTokens && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowBuyTokens(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {/* Warning if near limit */}
+            {billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.85 && (
+              <div className={`mb-6 rounded-lg border p-4 ${
+                billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.95
+                  ? 'border-red-500/50 bg-red-500/10'
+                  : 'border-yellow-500/50 bg-yellow-500/10'
+              }`}>
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className={`mt-0.5 h-5 w-5 ${
+                    billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.95
+                      ? 'text-red-500'
+                      : 'text-yellow-500'
+                  }`} />
+                  <div className="flex-1">
+                    <h4 className="mb-1 font-semibold">
+                      {billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.95
+                        ? '🚨 Critical: 95% Usage Reached'
+                        : '⚠️ Warning: 85% Usage Reached'}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      You've used {((billing?.usage.totalTokens / billing?.usage.totalLimit) * 100).toFixed(1)}%
+                      of your {billing?.plan === 'pro' ? '10M' : '1M'} token limit.
+                      Buy more tokens now to avoid service interruption.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Token Packs Grid */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {TOKEN_PACKS.map((pack) => (
+                <Card
+                  key={pack.id}
+                  className={cn(
+                    'relative transition-all hover:shadow-lg',
+                    pack.popular && 'border-2 border-primary'
+                  )}
+                >
+                  {pack.popular && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <Badge className="bg-gradient-to-r from-primary to-accent text-white">
+                        <Star className="mr-1 h-3 w-3" />
+                        Most Popular
+                      </Badge>
+                    </div>
+                  )}
+
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg">{pack.name}</CardTitle>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-bold">${pack.price}</span>
+                      <span className="text-sm text-muted-foreground">one-time</span>
+                    </div>
+                    {pack.savings && (
+                      <Badge variant="secondary" className="mt-2 w-fit">
+                        {pack.savings}
+                      </Badge>
+                    )}
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Tokens</span>
+                        <span className="font-bold">
+                          {(pack.tokens / 1000000).toFixed(1)}M
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Cost per 1K</span>
+                        <span className="font-medium">
+                          ${((pack.price / pack.tokens) * 1000).toFixed(3)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={() => handleBuyTokenPack(pack)}
+                      className={cn(
+                        'w-full',
+                        pack.popular && 'bg-gradient-to-r from-primary to-accent'
+                      )}
+                      variant={pack.popular ? 'default' : 'outline'}
+                    >
+                      Buy {pack.name}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Token Pack Benefits */}
+            <div className="mt-6 rounded-lg border border-dashed bg-muted/50 p-4">
+              <h4 className="mb-3 font-medium">✨ Token Pack Benefits</h4>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div className="flex items-start gap-2 text-sm">
+                  <CheckCircle className="mt-0.5 h-4 w-4 text-success" />
+                  <div>
+                    <span className="font-medium">Instant Activation</span>
+                    <p className="text-muted-foreground">Tokens available immediately after purchase</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <CheckCircle className="mt-0.5 h-4 w-4 text-success" />
+                  <div>
+                    <span className="font-medium">No Expiration</span>
+                    <p className="text-muted-foreground">Use your tokens whenever you need them</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <CheckCircle className="mt-0.5 h-4 w-4 text-success" />
+                  <div>
+                    <span className="font-medium">Market-Rate Pricing</span>
+                    <p className="text-muted-foreground">Same as direct OpenAI/Anthropic usage</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <CheckCircle className="mt-0.5 h-4 w-4 text-success" />
+                  <div>
+                    <span className="font-medium">All Providers</span>
+                    <p className="text-muted-foreground">Works with OpenAI, Claude, Gemini, Perplexity</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Alternative: Upgrade to Pro */}
+            {billing?.plan === 'free' && (
+              <div className="mt-6 rounded-lg border border-primary/30 bg-primary/5 p-4">
+                <div className="flex items-start gap-3">
+                  <Crown className="mt-0.5 h-5 w-5 text-primary" />
+                  <div className="flex-1">
+                    <h4 className="mb-1 font-semibold">💡 Better Value: Upgrade to Pro</h4>
+                    <p className="mb-3 text-sm text-muted-foreground">
+                      Get 10M tokens/month for $29 - Better value than buying token packs if you use AI regularly
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleUpgrade('pro', 'monthly')}
+                    >
+                      View Pro Plan
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Upgrade Options */}
       {billing?.plan === 'free' && (

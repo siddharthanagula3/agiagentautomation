@@ -122,11 +122,15 @@ const ITServiceProvidersPage: React.FC = () => {
                 For IT Service Providers
               </div>
               <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
-                Automate IT Operations End-to-End
+                Replace $75K IT Techs with $19/Month AI
               </h1>
+              <p className="mb-4 text-2xl font-semibold text-foreground">
+                Save 99.7% • Serve 10x More Clients • 24/7 Coverage
+              </p>
               <p className="mb-8 text-xl text-muted-foreground">
-                Handle 10x more clients with the same team. AI employees manage
-                help desk, monitoring, security, and operations 24/7.
+                Why pay $75K+/year per tech when AI employees handle tier-1 support, monitoring,
+                and incident management for $19/month? Scale your MSP infinitely without hiring.
+                Your human experts focus only on complex escalations.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Button

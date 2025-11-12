@@ -218,7 +218,9 @@ export const useChatHistory = () => {
   }, []);
 
   // Star/unstar session
-  const toggleStarSession = useCallback((sessionId: string) => {
+  const toggleStarSession = useCallback(async (sessionId: string) => {
+    const current = sessions.find((s) => s.id === sessionId);
+    
     setSessions((prev) =>
       prev.map((session) =>
         session.id === sessionId
@@ -227,10 +229,10 @@ export const useChatHistory = () => {
       )
     );
 
-    setCurrentSession((current) =>
-      current?.id === sessionId
-        ? { ...current, isStarred: !current.isStarred }
-        : current
+    setCurrentSession((currentSession) =>
+      currentSession?.id === sessionId
+        ? { ...currentSession, isStarred: !currentSession.isStarred }
+        : currentSession
     );
 
     // Persist star state to database
@@ -244,10 +246,12 @@ export const useChatHistory = () => {
       console.error('Failed to update starred state:', error);
       toast.error('Failed to update starred state');
     }
-  }, []);
+  }, [sessions]);
 
   // Pin/unpin session
-  const togglePinSession = useCallback((sessionId: string) => {
+  const togglePinSession = useCallback(async (sessionId: string) => {
+    const current = sessions.find((s) => s.id === sessionId);
+    
     setSessions((prev) =>
       prev.map((session) =>
         session.id === sessionId
@@ -256,10 +260,10 @@ export const useChatHistory = () => {
       )
     );
 
-    setCurrentSession((current) =>
-      current?.id === sessionId
-        ? { ...current, isPinned: !current.isPinned }
-        : current
+    setCurrentSession((currentSession) =>
+      currentSession?.id === sessionId
+        ? { ...currentSession, isPinned: !currentSession.isPinned }
+        : currentSession
     );
 
     // Persist pin state to database
@@ -273,16 +277,24 @@ export const useChatHistory = () => {
       console.error('Failed to update pinned state:', error);
       toast.error('Failed to update pinned state');
     }
-  }, []);
+  }, [sessions]);
 
   // Archive/unarchive session
-  const toggleArchiveSession = useCallback((sessionId: string) => {
+  const toggleArchiveSession = useCallback(async (sessionId: string) => {
+    const current = sessions.find((s) => s.id === sessionId);
+    
     setSessions((prev) =>
       prev.map((session) =>
         session.id === sessionId
           ? { ...session, isArchived: !session.isArchived }
           : session
       )
+    );
+
+    setCurrentSession((currentSession) =>
+      currentSession?.id === sessionId
+        ? { ...currentSession, isArchived: !currentSession.isArchived }
+        : currentSession
     );
 
     // Persist archive state to database
@@ -296,7 +308,7 @@ export const useChatHistory = () => {
       console.error('Failed to update archived state:', error);
       toast.error('Failed to update archived state');
     }
-  }, []);
+  }, [sessions]);
 
   // Duplicate session
   const duplicateSession = useCallback(

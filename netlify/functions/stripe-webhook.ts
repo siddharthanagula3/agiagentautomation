@@ -96,30 +96,59 @@ try {
   throw error;
 }
 
-// Webhook event processing registry for idempotency
-const processedEvents = new Set<string>();
+// SECURITY FIX: Database-backed idempotency instead of in-memory Set
+// In-memory Set resets on server restart, allowing duplicate processing
+
+/**
+ * Check if webhook event was already processed (database-backed)
+ * CRITICAL: Prevents duplicate processing of Stripe events
+ */
+async function isEventProcessed(eventId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('webhook_audit_log')
+      .select('event_id')
+      .eq('event_id', eventId)
+      .eq('action', 'processed')
+      .limit(1);
+
+    if (error) {
+      logger.error('Error checking event idempotency:', error);
+      // On error, assume not processed to prevent blocking legitimate events
+      return false;
+    }
+
+    return data && data.length > 0;
+  } catch (error) {
+    logger.error('Exception in isEventProcessed:', error);
+    return false;
+  }
+}
+
+/**
+ * Mark event as processed (database-backed)
+ * Stores in webhook_audit_log for permanent record
+ */
+async function markEventProcessed(
+  requestId: string,
+  eventId: string,
+  eventType: string
+): Promise<void> {
+  try {
+    await logAuditTrail(requestId, eventId, eventType, 'processed', {
+      timestamp: new Date().toISOString(),
+      markedAsProcessed: true,
+    });
+  } catch (error) {
+    logger.warn('Failed to mark event as processed:', error);
+    // Non-critical - audit trail logging failure shouldn't block webhook
+  }
+}
 
 // Rate limiting registry
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const RATE_LIMIT_MAX_REQUESTS = 100; // Max requests per minute per IP
-
-// Helper function to check if event was already processed
-function isEventProcessed(eventId: string): boolean {
-  return processedEvents.has(eventId);
-}
-
-// Helper function to mark event as processed
-function markEventProcessed(eventId: string): void {
-  processedEvents.add(eventId);
-  // Clean up old events (keep only last 1000)
-  if (processedEvents.size > 1000) {
-    const eventsArray = Array.from(processedEvents);
-    eventsArray
-      .slice(0, eventsArray.length - 1000)
-      .forEach((id) => processedEvents.delete(id));
-  }
-}
 
 // Rate limiting function
 function checkRateLimit(ip: string): boolean {
@@ -318,8 +347,8 @@ export const handler: Handler = async (event: HandlerEvent) => {
       };
     }
 
-    // Check for idempotency
-    if (isEventProcessed(stripeEvent.id)) {
+    // CRITICAL: Check for idempotency (database-backed)
+    if (await isEventProcessed(stripeEvent.id)) {
       logger.info(`Event ${stripeEvent.id} already processed, skipping`, {
         requestId,
       });
@@ -357,8 +386,8 @@ export const handler: Handler = async (event: HandlerEvent) => {
     try {
       await processStripeEvent(stripeEvent, requestId);
 
-      // Mark event as processed only after successful processing
-      markEventProcessed(stripeEvent.id);
+      // CRITICAL: Mark event as processed only after successful processing (database-backed)
+      await markEventProcessed(requestId, stripeEvent.id, stripeEvent.type);
 
       const processingTime = Date.now() - startTime;
       logger.info(`Event ${stripeEvent.id} processed successfully`, {

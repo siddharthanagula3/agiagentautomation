@@ -28,6 +28,8 @@ import {
   Camera,
   Music,
   Gamepad2,
+  Loader2,
+  ShoppingCart,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import {
@@ -39,6 +41,8 @@ import { useWorkforceStore } from '@shared/stores/workforce-store';
 import { useBusinessMetrics } from '@shared/hooks/useAnalytics';
 import { HireButton } from '@shared/components/HireButton';
 import { AnimatedAvatar } from '@shared/components/AnimatedAvatar';
+import { supabase } from '@shared/lib/supabase-client';
+import { toast } from 'sonner';
 
 interface AIEmployee extends BaseAIEmployee {
   isHired: boolean;
@@ -72,6 +76,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('popular');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [isHiringAll, setIsHiringAll] = useState(false);
+  const [hiringProgress, setHiringProgress] = useState({ current: 0, total: 0 });
 
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
@@ -181,6 +187,106 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  const handleHireAll = async () => {
+    if (!user) {
+      toast.error('Please sign in to hire AI employees', {
+        description: 'You need to be signed in to hire AI employees',
+        duration: 4000,
+      });
+      navigate('/auth/login');
+      return;
+    }
+
+    // Get all unhired employees
+    const unhiredEmployees = employees.filter((emp) => !emp.isHired);
+
+    if (unhiredEmployees.length === 0) {
+      toast.info('All employees are already hired', {
+        description: 'You have hired all available AI employees',
+      });
+      return;
+    }
+
+    setIsHiringAll(true);
+    setHiringProgress({ current: 0, total: unhiredEmployees.length });
+
+    let successCount = 0;
+    let failureCount = 0;
+
+    for (let i = 0; i < unhiredEmployees.length; i++) {
+      const employee = unhiredEmployees[i];
+
+      try {
+        // Check if already hired (double-check)
+        const { data: existingHire } = await supabase
+          .from('purchased_employees')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('employee_id', employee.id)
+          .single();
+
+        if (!existingHire) {
+          // Insert hire record
+          const { error } = await supabase.from('purchased_employees').insert({
+            user_id: user.id,
+            employee_id: employee.id,
+            name: employee.name,
+            role: employee.role,
+            provider: 'chatgpt', // Default provider
+            is_active: true,
+          });
+
+          if (error && error.code !== '23505') {
+            // Not a duplicate error
+            console.error('[HireAll] Insert failed:', error);
+            failureCount++;
+          } else {
+            successCount++;
+            // Track successful hire
+            trackEmployeeHire(employee.id, employee.name, {
+              category: employee.category,
+              skills: employee.skills,
+              price: employee.price,
+            });
+          }
+        } else {
+          successCount++; // Already hired
+        }
+      } catch (error) {
+        console.error('[HireAll] Unexpected error:', error);
+        failureCount++;
+      }
+
+      setHiringProgress({ current: i + 1, total: unhiredEmployees.length });
+
+      // Small delay to avoid rate limiting
+      if (i < unhiredEmployees.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    }
+
+    setIsHiringAll(false);
+
+    // Dispatch custom event for workforce sync
+    window.dispatchEvent(new CustomEvent('team:refresh'));
+
+    // Refresh the hired employees list
+    await fetchHiredEmployees();
+    queryClient.invalidateQueries({ queryKey: ['marketplace-employees'] });
+
+    if (failureCount === 0) {
+      toast.success(`Successfully hired all ${successCount} AI employees!`, {
+        description: 'All employees are now part of your workforce',
+        duration: 5000,
+      });
+    } else {
+      toast.warning(`Hired ${successCount} employees, ${failureCount} failed`, {
+        description: 'Some employees could not be hired. Please try again for failed employees.',
+        duration: 5000,
+      });
+    }
+  };
+
   return (
     <div className={cn('space-y-6 p-6', className)}>
       {/* Header */}
@@ -198,6 +304,23 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
             <Users className="mr-1 h-3 w-3" />
             {employees.length} Available
           </Badge>
+          <Button
+            onClick={handleHireAll}
+            disabled={isHiringAll || employees.filter((e) => !e.isHired).length === 0}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
+            {isHiringAll ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Hiring {hiringProgress.current}/{hiringProgress.total}
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Hire All
+              </>
+            )}
+          </Button>
         </div>
       </div>
 

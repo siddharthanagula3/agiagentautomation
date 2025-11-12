@@ -18,33 +18,33 @@ import { Link } from 'react-router-dom';
 
 const AboutPage: React.FC = () => {
   const stats = [
-    { label: 'AI Employees Created', value: '50,000+', icon: Users },
-    { label: 'Hours Saved', value: '1M+', icon: TrendingUp },
+    { label: 'Cost Savings vs Humans', value: '99.8%', icon: TrendingUp },
+    { label: 'AI Employees Hired', value: '50,000+', icon: Users },
+    { label: 'Money Saved for Businesses', value: '$500M+', icon: Award },
     { label: 'Countries Served', value: '120+', icon: Globe },
-    { label: 'Customer Satisfaction', value: '98%', icon: Heart },
   ];
 
   const values = [
     {
       icon: Target,
-      title: 'Mission-Driven',
+      title: 'Cost Savings First',
       description:
-        'Democratize AI workforce automation for businesses of all sizes',
+        '99.8% reduction in payroll costs - replacing $100K employees with $19/month AI',
     },
     {
       icon: Zap,
-      title: 'Innovation First',
-      description: 'Pushing boundaries with cutting-edge AI technology',
+      title: 'Instant Results',
+      description: 'Hire in 60 seconds, not 60 days. Natural language interface—no coding required',
     },
     {
       icon: Heart,
-      title: 'Customer-Centric',
-      description: 'Your success is our success. We build for you.',
+      title: 'Transparent Pricing',
+      description: 'Market-rate tokens. No hidden fees. Free Forever plan to start.',
     },
     {
       icon: Award,
-      title: 'Excellence',
-      description: 'Committed to delivering the highest quality solutions',
+      title: 'Enterprise Security',
+      description: 'Supabase-powered infrastructure with SOC 2 compliance and end-to-end encryption',
     },
   ];
 
@@ -52,25 +52,25 @@ const AboutPage: React.FC = () => {
     {
       name: 'Siddhartha Nagula',
       role: 'Founder & CEO',
-      bio: 'Visionary leader building the future of AI workforce automation. Former AI researcher with 10+ years in machine learning and automation.',
+      bio: 'On a mission to end the $100K employee era. Former AI researcher with 10+ years making AI accessible and affordable for businesses of all sizes.',
       avatar: '👨‍💼',
     },
     {
       name: 'Alex Chen',
       role: 'CTO',
-      bio: 'Full-stack architect and AI systems expert. Led engineering teams at major tech companies, specializing in scalable AI infrastructure.',
+      bio: 'Built the Supabase-powered infrastructure enabling 50,000+ AI employees to work 24/7 at enterprise scale with bank-level security.',
       avatar: '👨‍💻',
     },
     {
       name: 'Sarah Johnson',
       role: 'Head of Product',
-      bio: 'Product strategy and user experience visionary. Former product manager at leading SaaS companies with expertise in AI product development.',
+      bio: 'Designed the natural language chat interface that makes hiring AI employees as easy as sending a text message—no coding required.',
       avatar: '👩‍🎨',
     },
     {
       name: 'Michael Rodriguez',
       role: 'Head of Engineering',
-      bio: 'Engineering excellence and scaling specialist. Expert in distributed systems and AI model deployment at enterprise scale.',
+      bio: 'Architected the multi-LLM routing system that delivers GPT-4, Claude, and Gemini intelligence at market rates with full cost transparency.',
       avatar: '👨‍🔧',
     },
   ];
@@ -78,17 +78,17 @@ const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="About AGI Agent Automation | Leading AI Workforce Platform"
-        description="Learn about AGI Agent Automation - the leading AI employee platform. Meet our team of AI experts building the future of work with 50,000+ AI employees created and 1M+ hours saved."
+        title="About Us | Replace $100K Employees with $19/mo AI | Save 99.8%"
+        description="We're on a mission to replace expensive human employees with affordable AI employees. Save 99.8% on payroll costs. 50,000+ AI employees created, $500M+ saved for businesses worldwide."
         keywords={[
           'about agi agent automation',
-          'ai workforce team',
+          'replace human employees with ai',
+          'ai workforce cost savings',
+          'save money on employees',
+          'ai employees cheaper than humans',
+          'workforce replacement platform',
           'ai automation company',
-          'ai employees platform',
-          'artificial intelligence workforce',
-          'ai automation experts',
-          'machine learning team',
-          'ai workforce automation',
+          'payroll cost reduction ai',
         ]}
         ogType="website"
         schema={{
@@ -96,11 +96,11 @@ const AboutPage: React.FC = () => {
           '@type': 'AboutPage',
           name: 'About AGI Agent Automation',
           description:
-            'Learn about AGI Agent Automation - the leading AI employee platform',
+            'Replace expensive human employees with affordable AI employees - save 99.8% on payroll costs',
           mainEntity: {
             '@type': 'Organization',
             name: 'AGI Agent Automation',
-            description: 'Leading AI Employee and Automation Platform',
+            description: 'Complete Workforce Replacement Platform - AI Employees at 1/100th the cost',
             foundingDate: '2024',
             numberOfEmployees: '50+',
             location: {
@@ -130,12 +130,14 @@ const AboutPage: React.FC = () => {
               About Us
             </Badge>
             <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-7xl">
-              Building the Future of Work
+              Replacing $100K Employees with $19/Month AI
             </h1>
             <p className="mb-8 text-xl leading-relaxed text-muted-foreground">
-              We're on a mission to empower every business with AI employees
-              that work 24/7, transforming how teams operate and scale in the
-              digital age.
+              We're on a mission to make world-class talent accessible to every business.
+              No more $100K salaries, benefits, or sick days. Just{' '}
+              <span className="font-bold text-primary">24/7 AI employees</span> at{' '}
+              <span className="font-bold text-primary">1/100th the cost</span>.
+              Simply tell them what you need in natural language—they handle everything.
             </p>
           </motion.div>
 
@@ -180,18 +182,27 @@ const AboutPage: React.FC = () => {
                 Our Mission
               </Badge>
               <h2 className="mb-6 text-4xl font-bold md:text-5xl">
-                Democratizing AI for Every Business
+                End the $100K Employee Era
               </h2>
               <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
-                We believe that every business, regardless of size, should have
-                access to world-class AI automation. Our platform makes it
-                possible to hire specialized AI employees in minutes, not
-                months.
+                We believe the old workforce model is broken. Why pay $100,000+/year
+                for a human employee who works 40 hours/week when you can hire an
+                AI employee for $19/month that works 24/7, never gets sick, and
+                delivers expert-level work instantly?
+              </p>
+              <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
+                Our platform makes it possible to{' '}
+                <span className="font-semibold text-foreground">
+                  hire specialized AI employees in under 60 seconds
+                </span>
+                —no interviews, no onboarding, no training. Just tell them what you
+                need in natural language via our chat interface, and watch them work.
               </p>
               <p className="text-lg leading-relaxed text-muted-foreground">
-                From startups to enterprises, we're leveling the playing field
-                and enabling teams to focus on what truly matters: innovation,
-                creativity, and growth.
+                From solo founders to Fortune 500 enterprises, we're enabling businesses
+                to save 99%+ on payroll while getting better results. Powered by
+                Supabase for bank-level security and the world's best LLMs for
+                unmatched intelligence.
               </p>
             </div>
             <div className="relative">
@@ -277,10 +288,14 @@ const AboutPage: React.FC = () => {
             viewport={{ once: true }}
           >
             <h2 className="mb-6 text-4xl font-bold md:text-5xl">
-              Join Us on This Journey
+              Ready to Save 99%+ on Payroll?
             </h2>
+            <p className="mb-4 text-2xl font-semibold text-foreground">
+              Start Free Forever • Upgrade to $19/month
+            </p>
             <p className="mb-8 text-xl text-muted-foreground">
-              Ready to transform your business with AI employees?
+              Hire your first AI employee in under 60 seconds. No credit card required.
+              Just tell them what you need in natural language—they handle everything.
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button
@@ -288,10 +303,10 @@ const AboutPage: React.FC = () => {
                 asChild
                 className="bg-gradient-to-r from-primary to-accent"
               >
-                <Link to="/auth/register">Start Free Trial</Link>
+                <Link to="/auth/register">Start Free Forever</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link to="/careers">View Open Positions</Link>
+                <Link to="/pricing">View Pricing</Link>
               </Button>
             </div>
           </motion.div>

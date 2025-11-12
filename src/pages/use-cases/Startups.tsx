@@ -38,30 +38,30 @@ const StartupsPage: React.FC = () => {
   const benefits = [
     {
       icon: DollarSign,
-      title: 'Reduce Operating Costs by 70%',
+      title: 'Bootstrap for $190/Month Instead of Raising $2M',
       description:
-        'Scale your operations without the overhead of traditional hiring. AI employees work 24/7 at a fraction of the cost.',
+        'Full 10-person AI team costs $190/month vs $1M+/year for humans. That\'s 99.8% savings. Keep your equity, avoid dilution, stay profitable from day one.',
       color: 'from-green-500 to-emerald-500',
     },
     {
       icon: Zap,
-      title: 'Launch Features 10x Faster',
+      title: 'Launch MVP in Days, Not Months',
       description:
-        'Automate repetitive tasks and focus your human team on high-value strategic work.',
+        'AI developers, designers, and QA engineers work 24/7 in parallel. What takes a human team 6 months takes AI employees 2 weeks—at 1/100th the cost.',
       color: 'from-purple-500 to-pink-500',
     },
     {
       icon: TrendingUp,
-      title: 'Scale Without Limits',
+      title: 'Scale to 10,000 Customers Without Hiring',
       description:
-        'Grow from 10 to 10,000 customers without proportionally increasing headcount.',
+        'Grow revenue 100x while team size stays flat. AI support, sales, and ops scale infinitely with zero marginal cost. No recruitment, no onboarding, no turnover.',
       color: 'from-blue-500 to-cyan-500',
     },
     {
       icon: Users,
-      title: 'Lean Team, Maximum Output',
+      title: 'Compete with YC Companies from Your Bedroom',
       description:
-        'Build a lean, efficient team augmented by specialized AI employees for every function.',
+        'Get the same firepower as $10M funded startups for $190/month. Access 165+ specialized AI employees instantly. Tell them what you need in natural language—they execute.',
       color: 'from-orange-500 to-red-500',
     },
   ];
@@ -183,11 +183,15 @@ const StartupsPage: React.FC = () => {
                 For Startups
               </div>
               <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
-                Build Your Startup with an AI Workforce
+                Compete with $10M Funded Startups for $190/Month
               </h1>
+              <p className="mb-4 text-2xl font-semibold text-foreground">
+                Save 99.8% on Team Costs • 10 AI Employees = $190/mo
+              </p>
               <p className="mb-8 text-xl leading-relaxed text-muted-foreground">
-                Scale faster, spend less, and compete with companies 10x your
-                size. AI employees give you the leverage to move at hyperspeed.
+                Why raise $2M when you can build a world-class product with a $19/month AI team?
+                Replace expensive engineers, designers, and marketers with AI employees that work 24/7.
+                Free Forever plan available—no credit card required.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Button
@@ -327,10 +331,13 @@ const StartupsPage: React.FC = () => {
             className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-12 text-center text-white"
           >
             <h2 className="mb-4 text-4xl font-bold">
-              Ready to Build the Future?
+              Save $999,810/Year. Start in 60 Seconds.
             </h2>
+            <p className="mb-2 text-2xl font-semibold opacity-95">
+              Free Forever Plan • $19/month Pro • No Credit Card
+            </p>
             <p className="mb-8 text-xl opacity-90">
-              Join 1,000+ startups using AI employees to move faster than ever
+              Join 1,000+ startups replacing million-dollar teams with $190/month AI workforces
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button

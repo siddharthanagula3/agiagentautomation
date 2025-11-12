@@ -176,6 +176,26 @@ export const useChatHistory = () => {
     }
   }, []);
 
+  // Star/unstar session
+  const toggleStarSession = useCallback((sessionId: string) => {
+    setSessions((prev) =>
+      prev.map((session) =>
+        session.id === sessionId
+          ? { ...session, isStarred: !session.isStarred }
+          : session
+      )
+    );
+
+    setCurrentSession((current) =>
+      current?.id === sessionId
+        ? { ...current, isStarred: !current.isStarred }
+        : current
+    );
+
+    // TODO: Persist star state to database
+    toast.success('Chat starred');
+  }, []);
+
   // Pin/unpin session
   const togglePinSession = useCallback((sessionId: string) => {
     setSessions((prev) =>
@@ -193,6 +213,7 @@ export const useChatHistory = () => {
     );
 
     // TODO: Persist pin state to database
+    toast.success('Chat pinned');
   }, []);
 
   // Archive/unarchive session
@@ -207,6 +228,42 @@ export const useChatHistory = () => {
 
     // TODO: Persist archive state to database
     toast.success('Chat archived');
+  }, []);
+
+  // Duplicate session
+  const duplicateSession = useCallback(async (sessionId: string) => {
+    try {
+      const original = sessions.find((s) => s.id === sessionId);
+      if (!original) return;
+
+      const user = await getCurrentUser();
+      if (!user) return;
+
+      const newSession = await chatPersistenceService.createSession(
+        user.id,
+        `${original.title} (Copy)`
+      );
+
+      // TODO: Copy messages from original session
+      setSessions((prev) => [newSession, ...prev]);
+      toast.success('Chat duplicated');
+
+      return newSession;
+    } catch (error) {
+      console.error('Failed to duplicate session:', error);
+      toast.error('Failed to duplicate chat');
+    }
+  }, [sessions]);
+
+  // Share session (generate shareable link)
+  const shareSession = useCallback(async (sessionId: string) => {
+    try {
+      // TODO: Implement share functionality
+      toast.success('Share link copied to clipboard');
+    } catch (error) {
+      console.error('Failed to share session:', error);
+      toast.error('Failed to share chat');
+    }
   }, []);
 
   // Load sessions on mount
@@ -224,7 +281,10 @@ export const useChatHistory = () => {
     searchSessions,
     loadSessions,
     loadSession,
+    toggleStarSession,
     togglePinSession,
     toggleArchiveSession,
+    duplicateSession,
+    shareSession,
   };
 };

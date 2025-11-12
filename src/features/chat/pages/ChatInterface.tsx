@@ -10,7 +10,6 @@ import { ChatSidebar } from '../components/Sidebar/ChatSidebar';
 import { ChatHeader } from '../components/Main/ChatHeader';
 import { MessageList } from '../components/Main/MessageList';
 import { ChatComposer } from '../components/Composer/ChatComposer';
-import { ModelSelector } from '../components/Main/ModelSelector';
 import { ModeSelector } from '../components/Tools/ModeSelector';
 import { KeyboardShortcutsDialog } from '../components/KeyboardShortcutsDialog';
 import type { ChatSession, ChatMessage, ChatMode } from '../types';
@@ -117,8 +116,9 @@ const ChatPage: React.FC = () => {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMode, setSelectedMode] = useState<ChatMode>('team');
-  const [selectedModel, setSelectedModel] = useState('gpt-4-turbo');
-  const [temperature, setTemperature] = useState(0.7);
+  // Model is automatically selected by intelligent agent router
+  const selectedModel = 'claude-sonnet-4.5'; // Default model for general use
+  const temperature = 0.7; // Balanced temperature for most use cases
   const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
   const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [warningThreshold, setWarningThreshold] = useState<85 | 95>(85);

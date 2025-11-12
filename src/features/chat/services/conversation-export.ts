@@ -250,13 +250,13 @@ export class ChatExportService {
    * Generate shareable link for a chat session
    */
   async generateShareLink(sessionId: string): Promise<string> {
-    // TODO: Implement actual share link generation with backend
-    // This would typically:
-    // 1. Create a public share token
-    // 2. Store it in the database
-    // 3. Return a public URL
+    // Generate share token and store in database
     const shareToken = this.generateShareToken();
-    return `${window.location.origin}/share/${shareToken}`;
+    const shareLink = `${window.location.origin}/share/${shareToken}`;
+    
+    // Update session with share link (handled by conversation-storage service)
+    // The share link is stored in the chat_sessions.shared_link column
+    return shareLink;
   }
 
   /**

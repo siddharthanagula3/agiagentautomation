@@ -1,4 +1,4 @@
-import { supabase } from '@/shared/lib/supabase-client';
+import { supabase } from '@shared/lib/supabase-client';
 
 export interface AIEmployee {
   id: string;

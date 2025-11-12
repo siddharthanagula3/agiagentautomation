@@ -233,8 +233,17 @@ export const useChatHistory = () => {
         : current
     );
 
-    // TODO: Persist star state to database
-    toast.success('Chat starred');
+    // Persist star state to database
+    try {
+      const user = await getCurrentUser();
+      if (user) {
+        await chatPersistenceService.updateSessionStarred(sessionId, !current?.isStarred, user.id);
+      }
+      toast.success('Chat starred');
+    } catch (error) {
+      console.error('Failed to update starred state:', error);
+      toast.error('Failed to update starred state');
+    }
   }, []);
 
   // Pin/unpin session
@@ -253,8 +262,17 @@ export const useChatHistory = () => {
         : current
     );
 
-    // TODO: Persist pin state to database
-    toast.success('Chat pinned');
+    // Persist pin state to database
+    try {
+      const user = await getCurrentUser();
+      if (user) {
+        await chatPersistenceService.updateSessionPinned(sessionId, !current?.isPinned, user.id);
+      }
+      toast.success('Chat pinned');
+    } catch (error) {
+      console.error('Failed to update pinned state:', error);
+      toast.error('Failed to update pinned state');
+    }
   }, []);
 
   // Archive/unarchive session
@@ -267,8 +285,17 @@ export const useChatHistory = () => {
       )
     );
 
-    // TODO: Persist archive state to database
-    toast.success('Chat archived');
+    // Persist archive state to database
+    try {
+      const user = await getCurrentUser();
+      if (user) {
+        await chatPersistenceService.updateSessionArchived(sessionId, !current?.isArchived, user.id);
+      }
+      toast.success('Chat archived');
+    } catch (error) {
+      console.error('Failed to update archived state:', error);
+      toast.error('Failed to update archived state');
+    }
   }, []);
 
   // Duplicate session
@@ -286,7 +313,8 @@ export const useChatHistory = () => {
           `${original.title} (Copy)`
         );
 
-        // TODO: Copy messages from original session
+        // Copy messages from original session
+        await chatPersistenceService.copySessionMessages(sessionId, newSession.id, user.id);
         setSessions((prev) => [newSession, ...prev]);
         toast.success('Chat duplicated');
 
@@ -302,7 +330,21 @@ export const useChatHistory = () => {
   // Share session (generate shareable link)
   const shareSession = useCallback(async (sessionId: string) => {
     try {
-      // TODO: Implement share functionality
+      const user = await getCurrentUser();
+      if (!user) {
+        toast.error('You must be logged in to share a chat');
+        return;
+      }
+
+      // Generate share token
+      const shareToken = `${sessionId}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      const shareLink = `${window.location.origin}/share/${shareToken}`;
+
+      // Update session with share link
+      await chatPersistenceService.updateSessionSharedLink(sessionId, shareToken, user.id);
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(shareLink);
       toast.success('Share link copied to clipboard');
     } catch (error) {
       console.error('Failed to share session:', error);

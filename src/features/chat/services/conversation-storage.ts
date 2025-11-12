@@ -10,6 +10,11 @@ interface DBChatSession {
   provider: string;
   title: string | null;
   is_active: boolean | null;
+  is_starred?: boolean | null;
+  is_pinned?: boolean | null;
+  is_archived?: boolean | null;
+  shared_link?: string | null;
+  metadata?: Record<string, unknown> | null;
   last_message_at: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -107,7 +112,10 @@ export class ChatPersistenceService {
   async updateSessionTitle(sessionId: string, title: string, userId?: string): Promise<void> {
     let query = supabase
       .from('chat_sessions')
-      .update({ title, updated_at: new Date().toISOString() })
+      .update({ 
+        title, 
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', sessionId);
 
     // Add user_id filter if provided for extra security
@@ -257,6 +265,158 @@ export class ChatPersistenceService {
     return (data || []).map(this.mapDBSessionToSession);
   }
 
+  /**
+   * Update session starred state
+   */
+  async updateSessionStarred(sessionId: string, isStarred: boolean, userId?: string): Promise<void> {
+    let query = supabase
+      .from('chat_sessions')
+      .update({ 
+        is_starred: isStarred,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', sessionId);
+
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
+    const { error } = await query;
+
+    if (error) {
+      if (error.code === '42501' || error.message?.includes('permission denied')) {
+        throw new Error('You do not have permission to update this session');
+      }
+      throw new Error(`Failed to update starred state: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update session pinned state
+   */
+  async updateSessionPinned(sessionId: string, isPinned: boolean, userId?: string): Promise<void> {
+    let query = supabase
+      .from('chat_sessions')
+      .update({ 
+        is_pinned: isPinned,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', sessionId);
+
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
+    const { error } = await query;
+
+    if (error) {
+      if (error.code === '42501' || error.message?.includes('permission denied')) {
+        throw new Error('You do not have permission to update this session');
+      }
+      throw new Error(`Failed to update pinned state: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update session archived state
+   */
+  async updateSessionArchived(sessionId: string, isArchived: boolean, userId?: string): Promise<void> {
+    let query = supabase
+      .from('chat_sessions')
+      .update({ 
+        is_archived: isArchived,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', sessionId);
+
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
+    const { error } = await query;
+
+    if (error) {
+      if (error.code === '42501' || error.message?.includes('permission denied')) {
+        throw new Error('You do not have permission to update this session');
+      }
+      throw new Error(`Failed to update archived state: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update session shared link
+   */
+  async updateSessionSharedLink(sessionId: string, sharedLink: string | null, userId?: string): Promise<void> {
+    let query = supabase
+      .from('chat_sessions')
+      .update({ 
+        shared_link: sharedLink,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', sessionId);
+
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
+    const { error } = await query;
+
+    if (error) {
+      if (error.code === '42501' || error.message?.includes('permission denied')) {
+        throw new Error('You do not have permission to update this session');
+      }
+      throw new Error(`Failed to update shared link: ${error.message}`);
+    }
+  }
+
+  /**
+   * Copy messages from one session to another
+   */
+  async copySessionMessages(sourceSessionId: string, targetSessionId: string, userId?: string): Promise<void> {
+    // Verify both sessions belong to the user
+    if (userId) {
+      const { data: sessions, error } = await supabase
+        .from('chat_sessions')
+        .select('id')
+        .in('id', [sourceSessionId, targetSessionId])
+        .eq('user_id', userId);
+
+      if (error || !sessions || sessions.length !== 2) {
+        throw new Error('Invalid session IDs or permission denied');
+      }
+    }
+
+    // Get all messages from source session
+    const sourceMessages = await this.getSessionMessages(sourceSessionId);
+
+    // Insert messages into target session
+    if (sourceMessages.length > 0) {
+      const { error } = await supabase
+        .from('chat_messages')
+        .insert(
+          sourceMessages.map((msg) => ({
+            session_id: targetSessionId,
+            role: msg.role,
+            content: msg.content,
+            created_at: msg.createdAt.toISOString(),
+          }))
+        );
+
+      if (error) {
+        throw new Error(`Failed to copy messages: ${error.message}`);
+      }
+
+      // Update target session's last_message_at
+      await supabase
+        .from('chat_sessions')
+        .update({
+          last_message_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', targetSessionId);
+    }
+  }
+
   // Mapping functions
   private mapDBSessionToSession(dbSession: DBChatSession): ChatSession {
     // Safely convert timestamps to Date objects
@@ -275,6 +435,9 @@ export class ChatPersistenceService {
       console.warn('Invalid updatedAt for session:', dbSession.id);
     }
 
+    // Extract tags from metadata if available
+    const metadataTags = (dbSession.metadata as { tags?: string[] })?.tags || [];
+    
     return {
       id: dbSession.id,
       title: dbSession.title || 'New Chat',
@@ -283,14 +446,21 @@ export class ChatPersistenceService {
       messageCount: 0, // Will be populated separately if needed
       tokenCount: 0,
       cost: 0,
-      isPinned: false,
-      isArchived: !dbSession.is_active,
-      tags: [],
+      isPinned: dbSession.is_pinned ?? false,
+      isArchived: dbSession.is_archived ?? (!dbSession.is_active ?? false),
+      isStarred: dbSession.is_starred ?? false,
+      sharedLink: dbSession.shared_link || undefined,
+      tags: metadataTags,
       participants: [dbSession.user_id],
       metadata: {
         employeeId: dbSession.employee_id,
         role: dbSession.role,
         provider: dbSession.provider,
+        starred: dbSession.is_starred ?? false,
+        pinned: dbSession.is_pinned ?? false,
+        archived: dbSession.is_archived ?? false,
+        tags: metadataTags,
+        ...(dbSession.metadata || {}),
       },
     };
   }

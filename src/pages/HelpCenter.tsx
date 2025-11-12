@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   HelpCircle,
@@ -42,6 +43,7 @@ interface SupportCategory {
 }
 
 const HelpPage: React.FC = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
 
@@ -335,6 +337,7 @@ const HelpPage: React.FC = () => {
               cta="Start Chat"
               color="from-blue-500 to-cyan-500"
               index={0}
+              onClick={() => navigate('/chat')}
             />
             <ContactCard
               icon={Mail}
@@ -343,6 +346,7 @@ const HelpPage: React.FC = () => {
               cta="Send Email"
               color="from-purple-500 to-pink-500"
               index={1}
+              onClick={() => window.location.href = 'mailto:support@agiworkforce.com'}
             />
             <ContactCard
               icon={BookOpen}
@@ -351,6 +355,7 @@ const HelpPage: React.FC = () => {
               cta="View Docs"
               color="from-green-500 to-emerald-500"
               index={2}
+              onClick={() => navigate('/documentation')}
             />
           </div>
         </div>
@@ -371,13 +376,19 @@ const HelpPage: React.FC = () => {
               AI automation experts
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Button variant="outline" size="lg" className="border-border/40">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-border/40"
+                onClick={() => window.open('https://community.agiagentautomation.com', '_blank')}
+              >
                 <Users className="mr-2" size={18} />
                 Community Forum
               </Button>
               <Button
                 className="bg-gradient-to-r from-primary to-accent"
                 size="lg"
+                onClick={() => window.open('https://discord.gg/agiagentautomation', '_blank')}
               >
                 <ExternalLink className="mr-2" size={18} />
                 Join Discord
@@ -394,9 +405,18 @@ const CategoryCard: React.FC<{ category: SupportCategory; index: number }> = ({
   category,
   index,
 }) => {
+  const navigate = useNavigate();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
   const Icon = category.icon;
+
+  const handleClick = () => {
+    if (category.href.startsWith('http')) {
+      window.open(category.href, '_blank');
+    } else {
+      navigate(category.href);
+    }
+  };
 
   return (
     <motion.div
@@ -406,6 +426,7 @@ const CategoryCard: React.FC<{ category: SupportCategory; index: number }> = ({
       transition={{ duration: 0.6, delay: index * 0.1 }}
       className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border/40 bg-background/60 p-6 backdrop-blur-xl transition-all hover:border-primary/50"
       whileHover={{ y: -8 }}
+      onClick={handleClick}
     >
       <div
         className={`inline-flex rounded-xl bg-gradient-to-br p-3 ${category.color} mb-4 text-white`}
@@ -494,7 +515,8 @@ const ContactCard: React.FC<{
   cta: string;
   color: string;
   index: number;
-}> = ({ icon: Icon, title, description, cta, color, index }) => {
+  onClick?: () => void;
+}> = ({ icon: Icon, title, description, cta, color, index, onClick }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
 
@@ -514,7 +536,7 @@ const ContactCard: React.FC<{
       </div>
       <h3 className="mb-2 text-xl font-bold">{title}</h3>
       <p className="mb-6 text-sm text-muted-foreground">{description}</p>
-      <Button variant="outline" className="w-full">
+      <Button variant="outline" className="w-full" onClick={onClick}>
         {cta}
       </Button>
     </motion.div>

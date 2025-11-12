@@ -28,7 +28,7 @@ import {
   ExternalLink,
   Calendar,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 import { supabase } from '@shared/lib/supabase-client';
 
 interface PublicArtifact {

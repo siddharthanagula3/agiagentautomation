@@ -138,9 +138,23 @@ class TokenLoggerService {
     };
     const provider = pricing.provider;
 
-    // Calculate cost
-    const actualInputTokens = inputTokens || Math.floor(tokensUsed * 0.4); // Estimate 40/60 split
-    const actualOutputTokens = outputTokens || Math.ceil(tokensUsed * 0.6);
+    // Calculate cost - use actual values if provided, otherwise estimate
+    // NOTE: All providers should provide actual input/output tokens from API responses
+    const actualInputTokens = inputTokens ?? (tokensUsed > 0 ? Math.floor(tokensUsed * 0.4) : 0);
+    const actualOutputTokens = outputTokens ?? (tokensUsed > 0 ? Math.ceil(tokensUsed * 0.6) : 0);
+    
+    // Validate token values
+    if (tokensUsed > 0 && actualInputTokens === 0 && actualOutputTokens === 0) {
+      console.warn(`[TokenLogger] ⚠️ No input/output tokens provided for ${model}, using estimation`);
+    }
+    
+    // Validate that input + output equals total (with small tolerance for rounding)
+    const calculatedTotal = actualInputTokens + actualOutputTokens;
+    if (tokensUsed > 0 && Math.abs(calculatedTotal - tokensUsed) > 1) {
+      console.warn(
+        `[TokenLogger] ⚠️ Token mismatch for ${model}: input(${actualInputTokens}) + output(${actualOutputTokens}) = ${calculatedTotal}, but total = ${tokensUsed}`
+      );
+    }
     const cost = this.calculateCost(
       model,
       actualInputTokens,

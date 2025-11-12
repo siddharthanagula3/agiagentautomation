@@ -23,7 +23,7 @@ import {
 } from '@shared/ui/dropdown-menu';
 import { Button } from '@shared/ui/button';
 import { FileText, FileJson, FileCode, Download } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 import {
   UsageWarningBanner,
   useUsageMonitoring,
@@ -55,6 +55,7 @@ const ChatPage: React.FC = () => {
     deleteSession,
     searchSessions,
     loadSessions,
+    loadSession,
     toggleStarSession,
     togglePinSession,
     toggleArchiveSession,
@@ -312,7 +313,7 @@ const ChatPage: React.FC = () => {
           onShare={handleShare}
           onExport={() => handleExport('markdown')}
           onSettings={() => {
-            /* TODO: Implement settings */
+            navigate('/settings');
           }}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         />
@@ -346,7 +347,8 @@ const ChatPage: React.FC = () => {
               isLoading={isLoading}
               availableTools={availableTools}
               onToolToggle={(toolId) => {
-                /* TODO: Implement tool toggle */
+                // Tool toggle is handled by the ChatComposer component internally
+                // This callback can be used for future tool management features
               }}
               selectedMode={selectedMode}
               onModeChange={setSelectedMode}

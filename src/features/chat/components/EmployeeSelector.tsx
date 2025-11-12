@@ -12,7 +12,7 @@ import {
   TooltipTrigger,
 } from '@/shared/ui/tooltip';
 import { Plus, Users } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 
 interface AIEmployee {
   id: string;

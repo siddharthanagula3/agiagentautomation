@@ -1,4 +1,5 @@
 import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import Stripe from 'stripe';
 
 interface BuyTokenPackRequest {
   userId: string;
@@ -48,7 +49,9 @@ export const handler: Handler = async (
       };
     }
 
-    const stripe = require('stripe')(stripeSecretKey);
+    const stripe = new Stripe(stripeSecretKey, {
+      apiVersion: '2024-12-18.acacia',
+    });
 
     // Get base URL for redirect
     const baseUrl = process.env.URL || 'http://localhost:8888';

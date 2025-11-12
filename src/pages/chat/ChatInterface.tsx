@@ -96,12 +96,11 @@ export function ChatInterface() {
   ]);
 
   // Auto-scroll to bottom when new messages arrive
+  const messageCount =
+    conversations[activeConversationId || '']?.messages?.length ?? 0;
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [
-    conversations[activeConversationId || '']?.messages?.length,
-    activeConversationId,
-  ]);
+  }, [messageCount, activeConversationId]);
 
   // Get current conversation
   const currentConversation = activeConversationId

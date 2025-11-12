@@ -9,6 +9,7 @@ This module implements a sophisticated chat interface that combines the polish o
 ## Key Components
 
 ### MessageBubble - Enhanced Message Display
+
 - Rich Markdown rendering with syntax highlighting
 - Document view mode for long-form content
 - Per-code-block copy buttons
@@ -16,6 +17,7 @@ This module implements a sophisticated chat interface that combines the polish o
 - Export documents as .md files
 
 ### ChatComposer - Modern Input Component
+
 - Inline model selector with recommendations
 - Avatar-based employee multi-selector
 - Auto-resizing textarea (80-200px)
@@ -23,6 +25,7 @@ This module implements a sophisticated chat interface that combines the polish o
 - Keyboard shortcuts and character counter
 
 ### EmployeeWorkStream - Collaboration Visualization
+
 - Real-time display of AI employee work
 - Shows tool usage, files, commands
 - Status updates and progress tracking

@@ -714,8 +714,9 @@ export const useChatStore = create<ChatStore>()(
         removeConversationTag: (id: string, tag: string) =>
           set((state) => {
             if (state.conversations[id]) {
-              state.conversations[id].metadata.tags =
-                state.conversations[id].metadata.tags.filter((t) => t !== tag);
+              state.conversations[id].metadata.tags = state.conversations[
+                id
+              ].metadata.tags.filter((t) => t !== tag);
               state.conversations[id].metadata.updatedAt = new Date();
             }
           }),

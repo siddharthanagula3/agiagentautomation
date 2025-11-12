@@ -372,7 +372,10 @@ const BillingPage: React.FC = () => {
     // Handle successful token purchase
     if (success === 'true' && tokensParam && user) {
       const tokens = parseInt(tokensParam, 10);
-      console.log('[Billing] Token purchase successful:', tokens.toLocaleString());
+      console.log(
+        '[Billing] Token purchase successful:',
+        tokens.toLocaleString()
+      );
       toast.success(
         `Success! ${tokens.toLocaleString()} tokens added to your account.`,
         { duration: 5000 }
@@ -916,7 +919,7 @@ const BillingPage: React.FC = () => {
 
       {/* Buy More Tokens Section */}
       {(showBuyTokens ||
-        (billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.85)) && (
+        billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.85) && (
         <Card id="buy-tokens-section" className="border-2 border-primary/50">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -926,7 +929,8 @@ const BillingPage: React.FC = () => {
                   Buy More Tokens
                 </CardTitle>
                 <CardDescription>
-                  Purchase additional tokens to keep your AI employees working without interruption
+                  Purchase additional tokens to keep your AI employees working
+                  without interruption
                 </CardDescription>
               </div>
               {showBuyTokens && (
@@ -943,27 +947,38 @@ const BillingPage: React.FC = () => {
           <CardContent>
             {/* Warning if near limit */}
             {billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.85 && (
-              <div className={`mb-6 rounded-lg border p-4 ${
-                billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.95
-                  ? 'border-red-500/50 bg-red-500/10'
-                  : 'border-yellow-500/50 bg-yellow-500/10'
-              }`}>
+              <div
+                className={`mb-6 rounded-lg border p-4 ${
+                  billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.95
+                    ? 'border-red-500/50 bg-red-500/10'
+                    : 'border-yellow-500/50 bg-yellow-500/10'
+                }`}
+              >
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className={`mt-0.5 h-5 w-5 ${
-                    billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.95
-                      ? 'text-red-500'
-                      : 'text-yellow-500'
-                  }`} />
+                  <AlertTriangle
+                    className={`mt-0.5 h-5 w-5 ${
+                      billing?.usage.totalTokens >=
+                      billing?.usage.totalLimit * 0.95
+                        ? 'text-red-500'
+                        : 'text-yellow-500'
+                    }`}
+                  />
                   <div className="flex-1">
                     <h4 className="mb-1 font-semibold">
-                      {billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.95
+                      {billing?.usage.totalTokens >=
+                      billing?.usage.totalLimit * 0.95
                         ? '🚨 Critical: 95% Usage Reached'
                         : '⚠️ Warning: 85% Usage Reached'}
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      You've used {((billing?.usage.totalTokens / billing?.usage.totalLimit) * 100).toFixed(1)}%
-                      of your {billing?.plan === 'pro' ? '10M' : '1M'} token limit.
-                      Buy more tokens now to avoid service interruption.
+                      You've used{' '}
+                      {(
+                        (billing?.usage.totalTokens /
+                          billing?.usage.totalLimit) *
+                        100
+                      ).toFixed(1)}
+                      % of your {billing?.plan === 'pro' ? '10M' : '1M'} token
+                      limit. Buy more tokens now to avoid service interruption.
                     </p>
                   </div>
                 </div>
@@ -993,7 +1008,9 @@ const BillingPage: React.FC = () => {
                     <CardTitle className="text-lg">{pack.name}</CardTitle>
                     <div className="flex items-baseline gap-1">
                       <span className="text-3xl font-bold">${pack.price}</span>
-                      <span className="text-sm text-muted-foreground">one-time</span>
+                      <span className="text-sm text-muted-foreground">
+                        one-time
+                      </span>
                     </div>
                     {pack.savings && (
                       <Badge variant="secondary" className="mt-2 w-fit">
@@ -1011,7 +1028,9 @@ const BillingPage: React.FC = () => {
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Cost per 1K</span>
+                        <span className="text-muted-foreground">
+                          Cost per 1K
+                        </span>
                         <span className="font-medium">
                           ${((pack.price / pack.tokens) * 1000).toFixed(3)}
                         </span>
@@ -1022,7 +1041,8 @@ const BillingPage: React.FC = () => {
                       onClick={() => handleBuyTokenPack(pack)}
                       className={cn(
                         'w-full',
-                        pack.popular && 'bg-gradient-to-r from-primary to-accent'
+                        pack.popular &&
+                          'bg-gradient-to-r from-primary to-accent'
                       )}
                       variant={pack.popular ? 'default' : 'outline'}
                     >
@@ -1042,28 +1062,36 @@ const BillingPage: React.FC = () => {
                   <CheckCircle className="mt-0.5 h-4 w-4 text-success" />
                   <div>
                     <span className="font-medium">Instant Activation</span>
-                    <p className="text-muted-foreground">Tokens available immediately after purchase</p>
+                    <p className="text-muted-foreground">
+                      Tokens available immediately after purchase
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 text-sm">
                   <CheckCircle className="mt-0.5 h-4 w-4 text-success" />
                   <div>
                     <span className="font-medium">No Expiration</span>
-                    <p className="text-muted-foreground">Use your tokens whenever you need them</p>
+                    <p className="text-muted-foreground">
+                      Use your tokens whenever you need them
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 text-sm">
                   <CheckCircle className="mt-0.5 h-4 w-4 text-success" />
                   <div>
                     <span className="font-medium">Market-Rate Pricing</span>
-                    <p className="text-muted-foreground">Same as direct OpenAI/Anthropic usage</p>
+                    <p className="text-muted-foreground">
+                      Same as direct OpenAI/Anthropic usage
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2 text-sm">
                   <CheckCircle className="mt-0.5 h-4 w-4 text-success" />
                   <div>
                     <span className="font-medium">All Providers</span>
-                    <p className="text-muted-foreground">Works with OpenAI, Claude, Gemini, Perplexity</p>
+                    <p className="text-muted-foreground">
+                      Works with OpenAI, Claude, Gemini, Perplexity
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1075,9 +1103,12 @@ const BillingPage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <Crown className="mt-0.5 h-5 w-5 text-primary" />
                   <div className="flex-1">
-                    <h4 className="mb-1 font-semibold">💡 Better Value: Upgrade to Pro</h4>
+                    <h4 className="mb-1 font-semibold">
+                      💡 Better Value: Upgrade to Pro
+                    </h4>
                     <p className="mb-3 text-sm text-muted-foreground">
-                      Get 10M tokens/month for $29 - Better value than buying token packs if you use AI regularly
+                      Get 10M tokens/month for $29 - Better value than buying
+                      token packs if you use AI regularly
                     </p>
                     <Button
                       variant="outline"

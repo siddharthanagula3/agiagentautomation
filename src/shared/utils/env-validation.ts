@@ -89,14 +89,10 @@ export function validateEnvironmentVariables(): ValidationResult {
     if (!value || value.trim() === '') {
       if (config.required) {
         missingRequired.push(config.name);
-        errors.push(
-          `❌ REQUIRED: ${config.name} - ${config.description}`
-        );
+        errors.push(`❌ REQUIRED: ${config.name} - ${config.description}`);
       } else {
         missingOptional.push(config.name);
-        warnings.push(
-          `⚠️  OPTIONAL: ${config.name} - ${config.description}`
-        );
+        warnings.push(`⚠️  OPTIONAL: ${config.name} - ${config.description}`);
       }
     }
   }
@@ -144,12 +140,8 @@ export function validateAndLogEnvironment(throwOnError = true): void {
     import.meta.env.VITE_PERPLEXITY_API_KEY;
 
   if (!hasAIProvider) {
-    console.warn(
-      '\n⚠️  WARNING: No AI provider API keys configured!'
-    );
-    console.warn(
-      '   Chat functionality will require at least one provider.'
-    );
+    console.warn('\n⚠️  WARNING: No AI provider API keys configured!');
+    console.warn('   Chat functionality will require at least one provider.');
   }
 
   console.log('═'.repeat(50));

@@ -79,7 +79,8 @@ export function ArtifactPreview({
   useEffect(() => {
     if (activeTab === 'preview' && iframeRef.current) {
       const iframe = iframeRef.current;
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      const iframeDoc =
+        iframe.contentDocument || iframe.contentWindow?.document;
 
       if (iframeDoc) {
         iframeDoc.open();
@@ -249,7 +250,8 @@ export function ArtifactPreview({
   const handleRefresh = () => {
     if (iframeRef.current) {
       const iframe = iframeRef.current;
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      const iframeDoc =
+        iframe.contentDocument || iframe.contentWindow?.document;
       if (iframeDoc) {
         iframeDoc.open();
         iframeDoc.write(getPreviewHTML());
@@ -268,7 +270,9 @@ export function ArtifactPreview({
     }
   };
 
-  const canPreview = ['html', 'react', 'svg', 'mermaid'].includes(artifact.type);
+  const canPreview = ['html', 'react', 'svg', 'mermaid'].includes(
+    artifact.type
+  );
 
   return (
     <div

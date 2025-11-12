@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import type { ArtifactData, ArtifactVersion } from '@features/chat/components/ArtifactPreview';
+import type {
+  ArtifactData,
+  ArtifactVersion,
+} from '@features/chat/components/ArtifactPreview';
 
 /**
  * Artifact Store - Version Control & Sharing for Chat Artifacts
@@ -24,9 +27,21 @@ interface ArtifactState {
 
   // Actions
   addArtifact: (messageId: string, artifact: ArtifactData) => void;
-  updateArtifact: (messageId: string, artifactId: string, updates: Partial<ArtifactData>) => void;
-  addVersion: (messageId: string, artifactId: string, version: ArtifactVersion) => void;
-  setCurrentVersion: (messageId: string, artifactId: string, versionIndex: number) => void;
+  updateArtifact: (
+    messageId: string,
+    artifactId: string,
+    updates: Partial<ArtifactData>
+  ) => void;
+  addVersion: (
+    messageId: string,
+    artifactId: string,
+    version: ArtifactVersion
+  ) => void;
+  setCurrentVersion: (
+    messageId: string,
+    artifactId: string,
+    versionIndex: number
+  ) => void;
   shareArtifact: (messageId: string, artifactId: string) => Promise<string>;
   unshareArtifact: (shareId: string) => void;
   getSharedArtifact: (shareId: string) => ArtifactData | undefined;
@@ -50,12 +65,18 @@ export const useArtifactStore = create<ArtifactState>()(
       });
     },
 
-    updateArtifact: (messageId: string, artifactId: string, updates: Partial<ArtifactData>) => {
+    updateArtifact: (
+      messageId: string,
+      artifactId: string,
+      updates: Partial<ArtifactData>
+    ) => {
       set((state) => {
         const messageArtifacts = state.artifacts.get(messageId);
         if (!messageArtifacts) return;
 
-        const artifactIndex = messageArtifacts.findIndex((a) => a.id === artifactId);
+        const artifactIndex = messageArtifacts.findIndex(
+          (a) => a.id === artifactId
+        );
         if (artifactIndex === -1) return;
 
         messageArtifacts[artifactIndex] = {
@@ -65,7 +86,11 @@ export const useArtifactStore = create<ArtifactState>()(
       });
     },
 
-    addVersion: (messageId: string, artifactId: string, version: ArtifactVersion) => {
+    addVersion: (
+      messageId: string,
+      artifactId: string,
+      version: ArtifactVersion
+    ) => {
       set((state) => {
         const messageArtifacts = state.artifacts.get(messageId);
         if (!messageArtifacts) return;
@@ -81,7 +106,11 @@ export const useArtifactStore = create<ArtifactState>()(
       });
     },
 
-    setCurrentVersion: (messageId: string, artifactId: string, versionIndex: number) => {
+    setCurrentVersion: (
+      messageId: string,
+      artifactId: string,
+      versionIndex: number
+    ) => {
       set((state) => {
         const messageArtifacts = state.artifacts.get(messageId);
         if (!messageArtifacts) return;
@@ -96,7 +125,10 @@ export const useArtifactStore = create<ArtifactState>()(
       });
     },
 
-    shareArtifact: async (messageId: string, artifactId: string): Promise<string> => {
+    shareArtifact: async (
+      messageId: string,
+      artifactId: string
+    ): Promise<string> => {
       const messageArtifacts = get().artifacts.get(messageId);
       if (!messageArtifacts) {
         throw new Error('Message artifacts not found');

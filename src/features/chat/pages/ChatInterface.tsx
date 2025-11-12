@@ -24,7 +24,10 @@ import {
 import { Button } from '@shared/ui/button';
 import { FileText, FileJson, FileCode, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { UsageWarningBanner, useUsageMonitoring } from '../components/UsageWarningBanner';
+import {
+  UsageWarningBanner,
+  useUsageMonitoring,
+} from '../components/UsageWarningBanner';
 import { UsageWarningModal } from '../components/UsageWarningModal';
 import { useUsageWarningStore } from '@shared/stores/usage-warning-store';
 
@@ -289,7 +292,7 @@ const ChatPage: React.FC = () => {
       </div>
 
       {/* Main Chat Area - Optimized for full screen usage */}
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col">
         {/* Header - Compact and clean */}
         <ChatHeader
           session={currentSession}

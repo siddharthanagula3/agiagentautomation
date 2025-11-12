@@ -56,16 +56,20 @@ export const useUsageWarningStore = create<UsageWarningState>()(
 
       shouldShowWarning: (threshold: 85 | 95) => {
         const state = get();
-        const hasShown = threshold === 85 ? state.hasShown85Warning : state.hasShown95Warning;
+        const hasShown =
+          threshold === 85 ? state.hasShown85Warning : state.hasShown95Warning;
 
         // Show warning if:
         // 1. Usage >= threshold
         // 2. Warning hasn't been shown yet this session
         // 3. Or it's been more than 1 hour since last warning
-        const oneHourAgo = Date.now() - (60 * 60 * 1000);
-        const canShowAgain = !state.lastWarningTime || state.lastWarningTime < oneHourAgo;
+        const oneHourAgo = Date.now() - 60 * 60 * 1000;
+        const canShowAgain =
+          !state.lastWarningTime || state.lastWarningTime < oneHourAgo;
 
-        return state.usagePercentage >= threshold && (!hasShown || canShowAgain);
+        return (
+          state.usagePercentage >= threshold && (!hasShown || canShowAgain)
+        );
       },
 
       resetWarnings: () => {

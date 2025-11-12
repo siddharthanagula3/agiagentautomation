@@ -53,14 +53,20 @@ export const MessageList: React.FC<MessageListProps> = ({
   return (
     <ScrollArea className="flex-1">
       <div className="space-y-0">
-        {messages.map((message) => (
-          <MessageBubble
-            key={message.id}
-            message={{
-              id: message.id,
-              content: message.content,
-              role: message.role,
-              timestamp: new Date(message.createdAt),
+        {messages.map((message) => {
+          // Ensure createdAt is a Date object
+          const timestamp = message.createdAt instanceof Date 
+            ? message.createdAt 
+            : new Date(message.createdAt || Date.now());
+          
+          return (
+            <MessageBubble
+              key={message.id}
+              message={{
+                id: message.id,
+                content: message.content,
+                role: message.role,
+                timestamp,
               employeeId: message.metadata?.employeeId as string | undefined,
               employeeName: message.metadata?.employeeName as
                 | string
@@ -85,7 +91,8 @@ export const MessageList: React.FC<MessageListProps> = ({
             onPin={handlePin}
             onReact={handleReact}
           />
-        ))}
+          );
+        })}
 
         {/* Loading indicator */}
         {isLoading && (

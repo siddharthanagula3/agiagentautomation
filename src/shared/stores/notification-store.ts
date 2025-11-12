@@ -527,16 +527,22 @@ export const useNotificationStore = create<NotificationStore>()(
 // Selectors for optimized re-renders
 export const useNotifications = () =>
   useNotificationStore((state) =>
-    Object.values(state.notifications).sort(
-      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
-    )
+    Object.values(state.notifications).sort((a, b) => {
+      const aTime = a.timestamp instanceof Date ? a.timestamp.getTime() : new Date(a.timestamp).getTime();
+      const bTime = b.timestamp instanceof Date ? b.timestamp.getTime() : new Date(b.timestamp).getTime();
+      return bTime - aTime;
+    })
   );
 
 export const useUnreadNotifications = () =>
   useNotificationStore((state) =>
     Object.values(state.notifications)
       .filter((n) => !n.read)
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .sort((a, b) => {
+        const aTime = a.timestamp instanceof Date ? a.timestamp.getTime() : new Date(a.timestamp).getTime();
+        const bTime = b.timestamp instanceof Date ? b.timestamp.getTime() : new Date(b.timestamp).getTime();
+        return bTime - aTime;
+      })
   );
 
 export const useToasts = () =>

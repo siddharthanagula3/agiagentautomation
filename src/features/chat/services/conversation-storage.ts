@@ -26,6 +26,9 @@ interface DBChatMessage {
   role: string;
   content: string;
   created_at: string | null;
+  updated_at?: string | null;
+  edited?: boolean | null;
+  edit_count?: number | null;
 }
 
 export class ChatPersistenceService {
@@ -229,6 +232,73 @@ export class ChatPersistenceService {
     }
 
     return (data || []).map(this.mapDBMessageToMessage);
+  }
+
+  /**
+   * Update a message's content
+   * Note: RLS policies ensure users can only update messages from their own sessions
+   */
+  async updateMessage(
+    messageId: string,
+    newContent: string
+  ): Promise<ChatMessage> {
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .update({
+        content: newContent,
+        // updated_at, edited, and edit_count are automatically handled by the database trigger
+      })
+      .eq('id', messageId)
+      .select()
+      .single();
+
+    if (error) {
+      // RLS policy violation
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
+        throw new Error('You do not have permission to edit this message');
+      }
+      throw new Error(`Failed to update message: ${error.message}`);
+    }
+
+    return this.mapDBMessageToMessage(data);
+  }
+
+  /**
+   * Get edit history for a message
+   * Note: RLS policies ensure users can only view edit history for their own messages
+   */
+  async getMessageEditHistory(messageId: string): Promise<
+    Array<{
+      id: string;
+      previousContent: string;
+      editedAt: Date;
+    }>
+  > {
+    const { data, error } = await supabase
+      .from('chat_message_edits')
+      .select('id, previous_content, edited_at')
+      .eq('message_id', messageId)
+      .order('edited_at', { ascending: false });
+
+    if (error) {
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
+        console.warn('Access denied to edit history for message:', messageId);
+        return [];
+      }
+      throw new Error(`Failed to load edit history: ${error.message}`);
+    }
+
+    return (data || []).map((edit) => ({
+      id: edit.id,
+      previousContent: edit.previous_content,
+      editedAt: new Date(edit.edited_at),
+    }));
   }
 
   /**
@@ -516,14 +586,21 @@ export class ChatPersistenceService {
   }
 
   private mapDBMessageToMessage(dbMessage: DBChatMessage): ChatMessage {
-    // Safely convert timestamp to Date object
+    // Safely convert timestamps to Date objects
     const createdAt = dbMessage.created_at
       ? new Date(dbMessage.created_at)
       : new Date();
 
-    // Validate date
+    const updatedAt = dbMessage.updated_at
+      ? new Date(dbMessage.updated_at)
+      : createdAt;
+
+    // Validate dates
     if (isNaN(createdAt.getTime())) {
       console.warn('Invalid createdAt for message:', dbMessage.id);
+    }
+    if (isNaN(updatedAt.getTime())) {
+      console.warn('Invalid updatedAt for message:', dbMessage.id);
     }
 
     return {
@@ -532,6 +609,9 @@ export class ChatPersistenceService {
       role: dbMessage.role as 'user' | 'assistant' | 'system',
       content: dbMessage.content,
       createdAt: isNaN(createdAt.getTime()) ? new Date() : createdAt,
+      updatedAt: isNaN(updatedAt.getTime()) ? createdAt : updatedAt,
+      edited: dbMessage.edited ?? false,
+      editCount: dbMessage.edit_count ?? 0,
     };
   }
 }

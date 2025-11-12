@@ -37,8 +37,8 @@ export interface ChatMessage {
   toolCalls?: ToolCall[];
   createdAt: Date;
   updatedAt?: Date;
-  isEdited?: boolean;
-  editedAt?: Date;
+  edited?: boolean;
+  editCount?: number;
   metadata?: {
     mode?: ChatMode;
     model?: string;

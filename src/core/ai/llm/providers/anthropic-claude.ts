@@ -93,12 +93,11 @@ export class AnthropicProvider {
     userId?: string
   ): Promise<AnthropicResponse> {
     try {
-      if (!ANTHROPIC_API_KEY) {
-        throw new AnthropicError(
-          'Anthropic API key not configured. Please add VITE_ANTHROPIC_API_KEY to your environment variables.',
-          'API_KEY_MISSING'
-        );
-      }
+      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
+      throw new AnthropicError(
+        'Direct Anthropic API calls are disabled for security. Use /.netlify/functions/anthropic-proxy instead.',
+        'DIRECT_API_DISABLED'
+      );
 
       // Convert messages to Anthropic format
       const anthropicMessages = this.convertMessagesToAnthropic(messages);
@@ -191,12 +190,11 @@ export class AnthropicProvider {
     };
   }> {
     try {
-      if (!ANTHROPIC_API_KEY) {
-        throw new AnthropicError(
-          'Anthropic API key not configured. Please add VITE_ANTHROPIC_API_KEY to your environment variables.',
-          'API_KEY_MISSING'
-        );
-      }
+      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
+      throw new AnthropicError(
+        'Direct Anthropic streaming is disabled for security. Use /.netlify/functions/anthropic-proxy instead.',
+        'DIRECT_API_DISABLED'
+      );
 
       // Convert messages to Anthropic format
       const anthropicMessages = this.convertMessagesToAnthropic(messages);
@@ -363,9 +361,10 @@ export class AnthropicProvider {
 
   /**
    * Check if API key is configured
+   * SECURITY: Always returns false as direct API access is disabled
    */
   isConfigured(): boolean {
-    return !!ANTHROPIC_API_KEY;
+    return false; // Direct API access disabled for security
   }
 
   /**

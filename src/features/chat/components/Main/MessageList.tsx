@@ -27,9 +27,12 @@ export const MessageList: React.FC<MessageListProps> = ({
   const updateMessage = useChatStore((state) => state.updateMessage);
 
   const handleEdit = (messageId: string) => {
-    // TODO: Implement edit UI
-    const newContent = prompt('Edit message:');
-    if (newContent) {
+    // Simple edit implementation - can be enhanced with a modal dialog later
+    const message = messages.find((m) => m.id === messageId);
+    if (!message) return;
+
+    const newContent = prompt('Edit message:', message.content);
+    if (newContent && newContent !== message.content) {
       onEdit(messageId, newContent);
     }
   };
@@ -53,39 +56,47 @@ export const MessageList: React.FC<MessageListProps> = ({
   return (
     <ScrollArea className="flex-1">
       <div className="space-y-0">
-        {messages.map((message) => (
-          <MessageBubble
-            key={message.id}
-            message={{
-              id: message.id,
-              content: message.content,
-              role: message.role,
-              timestamp: new Date(message.createdAt),
-              employeeId: message.metadata?.employeeId as string | undefined,
-              employeeName: message.metadata?.employeeName as
-                | string
-                | undefined,
-              reactions: [],
-              metadata: {
-                tokensUsed: message.metadata?.tokens,
-                inputTokens: message.metadata?.inputTokens as
-                  | number
+        {messages.map((message) => {
+          // Ensure createdAt is a Date object
+          const timestamp =
+            message.createdAt instanceof Date
+              ? message.createdAt
+              : new Date(message.createdAt || Date.now());
+
+          return (
+            <MessageBubble
+              key={message.id}
+              message={{
+                id: message.id,
+                content: message.content,
+                role: message.role,
+                timestamp,
+                employeeId: message.metadata?.employeeId as string | undefined,
+                employeeName: message.metadata?.employeeName as
+                  | string
                   | undefined,
-                outputTokens: message.metadata?.outputTokens as
-                  | number
-                  | undefined,
-                model: message.metadata?.model,
-                cost: message.metadata?.cost,
-                isPinned: message.metadata?.isPinned as boolean | undefined,
-              },
-            }}
-            onEdit={handleEdit}
-            onRegenerate={onRegenerate}
-            onDelete={onDelete}
-            onPin={handlePin}
-            onReact={handleReact}
-          />
-        ))}
+                reactions: [],
+                metadata: {
+                  tokensUsed: message.metadata?.tokens,
+                  inputTokens: message.metadata?.inputTokens as
+                    | number
+                    | undefined,
+                  outputTokens: message.metadata?.outputTokens as
+                    | number
+                    | undefined,
+                  model: message.metadata?.model,
+                  cost: message.metadata?.cost,
+                  isPinned: message.metadata?.isPinned as boolean | undefined,
+                },
+              }}
+              onEdit={handleEdit}
+              onRegenerate={onRegenerate}
+              onDelete={onDelete}
+              onPin={handlePin}
+              onReact={handleReact}
+            />
+          );
+        })}
 
         {/* Loading indicator */}
         {isLoading && (

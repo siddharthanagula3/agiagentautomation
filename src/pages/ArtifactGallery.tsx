@@ -28,7 +28,7 @@ import {
   ExternalLink,
   Calendar,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 import { supabase } from '@shared/lib/supabase-client';
 
 interface PublicArtifact {
@@ -85,7 +85,10 @@ const ArtifactGalleryPage: React.FC = () => {
     try {
       setIsLoading(true);
 
-      let query = supabase.from('public_artifacts').select('*');
+      let query = supabase
+        .from('public_artifacts')
+        .select('*')
+        .eq('is_public', true); // Only show public artifacts
 
       // Filter by type
       if (selectedType !== 'all') {

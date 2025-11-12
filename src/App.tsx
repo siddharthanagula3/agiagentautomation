@@ -50,7 +50,9 @@ const ResetPasswordPage = lazyWithRetry(
 
 // === DASHBOARD PAGES ===
 const DashboardHomePage = lazyWithRetry(() => import('./pages/DashboardHome'));
-const ChatPage = lazyWithRetry(() => import('./pages/chat/ChatInterface'));
+const ChatPage = lazyWithRetry(
+  () => import('@features/chat/pages/ChatInterface')
+);
 const SettingsPage = lazyWithRetry(
   () => import('@features/settings/pages/UserSettings')
 );
@@ -172,11 +174,11 @@ function App() {
 
                   {/* Settings */}
                   <Route path="settings" element={<SettingsPage />} />
-                  <Route path="settings/:section" element={<SettingsPage />} />
                   <Route
                     path="settings/ai-configuration"
                     element={<AIConfigurationPage />}
                   />
+                  <Route path="settings/:section" element={<SettingsPage />} />
 
                   {/* Billing */}
                   <Route path="billing" element={<BillingPage />} />

@@ -23,7 +23,7 @@ import {
 } from '@shared/ui/dropdown-menu';
 import { Button } from '@shared/ui/button';
 import { FileText, FileJson, FileCode, Download } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 import {
   UsageWarningBanner,
   useUsageMonitoring,
@@ -37,7 +37,7 @@ const ChatPage: React.FC = () => {
 
   // Chat state management
   const {
-    messages,
+    messages: rawMessages,
     isLoading,
     error,
     sendMessage,
@@ -47,6 +47,39 @@ const ChatPage: React.FC = () => {
     clearMessages,
   } = useChat(sessionId);
 
+  // Defensive: Ensure all message timestamps are valid Date objects
+  const messages = React.useMemo(() => {
+    return rawMessages.map((msg) => {
+      let createdAt: Date;
+
+      if (msg.createdAt instanceof Date) {
+        createdAt = msg.createdAt;
+      } else if (
+        typeof msg.createdAt === 'string' ||
+        typeof msg.createdAt === 'number'
+      ) {
+        createdAt = new Date(msg.createdAt);
+      } else {
+        createdAt = new Date();
+      }
+
+      // Validate date - if invalid, use current date
+      if (isNaN(createdAt.getTime())) {
+        console.warn(
+          'Invalid createdAt for message in ChatInterface:',
+          msg.id,
+          msg.createdAt
+        );
+        createdAt = new Date();
+      }
+
+      return {
+        ...msg,
+        createdAt,
+      };
+    });
+  }, [rawMessages]);
+
   const {
     sessions,
     currentSession,
@@ -55,6 +88,7 @@ const ChatPage: React.FC = () => {
     deleteSession,
     searchSessions,
     loadSessions,
+    loadSession,
     toggleStarSession,
     togglePinSession,
     toggleArchiveSession,
@@ -102,12 +136,24 @@ const ChatPage: React.FC = () => {
     loadSessions();
   }, [loadSessions]);
 
+  // Load current session when sessionId changes
+  useEffect(() => {
+    if (sessionId && (!currentSession || currentSession.id !== sessionId)) {
+      loadSession(sessionId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId, currentSession]);
+
   // Create new session if none exists
   useEffect(() => {
     if (!currentSession && !sessionId) {
-      createSession('New Chat').then((session) => {
-        navigate(`/chat/${session.id}`);
-      });
+      createSession('New Chat')
+        .then((session) => {
+          navigate(`/chat/${session.id}`);
+        })
+        .catch((error) => {
+          console.error('Failed to create session:', error);
+        });
     }
   }, [currentSession, sessionId, createSession, navigate]);
 
@@ -309,7 +355,7 @@ const ChatPage: React.FC = () => {
           onShare={handleShare}
           onExport={() => handleExport('markdown')}
           onSettings={() => {
-            /* TODO: Implement settings */
+            navigate('/settings');
           }}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         />
@@ -343,7 +389,8 @@ const ChatPage: React.FC = () => {
               isLoading={isLoading}
               availableTools={availableTools}
               onToolToggle={(toolId) => {
-                /* TODO: Implement tool toggle */
+                // Tool toggle is handled by the ChatComposer component internally
+                // This callback can be used for future tool management features
               }}
               selectedMode={selectedMode}
               onModeChange={setSelectedMode}

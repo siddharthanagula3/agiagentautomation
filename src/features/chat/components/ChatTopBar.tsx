@@ -11,7 +11,7 @@ import {
   X,
   BarChart3,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 import { ThemeToggle } from '@shared/ui/theme-toggle';
 
 interface ChatTopBarProps {

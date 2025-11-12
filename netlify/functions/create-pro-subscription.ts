@@ -5,11 +5,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia',
 });
 
-// Plan Pricing
+// Plan Pricing - PRODUCTION PRICING
 const PLAN_PRICES = {
   pro: {
-    monthly: 20, // $20/month
-    yearly: 200, // $200/year (save $40)
+    monthly: 29, // $29/month
+    yearly: 299.88, // $299.88/year ($24.99/month if billed yearly)
   },
   max: {
     monthly: 299, // $299/month
@@ -131,8 +131,8 @@ export const handler: Handler = async (event: HandlerEvent) => {
           billingPeriod,
         },
       },
-      success_url: `${process.env.URL || 'http://localhost:5173'}/billing?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.URL || 'http://localhost:5173'}/billing?canceled=true`,
+      success_url: `${process.env.URL || 'https://agiagentautomation.com'}/billing?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.URL || 'https://agiagentautomation.com'}/billing?canceled=true`,
     });
 
     console.log(

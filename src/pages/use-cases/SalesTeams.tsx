@@ -127,7 +127,8 @@ const SalesTeamsPage: React.FC = () => {
                 For Sales Teams
               </div>
               <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
-                Replace $80K+ Sales Reps with $19/Month AI
+                Replace $80K+ Sales Reps with $29/Month AI ($24.99/month if
+                billed yearly)
               </h1>
               <p className="mb-4 text-2xl font-semibold text-foreground">
                 Save 99.7% • Work 24/7 • No Commission Needed
@@ -285,7 +286,8 @@ const SalesTeamsPage: React.FC = () => {
               Save $119K+ Per Sales Rep Starting Today
             </h2>
             <p className="mb-2 text-2xl font-semibold opacity-95">
-              Free Forever Plan • $19/month Pro • No Credit Card Required
+              Free Forever Plan • $29/month Pro ($24.99/month if billed yearly)
+              • No Credit Card Required
             </p>
             <p className="mb-8 text-xl opacity-90">
               Hire your first AI SDR in 60 seconds. Join 2,000+ sales teams

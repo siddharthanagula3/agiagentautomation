@@ -191,6 +191,7 @@ export function UsageWarningBanner({
 /**
  * Hook to fetch and monitor usage data
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useUsageMonitoring(userId: string | null) {
   const [usageData, setUsageData] = useState<UsageData[]>([]);
   const [isLoading, setIsLoading] = useState(true);

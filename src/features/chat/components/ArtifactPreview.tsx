@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import {
@@ -75,22 +75,7 @@ export function ArtifactPreview({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Update iframe content when artifact changes
-  useEffect(() => {
-    if (activeTab === 'preview' && iframeRef.current) {
-      const iframe = iframeRef.current;
-      const iframeDoc =
-        iframe.contentDocument || iframe.contentWindow?.document;
-
-      if (iframeDoc) {
-        iframeDoc.open();
-        iframeDoc.write(getPreviewHTML());
-        iframeDoc.close();
-      }
-    }
-  }, [artifact.content, artifact.currentVersion, activeTab]);
-
-  const getPreviewHTML = (): string => {
+  const getPreviewHTML = useCallback((): string => {
     const content =
       artifact.versions && artifact.currentVersion !== undefined
         ? artifact.versions[artifact.currentVersion].content
@@ -193,7 +178,27 @@ export function ArtifactPreview({
   <body>${content}</body>
 </html>`;
     }
-  };
+  }, [
+    artifact.content,
+    artifact.currentVersion,
+    artifact.versions,
+    artifact.type,
+  ]);
+
+  // Update iframe content when artifact changes
+  useEffect(() => {
+    if (activeTab === 'preview' && iframeRef.current) {
+      const iframe = iframeRef.current;
+      const iframeDoc =
+        iframe.contentDocument || iframe.contentWindow?.document;
+
+      if (iframeDoc) {
+        iframeDoc.open();
+        iframeDoc.write(getPreviewHTML());
+        iframeDoc.close();
+      }
+    }
+  }, [artifact.content, artifact.currentVersion, activeTab, getPreviewHTML]);
 
   const handleCopy = async () => {
     const content =
@@ -220,11 +225,12 @@ export function ArtifactPreview({
         blob = new Blob([getPreviewHTML()], { type: 'text/html' });
         filename = `${artifact.title || 'artifact'}.html`;
         break;
-      case 'md':
+      case 'md': {
         const markdown = `# ${artifact.title || 'Artifact'}\n\n\`\`\`${artifact.language || artifact.type}\n${content}\n\`\`\``;
         blob = new Blob([markdown], { type: 'text/markdown' });
         filename = `${artifact.title || 'artifact'}.md`;
         break;
+      }
       default:
         blob = new Blob([content], { type: 'text/plain' });
         filename = `${artifact.title || 'artifact'}.${artifact.language || 'txt'}`;

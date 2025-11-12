@@ -4,7 +4,6 @@
 
 ### Production Webhook
 - **URL**: `https://agiagentautomation.com/.netlify/functions/stripe-webhook`
-- **ID**: `we_1SSTUl0atLU7AWGTUYVLI2id`
 - **Status**: ✅ Enabled
 - **Events Configured**:
   - `checkout.session.completed`
@@ -14,11 +13,13 @@
   - `customer.subscription.deleted`
 
 ### Webhook Signing Secret
-```
-whsec_0B4ia2Igw7ZAguL7IfEXv96ccElJaWdr
-```
+**⚠️ IMPORTANT**: Get the signing secret from Stripe Dashboard and set it in Netlify as `STRIPE_WEBHOOK_SECRET`
 
-**⚠️ IMPORTANT**: Set this in Netlify as `STRIPE_WEBHOOK_SECRET`
+1. Go to [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)
+2. Click on your production webhook
+3. Click "Reveal" in the "Signing secret" section
+4. Copy the secret (starts with `whsec_...`)
+5. Set it in Netlify as `STRIPE_WEBHOOK_SECRET`
 
 ### Discount Coupon
 - **Code**: `BETATESTER100OFF`
@@ -33,8 +34,10 @@ whsec_0B4ia2Igw7ZAguL7IfEXv96ccElJaWdr
 Add/Update in Netlify Dashboard → Site Settings → Environment Variables:
 
 ```
-STRIPE_WEBHOOK_SECRET=whsec_0B4ia2Igw7ZAguL7IfEXv96ccElJaWdr
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
 ```
+
+**⚠️ Replace `whsec_your_webhook_secret_here` with your actual webhook signing secret from Stripe Dashboard**
 
 After setting, **redeploy** your site.
 

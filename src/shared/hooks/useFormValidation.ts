@@ -20,7 +20,7 @@ interface UseFormValidationReturn<T> {
   isDirty: boolean;
 
   // Methods
-  setValue: (field: keyof T, value: any) => void;
+  setValue: (field: keyof T, value: unknown) => void;
   setValues: (values: Partial<T>) => void;
   validate: () => boolean;
   validateField: (field: keyof T) => boolean;
@@ -60,7 +60,7 @@ export function useFormValidation<T extends z.ZodTypeAny>(
   /**
    * Set a single field value
    */
-  const setValue = useCallback((field: keyof DataType, value: any) => {
+  const setValue = useCallback((field: keyof DataType, value: unknown) => {
     setState((prev) => ({
       ...prev,
       data: { ...prev.data, [field]: value },
@@ -229,8 +229,8 @@ export function useAsyncValidation<T>(
  */
 export function createFieldProps<T>(
   field: keyof T,
-  value: any,
-  setValue: (field: keyof T, value: any) => void,
+  value: unknown,
+  setValue: (field: keyof T, value: unknown) => void,
   error?: string
 ) {
   return {

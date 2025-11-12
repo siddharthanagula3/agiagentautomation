@@ -60,7 +60,7 @@ interface Message {
     isDocument?: boolean;
     documentTitle?: string;
     hasWorkStream?: boolean;
-    workStreamData?: any;
+    workStreamData?: Record<string, unknown>;
     isPinned?: boolean;
     // Token tracking metadata
     tokensUsed?: number;
@@ -151,7 +151,9 @@ const CodeBlock = ({
 
 // Custom markdown components
 const markdownComponents: Components = {
-  code: CodeBlock as any,
+  code: CodeBlock as React.ComponentType<
+    React.HTMLAttributes<HTMLElement> & { inline?: boolean }
+  >,
   h1: ({ children }) => (
     <h1 className="mb-4 mt-6 text-2xl font-bold">{children}</h1>
   ),

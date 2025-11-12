@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@shared/ui/button';
 import { ScrollArea } from '@shared/ui/scroll-area';
 import {
@@ -162,14 +162,7 @@ export function PromptShortcuts({
     { id: 'creative', label: '✨ Creative', icon: Sparkles },
   ];
 
-  // Load custom shortcuts on mount
-  useEffect(() => {
-    if (user) {
-      loadCustomShortcuts();
-    }
-  }, [user]);
-
-  const loadCustomShortcuts = async () => {
+  const loadCustomShortcuts = useCallback(async () => {
     if (!user) return;
 
     setIsLoadingCustom(true);
@@ -190,7 +183,14 @@ export function PromptShortcuts({
     } finally {
       setIsLoadingCustom(false);
     }
-  };
+  }, [user]);
+
+  // Load custom shortcuts on mount
+  useEffect(() => {
+    if (user) {
+      loadCustomShortcuts();
+    }
+  }, [user, loadCustomShortcuts]);
 
   const handleCreateShortcut = async (shortcut: {
     label: string;

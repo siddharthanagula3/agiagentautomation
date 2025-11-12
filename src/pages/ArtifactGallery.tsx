@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -46,6 +46,21 @@ interface PublicArtifact {
   tags: string[];
 }
 
+interface DatabaseArtifact {
+  id: string;
+  title: string;
+  type: string;
+  description: string;
+  content: string;
+  language?: string;
+  author: string;
+  author_id: string;
+  views: number;
+  likes: number;
+  created_at: string;
+  tags: string[];
+}
+
 /**
  * Artifact Gallery Page
  *
@@ -66,11 +81,7 @@ const ArtifactGalleryPage: React.FC = () => {
     'recent'
   );
 
-  useEffect(() => {
-    loadPublicArtifacts();
-  }, [sortBy, selectedType]);
-
-  const loadPublicArtifacts = async () => {
+  const loadPublicArtifacts = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -103,7 +114,7 @@ const ArtifactGalleryPage: React.FC = () => {
         setArtifacts(DEMO_ARTIFACTS);
       } else {
         setArtifacts(
-          data?.map((artifact: any) => ({
+          data?.map((artifact: DatabaseArtifact) => ({
             id: artifact.id,
             title: artifact.title,
             type: artifact.type,
@@ -125,7 +136,11 @@ const ArtifactGalleryPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [sortBy, selectedType]);
+
+  useEffect(() => {
+    loadPublicArtifacts();
+  }, [loadPublicArtifacts]);
 
   const filteredArtifacts = artifacts.filter(
     (artifact) =>
@@ -208,7 +223,12 @@ const ArtifactGalleryPage: React.FC = () => {
             </Select>
 
             {/* Sort */}
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+            <Select
+              value={sortBy}
+              onValueChange={(v) =>
+                setSortBy(v as 'recent' | 'popular' | 'trending')
+              }
+            >
               <SelectTrigger className="w-full md:w-[180px]">
                 <SelectValue />
               </SelectTrigger>

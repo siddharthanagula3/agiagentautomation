@@ -61,6 +61,61 @@ export const ExpertiseTaxonomy: Record<string, string[]> = {
 
   // Architecture (specialized tech)
   architecture: ['architecture', 'system design', 'scalability', 'microservice', 'database design', 'design pattern', 'scalable', 'distributed system'],
+
+  // Healthcare Specialties
+  primary_care: ['primary care', 'family doctor', 'physician', 'general practitioner', 'checkup', 'physical exam'],
+  therapy: ['therapy', 'therapist', 'counseling', 'psychotherapy', 'cbt', 'dbt'],
+  psychiatry: ['psychiatrist', 'psychiatric', 'medication', 'antidepressant', 'ssri', 'mental illness'],
+  pediatrics: ['pediatrics', 'pediatrician', 'baby', 'infant', 'toddler', 'child health', 'kids health'],
+  veterinary: ['vet', 'veterinarian', 'pet health', 'dog health', 'cat health', 'animal doctor'],
+  dental: ['dentist', 'dental', 'teeth', 'tooth', 'cavity', 'oral health', 'gums'],
+  dermatology: ['dermatologist', 'skin', 'acne', 'rash', 'eczema', 'psoriasis'],
+  nutrition: ['nutritionist', 'dietitian', 'nutrition', 'diet', 'meal plan', 'eating'],
+
+  // Financial Specialties
+  investing: ['investing', 'investment', 'portfolio', 'stocks', 'bonds', 'etf', 'wealth management'],
+  tax: ['tax', 'taxes', 'cpa', 'tax return', 'irs', 'deduction', 'refund'],
+  mortgage: ['mortgage', 'home loan', 'refinance', 'interest rate', 'down payment'],
+  insurance: ['insurance', 'life insurance', 'health insurance', 'coverage', 'premium', 'policy'],
+  estate_planning: ['estate', 'will', 'trust', 'inheritance', 'beneficiary', 'legacy'],
+  retirement: ['retirement', '401k', 'ira', 'pension', 'retire', 'social security'],
+
+  // Legal Specialties
+  family_law: ['divorce', 'custody', 'child support', 'adoption', 'family law', 'separation'],
+  immigration: ['immigration', 'visa', 'green card', 'citizenship', 'immigration lawyer'],
+  real_estate_law: ['real estate law', 'property law', 'closing', 'title'],
+  employment_law: ['employment law', 'wrongful termination', 'discrimination', 'workplace'],
+  criminal: ['criminal', 'criminal defense', 'charges', 'dui', 'arrest'],
+
+  // Family & Parenting
+  parenting: ['parenting', 'parent', 'raising children', 'child behavior', 'discipline'],
+  childcare: ['childcare', 'daycare', 'nanny', 'babysitter', 'preschool'],
+  elder_care: ['elder care', 'senior care', 'assisted living', 'nursing home', 'aging parent'],
+
+  // Real Estate
+  real_estate: ['real estate', 'house', 'home', 'property', 'buy house', 'sell house', 'realtor'],
+  property_management: ['property management', 'landlord', 'tenant', 'rental property'],
+
+  // Creator Economy
+  youtube: ['youtube', 'youtuber', 'channel', 'subscribers', 'video content'],
+  tiktok: ['tiktok', 'short form', 'viral', 'trending'],
+  influencer: ['influencer', 'brand deal', 'sponsorship', 'partnership'],
+  podcast: ['podcast', 'podcasting', 'audio', 'episodes'],
+  streaming: ['streaming', 'twitch', 'streamer', 'live stream'],
+
+  // E-Commerce
+  shopify: ['shopify', 'ecommerce', 'online store', 'ecom'],
+  amazon_selling: ['amazon', 'fba', 'amazon seller', 'amazon business'],
+  dropshipping: ['dropshipping', 'dropship'],
+
+  // Creative
+  photography: ['photography', 'photographer', 'photos', 'camera', 'photoshoot'],
+  music_production: ['music production', 'producer', 'beat', 'mixing', 'mastering'],
+  video_editing: ['video editing', 'edit video', 'premiere', 'final cut'],
+
+  // Automotive
+  car_buying: ['buy car', 'car shopping', 'auto purchase', 'car dealer'],
+  auto_repair: ['car repair', 'mechanic', 'auto maintenance', 'car problem'],
 };
 
 // Agent role to expertise mapping
@@ -91,6 +146,147 @@ export const RoleExpertiseMapping: Record<string, string[]> = {
   'senior-ui-ux-designer': ['design', 'software'],
   'product-manager': ['product', 'software'],
   'system-architect': ['architecture', 'software'],
+
+  // Healthcare Specialists (NEW)
+  'primary-care-physician': ['primary_care', 'health'],
+  'mental-health-therapist': ['therapy', 'mental_health'],
+  'psychiatrist': ['psychiatry', 'mental_health'],
+  'pediatrician': ['pediatrics', 'health'],
+  'veterinarian': ['veterinary'],
+  'dentist': ['dental', 'health'],
+  'dermatologist': ['dermatology', 'health'],
+  'nutritionist': ['nutrition', 'health'],
+  'physical-therapist': ['health', 'fitness'],
+  'addiction-counselor': ['mental_health', 'therapy'],
+  'pharmacist': ['health'],
+  'nurse-practitioner': ['primary_care', 'health'],
+  'chiropractor': ['health'],
+  'sleep-specialist': ['health'],
+  'pain-management-specialist': ['health'],
+
+  // Financial Specialists (NEW)
+  'investment-advisor': ['investing', 'finance'],
+  'cpa-tax-specialist': ['tax', 'finance'],
+  'mortgage-broker': ['mortgage', 'finance', 'real_estate'],
+  'insurance-advisor': ['insurance', 'finance'],
+  'estate-planning-specialist': ['estate_planning', 'law'],
+  'retirement-planner': ['retirement', 'finance'],
+  'credit-counselor': ['finance'],
+  'cryptocurrency-advisor': ['investing', 'finance'],
+  'small-business-bookkeeper': ['finance'],
+  'personal-finance-coach': ['finance'],
+
+  // Legal Specialists (NEW)
+  'family-law-attorney': ['family_law', 'law'],
+  'immigration-lawyer': ['immigration', 'law'],
+  'real-estate-attorney': ['real_estate_law', 'law', 'real_estate'],
+  'employment-lawyer': ['employment_law', 'law', 'career'],
+  'criminal-defense-attorney': ['criminal', 'law'],
+  'personal-injury-lawyer': ['law'],
+  'intellectual-property-attorney': ['law'],
+  'bankruptcy-attorney': ['law', 'finance'],
+
+  // Education Specialists (NEW)
+  'academic-tutor': ['education'],
+  'college-admissions-advisor': ['education', 'career'],
+  'sat-act-tutor': ['education'],
+  'graduate-test-prep-coach': ['education'],
+  'language-tutor': ['education'],
+  'stem-educator': ['education'],
+  'homeschool-advisor': ['education'],
+  'study-skills-coach': ['education'],
+  'special-education-specialist': ['education'],
+
+  // Family & Parenting (NEW)
+  'parenting-coach': ['parenting'],
+  'childcare-advisor': ['childcare', 'parenting'],
+  'elder-care-specialist': ['elder_care'],
+  'family-therapist': ['therapy', 'mental_health'],
+  'pregnancy-coach': ['health', 'parenting'],
+  'pet-care-specialist': ['veterinary'],
+
+  // Real Estate (NEW)
+  'real-estate-agent': ['real_estate'],
+  'property-manager': ['property_management', 'real_estate'],
+  'home-inspector': ['real_estate', 'home_improvement'],
+  'real-estate-appraiser': ['real_estate'],
+  'landlord-advisor': ['property_management', 'real_estate'],
+  'first-time-homebuyer-consultant': ['real_estate', 'finance'],
+  'commercial-real-estate-advisor': ['real_estate'],
+
+  // Creator Economy (NEW)
+  'youtube-channel-manager': ['youtube'],
+  'tiktok-content-strategist': ['tiktok'],
+  'influencer-marketing-coach': ['influencer'],
+  'podcast-consultant': ['podcast'],
+  'streaming-consultant': ['streaming'],
+  'instagram-growth-specialist': ['influencer'],
+  'content-monetization-strategist': ['influencer', 'youtube'],
+  'personal-brand-consultant': ['career', 'influencer'],
+
+  // Wellness & Lifestyle (NEW)
+  'relationship-counselor': ['therapy', 'mental_health'],
+  'yoga-instructor': ['fitness'],
+  'meditation-coach': ['mental_health'],
+  'weight-loss-coach': ['fitness', 'nutrition'],
+  'sex-therapist': ['therapy', 'mental_health'],
+  'grief-counselor': ['therapy', 'mental_health'],
+  'adhd-coach': ['mental_health'],
+  'sleep-coach': ['health'],
+  'stress-management-coach': ['mental_health'],
+
+  // Creative (NEW)
+  'photographer': ['photography'],
+  'music-producer': ['music_production'],
+  'podcast-producer': ['podcast'],
+  'video-editor': ['video_editing'],
+  'animator': ['design'],
+  'voice-actor': ['creative'],
+  'illustrator': ['design'],
+  '3d-artist': ['design'],
+  'audio-engineer': ['music_production'],
+  'music-teacher': ['education'],
+
+  // E-Commerce (NEW)
+  'shopify-consultant': ['shopify'],
+  'amazon-fba-specialist': ['amazon_selling'],
+  'dropshipping-advisor': ['dropshipping', 'shopify'],
+  'affiliate-marketing-specialist': ['influencer'],
+  'etsy-shop-consultant': ['shopify'],
+  'online-course-creator': ['education'],
+
+  // Trades (NEW)
+  'electrician-advisor': ['home_improvement'],
+  'plumber-advisor': ['home_improvement'],
+  'hvac-technician': ['home_improvement'],
+  'auto-mechanic-advisor': ['auto_repair'],
+  'general-contractor': ['home_improvement'],
+  'carpenter-advisor': ['home_improvement'],
+  'landscaper-advisor': ['home_improvement'],
+
+  // Hospitality & Events (NEW)
+  'wedding-planner': ['event'],
+  'event-planner': ['event'],
+  'personal-chef': ['cooking'],
+  'party-planner': ['event'],
+  'vacation-planner': ['travel'],
+  'restaurant-consultant': ['cooking'],
+
+  // Automotive (NEW)
+  'car-buying-consultant': ['car_buying'],
+  'auto-insurance-specialist': ['insurance', 'car_buying'],
+  'electric-vehicle-specialist': ['car_buying'],
+  'used-car-advisor': ['car_buying'],
+
+  // Crisis Support (NEW)
+  'crisis-counselor': ['mental_health', 'therapy'],
+  'disaster-preparedness-specialist': ['home_improvement'],
+  'divorce-mediator': ['family_law', 'law'],
+  'moving-coordinator': ['home_improvement'],
+
+  // Hobbies (NEW)
+  'sports-coach': ['fitness'],
+  'gaming-coach': ['tech_support'],
 };
 
 export interface RoutingScore {

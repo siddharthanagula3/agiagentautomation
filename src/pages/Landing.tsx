@@ -116,7 +116,7 @@ const faqs = [
   {
     question: 'How quickly can I get started?',
     answer:
-      "Hire your first FREE AI employee in under 60 seconds! No interviews, no onboarding, no training, no cost to hire. Simply sign up, select from 165+ specialized AI employees in our marketplace, and start delegating tasks immediately in natural language. Free plan includes 1M tokens/month (250K each for OpenAI, Claude, Perplexity, Gemini).",
+      'Hire your first FREE AI employee in under 60 seconds! No interviews, no onboarding, no training, no cost to hire. Simply sign up, select from 165+ specialized AI employees in our marketplace, and start delegating tasks immediately in natural language. Free plan includes 1M tokens/month (250K each for OpenAI, Claude, Perplexity, Gemini).',
   },
   {
     question: 'What tasks can AI employees handle?',

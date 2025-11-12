@@ -92,7 +92,11 @@ const ApiReferencePage: React.FC = () => {
 
   const rateLimits = [
     { plan: 'Free', requests: '100 requests/hour', tokens: '1M tokens/month' },
-    { plan: 'Pro', requests: '1,000 requests/hour', tokens: '10M tokens/month' },
+    {
+      plan: 'Pro',
+      requests: '1,000 requests/hour',
+      tokens: '10M tokens/month',
+    },
     { plan: 'Enterprise', requests: 'Unlimited', tokens: 'Custom' },
   ];
 
@@ -101,7 +105,13 @@ const ApiReferencePage: React.FC = () => {
       <SEOHead
         title="API Reference | AGI Agent Automation"
         description="Complete API documentation for integrating AGI Agent Automation into your applications."
-        keywords={['API', 'documentation', 'integration', 'REST API', 'developer']}
+        keywords={[
+          'API',
+          'documentation',
+          'integration',
+          'REST API',
+          'developer',
+        ]}
       />
 
       <div className="min-h-screen bg-background">
@@ -121,8 +131,9 @@ const ApiReferencePage: React.FC = () => {
                 API Reference
               </h1>
               <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
-                Integrate AGI Agent Automation into your applications with our comprehensive REST
-                API. Build powerful AI-powered features with ease.
+                Integrate AGI Agent Automation into your applications with our
+                comprehensive REST API. Build powerful AI-powered features with
+                ease.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <a
@@ -185,10 +196,14 @@ const ApiReferencePage: React.FC = () => {
                                 >
                                   {endpoint.method}
                                 </Badge>
-                                <code className="text-lg font-mono">{endpoint.path}</code>
+                                <code className="font-mono text-lg">
+                                  {endpoint.path}
+                                </code>
                               </div>
                             </div>
-                            <CardTitle className="mt-4">{endpoint.description}</CardTitle>
+                            <CardTitle className="mt-4">
+                              {endpoint.description}
+                            </CardTitle>
                           </CardHeader>
                           <CardContent>
                             <div className="relative">
@@ -199,7 +214,12 @@ const ApiReferencePage: React.FC = () => {
                                 variant="ghost"
                                 size="sm"
                                 className="absolute right-2 top-2"
-                                onClick={() => copyToClipboard(endpoint.example, endpoint.path)}
+                                onClick={() =>
+                                  copyToClipboard(
+                                    endpoint.example,
+                                    endpoint.path
+                                  )
+                                }
                               >
                                 {copiedCode === endpoint.path ? (
                                   <CheckCircle2 className="h-4 w-4 text-green-600" />
@@ -240,7 +260,9 @@ const ApiReferencePage: React.FC = () => {
                       ))}
                     </div>
                     <div className="mt-6 rounded-lg bg-muted p-4">
-                      <p className="mb-2 text-sm font-semibold">Example Header:</p>
+                      <p className="mb-2 text-sm font-semibold">
+                        Example Header:
+                      </p>
                       <code className="text-sm">
                         Authorization: Bearer sk_live_xxxxxxxxxxxxxxxxxxxxx
                       </code>
@@ -257,8 +279,9 @@ const ApiReferencePage: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="mb-6 text-muted-foreground">
-                      Rate limits are applied per API key and vary by plan. Exceeding limits will
-                      result in a 429 Too Many Requests response.
+                      Rate limits are applied per API key and vary by plan.
+                      Exceeding limits will result in a 429 Too Many Requests
+                      response.
                     </p>
                     <div className="space-y-4">
                       {rateLimits.map((limit) => (
@@ -287,7 +310,9 @@ const ApiReferencePage: React.FC = () => {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div>
-                      <h3 className="mb-3 font-semibold">JavaScript/TypeScript</h3>
+                      <h3 className="mb-3 font-semibold">
+                        JavaScript/TypeScript
+                      </h3>
                       <div className="relative">
                         <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-sm">
                           <code>{`const response = await fetch('https://api.agiagentautomation.com/api/chat/completion', {

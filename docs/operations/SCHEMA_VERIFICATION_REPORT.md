@@ -1,4 +1,5 @@
 # Database Schema Verification Report
+
 **Generated:** November 11, 2025
 
 ## Executive Summary
@@ -10,11 +11,13 @@ After comparing the current Supabase schema with our migration files, **several 
 ## Missing Tables ❌
 
 ### 1. `user_shortcuts` Table
+
 **Status:** ❌ MISSING  
 **Migration:** `20250111000001_add_user_shortcuts_table.sql`  
 **Purpose:** Custom prompt shortcuts for users
 
 **Required Columns:**
+
 - `id` (uuid, primary key)
 - `user_id` (uuid, foreign key to auth.users)
 - `label` (text)
@@ -28,11 +31,13 @@ After comparing the current Supabase schema with our migration files, **several 
 ---
 
 ### 2. `public_artifacts` Table
+
 **Status:** ❌ MISSING  
 **Migration:** `20250111000002_add_public_artifacts_table.sql`  
 **Purpose:** Public artifact gallery for sharing AI-generated content
 
 **Required Columns:**
+
 - `id` (uuid, primary key)
 - `user_id` (uuid, foreign key to auth.users)
 - `title` (text)
@@ -52,11 +57,13 @@ After comparing the current Supabase schema with our migration files, **several 
 ---
 
 ### 3. `token_transactions` Table
+
 **Status:** ❌ MISSING  
 **Migration:** `20250111000003_add_token_system.sql`  
 **Purpose:** Audit trail for token purchases and usage
 
 **Required Columns:**
+
 - `id` (uuid, primary key)
 - `user_id` (uuid, foreign key to auth.users)
 - `transaction_type` (text) - 'purchase', 'usage', 'bonus', 'refund'
@@ -72,11 +79,13 @@ After comparing the current Supabase schema with our migration files, **several 
 ---
 
 ### 4. `api_usage` Table
+
 **Status:** ❌ MISSING  
 **Migration:** `20250113000001_add_api_usage_table.sql`  
 **Purpose:** Detailed API call tracking per user
 
 **Required Columns:**
+
 - `id` (uuid, primary key)
 - `user_id` (uuid, foreign key to auth.users)
 - `timestamp` (timestamptz)
@@ -96,11 +105,13 @@ After comparing the current Supabase schema with our migration files, **several 
 ## Missing Columns ❌
 
 ### 1. `users.token_balance` Column
+
 **Status:** ❌ MISSING  
 **Migration:** `20250111000003_add_token_system.sql`  
 **Purpose:** Current token balance for each user
 
 **Required:**
+
 - `token_balance` (bigint, default 0)
 
 **Impact:** Token balance tracking will not work. Users cannot see their token balance.
@@ -108,11 +119,13 @@ After comparing the current Supabase schema with our migration files, **several 
 ---
 
 ### 2. `users.subscription_start_date` Column
+
 **Status:** ❌ MISSING  
 **Migration:** `20250111000004_add_subscription_start_date.sql`  
 **Purpose:** Track when user's subscription started
 
 **Required:**
+
 - `subscription_start_date` (timestamptz, nullable)
 
 **Impact:** Subscription tracking and billing calculations may be inaccurate.
@@ -120,18 +133,21 @@ After comparing the current Supabase schema with our migration files, **several 
 ---
 
 ### 3. `chat_sessions` Metadata Columns
+
 **Status:** ❌ MISSING  
 **Migration:** `20250114000001_add_chat_session_metadata.sql`  
 **Purpose:** Enhanced chat session management (starred, pinned, archived, sharing)
 
 **Required Columns:**
+
 - `is_starred` (boolean, default false)
 - `is_pinned` (boolean, default false)
 - `is_archived` (boolean, default false)
 - `shared_link` (varchar(255), nullable)
 - `metadata` (jsonb, default '{}') - **NOTE:** This column exists but may need to be updated
 
-**Impact:** 
+**Impact:**
+
 - Users cannot star/pin/archive chat sessions
 - Chat session sharing will not work
 - Chat session metadata features will fail
@@ -185,14 +201,17 @@ The following tables exist in the schema and are properly configured:
 ## Migration Priority
 
 ### High Priority (Core Features):
+
 1. `20250111000003_add_token_system.sql` - Token system is critical for billing
 2. `20250114000001_add_chat_session_metadata.sql` - Chat features are core functionality
 
 ### Medium Priority (Enhanced Features):
+
 3. `20250111000001_add_user_shortcuts_table.sql` - Custom shortcuts enhance UX
 4. `20250111000002_add_public_artifacts_table.sql` - Artifact gallery is a nice-to-have feature
 
 ### Low Priority (Analytics):
+
 5. `20250113000001_add_api_usage_table.sql` - Detailed analytics, not critical for core functionality
 6. `20250111000004_add_subscription_start_date.sql` - Nice-to-have for subscription tracking
 
@@ -204,22 +223,22 @@ Run these queries in Supabase SQL Editor to verify:
 
 ```sql
 -- Check for missing tables
-SELECT table_name 
-FROM information_schema.tables 
-WHERE table_schema = 'public' 
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
 AND table_name IN ('user_shortcuts', 'public_artifacts', 'token_transactions', 'api_usage')
 ORDER BY table_name;
 
 -- Check for missing columns in users table
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'users' 
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'users'
 AND column_name IN ('token_balance', 'subscription_start_date');
 
 -- Check for missing columns in chat_sessions table
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'chat_sessions' 
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'chat_sessions'
 AND column_name IN ('is_starred', 'is_pinned', 'is_archived', 'shared_link');
 ```
 
@@ -235,4 +254,3 @@ AND column_name IN ('is_starred', 'is_pinned', 'is_archived', 'shared_link');
 ---
 
 **Status:** ⚠️ **ACTION REQUIRED** - Migrations need to be applied
-

@@ -352,9 +352,11 @@ const PricingPage: React.FC = () => {
               Free Plan: 1M Tokens/Month • Pro: 10M Tokens/Month
             </p>
             <p className="mb-8 text-xl text-muted-foreground">
-              Free Forever: 250K tokens each (OpenAI, Claude, Perplexity, Gemini)
+              Free Forever: 250K tokens each (OpenAI, Claude, Perplexity,
+              Gemini)
               <br />
-              Pro $29/month: 2.5M tokens each (10M total) • Business $99/month • Enterprise Custom
+              Pro $29/month: 2.5M tokens each (10M total) • Business $99/month •
+              Enterprise Custom
               <br />
               AI Employees are FREE to hire • Token costs at market rates
             </p>

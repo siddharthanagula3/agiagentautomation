@@ -87,13 +87,14 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           ) : (
             sessions.map((session) => {
               // Safely convert updatedAt to Date object
-              const updatedAt = session.updatedAt instanceof Date
-                ? session.updatedAt
-                : new Date(session.updatedAt || Date.now());
-              
+              const updatedAt =
+                session.updatedAt instanceof Date
+                  ? session.updatedAt
+                  : new Date(session.updatedAt || Date.now());
+
               // Validate date
-              const safeUpdatedAt = isNaN(updatedAt.getTime()) 
-                ? new Date() 
+              const safeUpdatedAt = isNaN(updatedAt.getTime())
+                ? new Date()
                 : updatedAt;
 
               return (
@@ -104,34 +105,36 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   summary={session.summary}
                   updatedAt={safeUpdatedAt}
                   totalMessages={session.messageCount}
-                isActive={currentSession?.id === session.id}
-                isStarred={session.metadata?.starred}
-                isPinned={session.metadata?.pinned}
-                isArchived={session.metadata?.archived}
-                tags={session.metadata?.tags || []}
-                onClick={() => onSessionSelect(session)}
-                onRename={() => onSessionRename(session.id, session.title)}
-                onDelete={() => onSessionDelete(session.id)}
-                onStar={
-                  onSessionStar ? () => onSessionStar(session.id) : undefined
-                }
-                onPin={
-                  onSessionPin ? () => onSessionPin(session.id) : undefined
-                }
-                onArchive={
-                  onSessionArchive
-                    ? () => onSessionArchive(session.id)
-                    : undefined
-                }
-                onShare={
-                  onSessionShare ? () => onSessionShare(session.id) : undefined
-                }
-                onDuplicate={
-                  onSessionDuplicate
-                    ? () => onSessionDuplicate(session.id)
-                    : undefined
-                }
-              />
+                  isActive={currentSession?.id === session.id}
+                  isStarred={session.metadata?.starred}
+                  isPinned={session.metadata?.pinned}
+                  isArchived={session.metadata?.archived}
+                  tags={session.metadata?.tags || []}
+                  onClick={() => onSessionSelect(session)}
+                  onRename={() => onSessionRename(session.id, session.title)}
+                  onDelete={() => onSessionDelete(session.id)}
+                  onStar={
+                    onSessionStar ? () => onSessionStar(session.id) : undefined
+                  }
+                  onPin={
+                    onSessionPin ? () => onSessionPin(session.id) : undefined
+                  }
+                  onArchive={
+                    onSessionArchive
+                      ? () => onSessionArchive(session.id)
+                      : undefined
+                  }
+                  onShare={
+                    onSessionShare
+                      ? () => onSessionShare(session.id)
+                      : undefined
+                  }
+                  onDuplicate={
+                    onSessionDuplicate
+                      ? () => onSessionDuplicate(session.id)
+                      : undefined
+                  }
+                />
               );
             })
           )}

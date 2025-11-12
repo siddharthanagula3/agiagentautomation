@@ -44,12 +44,12 @@ class CompleteAIEmployeeService {
       const { data, error, count } = await query;
 
       if (error) {
-      return {
-        success: false,
-        error: error.message,
-        data: null,
-        timestamp: new Date().toISOString(),
-      };
+        return {
+          success: false,
+          error: error.message,
+          data: null,
+          timestamp: new Date().toISOString(),
+        };
       }
 
       const employees: AIEmployee[] = (data || []).map((emp) => ({
@@ -144,12 +144,12 @@ class CompleteAIEmployeeService {
         .single();
 
       if (error) {
-      return {
-        success: false,
-        error: error.message,
-        data: null,
-        timestamp: new Date().toISOString(),
-      };
+        return {
+          success: false,
+          error: error.message,
+          data: null,
+          timestamp: new Date().toISOString(),
+        };
       }
 
       return {
@@ -195,7 +195,8 @@ class CompleteAIEmployeeService {
       if (updates.tools) updateData.tools = updates.tools;
       if (updates.model) updateData.model = updates.model;
       if (updates.systemPrompt) updateData.system_prompt = updates.systemPrompt;
-      if (updates.isActive !== undefined) updateData.is_active = updates.isActive;
+      if (updates.isActive !== undefined)
+        updateData.is_active = updates.isActive;
 
       const { data, error } = await supabase
         .from('ai_employees')
@@ -205,12 +206,12 @@ class CompleteAIEmployeeService {
         .single();
 
       if (error) {
-      return {
-        success: false,
-        error: error.message,
-        data: null,
-        timestamp: new Date().toISOString(),
-      };
+        return {
+          success: false,
+          error: error.message,
+          data: null,
+          timestamp: new Date().toISOString(),
+        };
       }
 
       return {
@@ -251,12 +252,12 @@ class CompleteAIEmployeeService {
         .eq('id', id);
 
       if (error) {
-      return {
-        success: false,
-        error: error.message,
-        data: null,
-        timestamp: new Date().toISOString(),
-      };
+        return {
+          success: false,
+          error: error.message,
+          data: null,
+          timestamp: new Date().toISOString(),
+        };
       }
 
       return {
@@ -282,7 +283,10 @@ class CompleteAIEmployeeService {
     userId: string
   ): Promise<APIResponse<void>> {
     try {
-      const success = await employeeService.purchaseEmployee(userId, employeeId);
+      const success = await employeeService.purchaseEmployee(
+        userId,
+        employeeId
+      );
       return {
         success,
         data: undefined,
@@ -554,4 +558,3 @@ class CompleteAIEmployeeService {
 }
 
 export const completeAIEmployeeService = new CompleteAIEmployeeService();
-

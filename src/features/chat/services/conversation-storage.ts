@@ -79,11 +79,11 @@ export class ChatPersistenceService {
    * Get a specific session by ID
    * Note: RLS policies ensure users can only access their own sessions
    */
-  async getSession(sessionId: string, userId?: string): Promise<ChatSession | null> {
-    let query = supabase
-      .from('chat_sessions')
-      .select('*')
-      .eq('id', sessionId);
+  async getSession(
+    sessionId: string,
+    userId?: string
+  ): Promise<ChatSession | null> {
+    let query = supabase.from('chat_sessions').select('*').eq('id', sessionId);
 
     // Add user_id filter if provided for extra security (RLS should handle this, but explicit is better)
     if (userId) {
@@ -95,7 +95,10 @@ export class ChatPersistenceService {
     if (error) {
       if (error.code === 'PGRST116') return null; // Not found
       // RLS policy violation - user doesn't own this session
-      if (error.code === '42501' || error.message?.includes('permission denied')) {
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
         console.warn('Access denied to session:', sessionId);
         return null;
       }
@@ -109,11 +112,15 @@ export class ChatPersistenceService {
    * Update session title
    * Note: RLS policies ensure users can only update their own sessions
    */
-  async updateSessionTitle(sessionId: string, title: string, userId?: string): Promise<void> {
+  async updateSessionTitle(
+    sessionId: string,
+    title: string,
+    userId?: string
+  ): Promise<void> {
     let query = supabase
       .from('chat_sessions')
-      .update({ 
-        title, 
+      .update({
+        title,
         updated_at: new Date().toISOString(),
       })
       .eq('id', sessionId);
@@ -127,7 +134,10 @@ export class ChatPersistenceService {
 
     if (error) {
       // RLS policy violation
-      if (error.code === '42501' || error.message?.includes('permission denied')) {
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
         throw new Error('You do not have permission to update this session');
       }
       throw new Error(`Failed to update session: ${error.message}`);
@@ -153,7 +163,10 @@ export class ChatPersistenceService {
 
     if (error) {
       // RLS policy violation
-      if (error.code === '42501' || error.message?.includes('permission denied')) {
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
         throw new Error('You do not have permission to delete this session');
       }
       throw new Error(`Failed to delete session: ${error.message}`);
@@ -205,7 +218,10 @@ export class ChatPersistenceService {
 
     if (error) {
       // RLS policy violation - user doesn't own this session
-      if (error.code === '42501' || error.message?.includes('permission denied')) {
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
         console.warn('Access denied to messages for session:', sessionId);
         return []; // Return empty array instead of throwing
       }
@@ -227,7 +243,10 @@ export class ChatPersistenceService {
 
     if (error) {
       // RLS policy violation
-      if (error.code === '42501' || error.message?.includes('permission denied')) {
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
         throw new Error('You do not have permission to delete this message');
       }
       throw new Error(`Failed to delete message: ${error.message}`);
@@ -268,10 +287,14 @@ export class ChatPersistenceService {
   /**
    * Update session starred state
    */
-  async updateSessionStarred(sessionId: string, isStarred: boolean, userId?: string): Promise<void> {
+  async updateSessionStarred(
+    sessionId: string,
+    isStarred: boolean,
+    userId?: string
+  ): Promise<void> {
     let query = supabase
       .from('chat_sessions')
-      .update({ 
+      .update({
         is_starred: isStarred,
         updated_at: new Date().toISOString(),
       })
@@ -284,7 +307,10 @@ export class ChatPersistenceService {
     const { error } = await query;
 
     if (error) {
-      if (error.code === '42501' || error.message?.includes('permission denied')) {
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
         throw new Error('You do not have permission to update this session');
       }
       throw new Error(`Failed to update starred state: ${error.message}`);
@@ -294,10 +320,14 @@ export class ChatPersistenceService {
   /**
    * Update session pinned state
    */
-  async updateSessionPinned(sessionId: string, isPinned: boolean, userId?: string): Promise<void> {
+  async updateSessionPinned(
+    sessionId: string,
+    isPinned: boolean,
+    userId?: string
+  ): Promise<void> {
     let query = supabase
       .from('chat_sessions')
-      .update({ 
+      .update({
         is_pinned: isPinned,
         updated_at: new Date().toISOString(),
       })
@@ -310,7 +340,10 @@ export class ChatPersistenceService {
     const { error } = await query;
 
     if (error) {
-      if (error.code === '42501' || error.message?.includes('permission denied')) {
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
         throw new Error('You do not have permission to update this session');
       }
       throw new Error(`Failed to update pinned state: ${error.message}`);
@@ -320,10 +353,14 @@ export class ChatPersistenceService {
   /**
    * Update session archived state
    */
-  async updateSessionArchived(sessionId: string, isArchived: boolean, userId?: string): Promise<void> {
+  async updateSessionArchived(
+    sessionId: string,
+    isArchived: boolean,
+    userId?: string
+  ): Promise<void> {
     let query = supabase
       .from('chat_sessions')
-      .update({ 
+      .update({
         is_archived: isArchived,
         updated_at: new Date().toISOString(),
       })
@@ -336,7 +373,10 @@ export class ChatPersistenceService {
     const { error } = await query;
 
     if (error) {
-      if (error.code === '42501' || error.message?.includes('permission denied')) {
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
         throw new Error('You do not have permission to update this session');
       }
       throw new Error(`Failed to update archived state: ${error.message}`);
@@ -346,10 +386,14 @@ export class ChatPersistenceService {
   /**
    * Update session shared link
    */
-  async updateSessionSharedLink(sessionId: string, sharedLink: string | null, userId?: string): Promise<void> {
+  async updateSessionSharedLink(
+    sessionId: string,
+    sharedLink: string | null,
+    userId?: string
+  ): Promise<void> {
     let query = supabase
       .from('chat_sessions')
-      .update({ 
+      .update({
         shared_link: sharedLink,
         updated_at: new Date().toISOString(),
       })
@@ -362,7 +406,10 @@ export class ChatPersistenceService {
     const { error } = await query;
 
     if (error) {
-      if (error.code === '42501' || error.message?.includes('permission denied')) {
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
         throw new Error('You do not have permission to update this session');
       }
       throw new Error(`Failed to update shared link: ${error.message}`);
@@ -372,7 +419,11 @@ export class ChatPersistenceService {
   /**
    * Copy messages from one session to another
    */
-  async copySessionMessages(sourceSessionId: string, targetSessionId: string, userId?: string): Promise<void> {
+  async copySessionMessages(
+    sourceSessionId: string,
+    targetSessionId: string,
+    userId?: string
+  ): Promise<void> {
     // Verify both sessions belong to the user
     if (userId) {
       const { data: sessions, error } = await supabase
@@ -391,16 +442,14 @@ export class ChatPersistenceService {
 
     // Insert messages into target session
     if (sourceMessages.length > 0) {
-      const { error } = await supabase
-        .from('chat_messages')
-        .insert(
-          sourceMessages.map((msg) => ({
-            session_id: targetSessionId,
-            role: msg.role,
-            content: msg.content,
-            created_at: msg.createdAt.toISOString(),
-          }))
-        );
+      const { error } = await supabase.from('chat_messages').insert(
+        sourceMessages.map((msg) => ({
+          session_id: targetSessionId,
+          role: msg.role,
+          content: msg.content,
+          created_at: msg.createdAt.toISOString(),
+        }))
+      );
 
       if (error) {
         throw new Error(`Failed to copy messages: ${error.message}`);
@@ -436,8 +485,9 @@ export class ChatPersistenceService {
     }
 
     // Extract tags from metadata if available
-    const metadataTags = (dbSession.metadata as { tags?: string[] })?.tags || [];
-    
+    const metadataTags =
+      (dbSession.metadata as { tags?: string[] })?.tags || [];
+
     return {
       id: dbSession.id,
       title: dbSession.title || 'New Chat',

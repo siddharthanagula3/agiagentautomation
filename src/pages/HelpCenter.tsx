@@ -346,7 +346,9 @@ const HelpPage: React.FC = () => {
               cta="Send Email"
               color="from-purple-500 to-pink-500"
               index={1}
-              onClick={() => window.location.href = 'mailto:support@agiworkforce.com'}
+              onClick={() =>
+                (window.location.href = 'mailto:support@agiworkforce.com')
+              }
             />
             <ContactCard
               icon={BookOpen}
@@ -376,11 +378,16 @@ const HelpPage: React.FC = () => {
               AI automation experts
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Button 
-                variant="outline" 
-                size="lg" 
+              <Button
+                variant="outline"
+                size="lg"
                 className="border-border/40"
-                onClick={() => window.open('https://community.agiagentautomation.com', '_blank')}
+                onClick={() =>
+                  window.open(
+                    'https://community.agiagentautomation.com',
+                    '_blank'
+                  )
+                }
               >
                 <Users className="mr-2" size={18} />
                 Community Forum
@@ -388,7 +395,9 @@ const HelpPage: React.FC = () => {
               <Button
                 className="bg-gradient-to-r from-primary to-accent"
                 size="lg"
-                onClick={() => window.open('https://discord.gg/agiagentautomation', '_blank')}
+                onClick={() =>
+                  window.open('https://discord.gg/agiagentautomation', '_blank')
+                }
               >
                 <ExternalLink className="mr-2" size={18} />
                 Join Discord

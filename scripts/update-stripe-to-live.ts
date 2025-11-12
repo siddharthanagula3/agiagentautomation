@@ -45,7 +45,10 @@ async function checkStripeKeys() {
     log('⚠️  Currently using TEST Stripe keys', 'yellow');
     log(`   Secret Key: ${testKey.substring(0, 20)}...`, 'yellow');
     if (publishableKey) {
-      log(`   Publishable Key: ${publishableKey.substring(0, 20)}...`, 'yellow');
+      log(
+        `   Publishable Key: ${publishableKey.substring(0, 20)}...`,
+        'yellow'
+      );
     }
   } else if (isLive) {
     log('✅ Already using LIVE Stripe keys!', 'green');
@@ -61,25 +64,29 @@ async function checkStripeKeys() {
 
 async function listWebhooks(stripe: Stripe) {
   log('\n🔗 Current Webhooks:\n', 'blue');
-  
+
   try {
     const webhooks = await stripe.webhookEndpoints.list({ limit: 100 });
-    
+
     if (webhooks.data.length === 0) {
       log('   No webhooks found', 'yellow');
       return;
     }
 
     webhooks.data.forEach((webhook, index) => {
-      const isProduction = webhook.url.includes('agiagentautomation.com') && 
-                          !webhook.url.includes('localhost') && 
-                          !webhook.url.includes('test');
-      
+      const isProduction =
+        webhook.url.includes('agiagentautomation.com') &&
+        !webhook.url.includes('localhost') &&
+        !webhook.url.includes('test');
+
       const status = isProduction ? '✅ Production' : '🧪 Test/Sandbox';
       log(`   ${index + 1}. ${status}`, isProduction ? 'green' : 'yellow');
       log(`      URL: ${webhook.url}`, 'blue');
       log(`      ID: ${webhook.id}`, 'blue');
-      log(`      Status: ${webhook.status}`, webhook.status === 'enabled' ? 'green' : 'yellow');
+      log(
+        `      Status: ${webhook.status}`,
+        webhook.status === 'enabled' ? 'green' : 'yellow'
+      );
       log(`      Events: ${webhook.enabled_events.length}`, 'blue');
       console.log('');
     });
@@ -97,7 +104,7 @@ async function main() {
 
   if (!usingTest) {
     log('\n📋 Steps to Switch to LIVE Mode:\n', 'cyan');
-    
+
     log('1. Get LIVE Keys from Stripe:', 'yellow');
     log('   a. Go to: https://dashboard.stripe.com', 'blue');
     log('   b. Toggle from "Test mode" to "Live mode" (top right)', 'blue');
@@ -150,4 +157,3 @@ main()
     console.error('❌ Error:', error);
     process.exit(1);
   });
-

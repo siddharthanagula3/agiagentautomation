@@ -34,7 +34,7 @@ async function applyPricingMigration() {
     const { data, error } = await supabase
       .from('subscription_plans')
       .update({
-        price_monthly: 29.00,
+        price_monthly: 29.0,
         price_yearly: 299.88,
         updated_at: new Date().toISOString(),
       })
@@ -53,7 +53,9 @@ async function applyPricingMigration() {
 
     console.log('✅ Pricing updated successfully!');
     console.log(`   Monthly: $${data[0].price_monthly}`);
-    console.log(`   Yearly: $${data[0].price_yearly} ($${(data[0].price_yearly / 12).toFixed(2)}/month)\n`);
+    console.log(
+      `   Yearly: $${data[0].price_yearly} ($${(data[0].price_yearly / 12).toFixed(2)}/month)\n`
+    );
 
     // Verify
     const { data: verify, error: verifyError } = await supabase
@@ -87,7 +89,10 @@ async function checkMissingMigrations() {
     {
       name: 'user_shortcuts table',
       check: async () => {
-        const { error } = await supabase.from('user_shortcuts').select('*').limit(1);
+        const { error } = await supabase
+          .from('user_shortcuts')
+          .select('*')
+          .limit(1);
         return !error || error.code !== 'PGRST116';
       },
       migration: '20250111000001_add_user_shortcuts_table.sql',
@@ -95,7 +100,10 @@ async function checkMissingMigrations() {
     {
       name: 'public_artifacts table',
       check: async () => {
-        const { error } = await supabase.from('public_artifacts').select('*').limit(1);
+        const { error } = await supabase
+          .from('public_artifacts')
+          .select('*')
+          .limit(1);
         return !error || error.code !== 'PGRST116';
       },
       migration: '20250111000002_add_public_artifacts_table.sql',
@@ -103,7 +111,10 @@ async function checkMissingMigrations() {
     {
       name: 'token_transactions table',
       check: async () => {
-        const { error } = await supabase.from('token_transactions').select('*').limit(1);
+        const { error } = await supabase
+          .from('token_transactions')
+          .select('*')
+          .limit(1);
         return !error || error.code !== 'PGRST116';
       },
       migration: '20250111000003_add_token_system.sql',
@@ -111,7 +122,10 @@ async function checkMissingMigrations() {
     {
       name: 'users.token_balance column',
       check: async () => {
-        const { error } = await supabase.from('users').select('token_balance').limit(1);
+        const { error } = await supabase
+          .from('users')
+          .select('token_balance')
+          .limit(1);
         return !error || error.code !== 'PGRST202';
       },
       migration: '20250111000003_add_token_system.sql',
@@ -119,7 +133,10 @@ async function checkMissingMigrations() {
     {
       name: 'users.subscription_start_date column',
       check: async () => {
-        const { error } = await supabase.from('users').select('subscription_start_date').limit(1);
+        const { error } = await supabase
+          .from('users')
+          .select('subscription_start_date')
+          .limit(1);
         return !error || error.code !== 'PGRST202';
       },
       migration: '20250111000004_add_subscription_start_date.sql',
@@ -140,8 +157,10 @@ async function checkMissingMigrations() {
 
   if (missing.length > 0) {
     console.log('\n⚠️  Missing migrations detected:');
-    missing.forEach(m => console.log(`   - ${m}`));
-    console.log('\n💡 Apply these migrations via Supabase Dashboard SQL Editor or CLI');
+    missing.forEach((m) => console.log(`   - ${m}`));
+    console.log(
+      '\n💡 Apply these migrations via Supabase Dashboard SQL Editor or CLI'
+    );
   } else {
     console.log('\n✅ All migrations appear to be applied!');
   }
@@ -170,4 +189,3 @@ main()
     console.error('❌ Error:', error);
     process.exit(1);
   });
-

@@ -3,7 +3,10 @@
  * Service layer for Model Context Protocol (MCP) integration
  */
 
-import type { MCPTool, MCPToolResult } from '@shared/types/complete-ai-employee';
+import type {
+  MCPTool,
+  MCPToolResult,
+} from '@shared/types/complete-ai-employee';
 
 class CompleteMCPService {
   /**
@@ -57,4 +60,3 @@ class CompleteMCPService {
 }
 
 export const completeMCPService = new CompleteMCPService();
-

@@ -16,16 +16,19 @@
 Go to **Netlify Dashboard** → **Site Settings** → **Environment Variables** and set:
 
 **Supabase:**
+
 - [ ] `VITE_SUPABASE_URL` = `https://xxxxx.supabase.co`
 - [ ] `VITE_SUPABASE_ANON_KEY` = `eyJxxx...`
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` = `eyJxxx...` (server-side only)
 
 **Stripe:**
+
 - [ ] `VITE_STRIPE_PUBLISHABLE_KEY` = `pk_live_xxx`
 - [ ] `STRIPE_SECRET_KEY` = `sk_live_xxx`
 - [ ] `STRIPE_WEBHOOK_SECRET` = `whsec_xxx` (get after creating webhook)
 
 **LLM Provider (at least one):**
+
 - [ ] `VITE_OPENAI_API_KEY` = `sk-xxx` OR
 - [ ] `VITE_ANTHROPIC_API_KEY` = `sk-ant-xxx` OR
 - [ ] `VITE_GOOGLE_API_KEY` = `xxx` OR
@@ -34,6 +37,7 @@ Go to **Netlify Dashboard** → **Site Settings** → **Environment Variables** 
 ### 2. Create Stripe Webhook Endpoint
 
 **Option A: Using Script (Recommended)**
+
 ```bash
 export PRODUCTION_URL=https://your-site.netlify.app
 export STRIPE_SECRET_KEY=sk_live_...
@@ -41,6 +45,7 @@ npx tsx scripts/setup-stripe-webhook.ts
 ```
 
 **Option B: Manual Setup**
+
 1. Go to [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)
 2. Click "Add endpoint"
 3. URL: `https://your-site.netlify.app/.netlify/functions/stripe-webhook`
@@ -116,6 +121,7 @@ git push origin main
 ## ✅ Success Criteria
 
 All of the following should be true:
+
 - ✅ Application deployed and accessible
 - ✅ All environment variables configured
 - ✅ Stripe webhook receiving events
@@ -147,4 +153,3 @@ If something doesn't work:
 ## 🎉 Ready for Production!
 
 Once all checklist items are complete, your application is fully deployed and ready for users!
-

@@ -42,17 +42,19 @@ export const useChatHistory = () => {
 
       // Sort sessions by updatedAt (most recent first), ensuring timestamps are valid
       const sortedSessions = sessionsWithCounts.sort((a, b) => {
-        const aTime = a.updatedAt instanceof Date 
-          ? a.updatedAt.getTime() 
-          : new Date(a.updatedAt).getTime();
-        const bTime = b.updatedAt instanceof Date 
-          ? b.updatedAt.getTime() 
-          : new Date(b.updatedAt).getTime();
-        
+        const aTime =
+          a.updatedAt instanceof Date
+            ? a.updatedAt.getTime()
+            : new Date(a.updatedAt).getTime();
+        const bTime =
+          b.updatedAt instanceof Date
+            ? b.updatedAt.getTime()
+            : new Date(b.updatedAt).getTime();
+
         // Handle invalid dates
         if (isNaN(aTime)) return 1;
         if (isNaN(bTime)) return -1;
-        
+
         return bTime - aTime; // Most recent first
       });
 
@@ -117,7 +119,11 @@ export const useChatHistory = () => {
         }
 
         // Pass userId for extra security verification
-        await chatPersistenceService.updateSessionTitle(sessionId, newTitle, user.id);
+        await chatPersistenceService.updateSessionTitle(
+          sessionId,
+          newTitle,
+          user.id
+        );
 
         setSessions((prev) =>
           prev.map((session) =>
@@ -136,7 +142,8 @@ export const useChatHistory = () => {
         toast.success('Chat renamed');
       } catch (error) {
         console.error('Failed to rename session:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Failed to rename chat';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to rename chat';
         toast.error(errorMessage);
       }
     },
@@ -164,7 +171,8 @@ export const useChatHistory = () => {
       toast.success('Chat deleted');
     } catch (error) {
       console.error('Failed to delete session:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to delete chat';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to delete chat';
       toast.error(errorMessage);
     }
   }, []);
@@ -205,7 +213,10 @@ export const useChatHistory = () => {
       }
 
       // Pass userId for extra security verification
-      const session = await chatPersistenceService.getSession(sessionId, user.id);
+      const session = await chatPersistenceService.getSession(
+        sessionId,
+        user.id
+      );
       if (session) {
         setCurrentSession(session);
       } else {
@@ -218,97 +229,118 @@ export const useChatHistory = () => {
   }, []);
 
   // Star/unstar session
-  const toggleStarSession = useCallback(async (sessionId: string) => {
-    const current = sessions.find((s) => s.id === sessionId);
-    
-    setSessions((prev) =>
-      prev.map((session) =>
-        session.id === sessionId
-          ? { ...session, isStarred: !session.isStarred }
-          : session
-      )
-    );
+  const toggleStarSession = useCallback(
+    async (sessionId: string) => {
+      const current = sessions.find((s) => s.id === sessionId);
 
-    setCurrentSession((currentSession) =>
-      currentSession?.id === sessionId
-        ? { ...currentSession, isStarred: !currentSession.isStarred }
-        : currentSession
-    );
+      setSessions((prev) =>
+        prev.map((session) =>
+          session.id === sessionId
+            ? { ...session, isStarred: !session.isStarred }
+            : session
+        )
+      );
 
-    // Persist star state to database
-    try {
-      const user = await getCurrentUser();
-      if (user) {
-        await chatPersistenceService.updateSessionStarred(sessionId, !current?.isStarred, user.id);
+      setCurrentSession((currentSession) =>
+        currentSession?.id === sessionId
+          ? { ...currentSession, isStarred: !currentSession.isStarred }
+          : currentSession
+      );
+
+      // Persist star state to database
+      try {
+        const user = await getCurrentUser();
+        if (user) {
+          await chatPersistenceService.updateSessionStarred(
+            sessionId,
+            !current?.isStarred,
+            user.id
+          );
+        }
+        toast.success('Chat starred');
+      } catch (error) {
+        console.error('Failed to update starred state:', error);
+        toast.error('Failed to update starred state');
       }
-      toast.success('Chat starred');
-    } catch (error) {
-      console.error('Failed to update starred state:', error);
-      toast.error('Failed to update starred state');
-    }
-  }, [sessions]);
+    },
+    [sessions]
+  );
 
   // Pin/unpin session
-  const togglePinSession = useCallback(async (sessionId: string) => {
-    const current = sessions.find((s) => s.id === sessionId);
-    
-    setSessions((prev) =>
-      prev.map((session) =>
-        session.id === sessionId
-          ? { ...session, isPinned: !session.isPinned }
-          : session
-      )
-    );
+  const togglePinSession = useCallback(
+    async (sessionId: string) => {
+      const current = sessions.find((s) => s.id === sessionId);
 
-    setCurrentSession((currentSession) =>
-      currentSession?.id === sessionId
-        ? { ...currentSession, isPinned: !currentSession.isPinned }
-        : currentSession
-    );
+      setSessions((prev) =>
+        prev.map((session) =>
+          session.id === sessionId
+            ? { ...session, isPinned: !session.isPinned }
+            : session
+        )
+      );
 
-    // Persist pin state to database
-    try {
-      const user = await getCurrentUser();
-      if (user) {
-        await chatPersistenceService.updateSessionPinned(sessionId, !current?.isPinned, user.id);
+      setCurrentSession((currentSession) =>
+        currentSession?.id === sessionId
+          ? { ...currentSession, isPinned: !currentSession.isPinned }
+          : currentSession
+      );
+
+      // Persist pin state to database
+      try {
+        const user = await getCurrentUser();
+        if (user) {
+          await chatPersistenceService.updateSessionPinned(
+            sessionId,
+            !current?.isPinned,
+            user.id
+          );
+        }
+        toast.success('Chat pinned');
+      } catch (error) {
+        console.error('Failed to update pinned state:', error);
+        toast.error('Failed to update pinned state');
       }
-      toast.success('Chat pinned');
-    } catch (error) {
-      console.error('Failed to update pinned state:', error);
-      toast.error('Failed to update pinned state');
-    }
-  }, [sessions]);
+    },
+    [sessions]
+  );
 
   // Archive/unarchive session
-  const toggleArchiveSession = useCallback(async (sessionId: string) => {
-    const current = sessions.find((s) => s.id === sessionId);
-    
-    setSessions((prev) =>
-      prev.map((session) =>
-        session.id === sessionId
-          ? { ...session, isArchived: !session.isArchived }
-          : session
-      )
-    );
+  const toggleArchiveSession = useCallback(
+    async (sessionId: string) => {
+      const current = sessions.find((s) => s.id === sessionId);
 
-    setCurrentSession((currentSession) =>
-      currentSession?.id === sessionId
-        ? { ...currentSession, isArchived: !currentSession.isArchived }
-        : currentSession
-    );
+      setSessions((prev) =>
+        prev.map((session) =>
+          session.id === sessionId
+            ? { ...session, isArchived: !session.isArchived }
+            : session
+        )
+      );
 
-    // Persist archive state to database
-    try {
-      const user = await getCurrentUser();
-      if (user) {
-        await chatPersistenceService.updateSessionArchived(sessionId, !current?.isArchived, user.id);
+      setCurrentSession((currentSession) =>
+        currentSession?.id === sessionId
+          ? { ...currentSession, isArchived: !currentSession.isArchived }
+          : currentSession
+      );
+
+      // Persist archive state to database
+      try {
+        const user = await getCurrentUser();
+        if (user) {
+          await chatPersistenceService.updateSessionArchived(
+            sessionId,
+            !current?.isArchived,
+            user.id
+          );
+        }
+        toast.success('Chat archived');
+      } catch (error) {
+        console.error('Failed to update archived state:', error);
+        toast.error('Failed to update archived state');
       }
-      toast.success('Chat archived');
-    } catch (error) {
-      console.error('Failed to update archived state:', error);
-      toast.error('Failed to update archived state');
-    }
-  }, [sessions]);
+    },
+    [sessions]
+  );
 
   // Duplicate session
   const duplicateSession = useCallback(
@@ -326,7 +358,11 @@ export const useChatHistory = () => {
         );
 
         // Copy messages from original session
-        await chatPersistenceService.copySessionMessages(sessionId, newSession.id, user.id);
+        await chatPersistenceService.copySessionMessages(
+          sessionId,
+          newSession.id,
+          user.id
+        );
         setSessions((prev) => [newSession, ...prev]);
         toast.success('Chat duplicated');
 
@@ -353,7 +389,11 @@ export const useChatHistory = () => {
       const shareLink = `${window.location.origin}/share/${shareToken}`;
 
       // Update session with share link
-      await chatPersistenceService.updateSessionSharedLink(sessionId, shareToken, user.id);
+      await chatPersistenceService.updateSessionSharedLink(
+        sessionId,
+        shareToken,
+        user.id
+      );
 
       // Copy to clipboard
       await navigator.clipboard.writeText(shareLink);

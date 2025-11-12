@@ -190,9 +190,10 @@ const StartupsPage: React.FC = () => {
               </p>
               <p className="mb-8 text-xl leading-relaxed text-muted-foreground">
                 Why raise $2M when you can build a world-class product with a
-                $29/month AI team ($24.99/month if billed yearly)? Replace expensive engineers, designers, and
-                marketers with AI employees that work 24/7. Free Forever plan
-                available—no credit card required.
+                $29/month AI team ($24.99/month if billed yearly)? Replace
+                expensive engineers, designers, and marketers with AI employees
+                that work 24/7. Free Forever plan available—no credit card
+                required.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Button
@@ -335,7 +336,8 @@ const StartupsPage: React.FC = () => {
               Save $999,810/Year. Start in 60 Seconds.
             </h2>
             <p className="mb-2 text-2xl font-semibold opacity-95">
-              Free Forever Plan • $29/month Pro ($24.99/month if billed yearly) • No Credit Card
+              Free Forever Plan • $29/month Pro ($24.99/month if billed yearly)
+              • No Credit Card
             </p>
             <p className="mb-8 text-xl opacity-90">
               Join 1,000+ startups replacing million-dollar teams with

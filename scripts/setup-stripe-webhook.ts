@@ -1,6 +1,6 @@
 /**
  * Setup Stripe Webhook Endpoint
- * 
+ *
  * This script creates a Stripe webhook endpoint for the production and local environments.
  * Run with: npx tsx scripts/setup-stripe-webhook.ts
  */
@@ -42,27 +42,31 @@ const REQUIRED_EVENTS = [
 
 async function listExistingWebhooks() {
   console.log('🔍 Listing existing webhooks...\n');
-  
+
   const webhooks = await stripe.webhookEndpoints.list({ limit: 100 });
-  
+
   if (webhooks.data.length === 0) {
     console.log('No webhooks found.\n');
     return [];
   }
-  
+
   console.log(`Found ${webhooks.data.length} webhook(s):\n`);
   console.log('='.repeat(70));
-  
+
   webhooks.data.forEach((webhook, index) => {
-    const isLocalhost = webhook.url.includes('localhost') || webhook.url.includes('127.0.0.1');
-    const isTest = webhook.url.includes('test') || webhook.url.includes('sandbox') || webhook.url.includes('stripe-mcp');
+    const isLocalhost =
+      webhook.url.includes('localhost') || webhook.url.includes('127.0.0.1');
+    const isTest =
+      webhook.url.includes('test') ||
+      webhook.url.includes('sandbox') ||
+      webhook.url.includes('stripe-mcp');
     const isProduction = !isLocalhost && !isTest;
-    
+
     let type = '❓ Unknown';
     if (isLocalhost) type = '🔧 Local/Dev';
     else if (isTest) type = '🧪 Test/Sandbox';
     else if (isProduction) type = '🚀 Production';
-    
+
     console.log(`\n${index + 1}. ${type}`);
     console.log(`   URL: ${webhook.url}`);
     console.log(`   ID: ${webhook.id}`);
@@ -71,17 +75,19 @@ async function listExistingWebhooks() {
     if (webhook.enabled_events.length > 0) {
       console.log(`   Events: ${webhook.enabled_events.join(', ')}`);
     }
-    console.log(`   Created: ${new Date(webhook.created * 1000).toISOString()}`);
+    console.log(
+      `   Created: ${new Date(webhook.created * 1000).toISOString()}`
+    );
   });
-  
+
   console.log('\n' + '='.repeat(70) + '\n');
-  
+
   return webhooks.data;
 }
 
 async function deleteWebhook(webhookId: string) {
   console.log(`🗑️  Deleting webhook: ${webhookId}\n`);
-  
+
   try {
     await stripe.webhookEndpoints.del(webhookId);
     console.log(`✅ Webhook ${webhookId} deleted successfully\n`);
@@ -106,7 +112,7 @@ function isSandboxWebhook(webhook: Stripe.WebhookEndpoint): boolean {
 
 async function createWebhookEndpoint(url: string, description: string) {
   console.log(`📝 Creating webhook endpoint for: ${url}\n`);
-  
+
   try {
     const webhook = await stripe.webhookEndpoints.create({
       url,
@@ -114,24 +120,30 @@ async function createWebhookEndpoint(url: string, description: string) {
       enabled_events: REQUIRED_EVENTS,
       api_version: '2024-12-18.acacia',
     });
-    
+
     console.log('✅ Webhook created successfully!\n');
     console.log('Webhook Details:');
     console.log(`   ID: ${webhook.id}`);
     console.log(`   URL: ${webhook.url}`);
     console.log(`   Status: ${webhook.status}`);
     console.log(`   Events: ${webhook.enabled_events.join(', ')}`);
-    console.log(`   Signing Secret: ${webhook.secret || 'Not available (check Stripe Dashboard)'}\n`);
-    
+    console.log(
+      `   Signing Secret: ${webhook.secret || 'Not available (check Stripe Dashboard)'}\n`
+    );
+
     if (webhook.secret) {
       console.log('🔑 WEBHOOK SIGNING SECRET:');
       console.log(`   ${webhook.secret}\n`);
-      console.log('⚠️  IMPORTANT: Save this secret and set it as STRIPE_WEBHOOK_SECRET in Netlify!\n');
+      console.log(
+        '⚠️  IMPORTANT: Save this secret and set it as STRIPE_WEBHOOK_SECRET in Netlify!\n'
+      );
     } else {
-      console.log('⚠️  Note: Signing secret not returned. Get it from Stripe Dashboard:\n');
+      console.log(
+        '⚠️  Note: Signing secret not returned. Get it from Stripe Dashboard:\n'
+      );
       console.log(`   https://dashboard.stripe.com/webhooks/${webhook.id}\n`);
     }
-    
+
     return webhook;
   } catch (error) {
     if (error instanceof Stripe.errors.StripeError) {
@@ -149,24 +161,30 @@ async function createWebhookEndpoint(url: string, description: string) {
 
 async function findOrCreateWebhook(url: string, description: string) {
   const existingWebhooks = await listExistingWebhooks();
-  
+
   // Identify sandbox/test webhooks
-  const sandboxWebhooks = existingWebhooks.filter(w => isSandboxWebhook(w));
-  const productionWebhooks = existingWebhooks.filter(w => !isSandboxWebhook(w));
-  
+  const sandboxWebhooks = existingWebhooks.filter((w) => isSandboxWebhook(w));
+  const productionWebhooks = existingWebhooks.filter(
+    (w) => !isSandboxWebhook(w)
+  );
+
   if (sandboxWebhooks.length > 0) {
     console.log('🧪 Found test/sandbox webhooks:\n');
     sandboxWebhooks.forEach((webhook, index) => {
       console.log(`   ${index + 1}. ${webhook.url} (ID: ${webhook.id})`);
     });
-    console.log('\n⚠️  Recommendation: These should be removed for production.\n');
-    console.log('💡 Would you like to delete them? (This script will skip deletion for safety)');
+    console.log(
+      '\n⚠️  Recommendation: These should be removed for production.\n'
+    );
+    console.log(
+      '💡 Would you like to delete them? (This script will skip deletion for safety)'
+    );
     console.log('   To delete manually, go to Stripe Dashboard → Webhooks\n');
   }
-  
+
   // Check if webhook already exists for this URL
-  const existing = existingWebhooks.find(w => w.url === url);
-  
+  const existing = existingWebhooks.find((w) => w.url === url);
+
   if (existing) {
     console.log(`✅ Webhook already exists for ${url}\n`);
     console.log('Webhook Details:');
@@ -174,29 +192,33 @@ async function findOrCreateWebhook(url: string, description: string) {
     console.log(`   URL: ${existing.url}`);
     console.log(`   Status: ${existing.status}`);
     console.log(`   Events: ${existing.enabled_events.join(', ')}\n`);
-    
+
     // Check if all required events are enabled
     const missingEvents = REQUIRED_EVENTS.filter(
-      event => !existing.enabled_events.includes(event)
+      (event) => !existing.enabled_events.includes(event)
     );
-    
+
     if (missingEvents.length > 0) {
       console.log('⚠️  Missing required events:', missingEvents.join(', '));
-      console.log('   Update the webhook in Stripe Dashboard to include all required events.\n');
+      console.log(
+        '   Update the webhook in Stripe Dashboard to include all required events.\n'
+      );
     } else {
       console.log('✅ All required events are enabled.\n');
     }
-    
+
     // Get the signing secret
     console.log('🔑 To get the signing secret:');
-    console.log(`   1. Go to: https://dashboard.stripe.com/webhooks/${existing.id}`);
+    console.log(
+      `   1. Go to: https://dashboard.stripe.com/webhooks/${existing.id}`
+    );
     console.log('   2. Click "Reveal" in the "Signing secret" section');
     console.log('   3. Copy the secret (starts with whsec_)');
     console.log('   4. Set it as STRIPE_WEBHOOK_SECRET in Netlify\n');
-    
+
     return existing;
   }
-  
+
   // Create new webhook
   return await createWebhookEndpoint(url, description);
 }
@@ -204,17 +226,20 @@ async function findOrCreateWebhook(url: string, description: string) {
 async function main() {
   console.log('🚀 Stripe Webhook Setup (Production)\n');
   console.log('='.repeat(50) + '\n');
-  
+
   // Get production URL from environment
-  const productionUrl = process.env.NETLIFY_SITE_URL || process.env.PRODUCTION_URL;
-  
+  const productionUrl =
+    process.env.NETLIFY_SITE_URL || process.env.PRODUCTION_URL;
+
   if (!productionUrl) {
     console.error('❌ Production URL not found in environment variables.');
     console.error('   Set NETLIFY_SITE_URL or PRODUCTION_URL');
-    console.error('   Example: export PRODUCTION_URL=https://your-site.netlify.app\n');
+    console.error(
+      '   Example: export PRODUCTION_URL=https://your-site.netlify.app\n'
+    );
     process.exit(1);
   }
-  
+
   // Setup production webhook only
   console.log('📝 Setting up PRODUCTION webhook endpoint...\n');
   const prodWebhookUrl = `${productionUrl}/.netlify/functions/stripe-webhook`;
@@ -222,7 +247,7 @@ async function main() {
     prodWebhookUrl,
     'AGI Agent Automation - Production Webhook'
   );
-  
+
   console.log('\n' + '='.repeat(50) + '\n');
   console.log('✅ Webhook setup complete!\n');
   console.log('📋 Summary:');
@@ -231,7 +256,9 @@ async function main() {
   console.log('   Webhook Handler: netlify/functions/stripe-webhook.ts');
   console.log('\n🔑 Next Steps:');
   console.log('   1. Get the webhook signing secret from Stripe Dashboard');
-  console.log('   2. Set STRIPE_WEBHOOK_SECRET in Netlify environment variables');
+  console.log(
+    '   2. Set STRIPE_WEBHOOK_SECRET in Netlify environment variables'
+  );
   console.log('   3. Test the webhook with a test purchase\n');
 }
 
@@ -243,4 +270,3 @@ main()
     console.error('❌ Error:', error);
     process.exit(1);
   });
-

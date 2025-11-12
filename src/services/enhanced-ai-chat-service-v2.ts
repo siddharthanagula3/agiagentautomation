@@ -12,7 +12,7 @@ export type AIProvider = 'openai' | 'anthropic' | 'google' | 'perplexity';
  */
 export function getConfiguredProviders(): AIProvider[] {
   const providers: AIProvider[] = [];
-  
+
   if (import.meta.env.VITE_OPENAI_API_KEY) {
     providers.push('openai');
   }
@@ -25,7 +25,7 @@ export function getConfiguredProviders(): AIProvider[] {
   if (import.meta.env.VITE_PERPLEXITY_API_KEY) {
     providers.push('perplexity');
   }
-  
+
   return providers;
 }
 
@@ -34,12 +34,7 @@ export function getConfiguredProviders(): AIProvider[] {
  */
 export function getAvailableModels(provider: AIProvider): string[] {
   const models: Record<AIProvider, string[]> = {
-    openai: [
-      'gpt-4o',
-      'gpt-4o-mini',
-      'gpt-4-turbo',
-      'gpt-3.5-turbo',
-    ],
+    openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
     anthropic: [
       'claude-3-5-sonnet-20241022',
       'claude-3-5-haiku-20241022',
@@ -47,18 +42,14 @@ export function getAvailableModels(provider: AIProvider): string[] {
       'claude-3-sonnet-20240229',
       'claude-3-haiku-20240307',
     ],
-    google: [
-      'gemini-1.5-pro',
-      'gemini-1.5-flash',
-      'gemini-1.0-pro',
-    ],
+    google: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'],
     perplexity: [
       'llama-3.1-sonar-small-128k-online',
       'llama-3.1-sonar-large-128k-online',
       'llama-3.1-sonar-huge-128k-online',
     ],
   };
-  
+
   return models[provider] || [];
 }
 
@@ -87,7 +78,7 @@ export async function testProviderConnection(
       messages: [{ role: 'user', content: 'test' }],
       model: getAvailableModels(provider)[0],
     });
-    
+
     return {
       success: !!response.content,
     };
@@ -98,4 +89,3 @@ export async function testProviderConnection(
     };
   }
 }
-

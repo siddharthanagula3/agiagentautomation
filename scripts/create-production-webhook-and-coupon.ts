@@ -53,7 +53,7 @@ async function createOrUpdateWebhook() {
   try {
     // List existing webhooks
     const existingWebhooks = await stripe.webhookEndpoints.list({ limit: 100 });
-    
+
     // Check if production webhook already exists
     const existingProdWebhook = existingWebhooks.data.find(
       (w) => w.url === WEBHOOK_URL
@@ -73,12 +73,15 @@ async function createOrUpdateWebhook() {
       if (missingEvents.length > 0) {
         log(`\n⚠️  Missing events: ${missingEvents.join(', ')}`, 'yellow');
         log(`   Updating webhook to include all required events...`, 'yellow');
-        
+
         // Update webhook to include all events
-        const updated = await stripe.webhookEndpoints.update(existingProdWebhook.id, {
-          enabled_events: REQUIRED_EVENTS,
-        });
-        
+        const updated = await stripe.webhookEndpoints.update(
+          existingProdWebhook.id,
+          {
+            enabled_events: REQUIRED_EVENTS,
+          }
+        );
+
         log(`   ✅ Webhook updated with all required events`, 'green');
         return updated;
       }
@@ -98,7 +101,10 @@ async function createOrUpdateWebhook() {
     log(`   ID: ${webhook.id}`, 'blue');
     log(`   URL: ${webhook.url}`, 'blue');
     log(`   Status: ${webhook.status}`, 'blue');
-    log(`   Events: ${webhook.enabled_events.length} events configured`, 'blue');
+    log(
+      `   Events: ${webhook.enabled_events.length} events configured`,
+      'blue'
+    );
 
     return webhook;
   } catch (error) {
@@ -125,18 +131,24 @@ async function createDiscountCoupon() {
       log(`   Percent Off: ${existing.percent_off}%`, 'blue');
       log(`   Duration: ${existing.duration}`, 'blue');
       log(`   Valid: ${existing.valid ? 'Yes' : 'No'}`, 'blue');
-      
+
       // Check if it's 100% off
       if (existing.percent_off === 100) {
         log(`   ✅ Already configured as 100% off`, 'green');
         return existing;
       } else {
-        log(`   ⚠️  Current discount is ${existing.percent_off}%, not 100%`, 'yellow');
+        log(
+          `   ⚠️  Current discount is ${existing.percent_off}%, not 100%`,
+          'yellow'
+        );
         log(`   Creating new coupon with 100% off...`, 'yellow');
       }
     } catch (error) {
       // Coupon doesn't exist, create it
-      if (error instanceof Stripe.errors.StripeError && error.code === 'resource_missing') {
+      if (
+        error instanceof Stripe.errors.StripeError &&
+        error.code === 'resource_missing'
+      ) {
         log(`Creating new coupon "${couponCode}"...`, 'blue');
       } else {
         throw error;
@@ -165,7 +177,10 @@ async function createDiscountCoupon() {
   } catch (error) {
     if (error instanceof Stripe.errors.StripeError) {
       if (error.code === 'resource_already_exists') {
-        log(`⚠️  Coupon "${couponCode}" already exists with different settings`, 'yellow');
+        log(
+          `⚠️  Coupon "${couponCode}" already exists with different settings`,
+          'yellow'
+        );
         log(`   You may need to delete it first in Stripe Dashboard`, 'yellow');
       } else {
         log(`❌ Stripe Error: ${error.message}`, 'red');
@@ -210,20 +225,26 @@ async function main() {
     // Summary
     console.log('\n' + '='.repeat(70));
     log('\n✅ Setup Complete!\n', 'green');
-    
+
     log('📋 Summary:', 'cyan');
     log(`   Webhook URL: ${WEBHOOK_URL}`, 'blue');
     log(`   Webhook ID: ${webhook.id}`, 'blue');
-    log(`   Webhook Secret: ${webhook.secret || 'Get from Stripe Dashboard'}`, 'blue');
+    log(
+      `   Webhook Secret: ${webhook.secret || 'Get from Stripe Dashboard'}`,
+      'blue'
+    );
     log(`   Discount Code: BETATESTER100OFF`, 'blue');
     log(`   Discount: 100% off (one-time use)`, 'blue');
 
     log('\n🔧 Next Steps:', 'cyan');
     log('   1. Copy webhook signing secret from Stripe Dashboard', 'yellow');
-    log('   2. Set STRIPE_WEBHOOK_SECRET in Netlify environment variables', 'yellow');
+    log(
+      '   2. Set STRIPE_WEBHOOK_SECRET in Netlify environment variables',
+      'yellow'
+    );
     log('   3. Test the discount code in checkout', 'yellow');
     log('   4. Verify webhook receives events', 'yellow');
-    
+
     console.log('\n');
   } catch (error) {
     log(`\n❌ Setup failed: ${error}`, 'red');
@@ -237,4 +258,3 @@ main()
     console.error('❌ Error:', error);
     process.exit(1);
   });
-

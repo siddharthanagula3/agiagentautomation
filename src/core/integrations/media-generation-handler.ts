@@ -58,10 +58,21 @@ export interface MediaGenerationStats {
   averageGenerationTime: number;
 }
 
-// Environment variables
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
-const NANO_BANANA_API_KEY = import.meta.env.VITE_NANO_BANANA_API_KEY || '';
-const VEO3_API_KEY = import.meta.env.VITE_VEO3_API_KEY || '';
+/**
+ * ⚠️ SECURITY WARNING: API keys in development mode only
+ * These keys are ONLY used in development for direct API access.
+ * In production, use server-side proxies to keep API keys secure.
+ * NEVER expose API keys with VITE_ prefix in production builds.
+ */
+const GOOGLE_API_KEY = import.meta.env.DEV
+  ? import.meta.env.VITE_GOOGLE_API_KEY || ''
+  : '';
+const NANO_BANANA_API_KEY = import.meta.env.DEV
+  ? import.meta.env.VITE_NANO_BANANA_API_KEY || ''
+  : '';
+const VEO3_API_KEY = import.meta.env.DEV
+  ? import.meta.env.VITE_VEO3_API_KEY || ''
+  : '';
 const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
 
 // Pricing (per generation)
@@ -338,7 +349,10 @@ export class MediaGenerationService {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = await response.json().catch((err) => {
+        console.error('[Nano Banana] Failed to parse error response:', err);
+        return {};
+      });
       throw new Error(
         `Nano Banana API error: ${errorData.message || response.statusText}`
       );
@@ -379,7 +393,10 @@ export class MediaGenerationService {
     );
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = await response.json().catch((err) => {
+        console.error('[Veo3] Failed to parse error response:', err);
+        return {};
+      });
       throw new Error(
         `Veo3 API error: ${errorData.message || response.statusText}`
       );

@@ -27,10 +27,24 @@ export type StreamCallback = (chunk: StreamChunk) => void;
 
 type ErrorResponse = { error?: string } & Record<string, unknown>;
 
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
-const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || '';
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
-const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY || '';
+/**
+ * ⚠️ SECURITY WARNING: API keys in development mode only
+ * These keys are ONLY used in development for direct API access.
+ * In production, ALL API calls are proxied through secure Netlify functions.
+ * NEVER expose API keys with VITE_ prefix in production builds.
+ */
+const OPENAI_API_KEY = import.meta.env.DEV
+  ? import.meta.env.VITE_OPENAI_API_KEY || ''
+  : '';
+const ANTHROPIC_API_KEY = import.meta.env.DEV
+  ? import.meta.env.VITE_ANTHROPIC_API_KEY || ''
+  : '';
+const GOOGLE_API_KEY = import.meta.env.DEV
+  ? import.meta.env.VITE_GOOGLE_API_KEY || ''
+  : '';
+const PERPLEXITY_API_KEY = import.meta.env.DEV
+  ? import.meta.env.VITE_PERPLEXITY_API_KEY || ''
+  : '';
 
 /**
  * Stream responses from OpenAI
@@ -49,9 +63,10 @@ export async function streamOpenAI(
       body: JSON.stringify({ model, messages, temperature: 0.7 }),
     });
     if (!response.ok) {
-      const data: ErrorResponse = await response
-        .json()
-        .catch(() => ({}) as ErrorResponse);
+      const data: ErrorResponse = await response.json().catch((err) => {
+        console.error('[OpenAI Proxy] Failed to parse error response:', err);
+        return {} as ErrorResponse;
+      });
       throw new Error(
         data?.error || `OpenAI proxy error: ${response.statusText}`
       );
@@ -163,9 +178,10 @@ export async function streamAnthropic(
       }),
     });
     if (!response.ok) {
-      const data: ErrorResponse = await response
-        .json()
-        .catch(() => ({}) as ErrorResponse);
+      const data: ErrorResponse = await response.json().catch((err) => {
+        console.error('[Anthropic Proxy] Failed to parse error response:', err);
+        return {} as ErrorResponse;
+      });
       throw new Error(
         data?.error || `Anthropic proxy error: ${response.statusText}`
       );
@@ -254,9 +270,10 @@ export async function streamGoogle(
       body: JSON.stringify({ model, messages, temperature: 0.7 }),
     });
     if (!response.ok) {
-      const data: ErrorResponse = await response
-        .json()
-        .catch(() => ({}) as ErrorResponse);
+      const data: ErrorResponse = await response.json().catch((err) => {
+        console.error('[Google Proxy] Failed to parse error response:', err);
+        return {} as ErrorResponse;
+      });
       throw new Error(
         data?.error || `Google proxy error: ${response.statusText}`
       );

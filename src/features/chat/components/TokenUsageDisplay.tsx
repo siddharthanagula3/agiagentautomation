@@ -12,7 +12,7 @@ import {
   TooltipTrigger,
 } from '@shared/ui/tooltip';
 import { Zap, TrendingUp, DollarSign } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 
 interface TokenUsageDisplayProps {
   tokensUsed: number;

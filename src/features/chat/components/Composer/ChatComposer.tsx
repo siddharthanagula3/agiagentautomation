@@ -28,10 +28,11 @@ import {
   ChevronDown,
   Zap,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 import type { ChatMode, Tool } from '../../types';
 import { PromptShortcuts } from '../PromptShortcuts';
 import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
+import { useNavigate } from 'react-router-dom';
 
 interface AIEmployee {
   id: string;
@@ -108,6 +109,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   availableEmployees = DEFAULT_EMPLOYEES,
   availableModels = DEFAULT_MODELS,
 }) => {
+  const navigate = useNavigate();
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODELS[1].id);
@@ -318,7 +320,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
               <TooltipTrigger asChild>
                 <button
                   onClick={() => {
-                    /* TODO: Navigate to marketplace */
+                    navigate('/marketplace');
                   }}
                   className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/30 transition-colors hover:border-primary hover:bg-muted"
                   disabled={isLoading}

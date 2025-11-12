@@ -172,11 +172,11 @@ function App() {
 
                   {/* Settings */}
                   <Route path="settings" element={<SettingsPage />} />
-                  <Route path="settings/:section" element={<SettingsPage />} />
                   <Route
                     path="settings/ai-configuration"
                     element={<AIConfigurationPage />}
                   />
+                  <Route path="settings/:section" element={<SettingsPage />} />
 
                   {/* Billing */}
                   <Route path="billing" element={<BillingPage />} />

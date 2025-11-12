@@ -27,9 +27,12 @@ export const MessageList: React.FC<MessageListProps> = ({
   const updateMessage = useChatStore((state) => state.updateMessage);
 
   const handleEdit = (messageId: string) => {
-    // TODO: Implement edit UI
-    const newContent = prompt('Edit message:');
-    if (newContent) {
+    // Simple edit implementation - can be enhanced with a modal dialog later
+    const message = messages.find((m) => m.id === messageId);
+    if (!message) return;
+    
+    const newContent = prompt('Edit message:', message.content);
+    if (newContent && newContent !== message.content) {
       onEdit(messageId, newContent);
     }
   };

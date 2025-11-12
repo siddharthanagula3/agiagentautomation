@@ -16,7 +16,7 @@ import {
   Check,
   Copy,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -28,6 +28,7 @@ import { EmployeeWorkStream } from './EmployeeWorkStream';
 import { TokenUsageDisplay } from './TokenUsageDisplay';
 import { MessageActions } from './MessageActions';
 import { ImageAttachmentPreview } from './ImageAttachmentPreview';
+import { toast } from 'sonner';
 import { ArtifactPreview } from './ArtifactPreview';
 import {
   extractArtifacts,
@@ -231,8 +232,7 @@ export function MessageBubble({
       // In production, copy share URL to clipboard
       const shareUrl = `${window.location.origin}/artifact/${shareId}`;
       await navigator.clipboard.writeText(shareUrl);
-      // TODO: Show toast notification
-      console.log('Artifact shared:', shareUrl);
+      toast.success('Artifact link copied to clipboard');
     } catch (error) {
       console.error('Failed to share artifact:', error);
     }

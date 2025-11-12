@@ -14,8 +14,9 @@ import {
   X,
   ExternalLink,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@shared/lib/supabase-client';
 
 interface UsageData {
   used: number;
@@ -204,15 +205,49 @@ export function useUsageMonitoring(userId: string | null) {
 
     const fetchUsage = async () => {
       try {
-        // TODO: Fetch from Supabase token_usage table
-        // This is a placeholder - implement actual query
-        const mockData: UsageData[] = [
-          { provider: 'OpenAI', used: 850000, limit: 1000000 },
-          { provider: 'Anthropic', used: 650000, limit: 1000000 },
-          { provider: 'Google', used: 200000, limit: 1000000 },
-        ];
+        // Fetch from Supabase token_usage table
+        if (userId) {
+          const { data, error: fetchError } = await supabase
+            .from('token_usage')
+            .select('provider, total_tokens')
+            .eq('user_id', userId)
+            .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()); // Last 30 days
 
-        setUsageData(mockData);
+          if (!fetchError && data) {
+            // Aggregate by provider
+            const providerMap = new Map<string, number>();
+            data.forEach((row) => {
+              const provider = row.provider.toLowerCase();
+              const current = providerMap.get(provider) || 0;
+              providerMap.set(provider, current + (row.total_tokens || 0));
+            });
+
+            // Get user plan to determine limits
+            const { data: userData } = await supabase
+              .from('users')
+              .select('plan')
+              .eq('id', userId)
+              .single();
+
+            const isPro = userData?.plan === 'pro';
+            const freeLimit = 250000; // 250K per provider for free
+            const proLimit = 2500000; // 2.5M per provider for pro
+
+            const usageData: UsageData[] = [
+              { provider: 'OpenAI', used: providerMap.get('openai') || 0, limit: isPro ? proLimit : freeLimit },
+              { provider: 'Anthropic', used: providerMap.get('anthropic') || 0, limit: isPro ? proLimit : freeLimit },
+              { provider: 'Google', used: providerMap.get('google') || 0, limit: isPro ? proLimit : freeLimit },
+              { provider: 'Perplexity', used: providerMap.get('perplexity') || 0, limit: isPro ? proLimit : freeLimit },
+            ];
+
+            setUsageData(usageData);
+          } else {
+            // Fallback to empty data if fetch fails
+            setUsageData([]);
+          }
+        } else {
+          setUsageData([]);
+        }
       } catch (error) {
         console.error('Failed to fetch usage data:', error);
       } finally {

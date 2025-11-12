@@ -111,7 +111,7 @@ const faqs = [
   {
     question: 'How much money will I save compared to hiring humans?',
     answer:
-      "Massive savings! A human developer costs $100K+/year ($8,333/month) plus benefits. Our AI developers cost just $29/month - that's a 99.7% cost reduction. For a team of 10, you save over $1M/year while getting 24/7 productivity with zero downtime, no sick days, and instant expertise.",
+      "Massive savings! A human developer costs $100K+/year ($8,333/month) plus benefits. Our AI developers cost just $29/month ($24.99/month if billed yearly) - that's a 99.7% cost reduction. For a team of 10, you save over $1M/year while getting 24/7 productivity with zero downtime, no sick days, and instant expertise.",
   },
   {
     question: 'How quickly can I get started?',
@@ -126,7 +126,7 @@ const faqs = [
   {
     question: 'How does pricing work for token usage?',
     answer:
-      'Ultra-competitive! We charge market rates for API usage - the same as OpenAI, Anthropic, and Google directly. Plans start at $19/month with generous token allowances. You get full cost transparency with real-time usage tracking. Most customers save 95%+ vs hiring human employees while getting superior 24/7 output.',
+      'Ultra-competitive! We charge market rates for API usage - the same as OpenAI, Anthropic, and Google directly. Plans start at $29/month ($24.99/month if billed yearly) with generous token allowances. You get full cost transparency with real-time usage tracking. Most customers save 95%+ vs hiring human employees while getting superior 24/7 output.',
   },
   {
     question: 'Is my data secure?',
@@ -273,7 +273,7 @@ const LandingPage: React.FC = () => {
               Replace $100K+/year human employees with
               <span className="font-bold text-primary">
                 {' '}
-                $19/month AI employees
+                $29/month AI employees ($24.99/month if billed yearly)
               </span>
               .
               <span className="font-semibold text-foreground">

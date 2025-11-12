@@ -51,15 +51,57 @@ async function listExistingWebhooks() {
   }
   
   console.log(`Found ${webhooks.data.length} webhook(s):\n`);
+  console.log('='.repeat(70));
+  
   webhooks.data.forEach((webhook, index) => {
-    console.log(`${index + 1}. ${webhook.url}`);
+    const isLocalhost = webhook.url.includes('localhost') || webhook.url.includes('127.0.0.1');
+    const isTest = webhook.url.includes('test') || webhook.url.includes('sandbox') || webhook.url.includes('stripe-mcp');
+    const isProduction = !isLocalhost && !isTest;
+    
+    let type = '❓ Unknown';
+    if (isLocalhost) type = '🔧 Local/Dev';
+    else if (isTest) type = '🧪 Test/Sandbox';
+    else if (isProduction) type = '🚀 Production';
+    
+    console.log(`\n${index + 1}. ${type}`);
+    console.log(`   URL: ${webhook.url}`);
     console.log(`   ID: ${webhook.id}`);
     console.log(`   Status: ${webhook.status}`);
     console.log(`   Events: ${webhook.enabled_events.length} events`);
-    console.log(`   Created: ${new Date(webhook.created * 1000).toISOString()}\n`);
+    if (webhook.enabled_events.length > 0) {
+      console.log(`   Events: ${webhook.enabled_events.join(', ')}`);
+    }
+    console.log(`   Created: ${new Date(webhook.created * 1000).toISOString()}`);
   });
   
+  console.log('\n' + '='.repeat(70) + '\n');
+  
   return webhooks.data;
+}
+
+async function deleteWebhook(webhookId: string) {
+  console.log(`🗑️  Deleting webhook: ${webhookId}\n`);
+  
+  try {
+    await stripe.webhookEndpoints.del(webhookId);
+    console.log(`✅ Webhook ${webhookId} deleted successfully\n`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error deleting webhook:`, error);
+    return false;
+  }
+}
+
+function isSandboxWebhook(webhook: Stripe.WebhookEndpoint): boolean {
+  const url = webhook.url.toLowerCase();
+  return (
+    url.includes('localhost') ||
+    url.includes('127.0.0.1') ||
+    url.includes('test') ||
+    url.includes('sandbox') ||
+    url.includes('stripe-mcp') ||
+    url.includes('local')
+  );
 }
 
 async function createWebhookEndpoint(url: string, description: string) {
@@ -107,6 +149,20 @@ async function createWebhookEndpoint(url: string, description: string) {
 
 async function findOrCreateWebhook(url: string, description: string) {
   const existingWebhooks = await listExistingWebhooks();
+  
+  // Identify sandbox/test webhooks
+  const sandboxWebhooks = existingWebhooks.filter(w => isSandboxWebhook(w));
+  const productionWebhooks = existingWebhooks.filter(w => !isSandboxWebhook(w));
+  
+  if (sandboxWebhooks.length > 0) {
+    console.log('🧪 Found test/sandbox webhooks:\n');
+    sandboxWebhooks.forEach((webhook, index) => {
+      console.log(`   ${index + 1}. ${webhook.url} (ID: ${webhook.id})`);
+    });
+    console.log('\n⚠️  Recommendation: These should be removed for production.\n');
+    console.log('💡 Would you like to delete them? (This script will skip deletion for safety)');
+    console.log('   To delete manually, go to Stripe Dashboard → Webhooks\n');
+  }
   
   // Check if webhook already exists for this URL
   const existing = existingWebhooks.find(w => w.url === url);

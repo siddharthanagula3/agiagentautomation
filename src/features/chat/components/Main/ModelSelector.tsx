@@ -411,19 +411,23 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 };
 
 // Helper functions for external use
+// eslint-disable-next-line react-refresh/only-export-components
 export const getDefaultModel = (): string => {
   // Returns the model marked as default (Claude Sonnet 4.5 for general use)
   return AVAILABLE_MODELS.find((m) => m.isDefault)?.id || 'claude-sonnet-4.5';
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const getModelById = (id: string): ModelInfo | undefined => {
   return AVAILABLE_MODELS.find((m) => m.id === id);
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const getAllModels = (): ModelInfo[] => {
   return AVAILABLE_MODELS;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const getModelsByProvider = (provider: string): ModelInfo[] => {
   return AVAILABLE_MODELS.filter((m) => m.provider === provider);
 };

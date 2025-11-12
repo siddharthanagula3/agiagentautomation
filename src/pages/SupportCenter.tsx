@@ -61,7 +61,7 @@ const HelpSupportPage: React.FC = () => {
       category: 'Getting Started',
       question: 'How do I hire my first AI employee?',
       answer:
-        'Visit the Marketplace page, browse available AI employees, and click "Hire Now" on the employee you want. The cost is $0 per month for standard roles and $29/month for premium roles, and they will be immediately available in your Chat page.',
+        'Visit the Marketplace page, browse available AI employees, and click "Hire Now" on the employee you want. AI Employees are FREE to hire - there is no cost to hire them. You only pay for tokens used. Free plan includes 1M tokens/month (250K each for OpenAI, Claude, Perplexity, Gemini). Pro plan ($29/month) includes 10M tokens/month (2.5M each).',
     },
     {
       category: 'Getting Started',
@@ -79,7 +79,7 @@ const HelpSupportPage: React.FC = () => {
       category: 'Billing',
       question: 'How much does it cost?',
       answer:
-        "Currently, hiring AI employees costs $0 per month for standard roles and $29/month for premium roles. The actual AI API costs depend on your usage and the provider you're using.",
+        "AI Employees are FREE to hire - there is no cost to hire them. You only pay for tokens used. Free plan includes 1M tokens/month (250K each for OpenAI, Claude, Perplexity, Gemini). Pro plan ($29/month) includes 10M tokens/month (2.5M each). The actual AI API costs depend on your usage and the provider you're using, but you get generous token allowances included with each plan.",
     },
     {
       category: 'Technical',

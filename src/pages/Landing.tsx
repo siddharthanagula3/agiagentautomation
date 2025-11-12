@@ -111,12 +111,12 @@ const faqs = [
   {
     question: 'How much money will I save compared to hiring humans?',
     answer:
-      "Massive savings! A human developer costs $100K+/year ($8,333/month) plus benefits. Our AI developers cost just $29/month ($24.99/month if billed yearly) - that's a 99.7% cost reduction. For a team of 10, you save over $1M/year while getting 24/7 productivity with zero downtime, no sick days, and instant expertise.",
+      "Massive savings! A human developer costs $100K+/year ($8,333/month) plus benefits. AI Employees are FREE to hire - you only pay for tokens used. Free plan includes 1M tokens/month (250K each for OpenAI, Claude, Perplexity, Gemini). Pro plan ($29/month) includes 10M tokens/month (2.5M each). That's a 99.7%+ cost reduction. For a team of 10, you save over $1M/year while getting 24/7 productivity with zero downtime, no sick days, and instant expertise.",
   },
   {
     question: 'How quickly can I get started?',
     answer:
-      "Hire your first AI employee in under 60 seconds! No interviews, no onboarding, no training. Simply sign up, select from 165+ specialized AI employees in our marketplace, and start delegating tasks immediately in natural language. It's literally faster than sending an email.",
+      "Hire your first FREE AI employee in under 60 seconds! No interviews, no onboarding, no training, no cost to hire. Simply sign up, select from 165+ specialized AI employees in our marketplace, and start delegating tasks immediately in natural language. Free plan includes 1M tokens/month (250K each for OpenAI, Claude, Perplexity, Gemini).",
   },
   {
     question: 'What tasks can AI employees handle?',
@@ -126,7 +126,7 @@ const faqs = [
   {
     question: 'How does pricing work for token usage?',
     answer:
-      'Ultra-competitive! We charge market rates for API usage - the same as OpenAI, Anthropic, and Google directly. Plans start at $29/month ($24.99/month if billed yearly) with generous token allowances. You get full cost transparency with real-time usage tracking. Most customers save 95%+ vs hiring human employees while getting superior 24/7 output.',
+      'AI Employees are FREE to hire! You only pay for tokens used. Free plan includes 1M tokens/month (250K each for OpenAI, Claude, Perplexity, Gemini). Pro plan ($29/month) includes 10M tokens/month (2.5M each). We charge market rates for API usage - the same as OpenAI, Anthropic, and Google directly. You get full cost transparency with real-time usage tracking. Most customers save 95%+ vs hiring human employees while getting superior 24/7 output.',
   },
   {
     question: 'Is my data secure?',
@@ -196,7 +196,7 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen">
       <SEOHead
         title="AGI Agent Automation | #1 AI Employees Platform USA | Hire 165+ AI Agents"
-        description="Hire AI Employees starting at $1/month. 165+ specialized AI agents for automation, customer support, sales, marketing & more. Best AI workforce platform in USA. 24/7 operation, 95% cost savings. Start free trial today!"
+        description="Hire Free AI Employees. Free plan: 1M tokens/month (250K per provider). Pro plan: 10M tokens/month (2.5M per provider). 165+ specialized AI agents. Best AI workforce platform. 24/7 operation. Start free today!"
         keywords={[
           'ai employees',
           'hire ai employees',
@@ -273,7 +273,7 @@ const LandingPage: React.FC = () => {
               Replace $100K+/year human employees with
               <span className="font-bold text-primary">
                 {' '}
-                $29/month AI employees ($24.99/month if billed yearly)
+                Hire Free AI Employees - Pay Only for Tokens
               </span>
               .
               <span className="font-semibold text-foreground">

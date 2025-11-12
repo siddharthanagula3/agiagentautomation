@@ -78,47 +78,51 @@ export function KeyboardShortcutsDialog({
         </DialogHeader>
 
         <div className="space-y-6">
-          {Object.entries(groupedShortcuts).map(([category, categoryShortcuts]) => (
-            <div key={category}>
-              <h3 className="mb-3 text-sm font-semibold text-foreground">
-                {categoryLabels[category] || category}
-              </h3>
+          {Object.entries(groupedShortcuts).map(
+            ([category, categoryShortcuts]) => (
+              <div key={category}>
+                <h3 className="mb-3 text-sm font-semibold text-foreground">
+                  {categoryLabels[category] || category}
+                </h3>
 
-              <div className="space-y-2">
-                {categoryShortcuts.map((shortcut, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3"
-                  >
-                    <span className="text-sm text-foreground">
-                      {shortcut.description}
-                    </span>
+                <div className="space-y-2">
+                  {categoryShortcuts.map((shortcut, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3"
+                    >
+                      <span className="text-sm text-foreground">
+                        {shortcut.description}
+                      </span>
 
-                    <div className="flex items-center gap-1">
-                      {formatShortcut(shortcut).map((key, keyIndex) => (
-                        <React.Fragment key={keyIndex}>
-                          <Badge
-                            variant="outline"
-                            className="min-w-[32px] justify-center font-mono text-xs"
-                          >
-                            {key}
-                          </Badge>
-                          {keyIndex < formatShortcut(shortcut).length - 1 && (
-                            <span className="text-xs text-muted-foreground">+</span>
-                          )}
-                        </React.Fragment>
-                      ))}
+                      <div className="flex items-center gap-1">
+                        {formatShortcut(shortcut).map((key, keyIndex) => (
+                          <React.Fragment key={keyIndex}>
+                            <Badge
+                              variant="outline"
+                              className="min-w-[32px] justify-center font-mono text-xs"
+                            >
+                              {key}
+                            </Badge>
+                            {keyIndex < formatShortcut(shortcut).length - 1 && (
+                              <span className="text-xs text-muted-foreground">
+                                +
+                              </span>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              {Object.keys(groupedShortcuts).indexOf(category) <
-                Object.keys(groupedShortcuts).length - 1 && (
-                <Separator className="my-4" />
-              )}
-            </div>
-          ))}
+                {Object.keys(groupedShortcuts).indexOf(category) <
+                  Object.keys(groupedShortcuts).length - 1 && (
+                  <Separator className="my-4" />
+                )}
+              </div>
+            )
+          )}
         </div>
 
         <div className="mt-4 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">

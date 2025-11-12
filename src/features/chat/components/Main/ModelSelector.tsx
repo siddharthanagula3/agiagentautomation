@@ -54,7 +54,8 @@ const AVAILABLE_MODELS: ModelInfo[] = [
     id: 'claude-sonnet-4.5',
     name: 'Claude Sonnet 4.5 ⭐',
     provider: 'Anthropic',
-    description: 'Best for general chat, coding, writing. Fast responses with excellent quality',
+    description:
+      'Best for general chat, coding, writing. Fast responses with excellent quality',
     specialty: 'General + Coding',
     isDefault: true, // ⭐ This is the default model for new chats
   },
@@ -64,7 +65,8 @@ const AVAILABLE_MODELS: ModelInfo[] = [
     id: 'gpt-5',
     name: 'GPT-5',
     provider: 'OpenAI',
-    description: 'Latest OpenAI flagship (Aug 2025). Excellent for general tasks & ecosystem',
+    description:
+      'Latest OpenAI flagship (Aug 2025). Excellent for general tasks & ecosystem',
     specialty: 'All-Purpose',
   },
 
@@ -73,7 +75,8 @@ const AVAILABLE_MODELS: ModelInfo[] = [
     id: 'gemini-2.5-flash',
     name: 'Gemini 2.5 Flash',
     provider: 'Google',
-    description: 'Ultra-fast at 372 tokens/sec. Perfect for quick responses & high volume',
+    description:
+      'Ultra-fast at 372 tokens/sec. Perfect for quick responses & high volume',
     specialty: 'Ultra Speed',
   },
 
@@ -86,7 +89,8 @@ const AVAILABLE_MODELS: ModelInfo[] = [
     id: 'kimi-k2-thinking',
     name: 'Kimi K2 Thinking',
     provider: 'Moonshot AI',
-    description: '#1 Reasoning (Nov 6). 71.3% SWE-bench, 44.9% Humanity\'s Exam. 256K context, FREE',
+    description:
+      "#1 Reasoning (Nov 6). 71.3% SWE-bench, 44.9% Humanity's Exam. 256K context, FREE",
     specialty: 'Advanced Reasoning',
   },
 
@@ -104,7 +108,8 @@ const AVAILABLE_MODELS: ModelInfo[] = [
     id: 'gpt-5-thinking',
     name: 'GPT-5 Thinking',
     provider: 'OpenAI',
-    description: 'Extended reasoning mode. 41.7% Humanity\'s Exam. Best for OpenAI ecosystem',
+    description:
+      "Extended reasoning mode. 41.7% Humanity's Exam. Best for OpenAI ecosystem",
     specialty: 'Advanced Thinking',
   },
 
@@ -113,7 +118,8 @@ const AVAILABLE_MODELS: ModelInfo[] = [
     id: 'gemini-2.5-pro-thinking',
     name: 'Gemini 2.5 Pro Thinking',
     provider: 'Google',
-    description: 'Advanced reasoning with images/video support. Google ecosystem',
+    description:
+      'Advanced reasoning with images/video support. Google ecosystem',
     specialty: 'Multimodal Reasoning',
   },
 
@@ -126,7 +132,8 @@ const AVAILABLE_MODELS: ModelInfo[] = [
     id: 'gpt-5-codex',
     name: 'GPT-5 Codex',
     provider: 'OpenAI',
-    description: 'Optimized for software engineering, code generation, debugging',
+    description:
+      'Optimized for software engineering, code generation, debugging',
     specialty: 'Coding Specialist',
   },
 
@@ -144,7 +151,8 @@ const AVAILABLE_MODELS: ModelInfo[] = [
     id: 'perplexity-sonar-pro',
     name: 'Perplexity Sonar Pro',
     provider: 'Perplexity',
-    description: 'Real-time web search with citations. Perfect for current events & research',
+    description:
+      'Real-time web search with citations. Perfect for current events & research',
     specialty: 'Research + Web',
   },
 
@@ -152,7 +160,8 @@ const AVAILABLE_MODELS: ModelInfo[] = [
     id: 'perplexity-sonar',
     name: 'Perplexity Sonar',
     provider: 'Perplexity',
-    description: 'Fast web search (10x faster than competitors). Good for quick fact-checking',
+    description:
+      'Fast web search (10x faster than competitors). Good for quick fact-checking',
     specialty: 'Quick Research',
   },
 
@@ -213,18 +222,27 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
     ['claude-sonnet-4.5', 'gpt-5', 'gemini-2.5-flash'].includes(m.id)
   );
 
-  const thinkingModels = AVAILABLE_MODELS.filter((m) =>
-    m.specialty.toLowerCase().includes('reasoning') ||
-    m.specialty.toLowerCase().includes('thinking') ||
-    m.id.includes('thinking')
+  const thinkingModels = AVAILABLE_MODELS.filter(
+    (m) =>
+      m.specialty.toLowerCase().includes('reasoning') ||
+      m.specialty.toLowerCase().includes('thinking') ||
+      m.id.includes('thinking')
   );
 
   const specializedModels = AVAILABLE_MODELS.filter((m) =>
-    ['gpt-5-codex', 'gemini-2.5-pro', 'perplexity-sonar-pro', 'perplexity-sonar', 'grok-3'].includes(m.id)
+    [
+      'gpt-5-codex',
+      'gemini-2.5-pro',
+      'perplexity-sonar-pro',
+      'perplexity-sonar',
+      'grok-3',
+    ].includes(m.id)
   );
 
-  const legacyModels = AVAILABLE_MODELS.filter((m) =>
-    m.specialty.toLowerCase().includes('legacy') || m.specialty.toLowerCase().includes('budget')
+  const legacyModels = AVAILABLE_MODELS.filter(
+    (m) =>
+      m.specialty.toLowerCase().includes('legacy') ||
+      m.specialty.toLowerCase().includes('budget')
   );
 
   return (
@@ -245,7 +263,10 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                     {AVAILABLE_MODELS.find((m) => m.id === selectedModel)?.name}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {AVAILABLE_MODELS.find((m) => m.id === selectedModel)?.specialty}
+                    {
+                      AVAILABLE_MODELS.find((m) => m.id === selectedModel)
+                        ?.specialty
+                    }
                   </span>
                 </div>
               )}
@@ -343,10 +364,15 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
           </SelectContent>
         </Select>
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          ⭐ <span className="font-semibold text-primary">Claude Sonnet 4.5</span> = Default for general use (fast, high quality).
+          ⭐{' '}
+          <span className="font-semibold text-primary">Claude Sonnet 4.5</span>{' '}
+          = Default for general use (fast, high quality).
           <br />
-          🧠 Use <span className="font-semibold text-green-600 dark:text-green-400">Thinking Models</span> for complex reasoning
-          (Kimi K2 is #1, FREE & open-source).
+          🧠 Use{' '}
+          <span className="font-semibold text-green-600 dark:text-green-400">
+            Thinking Models
+          </span>{' '}
+          for complex reasoning (Kimi K2 is #1, FREE & open-source).
         </p>
       </div>
 

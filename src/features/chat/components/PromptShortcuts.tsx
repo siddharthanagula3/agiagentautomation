@@ -55,14 +55,16 @@ const PROMPT_SHORTCUTS: PromptShortcut[] = [
     id: 'code-review',
     label: 'Review my code',
     icon: Code,
-    prompt: 'Please review this code for best practices, potential bugs, and improvements:',
+    prompt:
+      'Please review this code for best practices, potential bugs, and improvements:',
     category: 'coding',
   },
   {
     id: 'debug-error',
     label: 'Debug this error',
     icon: Bug,
-    prompt: 'I\'m getting this error. Can you help me debug it and explain what\'s wrong?',
+    prompt:
+      "I'm getting this error. Can you help me debug it and explain what's wrong?",
     category: 'coding',
   },
   {
@@ -76,7 +78,8 @@ const PROMPT_SHORTCUTS: PromptShortcut[] = [
     id: 'optimize-code',
     label: 'Optimize code',
     icon: Zap,
-    prompt: 'How can I optimize this code for better performance and readability?',
+    prompt:
+      'How can I optimize this code for better performance and readability?',
     category: 'coding',
   },
 
@@ -85,7 +88,8 @@ const PROMPT_SHORTCUTS: PromptShortcut[] = [
     id: 'improve-writing',
     label: 'Improve my writing',
     icon: FileText,
-    prompt: 'Please improve this text for clarity, grammar, and professionalism:',
+    prompt:
+      'Please improve this text for clarity, grammar, and professionalism:',
     category: 'writing',
   },
   {
@@ -124,7 +128,7 @@ const PROMPT_SHORTCUTS: PromptShortcut[] = [
     id: 'brainstorm',
     label: 'Brainstorm ideas',
     icon: Lightbulb,
-    prompt: 'Let\'s brainstorm creative ideas for:',
+    prompt: "Let's brainstorm creative ideas for:",
     category: 'creative',
   },
   {
@@ -141,7 +145,10 @@ interface PromptShortcutsProps {
   className?: string;
 }
 
-export function PromptShortcuts({ onSelectPrompt, className }: PromptShortcutsProps) {
+export function PromptShortcuts({
+  onSelectPrompt,
+  className,
+}: PromptShortcutsProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [customShortcuts, setCustomShortcuts] = useState<PromptShortcut[]>([]);
   const [showCustomDialog, setShowCustomDialog] = useState(false);
@@ -176,7 +183,10 @@ export function PromptShortcuts({ onSelectPrompt, className }: PromptShortcutsPr
       }));
       setCustomShortcuts(customWithIcons);
     } catch (error) {
-      console.error('[Prompt Shortcuts] Error loading custom shortcuts:', error);
+      console.error(
+        '[Prompt Shortcuts] Error loading custom shortcuts:',
+        error
+      );
     } finally {
       setIsLoadingCustom(false);
     }
@@ -221,9 +231,16 @@ export function PromptShortcuts({ onSelectPrompt, className }: PromptShortcutsPr
     : allShortcuts;
 
   return (
-    <div className={cn('rounded-xl border border-border bg-card p-4 shadow-lg', className)}>
+    <div
+      className={cn(
+        'rounded-xl border border-border bg-card p-4 shadow-lg',
+        className
+      )}
+    >
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">⚡ Quick Prompts</h3>
+        <h3 className="text-sm font-semibold text-foreground">
+          ⚡ Quick Prompts
+        </h3>
         <p className="text-xs text-muted-foreground">Click to insert</p>
       </div>
 
@@ -256,10 +273,7 @@ export function PromptShortcuts({ onSelectPrompt, className }: PromptShortcutsPr
           {filteredShortcuts.map((shortcut) => {
             const Icon = shortcut.icon;
             return (
-              <div
-                key={shortcut.id}
-                className="group flex items-center gap-2"
-              >
+              <div key={shortcut.id} className="group flex items-center gap-2">
                 <Button
                   variant="ghost"
                   onClick={() => onSelectPrompt(shortcut.prompt)}
@@ -268,7 +282,9 @@ export function PromptShortcuts({ onSelectPrompt, className }: PromptShortcutsPr
                   <Icon className="h-4 w-4 flex-shrink-0 text-primary" />
                   <span className="text-sm font-medium">{shortcut.label}</span>
                   {shortcut.isCustom && (
-                    <span className="ml-auto text-xs text-muted-foreground">Custom</span>
+                    <span className="ml-auto text-xs text-muted-foreground">
+                      Custom
+                    </span>
                   )}
                 </Button>
                 {shortcut.isCustom && (

@@ -231,29 +231,32 @@ export const useChatHistory = () => {
   }, []);
 
   // Duplicate session
-  const duplicateSession = useCallback(async (sessionId: string) => {
-    try {
-      const original = sessions.find((s) => s.id === sessionId);
-      if (!original) return;
+  const duplicateSession = useCallback(
+    async (sessionId: string) => {
+      try {
+        const original = sessions.find((s) => s.id === sessionId);
+        if (!original) return;
 
-      const user = await getCurrentUser();
-      if (!user) return;
+        const user = await getCurrentUser();
+        if (!user) return;
 
-      const newSession = await chatPersistenceService.createSession(
-        user.id,
-        `${original.title} (Copy)`
-      );
+        const newSession = await chatPersistenceService.createSession(
+          user.id,
+          `${original.title} (Copy)`
+        );
 
-      // TODO: Copy messages from original session
-      setSessions((prev) => [newSession, ...prev]);
-      toast.success('Chat duplicated');
+        // TODO: Copy messages from original session
+        setSessions((prev) => [newSession, ...prev]);
+        toast.success('Chat duplicated');
 
-      return newSession;
-    } catch (error) {
-      console.error('Failed to duplicate session:', error);
-      toast.error('Failed to duplicate chat');
-    }
-  }, [sessions]);
+        return newSession;
+      } catch (error) {
+        console.error('Failed to duplicate session:', error);
+        toast.error('Failed to duplicate chat');
+      }
+    },
+    [sessions]
+  );
 
   // Share session (generate shareable link)
   const shareSession = useCallback(async (sessionId: string) => {

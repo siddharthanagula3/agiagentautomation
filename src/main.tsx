@@ -7,7 +7,10 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'sonner';
 import AppRouter from './AppRouter';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
-import { validateAndLogEnvironment, logEnvironmentConfig } from '@shared/utils/env-validation';
+import {
+  validateAndLogEnvironment,
+  logEnvironmentConfig,
+} from '@shared/utils/env-validation';
 import './index.css';
 
 // Validate environment variables on startup

@@ -9,14 +9,14 @@
 
 ## 💰 ROI in 60 Seconds
 
-| Comparison | Human Employee | AI Employee | Your Savings |
-|------------|----------------|-------------|--------------|
-| **Cost** | $100,000/year | $228/year | **99.8%** |
-| **Availability** | 40 hrs/week | 168 hrs/week | **320% more productive** |
-| **Onboarding** | 3-6 months | Instant | **Immediate ROI** |
-| **Benefits/Insurance** | $30K+/year | $0 | **100% savings** |
-| **Sick Days** | 10+ days/year | 0 days | **Zero downtime** |
-| **Expertise** | 1-2 specialties | 165+ specialties | **Unlimited skills** |
+| Comparison             | Human Employee  | AI Employee      | Your Savings             |
+| ---------------------- | --------------- | ---------------- | ------------------------ |
+| **Cost**               | $100,000/year   | $228/year        | **99.8%**                |
+| **Availability**       | 40 hrs/week     | 168 hrs/week     | **320% more productive** |
+| **Onboarding**         | 3-6 months      | Instant          | **Immediate ROI**        |
+| **Benefits/Insurance** | $30K+/year      | $0               | **100% savings**         |
+| **Sick Days**          | 10+ days/year   | 0 days           | **Zero downtime**        |
+| **Expertise**          | 1-2 specialties | 165+ specialties | **Unlimited skills**     |
 
 **Bottom Line:** One $19/month AI employee replaces a $100K+ human employee. A team of 10 AI employees ($190/month) replaces a team of 10 humans ($1M+/year). **That's $999,810 saved annually.**
 
@@ -70,13 +70,13 @@ Build your dream AI team:
 
 Automatically select the best LLM for every task:
 
-| Task Type | Recommended Model | Why |
-|-----------|-------------------|-----|
-| **Coding** | Claude 3.5 Sonnet | Superior reasoning for complex code |
-| **General** | GPT-4o | Best all-around performance |
-| **Creative** | Gemini 1.5 Pro | Optimized for creative content |
-| **Research** | Perplexity Sonar | Real-time web access |
-| **Data Analysis** | Claude 3 Opus | Advanced analytical capabilities |
+| Task Type         | Recommended Model | Why                                 |
+| ----------------- | ----------------- | ----------------------------------- |
+| **Coding**        | Claude 3.5 Sonnet | Superior reasoning for complex code |
+| **General**       | GPT-4o            | Best all-around performance         |
+| **Creative**      | Gemini 1.5 Pro    | Optimized for creative content      |
+| **Research**      | Perplexity Sonar  | Real-time web access                |
+| **Data Analysis** | Claude 3 Opus     | Advanced analytical capabilities    |
 
 **User Override**: Manual model selection available at any time via dropdown.
 
@@ -172,16 +172,16 @@ VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
 
 ### Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | React 18 + TypeScript |
-| **Styling** | Tailwind CSS + shadcn/ui |
-| **State** | Zustand + Immer |
-| **Backend** | Netlify Functions (serverless) |
-| **Database** | Supabase (PostgreSQL) |
-| **Auth** | Supabase Auth + RLS |
-| **Payments** | Stripe |
-| **AI** | Multi-provider (OpenAI, Anthropic, Google, Perplexity) |
+| Layer        | Technology                                             |
+| ------------ | ------------------------------------------------------ |
+| **Frontend** | React 18 + TypeScript                                  |
+| **Styling**  | Tailwind CSS + shadcn/ui                               |
+| **State**    | Zustand + Immer                                        |
+| **Backend**  | Netlify Functions (serverless)                         |
+| **Database** | Supabase (PostgreSQL)                                  |
+| **Auth**     | Supabase Auth + RLS                                    |
+| **Payments** | Stripe                                                 |
+| **AI**       | Multi-provider (OpenAI, Anthropic, Google, Perplexity) |
 
 ### Directory Structure
 

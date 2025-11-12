@@ -57,7 +57,9 @@ export function UsageWarningModal({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className={`sm:max-w-[500px] ${isCritical ? 'border-red-500/50' : 'border-yellow-500/50'}`}>
+      <AlertDialogContent
+        className={`sm:max-w-[500px] ${isCritical ? 'border-red-500/50' : 'border-yellow-500/50'}`}
+      >
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
             <div
@@ -81,7 +83,9 @@ export function UsageWarningModal({
             <div className="rounded-lg border border-border bg-muted/50 p-4">
               <div className="mb-2 flex items-center justify-between text-sm">
                 <span className="font-medium">Current Usage</span>
-                <span className={`font-bold ${isCritical ? 'text-red-500' : 'text-yellow-500'}`}>
+                <span
+                  className={`font-bold ${isCritical ? 'text-red-500' : 'text-yellow-500'}`}
+                >
                   {usagePercentage.toFixed(1)}%
                 </span>
               </div>
@@ -100,10 +104,12 @@ export function UsageWarningModal({
 
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>
-                  {currentUsage.toLocaleString()} / {totalLimit.toLocaleString()} tokens
+                  {currentUsage.toLocaleString()} /{' '}
+                  {totalLimit.toLocaleString()} tokens
                 </span>
                 <span className="font-medium">
-                  {remainingTokens.toLocaleString()} left ({remainingPercentage.toFixed(1)}%)
+                  {remainingTokens.toLocaleString()} left (
+                  {remainingPercentage.toFixed(1)}%)
                 </span>
               </div>
             </div>
@@ -114,8 +120,9 @@ export function UsageWarningModal({
                   🚨 Service May Be Interrupted Soon
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  You're at 95% usage. Buy more tokens now to avoid interruption.
-                  Your AI employees need tokens to continue working.
+                  You're at 95% usage. Buy more tokens now to avoid
+                  interruption. Your AI employees need tokens to continue
+                  working.
                 </p>
               </div>
             ) : (
@@ -137,11 +144,16 @@ export function UsageWarningModal({
               <ul className="space-y-1 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <span className="text-primary">•</span>
-                  <span>No service interruption - your AI employees keep working 24/7</span>
+                  <span>
+                    No service interruption - your AI employees keep working
+                    24/7
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary">•</span>
-                  <span>Market-rate pricing - same as direct OpenAI/Anthropic usage</span>
+                  <span>
+                    Market-rate pricing - same as direct OpenAI/Anthropic usage
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary">•</span>

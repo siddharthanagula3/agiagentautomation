@@ -128,9 +128,10 @@ const ITServiceProvidersPage: React.FC = () => {
                 Save 99.7% • Serve 10x More Clients • 24/7 Coverage
               </p>
               <p className="mb-8 text-xl text-muted-foreground">
-                Why pay $75K+/year per tech when AI employees handle tier-1 support, monitoring,
-                and incident management for $19/month? Scale your MSP infinitely without hiring.
-                Your human experts focus only on complex escalations.
+                Why pay $75K+/year per tech when AI employees handle tier-1
+                support, monitoring, and incident management for $19/month?
+                Scale your MSP infinitely without hiring. Your human experts
+                focus only on complex escalations.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Button

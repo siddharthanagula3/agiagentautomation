@@ -4,12 +4,7 @@ import { Input } from '@shared/ui/input';
 import { ScrollArea } from '@shared/ui/scroll-area';
 import { Separator } from '@shared/ui/separator';
 import { Badge } from '@shared/ui/badge';
-import {
-  Plus,
-  Search,
-  MessageSquare,
-  MoreHorizontal,
-} from 'lucide-react';
+import { Plus, Search, MessageSquare, MoreHorizontal } from 'lucide-react';
 import type { ChatSession } from '../../types';
 import { ConversationListItem } from '../ConversationListItem';
 
@@ -106,11 +101,25 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 onClick={() => onSessionSelect(session)}
                 onRename={() => onSessionRename(session.id, session.title)}
                 onDelete={() => onSessionDelete(session.id)}
-                onStar={onSessionStar ? () => onSessionStar(session.id) : undefined}
-                onPin={onSessionPin ? () => onSessionPin(session.id) : undefined}
-                onArchive={onSessionArchive ? () => onSessionArchive(session.id) : undefined}
-                onShare={onSessionShare ? () => onSessionShare(session.id) : undefined}
-                onDuplicate={onSessionDuplicate ? () => onSessionDuplicate(session.id) : undefined}
+                onStar={
+                  onSessionStar ? () => onSessionStar(session.id) : undefined
+                }
+                onPin={
+                  onSessionPin ? () => onSessionPin(session.id) : undefined
+                }
+                onArchive={
+                  onSessionArchive
+                    ? () => onSessionArchive(session.id)
+                    : undefined
+                }
+                onShare={
+                  onSessionShare ? () => onSessionShare(session.id) : undefined
+                }
+                onDuplicate={
+                  onSessionDuplicate
+                    ? () => onSessionDuplicate(session.id)
+                    : undefined
+                }
               />
             ))
           )}

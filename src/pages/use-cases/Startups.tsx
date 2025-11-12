@@ -40,7 +40,7 @@ const StartupsPage: React.FC = () => {
       icon: DollarSign,
       title: 'Bootstrap for $190/Month Instead of Raising $2M',
       description:
-        'Full 10-person AI team costs $190/month vs $1M+/year for humans. That\'s 99.8% savings. Keep your equity, avoid dilution, stay profitable from day one.',
+        "Full 10-person AI team costs $190/month vs $1M+/year for humans. That's 99.8% savings. Keep your equity, avoid dilution, stay profitable from day one.",
       color: 'from-green-500 to-emerald-500',
     },
     {
@@ -189,9 +189,10 @@ const StartupsPage: React.FC = () => {
                 Save 99.8% on Team Costs • 10 AI Employees = $190/mo
               </p>
               <p className="mb-8 text-xl leading-relaxed text-muted-foreground">
-                Why raise $2M when you can build a world-class product with a $19/month AI team?
-                Replace expensive engineers, designers, and marketers with AI employees that work 24/7.
-                Free Forever plan available—no credit card required.
+                Why raise $2M when you can build a world-class product with a
+                $19/month AI team? Replace expensive engineers, designers, and
+                marketers with AI employees that work 24/7. Free Forever plan
+                available—no credit card required.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row">
                 <Button
@@ -337,7 +338,8 @@ const StartupsPage: React.FC = () => {
               Free Forever Plan • $19/month Pro • No Credit Card
             </p>
             <p className="mb-8 text-xl opacity-90">
-              Join 1,000+ startups replacing million-dollar teams with $190/month AI workforces
+              Join 1,000+ startups replacing million-dollar teams with
+              $190/month AI workforces
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button

@@ -211,7 +211,10 @@ export function useUsageMonitoring(userId: string | null) {
             .from('token_usage')
             .select('provider, total_tokens')
             .eq('user_id', userId)
-            .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()); // Last 30 days
+            .gte(
+              'created_at',
+              new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+            ); // Last 30 days
 
           if (!fetchError && data) {
             // Aggregate by provider
@@ -234,10 +237,26 @@ export function useUsageMonitoring(userId: string | null) {
             const proLimit = 2500000; // 2.5M per provider for pro
 
             const usageData: UsageData[] = [
-              { provider: 'OpenAI', used: providerMap.get('openai') || 0, limit: isPro ? proLimit : freeLimit },
-              { provider: 'Anthropic', used: providerMap.get('anthropic') || 0, limit: isPro ? proLimit : freeLimit },
-              { provider: 'Google', used: providerMap.get('google') || 0, limit: isPro ? proLimit : freeLimit },
-              { provider: 'Perplexity', used: providerMap.get('perplexity') || 0, limit: isPro ? proLimit : freeLimit },
+              {
+                provider: 'OpenAI',
+                used: providerMap.get('openai') || 0,
+                limit: isPro ? proLimit : freeLimit,
+              },
+              {
+                provider: 'Anthropic',
+                used: providerMap.get('anthropic') || 0,
+                limit: isPro ? proLimit : freeLimit,
+              },
+              {
+                provider: 'Google',
+                used: providerMap.get('google') || 0,
+                limit: isPro ? proLimit : freeLimit,
+              },
+              {
+                provider: 'Perplexity',
+                used: providerMap.get('perplexity') || 0,
+                limit: isPro ? proLimit : freeLimit,
+              },
             ];
 
             setUsageData(usageData);

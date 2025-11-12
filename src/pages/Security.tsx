@@ -92,7 +92,14 @@ const SecurityPage: React.FC = () => {
       <SEOHead
         title="Security | AGI Agent Automation"
         description="Learn about our security measures, compliance standards, and data protection practices."
-        keywords={['security', 'privacy', 'data protection', 'encryption', 'GDPR', 'compliance']}
+        keywords={[
+          'security',
+          'privacy',
+          'data protection',
+          'encryption',
+          'GDPR',
+          'compliance',
+        ]}
       />
 
       <div className="min-h-screen bg-background">
@@ -112,8 +119,9 @@ const SecurityPage: React.FC = () => {
                 Your Data is Protected
               </h1>
               <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
-                We take security seriously. Learn about our comprehensive security measures,
-                compliance standards, and commitment to protecting your data.
+                We take security seriously. Learn about our comprehensive
+                security measures, compliance standards, and commitment to
+                protecting your data.
               </p>
             </motion.div>
           </div>
@@ -122,7 +130,9 @@ const SecurityPage: React.FC = () => {
         {/* Security Features */}
         <section className="px-4 py-16 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="mb-12 text-center text-3xl font-bold">Security Features</h2>
+            <h2 className="mb-12 text-center text-3xl font-bold">
+              Security Features
+            </h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {securityFeatures.map((feature, index) => {
                 const Icon = feature.icon;
@@ -143,7 +153,9 @@ const SecurityPage: React.FC = () => {
                         <CardTitle>{feature.title}</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-muted-foreground">{feature.description}</p>
+                        <p className="text-muted-foreground">
+                          {feature.description}
+                        </p>
                       </CardContent>
                     </Card>
                   </motion.div>
@@ -156,18 +168,26 @@ const SecurityPage: React.FC = () => {
         {/* Compliance Standards */}
         <section className="border-t border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-4xl">
-            <h2 className="mb-12 text-center text-3xl font-bold">Compliance Standards</h2>
+            <h2 className="mb-12 text-center text-3xl font-bold">
+              Compliance Standards
+            </h2>
             <div className="grid gap-6 md:grid-cols-3">
               {complianceStandards.map((standard) => {
                 const Icon = standard.icon;
                 return (
-                  <Card key={standard.name} className="border-border text-center">
+                  <Card
+                    key={standard.name}
+                    className="border-border text-center"
+                  >
                     <CardHeader>
                       <Icon className="mx-auto mb-4 h-12 w-12 text-primary" />
                       <CardTitle>{standard.name}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <Badge variant="outline" className="border-green-600 text-green-600">
+                      <Badge
+                        variant="outline"
+                        className="border-green-600 text-green-600"
+                      >
                         {standard.status}
                       </Badge>
                     </CardContent>
@@ -181,7 +201,9 @@ const SecurityPage: React.FC = () => {
         {/* Security Practices */}
         <section className="px-4 py-16 sm:px-6 lg:px-8">
           <div className="container mx-auto max-w-4xl">
-            <h2 className="mb-12 text-center text-3xl font-bold">Security Practices</h2>
+            <h2 className="mb-12 text-center text-3xl font-bold">
+              Security Practices
+            </h2>
             <Card className="border-border">
               <CardContent className="p-8">
                 <ul className="space-y-4">
@@ -215,29 +237,29 @@ const SecurityPage: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">
-                  We are committed to protecting your data and privacy. Here's what you need to
-                  know:
+                  We are committed to protecting your data and privacy. Here's
+                  what you need to know:
                 </p>
                 <ul className="list-disc space-y-2 pl-6 text-muted-foreground">
                   <li>
-                    <strong>Data Ownership:</strong> You own all your data. We never sell or share
-                    your data with third parties.
+                    <strong>Data Ownership:</strong> You own all your data. We
+                    never sell or share your data with third parties.
                   </li>
                   <li>
-                    <strong>Data Retention:</strong> Data is retained according to your plan. You
-                    can delete your data at any time.
+                    <strong>Data Retention:</strong> Data is retained according
+                    to your plan. You can delete your data at any time.
                   </li>
                   <li>
-                    <strong>Right to Access:</strong> You can request a copy of all your data at
-                    any time.
+                    <strong>Right to Access:</strong> You can request a copy of
+                    all your data at any time.
                   </li>
                   <li>
-                    <strong>Right to Deletion:</strong> You can request deletion of your account
-                    and all associated data.
+                    <strong>Right to Deletion:</strong> You can request deletion
+                    of your account and all associated data.
                   </li>
                   <li>
-                    <strong>Data Processing:</strong> All data processing happens within secure,
-                    compliant infrastructure.
+                    <strong>Data Processing:</strong> All data processing
+                    happens within secure, compliant infrastructure.
                   </li>
                 </ul>
                 <div className="flex gap-4 pt-4">
@@ -268,7 +290,8 @@ const SecurityPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <p className="mb-6 text-muted-foreground">
-                  If you have security concerns or questions, please contact our security team.
+                  If you have security concerns or questions, please contact our
+                  security team.
                 </p>
                 <Link to="/contact-sales">
                   <Button>

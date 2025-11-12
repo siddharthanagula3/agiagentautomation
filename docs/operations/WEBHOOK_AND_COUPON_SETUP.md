@@ -3,6 +3,7 @@
 ## ✅ Completed Setup
 
 ### Production Webhook
+
 - **URL**: `https://agiagentautomation.com/.netlify/functions/stripe-webhook`
 - **Status**: ✅ Enabled
 - **Events Configured**:
@@ -13,6 +14,7 @@
   - `customer.subscription.deleted`
 
 ### Webhook Signing Secret
+
 **⚠️ IMPORTANT**: Get the signing secret from Stripe Dashboard and set it in Netlify as `STRIPE_WEBHOOK_SECRET`
 
 1. Go to [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)
@@ -22,6 +24,7 @@
 5. Set it in Netlify as `STRIPE_WEBHOOK_SECRET`
 
 ### Discount Coupon
+
 - **Code**: `BETATESTER100OFF`
 - **Discount**: 100% off
 - **Duration**: One-time use
@@ -67,12 +70,13 @@ After setting, **redeploy** your site.
 ## 🆘 Troubleshooting
 
 ### Webhook not receiving events?
+
 - Verify `STRIPE_WEBHOOK_SECRET` is set correctly in Netlify
 - Check webhook is enabled in Stripe Dashboard
 - Check Netlify function logs for errors
 
 ### Discount code not working?
+
 - Verify coupon is active in Stripe Dashboard
 - Check code spelling: `BETATESTER100OFF` (case-sensitive)
 - Verify it's a one-time use coupon (already used?)
-

@@ -30,7 +30,7 @@ export const MessageList: React.FC<MessageListProps> = ({
     // Simple edit implementation - can be enhanced with a modal dialog later
     const message = messages.find((m) => m.id === messageId);
     if (!message) return;
-    
+
     const newContent = prompt('Edit message:', message.content);
     if (newContent && newContent !== message.content) {
       onEdit(messageId, newContent);
@@ -58,10 +58,11 @@ export const MessageList: React.FC<MessageListProps> = ({
       <div className="space-y-0">
         {messages.map((message) => {
           // Ensure createdAt is a Date object
-          const timestamp = message.createdAt instanceof Date 
-            ? message.createdAt 
-            : new Date(message.createdAt || Date.now());
-          
+          const timestamp =
+            message.createdAt instanceof Date
+              ? message.createdAt
+              : new Date(message.createdAt || Date.now());
+
           return (
             <MessageBubble
               key={message.id}
@@ -70,30 +71,30 @@ export const MessageList: React.FC<MessageListProps> = ({
                 content: message.content,
                 role: message.role,
                 timestamp,
-              employeeId: message.metadata?.employeeId as string | undefined,
-              employeeName: message.metadata?.employeeName as
-                | string
-                | undefined,
-              reactions: [],
-              metadata: {
-                tokensUsed: message.metadata?.tokens,
-                inputTokens: message.metadata?.inputTokens as
-                  | number
+                employeeId: message.metadata?.employeeId as string | undefined,
+                employeeName: message.metadata?.employeeName as
+                  | string
                   | undefined,
-                outputTokens: message.metadata?.outputTokens as
-                  | number
-                  | undefined,
-                model: message.metadata?.model,
-                cost: message.metadata?.cost,
-                isPinned: message.metadata?.isPinned as boolean | undefined,
-              },
-            }}
-            onEdit={handleEdit}
-            onRegenerate={onRegenerate}
-            onDelete={onDelete}
-            onPin={handlePin}
-            onReact={handleReact}
-          />
+                reactions: [],
+                metadata: {
+                  tokensUsed: message.metadata?.tokens,
+                  inputTokens: message.metadata?.inputTokens as
+                    | number
+                    | undefined,
+                  outputTokens: message.metadata?.outputTokens as
+                    | number
+                    | undefined,
+                  model: message.metadata?.model,
+                  cost: message.metadata?.cost,
+                  isPinned: message.metadata?.isPinned as boolean | undefined,
+                },
+              }}
+              onEdit={handleEdit}
+              onRegenerate={onRegenerate}
+              onDelete={onDelete}
+              onPin={handlePin}
+              onReact={handleReact}
+            />
           );
         })}
 

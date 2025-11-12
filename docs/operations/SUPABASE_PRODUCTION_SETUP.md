@@ -9,6 +9,7 @@ This guide explains how to configure Supabase for production deployment. All con
 ### In Netlify Dashboard (Site Settings → Environment Variables):
 
 **Supabase Configuration:**
+
 - `VITE_SUPABASE_URL` - Your production Supabase project URL (e.g., `https://xxxxx.supabase.co`)
 - `VITE_SUPABASE_ANON_KEY` - Your Supabase anonymous/public key
 - `SUPABASE_SERVICE_ROLE_KEY` - Your Supabase service role key (server-side only, never expose to client)
@@ -46,8 +47,8 @@ All migrations have been applied to the production database. The following table
 Run this query in Supabase SQL Editor:
 
 ```sql
-SELECT table_name FROM information_schema.tables 
-WHERE table_schema = 'public' 
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public'
 AND table_name IN ('user_shortcuts', 'public_artifacts', 'token_transactions')
 ORDER BY table_name;
 ```
@@ -57,8 +58,8 @@ Should return 3 rows.
 ### Verify RLS Policies:
 
 ```sql
-SELECT tablename, rowsecurity FROM pg_tables 
-WHERE schemaname = 'public' 
+SELECT tablename, rowsecurity FROM pg_tables
+WHERE schemaname = 'public'
 AND tablename IN ('user_shortcuts', 'public_artifacts', 'token_transactions')
 ORDER BY tablename;
 ```
@@ -68,13 +69,14 @@ All should show `rowsecurity = true`.
 ### Verify Functions:
 
 ```sql
-SELECT routine_name FROM information_schema.routines 
-WHERE routine_schema = 'public' 
+SELECT routine_name FROM information_schema.routines
+WHERE routine_schema = 'public'
 AND (routine_name LIKE '%token%' OR routine_name LIKE '%artifact%')
 ORDER BY routine_name;
 ```
 
 Should return:
+
 - `update_user_token_balance`
 - `increment_artifact_views`
 - `increment_artifact_likes`
@@ -103,6 +105,7 @@ Should return:
 ### Migration Issues:
 
 If tables are missing:
+
 1. Go to Supabase Dashboard → Database → Migrations
 2. Verify all migrations are applied
 3. If needed, run: `supabase db push` (requires Supabase CLI)
@@ -110,9 +113,9 @@ If tables are missing:
 ## Next Steps
 
 After configuring Supabase:
+
 1. ✅ Set environment variables in Netlify
 2. ✅ Deploy application
 3. ✅ Test authentication flow
 4. ✅ Verify database queries work
 5. ✅ Test token system and artifact gallery
-

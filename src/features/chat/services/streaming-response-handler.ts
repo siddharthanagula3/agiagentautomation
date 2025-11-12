@@ -156,7 +156,7 @@ export class ChatStreamingService {
   cancelStream(streamId: string): void {
     // Cancel the stream by removing it from active streams
     this.activeStreams.delete(streamId);
-    
+
     // If there's an AbortController, abort it
     const controller = this.abortControllers.get(streamId);
     if (controller) {

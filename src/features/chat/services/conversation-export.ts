@@ -253,7 +253,7 @@ export class ChatExportService {
     // Generate share token and store in database
     const shareToken = this.generateShareToken();
     const shareLink = `${window.location.origin}/share/${shareToken}`;
-    
+
     // Update session with share link (handled by conversation-storage service)
     // The share link is stored in the chat_sessions.shared_link column
     return shareLink;

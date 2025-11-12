@@ -494,13 +494,15 @@ class ToolInvocationService {
     let result;
     switch (operation) {
       case 'select': {
-        let queryBuilder = supabase.from(table).select(parameters.select || '*');
-        
+        let queryBuilder = supabase
+          .from(table)
+          .select(parameters.select || '*');
+
         // Automatically add user_id filter for user-scoped tables
         if (isUserScopedTable && !parameters.user_id) {
           queryBuilder = queryBuilder.eq('user_id', userId);
         }
-        
+
         // Apply additional filters from parameters
         if (parameters.filters) {
           const filters = parameters.filters as Record<string, unknown>;
@@ -508,7 +510,7 @@ class ToolInvocationService {
             queryBuilder = queryBuilder.eq(key, value);
           }
         }
-        
+
         result = await queryBuilder;
         break;
       }
@@ -517,7 +519,7 @@ class ToolInvocationService {
         const insertData = isUserScopedTable
           ? { ...(parameters.data as Record<string, unknown>), user_id: userId }
           : (parameters.data as Record<string, unknown>);
-        
+
         result = await supabase.from(table).insert(insertData);
         break;
       }
@@ -525,12 +527,12 @@ class ToolInvocationService {
         let queryBuilder = supabase
           .from(table)
           .update(parameters.data as Record<string, unknown>);
-        
+
         // For user-scoped tables, require user_id in where clause
         if (isUserScopedTable) {
           queryBuilder = queryBuilder.eq('user_id', userId);
         }
-        
+
         // Apply additional where conditions
         if (parameters.column && parameters.value) {
           queryBuilder = queryBuilder.eq(
@@ -538,18 +540,18 @@ class ToolInvocationService {
             parameters.value
           );
         }
-        
+
         result = await queryBuilder;
         break;
       }
       case 'delete': {
         let queryBuilder = supabase.from(table).delete();
-        
+
         // For user-scoped tables, require user_id in where clause
         if (isUserScopedTable) {
           queryBuilder = queryBuilder.eq('user_id', userId);
         }
-        
+
         // Apply additional where conditions
         if (parameters.column && parameters.value) {
           queryBuilder = queryBuilder.eq(
@@ -557,7 +559,7 @@ class ToolInvocationService {
             parameters.value
           );
         }
-        
+
         result = await queryBuilder;
         break;
       }

@@ -35,10 +35,14 @@ const FALLBACK_PLANS: PricingPlan[] = [
     name: 'Starter',
     price: 'Free',
     period: 'Forever',
-    description: 'Try AI employees risk-free - perfect for testing',
+    description: 'Hire Free AI Employees - Perfect for getting started',
     features: [
-      'Up to 3 AI employees',
-      '50K tokens/month included ($10 value)',
+      'Hire Free AI Employees (unlimited)',
+      '250K tokens/month for OpenAI',
+      '250K tokens/month for Claude',
+      '250K tokens/month for Perplexity',
+      '250K tokens/month for Gemini',
+      '1M total tokens/month (250K per provider)',
       'All core features',
       'Community support',
       'Natural language chat interface',
@@ -52,10 +56,14 @@ const FALLBACK_PLANS: PricingPlan[] = [
     name: 'Pro',
     price: '$29',
     period: '/month',
-    description: 'Replace your first employee - save $99K+/year!',
+    description: '10M tokens/month - Perfect for scaling your AI workforce',
     features: [
-      'Up to 10 AI employees',
-      '500K tokens/month included ($100 value)',
+      'Hire Free AI Employees (unlimited)',
+      '2.5M tokens/month for OpenAI',
+      '2.5M tokens/month for Claude',
+      '2.5M tokens/month for Perplexity',
+      '2.5M tokens/month for Gemini',
+      '10M total tokens/month (2.5M per provider)',
       'Priority support (24/7)',
       'Advanced workflow automation',
       'API access',
@@ -73,8 +81,8 @@ const FALLBACK_PLANS: PricingPlan[] = [
     period: '/month',
     description: 'Replace your entire team - save $1M+/year!',
     features: [
-      'Unlimited AI employees',
-      '5M tokens/month included ($1,000 value)',
+      'Hire Free AI Employees (unlimited)',
+      '10M+ tokens/month (custom allocation)',
       'Everything in Pro',
       'Dedicated success manager',
       'Custom AI employee training',
@@ -186,10 +194,10 @@ const PricingPage: React.FC = () => {
       category: 'AI Employees',
       features: [
         {
-          name: 'Number of AI employees',
-          starter: 'Up to 10',
-          pro: 'Unlimited',
-          enterprise: 'Unlimited',
+          name: 'AI Employees',
+          starter: 'Hire Free (Unlimited)',
+          pro: 'Hire Free (Unlimited)',
+          enterprise: 'Hire Free (Unlimited)',
         },
         {
           name: 'Pricing model',
@@ -289,7 +297,7 @@ const PricingPage: React.FC = () => {
     <div className="min-h-screen bg-background">
       <SEOHead
         title="AI Employee Pricing | Free Forever to $99/mo | Save 99% vs Human Employees"
-        description="Replace $100K/year employees with $29/month AI employees. Free Forever plan available. Token costs at market rates. Save 99%+ on payroll. Start in 60 seconds!"
+        description="Hire Free AI Employees. Free plan: 1M tokens/month (250K per provider). Pro plan: 10M tokens/month (2.5M per provider). Token costs at market rates. Save 99%+ on payroll. Start in 60 seconds!"
         keywords={[
           'ai employee pricing',
           'cheapest ai employees',
@@ -338,17 +346,17 @@ const PricingPage: React.FC = () => {
             className="mx-auto max-w-3xl text-center"
           >
             <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
-              Replace $100K Employees with $29/Month AI
+              Hire Free AI Employees - Pay Only for Tokens
             </h1>
             <p className="mb-4 text-2xl font-semibold text-foreground">
-              Save 99.8% on Payroll Costs
+              Free Plan: 1M Tokens/Month • Pro: 10M Tokens/Month
             </p>
             <p className="mb-8 text-xl text-muted-foreground">
-              Free Forever plan • Pro $29/month ($24.99/month if billed yearly) • Business $99/month •
-              Enterprise Custom
+              Free Forever: 250K tokens each (OpenAI, Claude, Perplexity, Gemini)
               <br />
-              Token costs at market rates - same as OpenAI, Anthropic, Google
-              direct
+              Pro $29/month: 2.5M tokens each (10M total) • Business $99/month • Enterprise Custom
+              <br />
+              AI Employees are FREE to hire • Token costs at market rates
             </p>
 
             {/* Countdown Timer for Limited Offer */}

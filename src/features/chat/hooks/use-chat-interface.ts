@@ -38,17 +38,45 @@ export const useChat = (sessionId?: string) => {
       
       // Ensure all message timestamps are valid Date objects
       const validatedMessages = loadedMessages.map((msg) => {
-        const createdAt = msg.createdAt instanceof Date
-          ? msg.createdAt
-          : new Date(msg.createdAt || Date.now());
+        let createdAt: Date;
+        
+        if (msg.createdAt instanceof Date) {
+          createdAt = msg.createdAt;
+        } else if (typeof msg.createdAt === 'string' || typeof msg.createdAt === 'number') {
+          createdAt = new Date(msg.createdAt);
+        } else {
+          createdAt = new Date();
+        }
+        
+        // Validate date - if invalid, use current date
+        if (isNaN(createdAt.getTime())) {
+          console.warn('Invalid createdAt for message:', msg.id, msg.createdAt);
+          createdAt = new Date();
+        }
         
         return {
           ...msg,
-          createdAt: isNaN(createdAt.getTime()) ? new Date() : createdAt,
+          createdAt,
         };
       });
       
-      setMessages(validatedMessages);
+      // Sort messages by createdAt to ensure correct order (oldest first)
+      const sortedMessages = validatedMessages.sort((a, b) => {
+        const aTime = a.createdAt instanceof Date 
+          ? a.createdAt.getTime() 
+          : new Date(a.createdAt || Date.now()).getTime();
+        const bTime = b.createdAt instanceof Date 
+          ? b.createdAt.getTime() 
+          : new Date(b.createdAt || Date.now()).getTime();
+        
+        // Handle invalid dates
+        if (isNaN(aTime)) return 1;
+        if (isNaN(bTime)) return -1;
+        
+        return aTime - bTime; // Oldest first
+      });
+      
+      setMessages(sortedMessages);
       setError(null);
     } catch (error) {
       console.error('Failed to load messages:', error);

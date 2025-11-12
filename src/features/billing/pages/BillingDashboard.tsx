@@ -127,7 +127,7 @@ const BillingPage: React.FC = () => {
   const [billing, setBilling] = useState<BillingInfo | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>(
-    'monthly'
+    'yearly' // Default to yearly
   );
   const [isManagingBilling, setIsManagingBilling] = useState(false);
   const [stripeCustomerId, setStripeCustomerId] = useState<string | null>(null);
@@ -1179,15 +1179,14 @@ const BillingPage: React.FC = () => {
                   <div className="text-2xl font-bold">
                     {billingPeriod === 'yearly' ? (
                       <>
-                        $299.88
-                        <span className="text-sm text-muted-foreground">
-                          /year
-                        </span>
-                        <div className="text-sm text-green-600 dark:text-green-400">
-                          Save $40 (14% off monthly)
+                        <div className="text-3xl font-bold text-white">
+                          $24.99
+                          <span className="text-lg text-muted-foreground">
+                            /month
+                          </span>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          $24.99/month when billed yearly
+                        <div className="text-sm text-muted-foreground mt-1">
+                          Billed yearly as $299.88
                         </div>
                       </>
                     ) : (

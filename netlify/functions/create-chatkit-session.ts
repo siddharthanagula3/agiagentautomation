@@ -89,7 +89,10 @@ const handler: Handler = async (
     );
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = await response.json().catch((err) => {
+        console.error('[ChatKit] Failed to parse OpenAI error response:', err);
+        return {};
+      });
       console.error('OpenAI API Error:', response.status, errorData);
 
       return {

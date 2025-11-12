@@ -35,7 +35,20 @@ export const useChat = (sessionId?: string) => {
       setIsLoading(true);
       const loadedMessages =
         await chatPersistenceService.getSessionMessages(sid);
-      setMessages(loadedMessages);
+      
+      // Ensure all message timestamps are valid Date objects
+      const validatedMessages = loadedMessages.map((msg) => {
+        const createdAt = msg.createdAt instanceof Date
+          ? msg.createdAt
+          : new Date(msg.createdAt || Date.now());
+        
+        return {
+          ...msg,
+          createdAt: isNaN(createdAt.getTime()) ? new Date() : createdAt,
+        };
+      });
+      
+      setMessages(validatedMessages);
       setError(null);
     } catch (error) {
       console.error('Failed to load messages:', error);

@@ -463,28 +463,110 @@ class ToolInvocationService {
       throw new Error('Database operation is required');
     }
 
+    // Get current user for security - all operations must be user-scoped
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      throw new Error('User authentication required for database operations');
+    }
+
+    // Extract user context from parameters or context object
+    const userId = (context as { userId?: string })?.userId || user.id;
+
+    // Security: For user-specific tables, always filter by user_id
+    const userScopedTables = [
+      'chat_sessions',
+      'chat_messages',
+      'purchased_employees',
+      'user_shortcuts',
+      'token_transactions',
+      'token_usage',
+      'workforce_executions',
+      'workforce_tasks',
+      'api_usage',
+    ];
+
+    const isUserScopedTable = userScopedTables.includes(table);
+
     let result;
     switch (operation) {
-      case 'select':
-        result = await supabase.from(table).select(parameters.select || '*');
+      case 'select': {
+        let queryBuilder = supabase.from(table).select(parameters.select || '*');
+        
+        // Automatically add user_id filter for user-scoped tables
+        if (isUserScopedTable && !parameters.user_id) {
+          queryBuilder = queryBuilder.eq('user_id', userId);
+        }
+        
+        // Apply additional filters from parameters
+        if (parameters.filters) {
+          const filters = parameters.filters as Record<string, unknown>;
+          for (const [key, value] of Object.entries(filters)) {
+            queryBuilder = queryBuilder.eq(key, value);
+          }
+        }
+        
+        result = await queryBuilder;
         break;
-      case 'insert':
-        result = await supabase.from(table).insert(parameters.data);
+      }
+      case 'insert': {
+        // Automatically add user_id for user-scoped tables
+        const insertData = isUserScopedTable
+          ? { ...(parameters.data as Record<string, unknown>), user_id: userId }
+          : (parameters.data as Record<string, unknown>);
+        
+        result = await supabase.from(table).insert(insertData);
         break;
-      case 'update':
-        result = await supabase
+      }
+      case 'update': {
+        let queryBuilder = supabase
           .from(table)
-          .update(parameters.data)
-          .eq(parameters.column, parameters.value);
+          .update(parameters.data as Record<string, unknown>);
+        
+        // For user-scoped tables, require user_id in where clause
+        if (isUserScopedTable) {
+          queryBuilder = queryBuilder.eq('user_id', userId);
+        }
+        
+        // Apply additional where conditions
+        if (parameters.column && parameters.value) {
+          queryBuilder = queryBuilder.eq(
+            parameters.column as string,
+            parameters.value
+          );
+        }
+        
+        result = await queryBuilder;
         break;
-      case 'delete':
-        result = await supabase
-          .from(table)
-          .delete()
-          .eq(parameters.column, parameters.value);
+      }
+      case 'delete': {
+        let queryBuilder = supabase.from(table).delete();
+        
+        // For user-scoped tables, require user_id in where clause
+        if (isUserScopedTable) {
+          queryBuilder = queryBuilder.eq('user_id', userId);
+        }
+        
+        // Apply additional where conditions
+        if (parameters.column && parameters.value) {
+          queryBuilder = queryBuilder.eq(
+            parameters.column as string,
+            parameters.value
+          );
+        }
+        
+        result = await queryBuilder;
         break;
+      }
       case 'custom':
-        result = await supabase.rpc(query, parameters);
+        // For custom RPC calls, pass userId in parameters
+        result = await supabase.rpc(query, {
+          ...parameters,
+          user_id: userId,
+        });
         break;
       default:
         throw new Error(`Unsupported database operation: ${operation}`);

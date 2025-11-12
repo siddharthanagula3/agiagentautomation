@@ -40,7 +40,23 @@ export const useChatHistory = () => {
         })
       );
 
-      setSessions(sessionsWithCounts);
+      // Sort sessions by updatedAt (most recent first), ensuring timestamps are valid
+      const sortedSessions = sessionsWithCounts.sort((a, b) => {
+        const aTime = a.updatedAt instanceof Date 
+          ? a.updatedAt.getTime() 
+          : new Date(a.updatedAt).getTime();
+        const bTime = b.updatedAt instanceof Date 
+          ? b.updatedAt.getTime() 
+          : new Date(b.updatedAt).getTime();
+        
+        // Handle invalid dates
+        if (isNaN(aTime)) return 1;
+        if (isNaN(bTime)) return -1;
+        
+        return bTime - aTime; // Most recent first
+      });
+
+      setSessions(sortedSessions);
     } catch (error) {
       console.error('Failed to load sessions:', error);
       toast.error('Failed to load chat history');
@@ -94,7 +110,14 @@ export const useChatHistory = () => {
   const renameSession = useCallback(
     async (sessionId: string, newTitle: string) => {
       try {
-        await chatPersistenceService.updateSessionTitle(sessionId, newTitle);
+        const user = await getCurrentUser();
+        if (!user) {
+          toast.error('You must be logged in to rename a chat');
+          return;
+        }
+
+        // Pass userId for extra security verification
+        await chatPersistenceService.updateSessionTitle(sessionId, newTitle, user.id);
 
         setSessions((prev) =>
           prev.map((session) =>
@@ -113,7 +136,8 @@ export const useChatHistory = () => {
         toast.success('Chat renamed');
       } catch (error) {
         console.error('Failed to rename session:', error);
-        toast.error('Failed to rename chat');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to rename chat';
+        toast.error(errorMessage);
       }
     },
     []
@@ -122,7 +146,14 @@ export const useChatHistory = () => {
   // Delete session
   const deleteSession = useCallback(async (sessionId: string) => {
     try {
-      await chatPersistenceService.deleteSession(sessionId);
+      const user = await getCurrentUser();
+      if (!user) {
+        toast.error('You must be logged in to delete a chat');
+        return;
+      }
+
+      // Pass userId for extra security verification
+      await chatPersistenceService.deleteSession(sessionId, user.id);
 
       setSessions((prev) => prev.filter((session) => session.id !== sessionId));
 
@@ -133,7 +164,8 @@ export const useChatHistory = () => {
       toast.success('Chat deleted');
     } catch (error) {
       console.error('Failed to delete session:', error);
-      toast.error('Failed to delete chat');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete chat';
+      toast.error(errorMessage);
     }
   }, []);
 
@@ -166,9 +198,18 @@ export const useChatHistory = () => {
   // Load specific session
   const loadSession = useCallback(async (sessionId: string) => {
     try {
-      const session = await chatPersistenceService.getSession(sessionId);
+      const user = await getCurrentUser();
+      if (!user) {
+        toast.error('You must be logged in to load a chat');
+        return;
+      }
+
+      // Pass userId for extra security verification
+      const session = await chatPersistenceService.getSession(sessionId, user.id);
       if (session) {
         setCurrentSession(session);
+      } else {
+        toast.error('Chat not found or access denied');
       }
     } catch (error) {
       console.error('Failed to load session:', error);

@@ -72,16 +72,28 @@ export class ChatPersistenceService {
 
   /**
    * Get a specific session by ID
+   * Note: RLS policies ensure users can only access their own sessions
    */
-  async getSession(sessionId: string): Promise<ChatSession | null> {
-    const { data, error } = await supabase
+  async getSession(sessionId: string, userId?: string): Promise<ChatSession | null> {
+    let query = supabase
       .from('chat_sessions')
       .select('*')
-      .eq('id', sessionId)
-      .single();
+      .eq('id', sessionId);
+
+    // Add user_id filter if provided for extra security (RLS should handle this, but explicit is better)
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
+    const { data, error } = await query.single();
 
     if (error) {
       if (error.code === 'PGRST116') return null; // Not found
+      // RLS policy violation - user doesn't own this session
+      if (error.code === '42501' || error.message?.includes('permission denied')) {
+        console.warn('Access denied to session:', sessionId);
+        return null;
+      }
       throw new Error(`Failed to load session: ${error.message}`);
     }
 
@@ -90,26 +102,54 @@ export class ChatPersistenceService {
 
   /**
    * Update session title
+   * Note: RLS policies ensure users can only update their own sessions
    */
-  async updateSessionTitle(sessionId: string, title: string): Promise<void> {
-    const { error } = await supabase
+  async updateSessionTitle(sessionId: string, title: string, userId?: string): Promise<void> {
+    let query = supabase
       .from('chat_sessions')
       .update({ title, updated_at: new Date().toISOString() })
       .eq('id', sessionId);
 
-    if (error) throw new Error(`Failed to update session: ${error.message}`);
+    // Add user_id filter if provided for extra security
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
+    const { error } = await query;
+
+    if (error) {
+      // RLS policy violation
+      if (error.code === '42501' || error.message?.includes('permission denied')) {
+        throw new Error('You do not have permission to update this session');
+      }
+      throw new Error(`Failed to update session: ${error.message}`);
+    }
   }
 
   /**
    * Delete (archive) a session
+   * Note: RLS policies ensure users can only delete their own sessions
    */
-  async deleteSession(sessionId: string): Promise<void> {
-    const { error } = await supabase
+  async deleteSession(sessionId: string, userId?: string): Promise<void> {
+    let query = supabase
       .from('chat_sessions')
       .update({ is_active: false, updated_at: new Date().toISOString() })
       .eq('id', sessionId);
 
-    if (error) throw new Error(`Failed to delete session: ${error.message}`);
+    // Add user_id filter if provided for extra security
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
+    const { error } = await query;
+
+    if (error) {
+      // RLS policy violation
+      if (error.code === '42501' || error.message?.includes('permission denied')) {
+        throw new Error('You do not have permission to delete this session');
+      }
+      throw new Error(`Failed to delete session: ${error.message}`);
+    }
   }
 
   /**
@@ -146,6 +186,7 @@ export class ChatPersistenceService {
 
   /**
    * Get all messages for a session
+   * Note: RLS policies ensure users can only access messages from their own sessions
    */
   async getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
     const { data, error } = await supabase
@@ -154,13 +195,21 @@ export class ChatPersistenceService {
       .eq('session_id', sessionId)
       .order('created_at', { ascending: true });
 
-    if (error) throw new Error(`Failed to load messages: ${error.message}`);
+    if (error) {
+      // RLS policy violation - user doesn't own this session
+      if (error.code === '42501' || error.message?.includes('permission denied')) {
+        console.warn('Access denied to messages for session:', sessionId);
+        return []; // Return empty array instead of throwing
+      }
+      throw new Error(`Failed to load messages: ${error.message}`);
+    }
 
     return (data || []).map(this.mapDBMessageToMessage);
   }
 
   /**
    * Delete a message
+   * Note: RLS policies ensure users can only delete messages from their own sessions
    */
   async deleteMessage(messageId: string): Promise<void> {
     const { error } = await supabase
@@ -168,7 +217,13 @@ export class ChatPersistenceService {
       .delete()
       .eq('id', messageId);
 
-    if (error) throw new Error(`Failed to delete message: ${error.message}`);
+    if (error) {
+      // RLS policy violation
+      if (error.code === '42501' || error.message?.includes('permission denied')) {
+        throw new Error('You do not have permission to delete this message');
+      }
+      throw new Error(`Failed to delete message: ${error.message}`);
+    }
   }
 
   /**
@@ -204,11 +259,27 @@ export class ChatPersistenceService {
 
   // Mapping functions
   private mapDBSessionToSession(dbSession: DBChatSession): ChatSession {
+    // Safely convert timestamps to Date objects
+    const createdAt = dbSession.created_at
+      ? new Date(dbSession.created_at)
+      : new Date();
+    const updatedAt = dbSession.updated_at
+      ? new Date(dbSession.updated_at)
+      : new Date();
+
+    // Validate dates
+    if (isNaN(createdAt.getTime())) {
+      console.warn('Invalid createdAt for session:', dbSession.id);
+    }
+    if (isNaN(updatedAt.getTime())) {
+      console.warn('Invalid updatedAt for session:', dbSession.id);
+    }
+
     return {
       id: dbSession.id,
       title: dbSession.title || 'New Chat',
-      createdAt: new Date(dbSession.created_at || Date.now()),
-      updatedAt: new Date(dbSession.updated_at || Date.now()),
+      createdAt: isNaN(createdAt.getTime()) ? new Date() : createdAt,
+      updatedAt: isNaN(updatedAt.getTime()) ? new Date() : updatedAt,
       messageCount: 0, // Will be populated separately if needed
       tokenCount: 0,
       cost: 0,
@@ -225,12 +296,22 @@ export class ChatPersistenceService {
   }
 
   private mapDBMessageToMessage(dbMessage: DBChatMessage): ChatMessage {
+    // Safely convert timestamp to Date object
+    const createdAt = dbMessage.created_at
+      ? new Date(dbMessage.created_at)
+      : new Date();
+
+    // Validate date
+    if (isNaN(createdAt.getTime())) {
+      console.warn('Invalid createdAt for message:', dbMessage.id);
+    }
+
     return {
       id: dbMessage.id,
       sessionId: dbMessage.session_id,
       role: dbMessage.role as 'user' | 'assistant' | 'system',
       content: dbMessage.content,
-      createdAt: new Date(dbMessage.created_at || Date.now()),
+      createdAt: isNaN(createdAt.getTime()) ? new Date() : createdAt,
     };
   }
 }

@@ -102,11 +102,21 @@ const ChatPage: React.FC = () => {
     loadSessions();
   }, [loadSessions]);
 
+  // Load current session when sessionId changes
+  useEffect(() => {
+    if (sessionId && (!currentSession || currentSession.id !== sessionId)) {
+      loadSession(sessionId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId, currentSession]);
+
   // Create new session if none exists
   useEffect(() => {
     if (!currentSession && !sessionId) {
       createSession('New Chat').then((session) => {
         navigate(`/chat/${session.id}`);
+      }).catch((error) => {
+        console.error('Failed to create session:', error);
       });
     }
   }, [currentSession, sessionId, createSession, navigate]);

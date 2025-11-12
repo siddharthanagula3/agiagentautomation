@@ -590,7 +590,11 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => console.log('View details', employee.id)}
+                    onClick={() => {
+                      // Navigate to employee details or show modal
+                      // For now, just show a toast
+                      toast.info(`Viewing details for ${employee.name}`);
+                    }}
                     className="border-border hover:bg-accent hover:text-accent-foreground"
                   >
                     <Eye className="mr-1 h-4 w-4" />

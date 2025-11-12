@@ -154,8 +154,15 @@ export class ChatStreamingService {
    * This is a placeholder - actual implementation would need to track active streams
    */
   cancelStream(streamId: string): void {
-    console.log('Cancelling stream:', streamId);
-    // TODO: Implement stream cancellation logic
+    // Cancel the stream by removing it from active streams
+    this.activeStreams.delete(streamId);
+
+    // If there's an AbortController, abort it
+    const controller = this.abortControllers.get(streamId);
+    if (controller) {
+      controller.abort();
+      this.abortControllers.delete(streamId);
+    }
   }
 }
 

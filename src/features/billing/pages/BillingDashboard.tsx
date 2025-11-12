@@ -127,7 +127,7 @@ const BillingPage: React.FC = () => {
   const [billing, setBilling] = useState<BillingInfo | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>(
-    'monthly'
+    'yearly' // Default to yearly
   );
   const [isManagingBilling, setIsManagingBilling] = useState(false);
   const [stripeCustomerId, setStripeCustomerId] = useState<string | null>(null);
@@ -1107,8 +1107,9 @@ const BillingPage: React.FC = () => {
                       💡 Better Value: Upgrade to Pro
                     </h4>
                     <p className="mb-3 text-sm text-muted-foreground">
-                      Get 10M tokens/month for $29 - Better value than buying
-                      token packs if you use AI regularly
+                      Get 10M tokens/month for $29/month ($24.99/month if billed
+                      yearly) - Better value than buying token packs if you use
+                      AI regularly
                     </p>
                     <Button
                       variant="outline"
@@ -1160,7 +1161,7 @@ const BillingPage: React.FC = () => {
                   >
                     Yearly
                     <Badge variant="secondary" className="ml-1 text-xs">
-                      Save 17%
+                      Save 14%
                     </Badge>
                   </button>
                 </div>
@@ -1179,17 +1180,19 @@ const BillingPage: React.FC = () => {
                   <div className="text-2xl font-bold">
                     {billingPeriod === 'yearly' ? (
                       <>
-                        $200
-                        <span className="text-sm text-muted-foreground">
-                          /year
-                        </span>
-                        <div className="text-sm text-green-600 dark:text-green-400">
-                          Save $40 (17% off)
+                        <div className="text-3xl font-bold text-white">
+                          $24.99
+                          <span className="text-lg text-muted-foreground">
+                            /month
+                          </span>
+                        </div>
+                        <div className="mt-1 text-sm text-muted-foreground">
+                          Billed yearly as $299.88
                         </div>
                       </>
                     ) : (
                       <>
-                        $20
+                        $29
                         <span className="text-sm text-muted-foreground">
                           /month
                         </span>

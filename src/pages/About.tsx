@@ -29,7 +29,7 @@ const AboutPage: React.FC = () => {
       icon: Target,
       title: 'Cost Savings First',
       description:
-        '99.8% reduction in payroll costs - replacing $100K employees with $19/month AI',
+        '99.8% reduction in payroll costs - Hire Free AI Employees, pay only for tokens. Free: 1M tokens/month. Pro: 10M tokens/month for $29/month',
     },
     {
       icon: Zap,
@@ -134,7 +134,8 @@ const AboutPage: React.FC = () => {
               About Us
             </Badge>
             <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-7xl">
-              Replacing $100K Employees with $19/Month AI
+              Replacing $100K Employees with $29/Month AI ($24.99/month if
+              billed yearly)
             </h1>
             <p className="mb-8 text-xl leading-relaxed text-muted-foreground">
               We're on a mission to make world-class talent accessible to every
@@ -193,7 +194,9 @@ const AboutPage: React.FC = () => {
               <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
                 We believe the old workforce model is broken. Why pay
                 $100,000+/year for a human employee who works 40 hours/week when
-                you can hire an AI employee for $19/month that works 24/7, never
+                you can hire FREE AI employees (no cost to hire) and only pay
+                for tokens used. Free plan includes 1M tokens/month, Pro plan
+                ($29/month) includes 10M tokens/month. They work 24/7, never
                 gets sick, and delivers expert-level work instantly?
               </p>
               <p className="mb-6 text-lg leading-relaxed text-muted-foreground">
@@ -298,7 +301,8 @@ const AboutPage: React.FC = () => {
               Ready to Save 99%+ on Payroll?
             </h2>
             <p className="mb-4 text-2xl font-semibold text-foreground">
-              Start Free Forever • Upgrade to $19/month
+              Start Free Forever (1M tokens/month) • Upgrade to Pro ($29/month
+              for 10M tokens/month)
             </p>
             <p className="mb-8 text-xl text-muted-foreground">
               Hire your first AI employee in under 60 seconds. No credit card

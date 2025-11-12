@@ -8,9 +8,7 @@ export const getOneMonthFromNow = (): Date => {
 };
 
 export const createDiscountEndDate = (): Date => {
-  // 99 hours, 59 minutes, 59 seconds from now
+  // 15 minutes from now
   const now = new Date();
-  return new Date(
-    now.getTime() + 99 * 60 * 60 * 1000 + 59 * 60 * 1000 + 59 * 1000
-  );
+  return new Date(now.getTime() + 15 * 60 * 1000);
 };

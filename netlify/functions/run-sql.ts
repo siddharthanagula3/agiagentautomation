@@ -7,6 +7,20 @@ const supabase = createClient(
 );
 
 export const handler: Handler = async (event) => {
+  // SECURITY: Disabled arbitrary SQL execution endpoint
+  // This endpoint is a critical SQL injection risk and should never be exposed
+  // Use Supabase RPC functions with specific, validated inputs instead
+
+  return {
+    statusCode: 403,
+    body: JSON.stringify({
+      error: 'This endpoint has been disabled for security reasons',
+      message: 'Arbitrary SQL execution is not allowed. Use specific RPC functions instead.',
+    }),
+  };
+
+  // Original implementation preserved but disabled:
+  /*
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -59,4 +73,5 @@ export const handler: Handler = async (event) => {
       }),
     };
   }
+  */
 };

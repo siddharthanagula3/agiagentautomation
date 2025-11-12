@@ -214,7 +214,12 @@ export function PromptShortcuts({
   };
 
   const handleDeleteShortcut = async (shortcutId: string) => {
-    const success = await deleteUserShortcut(shortcutId);
+    if (!user) {
+      toast.error('Please log in to delete shortcuts');
+      return;
+    }
+
+    const success = await deleteUserShortcut(user.id, shortcutId);
     if (success) {
       setCustomShortcuts((prev) => prev.filter((s) => s.id !== shortcutId));
       toast.success('Shortcut deleted');

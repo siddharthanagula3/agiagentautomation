@@ -6,18 +6,18 @@
 import OpenAI from 'openai';
 import { supabase } from '@shared/lib/supabase-client';
 
-// Environment variables
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// SECURITY WARNING: Client-side API initialization is disabled
+// All API calls should go through Netlify proxy functions instead
+// Environment variables with VITE_ prefix are exposed to the browser (security risk)
 
-// Initialize clients
-const openai = OPENAI_API_KEY
-  ? new OpenAI({
-      apiKey: OPENAI_API_KEY,
-      dangerouslyAllowBrowser: true, // Allow browser usage for client-side
-    })
-  : null;
+// DEPRECATED: Direct client-side initialization (security risk)
+// const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
+
+// Initialize clients - DISABLED for security
+const openai = null; // Client-side SDK disabled - use Netlify proxy instead
+
+// TODO: Refactor all provider calls to use Netlify proxy functions
+// Proxy endpoints: /.netlify/functions/openai-proxy
 
 // Using centralized Supabase client
 
@@ -88,12 +88,11 @@ export class OpenAIProvider {
     userId?: string
   ): Promise<OpenAIResponse> {
     try {
-      if (!OPENAI_API_KEY) {
-        throw new OpenAIError(
-          'OpenAI API key not configured. Please add VITE_OPENAI_API_KEY to your environment variables.',
-          'API_KEY_MISSING'
-        );
-      }
+      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
+      throw new OpenAIError(
+        'Direct OpenAI API calls are disabled for security. Use /.netlify/functions/openai-proxy instead.',
+        'DIRECT_API_DISABLED'
+      );
 
       // Convert messages to OpenAI format
       const openaiMessages = this.convertMessagesToOpenAI(messages);
@@ -186,12 +185,11 @@ export class OpenAIProvider {
     };
   }> {
     try {
-      if (!OPENAI_API_KEY) {
-        throw new OpenAIError(
-          'OpenAI API key not configured. Please add VITE_OPENAI_API_KEY to your environment variables.',
-          'API_KEY_MISSING'
-        );
-      }
+      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
+      throw new OpenAIError(
+        'Direct OpenAI streaming is disabled for security. Use /.netlify/functions/openai-proxy instead.',
+        'DIRECT_API_DISABLED'
+      );
 
       // Convert messages to OpenAI format
       const openaiMessages = this.convertMessagesToOpenAI(messages);
@@ -354,9 +352,10 @@ export class OpenAIProvider {
 
   /**
    * Check if API key is configured
+   * SECURITY: Always returns false as direct API access is disabled
    */
   isConfigured(): boolean {
-    return !!OPENAI_API_KEY;
+    return false; // Direct API access disabled for security
   }
 
   /**

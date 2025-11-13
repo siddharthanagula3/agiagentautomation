@@ -158,7 +158,7 @@ export class SSEHandler {
   /**
    * Handle parsed SSE data
    */
-  private handleParsedData(data: any): void {
+  private handleParsedData(data: unknown): void {
     // OpenAI format
     if (data.choices?.[0]?.delta?.content) {
       this.options.onMessage({

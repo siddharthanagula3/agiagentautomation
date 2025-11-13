@@ -1,6 +1,7 @@
 /**
  * Mission Control Page - REFACTORED
  * AI Workforce Command Center with resizable panels
+ * Now supports both Mission Mode and Multi-Agent Chat Mode
  */
 
 import React, { useState } from 'react';
@@ -12,7 +13,16 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from '@shared/ui/resizable';
-import { Play, Pause, RotateCcw, Sparkles, Send } from 'lucide-react';
+import {
+  Play,
+  Pause,
+  RotateCcw,
+  Sparkles,
+  Send,
+  MessageSquare,
+  Layers,
+  Info
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import {
@@ -22,18 +32,49 @@ import {
 import { workforceOrchestratorRefactored } from '@core/ai/orchestration/workforce-orchestrator';
 import { AgentStatusPanel } from '../components/EmployeeStatusPanel';
 import { MissionLogEnhanced } from '../components/ActivityLog';
+import { useMultiAgentChat } from '@features/chat/hooks/use-multi-agent-chat';
+import { useAgentCollaboration } from '@features/chat/hooks/use-agent-collaboration';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@shared/ui/tabs';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@shared/ui/tooltip';
 
 const MissionControlPageRefactored: React.FC = () => {
   const { user } = useAuthStore();
   const { status, isOrchestrating, isPaused, error } = useMissionStatus();
-  const { pauseMission, resumeMission, reset } = useMissionStore();
+  const { pauseMission, resumeMission, reset, mode, setMode } = useMissionStore();
 
   const [userInput, setUserInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentMode, setCurrentMode] = useState<'mission' | 'chat'>('mission');
+
+  // Multi-agent chat integration
+  const multiAgentChat = useMultiAgentChat({
+    mode: currentMode,
+    userId: user?.id,
+    autoSelectAgent: true,
+  });
+
+  const agentCollaboration = useAgentCollaboration({
+    userId: user?.id,
+    maxConcurrentAgents: 5,
+  });
 
   const handleSendMessage = async () => {
     if (!userInput.trim()) {
-      toast.error('Please enter a mission objective');
+      toast.error(
+        currentMode === 'mission'
+          ? 'Please enter a mission objective'
+          : 'Please enter a message'
+      );
       return;
     }
 
@@ -45,21 +86,33 @@ const MissionControlPageRefactored: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await workforceOrchestratorRefactored.processRequest({
-        userId: user.id,
-        input: userInput.trim(),
-      });
-
-      if (response.success) {
-        toast.success('Mission started successfully!');
-        setUserInput(''); // Clear input after successful submission
+      if (currentMode === 'chat') {
+        // Use multi-agent chat hook
+        await multiAgentChat.sendMessage(userInput.trim());
       } else {
-        toast.error(response.error || 'Failed to start mission');
+        // Use traditional mission orchestration
+        const response = await workforceOrchestratorRefactored.processRequest({
+          userId: user.id,
+          input: userInput.trim(),
+          mode: 'mission',
+        });
+
+        if (response.success) {
+          toast.success('Mission started successfully!');
+        } else {
+          toast.error(response.error || 'Failed to start mission');
+        }
       }
+
+      setUserInput(''); // Clear input after successful submission
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      toast.error(`Failed to start mission: ${errorMessage}`);
+      toast.error(
+        currentMode === 'mission'
+          ? `Failed to start mission: ${errorMessage}`
+          : `Failed to send message: ${errorMessage}`
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -79,6 +132,17 @@ const MissionControlPageRefactored: React.FC = () => {
     reset();
     setUserInput('');
     toast.success('Mission control reset');
+  };
+
+  const handleModeSwitch = (newMode: 'mission' | 'chat') => {
+    setCurrentMode(newMode);
+    setMode(newMode);
+    multiAgentChat.switchMode(newMode);
+    toast.info(
+      newMode === 'mission'
+        ? 'Switched to Mission Mode - Full orchestration with task breakdown'
+        : 'Switched to Chat Mode - Conversational multi-agent interaction'
+    );
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -102,34 +166,101 @@ const MissionControlPageRefactored: React.FC = () => {
               <Sparkles className="h-7 w-7 text-primary" />
               Mission Control
             </h1>
-            <p className="mt-1 text-slate-400">AI Workforce Command Center</p>
+            <div className="mt-1 flex items-center gap-2">
+              <p className="text-slate-400">AI Workforce Command Center</p>
+              <div className="flex items-center gap-1 text-xs text-slate-500">
+                {currentMode === 'mission' ? (
+                  <>
+                    <Layers className="h-3 w-3" />
+                    <span>Mission Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <MessageSquare className="h-3 w-3" />
+                    <span>Chat Mode</span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Control Buttons */}
-          {status !== 'idle' && (
-            <div className="flex gap-2">
-              {status === 'completed' || status === 'failed' ? (
-                <Button variant="outline" onClick={handleReset}>
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Reset
-                </Button>
-              ) : isPaused ? (
-                <Button
-                  onClick={handleResume}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Play className="mr-2 h-4 w-4" />
-                  Resume
-                </Button>
-              ) : (
-                <Button variant="outline" onClick={handlePause}>
-                  <Pause className="mr-2 h-4 w-4" />
-                  Pause
-                </Button>
-              )}
-            </div>
-          )}
+          <div className="flex gap-2">
+            {/* Mode Toggle */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      handleModeSwitch(currentMode === 'mission' ? 'chat' : 'mission')
+                    }
+                    disabled={isOrchestrating && !isPaused}
+                  >
+                    {currentMode === 'mission' ? (
+                      <>
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Switch to Chat
+                      </>
+                    ) : (
+                      <>
+                        <Layers className="mr-2 h-4 w-4" />
+                        Switch to Mission
+                      </>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs text-xs">
+                    {currentMode === 'mission'
+                      ? 'Chat Mode: Conversational multi-agent interaction'
+                      : 'Mission Mode: Full task breakdown and orchestration'}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            {/* Orchestration Controls */}
+            {status !== 'idle' && (
+              <>
+                {status === 'completed' || status === 'failed' ? (
+                  <Button variant="outline" onClick={handleReset}>
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Reset
+                  </Button>
+                ) : isPaused ? (
+                  <Button
+                    onClick={handleResume}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <Play className="mr-2 h-4 w-4" />
+                    Resume
+                  </Button>
+                ) : (
+                  <Button variant="outline" onClick={handlePause}>
+                    <Pause className="mr-2 h-4 w-4" />
+                    Pause
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         </div>
+
+        {/* Mode Description */}
+        {currentMode === 'chat' && (
+          <div className="mt-3 flex items-start gap-2 rounded-lg border border-blue-500/20 bg-blue-500/10 p-3">
+            <Info className="h-4 w-4 text-blue-400 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-blue-300">Chat Mode Active</p>
+              <p className="text-blue-400/80 text-xs mt-1">
+                Messages are routed to the most appropriate agent based on context.
+                Perfect for conversational workflows and quick tasks.
+              </p>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Main Content - Resizable Panels */}
@@ -162,25 +293,47 @@ const MissionControlPageRefactored: React.FC = () => {
 
               {/* Input Area */}
               <div className="space-y-2 rounded-lg border border-border bg-card p-4">
-                <label className="text-sm font-medium text-foreground">
-                  Mission Objective
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-foreground">
+                    {currentMode === 'mission' ? 'Mission Objective' : 'Message'}
+                  </label>
+                  {currentMode === 'chat' && agentCollaboration.selectedAgents.length > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      {agentCollaboration.selectedAgents.length} agent(s) selected
+                    </span>
+                  )}
+                </div>
                 <Textarea
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Describe your mission objective... (e.g., 'Review the codebase and identify potential bugs')"
+                  placeholder={
+                    currentMode === 'mission'
+                      ? "Describe your mission objective... (e.g., 'Review the codebase and identify potential bugs')"
+                      : "Type your message... (e.g., 'Analyze this code for bugs')"
+                  }
                   className="min-h-[100px] resize-none"
                   disabled={isOrchestrating && !isPaused}
                 />
                 <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">
-                    {isOrchestrating
-                      ? isPaused
-                        ? 'Mission paused'
-                        : 'Mission in progress...'
-                      : 'Press Cmd/Ctrl + Enter to send'}
-                  </p>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs text-muted-foreground">
+                      {isOrchestrating
+                        ? isPaused
+                          ? currentMode === 'mission'
+                            ? 'Mission paused'
+                            : 'Chat paused'
+                          : currentMode === 'mission'
+                            ? 'Mission in progress...'
+                            : 'Agent processing...'
+                        : 'Press Cmd/Ctrl + Enter to send'}
+                    </p>
+                    {currentMode === 'chat' && multiAgentChat.activeAgents.length > 0 && (
+                      <p className="text-xs text-green-400">
+                        Active: {multiAgentChat.activeAgents.map((a) => a.name).join(', ')}
+                      </p>
+                    )}
+                  </div>
                   <Button
                     onClick={handleSendMessage}
                     disabled={
@@ -202,12 +355,12 @@ const MissionControlPageRefactored: React.FC = () => {
                         >
                           <Sparkles className="h-4 w-4" />
                         </motion.div>
-                        Starting...
+                        {currentMode === 'mission' ? 'Starting...' : 'Sending...'}
                       </>
                     ) : (
                       <>
                         <Send className="h-4 w-4" />
-                        Deploy Workforce
+                        {currentMode === 'mission' ? 'Deploy Workforce' : 'Send Message'}
                       </>
                     )}
                   </Button>

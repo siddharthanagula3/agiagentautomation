@@ -14,7 +14,7 @@ import type { ChatMessage } from '@features/chat/types';
 export interface QueuedOperation {
   id: string;
   type: 'create_message' | 'update_message' | 'delete_message' | 'create_session' | 'update_session';
-  payload: any;
+  payload: unknown;
   timestamp: number;
   attempts: number;
   status: 'pending' | 'syncing' | 'failed' | 'completed';
@@ -317,7 +317,7 @@ export class OfflineSyncManager {
   private async syncCreateSession(payload: {
     userId: string;
     title: string;
-    metadata?: any;
+    metadata?: unknown;
   }): Promise<void> {
     await chatPersistenceService.createSession(payload.userId, payload.title, payload.metadata);
   }

@@ -13,6 +13,9 @@ export interface WorkforceRequest {
   userId: string;
   input: string;
   context?: Record<string, unknown>;
+  mode?: 'mission' | 'chat'; // NEW: Support chat mode
+  sessionId?: string; // NEW: Chat session tracking
+  conversationHistory?: Array<{ role: string; content: string }>; // NEW: Chat context
 }
 
 export interface WorkforceResponse {
@@ -20,6 +23,8 @@ export interface WorkforceResponse {
   missionId?: string;
   plan?: Task[];
   error?: string;
+  chatResponse?: string; // NEW: Direct chat response
+  mode?: 'mission' | 'chat';
 }
 
 export interface PlanTask {
@@ -41,10 +46,12 @@ export class WorkforceOrchestratorRefactored {
 
   /**
    * MAIN METHOD: Plan, Delegate, Execute
+   * Now supports both mission mode (full orchestration) and chat mode (conversational)
    */
   async processRequest(request: WorkforceRequest): Promise<WorkforceResponse> {
     const missionId = crypto.randomUUID();
     const store = useMissionStore.getState();
+    const mode = request.mode || 'mission';
 
     try {
       // Load employees if not already loaded
@@ -56,6 +63,12 @@ export class WorkforceOrchestratorRefactored {
         );
       }
 
+      // CHAT MODE: Direct conversational response
+      if (mode === 'chat') {
+        return await this.processChatRequest(request, missionId);
+      }
+
+      // MISSION MODE: Full Plan-Delegate-Execute
       store.startMission(missionId);
       store.addMessage({
         from: 'user',
@@ -427,6 +440,203 @@ Please complete this task according to your role and capabilities.`;
    */
   reset() {
     useMissionStore.getState().reset();
+  }
+
+  /**
+   * CHAT MODE: Process conversational chat request
+   * Routes to appropriate employee based on message content
+   */
+  private async processChatRequest(
+    request: WorkforceRequest,
+    missionId: string
+  ): Promise<WorkforceResponse> {
+    const store = useMissionStore.getState();
+
+    store.startMission(missionId);
+    store.addMessage({
+      from: 'user',
+      type: 'user',
+      content: request.input,
+    });
+
+    try {
+      // Select best employee for this chat interaction
+      const selectedEmployee = await this.selectEmployeeForChat(request.input);
+
+      if (!selectedEmployee) {
+        throw new Error('No suitable employee found for this request');
+      }
+
+      store.updateEmployeeStatus(
+        selectedEmployee.name,
+        'thinking',
+        null,
+        'Processing chat message'
+      );
+
+      // Build conversation context
+      const conversationMessages = [
+        { role: 'system', content: selectedEmployee.systemPrompt },
+        ...(request.conversationHistory || []),
+        { role: 'user', content: request.input },
+      ];
+
+      // Get response from employee
+      const response = await unifiedLLMService.sendMessage({
+        provider: 'anthropic',
+        messages: conversationMessages,
+        model:
+          selectedEmployee.model === 'inherit'
+            ? 'claude-3-5-sonnet-20241022'
+            : selectedEmployee.model,
+        temperature: 0.7,
+      });
+
+      store.updateEmployeeStatus(selectedEmployee.name, 'idle');
+      store.addMessage({
+        from: selectedEmployee.name,
+        type: 'employee',
+        content: response.content,
+        metadata: { employeeName: selectedEmployee.name },
+      });
+
+      store.completeMission();
+
+      return {
+        success: true,
+        missionId,
+        chatResponse: response.content,
+        mode: 'chat',
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.error('❌ Error processing chat request:', errorMessage);
+
+      store.failMission(errorMessage);
+      store.addMessage({
+        from: 'system',
+        type: 'error',
+        content: `❌ Chat failed: ${errorMessage}`,
+      });
+
+      return {
+        success: false,
+        error: errorMessage,
+        mode: 'chat',
+      };
+    }
+  }
+
+  /**
+   * Select optimal employee for chat interaction
+   * Uses simpler matching than full task delegation
+   */
+  private async selectEmployeeForChat(
+    userMessage: string
+  ): Promise<AIEmployee | null> {
+    if (this.employees.length === 0) {
+      return null;
+    }
+
+    // Simple keyword matching for chat mode
+    const messageLower = userMessage.toLowerCase();
+    let bestMatch: AIEmployee | null = null;
+    let bestScore = 0;
+
+    for (const employee of this.employees) {
+      let score = 0;
+      const descLower = employee.description.toLowerCase();
+
+      // Score based on description relevance
+      if (messageLower.includes('code') && descLower.includes('code'))
+        score += 10;
+      if (messageLower.includes('debug') && descLower.includes('debug'))
+        score += 10;
+      if (messageLower.includes('review') && descLower.includes('review'))
+        score += 10;
+      if (messageLower.includes('test') && descLower.includes('test'))
+        score += 10;
+      if (messageLower.includes('write') && descLower.includes('write'))
+        score += 5;
+      if (messageLower.includes('analyze') && descLower.includes('analyze'))
+        score += 5;
+
+      // General capability score
+      score += employee.tools.length * 0.5;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = employee;
+      }
+    }
+
+    // Return best match or first employee as fallback
+    return bestMatch || this.employees[0];
+  }
+
+  /**
+   * Route message to specific employee (for multi-agent chat)
+   */
+  async routeMessageToEmployee(
+    employeeName: string,
+    message: string,
+    conversationHistory?: Array<{ role: string; content: string }>
+  ): Promise<string> {
+    const employee = this.employees.find((e) => e.name === employeeName);
+
+    if (!employee) {
+      throw new Error(`Employee ${employeeName} not found`);
+    }
+
+    const store = useMissionStore.getState();
+
+    store.updateEmployeeStatus(
+      employee.name,
+      'thinking',
+      null,
+      'Processing message'
+    );
+
+    try {
+      const conversationMessages = [
+        { role: 'system', content: employee.systemPrompt },
+        ...(conversationHistory || []),
+        { role: 'user', content: message },
+      ];
+
+      const response = await unifiedLLMService.sendMessage({
+        provider: 'anthropic',
+        messages: conversationMessages,
+        model:
+          employee.model === 'inherit'
+            ? 'claude-3-5-sonnet-20241022'
+            : employee.model,
+        temperature: 0.7,
+      });
+
+      store.updateEmployeeStatus(employee.name, 'idle');
+      store.addEmployeeLog(employee.name, `Responded to: ${message.slice(0, 50)}...`);
+
+      return response.content;
+    } catch (error) {
+      store.updateEmployeeStatus(employee.name, 'error');
+      throw error;
+    }
+  }
+
+  /**
+   * Get available employees for multi-agent chat
+   */
+  getAvailableEmployees(): AIEmployee[] {
+    return this.employees;
+  }
+
+  /**
+   * Check if employees are loaded
+   */
+  areEmployeesLoaded(): boolean {
+    return this.employeesLoaded;
   }
 }
 

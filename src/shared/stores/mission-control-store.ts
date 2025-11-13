@@ -67,6 +67,11 @@ interface MissionState {
   isPaused: boolean;
   error: string | null;
 
+  // NEW: Multi-agent chat integration
+  mode: 'mission' | 'chat'; // Orchestration mode
+  activeChatSession: string | null; // Active chat session ID
+  collaborativeAgents: Set<string>; // Agents in collaborative mode
+
   // Actions
   setMissionPlan: (plan: Task[]) => void;
   updateTaskStatus: (
@@ -85,13 +90,22 @@ interface MissionState {
   addEmployeeLog: (employeeName: string, logEntry: string) => void;
   updateEmployeeProgress: (employeeName: string, progress: number) => void;
   addMessage: (message: Omit<MissionMessage, 'id' | 'timestamp'>) => void;
-  startMission: (missionId: string) => void;
+  startMission: (missionId: string, mode?: 'mission' | 'chat') => void;
   pauseMission: () => void;
   resumeMission: () => void;
   completeMission: () => void;
   failMission: (error: string) => void;
   reset: () => void;
   setOrchestrating: (value: boolean) => void;
+  cleanupCompletedTasks: () => void;
+
+  // NEW: Multi-agent chat actions
+  setMode: (mode: 'mission' | 'chat') => void;
+  setChatSession: (sessionId: string | null) => void;
+  addCollaborativeAgent: (agentName: string) => void;
+  removeCollaborativeAgent: (agentName: string) => void;
+  clearCollaborativeAgents: () => void;
+  getAgentStatus: (agentName: string) => ActiveEmployee | undefined;
 }
 
 export const useMissionStore = create<MissionState>()(
@@ -106,6 +120,9 @@ export const useMissionStore = create<MissionState>()(
       isOrchestrating: false,
       isPaused: false,
       error: null,
+      mode: 'mission',
+      activeChatSession: null,
+      collaborativeAgents: new Set(),
 
       // Set mission plan from orchestrator
       setMissionPlan: (plan) =>
@@ -185,12 +202,13 @@ export const useMissionStore = create<MissionState>()(
         }),
 
       // Start mission
-      startMission: (missionId) =>
+      startMission: (missionId, mode = 'mission') =>
         set((state) => {
           state.currentMissionId = missionId;
           state.missionStatus = 'executing';
           state.isOrchestrating = true;
           state.error = null;
+          state.mode = mode;
         }),
 
       // Pause mission
@@ -235,6 +253,9 @@ export const useMissionStore = create<MissionState>()(
           state.isOrchestrating = false;
           state.isPaused = false;
           state.error = null;
+          state.mode = 'mission';
+          state.activeChatSession = null;
+          state.collaborativeAgents.clear();
         }),
 
       // Set orchestrating flag
@@ -242,10 +263,99 @@ export const useMissionStore = create<MissionState>()(
         set((state) => {
           state.isOrchestrating = value;
         }),
+
+      // Cleanup completed tasks and idle employees
+      // Should be called periodically to prevent memory leaks
+      cleanupCompletedTasks: () =>
+        set((state) => {
+          const oneHourAgo = Date.now() - 60 * 60 * 1000;
+
+          // Remove completed/failed tasks older than 1 hour
+          state.missionPlan = state.missionPlan.filter((task) => {
+            if (
+              (task.status === 'completed' || task.status === 'failed') &&
+              task.completedAt
+            ) {
+              return task.completedAt.getTime() > oneHourAgo;
+            }
+            return true; // Keep pending and in_progress tasks
+          });
+
+          // Remove idle employees that haven't been active for 1 hour
+          const employeesToRemove: string[] = [];
+          state.activeEmployees.forEach((employee, name) => {
+            if (
+              employee.status === 'idle' ||
+              employee.status === 'error'
+            ) {
+              // Check if employee has any log entries
+              if (employee.log.length > 0) {
+                // If no recent activity, mark for removal
+                const lastLogTime = employee.log.length > 0 ? Date.now() : 0;
+                if (lastLogTime < oneHourAgo) {
+                  employeesToRemove.push(name);
+                }
+              }
+            }
+          });
+
+          // Remove marked employees
+          employeesToRemove.forEach((name) => {
+            state.activeEmployees.delete(name);
+          });
+
+          // Limit message history to last 100 messages
+          if (state.messages.length > 100) {
+            state.messages = state.messages.slice(-100);
+          }
+
+          if (employeesToRemove.length > 0 || state.missionPlan.length > 0) {
+            console.log(
+              `[MissionStore] Cleaned up ${employeesToRemove.length} idle employees and pruned old tasks/messages`
+            );
+          }
+        }),
+
+      // NEW: Multi-agent chat actions
+      setMode: (mode: 'mission' | 'chat') =>
+        set((state) => {
+          state.mode = mode;
+        }),
+
+      setChatSession: (sessionId: string | null) =>
+        set((state) => {
+          state.activeChatSession = sessionId;
+        }),
+
+      addCollaborativeAgent: (agentName: string) =>
+        set((state) => {
+          state.collaborativeAgents.add(agentName);
+        }),
+
+      removeCollaborativeAgent: (agentName: string) =>
+        set((state) => {
+          state.collaborativeAgents.delete(agentName);
+        }),
+
+      clearCollaborativeAgents: () =>
+        set((state) => {
+          state.collaborativeAgents.clear();
+        }),
+
+      getAgentStatus: (agentName: string) => {
+        return useMissionStore.getState().activeEmployees.get(agentName);
+      },
     })),
     { name: 'MissionStore' }
   )
 );
+
+// Setup periodic cleanup (runs every 5 minutes)
+if (typeof window !== 'undefined') {
+  setInterval(() => {
+    useMissionStore.getState().cleanupCompletedTasks();
+  }, 5 * 60 * 1000); // Every 5 minutes
+}
 
 // Selector hooks for optimized re-renders
 export const useMissionPlan = () =>

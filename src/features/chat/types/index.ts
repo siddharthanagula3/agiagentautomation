@@ -110,4 +110,12 @@ export interface StreamingUpdate {
   content?: string;
   toolCall?: ToolCall;
   error?: string;
+  metadata?: {
+    tokensUsed?: number;
+    inputTokens?: number;
+    outputTokens?: number;
+    model?: string;
+    cost?: number;
+    metrics?: unknown;
+  };
 }

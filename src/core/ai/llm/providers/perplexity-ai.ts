@@ -6,18 +6,18 @@
 import { Perplexity } from '@perplexity-ai/perplexity_ai';
 import { supabase } from '@shared/lib/supabase-client';
 
-// Environment variables
-const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY || '';
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// SECURITY WARNING: Client-side API initialization is disabled
+// All API calls should go through Netlify proxy functions instead
+// Environment variables with VITE_ prefix are exposed to the browser (security risk)
 
-// Initialize clients
-const perplexity = PERPLEXITY_API_KEY
-  ? new Perplexity({
-      apiKey: PERPLEXITY_API_KEY,
-      dangerouslyAllowBrowser: true, // Allow browser usage for client-side
-    })
-  : null;
+// DEPRECATED: Direct client-side initialization (security risk)
+// const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY || '';
+
+// Initialize clients - DISABLED for security
+const perplexity = null; // Client-side SDK disabled - use Netlify proxy instead
+
+// TODO: Refactor all provider calls to use Netlify proxy functions
+// Proxy endpoints: /.netlify/functions/perplexity-proxy
 
 // Using centralized Supabase client
 
@@ -94,12 +94,11 @@ export class PerplexityProvider {
     userId?: string
   ): Promise<PerplexityResponse> {
     try {
-      if (!PERPLEXITY_API_KEY) {
-        throw new PerplexityError(
-          'Perplexity API key not configured. Please add VITE_PERPLEXITY_API_KEY to your environment variables.',
-          'API_KEY_MISSING'
-        );
-      }
+      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
+      throw new PerplexityError(
+        'Direct Perplexity API calls are disabled for security. Use /.netlify/functions/perplexity-proxy instead.',
+        'DIRECT_API_DISABLED'
+      );
 
       // Convert messages to Perplexity format
       const prompt = this.convertMessagesToPerplexity(messages);
@@ -228,12 +227,11 @@ export class PerplexityProvider {
     };
   }> {
     try {
-      if (!PERPLEXITY_API_KEY) {
-        throw new PerplexityError(
-          'Perplexity API key not configured. Please add VITE_PERPLEXITY_API_KEY to your environment variables.',
-          'API_KEY_MISSING'
-        );
-      }
+      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
+      throw new PerplexityError(
+        'Direct Perplexity streaming is disabled for security. Use /.netlify/functions/perplexity-proxy instead.',
+        'DIRECT_API_DISABLED'
+      );
 
       // Convert messages to Perplexity format
       const prompt = this.convertMessagesToPerplexity(messages);
@@ -432,9 +430,10 @@ export class PerplexityProvider {
 
   /**
    * Check if API key is configured
+   * SECURITY: Always returns false as direct API access is disabled
    */
   isConfigured(): boolean {
-    return !!PERPLEXITY_API_KEY;
+    return false; // Direct API access disabled for security
   }
 
   /**

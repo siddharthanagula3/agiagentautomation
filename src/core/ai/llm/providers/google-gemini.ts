@@ -10,13 +10,19 @@ import {
 } from '@google/generative-ai';
 import { supabase } from '@shared/lib/supabase-client';
 
-// Environment variables
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// SECURITY WARNING: Client-side API initialization is disabled
+// All API calls should go through Netlify proxy functions instead
+// Environment variables with VITE_ prefix are exposed to the browser (security risk)
 
-// Initialize clients
-const genAI = GOOGLE_API_KEY ? new GoogleGenerativeAI(GOOGLE_API_KEY) : null;
+// DEPRECATED: Direct client-side initialization (security risk)
+// const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
+
+// Initialize clients - DISABLED for security
+const genAI = null; // Client-side SDK disabled - use Netlify proxy instead
+
+// TODO: Refactor all provider calls to use Netlify proxy functions
+// Proxy endpoints: /.netlify/functions/google-proxy
+
 // Using centralized Supabase client
 
 export interface GoogleMessage {
@@ -97,12 +103,11 @@ export class GoogleProvider {
     userId?: string
   ): Promise<GoogleResponse> {
     try {
-      if (!GOOGLE_API_KEY) {
-        throw new GoogleError(
-          'Google API key not configured. Please add VITE_GOOGLE_API_KEY to your environment variables.',
-          'API_KEY_MISSING'
-        );
-      }
+      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
+      throw new GoogleError(
+        'Direct Google API calls are disabled for security. Use /.netlify/functions/google-proxy instead.',
+        'DIRECT_API_DISABLED'
+      );
 
       // Convert messages to Gemini format
       const prompt = this.convertMessagesToGemini(messages);
@@ -208,12 +213,11 @@ export class GoogleProvider {
     };
   }> {
     try {
-      if (!GOOGLE_API_KEY) {
-        throw new GoogleError(
-          'Google API key not configured. Please add VITE_GOOGLE_API_KEY to your environment variables.',
-          'API_KEY_MISSING'
-        );
-      }
+      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
+      throw new GoogleError(
+        'Direct Google streaming is disabled for security. Use /.netlify/functions/google-proxy instead.',
+        'DIRECT_API_DISABLED'
+      );
 
       // Convert messages to Gemini format
       const prompt = this.convertMessagesToGemini(messages);
@@ -397,9 +401,10 @@ export class GoogleProvider {
 
   /**
    * Check if API key is configured
+   * SECURITY: Always returns false as direct API access is disabled
    */
   isConfigured(): boolean {
-    return !!GOOGLE_API_KEY;
+    return false; // Direct API access disabled for security
   }
 
   /**

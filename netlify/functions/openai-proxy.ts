@@ -4,13 +4,15 @@ import {
   storeTokenUsage,
   extractRequestMetadata,
 } from './utils/token-tracking';
+import { withRateLimit } from './utils/rate-limiter';
 
 /**
  * Netlify Function to proxy OpenAI API calls
  * This solves CORS issues by making API calls server-side
  * Includes token usage tracking for billing and analytics
+ * SECURITY: Rate limited to 10 requests per minute per user
  */
-export const handler: Handler = async (event: HandlerEvent) => {
+const openaiHandler: Handler = async (event: HandlerEvent) => {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {
@@ -126,3 +128,6 @@ export const handler: Handler = async (event: HandlerEvent) => {
     };
   }
 };
+
+// Export handler with rate limiting middleware
+export const handler = withRateLimit(openaiHandler);

@@ -142,6 +142,11 @@ const BillingPage: React.FC = () => {
       const PROVIDER_LIMIT = 250000; // 250k tokens per LLM
       const TOTAL_LIMIT = 1000000; // 1M total tokens
 
+      // Initialize token balance and usage
+      let currentBalance = 0;
+      let totalUsed = 0;
+      let totalGranted = TOTAL_LIMIT; // Default to free tier limit
+
       // Fetch token usage from Supabase
       let llmUsage: LLMUsage[] = [
         {
@@ -184,7 +189,23 @@ const BillingPage: React.FC = () => {
 
       if (user) {
         try {
-          // Fetch usage from Supabase token_usage table
+          // Fetch current token balance from user_token_balances table
+          const { data: balanceData, error: balanceError } = await supabase
+            .from('user_token_balances')
+            .select('current_balance')
+            .eq('user_id', user.id)
+            .single();
+
+          if (balanceError) {
+            console.warn('[Billing] No token balance record found, using defaults:', balanceError);
+            // User might not have a balance record yet - that's okay, use free tier defaults
+            currentBalance = TOTAL_LIMIT; // Free tier starts with full allocation
+          } else if (balanceData) {
+            currentBalance = Math.max(balanceData.current_balance || 0, 0);
+            console.log('[Billing] Current token balance:', currentBalance);
+          }
+
+          // Fetch usage from Supabase token_usage table (for cost estimation)
           const { data: usageData, error: usageError } = await supabase
             .from('token_usage')
             .select(
@@ -193,7 +214,7 @@ const BillingPage: React.FC = () => {
             .eq('user_id', user.id);
 
           if (usageError) {
-            console.error('Error fetching token usage:', usageError);
+            console.error('[Billing] Error fetching token usage:', usageError);
           } else if (usageData && usageData.length > 0) {
             // Aggregate by provider
             const providerMap = new Map<
@@ -227,12 +248,12 @@ const BillingPage: React.FC = () => {
             });
           }
         } catch (err) {
-          console.error('Error querying token usage:', err);
+          console.error('[Billing] Error querying token data:', err);
         }
       }
 
-      // Calculate total usage
-      const totalTokens = llmUsage.reduce((sum, llm) => sum + llm.tokens, 0);
+      // Calculate total usage (tokens spent)
+      totalUsed = llmUsage.reduce((sum, llm) => sum + llm.tokens, 0);
       const totalCost = llmUsage.reduce((sum, llm) => sum + llm.cost, 0);
 
       // Fetch user's plan from database
@@ -285,6 +306,8 @@ const BillingPage: React.FC = () => {
       console.log('[Billing] 📊 Applying token limits:');
       console.log('[Billing]    User Plan:', userPlan);
       console.log('[Billing]    Is Pro?', isPro ? 'Yes ✓' : 'No ✗');
+      console.log('[Billing]    Current Balance:', currentBalance.toLocaleString());
+      console.log('[Billing]    Total Used:', totalUsed.toLocaleString());
       console.log(
         '[Billing]    Token Limit per LLM:',
         isPro ? '2.5M (Pro)' : '250k (Free)'
@@ -299,7 +322,13 @@ const BillingPage: React.FC = () => {
           ...llm,
           limit: proProviderLimit,
         }));
+        totalGranted = proTotalLimit;
       }
+
+      // Calculate stable billing period dates
+      const now = new Date();
+      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
       const billingData: BillingInfo = {
         plan: userPlan,
@@ -308,10 +337,8 @@ const BillingPage: React.FC = () => {
           ? new Date(
               new Date(subscriptionEndDate).getTime() - 30 * 24 * 60 * 60 * 1000
             ).toISOString()
-          : new Date().toISOString(),
-        current_period_end:
-          subscriptionEndDate ||
-          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          : currentMonthStart.toISOString(),
+        current_period_end: subscriptionEndDate || nextMonthStart.toISOString(),
         price: isPro ? 29 : 0,
         currency: 'USD',
         features: isPro
@@ -329,8 +356,8 @@ const BillingPage: React.FC = () => {
               'Community support',
             ],
         usage: {
-          totalTokens,
-          totalLimit: isPro ? proTotalLimit : TOTAL_LIMIT,
+          totalTokens: totalGranted - currentBalance, // Tokens used = granted - remaining
+          totalLimit: totalGranted,
           totalCost,
           llmUsage,
         },
@@ -714,28 +741,31 @@ const BillingPage: React.FC = () => {
                 className="h-3"
               />
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Free Tier Limit</span>
+                <span className="text-muted-foreground">
+                  {billing?.plan === 'free' ? 'Monthly Limit' : 'Token Allocation'}
+                </span>
                 <span className="font-medium">
                   {(billing?.usage.totalLimit || 1000000).toLocaleString()}{' '}
                   tokens
                 </span>
               </div>
-              {billing?.usage.totalTokens >=
-                billing?.usage.totalLimit * 0.8 && (
-                <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-500">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span>
-                    Approaching limit -{' '}
-                    {(
-                      (1 -
-                        billing?.usage.totalTokens /
+              {billing?.usage.totalTokens > 0 &&
+                billing?.usage.totalTokens >=
+                  (billing?.usage.totalLimit || 1000000) * 0.8 && (
+                  <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-500">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>
+                      Approaching limit -{' '}
+                      {(
+                        ((billing?.usage.totalLimit -
+                          billing?.usage.totalTokens) /
                           billing?.usage.totalLimit) *
-                      100
-                    ).toFixed(0)}
-                    % remaining
-                  </span>
-                </div>
-              )}
+                        100
+                      ).toFixed(0)}
+                      % remaining
+                    </span>
+                  </div>
+                )}
             </div>
           </CardContent>
         </Card>
@@ -844,11 +874,12 @@ const BillingPage: React.FC = () => {
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>0</span>
                       <span>
-                        {(llm.limit - llm.tokens).toLocaleString()} remaining
+                        {Math.max(llm.limit - llm.tokens, 0).toLocaleString()}{' '}
+                        remaining
                       </span>
                     </div>
 
-                    {isAtLimit && (
+                    {llm.tokens > 0 && isAtLimit && (
                       <div className="mt-2 flex items-center gap-2 text-sm text-red-600 dark:text-red-500">
                         <AlertTriangle className="h-4 w-4" />
                         <span>
@@ -857,7 +888,7 @@ const BillingPage: React.FC = () => {
                         </span>
                       </div>
                     )}
-                    {!isAtLimit && isNearLimit && (
+                    {llm.tokens > 0 && !isAtLimit && isNearLimit && (
                       <div className="mt-2 flex items-center gap-2 text-sm text-amber-600 dark:text-amber-500">
                         <AlertTriangle className="h-4 w-4" />
                         <span>{(100 - percentage).toFixed(0)}% remaining</span>
@@ -919,7 +950,8 @@ const BillingPage: React.FC = () => {
 
       {/* Buy More Tokens Section */}
       {(showBuyTokens ||
-        billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.85) && (
+        (billing?.usage.totalTokens > 0 &&
+          billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.85)) && (
         <Card id="buy-tokens-section" className="border-2 border-primary/50">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -946,7 +978,8 @@ const BillingPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             {/* Warning if near limit */}
-            {billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.85 && (
+            {billing?.usage.totalTokens > 0 &&
+              billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.85 && (
               <div
                 className={`mb-6 rounded-lg border p-4 ${
                   billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.95

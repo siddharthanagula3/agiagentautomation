@@ -5,7 +5,7 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useEmployeeManagementStore } from '@shared/stores/employee-management-store';
+import { useWorkforceStore } from '@shared/stores/employee-management-store';
 import { useVibeChatStore } from '../stores/vibe-chat-store';
 import VibeLayout from '../components/layout/VibeLayout';
 import VibeSidebar from '../components/layout/VibeSidebar';
@@ -13,7 +13,7 @@ import VibeChatCanvas from '../components/chat/VibeChatCanvas';
 
 const VibeDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { hiredEmployees } = useEmployeeManagementStore();
+  const { hiredEmployees } = useWorkforceStore();
   const { currentSessionId, createNewSession } = useVibeChatStore();
 
   useEffect(() => {

@@ -40,7 +40,10 @@ import {
   Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { supportService, FAQ as FAQType } from '@features/support/services/support-service';
+import {
+  supportService,
+  FAQ as FAQType,
+} from '@features/support/services/support-service';
 import { useAuthStore } from '@shared/stores/authentication-store';
 
 interface FAQItem {
@@ -122,7 +125,12 @@ const HelpSupportPage: React.FC = () => {
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!contactForm.name || !contactForm.email || !contactForm.subject || !contactForm.message) {
+    if (
+      !contactForm.name ||
+      !contactForm.email ||
+      !contactForm.subject ||
+      !contactForm.message
+    ) {
       toast.error('Please fill in all fields');
       return;
     }
@@ -143,7 +151,7 @@ const HelpSupportPage: React.FC = () => {
         return;
       }
 
-      toast.success('Message sent successfully! We\'ll get back to you soon.');
+      toast.success("Message sent successfully! We'll get back to you soon.");
       setContactForm({
         name: '',
         email: user?.email || '',

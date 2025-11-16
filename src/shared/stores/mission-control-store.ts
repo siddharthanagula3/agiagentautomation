@@ -304,10 +304,7 @@ export const useMissionStore = create<MissionState>()(
           // Remove idle employees that haven't been active for 1 hour
           const employeesToRemove: string[] = [];
           state.activeEmployees.forEach((employee, name) => {
-            if (
-              employee.status === 'idle' ||
-              employee.status === 'error'
-            ) {
+            if (employee.status === 'idle' || employee.status === 'error') {
               // Check if employee has any log entries
               if (employee.log.length > 0) {
                 // If no recent activity, mark for removal
@@ -372,9 +369,12 @@ export const useMissionStore = create<MissionState>()(
 
 // Setup periodic cleanup (runs every 5 minutes)
 if (typeof window !== 'undefined') {
-  setInterval(() => {
-    useMissionStore.getState().cleanupCompletedTasks();
-  }, 5 * 60 * 1000); // Every 5 minutes
+  setInterval(
+    () => {
+      useMissionStore.getState().cleanupCompletedTasks();
+    },
+    5 * 60 * 1000
+  ); // Every 5 minutes
 }
 
 // Selector hooks for optimized re-renders

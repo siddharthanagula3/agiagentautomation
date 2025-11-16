@@ -111,7 +111,8 @@ try {
 
   // Create error display using DOM API to prevent XSS
   const errorContainer = document.createElement('div');
-  errorContainer.style.cssText = 'padding: 20px; font-family: monospace; color: red; background: #111; min-height: 100vh;';
+  errorContainer.style.cssText =
+    'padding: 20px; font-family: monospace; color: red; background: #111; min-height: 100vh;';
 
   const title = document.createElement('h1');
   title.textContent = 'Application Initialization Error';
@@ -132,7 +133,8 @@ try {
   errorContainer.appendChild(stackLabel);
 
   const stackPre = document.createElement('pre');
-  stackPre.style.cssText = 'background: #222; padding: 10px; border-radius: 4px; overflow: auto;';
+  stackPre.style.cssText =
+    'background: #222; padding: 10px; border-radius: 4px; overflow: auto;';
   stackPre.textContent = errorStack;
   errorContainer.appendChild(stackPre);
 
@@ -142,7 +144,8 @@ try {
 
   const reloadButton = document.createElement('button');
   reloadButton.textContent = 'Reload Page';
-  reloadButton.style.cssText = 'background: #007acc; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;';
+  reloadButton.style.cssText =
+    'background: #007acc; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;';
   reloadButton.addEventListener('click', () => window.location.reload());
   errorContainer.appendChild(reloadButton);
 

@@ -237,7 +237,9 @@ export class EnhancedChatSynchronizationService {
     if (channel) {
       await supabase.removeChannel(channel);
       this.channels.delete(conversationId);
-      console.log(`[ChatSync] Unsubscribed from conversation ${conversationId}`);
+      console.log(
+        `[ChatSync] Unsubscribed from conversation ${conversationId}`
+      );
     }
   }
 
@@ -261,9 +263,13 @@ export class EnhancedChatSynchronizationService {
     if (existingMessage) {
       // Message already exists, check for conflicts
       if (
-        existingMessage.timestamp.getTime() !== new Date(remoteData.timestamp).getTime()
+        existingMessage.timestamp.getTime() !==
+        new Date(remoteData.timestamp).getTime()
       ) {
-        this.handleConflict(existingMessage, this.transformRemoteMessage(remoteData));
+        this.handleConflict(
+          existingMessage,
+          this.transformRemoteMessage(remoteData)
+        );
       }
     } else {
       // New message, add it
@@ -285,7 +291,9 @@ export class EnhancedChatSynchronizationService {
       return;
     }
 
-    const localMessage = conversation.messages.find((m) => m.id === remoteData.id);
+    const localMessage = conversation.messages.find(
+      (m) => m.id === remoteData.id
+    );
 
     if (!localMessage) {
       // Message doesn't exist locally, treat as insert
@@ -294,14 +302,22 @@ export class EnhancedChatSynchronizationService {
     }
 
     // Check for conflicts
-    const remoteTimestamp = new Date(remoteData.updated_at || remoteData.timestamp);
+    const remoteTimestamp = new Date(
+      remoteData.updated_at || remoteData.timestamp
+    );
     const localTimestamp = localMessage.timestamp;
 
     if (localTimestamp.getTime() !== remoteTimestamp.getTime()) {
-      this.handleConflict(localMessage, this.transformRemoteMessage(remoteData));
+      this.handleConflict(
+        localMessage,
+        this.transformRemoteMessage(remoteData)
+      );
     } else {
       // No conflict, apply update
-      store.updateMessage(remoteData.id, this.transformRemoteMessage(remoteData));
+      store.updateMessage(
+        remoteData.id,
+        this.transformRemoteMessage(remoteData)
+      );
       this.statistics.totalSynced++;
     }
   }
@@ -445,7 +461,9 @@ export class EnhancedChatSynchronizationService {
   /**
    * Update a message on the server
    */
-  async updateMessage(message: Partial<ChatMessage> & { id: string }): Promise<void> {
+  async updateMessage(
+    message: Partial<ChatMessage> & { id: string }
+  ): Promise<void> {
     if (!this.isOnline && this.config.enableOfflineQueue) {
       this.queueOperation({
         id: crypto.randomUUID(),
@@ -503,7 +521,10 @@ export class EnhancedChatSynchronizationService {
   /**
    * Delete a message from the server
    */
-  async deleteMessage(conversationId: string, messageId: string): Promise<void> {
+  async deleteMessage(
+    conversationId: string,
+    messageId: string
+  ): Promise<void> {
     if (!this.isOnline && this.config.enableOfflineQueue) {
       this.queueOperation({
         id: crypto.randomUUID(),
@@ -564,7 +585,9 @@ export class EnhancedChatSynchronizationService {
     const store = useMultiAgentChatStore.getState();
     store.setSyncing(true);
 
-    console.log(`[ChatSync] Processing ${this.syncQueue.length} queued operations`);
+    console.log(
+      `[ChatSync] Processing ${this.syncQueue.length} queued operations`
+    );
 
     const operations = [...this.syncQueue];
     this.syncQueue = [];
@@ -594,7 +617,8 @@ export class EnhancedChatSynchronizationService {
         console.error('[ChatSync] Queue processing error:', error);
         operation.status = 'failed';
         operation.retryCount++;
-        operation.error = error instanceof Error ? error.message : 'Unknown error';
+        operation.error =
+          error instanceof Error ? error.message : 'Unknown error';
 
         // Re-queue if retries remain
         if (operation.retryCount < this.config.maxRetries) {

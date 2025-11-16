@@ -82,37 +82,37 @@ Organizations deploying multi-agent screen sharing face four architectural decis
 
 **Screen Layout Strategies:**
 
-*Grid Layout* (2×2, 3×3): Equal-sized quadrants for homogeneous teams where all employees deserve equal attention. Optimal for 4-9 employees performing similar tasks.
+_Grid Layout_ (2×2, 3×3): Equal-sized quadrants for homogeneous teams where all employees deserve equal attention. Optimal for 4-9 employees performing similar tasks.
 
-*Priority Layout* (1 large + 4-6 small): One AI employee receives majority screen space (primary focus), others display in sidebar thumbnails. Optimal when one employee performs critical operations while others handle background tasks.
+_Priority Layout_ (1 large + 4-6 small): One AI employee receives majority screen space (primary focus), others display in sidebar thumbnails. Optimal when one employee performs critical operations while others handle background tasks.
 
-*Carousel Layout* (3-4 visible, auto-rotate): Display subset of employees at full detail, automatically rotating through full team every 30-60 seconds. Optimal for 12+ employees where continuous monitoring is unnecessary.
+_Carousel Layout_ (3-4 visible, auto-rotate): Display subset of employees at full detail, automatically rotating through full team every 30-60 seconds. Optimal for 12+ employees where continuous monitoring is unnecessary.
 
-*Follow Mode* (single screen with focus tracking): Display only the currently-active AI employee's screen. Human attention follows the employee speaking or showing activity. Optimal for sequential workflows where employees take turns.
+_Follow Mode_ (single screen with focus tracking): Display only the currently-active AI employee's screen. Human attention follows the employee speaking or showing activity. Optimal for sequential workflows where employees take turns.
 
 **Bandwidth Optimization Approaches:**
 
-*Attention-Based:* Track human eye gaze or mouse position. High-detail encoding follows attention. Reduces bandwidth 60-70% but requires eye-tracking hardware or consistent mouse usage.
+_Attention-Based:_ Track human eye gaze or mouse position. High-detail encoding follows attention. Reduces bandwidth 60-70% but requires eye-tracking hardware or consistent mouse usage.
 
-*Activity-Based:* High-detail encoding for screens with rapid change (active work). Low-detail for static screens (monitoring dashboards). Reduces bandwidth 50-60% without attention tracking.
+_Activity-Based:_ High-detail encoding for screens with rapid change (active work). Low-detail for static screens (monitoring dashboards). Reduces bandwidth 50-60% without attention tracking.
 
-*Adaptive Quality:* Automatically detect network conditions and adjust encoding quality across all screens. Maintains smooth experience on constrained networks at cost of resolution.
+_Adaptive Quality:_ Automatically detect network conditions and adjust encoding quality across all screens. Maintains smooth experience on constrained networks at cost of resolution.
 
 **Annotation Persistence:**
 
-*Ephemeral Annotations:* Annotations disappear after 30-60 seconds. Reduces visual clutter for ongoing work. Optimal for real-time collaboration.
+_Ephemeral Annotations:_ Annotations disappear after 30-60 seconds. Reduces visual clutter for ongoing work. Optimal for real-time collaboration.
 
-*Session Annotations:* Annotations persist for entire screen sharing session. Creates visual history of discussion. Optimal for design reviews and pair programming.
+_Session Annotations:_ Annotations persist for entire screen sharing session. Creates visual history of discussion. Optimal for design reviews and pair programming.
 
-*Archived Annotations:* Annotations save to screen recordings and audit logs. Enables retrospective review. Required for compliance scenarios.
+_Archived Annotations:_ Annotations save to screen recordings and audit logs. Enables retrospective review. Required for compliance scenarios.
 
 **Privacy and Access Controls:**
 
-*Role-Based Screen Access:* Supervisors see all screens. Peer AI employees see only their team's screens. Cross-functional employees see screens relevant to current task. Prevents information leakage.
+_Role-Based Screen Access:_ Supervisors see all screens. Peer AI employees see only their team's screens. Cross-functional employees see screens relevant to current task. Prevents information leakage.
 
-*Sensitive Content Filtering:* Automatically blur or redact sensitive information (passwords, API keys, PII) before screen transmission. Preserves collaboration while protecting confidential data.
+_Sensitive Content Filtering:_ Automatically blur or redact sensitive information (passwords, API keys, PII) before screen transmission. Preserves collaboration while protecting confidential data.
 
-*On-Premise Routing:* For highest-security scenarios, route screen streams through organization's internal network infrastructure, preventing cloud transit. Increases latency 50-100ms but ensures data sovereignty.
+_On-Premise Routing:_ For highest-security scenarios, route screen streams through organization's internal network infrastructure, preventing cloud transit. Increases latency 50-100ms but ensures data sovereignty.
 
 ## Looking Ahead to 2026
 

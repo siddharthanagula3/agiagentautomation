@@ -62,14 +62,18 @@ export function AgentParticipantPanel({
 }: AgentParticipantPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'active' | 'idle' | 'offline'>('all');
+  const [selectedFilter, setSelectedFilter] = useState<
+    'all' | 'active' | 'idle' | 'offline'
+  >('all');
 
   // Filter agents by search query and status
   const filteredAgents = useMemo(() => {
-    return agents.filter(agent => {
-      const matchesSearch = agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           agent.role.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesFilter = selectedFilter === 'all' || agent.status === selectedFilter;
+    return agents.filter((agent) => {
+      const matchesSearch =
+        agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        agent.role.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesFilter =
+        selectedFilter === 'all' || agent.status === selectedFilter;
       return matchesSearch && matchesFilter;
     });
   }, [agents, searchQuery, selectedFilter]);
@@ -79,7 +83,7 @@ export function AgentParticipantPanel({
     if (!groupByRole) return null;
 
     const groups = new Map<string, Agent[]>();
-    filteredAgents.forEach(agent => {
+    filteredAgents.forEach((agent) => {
       const role = agent.role || 'Other';
       if (!groups.has(role)) {
         groups.set(role, []);
@@ -98,7 +102,7 @@ export function AgentParticipantPanel({
 
   // Toggle group expansion
   const toggleGroup = (role: string) => {
-    setExpandedGroups(prev => {
+    setExpandedGroups((prev) => {
       const next = new Set(prev);
       if (next.has(role)) {
         next.delete(role);
@@ -112,18 +116,18 @@ export function AgentParticipantPanel({
   // Expand all groups initially
   React.useEffect(() => {
     if (groupedAgents && expandedGroups.size === 0) {
-      setExpandedGroups(new Set(groupedAgents.map(g => g.role)));
+      setExpandedGroups(new Set(groupedAgents.map((g) => g.role)));
     }
   }, [groupedAgents]);
 
   // Status counts
   const statusCounts = useMemo(() => {
     return {
-      active: agents.filter(a => a.status === 'active').length,
-      idle: agents.filter(a => a.status === 'idle').length,
-      thinking: agents.filter(a => a.status === 'thinking').length,
-      typing: agents.filter(a => a.status === 'typing').length,
-      offline: agents.filter(a => a.status === 'offline').length,
+      active: agents.filter((a) => a.status === 'active').length,
+      idle: agents.filter((a) => a.status === 'idle').length,
+      thinking: agents.filter((a) => a.status === 'thinking').length,
+      typing: agents.filter((a) => a.status === 'typing').length,
+      offline: agents.filter((a) => a.status === 'offline').length,
     };
   }, [agents]);
 
@@ -187,7 +191,7 @@ export function AgentParticipantPanel({
       <ScrollArea className="flex-1">
         {groupByRole && groupedAgents ? (
           <div className="space-y-1">
-            {groupedAgents.map(group => (
+            {groupedAgents.map((group) => (
               <div key={group.role} className="space-y-1">
                 {/* Group Header */}
                 <button
@@ -208,7 +212,7 @@ export function AgentParticipantPanel({
                 {/* Group Agents */}
                 {group.expanded && (
                   <div className="space-y-1 pl-6">
-                    {group.agents.map(agent => (
+                    {group.agents.map((agent) => (
                       <AgentCard
                         key={agent.id}
                         agent={agent}
@@ -224,7 +228,7 @@ export function AgentParticipantPanel({
           </div>
         ) : (
           <div className="space-y-1">
-            {filteredAgents.map(agent => (
+            {filteredAgents.map((agent) => (
               <AgentCard
                 key={agent.id}
                 agent={agent}
@@ -255,7 +259,12 @@ interface AgentCardProps {
   showMetrics: boolean;
 }
 
-function AgentCard({ agent, isSelected, onSelect, showMetrics }: AgentCardProps) {
+function AgentCard({
+  agent,
+  isSelected,
+  onSelect,
+  showMetrics,
+}: AgentCardProps) {
   const [showDetails, setShowDetails] = useState(false);
 
   const statusConfig = {
@@ -297,7 +306,8 @@ function AgentCard({ agent, isSelected, onSelect, showMetrics }: AgentCardProps)
             className={cn(
               'absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background',
               status.color,
-              (agent.status === 'thinking' || agent.status === 'typing') && 'animate-pulse'
+              (agent.status === 'thinking' || agent.status === 'typing') &&
+                'animate-pulse'
             )}
           />
         </div>
@@ -324,15 +334,17 @@ function AgentCard({ agent, isSelected, onSelect, showMetrics }: AgentCardProps)
           </div>
 
           {/* Progress Bar */}
-          {showMetrics && agent.progress !== undefined && agent.progress > 0 && (
-            <div className="mt-2 space-y-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Progress</span>
-                <span className="font-medium">{agent.progress}%</span>
+          {showMetrics &&
+            agent.progress !== undefined &&
+            agent.progress > 0 && (
+              <div className="mt-2 space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Progress</span>
+                  <span className="font-medium">{agent.progress}%</span>
+                </div>
+                <Progress value={agent.progress} className="h-1.5" />
               </div>
-              <Progress value={agent.progress} className="h-1.5" />
-            </div>
-          )}
+            )}
         </div>
 
         {/* Info Button */}
@@ -359,7 +371,9 @@ function AgentCard({ agent, isSelected, onSelect, showMetrics }: AgentCardProps)
             </div>
             {agent.currentTask && (
               <div>
-                <span className="font-medium text-muted-foreground">Current Task:</span>{' '}
+                <span className="font-medium text-muted-foreground">
+                  Current Task:
+                </span>{' '}
                 <span className="break-words">{agent.currentTask}</span>
               </div>
             )}

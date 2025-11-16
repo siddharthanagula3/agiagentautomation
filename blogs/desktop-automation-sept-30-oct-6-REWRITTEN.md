@@ -1,4 +1,5 @@
 # Desktop Automation Fundamentals: SEO-Optimized Newsletter Series
+
 **September 30 - October 6, 2025 • Publication-Ready Edition**
 
 ---
@@ -224,6 +225,7 @@ Traditional RPA: Record coordinates, replay clicks
 **Fragility:** Breaks when window resizes or UI changes
 
 Windows MCP approach:
+
 1. Agent requests `ui_element_find` with query: "text input fields in customer form"
 2. MCP server returns structured results: field names, types, current values, validation rules
 3. Agent reasons about which fields require which data
@@ -405,12 +407,15 @@ If the primary query fails (developer changed automation ID), the system tries s
 ### Example: Resilient Button Identification
 
 **Brittle approach (coordinate-based):**
+
 ```
 Click at (437, 289)
 ```
+
 Breaks when: window resizes, DPI changes, UI reorganizes
 
 **Semantic approach (multi-attribute):**
+
 ```
 Find element where:
   - ControlType = Button
@@ -418,9 +423,11 @@ Find element where:
   - Parent.Name = "Customer Information Form"
   - Bounds within region (form container)
 ```
+
 Adapts to: position changes, window sizing, theme updates
 
 **Visual reasoning fallback:**
+
 ```
 If semantic query returns zero results:
   Analyze screenshot
@@ -905,6 +912,7 @@ This pattern embraces uncertainty. The agent doesn't know all 50 steps upfront�
 **Scenario:** Fill customer information form. Form has conditional fields that appear based on customer type.
 
 **Upfront planning approach:**
+
 ```
 Plan:
 1. Enter customer name
@@ -922,6 +930,7 @@ AUTOMATION FAILS
 ```
 
 **Cursor-Agent approach:**
+
 ```
 Observation 1: Form has Name, Type, Address fields visible
 Action 1: Enter name → Success
@@ -959,6 +968,7 @@ Effective state observation answers: "What's different from my expectations?"
 The agent evaluates: "Given current state, what's the optimal next action?"
 
 This reasoning considers:
+
 - **Goal progress:** What brings me closer to task completion?
 - **Risk assessment:** Which actions might cause irreversible problems?
 - **Information gathering:** Do I need more data before proceeding?
@@ -988,6 +998,7 @@ Actions remain atomic and reversible where possible:
 **Reversible:** When feasible, actions should be undoable if outcomes unexpected
 
 Example atomic actions:
+
 - Enter text in single field (not "fill entire form")
 - Click one button (not "click Submit and handle confirmation dialog")
 - Select single dropdown option (not "configure all form sections")
@@ -1756,6 +1767,7 @@ Desktop automation evolved from procedural scripting to intelligent reasoning:
 - **AGI Automation (2025-2026):** Reasoning models plan workflows, adapt to changes, handle ambiguity
 
 Organizations implementing AGI automation report:
+
 - **70% cost reduction** (Thermo Fisher benchmark)
 - **60% faster implementation** (vs. traditional RPA development)
 - **95% automation reliability** (vs. 60% with coordinate-based approaches)

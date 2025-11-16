@@ -93,10 +93,12 @@ System: "Completed performance optimization. Results:
 The system isn't just suggesting—it's executing. You describe the goal, walk away, return to completed work.
 
 **Time comparison:**
+
 - ChatGPT approach: 2-4 hours of human work + 47 copy-paste iterations
 - AGI Automation approach: 15-20 minutes of autonomous execution + 5 minutes human review
 
 **Error rate comparison:**
+
 - ChatGPT approach: High (manual copy-paste errors, misunderstood suggestions, incomplete execution)
 - AGI Automation approach: <5% (LLM error rates on structured tasks, automatic retry for transient failures)
 
@@ -107,12 +109,14 @@ ChatGPT and Claude.ai are general-purpose models trained on broad internet data.
 ### The Math of Specialization
 
 **General-purpose model (GPT-4, Claude Sonnet):**
+
 - Training data: Entire internet (code, text, images, etc.)
 - Optimization: Broad competence across all domains
 - Context: 128K-200K tokens, but no persistent domain focus
 - Performance: 70-80% accuracy on domain-specific tasks (excellent for general queries)
 
 **Specialized AI employee (AGI Automation's security-analyst):**
+
 - System prompt: 110 lines of security expertise, vulnerability patterns, remediation strategies
 - Tool access: Grep (pattern matching for SQL injection, XSS), Read (code analysis), Write (audit reports)
 - Context: Same base model (Claude Sonnet 4.5) + specialized instructions
@@ -120,13 +124,13 @@ ChatGPT and Claude.ai are general-purpose models trained on broad internet data.
 
 **Real-world benchmark from AGI Automation platform (based on 10,000+ task executions):**
 
-| Task Type | General Model (ChatGPT) | Specialized Employee (AGI) | Performance Delta |
-|-----------|------------------------|----------------------------|-------------------|
-| Security vulnerability detection | 68% recall | 94% recall | 38% improvement (300%+ better) |
-| Code review for style violations | 71% accuracy | 96% accuracy | 35% improvement |
-| API documentation generation | 73% completeness | 98% completeness | 34% improvement |
-| React performance optimization | 65% effectiveness | 89% effectiveness | 37% improvement |
-| SQL query optimization | 62% improvement avg | 87% improvement avg | 40% better results |
+| Task Type                        | General Model (ChatGPT) | Specialized Employee (AGI) | Performance Delta              |
+| -------------------------------- | ----------------------- | -------------------------- | ------------------------------ |
+| Security vulnerability detection | 68% recall              | 94% recall                 | 38% improvement (300%+ better) |
+| Code review for style violations | 71% accuracy            | 96% accuracy               | 35% improvement                |
+| API documentation generation     | 73% completeness        | 98% completeness           | 34% improvement                |
+| React performance optimization   | 65% effectiveness       | 89% effectiveness          | 37% improvement                |
+| SQL query optimization           | 62% improvement avg     | 87% improvement avg        | 40% better results             |
 
 The pattern is consistent: specialized employees outperform generalists by 300-400% on domain-specific metrics because their system prompts encode expertise that base models don't prioritize during generation.
 
@@ -138,12 +142,14 @@ AGI Automation's security-analyst employee includes a system prompt like:
 You are an expert security analyst specializing in web application vulnerabilities.
 
 Your expertise includes:
+
 - OWASP Top 10 vulnerabilities (SQL injection, XSS, CSRF, authentication flaws)
 - Secure coding patterns for JavaScript, Python, Java, Go
 - Infrastructure security (exposed secrets, insecure dependencies, misconfigured permissions)
 - Compliance requirements (GDPR, SOC2, HIPAA where applicable)
 
 When analyzing code:
+
 1. Use Grep to search for vulnerability patterns: SQL concatenation, eval() usage, innerHTML assignments
 2. Use Read to analyze authentication/authorization logic
 3. Prioritize findings by severity: Critical (RCE, auth bypass) → High (data exposure) → Medium (info disclosure)
@@ -151,6 +157,7 @@ When analyzing code:
 5. Cite specific line numbers and file paths for all findings
 
 Output format:
+
 - Executive summary (2-3 sentences)
 - Critical findings (vulnerability, location, remediation)
 - High/Medium findings (grouped by type)
@@ -160,6 +167,7 @@ Output format:
 This 110-line prompt transforms Claude Sonnet 4.5 from "general AI that knows about security" to "security specialist that follows industry best practices and provides actionable outputs."
 
 **Why ChatGPT can't replicate this:**
+
 1. **No persistence:** You'd need to paste this prompt in every conversation
 2. **No tool access:** ChatGPT can't execute Grep, Read, or Write operations on your actual codebase
 3. **No multi-agent coordination:** One ChatGPT instance can't delegate to specialized variants
@@ -171,6 +179,7 @@ AGI Automation's file-based employee system (`.agi/employees/security-analyst.md
 ChatGPT locks you into OpenAI's models. Claude.ai locks you into Anthropic's models. AGI Automation's unified LLM service routes tasks to optimal providers:
 
 **Provider-Specific Strengths:**
+
 - **Claude (Anthropic):** Long-context reasoning, code analysis, complex multi-step planning (best for: system architecture, code review, security audits)
 - **GPT-4/GPT-5 (OpenAI):** Structured JSON outputs, function calling reliability, general knowledge (best for: task planning, API integration, data transformation)
 - **Gemini (Google):** Multimodal tasks, image analysis, YouTube transcription (best for: design-to-code, video processing, OCR workflows)
@@ -217,6 +226,7 @@ commit c4d2b9e - "Initial security analyst employee definition"
 ```
 
 This enables:
+
 - **Collaborative prompt engineering:** Team members improve employees via pull requests
 - **Rollback capability:** Bad prompt update? `git revert` to previous version
 - **Audit trail:** See exactly when/why employee behavior changed
@@ -259,6 +269,7 @@ model: claude-sonnet-4-5-thinking
 You are ACME Corp's internal compliance auditor...
 
 **ACME-specific requirements:**
+
 - All API endpoints must use OAuth2 with acme-auth-lib v3.2+
 - Database queries require parameterization (no string concatenation)
 - Logging must include trace_id for SIEM integration
@@ -275,6 +286,7 @@ This employee becomes a strategic asset—competitors can't replicate your inter
 ### If You're Currently Using ChatGPT/Claude for Development Work
 
 You've experienced the limitation: brilliant suggestions, tedious execution. Every coding session involves:
+
 - Describe problem to ChatGPT (2 minutes)
 - ChatGPT suggests solution (30 seconds)
 - You manually implement suggestion (10 minutes)
@@ -286,6 +298,7 @@ You've experienced the limitation: brilliant suggestions, tedious execution. Eve
 **Total time:** 60-90 minutes of human work for task that should take 15 minutes
 
 AGI Automation eliminates this friction. The same workflow becomes:
+
 - Describe problem to mission control (2 minutes)
 - System plans → delegates → executes (15 minutes autonomous)
 - You review completed work (3 minutes)
@@ -304,15 +317,15 @@ AGI Automation is **autonomous AI**—it replaces human execution for entire wor
 
 **Comparison:**
 
-| Capability | GitHub Copilot | ChatGPT/Claude | AGI Automation |
-|------------|---------------|----------------|----------------|
-| Code completion | Excellent | Good | Not primary use case |
-| Code explanation | No | Excellent | Good |
-| Multi-step workflows | No | Suggests, doesn't execute | Plans, delegates, executes |
-| Tool access (file read/write, bash) | No | No | Yes (7 core tools) |
-| Multi-agent coordination | No | No | Yes (165+ specialists) |
-| Custom specialization | No | Limited (custom GPTs) | Yes (file-based employees) |
-| Cost model | $10-20/user/month | $20/user/month | Token-based (pay per execution) |
+| Capability                          | GitHub Copilot    | ChatGPT/Claude            | AGI Automation                  |
+| ----------------------------------- | ----------------- | ------------------------- | ------------------------------- |
+| Code completion                     | Excellent         | Good                      | Not primary use case            |
+| Code explanation                    | No                | Excellent                 | Good                            |
+| Multi-step workflows                | No                | Suggests, doesn't execute | Plans, delegates, executes      |
+| Tool access (file read/write, bash) | No                | No                        | Yes (7 core tools)              |
+| Multi-agent coordination            | No                | No                        | Yes (165+ specialists)          |
+| Custom specialization               | No                | Limited (custom GPTs)     | Yes (file-based employees)      |
+| Cost model                          | $10-20/user/month | $20/user/month            | Token-based (pay per execution) |
 
 **The implication:** Assistive AI tools reduce time-per-task by 30-50%. Autonomous AI tools reduce tasks-requiring-human-execution by 70-85%. The productivity gain isn't additive—it's exponential.
 
@@ -338,6 +351,7 @@ AGI Automation's architecture (Plan-Delegate-Execute pattern, file-based employe
 ChatGPT, Claude, and Gemini-level conversational AI becomes commodity infrastructure. 90%+ knowledge workers have access. Competitive advantage from "using ChatGPT" disappears—everyone has it.
 
 The new competitive advantage shifts to **autonomous execution capabilities**. Organizations that deployed agentic AI in 2025 have:
+
 - 12-18 months of workflow optimization experience
 - Custom employee libraries encoding institutional knowledge
 - Established best practices for task delegation and quality control
@@ -349,6 +363,7 @@ Late adopters starting in 2026 face steeper learning curves and catch-up gaps.
 AGI Automation's Plan-Delegate-Execute pattern, file-based employee definitions, and tool execution patterns become de facto industry standards. Competing platforms converge on similar architectures.
 
 Differentiation shifts from "can you execute autonomously?" (table stakes) to:
+
 - **Employee library depth:** 165+ pre-built specialists vs 20-30 generalists
 - **Specialization quality:** Domain expertise encoded in system prompts
 - **Orchestration reliability:** Error handling, fault tolerance, graceful degradation
@@ -359,6 +374,7 @@ Differentiation shifts from "can you execute autonomously?" (table stakes) to:
 Users will expect AI tools to execute, not suggest. Conversational AI that requires human copy-paste will feel antiquated—like using a search engine that returns library card catalog numbers instead of web links.
 
 The industry terminology shifts:
+
 - **2024-2025:** "AI assistant," "copilot," "chatbot"
 - **2026-2027:** "AI employee," "autonomous agent," "workforce automation"
 
@@ -383,6 +399,7 @@ Products that haven't transitioned from assistive to autonomous become legacy to
 Start by hiring 3 specialized AI employees for your most repetitive workflow. Compare autonomous execution vs ChatGPT's suggestion-based approach.
 
 Recommended starting team:
+
 - **Senior Software Engineer** (code implementation)
 - **QA Engineer** (testing and validation)
 - **Documentation Writer** (reports and documentation)

@@ -23,6 +23,7 @@ This semantic analysis eliminates false positives that plague pixel-based testin
 Manual accessibility auditing is expensive and inconsistent. Automated tools (axe, Lighthouse) catch syntactic violations—missing alt attributes, invalid ARIA—but miss semantic problems. o3 combines both: syntactic validation plus semantic accessibility analysis.
 
 **Real Example:** An e-commerce checkout flow passes all automated accessibility tests. o3 analysis identifies:
+
 - "Payment method selection uses color alone to indicate selected state, violating WCAG 1.4.1 (use of color)"
 - "Error messages appear below the fold on mobile, forcing screen reader users to search for validation feedback"
 - "Submit button label 'Continue' is ambiguous without surrounding context, reducing clarity for cognitive accessibility"
@@ -34,6 +35,7 @@ These are human-level accessibility insights that no automated tool catches. QA 
 Large organizations maintain design systems—component libraries, brand guidelines, interaction patterns. Ensuring engineering teams follow these systems is an ongoing challenge. One-off implementations proliferate. Visual fragmentation accumulates. Manual design reviews catch some violations but don't scale.
 
 o3 enables automated design system validation. Upload a screenshot and your design system documentation. o3 analyzes:
+
 - **Component usage:** "Form uses custom button styling instead of design system Button component. Recommend migration to maintain consistency."
 - **Spacing violations:** "Card padding is 20px. Design system specifies 24px for medium spacing token."
 - **Typography inconsistencies:** "Heading uses font-size: 19px. Design system requires h3 at 20px (heading-md token)."
@@ -73,6 +75,7 @@ AGI Agent Automation's multi-provider architecture enables intelligent routing o
 This multi-model orchestration delivers better results at lower cost than single-model approaches. Organizations using AGI Agent Automation for QA workflows report 60-75% reduction in manual testing effort and 3-4x improvement in issue detection compared to traditional automated testing.
 
 **Real Implementation:** A SaaS company implemented a QA AI Employee that uses o3 for visual analysis. The employee:
+
 - Analyzes every PR's screenshots automatically
 - Comments on pull requests with accessibility violations, design system issues, and UX concerns
 - Generates severity-ranked issue lists (blocking vs. nice-to-fix)

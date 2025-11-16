@@ -165,7 +165,7 @@ export function detectPromptInjection(input: string): InjectionDetectionResult {
   }
 
   // Check for suspicious keyword density
-  const keywords = SUSPICIOUS_KEYWORDS.filter(keyword =>
+  const keywords = SUSPICIOUS_KEYWORDS.filter((keyword) =>
     input.toLowerCase().includes(keyword.toLowerCase())
   );
 
@@ -270,7 +270,7 @@ export function validatePromptInput(
   if (input.length > maxLength) {
     return {
       valid: false,
-      reason: `Input too long (${input.length} chars, max ${maxLength})`
+      reason: `Input too long (${input.length} chars, max ${maxLength})`,
     };
   }
 
@@ -281,11 +281,12 @@ export function validatePromptInput(
 
   // Check for excessive non-ASCII content (potential encoding attack)
   // eslint-disable-next-line no-control-regex
-  const nonAsciiRatio = (input.match(/[^\x00-\x7F]/g) || []).length / input.length;
+  const nonAsciiRatio =
+    (input.match(/[^\x00-\x7F]/g) || []).length / input.length;
   if (nonAsciiRatio > 0.5) {
     return {
       valid: false,
-      reason: 'Input contains excessive non-ASCII characters'
+      reason: 'Input contains excessive non-ASCII characters',
     };
   }
 
@@ -332,7 +333,8 @@ export function checkUserInput(input: string): {
   return {
     allowed: true,
     riskLevel: detection.riskLevel,
-    sanitizedInput: detection.riskLevel === 'medium' ? sanitizedInput : undefined,
+    sanitizedInput:
+      detection.riskLevel === 'medium' ? sanitizedInput : undefined,
   };
 }
 

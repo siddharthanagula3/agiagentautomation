@@ -1,4 +1,5 @@
 # Billing & Token System Audit Report
+
 **Date:** 2025-01-15
 **Severity:** CRITICAL 🔴
 **Impact:** Users cannot use chat features, seeing false "limit exceeded" errors
@@ -8,6 +9,7 @@
 ## Executive Summary
 
 The token enforcement system is querying the **WRONG database tables**, causing:
+
 - ❌ "Monthly limit exceeded" errors even for new users
 - ❌ "You've used 0 of 0 tokens" display
 - ❌ Chat interface blocked for all users
@@ -24,29 +26,33 @@ The token enforcement system is querying the **WRONG database tables**, causing:
 **Location:** `src/core/billing/token-enforcement-service.ts`
 
 **Lines 50-54 (`checkTokenSufficiency`):**
+
 ```typescript
 const { data: user, error } = await supabase
   .from('users')
-  .select('token_balance, subscription_tier')  // ❌ WRONG COLUMN
+  .select('token_balance, subscription_tier') // ❌ WRONG COLUMN
   .eq('id', userId)
   .single();
 ```
 
 **Lines 160-164 (`getUserTokenBalance`):**
+
 ```typescript
 const { data, error } = await supabase
   .from('users')
-  .select('token_balance')  // ❌ WRONG COLUMN
+  .select('token_balance') // ❌ WRONG COLUMN
   .eq('id', userId)
   .single();
 ```
 
 **Problem:**
+
 - `users` table does NOT have a `token_balance` column
 - Token balances are stored in `user_token_balances.current_balance`
 - Query returns `null`, causing balance to default to 0
 
 **Impact:**
+
 - ✅ Billing dashboard: Fixed (uses correct table)
 - ❌ Chat interface: Broken (uses wrong table)
 - ❌ Token enforcement: Broken (uses wrong table)
@@ -62,13 +68,14 @@ if (error || !user) {
   return {
     allowed: false,
     used: 0,
-    limit: 0,  // ❌ Shows as "0 of 0 tokens"
+    limit: 0, // ❌ Shows as "0 of 0 tokens"
     resetDate: new Date(),
   };
 }
 ```
 
 **Problem:**
+
 - When user query fails, returns `limit: 0`
 - Error message becomes: "You've used 0 of 0 tokens"
 - Should return sensible defaults (1M for free tier)
@@ -80,10 +87,11 @@ if (error || !user) {
 **Location:** `src/core/billing/token-enforcement-service.ts:302`
 
 ```typescript
-reason: `Monthly limit exceeded. You've used ${allowance.used.toLocaleString()} of ${allowance.limit.toLocaleString()} tokens...`
+reason: `Monthly limit exceeded. You've used ${allowance.used.toLocaleString()} of ${allowance.limit.toLocaleString()} tokens...`;
 ```
 
 **Problem:**
+
 - Message references "monthly usage" (from token_transactions)
 - Users expect to see "token balance remaining"
 - Two different concepts:
@@ -91,6 +99,7 @@ reason: `Monthly limit exceeded. You've used ${allowance.used.toLocaleString()} 
   - **Token balance**: Prepaid tokens remaining (all tiers)
 
 **Confusion:**
+
 - Free tier: "1M tokens/month limit" (monthly allowance)
 - Pro tier: "10M tokens balance" (prepaid balance)
 - Error mixes these concepts
@@ -100,11 +109,13 @@ reason: `Monthly limit exceeded. You've used ${allowance.used.toLocaleString()} 
 ### Issue #4: Fallback Logic Missing 🛡️
 
 **Current behavior:**
+
 ```typescript
-return data.token_balance || 0;  // ❌ Returns 0 if null
+return data.token_balance || 0; // ❌ Returns 0 if null
 ```
 
 **Problem:**
+
 - New users have no balance record → returns 0 → blocks all requests
 - Should default to free tier allocation (1M tokens)
 
@@ -115,6 +126,7 @@ return data.token_balance || 0;  // ❌ Returns 0 if null
 ### ✅ Correct Schema (Production)
 
 **Table:** `user_token_balances`
+
 ```sql
 CREATE TABLE user_token_balances (
   id UUID PRIMARY KEY,
@@ -128,6 +140,7 @@ CREATE TABLE user_token_balances (
 ```
 
 **Table:** `token_transactions`
+
 ```sql
 CREATE TABLE token_transactions (
   id UUID PRIMARY KEY,
@@ -141,6 +154,7 @@ CREATE TABLE token_transactions (
 ```
 
 **Table:** `users`
+
 ```sql
 -- ❌ DOES NOT HAVE token_balance column
 -- Has: id, email, plan, subscription_end_date, etc.
@@ -191,12 +205,14 @@ CREATE TABLE token_transactions (
 ## Impact Assessment
 
 ### Users Affected
+
 - ✅ **Billing Dashboard:** Working correctly (uses correct table)
 - ❌ **Chat Interface:** Completely broken for ALL users
 - ❌ **Mission Control:** Token checks fail
 - ❌ **Token Balance Display:** Shows null/0
 
 ### Error Messages Seen
+
 1. "Monthly limit exceeded" (even for new users with 0 usage)
 2. "You've used 0 of 0 tokens" (limit shows as 0)
 3. Chat requests blocked immediately
@@ -211,17 +227,19 @@ CREATE TABLE token_transactions (
 **File:** `src/core/billing/token-enforcement-service.ts:156-176`
 
 **Current:**
+
 ```typescript
 const { data, error } = await supabase
   .from('users')
-  .select('token_balance')  // ❌ Wrong table
+  .select('token_balance') // ❌ Wrong table
   .eq('id', userId)
   .single();
 
-return data.token_balance || 0;  // ❌ Returns 0 if null
+return data.token_balance || 0; // ❌ Returns 0 if null
 ```
 
 **Correct:**
+
 ```typescript
 // Query user_token_balances table
 const { data: balanceData, error: balanceError } = await supabase
@@ -252,10 +270,11 @@ return Math.max(balanceData.current_balance || 0, 0);
 **File:** `src/core/billing/token-enforcement-service.ts:44-91`
 
 **Current:**
+
 ```typescript
 const { data: user, error } = await supabase
   .from('users')
-  .select('token_balance, subscription_tier')  // ❌ Wrong
+  .select('token_balance, subscription_tier') // ❌ Wrong
   .eq('id', userId)
   .single();
 
@@ -263,6 +282,7 @@ const currentBalance = user.token_balance || 0;
 ```
 
 **Correct:**
+
 ```typescript
 // Get balance from correct table
 const currentBalance = await getUserTokenBalance(userId);
@@ -282,26 +302,24 @@ if (currentBalance === null) {
 **File:** `src/core/billing/token-enforcement-service.ts:215-222`
 
 **Current:**
+
 ```typescript
 return {
   allowed: false,
   used: 0,
-  limit: 0,  // ❌ Shows "0 of 0 tokens"
+  limit: 0, // ❌ Shows "0 of 0 tokens"
   resetDate: new Date(),
 };
 ```
 
 **Correct:**
+
 ```typescript
 return {
   allowed: false,
   used: 0,
-  limit: 1000000,  // ✅ Free tier default
-  resetDate: new Date(
-    new Date().getFullYear(),
-    new Date().getMonth() + 1,
-    1
-  ),
+  limit: 1000000, // ✅ Free tier default
+  resetDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
 };
 ```
 
@@ -310,13 +328,15 @@ return {
 **File:** `src/core/billing/token-enforcement-service.ts:302`
 
 **Current:**
+
 ```typescript
-reason: `Monthly limit exceeded. You've used ${allowance.used.toLocaleString()} of ${allowance.limit.toLocaleString()} tokens...`
+reason: `Monthly limit exceeded. You've used ${allowance.used.toLocaleString()} of ${allowance.limit.toLocaleString()} tokens...`;
 ```
 
 **Improved:**
+
 ```typescript
-reason: `Monthly limit reached. You've used ${allowance.used.toLocaleString()} of your ${allowance.limit.toLocaleString()} token monthly allowance. Limit resets ${allowance.resetDate.toLocaleDateString()}.`
+reason: `Monthly limit reached. You've used ${allowance.used.toLocaleString()} of your ${allowance.limit.toLocaleString()} token monthly allowance. Limit resets ${allowance.resetDate.toLocaleDateString()}.`;
 ```
 
 ---
@@ -324,6 +344,7 @@ reason: `Monthly limit reached. You've used ${allowance.used.toLocaleString()} o
 ## Testing Plan
 
 ### Test Case 1: New User (No Balance Record)
+
 ```
 1. Create new user account
 2. Send first chat message
@@ -333,6 +354,7 @@ reason: `Monthly limit reached. You've used ${allowance.used.toLocaleString()} o
 ```
 
 ### Test Case 2: Free User (With Balance)
+
 ```
 1. User with 500K token balance
 2. Send chat message (estimate: 1K tokens)
@@ -342,6 +364,7 @@ reason: `Monthly limit reached. You've used ${allowance.used.toLocaleString()} o
 ```
 
 ### Test Case 3: Pro User
+
 ```
 1. Pro user with 5M token balance
 2. Send chat message
@@ -350,6 +373,7 @@ reason: `Monthly limit reached. You've used ${allowance.used.toLocaleString()} o
 ```
 
 ### Test Case 4: Zero Balance User
+
 ```
 1. User with 0 token balance
 2. Send chat message
@@ -363,12 +387,14 @@ reason: `Monthly limit reached. You've used ${allowance.used.toLocaleString()} o
 ## Migration Steps
 
 ### Step 1: Fix Code
+
 1. Update `getUserTokenBalance()` to query `user_token_balances`
 2. Update `checkTokenSufficiency()` to use `getUserTokenBalance()`
 3. Fix error handling defaults
 4. Improve error messages
 
 ### Step 2: Database Check
+
 ```sql
 -- Verify user_token_balances table exists
 SELECT COUNT(*) FROM user_token_balances;
@@ -381,6 +407,7 @@ WHERE utb.id IS NULL;
 ```
 
 ### Step 3: Initialize Missing Balances
+
 ```sql
 -- Create balance records for users without them
 INSERT INTO user_token_balances (user_id, current_balance, lifetime_granted, lifetime_used)
@@ -401,6 +428,7 @@ WHERE utb.id IS NULL;
 ```
 
 ### Step 4: Deploy & Monitor
+
 1. Deploy code fixes
 2. Monitor error logs for token-related errors
 3. Check user_token_balances table for negative balances
@@ -411,11 +439,13 @@ WHERE utb.id IS NULL;
 ## Success Metrics
 
 ✅ **Before Fixes:**
+
 - Chat success rate: ~0% (all users blocked)
 - Error rate: ~100% ("limit exceeded")
 - Token balance display: Broken (shows null/0)
 
 ✅ **After Fixes:**
+
 - Chat success rate: ~100% (for users with balance)
 - Error rate: <1% (only users with 0 balance)
 - Token balance display: Accurate and real-time
@@ -425,10 +455,12 @@ WHERE utb.id IS NULL;
 ## Related Files
 
 ### Fixed (Billing Dashboard)
+
 - ✅ `src/features/billing/pages/BillingDashboard.tsx` (commit: 31a7d54)
 - ✅ `src/shared/ui/progress.tsx` (commit: 31a7d54)
 
 ### Need Fixing (Token Enforcement)
+
 - ❌ `src/core/billing/token-enforcement-service.ts` (CRITICAL)
 - ❌ `src/features/chat/components/TokenBalanceDisplay.tsx` (uses getUserTokenBalance)
 - 📝 `src/core/ai/llm/unified-language-model.ts` (calls canUserMakeRequest)
@@ -438,18 +470,21 @@ WHERE utb.id IS NULL;
 ## Recommendations
 
 ### Immediate Actions (P0 - Critical)
+
 1. ✅ Fix `getUserTokenBalance()` to query correct table
 2. ✅ Fix `checkTokenSufficiency()` to use correct balance source
 3. ✅ Fix error handling to return sensible defaults
 4. ✅ Initialize missing user balance records
 
 ### Short-term (P1 - High)
+
 1. Add database migration to ensure all users have balance records
 2. Add monitoring/alerts for token balance failures
 3. Improve error messages to be more user-friendly
 4. Add retry logic for database queries
 
 ### Long-term (P2 - Medium)
+
 1. Consolidate token balance logic into single service
 2. Add caching for balance checks (reduce DB load)
 3. Add balance threshold warnings (before hitting 0)

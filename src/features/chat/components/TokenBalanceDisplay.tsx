@@ -95,7 +95,11 @@ export function TokenBalanceDisplay({
         </span>
         {isCritical && (
           <Link to="/billing">
-            <Button size="sm" variant="destructive" className="ml-2 h-6 text-xs">
+            <Button
+              size="sm"
+              variant="destructive"
+              className="ml-2 h-6 text-xs"
+            >
               Buy Now
             </Button>
           </Link>
@@ -156,8 +160,9 @@ export function TokenBalanceDisplay({
 
             {isCritical && (
               <div className="mt-3 rounded-md bg-red-100 p-2 text-xs text-red-700">
-                ⚠️ <strong>Action Required:</strong> Your token balance is critically low.
-                Purchase more tokens to continue using AI features.
+                ⚠️ <strong>Action Required:</strong> Your token balance is
+                critically low. Purchase more tokens to continue using AI
+                features.
               </div>
             )}
 

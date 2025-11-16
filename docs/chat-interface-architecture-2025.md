@@ -151,22 +151,22 @@ ModernChatInterface
 
 ### Component Responsibility Matrix
 
-| Component | Responsibilities | State | Side Effects |
-|-----------|-----------------|-------|--------------|
-| **TopBar** | Navigation, model/mode selection | Local UI state | None |
-| **ModelSelector** | Display available models, handle selection | Local selection | Update chat config |
-| **ModeSelector** | Toggle Fast/Balanced/Thinking modes | Local selection | Update message processing |
-| **TokenUsageDisplay** | Show real-time token consumption | Subscribes to token store | None |
-| **LeftSidebar** | Conversation history management | Subscribes to chat store | Load conversations |
-| **ConversationList** | Display, search, filter conversations | Local filters | Fetch conversations |
-| **MainChatArea** | Message display and input orchestration | Subscribes to message store | Scroll management |
-| **MessageList** | Render messages with virtualization | Computed from store | Auto-scroll, lazy load |
-| **AIMessage** | Display AI responses with tools/artifacts | Individual message state | None |
-| **ThinkingModeDisplay** | Visualize reasoning process | Thinking steps state | Animate progress |
-| **ToolExecutionDisplay** | Show tool calls and results | Tool execution state | Collapsible state |
-| **ChatInput** | Handle user input and attachments | Local input state | Submit messages |
-| **RightPanel** | Display artifacts, tools, context | Active tab state | None |
-| **ArtifactViewer** | Render code, images, documents | Current artifact | Syntax highlighting |
+| Component                | Responsibilities                           | State                       | Side Effects              |
+| ------------------------ | ------------------------------------------ | --------------------------- | ------------------------- |
+| **TopBar**               | Navigation, model/mode selection           | Local UI state              | None                      |
+| **ModelSelector**        | Display available models, handle selection | Local selection             | Update chat config        |
+| **ModeSelector**         | Toggle Fast/Balanced/Thinking modes        | Local selection             | Update message processing |
+| **TokenUsageDisplay**    | Show real-time token consumption           | Subscribes to token store   | None                      |
+| **LeftSidebar**          | Conversation history management            | Subscribes to chat store    | Load conversations        |
+| **ConversationList**     | Display, search, filter conversations      | Local filters               | Fetch conversations       |
+| **MainChatArea**         | Message display and input orchestration    | Subscribes to message store | Scroll management         |
+| **MessageList**          | Render messages with virtualization        | Computed from store         | Auto-scroll, lazy load    |
+| **AIMessage**            | Display AI responses with tools/artifacts  | Individual message state    | None                      |
+| **ThinkingModeDisplay**  | Visualize reasoning process                | Thinking steps state        | Animate progress          |
+| **ToolExecutionDisplay** | Show tool calls and results                | Tool execution state        | Collapsible state         |
+| **ChatInput**            | Handle user input and attachments          | Local input state           | Submit messages           |
+| **RightPanel**           | Display artifacts, tools, context          | Active tab state            | None                      |
+| **ArtifactViewer**       | Render code, images, documents             | Current artifact            | Syntax highlighting       |
 
 ---
 
@@ -209,6 +209,7 @@ ModernChatInterface
 ### State Management Strategy
 
 **Principles:**
+
 1. **Separation of Concerns**: Each store handles a distinct domain
 2. **Computed Values**: Derive state instead of duplicating
 3. **Selective Subscriptions**: Components subscribe only to needed slices
@@ -216,6 +217,7 @@ ModernChatInterface
 5. **Persistence**: Auto-save conversation state to Supabase
 
 **Store Dependencies:**
+
 ```
 chat-configuration-store (independent)
     ↓
@@ -235,12 +237,14 @@ conversation-history-store (persists to DB)
 **UI Component**: Dropdown in top bar
 
 **Available Models**:
+
 - OpenAI: GPT-4o, GPT-4o-mini, o1-preview, o1-mini
 - Anthropic: Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku
 - Google: Gemini 1.5 Pro, Gemini 1.5 Flash, Gemini 2.0 Flash
 - Perplexity: Sonar Pro, Sonar
 
 **Features**:
+
 - Model capabilities badge (context window, multimodal, speed)
 - Cost per million tokens display
 - Availability indicator (green/yellow/red)
@@ -248,6 +252,7 @@ conversation-history-store (persists to DB)
 - Default model preference saved per user
 
 **Implementation**:
+
 ```typescript
 interface ModelOption {
   id: string;
@@ -266,17 +271,20 @@ interface ModelOption {
 **UI Component**: Toggle group in top bar
 
 **Available Modes**:
+
 - **Fast Mode**: Optimized for speed, minimal processing
 - **Balanced Mode**: Default, balances quality and speed
 - **Thinking Mode**: Extended reasoning, shows thought process
 
 **Features**:
+
 - Visual indicator in messages (badge)
 - Mode-specific UI changes (thinking progress bar)
 - Auto-mode suggestion based on query complexity
 - Keyboard shortcut: Ctrl+Shift+M to toggle
 
 **Thinking Mode Visualization**:
+
 ```
 ┌─────────────────────────────────────┐
 │ Thinking... (Step 2 of 5)          │
@@ -294,6 +302,7 @@ interface ModelOption {
 **UI Component**: Live counter in top bar and bottom bar
 
 **Metrics**:
+
 - Input tokens (current message)
 - Output tokens (AI response)
 - Total session tokens
@@ -301,12 +310,14 @@ interface ModelOption {
 - Remaining credits (if applicable)
 
 **Visual Design**:
+
 ```
 Tokens: 1,234 / 50,000  Cost: $0.05  |  Credits: 950 remaining
 ████████████████████████████████░░░░░░░ 82%
 ```
 
 **Implementation**:
+
 - Subscribe to `token-usage-tracker` service
 - Update in real-time during streaming
 - Persist to database on message completion
@@ -317,6 +328,7 @@ Tokens: 1,234 / 50,000  Cost: $0.05  |  Credits: 950 remaining
 **UI Component**: Collapsible accordion within AI messages
 
 **Features**:
+
 - Tool name with icon
 - Parameters passed (JSON formatted)
 - Execution status (pending, running, completed, failed)
@@ -325,6 +337,7 @@ Tokens: 1,234 / 50,000  Cost: $0.05  |  Credits: 950 remaining
 - Expand/collapse for detailed view
 
 **Visual Design**:
+
 ```
 ┌─────────────────────────────────────────┐
 │ 🔧 Web Search                      ▼    │
@@ -342,6 +355,7 @@ Tokens: 1,234 / 50,000  Cost: $0.05  |  Credits: 950 remaining
 ```
 
 **Implementation**:
+
 - Track tool calls via `tool-execution-engine`
 - Stream tool status updates
 - Store tool results in message metadata
@@ -352,6 +366,7 @@ Tokens: 1,234 / 50,000  Cost: $0.05  |  Credits: 950 remaining
 **UI Component**: Right panel with tabbed interface
 
 **Artifact Types**:
+
 - Code blocks (with syntax highlighting)
 - HTML/React components (live preview)
 - Images (generated or uploaded)
@@ -360,6 +375,7 @@ Tokens: 1,234 / 50,000  Cost: $0.05  |  Credits: 950 remaining
 - JSON/YAML data structures
 
 **Features**:
+
 - Live code preview with hot reload
 - Copy to clipboard button
 - Download artifact
@@ -368,6 +384,7 @@ Tokens: 1,234 / 50,000  Cost: $0.05  |  Credits: 950 remaining
 - Version history (compare changes)
 
 **Code Preview Layout**:
+
 ```
 ┌─────────────────────────────────────────┐
 │ [Code] [Preview] [Console]        [⤢]  │
@@ -392,6 +409,7 @@ Tokens: 1,234 / 50,000  Cost: $0.05  |  Credits: 950 remaining
 **UI Component**: Export button in conversation menu
 
 **Export Formats**:
+
 - Markdown (.md)
 - PDF (formatted)
 - JSON (structured data)
@@ -399,6 +417,7 @@ Tokens: 1,234 / 50,000  Cost: $0.05  |  Credits: 950 remaining
 - Plain text (.txt)
 
 **Export Options**:
+
 - Include/exclude thinking process
 - Include/exclude tool executions
 - Include/exclude artifacts
@@ -406,6 +425,7 @@ Tokens: 1,234 / 50,000  Cost: $0.05  |  Credits: 950 remaining
 - Message filtering
 
 **Implementation**:
+
 ```typescript
 interface ExportOptions {
   format: 'markdown' | 'pdf' | 'json' | 'html' | 'text';
@@ -422,6 +442,7 @@ interface ExportOptions {
 **UI Component**: Search bar in left sidebar
 
 **Features**:
+
 - Full-text search across all messages
 - Filter by date range
 - Filter by message type (user/AI)
@@ -432,6 +453,7 @@ interface ExportOptions {
 - Search history
 
 **Search UI**:
+
 ```
 ┌─────────────────────────────────────────┐
 │ 🔍 Search conversations...              │
@@ -454,6 +476,7 @@ interface ExportOptions {
 **UI Component**: Toggle in top bar
 
 **Features**:
+
 - Not saved to history
 - No database persistence
 - Cleared on browser close
@@ -462,6 +485,7 @@ interface ExportOptions {
 - Visual indicator (incognito icon)
 
 **Implementation**:
+
 - Use session storage instead of database
 - Skip `chat-history-persistence` service
 - Disable auto-save
@@ -964,10 +988,10 @@ src/
 
 ```typescript
 const breakpoints = {
-  mobile: '0px',      // < 768px
-  tablet: '768px',    // 768px - 1024px
-  desktop: '1024px',  // > 1024px
-  wide: '1440px'      // > 1440px
+  mobile: '0px', // < 768px
+  tablet: '768px', // 768px - 1024px
+  desktop: '1024px', // > 1024px
+  wide: '1440px', // > 1440px
 };
 ```
 
@@ -990,6 +1014,7 @@ const breakpoints = {
 ```
 
 **Mobile Adaptations:**
+
 - Left sidebar opens as slide-in overlay (hamburger menu)
 - Right panel opens as modal (bottom sheet)
 - Top bar collapses to icons only
@@ -1015,6 +1040,7 @@ const breakpoints = {
 ```
 
 **Tablet Adaptations:**
+
 - Left sidebar always visible (30% width)
 - Main chat area takes remaining space
 - Right panel opens as overlay when needed
@@ -1038,6 +1064,7 @@ const breakpoints = {
 ```
 
 **Desktop Adaptations:**
+
 - Three-column layout (sidebar + main + panel)
 - Left sidebar: 20% width (min 280px, max 360px)
 - Main chat: 50-60% width (max 800px for readability)
@@ -1110,6 +1137,7 @@ const MessageList: React.FC = ({ messages }) => {
 ```
 
 **Benefits**:
+
 - Renders only visible messages (~20 at a time)
 - Reduces DOM nodes from 1000+ to ~30
 - Smooth scrolling even with 10,000+ messages
@@ -1120,7 +1148,9 @@ const MessageList: React.FC = ({ messages }) => {
 
 ```typescript
 // Heavy components loaded on demand
-const ArtifactViewer = lazy(() => import('./components/artifacts/ArtifactViewer'));
+const ArtifactViewer = lazy(
+  () => import('./components/artifacts/ArtifactViewer')
+);
 const CodePreview = lazy(() => import('./components/artifacts/CodePreview'));
 const ExportDialog = lazy(() => import('./components/export/ExportDialog'));
 
@@ -1131,6 +1161,7 @@ const handleMouseEnter = () => {
 ```
 
 **Split Points**:
+
 - Right panel (artifacts, tools) - load when panel opens
 - Export functionality - load when export clicked
 - Advanced settings - load when settings opened
@@ -1190,7 +1221,7 @@ const useStreamingOptimization = () => {
   }, [buffer, displayed]);
 
   const appendChunk = useCallback((chunk: string) => {
-    setBuffer(prev => prev + chunk);
+    setBuffer((prev) => prev + chunk);
   }, []);
 
   return { displayed, appendChunk };
@@ -1217,7 +1248,9 @@ const useTokenCounter = (text: string) => {
   const workerRef = useRef<Worker>();
 
   useEffect(() => {
-    workerRef.current = new Worker(new URL('./token-counter.worker', import.meta.url));
+    workerRef.current = new Worker(
+      new URL('./token-counter.worker', import.meta.url)
+    );
     workerRef.current.onmessage = (e) => setTokens(e.data.tokens);
     return () => workerRef.current?.terminate();
   }, []);
@@ -1256,11 +1289,12 @@ const useConversationSearch = () => {
   const [results, setResults] = useState<SearchResult[]>([]);
 
   const debouncedSearch = useMemo(
-    () => debounce(async (q: string) => {
-      if (q.length < 2) return;
-      const results = await searchService.search(q);
-      setResults(results);
-    }, 300),
+    () =>
+      debounce(async (q: string) => {
+        if (q.length < 2) return;
+        const results = await searchService.search(q);
+        setResults(results);
+      }, 300),
     []
   );
 
@@ -1279,7 +1313,7 @@ const useConversationSearch = () => {
 const useChatInterface = () => {
   // Only re-render when isStreaming changes
   const isStreaming = useChatInterfaceStore(
-    state => state.isStreaming,
+    (state) => state.isStreaming,
     shallow
   );
 
@@ -1297,22 +1331,22 @@ const chatInterfaceStore = create<ChatInterfaceState>()(
         state.streamingMessageId = messageId;
         state.inputValue = '';
       });
-    }
+    },
   }))
 );
 ```
 
 ### Performance Targets
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Initial Load | < 2s | Time to interactive |
-| Message Render | < 50ms | Per message |
-| Streaming Update | 60fps | No dropped frames |
-| Scroll Performance | 60fps | Smooth scrolling |
-| Search Response | < 100ms | First result displayed |
-| Input Lag | < 16ms | Key press to display |
-| Memory Usage | < 200MB | For 1000 messages |
+| Metric             | Target  | Measurement            |
+| ------------------ | ------- | ---------------------- |
+| Initial Load       | < 2s    | Time to interactive    |
+| Message Render     | < 50ms  | Per message            |
+| Streaming Update   | 60fps   | No dropped frames      |
+| Scroll Performance | 60fps   | Smooth scrolling       |
+| Search Response    | < 100ms | First result displayed |
+| Input Lag          | < 16ms  | Key press to display   |
+| Memory Usage       | < 200MB | For 1000 messages      |
 
 ---
 
@@ -1324,20 +1358,20 @@ const chatInterfaceStore = create<ChatInterfaceState>()(
 
 **All interactive elements must be keyboard accessible:**
 
-| Action | Keyboard Shortcut |
-|--------|-------------------|
-| New conversation | Ctrl/Cmd + N |
-| Search conversations | Ctrl/Cmd + K |
-| Focus input | Ctrl/Cmd + L |
-| Send message | Enter |
-| New line in input | Shift + Enter |
-| Toggle left sidebar | Ctrl/Cmd + B |
-| Toggle right panel | Ctrl/Cmd + . |
-| Navigate messages | Arrow Up/Down |
-| Copy message | Ctrl/Cmd + C (when message focused) |
-| Regenerate message | Ctrl/Cmd + R (when message focused) |
-| Toggle mode | Ctrl/Cmd + Shift + M |
-| Stop generation | Escape |
+| Action               | Keyboard Shortcut                   |
+| -------------------- | ----------------------------------- |
+| New conversation     | Ctrl/Cmd + N                        |
+| Search conversations | Ctrl/Cmd + K                        |
+| Focus input          | Ctrl/Cmd + L                        |
+| Send message         | Enter                               |
+| New line in input    | Shift + Enter                       |
+| Toggle left sidebar  | Ctrl/Cmd + B                        |
+| Toggle right panel   | Ctrl/Cmd + .                        |
+| Navigate messages    | Arrow Up/Down                       |
+| Copy message         | Ctrl/Cmd + C (when message focused) |
+| Regenerate message   | Ctrl/Cmd + R (when message focused) |
+| Toggle mode          | Ctrl/Cmd + Shift + M                |
+| Stop generation      | Escape                              |
 
 **Implementation:**
 
@@ -1472,9 +1506,9 @@ module.exports = {
       colors: {
         // Accessible color palette
         text: {
-          primary: '#0A0A0A',    // 19:1 on white
-          secondary: '#505050',  // 7:1 on white
-          tertiary: '#737373',   // 4.6:1 on white (AA)
+          primary: '#0A0A0A', // 19:1 on white
+          secondary: '#505050', // 7:1 on white
+          tertiary: '#737373', // 4.6:1 on white (AA)
         },
         background: {
           primary: '#FFFFFF',
@@ -1482,21 +1516,22 @@ module.exports = {
           tertiary: '#E5E5E5',
         },
         border: {
-          DEFAULT: '#D4D4D4',    // 3:1 on white (UI elements)
+          DEFAULT: '#D4D4D4', // 3:1 on white (UI elements)
         },
         // High contrast mode colors
         hcm: {
           text: '#000000',
           background: '#FFFFFF',
           link: '#0000FF',
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 };
 ```
 
 **Ensure contrast in all states:**
+
 - Default
 - Hover
 - Focus
@@ -1546,7 +1581,7 @@ const MessageList: React.FC = () => {
 <div className="flex flex-col gap-2">
   <label htmlFor="temperature" className="text-sm font-medium">
     Temperature
-    <span className="text-muted-foreground ml-2">(0.0 - 2.0)</span>
+    <span className="ml-2 text-muted-foreground">(0.0 - 2.0)</span>
   </label>
   <input
     id="temperature"
@@ -1574,6 +1609,7 @@ const MessageList: React.FC = () => {
 **Goals**: Set up core architecture and basic UI
 
 **Tasks**:
+
 1. Create file structure and base components
 2. Implement Zustand stores (chat-interface, message-processing)
 3. Build TopBar with model/mode selectors
@@ -1582,6 +1618,7 @@ const MessageList: React.FC = () => {
 6. Set up routing and full-screen layout
 
 **Deliverables**:
+
 - Working single-conversation chat interface
 - Model and mode selection functional
 - Basic message display and input
@@ -1591,6 +1628,7 @@ const MessageList: React.FC = () => {
 **Goals**: Add streaming, thinking mode, and tool execution
 
 **Tasks**:
+
 1. Implement message streaming with optimization
 2. Build ThinkingModeDisplay with progress indicator
 3. Create ToolExecutionDisplay components
@@ -1599,6 +1637,7 @@ const MessageList: React.FC = () => {
 6. Add message actions (copy, regenerate, edit)
 
 **Deliverables**:
+
 - Streaming responses with smooth animations
 - Thinking mode visualization
 - Tool execution display
@@ -1609,6 +1648,7 @@ const MessageList: React.FC = () => {
 **Goals**: Multi-conversation support and search
 
 **Tasks**:
+
 1. Build LeftSidebar with ConversationList
 2. Implement conversation CRUD operations
 3. Add search functionality with highlighting
@@ -1617,6 +1657,7 @@ const MessageList: React.FC = () => {
 6. Implement conversation export
 
 **Deliverables**:
+
 - Full conversation history management
 - Search across all conversations
 - Export to multiple formats
@@ -1626,6 +1667,7 @@ const MessageList: React.FC = () => {
 **Goals**: Artifacts, advanced UI, and right panel
 
 **Tasks**:
+
 1. Build RightPanel with tabbed interface
 2. Create ArtifactViewer with code preview
 3. Implement live preview for HTML/React
@@ -1634,6 +1676,7 @@ const MessageList: React.FC = () => {
 6. Create quick settings panel
 
 **Deliverables**:
+
 - Complete artifact system
 - Right panel with all tabs functional
 - Context-aware assistance
@@ -1643,6 +1686,7 @@ const MessageList: React.FC = () => {
 **Goals**: Performance, accessibility, and responsive design
 
 **Tasks**:
+
 1. Implement message virtualization
 2. Add keyboard shortcuts
 3. Complete accessibility audit (WCAG AA)
@@ -1651,6 +1695,7 @@ const MessageList: React.FC = () => {
 6. Performance profiling and optimization
 
 **Deliverables**:
+
 - Smooth performance with 1000+ messages
 - Full keyboard navigation
 - WCAG AA compliant
@@ -1661,6 +1706,7 @@ const MessageList: React.FC = () => {
 **Goals**: Comprehensive testing and developer docs
 
 **Tasks**:
+
 1. Write unit tests for all components
 2. Create integration tests for critical flows
 3. E2E tests with Playwright
@@ -1669,6 +1715,7 @@ const MessageList: React.FC = () => {
 6. Write component documentation and Storybook stories
 
 **Deliverables**:
+
 - 80%+ test coverage
 - All accessibility tests passing
 - Complete component library documentation
@@ -1757,17 +1804,17 @@ module.exports = {
 // Consistent component structure
 const Message: React.FC<MessageProps> = ({ message, variant = 'user' }) => {
   return (
-    <div className={cn(
-      "flex gap-3 p-4 rounded-lg transition-colors",
-      variant === 'user' && "bg-secondary",
-      variant === 'assistant' && "bg-muted/50",
-      "hover:bg-accent/5"
-    )}>
-      <Avatar className="h-8 w-8 shrink-0">
-        {/* Avatar content */}
-      </Avatar>
+    <div
+      className={cn(
+        'flex gap-3 rounded-lg p-4 transition-colors',
+        variant === 'user' && 'bg-secondary',
+        variant === 'assistant' && 'bg-muted/50',
+        'hover:bg-accent/5'
+      )}
+    >
+      <Avatar className="h-8 w-8 shrink-0">{/* Avatar content */}</Avatar>
 
-      <div className="flex-1 space-y-2 min-w-0">
+      <div className="min-w-0 flex-1 space-y-2">
         <MessageContent content={message.content} />
         <MessageActions message={message} />
       </div>
@@ -1791,7 +1838,7 @@ const ThemeToggle: React.FC = () => {
     <Button
       variant="ghost"
       size="sm"
-      onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
+      onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}
     >
       {theme === 'light' ? <Moon /> : <Sun />}
     </Button>

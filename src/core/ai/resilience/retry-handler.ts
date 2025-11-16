@@ -28,14 +28,19 @@ export class RetryHandler {
   private readonly maxDelay: number;
   private readonly backoffMultiplier: number;
   private readonly retryableErrors: (error: Error) => boolean;
-  private readonly onRetry?: (attempt: number, error: Error, nextDelay: number) => void;
+  private readonly onRetry?: (
+    attempt: number,
+    error: Error,
+    nextDelay: number
+  ) => void;
 
   constructor(options: RetryOptions = {}) {
     this.maxAttempts = options.maxAttempts ?? 3;
     this.initialDelay = options.initialDelay ?? 2000; // 2 seconds
     this.maxDelay = options.maxDelay ?? 32000; // 32 seconds
     this.backoffMultiplier = options.backoffMultiplier ?? 2;
-    this.retryableErrors = options.retryableErrors ?? this.defaultRetryableErrors;
+    this.retryableErrors =
+      options.retryableErrors ?? this.defaultRetryableErrors;
     this.onRetry = options.onRetry;
   }
 
@@ -186,7 +191,11 @@ export class RetryHandler {
     }
 
     // Server errors (5xx)
-    if (error.message.includes('500') || error.message.includes('502') || error.message.includes('503')) {
+    if (
+      error.message.includes('500') ||
+      error.message.includes('502') ||
+      error.message.includes('503')
+    ) {
       return true;
     }
 
@@ -209,7 +218,9 @@ export class RetryHandler {
 /**
  * Create a retry handler with common presets
  */
-export function createRetryHandler(preset: 'default' | 'aggressive' | 'conservative' = 'default'): RetryHandler {
+export function createRetryHandler(
+  preset: 'default' | 'aggressive' | 'conservative' = 'default'
+): RetryHandler {
   switch (preset) {
     case 'aggressive':
       return new RetryHandler({
@@ -241,7 +252,10 @@ export function createRetryHandler(preset: 'default' | 'aggressive' | 'conservat
 /**
  * Convenience function to retry an async operation
  */
-export async function withRetry<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<T> {
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  options?: RetryOptions
+): Promise<T> {
   const handler = new RetryHandler(options);
   return handler.execute(fn);
 }
@@ -357,7 +371,10 @@ export class MessageRetryQueue {
   /**
    * Retry a specific message
    */
-  async retryMessage(messageId: string, sendFn: (message: QueuedMessage) => Promise<void>): Promise<void> {
+  async retryMessage(
+    messageId: string,
+    sendFn: (message: QueuedMessage) => Promise<void>
+  ): Promise<void> {
     const message = this.queue.get(messageId);
     if (!message) {
       throw new Error(`Message ${messageId} not found in queue`);
@@ -372,7 +389,9 @@ export class MessageRetryQueue {
   /**
    * Retry all queued messages
    */
-  async retryAll(sendFn: (message: QueuedMessage) => Promise<void>): Promise<void> {
+  async retryAll(
+    sendFn: (message: QueuedMessage) => Promise<void>
+  ): Promise<void> {
     const messages = Array.from(this.queue.values());
 
     for (const message of messages) {

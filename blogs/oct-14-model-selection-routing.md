@@ -29,31 +29,37 @@ The capability gaps are unbridgeable. Organizations using single providers leave
 Effective routing starts with task classification—mapping specific operations to model strengths:
 
 **Task Category 1: Structured Orchestration & JSON Generation**
+
 - **Examples:** API responses, workflow delegation, multi-agent coordination, database queries
 - **Optimal Model:** Claude Sonnet 4.5 ($0.003/1K input, $0.015/1K output)
 - **Why:** 98.7% schema compliance eliminates retry overhead, reducing total cost despite premium output pricing
 
 **Task Category 2: Multi-Step Planning & Constraint Satisfaction**
+
 - **Examples:** Project planning, resource allocation, optimization problems, complex reasoning
 - **Optimal Model:** GPT-5.1 ($0.006/1K tokens)
 - **Why:** 85-90% plan success rate vs. 65-70% for alternatives. Higher base cost offset by dramatically fewer failures
 
 **Task Category 3: Visual Analysis & UI Reasoning**
+
 - **Examples:** Screenshot analysis, UI testing, accessibility audits, design validation
 - **Optimal Model:** o3 ($0.008/1K tokens with vision)
 - **Why:** Semantic understanding catches issues pixel-matching and generic vision models miss. Quality gap justifies premium pricing
 
 **Task Category 4: Multimodal Document & Video Processing**
+
 - **Examples:** PDF analysis, video transcription, mixed-media support tickets
 - **Optimal Model:** Gemini 2.5 Pro ($0.004/1K tokens multimodal)
 - **Why:** Single-inference processing eliminates orchestration overhead. 60% latency reduction vs. multi-model approaches
 
 **Task Category 5: Tool-Heavy Debugging & Iterative Problem-Solving**
+
 - **Examples:** Code debugging, technical troubleshooting, hypothesis testing
 - **Optimal Model:** Kimi K2 ($0.003/1K tokens with tool cycles)
 - **Why:** Grounded reasoning reduces total tokens 55% vs. extended thinking approaches through continuous validation
 
 **Task Category 6: General Text Processing**
+
 - **Examples:** Summarization, simple extraction, content generation
 - **Optimal Model:** Claude Sonnet 4.5 or GPT-4 Turbo (cheapest available)
 - **Why:** Commodity tasks don't benefit from specialization. Optimize for cost.
@@ -65,36 +71,43 @@ Organizations implementing this classification report 35-50% cost reduction and 
 **Example Workflow: Customer Support Automation**
 
 **Incoming Ticket Processing:**
+
 - **Ticket classification:** Claude Sonnet 4.5 ($0.003/1K tokens)
   - Structured output required (category, priority, routing)
   - 98.7% schema compliance ensures reliable downstream processing
 
 **Planning Resolution Strategy:**
+
 - **Multi-step plan generation:** GPT-5.1 ($0.006/1K tokens)
   - Complex constraint satisfaction (SLA requirements, resource availability, escalation policies)
   - 85-90% plan success rate reduces manual intervention
 
 **Visual Content Analysis (if ticket includes screenshots):**
+
 - **UI/screenshot analysis:** o3 ($0.008/1K tokens)
   - Semantic understanding of error states, accessibility issues
   - Catches context visual-only models miss
 
 **Video Content Processing (if ticket includes screen recording):**
+
 - **Multimodal analysis:** Gemini 2.5 Pro ($0.004/1K tokens)
   - Synchronized audio-visual understanding
   - Single inference eliminates transcription + vision orchestration
 
 **Technical Debugging (if resolution requires system investigation):**
+
 - **Tool-integrated troubleshooting:** Kimi K2 ($0.003/1K tokens)
   - Grounded reasoning with log analysis, system checks
   - 55% token reduction vs. traditional extended thinking
 
 **Response Generation:**
+
 - **Customer-facing message:** Claude Sonnet 4.5 ($0.015/1K output tokens)
   - Structured response format
   - Consistent tone and brand voice
 
 **Total Cost Per Ticket:**
+
 - Multi-provider routing: $0.11 average
 - Single-model approach (GPT-4 for everything): $0.19 average
 - **Savings: 42% cost reduction with improved quality**
@@ -124,11 +137,13 @@ Your constraint is architectural adaptability. The October 2025 model landscape 
 AGI Agent Automation's unified LLM service implements intelligent routing across all major providers:
 
 **Unified Interface:**
+
 ```typescript
 await unifiedLLMService.sendMessage(messages, sessionId, userId, provider?)
 ```
 
 The `provider` parameter is optional. If unspecified, the service routes based on message type:
+
 - Structured output tasks → Claude Sonnet 4.5
 - Planning tasks → GPT-5.1
 - Visual analysis → o3
@@ -137,6 +152,7 @@ The `provider` parameter is optional. If unspecified, the service routes based o
 
 **AI Employee Model Inheritance:**
 AI employees defined in `.agi/employees/*.md` specify `model: inherit`. The orchestrator selects optimal models based on task requirements:
+
 - Product Manager generating specs → GPT-5.1 (planning capability)
 - Senior Software Engineer implementing → Claude Sonnet 4.5 (structured output)
 - QA Engineer analyzing screenshots → o3 (visual reasoning)
@@ -146,6 +162,7 @@ This automatic routing means organizations get optimal model selection without m
 
 **Performance Monitoring:**
 The system tracks model performance across tasks:
+
 - Success rate by model × task type
 - Cost per successful operation
 - Latency percentiles

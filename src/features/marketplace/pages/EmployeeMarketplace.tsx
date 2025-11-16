@@ -74,7 +74,10 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   const [sortBy, setSortBy] = useState('popular');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isHiringAll, setIsHiringAll] = useState(false);
-  const [hiringProgress, setHiringProgress] = useState({ current: 0, total: 0 });
+  const [hiringProgress, setHiringProgress] = useState({
+    current: 0,
+    total: 0,
+  });
 
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
@@ -162,15 +165,18 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       let transformedEmployees = (dbEmployees || []).map((dbEmp) => {
         // Get cost from database or use defaults
         const cost = dbEmp.cost || { monthly: 99, yearly: 999 };
-        const monthlyPrice = typeof cost === 'object' && cost.monthly ? cost.monthly : 99;
-        const yearlyPrice = typeof cost === 'object' && cost.yearly ? cost.yearly : 999;
+        const monthlyPrice =
+          typeof cost === 'object' && cost.monthly ? cost.monthly : 99;
+        const yearlyPrice =
+          typeof cost === 'object' && cost.yearly ? cost.yearly : 999;
 
         return {
           id: dbEmp.employee_id || dbEmp.id,
           name: dbEmp.name,
           role: dbEmp.role,
           category: dbEmp.category || 'general',
-          description: dbEmp.system_prompt?.slice(0, 150) || `Expert ${dbEmp.role}`,
+          description:
+            dbEmp.system_prompt?.slice(0, 150) || `Expert ${dbEmp.role}`,
           provider: 'claude' as const, // Default provider
           price: monthlyPrice,
           originalPrice: monthlyPrice * 2,
@@ -317,7 +323,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       });
     } else {
       toast.warning(`Hired ${successCount} employees, ${failureCount} failed`, {
-        description: 'Some employees could not be hired. Please try again for failed employees.',
+        description:
+          'Some employees could not be hired. Please try again for failed employees.',
         duration: 5000,
       });
     }
@@ -342,7 +349,9 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           </Badge>
           <Button
             onClick={handleHireAll}
-            disabled={isHiringAll || employees.filter((e) => !e.isHired).length === 0}
+            disabled={
+              isHiringAll || employees.filter((e) => !e.isHired).length === 0
+            }
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
             {isHiringAll ? (

@@ -92,7 +92,9 @@ export const MarketplacePublicPage: React.FC = () => {
   }, [user?.id]);
 
   // Fetch employees from database
-  const { data: dbEmployees = [], isLoading: isLoadingEmployees } = useQuery<AIEmployee[]>({
+  const { data: dbEmployees = [], isLoading: isLoadingEmployees } = useQuery<
+    AIEmployee[]
+  >({
     queryKey: ['public-marketplace-employees', selectedCategory, searchQuery],
     queryFn: async () => {
       let query = supabase
@@ -124,15 +126,18 @@ export const MarketplacePublicPage: React.FC = () => {
       // Transform database employees to marketplace format
       return (data || []).map((dbEmp): AIEmployee => {
         const cost = dbEmp.cost || { monthly: 0, yearly: 0 };
-        const monthlyPrice = typeof cost === 'object' && cost.monthly ? cost.monthly : 0;
-        const yearlyPrice = typeof cost === 'object' && cost.yearly ? cost.yearly : 0;
+        const monthlyPrice =
+          typeof cost === 'object' && cost.monthly ? cost.monthly : 0;
+        const yearlyPrice =
+          typeof cost === 'object' && cost.yearly ? cost.yearly : 0;
 
         return {
           id: dbEmp.employee_id || dbEmp.id,
           name: dbEmp.name,
           role: dbEmp.role,
           category: dbEmp.category || 'general',
-          description: dbEmp.system_prompt?.slice(0, 150) || `Expert ${dbEmp.role}`,
+          description:
+            dbEmp.system_prompt?.slice(0, 150) || `Expert ${dbEmp.role}`,
           provider: 'claude' as const,
           price: monthlyPrice,
           originalPrice: monthlyPrice * 2,
@@ -250,7 +255,8 @@ export const MarketplacePublicPage: React.FC = () => {
                   <span className="bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text font-extrabold text-transparent">
                     FREE
                   </span>{' '}
-                  per month • {isLoadingEmployees ? '...' : dbEmployees.length} available
+                  per month • {isLoadingEmployees ? '...' : dbEmployees.length}{' '}
+                  available
                 </p>
               </div>
             </div>

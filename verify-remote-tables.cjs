@@ -27,7 +27,7 @@ async function verifyTables() {
     'conversation_participants',
     'agent_collaborations',
     'message_reactions',
-    'conversation_metadata'
+    'conversation_metadata',
   ];
 
   const results = {};
@@ -40,7 +40,10 @@ async function verifyTables() {
         .select('*', { count: 'exact', head: true });
 
       if (error) {
-        if (error.message.includes('does not exist') || error.code === '42P01') {
+        if (
+          error.message.includes('does not exist') ||
+          error.code === '42P01'
+        ) {
           results[table] = { exists: false, error: 'Table does not exist' };
         } else {
           results[table] = { exists: false, error: error.message };
@@ -60,9 +63,7 @@ async function verifyTables() {
   let allTablesExist = true;
   for (const [table, result] of Object.entries(results)) {
     const status = result.exists ? '✅' : '❌';
-    const details = result.exists
-      ? `EXISTS`
-      : `MISSING - ${result.error}`;
+    const details = result.exists ? `EXISTS` : `MISSING - ${result.error}`;
 
     console.log(`${status} ${table.padEnd(35)} ${details}`);
 
@@ -74,12 +75,18 @@ async function verifyTables() {
   console.log('═'.repeat(80));
 
   if (allTablesExist) {
-    console.log('\n✅ SUCCESS: All multi-agent chat tables exist on remote database!');
+    console.log(
+      '\n✅ SUCCESS: All multi-agent chat tables exist on remote database!'
+    );
     console.log('\n✨ Migration Status: COMPLETE ✨\n');
     process.exit(0);
   } else {
-    console.log('\n❌ INCOMPLETE: Some tables are missing from remote database');
-    console.log('\n📝 Action Required: Run `supabase db push --linked` to apply migrations\n');
+    console.log(
+      '\n❌ INCOMPLETE: Some tables are missing from remote database'
+    );
+    console.log(
+      '\n📝 Action Required: Run `supabase db push --linked` to apply migrations\n'
+    );
     process.exit(1);
   }
 }

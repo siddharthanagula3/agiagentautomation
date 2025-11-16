@@ -490,11 +490,12 @@ Please complete this task according to your role and capabilities.`;
         `🗣️ Starting conversation with ${selectedEmployees.length} employee(s)`
       );
 
-      const conversationResult = await agentConversationProtocol.startConversation(
-        request.input,
-        selectedEmployees,
-        request.userId
-      );
+      const conversationResult =
+        await agentConversationProtocol.startConversation(
+          request.input,
+          selectedEmployees,
+          request.userId
+        );
 
       // Display conversation to user (all agent messages are already in store via protocol)
       // Add final answer
@@ -699,7 +700,10 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
       });
 
       store.updateEmployeeStatus(employee.name, 'idle');
-      store.addEmployeeLog(employee.name, `Responded to: ${message.slice(0, 50)}...`);
+      store.addEmployeeLog(
+        employee.name,
+        `Responded to: ${message.slice(0, 50)}...`
+      );
 
       return response.content;
     } catch (error) {

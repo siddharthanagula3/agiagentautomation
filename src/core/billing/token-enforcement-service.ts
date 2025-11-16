@@ -224,9 +224,7 @@ export function estimateTokensForRequest(
  * Free tier: 1M tokens/month (matches billing dashboard display)
  * Pro tier: Unlimited with balance
  */
-export async function checkMonthlyAllowance(
-  userId: string
-): Promise<{
+export async function checkMonthlyAllowance(userId: string): Promise<{
   allowed: boolean;
   used: number;
   limit: number;

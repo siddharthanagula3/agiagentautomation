@@ -10,7 +10,10 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
-import { websocketManager, MessageType } from '@core/integrations/websocket-manager';
+import {
+  websocketManager,
+  MessageType,
+} from '@core/integrations/websocket-manager';
 import type { ChatMessage } from '../types';
 
 // Delivery status types
@@ -169,7 +172,7 @@ export class MessageDeliveryService {
       await this.saveMessageToDatabase(message);
 
       // Send via WebSocket to all recipients
-      const promises = record.recipientIds.map(recipientId =>
+      const promises = record.recipientIds.map((recipientId) =>
         websocketManager.send(`collaboration-${record.sessionId}`, {
           type: MessageType.CHAT,
           payload: {
@@ -226,7 +229,7 @@ export class MessageDeliveryService {
       const timer = setTimeout(() => {
         const message = this.pendingMessages.get(record.messageId);
         if (message) {
-          this.attemptDelivery(record, message).catch(error => {
+          this.attemptDelivery(record, message).catch((error) => {
             this.handleDeliveryFailure(record, error);
           });
         }
@@ -252,7 +255,8 @@ export class MessageDeliveryService {
    */
   private calculateRetryDelay(retryCount: number): number {
     const delay = Math.min(
-      this.retryPolicy.baseDelay * Math.pow(this.retryPolicy.backoffMultiplier, retryCount - 1),
+      this.retryPolicy.baseDelay *
+        Math.pow(this.retryPolicy.backoffMultiplier, retryCount - 1),
       this.retryPolicy.maxDelay
     );
 
@@ -266,8 +270,13 @@ export class MessageDeliveryService {
    */
   private setDeliveryTimeout(record: MessageDeliveryRecord): void {
     const timer = setTimeout(() => {
-      if (record.status === DeliveryStatus.SENT && record.metadata?.requiresAck) {
-        console.warn(`[MessageDelivery] Delivery timeout for message ${record.messageId}`);
+      if (
+        record.status === DeliveryStatus.SENT &&
+        record.metadata?.requiresAck
+      ) {
+        console.warn(
+          `[MessageDelivery] Delivery timeout for message ${record.messageId}`
+        );
         // Don't mark as failed, just note the timeout
         // The message may still be delivered
       }
@@ -283,7 +292,9 @@ export class MessageDeliveryService {
   async confirmDelivery(confirmation: DeliveryConfirmation): Promise<void> {
     const record = this.deliveryRecords.get(confirmation.messageId);
     if (!record) {
-      console.warn(`[MessageDelivery] Record not found for message ${confirmation.messageId}`);
+      console.warn(
+        `[MessageDelivery] Record not found for message ${confirmation.messageId}`
+      );
       return;
     }
 
@@ -301,7 +312,9 @@ export class MessageDeliveryService {
       this.emitStatusUpdate(record);
       this.clearPendingMessage(record.messageId);
 
-      console.log(`[MessageDelivery] Message ${record.messageId} delivered to ${confirmation.recipientId}`);
+      console.log(
+        `[MessageDelivery] Message ${record.messageId} delivered to ${confirmation.recipientId}`
+      );
     }
   }
 
@@ -331,7 +344,7 @@ export class MessageDeliveryService {
     // Update delivery record
     const record = this.deliveryRecords.get(messageId);
     if (record) {
-      const allRead = record.recipientIds.every(recipientId =>
+      const allRead = record.recipientIds.every((recipientId) =>
         this.isMessageReadBy(messageId, recipientId)
       );
 
@@ -343,19 +356,26 @@ export class MessageDeliveryService {
     }
 
     // Broadcast read receipt
-    await websocketManager.send(`collaboration-${sessionId}`, {
-      type: MessageType.READ_RECEIPT,
-      payload: receipt,
-      sessionId,
-      userId,
-    }).catch(error => {
-      console.error('[MessageDelivery] Failed to broadcast read receipt', error);
-    });
+    await websocketManager
+      .send(`collaboration-${sessionId}`, {
+        type: MessageType.READ_RECEIPT,
+        payload: receipt,
+        sessionId,
+        userId,
+      })
+      .catch((error) => {
+        console.error(
+          '[MessageDelivery] Failed to broadcast read receipt',
+          error
+        );
+      });
 
     // Save to database
     await this.saveReadReceiptToDatabase(receipt);
 
-    console.log(`[MessageDelivery] Message ${messageId} marked as read by ${userId}`);
+    console.log(
+      `[MessageDelivery] Message ${messageId} marked as read by ${userId}`
+    );
   }
 
   /**
@@ -363,7 +383,7 @@ export class MessageDeliveryService {
    */
   isMessageReadBy(messageId: string, userId: string): boolean {
     const receipts = this.readReceipts.get(messageId) || [];
-    return receipts.some(receipt => receipt.userId === userId);
+    return receipts.some((receipt) => receipt.userId === userId);
   }
 
   /**
@@ -451,7 +471,10 @@ export class MessageDeliveryService {
 
       if (error) throw error;
     } catch (error) {
-      console.error('[MessageDelivery] Failed to save message to database', error);
+      console.error(
+        '[MessageDelivery] Failed to save message to database',
+        error
+      );
       throw error;
     }
   }
@@ -459,7 +482,9 @@ export class MessageDeliveryService {
   /**
    * Save read receipt to database
    */
-  private async saveReadReceiptToDatabase(receipt: ReadReceiptRecord): Promise<void> {
+  private async saveReadReceiptToDatabase(
+    receipt: ReadReceiptRecord
+  ): Promise<void> {
     try {
       const { error } = await supabase.from('message_read_receipts').insert({
         message_id: receipt.messageId,
@@ -474,7 +499,10 @@ export class MessageDeliveryService {
         throw error;
       }
     } catch (error) {
-      console.error('[MessageDelivery] Failed to save read receipt to database', error);
+      console.error(
+        '[MessageDelivery] Failed to save read receipt to database',
+        error
+      );
       // Don't throw, read receipts are not critical
     }
   }
@@ -505,16 +533,18 @@ export class MessageDeliveryService {
    */
   private emitStatusUpdate(record: MessageDeliveryRecord): void {
     // Broadcast status update via WebSocket
-    websocketManager.broadcast({
-      type: MessageType.DELIVERY,
-      payload: {
-        messageId: record.messageId,
-        status: record.status,
-        timestamp: Date.now(),
-      },
-    }).catch(() => {
-      // Ignore broadcast errors
-    });
+    websocketManager
+      .broadcast({
+        type: MessageType.DELIVERY,
+        payload: {
+          messageId: record.messageId,
+          status: record.status,
+          timestamp: Date.now(),
+        },
+      })
+      .catch(() => {
+        // Ignore broadcast errors
+      });
   }
 
   /**

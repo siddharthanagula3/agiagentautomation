@@ -56,7 +56,9 @@ export function useChatPersistence(
   const mode = useMissionStore((state) => state.mode);
   const activeChatSession = useMissionStore((state) => state.activeChatSession);
 
-  const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
+  const [currentSession, setCurrentSession] = useState<ChatSession | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -126,7 +128,8 @@ export function useChatPersistence(
 
         return data.id;
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to create session';
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to create session';
         setError(errorMsg);
         toast.error(errorMsg);
         throw err;
@@ -178,7 +181,8 @@ export function useChatPersistence(
 
       toast.success('Session loaded');
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to load session';
+      const errorMsg =
+        err instanceof Error ? err.message : 'Failed to load session';
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -263,7 +267,8 @@ export function useChatPersistence(
 
         toast.success('Session title updated');
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to update title';
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to update title';
         toast.error(errorMsg);
       }
     },
@@ -271,35 +276,39 @@ export function useChatPersistence(
   );
 
   // Delete session
-  const deleteSession = useCallback(async (sid: string) => {
-    try {
-      // Delete messages first
-      const { error: messagesError } = await supabase
-        .from('chat_messages')
-        .delete()
-        .eq('session_id', sid);
+  const deleteSession = useCallback(
+    async (sid: string) => {
+      try {
+        // Delete messages first
+        const { error: messagesError } = await supabase
+          .from('chat_messages')
+          .delete()
+          .eq('session_id', sid);
 
-      if (messagesError) throw messagesError;
+        if (messagesError) throw messagesError;
 
-      // Delete session
-      const { error: sessionError } = await supabase
-        .from('chat_sessions')
-        .delete()
-        .eq('id', sid);
+        // Delete session
+        const { error: sessionError } = await supabase
+          .from('chat_sessions')
+          .delete()
+          .eq('id', sid);
 
-      if (sessionError) throw sessionError;
+        if (sessionError) throw sessionError;
 
-      if (currentSession?.id === sid) {
-        setCurrentSession(null);
+        if (currentSession?.id === sid) {
+          setCurrentSession(null);
+        }
+
+        toast.success('Session deleted');
+      } catch (err) {
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to delete session';
+        toast.error(errorMsg);
+        throw err;
       }
-
-      toast.success('Session deleted');
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to delete session';
-      toast.error(errorMsg);
-      throw err;
-    }
-  }, [currentSession]);
+    },
+    [currentSession]
+  );
 
   // Toggle auto-save
   const autoSave = useCallback((enabled: boolean) => {

@@ -3,7 +3,11 @@
  * Provides reusable test fixtures and builders for consistent test data
  */
 
-import type { Task, ActiveEmployee, MissionMessage } from '@shared/stores/mission-control-store';
+import type {
+  Task,
+  ActiveEmployee,
+  MissionMessage,
+} from '@shared/stores/mission-control-store';
 import type { AIEmployee } from '@core/types/ai-employee';
 
 let idCounter = 0;
@@ -30,7 +34,9 @@ export const createMockUser = (overrides: Partial<any> = {}) => ({
 /**
  * AI Employee Factory
  */
-export const createMockEmployee = (overrides: Partial<AIEmployee> = {}): AIEmployee => ({
+export const createMockEmployee = (
+  overrides: Partial<AIEmployee> = {}
+): AIEmployee => ({
   name: `employee-${generateId()}`,
   description: 'A skilled AI employee for testing',
   tools: ['Read', 'Write', 'Bash'],
@@ -42,26 +48,32 @@ export const createMockEmployee = (overrides: Partial<AIEmployee> = {}): AIEmplo
 /**
  * Specialized Employee Factories
  */
-export const createCodeReviewerEmployee = (): AIEmployee => createMockEmployee({
-  name: 'code-reviewer',
-  description: 'Reviews code for best practices and potential issues',
-  tools: ['Read', 'Grep', 'Glob'],
-  systemPrompt: 'You are an expert code reviewer focused on quality and maintainability.',
-});
+export const createCodeReviewerEmployee = (): AIEmployee =>
+  createMockEmployee({
+    name: 'code-reviewer',
+    description: 'Reviews code for best practices and potential issues',
+    tools: ['Read', 'Grep', 'Glob'],
+    systemPrompt:
+      'You are an expert code reviewer focused on quality and maintainability.',
+  });
 
-export const createDebuggerEmployee = (): AIEmployee => createMockEmployee({
-  name: 'debugger',
-  description: 'Finds and fixes bugs in code',
-  tools: ['Bash', 'Read', 'Edit', 'Grep'],
-  systemPrompt: 'You are an expert debugger skilled at identifying and resolving issues.',
-});
+export const createDebuggerEmployee = (): AIEmployee =>
+  createMockEmployee({
+    name: 'debugger',
+    description: 'Finds and fixes bugs in code',
+    tools: ['Bash', 'Read', 'Edit', 'Grep'],
+    systemPrompt:
+      'You are an expert debugger skilled at identifying and resolving issues.',
+  });
 
-export const createDataAnalystEmployee = (): AIEmployee => createMockEmployee({
-  name: 'data-analyst',
-  description: 'Analyzes data and generates insights',
-  tools: ['Read', 'Bash'],
-  systemPrompt: 'You are a data analyst expert at extracting insights from data.',
-});
+export const createDataAnalystEmployee = (): AIEmployee =>
+  createMockEmployee({
+    name: 'data-analyst',
+    description: 'Analyzes data and generates insights',
+    tools: ['Read', 'Bash'],
+    systemPrompt:
+      'You are a data analyst expert at extracting insights from data.',
+  });
 
 /**
  * Task Factory
@@ -80,7 +92,10 @@ export const createMockTask = (overrides: Partial<Task> = {}): Task => ({
 export const createPendingTask = (description: string): Task =>
   createMockTask({ description, status: 'pending' });
 
-export const createInProgressTask = (description: string, assignedTo: string): Task =>
+export const createInProgressTask = (
+  description: string,
+  assignedTo: string
+): Task =>
   createMockTask({
     description,
     status: 'in_progress',
@@ -88,7 +103,10 @@ export const createInProgressTask = (description: string, assignedTo: string): T
     startedAt: new Date(),
   });
 
-export const createCompletedTask = (description: string, result: string): Task =>
+export const createCompletedTask = (
+  description: string,
+  result: string
+): Task =>
   createMockTask({
     description,
     status: 'completed',
@@ -106,7 +124,9 @@ export const createFailedTask = (description: string, error: string): Task =>
 /**
  * Active Employee Factory
  */
-export const createMockActiveEmployee = (overrides: Partial<ActiveEmployee> = {}): ActiveEmployee => ({
+export const createMockActiveEmployee = (
+  overrides: Partial<ActiveEmployee> = {}
+): ActiveEmployee => ({
   name: `employee-${generateId()}`,
   status: 'idle',
   currentTool: null,
@@ -119,7 +139,9 @@ export const createMockActiveEmployee = (overrides: Partial<ActiveEmployee> = {}
 /**
  * Mission Message Factory
  */
-export const createMockMessage = (overrides: Partial<MissionMessage> = {}): MissionMessage => ({
+export const createMockMessage = (
+  overrides: Partial<MissionMessage> = {}
+): MissionMessage => ({
   id: generateId(),
   from: 'system',
   type: 'system',
@@ -137,10 +159,16 @@ export const createUserMessage = (content: string): MissionMessage =>
 export const createSystemMessage = (content: string): MissionMessage =>
   createMockMessage({ from: 'system', type: 'system', content });
 
-export const createEmployeeMessage = (employeeName: string, content: string): MissionMessage =>
+export const createEmployeeMessage = (
+  employeeName: string,
+  content: string
+): MissionMessage =>
   createMockMessage({ from: employeeName, type: 'employee', content });
 
-export const createTaskUpdateMessage = (taskId: string, content: string): MissionMessage =>
+export const createTaskUpdateMessage = (
+  taskId: string,
+  content: string
+): MissionMessage =>
   createMockMessage({
     type: 'task_update',
     content,
@@ -169,7 +197,8 @@ export const createMockMissionPlan = (
 
   return {
     plan: defaultPlan,
-    reasoning: 'Test plan reasoning: Breaking down the task into manageable steps.',
+    reasoning:
+      'Test plan reasoning: Breaking down the task into manageable steps.',
     ...overrides,
   };
 };
@@ -179,9 +208,15 @@ export const createMockMissionPlan = (
  */
 export const createCodeReviewPlan = (): MockMissionPlan => ({
   plan: [
-    { task: 'Read the source file to understand the code', tool_required: 'Read' },
+    {
+      task: 'Read the source file to understand the code',
+      tool_required: 'Read',
+    },
     { task: 'Search for common anti-patterns', tool_required: 'Grep' },
-    { task: 'Analyze code complexity and suggest improvements', tool_required: 'Read' },
+    {
+      task: 'Analyze code complexity and suggest improvements',
+      tool_required: 'Read',
+    },
   ],
   reasoning: 'Systematic code review approach: read, search, analyze.',
 });
@@ -212,7 +247,11 @@ export const createMockSupabaseEmployee = (overrides: Partial<any> = {}) => ({
   ...overrides,
 });
 
-export const createMockPurchasedEmployee = (userId: string, employeeId: string, overrides: Partial<any> = {}) => ({
+export const createMockPurchasedEmployee = (
+  userId: string,
+  employeeId: string,
+  overrides: Partial<any> = {}
+) => ({
   id: generateId(),
   user_id: userId,
   employee_id: employeeId,
@@ -255,7 +294,10 @@ export const createMockStripeWebhookEvent = (type: string, data: any) => ({
 /**
  * LLM Response Factory
  */
-export const createMockLLMResponse = (content: string, overrides: Partial<any> = {}) => ({
+export const createMockLLMResponse = (
+  content: string,
+  overrides: Partial<any> = {}
+) => ({
   content: [{ text: content, type: 'text' }],
   usage: {
     input_tokens: 100,
@@ -269,7 +311,10 @@ export const createMockLLMResponse = (content: string, overrides: Partial<any> =
 /**
  * Chat Session Factory
  */
-export const createMockChatSession = (userId: string, overrides: Partial<any> = {}) => ({
+export const createMockChatSession = (
+  userId: string,
+  overrides: Partial<any> = {}
+) => ({
   id: generateId(),
   user_id: userId,
   title: 'Test Chat Session',
@@ -278,7 +323,10 @@ export const createMockChatSession = (userId: string, overrides: Partial<any> = 
   ...overrides,
 });
 
-export const createMockChatMessage = (sessionId: string, overrides: Partial<any> = {}) => ({
+export const createMockChatMessage = (
+  sessionId: string,
+  overrides: Partial<any> = {}
+) => ({
   id: generateId(),
   session_id: sessionId,
   role: 'user',

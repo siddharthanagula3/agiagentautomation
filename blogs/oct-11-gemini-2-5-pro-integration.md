@@ -75,16 +75,19 @@ Your constraint is compliance and auditability. Multi-provider AI systems create
 AGI Agent Automation's unified LLM service routes tasks to optimal models based on capabilities and cost. Gemini 2.5 Pro becomes the default for:
 
 **Document Analysis Workflows:**
+
 - Contract review (text + tables + signatures)
 - Research paper summarization (text + diagrams + citations)
 - Financial report analysis (text + charts + tables)
 
 **Video Content Processing:**
+
 - Customer support screen recordings (visual + audio + context)
 - Training video indexing (scenes + transcripts + topics)
 - Surveillance analysis (events + temporal reasoning + alerts)
 
 **Mixed-Media Customer Interactions:**
+
 - Technical support tickets (screenshots + recordings + logs)
 - Product feedback (images + text + sentiment)
 - Bug reports (UI screenshots + console output + descriptions)
@@ -92,6 +95,7 @@ AGI Agent Automation's unified LLM service routes tasks to optimal models based 
 This intelligent routing means organizations get Gemini's multimodal advantages for appropriate workloads while using Claude for orchestration, GPT-5.1 for planning, and o3 for specialized visual reasoning—optimizing both quality and cost across entire AI operations.
 
 **Real Implementation:** A customer support automation system routes incoming tickets based on content type:
+
 - **Text-only tickets:** Claude Sonnet 4.5 ($0.003/1K tokens)
 - **Screenshots + text:** Gemini 2.5 Pro ($0.004/1K tokens multimodal)
 - **Screen recordings:** Gemini 2.5 Pro video analysis ($0.006/1K tokens)

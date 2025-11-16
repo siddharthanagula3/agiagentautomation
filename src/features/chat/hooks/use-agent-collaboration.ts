@@ -62,15 +62,23 @@ export function useAgentCollaboration(
   } = options;
 
   // Store state
-  const collaborativeAgents = useMissionStore((state) => state.collaborativeAgents);
+  const collaborativeAgents = useMissionStore(
+    (state) => state.collaborativeAgents
+  );
   const activeEmployees = useMissionStore((state) => state.activeEmployees);
   const missionStatus = useMissionStore((state) => state.missionStatus);
   const isOrchestrating = useMissionStore((state) => state.isOrchestrating);
 
   // Store actions
-  const addCollaborativeAgent = useMissionStore((state) => state.addCollaborativeAgent);
-  const removeCollaborativeAgent = useMissionStore((state) => state.removeCollaborativeAgent);
-  const clearCollaborativeAgents = useMissionStore((state) => state.clearCollaborativeAgents);
+  const addCollaborativeAgent = useMissionStore(
+    (state) => state.addCollaborativeAgent
+  );
+  const removeCollaborativeAgent = useMissionStore(
+    (state) => state.removeCollaborativeAgent
+  );
+  const clearCollaborativeAgents = useMissionStore(
+    (state) => state.clearCollaborativeAgents
+  );
   const pauseMission = useMissionStore((state) => state.pauseMission);
   const resumeMission = useMissionStore((state) => state.resumeMission);
 
@@ -129,7 +137,12 @@ export function useAgentCollaboration(
       addCollaborativeAgent(agentName);
       toast.success(`${agentName} added to collaboration team`);
     },
-    [collaborativeAgents, maxConcurrentAgents, availableAgents, addCollaborativeAgent]
+    [
+      collaborativeAgents,
+      maxConcurrentAgents,
+      availableAgents,
+      addCollaborativeAgent,
+    ]
   );
 
   // Remove agent from collaboration
@@ -190,7 +203,8 @@ export function useAgentCollaboration(
 
         toast.success('Collaboration started successfully');
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to start collaboration';
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to start collaboration';
         toast.error(errorMsg);
       }
     },
@@ -213,13 +227,15 @@ export function useAgentCollaboration(
   const routeMessageToAgent = useCallback(
     async (agentName: string, message: string): Promise<string> => {
       try {
-        const response = await workforceOrchestratorRefactored.routeMessageToEmployee(
-          agentName,
-          message
-        );
+        const response =
+          await workforceOrchestratorRefactored.routeMessageToEmployee(
+            agentName,
+            message
+          );
         return response;
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to route message';
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to route message';
         toast.error(errorMsg);
         throw err;
       }

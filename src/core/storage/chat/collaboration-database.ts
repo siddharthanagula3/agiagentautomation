@@ -208,7 +208,9 @@ export async function updateCollaboration(
 /**
  * Deletes a collaboration session
  */
-export async function deleteCollaboration(collaborationId: string): Promise<void> {
+export async function deleteCollaboration(
+  collaborationId: string
+): Promise<void> {
   try {
     const { error } = await supabase
       .from('agent_collaborations')
@@ -241,7 +243,9 @@ export async function deleteCollaboration(collaborationId: string): Promise<void
 /**
  * Starts a collaboration session
  */
-export async function startCollaboration(collaborationId: string): Promise<AgentCollaboration> {
+export async function startCollaboration(
+  collaborationId: string
+): Promise<AgentCollaboration> {
   return updateCollaboration(collaborationId, {
     task_status: 'in_progress',
     started_at: new Date().toISOString(),
@@ -283,7 +287,9 @@ export async function failCollaboration(
 /**
  * Cancels a collaboration session
  */
-export async function cancelCollaboration(collaborationId: string): Promise<AgentCollaboration> {
+export async function cancelCollaboration(
+  collaborationId: string
+): Promise<AgentCollaboration> {
   return updateCollaboration(collaborationId, {
     task_status: 'cancelled',
     completed_at: new Date().toISOString(),
@@ -417,7 +423,10 @@ export async function addCollaborationParticipant(
       );
     }
 
-    const updatedParticipants = [...collaboration.participant_ids, participantId];
+    const updatedParticipants = [
+      ...collaboration.participant_ids,
+      participantId,
+    ];
 
     return updateCollaboration(collaborationId, {
       participant_ids: updatedParticipants,
@@ -678,24 +687,31 @@ export async function getCollaborationStats(conversationId: string): Promise<{
     const stats = {
       total_collaborations: collaborations?.length || 0,
       active_collaborations:
-        collaborations?.filter((c) => c.task_status === 'in_progress').length || 0,
+        collaborations?.filter((c) => c.task_status === 'in_progress').length ||
+        0,
       completed_collaborations:
-        collaborations?.filter((c) => c.task_status === 'completed').length || 0,
+        collaborations?.filter((c) => c.task_status === 'completed').length ||
+        0,
       failed_collaborations:
         collaborations?.filter((c) => c.task_status === 'failed').length || 0,
-      total_messages: collaborations?.reduce((sum, c) => sum + c.total_messages, 0) || 0,
-      total_iterations: collaborations?.reduce((sum, c) => sum + c.total_iterations, 0) || 0,
+      total_messages:
+        collaborations?.reduce((sum, c) => sum + c.total_messages, 0) || 0,
+      total_iterations:
+        collaborations?.reduce((sum, c) => sum + c.total_iterations, 0) || 0,
       average_consensus_score: 0,
       average_duration_seconds: 0,
       collaboration_types: {} as Record<string, number>,
     };
 
     // Calculate average consensus score
-    const collaborationsWithConsensus = collaborations?.filter((c) => c.consensus_score !== null) || [];
+    const collaborationsWithConsensus =
+      collaborations?.filter((c) => c.consensus_score !== null) || [];
     if (collaborationsWithConsensus.length > 0) {
       stats.average_consensus_score =
-        collaborationsWithConsensus.reduce((sum, c) => sum + (c.consensus_score || 0), 0) /
-        collaborationsWithConsensus.length;
+        collaborationsWithConsensus.reduce(
+          (sum, c) => sum + (c.consensus_score || 0),
+          0
+        ) / collaborationsWithConsensus.length;
     }
 
     // Calculate average duration

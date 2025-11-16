@@ -11,10 +11,20 @@
  * - Smooth animations
  */
 
-import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react';
 import { cn } from '@shared/lib/utils';
 import { ScrollArea } from '@shared/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@shared/components/ui/avatar';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@shared/components/ui/avatar';
 import { Badge } from '@shared/components/ui/badge';
 import { Button } from '@shared/components/ui/button';
 import { Separator } from '@shared/components/ui/separator';
@@ -89,7 +99,9 @@ export function AdvancedMessageList({
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (shouldAutoScroll && scrollRef.current) {
-      const scrollElement = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollElement = scrollRef.current.querySelector(
+        '[data-radix-scroll-area-viewport]'
+      );
       if (scrollElement) {
         scrollElement.scrollTop = scrollElement.scrollHeight;
       }
@@ -99,14 +111,18 @@ export function AdvancedMessageList({
   // Handle scroll to detect manual scrolling
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const target = e.target as HTMLDivElement;
-    const isAtBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 100;
+    const isAtBottom =
+      target.scrollHeight - target.scrollTop - target.clientHeight < 100;
     setShouldAutoScroll(isAtBottom);
   }, []);
 
   // Get agent info
-  const getAgent = useCallback((agentId: string) => {
-    return agents.find(a => a.id === agentId);
-  }, [agents]);
+  const getAgent = useCallback(
+    (agentId: string) => {
+      return agents.find((a) => a.id === agentId);
+    },
+    [agents]
+  );
 
   return (
     <ScrollArea
@@ -210,7 +226,9 @@ function MessageClusterComponent({
       </div>
 
       {/* Messages */}
-      <div className={cn('flex max-w-[70%] flex-col gap-1', isUser && 'items-end')}>
+      <div
+        className={cn('flex max-w-[70%] flex-col gap-1', isUser && 'items-end')}
+      >
         {/* Agent Name & Time */}
         {!isUser && (
           <div className="flex items-center gap-2 px-2">
@@ -270,9 +288,7 @@ function MessageBubbleComponent({
       <div
         className={cn(
           'rounded-2xl px-4 py-2 transition-colors',
-          isUser
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted',
+          isUser ? 'bg-primary text-primary-foreground' : 'bg-muted',
           !isFirstInCluster && (isUser ? 'rounded-tr-sm' : 'rounded-tl-sm'),
           !isLastInCluster && (isUser ? 'rounded-br-sm' : 'rounded-bl-sm')
         )}
@@ -335,7 +351,7 @@ function MessageBubbleComponent({
       {/* Reaction Buttons (on hover) */}
       <div
         className={cn(
-          'absolute -top-8 flex gap-1 rounded-lg border border-border bg-card p-1 shadow-lg opacity-0 transition-opacity group-hover:opacity-100',
+          'absolute -top-8 flex gap-1 rounded-lg border border-border bg-card p-1 opacity-0 shadow-lg transition-opacity group-hover:opacity-100',
           isUser ? 'right-0' : 'left-0'
         )}
       >
@@ -413,7 +429,8 @@ function groupMessagesByTimeAndAgent(messages: ChatMessage[]): TimeGroup[] {
     if (
       !currentCluster ||
       currentCluster.agentId !== agentId ||
-      messageDate.getTime() - currentCluster.endTime.getTime() > CLUSTER_TIME_THRESHOLD
+      messageDate.getTime() - currentCluster.endTime.getTime() >
+        CLUSTER_TIME_THRESHOLD
     ) {
       currentCluster = {
         agentId,
@@ -455,10 +472,15 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function aggregateReactions(reactions: Array<{ emoji: string; userId: string; timestamp: Date }>) {
+function aggregateReactions(
+  reactions: Array<{ emoji: string; userId: string; timestamp: Date }>
+) {
   const counts = new Map<string, number>();
   reactions.forEach(({ emoji }) => {
     counts.set(emoji, (counts.get(emoji) || 0) + 1);
   });
-  return Array.from(counts.entries()).map(([emoji, count]) => ({ emoji, count }));
+  return Array.from(counts.entries()).map(([emoji, count]) => ({
+    emoji,
+    count,
+  }));
 }

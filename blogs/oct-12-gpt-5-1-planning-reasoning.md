@@ -25,6 +25,7 @@ GPT-5.1's most transformative capability: reasoning about competing objectives w
 **Real Example—Feature Development Planning:**
 
 Objective: Ship new authentication system
+
 - **Speed constraint:** Must deploy within 3 weeks
 - **Quality constraint:** Zero security vulnerabilities
 - **Cost constraint:** Maximum $8,000 in AI inference costs
@@ -32,6 +33,7 @@ Objective: Ship new authentication system
 - **Compliance constraint:** Must satisfy SOC 2 audit requirements
 
 GPT-5.1 generates plan satisfying all constraints:
+
 - Week 1: Requirements gathering + security architecture design (Product Manager + Security Architect)
 - Week 2: Implementation + continuous security testing (3 Engineers + QA running parallel)
 - Week 3: Penetration testing + compliance documentation + deployment (Security + DevOps)
@@ -77,16 +79,19 @@ Your constraint is human-in-the-loop overhead. Current AI systems require human 
 AGI Agent Automation's Plan-Delegate-Execute pattern uses GPT-5.1 for the planning stage:
 
 **Stage 1: Planning (GPT-5.1)**
+
 - User provides high-level goal: "Build customer analytics dashboard"
 - GPT-5.1 analyzes requirements, available AI employees, constraints
 - Generates structured JSON plan: tasks[], dependencies[], employees[], success_criteria[]
 - Plan includes parallelization opportunities, validation checkpoints, fallback strategies
 
 **Stage 2: Delegation (Claude Sonnet 4.5)**
+
 - Orchestrator assigns each task to optimal AI employee based on capabilities
 - Structured communication via JSON ensures reliability
 
 **Stage 3: Execution (Multi-Model)**
+
 - Tasks execute in dependency-respecting order
 - Independent tasks run in parallel
 - Results feed forward to dependent tasks
@@ -94,6 +99,7 @@ AGI Agent Automation's Plan-Delegate-Execute pattern uses GPT-5.1 for the planni
 This model-specialized architecture delivers 35-50% better results than single-model approaches while optimizing costs through intelligent model routing.
 
 **Real Implementation:** A product development workflow receives goal "Build mobile app onboarding flow." GPT-5.1 planning generates:
+
 - 12 tasks (requirements → design → implementation → testing → deployment)
 - 6 dependencies explicitly modeled
 - 4 parallel execution opportunities identified

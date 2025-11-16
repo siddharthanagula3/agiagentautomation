@@ -158,8 +158,16 @@ describe('Mission Control Store', () => {
     beforeEach(() => {
       const state = useMissionStore.getState();
       state.setMissionPlan([
-        createMockTask({ id: 'task-1', description: 'Task 1', status: 'pending' }),
-        createMockTask({ id: 'task-2', description: 'Task 2', status: 'pending' }),
+        createMockTask({
+          id: 'task-1',
+          description: 'Task 1',
+          status: 'pending',
+        }),
+        createMockTask({
+          id: 'task-2',
+          description: 'Task 2',
+          status: 'pending',
+        }),
       ]);
     });
 
@@ -190,7 +198,13 @@ describe('Mission Control Store', () => {
       const state = useMissionStore.getState();
       const error = 'File not found: auth.ts';
 
-      state.updateTaskStatus('task-1', 'failed', 'code-reviewer', undefined, error);
+      state.updateTaskStatus(
+        'task-1',
+        'failed',
+        'code-reviewer',
+        undefined,
+        error
+      );
 
       const task = state.missionPlan.find((t) => t.id === 'task-1');
       expect(task?.status).toBe('failed');
@@ -484,7 +498,13 @@ describe('Mission Control Store', () => {
       state.setMissionPlan([createMockTask({ id: 'task-1' })]);
 
       expect(() => {
-        state.updateTaskStatus('task-1', 'completed', undefined, undefined, undefined);
+        state.updateTaskStatus(
+          'task-1',
+          'completed',
+          undefined,
+          undefined,
+          undefined
+        );
       }).not.toThrow();
     });
 

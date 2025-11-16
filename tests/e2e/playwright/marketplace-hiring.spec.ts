@@ -23,7 +23,10 @@ async function createTestUser(page: Page) {
   await page.fill('[data-testid="register-name-input"]', testUser.name);
   await page.fill('[data-testid="register-email-input"]', testUser.email);
   await page.fill('[data-testid="register-password-input"]', testUser.password);
-  await page.fill('[data-testid="register-confirm-password-input"]', testUser.password);
+  await page.fill(
+    '[data-testid="register-confirm-password-input"]',
+    testUser.password
+  );
 
   // Submit registration
   await page.click('[data-testid="register-submit-button"]');
@@ -57,13 +60,17 @@ test.describe('Marketplace and Employee Hiring', () => {
     await createTestUser(page);
   });
 
-  test('should display marketplace with employee listings', async ({ page }) => {
+  test('should display marketplace with employee listings', async ({
+    page,
+  }) => {
     // Navigate to marketplace
     await page.click('[data-testid="nav-marketplace"]');
     await expect(page).toHaveURL(/.*\/marketplace/);
 
     // Verify marketplace loaded
-    await expect(page.locator('[data-testid="marketplace-title"]')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="marketplace-title"]')
+    ).toBeVisible();
     await expect(page.locator('[data-testid="marketplace-title"]')).toHaveText(
       /AI Employee Marketplace/i
     );
@@ -78,9 +85,15 @@ test.describe('Marketplace and Employee Hiring', () => {
 
     // Verify employee card structure
     const firstCard = employeeCards.first();
-    await expect(firstCard.locator('[data-testid="employee-name"]')).toBeVisible();
-    await expect(firstCard.locator('[data-testid="employee-description"]')).toBeVisible();
-    await expect(firstCard.locator('[data-testid="employee-tools"]')).toBeVisible();
+    await expect(
+      firstCard.locator('[data-testid="employee-name"]')
+    ).toBeVisible();
+    await expect(
+      firstCard.locator('[data-testid="employee-description"]')
+    ).toBeVisible();
+    await expect(
+      firstCard.locator('[data-testid="employee-tools"]')
+    ).toBeVisible();
   });
 
   test('should filter employees by category', async ({ page }) => {
@@ -88,14 +101,20 @@ test.describe('Marketplace and Employee Hiring', () => {
     await expect(page).toHaveURL(/.*\/marketplace/);
 
     // Wait for employees to load
-    await expect(page.locator('[data-testid="employee-card"]').first()).toBeVisible();
+    await expect(
+      page.locator('[data-testid="employee-card"]').first()
+    ).toBeVisible();
 
     // Get initial count
-    const initialCount = await page.locator('[data-testid="employee-card"]').count();
+    const initialCount = await page
+      .locator('[data-testid="employee-card"]')
+      .count();
     expect(initialCount).toBeGreaterThan(0);
 
     // Click on a category filter
-    const categoryFilter = page.locator('[data-testid="category-filter-development"]');
+    const categoryFilter = page.locator(
+      '[data-testid="category-filter-development"]'
+    );
     if (await categoryFilter.isVisible()) {
       await categoryFilter.click();
 
@@ -103,7 +122,9 @@ test.describe('Marketplace and Employee Hiring', () => {
       await page.waitForTimeout(500);
 
       // Filtered count should be different (or same if all are in that category)
-      const filteredCount = await page.locator('[data-testid="employee-card"]').count();
+      const filteredCount = await page
+        .locator('[data-testid="employee-card"]')
+        .count();
 
       // At minimum, verify the filter interaction worked
       expect(categoryFilter).toHaveClass(/active|selected/);
@@ -123,9 +144,15 @@ test.describe('Marketplace and Employee Hiring', () => {
     await expect(modal).toBeVisible();
 
     // Verify modal contains detailed information
-    await expect(modal.locator('[data-testid="employee-detail-name"]')).toBeVisible();
-    await expect(modal.locator('[data-testid="employee-detail-description"]')).toBeVisible();
-    await expect(modal.locator('[data-testid="employee-detail-capabilities"]')).toBeVisible();
+    await expect(
+      modal.locator('[data-testid="employee-detail-name"]')
+    ).toBeVisible();
+    await expect(
+      modal.locator('[data-testid="employee-detail-description"]')
+    ).toBeVisible();
+    await expect(
+      modal.locator('[data-testid="employee-detail-capabilities"]')
+    ).toBeVisible();
 
     // Close modal
     await page.click('[data-testid="employee-details-modal-close"]');
@@ -137,10 +164,14 @@ test.describe('Marketplace and Employee Hiring', () => {
     await expect(page).toHaveURL(/.*\/marketplace/);
 
     // Wait for employees to load
-    await expect(page.locator('[data-testid="employee-card"]').first()).toBeVisible();
+    await expect(
+      page.locator('[data-testid="employee-card"]').first()
+    ).toBeVisible();
 
     // Find and click hire button on first free employee
-    const firstFreeEmployee = page.locator('[data-testid="employee-card"]').first();
+    const firstFreeEmployee = page
+      .locator('[data-testid="employee-card"]')
+      .first();
     const employeeName = await firstFreeEmployee
       .locator('[data-testid="employee-name"]')
       .textContent();
@@ -175,7 +206,9 @@ test.describe('Marketplace and Employee Hiring', () => {
     await page.click('[data-testid="nav-marketplace"]');
     await expect(page).toHaveURL(/.*\/marketplace/);
 
-    await expect(page.locator('[data-testid="employee-card"]').first()).toBeVisible();
+    await expect(
+      page.locator('[data-testid="employee-card"]').first()
+    ).toBeVisible();
 
     // Hire first employee
     const firstEmployee = page.locator('[data-testid="employee-card"]').first();
@@ -200,7 +233,9 @@ test.describe('Marketplace and Employee Hiring', () => {
     await page.click('[data-testid="nav-marketplace"]');
     await expect(page).toHaveURL(/.*\/marketplace/);
 
-    await expect(page.locator('[data-testid="employee-card"]').first()).toBeVisible();
+    await expect(
+      page.locator('[data-testid="employee-card"]').first()
+    ).toBeVisible();
 
     // Get name of first employee
     const firstEmployeeName = await page
@@ -224,8 +259,13 @@ test.describe('Marketplace and Employee Hiring', () => {
 
     // Verify all visible employees match search
     for (let i = 0; i < count; i++) {
-      const name = await visibleCards.nth(i).locator('[data-testid="employee-name"]').textContent();
-      expect(name?.toLowerCase()).toContain((firstEmployeeName || 'code').toLowerCase());
+      const name = await visibleCards
+        .nth(i)
+        .locator('[data-testid="employee-name"]')
+        .textContent();
+      expect(name?.toLowerCase()).toContain(
+        (firstEmployeeName || 'code').toLowerCase()
+      );
     }
   });
 
@@ -233,20 +273,34 @@ test.describe('Marketplace and Employee Hiring', () => {
     await page.click('[data-testid="nav-marketplace"]');
     await expect(page).toHaveURL(/.*\/marketplace/);
 
-    await expect(page.locator('[data-testid="employee-card"]').first()).toBeVisible();
+    await expect(
+      page.locator('[data-testid="employee-card"]').first()
+    ).toBeVisible();
 
     // Hire first employee
-    await page.locator('[data-testid="employee-card"]').first().locator('[data-testid="hire-button"]').click();
+    await page
+      .locator('[data-testid="employee-card"]')
+      .first()
+      .locator('[data-testid="hire-button"]')
+      .click();
     await expect(page.locator('[data-testid="success-toast"]')).toBeVisible();
     await page.waitForTimeout(2000);
 
     // Hire second employee
-    await page.locator('[data-testid="employee-card"]').nth(1).locator('[data-testid="hire-button"]').click();
+    await page
+      .locator('[data-testid="employee-card"]')
+      .nth(1)
+      .locator('[data-testid="hire-button"]')
+      .click();
     await expect(page.locator('[data-testid="success-toast"]')).toBeVisible();
     await page.waitForTimeout(2000);
 
     // Hire third employee
-    await page.locator('[data-testid="employee-card"]').nth(2).locator('[data-testid="hire-button"]').click();
+    await page
+      .locator('[data-testid="employee-card"]')
+      .nth(2)
+      .locator('[data-testid="hire-button"]')
+      .click();
     await expect(page.locator('[data-testid="success-toast"]')).toBeVisible();
 
     // Navigate to workforce
@@ -262,7 +316,9 @@ test.describe('Marketplace and Employee Hiring', () => {
     await page.click('[data-testid="nav-marketplace"]');
     await expect(page).toHaveURL(/.*\/marketplace/);
 
-    await expect(page.locator('[data-testid="employee-card"]').first()).toBeVisible();
+    await expect(
+      page.locator('[data-testid="employee-card"]').first()
+    ).toBeVisible();
 
     // Open first employee details
     await page.locator('[data-testid="employee-card"]').first().click();
@@ -280,7 +336,9 @@ test.describe('Marketplace and Employee Hiring', () => {
     expect(toolCount).toBeGreaterThan(0);
 
     // Verify capabilities/description
-    const capabilities = modal.locator('[data-testid="employee-detail-capabilities"]');
+    const capabilities = modal.locator(
+      '[data-testid="employee-detail-capabilities"]'
+    );
     await expect(capabilities).toBeVisible();
     const capabilitiesText = await capabilities.textContent();
     expect(capabilitiesText).toBeTruthy();
@@ -307,16 +365,22 @@ test.describe('Marketplace and Employee Hiring', () => {
     await page.reload();
 
     // Should now load successfully
-    await expect(page.locator('[data-testid="employee-card"]').first()).toBeVisible({
+    await expect(
+      page.locator('[data-testid="employee-card"]').first()
+    ).toBeVisible({
       timeout: 10000,
     });
   });
 
-  test('should navigate from marketplace to chat with hired employee', async ({ page }) => {
+  test('should navigate from marketplace to chat with hired employee', async ({
+    page,
+  }) => {
     await page.click('[data-testid="nav-marketplace"]');
     await expect(page).toHaveURL(/.*\/marketplace/);
 
-    await expect(page.locator('[data-testid="employee-card"]').first()).toBeVisible();
+    await expect(
+      page.locator('[data-testid="employee-card"]').first()
+    ).toBeVisible();
 
     // Hire an employee
     const employeeName = await page
@@ -325,7 +389,11 @@ test.describe('Marketplace and Employee Hiring', () => {
       .locator('[data-testid="employee-name"]')
       .textContent();
 
-    await page.locator('[data-testid="employee-card"]').first().locator('[data-testid="hire-button"]').click();
+    await page
+      .locator('[data-testid="employee-card"]')
+      .first()
+      .locator('[data-testid="hire-button"]')
+      .click();
     await expect(page.locator('[data-testid="success-toast"]')).toBeVisible();
 
     // Navigate to chat
@@ -334,12 +402,16 @@ test.describe('Marketplace and Employee Hiring', () => {
 
     // Select the hired employee
     await page.click('[data-testid="employee-selector"]');
-    await page.click(`[data-testid="employee-option-${employeeName?.toLowerCase().replace(/\s+/g, '-')}"]`);
+    await page.click(
+      `[data-testid="employee-option-${employeeName?.toLowerCase().replace(/\s+/g, '-')}"]`
+    );
 
     // Verify chat interface is ready
     await expect(page.locator('[data-testid="chat-input"]')).toBeVisible();
     await expect(page.locator('[data-testid="chat-messages"]')).toBeVisible();
-    await expect(page.locator('[data-testid="selected-employee-name"]')).toHaveText(employeeName!);
+    await expect(
+      page.locator('[data-testid="selected-employee-name"]')
+    ).toHaveText(employeeName!);
   });
 
   test('should respect free tier limits (if applicable)', async ({ page }) => {
@@ -361,7 +433,9 @@ test.describe('Marketplace and Employee Hiring', () => {
 test.describe('Marketplace - Visual Regression', () => {
   test('should match marketplace layout snapshot', async ({ page }) => {
     await page.goto('/marketplace');
-    await expect(page.locator('[data-testid="employee-card"]').first()).toBeVisible();
+    await expect(
+      page.locator('[data-testid="employee-card"]').first()
+    ).toBeVisible();
 
     // Wait for images to load
     await page.waitForTimeout(1000);
@@ -377,11 +451,15 @@ test.describe('Marketplace - Visual Regression', () => {
 test.describe('Marketplace - Accessibility', () => {
   test('should be keyboard navigable', async ({ page }) => {
     await page.goto('/marketplace');
-    await expect(page.locator('[data-testid="employee-card"]').first()).toBeVisible();
+    await expect(
+      page.locator('[data-testid="employee-card"]').first()
+    ).toBeVisible();
 
     // Tab through interactive elements
     await page.keyboard.press('Tab');
-    const focused = await page.evaluate(() => document.activeElement?.getAttribute('data-testid'));
+    const focused = await page.evaluate(() =>
+      document.activeElement?.getAttribute('data-testid')
+    );
 
     // Should focus on interactive element
     expect(focused).toBeTruthy();
@@ -389,7 +467,9 @@ test.describe('Marketplace - Accessibility', () => {
 
   test('should have proper ARIA labels', async ({ page }) => {
     await page.goto('/marketplace');
-    await expect(page.locator('[data-testid="employee-card"]').first()).toBeVisible();
+    await expect(
+      page.locator('[data-testid="employee-card"]').first()
+    ).toBeVisible();
 
     // Check for aria-label or aria-labelledby
     const firstCard = page.locator('[data-testid="employee-card"]').first();

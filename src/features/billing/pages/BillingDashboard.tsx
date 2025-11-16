@@ -197,7 +197,10 @@ const BillingPage: React.FC = () => {
             .single();
 
           if (balanceError) {
-            console.warn('[Billing] No token balance record found, using defaults:', balanceError);
+            console.warn(
+              '[Billing] No token balance record found, using defaults:',
+              balanceError
+            );
             // User might not have a balance record yet - that's okay, use free tier defaults
             currentBalance = TOTAL_LIMIT; // Free tier starts with full allocation
           } else if (balanceData) {
@@ -306,7 +309,10 @@ const BillingPage: React.FC = () => {
       console.log('[Billing] 📊 Applying token limits:');
       console.log('[Billing]    User Plan:', userPlan);
       console.log('[Billing]    Is Pro?', isPro ? 'Yes ✓' : 'No ✗');
-      console.log('[Billing]    Current Balance:', currentBalance.toLocaleString());
+      console.log(
+        '[Billing]    Current Balance:',
+        currentBalance.toLocaleString()
+      );
       console.log('[Billing]    Total Used:', totalUsed.toLocaleString());
       console.log(
         '[Billing]    Token Limit per LLM:',
@@ -742,7 +748,9 @@ const BillingPage: React.FC = () => {
               />
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
-                  {billing?.plan === 'free' ? 'Monthly Limit' : 'Token Allocation'}
+                  {billing?.plan === 'free'
+                    ? 'Monthly Limit'
+                    : 'Token Allocation'}
                 </span>
                 <span className="font-medium">
                   {(billing?.usage.totalLimit || 1000000).toLocaleString()}{' '}
@@ -979,44 +987,47 @@ const BillingPage: React.FC = () => {
           <CardContent>
             {/* Warning if near limit */}
             {billing?.usage.totalTokens > 0 &&
-              billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.85 && (
-              <div
-                className={`mb-6 rounded-lg border p-4 ${
-                  billing?.usage.totalTokens >= billing?.usage.totalLimit * 0.95
-                    ? 'border-red-500/50 bg-red-500/10'
-                    : 'border-yellow-500/50 bg-yellow-500/10'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <AlertTriangle
-                    className={`mt-0.5 h-5 w-5 ${
-                      billing?.usage.totalTokens >=
-                      billing?.usage.totalLimit * 0.95
-                        ? 'text-red-500'
-                        : 'text-yellow-500'
-                    }`}
-                  />
-                  <div className="flex-1">
-                    <h4 className="mb-1 font-semibold">
-                      {billing?.usage.totalTokens >=
-                      billing?.usage.totalLimit * 0.95
-                        ? '🚨 Critical: 95% Usage Reached'
-                        : '⚠️ Warning: 85% Usage Reached'}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      You've used{' '}
-                      {(
-                        (billing?.usage.totalTokens /
-                          billing?.usage.totalLimit) *
-                        100
-                      ).toFixed(1)}
-                      % of your {billing?.plan === 'pro' ? '10M' : '1M'} token
-                      limit. Buy more tokens now to avoid service interruption.
-                    </p>
+              billing?.usage.totalTokens >=
+                billing?.usage.totalLimit * 0.85 && (
+                <div
+                  className={`mb-6 rounded-lg border p-4 ${
+                    billing?.usage.totalTokens >=
+                    billing?.usage.totalLimit * 0.95
+                      ? 'border-red-500/50 bg-red-500/10'
+                      : 'border-yellow-500/50 bg-yellow-500/10'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle
+                      className={`mt-0.5 h-5 w-5 ${
+                        billing?.usage.totalTokens >=
+                        billing?.usage.totalLimit * 0.95
+                          ? 'text-red-500'
+                          : 'text-yellow-500'
+                      }`}
+                    />
+                    <div className="flex-1">
+                      <h4 className="mb-1 font-semibold">
+                        {billing?.usage.totalTokens >=
+                        billing?.usage.totalLimit * 0.95
+                          ? '🚨 Critical: 95% Usage Reached'
+                          : '⚠️ Warning: 85% Usage Reached'}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        You've used{' '}
+                        {(
+                          (billing?.usage.totalTokens /
+                            billing?.usage.totalLimit) *
+                          100
+                        ).toFixed(1)}
+                        % of your {billing?.plan === 'pro' ? '10M' : '1M'} token
+                        limit. Buy more tokens now to avoid service
+                        interruption.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Token Packs Grid */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">

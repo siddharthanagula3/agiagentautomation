@@ -299,7 +299,10 @@ export function hasXSSRisk(content: string): boolean {
 /**
  * Sanitize and validate user input for chat/prompts
  */
-export function sanitizeUserInput(input: string, maxLength: number = 10000): string {
+export function sanitizeUserInput(
+  input: string,
+  maxLength: number = 10000
+): string {
   // Trim and limit length
   let sanitized = input.trim().slice(0, maxLength);
 

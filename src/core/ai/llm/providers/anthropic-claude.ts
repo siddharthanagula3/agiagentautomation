@@ -110,7 +110,10 @@ export class AnthropicProvider {
           max_tokens: this.config.maxTokens,
           temperature: this.config.temperature,
           system: this.config.systemPrompt,
-          tools: this.config.tools && this.config.tools.length > 0 ? this.config.tools : undefined,
+          tools:
+            this.config.tools && this.config.tools.length > 0
+              ? this.config.tools
+              : undefined,
         }),
       });
 
@@ -126,12 +129,17 @@ export class AnthropicProvider {
       const data = await response.json();
 
       // Extract content and usage from proxy response
-      const content = data.content || (Array.isArray(data.content) ? data.content[0]?.text : '');
-      const usage = data.usage ? {
-        inputTokens: data.usage.input_tokens || 0,
-        outputTokens: data.usage.output_tokens || 0,
-        totalTokens: (data.usage.input_tokens || 0) + (data.usage.output_tokens || 0),
-      } : { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
+      const content =
+        data.content ||
+        (Array.isArray(data.content) ? data.content[0]?.text : '');
+      const usage = data.usage
+        ? {
+            inputTokens: data.usage.input_tokens || 0,
+            outputTokens: data.usage.output_tokens || 0,
+            totalTokens:
+              (data.usage.input_tokens || 0) + (data.usage.output_tokens || 0),
+          }
+        : { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
 
       // Save to database
       if (sessionId && userId) {

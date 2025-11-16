@@ -94,6 +94,7 @@ export default function ChatInterface() {
 ### Key Components Available
 
 #### Core Components:
+
 - **Thread** - Main conversation interface with message list
 - **ThreadList** - Multi-conversation management
 - **Composer** - Message input with auto-resize, file attachments, and previews
@@ -105,6 +106,7 @@ export default function ChatInterface() {
 - **UserAvatar** - User profile display
 
 #### Advanced Components:
+
 - **BranchPicker** - Navigate message branches/alternatives
 - **ToolUI** - Custom rendering for tool/function calls
 - **Attachment** - File upload and preview system
@@ -116,38 +118,46 @@ export default function ChatInterface() {
 **Philosophy:** Fully customizable via Tailwind CSS and CSS variables
 
 **Implementation:**
+
 ```typescript
 // Tailwind Plugin (optional for legacy styled components)
 // tailwind.config.ts
 {
   plugins: [
-    require("tailwindcss-animate"),
-    require("@assistant-ui/react-ui/tailwindcss")({
-      components: ["assistant-modal"],
-      shadcn: true
-    })
-  ]
+    require('tailwindcss-animate'),
+    require('@assistant-ui/react-ui/tailwindcss')({
+      components: ['assistant-modal'],
+      shadcn: true,
+    }),
+  ];
 }
 ```
 
 **Customization Options:**
+
 - CSS Variables for colors, spacing, and typography
 - Tailwind utility classes for component styling
 - Component-level className props
 - Custom theme systems (ChatGPT, Claude, Perplexity themes demonstrated)
 
 **CSS Class Pattern:**
+
 ```css
 /* Components use predictable class names */
-.aui-thread-root { }
-.aui-composer-input { }
-.aui-message-user { }
-.aui-message-assistant { }
+.aui-thread-root {
+}
+.aui-composer-input {
+}
+.aui-message-user {
+}
+.aui-message-assistant {
+}
 ```
 
 ### Integration Patterns
 
 #### LLM Provider Support (Built-in):
+
 - **OpenAI** - GPT-4, GPT-3.5, etc.
 - **Anthropic** - Claude 3.5 Sonnet, Claude 3 Opus, etc.
 - **Google** - Gemini 1.5 Pro, Gemini 1.5 Flash
@@ -164,38 +174,42 @@ export default function ChatInterface() {
 #### Backend Integration Options:
 
 **1. Assistant Cloud (Managed):**
+
 ```typescript
-import { useAssistantCloud } from "@assistant-ui/react-assistant-cloud";
+import { useAssistantCloud } from '@assistant-ui/react-assistant-cloud';
 
 const runtime = useAssistantCloud({
-  apiKey: process.env.ASSISTANT_CLOUD_API_KEY
+  apiKey: process.env.ASSISTANT_CLOUD_API_KEY,
 });
 ```
 
 **2. Vercel AI SDK:**
+
 ```typescript
-import { useChatRuntime } from "@assistant-ui/react-ai-sdk";
+import { useChatRuntime } from '@assistant-ui/react-ai-sdk';
 
 const runtime = useChatRuntime({
   transport: new AssistantChatTransport({
-    api: "/api/chat",
+    api: '/api/chat',
   }),
 });
 ```
 
 **3. LangGraph/LangChain:**
+
 ```typescript
-import { useLangGraphRuntime } from "@assistant-ui/react-langgraph";
+import { useLangGraphRuntime } from '@assistant-ui/react-langgraph';
 
 const runtime = useLangGraphRuntime({
-  graphId: "my-graph",
-  apiUrl: "https://langgraph.example.com",
+  graphId: 'my-graph',
+  apiUrl: 'https://langgraph.example.com',
 });
 ```
 
 **4. Custom Backend:**
+
 ```typescript
-import { useExternalStoreRuntime } from "@assistant-ui/react";
+import { useExternalStoreRuntime } from '@assistant-ui/react';
 
 const runtime = useExternalStoreRuntime({
   messages,
@@ -257,16 +271,16 @@ const runtime = useExternalStoreRuntime({
 
 ### Compatibility with Current Tech Stack
 
-| Technology | Status | Notes |
-|------------|--------|-------|
-| React 18 | ✅ Perfect | Designed for React 18+ |
-| Vite | ✅ Perfect | No special configuration needed |
-| TypeScript | ✅ Perfect | Full type safety, strict mode compatible |
-| Tailwind CSS | ✅ Perfect | Built on Tailwind, uses same patterns |
-| shadcn/ui | ✅ Perfect | Built on shadcn/ui primitives |
-| Zustand | ✅ Perfect | Uses Zustand for state management |
-| Supabase | ✅ Compatible | Can integrate with chat persistence |
-| OpenAI/Anthropic | ✅ Perfect | Native support for both providers |
+| Technology       | Status        | Notes                                    |
+| ---------------- | ------------- | ---------------------------------------- |
+| React 18         | ✅ Perfect    | Designed for React 18+                   |
+| Vite             | ✅ Perfect    | No special configuration needed          |
+| TypeScript       | ✅ Perfect    | Full type safety, strict mode compatible |
+| Tailwind CSS     | ✅ Perfect    | Built on Tailwind, uses same patterns    |
+| shadcn/ui        | ✅ Perfect    | Built on shadcn/ui primitives            |
+| Zustand          | ✅ Perfect    | Uses Zustand for state management        |
+| Supabase         | ✅ Compatible | Can integrate with chat persistence      |
+| OpenAI/Anthropic | ✅ Perfect    | Native support for both providers        |
 
 ### Code Example
 
@@ -426,16 +440,16 @@ export function ChatDemo() {
 
 ### Compatibility with Current Tech Stack
 
-| Technology | Status | Notes |
-|------------|--------|-------|
-| React 18 | ✅ Perfect | Built for React 18+ |
-| Vite | ✅ Perfect | Works seamlessly |
-| TypeScript | ✅ Perfect | Full TypeScript support |
-| Tailwind CSS | ✅ Perfect | Built with Tailwind |
-| shadcn/ui | ✅ Perfect | Native shadcn/ui components |
-| Zustand | ⚠️ Manual | Need to implement custom state |
-| Supabase | ⚠️ Manual | Need custom integration |
-| OpenAI/Anthropic | ⚠️ Manual | Need custom adapters |
+| Technology       | Status     | Notes                          |
+| ---------------- | ---------- | ------------------------------ |
+| React 18         | ✅ Perfect | Built for React 18+            |
+| Vite             | ✅ Perfect | Works seamlessly               |
+| TypeScript       | ✅ Perfect | Full TypeScript support        |
+| Tailwind CSS     | ✅ Perfect | Built with Tailwind            |
+| shadcn/ui        | ✅ Perfect | Native shadcn/ui components    |
+| Zustand          | ⚠️ Manual  | Need to implement custom state |
+| Supabase         | ⚠️ Manual  | Need custom integration        |
+| OpenAI/Anthropic | ⚠️ Manual  | Need custom adapters           |
 
 ### Code Example
 
@@ -531,7 +545,7 @@ Built with Tailwind CSS and shadcn/ui patterns. Full customization via CSS class
 
 ```typescript
 // Build AI support chatbot from scratch in < 5 minutes
-import { useChat } from "ai/react"
+import { useChat } from 'ai/react';
 // Component implementation follows Vercel AI SDK patterns
 ```
 
@@ -560,13 +574,13 @@ import { useChat } from "ai/react"
 
 ### Compatibility with Current Tech Stack
 
-| Technology | Status | Notes |
-|------------|--------|-------|
-| React 18 | ✅ Compatible | Works with React 18 |
-| Vite | ⚠️ Limited | Designed for Next.js |
-| TypeScript | ✅ Compatible | TypeScript support (87.5%) |
-| Tailwind CSS | ✅ Perfect | Built with Tailwind |
-| shadcn/ui | ✅ Perfect | Requires shadcn/ui |
+| Technology   | Status        | Notes                      |
+| ------------ | ------------- | -------------------------- |
+| React 18     | ✅ Compatible | Works with React 18        |
+| Vite         | ⚠️ Limited    | Designed for Next.js       |
+| TypeScript   | ✅ Compatible | TypeScript support (87.5%) |
+| Tailwind CSS | ✅ Perfect    | Built with Tailwind        |
+| shadcn/ui    | ✅ Perfect    | Requires shadcn/ui         |
 
 ---
 
@@ -596,12 +610,14 @@ npm install @nlux/hf-react          # For Hugging Face
 ### Key Components Available
 
 #### Core Components:
+
 - **AiChat** - Main chat component
 - **Composer** - Message input area
 - **MessageList** - Conversation display
 - **ConversationStarters** - Prompt suggestions
 
 #### Features:
+
 - Persona customization (assistant & user)
 - Conversation layouts (bubbles, fullscreen)
 - Markdown streaming support
@@ -613,6 +629,7 @@ npm install @nlux/hf-react          # For Hugging Face
 ### Styling Approach
 
 **Theme System:**
+
 ```typescript
 import { AiChat } from '@nlux/react';
 import '@nlux/themes/nova.css'; // Pre-built theme
@@ -633,6 +650,7 @@ import '@nlux/themes/nova.css'; // Pre-built theme
 ```
 
 **Customization:**
+
 - Pre-built themes (Nova, etc.)
 - Advanced theming via CSS variables
 - Component-level styling props
@@ -641,6 +659,7 @@ import '@nlux/themes/nova.css'; // Pre-built theme
 ### Integration Patterns
 
 #### OpenAI Integration:
+
 ```typescript
 import { AiChat } from '@nlux/react';
 import { useAsStreamAdapter } from '@nlux/react';
@@ -669,20 +688,19 @@ function ChatComponent() {
 ```
 
 #### Custom Backend:
+
 ```typescript
-const customAdapter = useAsStreamAdapter(
-  async (message) => {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      body: JSON.stringify({ message })
-    });
-    return response.body; // ReadableStream
-  },
-  []
-);
+const customAdapter = useAsStreamAdapter(async (message) => {
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+  });
+  return response.body; // ReadableStream
+}, []);
 ```
 
 #### LLM Provider Support:
+
 - OpenAI (via `@nlux/openai-react`)
 - Hugging Face (via `@nlux/hf-react`)
 - LangChain / LangServe (via `@nlux/langchain-react`)
@@ -720,16 +738,16 @@ const customAdapter = useAsStreamAdapter(
 
 ### Compatibility with Current Tech Stack
 
-| Technology | Status | Notes |
-|------------|--------|-------|
-| React 18 | ✅ Perfect | Designed for React 18+ |
-| Vite | ✅ Perfect | Works seamlessly |
-| TypeScript | ✅ Compatible | TypeScript support available |
-| Tailwind CSS | ⚠️ Manual | Can integrate but not native |
-| shadcn/ui | ⚠️ Manual | No direct integration |
-| Zustand | ⚠️ Manual | Uses internal state management |
-| Supabase | ⚠️ Manual | Custom integration needed |
-| OpenAI/Anthropic | ✅ Good | OpenAI adapter, Anthropic custom |
+| Technology       | Status        | Notes                            |
+| ---------------- | ------------- | -------------------------------- |
+| React 18         | ✅ Perfect    | Designed for React 18+           |
+| Vite             | ✅ Perfect    | Works seamlessly                 |
+| TypeScript       | ✅ Compatible | TypeScript support available     |
+| Tailwind CSS     | ⚠️ Manual     | Can integrate but not native     |
+| shadcn/ui        | ⚠️ Manual     | No direct integration            |
+| Zustand          | ⚠️ Manual     | Uses internal state management   |
+| Supabase         | ⚠️ Manual     | Custom integration needed        |
+| OpenAI/Anthropic | ✅ Good       | OpenAI adapter, Anthropic custom |
 
 ### Code Example
 
@@ -813,6 +831,7 @@ Highly customizable via props and CSS. Supports avatars, names, and custom theme
 ### Integration Patterns
 
 #### Direct API Connections:
+
 - OpenAI
 - HuggingFace
 - Cohere
@@ -821,6 +840,7 @@ Highly customizable via props and CSS. Supports avatars, names, and custom theme
 - AssemblyAI
 
 #### Custom Service:
+
 ```typescript
 import { DeepChat } from 'deep-chat-react';
 
@@ -833,6 +853,7 @@ import { DeepChat } from 'deep-chat-react';
 ```
 
 #### Web-based LLM:
+
 ```typescript
 import { DeepChat } from 'deep-chat-react';
 import 'deep-chat-web-llm';
@@ -872,14 +893,14 @@ import 'deep-chat-web-llm';
 
 ### Compatibility with Current Tech Stack
 
-| Technology | Status | Notes |
-|------------|--------|-------|
-| React 18 | ✅ Compatible | React wrapper available |
-| Vite | ✅ Compatible | Works with Vite |
-| TypeScript | ⚠️ Limited | Limited TypeScript support |
-| Tailwind CSS | ⚠️ Manual | Not Tailwind-native |
-| shadcn/ui | ❌ Incompatible | Different design system |
-| Zustand | ⚠️ Manual | Internal state management |
+| Technology   | Status          | Notes                      |
+| ------------ | --------------- | -------------------------- |
+| React 18     | ✅ Compatible   | React wrapper available    |
+| Vite         | ✅ Compatible   | Works with Vite            |
+| TypeScript   | ⚠️ Limited      | Limited TypeScript support |
+| Tailwind CSS | ⚠️ Manual       | Not Tailwind-native        |
+| shadcn/ui    | ❌ Incompatible | Different design system    |
+| Zustand      | ⚠️ Manual       | Internal state management  |
 
 ---
 
@@ -887,46 +908,46 @@ import 'deep-chat-web-llm';
 
 ### Feature Matrix
 
-| Feature | assistant-ui | shadcn-chatbot-kit | shadcn-chat | NLUX | Deep Chat |
-|---------|--------------|-------------------|-------------|------|-----------|
-| **Streaming** | ✅ Built-in | ⚠️ Via AI SDK | ⚠️ Manual | ✅ Built-in | ✅ Built-in |
-| **Auto-scroll** | ✅ Smart | ✅ Basic | ✅ Basic | ✅ Basic | ✅ Basic |
-| **File Upload** | ✅ Advanced | ✅ Advanced | ✅ Basic | ❌ Roadmap | ✅ Advanced |
-| **Markdown** | ✅ Full | ✅ Full | ✅ Basic | ✅ Full | ✅ Basic |
-| **Syntax Highlight** | ✅ Yes | ✅ Yes | ⚠️ Manual | ✅ Yes | ✅ Yes |
-| **Keyboard Shortcuts** | ✅ Yes | ❌ No | ❌ No | ❌ No | ❌ No |
-| **Accessibility** | ✅ Full | ✅ Good | ⚠️ Basic | ⚠️ Basic | ✅ Enhanced |
-| **Message Branching** | ✅ Yes | ❌ No | ❌ No | ❌ No | ❌ No |
-| **Tool UI** | ✅ Yes | ❌ No | ❌ No | ❌ No | ❌ No |
-| **Retry/Regenerate** | ✅ Yes | ⚠️ Manual | ⚠️ Manual | ⚠️ Manual | ⚠️ Manual |
-| **Dark Mode** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
-| **TypeScript** | ✅ Full | ✅ Full | ✅ Good | ✅ Good | ⚠️ Limited |
-| **Bundle Size** | 🔶 Medium | 🟢 Small | 🟢 Small | 🟢 Small | 🔶 Large |
-| **Active Maintenance** | ✅ Very Active | ❌ Inactive | ❌ Inactive | ✅ Active | ✅ Active |
+| Feature                | assistant-ui   | shadcn-chatbot-kit | shadcn-chat | NLUX        | Deep Chat   |
+| ---------------------- | -------------- | ------------------ | ----------- | ----------- | ----------- |
+| **Streaming**          | ✅ Built-in    | ⚠️ Via AI SDK      | ⚠️ Manual   | ✅ Built-in | ✅ Built-in |
+| **Auto-scroll**        | ✅ Smart       | ✅ Basic           | ✅ Basic    | ✅ Basic    | ✅ Basic    |
+| **File Upload**        | ✅ Advanced    | ✅ Advanced        | ✅ Basic    | ❌ Roadmap  | ✅ Advanced |
+| **Markdown**           | ✅ Full        | ✅ Full            | ✅ Basic    | ✅ Full     | ✅ Basic    |
+| **Syntax Highlight**   | ✅ Yes         | ✅ Yes             | ⚠️ Manual   | ✅ Yes      | ✅ Yes      |
+| **Keyboard Shortcuts** | ✅ Yes         | ❌ No              | ❌ No       | ❌ No       | ❌ No       |
+| **Accessibility**      | ✅ Full        | ✅ Good            | ⚠️ Basic    | ⚠️ Basic    | ✅ Enhanced |
+| **Message Branching**  | ✅ Yes         | ❌ No              | ❌ No       | ❌ No       | ❌ No       |
+| **Tool UI**            | ✅ Yes         | ❌ No              | ❌ No       | ❌ No       | ❌ No       |
+| **Retry/Regenerate**   | ✅ Yes         | ⚠️ Manual          | ⚠️ Manual   | ⚠️ Manual   | ⚠️ Manual   |
+| **Dark Mode**          | ✅ Yes         | ✅ Yes             | ✅ Yes      | ✅ Yes      | ✅ Yes      |
+| **TypeScript**         | ✅ Full        | ✅ Full            | ✅ Good     | ✅ Good     | ⚠️ Limited  |
+| **Bundle Size**        | 🔶 Medium      | 🟢 Small           | 🟢 Small    | 🟢 Small    | 🔶 Large    |
+| **Active Maintenance** | ✅ Very Active | ❌ Inactive        | ❌ Inactive | ✅ Active   | ✅ Active   |
 
 ### Provider Support Matrix
 
-| Provider | assistant-ui | shadcn-chatbot-kit | shadcn-chat | NLUX | Deep Chat |
-|----------|--------------|-------------------|-------------|------|-----------|
-| OpenAI | ✅ Native | ✅ Via AI SDK | ✅ Via AI SDK | ✅ Native | ✅ Direct API |
-| Anthropic | ✅ Native | ⚠️ Custom | ⚠️ Custom | ⚠️ Custom | ⚠️ Custom |
-| Google Gemini | ✅ Native | ⚠️ Via AI SDK | ⚠️ Via AI SDK | ⚠️ Custom | ⚠️ Custom |
-| AWS Bedrock | ✅ Native | ❌ No | ❌ No | ❌ No | ❌ No |
-| Azure | ✅ Native | ⚠️ Via AI SDK | ⚠️ Via AI SDK | ❌ No | ✅ Direct API |
-| Hugging Face | ✅ Native | ❌ No | ❌ No | ✅ Native | ✅ Direct API |
-| LangChain | ✅ Native | ❌ No | ❌ No | ✅ Native | ❌ No |
-| Ollama | ✅ Native | ⚠️ Custom | ⚠️ Custom | ⚠️ Custom | ⚠️ Custom |
-| Custom | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| Provider      | assistant-ui | shadcn-chatbot-kit | shadcn-chat   | NLUX      | Deep Chat     |
+| ------------- | ------------ | ------------------ | ------------- | --------- | ------------- |
+| OpenAI        | ✅ Native    | ✅ Via AI SDK      | ✅ Via AI SDK | ✅ Native | ✅ Direct API |
+| Anthropic     | ✅ Native    | ⚠️ Custom          | ⚠️ Custom     | ⚠️ Custom | ⚠️ Custom     |
+| Google Gemini | ✅ Native    | ⚠️ Via AI SDK      | ⚠️ Via AI SDK | ⚠️ Custom | ⚠️ Custom     |
+| AWS Bedrock   | ✅ Native    | ❌ No              | ❌ No         | ❌ No     | ❌ No         |
+| Azure         | ✅ Native    | ⚠️ Via AI SDK      | ⚠️ Via AI SDK | ❌ No     | ✅ Direct API |
+| Hugging Face  | ✅ Native    | ❌ No              | ❌ No         | ✅ Native | ✅ Direct API |
+| LangChain     | ✅ Native    | ❌ No              | ❌ No         | ✅ Native | ❌ No         |
+| Ollama        | ✅ Native    | ⚠️ Custom          | ⚠️ Custom     | ⚠️ Custom | ⚠️ Custom     |
+| Custom        | ✅ Yes       | ✅ Yes             | ✅ Yes        | ✅ Yes    | ✅ Yes        |
 
 ### Tech Stack Compatibility Score
 
-| Library | React 18 | Vite | TypeScript | Tailwind | shadcn/ui | Zustand | Overall |
-|---------|----------|------|------------|----------|-----------|---------|---------|
-| **assistant-ui** | 100% | 100% | 100% | 100% | 100% | 100% | **100%** |
-| **shadcn-chatbot-kit** | 100% | 100% | 100% | 100% | 100% | 50% | **92%** |
-| **shadcn-chat** | 100% | 75% | 85% | 100% | 100% | 50% | **85%** |
-| **NLUX** | 100% | 100% | 85% | 50% | 40% | 40% | **69%** |
-| **Deep Chat** | 85% | 85% | 60% | 40% | 20% | 40% | **55%** |
+| Library                | React 18 | Vite | TypeScript | Tailwind | shadcn/ui | Zustand | Overall  |
+| ---------------------- | -------- | ---- | ---------- | -------- | --------- | ------- | -------- |
+| **assistant-ui**       | 100%     | 100% | 100%       | 100%     | 100%      | 100%    | **100%** |
+| **shadcn-chatbot-kit** | 100%     | 100% | 100%       | 100%     | 100%      | 50%     | **92%**  |
+| **shadcn-chat**        | 100%     | 75%  | 85%        | 100%     | 100%      | 50%     | **85%**  |
+| **NLUX**               | 100%     | 100% | 85%        | 50%      | 40%       | 40%     | **69%**  |
+| **Deep Chat**          | 85%      | 85%  | 60%        | 40%      | 20%       | 40%     | **55%**  |
 
 ---
 
@@ -987,10 +1008,11 @@ npm install \
 ```
 
 **Create Netlify Function:**
+
 ```typescript
 // netlify/functions/chat-stream.ts
-import { convertToModelMessages, streamText } from "ai";
-import { unifiedLLMService } from "@core/ai/llm/unified-language-model";
+import { convertToModelMessages, streamText } from 'ai';
+import { unifiedLLMService } from '@core/ai/llm/unified-language-model';
 
 export async function handler(event, context) {
   const { messages, provider } = JSON.parse(event.body);
@@ -998,13 +1020,13 @@ export async function handler(event, context) {
   // Use existing unified service
   const stream = await unifiedLLMService.streamMessage(
     messages,
-    provider || "openai"
+    provider || 'openai'
   );
 
   return {
     statusCode: 200,
-    headers: { "Content-Type": "text/event-stream" },
-    body: stream
+    headers: { 'Content-Type': 'text/event-stream' },
+    body: stream,
   };
 }
 ```
@@ -1012,6 +1034,7 @@ export async function handler(event, context) {
 #### Phase 2: Replace Chat Interface (Week 2)
 
 **Update ChatInterface.tsx:**
+
 ```typescript
 // src/features/chat/pages/ChatInterface.tsx
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
@@ -1056,6 +1079,7 @@ export function ChatInterface() {
 #### Phase 3: Custom Tool UI (Week 3)
 
 **Integrate with Mission Control:**
+
 ```typescript
 // src/features/mission-control/components/MissionToolUI.tsx
 import { makeAssistantToolUI } from "@assistant-ui/react";
@@ -1089,10 +1113,11 @@ export const MissionStartToolUI = makeAssistantToolUI({
 #### Phase 4: Persistence Integration (Week 4)
 
 **Connect to Supabase:**
+
 ```typescript
 // src/features/chat/services/assistant-persistence.ts
-import { supabase } from "@shared/lib/supabase-client";
-import { useExternalStoreRuntime } from "@assistant-ui/react";
+import { supabase } from '@shared/lib/supabase-client';
+import { useExternalStoreRuntime } from '@assistant-ui/react';
 
 export function usePersistedChatRuntime(sessionId: string) {
   const [messages, setMessages] = useState([]);
@@ -1101,10 +1126,10 @@ export function usePersistedChatRuntime(sessionId: string) {
   useEffect(() => {
     const loadHistory = async () => {
       const { data } = await supabase
-        .from("chat_messages")
-        .select("*")
-        .eq("session_id", sessionId)
-        .order("created_at", { ascending: true });
+        .from('chat_messages')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: true });
 
       setMessages(data || []);
     };
@@ -1117,20 +1142,20 @@ export function usePersistedChatRuntime(sessionId: string) {
     isRunning: false,
     onNew: async (message) => {
       // Save to Supabase
-      await supabase.from("chat_messages").insert({
+      await supabase.from('chat_messages').insert({
         session_id: sessionId,
         role: message.role,
-        content: message.content
+        content: message.content,
       });
 
       // Stream response
-      const response = await fetch("/.netlify/functions/chat-stream", {
-        method: "POST",
-        body: JSON.stringify({ messages: [...messages, message] })
+      const response = await fetch('/.netlify/functions/chat-stream', {
+        method: 'POST',
+        body: JSON.stringify({ messages: [...messages, message] }),
       });
 
       // Handle streaming...
-    }
+    },
   });
 }
 ```
@@ -1161,6 +1186,7 @@ If full migration is too risky, consider hybrid:
 **Problem:** Character-by-character updates cause excessive re-renders
 
 **Solution:**
+
 ```typescript
 // Use selective rendering
 const MessageComponent = React.memo(({ message }) => {
@@ -1187,13 +1213,14 @@ const handleStream = (chunk: string) => {
 **Problem:** Auto-scroll conflicts with user manual scrolling
 
 **Solution:**
+
 ```typescript
 const [isUserScrolling, setIsUserScrolling] = useState(false);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 
 const scrollToBottom = () => {
   if (!isUserScrolling) {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }
 };
 
@@ -1207,12 +1234,14 @@ const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
 ### 3. Accessibility
 
 **Requirements:**
+
 - ARIA live regions for dynamic content
 - Keyboard navigation
 - Screen reader announcements
 - Focus management
 
 **Implementation:**
+
 ```typescript
 <div
   role="log"
@@ -1231,14 +1260,15 @@ const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
 ### 4. Error Handling
 
 **Strategy:**
+
 ```typescript
 const [error, setError] = useState<Error | null>(null);
 
 const sendMessage = async (content: string) => {
   try {
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      body: JSON.stringify({ content })
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({ content }),
     });
 
     if (!response.ok) {
@@ -1257,6 +1287,7 @@ const sendMessage = async (content: string) => {
 ### 5. Security
 
 **Best Practices:**
+
 - Never expose API keys on client
 - Use Netlify Functions for API proxying
 - Validate and sanitize all inputs
@@ -1264,20 +1295,21 @@ const sendMessage = async (content: string) => {
 - Use CSRF protection
 
 **Example:**
+
 ```typescript
 // Netlify Function with rate limiting
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(10, "1 m"),
+  limiter: Ratelimit.slidingWindow(10, '1 m'),
 });
 
 export async function handler(event, context) {
   const { success } = await ratelimit.limit(context.ip);
   if (!success) {
-    return { statusCode: 429, body: "Too many requests" };
+    return { statusCode: 429, body: 'Too many requests' };
   }
 
   // Process request...
@@ -1292,7 +1324,7 @@ export async function handler(event, context) {
 // UI State (Zustand)
 const useChatUIStore = create((set) => ({
   isComposerFocused: false,
-  selectedModel: "gpt-4",
+  selectedModel: 'gpt-4',
   setComposerFocus: (focused) => set({ isComposerFocused: focused }),
 }));
 
@@ -1305,6 +1337,7 @@ const runtime = useChatRuntime({
 ### 7. Testing Strategy
 
 **Unit Tests:**
+
 ```typescript
 // Message component test
 describe("MessageComponent", () => {
@@ -1324,13 +1357,14 @@ describe("MessageComponent", () => {
 ```
 
 **E2E Tests:**
+
 ```typescript
 // Playwright test
-test("chat interface handles full conversation", async ({ page }) => {
-  await page.goto("/chat");
+test('chat interface handles full conversation', async ({ page }) => {
+  await page.goto('/chat');
 
   // Send message
-  await page.fill('[data-testid="chat-input"]', "Hello AI");
+  await page.fill('[data-testid="chat-input"]', 'Hello AI');
   await page.click('[data-testid="send-button"]');
 
   // Wait for response
@@ -1360,6 +1394,7 @@ The migration path is straightforward, can be done incrementally, and leverages 
 For specialized use cases like Mission Control orchestration, we can use assistant-ui's Tool UI system to create custom visualizations for agent activities, task progress, and real-time updates.
 
 **Next Steps:**
+
 1. Install assistant-ui dependencies
 2. Create Netlify function for chat streaming
 3. Replace `/chat` interface as proof-of-concept
@@ -1372,24 +1407,29 @@ For specialized use cases like Mission Control orchestration, we can use assista
 ## Additional Resources
 
 ### assistant-ui
+
 - Documentation: https://www.assistant-ui.com/docs
 - GitHub: https://github.com/assistant-ui/assistant-ui
 - Discord: https://discord.gg/assistant-ui
 - Examples: https://www.assistant-ui.com/examples
 
 ### shadcn-chatbot-kit
+
 - Documentation: https://shadcn-chatbot-kit.vercel.app
 - GitHub: https://github.com/Blazity/shadcn-chatbot-kit
 
 ### NLUX
+
 - Documentation: https://docs.nlkit.com/nlux
 - GitHub: https://github.com/nlkitai/nlux
 
 ### Deep Chat
+
 - Documentation: https://deepchat.dev/docs
 - GitHub: https://github.com/OvidijusParsiunas/deep-chat
 
 ### General Resources
+
 - React AI SDK: https://ai-sdk.dev
 - Vercel AI Templates: https://vercel.com/templates/ai
 - LangChain Docs: https://docs.langchain.com

@@ -265,7 +265,8 @@ export const MissionLogEnhanced: React.FC = () => {
                               employeeAvatar ||
                               (message.type === 'system'
                                 ? 'https://api.dicebear.com/7.x/shapes/svg?seed=system'
-                                : message.type === 'agent' && role === 'supervisor'
+                                : message.type === 'agent' &&
+                                    role === 'supervisor'
                                   ? 'https://api.dicebear.com/7.x/shapes/svg?seed=supervisor'
                                   : `https://api.dicebear.com/7.x/bottts/svg?seed=${employeeName}`)
                             }
@@ -292,7 +293,7 @@ export const MissionLogEnhanced: React.FC = () => {
                             {role && role !== 'user' && (
                               <Badge
                                 variant="outline"
-                                className="text-[10px] px-1.5 py-0"
+                                className="px-1.5 py-0 text-[10px]"
                               >
                                 {role === 'supervisor' ? 'Supervisor' : 'Agent'}
                               </Badge>

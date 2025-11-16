@@ -73,17 +73,20 @@ export const REQUEST_LIMITS = {
 /**
  * In-memory tracking (replace with Redis in production)
  */
-const userMetrics = new Map<string, {
-  requests: Array<{ timestamp: number; cost: number; model: string }>;
-  concurrentRequests: number;
-}>();
+const userMetrics = new Map<
+  string,
+  {
+    requests: Array<{ timestamp: number; cost: number; model: string }>;
+    concurrentRequests: number;
+  }
+>();
 
 /**
  * Get cost tier for a model
  */
 function getModelCostTier(model: string): keyof typeof MODEL_COST_TIERS {
   for (const [tier, config] of Object.entries(MODEL_COST_TIERS)) {
-    if (config.models.some(m => model.includes(m))) {
+    if (config.models.some((m) => model.includes(m))) {
       return tier as keyof typeof MODEL_COST_TIERS;
     }
   }
@@ -119,17 +122,17 @@ export async function checkApiAbuse(
   const oneHourAgo = now - 60 * 60 * 1000;
 
   // Clean old requests
-  metrics.requests = metrics.requests.filter(r => r.timestamp > oneHourAgo);
+  metrics.requests = metrics.requests.filter((r) => r.timestamp > oneHourAgo);
 
   // Calculate current usage
   const requestsLastMinute = metrics.requests.filter(
-    r => r.timestamp > oneMinuteAgo
+    (r) => r.timestamp > oneMinuteAgo
   ).length;
 
   const requestsLastHour = metrics.requests.length;
 
   const totalCostLastHour = metrics.requests
-    .filter(r => r.timestamp > oneHourAgo)
+    .filter((r) => r.timestamp > oneHourAgo)
     .reduce((sum, r) => sum + r.cost, 0);
 
   // Get limits for this model
@@ -272,7 +275,7 @@ export function detectAbusePatterns(
 
   // Check for rapid-fire requests
   const recentRequestCount = metrics.requests.filter(
-    r => r.timestamp > last5Minutes
+    (r) => r.timestamp > last5Minutes
   ).length;
 
   if (recentRequestCount > 50) {
@@ -282,8 +285,8 @@ export function detectAbusePatterns(
   // Check for same model spam
   const modelCounts = new Map<string, number>();
   metrics.requests
-    .filter(r => r.timestamp > last5Minutes)
-    .forEach(r => {
+    .filter((r) => r.timestamp > last5Minutes)
+    .forEach((r) => {
       modelCounts.set(r.model, (modelCounts.get(r.model) || 0) + 1);
     });
 
@@ -312,9 +315,7 @@ export function cleanupOldMetrics(): void {
 
   for (const [userId, metrics] of userMetrics.entries()) {
     // Remove old requests
-    metrics.requests = metrics.requests.filter(
-      r => r.timestamp > oneHourAgo
-    );
+    metrics.requests = metrics.requests.filter((r) => r.timestamp > oneHourAgo);
 
     // Remove empty entries
     if (metrics.requests.length === 0 && metrics.concurrentRequests === 0) {
@@ -345,10 +346,13 @@ export function getUserUsageStats(userId: string): ApiUsageMetrics {
   const oneHourAgo = now - 60 * 60 * 1000;
 
   return {
-    requestsLastMinute: metrics.requests.filter(r => r.timestamp > oneMinuteAgo).length,
-    requestsLastHour: metrics.requests.filter(r => r.timestamp > oneHourAgo).length,
+    requestsLastMinute: metrics.requests.filter(
+      (r) => r.timestamp > oneMinuteAgo
+    ).length,
+    requestsLastHour: metrics.requests.filter((r) => r.timestamp > oneHourAgo)
+      .length,
     totalCostLastHour: metrics.requests
-      .filter(r => r.timestamp > oneHourAgo)
+      .filter((r) => r.timestamp > oneHourAgo)
       .reduce((sum, r) => sum + r.cost, 0),
     concurrentRequests: metrics.concurrentRequests,
   };

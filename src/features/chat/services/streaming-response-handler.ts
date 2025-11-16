@@ -89,7 +89,11 @@ export class ChatStreamingService {
   /**
    * Save stream state for recovery
    */
-  private saveStreamState(streamId: string, chunkIndex: number, content: string): void {
+  private saveStreamState(
+    streamId: string,
+    chunkIndex: number,
+    content: string
+  ): void {
     this.streamRecoveryStates.set(streamId, {
       streamId,
       lastChunkIndex: chunkIndex,
@@ -109,7 +113,9 @@ export class ChatStreamingService {
   /**
    * Attempt to recover stream from saved state
    */
-  private async recoverStream(streamId: string): Promise<StreamRecoveryState | null> {
+  private async recoverStream(
+    streamId: string
+  ): Promise<StreamRecoveryState | null> {
     const state = this.streamRecoveryStates.get(streamId);
     if (!state) return null;
 
@@ -119,7 +125,9 @@ export class ChatStreamingService {
       return null;
     }
 
-    console.log(`[StreamRecovery] Recovering stream ${streamId} from chunk ${state.lastChunkIndex}`);
+    console.log(
+      `[StreamRecovery] Recovering stream ${streamId} from chunk ${state.lastChunkIndex}`
+    );
     return state;
   }
 
@@ -131,17 +139,24 @@ export class ChatStreamingService {
 
     if (bufferSize >= BACKPRESSURE_HIGH_WATER && !stream.isBackpressured) {
       stream.isBackpressured = true;
-      console.log(`[Backpressure] Stream ${stream.id} entering backpressure mode (buffer: ${bufferSize})`);
+      console.log(
+        `[Backpressure] Stream ${stream.id} entering backpressure mode (buffer: ${bufferSize})`
+      );
     }
 
     // Wait until buffer drains below low water mark
-    while (stream.buffer.length > BACKPRESSURE_LOW_WATER && stream.isBackpressured) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    while (
+      stream.buffer.length > BACKPRESSURE_LOW_WATER &&
+      stream.isBackpressured
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     if (stream.isBackpressured) {
       stream.isBackpressured = false;
-      console.log(`[Backpressure] Stream ${stream.id} exiting backpressure mode`);
+      console.log(
+        `[Backpressure] Stream ${stream.id} exiting backpressure mode`
+      );
     }
   }
 
@@ -158,7 +173,7 @@ export class ChatStreamingService {
       provider = 'openai',
       onUpdate,
       signal,
-      agentId
+      agentId,
     } = options;
 
     const streamId = this.generateStreamId(sessionId, agentId);
@@ -323,22 +338,30 @@ export class ChatStreamingService {
         reconnectAttempts++;
         metrics.reconnects++;
 
-        console.log(`[StreamRecovery] Attempting recovery ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`);
+        console.log(
+          `[StreamRecovery] Attempting recovery ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`
+        );
 
         // Save current state
         this.saveStreamState(streamId, chunkIndex, fullContent);
 
         // Wait before retry with exponential backoff
-        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, reconnectAttempts - 1)));
+        await new Promise((resolve) =>
+          setTimeout(resolve, 1000 * Math.pow(2, reconnectAttempts - 1))
+        );
 
         // Retry the stream
-        yield* this.streamMessage(messages, { ...options, signal: controller.signal });
+        yield* this.streamMessage(messages, {
+          ...options,
+          signal: controller.signal,
+        });
         return;
       }
 
       const errorUpdate: MultiAgentStreamingUpdate = {
         type: 'error',
-        error: error instanceof Error ? error.message : 'Unknown streaming error',
+        error:
+          error instanceof Error ? error.message : 'Unknown streaming error',
         agentId,
         streamId,
         timestamp: Date.now(),
@@ -370,7 +393,7 @@ export class ChatStreamingService {
       'connection reset',
     ];
 
-    return recoverableErrors.some(msg =>
+    return recoverableErrors.some((msg) =>
       error.message.toLowerCase().includes(msg.toLowerCase())
     );
   }
@@ -405,17 +428,28 @@ export class ChatStreamingService {
       provider?: 'openai' | 'anthropic' | 'google';
       agentId?: string;
       onChunk: (chunk: string, agentId?: string) => void;
-      onComplete: (metadata?: { tokensUsed?: number; cost?: number; metrics?: StreamMetrics }) => void;
+      onComplete: (metadata?: {
+        tokensUsed?: number;
+        cost?: number;
+        metrics?: StreamMetrics;
+      }) => void;
       onError: (error: Error) => void;
       signal?: AbortSignal;
     }
   ): Promise<void> {
-    const { onChunk, onComplete, onError, signal, agentId, ...streamOptions } = options;
+    const { onChunk, onComplete, onError, signal, agentId, ...streamOptions } =
+      options;
 
     try {
-      let metadata: { tokensUsed?: number; cost?: number; metrics?: StreamMetrics } | undefined;
+      let metadata:
+        | { tokensUsed?: number; cost?: number; metrics?: StreamMetrics }
+        | undefined;
 
-      for await (const update of this.streamMessage(messages, { ...streamOptions, signal, agentId })) {
+      for await (const update of this.streamMessage(messages, {
+        ...streamOptions,
+        signal,
+        agentId,
+      })) {
         if (update.type === 'content' && update.content) {
           onChunk(update.content, update.agentId);
         } else if (update.type === 'done') {
@@ -442,7 +476,8 @@ export class ChatStreamingService {
       options: StreamingOptions;
     }>
   ): AsyncGenerator<MultiAgentStreamingUpdate> {
-    const sessionId = agentStreams[0]?.options.sessionId || `multiplex-${Date.now()}`;
+    const sessionId =
+      agentStreams[0]?.options.sessionId || `multiplex-${Date.now()}`;
     const generators: Array<{
       agentId: string;
       generator: AsyncGenerator<MultiAgentStreamingUpdate>;
@@ -461,7 +496,10 @@ export class ChatStreamingService {
 
     // Multiplex the streams using Promise.race
     const activeGenerators = new Map(
-      generators.map(g => [g.agentId, { generator: g.generator, done: false }])
+      generators.map((g) => [
+        g.agentId,
+        { generator: g.generator, done: false },
+      ])
     );
 
     while (activeGenerators.size > 0) {
@@ -517,7 +555,7 @@ export class ChatStreamingService {
   cancelSessionStreams(sessionId: string): void {
     const streams = this.multiplexedStreams.get(sessionId);
     if (streams) {
-      streams.forEach(streamId => this.cancelStream(streamId));
+      streams.forEach((streamId) => this.cancelStream(streamId));
       this.multiplexedStreams.delete(sessionId);
     }
   }

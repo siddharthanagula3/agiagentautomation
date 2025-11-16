@@ -9,7 +9,10 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
-import { websocketManager, MessageType } from '@core/integrations/websocket-manager';
+import {
+  websocketManager,
+  MessageType,
+} from '@core/integrations/websocket-manager';
 
 // Presence status types
 export enum PresenceStatus {
@@ -108,7 +111,8 @@ export class RealtimeCollaborationService {
   private presenceTimers: Map<string, NodeJS.Timeout> = new Map();
   private cursorThrottleTimers: Map<string, NodeJS.Timeout> = new Map();
   private activityDebounceTimers: Map<string, NodeJS.Timeout> = new Map();
-  private supabaseChannels: Map<string, ReturnType<typeof supabase.channel>> = new Map();
+  private supabaseChannels: Map<string, ReturnType<typeof supabase.channel>> =
+    new Map();
   private currentUserId?: string;
   private currentSessionId?: string;
 
@@ -249,14 +253,16 @@ export class RealtimeCollaborationService {
     }
 
     // Also send via WebSocket as fallback
-    await websocketManager.send(`collaboration-${sessionId}`, {
-      type: MessageType.PRESENCE,
-      payload: presence,
-      sessionId,
-      userId,
-    }).catch(() => {
-      // Ignore WebSocket errors, Supabase is primary
-    });
+    await websocketManager
+      .send(`collaboration-${sessionId}`, {
+        type: MessageType.PRESENCE,
+        payload: presence,
+        sessionId,
+        userId,
+      })
+      .catch(() => {
+        // Ignore WebSocket errors, Supabase is primary
+      });
   }
 
   /**
@@ -324,15 +330,17 @@ export class RealtimeCollaborationService {
     }
 
     // Also send via WebSocket
-    await websocketManager.send(`collaboration-${sessionId}`, {
-      type: MessageType.TYPING,
-      payload: indicator,
-      sessionId,
-      userId,
-      agentId,
-    }).catch(() => {
-      // Ignore errors
-    });
+    await websocketManager
+      .send(`collaboration-${sessionId}`, {
+        type: MessageType.TYPING,
+        payload: indicator,
+        sessionId,
+        userId,
+        agentId,
+      })
+      .catch(() => {
+        // Ignore errors
+      });
   }
 
   /**
@@ -380,14 +388,16 @@ export class RealtimeCollaborationService {
     }
 
     // Also send via WebSocket
-    await websocketManager.send(`collaboration-${sessionId}`, {
-      type: MessageType.CURSOR,
-      payload: cursor,
-      sessionId,
-      userId,
-    }).catch(() => {
-      // Ignore errors
-    });
+    await websocketManager
+      .send(`collaboration-${sessionId}`, {
+        type: MessageType.CURSOR,
+        payload: cursor,
+        sessionId,
+        userId,
+      })
+      .catch(() => {
+        // Ignore errors
+      });
 
     // Set throttle timer
     const timer = setTimeout(() => {
@@ -446,14 +456,16 @@ export class RealtimeCollaborationService {
       }
 
       // Also send via WebSocket
-      await websocketManager.send(`collaboration-${sessionId}`, {
-        type: MessageType.ACTIVITY,
-        payload: update,
-        sessionId,
-        userId,
-      }).catch(() => {
-        // Ignore errors
-      });
+      await websocketManager
+        .send(`collaboration-${sessionId}`, {
+          type: MessageType.ACTIVITY,
+          payload: update,
+          sessionId,
+          userId,
+        })
+        .catch(() => {
+          // Ignore errors
+        });
 
       this.activityDebounceTimers.delete(timerKey);
     }, ACTIVITY_DEBOUNCE);
@@ -595,7 +607,10 @@ export class RealtimeCollaborationService {
   /**
    * Handle presence sync from Supabase
    */
-  private handlePresenceSync(sessionId: string, state: Record<string, unknown>): void {
+  private handlePresenceSync(
+    sessionId: string,
+    state: Record<string, unknown>
+  ): void {
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
@@ -607,13 +622,19 @@ export class RealtimeCollaborationService {
       }
     }
 
-    console.log(`[Collaboration] Presence synced: ${sessionId}, ${session.participants.size} participants`);
+    console.log(
+      `[Collaboration] Presence synced: ${sessionId}, ${session.participants.size} participants`
+    );
   }
 
   /**
    * Handle presence join
    */
-  private handlePresenceJoin(sessionId: string, key: string, presences: unknown[]): void {
+  private handlePresenceJoin(
+    sessionId: string,
+    key: string,
+    presences: unknown[]
+  ): void {
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
@@ -626,7 +647,11 @@ export class RealtimeCollaborationService {
   /**
    * Handle presence leave
    */
-  private handlePresenceLeave(sessionId: string, key: string, presences: unknown[]): void {
+  private handlePresenceLeave(
+    sessionId: string,
+    key: string,
+    presences: unknown[]
+  ): void {
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
@@ -642,7 +667,10 @@ export class RealtimeCollaborationService {
   /**
    * Handle typing update
    */
-  private handleTypingUpdate(sessionId: string, indicator: TypingIndicator): void {
+  private handleTypingUpdate(
+    sessionId: string,
+    indicator: TypingIndicator
+  ): void {
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
@@ -672,7 +700,10 @@ export class RealtimeCollaborationService {
   /**
    * Handle activity update
    */
-  private handleActivityUpdate(sessionId: string, update: ActivityUpdate): void {
+  private handleActivityUpdate(
+    sessionId: string,
+    update: ActivityUpdate
+  ): void {
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
@@ -706,7 +737,7 @@ export class RealtimeCollaborationService {
         PresenceStatus.ONLINE,
         ActivityType.VIEWING,
         metadata
-      ).catch(error => {
+      ).catch((error) => {
         console.error('[Collaboration] Heartbeat failed', error);
       });
     }, PRESENCE_HEARTBEAT);

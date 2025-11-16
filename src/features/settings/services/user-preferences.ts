@@ -61,7 +61,9 @@ class SettingsService {
    */
   async getProfile(): Promise<{ data: UserProfile | null; error?: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         return { data: null, error: 'User not authenticated' };
       }
@@ -94,7 +96,10 @@ class SettingsService {
       };
     } catch (error) {
       console.error('Error getting profile:', error);
-      return { data: null, error: error instanceof Error ? error.message : 'Unknown error' };
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 
@@ -105,23 +110,23 @@ class SettingsService {
     profile: Partial<UserProfile>
   ): Promise<{ error?: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         return { error: 'User not authenticated' };
       }
 
-      const { error } = await supabase
-        .from('user_profiles')
-        .upsert({
-          id: user.id,
-          name: profile.name,
-          avatar_url: profile.avatar_url,
-          phone: profile.phone,
-          bio: profile.bio,
-          timezone: profile.timezone,
-          language: profile.language,
-          updated_at: new Date().toISOString(),
-        });
+      const { error } = await supabase.from('user_profiles').upsert({
+        id: user.id,
+        name: profile.name,
+        avatar_url: profile.avatar_url,
+        phone: profile.phone,
+        bio: profile.bio,
+        timezone: profile.timezone,
+        language: profile.language,
+        updated_at: new Date().toISOString(),
+      });
 
       if (error) {
         console.error('Error updating profile:', error);
@@ -131,7 +136,9 @@ class SettingsService {
       return {};
     } catch (error) {
       console.error('Error updating profile:', error);
-      return { error: error instanceof Error ? error.message : 'Unknown error' };
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 
@@ -140,7 +147,9 @@ class SettingsService {
    */
   async getSettings(): Promise<{ data: UserSettings; error?: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         return { data: {}, error: 'User not authenticated' };
       }
@@ -151,7 +160,8 @@ class SettingsService {
         .eq('id', user.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 = no rows returned
         console.error('Error fetching settings:', error);
         return { data: {}, error: error.message };
       }
@@ -185,7 +195,10 @@ class SettingsService {
       return { data: data as UserSettings };
     } catch (error) {
       console.error('Error getting settings:', error);
-      return { data: {}, error: error instanceof Error ? error.message : 'Unknown error' };
+      return {
+        data: {},
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 
@@ -196,7 +209,9 @@ class SettingsService {
     settings: Partial<UserSettings>
   ): Promise<{ error?: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         return { error: 'User not authenticated' };
       }
@@ -215,7 +230,9 @@ class SettingsService {
       return {};
     } catch (error) {
       console.error('Error updating settings:', error);
-      return { error: error instanceof Error ? error.message : 'Unknown error' };
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 
@@ -224,7 +241,9 @@ class SettingsService {
    */
   async uploadAvatar(file: File): Promise<{ data: string; error?: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         return { data: '', error: 'User not authenticated' };
       }
@@ -248,9 +267,9 @@ class SettingsService {
       }
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('avatars').getPublicUrl(filePath);
 
       // Update profile with new avatar URL
       await this.updateProfile({ avatar_url: publicUrl });
@@ -258,7 +277,10 @@ class SettingsService {
       return { data: publicUrl };
     } catch (error) {
       console.error('Error uploading avatar:', error);
-      return { data: '', error: error instanceof Error ? error.message : 'Unknown error' };
+      return {
+        data: '',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 
@@ -279,7 +301,9 @@ class SettingsService {
       return {};
     } catch (error) {
       console.error('Error changing password:', error);
-      return { error: error instanceof Error ? error.message : 'Unknown error' };
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 
@@ -288,7 +312,9 @@ class SettingsService {
    */
   async getAPIKeys(): Promise<{ data: APIKey[]; error?: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         return { data: [], error: 'User not authenticated' };
       }
@@ -307,7 +333,10 @@ class SettingsService {
       return { data: data as APIKey[] };
     } catch (error) {
       console.error('Error getting API keys:', error);
-      return { data: [], error: error instanceof Error ? error.message : 'Unknown error' };
+      return {
+        data: [],
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 
@@ -318,7 +347,9 @@ class SettingsService {
     name: string
   ): Promise<{ data: APIKey | null; error?: string; fullKey?: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         return { data: null, error: 'User not authenticated' };
       }
@@ -347,7 +378,10 @@ class SettingsService {
       return { data: data as APIKey, fullKey };
     } catch (error) {
       console.error('Error creating API key:', error);
-      return { data: null, error: error instanceof Error ? error.message : 'Unknown error' };
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 
@@ -369,14 +403,20 @@ class SettingsService {
       return {};
     } catch (error) {
       console.error('Error deleting API key:', error);
-      return { error: error instanceof Error ? error.message : 'Unknown error' };
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 
   /**
    * Enable 2FA
    */
-  async enable2FA(): Promise<{ error?: string; secret?: string; qrCode?: string }> {
+  async enable2FA(): Promise<{
+    error?: string;
+    secret?: string;
+    qrCode?: string;
+  }> {
     try {
       // TODO: Implement TOTP 2FA
       // For now, just update the settings
@@ -384,7 +424,9 @@ class SettingsService {
       return { error };
     } catch (error) {
       console.error('Error enabling 2FA:', error);
-      return { error: error instanceof Error ? error.message : 'Unknown error' };
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 
@@ -393,11 +435,15 @@ class SettingsService {
    */
   async disable2FA(): Promise<{ error?: string }> {
     try {
-      const { error } = await this.updateSettings({ two_factor_enabled: false });
+      const { error } = await this.updateSettings({
+        two_factor_enabled: false,
+      });
       return { error };
     } catch (error) {
       console.error('Error disabling 2FA:', error);
-      return { error: error instanceof Error ? error.message : 'Unknown error' };
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 
@@ -405,7 +451,8 @@ class SettingsService {
    * Generate secure random token
    */
   private generateSecureToken(length: number): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     const randomArray = new Uint8Array(length);
     crypto.getRandomValues(randomArray);

@@ -56,10 +56,26 @@ When you submit a request like "analyze my codebase for security vulnerabilities
 ```json
 {
   "tasks": [
-    {"id": 1, "description": "Scan codebase for SQL injection vulnerabilities", "tool_required": "Grep"},
-    {"id": 2, "description": "Identify XSS attack vectors in frontend", "tool_required": "Read"},
-    {"id": 3, "description": "Generate security audit report", "tool_required": "Write"},
-    {"id": 4, "description": "Create remediation PRs for critical issues", "tool_required": "Edit"}
+    {
+      "id": 1,
+      "description": "Scan codebase for SQL injection vulnerabilities",
+      "tool_required": "Grep"
+    },
+    {
+      "id": 2,
+      "description": "Identify XSS attack vectors in frontend",
+      "tool_required": "Read"
+    },
+    {
+      "id": 3,
+      "description": "Generate security audit report",
+      "tool_required": "Write"
+    },
+    {
+      "id": 4,
+      "description": "Create remediation PRs for critical issues",
+      "tool_required": "Edit"
+    }
   ],
   "reasoning": "Security audit requires systematic vulnerability scanning followed by structured reporting and code fixes"
 }
@@ -76,6 +92,7 @@ The workforce orchestrator analyzes each task and selects optimal AI employees f
 3. **Specialization priority:** Domain specialists (security-analyst) rank higher than generalists (code-reviewer)
 
 For the security audit example, the orchestrator might assign:
+
 - **security-analyst** → SQL injection scanning (has Grep, specialized in security)
 - **frontend-engineer** → XSS vulnerability identification (has Read, knows frontend attack vectors)
 - **documentation-writer** → Audit report generation (has Write, structured output expertise)
@@ -94,6 +111,7 @@ Tasks without dependencies execute in parallel. The mission control dashboard pr
 The Zustand-powered state management updates in <1 second when employees complete tasks, invoke tools, or encounter errors. Users see exactly what's happening without black-box uncertainty.
 
 For the security audit example, you'd observe:
+
 1. security-analyst using Grep to scan 247 files for SQL patterns (2 minutes)
 2. frontend-engineer reading React components and identifying 5 potential XSS vulnerabilities (4 minutes)
 3. documentation-writer generating structured audit report with severity rankings (1 minute)
@@ -148,6 +166,7 @@ AGI Agent Automation leverages this reliability through provider-agnostic archit
 Function calling, code execution, and web search transitioned from experimental APIs to core LLM capabilities in 2025. OpenAI's GPT-5, Anthropic's Claude Sonnet 4.5, and Google's Gemini 2.5 all support native tool use with <2% error rates on tool invocation.
 
 AGI Agent Automation's employees leverage 7 core tools:
+
 - **Read:** File content analysis
 - **Grep:** Pattern matching across codebases
 - **Glob:** File discovery by pattern

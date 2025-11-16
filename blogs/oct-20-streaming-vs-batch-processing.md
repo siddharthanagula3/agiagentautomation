@@ -27,6 +27,7 @@ Streaming workflows prioritize minimizing time between input arrival and output 
 Streaming consumes resources continuously. A security monitor runs 24/7 whether threats exist or not. Idle time still incurs compute costs. Cloud providers charge for sustained resource allocation. Streaming 100 AI employees costs $15,000-25,000 monthly in compute resources (assuming mid-tier cloud instances).
 
 **Optimal Use Cases:**
+
 - Customer support (users expect instant responses)
 - Security monitoring (threats require immediate detection)
 - Real-time dashboards (humans monitor continuously)
@@ -47,6 +48,7 @@ Batch workflows prioritize maximizing work completed per dollar spent. A Financi
 Batching dramatically reduces costs. Cloud providers charge 60-70% less for spot instances and off-peak resources. A batch job consuming 100 CPU-hours costs $12-18 during off-peak versus $45-60 during peak hours. Batching 100 AI employees' background work costs $3,000-6,000 monthly—50-75% cheaper than streaming.
 
 **Optimal Use Cases:**
+
 - Periodic reporting (daily/weekly/monthly deadlines)
 - Data pipeline processing (ETL workflows tolerate hours of latency)
 - Compliance audits (regulatory deadlines measured in days/weeks)
@@ -96,35 +98,35 @@ Organizations deploying hybrid execution face four architectural decisions: task
 
 **Task Classification Approach:**
 
-*User-Initiated vs Background:* Simplest heuristic. Tasks triggered by user action stream. Tasks triggered by schedules or system events batch. Captures 80% of optimal classification.
+_User-Initiated vs Background:_ Simplest heuristic. Tasks triggered by user action stream. Tasks triggered by schedules or system events batch. Captures 80% of optimal classification.
 
-*Latency SLA-Based:* More sophisticated. Tasks with <5 second SLA stream. Tasks with <1 hour SLA use fast batch. Tasks with >1 hour SLA use slow batch. Enables fine-grained optimization.
+_Latency SLA-Based:_ More sophisticated. Tasks with <5 second SLA stream. Tasks with <1 hour SLA use fast batch. Tasks with >1 hour SLA use slow batch. Enables fine-grained optimization.
 
-*Cost-Benefit Analysis:* Most complex. System calculates cost of streaming versus batch, compares against latency value. High-value low-latency tasks stream. Low-value tolerant tasks batch. Requires organizational cost models.
+_Cost-Benefit Analysis:_ Most complex. System calculates cost of streaming versus batch, compares against latency value. High-value low-latency tasks stream. Low-value tolerant tasks batch. Requires organizational cost models.
 
 **Execution Window Optimization:**
 
-*Fixed Windows:* Batch jobs execute at predetermined times (midnight, 3 AM, 6 AM). Simplest implementation. Works for predictable workloads.
+_Fixed Windows:_ Batch jobs execute at predetermined times (midnight, 3 AM, 6 AM). Simplest implementation. Works for predictable workloads.
 
-*Adaptive Windows:* System learns task patterns and optimizes execution timing. A weekly report historically completes in 45 minutes. System schedules start time ensuring completion 15 minutes before deadline—no earlier (wastes off-peak pricing), no later (risks missing deadline).
+_Adaptive Windows:_ System learns task patterns and optimizes execution timing. A weekly report historically completes in 45 minutes. System schedules start time ensuring completion 15 minutes before deadline—no earlier (wastes off-peak pricing), no later (risks missing deadline).
 
-*Opportunistic Execution:* System monitors resource utilization. When idle capacity exists (low user traffic periods), batch jobs execute opportunistically using spare resources. Zero marginal cost for batch processing during idle windows.
+_Opportunistic Execution:_ System monitors resource utilization. When idle capacity exists (low user traffic periods), batch jobs execute opportunistically using spare resources. Zero marginal cost for batch processing during idle windows.
 
 **Failure Handling Patterns:**
 
-*Streaming Failures - Immediate Retry:* User-facing tasks retry instantly. Maximum 3 attempts. Escalate to human after failures. User visibility demands quick resolution.
+_Streaming Failures - Immediate Retry:_ User-facing tasks retry instantly. Maximum 3 attempts. Escalate to human after failures. User visibility demands quick resolution.
 
-*Batch Failures - Deferred Retry:* Background tasks retry during next execution window. Acceptable to delay hours if task eventually succeeds. Reduces retry-induced load spikes.
+_Batch Failures - Deferred Retry:_ Background tasks retry during next execution window. Acceptable to delay hours if task eventually succeeds. Reduces retry-induced load spikes.
 
-*Partial Failure Handling:* Batch jobs processing 10,000 records can partially fail. System checkpoints progress every 1,000 records. On failure, resume from last checkpoint—avoiding full restart.
+_Partial Failure Handling:_ Batch jobs processing 10,000 records can partially fail. System checkpoints progress every 1,000 records. On failure, resume from last checkpoint—avoiding full restart.
 
 **Cost Allocation Models:**
 
-*Department-Based:* Charge streaming costs to user-facing teams (customer support, sales). Charge batch costs to analytics/reporting teams. Aligns costs with benefiting organizations.
+_Department-Based:_ Charge streaming costs to user-facing teams (customer support, sales). Charge batch costs to analytics/reporting teams. Aligns costs with benefiting organizations.
 
-*Task-Based:* Allocate costs per task type. Customer support queries cost $0.03 each (streaming). Weekly reports cost $0.80 each (batch). Enables granular ROI analysis.
+_Task-Based:_ Allocate costs per task type. Customer support queries cost $0.03 each (streaming). Weekly reports cost $0.80 each (batch). Enables granular ROI analysis.
 
-*Resource-Based:* Track actual compute consumption per AI employee. Frontend-facing employees (mostly streaming) cost more per task. Backend analytics employees (mostly batch) cost less. Transparent resource attribution.
+_Resource-Based:_ Track actual compute consumption per AI employee. Frontend-facing employees (mostly streaming) cost more per task. Backend analytics employees (mostly batch) cost less. Transparent resource attribution.
 
 ## Looking Ahead to 2026
 

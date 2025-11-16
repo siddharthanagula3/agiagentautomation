@@ -13,9 +13,11 @@ The codebase has a **partially implemented** token system with significant gaps 
 ## 1. What's Implemented and Working
 
 ### 1.1 Database Layer ✅
+
 **Files:** `supabase/migrations/20250111000003_add_token_system.sql`
 
 **Working Components:**
+
 - `users.token_balance` column (BIGINT, non-negative constraint)
 - `token_transactions` audit table with:
   - Complete transaction history tracking
@@ -31,12 +33,15 @@ The codebase has a **partially implemented** token system with significant gaps 
   - `get_user_transaction_history()` - paginated history
 
 **Constraints:**
+
 - `users_token_balance_non_negative` CHECK constraint prevents negative balances
 - `token_transactions_type_valid` validates transaction types
 - `token_transactions_new_balance_non_negative` validates new balance
 
 ### 1.2 Token Purchase Flow ✅
+
 **Files:**
+
 - `src/features/billing/services/token-pack-purchase.ts`
 - `netlify/functions/buy-token-pack.ts`
 - `netlify/functions/stripe-webhook.ts` (token pack section)
@@ -44,6 +49,7 @@ The codebase has a **partially implemented** token system with significant gaps 
 **Working Components:**
 
 **Frontend:**
+
 ```typescript
 buyTokenPack(params: {
   userId: string;
@@ -53,17 +59,20 @@ buyTokenPack(params: {
   price: number;
 })
 ```
+
 - Creates Stripe checkout session
 - Configurable token packs (500K, 1.5M, 5M, 10M)
 - Tracks pricing and discounts
 
 **API Endpoint (buy-token-pack):**
+
 - Validates required fields
 - Creates Stripe payment session with correct metadata
 - Stores tokens count, packId, userId in metadata
 - Proper error handling
 
 **Webhook Processing (stripe-webhook.ts):**
+
 - Detects `checkout.session.completed` event
 - Identifies token pack purchase via `metadata.type === 'token_pack_purchase'`
 - Calls `supabase.rpc('update_user_token_balance', {...})` to add tokens
@@ -71,6 +80,7 @@ buyTokenPack(params: {
 - Has error handling with audit logging
 
 **Token Balance Update:**
+
 - Successfully reads current balance from database
 - Calculates new balance
 - Updates `users.token_balance` using the safe database function
@@ -78,7 +88,9 @@ buyTokenPack(params: {
 - Returns new balance after update
 
 ### 1.3 Token Usage Tracking (Logging) ✅
+
 **Files:**
+
 - `src/core/integrations/token-usage-tracker.ts`
 - `netlify/functions/utils/token-tracking.ts`
 - `src/features/billing/services/credit-tracking.ts`
@@ -88,12 +100,14 @@ buyTokenPack(params: {
 
 **Token Pricing Database:**
 Comprehensive pricing for multiple models:
+
 - OpenAI: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo
 - Anthropic: claude-3-5-sonnet-20241022, claude-3-opus-20240229, claude-3-haiku-20240307
 - Google: gemini-1.5-pro, gemini-1.5-flash, gemini-1.0-pro
 - Perplexity: sonar-small/large/huge models
 
 **Token Logging Service:**
+
 ```typescript
 tokenLogger.logTokenUsage(
   model: string,
@@ -108,29 +122,35 @@ tokenLogger.logTokenUsage(
 ```
 
 **Cost Calculation:**
+
 - Accurate pricing per model ($/per 1M tokens)
 - Separates input/output tokens
 - Calculates cost as: `(tokens / 1,000,000) * rate`
 
 **Usage Storage:**
+
 - Stores in `token_usage` table (via UsageTracker)
 - Stores in `api_usage` table (via credit-tracking)
 - Session-based aggregation with real-time summaries
 - Daily and monthly statistics
 
 **Integration Points:**
+
 - Called from `anthropic-proxy.ts` (non-blocking)
 - Called from streaming service after API response
 - Tracks per model, per provider, per user
 
 ### 1.4 Token Display Components ✅
+
 **Files:**
+
 - `src/features/chat/components/TokenUsageDisplay.tsx`
 - `src/features/chat/components/UsageWarningBanner.tsx`
 - `src/features/chat/components/UsageWarningModal.tsx`
 - `src/features/billing/pages/BillingDashboard.tsx`
 
 **Working Components:**
+
 - Real-time token counter showing tokens used per message
 - Token cost display in USD (handles sub-penny amounts)
 - Input/output token breakdown in tooltips
@@ -145,12 +165,14 @@ tokenLogger.logTokenUsage(
 ## 2. Critical Missing Features ❌
 
 ### 2.1 Token Deduction on Usage (CRITICAL) ❌
+
 **Severity:** CRITICAL - System-breaking bug
 
 **What's Missing:**
 When users consume tokens (make API calls), **no tokens are deducted from their balance**.
 
 **Evidence:**
+
 - No code anywhere in the codebase that decrements `users.token_balance`
 - Token logging only records usage in `token_usage` table (for analytics)
 - No integration between token usage tracking and balance management
@@ -161,6 +183,7 @@ When users consume tokens (make API calls), **no tokens are deducted from their 
   - Result: **Zero matches** for deduction/subtraction logic
 
 **Impact:**
+
 ```
 User Balance: 1,000,000 tokens (purchased)
 After 10M tokens of API usage:
@@ -170,33 +193,39 @@ After 10M tokens of API usage:
 ```
 
 **Why This Matters:**
+
 - Free tier users can consume unlimited tokens
 - Pro/Max tier users' purchased tokens never decrease
 - Zero token cost enforcement
 - Revenue impact: All usage after initial purchase is "free"
 
 ### 2.2 Token Limit Enforcement (CRITICAL) ❌
+
 **Severity:** CRITICAL
 
 **What's Missing:**
 No code prevents API calls when:
+
 - Free tier user exceeds 1M tokens/month
 - Pro tier user exceeds their token allowance
 - Purchased tokens are exhausted
 
 **How It Should Work:**
+
 1. Before making API call, check `users.token_balance`
 2. Estimate tokens needed for this request (varies by model)
 3. If insufficient, reject with 429 or 402 status
 4. If sufficient, allow request and deduct after completion
 
 **Current Reality:**
+
 - LLM services accept requests unconditionally
 - No pre-flight token balance checks
 - No rate limiting based on token balance
 - No cost enforcement mechanism
 
 **Files That Should Have This:**
+
 - `src/core/ai/llm/unified-language-model.ts` - Should check balance before sending
 - `netlify/functions/anthropic-proxy.ts` - Should validate token sufficiency
 - `netlify/functions/openai-proxy.ts` - Should validate token sufficiency
@@ -205,27 +234,33 @@ No code prevents API calls when:
 **Current State:** NONE of these files have token checking
 
 ### 2.3 Incomplete Token Balance Retrieval ❌
+
 **Issue:** Token balance is never retrieved to:
+
 - Display to user in chat UI
 - Check before processing requests
 - Show in billing dashboard
 
 **Only Found In:**
+
 - `token-pack-purchase.ts` - Gets balance only to update after purchase
 - Never called from chat, LLM, or billing dashboard
 
 **Should Be Called From:**
+
 - Chat interface before sending messages
 - Every API proxy endpoint
 - Billing dashboard to show current balance
 - Stream handlers to track real-time balance
 
 ### 2.4 Race Condition Risk on Concurrent Requests ⚠️
+
 **Severity:** HIGH
 
 **Issue:** While the database function `update_user_token_balance()` uses row-level locking (GOOD), the client-side code that calls it has no race condition protection.
 
 **Scenario:**
+
 ```
 1. User makes 2 concurrent API calls
 2. Both proxies call the webhook with tokens
@@ -242,12 +277,14 @@ But wait - this uses the DB function which locks, so it might be okay...
 ### 2.5 No Enforcement of Plan-Based Token Limits ❌
 
 **Current Plans in Pricing Page:**
+
 - **Starter (Free):** 50K tokens/month
 - **Pro:** 500K tokens/month
 - **Business:** 5M tokens/month
 - **Enterprise:** Custom
 
 **What's Missing:**
+
 - No tracking of "monthly allowance" separate from "purchased tokens"
 - No monthly reset mechanism
 - No way to distinguish:
@@ -261,9 +298,11 @@ But wait - this uses the DB function which locks, so it might be okay...
 ## 3. Potential Bugs and Security Issues 🔴
 
 ### 3.1 Webhook Idempotency Vulnerability
+
 **File:** `stripe-webhook.ts` (lines 100-122)
 
 **Issue:**
+
 ```typescript
 const processedEvents = new Set<string>();
 
@@ -271,19 +310,22 @@ function markEventProcessed(eventId: string): void {
   processedEvents.add(eventId);
   if (processedEvents.size > 1000) {
     const eventsArray = Array.from(processedEvents);
-    eventsArray.slice(0, eventsArray.length - 1000)
+    eventsArray
+      .slice(0, eventsArray.length - 1000)
       .forEach((id) => processedEvents.delete(id));
   }
 }
 ```
 
 **Problems:**
+
 1. **In-memory storage:** Resets on server restart
 2. **Not persistent:** If service restarts, same webhook can be processed twice
 3. **Only keeps 1000 events:** Older events can be reprocessed
 4. **Race condition:** No locks on `processedEvents` Set (JavaScript is not thread-safe)
 
 **Attack Vector:**
+
 1. Attacker replays token purchase webhook during server startup window
 2. Tokens added twice without extra payment
 3. OR Stripe retries webhook, adds tokens twice
@@ -291,9 +333,11 @@ function markEventProcessed(eventId: string): void {
 **Fix Needed:** Store processed event IDs in database table with timestamp
 
 ### 3.2 Missing Token Sufficiency Check
+
 **Files:** All `*-proxy.ts` files
 
 **Current Code (anthropic-proxy.ts):**
+
 ```typescript
 // Makes API call without checking token balance
 const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -304,68 +348,88 @@ const response = await fetch('https://api.anthropic.com/v1/messages', {
 ```
 
 **Missing:**
+
 ```typescript
 // Should be:
 const balance = await getUserTokenBalance(userId);
 const estimatedTokens = estimateTokens(messages, model);
 if (balance < estimatedTokens) {
-  return { statusCode: 402, body: JSON.stringify({error: 'Insufficient tokens'}) };
+  return {
+    statusCode: 402,
+    body: JSON.stringify({ error: 'Insufficient tokens' }),
+  };
 }
 ```
 
 ### 3.3 Stripe Metadata Not Validated
+
 **File:** `stripe-webhook.ts` (lines 547-549)
 
 **Issue:**
+
 ```typescript
 if (session.metadata?.type === 'token_pack_purchase' && userId) {
   const tokens = parseInt(session.metadata.tokens || '0', 10);
 ```
 
 **Problems:**
+
 1. No validation that `tokens` is positive
 2. No maximum limit (could be artificially large)
 3. `packId` is stored but never validated against allowed packs
 4. `sessionId` from metadata not verified
 
 **Attack Vector:**
+
 1. Stripe is compromised/MITM
 2. Webhook metadata modified to add 1 billion tokens
 3. No validation prevents it
 
 **Fix Needed:**
+
 ```typescript
-if (!Number.isInteger(tokens) || tokens <= 0 || tokens > MAX_TOKENS_PER_PURCHASE) {
+if (
+  !Number.isInteger(tokens) ||
+  tokens <= 0 ||
+  tokens > MAX_TOKENS_PER_PURCHASE
+) {
   throw new Error('Invalid token amount');
 }
 ```
 
 ### 3.4 No Rate Limiting on Token Purchases
+
 **Issue:** A user could rapidly call `buy-token-pack` endpoint 1000 times and create 1000 checkout sessions simultaneously, overloading Stripe and the database.
 
 **Missing:**
+
 - Rate limiting per user
 - Cooldown between purchases
 - Concurrent purchase limits
 
 ### 3.5 Webhook Rate Limiting Insufficient
+
 **File:** `stripe-webhook.ts` (lines 125-141)
 
 **Current Limits:**
+
 ```typescript
 const RATE_LIMIT_MAX_REQUESTS = 100; // per minute per IP
 ```
 
 **Issues:**
+
 1. Uses IP-based limiting (shared by multiple users behind NAT)
 2. 100 req/min = ~1.7 requests/second (aggressive for webhook retries)
 3. No persistent state (resets on server restart)
 4. `rateLimitMap` cleared periodically (race condition window)
 
 ### 3.6 Token Tracking Not Guaranteed to Persist
+
 **File:** `anthropic-proxy.ts` (lines 94-99)
 
 **Code:**
+
 ```typescript
 storeTokenUsage('anthropic', model, userId, sessionId, tokenUsage).catch(
   (err) => {
@@ -376,16 +440,20 @@ storeTokenUsage('anthropic', model, userId, sessionId, tokenUsage).catch(
 ```
 
 **Issue:**
+
 - If database fails, usage isn't tracked but user still gets response
 - No retry logic
 - No fallback queue
 - Audit trail gaps if many requests fail
 
 ### 3.7 Cost Calculation Discrepancies
+
 **Files:**
+
 - `token-usage-tracker.ts` has different pricing than `netlify/functions/utils/token-tracking.ts`
 
 **Example:**
+
 ```typescript
 // token-usage-tracker.ts (line 52-55)
 'gpt-4o': { input: 5.0, output: 15.0, provider: 'openai' },
@@ -395,6 +463,7 @@ storeTokenUsage('anthropic', model, userId, sessionId, tokenUsage).catch(
 ```
 
 **Impact:**
+
 - Cost displayed to user != cost actually paid
 - Billing discrepancy
 - Audit issues
@@ -404,6 +473,7 @@ storeTokenUsage('anthropic', model, userId, sessionId, tokenUsage).catch(
 ## 4. Performance Concerns ⚠️
 
 ### 4.1 In-Memory Token Caching
+
 **File:** `token-usage-tracker.ts` (lines 110-111)
 
 ```typescript
@@ -412,17 +482,20 @@ private logEntries: Map<string, TokenLogEntry[]>;
 ```
 
 **Issues:**
+
 1. **Memory leak:** Never cleared for long-running sessions
 2. **Unbounded growth:** Maps grow indefinitely
 3. **Lost on restart:** All session data reset when server restarts
 4. **No cleanup:** Orphaned entries from crashed sessions remain
 
 **Better Approach:**
+
 - Store in Redis for shared state across servers
 - Auto-cleanup after session expires
 - Periodic pruning of old entries
 
 ### 4.2 Database Function Locking
+
 **File:** `20250111000003_add_token_system.sql` (line 85)
 
 ```sql
@@ -433,17 +506,20 @@ FOR UPDATE;
 ```
 
 **Concern:**
+
 - `FOR UPDATE` locks the user row
 - High concurrency will cause lock contention
 - Long-running transactions holding lock = timeout risk
 
 **Scale Impact:**
+
 - 1 user with 100 concurrent API calls = 100 queue operations
 - Each one acquires exclusive lock
 - Sequential processing instead of parallel
 - Could cause "lock timeout" errors at scale
 
 ### 4.3 Synchronous Token Tracking
+
 **File:** `streaming-response-handler.ts` (line 44)
 
 ```typescript
@@ -451,16 +527,19 @@ await tokenLogger.logTokenUsage(...);
 ```
 
 **Issue:**
+
 - Blocks response completion on database write
 - If database slow, user experience suffers
 - Streaming response waits for database acknowledgment
 
 **Should Be:**
+
 - Fire-and-forget with queue
 - Log after response sent
 - Don't block user on tracking
 
 ### 4.4 Full Table Scans on Usage Queries
+
 **File:** `usage-monitor.ts` (line 91)
 
 ```typescript
@@ -474,6 +553,7 @@ const { data, error } = await supabase
 ```
 
 **Missing Indexes:**
+
 - Should have composite index: `(user_id, timestamp DESC)`
 - Currently has `idx_token_usage_user_id` but date range not indexed
 - Large result sets could be slow
@@ -483,12 +563,15 @@ const { data, error } = await supabase
 ## 5. Incomplete Implementations ⚠️
 
 ### 5.1 Usage Warning System (70% Complete)
+
 **Files:**
+
 - `UsageWarningBanner.tsx` - UI component works
 - `UsageWarningModal.tsx` - Modal component works
 - `BillingDashboard.tsx` - Partially integrated
 
 **Missing:**
+
 ```typescript
 // Lines 207-215 in UsageWarningBanner.tsx
 const fetchUsage = async () => {
@@ -503,20 +586,25 @@ const fetchUsage = async () => {
 ```
 
 **Issues:**
+
 1. Using mock data instead of real database queries
 2. Hardcoded limits instead of user's actual plan limits
 3. Per-provider limits not matching configured pricing plans
 4. Not integrated with chat interface
 
 ### 5.2 Free Tier Token Allowance (0% Complete)
+
 **Issue:** Pricing page mentions "50K tokens/month" for free tier, but:
+
 - No monthly allowance tracking
 - No reset mechanism
 - No enforcement
 - Free users get unlimited tokens
 
 ### 5.3 Token Balance Display (0% Complete)
+
 **Missing:**
+
 - Current balance display in chat UI
 - Token balance badge/indicator
 - "Buy tokens" quick access button
@@ -527,6 +615,7 @@ const fetchUsage = async () => {
 ## 6. Database Schema Review
 
 ### 6.1 Tables Present
+
 ```
 users.token_balance ✅
 token_transactions ✅
@@ -535,6 +624,7 @@ api_usage ✅
 ```
 
 ### 6.2 Missing Tables
+
 ```
 token_limits (per-user limits based on plan) ❌
 token_subscriptions (distinguish sub vs purchase tokens) ❌
@@ -542,6 +632,7 @@ token_usage_daily (aggregates for fast queries) ❌
 ```
 
 ### 6.3 RLS Policies
+
 ```
 token_transactions: SELECT only ✅ (users see own transactions)
 token_usage: SELECT only ✅ (users see own usage)
@@ -553,6 +644,7 @@ But: No INSERT/UPDATE policies = can only be modified by service role ✅
 ## 7. Stripe Integration Review
 
 ### 7.1 What Works ✅
+
 - Checkout session creation
 - Metadata storage
 - Webhook signature verification
@@ -561,6 +653,7 @@ But: No INSERT/UPDATE policies = can only be modified by service role ✅
 - Audit logging
 
 ### 7.2 What's Missing ❌
+
 - Webhook persistence (not in database)
 - Payment confirmation email notifications
 - Refund handling (webhook processes but token not reversed)
@@ -654,6 +747,7 @@ But: No INSERT/UPDATE policies = can only be modified by service role ✅
 ## 9. Testing Gaps
 
 ### What's NOT Tested
+
 - Token deduction under concurrent requests
 - Webhook idempotency
 - Token balance enforcement
@@ -663,6 +757,7 @@ But: No INSERT/UPDATE policies = can only be modified by service role ✅
 - Insufficient balance error handling
 
 ### Recommended Tests to Add
+
 ```typescript
 // Test insufficient balance blocking
 test('API call blocked when token balance < estimated tokens', async () => {
@@ -695,18 +790,18 @@ test('Same webhook processed only once', async () => {
 
 ### Status Summary
 
-| Component | Status | Severity |
-|-----------|--------|----------|
-| Token Purchase Flow | ✅ Working | - |
-| Token Balance Storage | ✅ Working | - |
-| Stripe Webhook | ⚠️ Mostly Working | HIGH |
-| Token Usage Tracking | ✅ Working | - |
-| Token Deduction | ❌ Missing | CRITICAL |
-| Token Limit Enforcement | ❌ Missing | CRITICAL |
-| Plan Allowances | ❌ Missing | CRITICAL |
-| Usage Warnings | ⚠️ Incomplete | MEDIUM |
-| Rate Limiting | ⚠️ Weak | HIGH |
-| Webhook Idempotency | ❌ Not Persistent | HIGH |
+| Component               | Status            | Severity |
+| ----------------------- | ----------------- | -------- |
+| Token Purchase Flow     | ✅ Working        | -        |
+| Token Balance Storage   | ✅ Working        | -        |
+| Stripe Webhook          | ⚠️ Mostly Working | HIGH     |
+| Token Usage Tracking    | ✅ Working        | -        |
+| Token Deduction         | ❌ Missing        | CRITICAL |
+| Token Limit Enforcement | ❌ Missing        | CRITICAL |
+| Plan Allowances         | ❌ Missing        | CRITICAL |
+| Usage Warnings          | ⚠️ Incomplete     | MEDIUM   |
+| Rate Limiting           | ⚠️ Weak           | HIGH     |
+| Webhook Idempotency     | ❌ Not Persistent | HIGH     |
 
 ### Key Takeaway
 
@@ -718,9 +813,9 @@ test('Same webhook processed only once', async () => {
 4. Monthly allowances aren't tracked
 
 **Estimated effort to complete:** 2-3 weeks for a single developer:
+
 - Week 1: Add deduction logic, sufficiency checks, tests
 - Week 2: Add monthly allowances, persistence, remaining edge cases
 - Week 3: Add UI improvements, monitoring, documentation
 
 The good news: The database foundation is solid and will handle the additional logic without changes.
-

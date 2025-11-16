@@ -21,7 +21,7 @@ import {
   Send,
   MessageSquare,
   Layers,
-  Info
+  Info,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@shared/stores/authentication-store';
@@ -34,12 +34,7 @@ import { AgentStatusPanel } from '../components/EmployeeStatusPanel';
 import { MissionLogEnhanced } from '../components/ActivityLog';
 import { useMultiAgentChat } from '@features/chat/hooks/use-multi-agent-chat';
 import { useAgentCollaboration } from '@features/chat/hooks/use-agent-collaboration';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from '@shared/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import {
   Tooltip,
   TooltipContent,
@@ -50,7 +45,8 @@ import {
 const MissionControlPageRefactored: React.FC = () => {
   const { user } = useAuthStore();
   const { status, isOrchestrating, isPaused, error } = useMissionStatus();
-  const { pauseMission, resumeMission, reset, mode, setMode } = useMissionStore();
+  const { pauseMission, resumeMission, reset, mode, setMode } =
+    useMissionStore();
 
   const [userInput, setUserInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -194,7 +190,9 @@ const MissionControlPageRefactored: React.FC = () => {
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      handleModeSwitch(currentMode === 'mission' ? 'chat' : 'mission')
+                      handleModeSwitch(
+                        currentMode === 'mission' ? 'chat' : 'mission'
+                      )
                     }
                     disabled={isOrchestrating && !isPaused}
                   >
@@ -251,12 +249,12 @@ const MissionControlPageRefactored: React.FC = () => {
         {/* Mode Description */}
         {currentMode === 'chat' && (
           <div className="mt-3 flex items-start gap-2 rounded-lg border border-blue-500/20 bg-blue-500/10 p-3">
-            <Info className="h-4 w-4 text-blue-400 mt-0.5" />
+            <Info className="mt-0.5 h-4 w-4 text-blue-400" />
             <div className="text-sm">
               <p className="font-medium text-blue-300">Chat Mode Active</p>
-              <p className="text-blue-400/80 text-xs mt-1">
-                Messages are routed to the most appropriate agent based on context.
-                Perfect for conversational workflows and quick tasks.
+              <p className="mt-1 text-xs text-blue-400/80">
+                Messages are routed to the most appropriate agent based on
+                context. Perfect for conversational workflows and quick tasks.
               </p>
             </div>
           </div>
@@ -295,13 +293,17 @@ const MissionControlPageRefactored: React.FC = () => {
               <div className="space-y-2 rounded-lg border border-border bg-card p-4">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium text-foreground">
-                    {currentMode === 'mission' ? 'Mission Objective' : 'Message'}
+                    {currentMode === 'mission'
+                      ? 'Mission Objective'
+                      : 'Message'}
                   </label>
-                  {currentMode === 'chat' && agentCollaboration.selectedAgents.length > 0 && (
-                    <span className="text-xs text-muted-foreground">
-                      {agentCollaboration.selectedAgents.length} agent(s) selected
-                    </span>
-                  )}
+                  {currentMode === 'chat' &&
+                    agentCollaboration.selectedAgents.length > 0 && (
+                      <span className="text-xs text-muted-foreground">
+                        {agentCollaboration.selectedAgents.length} agent(s)
+                        selected
+                      </span>
+                    )}
                 </div>
                 <Textarea
                   value={userInput}
@@ -328,11 +330,15 @@ const MissionControlPageRefactored: React.FC = () => {
                             : 'Agent processing...'
                         : 'Press Cmd/Ctrl + Enter to send'}
                     </p>
-                    {currentMode === 'chat' && multiAgentChat.activeAgents.length > 0 && (
-                      <p className="text-xs text-green-400">
-                        Active: {multiAgentChat.activeAgents.map((a) => a.name).join(', ')}
-                      </p>
-                    )}
+                    {currentMode === 'chat' &&
+                      multiAgentChat.activeAgents.length > 0 && (
+                        <p className="text-xs text-green-400">
+                          Active:{' '}
+                          {multiAgentChat.activeAgents
+                            .map((a) => a.name)
+                            .join(', ')}
+                        </p>
+                      )}
                   </div>
                   <Button
                     onClick={handleSendMessage}
@@ -355,12 +361,16 @@ const MissionControlPageRefactored: React.FC = () => {
                         >
                           <Sparkles className="h-4 w-4" />
                         </motion.div>
-                        {currentMode === 'mission' ? 'Starting...' : 'Sending...'}
+                        {currentMode === 'mission'
+                          ? 'Starting...'
+                          : 'Sending...'}
                       </>
                     ) : (
                       <>
                         <Send className="h-4 w-4" />
-                        {currentMode === 'mission' ? 'Deploy Workforce' : 'Send Message'}
+                        {currentMode === 'mission'
+                          ? 'Deploy Workforce'
+                          : 'Send Message'}
                       </>
                     )}
                   </Button>

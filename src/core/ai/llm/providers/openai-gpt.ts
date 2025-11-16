@@ -104,8 +104,14 @@ export class OpenAIProvider {
           model: this.config.model,
           max_tokens: this.config.maxTokens,
           temperature: this.config.temperature,
-          tools: this.config.tools && this.config.tools.length > 0 ? this.config.tools : undefined,
-          tool_choice: this.config.tools && this.config.tools.length > 0 ? 'auto' : undefined,
+          tools:
+            this.config.tools && this.config.tools.length > 0
+              ? this.config.tools
+              : undefined,
+          tool_choice:
+            this.config.tools && this.config.tools.length > 0
+              ? 'auto'
+              : undefined,
         }),
       });
 
@@ -122,11 +128,13 @@ export class OpenAIProvider {
 
       // Extract content and usage from proxy response
       const content = data.content || data.choices?.[0]?.message?.content || '';
-      const usage = data.usage ? {
-        promptTokens: data.usage.prompt_tokens || 0,
-        completionTokens: data.usage.completion_tokens || 0,
-        totalTokens: data.usage.total_tokens || 0,
-      } : { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
+      const usage = data.usage
+        ? {
+            promptTokens: data.usage.prompt_tokens || 0,
+            completionTokens: data.usage.completion_tokens || 0,
+            totalTokens: data.usage.total_tokens || 0,
+          }
+        : { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
 
       // Save to database
       if (sessionId && userId) {
@@ -209,8 +217,14 @@ export class OpenAIProvider {
           model: this.config.model,
           max_tokens: this.config.maxTokens,
           temperature: this.config.temperature,
-          tools: this.config.tools && this.config.tools.length > 0 ? this.config.tools : undefined,
-          tool_choice: this.config.tools && this.config.tools.length > 0 ? 'auto' : undefined,
+          tools:
+            this.config.tools && this.config.tools.length > 0
+              ? this.config.tools
+              : undefined,
+          tool_choice:
+            this.config.tools && this.config.tools.length > 0
+              ? 'auto'
+              : undefined,
           stream: false, // Note: Netlify proxy doesn't support streaming yet, using non-streaming for now
         }),
       });
@@ -225,7 +239,8 @@ export class OpenAIProvider {
       }
 
       const data = await response.json();
-      const fullContent = data.content || data.choices?.[0]?.message?.content || '';
+      const fullContent =
+        data.content || data.choices?.[0]?.message?.content || '';
       const usage = data.usage;
 
       // Yield the full response at once (simulating streaming)

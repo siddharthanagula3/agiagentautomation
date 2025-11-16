@@ -85,6 +85,7 @@ If transcription confidence falls below threshold, the system requests repetitio
 
 **Audit Trail Generation:**
 All voice confirmations log to immutable audit systems including:
+
 - Timestamp (UTC)
 - AI employee identity
 - Task description (full transcript)

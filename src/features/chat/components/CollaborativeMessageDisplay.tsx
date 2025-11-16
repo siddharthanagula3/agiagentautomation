@@ -95,7 +95,7 @@ export const CollaborativeMessageDisplay: React.FC<
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className={cn('flex items-start space-x-3 mb-4', className)}
+        className={cn('mb-4 flex items-start space-x-3', className)}
       >
         {showAvatar && (
           <Avatar className="h-8 w-8 shrink-0">
@@ -145,7 +145,7 @@ export const CollaborativeMessageDisplay: React.FC<
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className={cn('flex items-start space-x-3 mb-4', className)}
+        className={cn('mb-4 flex items-start space-x-3', className)}
       >
         {showAvatar && (
           <Avatar className="h-8 w-8 shrink-0">
@@ -168,10 +168,10 @@ export const CollaborativeMessageDisplay: React.FC<
           )}
         >
           <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Wrench className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                <span className="font-medium text-sm">
+                <span className="text-sm font-medium">
                   {message.agentName} used {message.toolName}
                 </span>
                 <Badge variant="outline" className="text-xs">
@@ -202,20 +202,20 @@ export const CollaborativeMessageDisplay: React.FC<
                 >
                   {message.toolArgs && (
                     <div>
-                      <div className="text-xs font-medium text-muted-foreground mb-1">
+                      <div className="mb-1 text-xs font-medium text-muted-foreground">
                         Arguments:
                       </div>
-                      <pre className="text-xs bg-slate-100 dark:bg-slate-900 p-2 rounded overflow-x-auto">
+                      <pre className="overflow-x-auto rounded bg-slate-100 p-2 text-xs dark:bg-slate-900">
                         {JSON.stringify(message.toolArgs, null, 2)}
                       </pre>
                     </div>
                   )}
                   {message.toolResult && (
                     <div>
-                      <div className="text-xs font-medium text-muted-foreground mb-1">
+                      <div className="mb-1 text-xs font-medium text-muted-foreground">
                         Result:
                       </div>
-                      <pre className="text-xs bg-slate-100 dark:bg-slate-900 p-2 rounded overflow-x-auto max-h-40">
+                      <pre className="max-h-40 overflow-x-auto rounded bg-slate-100 p-2 text-xs dark:bg-slate-900">
                         {typeof message.toolResult === 'string'
                           ? message.toolResult
                           : JSON.stringify(message.toolResult, null, 2)}
@@ -240,7 +240,7 @@ export const CollaborativeMessageDisplay: React.FC<
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn('flex items-start space-x-3 mb-4', className)}
+      className={cn('mb-4 flex items-start space-x-3', className)}
     >
       {showAvatar && (
         <Avatar className="h-8 w-8 shrink-0">
@@ -264,12 +264,12 @@ export const CollaborativeMessageDisplay: React.FC<
         )}
       >
         <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-2">
+          <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <span className="font-semibold text-sm">{message.agentName}</span>
+              <span className="text-sm font-semibold">{message.agentName}</span>
               {message.isIntermediate && (
                 <Badge variant="secondary" className="text-xs">
-                  <Zap className="h-3 w-3 mr-1" />
+                  <Zap className="mr-1 h-3 w-3" />
                   Processing
                 </Badge>
               )}
@@ -326,11 +326,11 @@ export const CollaborativeMessageDisplay: React.FC<
 
           {message.metadata?.reasoning && (
             <details className="mt-3">
-              <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
-                <MessageSquare className="inline h-3 w-3 mr-1" />
+              <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
+                <MessageSquare className="mr-1 inline h-3 w-3" />
                 View reasoning
               </summary>
-              <div className="mt-2 text-xs text-muted-foreground bg-slate-50 dark:bg-slate-900/50 p-2 rounded">
+              <div className="mt-2 rounded bg-slate-50 p-2 text-xs text-muted-foreground dark:bg-slate-900/50">
                 {message.metadata.reasoning}
               </div>
             </details>

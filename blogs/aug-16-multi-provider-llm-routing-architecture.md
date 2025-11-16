@@ -1,6 +1,6 @@
 # Multi-Provider LLM Routing: Claude, GPT-4, Gemini, Perplexity
 
-*How unified abstraction layers enable automatic model selection and 40% cost optimization across providers*
+_How unified abstraction layers enable automatic model selection and 40% cost optimization across providers_
 
 **Meta Description:** AGI Automation's multi-provider LLM architecture routes between Claude, GPT-4, Gemini, and Perplexity automatically. Learn how provider-specific optimizations reduce costs 40% while improving task accuracy by 2026.
 
@@ -49,24 +49,28 @@ The workforce orchestrator calls `unifiedLLMService.sendMessage()` without knowi
 The `system-prompts-service.ts` applies provider-specific prompt engineering based on model strengths:
 
 **Claude Sonnet 4.5** — Long-context reasoning tasks (10K+ token inputs)
+
 - System prompts emphasize step-by-step thinking
 - Optimized for: code reviews with full file context, multi-document analysis, complex planning workflows
 - Cost: $3 per 1M input tokens, $15 per 1M output tokens
 - Use case: Senior Software Engineer, System Architect, Research Analyst employees
 
 **GPT-4 Turbo** — Structured output generation (JSON, XML, code)
+
 - System prompts include schema definitions and format examples
 - Optimized for: API response generation, database queries, configuration files
 - Cost: $10 per 1M input tokens, $30 per 1M output tokens
 - Use case: Backend Engineer, DevOps Engineer, Data Scientist employees
 
 **Gemini 2.5 Pro** — Multimodal tasks (image analysis, video processing)
+
 - System prompts reference visual elements and spatial reasoning
 - Optimized for: UI design review, screenshot analysis, video content summarization
 - Cost: $1.25 per 1M input tokens, $5 per 1M output tokens
 - Use case: UI/UX Designer, Video Editor, 3D Artist employees
 
 **Perplexity Sonar Pro** — Real-time web search and current events
+
 - System prompts request citation and source verification
 - Optimized for: market research, competitive analysis, fact-checking
 - Cost: $1 per 1M tokens (includes web search)
@@ -116,16 +120,13 @@ This granular control enables specialization at scale: 138+ employees using best
 AGI Automation's unified LLM service supports two calling conventions for backward compatibility:
 
 **New Parameter-Based API:**
+
 ```typescript
-await unifiedLLMService.sendMessage(
-  messages,
-  sessionId,
-  userId,
-  provider
-);
+await unifiedLLMService.sendMessage(messages, sessionId, userId, provider);
 ```
 
 **Legacy Object-Based API:**
+
 ```typescript
 await unifiedLLMService.sendMessage({
   provider,
@@ -134,7 +135,7 @@ await unifiedLLMService.sendMessage({
   sessionId,
   userId,
   temperature,
-  maxTokens
+  maxTokens,
 });
 ```
 

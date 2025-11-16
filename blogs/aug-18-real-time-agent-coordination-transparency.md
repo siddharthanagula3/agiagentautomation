@@ -1,6 +1,6 @@
 # Real-Time Agent Coordination: Transparent AI Workflows
 
-*How mission control dashboards build trust in autonomous systems through complete execution visibility*
+_How mission control dashboards build trust in autonomous systems through complete execution visibility_
 
 **Meta Description:** AGI Automation's mission control provides real-time visibility into multi-agent workflows. Track 50+ AI employees, monitor tool execution, audit complete task lifecycle. Transparency enables trust in autonomous AI by 2026.
 
@@ -24,7 +24,7 @@ The fundamental problem with opaque automation: when something goes wrong, users
 4. Deployment executes (visible: "Deploying...")
 5. Pipeline completes or fails
 
-This provides **state visibility** but not **execution visibility**. If tests fail, the pipeline reports "23 tests failed" but doesn't explain *why* those specific tests failed or *how* the test runner reached those failures. The execution reasoning remains opaque.
+This provides **state visibility** but not **execution visibility**. If tests fail, the pipeline reports "23 tests failed" but doesn't explain _why_ those specific tests failed or _how_ the test runner reached those failures. The execution reasoning remains opaque.
 
 Multi-agent AI systems magnify this problem 10x. Instead of a linear 4-step pipeline, you have 10-50 agents executing 100+ tasks with complex dependencies. Without execution visibility:
 
@@ -44,6 +44,7 @@ The `MissionControlDashboard.tsx` provides command-center visibility organized i
 Real-time status cards for each active AI employee displaying:
 
 **Current Status Badge:**
+
 - 🔵 **Idle** — Employee available, no assigned task
 - 🟡 **Planning** — Analyzing task requirements, selecting tools
 - 🟢 **Working** — Actively executing task with tool invocation
@@ -52,6 +53,7 @@ Real-time status cards for each active AI employee displaying:
 
 **Active Tool Indicator:**
 When employee status = "Working", the card highlights which tool is executing:
+
 - 📖 **Read** — Loading file contents for analysis
 - 🔍 **Grep** — Searching codebase patterns
 - 🌐 **Glob** — Finding files matching pattern
@@ -60,12 +62,14 @@ When employee status = "Working", the card highlights which tool is executing:
 - 📝 **Write** — Creating new files
 
 **Task Progress:**
+
 - Task ID and description
 - Completion percentage (estimated based on tool invocations)
 - Time elapsed since task assignment
 
 **Recent Activity Log:**
 Last 5 actions with timestamps:
+
 - "Loaded authentication-manager.ts (947 lines)"
 - "Searched for 'supabase.auth' pattern (23 matches)"
 - "Modified user-permissions.ts (lines 45-67)"
@@ -77,6 +81,7 @@ Each card updates in real-time via Zustand store subscriptions. When employee-A 
 Chronological feed of execution events across all employees:
 
 **Plan Generation Events** (purple badge):
+
 ```
 09:23:45 | PLAN | Generated execution plan with 12 tasks
           ↳ Task breakdown: 5 implementation, 4 testing, 3 documentation
@@ -84,6 +89,7 @@ Chronological feed of execution events across all employees:
 ```
 
 **Delegation Events** (blue badge):
+
 ```
 09:23:47 | DELEGATE | Assigned task-1 to senior-software-engineer
           ↳ Task: "Implement user authentication with Supabase"
@@ -92,6 +98,7 @@ Chronological feed of execution events across all employees:
 ```
 
 **Execution Events** (green badge):
+
 ```
 09:24:12 | EXECUTE | senior-software-engineer invoked Read tool
           ↳ File: src/core/auth/authentication-manager.ts (947 lines)
@@ -103,6 +110,7 @@ Chronological feed of execution events across all employees:
 ```
 
 **Completion Events** (success badge):
+
 ```
 09:26:30 | COMPLETE | senior-software-engineer completed task-1
           ↳ Duration: 2m 43s
@@ -111,6 +119,7 @@ Chronological feed of execution events across all employees:
 ```
 
 **Error Events** (red badge):
+
 ```
 09:27:15 | ERROR | backend-engineer failed task-5
           ↳ Error: Supabase RLS policy blocking update query
@@ -125,6 +134,7 @@ The activity timeline maintains complete audit trail. Users scroll to any timest
 `BasicChatInterface` component enables 1:1 communication with orchestrator or specific employees:
 
 **Chat with Orchestrator:**
+
 ```
 User: Why did you assign task-3 to debugger instead of code-reviewer?
 Orchestrator: Task-3 requires fixing runtime error in authentication flow.
@@ -133,6 +143,7 @@ Orchestrator: Task-3 requires fixing runtime error in authentication flow.
 ```
 
 **Chat with Specific Employee:**
+
 ```
 User: @senior-software-engineer What's taking so long on task-1?
 Employee: I'm analyzing 8 authentication-related files to ensure consistent
@@ -154,6 +165,7 @@ Production systems require observability for reliability. Without real-time dash
 - Team adoption stalls because users don't trust opaque automation
 
 **AGI Automation's transparency architecture enables:**
+
 - **Immediate failure detection** — Red error badges appear within seconds of task failures
 - **Root cause analysis** — Activity timeline shows exact tool invocation that triggered error
 - **Performance optimization** — Identify slowest tasks, reassign to faster employees
@@ -166,16 +178,19 @@ Production systems require observability for reliability. Without real-time dash
 At 5 employees, you can track status mentally or via Slack notifications. At 50 employees, this breaks down. You need structured dashboards with:
 
 **Filtering and Search:**
+
 - Show only failed tasks (focus on problems)
 - Search activity timeline for specific file modifications
 - Filter by employee type (show only backend engineers)
 
 **Performance Metrics:**
+
 - Average task completion time per employee
 - Success rate (completed vs failed tasks)
 - Tool usage patterns (which employees use Bash most frequently?)
 
 AGI Automation's mission control scales to 50+ employees through:
+
 - Selector-based Zustand subscriptions (only affected components re-render)
 - Virtual scrolling in activity timeline (render only visible events)
 - Lazy loading for employee logs (fetch on-demand when user expands card)
@@ -201,6 +216,7 @@ Without dashboards, users never progress beyond week 1. They remain stuck in "ve
 The mission control dashboard achieves sub-second real-time updates through Zustand state management:
 
 **State Update Flow:**
+
 1. Employee executes tool (e.g., Read file)
 2. Tool execution engine calls `addEmployeeLog(employeeName, entry)`
 3. Mission control store updates immutably via Immer middleware
@@ -229,7 +245,7 @@ Mission control activity timelines satisfy this: complete timestamp logs of empl
 
 **Q3-Q4 2026: Predictive Dashboards Emerge**
 
-Current dashboards show *what's happening now*. Next evolution: predict what *will happen next* based on execution patterns.
+Current dashboards show _what's happening now_. Next evolution: predict what _will happen next_ based on execution patterns.
 
 **Example:** Dashboard detects that debugger employee typically takes 8-12 minutes on security vulnerability fixes. After 15 minutes on current task, dashboard alerts: "Task-7 taking 25% longer than typical. Possible escalation needed?"
 

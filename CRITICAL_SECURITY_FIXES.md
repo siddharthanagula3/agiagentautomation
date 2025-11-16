@@ -1,4 +1,5 @@
 # CRITICAL SECURITY FIXES
+
 **Priority: IMMEDIATE - Deploy within 24 hours**
 
 ---
@@ -6,11 +7,13 @@
 ## Fix #1: Token Tracking Authentication (CRITICAL)
 
 ### Current Issue
+
 `netlify/functions/utils/token-tracking.ts` uses `VITE_SUPABASE_ANON_KEY` which cannot write to `token_usage` table due to RLS policies. This causes **silent failures** - token usage is never tracked in production.
 
 ### File: `netlify/functions/utils/token-tracking.ts`
 
 **BEFORE (Line 100-110):**
+
 ```typescript
 export async function storeTokenUsage(
   provider: string,
@@ -32,6 +35,7 @@ export async function storeTokenUsage(
 ```
 
 **AFTER (Fixed):**
+
 ```typescript
 export async function storeTokenUsage(
   provider: string,
@@ -53,7 +57,9 @@ export async function storeTokenUsage(
 ```
 
 ### Verification
+
 After deploying, check token_usage table:
+
 ```sql
 SELECT COUNT(*), MAX(created_at)
 FROM token_usage
@@ -66,6 +72,7 @@ WHERE created_at > NOW() - INTERVAL '1 hour';
 ## Fix #2: Add Authentication to LLM Proxies (CRITICAL)
 
 ### Current Issue
+
 `anthropic-proxy.ts` and `openai-proxy.ts` have **NO authentication check**. Anyone with the function URL can make unlimited LLM API calls, draining your API credits.
 
 ### File: `netlify/functions/utils/auth-middleware.ts` (NEW FILE)
@@ -78,7 +85,9 @@ import { createClient } from '@supabase/supabase-js';
  * Verify Supabase JWT token from Authorization header
  * Returns user if valid, throws error if invalid
  */
-export async function verifySupabaseAuth(authHeader: string | undefined): Promise<{
+export async function verifySupabaseAuth(
+  authHeader: string | undefined
+): Promise<{
   id: string;
   email: string;
 } | null> {
@@ -93,7 +102,10 @@ export async function verifySupabaseAuth(authHeader: string | undefined): Promis
     process.env.VITE_SUPABASE_ANON_KEY!
   );
 
-  const { data: { user }, error } = await supabase.auth.getUser(token);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
 
   if (error || !user) {
     console.warn('[Auth] Invalid token:', error?.message);
@@ -110,10 +122,14 @@ export async function verifySupabaseAuth(authHeader: string | undefined): Promis
  * Authentication middleware for Netlify functions
  */
 export function withAuth(
-  handler: (event: HandlerEvent, user: { id: string; email: string }) => Promise<any>
+  handler: (
+    event: HandlerEvent,
+    user: { id: string; email: string }
+  ) => Promise<any>
 ): (event: HandlerEvent) => Promise<any> {
   return async (event: HandlerEvent) => {
-    const authHeader = event.headers.authorization || event.headers.Authorization;
+    const authHeader =
+      event.headers.authorization || event.headers.Authorization;
     const user = await verifySupabaseAuth(authHeader);
 
     if (!user) {
@@ -137,6 +153,7 @@ export function withAuth(
 ### File: `netlify/functions/anthropic-proxy.ts`
 
 **BEFORE (Line 15-23):**
+
 ```typescript
 const anthropicHandler: Handler = async (event: HandlerEvent) => {
   // Only allow POST requests
@@ -149,6 +166,7 @@ const anthropicHandler: Handler = async (event: HandlerEvent) => {
 ```
 
 **AFTER (Fixed):**
+
 ```typescript
 import { withAuth } from './utils/auth-middleware'; // ✅ ADD IMPORT
 
@@ -166,6 +184,7 @@ const anthropicHandler: Handler = async (event: HandlerEvent, user: { id: string
 ```
 
 **AND (Line 87-94) - Update token tracking:**
+
 ```typescript
 // Track token usage
 if (data.usage) {
@@ -186,6 +205,7 @@ if (data.usage) {
 ```
 
 **AND (Line 137) - Export with auth middleware:**
+
 ```typescript
 // Export handler with rate limiting AND authentication
 export const handler = withAuth(withRateLimit(anthropicHandler));
@@ -199,6 +219,7 @@ export const handler = withAuth(withRateLimit(anthropicHandler));
 ## Fix #3: Verify Upstash Redis Configuration (CRITICAL)
 
 ### Current Issue
+
 Rate limiting middleware returns `null` if Redis is not configured, which disables ALL rate limiting.
 
 ### Check Netlify Environment Variables
@@ -226,6 +247,7 @@ If you can't set up Redis immediately, add in-memory rate limiting:
 **File: `netlify/functions/utils/rate-limiter.ts`**
 
 **AFTER (Line 20-26):**
+
 ```typescript
 // Fallback in-memory rate limiter for development/emergency
 const inMemoryLimits = new Map<string, { count: number; resetAt: number }>();
@@ -253,7 +275,12 @@ function fallbackRateLimit(identifier: string): {
   }
 
   entry.count++;
-  return { success: true, limit, remaining: limit - entry.count, reset: entry.resetAt };
+  return {
+    success: true,
+    limit,
+    remaining: limit - entry.count,
+    reset: entry.resetAt,
+  };
 }
 
 // If Redis is not configured, use fallback (log warning)
@@ -266,6 +293,7 @@ if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) {
 ```
 
 **Then in `checkRateLimit()` function:**
+
 ```typescript
 export async function checkRateLimit(event: HandlerEvent): Promise<{
   success: boolean;
@@ -290,6 +318,7 @@ export async function checkRateLimit(event: HandlerEvent): Promise<{
 ## Fix #4: Add Input Validation with Zod (HIGH PRIORITY)
 
 ### Install Zod
+
 ```bash
 npm install zod
 ```
@@ -297,6 +326,7 @@ npm install zod
 ### File: `netlify/functions/create-pro-subscription.ts`
 
 **BEFORE (Line 30-44):**
+
 ```typescript
 try {
   const {
@@ -317,6 +347,7 @@ try {
 ```
 
 **AFTER (Fixed):**
+
 ```typescript
 import { z } from 'zod'; // ✅ ADD IMPORT
 
@@ -335,6 +366,7 @@ try {
 ```
 
 **Add error handling:**
+
 ```typescript
 } catch (error) {
   if (error instanceof z.ZodError) {
@@ -369,6 +401,7 @@ try {
 ## Fix #5: Add Marketplace Referential Integrity (HIGH PRIORITY)
 
 ### Current Issue
+
 `purchased_employees.employee_id` is TEXT with no foreign key to `ai_employees`. Users can hire non-existent employees.
 
 ### Migration: `supabase/migrations/20250113000004_fix_marketplace_integrity.sql`
@@ -491,6 +524,7 @@ If any fix causes issues:
 ## Monitoring Post-Deployment
 
 1. **Token Usage:** Check hourly counts
+
    ```sql
    SELECT DATE_TRUNC('hour', created_at) as hour, COUNT(*), SUM(total_cost)
    FROM token_usage
@@ -500,11 +534,13 @@ If any fix causes issues:
    ```
 
 2. **Auth Failures:** Monitor 401 errors in Netlify logs
+
    ```bash
    netlify logs:stream --filter="401"
    ```
 
 3. **Rate Limit Hits:** Count 429 responses
+
    ```bash
    netlify logs:stream --filter="Rate limit exceeded"
    ```

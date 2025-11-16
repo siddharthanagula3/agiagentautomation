@@ -88,37 +88,45 @@ export class OpenAIProvider {
     userId?: string
   ): Promise<OpenAIResponse> {
     try {
-      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
-      throw new OpenAIError(
-        'Direct OpenAI API calls are disabled for security. Use /.netlify/functions/openai-proxy instead.',
-        'DIRECT_API_DISABLED'
-      );
-
       // Convert messages to OpenAI format
       const openaiMessages = this.convertMessagesToOpenAI(messages);
 
-      // Prepare the request
-      const request: OpenAI.Chat.Completions.ChatCompletionCreateParams = {
-        model: this.config.model,
-        max_tokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-        messages: openaiMessages,
-        tools: this.config.tools.length > 0 ? this.config.tools : undefined,
-        tool_choice: this.config.tools.length > 0 ? 'auto' : undefined,
-      };
+      // SECURITY: Use Netlify proxy to keep API keys secure
+      const proxyUrl = '/.netlify/functions/openai-proxy';
 
-      // Make the API call
-      if (!openai) {
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: openaiMessages,
+          model: this.config.model,
+          max_tokens: this.config.maxTokens,
+          temperature: this.config.temperature,
+          tools: this.config.tools && this.config.tools.length > 0 ? this.config.tools : undefined,
+          tool_choice: this.config.tools && this.config.tools.length > 0 ? 'auto' : undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
         throw new OpenAIError(
-          'OpenAI client not initialized. Please check your API key configuration.',
-          'CLIENT_NOT_INITIALIZED'
+          errorData.error || `HTTP error! status: ${response.status}`,
+          `HTTP_${response.status}`,
+          response.status === 429 || response.status === 503
         );
       }
-      const response = await openai.chat.completions.create(request);
 
-      // Process the response
-      const content = this.extractContentFromResponse(response);
-      const usage = this.extractUsageFromResponse(response);
+      const data = await response.json();
+
+      // Extract content and usage from proxy response
+      const content = data.content || data.choices?.[0]?.message?.content || '';
+      const usage = data.usage ? {
+        promptTokens: data.usage.prompt_tokens || 0,
+        completionTokens: data.usage.completion_tokens || 0,
+        totalTokens: data.usage.total_tokens || 0,
+      } : { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
 
       // Save to database
       if (sessionId && userId) {
@@ -131,7 +139,7 @@ export class OpenAIProvider {
             provider: 'openai',
             model: this.config.model,
             usage,
-            responseId: response.id,
+            responseId: data.id,
             timestamp: new Date().toISOString(),
           },
         });
@@ -144,9 +152,9 @@ export class OpenAIProvider {
         sessionId,
         userId,
         metadata: {
-          responseId: response.id,
-          finishReason: response.choices[0]?.finish_reason,
-          usage: response.usage,
+          responseId: data.id,
+          finishReason: data.choices?.[0]?.finish_reason,
+          usage: data.usage,
         },
       };
     } catch (error) {
@@ -185,50 +193,44 @@ export class OpenAIProvider {
     };
   }> {
     try {
-      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
-      throw new OpenAIError(
-        'Direct OpenAI streaming is disabled for security. Use /.netlify/functions/openai-proxy instead.',
-        'DIRECT_API_DISABLED'
-      );
-
       // Convert messages to OpenAI format
       const openaiMessages = this.convertMessagesToOpenAI(messages);
 
-      // Prepare the request
-      const request: OpenAI.Chat.Completions.ChatCompletionCreateParams = {
-        model: this.config.model,
-        max_tokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-        messages: openaiMessages,
-        tools: this.config.tools.length > 0 ? this.config.tools : undefined,
-        tool_choice: this.config.tools.length > 0 ? 'auto' : undefined,
-        stream: true,
-      };
+      // SECURITY: Use Netlify proxy to keep API keys secure
+      const proxyUrl = '/.netlify/functions/openai-proxy';
 
-      // Make the streaming API call
-      if (!openai) {
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: openaiMessages,
+          model: this.config.model,
+          max_tokens: this.config.maxTokens,
+          temperature: this.config.temperature,
+          tools: this.config.tools && this.config.tools.length > 0 ? this.config.tools : undefined,
+          tool_choice: this.config.tools && this.config.tools.length > 0 ? 'auto' : undefined,
+          stream: false, // Note: Netlify proxy doesn't support streaming yet, using non-streaming for now
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
         throw new OpenAIError(
-          'OpenAI client not initialized. Please check your API key configuration.',
-          'CLIENT_NOT_INITIALIZED'
+          errorData.error || `HTTP error! status: ${response.status}`,
+          `HTTP_${response.status}`,
+          response.status === 429 || response.status === 503
         );
       }
-      const stream = await openai.chat.completions.create(request);
 
-      let fullContent = '';
-      let usage: unknown = null;
+      const data = await response.json();
+      const fullContent = data.content || data.choices?.[0]?.message?.content || '';
+      const usage = data.usage;
 
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content || '';
-        if (content) {
-          fullContent += content;
-          yield { content, done: false };
-        }
-
-        if (chunk.choices[0]?.finish_reason) {
-          usage = chunk.usage;
-          yield { content: '', done: true, usage };
-        }
-      }
+      // Yield the full response at once (simulating streaming)
+      yield { content: fullContent, done: false };
+      yield { content: '', done: true, usage };
 
       // Save to database
       if (sessionId && userId) {
@@ -352,10 +354,10 @@ export class OpenAIProvider {
 
   /**
    * Check if API key is configured
-   * SECURITY: Always returns false as direct API access is disabled
+   * SECURITY: API keys are managed by Netlify proxy functions
    */
   isConfigured(): boolean {
-    return false; // Direct API access disabled for security
+    return true; // API keys managed securely by Netlify proxy
   }
 
   /**

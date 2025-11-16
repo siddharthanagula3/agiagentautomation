@@ -63,12 +63,26 @@ const getTaskStatusColor = (status: Task['status']) => {
   }
 };
 
-const getMessageIcon = (type: MissionMessage['type'], from: string) => {
+const getMessageIcon = (
+  type: MissionMessage['type'],
+  from: string,
+  role?: 'agent' | 'supervisor' | 'user'
+) => {
   switch (type) {
     case 'user':
       return <User className="h-4 w-4" />;
     case 'system':
       return <Sparkles className="h-4 w-4 text-primary" />;
+    case 'agent':
+      // Differentiate between supervisor and regular agents
+      if (role === 'supervisor') {
+        return <Sparkles className="h-4 w-4 text-amber-500" />;
+      }
+      return <Bot className="h-4 w-4 text-blue-500" />;
+    case 'assistant':
+      return <Bot className="h-4 w-4 text-green-500" />;
+    case 'status':
+      return <Loader2 className="h-4 w-4 text-muted-foreground" />;
     case 'employee':
       return <Bot className="h-4 w-4 text-purple-500" />;
     case 'plan':
@@ -80,12 +94,25 @@ const getMessageIcon = (type: MissionMessage['type'], from: string) => {
   }
 };
 
-const getMessageColor = (type: MissionMessage['type']) => {
+const getMessageColor = (
+  type: MissionMessage['type'],
+  role?: 'agent' | 'supervisor' | 'user'
+) => {
   switch (type) {
     case 'user':
       return 'bg-primary text-primary-foreground';
     case 'system':
       return 'bg-muted/50 text-muted-foreground border border-border';
+    case 'agent':
+      // Supervisor messages get different styling
+      if (role === 'supervisor') {
+        return 'bg-amber-500/10 text-amber-400 border border-amber-500/30';
+      }
+      return 'bg-blue-500/10 text-blue-400 border border-blue-500/30';
+    case 'assistant':
+      return 'bg-green-500/10 text-green-400 border border-green-500/30';
+    case 'status':
+      return 'bg-muted/30 text-muted-foreground border border-border text-xs';
     case 'employee':
       return 'bg-purple-500/10 text-purple-400 border border-purple-500/30';
     case 'plan':
@@ -208,80 +235,103 @@ export const MissionLogEnhanced: React.FC = () => {
                 Activity Log
               </h4>
               <AnimatePresence mode="popLayout">
-                {messages.map((message, index) => (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ delay: index * 0.03 }}
-                    className={cn(
-                      'flex items-start gap-3',
-                      message.type === 'user' && 'justify-end'
-                    )}
-                  >
-                    {message.type !== 'user' && (
-                      <Avatar className="h-8 w-8 flex-shrink-0">
-                        <AvatarImage
-                          src={
-                            message.type === 'system'
-                              ? 'https://api.dicebear.com/7.x/shapes/svg?seed=system'
-                              : `https://api.dicebear.com/7.x/bottts/svg?seed=${message.from}`
-                          }
-                          alt={message.from}
-                        />
-                        <AvatarFallback className="bg-primary/10">
-                          {getMessageIcon(message.type, message.from)}
-                        </AvatarFallback>
-                      </Avatar>
-                    )}
+                {messages.map((message, index) => {
+                  // Extract metadata for agent messages
+                  const employeeName =
+                    message.metadata?.employeeName || message.from;
+                  const employeeAvatar = message.metadata?.employeeAvatar;
+                  const role = message.metadata?.role as
+                    | 'agent'
+                    | 'supervisor'
+                    | 'user'
+                    | undefined;
 
-                    <div
+                  return (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ delay: index * 0.03 }}
                       className={cn(
-                        'max-w-[85%] flex-1',
-                        message.type === 'user' && 'flex justify-end'
+                        'flex items-start gap-3',
+                        message.type === 'user' && 'justify-end'
                       )}
                     >
-                      {/* Message Sender */}
-                      {message.from !== 'user' && (
-                        <div className="mb-1 flex items-center gap-2">
-                          <p className="text-xs font-semibold text-foreground">
-                            {message.from}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(message.timestamp).toLocaleTimeString()}
-                          </p>
-                        </div>
+                      {message.type !== 'user' && (
+                        <Avatar className="h-8 w-8 flex-shrink-0">
+                          <AvatarImage
+                            src={
+                              employeeAvatar ||
+                              (message.type === 'system'
+                                ? 'https://api.dicebear.com/7.x/shapes/svg?seed=system'
+                                : message.type === 'agent' && role === 'supervisor'
+                                  ? 'https://api.dicebear.com/7.x/shapes/svg?seed=supervisor'
+                                  : `https://api.dicebear.com/7.x/bottts/svg?seed=${employeeName}`)
+                            }
+                            alt={employeeName}
+                          />
+                          <AvatarFallback className="bg-primary/10">
+                            {getMessageIcon(message.type, message.from, role)}
+                          </AvatarFallback>
+                        </Avatar>
                       )}
 
-                      {/* Message Content */}
                       <div
                         className={cn(
-                          'rounded-lg p-3',
-                          getMessageColor(message.type)
+                          'max-w-[85%] flex-1',
+                          message.type === 'user' && 'flex justify-end'
                         )}
                       >
-                        {message.type === 'user' ? (
-                          <p className="text-sm">{message.content}</p>
-                        ) : (
-                          <div className="prose prose-sm dark:prose-invert max-w-none">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {message.content}
-                            </ReactMarkdown>
+                        {/* Message Sender */}
+                        {message.from !== 'user' && (
+                          <div className="mb-1 flex items-center gap-2">
+                            <p className="text-xs font-semibold text-foreground">
+                              {employeeName}
+                            </p>
+                            {role && role !== 'user' && (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] px-1.5 py-0"
+                              >
+                                {role === 'supervisor' ? 'Supervisor' : 'Agent'}
+                              </Badge>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(message.timestamp).toLocaleTimeString()}
+                            </p>
                           </div>
                         )}
-                      </div>
-                    </div>
 
-                    {message.type === 'user' && (
-                      <Avatar className="h-8 w-8 flex-shrink-0">
-                        <AvatarFallback className="bg-primary">
-                          <User className="h-4 w-4 text-primary-foreground" />
-                        </AvatarFallback>
-                      </Avatar>
-                    )}
-                  </motion.div>
-                ))}
+                        {/* Message Content */}
+                        <div
+                          className={cn(
+                            'rounded-lg p-3',
+                            getMessageColor(message.type, role)
+                          )}
+                        >
+                          {message.type === 'user' ? (
+                            <p className="text-sm">{message.content}</p>
+                          ) : (
+                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {message.content}
+                              </ReactMarkdown>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {message.type === 'user' && (
+                        <Avatar className="h-8 w-8 flex-shrink-0">
+                          <AvatarFallback className="bg-primary">
+                            <User className="h-4 w-4 text-primary-foreground" />
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
               <div ref={messagesEndRef} />
             </>

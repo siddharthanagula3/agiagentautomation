@@ -8,6 +8,7 @@ import { systemPromptsService } from '@core/ai/employees/prompt-management';
 import { useMissionStore } from '@shared/stores/mission-control-store';
 import type { Task } from '@shared/stores/mission-control-store';
 import type { AIEmployee } from '@core/types/ai-employee';
+import { agentConversationProtocol } from './agent-conversation-protocol';
 
 export interface WorkforceRequest {
   userId: string;
@@ -444,7 +445,7 @@ Please complete this task according to your role and capabilities.`;
 
   /**
    * CHAT MODE: Process conversational chat request
-   * Routes to appropriate employee based on message content
+   * Auto-selects best employee(s) and initiates multi-agent conversation if needed
    */
   private async processChatRequest(
     request: WorkforceRequest,
@@ -460,44 +461,55 @@ Please complete this task according to your role and capabilities.`;
     });
 
     try {
-      // Select best employee for this chat interaction
-      const selectedEmployee = await this.selectEmployeeForChat(request.input);
+      // AUTO-SELECT: Analyze query and select best employee(s)
+      const selectedEmployees = await this.autoSelectEmployees(request.input);
 
-      if (!selectedEmployee) {
-        throw new Error('No suitable employee found for this request');
+      if (selectedEmployees.length === 0) {
+        throw new Error('No suitable employees found for this request');
       }
 
-      store.updateEmployeeStatus(
-        selectedEmployee.name,
-        'thinking',
-        null,
-        'Processing chat message'
-      );
-
-      // Build conversation context
-      const conversationMessages = [
-        { role: 'system', content: selectedEmployee.systemPrompt },
-        ...(request.conversationHistory || []),
-        { role: 'user', content: request.input },
-      ];
-
-      // Get response from employee
-      const response = await unifiedLLMService.sendMessage({
-        provider: 'anthropic',
-        messages: conversationMessages,
-        model:
-          selectedEmployee.model === 'inherit'
-            ? 'claude-3-5-sonnet-20241022'
-            : selectedEmployee.model,
-        temperature: 0.7,
+      // Show selected team to user
+      store.addMessage({
+        from: 'system',
+        type: 'system',
+        content: `🤖 **Selected team:** ${selectedEmployees.map((e) => e.name).join(', ')}`,
       });
 
-      store.updateEmployeeStatus(selectedEmployee.name, 'idle');
+      // Update employee statuses
+      selectedEmployees.forEach((employee) => {
+        store.updateEmployeeStatus(
+          employee.name,
+          'thinking',
+          null,
+          'Analyzing query'
+        );
+      });
+
+      // Start multi-agent conversation protocol
+      console.log(
+        `🗣️ Starting conversation with ${selectedEmployees.length} employee(s)`
+      );
+
+      const conversationResult = await agentConversationProtocol.startConversation(
+        request.input,
+        selectedEmployees,
+        request.userId
+      );
+
+      // Display conversation to user (all agent messages are already in store via protocol)
+      // Add final answer
       store.addMessage({
-        from: selectedEmployee.name,
-        type: 'employee',
-        content: response.content,
-        metadata: { employeeName: selectedEmployee.name },
+        from: 'system',
+        type: 'assistant',
+        content: conversationResult.finalAnswer,
+        metadata: {
+          conversationMetadata: conversationResult.metadata,
+        },
+      });
+
+      // Update all employees to idle
+      selectedEmployees.forEach((employee) => {
+        store.updateEmployeeStatus(employee.name, 'idle');
       });
 
       store.completeMission();
@@ -505,7 +517,7 @@ Please complete this task according to your role and capabilities.`;
       return {
         success: true,
         missionId,
-        chatResponse: response.content,
+        chatResponse: conversationResult.finalAnswer,
         mode: 'chat',
       };
     } catch (error) {
@@ -525,6 +537,77 @@ Please complete this task according to your role and capabilities.`;
         error: errorMessage,
         mode: 'chat',
       };
+    }
+  }
+
+  /**
+   * AUTO-SELECT: Automatically select best employee(s) for a query
+   * Uses LLM to analyze query and match with employee capabilities
+   */
+  private async autoSelectEmployees(query: string): Promise<AIEmployee[]> {
+    // Build employee directory
+    const employeeDirectory = this.employees
+      .map((e) => `- ${e.name}: ${e.description}`)
+      .join('\n');
+
+    const selectionPrompt = `Analyze this user query and select the BEST AI employee(s) to answer it.
+
+**User Query:** ${query}
+
+**Available Employees:**
+${employeeDirectory}
+
+**Instructions:**
+- Select 1-3 employees maximum
+- Choose employees whose expertise directly matches the query
+- If query is simple, select only ONE employee
+- If query requires multiple areas of expertise, select 2-3 employees
+- Return ONLY employee names, comma-separated, nothing else
+
+**Examples:**
+Query: "Review my code for bugs" → Answer: "code-reviewer"
+Query: "Build a login system and make it secure" → Answer: "backend-engineer, code-reviewer"
+Query: "Help me learn Python" → Answer: "expert-tutor"
+
+**Your selection (names only, comma-separated):**`;
+
+    try {
+      const response = await unifiedLLMService.sendMessage(
+        [{ role: 'user', content: selectionPrompt }],
+        undefined,
+        undefined,
+        'anthropic'
+      );
+
+      // Parse response to extract employee names
+      const selectedNames = response.content
+        .split(',')
+        .map((name) => name.trim().toLowerCase())
+        .filter((name) => name.length > 0);
+
+      // Match names to actual employees
+      const selectedEmployees = selectedNames
+        .map((name) =>
+          this.employees.find((e) => e.name.toLowerCase() === name)
+        )
+        .filter((e): e is AIEmployee => e !== undefined);
+
+      // Fallback: if no match, select first employee
+      if (selectedEmployees.length === 0 && this.employees.length > 0) {
+        console.warn('⚠️ Auto-select failed, using default employee');
+        return [this.employees[0]];
+      }
+
+      console.log(
+        `✅ Auto-selected ${selectedEmployees.length} employee(s):`,
+        selectedEmployees.map((e) => e.name)
+      );
+
+      return selectedEmployees;
+    } catch (error) {
+      console.error('❌ Auto-select failed:', error);
+      // Fallback to first employee
+      return this.employees.length > 0 ? [this.employees[0]] : [];
     }
   }
 

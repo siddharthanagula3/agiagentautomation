@@ -34,13 +34,33 @@ export interface ActiveEmployee {
 export interface MissionMessage {
   id: string;
   from: string; // 'user' | 'system' | employee name
-  type: 'user' | 'system' | 'employee' | 'task_update' | 'plan' | 'error';
+  type:
+    | 'user'
+    | 'system'
+    | 'employee'
+    | 'agent' // Multi-agent conversation messages
+    | 'assistant' // AI assistant responses
+    | 'status' // Status updates
+    | 'task_update'
+    | 'plan'
+    | 'error';
   content: string;
   timestamp: Date;
   metadata?: {
     taskId?: string;
     employeeName?: string;
+    employeeAvatar?: string;
+    role?: 'agent' | 'supervisor' | 'user'; // Agent conversation roles
     tool?: string;
+    model?: string;
+    tokens?: number;
+    conversationMetadata?: {
+      turnCount: number;
+      participantCount: number;
+      duration: number;
+      wasInterrupted: boolean;
+      loopDetected: boolean;
+    };
   };
 }
 

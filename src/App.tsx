@@ -70,6 +70,9 @@ const MissionControlPage = lazyWithRetry(
 const BillingPage = lazyWithRetry(
   () => import('@features/billing/pages/BillingDashboard')
 );
+const VibeDashboard = lazyWithRetry(
+  () => import('@features/vibe/pages/VibeDashboard')
+);
 
 // Loading component for Suspense fallback
 const RouteLoadingSpinner = () => (
@@ -171,6 +174,16 @@ function App() {
                     element={<MissionControlPage />}
                   />
                   <Route path="company-hub" element={<MissionControlPage />} />
+
+                  {/* VIBE - Multi-Agent Collaborative Interface */}
+                  <Route
+                    path="vibe"
+                    element={
+                      <ErrorBoundary>
+                        <VibeDashboard />
+                      </ErrorBoundary>
+                    }
+                  />
 
                   {/* Settings */}
                   <Route path="settings" element={<SettingsPage />} />

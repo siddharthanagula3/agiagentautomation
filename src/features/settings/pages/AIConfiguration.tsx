@@ -123,6 +123,14 @@ const AIConfigurationPage: React.FC = () => {
 
   // Initialize configurations
   useEffect(() => {
+    // Static mapping for environment variables (Vite requires static access)
+    const envKeyMapping: Record<string, boolean> = {
+      OpenAI: !!import.meta.env.VITE_OPENAI_API_KEY,
+      Anthropic: !!import.meta.env.VITE_ANTHROPIC_API_KEY,
+      Google: !!import.meta.env.VITE_GOOGLE_API_KEY,
+      Perplexity: !!import.meta.env.VITE_PERPLEXITY_API_KEY,
+    };
+
     const initialConfigs: Record<string, ProviderConfig> = {};
 
     Object.entries(PROVIDER_CONFIGS).forEach(([key, config]) => {
@@ -132,7 +140,7 @@ const AIConfigurationPage: React.FC = () => {
       initialConfigs[key] = {
         ...config,
         apiKey,
-        isConfigured: !!import.meta.env[`VITE_${key.toUpperCase()}_API_KEY`],
+        isConfigured: envKeyMapping[key] || false,
       };
     });
 

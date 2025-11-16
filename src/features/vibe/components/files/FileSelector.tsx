@@ -5,8 +5,23 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { Search, File, Folder, FileText, Image, Code, CheckCircle2 } from 'lucide-react';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/shared/components/ui/command';
+import {
+  Search,
+  File,
+  Folder,
+  FileText,
+  Image,
+  Code,
+  CheckCircle2,
+} from 'lucide-react';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/shared/components/ui/command';
 import { Badge } from '@/shared/components/ui/badge';
 import { cn } from '@/shared/lib/utils';
 
@@ -107,9 +122,9 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
       <CommandList className="max-h-[300px]">
         <CommandEmpty>
           <div className="flex flex-col items-center justify-center py-6 text-center">
-            <Search className="h-8 w-8 text-muted-foreground mb-2" />
+            <Search className="mb-2 h-8 w-8 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">No files found</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="mt-1 text-xs text-muted-foreground">
               Try a different search term
             </p>
           </div>
@@ -126,36 +141,44 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
                   key={file.id}
                   value={file.path}
                   onSelect={() => handleSelect(file)}
-                  className="flex items-center gap-3 px-3 py-2 cursor-pointer"
+                  className="flex cursor-pointer items-center gap-3 px-3 py-2"
                 >
                   {/* File Icon */}
                   <div className="flex-shrink-0">
-                    <FileIcon className={cn(
-                      'h-5 w-5',
-                      file.type === 'folder' ? 'text-amber-500' : 'text-muted-foreground'
-                    )} />
+                    <FileIcon
+                      className={cn(
+                        'h-5 w-5',
+                        file.type === 'folder'
+                          ? 'text-amber-500'
+                          : 'text-muted-foreground'
+                      )}
+                    />
                   </div>
 
                   {/* File Info */}
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className={cn(
-                        'text-sm truncate',
-                        selected ? 'font-medium' : 'font-normal'
-                      )}>
+                      <span
+                        className={cn(
+                          'truncate text-sm',
+                          selected ? 'font-medium' : 'font-normal'
+                        )}
+                      >
                         {file.name}
                       </span>
                       {selected && (
-                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-primary" />
                       )}
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <p className="text-xs text-muted-foreground truncate">
+                    <div className="mt-0.5 flex items-center gap-2">
+                      <p className="truncate text-xs text-muted-foreground">
                         {formatPath(file.path)}
                       </p>
                       {file.size && (
                         <>
-                          <span className="text-xs text-muted-foreground">•</span>
+                          <span className="text-xs text-muted-foreground">
+                            •
+                          </span>
                           <span className="text-xs text-muted-foreground">
                             {formatFileSize(file.size)}
                           </span>
@@ -166,7 +189,10 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
 
                   {/* File Type Badge */}
                   {file.type === 'file' && file.mimeType && (
-                    <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
+                    <Badge
+                      variant="secondary"
+                      className="h-5 px-1.5 py-0 text-xs"
+                    >
                       {getFileExtension(file.name)}
                     </Badge>
                   )}
@@ -181,7 +207,8 @@ export const FileSelector: React.FC<FileSelectorProps> = ({
       {multiSelect && selectedFiles.length > 0 && (
         <div className="border-t px-3 py-2">
           <p className="text-xs text-muted-foreground">
-            {selectedFiles.length} {selectedFiles.length === 1 ? 'file' : 'files'} selected
+            {selectedFiles.length}{' '}
+            {selectedFiles.length === 1 ? 'file' : 'files'} selected
           </p>
         </div>
       )}
@@ -200,7 +227,21 @@ function getFileIcon(file: FileItem) {
   const ext = getFileExtension(file.name).toLowerCase();
 
   // Code files
-  if (['js', 'ts', 'jsx', 'tsx', 'py', 'java', 'cpp', 'c', 'go', 'rs', 'rb'].includes(ext)) {
+  if (
+    [
+      'js',
+      'ts',
+      'jsx',
+      'tsx',
+      'py',
+      'java',
+      'cpp',
+      'c',
+      'go',
+      'rs',
+      'rb',
+    ].includes(ext)
+  ) {
     return Code;
   }
 
@@ -223,7 +264,23 @@ function getFileIcon(file: FileItem) {
 function categorizeFile(file: FileItem): string {
   const ext = getFileExtension(file.name).toLowerCase();
 
-  if (['js', 'ts', 'jsx', 'tsx', 'py', 'java', 'cpp', 'c', 'go', 'rs', 'rb', 'html', 'css'].includes(ext)) {
+  if (
+    [
+      'js',
+      'ts',
+      'jsx',
+      'tsx',
+      'py',
+      'java',
+      'cpp',
+      'c',
+      'go',
+      'rs',
+      'rb',
+      'html',
+      'css',
+    ].includes(ext)
+  ) {
     return 'code';
   }
 

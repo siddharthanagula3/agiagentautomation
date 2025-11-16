@@ -125,9 +125,11 @@ export class ChatStreamingService {
       return null;
     }
 
-    console.log(
-      `[StreamRecovery] Recovering stream ${streamId} from chunk ${state.lastChunkIndex}`
-    );
+    if (import.meta.env.DEV) {
+      console.log(
+        `[StreamRecovery] Recovering stream ${streamId} from chunk ${state.lastChunkIndex}`
+      );
+    }
     return state;
   }
 
@@ -139,9 +141,11 @@ export class ChatStreamingService {
 
     if (bufferSize >= BACKPRESSURE_HIGH_WATER && !stream.isBackpressured) {
       stream.isBackpressured = true;
-      console.log(
-        `[Backpressure] Stream ${stream.id} entering backpressure mode (buffer: ${bufferSize})`
-      );
+      if (import.meta.env.DEV) {
+        console.log(
+          `[Backpressure] Stream ${stream.id} entering backpressure mode (buffer: ${bufferSize})`
+        );
+      }
     }
 
     // Wait until buffer drains below low water mark
@@ -154,9 +158,11 @@ export class ChatStreamingService {
 
     if (stream.isBackpressured) {
       stream.isBackpressured = false;
-      console.log(
-        `[Backpressure] Stream ${stream.id} exiting backpressure mode`
-      );
+      if (import.meta.env.DEV) {
+        console.log(
+          `[Backpressure] Stream ${stream.id} exiting backpressure mode`
+        );
+      }
     }
   }
 
@@ -253,9 +259,11 @@ export class ChatStreamingService {
             'Chat conversation'
           );
 
-          console.log(
-            `[TokenTracking] ✅ Logged ${tokensUsed} tokens (${inputTokens} in, ${outputTokens} out) for session ${sessionId}, agent ${agentId || 'default'}`
-          );
+          if (import.meta.env.DEV) {
+            console.log(
+              `[TokenTracking] ✅ Logged ${tokensUsed} tokens (${inputTokens} in, ${outputTokens} out) for session ${sessionId}, agent ${agentId || 'default'}`
+            );
+          }
         } catch (error) {
           console.error('[TokenTracking] ❌ Failed to log token usage:', error);
           metrics.errors++;
@@ -338,9 +346,11 @@ export class ChatStreamingService {
         reconnectAttempts++;
         metrics.reconnects++;
 
-        console.log(
-          `[StreamRecovery] Attempting recovery ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`
-        );
+        if (import.meta.env.DEV) {
+          console.log(
+            `[StreamRecovery] Attempting recovery ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`
+          );
+        }
 
         // Save current state
         this.saveStreamState(streamId, chunkIndex, fullContent);

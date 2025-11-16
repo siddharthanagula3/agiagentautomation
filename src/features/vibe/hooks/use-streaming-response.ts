@@ -205,11 +205,7 @@ export function useStreamingResponse(): UseStreamingResponseReturn {
       });
       contentBufferRef.current = '';
     }, 500);
-  }, [
-    streamingState,
-    finishStreamingMessage,
-    updateAgentStatus,
-  ]);
+  }, [streamingState, finishStreamingMessage, updateAgentStatus]);
 
   /**
    * Handle streaming error

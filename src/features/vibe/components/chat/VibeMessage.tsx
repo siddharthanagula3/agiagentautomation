@@ -21,7 +21,9 @@ interface VibeMessageProps {
 const formatTimestamp = (date: Date): string => {
   const now = new Date();
   const messageDate = new Date(date);
-  const diffInSeconds = Math.floor((now.getTime() - messageDate.getTime()) / 1000);
+  const diffInSeconds = Math.floor(
+    (now.getTime() - messageDate.getTime()) / 1000
+  );
 
   if (diffInSeconds < 60) {
     return 'Just now';
@@ -56,14 +58,14 @@ export const VibeMessage: React.FC<VibeMessageProps> = ({
   if (message.role === 'user') {
     return (
       <motion.div
-        className="flex justify-end mb-4"
+        className="mb-4 flex justify-end"
         variants={messageVariants}
         initial="initial"
         animate="animate"
         transition={{ duration: 0.2 }}
       >
         <div className="max-w-[70%]">
-          <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-5 py-3 shadow-sm">
+          <div className="rounded-2xl rounded-tr-sm bg-primary px-5 py-3 text-primary-foreground shadow-sm">
             <ReactMarkdown
               className="prose prose-sm dark:prose-invert max-w-none"
               components={{
@@ -74,13 +76,13 @@ export const VibeMessage: React.FC<VibeMessageProps> = ({
             </ReactMarkdown>
             {message.is_streaming && (
               <motion.span
-                className="inline-block w-2 h-4 bg-primary-foreground ml-1"
+                className="ml-1 inline-block h-4 w-2 bg-primary-foreground"
                 animate={{ opacity: [1, 0.3, 1] }}
                 transition={{ duration: 1, repeat: Infinity }}
               />
             )}
           </div>
-          <div className="text-xs text-muted-foreground mt-1 text-right">
+          <div className="mt-1 text-right text-xs text-muted-foreground">
             {formatTimestamp(message.timestamp)}
           </div>
         </div>
@@ -92,17 +94,17 @@ export const VibeMessage: React.FC<VibeMessageProps> = ({
   if (message.role === 'system') {
     return (
       <motion.div
-        className="flex justify-center mb-4"
+        className="mb-4 flex justify-center"
         variants={messageVariants}
         initial="initial"
         animate="animate"
         transition={{ duration: 0.2 }}
       >
         <div className="max-w-[80%] text-center">
-          <div className="bg-muted/50 text-muted-foreground rounded-xl px-4 py-2 text-sm">
+          <div className="rounded-xl bg-muted/50 px-4 py-2 text-sm text-muted-foreground">
             {message.content}
           </div>
-          <div className="text-xs text-muted-foreground mt-1">
+          <div className="mt-1 text-xs text-muted-foreground">
             {formatTimestamp(message.timestamp)}
           </div>
         </div>
@@ -113,7 +115,7 @@ export const VibeMessage: React.FC<VibeMessageProps> = ({
   // Agent message (left-aligned with avatar)
   return (
     <motion.div
-      className="flex gap-3 mb-4"
+      className="mb-4 flex gap-3"
       variants={messageVariants}
       initial="initial"
       animate="animate"
@@ -126,10 +128,10 @@ export const VibeMessage: React.FC<VibeMessageProps> = ({
         </div>
       )}
 
-      <div className="flex-1 max-w-[70%]">
+      <div className="max-w-[70%] flex-1">
         {/* Agent Name and Role Badge */}
         {(message.employee_name || employee) && (
-          <div className="flex items-center gap-2 mb-1">
+          <div className="mb-1 flex items-center gap-2">
             <span className="text-sm font-medium">
               {message.employee_name || employee?.name || 'AI Assistant'}
             </span>
@@ -142,18 +144,24 @@ export const VibeMessage: React.FC<VibeMessageProps> = ({
         )}
 
         {/* Message Content */}
-        <div className="bg-card rounded-2xl rounded-tl-sm px-5 py-3 shadow-sm border">
+        <div className="rounded-2xl rounded-tl-sm border bg-card px-5 py-3 shadow-sm">
           <ReactMarkdown
             className="prose prose-sm dark:prose-invert max-w-none"
             components={{
               p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-              ul: ({ children }) => <ul className="mb-2 last:mb-0 ml-4">{children}</ul>,
-              ol: ({ children }) => <ol className="mb-2 last:mb-0 ml-4">{children}</ol>,
+              ul: ({ children }) => (
+                <ul className="mb-2 ml-4 last:mb-0">{children}</ul>
+              ),
+              ol: ({ children }) => (
+                <ol className="mb-2 ml-4 last:mb-0">{children}</ol>
+              ),
               code: ({ inline, children }) =>
                 inline ? (
-                  <code className="bg-muted px-1 py-0.5 rounded text-sm">{children}</code>
+                  <code className="rounded bg-muted px-1 py-0.5 text-sm">
+                    {children}
+                  </code>
                 ) : (
-                  <code className="block bg-muted p-2 rounded my-2 overflow-x-auto">
+                  <code className="my-2 block overflow-x-auto rounded bg-muted p-2">
                     {children}
                   </code>
                 ),
@@ -163,7 +171,7 @@ export const VibeMessage: React.FC<VibeMessageProps> = ({
           </ReactMarkdown>
           {message.is_streaming && (
             <motion.span
-              className="inline-block w-2 h-4 bg-primary ml-1"
+              className="ml-1 inline-block h-4 w-2 bg-primary"
               animate={{ opacity: [1, 0.3, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
             />
@@ -171,7 +179,7 @@ export const VibeMessage: React.FC<VibeMessageProps> = ({
         </div>
 
         {/* Timestamp */}
-        <div className="text-xs text-muted-foreground mt-1">
+        <div className="mt-1 text-xs text-muted-foreground">
           {formatTimestamp(message.timestamp)}
         </div>
       </div>

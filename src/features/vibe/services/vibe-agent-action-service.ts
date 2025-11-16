@@ -231,8 +231,7 @@ export class VibeAgentActionService {
 
     return {
       actionId: action.id,
-      complete: (output?: string) =>
-        this.completeAction(action.id, { output }),
+      complete: (output?: string) => this.completeAction(action.id, { output }),
       fail: (error: string) => this.failAction(action.id, error),
     };
   }
@@ -382,14 +381,20 @@ export class VibeAgentActionService {
       completed: actions.filter((a) => a.status === 'completed').length,
       failed: actions.filter((a) => a.status === 'failed').length,
       in_progress: actions.filter((a) => a.status === 'in_progress').length,
-      by_type: actions.reduce((acc, action) => {
-        acc[action.action_type] = (acc[action.action_type] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>),
-      by_agent: actions.reduce((acc, action) => {
-        acc[action.agent_name] = (acc[action.agent_name] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>),
+      by_type: actions.reduce(
+        (acc, action) => {
+          acc[action.action_type] = (acc[action.action_type] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
+      by_agent: actions.reduce(
+        (acc, action) => {
+          acc[action.agent_name] = (acc[action.agent_name] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
     };
   }
 }

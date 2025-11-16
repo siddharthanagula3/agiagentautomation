@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@shared/lib/supabase-client';
+import { useChatStore } from '@shared/stores/chat-store';
 import { chatPersistenceService } from '../services/conversation-storage';
 import { chatStreamingService } from '../services/streaming-response-handler';
 import type { ChatMessage, ChatMode, StreamingUpdate } from '../types';
@@ -15,6 +16,7 @@ interface SendMessageParams {
 }
 
 export const useChat = (sessionId?: string) => {
+  const { selectedModel } = useChatStore();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,7 +107,7 @@ export const useChat = (sessionId?: string) => {
       content,
       attachments,
       mode = 'team',
-      model = 'gpt-4-turbo',
+      model = selectedModel || 'gpt-4o', // Use user's selected model or default to gpt-4o
       temperature = 0.7,
       tools = [],
     }: SendMessageParams) => {
@@ -228,7 +230,7 @@ export const useChat = (sessionId?: string) => {
         setStreamingContent('');
       }
     },
-    [messages, sessionId]
+    [messages, sessionId, selectedModel]
   );
 
   // Regenerate last assistant message

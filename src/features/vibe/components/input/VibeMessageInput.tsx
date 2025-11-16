@@ -12,7 +12,16 @@ import { useWorkforceStore } from '@shared/stores/employee-management-store';
 import { useVibeViewStore } from '../../stores/vibe-view-store';
 import { Button } from '@/shared/components/ui/button';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
-import { Send, Paperclip, Mic, Loader2, User, File as FileIcon, Hash, AtSign } from 'lucide-react';
+import {
+  Send,
+  Paperclip,
+  Mic,
+  Loader2,
+  User,
+  File as FileIcon,
+  Hash,
+  AtSign,
+} from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 
 interface VibeMessageInputProps {
@@ -44,7 +53,9 @@ export function VibeMessageInput({
   const [showMentions, setShowMentions] = useState(false);
   const [mentionType, setMentionType] = useState<'agent' | 'file' | null>(null);
   const [mentionQuery, setMentionQuery] = useState('');
-  const [mentionSuggestions, setMentionSuggestions] = useState<MentionSuggestion[]>([]);
+  const [mentionSuggestions, setMentionSuggestions] = useState<
+    MentionSuggestion[]
+  >([]);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
   const [mentionStartPos, setMentionStartPos] = useState(0);
 
@@ -128,10 +139,13 @@ export function VibeMessageInput({
 
   const insertMention = (suggestion: MentionSuggestion) => {
     const before = input.substring(0, mentionStartPos);
-    const after = input.substring(textareaRef.current?.selectionStart || input.length);
-    const mentionText = suggestion.type === 'agent'
-      ? `@${suggestion.name}`
-      : `#${suggestion.name}`;
+    const after = input.substring(
+      textareaRef.current?.selectionStart || input.length
+    );
+    const mentionText =
+      suggestion.type === 'agent'
+        ? `@${suggestion.name}`
+        : `#${suggestion.name}`;
 
     const newInput = `${before}${mentionText} ${after}`;
     setInput(newInput);
@@ -172,9 +186,10 @@ export function VibeMessageInput({
 
       // Filter agents
       const agentSuggestions: MentionSuggestion[] = (hiredEmployees || [])
-        .filter((emp) =>
-          emp.name?.toLowerCase().includes(query) ||
-          emp.role?.toLowerCase().includes(query)
+        .filter(
+          (emp) =>
+            emp.name?.toLowerCase().includes(query) ||
+            emp.role?.toLowerCase().includes(query)
         )
         .map((emp) => ({
           id: emp.id,
@@ -201,9 +216,10 @@ export function VibeMessageInput({
       // Filter files
       const allFiles = getAllFiles(fileTree);
       const fileSuggestions = allFiles
-        .filter((file) =>
-          file.name.toLowerCase().includes(query) ||
-          file.path?.toLowerCase().includes(query)
+        .filter(
+          (file) =>
+            file.name.toLowerCase().includes(query) ||
+            file.path?.toLowerCase().includes(query)
         )
         .slice(0, 5); // Limit to 5 suggestions
 
@@ -232,7 +248,7 @@ export function VibeMessageInput({
   return (
     <div
       className={cn(
-        'border-t border-gray-200 dark:border-gray-800 bg-background',
+        'border-t border-gray-200 bg-background dark:border-gray-800',
         className
       )}
     >
@@ -243,9 +259,9 @@ export function VibeMessageInput({
             {selectedFiles.map((file, index) => (
               <div
                 key={index}
-                className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-md text-sm"
+                className="flex items-center gap-2 rounded-md bg-muted px-3 py-1.5 text-sm"
               >
-                <Paperclip className="w-3.5 h-3.5" />
+                <Paperclip className="h-3.5 w-3.5" />
                 <span className="max-w-[200px] truncate">{file.name}</span>
                 <button
                   onClick={() => removeFile(index)}
@@ -261,7 +277,7 @@ export function VibeMessageInput({
         {/* Input Area */}
         <div className="flex items-end gap-2">
           {/* Textarea */}
-          <div className="flex-1 relative">
+          <div className="relative flex-1">
             <textarea
               ref={textareaRef}
               value={input}
@@ -270,11 +286,11 @@ export function VibeMessageInput({
               placeholder={placeholder}
               disabled={isLoading}
               className={cn(
-                'w-full min-h-[80px] max-h-[200px] px-4 py-3 rounded-lg',
+                'max-h-[200px] min-h-[80px] w-full rounded-lg px-4 py-3',
                 'border border-input bg-background',
                 'resize-none',
                 'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
-                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'disabled:cursor-not-allowed disabled:opacity-50',
                 'text-sm placeholder:text-muted-foreground'
               )}
               rows={1}
@@ -291,18 +307,18 @@ export function VibeMessageInput({
             {showMentions && mentionSuggestions.length > 0 && (
               <div
                 ref={mentionPopoverRef}
-                className="absolute bottom-full left-0 mb-2 w-80 rounded-lg border border-border bg-popover shadow-lg z-50"
+                className="absolute bottom-full left-0 z-50 mb-2 w-80 rounded-lg border border-border bg-popover shadow-lg"
               >
-                <div className="p-2 border-b border-border bg-muted/30">
+                <div className="border-b border-border bg-muted/30 p-2">
                   <div className="flex items-center gap-2 text-sm">
                     {mentionType === 'agent' ? (
                       <>
-                        <AtSign className="w-4 h-4 text-primary" />
+                        <AtSign className="h-4 w-4 text-primary" />
                         <span className="font-medium">Mention Agent</span>
                       </>
                     ) : (
                       <>
-                        <Hash className="w-4 h-4 text-primary" />
+                        <Hash className="h-4 w-4 text-primary" />
                         <span className="font-medium">Mention File</span>
                       </>
                     )}
@@ -320,7 +336,7 @@ export function VibeMessageInput({
                         onClick={() => insertMention(suggestion)}
                         onMouseEnter={() => setSelectedSuggestionIndex(index)}
                         className={cn(
-                          'w-full flex items-center gap-3 px-3 py-2 rounded-md text-left transition-colors',
+                          'flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors',
                           index === selectedSuggestionIndex
                             ? 'bg-primary/10 text-primary'
                             : 'hover:bg-muted'
@@ -328,15 +344,15 @@ export function VibeMessageInput({
                       >
                         {suggestion.type === 'agent' ? (
                           <>
-                            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-                              <User className="w-4 h-4 text-primary" />
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20">
+                              <User className="h-4 w-4 text-primary" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium truncate">
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate text-sm font-medium">
                                 {suggestion.name}
                               </div>
                               {suggestion.role && (
-                                <div className="text-xs text-muted-foreground truncate">
+                                <div className="truncate text-xs text-muted-foreground">
                                   {suggestion.role}
                                 </div>
                               )}
@@ -344,15 +360,15 @@ export function VibeMessageInput({
                           </>
                         ) : (
                           <>
-                            <div className="w-8 h-8 rounded-md bg-muted flex items-center justify-center shrink-0">
-                              <FileIcon className="w-4 h-4 text-muted-foreground" />
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
+                              <FileIcon className="h-4 w-4 text-muted-foreground" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium truncate">
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate text-sm font-medium">
                                 {suggestion.name}
                               </div>
                               {suggestion.path && (
-                                <div className="text-xs text-muted-foreground truncate">
+                                <div className="truncate text-xs text-muted-foreground">
                                   {suggestion.path}
                                 </div>
                               )}
@@ -364,18 +380,24 @@ export function VibeMessageInput({
                   </div>
                 </ScrollArea>
 
-                <div className="p-2 border-t border-border bg-muted/30">
+                <div className="border-t border-border bg-muted/30 p-2">
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
-                      <kbd className="px-1.5 py-0.5 bg-background rounded text-xs">↑↓</kbd>
+                      <kbd className="rounded bg-background px-1.5 py-0.5 text-xs">
+                        ↑↓
+                      </kbd>
                       <span>Navigate</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <kbd className="px-1.5 py-0.5 bg-background rounded text-xs">Tab</kbd>
+                      <kbd className="rounded bg-background px-1.5 py-0.5 text-xs">
+                        Tab
+                      </kbd>
                       <span>Select</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <kbd className="px-1.5 py-0.5 bg-background rounded text-xs">Esc</kbd>
+                      <kbd className="rounded bg-background px-1.5 py-0.5 text-xs">
+                        Esc
+                      </kbd>
                       <span>Close</span>
                     </div>
                   </div>
@@ -394,7 +416,7 @@ export function VibeMessageInput({
               disabled={isLoading}
               className="shrink-0"
             >
-              <Paperclip className="w-4 h-4" />
+              <Paperclip className="h-4 w-4" />
             </Button>
             <input
               ref={fileInputRef}
@@ -411,20 +433,22 @@ export function VibeMessageInput({
               disabled={isLoading}
               className="shrink-0"
             >
-              <Mic className="w-4 h-4" />
+              <Mic className="h-4 w-4" />
             </Button>
 
             {/* Send Button */}
             <Button
               onClick={handleSend}
-              disabled={(!input.trim() && selectedFiles.length === 0) || isLoading}
+              disabled={
+                (!input.trim() && selectedFiles.length === 0) || isLoading
+              }
               className="shrink-0"
             >
               {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
-                  <Send className="w-4 h-4 mr-2" />
+                  <Send className="mr-2 h-4 w-4" />
                   Send
                 </>
               )}
@@ -434,8 +458,12 @@ export function VibeMessageInput({
 
         {/* Helper Text */}
         <p className="mt-2 text-xs text-muted-foreground">
-          Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd> to
-          send, <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Shift+Enter</kbd>{' '}
+          Press{' '}
+          <kbd className="rounded bg-muted px-1.5 py-0.5 text-xs">Enter</kbd> to
+          send,{' '}
+          <kbd className="rounded bg-muted px-1.5 py-0.5 text-xs">
+            Shift+Enter
+          </kbd>{' '}
           for new line
         </p>
       </div>

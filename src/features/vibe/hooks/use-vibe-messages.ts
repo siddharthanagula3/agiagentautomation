@@ -6,7 +6,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { VibeMessageService, type VibeMessage } from '../services/vibe-message-service';
+import {
+  VibeMessageService,
+  type VibeMessage,
+} from '../services/vibe-message-service';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { toast } from 'sonner';
 
@@ -54,7 +57,8 @@ export function useVibeMessages(
       const loadedMessages = await VibeMessageService.getMessages(sessionId);
       setMessages(loadedMessages);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to load messages');
+      const error =
+        err instanceof Error ? err : new Error('Failed to load messages');
       setError(error);
       console.error('[useVibeMessages] Load failed:', error);
     } finally {
@@ -95,7 +99,8 @@ export function useVibeMessages(
       await VibeMessageService.clearSessionMessages(sessionId);
       setMessages([]);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to clear messages');
+      const error =
+        err instanceof Error ? err : new Error('Failed to clear messages');
       setError(error);
       toast.error(error.message);
     }

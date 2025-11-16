@@ -51,68 +51,73 @@ export function PlannerView() {
   const { plannerState } = useVibeViewStore();
 
   // Mock tasks for demonstration
-  const mockTasks = plannerState.tasks.length > 0 ? plannerState.tasks : [
-    {
-      id: '1',
-      title: 'Analyze Requirements',
-      description: 'Review user request and identify key requirements',
-      status: 'completed' as const,
-      assignedTo: 'Project Manager',
-      dependencies: [],
-      progress: 100,
-      estimatedTime: '2 min',
-    },
-    {
-      id: '2',
-      title: 'Design System Architecture',
-      description: 'Create technical design and component structure',
-      status: 'completed' as const,
-      assignedTo: 'Architect',
-      dependencies: ['1'],
-      progress: 100,
-      estimatedTime: '5 min',
-    },
-    {
-      id: '3',
-      title: 'Implement Core Features',
-      description: 'Build main application components and functionality',
-      status: 'in_progress' as const,
-      assignedTo: 'Engineer',
-      dependencies: ['2'],
-      progress: 45,
-      estimatedTime: '15 min',
-    },
-    {
-      id: '4',
-      title: 'Write Unit Tests',
-      description: 'Create comprehensive test coverage',
-      status: 'pending' as const,
-      assignedTo: 'QA Engineer',
-      dependencies: ['3'],
-      progress: 0,
-      estimatedTime: '8 min',
-    },
-    {
-      id: '5',
-      title: 'Deploy to Production',
-      description: 'Build and deploy application',
-      status: 'pending' as const,
-      assignedTo: 'DevOps',
-      dependencies: ['4'],
-      progress: 0,
-      estimatedTime: '3 min',
-    },
-  ];
+  const mockTasks =
+    plannerState.tasks.length > 0
+      ? plannerState.tasks
+      : [
+          {
+            id: '1',
+            title: 'Analyze Requirements',
+            description: 'Review user request and identify key requirements',
+            status: 'completed' as const,
+            assignedTo: 'Project Manager',
+            dependencies: [],
+            progress: 100,
+            estimatedTime: '2 min',
+          },
+          {
+            id: '2',
+            title: 'Design System Architecture',
+            description: 'Create technical design and component structure',
+            status: 'completed' as const,
+            assignedTo: 'Architect',
+            dependencies: ['1'],
+            progress: 100,
+            estimatedTime: '5 min',
+          },
+          {
+            id: '3',
+            title: 'Implement Core Features',
+            description: 'Build main application components and functionality',
+            status: 'in_progress' as const,
+            assignedTo: 'Engineer',
+            dependencies: ['2'],
+            progress: 45,
+            estimatedTime: '15 min',
+          },
+          {
+            id: '4',
+            title: 'Write Unit Tests',
+            description: 'Create comprehensive test coverage',
+            status: 'pending' as const,
+            assignedTo: 'QA Engineer',
+            dependencies: ['3'],
+            progress: 0,
+            estimatedTime: '8 min',
+          },
+          {
+            id: '5',
+            title: 'Deploy to Production',
+            description: 'Build and deploy application',
+            status: 'pending' as const,
+            assignedTo: 'DevOps',
+            dependencies: ['4'],
+            progress: 0,
+            estimatedTime: '3 min',
+          },
+        ];
 
-  const completedCount = mockTasks.filter((t) => t.status === 'completed').length;
+  const completedCount = mockTasks.filter(
+    (t) => t.status === 'completed'
+  ).length;
   const totalCount = mockTasks.length;
   const overallProgress = (completedCount / totalCount) * 100;
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="flex h-full flex-col bg-background">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-        <div className="flex items-center justify-between mb-4">
+      <div className="border-b border-gray-200 p-6 dark:border-gray-800">
+        <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Execution Plan</h2>
           <Badge variant="secondary">
             {completedCount} / {totalCount} Completed
@@ -131,7 +136,7 @@ export function PlannerView() {
 
       {/* Task List */}
       <ScrollArea className="flex-1">
-        <div className="p-6 space-y-4">
+        <div className="space-y-4 p-6">
           {mockTasks.map((task, index) => {
             const config = statusConfig[task.status];
             const Icon = config.icon;
@@ -142,33 +147,37 @@ export function PlannerView() {
                 {/* Dependency Arrow */}
                 {hasDependencies && index > 0 && (
                   <div className="flex justify-center py-2">
-                    <ArrowRight className="w-4 h-4 text-muted-foreground rotate-90" />
+                    <ArrowRight className="h-4 w-4 rotate-90 text-muted-foreground" />
                   </div>
                 )}
 
                 {/* Task Card */}
                 <div
                   className={cn(
-                    'p-4 rounded-lg border transition-all',
+                    'rounded-lg border p-4 transition-all',
                     config.bgColor,
                     task.status === 'in_progress' && 'ring-2 ring-blue-500/20'
                   )}
                 >
                   {/* Task Header */}
-                  <div className="flex items-start gap-3 mb-3">
+                  <div className="mb-3 flex items-start gap-3">
                     <Icon
                       className={cn(
-                        'w-5 h-5 mt-0.5 shrink-0',
+                        'mt-0.5 h-5 w-5 shrink-0',
                         config.color,
                         config.animate && 'animate-spin'
                       )}
                     />
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-sm">{task.title}</h3>
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1 flex items-center gap-2">
+                        <h3 className="text-sm font-semibold">{task.title}</h3>
                         <Badge
-                          variant={task.status === 'in_progress' ? 'default' : 'secondary'}
+                          variant={
+                            task.status === 'in_progress'
+                              ? 'default'
+                              : 'secondary'
+                          }
                           className="text-xs"
                         >
                           {config.label}
@@ -181,14 +190,14 @@ export function PlannerView() {
                   </div>
 
                   {/* Task Meta */}
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground ml-8">
+                  <div className="ml-8 flex items-center gap-4 text-xs text-muted-foreground">
                     <div className="flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5" />
+                      <User className="h-3.5 w-3.5" />
                       <span>{task.assignedTo}</span>
                     </div>
                     {task.estimatedTime && (
                       <div className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5" />
+                        <Clock className="h-3.5 w-3.5" />
                         <span>{task.estimatedTime}</span>
                       </div>
                     )}
@@ -196,8 +205,8 @@ export function PlannerView() {
 
                   {/* Progress Bar (for in-progress tasks) */}
                   {task.status === 'in_progress' && (
-                    <div className="mt-3 ml-8">
-                      <div className="flex items-center justify-between text-xs mb-1.5">
+                    <div className="ml-8 mt-3">
+                      <div className="mb-1.5 flex items-center justify-between text-xs">
                         <span className="text-muted-foreground">Progress</span>
                         <span className="font-medium">{task.progress}%</span>
                       </div>
@@ -207,8 +216,10 @@ export function PlannerView() {
 
                   {/* Dependencies */}
                   {hasDependencies && (
-                    <div className="mt-3 ml-8 flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">Depends on:</span>
+                    <div className="ml-8 mt-3 flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        Depends on:
+                      </span>
                       <div className="flex gap-1">
                         {task.dependencies.map((depId) => {
                           const depTask = mockTasks.find((t) => t.id === depId);
@@ -216,7 +227,7 @@ export function PlannerView() {
                             <Badge
                               key={depId}
                               variant="outline"
-                              className="text-xs h-5 px-2"
+                              className="h-5 px-2 text-xs"
                             >
                               {depTask?.title || `Task ${depId}`}
                             </Badge>
@@ -233,7 +244,7 @@ export function PlannerView() {
       </ScrollArea>
 
       {/* Footer Stats */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-muted/30">
+      <div className="border-t border-gray-200 bg-muted/30 p-4 dark:border-gray-800">
         <div className="grid grid-cols-4 gap-4 text-center text-sm">
           <div>
             <div className="text-2xl font-bold text-green-600">

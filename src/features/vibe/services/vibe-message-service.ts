@@ -70,7 +70,9 @@ export class VibeMessageService {
   /**
    * Create a new message in the database
    */
-  static async createMessage(params: CreateMessageParams): Promise<VibeMessage> {
+  static async createMessage(
+    params: CreateMessageParams
+  ): Promise<VibeMessage> {
     const messageId = crypto.randomUUID();
     const message: Partial<VibeMessage> = {
       id: messageId,
@@ -180,7 +182,8 @@ export class VibeMessageService {
 
       if (!orchestratorResponse.success || !orchestratorResponse.chatResponse) {
         throw new Error(
-          orchestratorResponse.error || 'No response from workforce orchestrator'
+          orchestratorResponse.error ||
+            'No response from workforce orchestrator'
         );
       }
 
@@ -288,7 +291,10 @@ export class VibeMessageService {
       .limit(limit);
 
     if (error) {
-      console.error('[VibeMessageService] Failed to fetch recent messages:', error);
+      console.error(
+        '[VibeMessageService] Failed to fetch recent messages:',
+        error
+      );
       throw new Error(`Failed to fetch recent messages: ${error.message}`);
     }
 

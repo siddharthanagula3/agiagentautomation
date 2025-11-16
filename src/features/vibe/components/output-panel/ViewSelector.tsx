@@ -22,10 +22,11 @@ const viewTabs: ViewTab[] = [
 ];
 
 export function ViewSelector() {
-  const { activeView, setActiveView, followingAgent, toggleFollowAgent } = useVibeViewStore();
+  const { activeView, setActiveView, followingAgent, toggleFollowAgent } =
+    useVibeViewStore();
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-800 bg-background">
+    <div className="border-b border-gray-200 bg-background dark:border-gray-800">
       <div className="flex items-center justify-between px-4 py-2">
         {/* View Tabs */}
         <div className="flex items-center gap-1">
@@ -38,13 +39,13 @@ export function ViewSelector() {
                 key={tab.id}
                 onClick={() => setActiveView(tab.id)}
                 className={cn(
-                  'flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+                  'flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
                   isActive
                     ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 )}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="h-4 w-4" />
                 <span>{tab.label}</span>
                 {tab.badge && (
                   <Badge variant="secondary" className="ml-1 h-5 text-xs">
@@ -60,21 +61,23 @@ export function ViewSelector() {
         <button
           onClick={toggleFollowAgent}
           className={cn(
-            'flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+            'flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
             followingAgent
               ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
           )}
-          title={followingAgent ? 'Stop following agent' : 'Follow agent actions'}
+          title={
+            followingAgent ? 'Stop following agent' : 'Follow agent actions'
+          }
         >
           {followingAgent ? (
             <>
-              <Eye className="w-4 h-4" />
+              <Eye className="h-4 w-4" />
               <span className="text-xs">Following Agent</span>
             </>
           ) : (
             <>
-              <EyeOff className="w-4 h-4" />
+              <EyeOff className="h-4 w-4" />
               <span className="text-xs">Follow Agent</span>
             </>
           )}

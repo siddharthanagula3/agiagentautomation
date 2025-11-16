@@ -24,9 +24,12 @@ const VibeSidebar: React.FC = () => {
   };
 
   return (
-    <aside className="w-16 bg-card border-r border-border flex flex-col items-center py-4 shrink-0">
+    <aside className="flex w-16 shrink-0 flex-col items-center border-r border-border bg-card py-4">
       {/* Logo */}
-      <Link to="/" className="mb-8 p-2 rounded-lg hover:bg-muted transition-colors">
+      <Link
+        to="/"
+        className="mb-8 rounded-lg p-2 transition-colors hover:bg-muted"
+      >
         <Sparkles size={24} className="text-primary" />
       </Link>
 
@@ -36,7 +39,7 @@ const VibeSidebar: React.FC = () => {
           <TooltipTrigger asChild>
             <Link
               to="/dashboard"
-              className="p-3 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              className="rounded-lg p-3 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <LayoutDashboard size={20} />
             </Link>
@@ -56,11 +59,11 @@ const VibeSidebar: React.FC = () => {
           <TooltipTrigger asChild>
             <Link
               to="/settings"
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              className="rounded-lg p-2 transition-colors hover:bg-muted"
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user?.user_metadata?.avatar_url} />
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                <AvatarFallback className="bg-primary text-xs text-primary-foreground">
                   {getUserInitials()}
                 </AvatarFallback>
               </Avatar>

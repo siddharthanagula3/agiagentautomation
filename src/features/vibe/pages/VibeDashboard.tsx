@@ -1,9 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-} from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { useWorkforceStore } from '@shared/stores/employee-management-store';
@@ -22,7 +17,10 @@ import type { WorkingStep } from '../components/agent-panel/WorkingProcessSectio
 import type { AgentMessage } from '../components/agent-panel/AgentMessageList';
 import { supabase } from '@shared/lib/supabase-client';
 import { workforceOrchestratorRefactored } from '@core/ai/orchestration/workforce-orchestrator';
-import { useVibeRealtime, type VibeAgentActionRow } from '../hooks/use-vibe-realtime';
+import {
+  useVibeRealtime,
+  type VibeAgentActionRow,
+} from '../hooks/use-vibe-realtime';
 import { VibeMessageService } from '../services/vibe-message-service';
 import { toast } from 'sonner';
 
@@ -44,7 +42,7 @@ const OutputPanel = () => {
   const { activeView } = useVibeViewStore();
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="flex h-full flex-col bg-background">
       <ViewSelector />
       <div className="flex-1 overflow-hidden">
         {activeView === 'editor' && <EditorView />}
@@ -87,9 +85,7 @@ const VibeDashboard: React.FC = () => {
       const index = prev.findIndex((item) => item.id === message.id);
       if (index === -1) {
         const next = [...prev, message];
-        next.sort(
-          (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
-        );
+        next.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
         return next;
       }
       const next = [...prev];
@@ -98,28 +94,25 @@ const VibeDashboard: React.FC = () => {
     });
   }, []);
 
-  const loadMessages = useCallback(
-    async (sessionId: string) => {
-      try {
-        const messages = await VibeMessageService.getMessages(sessionId);
-        const mapped = messages.map((msg) => ({
-          id: msg.id,
-          role: msg.role,
-          content: msg.content,
-          agentName: msg.employee_name || undefined,
-          agentRole: msg.employee_role || undefined,
-          timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
-          isStreaming: Boolean(msg.is_streaming),
-        }));
-        messageIdsRef.current = new Set(mapped.map((msg) => msg.id));
-        setMessages(mapped);
-      } catch (error) {
-        console.error('[VIBE] Failed to load messages', error);
-        toast.error('Failed to load VIBE history.');
-      }
-    },
-    []
-  );
+  const loadMessages = useCallback(async (sessionId: string) => {
+    try {
+      const messages = await VibeMessageService.getMessages(sessionId);
+      const mapped = messages.map((msg) => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        agentName: msg.employee_name || undefined,
+        agentRole: msg.employee_role || undefined,
+        timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+        isStreaming: Boolean(msg.is_streaming),
+      }));
+      messageIdsRef.current = new Set(mapped.map((msg) => msg.id));
+      setMessages(mapped);
+    } catch (error) {
+      console.error('[VIBE] Failed to load messages', error);
+      toast.error('Failed to load VIBE history.');
+    }
+  }, []);
 
   const ensureSession = useCallback(async () => {
     if (currentSessionId) {
@@ -180,7 +173,9 @@ const VibeDashboard: React.FC = () => {
 
       setMessages((prev) =>
         prev.map((message) =>
-          message.id === messageId ? { ...message, isStreaming: false } : message
+          message.id === messageId
+            ? { ...message, isStreaming: false }
+            : message
         )
       );
     },
@@ -193,8 +188,8 @@ const VibeDashboard: React.FC = () => {
         action.status === 'failed'
           ? 'failed'
           : action.status === 'completed'
-          ? 'completed'
-          : 'in_progress';
+            ? 'completed'
+            : 'in_progress';
 
       const description =
         action.metadata?.summary ||
@@ -215,8 +210,7 @@ const VibeDashboard: React.FC = () => {
       });
 
       const ordered = Array.from(workingStepsMapRef.current.values()).sort(
-        (a, b) =>
-          (a.timestamp?.getTime() || 0) - (b.timestamp?.getTime() || 0)
+        (a, b) => (a.timestamp?.getTime() || 0) - (b.timestamp?.getTime() || 0)
       );
       setWorkingSteps(ordered);
 
@@ -231,8 +225,8 @@ const VibeDashboard: React.FC = () => {
           status === 'failed'
             ? 'error'
             : status === 'completed'
-            ? 'completed'
-            : 'working',
+              ? 'completed'
+              : 'working',
         currentTask: description,
       }));
     },
@@ -257,7 +251,8 @@ const VibeDashboard: React.FC = () => {
     if (!hiredEmployees || hiredEmployees.length === 0) {
       navigate('/workforce', {
         state: {
-          message: 'Please hire at least one AI employee to use the VIBE workspace.',
+          message:
+            'Please hire at least one AI employee to use the VIBE workspace.',
         },
       });
       return;
@@ -381,7 +376,10 @@ const VibeDashboard: React.FC = () => {
             ),
           });
 
-        if (!orchestratorResponse.success || !orchestratorResponse.chatResponse) {
+        if (
+          !orchestratorResponse.success ||
+          !orchestratorResponse.chatResponse
+        ) {
           throw new Error(
             orchestratorResponse.error || 'No response generated by workforce.'
           );
@@ -466,8 +464,8 @@ const VibeDashboard: React.FC = () => {
 
   if (!user || !hiredEmployees) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex h-screen w-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -478,7 +476,7 @@ const VibeDashboard: React.FC = () => {
 
   return (
     <VibeLayout>
-      <div className="h-full flex flex-col">
+      <div className="flex h-full flex-col">
         <div className="flex-1 overflow-hidden">
           <VibeSplitView>
             <AgentPanel

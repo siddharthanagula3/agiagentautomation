@@ -60,7 +60,7 @@ export class MessagePool extends EventEmitter {
     }
 
     const agentSubs = this.subscriptions.get(agentName)!;
-    messageTypes.forEach(type => agentSubs.add(type));
+    messageTypes.forEach((type) => agentSubs.add(type));
   }
 
   /**
@@ -83,7 +83,7 @@ export class MessagePool extends EventEmitter {
     const agentSubs = this.subscriptions.get(agentName);
     if (!agentSubs) return [];
 
-    return Array.from(this.messages.values()).filter(msg => {
+    return Array.from(this.messages.values()).filter((msg) => {
       // Message is directly addressed to this agent
       const isDirect = msg.to_agents.includes(agentName);
 
@@ -114,7 +114,7 @@ export class MessagePool extends EventEmitter {
    */
   getMessagesBySession(sessionId: string): VibeAgentMessage[] {
     return Array.from(this.messages.values()).filter(
-      msg => msg.session_id === sessionId
+      (msg) => msg.session_id === sessionId
     );
   }
 
@@ -126,7 +126,7 @@ export class MessagePool extends EventEmitter {
    */
   getMessagesByType(type: AgentMessageType): VibeAgentMessage[] {
     return Array.from(this.messages.values()).filter(
-      msg => msg.type === type
+      (msg) => msg.type === type
     );
   }
 
@@ -239,7 +239,7 @@ export class MessagePool extends EventEmitter {
       if (error) throw error;
 
       if (data) {
-        data.forEach(row => {
+        data.forEach((row) => {
           const message: VibeAgentMessage = {
             id: row.id,
             session_id: row.session_id,

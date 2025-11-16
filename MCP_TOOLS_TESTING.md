@@ -5,14 +5,17 @@ This document lists the best open-source MCP (Model Context Protocol) servers fo
 ## 🎯 Essential MCP Tools for Testing
 
 ### 1. **Puppeteer MCP Server** (Official by Anthropic)
+
 **Purpose:** Browser automation, screenshots, JavaScript execution
 
 **Installation:**
+
 ```bash
 npx @modelcontextprotocol/create-server puppeteer
 ```
 
 **Features:**
+
 - ✅ Full browser automation
 - ✅ Screenshot capture (full page & elements)
 - ✅ Console log monitoring
@@ -20,6 +23,7 @@ npx @modelcontextprotocol/create-server puppeteer
 - ✅ JavaScript execution
 
 **Use Cases:**
+
 - Automated E2E testing
 - Visual regression testing
 - Performance monitoring
@@ -30,14 +34,17 @@ npx @modelcontextprotocol/create-server puppeteer
 ---
 
 ### 2. **Playwright MCP Server** (Official by Microsoft)
+
 **Purpose:** Cross-browser testing, advanced automation
 
 **Installation:**
+
 ```bash
 npm install -g @playwright/mcp-server
 ```
 
 **Features:**
+
 - ✅ 33+ automation tools
 - ✅ Multi-browser support (Chromium, Firefox, WebKit)
 - ✅ Network interception
@@ -45,6 +52,7 @@ npm install -g @playwright/mcp-server
 - ✅ Parallel execution
 
 **Use Cases:**
+
 - Cross-browser compatibility testing
 - Mobile responsiveness testing
 - API mocking and testing
@@ -55,20 +63,24 @@ npm install -g @playwright/mcp-server
 ---
 
 ### 3. **Context7 MCP Server** (by Upstash)
+
 **Purpose:** Up-to-date code documentation and examples
 
 **Installation:**
+
 ```bash
 npm install -g context7-mcp
 ```
 
 **Features:**
+
 - ✅ Real-time documentation lookup
 - ✅ Version-specific code examples
 - ✅ Framework and library documentation
 - ✅ Best practices and patterns
 
 **Use Cases:**
+
 - Quick API reference
 - Finding updated code examples
 - Learning new libraries
@@ -79,20 +91,24 @@ npm install -g context7-mcp
 ---
 
 ### 4. **MCP Inspector** (Official Testing Tool)
+
 **Purpose:** Visual debugging and testing MCP servers
 
 **Installation:**
+
 ```bash
 npm install -g @modelcontextprotocol/inspector
 ```
 
 **Features:**
+
 - ✅ Visual interface for MCP testing
 - ✅ Tool/resource/prompt testing
 - ✅ LLM playground integration
 - ✅ Authentication testing
 
 **Use Cases:**
+
 - Testing custom MCP servers
 - Debugging MCP integrations
 - API exploration
@@ -105,9 +121,11 @@ npm install -g @modelcontextprotocol/inspector
 ## 🔧 Additional Useful MCP Tools
 
 ### 5. **GitHub MCP Server**
+
 **Purpose:** Repository management and code analysis
 
 **Features:**
+
 - Repository operations
 - Issue tracking
 - PR management
@@ -118,9 +136,11 @@ npm install -g @modelcontextprotocol/inspector
 ---
 
 ### 6. **Filesystem MCP Server**
+
 **Purpose:** Local file operations and analysis
 
 **Features:**
+
 - File reading/writing
 - Directory traversal
 - File search
@@ -131,9 +151,11 @@ npm install -g @modelcontextprotocol/inspector
 ---
 
 ### 7. **PostgreSQL/Supabase MCP Server**
+
 **Purpose:** Database testing and debugging
 
 **Features:**
+
 - SQL query execution
 - Schema inspection
 - Data validation
@@ -177,7 +199,10 @@ Create a `.mcp.json` configuration file:
     "filesystem": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-filesystem"],
-      "args": ["--allowed-directory", "C:\\Users\\SIDDHARTHA NAGULA\\Desktop\\agi\\agiagentautomation"]
+      "args": [
+        "--allowed-directory",
+        "C:\\Users\\SIDDHARTHA NAGULA\\Desktop\\agi\\agiagentautomation"
+      ]
     }
   }
 }
@@ -188,6 +213,7 @@ Create a `.mcp.json` configuration file:
 ## 🎮 Testing Workflow
 
 ### 1. **Local Development Testing**
+
 ```bash
 # Run Playwright tests
 npm run e2e
@@ -203,21 +229,27 @@ npx playwright test --debug
 ```
 
 ### 2. **Visual Testing with Puppeteer MCP**
+
 Use Puppeteer MCP server to:
+
 - Take full-page screenshots
 - Compare visual changes
 - Test responsive design
 - Validate UI components
 
 ### 3. **Documentation Lookup with Context7**
+
 Use Context7 to:
+
 - Get latest React documentation
 - Find Supabase API examples
 - Check TypeScript patterns
 - Verify best practices
 
 ### 4. **Bug Detection**
+
 Run automated bug detection tests:
+
 ```bash
 npx playwright test --grep "BUG CHECK"
 ```
@@ -226,22 +258,24 @@ npx playwright test --grep "BUG CHECK"
 
 ## 📊 Test Coverage Goals
 
-| Area | Coverage | Status |
-|------|----------|--------|
-| Authentication | 100% | ✅ |
-| Chat Interface | 90% | 🟡 |
-| VIBE Workspace | 85% | 🟡 |
-| Mission Control | 80% | 🟡 |
-| Marketplace | 95% | ✅ |
-| Settings | 70% | 🟡 |
-| Mobile Responsive | 75% | 🟡 |
+| Area              | Coverage | Status |
+| ----------------- | -------- | ------ |
+| Authentication    | 100%     | ✅     |
+| Chat Interface    | 90%      | 🟡     |
+| VIBE Workspace    | 85%      | 🟡     |
+| Mission Control   | 80%      | 🟡     |
+| Marketplace       | 95%      | ✅     |
+| Settings          | 70%      | 🟡     |
+| Mobile Responsive | 75%      | 🟡     |
 
 ---
 
 ## 🐛 Common Issues & Solutions
 
 ### Issue 1: MCP Server Not Starting
+
 **Solution:**
+
 ```bash
 # Clear npm cache
 npm cache clean --force
@@ -251,14 +285,18 @@ npm install -g @modelcontextprotocol/inspector
 ```
 
 ### Issue 2: Screenshot Directory Missing
+
 **Solution:**
+
 ```bash
 mkdir -p e2e/screenshots
 mkdir -p test-results
 ```
 
 ### Issue 3: Browser Not Launching
+
 **Solution:**
+
 ```bash
 # Install Playwright browsers
 npx playwright install

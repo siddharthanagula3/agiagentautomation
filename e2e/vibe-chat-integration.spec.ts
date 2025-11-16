@@ -65,18 +65,26 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
 
     // Fill in credentials
     const emailInput = page.locator('input[type="email"], input[name="email"]');
-    const passwordInput = page.locator('input[type="password"], input[name="password"]');
+    const passwordInput = page.locator(
+      'input[type="password"], input[name="password"]'
+    );
 
     await emailInput.fill(TEST_USER.email);
     await passwordInput.fill(TEST_USER.password);
     await captureScreenshot(page, '03-login-filled');
 
     // Click login button
-    const loginButton = page.locator('button:has-text("Sign In"), button:has-text("Login"), button[type="submit"]').first();
+    const loginButton = page
+      .locator(
+        'button:has-text("Sign In"), button:has-text("Login"), button[type="submit"]'
+      )
+      .first();
     await loginButton.click();
 
     // Wait for redirect
-    await page.waitForURL(/\/(dashboard|home|chat|vibe|mission-control)/, { timeout: 15000 });
+    await page.waitForURL(/\/(dashboard|home|chat|vibe|mission-control)/, {
+      timeout: 15000,
+    });
     await waitForPageLoad(page);
     await captureScreenshot(page, '04-after-login');
 
@@ -93,7 +101,9 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     await page.locator('button[type="submit"]').first().click();
 
     // Wait for successful authentication and redirect
-    await page.waitForURL(/\/(dashboard|home|chat|vibe|mission-control)/, { timeout: 15000 });
+    await page.waitForURL(/\/(dashboard|home|chat|vibe|mission-control)/, {
+      timeout: 15000,
+    });
     await waitForPageLoad(page);
 
     // If not already on dashboard, navigate there
@@ -108,7 +118,10 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     expect(page.url()).toContain('/dashboard');
 
     // Check for any text content (more flexible than specific h1/h2)
-    await expect(page.locator('body')).toContainText(/Dashboard|Welcome|Overview/i, { timeout: 10000 });
+    await expect(page.locator('body')).toContainText(
+      /Dashboard|Welcome|Overview/i,
+      { timeout: 10000 }
+    );
 
     console.log('✅ Dashboard loaded successfully');
   });
@@ -129,17 +142,27 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     await captureScreenshot(page, '06-chat-interface');
 
     // Check for chat input
-    const chatInput = page.locator('textarea, input[placeholder*="message" i], input[placeholder*="type" i], [contenteditable="true"]').first();
+    const chatInput = page
+      .locator(
+        'textarea, input[placeholder*="message" i], input[placeholder*="type" i], [contenteditable="true"]'
+      )
+      .first();
 
     if (await chatInput.isVisible()) {
       console.log('✅ Chat input found');
 
       // Type a test message
-      await chatInput.fill('Hello! This is an automated test. Can you help me understand your capabilities?');
+      await chatInput.fill(
+        'Hello! This is an automated test. Can you help me understand your capabilities?'
+      );
       await captureScreenshot(page, '07-chat-message-typed');
 
       // Try to find and click send button
-      const sendButton = page.locator('button:has-text("Send"), button[type="submit"], button:has([class*="send" i])').first();
+      const sendButton = page
+        .locator(
+          'button:has-text("Send"), button[type="submit"], button:has([class*="send" i])'
+        )
+        .first();
 
       if (await sendButton.isVisible({ timeout: 2000 }).catch(() => false)) {
         await sendButton.click();
@@ -154,10 +177,14 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
         const messageCount = await messageList.count();
         console.log(`📊 Messages visible: ${messageCount}`);
       } else {
-        console.log('⚠️ Send button not found - chat may use different submission method');
+        console.log(
+          '⚠️ Send button not found - chat may use different submission method'
+        );
       }
     } else {
-      console.log('⚠️ Chat input not immediately visible - may need employee selection first');
+      console.log(
+        '⚠️ Chat input not immediately visible - may need employee selection first'
+      );
       await captureScreenshot(page, '06b-chat-no-input');
     }
 
@@ -180,27 +207,35 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     await captureScreenshot(page, '09-vibe-interface');
 
     // Check for VIBE-specific elements
-    const vibeLayout = page.locator('[class*="vibe"], [class*="agent"], [class*="workspace"]').first();
+    const vibeLayout = page
+      .locator('[class*="vibe"], [class*="agent"], [class*="workspace"]')
+      .first();
 
     if (await vibeLayout.isVisible({ timeout: 5000 }).catch(() => false)) {
       console.log('✅ VIBE workspace loaded');
 
       // Look for agent panel
-      const agentPanel = page.locator('[class*="agent-panel"], [class*="agent-status"]').first();
+      const agentPanel = page
+        .locator('[class*="agent-panel"], [class*="agent-status"]')
+        .first();
       if (await agentPanel.isVisible({ timeout: 2000 }).catch(() => false)) {
         console.log('✅ Agent panel visible');
         await captureScreenshot(page, '10-vibe-agent-panel');
       }
 
       // Look for editor/output views
-      const editorView = page.locator('[class*="editor"], [class*="monaco"]').first();
+      const editorView = page
+        .locator('[class*="editor"], [class*="monaco"]')
+        .first();
       if (await editorView.isVisible({ timeout: 2000 }).catch(() => false)) {
         console.log('✅ Editor view visible');
         await captureScreenshot(page, '11-vibe-editor');
       }
 
       // Look for message input
-      const vibeInput = page.locator('textarea, input[placeholder*="message" i]').first();
+      const vibeInput = page
+        .locator('textarea, input[placeholder*="message" i]')
+        .first();
       if (await vibeInput.isVisible({ timeout: 2000 }).catch(() => false)) {
         console.log('✅ VIBE input found');
 
@@ -209,7 +244,9 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
         await captureScreenshot(page, '12-vibe-message-typed');
 
         // Try to send
-        const sendButton = page.locator('button:has-text("Send"), button[type="submit"]').first();
+        const sendButton = page
+          .locator('button:has-text("Send"), button[type="submit"]')
+          .first();
         if (await sendButton.isVisible({ timeout: 2000 }).catch(() => false)) {
           await sendButton.click();
           console.log('✅ VIBE message sent');
@@ -224,7 +261,9 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
 
       // Check if redirected to workforce (no agents hired)
       if (page.url().includes('/workforce')) {
-        console.log('ℹ️ Redirected to workforce - may need to hire agents first');
+        console.log(
+          'ℹ️ Redirected to workforce - may need to hire agents first'
+        );
         await captureScreenshot(page, '09b-vibe-redirect-workforce');
       }
     }
@@ -256,7 +295,9 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
       console.log('✅ Marketplace loaded with employees');
 
       // Scroll to see more
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
+      await page.evaluate(() =>
+        window.scrollTo(0, document.body.scrollHeight / 2)
+      );
       await page.waitForTimeout(1000);
       await captureScreenshot(page, '15-marketplace-scrolled');
     } else {
@@ -266,7 +307,9 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     console.log('✅ Marketplace test completed');
   });
 
-  test('7. Mission Control - Test orchestration dashboard', async ({ page }) => {
+  test('7. Mission Control - Test orchestration dashboard', async ({
+    page,
+  }) => {
     console.log('\n🧪 TEST 7: Mission Control');
 
     // Login
@@ -282,19 +325,25 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     await captureScreenshot(page, '16-mission-control');
 
     // Check for mission control elements
-    const missionLayout = page.locator('[class*="mission"], [class*="orchestrat"]').first();
+    const missionLayout = page
+      .locator('[class*="mission"], [class*="orchestrat"]')
+      .first();
 
     if (await missionLayout.isVisible({ timeout: 5000 }).catch(() => false)) {
       console.log('✅ Mission Control loaded');
 
       // Look for activity log
-      const activityLog = page.locator('[class*="activity"], [class*="log"]').first();
+      const activityLog = page
+        .locator('[class*="activity"], [class*="log"]')
+        .first();
       if (await activityLog.isVisible({ timeout: 2000 }).catch(() => false)) {
         console.log('✅ Activity log visible');
       }
 
       // Look for employee panel
-      const employeePanel = page.locator('[class*="employee"], [class*="status"]').first();
+      const employeePanel = page
+        .locator('[class*="employee"], [class*="status"]')
+        .first();
       if (await employeePanel.isVisible({ timeout: 2000 }).catch(() => false)) {
         console.log('✅ Employee panel visible');
       }
@@ -344,12 +393,20 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     await captureScreenshot(page, '18-main-navigation');
 
     // Find navigation links
-    const navLinks = page.locator('nav a, [class*="nav"] a, [class*="sidebar"] a');
+    const navLinks = page.locator(
+      'nav a, [class*="nav"] a, [class*="sidebar"] a'
+    );
     const linkCount = await navLinks.count();
     console.log(`📊 Navigation links found: ${linkCount}`);
 
     // Test a few key links
-    const testLinks = ['Dashboard', 'Chat', 'VIBE', 'Marketplace', 'Mission Control'];
+    const testLinks = [
+      'Dashboard',
+      'Chat',
+      'VIBE',
+      'Marketplace',
+      'Mission Control',
+    ];
 
     for (const linkText of testLinks) {
       const link = page.locator(`a:has-text("${linkText}")`).first();
@@ -380,7 +437,11 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     await captureScreenshot(page, '19-mobile-view');
 
     // Test mobile navigation
-    const hamburger = page.locator('button[class*="hamburger"], button[class*="menu"], [class*="mobile-menu"]').first();
+    const hamburger = page
+      .locator(
+        'button[class*="hamburger"], button[class*="menu"], [class*="mobile-menu"]'
+      )
+      .first();
     if (await hamburger.isVisible({ timeout: 2000 }).catch(() => false)) {
       console.log('✅ Mobile menu button found');
       await hamburger.click();

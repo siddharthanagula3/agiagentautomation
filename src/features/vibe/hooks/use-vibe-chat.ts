@@ -35,10 +35,7 @@ export interface UseVibeChatReturn {
   error: string | null;
 
   // Message actions
-  sendMessage: (
-    message: string,
-    options?: SendMessageOptions
-  ) => Promise<void>;
+  sendMessage: (message: string, options?: SendMessageOptions) => Promise<void>;
   regenerateLastMessage: () => Promise<void>;
   editMessage: (messageId: string, newContent: string) => Promise<void>;
   deleteMessage: (messageId: string) => void;
@@ -83,10 +80,12 @@ export interface UseVibeChatReturn {
  * };
  * ```
  */
-export function useVibeChat(
-  options: UseVibeChatOptions
-): UseVibeChatReturn {
-  const { employees, sessionId: initialSessionId, enableAutoSave = true } = options;
+export function useVibeChat(options: UseVibeChatOptions): UseVibeChatReturn {
+  const {
+    employees,
+    sessionId: initialSessionId,
+    enableAutoSave = true,
+  } = options;
 
   // Chat store
   const {
@@ -137,7 +136,12 @@ export function useVibeChat(
     };
 
     initSession();
-  }, [initialSessionId, currentSessionId, createNewSession, loadSessionInStore]);
+  }, [
+    initialSessionId,
+    currentSessionId,
+    createNewSession,
+    loadSessionInStore,
+  ]);
 
   /**
    * Add employees to active agents on mount

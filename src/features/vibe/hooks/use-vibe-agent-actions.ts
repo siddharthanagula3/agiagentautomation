@@ -107,7 +107,8 @@ export function useVibeAgentActions(
       setActions(loadedActions);
 
       // Calculate stats
-      const actionStats = await VibeAgentActionService.getActionStats(sessionId);
+      const actionStats =
+        await VibeAgentActionService.getActionStats(sessionId);
       setStats(actionStats);
     } catch (err) {
       const error =

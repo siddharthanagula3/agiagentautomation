@@ -20,7 +20,12 @@ import { cn } from '@shared/lib/utils';
 const viewportSizes = {
   desktop: { width: '100%', height: '100%', icon: Monitor, label: 'Desktop' },
   tablet: { width: '768px', height: '1024px', icon: Tablet, label: 'Tablet' },
-  mobile: { width: '375px', height: '667px', icon: Smartphone, label: 'Mobile' },
+  mobile: {
+    width: '375px',
+    height: '667px',
+    icon: Smartphone,
+    label: 'Mobile',
+  },
 };
 
 export function AppViewerView() {
@@ -45,9 +50,9 @@ export function AppViewerView() {
   const currentViewport = viewportSizes[appViewerState.viewport];
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="flex h-full flex-col bg-background">
       {/* Toolbar */}
-      <div className="p-3 border-b border-gray-200 dark:border-gray-800 space-y-3">
+      <div className="space-y-3 border-b border-gray-200 p-3 dark:border-gray-800">
         {/* Viewport Controls */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -56,12 +61,14 @@ export function AppViewerView() {
               return (
                 <Button
                   key={key}
-                  variant={appViewerState.viewport === key ? 'default' : 'ghost'}
+                  variant={
+                    appViewerState.viewport === key ? 'default' : 'ghost'
+                  }
                   size="sm"
                   onClick={() => setViewport(key as any)}
                   className="h-8"
                 >
-                  <Icon className="w-4 h-4 mr-1.5" />
+                  <Icon className="mr-1.5 h-4 w-4" />
                   {config.label}
                 </Button>
               );
@@ -77,7 +84,7 @@ export function AppViewerView() {
               className="h-8"
             >
               <RefreshCw
-                className={cn('w-4 h-4', isRefreshing && 'animate-spin')}
+                className={cn('h-4 w-4', isRefreshing && 'animate-spin')}
               />
             </Button>
             {previewUrl !== 'about:blank' && (
@@ -87,7 +94,7 @@ export function AppViewerView() {
                 onClick={() => window.open(previewUrl, '_blank')}
                 className="h-8"
               >
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="h-4 w-4" />
               </Button>
             )}
           </div>
@@ -101,7 +108,7 @@ export function AppViewerView() {
             onChange={(e) => setCustomUrl(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleLoadUrl()}
             placeholder="Enter URL to preview (e.g., http://localhost:3000)"
-            className="flex-1 px-3 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+            className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <Button size="sm" onClick={handleLoadUrl} className="h-8">
             Load
@@ -122,10 +129,10 @@ export function AppViewerView() {
       {/* Preview Area */}
       <div className="flex-1 overflow-auto bg-muted/30 p-4">
         {previewUrl === 'about:blank' ? (
-          <div className="h-full flex items-center justify-center text-center">
+          <div className="flex h-full items-center justify-center text-center">
             <div>
-              <Monitor className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-              <p className="text-sm text-muted-foreground mb-2">
+              <Monitor className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
+              <p className="mb-2 text-sm text-muted-foreground">
                 No preview available
               </p>
               <p className="text-xs text-muted-foreground">
@@ -134,9 +141,9 @@ export function AppViewerView() {
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex h-full items-center justify-center">
             <div
-              className="bg-background rounded-lg shadow-lg overflow-hidden transition-all duration-300"
+              className="overflow-hidden rounded-lg bg-background shadow-lg transition-all duration-300"
               style={{
                 width: currentViewport.width,
                 height: currentViewport.height,
@@ -145,14 +152,14 @@ export function AppViewerView() {
               }}
             >
               {appViewerState.isLoading && (
-                <div className="h-full flex items-center justify-center">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <div className="flex h-full items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               )}
               <iframe
                 key={isRefreshing ? Date.now() : previewUrl}
                 src={previewUrl}
-                className="w-full h-full border-0"
+                className="h-full w-full border-0"
                 title="App Preview"
                 sandbox="allow-scripts allow-same-origin allow-forms"
                 onLoad={() => {

@@ -55,21 +55,23 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       exit={{ opacity: 0, y: 10 }}
       className={className}
     >
-      <Card className={cn('overflow-hidden', isExpanded && 'fixed inset-4 z-50')}>
+      <Card
+        className={cn('overflow-hidden', isExpanded && 'fixed inset-4 z-50')}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             {/* File Icon */}
             <FileTypeIcon type={fileType} className="h-5 w-5 flex-shrink-0" />
 
             {/* File Info */}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{file.name}</p>
-              <div className="flex items-center gap-2 mt-0.5">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">{file.name}</p>
+              <div className="mt-0.5 flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">
                   {formatFileSize(file.size)}
                 </span>
-                <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
+                <Badge variant="secondary" className="h-5 px-1.5 py-0 text-xs">
                   {getFileExtension(file.name)}
                 </Badge>
               </div>
@@ -77,7 +79,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex flex-shrink-0 items-center gap-1">
             {onDownload && (
               <Button variant="ghost" size="sm" onClick={onDownload}>
                 <Download className="h-4 w-4" />
@@ -127,7 +129,7 @@ function renderPreview(
   switch (fileType) {
     case 'image':
       return (
-        <div className="flex items-center justify-center p-4 bg-muted/20">
+        <div className="flex items-center justify-center bg-muted/20 p-4">
           <img
             src={file.url}
             alt={file.name}
@@ -142,7 +144,7 @@ function renderPreview(
     case 'code':
       return (
         <ScrollArea className="h-full">
-          <pre className="p-4 text-xs font-mono">
+          <pre className="p-4 font-mono text-xs">
             <code>{file.content || 'Loading...'}</code>
           </pre>
         </ScrollArea>
@@ -151,7 +153,7 @@ function renderPreview(
     case 'text':
       return (
         <ScrollArea className="h-full">
-          <div className="p-4 text-sm whitespace-pre-wrap">
+          <div className="whitespace-pre-wrap p-4 text-sm">
             {file.content || 'Loading...'}
           </div>
         </ScrollArea>
@@ -161,7 +163,7 @@ function renderPreview(
       return file.url ? (
         <iframe
           src={file.url}
-          className="w-full h-full border-0"
+          className="h-full w-full border-0"
           title={file.name}
         />
       ) : (
@@ -197,9 +199,9 @@ const PreviewPlaceholder: React.FC<PreviewPlaceholderProps> = ({
   message,
   action,
 }) => (
-  <div className="flex flex-col items-center justify-center p-8 text-center h-full min-h-[200px]">
-    <Icon className="h-12 w-12 text-muted-foreground mb-3" />
-    <p className="text-sm font-medium mb-1">{message}</p>
+  <div className="flex h-full min-h-[200px] flex-col items-center justify-center p-8 text-center">
+    <Icon className="mb-3 h-12 w-12 text-muted-foreground" />
+    <p className="mb-1 text-sm font-medium">{message}</p>
     {action && <p className="text-xs text-muted-foreground">{action}</p>}
   </div>
 );
@@ -242,7 +244,27 @@ function getFileType(filename: string, mimeType: string): string {
 
   // Code types
   if (
-    ['js', 'ts', 'jsx', 'tsx', 'py', 'java', 'cpp', 'c', 'go', 'rs', 'rb', 'php', 'html', 'css', 'scss', 'json', 'xml', 'yaml', 'yml'].includes(ext)
+    [
+      'js',
+      'ts',
+      'jsx',
+      'tsx',
+      'py',
+      'java',
+      'cpp',
+      'c',
+      'go',
+      'rs',
+      'rb',
+      'php',
+      'html',
+      'css',
+      'scss',
+      'json',
+      'xml',
+      'yaml',
+      'yml',
+    ].includes(ext)
   ) {
     return 'code';
   }

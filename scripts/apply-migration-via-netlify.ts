@@ -88,11 +88,15 @@ async function applyMigration() {
       console.log(JSON.stringify(schemaResult, null, 2));
 
       // Check if user_id column exists
-      const hasUserId = schemaResult.some((col: any) => col.column_name === 'user_id');
+      const hasUserId = schemaResult.some(
+        (col: any) => col.column_name === 'user_id'
+      );
       if (hasUserId) {
         console.log('\n✅ user_id column confirmed in vibe_messages table');
       } else {
-        console.log('\n⚠️  user_id column not found - migration may need manual application');
+        console.log(
+          '\n⚠️  user_id column not found - migration may need manual application'
+        );
       }
     }
 
@@ -123,13 +127,14 @@ async function applyMigration() {
     }
 
     console.log('\n✅ Migration complete!');
-
   } catch (error) {
     console.error('\n❌ Migration failed:', error);
     console.error('\n💡 Alternative methods:');
     console.error('   1. Run locally: supabase db reset');
     console.error('   2. Apply via Supabase Dashboard SQL Editor');
-    console.error('   3. Use migration script: tsx scripts/apply-vibe-migration.ts');
+    console.error(
+      '   3. Use migration script: tsx scripts/apply-vibe-migration.ts'
+    );
     process.exit(1);
   }
 }

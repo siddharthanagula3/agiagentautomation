@@ -100,9 +100,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         onFilesSelected(validFiles);
       }
 
-      if (errors.length > 0) {
-        console.warn('File upload errors:', errors);
-      }
+      // Errors are already shown in UI via error messages
     },
     [uploadedFiles.length, maxFiles, maxFileSize, acceptedFileTypes, onFilesSelected]
   );

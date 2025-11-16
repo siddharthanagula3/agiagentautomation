@@ -30,7 +30,7 @@ export interface VibeAgentState {
     progress?: number
   ) => void;
   setPrimaryAgent: (employee: AIEmployee) => void;
-  setS upervisorMode: (
+  setSupervisorMode: (
     isEnabled: boolean,
     supervisor?: AIEmployee
   ) => void;

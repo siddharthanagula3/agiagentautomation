@@ -116,9 +116,7 @@ const ChatPage: React.FC = () => {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMode, setSelectedMode] = useState<ChatMode>('team');
-  // Model is automatically selected by intelligent agent router
-  const selectedModel = 'claude-sonnet-4.5'; // Default model for general use
-  const temperature = 0.7; // Balanced temperature for most use cases
+  // Models are automatically managed by AI employees - each employee uses their configured model
   const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
   const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [warningThreshold, setWarningThreshold] = useState<85 | 95>(85);
@@ -161,7 +159,6 @@ const ChatPage: React.FC = () => {
     content: string,
     options?: {
       attachments?: File[];
-      model?: string;
       employees?: string[];
     }
   ) => {
@@ -172,8 +169,7 @@ const ChatPage: React.FC = () => {
         content,
         attachments: options?.attachments,
         mode: selectedMode,
-        model: options?.model || selectedModel,
-        temperature,
+        // Model selection removed - AI employees use their configured models
         tools: availableTools,
       });
     } catch (error) {

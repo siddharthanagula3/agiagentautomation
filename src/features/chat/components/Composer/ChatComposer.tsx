@@ -133,7 +133,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   const navigate = useNavigate();
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
-  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODELS[2].id); // Claude Sonnet 4.5 Thinking
+  // Model selection removed - AI employees use their own configured models
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([
     'auto',
   ]);
@@ -159,7 +159,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
     try {
       await onSendMessage(message, {
         attachments,
-        model: selectedModel,
+        // Model selection removed - AI employees use their own configured models
         employees: selectedEmployees,
       });
       setMessage('');
@@ -209,12 +209,9 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
     }, 100);
   };
 
-  const selectedModel_ =
-    availableModels.find((m) => m.id === selectedModel) || availableModels[0];
-
   return (
     <div className="space-y-3 rounded-lg border border-border bg-background p-4 shadow-sm">
-      {/* Top Bar: Model + Employee Selection */}
+      {/* Top Bar: Employee Selection */}
       <div className="flex items-center gap-2">
         {/* Prompt Shortcuts Button */}
         <Popover
@@ -237,48 +234,6 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             <PromptShortcuts onSelectPrompt={handleSelectPrompt} />
           </PopoverContent>
         </Popover>
-
-        {/* Model Selector */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 gap-2 text-xs"
-              disabled={isLoading}
-            >
-              <Sparkles className="h-3 w-3" />
-              <span className="hidden sm:inline">{selectedModel_.name}</span>
-              <span className="sm:hidden">{selectedModel_.provider}</span>
-              <ChevronDown className="h-3 w-3 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-64">
-            <DropdownMenuLabel className="text-xs">
-              Select AI Model
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {availableModels.map((model) => (
-              <DropdownMenuItem
-                key={model.id}
-                onClick={() => setSelectedModel(model.id)}
-                className="flex flex-col items-start gap-1 p-3"
-              >
-                <div className="flex w-full items-center justify-between">
-                  <span className="font-medium">{model.name}</span>
-                  {model.recommended && (
-                    <Badge variant="secondary" className="text-[10px]">
-                      {model.recommended}
-                    </Badge>
-                  )}
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {model.description}
-                </span>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
 
         {/* Employee Selector - Avatar Chips */}
         <div className="flex flex-1 items-center gap-2 overflow-x-auto">

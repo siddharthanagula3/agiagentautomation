@@ -93,37 +93,45 @@ export class AnthropicProvider {
     userId?: string
   ): Promise<AnthropicResponse> {
     try {
-      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
-      throw new AnthropicError(
-        'Direct Anthropic API calls are disabled for security. Use /.netlify/functions/anthropic-proxy instead.',
-        'DIRECT_API_DISABLED'
-      );
-
       // Convert messages to Anthropic format
       const anthropicMessages = this.convertMessagesToAnthropic(messages);
 
-      // Prepare the request
-      const request: Anthropic.Messages.MessageCreateParams = {
-        model: this.config.model,
-        max_tokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-        messages: anthropicMessages,
-        system: this.config.systemPrompt,
-        tools: this.config.tools.length > 0 ? this.config.tools : undefined,
-      };
+      // SECURITY: Use Netlify proxy to keep API keys secure
+      const proxyUrl = '/.netlify/functions/anthropic-proxy';
 
-      // Make the API call
-      if (!anthropic) {
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: anthropicMessages,
+          model: this.config.model,
+          max_tokens: this.config.maxTokens,
+          temperature: this.config.temperature,
+          system: this.config.systemPrompt,
+          tools: this.config.tools && this.config.tools.length > 0 ? this.config.tools : undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
         throw new AnthropicError(
-          'Anthropic client not initialized. Please check your API key configuration.',
-          'CLIENT_NOT_INITIALIZED'
+          errorData.error || `HTTP error! status: ${response.status}`,
+          `HTTP_${response.status}`,
+          response.status === 429 || response.status === 503
         );
       }
-      const response = await anthropic.messages.create(request);
 
-      // Process the response
-      const content = this.extractContentFromResponse(response);
-      const usage = this.extractUsageFromResponse(response);
+      const data = await response.json();
+
+      // Extract content and usage from proxy response
+      const content = data.content || (Array.isArray(data.content) ? data.content[0]?.text : '');
+      const usage = data.usage ? {
+        inputTokens: data.usage.input_tokens || 0,
+        outputTokens: data.usage.output_tokens || 0,
+        totalTokens: (data.usage.input_tokens || 0) + (data.usage.output_tokens || 0),
+      } : { inputTokens: 0, outputTokens: 0, totalTokens: 0 };
 
       // Save to database
       if (sessionId && userId) {
@@ -136,7 +144,7 @@ export class AnthropicProvider {
             provider: 'anthropic',
             model: this.config.model,
             usage,
-            responseId: response.id,
+            responseId: data.id,
             timestamp: new Date().toISOString(),
           },
         });
@@ -149,9 +157,9 @@ export class AnthropicProvider {
         sessionId,
         userId,
         metadata: {
-          responseId: response.id,
-          stopReason: response.stop_reason,
-          usage: response.usage,
+          responseId: data.id,
+          stopReason: data.stop_reason,
+          usage: data.usage,
         },
       };
     } catch (error) {

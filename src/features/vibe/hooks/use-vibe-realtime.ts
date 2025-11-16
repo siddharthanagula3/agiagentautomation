@@ -95,7 +95,8 @@ export function useVibeRealtime({
   );
 
   useEffect(() => {
-    if (!sessionId) return;
+    // Defensive: Ensure sessionId is a valid string
+    if (!sessionId || typeof sessionId !== 'string') return;
 
     loadInitialFiles(sessionId);
 
@@ -141,7 +142,8 @@ export function useVibeRealtime({
   }, [loadInitialFiles, rebuildTree, removeFileMetadata, sessionId, upsertFileMetadata]);
 
   useEffect(() => {
-    if (!sessionId) return;
+    // Defensive: Ensure sessionId is a valid string
+    if (!sessionId || typeof sessionId !== 'string') return;
 
     const handleCommandAction = (action: VibeAgentActionRow) => {
       if (action.action_type !== 'command_execution') return;
@@ -240,7 +242,11 @@ export function useVibeRealtime({
     updateAppViewerState,
     updateTerminalCommand,
   ]);
-}
+
   useEffect(() => {
-    commandMap.current.clear();
+    // Clear command map when session changes
+    if (sessionId) {
+      commandMap.current.clear();
+    }
   }, [sessionId]);
+}

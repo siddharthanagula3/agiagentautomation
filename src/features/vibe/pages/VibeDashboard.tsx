@@ -240,7 +240,7 @@ const VibeDashboard: React.FC = () => {
   );
 
   useVibeRealtime({
-    sessionId: currentSessionId,
+    sessionId: currentSessionId || null,
     onAction: handleAgentAction,
   });
 
@@ -277,17 +277,19 @@ const VibeDashboard: React.FC = () => {
   }, [activeAgent, hiredEmployees]);
 
   useEffect(() => {
-    if (!currentSessionId) return;
+    // Defensive: Ensure sessionId is valid before creating channel
+    const sessionId = currentSessionId;
+    if (!sessionId || typeof sessionId !== 'string') return;
 
     const channel = supabase
-      .channel(`vibe-messages-${currentSessionId}`)
+      .channel(`vibe-messages-${sessionId}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'vibe_messages',
-          filter: `session_id=eq.${currentSessionId}`,
+          filter: `session_id=eq.${sessionId}`,
         },
         (payload) => {
           if (!payload.new) return;
@@ -315,8 +317,12 @@ const VibeDashboard: React.FC = () => {
         return;
       }
 
+      // Defensive: Ensure we have a valid sessionId
       const sessionId = currentSessionId || (await ensureSession());
-      if (!sessionId) return;
+      if (!sessionId || typeof sessionId !== 'string') {
+        toast.error('Unable to send message: Invalid session.');
+        return;
+      }
 
       setIsLoading(true);
       workingStepsMapRef.current.clear();

@@ -40,20 +40,17 @@ export interface UsageMetadata {
 /**
  * Check if user has sufficient tokens for an operation
  * MUST be called BEFORE making any API request
+ * Uses user_token_balances table (correct table)
  */
 export async function checkTokenSufficiency(
   userId: string,
   estimatedTokens: number
 ): Promise<TokenCheckResult> {
   try {
-    // Get user's current token balance
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('token_balance, subscription_tier')
-      .eq('id', userId)
-      .single();
+    // Get user's current token balance from correct table
+    const currentBalance = await getUserTokenBalance(userId);
 
-    if (error || !user) {
+    if (currentBalance === null) {
       return {
         allowed: false,
         currentBalance: 0,
@@ -62,15 +59,13 @@ export async function checkTokenSufficiency(
       };
     }
 
-    const currentBalance = user.token_balance || 0;
-
     // Check if user has sufficient balance
     if (currentBalance < estimatedTokens) {
       return {
         allowed: false,
         currentBalance,
         estimatedCost: estimatedTokens,
-        reason: `Insufficient tokens. Need ${estimatedTokens}, have ${currentBalance}`,
+        reason: `Insufficient tokens. You need ${estimatedTokens.toLocaleString()} tokens, but only have ${currentBalance.toLocaleString()} remaining.`,
       };
     }
 
@@ -152,26 +147,58 @@ export async function deductTokens(
 
 /**
  * Get user's current token balance
+ * Queries user_token_balances table (correct table)
+ * Returns free tier default if no balance record exists
  */
 export async function getUserTokenBalance(
   userId: string
 ): Promise<number | null> {
   try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('token_balance')
-      .eq('id', userId)
+    // Query user_token_balances table (correct table)
+    const { data: balanceData, error: balanceError } = await supabase
+      .from('user_token_balances')
+      .select('current_balance')
+      .eq('user_id', userId)
       .single();
 
-    if (error || !data) {
-      console.error('[Token Enforcement] Error fetching balance:', error);
-      return null;
+    if (balanceError) {
+      console.warn(
+        '[Token Balance] No balance record found, checking user plan...',
+        balanceError.message
+      );
+
+      // Get user's plan to determine appropriate default balance
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('plan')
+        .eq('id', userId)
+        .single();
+
+      if (userError || !userData) {
+        console.error('[Token Balance] Error fetching user plan:', userError);
+        // Default to free tier if we can't determine plan
+        return 1000000; // 1M tokens for free tier
+      }
+
+      const isPro =
+        userData.plan === 'pro' ||
+        userData.plan === 'max' ||
+        userData.plan === 'enterprise';
+      const defaultBalance = isPro ? 10000000 : 1000000; // 10M for pro, 1M for free
+
+      console.log(
+        `[Token Balance] User has no balance record. Plan: ${userData.plan}. Returning default: ${defaultBalance.toLocaleString()}`
+      );
+      return defaultBalance;
     }
 
-    return data.token_balance || 0;
+    const balance = Math.max(balanceData.current_balance || 0, 0);
+    console.log(`[Token Balance] Current balance: ${balance.toLocaleString()}`);
+    return balance;
   } catch (error) {
     console.error('[Token Enforcement] Error:', error);
-    return null;
+    // Return free tier default on error
+    return 1000000;
   }
 }
 
@@ -206,28 +233,38 @@ export async function checkMonthlyAllowance(
   resetDate: Date;
 }> {
   try {
+    // Calculate reset date (first of next month)
+    const now = new Date();
+    const resetDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
     const { data: user, error } = await supabase
       .from('users')
-      .select('subscription_tier')
+      .select('plan')
       .eq('id', userId)
       .single();
 
     if (error || !user) {
+      console.error('[Token Enforcement] Error fetching user:', error);
+      // Return free tier defaults on error
       return {
-        allowed: false,
+        allowed: true, // Allow request but with free tier limits
         used: 0,
-        limit: 0,
-        resetDate: new Date(),
+        limit: 1000000, // Free tier default: 1M tokens/month
+        resetDate,
       };
     }
 
-    // Pro/Max users: unlimited (only limited by token balance)
-    if (user.subscription_tier === 'pro' || user.subscription_tier === 'max') {
+    // Pro/Max/Enterprise users: unlimited monthly (only limited by token balance)
+    if (
+      user.plan === 'pro' ||
+      user.plan === 'max' ||
+      user.plan === 'enterprise'
+    ) {
       return {
         allowed: true,
         used: 0,
         limit: Infinity,
-        resetDate: new Date(),
+        resetDate,
       };
     }
 
@@ -249,14 +286,10 @@ export async function checkMonthlyAllowance(
         txError
       );
       return {
-        allowed: false,
+        allowed: true, // Allow on error to prevent blocking users
         used: 0,
         limit: 1000000,
-        resetDate: new Date(
-          startOfMonth.getFullYear(),
-          startOfMonth.getMonth() + 1,
-          1
-        ),
+        resetDate,
       };
     }
 
@@ -294,12 +327,12 @@ export async function canUserMakeRequest(
   userId: string,
   estimatedTokens: number
 ): Promise<{ allowed: boolean; reason?: string }> {
-  // Check monthly allowance first
+  // Check monthly allowance first (free tier only)
   const allowance = await checkMonthlyAllowance(userId);
   if (!allowance.allowed) {
     return {
       allowed: false,
-      reason: `Monthly limit exceeded. You've used ${allowance.used.toLocaleString()} of ${allowance.limit.toLocaleString()} tokens. Limit resets on ${allowance.resetDate.toLocaleDateString()}.`,
+      reason: `Monthly limit reached. You've used ${allowance.used.toLocaleString()} of your ${allowance.limit.toLocaleString()} token monthly allowance. Limit resets ${allowance.resetDate.toLocaleDateString()}. Upgrade to Pro for unlimited usage.`,
     };
   }
 
@@ -310,7 +343,7 @@ export async function canUserMakeRequest(
       allowed: false,
       reason:
         sufficiency.reason ||
-        `Insufficient tokens. You need ${estimatedTokens.toLocaleString()} tokens, but only have ${sufficiency.currentBalance.toLocaleString()}.`,
+        `Insufficient tokens. You need ${estimatedTokens.toLocaleString()} tokens, but only have ${sufficiency.currentBalance.toLocaleString()} remaining.`,
     };
   }
 

@@ -3,7 +3,7 @@
  * Real-time code display as agents write code
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Editor from '@monaco-editor/react';
 import * as Monaco from 'monaco-editor';
 import { useVibeViewStore } from '../../stores/vibe-view-store';
@@ -20,8 +20,10 @@ import {
   Download,
   Copy,
   Check,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
+import { inferLanguageFromPath } from '../../utils/file-tree';
 
 interface FileTreeItemProps {
   item: {
@@ -97,68 +99,50 @@ function FileTreeItem({ item, level, onFileClick, selectedFile }: FileTreeItemPr
 }
 
 export function EditorView() {
-  const { editorState, openFile, closeFile, setCurrentFile, followingAgent } =
-    useVibeViewStore();
+  const editorState = useVibeViewStore((state) => state.editorState);
+  const openFileInStore = useVibeViewStore((state) => state.openFile);
+  const closeFileInStore = useVibeViewStore((state) => state.closeFile);
+  const setCurrentFile = useVibeViewStore((state) => state.setCurrentFile);
+  const followingAgent = useVibeViewStore((state) => state.followingAgent);
+  const fileTree = useVibeViewStore((state) => state.fileTree);
+  const getFileMetadata = useVibeViewStore((state) => state.getFileMetadata);
+
   const [editorInstance, setEditorInstance] =
     useState<Monaco.editor.IStandaloneCodeEditor | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isFetchingFile, setIsFetchingFile] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Mock file tree - will be replaced with real project structure
-  const [fileTree] = useState([
-    {
-      id: '1',
-      name: 'src',
-      type: 'folder' as const,
-      path: 'src',
-      children: [
-        {
-          id: '2',
-          name: 'components',
-          type: 'folder' as const,
-          path: 'src/components',
-          children: [
-            { id: '3', name: 'App.tsx', type: 'file' as const, path: 'src/components/App.tsx' },
-            {
-              id: '4',
-              name: 'Header.tsx',
-              type: 'file' as const,
-              path: 'src/components/Header.tsx',
-            },
-          ],
-        },
-        { id: '5', name: 'index.tsx', type: 'file' as const, path: 'src/index.tsx' },
-        { id: '6', name: 'App.css', type: 'file' as const, path: 'src/App.css' },
-      ],
+  const handleFileClick = useCallback(
+    async (path: string) => {
+      const metadata = getFileMetadata(path);
+      if (!metadata?.url) {
+        setLoadError('Unable to locate file contents for the selected path.');
+        return;
+      }
+
+      setLoadError(null);
+      setIsFetchingFile(true);
+      try {
+        const response = await fetch(metadata.url);
+        if (!response.ok) {
+          throw new Error(`Unable to load file (${response.status})`);
+        }
+        const content = await response.text();
+        const language =
+          metadata.language || inferLanguageFromPath(metadata.path || path);
+        openFileInStore(path, content, language);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Failed to open file';
+        setLoadError(message);
+        console.error('[VIBE] Failed to open file', error);
+      } finally {
+        setIsFetchingFile(false);
+      }
     },
-    {
-      id: '7',
-      name: 'public',
-      type: 'folder' as const,
-      path: 'public',
-      children: [
-        { id: '8', name: 'index.html', type: 'file' as const, path: 'public/index.html' },
-      ],
-    },
-    { id: '9', name: 'package.json', type: 'file' as const, path: 'package.json' },
-    { id: '10', name: 'README.md', type: 'file' as const, path: 'README.md' },
-  ]);
-
-  const handleFileClick = (path: string) => {
-    // Mock file content - will be replaced with real file loading
-    const mockContent = `// File: ${path}\n// This is a demonstration of the Editor view\n\nfunction example() {\n  console.log("Agent is writing code here...");\n  return "VIBE Editor View";\n}\n\nexport default example;`;
-
-    const language = path.endsWith('.tsx') || path.endsWith('.ts')
-      ? 'typescript'
-      : path.endsWith('.css')
-        ? 'css'
-        : path.endsWith('.html')
-          ? 'html'
-          : path.endsWith('.json')
-            ? 'json'
-            : 'markdown';
-
-    openFile(path, mockContent, language);
-  };
+    [getFileMetadata, openFileInStore]
+  );
 
   const handleCopyCode = async () => {
     if (editorState.content) {
@@ -187,19 +171,31 @@ export function EditorView() {
         <div className="p-3 border-b border-gray-200 dark:border-gray-800">
           <h3 className="text-sm font-semibold">Project Files</h3>
         </div>
-        <ScrollArea className="h-[calc(100%-49px)]">
-          <div className="py-2">
-            {fileTree.map((item) => (
-              <FileTreeItem
-                key={item.id}
-                item={item}
-                level={0}
-                onFileClick={handleFileClick}
-                selectedFile={editorState.currentFile}
-              />
-            ))}
+        {fileTree.length === 0 ? (
+          <div className="h-[calc(100%-49px)] flex items-center justify-center p-4 text-center text-xs text-muted-foreground">
+            <div>
+              <Folder className="w-8 h-8 mx-auto mb-2 opacity-60" />
+              <p>No files yet.</p>
+              <p className="mt-1 opacity-75">
+                Agent-created files will appear here automatically.
+              </p>
+            </div>
           </div>
-        </ScrollArea>
+        ) : (
+          <ScrollArea className="h-[calc(100%-49px)]">
+            <div className="py-2">
+              {fileTree.map((item) => (
+                <FileTreeItem
+                  key={item.id}
+                  item={item}
+                  level={0}
+                  onFileClick={handleFileClick}
+                  selectedFile={editorState.currentFile}
+                />
+              ))}
+            </div>
+          </ScrollArea>
+        )}
       </div>
 
       {/* Editor Area */}
@@ -227,7 +223,7 @@ export function EditorView() {
                   </span>
                 </button>
                 <button
-                  onClick={() => closeFile(file)}
+                  onClick={() => closeFileInStore(file)}
                   className="opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -282,9 +278,23 @@ export function EditorView() {
           </div>
         )}
 
+        {loadError && (
+          <div className="px-4 py-2 text-xs text-destructive bg-destructive/5">
+            {loadError}
+          </div>
+        )}
+
         {/* Monaco Editor */}
         {editorState.currentFile ? (
           <div className="flex-1 relative">
+            {isFetchingFile && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80">
+                <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <span>Loading file…</span>
+                </div>
+              </div>
+            )}
             <Editor
               height="100%"
               language={editorState.language}

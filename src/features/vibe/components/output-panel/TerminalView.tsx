@@ -3,7 +3,7 @@
  * Shows commands run by agents with color-coded output
  */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useVibeViewStore } from '../../stores/vibe-view-store';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { Button } from '@/shared/components/ui/button';
@@ -18,52 +18,30 @@ import {
   XCircle,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
-import { useState } from 'react';
 
 export function TerminalView() {
   const { terminalState, clearTerminalHistory } = useVibeViewStore();
   const [copied, setCopied] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Mock terminal history for demonstration
-  const mockHistory = terminalState.history.length > 0 ? terminalState.history : [
-    {
-      id: '1',
-      command: 'npm install',
-      output: 'added 1247 packages in 12.3s\n\n128 packages are looking for funding',
-      status: 'completed' as const,
-      timestamp: new Date(Date.now() - 120000),
-      exitCode: 0,
-    },
-    {
-      id: '2',
-      command: 'npm run build',
-      output: 'Building for production...\n✓ 1532 modules transformed.\ndist/index.html  1.23 kB │ gzip: 0.54 kB\nbuilt in 8.42s',
-      status: 'completed' as const,
-      timestamp: new Date(Date.now() - 60000),
-      exitCode: 0,
-    },
-    {
-      id: '3',
-      command: 'npm test',
-      output: 'Running tests...\n\n✓ App.test.tsx (2)\n✓ utils.test.ts (5)\n\nTest Files  2 passed (2)\nTests  7 passed (7)\nStart at  10:45:23\nDuration  2.14s',
-      status: 'running' as const,
-      timestamp: new Date(),
-    },
-  ];
+  const history = terminalState.history;
 
   useEffect(() => {
-    // Auto-scroll to bottom when new output arrives
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [mockHistory]);
+  }, [history]);
 
   const handleCopy = async (text: string, id: string) => {
     await navigator.clipboard.writeText(text);
     setCopied(id);
     setTimeout(() => setCopied(null), 2000);
   };
+
+  const successCount = history.filter(
+    (c) => c.status === 'completed' && c.exitCode === 0
+  ).length;
+  const runningCount = history.filter((c) => c.status === 'running').length;
+  const failedCount = history.filter((c) => c.status === 'failed').length;
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -73,14 +51,14 @@ export function TerminalView() {
           <TerminalIcon className="w-4 h-4" />
           <h3 className="font-semibold text-sm">Terminal</h3>
           <Badge variant="secondary" className="text-xs">
-            {mockHistory.length} commands
+            {history.length} commands
           </Badge>
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={clearTerminalHistory}
-          disabled={mockHistory.length === 0}
+          disabled={history.length === 0}
           className="h-8"
         >
           <Trash2 className="w-3.5 h-3.5 mr-1.5" />
@@ -94,7 +72,7 @@ export function TerminalView() {
           ref={scrollRef}
           className="p-4 font-mono text-sm space-y-4 bg-gray-950 text-gray-100"
         >
-          {mockHistory.length === 0 ? (
+          {history.length === 0 ? (
             <div className="flex items-center justify-center h-full text-center py-12">
               <div>
                 <TerminalIcon className="w-12 h-12 text-gray-600 mx-auto mb-3" />
@@ -107,7 +85,7 @@ export function TerminalView() {
               </div>
             </div>
           ) : (
-            mockHistory.map((cmd) => (
+            history.map((cmd) => (
               <div
                 key={cmd.id}
                 className="group border border-gray-800 rounded-lg overflow-hidden hover:border-gray-700 transition-colors"
@@ -115,7 +93,6 @@ export function TerminalView() {
                 {/* Command Header */}
                 <div className="flex items-center justify-between p-3 bg-gray-900 border-b border-gray-800">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    {/* Status Icon */}
                     {cmd.status === 'running' && (
                       <Loader2 className="w-4 h-4 text-blue-400 animate-spin shrink-0" />
                     )}
@@ -125,19 +102,11 @@ export function TerminalView() {
                     {cmd.status === 'failed' && (
                       <XCircle className="w-4 h-4 text-red-400 shrink-0" />
                     )}
-
-                    {/* Command */}
-                    <span className="text-blue-400 truncate">
-                      $ {cmd.command}
-                    </span>
-
-                    {/* Timestamp */}
+                    <span className="text-blue-400 truncate">$ {cmd.command}</span>
                     <span className="text-xs text-gray-500 shrink-0">
                       {cmd.timestamp.toLocaleTimeString()}
                     </span>
                   </div>
-
-                  {/* Copy Button */}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -157,8 +126,6 @@ export function TerminalView() {
                   <pre className="whitespace-pre-wrap text-xs text-gray-300 leading-relaxed">
                     {cmd.output}
                   </pre>
-
-                  {/* Exit Code */}
                   {cmd.status === 'completed' && cmd.exitCode !== undefined && (
                     <div className="mt-2 pt-2 border-t border-gray-800">
                       <span
@@ -182,21 +149,15 @@ export function TerminalView() {
       <div className="p-3 border-t border-gray-200 dark:border-gray-800 bg-muted/30">
         <div className="grid grid-cols-3 gap-4 text-center text-xs">
           <div>
-            <div className="text-lg font-bold text-green-600">
-              {mockHistory.filter((c) => c.status === 'completed' && c.exitCode === 0).length}
-            </div>
+            <div className="text-lg font-bold text-green-600">{successCount}</div>
             <div className="text-muted-foreground">Success</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-blue-600">
-              {mockHistory.filter((c) => c.status === 'running').length}
-            </div>
+            <div className="text-lg font-bold text-blue-600">{runningCount}</div>
             <div className="text-muted-foreground">Running</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-red-600">
-              {mockHistory.filter((c) => c.status === 'failed').length}
-            </div>
+            <div className="text-lg font-bold text-red-600">{failedCount}</div>
             <div className="text-muted-foreground">Failed</div>
           </div>
         </div>

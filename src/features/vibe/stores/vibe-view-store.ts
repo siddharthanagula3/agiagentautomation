@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-export type ViewMode = 'chat' | 'editor' | 'planner' | 'app-viewer' | 'terminal' | 'file-tree';
+export type ViewMode = 'editor' | 'app-viewer';
 
 export interface EditorState {
   currentFile: string | null;
@@ -55,6 +55,19 @@ export interface FileTreeItem {
   children?: FileTreeItem[];
   size?: number;
   modified?: Date;
+  metadata?: Record<string, any>;
+}
+
+export interface FileMetadata {
+  id: string;
+  name: string;
+  path: string;
+  url: string;
+  size?: number;
+  uploadedAt?: Date;
+  modifiedAt?: Date;
+  language?: string;
+  [key: string]: unknown;
 }
 
 interface VibeViewStore {
@@ -85,7 +98,7 @@ interface VibeViewStore {
 
   // Terminal state
   terminalState: TerminalState;
-  addTerminalCommand: (command: Omit<TerminalCommand, 'id' | 'timestamp'>) => void;
+  addTerminalCommand: (command: Omit<TerminalCommand, 'id' | 'timestamp'>) => string;
   updateTerminalCommand: (id: string, updates: Partial<TerminalCommand>) => void;
   clearTerminalHistory: () => void;
 
@@ -107,13 +120,18 @@ interface VibeViewStore {
   setFileTree: (tree: FileTreeItem[]) => void;
   expandFolder: (folderId: string) => void;
   collapseFolder: (folderId: string) => void;
+  fileMetadata: Map<string, FileMetadata>;
+  setFileMetadata: (metadata: FileMetadata[]) => void;
+  upsertFileMetadata: (metadata: FileMetadata) => void;
+  removeFileMetadata: (path: string) => void;
+  getFileMetadata: (path: string) => FileMetadata | undefined;
 
   // Reset all state
   resetViewState: () => void;
 }
 
 const initialState = {
-  activeView: 'chat' as ViewMode,
+  activeView: 'editor' as ViewMode,
   splitLayout: {
     leftWidth: 40,
     rightWidth: 60,
@@ -140,6 +158,7 @@ const initialState = {
     currentTaskId: null,
   },
   fileTree: [],
+  fileMetadata: new Map<string, FileMetadata>(),
 };
 
 export const useVibeViewStore = create<VibeViewStore>()(
@@ -202,15 +221,20 @@ export const useVibeViewStore = create<VibeViewStore>()(
     }),
 
     // Terminal state
-    addTerminalCommand: (command) => set((state) => {
-      const newCommand: TerminalCommand = {
-        ...command,
-        id: crypto.randomUUID(),
-        timestamp: new Date(),
-      };
-      state.terminalState.history.push(newCommand);
-      state.terminalState.activeCommand = newCommand.id;
-    }),
+    addTerminalCommand: (command) => {
+      let commandId = '';
+      set((state) => {
+        const newCommand: TerminalCommand = {
+          ...command,
+          id: crypto.randomUUID(),
+          timestamp: new Date(),
+        };
+        commandId = newCommand.id;
+        state.terminalState.history.push(newCommand);
+        state.terminalState.activeCommand = newCommand.id;
+      });
+      return commandId;
+    },
 
     updateTerminalCommand: (id, updates) => set((state) => {
       const command = state.terminalState.history.find((c) => c.id === id);
@@ -275,7 +299,29 @@ export const useVibeViewStore = create<VibeViewStore>()(
       // Implementation for collapsing folders in tree
     }),
 
+    setFileMetadata: (metadata) => set((state) => {
+      state.fileMetadata = new Map(
+        metadata.map((entry) => [entry.path, entry])
+      );
+    }),
+
+    upsertFileMetadata: (metadata) => set((state) => {
+      state.fileMetadata.set(metadata.path, metadata);
+    }),
+
+    removeFileMetadata: (path) => set((state) => {
+      state.fileMetadata.delete(path);
+    }),
+
+    getFileMetadata: (path) => {
+      return get().fileMetadata.get(path);
+    },
+
     // Reset
-    resetViewState: () => set(() => ({ ...initialState })),
+    resetViewState: () =>
+      set(() => ({
+        ...initialState,
+        fileMetadata: new Map<string, FileMetadata>(),
+      })),
   }))
 );

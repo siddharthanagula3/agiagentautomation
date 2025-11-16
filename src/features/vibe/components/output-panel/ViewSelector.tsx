@@ -6,16 +6,7 @@
 import React from 'react';
 import { useVibeViewStore, type ViewMode } from '../../stores/vibe-view-store';
 import { Badge } from '@/shared/components/ui/badge';
-import {
-  MessageSquare,
-  Code2,
-  ListChecks,
-  Monitor,
-  Terminal,
-  FolderTree,
-  Eye,
-  EyeOff,
-} from 'lucide-react';
+import { Code2, Monitor, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 
 interface ViewTab {
@@ -26,12 +17,8 @@ interface ViewTab {
 }
 
 const viewTabs: ViewTab[] = [
-  { id: 'chat', label: 'Chat', icon: MessageSquare },
   { id: 'editor', label: 'Editor', icon: Code2 },
-  { id: 'planner', label: 'Planner', icon: ListChecks },
   { id: 'app-viewer', label: 'App Viewer', icon: Monitor },
-  { id: 'terminal', label: 'Terminal', icon: Terminal },
-  { id: 'file-tree', label: 'Files', icon: FolderTree },
 ];
 
 export function ViewSelector() {

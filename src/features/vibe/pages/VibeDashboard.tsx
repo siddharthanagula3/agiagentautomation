@@ -1,14 +1,9 @@
-/**
- * VibeDashboard - MGX-Inspired Multi-Agent Workspace
- *
- * Features:
- * - Standalone layout (no main sidebar)
- * - Split view (agent panel + output views)
- * - Real-time agent work visualization
- * - Multi-view system (Chat/Editor/Planner/App Viewer/Terminal/File Tree)
- */
-
-import React, { useEffect, useState } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { useWorkforceStore } from '@shared/stores/employee-management-store';
@@ -20,37 +15,40 @@ import { AgentPanel } from '../components/agent-panel/AgentPanel';
 import { VibeMessageInput } from '../components/input/VibeMessageInput';
 import { ViewSelector } from '../components/output-panel/ViewSelector';
 import { EditorView } from '../components/output-panel/EditorView';
-import { PlannerView } from '../components/output-panel/PlannerView';
 import { AppViewerView } from '../components/output-panel/AppViewerView';
-import { TerminalView } from '../components/output-panel/TerminalView';
-import { FileTreeView } from '../components/output-panel/FileTreeView';
-import { AgentMessageList } from '../components/agent-panel/AgentMessageList';
 import { Loader2 } from 'lucide-react';
 import type { AgentStatus } from '../components/agent-panel/AgentStatusCard';
 import type { WorkingStep } from '../components/agent-panel/WorkingProcessSection';
 import type { AgentMessage } from '../components/agent-panel/AgentMessageList';
+import { supabase } from '@shared/lib/supabase-client';
+import { workforceOrchestratorRefactored } from '@core/ai/orchestration/workforce-orchestrator';
+import { useVibeRealtime, type VibeAgentActionRow } from '../hooks/use-vibe-realtime';
+import { VibeMessageService } from '../services/vibe-message-service';
+import { toast } from 'sonner';
 
-// Output Panel with View Switching
-const OutputPanel = ({ messages }: { messages: AgentMessage[] }) => {
+interface VibeMessageRow {
+  id: string;
+  session_id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  user_id?: string | null;
+  employee_id?: string | null;
+  employee_name?: string | null;
+  employee_role?: string | null;
+  timestamp?: string | null;
+  metadata?: Record<string, any> | null;
+  is_streaming?: boolean | null;
+}
+
+const OutputPanel = () => {
   const { activeView } = useVibeViewStore();
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* View Selector Tabs */}
       <ViewSelector />
-
-      {/* View Content */}
       <div className="flex-1 overflow-hidden">
-        {activeView === 'chat' && (
-          <div className="h-full">
-            <AgentMessageList messages={messages} />
-          </div>
-        )}
         {activeView === 'editor' && <EditorView />}
-        {activeView === 'planner' && <PlannerView />}
         {activeView === 'app-viewer' && <AppViewerView />}
-        {activeView === 'terminal' && <TerminalView />}
-        {activeView === 'file-tree' && <FileTreeView />}
       </div>
     </div>
   );
@@ -60,24 +58,202 @@ const VibeDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { hiredEmployees } = useWorkforceStore();
-  const { currentSessionId, createNewSession, addMessage } = useVibeChatStore();
+  const { currentSessionId, setCurrentSession } = useVibeChatStore();
 
-  // Mock state for demonstration
   const [activeAgent, setActiveAgent] = useState<AgentStatus | null>(null);
   const [workingSteps, setWorkingSteps] = useState<WorkingStep[]>([]);
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // Check if user is authenticated
-    if (!user) {
-      navigate('/login', {
-        state: { from: '/vibe' },
+  const messageIdsRef = useRef<Set<string>>(new Set());
+  const messagesRef = useRef<AgentMessage[]>([]);
+  const workingStepsMapRef = useRef<Map<string, WorkingStep>>(new Map());
+
+  const mapRowToMessage = useCallback((row: VibeMessageRow): AgentMessage => {
+    return {
+      id: row.id,
+      role: row.role,
+      content: row.content,
+      agentName: row.employee_name || undefined,
+      agentRole: row.employee_role || undefined,
+      timestamp: row.timestamp ? new Date(row.timestamp) : new Date(),
+      isStreaming: Boolean(row.metadata?.is_streaming),
+    };
+  }, []);
+
+  const upsertMessage = useCallback((message: AgentMessage) => {
+    messageIdsRef.current.add(message.id);
+    setMessages((prev) => {
+      const index = prev.findIndex((item) => item.id === message.id);
+      if (index === -1) {
+        const next = [...prev, message];
+        next.sort(
+          (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+        );
+        return next;
+      }
+      const next = [...prev];
+      next[index] = message;
+      return next;
+    });
+  }, []);
+
+  const loadMessages = useCallback(
+    async (sessionId: string) => {
+      try {
+        const messages = await VibeMessageService.getMessages(sessionId);
+        const mapped = messages.map((msg) => ({
+          id: msg.id,
+          role: msg.role,
+          content: msg.content,
+          agentName: msg.employee_name || undefined,
+          agentRole: msg.employee_role || undefined,
+          timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+          isStreaming: Boolean(msg.is_streaming),
+        }));
+        messageIdsRef.current = new Set(mapped.map((msg) => msg.id));
+        setMessages(mapped);
+      } catch (error) {
+        console.error('[VIBE] Failed to load messages', error);
+        toast.error('Failed to load VIBE history.');
+      }
+    },
+    []
+  );
+
+  const ensureSession = useCallback(async () => {
+    if (currentSessionId) {
+      return currentSessionId;
+    }
+    if (!user) return null;
+
+    try {
+      const { data, error } = await supabase
+        .from('vibe_sessions')
+        .select('id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      let sessionId = data?.id;
+
+      if (!sessionId) {
+        const { data: inserted, error: insertError } = await supabase
+          .from('vibe_sessions')
+          .insert({ user_id: user.id, title: 'VIBE Session' })
+          .select('id')
+          .single();
+
+        if (insertError) throw insertError;
+        sessionId = inserted.id;
+      }
+
+      setCurrentSession(sessionId);
+      await loadMessages(sessionId);
+      return sessionId;
+    } catch (error) {
+      console.error('[VIBE] Failed to initialize session', error);
+      toast.error('Unable to initialize VIBE session.');
+      return null;
+    }
+  }, [currentSessionId, loadMessages, setCurrentSession, user]);
+
+  const streamAssistantResponse = useCallback(
+    async (messageId: string, fullContent: string) => {
+      const chunks = fullContent.split(/(\s+)/).filter((part) => part.length);
+      for (const chunk of chunks) {
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === messageId
+              ? {
+                  ...message,
+                  content: `${message.content || ''}${chunk}`,
+                }
+              : message
+          )
+        );
+        await new Promise((resolve) => setTimeout(resolve, 40));
+      }
+
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === messageId ? { ...message, isStreaming: false } : message
+        )
+      );
+    },
+    []
+  );
+
+  const handleAgentAction = useCallback(
+    (action: VibeAgentActionRow) => {
+      const status: WorkingStep['status'] =
+        action.status === 'failed'
+          ? 'failed'
+          : action.status === 'completed'
+          ? 'completed'
+          : 'in_progress';
+
+      const description =
+        action.metadata?.summary ||
+        action.metadata?.description ||
+        action.metadata?.command ||
+        `${action.agent_name} ${action.action_type.replace(/_/g, ' ')}`;
+
+      workingStepsMapRef.current.set(action.id, {
+        id: action.id,
+        description,
+        status,
+        timestamp: action.timestamp ? new Date(action.timestamp) : undefined,
+        result:
+          action.result?.output ||
+          action.result?.summary ||
+          action.error ||
+          undefined,
       });
+
+      const ordered = Array.from(workingStepsMapRef.current.values()).sort(
+        (a, b) =>
+          (a.timestamp?.getTime() || 0) - (b.timestamp?.getTime() || 0)
+      );
+      setWorkingSteps(ordered);
+
+      setActiveAgent((prev) => ({
+        name: action.agent_name,
+        role:
+          action.metadata?.agent_role ||
+          prev?.role ||
+          hiredEmployees?.find((emp) => emp.name === action.agent_name)?.role ||
+          'AI Agent',
+        status:
+          status === 'failed'
+            ? 'error'
+            : status === 'completed'
+            ? 'completed'
+            : 'working',
+        currentTask: description,
+      }));
+    },
+    [hiredEmployees]
+  );
+
+  useVibeRealtime({
+    sessionId: currentSessionId,
+    onAction: handleAgentAction,
+  });
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login', { state: { from: '/vibe' } });
       return;
     }
 
-    // Check if user has hired employees
     if (!hiredEmployees || hiredEmployees.length === 0) {
       navigate('/workforce', {
         state: {
@@ -87,138 +263,202 @@ const VibeDashboard: React.FC = () => {
       return;
     }
 
-    // Create a new session if none exists
-    if (!currentSessionId) {
-      createNewSession('New VIBE Session');
-    }
+    ensureSession();
+  }, [ensureSession, hiredEmployees, navigate, user]);
 
-    // Set up mock agent for demonstration
-    if (hiredEmployees.length > 0 && !activeAgent) {
+  useEffect(() => {
+    if (hiredEmployees?.length && !activeAgent) {
       setActiveAgent({
-        name: hiredEmployees[0].name || 'AI Assistant',
+        name: hiredEmployees[0].name || 'AI Specialist',
         role: hiredEmployees[0].role || 'Engineer',
         status: 'idle',
-        currentTask: undefined,
       });
     }
-  }, [user, hiredEmployees, currentSessionId, createNewSession, navigate, activeAgent]);
+  }, [activeAgent, hiredEmployees]);
 
-  const handleSendMessage = async (content: string, files?: File[]) => {
-    if (!content.trim()) return;
+  useEffect(() => {
+    if (!currentSessionId) return;
 
-    // Add user message
-    const userMessage: AgentMessage = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content,
-      timestamp: new Date(),
+    const channel = supabase
+      .channel(`vibe-messages-${currentSessionId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'vibe_messages',
+          filter: `session_id=eq.${currentSessionId}`,
+        },
+        (payload) => {
+          if (!payload.new) return;
+          const row = payload.new as VibeMessageRow;
+          const message = mapRowToMessage(row);
+          upsertMessage(message);
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error('[VIBE] Failed to subscribe to message updates');
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
     };
-    setMessages((prev) => [...prev, userMessage]);
+  }, [currentSessionId, mapRowToMessage, upsertMessage]);
 
-    // Add to store
-    addMessage({
-      role: 'user',
-      content,
-      session_id: currentSessionId!,
-      user_id: user!.id,
-    });
+  const handleSendMessage = useCallback(
+    async (content: string, files?: File[]) => {
+      if (!content.trim()) return;
+      if (!user) {
+        toast.error('You must be logged in to send messages.');
+        return;
+      }
 
-    // Simulate agent response
-    setIsLoading(true);
+      const sessionId = currentSessionId || (await ensureSession());
+      if (!sessionId) return;
 
-    // Update agent status to working
-    if (activeAgent) {
-      setActiveAgent({
-        ...activeAgent,
-        status: 'working',
-        currentTask: content,
-      });
-    }
+      setIsLoading(true);
+      workingStepsMapRef.current.clear();
+      setWorkingSteps([
+        {
+          id: 'analyze',
+          description: 'Analyzing request…',
+          status: 'in_progress',
+          timestamp: new Date(),
+        },
+        {
+          id: 'plan',
+          description: 'Planning multi-agent workflow',
+          status: 'pending',
+        },
+        {
+          id: 'execute',
+          description: 'Executing plan',
+          status: 'pending',
+        },
+      ]);
 
-    // Simulate working steps
-    const mockSteps: WorkingStep[] = [
-      {
-        id: '1',
-        description: 'Analyzing your request...',
-        status: 'in_progress',
-        timestamp: new Date(),
-      },
-      {
-        id: '2',
-        description: 'Planning implementation steps',
-        status: 'pending',
-      },
-      {
-        id: '3',
-        description: 'Executing tasks',
-        status: 'pending',
-      },
-    ];
-    setWorkingSteps(mockSteps);
+      try {
+        // Create user message locally first
+        const userMessage: AgentMessage = {
+          id: crypto.randomUUID(),
+          role: 'user',
+          content,
+          timestamp: new Date(),
+        };
+        upsertMessage(userMessage);
 
-    // Simulate response delay
-    setTimeout(() => {
-      // Complete first step
-      setWorkingSteps((prev) =>
-        prev.map((step, idx) => ({
-          ...step,
-          status: idx === 0 ? 'completed' : idx === 1 ? 'in_progress' : 'pending',
-        }))
-      );
+        // Create user message in database
+        await VibeMessageService.createMessage({
+          sessionId,
+          userId: user.id,
+          role: 'user',
+          content,
+          metadata: {
+            files: files?.map((file) => file.name) || [],
+          },
+        });
 
-      setTimeout(() => {
-        // Complete second step
-        setWorkingSteps((prev) =>
-          prev.map((step, idx) => ({
-            ...step,
-            status: idx < 2 ? 'completed' : idx === 2 ? 'in_progress' : 'pending',
-          }))
-        );
-
-        setTimeout(() => {
-          // Complete all steps
-          setWorkingSteps((prev) =>
-            prev.map((step) => ({
-              ...step,
-              status: 'completed',
-            }))
-          );
-
-          // Add agent response
-          const assistantMessage: AgentMessage = {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: `I understand you want me to help with: "${content}"\n\nI've analyzed your request and I'm ready to assist. This is a demonstration of the VIBE interface. The full agent execution logic will be integrated in the next phase.\n\n**Next steps:**\n1. Connect to the workforce orchestrator\n2. Implement real agent execution\n3. Add streaming responses\n4. Enable multi-agent collaboration`,
-            timestamp: new Date(),
-            agentName: activeAgent?.name,
-            agentRole: activeAgent?.role,
-          };
-          setMessages((prev) => [...prev, assistantMessage]);
-
-          addMessage({
-            role: 'assistant',
-            content: assistantMessage.content,
-            session_id: currentSessionId!,
-            user_id: user!.id,
+        // Call workforce orchestrator
+        const orchestratorResponse =
+          await workforceOrchestratorRefactored.processRequest({
+            userId: user.id,
+            input: content,
+            mode: 'chat',
+            sessionId,
+            conversationHistory: [...messagesRef.current, userMessage].map(
+              (message) => ({
+                role: message.role,
+                content: message.content,
+              })
+            ),
           });
 
-          // Update agent status back to idle
-          if (activeAgent) {
-            setActiveAgent({
-              ...activeAgent,
-              status: 'completed',
-              currentTask: undefined,
-            });
-          }
+        if (!orchestratorResponse.success || !orchestratorResponse.chatResponse) {
+          throw new Error(
+            orchestratorResponse.error || 'No response generated by workforce.'
+          );
+        }
 
-          setIsLoading(false);
-        }, 1000);
-      }, 1000);
-    }, 1000);
-  };
+        setWorkingSteps((prev) =>
+          prev.map((step, index) =>
+            index <= 1 ? { ...step, status: 'completed' } : step
+          )
+        );
 
-  // Loading state
-  if (!user) {
+        // Create streaming assistant message
+        const assistantMessageId = crypto.randomUUID();
+        const assistantMessage: AgentMessage = {
+          id: assistantMessageId,
+          role: 'assistant',
+          content: '',
+          timestamp: new Date(),
+          agentName:
+            orchestratorResponse.assignedEmployee ||
+            activeAgent?.name ||
+            hiredEmployees?.[0]?.name ||
+            'AI Assistant',
+          agentRole:
+            activeAgent?.role || hiredEmployees?.[0]?.role || 'Specialist',
+          isStreaming: true,
+        };
+
+        upsertMessage(assistantMessage);
+
+        // Stream response to UI
+        await streamAssistantResponse(
+          assistantMessageId,
+          orchestratorResponse.chatResponse
+        );
+
+        // Save final assistant message to database
+        await VibeMessageService.createMessage({
+          sessionId,
+          userId: user.id,
+          role: 'assistant',
+          content: orchestratorResponse.chatResponse,
+          employeeName: assistantMessage.agentName,
+          employeeRole: assistantMessage.agentRole,
+          isStreaming: false,
+        });
+
+        setWorkingSteps((prev) =>
+          prev.map((step) =>
+            step.id === 'execute'
+              ? { ...step, status: 'completed', timestamp: new Date() }
+              : step
+          )
+        );
+      } catch (error) {
+        console.error('[VIBE] Failed to send message', error);
+        toast.error(
+          error instanceof Error ? error.message : 'Failed to send message'
+        );
+        setWorkingSteps((prev) =>
+          prev.map((step) =>
+            step.status === 'in_progress' ? { ...step, status: 'failed' } : step
+          )
+        );
+        if (activeAgent) {
+          setActiveAgent({ ...activeAgent, status: 'error' });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [
+      activeAgent,
+      currentSessionId,
+      ensureSession,
+      hiredEmployees,
+      streamAssistantResponse,
+      upsertMessage,
+      user,
+    ]
+  );
+
+  if (!user || !hiredEmployees) {
     return (
       <div className="h-screen w-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -226,30 +466,24 @@ const VibeDashboard: React.FC = () => {
     );
   }
 
-  // No employees state
-  if (!hiredEmployees || hiredEmployees.length === 0) {
+  if (hiredEmployees.length === 0) {
     return null;
   }
 
   return (
     <VibeLayout>
       <div className="h-full flex flex-col">
-        {/* Split View - Takes remaining space */}
         <div className="flex-1 overflow-hidden">
           <VibeSplitView>
-            {/* Left Panel: Agent Process */}
             <AgentPanel
               agent={activeAgent}
               workingSteps={workingSteps}
               messages={messages}
             />
-
-            {/* Right Panel: Output Views */}
-            <OutputPanel messages={messages} />
+            <OutputPanel />
           </VibeSplitView>
         </div>
 
-        {/* Message Input - Fixed at bottom */}
         <VibeMessageInput onSend={handleSendMessage} isLoading={isLoading} />
       </div>
     </VibeLayout>

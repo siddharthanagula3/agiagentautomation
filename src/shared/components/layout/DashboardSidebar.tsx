@@ -16,6 +16,7 @@ import {
   Plus,
   ChevronDown,
   Search,
+  Zap,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -49,6 +50,15 @@ const MAIN_NAVIGATION: NavigationItem[] = [
     icon: Users,
     description: 'Manage AI employees',
     badge: 'Beta',
+  },
+  {
+    name: 'VIBE',
+    href: '/vibe',
+    icon: Zap,
+    description: 'Multi-agent workspace',
+    badge: 'New',
+    badgeVariant: 'default',
+    isNew: true,
   },
   {
     name: 'Chat',

@@ -323,8 +323,6 @@ export class VibeToolOrchestrator {
     parameters: Record<string, any>
   ): Promise<any> {
     // Mock implementation - would integrate with actual tool execution engine
-    console.log(`Executing tool: ${toolName} with parameters:`, parameters);
-
     // Simulate async execution
     await new Promise(resolve => setTimeout(resolve, 100));
 

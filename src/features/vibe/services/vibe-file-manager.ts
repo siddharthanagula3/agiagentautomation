@@ -365,7 +365,7 @@ export class VibeFileManager {
 
       if (dbError) throw dbError;
 
-      console.log(`Cleaned up ${files.length} old files`);
+      // Cleaned up old files
     } catch (error) {
       console.error('Failed to cleanup old files:', error);
     }

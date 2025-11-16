@@ -1,4 +1,5 @@
 # MASTER IMPLEMENTATION PLAN
+
 ## Chat Interface Overhaul - November 2025
 
 **Project:** AGI Agent Automation Platform - Modern Chat Interface
@@ -31,9 +32,11 @@
 ## 🎯 EXECUTIVE SUMMARY
 
 ### Project Goal
+
 Transform the AGI Agent Automation chat interface into a world-class, production-ready AI chat experience that rivals Claude.ai, ChatGPT, Google Gemini, and Grok while maintaining our unique multi-agent orchestration capabilities.
 
 ### Key Deliverables
+
 1. **Full-Screen Modern Chat Interface** - Three-panel layout with collapsible sidebars
 2. **Advanced LLM Model Support** - GPT-5.1 Thinking, Claude Sonnet 4.5, Gemini 2.5 Pro, Kimi K2 Thinking
 3. **Thinking Mode Visualization** - Real-time reasoning process display
@@ -43,6 +46,7 @@ Transform the AGI Agent Automation chat interface into a world-class, production
 7. **Complete Documentation** - Updated README, CLAUDE.md, and developer docs
 
 ### Success Criteria
+
 - ✅ TypeScript compilation with 0 errors
 - ✅ Production build completes successfully
 - ✅ All features from competitive analysis implemented
@@ -60,6 +64,7 @@ Transform the AGI Agent Automation chat interface into a world-class, production
 Based on comprehensive research of Claude.ai, ChatGPT, Google Gemini, and Grok AI (November 2025), the following features are now **table stakes** for modern AI chat interfaces:
 
 #### Must-Have Features
+
 1. **Extended Reasoning Modes** - "Thinking" modes with visible reasoning steps
 2. **Multi-Modal Support** - Text, images, voice, file uploads
 3. **Real-Time Token Tracking** - With cost estimation
@@ -73,32 +78,33 @@ Based on comprehensive research of Claude.ai, ChatGPT, Google Gemini, and Grok A
 
 #### Competitive Positioning
 
-| Feature | Claude.ai | ChatGPT | Gemini | Grok | **Our Platform** |
-|---------|-----------|---------|--------|------|------------------|
-| Multi-Agent Orchestration | ❌ | ❌ | ❌ | ❌ | ✅ **UNIQUE** |
-| AI Employee Marketplace | ❌ | ❌ | ❌ | ❌ | ✅ **UNIQUE** |
-| Thinking Mode | ✅ | ✅ | ✅ Deep Think | ✅ Big Brain | ✅ **PLANNED** |
-| Artifacts/Canvas | ✅ | ✅ Canvas | ⚠️ Code Editor | ❌ | ✅ **PLANNED** |
-| Voice Mode | ⚠️ Mobile | ✅ Advanced | ✅ Gemini Live | ⚠️ Limited | ⚠️ **FUTURE** |
-| Screen Sharing | ❌ | ✅ | ✅ | ❌ | ❌ **FUTURE** |
-| Tool Integration | ✅ | ✅ | ✅ | ✅ | ✅ **EXISTING** |
-| Context Window | 200K-1M | 400K | 1M | 256K | **Depends on model** |
+| Feature                   | Claude.ai | ChatGPT     | Gemini         | Grok         | **Our Platform**     |
+| ------------------------- | --------- | ----------- | -------------- | ------------ | -------------------- |
+| Multi-Agent Orchestration | ❌        | ❌          | ❌             | ❌           | ✅ **UNIQUE**        |
+| AI Employee Marketplace   | ❌        | ❌          | ❌             | ❌           | ✅ **UNIQUE**        |
+| Thinking Mode             | ✅        | ✅          | ✅ Deep Think  | ✅ Big Brain | ✅ **PLANNED**       |
+| Artifacts/Canvas          | ✅        | ✅ Canvas   | ⚠️ Code Editor | ❌           | ✅ **PLANNED**       |
+| Voice Mode                | ⚠️ Mobile | ✅ Advanced | ✅ Gemini Live | ⚠️ Limited   | ⚠️ **FUTURE**        |
+| Screen Sharing            | ❌        | ✅          | ✅             | ❌           | ❌ **FUTURE**        |
+| Tool Integration          | ✅        | ✅          | ✅             | ✅           | ✅ **EXISTING**      |
+| Context Window            | 200K-1M   | 400K        | 1M             | 256K         | **Depends on model** |
 
 ### Latest LLM Models (November 2025)
 
-| Model | Provider | Best For | Cost ($/M tokens) | Context Window |
-|-------|----------|----------|-------------------|----------------|
-| **GPT-5.1 Thinking** | OpenAI | General-purpose, adaptive | $3-5 / $15-20 | 400K |
-| **o3** | OpenAI | High-stakes reasoning, visual | $10 / $40 | 128K |
-| **o4-mini** | OpenAI | Cost-effective reasoning | $2 / $8 | 128K |
-| **Claude Sonnet 4.5** | Anthropic | **Best coding** (77.2% SWE-bench) | $3 / $15 | 200K |
-| **Claude Opus 4.1** | Anthropic | Advanced reasoning | $4.50 / $22.50 | 200K |
-| **Gemini 2.5 Pro** | Google | **Best reasoning** (86.4% GPQA) | $2.50 / $10 | **1M** |
-| **Gemini 3.0 Pro** | Google | Next-gen (preview) | TBD | **1M** |
-| **Kimi K2 Thinking** | Moonshot | **Open-source**, 300 tool cycles | **$0.55 / $2.25** | 256K |
-| **Grok 4** | xAI | Real-time X integration | $10-30 | 128K |
+| Model                 | Provider  | Best For                          | Cost ($/M tokens) | Context Window |
+| --------------------- | --------- | --------------------------------- | ----------------- | -------------- |
+| **GPT-5.1 Thinking**  | OpenAI    | General-purpose, adaptive         | $3-5 / $15-20     | 400K           |
+| **o3**                | OpenAI    | High-stakes reasoning, visual     | $10 / $40         | 128K           |
+| **o4-mini**           | OpenAI    | Cost-effective reasoning          | $2 / $8           | 128K           |
+| **Claude Sonnet 4.5** | Anthropic | **Best coding** (77.2% SWE-bench) | $3 / $15          | 200K           |
+| **Claude Opus 4.1**   | Anthropic | Advanced reasoning                | $4.50 / $22.50    | 200K           |
+| **Gemini 2.5 Pro**    | Google    | **Best reasoning** (86.4% GPQA)   | $2.50 / $10       | **1M**         |
+| **Gemini 3.0 Pro**    | Google    | Next-gen (preview)                | TBD               | **1M**         |
+| **Kimi K2 Thinking**  | Moonshot  | **Open-source**, 300 tool cycles  | **$0.55 / $2.25** | 256K           |
+| **Grok 4**            | xAI       | Real-time X integration           | $10-30            | 128K           |
 
 **Recommendation for Default Models:**
+
 1. **Coding Tasks**: Claude Sonnet 4.5 (best SWE-bench score)
 2. **Scientific Reasoning**: Gemini 2.5 Pro (best GPQA score)
 3. **General Purpose**: GPT-5.1 Thinking (adaptive, warm tone)
@@ -109,6 +115,7 @@ Based on comprehensive research of Claude.ai, ChatGPT, Google Gemini, and Grok A
 **Selected Library:** **assistant-ui** (https://github.com/assistant-ui/assistant-ui)
 
 **Rationale:**
+
 - ✅ **100% tech stack compatibility** (React 18, Vite, TypeScript, Tailwind, shadcn/ui, Zustand)
 - ✅ **Production-ready** (streaming, auto-scroll, accessibility, keyboard shortcuts)
 - ✅ **15+ LLM providers** (OpenAI, Anthropic, Google, Perplexity, etc.)
@@ -118,6 +125,7 @@ Based on comprehensive research of Claude.ai, ChatGPT, Google Gemini, and Grok A
 - ✅ **Chat history** (integrates with Supabase)
 
 **Installation:**
+
 ```bash
 npm install \
   @assistant-ui/react \
@@ -211,6 +219,7 @@ npm install \
 **Rationale:** Use assistant-ui for standard chat UX while maintaining custom components for unique features (Mission Control, AI employees).
 
 **Implementation:**
+
 - **Standard Chat (`/chat`)**: Use assistant-ui for 90% of functionality
 - **Mission Control (`/mission-control`)**: Custom UI with assistant-ui Tool UI system
 - **Employee Chat**: Hybrid - assistant-ui base + custom employee selector
@@ -218,12 +227,14 @@ npm install \
 #### 2. Backward Compatibility
 
 **Preserve Existing Services:**
+
 - ✅ `unified-llm-service.ts` - Keep as-is, add adapter layer
 - ✅ `workforce-orchestrator.ts` - Integrate via custom Tool UI
 - ✅ `mission-control-store.ts` - Keep for orchestration state
 - ✅ Supabase schema - No breaking changes
 
 **Migration Path:**
+
 1. Add new components alongside existing
 2. Feature flag for gradual rollout
 3. A/B test with users
@@ -246,6 +257,7 @@ npm install \
 ```
 
 **Store Interaction Pattern:**
+
 ```
 chat-configuration-store (independent)
     ↓ provides config to
@@ -264,21 +276,21 @@ Supabase (chat_sessions, chat_messages)
 
 ### Feature Priority Matrix
 
-| Feature | Priority | Complexity | Impact | Est. Time | Phase |
-|---------|----------|------------|--------|-----------|-------|
-| **Full-Screen Layout** | 🔴 Critical | Low | High | 1 week | 1 |
-| **Model Selection** | 🔴 Critical | Low | High | 3 days | 1 |
-| **Thinking Mode Display** | 🔴 Critical | Medium | High | 1 week | 2 |
-| **Tool Execution Display** | 🔴 Critical | Medium | High | 1 week | 2 |
-| **Token Usage Tracking** | 🔴 Critical | Low | High | 3 days | 2 |
-| **Conversation Management** | 🟡 High | Medium | High | 1 week | 3 |
-| **Search Functionality** | 🟡 High | Medium | Medium | 5 days | 3 |
-| **Export System** | 🟡 High | Medium | Medium | 5 days | 3 |
-| **Artifact System** | 🟡 High | High | High | 1.5 weeks | 4 |
-| **Code Preview** | 🟡 High | High | High | 1 week | 4 |
-| **Temporary Chat** | 🟢 Medium | Low | Low | 2 days | 3 |
-| **Voice Input** | 🔵 Low | High | Medium | **Future** | - |
-| **Screen Sharing** | 🔵 Low | High | Medium | **Future** | - |
+| Feature                     | Priority    | Complexity | Impact | Est. Time  | Phase |
+| --------------------------- | ----------- | ---------- | ------ | ---------- | ----- |
+| **Full-Screen Layout**      | 🔴 Critical | Low        | High   | 1 week     | 1     |
+| **Model Selection**         | 🔴 Critical | Low        | High   | 3 days     | 1     |
+| **Thinking Mode Display**   | 🔴 Critical | Medium     | High   | 1 week     | 2     |
+| **Tool Execution Display**  | 🔴 Critical | Medium     | High   | 1 week     | 2     |
+| **Token Usage Tracking**    | 🔴 Critical | Low        | High   | 3 days     | 2     |
+| **Conversation Management** | 🟡 High     | Medium     | High   | 1 week     | 3     |
+| **Search Functionality**    | 🟡 High     | Medium     | Medium | 5 days     | 3     |
+| **Export System**           | 🟡 High     | Medium     | Medium | 5 days     | 3     |
+| **Artifact System**         | 🟡 High     | High       | High   | 1.5 weeks  | 4     |
+| **Code Preview**            | 🟡 High     | High       | High   | 1 week     | 4     |
+| **Temporary Chat**          | 🟢 Medium   | Low        | Low    | 2 days     | 3     |
+| **Voice Input**             | 🔵 Low      | High       | Medium | **Future** | -     |
+| **Screen Sharing**          | 🔵 Low      | High       | Medium | **Future** | -     |
 
 ### Detailed Feature Specifications
 
@@ -287,6 +299,7 @@ Supabase (chat_sessions, chat_messages)
 **Description:** Immersive three-panel layout maximizing screen real estate
 
 **Layout Breakdown:**
+
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │  Top Bar (64px fixed)                                            │
@@ -315,11 +328,13 @@ Supabase (chat_sessions, chat_messages)
 ```
 
 **Responsive Behavior:**
+
 - **Desktop (>1024px)**: Full three-panel layout
 - **Tablet (768-1024px)**: Left sidebar + main area (right panel as overlay)
 - **Mobile (<768px)**: Main area only (sidebars as slide-in overlays)
 
 **Keyboard Shortcuts:**
+
 - `Ctrl/Cmd + B` - Toggle left sidebar
 - `Ctrl/Cmd + .` - Toggle right panel
 - `Ctrl/Cmd + N` - New conversation
@@ -328,6 +343,7 @@ Supabase (chat_sessions, chat_messages)
 - `Escape` - Stop generation
 
 **Implementation:**
+
 ```typescript
 // src/features/chat-interface/pages/ModernChatInterface.tsx
 interface LayoutState {
@@ -346,53 +362,104 @@ interface LayoutState {
 ```typescript
 const AVAILABLE_MODELS: ModelOption[] = [
   // OpenAI
-  { id: 'gpt-5.1-thinking', provider: 'openai', name: 'GPT-5.1 Thinking',
-    contextWindow: 400000, cost: { input: 5, output: 20 },
-    capabilities: ['text', 'vision', 'thinking', 'tool-use'] },
-  { id: 'gpt-4o', provider: 'openai', name: 'GPT-4o',
-    contextWindow: 128000, cost: { input: 2.50, output: 10 },
-    capabilities: ['text', 'vision', 'tool-use'] },
-  { id: 'o3', provider: 'openai', name: 'o3',
-    contextWindow: 128000, cost: { input: 10, output: 40 },
-    capabilities: ['text', 'vision', 'thinking', 'tool-use'] },
-  { id: 'o4-mini', provider: 'openai', name: 'o4-mini',
-    contextWindow: 128000, cost: { input: 2, output: 8 },
-    capabilities: ['text', 'thinking', 'tool-use'] },
+  {
+    id: 'gpt-5.1-thinking',
+    provider: 'openai',
+    name: 'GPT-5.1 Thinking',
+    contextWindow: 400000,
+    cost: { input: 5, output: 20 },
+    capabilities: ['text', 'vision', 'thinking', 'tool-use'],
+  },
+  {
+    id: 'gpt-4o',
+    provider: 'openai',
+    name: 'GPT-4o',
+    contextWindow: 128000,
+    cost: { input: 2.5, output: 10 },
+    capabilities: ['text', 'vision', 'tool-use'],
+  },
+  {
+    id: 'o3',
+    provider: 'openai',
+    name: 'o3',
+    contextWindow: 128000,
+    cost: { input: 10, output: 40 },
+    capabilities: ['text', 'vision', 'thinking', 'tool-use'],
+  },
+  {
+    id: 'o4-mini',
+    provider: 'openai',
+    name: 'o4-mini',
+    contextWindow: 128000,
+    cost: { input: 2, output: 8 },
+    capabilities: ['text', 'thinking', 'tool-use'],
+  },
 
   // Anthropic
-  { id: 'claude-sonnet-4.5', provider: 'anthropic', name: 'Claude Sonnet 4.5',
-    contextWindow: 200000, cost: { input: 3, output: 15 },
+  {
+    id: 'claude-sonnet-4.5',
+    provider: 'anthropic',
+    name: 'Claude Sonnet 4.5',
+    contextWindow: 200000,
+    cost: { input: 3, output: 15 },
     capabilities: ['text', 'vision', 'thinking', 'tool-use'],
-    badge: 'Best Coding' },
-  { id: 'claude-opus-4.1', provider: 'anthropic', name: 'Claude Opus 4.1',
-    contextWindow: 200000, cost: { input: 4.50, output: 22.50 },
-    capabilities: ['text', 'vision', 'thinking', 'tool-use'] },
+    badge: 'Best Coding',
+  },
+  {
+    id: 'claude-opus-4.1',
+    provider: 'anthropic',
+    name: 'Claude Opus 4.1',
+    contextWindow: 200000,
+    cost: { input: 4.5, output: 22.5 },
+    capabilities: ['text', 'vision', 'thinking', 'tool-use'],
+  },
 
   // Google
-  { id: 'gemini-2.5-pro', provider: 'google', name: 'Gemini 2.5 Pro',
-    contextWindow: 1000000, cost: { input: 2.50, output: 10 },
+  {
+    id: 'gemini-2.5-pro',
+    provider: 'google',
+    name: 'Gemini 2.5 Pro',
+    contextWindow: 1000000,
+    cost: { input: 2.5, output: 10 },
     capabilities: ['text', 'vision', 'thinking', 'tool-use'],
-    badge: 'Best Reasoning' },
-  { id: 'gemini-3.0-pro', provider: 'google', name: 'Gemini 3.0 Pro (Preview)',
-    contextWindow: 1000000, cost: { input: 3, output: 12 },
+    badge: 'Best Reasoning',
+  },
+  {
+    id: 'gemini-3.0-pro',
+    provider: 'google',
+    name: 'Gemini 3.0 Pro (Preview)',
+    contextWindow: 1000000,
+    cost: { input: 3, output: 12 },
     capabilities: ['text', 'vision', 'thinking', 'tool-use'],
-    badge: 'Next-Gen' },
+    badge: 'Next-Gen',
+  },
 
   // Moonshot AI
-  { id: 'kimi-k2-thinking', provider: 'moonshot', name: 'Kimi K2 Thinking',
-    contextWindow: 256000, cost: { input: 0.55, output: 2.25 },
+  {
+    id: 'kimi-k2-thinking',
+    provider: 'moonshot',
+    name: 'Kimi K2 Thinking',
+    contextWindow: 256000,
+    cost: { input: 0.55, output: 2.25 },
     capabilities: ['text', 'thinking', 'tool-use'],
-    badge: 'Open-Source' },
+    badge: 'Open-Source',
+  },
 
   // Perplexity
-  { id: 'perplexity-sonar-pro', provider: 'perplexity', name: 'Perplexity Sonar Pro',
-    contextWindow: 128000, cost: { input: 3, output: 15 },
+  {
+    id: 'perplexity-sonar-pro',
+    provider: 'perplexity',
+    name: 'Perplexity Sonar Pro',
+    contextWindow: 128000,
+    cost: { input: 3, output: 15 },
     capabilities: ['text', 'web-search', 'tool-use'],
-    badge: 'Real-Time Web' },
+    badge: 'Real-Time Web',
+  },
 ];
 ```
 
 **UI Design:**
+
 ```tsx
 <Select value={selectedModel} onValueChange={setSelectedModel}>
   <SelectTrigger className="w-[280px]">
@@ -432,6 +499,7 @@ const AVAILABLE_MODELS: ModelOption[] = [
 ```
 
 **Model Selection Logic:**
+
 ```typescript
 // Automatic model recommendation based on task type
 function suggestModel(userQuery: string): ModelOption {
@@ -458,17 +526,23 @@ function suggestModel(userQuery: string): ModelOption {
 ```
 
 **Provider Availability Indicator:**
+
 ```tsx
 <div className="flex items-center gap-1">
-  <div className={cn(
-    "w-2 h-2 rounded-full",
-    provider.status === 'operational' && "bg-green-500",
-    provider.status === 'degraded' && "bg-yellow-500",
-    provider.status === 'outage' && "bg-red-500"
-  )} />
+  <div
+    className={cn(
+      'h-2 w-2 rounded-full',
+      provider.status === 'operational' && 'bg-green-500',
+      provider.status === 'degraded' && 'bg-yellow-500',
+      provider.status === 'outage' && 'bg-red-500'
+    )}
+  />
   <span className="text-xs">
-    {provider.status === 'operational' ? 'Available' :
-     provider.status === 'degraded' ? 'Slow' : 'Unavailable'}
+    {provider.status === 'operational'
+      ? 'Available'
+      : provider.status === 'degraded'
+        ? 'Slow'
+        : 'Unavailable'}
   </span>
 </div>
 ```
@@ -479,36 +553,40 @@ function suggestModel(userQuery: string): ModelOption {
 
 **Mode Definitions:**
 
-| Mode | Description | Use Cases | Cost Multiplier | Response Time |
-|------|-------------|-----------|-----------------|---------------|
-| **Fast** | Minimal processing, quick responses | Simple questions, casual chat | 1x | <2s |
-| **Balanced** | Default, balances quality and speed | General use | 1x | 2-5s |
-| **Thinking** | Extended reasoning, shows thought process | Complex problems, coding, research | 2-3x | 5-30s |
+| Mode         | Description                               | Use Cases                          | Cost Multiplier | Response Time |
+| ------------ | ----------------------------------------- | ---------------------------------- | --------------- | ------------- |
+| **Fast**     | Minimal processing, quick responses       | Simple questions, casual chat      | 1x              | <2s           |
+| **Balanced** | Default, balances quality and speed       | General use                        | 1x              | 2-5s          |
+| **Thinking** | Extended reasoning, shows thought process | Complex problems, coding, research | 2-3x            | 5-30s         |
 
 **UI Component:**
+
 ```tsx
 <ToggleGroup type="single" value={mode} onValueChange={setMode}>
   <ToggleGroupItem value="fast" aria-label="Fast mode">
-    <Zap className="h-4 w-4 mr-2" />
+    <Zap className="mr-2 h-4 w-4" />
     Fast
   </ToggleGroupItem>
   <ToggleGroupItem value="balanced" aria-label="Balanced mode">
-    <Scale className="h-4 w-4 mr-2" />
+    <Scale className="mr-2 h-4 w-4" />
     Balanced
   </ToggleGroupItem>
   <ToggleGroupItem value="thinking" aria-label="Thinking mode">
-    <Brain className="h-4 w-4 mr-2" />
+    <Brain className="mr-2 h-4 w-4" />
     Thinking
   </ToggleGroupItem>
 </ToggleGroup>
 ```
 
 **Auto-Suggestion Logic:**
-```typescript
+
+````typescript
 function suggestMode(query: string, conversationContext: Message[]): ChatMode {
   const complexity = analyzeComplexity(query);
   const hasCode = /```|function|class|import/.test(query);
-  const needsReasoning = /why|how|explain|analyze|compare/.test(query.toLowerCase());
+  const needsReasoning = /why|how|explain|analyze|compare/.test(
+    query.toLowerCase()
+  );
 
   if (complexity.score > 0.7 || hasCode || needsReasoning) {
     return 'thinking';
@@ -520,60 +598,66 @@ function suggestMode(query: string, conversationContext: Message[]): ChatMode {
 
   return 'balanced';
 }
-```
+````
 
 **Thinking Mode Visualization:**
 
 When thinking mode is active, display a collapsible section showing reasoning steps:
 
 ```tsx
-{mode === 'thinking' && message.thinkingProcess && (
-  <Collapsible>
-    <CollapsibleTrigger className="flex items-center gap-2">
-      <Brain className="h-4 w-4 animate-pulse" />
-      <span>View reasoning ({message.thinkingProcess.length} steps)</span>
-      <ChevronDown className="h-4 w-4" />
-    </CollapsibleTrigger>
-    <CollapsibleContent>
-      <Card className="mt-2 bg-muted/50">
-        <CardContent className="pt-4">
-          {message.thinkingProcess.map((step, idx) => (
-            <div key={step.id} className="flex gap-3 mb-3">
-              <div className="flex flex-col items-center">
-                <div className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center",
-                  step.completedAt ? "bg-green-500" : "bg-yellow-500"
-                )}>
-                  {step.completedAt ?
-                    <Check className="h-4 w-4 text-white" /> :
-                    <Loader2 className="h-4 w-4 animate-spin text-white" />
-                  }
-                </div>
-                {idx < message.thinkingProcess.length - 1 && (
-                  <div className="w-px h-full bg-border mt-2" />
-                )}
-              </div>
-              <div className="flex-1">
-                <div className="font-medium">Step {step.step}: {step.description}</div>
-                {step.reasoning && (
-                  <div className="text-sm text-muted-foreground mt-1">
-                    {step.reasoning}
+{
+  mode === 'thinking' && message.thinkingProcess && (
+    <Collapsible>
+      <CollapsibleTrigger className="flex items-center gap-2">
+        <Brain className="h-4 w-4 animate-pulse" />
+        <span>View reasoning ({message.thinkingProcess.length} steps)</span>
+        <ChevronDown className="h-4 w-4" />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <Card className="mt-2 bg-muted/50">
+          <CardContent className="pt-4">
+            {message.thinkingProcess.map((step, idx) => (
+              <div key={step.id} className="mb-3 flex gap-3">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={cn(
+                      'flex h-8 w-8 items-center justify-center rounded-full',
+                      step.completedAt ? 'bg-green-500' : 'bg-yellow-500'
+                    )}
+                  >
+                    {step.completedAt ? (
+                      <Check className="h-4 w-4 text-white" />
+                    ) : (
+                      <Loader2 className="h-4 w-4 animate-spin text-white" />
+                    )}
                   </div>
-                )}
-                <div className="text-xs text-muted-foreground mt-1">
-                  {step.completedAt ?
-                    `Completed in ${formatDuration(step.startedAt, step.completedAt)}` :
-                    'In progress...'
-                  }
+                  {idx < message.thinkingProcess.length - 1 && (
+                    <div className="mt-2 h-full w-px bg-border" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium">
+                    Step {step.step}: {step.description}
+                  </div>
+                  {step.reasoning && (
+                    <div className="mt-1 text-sm text-muted-foreground">
+                      {step.reasoning}
+                    </div>
+                  )}
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {step.completedAt
+                      ? `Completed in ${formatDuration(step.startedAt, step.completedAt)}`
+                      : 'In progress...'}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    </CollapsibleContent>
-  </Collapsible>
-)}
+            ))}
+          </CardContent>
+        </Card>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
 ```
 
 #### 4. Real-Time Token Usage Display
@@ -581,6 +665,7 @@ When thinking mode is active, display a collapsible section showing reasoning st
 **Description:** Live token counting with cost estimation and usage warnings
 
 **Display Locations:**
+
 1. **Top Bar**: Compact counter showing total session tokens
 2. **Bottom Bar**: Detailed breakdown with cost
 3. **Per-Message**: Individual message token counts
@@ -589,16 +674,18 @@ When thinking mode is active, display a collapsible section showing reasoning st
 **UI Components:**
 
 **Top Bar (Compact):**
+
 ```tsx
 <div className="flex items-center gap-2 text-sm">
   <Coins className="h-4 w-4" />
   <span className="font-mono">{formatNumber(totalTokens)}</span>
   <span className="text-muted-foreground">tokens</span>
-  <Progress value={usagePercentage} className="w-20 h-2" />
+  <Progress value={usagePercentage} className="h-2 w-20" />
 </div>
 ```
 
 **Bottom Bar (Detailed):**
+
 ```tsx
 <div className="flex items-center gap-4 text-xs text-muted-foreground">
   <span>
@@ -618,8 +705,9 @@ When thinking mode is active, display a collapsible section showing reasoning st
 ```
 
 **Per-Message Token Display:**
+
 ```tsx
-<div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+<div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
   <Sparkles className="h-3 w-3" />
   <span>{message.metadata.tokenUsage.inputTokens} in</span>
   <span>•</span>
@@ -635,6 +723,7 @@ When thinking mode is active, display a collapsible section showing reasoning st
 ```
 
 **Usage Warning System:**
+
 ```typescript
 // Check usage and show warnings
 function checkTokenUsage(totalTokens: number, limit: number) {
@@ -645,7 +734,7 @@ function checkTokenUsage(totalTokens: number, limit: number) {
       level: 'critical',
       title: 'Token Limit Almost Reached',
       message: `You've used ${percentage.toFixed(0)}% of your monthly tokens. Only ${limit - totalTokens} tokens remaining.`,
-      action: 'Upgrade Plan'
+      action: 'Upgrade Plan',
     };
   }
 
@@ -654,7 +743,7 @@ function checkTokenUsage(totalTokens: number, limit: number) {
       level: 'warning',
       title: 'High Token Usage',
       message: `You've used ${percentage.toFixed(0)}% of your monthly tokens.`,
-      action: 'View Usage'
+      action: 'View Usage',
     };
   }
 
@@ -663,22 +752,26 @@ function checkTokenUsage(totalTokens: number, limit: number) {
 ```
 
 **Warning Alert UI:**
+
 ```tsx
-{warning && (
-  <Alert variant={warning.level === 'critical' ? 'destructive' : 'default'}>
-    <AlertTriangle className="h-4 w-4" />
-    <AlertTitle>{warning.title}</AlertTitle>
-    <AlertDescription className="flex items-center justify-between">
-      <span>{warning.message}</span>
-      <Button size="sm" variant="outline">
-        {warning.action}
-      </Button>
-    </AlertDescription>
-  </Alert>
-)}
+{
+  warning && (
+    <Alert variant={warning.level === 'critical' ? 'destructive' : 'default'}>
+      <AlertTriangle className="h-4 w-4" />
+      <AlertTitle>{warning.title}</AlertTitle>
+      <AlertDescription className="flex items-center justify-between">
+        <span>{warning.message}</span>
+        <Button size="sm" variant="outline">
+          {warning.action}
+        </Button>
+      </AlertDescription>
+    </Alert>
+  );
+}
 ```
 
 **Token Calculation (Web Worker):**
+
 ```typescript
 // token-counter.worker.ts
 import { encode } from 'gpt-tokenizer';
@@ -690,11 +783,12 @@ self.addEventListener('message', (e) => {
   const tokens = encode(text).length;
 
   // Adjust for model-specific tokenization
-  const modelMultiplier = {
-    'claude': 1.1,    // Claude uses slightly different tokenization
-    'gemini': 0.95,   // Gemini is more efficient
-    'openai': 1.0     // GPT tokenization is standard
-  }[model] || 1.0;
+  const modelMultiplier =
+    {
+      claude: 1.1, // Claude uses slightly different tokenization
+      gemini: 0.95, // Gemini is more efficient
+      openai: 1.0, // GPT tokenization is standard
+    }[model] || 1.0;
 
   const adjustedTokens = Math.ceil(tokens * modelMultiplier);
 
@@ -707,35 +801,42 @@ self.addEventListener('message', (e) => {
 **Description:** Visual display of tool calls showing parameters, execution status, and results
 
 **Tool Execution States:**
+
 1. **Pending** - Tool queued, not started
 2. **Running** - Tool executing with progress indicator
 3. **Completed** - Tool finished, results available
 4. **Failed** - Tool error with error message
 
 **UI Component (Collapsible):**
+
 ```tsx
 <Collapsible open={toolCallExpanded} onOpenChange={setToolCallExpanded}>
-  <div className="border rounded-lg my-2 overflow-hidden">
+  <div className="my-2 overflow-hidden rounded-lg border">
     {/* Header - Always Visible */}
-    <CollapsibleTrigger className="w-full px-4 py-3 flex items-center justify-between hover:bg-muted/50 transition-colors">
+    <CollapsibleTrigger className="flex w-full items-center justify-between px-4 py-3 transition-colors hover:bg-muted/50">
       <div className="flex items-center gap-3">
         {/* Tool Icon */}
-        <div className={cn(
-          "w-8 h-8 rounded-md flex items-center justify-center",
-          toolCall.status === 'completed' && "bg-green-500/10 text-green-500",
-          toolCall.status === 'running' && "bg-blue-500/10 text-blue-500",
-          toolCall.status === 'failed' && "bg-red-500/10 text-red-500",
-          toolCall.status === 'pending' && "bg-yellow-500/10 text-yellow-500"
-        )}>
+        <div
+          className={cn(
+            'flex h-8 w-8 items-center justify-center rounded-md',
+            toolCall.status === 'completed' && 'bg-green-500/10 text-green-500',
+            toolCall.status === 'running' && 'bg-blue-500/10 text-blue-500',
+            toolCall.status === 'failed' && 'bg-red-500/10 text-red-500',
+            toolCall.status === 'pending' && 'bg-yellow-500/10 text-yellow-500'
+          )}
+        >
           {TOOL_ICONS[toolCall.name] || <Wrench className="h-4 w-4" />}
         </div>
 
         {/* Tool Name */}
         <div className="flex flex-col items-start">
           <div className="font-medium">{formatToolName(toolCall.name)}</div>
-          <div className="text-xs text-muted-foreground flex items-center gap-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             {toolCall.status === 'completed' && (
-              <span>✓ Completed in {formatDuration(toolCall.startedAt, toolCall.completedAt)}</span>
+              <span>
+                ✓ Completed in{' '}
+                {formatDuration(toolCall.startedAt, toolCall.completedAt)}
+              </span>
             )}
             {toolCall.status === 'running' && (
               <span className="flex items-center gap-1">
@@ -743,31 +844,29 @@ self.addEventListener('message', (e) => {
                 Running...
               </span>
             )}
-            {toolCall.status === 'failed' && (
-              <span>✗ Failed</span>
-            )}
-            {toolCall.status === 'pending' && (
-              <span>⏱ Pending</span>
-            )}
+            {toolCall.status === 'failed' && <span>✗ Failed</span>}
+            {toolCall.status === 'pending' && <span>⏱ Pending</span>}
           </div>
         </div>
       </div>
 
       {/* Expand Icon */}
-      <ChevronDown className={cn(
-        "h-4 w-4 transition-transform",
-        toolCallExpanded && "transform rotate-180"
-      )} />
+      <ChevronDown
+        className={cn(
+          'h-4 w-4 transition-transform',
+          toolCallExpanded && 'rotate-180 transform'
+        )}
+      />
     </CollapsibleTrigger>
 
     {/* Expanded Content */}
     <CollapsibleContent>
-      <div className="px-4 py-3 bg-muted/30 space-y-3">
+      <div className="space-y-3 bg-muted/30 px-4 py-3">
         {/* Parameters */}
         <div>
-          <div className="text-sm font-medium mb-2">Parameters</div>
-          <div className="bg-background rounded-md p-3">
-            <pre className="text-xs overflow-x-auto">
+          <div className="mb-2 text-sm font-medium">Parameters</div>
+          <div className="rounded-md bg-background p-3">
+            <pre className="overflow-x-auto text-xs">
               {JSON.stringify(toolCall.parameters, null, 2)}
             </pre>
           </div>
@@ -776,8 +875,8 @@ self.addEventListener('message', (e) => {
         {/* Result (if completed) */}
         {toolCall.status === 'completed' && toolCall.result && (
           <div>
-            <div className="text-sm font-medium mb-2">Result</div>
-            <div className="bg-background rounded-md p-3">
+            <div className="mb-2 text-sm font-medium">Result</div>
+            <div className="rounded-md bg-background p-3">
               {renderToolResult(toolCall.result)}
             </div>
           </div>
@@ -794,13 +893,19 @@ self.addEventListener('message', (e) => {
 
         {/* Execution Timeline */}
         <div>
-          <div className="text-sm font-medium mb-2">Timeline</div>
+          <div className="mb-2 text-sm font-medium">Timeline</div>
           <div className="space-y-1 text-xs text-muted-foreground">
             <div>Started: {formatTimestamp(toolCall.startedAt)}</div>
             {toolCall.completedAt && (
               <div>Completed: {formatTimestamp(toolCall.completedAt)}</div>
             )}
-            <div>Duration: {formatDuration(toolCall.startedAt, toolCall.completedAt || new Date())}</div>
+            <div>
+              Duration:{' '}
+              {formatDuration(
+                toolCall.startedAt,
+                toolCall.completedAt || new Date()
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -810,6 +915,7 @@ self.addEventListener('message', (e) => {
 ```
 
 **Tool-Specific Rendering:**
+
 ```typescript
 function renderToolResult(result: ToolResult): React.ReactNode {
   // Web Search Results
@@ -862,6 +968,7 @@ function renderToolResult(result: ToolResult): React.ReactNode {
 ```
 
 **Tool Icons Mapping:**
+
 ```typescript
 const TOOL_ICONS: Record<string, React.ReactNode> = {
   'web_search': <Globe className="h-4 w-4" />,
@@ -881,6 +988,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
 **Description:** Side panel for viewing and interacting with generated code, documents, and visualizations
 
 **Artifact Types:**
+
 1. **Code** - Syntax-highlighted code with copy/download
 2. **HTML** - Live preview in iframe
 3. **React Component** - Live preview with hot reload
@@ -890,26 +998,27 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
 7. **Charts** - Data visualizations (via Chart.js/Recharts)
 
 **Right Panel Tab Structure:**
+
 ```tsx
 <Tabs value={activeTab} onValueChange={setActiveTab}>
   <TabsList>
     <TabsTrigger value="artifacts">
-      <FileCode className="h-4 w-4 mr-2" />
+      <FileCode className="mr-2 h-4 w-4" />
       Artifacts
       {artifacts.length > 0 && (
         <Badge className="ml-2">{artifacts.length}</Badge>
       )}
     </TabsTrigger>
     <TabsTrigger value="tools">
-      <Wrench className="h-4 w-4 mr-2" />
+      <Wrench className="mr-2 h-4 w-4" />
       Tools
     </TabsTrigger>
     <TabsTrigger value="context">
-      <Brain className="h-4 w-4 mr-2" />
+      <Brain className="mr-2 h-4 w-4" />
       Context
     </TabsTrigger>
     <TabsTrigger value="settings">
-      <Settings className="h-4 w-4 mr-2" />
+      <Settings className="mr-2 h-4 w-4" />
       Settings
     </TabsTrigger>
   </TabsList>
@@ -933,8 +1042,9 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
 ```
 
 **Code Artifact Viewer:**
+
 ```tsx
-<Card className="h-full flex flex-col">
+<Card className="flex h-full flex-col">
   <CardHeader className="border-b">
     <div className="flex items-center justify-between">
       <div>
@@ -945,21 +1055,25 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
       </div>
       <div className="flex gap-2">
         <Button size="sm" variant="outline" onClick={handleCopy}>
-          <Copy className="h-4 w-4 mr-2" />
+          <Copy className="mr-2 h-4 w-4" />
           Copy
         </Button>
         <Button size="sm" variant="outline" onClick={handleDownload}>
-          <Download className="h-4 w-4 mr-2" />
+          <Download className="mr-2 h-4 w-4" />
           Download
         </Button>
         <Button size="sm" variant="outline" onClick={toggleFullScreen}>
-          {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          {isFullScreen ? (
+            <Minimize2 className="h-4 w-4" />
+          ) : (
+            <Maximize2 className="h-4 w-4" />
+          )}
         </Button>
       </div>
     </div>
   </CardHeader>
 
-  <CardContent className="flex-1 p-0 overflow-hidden">
+  <CardContent className="flex-1 overflow-hidden p-0">
     {artifact.type === 'code' && (
       <Tabs defaultValue="code">
         <TabsList className="rounded-none border-b">
@@ -972,7 +1086,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
           )}
         </TabsList>
 
-        <TabsContent value="code" className="h-full m-0">
+        <TabsContent value="code" className="m-0 h-full">
           <SyntaxHighlighter
             language={artifact.language}
             style={vscDarkPlus}
@@ -983,11 +1097,11 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
           </SyntaxHighlighter>
         </TabsContent>
 
-        <TabsContent value="preview" className="h-full m-0">
+        <TabsContent value="preview" className="m-0 h-full">
           {artifact.language === 'html' && (
             <iframe
               srcDoc={artifact.content}
-              className="w-full h-full border-0"
+              className="h-full w-full border-0"
               sandbox="allow-scripts"
             />
           )}
@@ -1009,6 +1123,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
 ```
 
 **Live React Component Preview:**
+
 ```typescript
 // Uses react-live for live component preview
 import { LiveProvider, LiveError, LivePreview } from 'react-live';
@@ -1030,6 +1145,7 @@ function LivePreview({ code }: { code: string }) {
 ```
 
 **Version History:**
+
 ```tsx
 <ScrollArea className="h-full">
   <div className="space-y-2">
@@ -1051,7 +1167,7 @@ function LivePreview({ code }: { code: string }) {
                 variant="ghost"
                 onClick={() => onRestore(version)}
               >
-                <RotateCcw className="h-4 w-4 mr-2" />
+                <RotateCcw className="mr-2 h-4 w-4" />
                 Restore
               </Button>
             )}
@@ -1071,20 +1187,21 @@ function LivePreview({ code }: { code: string }) {
 **Description:** Full conversation history with search, folders, and filters
 
 **Left Sidebar Structure:**
+
 ```tsx
-<div className="flex flex-col h-full">
+<div className="flex h-full flex-col">
   {/* Header */}
-  <div className="p-4 border-b">
+  <div className="border-b p-4">
     <Button className="w-full" onClick={createNewConversation}>
-      <Plus className="h-4 w-4 mr-2" />
+      <Plus className="mr-2 h-4 w-4" />
       New Chat
     </Button>
   </div>
 
   {/* Search */}
-  <div className="p-4 border-b">
+  <div className="border-b p-4">
     <div className="relative">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
       <Input
         placeholder="Search conversations..."
         value={searchQuery}
@@ -1095,7 +1212,7 @@ function LivePreview({ code }: { code: string }) {
   </div>
 
   {/* Filters */}
-  <div className="px-4 py-2 border-b flex gap-2">
+  <div className="flex gap-2 border-b px-4 py-2">
     <Button
       size="sm"
       variant={filter === 'all' ? 'default' : 'ghost'}
@@ -1108,7 +1225,7 @@ function LivePreview({ code }: { code: string }) {
       variant={filter === 'pinned' ? 'default' : 'ghost'}
       onClick={() => setFilter('pinned')}
     >
-      <Pin className="h-3 w-3 mr-1" />
+      <Pin className="mr-1 h-3 w-3" />
       Pinned
     </Button>
     <Button
@@ -1116,43 +1233,43 @@ function LivePreview({ code }: { code: string }) {
       variant={filter === 'archived' ? 'default' : 'ghost'}
       onClick={() => setFilter('archived')}
     >
-      <Archive className="h-3 w-3 mr-1" />
+      <Archive className="mr-1 h-3 w-3" />
       Archived
     </Button>
   </div>
 
   {/* Conversation List */}
   <ScrollArea className="flex-1">
-    <div className="p-2 space-y-1">
+    <div className="space-y-1 p-2">
       {/* Today */}
-      <div className="text-xs font-semibold text-muted-foreground px-3 py-2">
+      <div className="px-3 py-2 text-xs font-semibold text-muted-foreground">
         Today
       </div>
-      {todayConversations.map(conv => (
+      {todayConversations.map((conv) => (
         <ConversationItem key={conv.id} conversation={conv} />
       ))}
 
       {/* Yesterday */}
-      <div className="text-xs font-semibold text-muted-foreground px-3 py-2 mt-4">
+      <div className="mt-4 px-3 py-2 text-xs font-semibold text-muted-foreground">
         Yesterday
       </div>
-      {yesterdayConversations.map(conv => (
+      {yesterdayConversations.map((conv) => (
         <ConversationItem key={conv.id} conversation={conv} />
       ))}
 
       {/* Previous 7 Days */}
-      <div className="text-xs font-semibold text-muted-foreground px-3 py-2 mt-4">
+      <div className="mt-4 px-3 py-2 text-xs font-semibold text-muted-foreground">
         Previous 7 Days
       </div>
-      {weekConversations.map(conv => (
+      {weekConversations.map((conv) => (
         <ConversationItem key={conv.id} conversation={conv} />
       ))}
 
       {/* Older */}
-      <div className="text-xs font-semibold text-muted-foreground px-3 py-2 mt-4">
+      <div className="mt-4 px-3 py-2 text-xs font-semibold text-muted-foreground">
         Older
       </div>
-      {olderConversations.map(conv => (
+      {olderConversations.map((conv) => (
         <ConversationItem key={conv.id} conversation={conv} />
       ))}
     </div>
@@ -1161,13 +1278,14 @@ function LivePreview({ code }: { code: string }) {
 ```
 
 **Conversation Item Component:**
+
 ```tsx
 <ContextMenu>
   <ContextMenuTrigger>
     <div
       className={cn(
-        "flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors",
-        conversation.id === currentConversationId && "bg-muted"
+        'flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-muted',
+        conversation.id === currentConversationId && 'bg-muted'
       )}
       onClick={() => loadConversation(conversation.id)}
     >
@@ -1177,11 +1295,9 @@ function LivePreview({ code }: { code: string }) {
       )}
 
       {/* Conversation Info */}
-      <div className="flex-1 min-w-0">
-        <div className="font-medium text-sm truncate">
-          {conversation.title}
-        </div>
-        <div className="text-xs text-muted-foreground truncate">
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-medium">{conversation.title}</div>
+        <div className="truncate text-xs text-muted-foreground">
           {conversation.summary || 'No summary'}
         </div>
       </div>
@@ -1195,19 +1311,19 @@ function LivePreview({ code }: { code: string }) {
 
   <ContextMenuContent>
     <ContextMenuItem onClick={() => pinConversation(conversation.id)}>
-      <Pin className="h-4 w-4 mr-2" />
+      <Pin className="mr-2 h-4 w-4" />
       {conversation.metadata.isPinned ? 'Unpin' : 'Pin'}
     </ContextMenuItem>
     <ContextMenuItem onClick={() => renameConversation(conversation.id)}>
-      <Edit className="h-4 w-4 mr-2" />
+      <Edit className="mr-2 h-4 w-4" />
       Rename
     </ContextMenuItem>
     <ContextMenuItem onClick={() => exportConversation(conversation.id)}>
-      <Download className="h-4 w-4 mr-2" />
+      <Download className="mr-2 h-4 w-4" />
       Export
     </ContextMenuItem>
     <ContextMenuItem onClick={() => archiveConversation(conversation.id)}>
-      <Archive className="h-4 w-4 mr-2" />
+      <Archive className="mr-2 h-4 w-4" />
       Archive
     </ContextMenuItem>
     <ContextMenuSeparator />
@@ -1215,7 +1331,7 @@ function LivePreview({ code }: { code: string }) {
       className="text-destructive"
       onClick={() => deleteConversation(conversation.id)}
     >
-      <Trash2 className="h-4 w-4 mr-2" />
+      <Trash2 className="mr-2 h-4 w-4" />
       Delete
     </ContextMenuItem>
   </ContextMenuContent>
@@ -1223,6 +1339,7 @@ function LivePreview({ code }: { code: string }) {
 ```
 
 **Search Implementation:**
+
 ```typescript
 // Full-text search across all conversations
 function searchConversations(query: string, conversations: Conversation[]) {
@@ -1230,24 +1347,26 @@ function searchConversations(query: string, conversations: Conversation[]) {
 
   const lowerQuery = query.toLowerCase();
 
-  return conversations.filter(conv => {
-    // Search in title
-    if (conv.title.toLowerCase().includes(lowerQuery)) return true;
+  return conversations
+    .filter((conv) => {
+      // Search in title
+      if (conv.title.toLowerCase().includes(lowerQuery)) return true;
 
-    // Search in summary
-    if (conv.summary?.toLowerCase().includes(lowerQuery)) return true;
+      // Search in summary
+      if (conv.summary?.toLowerCase().includes(lowerQuery)) return true;
 
-    // Search in messages
-    const hasMatchingMessage = conv.messages.some(msg =>
-      msg.content.text?.toLowerCase().includes(lowerQuery)
-    );
+      // Search in messages
+      const hasMatchingMessage = conv.messages.some((msg) =>
+        msg.content.text?.toLowerCase().includes(lowerQuery)
+      );
 
-    return hasMatchingMessage;
-  }).map(conv => ({
-    ...conv,
-    // Highlight matching text
-    highlightedMatches: extractMatches(conv, lowerQuery)
-  }));
+      return hasMatchingMessage;
+    })
+    .map((conv) => ({
+      ...conv,
+      // Highlight matching text
+      highlightedMatches: extractMatches(conv, lowerQuery),
+    }));
 }
 ```
 
@@ -1256,6 +1375,7 @@ function searchConversations(query: string, conversations: Conversation[]) {
 **Description:** Export conversations to multiple formats with customization options
 
 **Export Formats:**
+
 1. **Markdown (.md)** - Plain text with formatting
 2. **PDF** - Formatted document with styling
 3. **JSON** - Structured data for programmatic use
@@ -1263,6 +1383,7 @@ function searchConversations(query: string, conversations: Conversation[]) {
 5. **Plain Text (.txt)** - Simple text dump
 
 **Export Dialog:**
+
 ```tsx
 <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
   <DialogContent className="max-w-2xl">
@@ -1326,7 +1447,10 @@ function searchConversations(query: string, conversations: Conversation[]) {
               id="include-thinking"
               checked={exportOptions.includeThinking}
               onCheckedChange={(checked) =>
-                setExportOptions(prev => ({ ...prev, includeThinking: checked as boolean }))
+                setExportOptions((prev) => ({
+                  ...prev,
+                  includeThinking: checked as boolean,
+                }))
               }
             />
             <Label htmlFor="include-thinking">Include thinking process</Label>
@@ -1336,7 +1460,10 @@ function searchConversations(query: string, conversations: Conversation[]) {
               id="include-tools"
               checked={exportOptions.includeTools}
               onCheckedChange={(checked) =>
-                setExportOptions(prev => ({ ...prev, includeTools: checked as boolean }))
+                setExportOptions((prev) => ({
+                  ...prev,
+                  includeTools: checked as boolean,
+                }))
               }
             />
             <Label htmlFor="include-tools">Include tool executions</Label>
@@ -1346,7 +1473,10 @@ function searchConversations(query: string, conversations: Conversation[]) {
               id="include-artifacts"
               checked={exportOptions.includeArtifacts}
               onCheckedChange={(checked) =>
-                setExportOptions(prev => ({ ...prev, includeArtifacts: checked as boolean }))
+                setExportOptions((prev) => ({
+                  ...prev,
+                  includeArtifacts: checked as boolean,
+                }))
               }
             />
             <Label htmlFor="include-artifacts">Include artifacts</Label>
@@ -1356,10 +1486,15 @@ function searchConversations(query: string, conversations: Conversation[]) {
               id="include-metadata"
               checked={exportOptions.includeMetadata}
               onCheckedChange={(checked) =>
-                setExportOptions(prev => ({ ...prev, includeMetadata: checked as boolean }))
+                setExportOptions((prev) => ({
+                  ...prev,
+                  includeMetadata: checked as boolean,
+                }))
               }
             />
-            <Label htmlFor="include-metadata">Include metadata (timestamps, token counts)</Label>
+            <Label htmlFor="include-metadata">
+              Include metadata (timestamps, token counts)
+            </Label>
           </div>
         </div>
       </div>
@@ -1371,11 +1506,9 @@ function searchConversations(query: string, conversations: Conversation[]) {
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full justify-start">
               <Calendar className="mr-2 h-4 w-4" />
-              {exportDateRange ? (
-                `${format(exportDateRange.start, 'PP')} - ${format(exportDateRange.end, 'PP')}`
-              ) : (
-                'All messages'
-              )}
+              {exportDateRange
+                ? `${format(exportDateRange.start, 'PP')} - ${format(exportDateRange.end, 'PP')}`
+                : 'All messages'}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -1393,7 +1526,7 @@ function searchConversations(query: string, conversations: Conversation[]) {
         Cancel
       </Button>
       <Button onClick={handleExport}>
-        <Download className="h-4 w-4 mr-2" />
+        <Download className="mr-2 h-4 w-4" />
         Export
       </Button>
     </DialogFooter>
@@ -1402,6 +1535,7 @@ function searchConversations(query: string, conversations: Conversation[]) {
 ```
 
 **Export Service Implementation:**
+
 ```typescript
 // src/features/chat-interface/services/export-service.ts
 export class ExportService {
@@ -1470,15 +1604,15 @@ export class ExportService {
         id: conversation.id,
         title: conversation.title,
         createdAt: conversation.createdAt.toISOString(),
-        metadata: conversation.metadata
+        metadata: conversation.metadata,
       },
-      messages: conversation.messages.map(msg => ({
+      messages: conversation.messages.map((msg) => ({
         id: msg.id,
         role: msg.role,
         content: msg.content,
         metadata: options.includeMetadata ? msg.metadata : undefined,
-        createdAt: msg.createdAt.toISOString()
-      }))
+        createdAt: msg.createdAt.toISOString(),
+      })),
     };
 
     return JSON.stringify(data, null, 2);
@@ -1502,12 +1636,16 @@ export class ExportService {
 <body>
   <div class="container">
     <h1>${conversation.title}</h1>
-    ${conversation.messages.map(msg => `
+    ${conversation.messages
+      .map(
+        (msg) => `
       <div class="message ${msg.role}">
         <div class="role">${msg.role}</div>
         <div class="content">${msg.content.text}</div>
       </div>
-    `).join('')}
+    `
+      )
+      .join('')}
   </div>
 </body>
 </html>
@@ -1530,8 +1668,10 @@ Each AI employee should have distinct communication characteristics based on the
 # Employee Communication Protocols
 
 ## 1. Code Reviewer
+
 **Tone:** Professional, constructive, detail-oriented
 **Response Pattern:**
+
 - Start with positive observations
 - List issues in order of severity
 - Provide specific code examples
@@ -1540,31 +1680,37 @@ Each AI employee should have distinct communication characteristics based on the
 
 **Example:**
 ```
+
 ✅ **Strengths:**
+
 - Clean function organization
 - Good error handling in main paths
 
 ⚠️ **Issues Found:**
 
 **CRITICAL:**
+
 - Line 42: SQL injection vulnerability in user input
   ```typescript
   // BAD
-  db.query(`SELECT * FROM users WHERE id = ${userId}`)
+  db.query(`SELECT * FROM users WHERE id = ${userId}`);
   // GOOD
-  db.query('SELECT * FROM users WHERE id = ?', [userId])
+  db.query('SELECT * FROM users WHERE id = ?', [userId]);
   ```
 
 **MEDIUM:**
+
 - Line 67: Potential memory leak (event listener not cleaned up)
 - Line 89: Missing null check before array operation
 
 **MINOR:**
+
 - Inconsistent naming convention (camelCase vs snake_case)
 
 **Summary:**
 Fix the SQL injection vulnerability immediately before deploying.
 Other issues should be addressed in the next sprint.
+
 ```
 
 ## 2. Debugger
@@ -1579,6 +1725,7 @@ Other issues should be addressed in the next sprint.
 
 **Example:**
 ```
+
 I'm analyzing the error you're encountering. Let me investigate systematically:
 
 **Error Analysis:**
@@ -1588,6 +1735,7 @@ TypeError: Cannot read property 'map' of undefined
 The `data` variable is undefined, likely due to an async race condition.
 
 **Investigation Steps:**
+
 1. Check where `data` is set
 2. Verify async timing
 3. Check error handling
@@ -1596,6 +1744,7 @@ The `data` variable is undefined, likely due to an async race condition.
 Line 23: `useEffect` runs before data is fetched, causing premature render.
 
 **Fix:**
+
 ```typescript
 // Add conditional rendering
 {data && data.map(item => ...)}
@@ -1607,6 +1756,7 @@ if (!data) return <Spinner />;
 **Explanation:**
 The component renders immediately, but the API call takes 200ms.
 Adding a null check prevents the error until data arrives.
+
 ```
 
 ## 3. Frontend Engineer
@@ -1620,9 +1770,11 @@ Adding a null check prevents the error until data arrives.
 
 **Example:**
 ```
+
 I'll create a responsive navigation bar with accessibility in mind.
 
 **Component Structure:**
+
 ```
 <Navigation>
   ├── Logo
@@ -1634,6 +1786,7 @@ I'll create a responsive navigation bar with accessibility in mind.
 ```
 
 **Implementation:**
+
 ```typescript
 // Accessible, responsive navigation
 export function Navigation() {
@@ -1654,9 +1807,11 @@ export function Navigation() {
 ✅ Screen reader friendly
 
 **Responsive Breakpoints:**
+
 - Mobile: < 768px (hamburger menu)
 - Tablet: 768px - 1024px (horizontal nav)
 - Desktop: > 1024px (full nav with dropdowns)
+
 ```
 
 ## 4. Backend Engineer
@@ -1670,12 +1825,14 @@ export function Navigation() {
 
 **Example:**
 ```
+
 I'll implement a secure user authentication endpoint.
 
 **Endpoint Design:**
 POST /api/auth/login
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -1684,6 +1841,7 @@ POST /api/auth/login
 ```
 
 **Response (Success):**
+
 ```json
 {
   "token": "jwt_token_here",
@@ -1703,12 +1861,14 @@ POST /api/auth/login
 ✅ Input validation
 
 **Error Handling:**
+
 - 400: Invalid email/password format
 - 401: Incorrect credentials
 - 429: Too many attempts
 - 500: Server error
 
 **Implementation:**
+
 ```typescript
 // netlify/functions/auth-login.ts
 import bcrypt from 'bcryptjs';
@@ -1719,18 +1879,25 @@ export async function handler(event, context) {
   // Rate limit check
   const rateLimitResult = await rateLimit(context.ip);
   if (!rateLimitResult.success) {
-    return { statusCode: 429, body: JSON.stringify({ error: 'Too many attempts' }) };
+    return {
+      statusCode: 429,
+      body: JSON.stringify({ error: 'Too many attempts' }),
+    };
   }
 
   // Validate input
   const { email, password } = JSON.parse(event.body);
   if (!isValidEmail(email) || !password) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid input' }) };
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Invalid input' }),
+    };
   }
 
   // ... authentication logic
 }
 ```
+
 ```
 
 ## 5. Data Scientist
@@ -1744,9 +1911,11 @@ export async function handler(event, context) {
 
 **Example:**
 ```
+
 I've analyzed your sales data for Q4 2024. Here are my findings:
 
 **Dataset Overview:**
+
 - 15,247 transactions
 - Date range: Oct 1 - Dec 31, 2024
 - Revenue: $2.4M total
@@ -1754,28 +1923,31 @@ I've analyzed your sales data for Q4 2024. Here are my findings:
 **Key Findings:**
 
 1️⃣ **Revenue Trend:**
-   November showed 35% spike (Black Friday effect)
-   December declined 12% (post-holiday drop)
+November showed 35% spike (Black Friday effect)
+December declined 12% (post-holiday drop)
 
-   [Chart: Line graph showing daily revenue]
+[Chart: Line graph showing daily revenue]
 
 2️⃣ **Top Performing Categories:**
-   - Electronics: $892K (37%)
-   - Home & Garden: $531K (22%)
-   - Fashion: $487K (20%)
 
-   [Chart: Pie chart of category distribution]
+- Electronics: $892K (37%)
+- Home & Garden: $531K (22%)
+- Fashion: $487K (20%)
+
+[Chart: Pie chart of category distribution]
 
 3️⃣ **Customer Segmentation:**
-   - High-value customers (>$500): 8% of customers, 42% of revenue
-   - Medium-value ($100-500): 35% of customers, 41% of revenue
-   - Low-value (<$100): 57% of customers, 17% of revenue
 
-   [Chart: Scatter plot of customer value distribution]
+- High-value customers (>$500): 8% of customers, 42% of revenue
+- Medium-value ($100-500): 35% of customers, 41% of revenue
+- Low-value (<$100): 57% of customers, 17% of revenue
+
+[Chart: Scatter plot of customer value distribution]
 
 **Recommendations:**
 
 📊 **Data-Driven Actions:**
+
 1. Launch loyalty program targeting high-value segment
    (Projected ROI: +23% revenue from this segment)
 
@@ -1786,10 +1958,13 @@ I've analyzed your sales data for Q4 2024. Here are my findings:
    (Prevent post-holiday revenue decline)
 
 **Statistical Confidence:**
+
 - Analysis based on 15K+ data points
 - 95% confidence intervals calculated
 - Results are statistically significant (p < 0.05)
+
 ```
+
 ```
 
 ### Multi-Agent Collaboration Display
@@ -1809,8 +1984,11 @@ When multiple AI employees work together, show their collaboration visually:
   </CardHeader>
   <CardContent className="space-y-3">
     {/* Employee Status Cards */}
-    {activeEmployees.map(employee => (
-      <div key={employee.name} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+    {activeEmployees.map((employee) => (
+      <div
+        key={employee.name}
+        className="flex items-start gap-3 rounded-lg bg-muted/50 p-3"
+      >
         <Avatar className="h-10 w-10 border-2 border-primary">
           <AvatarImage src={employee.avatar} />
           <AvatarFallback>{employee.name[0]}</AvatarFallback>
@@ -1819,11 +1997,17 @@ When multiple AI employees work together, show their collaboration visually:
         <div className="flex-1 space-y-2">
           <div className="flex items-center justify-between">
             <div className="font-medium">{employee.name}</div>
-            <Badge variant={
-              employee.status === 'completed' ? 'default' :
-              employee.status === 'working' ? 'secondary' :
-              employee.status === 'thinking' ? 'outline' : 'default'
-            }>
+            <Badge
+              variant={
+                employee.status === 'completed'
+                  ? 'default'
+                  : employee.status === 'working'
+                    ? 'secondary'
+                    : employee.status === 'thinking'
+                      ? 'outline'
+                      : 'default'
+              }
+            >
               {employee.status}
             </Badge>
           </div>
@@ -1855,7 +2039,7 @@ When multiple AI employees work together, show their collaboration visually:
 
     {/* Communication Flow */}
     <Collapsible>
-      <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+      <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
         <MessageSquare className="h-4 w-4" />
         <span>View collaboration timeline</span>
         <ChevronDown className="h-4 w-4" />
@@ -1863,12 +2047,14 @@ When multiple AI employees work together, show their collaboration visually:
       <CollapsibleContent className="mt-3 space-y-2">
         {collaborationMessages.map((msg, idx) => (
           <div key={idx} className="flex items-start gap-2 text-sm">
-            <div className="text-xs text-muted-foreground mt-0.5">
+            <div className="mt-0.5 text-xs text-muted-foreground">
               {format(msg.timestamp, 'HH:mm:ss')}
             </div>
             <div className="flex-1">
               <span className="font-medium">{msg.from}</span>
-              {msg.to && <span className="text-muted-foreground"> → {msg.to}</span>}
+              {msg.to && (
+                <span className="text-muted-foreground"> → {msg.to}</span>
+              )}
               <span className="text-muted-foreground">: {msg.message}</span>
             </div>
           </div>
@@ -1891,14 +2077,14 @@ When multiple AI employees work together, show their collaboration visually:
 // Agent-to-Agent Communication
 interface AgentMessage {
   id: string;
-  from: string;           // Sending agent name
-  to: string | 'all';     // Receiving agent or broadcast
+  from: string; // Sending agent name
+  to: string | 'all'; // Receiving agent or broadcast
   type: 'request' | 'response' | 'notification' | 'question';
   priority: 'low' | 'medium' | 'high' | 'critical';
   content: string;
   context?: Record<string, unknown>;
   timestamp: Date;
-  threadId?: string;      // For conversation threading
+  threadId?: string; // For conversation threading
 }
 
 // Agent Status Updates
@@ -1906,7 +2092,7 @@ interface AgentStatusUpdate {
   agentName: string;
   status: 'idle' | 'thinking' | 'working' | 'blocked' | 'completed' | 'error';
   currentTask: string;
-  progress: number;       // 0-100
+  progress: number; // 0-100
   currentTool: string | null;
   estimatedCompletion?: Date;
   blockedReason?: string;
@@ -1945,23 +2131,28 @@ User Request: "Design and implement a login form"
 ```
 
 **Implementation:**
+
 ```typescript
 async function executeSequentialWorkflow(tasks: Task[]) {
   for (const task of tasks) {
     // Update mission control store
-    useMissionStore.getState().updateTaskStatus(task.id, 'in_progress', task.assignedTo);
+    useMissionStore
+      .getState()
+      .updateTaskStatus(task.id, 'in_progress', task.assignedTo);
 
     // Execute task
     const result = await executeTask(task);
 
     // Update status
-    useMissionStore.getState().updateTaskStatus(
-      task.id,
-      result.success ? 'completed' : 'failed',
-      task.assignedTo,
-      result.output,
-      result.error
-    );
+    useMissionStore
+      .getState()
+      .updateTaskStatus(
+        task.id,
+        result.success ? 'completed' : 'failed',
+        task.assignedTo,
+        result.output,
+        result.error
+      );
 
     // Pass output to next task
     if (tasks[tasks.indexOf(task) + 1]) {
@@ -1987,29 +2178,31 @@ User Request: "Prepare this codebase for production"
 ```
 
 **Implementation:**
+
 ```typescript
 async function executeParallelWorkflow(tasks: Task[]) {
   // Start all tasks concurrently
   const promises = tasks.map(async (task) => {
-    useMissionStore.getState().updateTaskStatus(task.id, 'in_progress', task.assignedTo);
+    useMissionStore
+      .getState()
+      .updateTaskStatus(task.id, 'in_progress', task.assignedTo);
 
     try {
       const result = await executeTask(task);
-      useMissionStore.getState().updateTaskStatus(
-        task.id,
-        'completed',
-        task.assignedTo,
-        result.output
-      );
+      useMissionStore
+        .getState()
+        .updateTaskStatus(task.id, 'completed', task.assignedTo, result.output);
       return result;
     } catch (error) {
-      useMissionStore.getState().updateTaskStatus(
-        task.id,
-        'failed',
-        task.assignedTo,
-        undefined,
-        error.message
-      );
+      useMissionStore
+        .getState()
+        .updateTaskStatus(
+          task.id,
+          'failed',
+          task.assignedTo,
+          undefined,
+          error.message
+        );
       throw error;
     }
   });
@@ -2051,6 +2244,7 @@ User: [provides information]
 ```
 
 **Implementation:**
+
 ```typescript
 async function executeCollaborativeWorkflow(initialTask: Task) {
   const conversationThread: AgentMessage[] = [];
@@ -2060,7 +2254,7 @@ async function executeCollaborativeWorkflow(initialTask: Task) {
     // Execute current agent's task
     const result = await executeTask(currentAgent, {
       task: initialTask,
-      conversationHistory: conversationThread
+      conversationHistory: conversationThread,
     });
 
     // Add to conversation thread
@@ -2070,7 +2264,7 @@ async function executeCollaborativeWorkflow(initialTask: Task) {
       to: result.nextAgent || 'user',
       type: result.needsInput ? 'question' : 'response',
       content: result.message,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Check if workflow is complete
@@ -2102,8 +2296,8 @@ async function executeCollaborativeWorkflow(initialTask: Task) {
 interface AgentDisagreement {
   task: Task;
   agents: [
-    { name: string; approach: string; reasoning: string; },
-    { name: string; approach: string; reasoning: string; }
+    { name: string; approach: string; reasoning: string },
+    { name: string; approach: string; reasoning: string },
   ];
 }
 
@@ -2111,11 +2305,11 @@ async function resolveDisagreement(disagreement: AgentDisagreement) {
   // Present both approaches to orchestrator
   const orchestratorDecision = await orchestratorAgent.decide({
     task: disagreement.task,
-    options: disagreement.agents.map(a => ({
+    options: disagreement.agents.map((a) => ({
       name: a.name,
       approach: a.approach,
-      reasoning: a.reasoning
-    }))
+      reasoning: a.reasoning,
+    })),
   });
 
   // Notify agents of decision
@@ -2123,7 +2317,7 @@ async function resolveDisagreement(disagreement: AgentDisagreement) {
     from: 'orchestrator',
     type: 'system',
     content: `Decision: Using ${orchestratorDecision.selectedAgent}'s approach. Reason: ${orchestratorDecision.reasoning}`,
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 
   return orchestratorDecision;
@@ -2137,6 +2331,7 @@ async function resolveDisagreement(disagreement: AgentDisagreement) {
 ### Design System
 
 **Colors:**
+
 ```typescript
 // Tailwind CSS Variables (src/index.css)
 @layer base {
@@ -2176,6 +2371,7 @@ async function resolveDisagreement(disagreement: AgentDisagreement) {
 ```
 
 **Typography:**
+
 ```typescript
 // Font Family
 --font-sans: "Inter", system-ui, sans-serif;
@@ -2193,6 +2389,7 @@ async function resolveDisagreement(disagreement: AgentDisagreement) {
 ```
 
 **Spacing:**
+
 ```typescript
 // Consistent spacing scale (Tailwind defaults)
 0.5 = 2px   (0.125rem)
@@ -2209,50 +2406,75 @@ async function resolveDisagreement(disagreement: AgentDisagreement) {
 ```
 
 **Animations:**
+
 ```css
 /* Fade In */
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Slide In Left */
 @keyframes slide-in-left {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 /* Pulse (Thinking Indicator) */
 @keyframes pulse-slow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Shimmer (Loading State) */
 @keyframes shimmer {
-  0% { background-position: -1000px 0; }
-  100% { background-position: 1000px 0; }
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
 }
 ```
 
 ### Component Styling Examples
 
 **Message Bubble:**
+
 ```tsx
-<div className={cn(
-  "flex gap-3 p-4 rounded-lg transition-colors group",
-  message.role === 'user' && "bg-secondary",
-  message.role === 'assistant' && "bg-muted/50",
-  "hover:bg-accent/5"
-)}>
+<div
+  className={cn(
+    'group flex gap-3 rounded-lg p-4 transition-colors',
+    message.role === 'user' && 'bg-secondary',
+    message.role === 'assistant' && 'bg-muted/50',
+    'hover:bg-accent/5'
+  )}
+>
   {/* Avatar */}
   <Avatar className="h-8 w-8 shrink-0">
-    <AvatarImage src={message.role === 'user' ? user.avatar : '/ai-avatar.png'} />
+    <AvatarImage
+      src={message.role === 'user' ? user.avatar : '/ai-avatar.png'}
+    />
     <AvatarFallback>{message.role === 'user' ? 'U' : 'AI'}</AvatarFallback>
   </Avatar>
 
   {/* Content */}
-  <div className="flex-1 space-y-2 min-w-0">
+  <div className="min-w-0 flex-1 space-y-2">
     {/* Header */}
     <div className="flex items-center gap-2">
       <span className="text-sm font-medium">
@@ -2263,29 +2485,33 @@ async function resolveDisagreement(disagreement: AgentDisagreement) {
       </span>
       {message.metadata.mode === 'thinking' && (
         <Badge variant="secondary" className="text-xs">
-          <Brain className="h-3 w-3 mr-1" />
+          <Brain className="mr-1 h-3 w-3" />
           Thinking Mode
         </Badge>
       )}
     </div>
 
     {/* Message Content */}
-    <div className="prose prose-sm max-w-none dark:prose-invert">
+    <div className="prose prose-sm dark:prose-invert max-w-none">
       <MarkdownRenderer content={message.content.text} />
     </div>
 
     {/* Actions (visible on hover) */}
-    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+    <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
       <Button size="sm" variant="ghost" onClick={() => handleCopy(message)}>
-        <Copy className="h-3 w-3 mr-1" />
+        <Copy className="mr-1 h-3 w-3" />
         Copy
       </Button>
-      <Button size="sm" variant="ghost" onClick={() => handleRegenerate(message)}>
-        <RotateCcw className="h-3 w-3 mr-1" />
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => handleRegenerate(message)}
+      >
+        <RotateCcw className="mr-1 h-3 w-3" />
         Regenerate
       </Button>
       <Button size="sm" variant="ghost" onClick={() => handleEdit(message)}>
-        <Edit className="h-3 w-3 mr-1" />
+        <Edit className="mr-1 h-3 w-3" />
         Edit
       </Button>
     </div>
@@ -2294,8 +2520,9 @@ async function resolveDisagreement(disagreement: AgentDisagreement) {
 ```
 
 **Loading State (Streaming):**
+
 ```tsx
-<div className="flex gap-3 p-4 rounded-lg bg-muted/50">
+<div className="flex gap-3 rounded-lg bg-muted/50 p-4">
   <Avatar className="h-8 w-8 shrink-0">
     <AvatarImage src="/ai-avatar.png" />
     <AvatarFallback>AI</AvatarFallback>
@@ -2305,15 +2532,15 @@ async function resolveDisagreement(disagreement: AgentDisagreement) {
     <div className="flex items-center gap-2">
       <span className="text-sm font-medium">AI Assistant</span>
       <Badge variant="secondary" className="text-xs">
-        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
         Streaming
       </Badge>
     </div>
 
     {/* Streaming Content */}
-    <div className="prose prose-sm max-w-none dark:prose-invert">
+    <div className="prose prose-sm dark:prose-invert max-w-none">
       {streamingContent}
-      <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5" />
+      <span className="ml-0.5 inline-block h-4 w-2 animate-pulse bg-primary" />
     </div>
 
     {/* Token Counter */}
@@ -2502,6 +2729,7 @@ src/
 **Week 1: Setup & Core Layout**
 
 **Day 1-2: Project Setup**
+
 - [ ] Install assistant-ui dependencies
 - [ ] Create new file structure (`/chat-interface`)
 - [ ] Set up Zustand stores (4 new stores)
@@ -2509,6 +2737,7 @@ src/
 - [ ] Set up feature flag for gradual rollout
 
 **Day 3-4: Layout Components**
+
 - [ ] Build `ModernChatInterface.tsx` (main page)
 - [ ] Create `TopBar.tsx` with placeholders
 - [ ] Create `BottomBar.tsx` with placeholders
@@ -2518,6 +2747,7 @@ src/
 - [ ] Add keyboard shortcut system
 
 **Day 5: Model & Mode Selection**
+
 - [ ] Build `ModelSelector.tsx` with all models
 - [ ] Build `ModeSelector.tsx` (Fast/Balanced/Thinking)
 - [ ] Implement model recommendation logic
@@ -2527,6 +2757,7 @@ src/
 **Week 2: Message Display**
 
 **Day 1-2: Basic Message Components**
+
 - [ ] Create `MessageList.tsx` with virtualization
 - [ ] Build `UserMessage.tsx` component
 - [ ] Build `AIMessage.tsx` component
@@ -2535,6 +2766,7 @@ src/
 - [ ] Style message bubbles
 
 **Day 3-4: Message Actions & Features**
+
 - [ ] Add `MessageActions.tsx` (copy/regenerate/edit)
 - [ ] Implement copy to clipboard functionality
 - [ ] Add message regeneration
@@ -2543,6 +2775,7 @@ src/
 - [ ] Create `WelcomeScreen.tsx` for empty state
 
 **Day 5: Chat Input**
+
 - [ ] Build `ChatInput.tsx` (auto-resize textarea)
 - [ ] Add `SendButton.tsx` with loading states
 - [ ] Add `StopButton.tsx` for streaming
@@ -2558,6 +2791,7 @@ src/
 **Week 3: Streaming & Thinking Mode**
 
 **Day 1-2: Message Streaming**
+
 - [ ] Implement streaming service with optimization
 - [ ] Add `StreamingMessage.tsx` component
 - [ ] Build streaming cursor animation
@@ -2566,6 +2800,7 @@ src/
 - [ ] Add stream error handling
 
 **Day 3-4: Thinking Mode**
+
 - [ ] Build `ThinkingModeDisplay.tsx`
 - [ ] Create `ThinkingProgressBar.tsx`
 - [ ] Build `ThinkingSteps.tsx` list
@@ -2575,6 +2810,7 @@ src/
 - [ ] Style thinking steps with timeline
 
 **Day 5: Token Usage System**
+
 - [ ] Create `TokenUsageDisplay.tsx` (top bar)
 - [ ] Add detailed token display (bottom bar)
 - [ ] Implement per-message token counts
@@ -2585,6 +2821,7 @@ src/
 **Week 4: Tool Execution**
 
 **Day 1-3: Tool Display Components**
+
 - [ ] Build `ToolExecutionDisplay.tsx` (collapsible)
 - [ ] Create `ToolHeader.tsx` with status
 - [ ] Build `ToolParameters.tsx` (JSON display)
@@ -2594,6 +2831,7 @@ src/
 - [ ] Add tool icons mapping
 
 **Day 4-5: Integration & Testing**
+
 - [ ] Connect tool displays to mission control store
 - [ ] Test tool execution with real examples
 - [ ] Add error handling for tool failures
@@ -2610,6 +2848,7 @@ src/
 **Week 5: History, Search & Export**
 
 **Day 1-2: Conversation List**
+
 - [ ] Build `ConversationList.tsx` with grouping (Today, Yesterday, etc.)
 - [ ] Create `ConversationItem.tsx` with context menu
 - [ ] Add `NewChatButton.tsx`
@@ -2618,6 +2857,7 @@ src/
 - [ ] Build rename conversation dialog
 
 **Day 3: Search Functionality**
+
 - [ ] Build `SearchConversations.tsx` component
 - [ ] Implement full-text search service
 - [ ] Add search result highlighting
@@ -2626,6 +2866,7 @@ src/
 - [ ] Implement debounced search
 
 **Day 4-5: Export System**
+
 - [ ] Build `ExportDialog.tsx` with options
 - [ ] Implement Markdown exporter
 - [ ] Implement PDF exporter (jsPDF)
@@ -2643,6 +2884,7 @@ src/
 **Week 6: Artifacts System**
 
 **Day 1-2: Artifact Viewer**
+
 - [ ] Build `ArtifactViewer.tsx` with tabs
 - [ ] Create `CodePreview.tsx` with syntax highlighting
 - [ ] Implement copy/download buttons
@@ -2650,6 +2892,7 @@ src/
 - [ ] Build tab navigation (Code/Preview/History)
 
 **Day 3: Live Preview**
+
 - [ ] Build `LivePreview.tsx` for HTML (iframe with sandbox)
 - [ ] Implement React component preview (react-live)
 - [ ] Add preview error handling
@@ -2657,12 +2900,14 @@ src/
 - [ ] Test with various code types
 
 **Day 4: Additional Viewers**
+
 - [ ] Build `ImagePreview.tsx` with zoom
 - [ ] Create `DocumentPreview.tsx` for Markdown/PDF
 - [ ] Build `DataVisualization.tsx` (Recharts integration)
 - [ ] Add artifact type detection
 
 **Day 5: Version History**
+
 - [ ] Build `ArtifactVersionHistory.tsx`
 - [ ] Implement version comparison (diff)
 - [ ] Add restore version functionality
@@ -2677,6 +2922,7 @@ src/
 **Week 7: Performance, Accessibility, Responsive**
 
 **Day 1-2: Performance Optimization**
+
 - [ ] Implement message virtualization (react-virtuoso)
 - [ ] Add component memoization (React.memo)
 - [ ] Optimize re-renders with selective subscriptions
@@ -2686,6 +2932,7 @@ src/
 - [ ] Profile and fix performance bottlenecks
 
 **Day 3: Accessibility**
+
 - [ ] Add ARIA labels to all interactive elements
 - [ ] Implement focus management
 - [ ] Add keyboard shortcuts help dialog
@@ -2695,6 +2942,7 @@ src/
 - [ ] Implement reduced motion support
 
 **Day 4-5: Responsive Design**
+
 - [ ] Test on mobile (iPhone, Android)
 - [ ] Test on tablet (iPad)
 - [ ] Add touch gestures (swipe, long-press)
@@ -2711,6 +2959,7 @@ src/
 **Week 8: Testing, Docs & Launch**
 
 **Day 1-2: Testing**
+
 - [ ] Write unit tests for all hooks
 - [ ] Write unit tests for utility functions
 - [ ] Write component tests (React Testing Library)
@@ -2724,6 +2973,7 @@ src/
 - [ ] Performance benchmarking
 
 **Day 3: Documentation**
+
 - [ ] Update `README.md` with new features
 - [ ] Update `CLAUDE.md` with new architecture
 - [ ] Create `CHAT_INTERFACE.md` developer guide
@@ -2733,6 +2983,7 @@ src/
 - [ ] Write deployment guide
 
 **Day 4: Final Integration**
+
 - [ ] Integrate with existing Mission Control
 - [ ] Test with AI employee system
 - [ ] Verify backward compatibility
@@ -2741,6 +2992,7 @@ src/
 - [ ] Test token usage tracking end-to-end
 
 **Day 5: Launch Preparation**
+
 - [ ] Final type-check (must pass)
 - [ ] Final lint check
 - [ ] Production build test
@@ -2773,6 +3025,7 @@ src/
 ### Unit Tests (Vitest)
 
 **Coverage Targets:**
+
 - Hooks: 90%+
 - Services: 85%+
 - Utils: 95%+
@@ -2785,7 +3038,7 @@ src/
 describe('useTokenTracking', () => {
   it('should calculate tokens correctly for GPT-4o', () => {
     const { result } = renderHook(() => useTokenTracking());
-    const text = "Hello, world!";
+    const text = 'Hello, world!';
     const tokens = result.current.calculateTokens(text, 'gpt-4o');
     expect(tokens).toBeGreaterThan(0);
   });
@@ -2813,14 +3066,14 @@ describe('ExportService', () => {
     title: 'Test Conversation',
     messages: [
       { role: 'user', content: { text: 'Hello' } },
-      { role: 'assistant', content: { text: 'Hi there!' } }
-    ]
+      { role: 'assistant', content: { text: 'Hi there!' } },
+    ],
   };
 
   it('should export to markdown correctly', async () => {
     const service = new ExportService();
     const markdown = await service.exportToMarkdown(mockConversation, {
-      includeMetadata: true
+      includeMetadata: true,
     });
     expect(markdown).toContain('# Test Conversation');
     expect(markdown).toContain('## You');
@@ -2840,6 +3093,7 @@ describe('ExportService', () => {
 ### Integration Tests
 
 **Focus Areas:**
+
 1. Chat flow (send message → receive response)
 2. Tool execution (trigger tool → display result)
 3. Thinking mode (enable → display steps)
@@ -2903,10 +3157,14 @@ test('complete chat conversation flow', async ({ page }) => {
   await expect(page.locator('[data-testid="thinking-display"]')).toBeVisible();
 
   // Wait for response
-  await expect(page.locator('[data-testid="ai-message"]')).toBeVisible({ timeout: 30000 });
+  await expect(page.locator('[data-testid="ai-message"]')).toBeVisible({
+    timeout: 30000,
+  });
 
   // Verify response contains content
-  const response = await page.locator('[data-testid="ai-message"]').textContent();
+  const response = await page
+    .locator('[data-testid="ai-message"]')
+    .textContent();
   expect(response).toContain('quantum');
 
   // Test copy functionality
@@ -2932,7 +3190,9 @@ test('conversation management', async ({ page }) => {
   await page.click('[data-testid="conversation-list-item"]:first-child');
 
   // Right-click for context menu
-  await page.click('[data-testid="conversation-list-item"]:first-child', { button: 'right' });
+  await page.click('[data-testid="conversation-list-item"]:first-child', {
+    button: 'right',
+  });
 
   // Rename conversation
   await page.click('text=Rename');
@@ -2943,7 +3203,9 @@ test('conversation management', async ({ page }) => {
   await expect(page.locator('text=My Test Conversation')).toBeVisible();
 
   // Pin conversation
-  await page.click('[data-testid="conversation-list-item"]:first-child', { button: 'right' });
+  await page.click('[data-testid="conversation-list-item"]:first-child', {
+    button: 'right',
+  });
   await page.click('text=Pin');
 
   // Verify pin icon
@@ -2991,8 +3253,8 @@ test('chat interface accessibility', async ({ page }) => {
   await checkA11y(page, undefined, {
     detailedReport: true,
     detailedReportOptions: {
-      html: true
-    }
+      html: true,
+    },
   });
 
   // Test keyboard navigation
@@ -3034,7 +3296,7 @@ test('performance benchmarks', async ({ page }) => {
         id: `test-${idx}`,
         role: idx % 2 === 0 ? 'user' : 'assistant',
         content: { text: `Test message ${idx}` },
-        createdAt: new Date()
+        createdAt: new Date(),
       });
     }, i);
   }
@@ -3079,6 +3341,7 @@ Experience a **world-class AI chat interface** that rivals Claude.ai, ChatGPT, a
 - **♿ Accessible** - WCAG AA compliant with keyboard navigation and screen reader support
 
 **Latest LLM Models (November 2025):**
+
 - **Claude Sonnet 4.5**: Best coding model (77.2% SWE-bench)
 - **Gemini 2.5 Pro**: Best reasoning (86.4% GPQA Diamond, 1M context window)
 - **GPT-5.1 Thinking**: Adaptive reasoning with warm, conversational tone
@@ -3100,6 +3363,7 @@ Experience a **world-class AI chat interface** that rivals Claude.ai, ChatGPT, a
 4. Start chatting! Your conversation is automatically saved.
 
 **Keyboard Shortcuts:**
+
 - `Ctrl/Cmd + N` - New conversation
 - `Ctrl/Cmd + K` - Search conversations
 - `Ctrl/Cmd + L` - Focus input
@@ -3111,7 +3375,7 @@ Experience a **world-class AI chat interface** that rivals Claude.ai, ChatGPT, a
 
 **Add New Section:**
 
-```markdown
+````markdown
 ## Modern Chat Interface Architecture (November 2025)
 
 ### Overview
@@ -3121,9 +3385,11 @@ The AGI Agent Automation platform features a modern, full-screen chat interface 
 ### Key Files
 
 **Main Entry Point:**
+
 - `src/features/chat-interface/pages/ModernChatInterface.tsx` - Full-screen chat page (primary interface)
 
 **State Management (6 Zustand Stores):**
+
 - `src/features/chat-interface/stores/chat-interface-store.ts` - UI state (sidebars, panels, focus)
 - `src/features/chat-interface/stores/conversation-history-store.ts` - Conversation list, search, folders
 - `src/features/chat-interface/stores/message-processing-store.ts` - Message queue, streaming, thinking mode
@@ -3132,6 +3398,7 @@ The AGI Agent Automation platform features a modern, full-screen chat interface 
 - `src/shared/stores/mission-control-store.ts` - **EXISTING** - Orchestration state (keep for multi-agent)
 
 **Critical Services:**
+
 - `src/features/chat-interface/services/chat-message-handler.ts` - Message processing
 - `src/features/chat-interface/services/export-service.ts` - Export to Markdown/PDF/JSON/HTML
 - `src/features/chat-interface/services/search-service.ts` - Full-text search
@@ -3151,6 +3418,7 @@ The AGI Agent Automation platform features a modern, full-screen chat interface 
 The platform supports multiple LLM providers with automatic model recommendation:
 
 **Default Models by Task Type:**
+
 - **Coding**: Claude Sonnet 4.5 (77.2% SWE-bench, $3/$15 per M tokens)
 - **Scientific Reasoning**: Gemini 2.5 Pro (86.4% GPQA, 1M context, $2.50/$10)
 - **General Purpose**: GPT-5.1 Thinking (adaptive, warm tone, $5/$20)
@@ -3169,6 +3437,7 @@ When extending the chat interface:
 ### Common Tasks
 
 **Adding a New Model:**
+
 ```typescript
 // src/features/chat-interface/stores/chat-configuration-store.ts
 const NEW_MODEL: ModelOption = {
@@ -3177,11 +3446,13 @@ const NEW_MODEL: ModelOption = {
   name: 'Display Name',
   contextWindow: 128000,
   cost: { input: 2, output: 8 },
-  capabilities: ['text', 'thinking', 'tool-use']
+  capabilities: ['text', 'thinking', 'tool-use'],
 };
 ```
+````
 
 **Adding a New Tool Renderer:**
+
 ```typescript
 // src/features/chat-interface/components/tools/ToolResult.tsx
 if (result.type === 'new_tool_type') {
@@ -3190,17 +3461,19 @@ if (result.type === 'new_tool_type') {
 ```
 
 **Integrating with Mission Control:**
+
 ```typescript
 // Use mission-control-store for orchestration state
 import { useMissionStore } from '@shared/stores/mission-control-store';
 
 // Connect to chat interface for display
-const activeEmployees = useMissionStore(state => state.activeEmployees);
+const activeEmployees = useMissionStore((state) => state.activeEmployees);
 ```
 
 ### Testing
 
 **Run Tests:**
+
 ```bash
 npm run test                # Unit tests
 npm run test:coverage       # Coverage report
@@ -3209,18 +3482,19 @@ npm run test:a11y           # Accessibility tests
 ```
 
 **Coverage Requirements:**
+
 - Hooks: 90%+
 - Services: 85%+
 - Components: 70%+
 
 ### Performance Targets
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| Initial Load | < 2s | TBD |
-| Message Render | < 50ms | TBD |
-| Streaming | 60fps | TBD |
-| Search Response | < 100ms | TBD |
+| Metric          | Target  | Current |
+| --------------- | ------- | ------- |
+| Initial Load    | < 2s    | TBD     |
+| Message Render  | < 50ms  | TBD     |
+| Streaming       | 60fps   | TBD     |
+| Search Response | < 100ms | TBD     |
 
 ### Deployment Checklist
 
@@ -3234,7 +3508,8 @@ Before deploying chat interface changes:
 - [ ] Performance benchmarks met
 - [ ] Documentation updated
 - [ ] Feature flag configured for gradual rollout
-```
+
+````
 
 ### 3. New Developer Guide
 
@@ -3261,7 +3536,7 @@ npm run dev
 
 # Navigate to chat interface
 # http://localhost:5173/chat
-```
+````
 
 ### Project Structure
 
@@ -3297,6 +3572,7 @@ Component Re-render (selective)
 ### Adding a New Component
 
 1. **Create Component File:**
+
 ```typescript
 // src/features/chat-interface/components/example/NewFeature.tsx
 import { useFeatureStore } from '../../stores/feature-store';
@@ -3313,6 +3589,7 @@ export function NewFeature() {
 ```
 
 2. **Add Types:**
+
 ```typescript
 // src/features/chat-interface/types/feature.types.ts
 export interface FeatureState {
@@ -3322,6 +3599,7 @@ export interface FeatureState {
 ```
 
 3. **Write Tests:**
+
 ```typescript
 // src/features/chat-interface/components/example/NewFeature.test.tsx
 describe('NewFeature', () => {
@@ -3335,18 +3613,21 @@ describe('NewFeature', () => {
 ### Debugging Tips
 
 **1. Zustand DevTools:**
+
 ```typescript
 // Stores are already configured with devtools
 // Open Redux DevTools in browser to inspect state
 ```
 
 **2. Check Mission Control Store:**
+
 ```typescript
 // In browser console:
-window.__ZUSTAND_STORES__.missionControl.getState()
+window.__ZUSTAND_STORES__.missionControl.getState();
 ```
 
 **3. Enable Verbose Logging:**
+
 ```typescript
 // Set in localStorage
 localStorage.setItem('DEBUG', 'chat:*');
@@ -3355,13 +3636,14 @@ localStorage.setItem('DEBUG', 'chat:*');
 ### Common Patterns
 
 **1. Optimistic UI Updates:**
+
 ```typescript
 async function sendMessage(content: string) {
   // Add message immediately
   const optimisticMessage = {
     id: crypto.randomUUID(),
     content,
-    status: 'sending'
+    status: 'sending',
   };
   addMessage(optimisticMessage);
 
@@ -3378,15 +3660,17 @@ async function sendMessage(content: string) {
 ```
 
 **2. Selective Re-renders:**
+
 ```typescript
 // BAD: Subscribes to entire store, re-renders on any change
 const store = useChatStore();
 
 // GOOD: Subscribes only to needed value
-const isStreaming = useChatStore(state => state.isStreaming);
+const isStreaming = useChatStore((state) => state.isStreaming);
 ```
 
 **3. Batch State Updates:**
+
 ```typescript
 // Use Immer to batch multiple updates
 set((state) => {
@@ -3400,16 +3684,19 @@ set((state) => {
 ### Troubleshooting
 
 **Issue: Messages not streaming**
+
 - Check Netlify function is running: `netlify dev`
 - Verify WebSocket connection in Network tab
 - Check `message-processing-store` state
 
 **Issue: Thinking mode not displaying**
+
 - Verify model supports thinking mode
 - Check `thinkingProcess` in message metadata
 - Ensure `ThinkingModeDisplay` component is rendered
 
 **Issue: Poor performance with many messages**
+
 - Verify virtualization is enabled (`use-virtualized-list.ts`)
 - Check for unnecessary re-renders (React DevTools Profiler)
 - Ensure selective Zustand subscriptions
@@ -3420,7 +3707,8 @@ set((state) => {
 - [Zustand Documentation](https://zustand-demo.pmnd.rs/)
 - [shadcn/ui Components](https://ui.shadcn.com/)
 - [React 18 Documentation](https://react.dev/)
-```
+
+````
 
 ---
 
@@ -3503,14 +3791,16 @@ TESTING:
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
-```
+````
 
 2. **Push to Remote**
+
 ```bash
 git push origin feat/modern-chat-interface
 ```
 
 3. **Create Pull Request**
+
 ```bash
 gh pr create --title "Modern Chat Interface - November 2025" --body "$(cat <<'EOF'
 ## Summary
@@ -3616,12 +3906,14 @@ EOF
 ```
 
 4. **Deploy to Staging**
+
 ```bash
 # Netlify auto-deploys on PR creation
 # Wait for deploy preview to complete
 ```
 
 5. **Run Final Tests on Staging**
+
 - [ ] Verify all features work on staging URL
 - [ ] Test with real LLM providers
 - [ ] Verify token tracking accuracy
@@ -3629,12 +3921,14 @@ EOF
 - [ ] Mobile testing
 
 6. **Get Approval & Merge**
+
 ```bash
 # After PR approval
 gh pr merge --squash
 ```
 
 7. **Deploy to Production**
+
 ```bash
 # Netlify auto-deploys on merge to main
 # Monitor deployment logs
@@ -3685,16 +3979,19 @@ git push origin main
 ### Success Metrics
 
 **Week 1:**
+
 - [ ] 100% of beta users can access new interface
 - [ ] <5 critical bugs reported
 - [ ] 90%+ positive feedback
 
 **Week 4:**
+
 - [ ] 50%+ of users prefer new interface (A/B test)
 - [ ] Average session time +20%
 - [ ] Message throughput +30%
 
 **Week 8:**
+
 - [ ] 90%+ of users migrated to new interface
 - [ ] <1% error rate
 - [ ] Performance targets met
@@ -3709,13 +4006,13 @@ git push origin main
 
 ### Risk Mitigation
 
-| Risk | Mitigation |
-|------|------------|
+| Risk                              | Mitigation                                 |
+| --------------------------------- | ------------------------------------------ |
 | **assistant-ui breaking changes** | Pin to specific version, monitor changelog |
-| **Performance issues** | Virtualization, web workers, lazy loading |
-| **User confusion** | Gradual rollout, onboarding tooltips |
-| **Token cost overruns** | Usage warnings at 85%/95%, cost caps |
-| **Accessibility issues** | axe-core testing, screen reader testing |
+| **Performance issues**            | Virtualization, web workers, lazy loading  |
+| **User confusion**                | Gradual rollout, onboarding tooltips       |
+| **Token cost overruns**           | Usage warnings at 85%/95%, cost caps       |
+| **Accessibility issues**          | axe-core testing, screen reader testing    |
 
 ### Next Steps After Launch
 

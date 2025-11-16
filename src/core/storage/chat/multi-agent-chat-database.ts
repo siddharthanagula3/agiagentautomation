@@ -87,8 +87,14 @@ export async function createConversation(
 
     // Add initial participants if provided
     let participants: ConversationParticipant[] = [];
-    if (request.initial_participants && request.initial_participants.length > 0) {
-      participants = await addParticipantsBatch(conversation.id, request.initial_participants);
+    if (
+      request.initial_participants &&
+      request.initial_participants.length > 0
+    ) {
+      participants = await addParticipantsBatch(
+        conversation.id,
+        request.initial_participants
+      );
     }
 
     return {
@@ -259,7 +265,9 @@ export async function listConversations(
     // Apply metadata filters (requires join - simplified approach)
     if (filters.is_archived !== undefined || filters.is_pinned !== undefined) {
       // This is a simplified approach - ideally use a view or complex query
-      console.warn('Archived/pinned filters require metadata join - not implemented in this query');
+      console.warn(
+        'Archived/pinned filters require metadata join - not implemented in this query'
+      );
     }
 
     if (filters.date_from) {
@@ -276,7 +284,10 @@ export async function listConversations(
     query = query.range(offset, offset + limit - 1);
 
     // Ordering
-    query = query.order('last_message_at', { ascending: false, nullsFirst: false });
+    query = query.order('last_message_at', {
+      ascending: false,
+      nullsFirst: false,
+    });
 
     const { data: conversations, error: convError, count } = await query;
 
@@ -302,13 +313,16 @@ export async function listConversations(
         console.error('Failed to fetch participants:', partError);
       } else {
         // Group participants by conversation_id
-        participantsMap = (allParticipants || []).reduce((acc, participant) => {
-          if (!acc[participant.conversation_id]) {
-            acc[participant.conversation_id] = [];
-          }
-          acc[participant.conversation_id].push(participant);
-          return acc;
-        }, {} as Record<string, ConversationParticipant[]>);
+        participantsMap = (allParticipants || []).reduce(
+          (acc, participant) => {
+            if (!acc[participant.conversation_id]) {
+              acc[participant.conversation_id] = [];
+            }
+            acc[participant.conversation_id].push(participant);
+            return acc;
+          },
+          {} as Record<string, ConversationParticipant[]>
+        );
       }
     }
 
@@ -472,17 +486,19 @@ export async function addParticipantsBatch(
   participants: AddParticipantRequest[]
 ): Promise<ConversationParticipant[]> {
   try {
-    const participantsData: ConversationParticipantInsert[] = participants.map((p) => ({
-      conversation_id: conversationId,
-      employee_id: p.employee_id,
-      employee_name: p.employee_name,
-      employee_role: p.employee_role,
-      employee_provider: p.employee_provider,
-      participant_role: p.participant_role || 'collaborator',
-      status: 'active',
-      capabilities: p.capabilities || [],
-      tools_available: p.tools_available || [],
-    }));
+    const participantsData: ConversationParticipantInsert[] = participants.map(
+      (p) => ({
+        conversation_id: conversationId,
+        employee_id: p.employee_id,
+        employee_name: p.employee_name,
+        employee_role: p.employee_role,
+        employee_provider: p.employee_provider,
+        participant_role: p.participant_role || 'collaborator',
+        status: 'active',
+        capabilities: p.capabilities || [],
+        tools_available: p.tools_available || [],
+      })
+    );
 
     const { data, error } = await supabase
       .from('conversation_participants')
@@ -681,7 +697,8 @@ export async function incrementParticipantStats(
       message_count: participant.message_count + (stats.message_count || 0),
       tokens_used: participant.tokens_used + (stats.tokens_used || 0),
       cost_incurred: participant.cost_incurred + (stats.cost_incurred || 0),
-      tasks_completed: participant.tasks_completed + (stats.tasks_completed || 0),
+      tasks_completed:
+        participant.tasks_completed + (stats.tasks_completed || 0),
     };
 
     const { error: updateError } = await supabase
@@ -792,12 +809,16 @@ export async function updateConversationMetadata(
 /**
  * Gets conversation statistics for a user
  */
-export async function getConversationStats(userId: string): Promise<ConversationStats> {
+export async function getConversationStats(
+  userId: string
+): Promise<ConversationStats> {
   try {
     // Get aggregate stats
     const { data: conversations, error: convError } = await supabase
       .from('multi_agent_conversations')
-      .select('status, total_messages, total_tokens, total_cost, started_at, completed_at')
+      .select(
+        'status, total_messages, total_tokens, total_cost, started_at, completed_at'
+      )
       .eq('user_id', userId);
 
     if (convError) {
@@ -811,9 +832,12 @@ export async function getConversationStats(userId: string): Promise<Conversation
     const total_conversations = conversations?.length || 0;
     const active_conversations =
       conversations?.filter((c) => c.status === 'active').length || 0;
-    const total_messages = conversations?.reduce((sum, c) => sum + c.total_messages, 0) || 0;
-    const total_tokens = conversations?.reduce((sum, c) => sum + c.total_tokens, 0) || 0;
-    const total_cost = conversations?.reduce((sum, c) => sum + c.total_cost, 0) || 0;
+    const total_messages =
+      conversations?.reduce((sum, c) => sum + c.total_messages, 0) || 0;
+    const total_tokens =
+      conversations?.reduce((sum, c) => sum + c.total_tokens, 0) || 0;
+    const total_cost =
+      conversations?.reduce((sum, c) => sum + c.total_cost, 0) || 0;
 
     // Calculate average duration
     const completedConversations =
@@ -843,11 +867,14 @@ export async function getConversationStats(userId: string): Promise<Conversation
         .in('conversation_id', conversationIds);
 
       if (!partError && participants) {
-        const agentCounts = participants.reduce((acc, p) => {
-          const key = `${p.employee_id}|${p.employee_name}`;
-          acc[key] = (acc[key] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
+        const agentCounts = participants.reduce(
+          (acc, p) => {
+            const key = `${p.employee_id}|${p.employee_name}`;
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+          },
+          {} as Record<string, number>
+        );
 
         most_used_agents = Object.entries(agentCounts)
           .map(([key, count]) => {
@@ -933,7 +960,9 @@ export async function pinConversation(
 /**
  * Generates a share token for a conversation
  */
-export async function generateShareToken(conversationId: string): Promise<string> {
+export async function generateShareToken(
+  conversationId: string
+): Promise<string> {
   try {
     const shareToken = crypto.randomUUID();
     await updateConversationMetadata(conversationId, {

@@ -7,18 +7,54 @@
 // ENUMS AND CONSTANTS
 // =============================================
 
-export type ConversationType = 'single' | 'multi_agent' | 'collaborative' | 'mission_control';
-export type ConversationStatus = 'active' | 'paused' | 'completed' | 'archived' | 'failed';
+export type ConversationType =
+  | 'single'
+  | 'multi_agent'
+  | 'collaborative'
+  | 'mission_control';
+export type ConversationStatus =
+  | 'active'
+  | 'paused'
+  | 'completed'
+  | 'archived'
+  | 'failed';
 export type OrchestrationMode = 'automatic' | 'manual' | 'supervised';
 export type CollaborationStrategy = 'parallel' | 'sequential' | 'hierarchical';
 
-export type ParticipantRole = 'lead' | 'collaborator' | 'advisor' | 'reviewer' | 'observer';
-export type ParticipantStatus = 'active' | 'idle' | 'working' | 'completed' | 'removed';
+export type ParticipantRole =
+  | 'lead'
+  | 'collaborator'
+  | 'advisor'
+  | 'reviewer'
+  | 'observer';
+export type ParticipantStatus =
+  | 'active'
+  | 'idle'
+  | 'working'
+  | 'completed'
+  | 'removed';
 
-export type SessionType = 'task_based' | 'brainstorming' | 'review' | 'problem_solving' | 'research';
-export type TaskStatus = 'pending' | 'in_progress' | 'reviewing' | 'completed' | 'failed' | 'cancelled';
+export type SessionType =
+  | 'task_based'
+  | 'brainstorming'
+  | 'review'
+  | 'problem_solving'
+  | 'research';
+export type TaskStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'reviewing'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
 
-export type ReactionType = 'like' | 'helpful' | 'unhelpful' | 'insightful' | 'flag' | 'bookmark';
+export type ReactionType =
+  | 'like'
+  | 'helpful'
+  | 'unhelpful'
+  | 'insightful'
+  | 'flag'
+  | 'bookmark';
 
 // =============================================
 // DATABASE ROW TYPES
@@ -182,7 +218,15 @@ export interface ConversationMetadata {
 
 export type MultiAgentConversationInsert = Omit<
   MultiAgentConversation,
-  'id' | 'created_at' | 'updated_at' | 'total_messages' | 'total_tokens' | 'total_cost' | 'active_agents_count' | 'last_message_at' | 'completed_at'
+  | 'id'
+  | 'created_at'
+  | 'updated_at'
+  | 'total_messages'
+  | 'total_tokens'
+  | 'total_cost'
+  | 'active_agents_count'
+  | 'last_message_at'
+  | 'completed_at'
 > & {
   id?: string;
   title?: string | null;
@@ -199,7 +243,17 @@ export type MultiAgentConversationInsert = Omit<
 
 export type ConversationParticipantInsert = Omit<
   ConversationParticipant,
-  'id' | 'created_at' | 'updated_at' | 'message_count' | 'tokens_used' | 'cost_incurred' | 'tasks_assigned' | 'tasks_completed' | 'total_active_duration' | 'last_active_at' | 'left_at'
+  | 'id'
+  | 'created_at'
+  | 'updated_at'
+  | 'message_count'
+  | 'tokens_used'
+  | 'cost_incurred'
+  | 'tasks_assigned'
+  | 'tasks_completed'
+  | 'total_active_duration'
+  | 'last_active_at'
+  | 'left_at'
 > & {
   id?: string;
   participant_role?: ParticipantRole;
@@ -211,7 +265,14 @@ export type ConversationParticipantInsert = Omit<
 
 export type AgentCollaborationInsert = Omit<
   AgentCollaboration,
-  'id' | 'created_at' | 'updated_at' | 'total_messages' | 'total_iterations' | 'completed_at' | 'collaboration_result' | 'consensus_score'
+  | 'id'
+  | 'created_at'
+  | 'updated_at'
+  | 'total_messages'
+  | 'total_iterations'
+  | 'completed_at'
+  | 'collaboration_result'
+  | 'consensus_score'
 > & {
   id?: string;
   session_name?: string | null;
@@ -225,14 +286,23 @@ export type AgentCollaborationInsert = Omit<
   started_at?: string;
 };
 
-export type MessageReactionInsert = Omit<MessageReaction, 'id' | 'created_at' | 'updated_at'> & {
+export type MessageReactionInsert = Omit<
+  MessageReaction,
+  'id' | 'created_at' | 'updated_at'
+> & {
   id?: string;
   feedback_text?: string | null;
 };
 
 export type ConversationMetadataInsert = Omit<
   ConversationMetadata,
-  'id' | 'created_at' | 'updated_at' | 'view_count' | 'export_count' | 'share_count' | 'last_viewed_at'
+  | 'id'
+  | 'created_at'
+  | 'updated_at'
+  | 'view_count'
+  | 'export_count'
+  | 'share_count'
+  | 'last_viewed_at'
 > & {
   id?: string;
   is_pinned?: boolean;
@@ -252,11 +322,33 @@ export type ConversationMetadataInsert = Omit<
 // UPDATE TYPES (for updating records)
 // =============================================
 
-export type MultiAgentConversationUpdate = Partial<Omit<MultiAgentConversation, 'id' | 'user_id' | 'created_at' | 'updated_at'>>;
-export type ConversationParticipantUpdate = Partial<Omit<ConversationParticipant, 'id' | 'conversation_id' | 'created_at' | 'updated_at'>>;
-export type AgentCollaborationUpdate = Partial<Omit<AgentCollaboration, 'id' | 'conversation_id' | 'created_at' | 'updated_at'>>;
-export type MessageReactionUpdate = Partial<Omit<MessageReaction, 'id' | 'message_id' | 'user_id' | 'created_at' | 'updated_at'>>;
-export type ConversationMetadataUpdate = Partial<Omit<ConversationMetadata, 'id' | 'conversation_id' | 'user_id' | 'created_at' | 'updated_at'>>;
+export type MultiAgentConversationUpdate = Partial<
+  Omit<MultiAgentConversation, 'id' | 'user_id' | 'created_at' | 'updated_at'>
+>;
+export type ConversationParticipantUpdate = Partial<
+  Omit<
+    ConversationParticipant,
+    'id' | 'conversation_id' | 'created_at' | 'updated_at'
+  >
+>;
+export type AgentCollaborationUpdate = Partial<
+  Omit<
+    AgentCollaboration,
+    'id' | 'conversation_id' | 'created_at' | 'updated_at'
+  >
+>;
+export type MessageReactionUpdate = Partial<
+  Omit<
+    MessageReaction,
+    'id' | 'message_id' | 'user_id' | 'created_at' | 'updated_at'
+  >
+>;
+export type ConversationMetadataUpdate = Partial<
+  Omit<
+    ConversationMetadata,
+    'id' | 'conversation_id' | 'user_id' | 'created_at' | 'updated_at'
+  >
+>;
 
 // =============================================
 // EXTENDED TYPES (with joins)
@@ -353,7 +445,12 @@ export interface ConversationStats {
 
 export interface RealtimeConversationUpdate {
   conversation_id: string;
-  update_type: 'status_change' | 'participant_added' | 'participant_removed' | 'message_added' | 'stats_updated';
+  update_type:
+    | 'status_change'
+    | 'participant_added'
+    | 'participant_removed'
+    | 'message_added'
+    | 'stats_updated';
   data: unknown;
   timestamp: string;
 }

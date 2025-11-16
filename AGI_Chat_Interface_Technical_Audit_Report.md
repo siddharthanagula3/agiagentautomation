@@ -1,4 +1,5 @@
 # AGI Agent Automation - Chat Interface Technical Audit Report
+
 **Document Version:** 1.0  
 **Date:** November 2024  
 **Severity Legend:** 🔴 CRITICAL | 🟠 HIGH | 🟡 MEDIUM | 🔵 LOW
@@ -16,7 +17,9 @@ This comprehensive technical audit identifies 47 distinct issues in the AGI Agen
 ## 1. CRITICAL SECURITY VULNERABILITIES 🔴
 
 ### 1.1 Client-Side API Key Exposure
+
 **Files Affected:**
+
 - `/src/core/ai/llm/providers/anthropic-claude.ts`
 - `/src/core/ai/llm/providers/openai-gpt.ts`
 - `/src/core/ai/llm/providers/google-gemini.ts`
@@ -25,6 +28,7 @@ This comprehensive technical audit identifies 47 distinct issues in the AGI Agen
 **Issue:** Direct initialization of AI provider SDKs with API keys from environment variables in browser-executable code.
 
 **Technical Details:**
+
 ```typescript
 // VULNERABLE CODE PATTERN
 const client = new Anthropic({
@@ -33,6 +37,7 @@ const client = new Anthropic({
 ```
 
 **Resolution Strategy:**
+
 1. Remove all direct SDK initializations from client-side code
 2. Implement server-side proxy functions in Netlify Functions
 3. Use the following pattern for all AI provider calls:
@@ -44,25 +49,28 @@ async function callAIProvider(messages, provider) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${userToken}` // User auth, not API key
+      Authorization: `Bearer ${userToken}`, // User auth, not API key
     },
-    body: JSON.stringify({ messages, provider })
+    body: JSON.stringify({ messages, provider }),
   });
   return response.json();
 }
 ```
 
 **Required Tools:**
+
 - Netlify Functions for serverless proxy implementation
 - Environment variable management in Netlify dashboard
 - Request signing/verification mechanism
 
 ### 1.2 API Key Storage in localStorage
+
 **File:** `/src/features/settings/pages/AIConfiguration.tsx` (Lines 129, 151, 181)
 
 **Issue:** Storing sensitive API keys in browser localStorage, accessible to any JavaScript code or XSS attack.
 
 **Resolution Strategy:**
+
 1. Remove all localStorage.setItem calls for API keys
 2. Implement server-side key management service
 3. Use encrypted session storage for temporary tokens only
@@ -76,22 +84,23 @@ await saveAPIKeyToServer(provider, apiKey); // Server-side encrypted storage
 ```
 
 ### 1.3 SQL Injection Vulnerability
+
 **File:** `/netlify/functions/run-sql.ts`
 
 **Issue:** Direct SQL execution without parameterization or validation.
 
 **Resolution Strategy:**
+
 1. Implement parameterized queries using Supabase client
 2. Add input validation and sanitization
 3. Restrict to admin-only access with role verification
 
 ```typescript
 // SECURE IMPLEMENTATION
-const { data, error } = await supabase
-  .rpc('execute_admin_query', {
-    query_template: 'SELECT * FROM users WHERE id = $1',
-    params: [userId]
-  });
+const { data, error } = await supabase.rpc('execute_admin_query', {
+  query_template: 'SELECT * FROM users WHERE id = $1',
+  params: [userId],
+});
 ```
 
 ---
@@ -99,7 +108,9 @@ const { data, error } = await supabase
 ## 2. HIGH-SEVERITY ISSUES 🟠
 
 ### 2.1 Token Tracking Failure Chain
+
 **Files:**
+
 - `/src/features/chat/services/streaming-response-handler.ts`
 - `/src/core/integrations/token-usage-tracker.ts`
 - `/src/features/chat/hooks/use-chat-interface.ts`
@@ -107,38 +118,42 @@ const { data, error } = await supabase
 **Issue:** Inconsistent token tracking leading to unbilled API usage.
 
 **Technical Analysis:**
+
 1. Streaming responses don't properly extract token counts from provider responses
 2. Token logger receives undefined/zero values for token counts
 3. Fallback estimation (40% input, 60% output) is inaccurate
 
 **Resolution Strategy:**
+
 ```typescript
 // CORRECT TOKEN EXTRACTION
 interface ProviderResponse {
-  usage: {
-    prompt_tokens: number;    // OpenAI format
-    completion_tokens: number;
-    total_tokens: number;
-  } | {
-    input_tokens: number;     // Anthropic format
-    output_tokens: number;
-    total_tokens: number;
-  }
+  usage:
+    | {
+        prompt_tokens: number; // OpenAI format
+        completion_tokens: number;
+        total_tokens: number;
+      }
+    | {
+        input_tokens: number; // Anthropic format
+        output_tokens: number;
+        total_tokens: number;
+      };
 }
 
 function extractTokenUsage(response: ProviderResponse, provider: string) {
-  switch(provider) {
+  switch (provider) {
     case 'openai':
       return {
         input: response.usage.prompt_tokens,
         output: response.usage.completion_tokens,
-        total: response.usage.total_tokens
+        total: response.usage.total_tokens,
       };
     case 'anthropic':
       return {
         input: response.usage.input_tokens,
         output: response.usage.output_tokens,
-        total: response.usage.total_tokens
+        total: response.usage.total_tokens,
       };
   }
 }
@@ -153,7 +168,7 @@ if (tokens.total > 0) {
     sessionId,
     employeeId,
     employeeName,
-    tokens.input,  // CRITICAL: Pass actual values
+    tokens.input, // CRITICAL: Pass actual values
     tokens.output, // CRITICAL: Pass actual values
     taskDescription
   );
@@ -161,7 +176,9 @@ if (tokens.total > 0) {
 ```
 
 ### 2.2 Missing Rate Limiting
+
 **Files:**
+
 - `/netlify/functions/anthropic-proxy.ts`
 - `/netlify/functions/openai-proxy.ts`
 - `/netlify/functions/google-proxy.ts`
@@ -169,14 +186,15 @@ if (tokens.total > 0) {
 **Issue:** No rate limiting on API proxy endpoints, allowing abuse.
 
 **Resolution Strategy:**
+
 ```typescript
 // IMPLEMENT RATE LIMITING
 import { RateLimiter } from '@/lib/rate-limiter';
 
 const limiter = new RateLimiter({
-  windowMs: 60 * 1000,  // 1 minute
-  max: 10,               // 10 requests per minute
-  keyGenerator: (req) => req.user.id
+  windowMs: 60 * 1000, // 1 minute
+  max: 10, // 10 requests per minute
+  keyGenerator: (req) => req.user.id,
 });
 
 export async function handler(event, context) {
@@ -184,7 +202,7 @@ export async function handler(event, context) {
   if (limited) {
     return {
       statusCode: 429,
-      body: JSON.stringify({ error: 'Rate limit exceeded' })
+      body: JSON.stringify({ error: 'Rate limit exceeded' }),
     };
   }
   // Process request
@@ -192,47 +210,55 @@ export async function handler(event, context) {
 ```
 
 ### 2.3 Authentication State Inconsistency
+
 **File:** `/src/features/chat/hooks/use-chat-interface.ts`
 
 **Issue:** Missing user authentication check before message sending.
 
 **Resolution Strategy:**
+
 ```typescript
 const sendMessage = useCallback(async (params) => {
   // CRITICAL: Verify auth state
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   if (!session) {
     throw new AuthError('Session expired. Please login again.');
   }
-  
+
   // Verify session is valid
-  const { data: { user } } = await supabase.auth.getUser(session.access_token);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(session.access_token);
   if (!user) {
     throw new AuthError('Invalid session');
   }
-  
+
   // Continue with message sending
 }, []);
 ```
 
 ### 2.4 Date Handling Errors
+
 **Multiple Files:** Chat interface components
 
 **Issue:** Inconsistent Date object handling causing render crashes.
 
 **Resolution Strategy:**
+
 ```typescript
 // DATE VALIDATION UTILITY
 function ensureValidDate(value: any): Date {
   if (value instanceof Date && !isNaN(value.getTime())) {
     return value;
   }
-  
+
   const parsed = new Date(value);
   if (!isNaN(parsed.getTime())) {
     return parsed;
   }
-  
+
   console.error('Invalid date value:', value);
   return new Date(); // Fallback to current date
 }
@@ -241,7 +267,7 @@ function ensureValidDate(value: any): Date {
 const validatedMessage = {
   ...message,
   createdAt: ensureValidDate(message.createdAt),
-  updatedAt: message.updatedAt ? ensureValidDate(message.updatedAt) : undefined
+  updatedAt: message.updatedAt ? ensureValidDate(message.updatedAt) : undefined,
 };
 ```
 
@@ -250,13 +276,16 @@ const validatedMessage = {
 ## 3. MEDIUM-SEVERITY ISSUES 🟡
 
 ### 3.1 Import Path Resolution Failures
+
 **Issue:** Missing unified-llm-service imports causing module resolution errors.
 
 **Files with broken imports:**
+
 - `/src/features/chat/services/streaming-response-handler.ts`
 - `/src/core/integrations/chat-completion-handler.ts`
 
 **Resolution Strategy:**
+
 ```typescript
 // FIX IMPORT PATHS
 // Change from:
@@ -266,15 +295,17 @@ import { unifiedLLMService } from '@core/ai/llm/unified-language-model';
 ```
 
 ### 3.2 Zustand Store Memory Leaks
+
 **File:** `/src/shared/stores/chat-store.ts`
 
 **Issue:** WorkingProcesses Map never cleaned up, causing memory buildup.
 
 **Resolution Strategy:**
+
 ```typescript
 // ADD CLEANUP MECHANISM
 const cleanupWorkingProcesses = () => {
-  const oneHourAgo = Date.now() - (60 * 60 * 1000);
+  const oneHourAgo = Date.now() - 60 * 60 * 1000;
   workingProcesses.forEach((process, employeeId) => {
     if (process.status === 'completed' || process.status === 'error') {
       const lastUpdate = process.steps[process.steps.length - 1]?.timestamp;
@@ -293,25 +324,29 @@ useEffect(() => {
 ```
 
 ### 3.3 Streaming Response Buffer Overflow
+
 **File:** `/src/features/chat/hooks/use-chat-interface.ts`
 
 **Issue:** Unbounded streaming content accumulation.
 
 **Resolution Strategy:**
+
 ```typescript
 const MAX_STREAMING_LENGTH = 100000; // 100KB limit
 
 // In streaming handler
 if (streamingContent.length > MAX_STREAMING_LENGTH) {
   console.warn('Streaming content exceeded limit, truncating');
-  setStreamingContent(prev => prev.slice(-MAX_STREAMING_LENGTH));
+  setStreamingContent((prev) => prev.slice(-MAX_STREAMING_LENGTH));
 }
 ```
 
 ### 3.4 Missing Error Boundaries
+
 **Issue:** Chat components lack error boundary protection.
 
 **Resolution Strategy:**
+
 ```typescript
 // WRAP CHAT COMPONENTS
 <ErrorBoundary
@@ -337,11 +372,13 @@ function ChatErrorFallback() {
 ```
 
 ### 3.5 RLS Policy Bypass Risk
+
 **File:** `/src/features/chat/services/conversation-storage.ts`
 
 **Issue:** Insufficient server-side validation of session ownership.
 
 **Resolution Strategy:**
+
 ```sql
 -- ADD ROW LEVEL SECURITY POLICY
 ALTER TABLE chat_sessions ENABLE ROW LEVEL SECURITY;
@@ -368,9 +405,11 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ## 4. LOW-SEVERITY ISSUES 🔵
 
 ### 4.1 Console Logging in Production
+
 **Issue:** Sensitive data logged to console in production builds.
 
 **Resolution Strategy:**
+
 ```typescript
 // CREATE LOGGER UTILITY
 const logger = {
@@ -387,33 +426,39 @@ const logger = {
     if (import.meta.env.PROD) {
       sendToSentry(...args);
     }
-  }
+  },
 };
 ```
 
 ### 4.2 Hardcoded Demo Credentials
+
 **File:** `/src/features/auth/pages/Login.tsx`
 
 **Resolution Strategy:**
+
 ```typescript
 // REMOVE HARDCODED VALUES
 // Instead, use environment-based demo mode
 const DEMO_ENABLED = import.meta.env.VITE_DEMO_MODE === 'true';
-const DEMO_CREDENTIALS = DEMO_ENABLED ? {
-  email: import.meta.env.VITE_DEMO_EMAIL,
-  password: import.meta.env.VITE_DEMO_PASSWORD
-} : null;
+const DEMO_CREDENTIALS = DEMO_ENABLED
+  ? {
+      email: import.meta.env.VITE_DEMO_EMAIL,
+      password: import.meta.env.VITE_DEMO_PASSWORD,
+    }
+  : null;
 ```
 
 ### 4.3 Missing CSRF Protection
+
 **Issue:** No CSRF tokens in state-changing requests.
 
 **Resolution Strategy:**
+
 ```typescript
 // IMPLEMENT CSRF TOKEN MANAGEMENT
 class CSRFManager {
   private token: string | null = null;
-  
+
   async getToken(): Promise<string> {
     if (!this.token) {
       const response = await fetch('/api/csrf-token');
@@ -422,15 +467,15 @@ class CSRFManager {
     }
     return this.token;
   }
-  
+
   async attachToRequest(options: RequestInit): Promise<RequestInit> {
     const token = await this.getToken();
     return {
       ...options,
       headers: {
         ...options.headers,
-        'X-CSRF-Token': token
-      }
+        'X-CSRF-Token': token,
+      },
     };
   }
 }
@@ -441,9 +486,11 @@ class CSRFManager {
 ## 5. PERFORMANCE OPTIMIZATIONS
 
 ### 5.1 Bundle Size Optimization
+
 **Issue:** Chat interface bundle exceeds 1MB.
 
 **Resolution Strategy:**
+
 ```javascript
 // vite.config.ts OPTIMIZATION
 rollupOptions: {
@@ -467,9 +514,11 @@ rollupOptions: {
 ```
 
 ### 5.2 React Re-render Optimization
+
 **Issue:** Excessive re-renders in message list.
 
 **Resolution Strategy:**
+
 ```typescript
 // MEMOIZE MESSAGE COMPONENTS
 const MessageItem = React.memo(({ message, onEdit, onDelete }) => {
@@ -508,9 +557,11 @@ function MessageList({ messages }) {
 ## 6. DATA INTEGRITY FIXES
 
 ### 6.1 Message Ordering Issues
+
 **Issue:** Messages appear out of order due to timestamp issues.
 
 **Resolution Strategy:**
+
 ```typescript
 // IMPLEMENT RELIABLE ORDERING
 interface OrderedMessage extends ChatMessage {
@@ -526,8 +577,10 @@ const sortedMessages = messages.sort((a, b) => {
   }
   // Secondary: server timestamp
   if (a.serverTimestamp !== b.serverTimestamp) {
-    return new Date(a.serverTimestamp).getTime() - 
-           new Date(b.serverTimestamp).getTime();
+    return (
+      new Date(a.serverTimestamp).getTime() -
+      new Date(b.serverTimestamp).getTime()
+    );
   }
   // Tertiary: local timestamp
   return a.createdAt.getTime() - b.createdAt.getTime();
@@ -535,34 +588,36 @@ const sortedMessages = messages.sort((a, b) => {
 ```
 
 ### 6.2 Session State Synchronization
+
 **Issue:** Session state not synchronized across tabs.
 
 **Resolution Strategy:**
+
 ```typescript
 // USE BROADCAST CHANNEL API
 class SessionSync {
   private channel: BroadcastChannel;
-  
+
   constructor() {
     this.channel = new BroadcastChannel('chat-session-sync');
     this.channel.onmessage = this.handleMessage;
   }
-  
+
   private handleMessage = (event: MessageEvent) => {
     if (event.data.type === 'session-update') {
       // Update local state
       useChatStore.setState({
         activeSessionId: event.data.sessionId,
-        messages: event.data.messages
+        messages: event.data.messages,
       });
     }
   };
-  
+
   broadcastUpdate(sessionId: string, messages: ChatMessage[]) {
     this.channel.postMessage({
       type: 'session-update',
       sessionId,
-      messages
+      messages,
     });
   }
 }
@@ -573,6 +628,7 @@ class SessionSync {
 ## 7. IMPLEMENTATION ROADMAP
 
 ### Phase 1: Critical Security (Week 1)
+
 **Claude Code Implementation Instructions:**
 
 ```bash
@@ -597,6 +653,7 @@ claude-code --task "Implement parameterized queries" \
 ```
 
 ### Phase 2: High Priority (Week 1-2)
+
 **Implementation Commands:**
 
 ```bash
@@ -620,6 +677,7 @@ claude-code --task "Add session validation" \
 ```
 
 ### Phase 3: Medium Priority (Week 2-3)
+
 ```bash
 # Task 7: Fix import paths
 claude-code --task "Correct import paths" \
@@ -641,6 +699,7 @@ claude-code --task "Wrap components in error boundaries" \
 ```
 
 ### Phase 4: Performance & Polish (Week 3-4)
+
 ```bash
 # Task 10: Optimize bundle
 claude-code --task "Optimize build chunks" \
@@ -666,6 +725,7 @@ claude-code --task "Implement cross-tab sync" \
 ## 8. TESTING REQUIREMENTS
 
 ### 8.1 Security Testing
+
 ```typescript
 // CRITICAL SECURITY TESTS
 describe('Security Tests', () => {
@@ -674,59 +734,61 @@ describe('Security Tests', () => {
     expect(bundle).not.toContain('sk-');
     expect(bundle).not.toContain('VITE_OPENAI_API_KEY');
   });
-  
+
   test('SQL injection prevention', async () => {
     const maliciousInput = "'; DROP TABLE users; --";
     const response = await fetch('/api/search', {
-      body: JSON.stringify({ query: maliciousInput })
+      body: JSON.stringify({ query: maliciousInput }),
     });
     expect(response.status).not.toBe(500);
     // Verify tables still exist
   });
-  
+
   test('Rate limiting enforcement', async () => {
-    const requests = Array(15).fill(null).map(() => 
-      fetch('/api/chat', { method: 'POST' })
-    );
+    const requests = Array(15)
+      .fill(null)
+      .map(() => fetch('/api/chat', { method: 'POST' }));
     const responses = await Promise.all(requests);
-    const rateLimited = responses.filter(r => r.status === 429);
+    const rateLimited = responses.filter((r) => r.status === 429);
     expect(rateLimited.length).toBeGreaterThan(0);
   });
 });
 ```
 
 ### 8.2 Token Tracking Tests
+
 ```typescript
 describe('Token Tracking', () => {
   test('Tokens logged for all API calls', async () => {
     const spy = jest.spyOn(tokenLogger, 'logTokenUsage');
-    
+
     await sendMessage('Test message');
-    
+
     expect(spy).toHaveBeenCalledWith(
-      expect.any(String),  // model
-      expect.any(Number),  // total tokens
-      expect.any(String),  // userId
-      expect.any(String),  // sessionId
-      expect.any(String),  // employeeId
-      expect.any(String),  // employeeName
-      expect.any(Number),  // input tokens (NOT undefined)
-      expect.any(Number),  // output tokens (NOT undefined)
-      expect.any(String)   // description
+      expect.any(String), // model
+      expect.any(Number), // total tokens
+      expect.any(String), // userId
+      expect.any(String), // sessionId
+      expect.any(String), // employeeId
+      expect.any(String), // employeeName
+      expect.any(Number), // input tokens (NOT undefined)
+      expect.any(Number), // output tokens (NOT undefined)
+      expect.any(String) // description
     );
   });
 });
 ```
 
 ### 8.3 Performance Benchmarks
+
 ```javascript
 // PERFORMANCE REQUIREMENTS
 const PERFORMANCE_TARGETS = {
-  initialLoad: 3000,      // 3 seconds
-  messageRender: 100,     // 100ms per message
-  streamingLatency: 50,   // 50ms chunk processing
-  bundleSize: 500000,     // 500KB main bundle
-  memoryCap: 50000000     // 50MB memory usage
+  initialLoad: 3000, // 3 seconds
+  messageRender: 100, // 100ms per message
+  streamingLatency: 50, // 50ms chunk processing
+  bundleSize: 500000, // 500KB main bundle
+  memoryCap: 50000000, // 50MB memory usage
 };
 
 describe('Performance', () => {
@@ -734,7 +796,7 @@ describe('Performance', () => {
     const stats = getWebpackStats();
     expect(stats.assets[0].size).toBeLessThan(PERFORMANCE_TARGETS.bundleSize);
   });
-  
+
   test('Message rendering performance', async () => {
     const start = performance.now();
     render(<MessageList messages={generateMessages(100)} />);
@@ -749,6 +811,7 @@ describe('Performance', () => {
 ## 9. MONITORING & ALERTS
 
 ### 9.1 Critical Metrics to Monitor
+
 ```typescript
 // MONITORING CONFIGURATION
 const MONITORING_CONFIG = {
@@ -756,36 +819,37 @@ const MONITORING_CONFIG = {
     apiKeyExposure: {
       query: 'logs.message:("api_key" OR "sk-")',
       threshold: 1,
-      severity: 'CRITICAL'
+      severity: 'CRITICAL',
     },
     tokenTrackingFailure: {
       query: 'error.type:"TokenTrackingError"',
       threshold: 10,
       window: '5m',
-      severity: 'HIGH'
+      severity: 'HIGH',
     },
     authenticationErrors: {
       query: 'error.type:"AuthError"',
       threshold: 50,
       window: '15m',
-      severity: 'MEDIUM'
+      severity: 'MEDIUM',
     },
     rateLimitHits: {
       query: 'response.status:429',
       threshold: 100,
       window: '5m',
-      severity: 'MEDIUM'
-    }
+      severity: 'MEDIUM',
+    },
   },
   alerts: {
     pagerDuty: ['CRITICAL'],
     slack: ['HIGH', 'MEDIUM'],
-    email: ['LOW']
-  }
+    email: ['LOW'],
+  },
 };
 ```
 
 ### 9.2 Logging Requirements
+
 ```typescript
 // STRUCTURED LOGGING
 interface ChatEventLog {
@@ -807,7 +871,7 @@ interface ChatEventLog {
 function logChatEvent(event: ChatEventLog) {
   // Send to centralized logging
   logger.info('chat_event', event);
-  
+
   // Track metrics
   if (event.event === 'token_usage') {
     metrics.increment('tokens.used', event.metadata.tokens);
@@ -821,6 +885,7 @@ function logChatEvent(event: ChatEventLog) {
 ## 10. COMPLIANCE & DOCUMENTATION
 
 ### 10.1 Security Compliance Checklist
+
 - [ ] All API keys removed from client code
 - [ ] localStorage cleared of sensitive data
 - [ ] SQL injection vulnerabilities patched
@@ -833,22 +898,26 @@ function logChatEvent(event: ChatEventLog) {
 - [ ] Security headers configured (CSP, HSTS, etc.)
 
 ### 10.2 Required Documentation Updates
+
 ```markdown
 ## Chat Interface Security Guide
 
 ### API Key Management
+
 - Never store API keys in client-side code
 - Use environment variables only in server-side functions
 - Rotate keys every 90 days
 - Monitor for key exposure in logs
 
 ### Token Tracking
+
 - All AI API calls must log token usage
 - Verify input/output token counts from provider response
 - Alert on tracking failures >1% of requests
 - Reconcile usage weekly with provider dashboards
 
 ### Authentication Flow
+
 1. Verify session exists
 2. Validate session token
 3. Check user permissions
@@ -862,6 +931,7 @@ function logChatEvent(event: ChatEventLog) {
 ## Appendix A: Emergency Hotfixes
 
 ### Critical Hotfix #1: Disable Client API Keys
+
 ```bash
 # IMMEDIATE ACTION - Disable all client-side API usage
 sed -i 's/import.meta.env.VITE_.*_API_KEY/undefined/g' src/**/*.ts
@@ -871,19 +941,21 @@ npm run build && npm run deploy
 ```
 
 ### Critical Hotfix #2: Block SQL Endpoint
+
 ```typescript
 // Add to netlify/functions/run-sql.ts
 export async function handler(event, context) {
   return {
     statusCode: 503,
-    body: JSON.stringify({ 
-      error: 'Endpoint temporarily disabled for security update' 
-    })
+    body: JSON.stringify({
+      error: 'Endpoint temporarily disabled for security update',
+    }),
   };
 }
 ```
 
 ### Critical Hotfix #3: Emergency Rate Limit
+
 ```typescript
 // Add to all proxy functions
 const EMERGENCY_RATE_LIMIT = 1; // 1 request per minute
@@ -892,11 +964,11 @@ const lastRequest = {};
 export async function handler(event, context) {
   const userId = event.headers['x-user-id'];
   const now = Date.now();
-  
+
   if (lastRequest[userId] && now - lastRequest[userId] < 60000) {
     return { statusCode: 429, body: 'Rate limited' };
   }
-  
+
   lastRequest[userId] = now;
   // Continue processing
 }
@@ -907,6 +979,7 @@ export async function handler(event, context) {
 ## Appendix B: Tool Requirements for Claude Code
 
 ### Required NPM Packages
+
 ```json
 {
   "dependencies": {
@@ -925,6 +998,7 @@ export async function handler(event, context) {
 ```
 
 ### Environment Variables Required
+
 ```bash
 # Production Environment
 SUPABASE_SERVICE_ROLE_KEY=
@@ -940,6 +1014,7 @@ VITE_PERPLEXITY_API_KEY= # Move to server-only
 ```
 
 ### VS Code Extensions for Claude Code
+
 ```json
 {
   "recommendations": [
@@ -964,10 +1039,10 @@ VITE_PERPLEXITY_API_KEY= # Move to server-only
 **Medium Priority:** 12  
 **Low Priority:** 26  
 **Estimated Resolution Time:** 3-4 weeks  
-**Required Team:** 2-3 developers  
+**Required Team:** 2-3 developers
 
 **Document Hash:** SHA-256:a7b9c2d4e6f8...  
-**Version Control:** Track all changes in Git with issue references  
+**Version Control:** Track all changes in Git with issue references
 
 ---
 

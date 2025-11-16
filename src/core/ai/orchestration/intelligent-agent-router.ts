@@ -9,92 +9,529 @@ import { AgentCapability } from './agent-collaboration-protocol';
 // Expertise taxonomy with keywords
 export const ExpertiseTaxonomy: Record<string, string[]> = {
   // Legal & Compliance
-  law: ['law', 'legal', 'lawyer', 'attorney', 'contract', 'sue', 'court', 'litigation', 'intellectual property', 'patent', 'trademark', 'copyright', 'compliance', 'regulation', 'rights', 'lawsuit', 'divorce', 'custody', 'criminal', 'civil'],
+  law: [
+    'law',
+    'legal',
+    'lawyer',
+    'attorney',
+    'contract',
+    'sue',
+    'court',
+    'litigation',
+    'intellectual property',
+    'patent',
+    'trademark',
+    'copyright',
+    'compliance',
+    'regulation',
+    'rights',
+    'lawsuit',
+    'divorce',
+    'custody',
+    'criminal',
+    'civil',
+  ],
 
   // Food & Culinary
-  cooking: ['cook', 'recipe', 'food', 'chef', 'kitchen', 'bake', 'baking', 'ingredient', 'meal', 'dish', 'cuisine', 'restaurant', 'eat', 'dinner', 'lunch', 'breakfast', 'dessert', 'vegetarian', 'vegan'],
+  cooking: [
+    'cook',
+    'recipe',
+    'food',
+    'chef',
+    'kitchen',
+    'bake',
+    'baking',
+    'ingredient',
+    'meal',
+    'dish',
+    'cuisine',
+    'restaurant',
+    'eat',
+    'dinner',
+    'lunch',
+    'breakfast',
+    'dessert',
+    'vegetarian',
+    'vegan',
+  ],
 
   // Health & Wellness
-  health: ['health', 'medical', 'doctor', 'symptom', 'sick', 'disease', 'medicine', 'treatment', 'pain', 'ache', 'fever', 'cough', 'diagnosis', 'hospital', 'wellness'],
+  health: [
+    'health',
+    'medical',
+    'doctor',
+    'symptom',
+    'sick',
+    'disease',
+    'medicine',
+    'treatment',
+    'pain',
+    'ache',
+    'fever',
+    'cough',
+    'diagnosis',
+    'hospital',
+    'wellness',
+  ],
 
   // Mental Health & Counseling
-  mental_health: ['mental health', 'anxiety', 'depression', 'stress', 'therapy', 'counseling', 'therapist', 'psychologist', 'emotional', 'mental wellness', 'panic', 'trauma', 'ptsd', 'self-care', 'mindfulness', 'coping'],
+  mental_health: [
+    'mental health',
+    'anxiety',
+    'depression',
+    'stress',
+    'therapy',
+    'counseling',
+    'therapist',
+    'psychologist',
+    'emotional',
+    'mental wellness',
+    'panic',
+    'trauma',
+    'ptsd',
+    'self-care',
+    'mindfulness',
+    'coping',
+  ],
 
   // Finance & Money
-  finance: ['money', 'finance', 'invest', 'stock', 'budget', 'save', 'savings', 'retirement', '401k', 'ira', 'tax', 'loan', 'mortgage', 'credit', 'debt', 'salary', 'portfolio', 'dividend', 'etf', 'mutual fund'],
+  finance: [
+    'money',
+    'finance',
+    'invest',
+    'stock',
+    'budget',
+    'save',
+    'savings',
+    'retirement',
+    '401k',
+    'ira',
+    'tax',
+    'loan',
+    'mortgage',
+    'credit',
+    'debt',
+    'salary',
+    'portfolio',
+    'dividend',
+    'etf',
+    'mutual fund',
+  ],
 
   // Education & Learning
-  education: ['learn', 'study', 'teach', 'tutor', 'homework', 'math', 'science', 'physics', 'chemistry', 'biology', 'history', 'geography', 'test', 'exam', 'sat', 'act', 'gre', 'school', 'university', 'college'],
+  education: [
+    'learn',
+    'study',
+    'teach',
+    'tutor',
+    'homework',
+    'math',
+    'science',
+    'physics',
+    'chemistry',
+    'biology',
+    'history',
+    'geography',
+    'test',
+    'exam',
+    'sat',
+    'act',
+    'gre',
+    'school',
+    'university',
+    'college',
+  ],
 
   // Fitness & Exercise
-  fitness: ['fitness', 'exercise', 'workout', 'gym', 'train', 'training', 'muscle', 'strength', 'cardio', 'run', 'running', 'weight', 'lose weight', 'bodybuilding', 'yoga', 'crossfit', 'athlete'],
+  fitness: [
+    'fitness',
+    'exercise',
+    'workout',
+    'gym',
+    'train',
+    'training',
+    'muscle',
+    'strength',
+    'cardio',
+    'run',
+    'running',
+    'weight',
+    'lose weight',
+    'bodybuilding',
+    'yoga',
+    'crossfit',
+    'athlete',
+  ],
 
   // Travel & Tourism
-  travel: ['travel', 'trip', 'vacation', 'destination', 'flight', 'hotel', 'tourism', 'visit', 'backpack', 'itinerary', 'tour', 'cruise', 'resort', 'adventure', 'sightseeing'],
+  travel: [
+    'travel',
+    'trip',
+    'vacation',
+    'destination',
+    'flight',
+    'hotel',
+    'tourism',
+    'visit',
+    'backpack',
+    'itinerary',
+    'tour',
+    'cruise',
+    'resort',
+    'adventure',
+    'sightseeing',
+  ],
 
   // Career & Jobs
-  career: ['job', 'career', 'resume', 'cv', 'interview', 'hire', 'employment', 'work', 'profession', 'linkedin', 'cover letter', 'salary negotiation', 'job search', 'networking'],
+  career: [
+    'job',
+    'career',
+    'resume',
+    'cv',
+    'interview',
+    'hire',
+    'employment',
+    'work',
+    'profession',
+    'linkedin',
+    'cover letter',
+    'salary negotiation',
+    'job search',
+    'networking',
+  ],
 
   // Software & Technology
-  software: ['code', 'coding', 'program', 'programming', 'software', 'developer', 'app', 'application', 'bug', 'debug', 'function', 'class', 'algorithm', 'data structure', 'api', 'frontend', 'backend', 'database', 'javascript', 'python', 'java', 'react', 'node'],
+  software: [
+    'code',
+    'coding',
+    'program',
+    'programming',
+    'software',
+    'developer',
+    'app',
+    'application',
+    'bug',
+    'debug',
+    'function',
+    'class',
+    'algorithm',
+    'data structure',
+    'api',
+    'frontend',
+    'backend',
+    'database',
+    'javascript',
+    'python',
+    'java',
+    'react',
+    'node',
+  ],
 
   // Tech Support & Troubleshooting
-  tech_support: ['computer', 'laptop', 'pc', 'troubleshoot', 'fix', 'error', 'crash', 'slow', 'virus', 'malware', 'windows', 'mac', 'linux', 'wifi', 'internet', 'printer', 'email', 'password', 'backup', 'update', 'install'],
+  tech_support: [
+    'computer',
+    'laptop',
+    'pc',
+    'troubleshoot',
+    'fix',
+    'error',
+    'crash',
+    'slow',
+    'virus',
+    'malware',
+    'windows',
+    'mac',
+    'linux',
+    'wifi',
+    'internet',
+    'printer',
+    'email',
+    'password',
+    'backup',
+    'update',
+    'install',
+  ],
 
   // Life Coaching & Personal Development
-  life_coaching: ['life coach', 'personal development', 'goals', 'motivation', 'habits', 'productivity', 'confidence', 'self-improvement', 'mindset', 'success', 'purpose', 'transformation', 'change', 'growth'],
+  life_coaching: [
+    'life coach',
+    'personal development',
+    'goals',
+    'motivation',
+    'habits',
+    'productivity',
+    'confidence',
+    'self-improvement',
+    'mindset',
+    'success',
+    'purpose',
+    'transformation',
+    'change',
+    'growth',
+  ],
 
   // Home & DIY
-  home_improvement: ['home', 'house', 'diy', 'repair', 'fix', 'renovation', 'remodel', 'home improvement', 'maintenance', 'plumbing', 'electrical', 'painting', 'carpentry', 'garden', 'landscaping', 'tools', 'handyman', 'leak', 'faucet', 'wall', 'floor'],
+  home_improvement: [
+    'home',
+    'house',
+    'diy',
+    'repair',
+    'fix',
+    'renovation',
+    'remodel',
+    'home improvement',
+    'maintenance',
+    'plumbing',
+    'electrical',
+    'painting',
+    'carpentry',
+    'garden',
+    'landscaping',
+    'tools',
+    'handyman',
+    'leak',
+    'faucet',
+    'wall',
+    'floor',
+  ],
 
   // DevOps & Infrastructure (specialized tech)
-  devops: ['deploy', 'deployment', 'server', 'cloud', 'aws', 'azure', 'gcp', 'kubernetes', 'docker', 'container', 'ci/cd', 'pipeline', 'infrastructure', 'devops'],
+  devops: [
+    'deploy',
+    'deployment',
+    'server',
+    'cloud',
+    'aws',
+    'azure',
+    'gcp',
+    'kubernetes',
+    'docker',
+    'container',
+    'ci/cd',
+    'pipeline',
+    'infrastructure',
+    'devops',
+  ],
 
   // QA & Testing (specialized tech)
-  testing: ['test', 'testing', 'qa', 'quality assurance', 'bug', 'defect', 'selenium', 'automation', 'unit test', 'integration test', 'e2e'],
+  testing: [
+    'test',
+    'testing',
+    'qa',
+    'quality assurance',
+    'bug',
+    'defect',
+    'selenium',
+    'automation',
+    'unit test',
+    'integration test',
+    'e2e',
+  ],
 
   // Design & UX (specialized tech)
-  design: ['design', 'ui', 'ux', 'interface', 'user experience', 'wireframe', 'mockup', 'figma', 'prototype', 'typography', 'color', 'layout'],
+  design: [
+    'design',
+    'ui',
+    'ux',
+    'interface',
+    'user experience',
+    'wireframe',
+    'mockup',
+    'figma',
+    'prototype',
+    'typography',
+    'color',
+    'layout',
+  ],
 
   // Product Management (specialized tech)
-  product: ['product', 'feature', 'requirement', 'user story', 'roadmap', 'prd', 'product manager', 'stakeholder', 'sprint', 'agile'],
+  product: [
+    'product',
+    'feature',
+    'requirement',
+    'user story',
+    'roadmap',
+    'prd',
+    'product manager',
+    'stakeholder',
+    'sprint',
+    'agile',
+  ],
 
   // Architecture (specialized tech)
-  architecture: ['architecture', 'system design', 'scalability', 'microservice', 'database design', 'design pattern', 'scalable', 'distributed system'],
+  architecture: [
+    'architecture',
+    'system design',
+    'scalability',
+    'microservice',
+    'database design',
+    'design pattern',
+    'scalable',
+    'distributed system',
+  ],
 
   // Healthcare Specialties
-  primary_care: ['primary care', 'family doctor', 'physician', 'general practitioner', 'checkup', 'physical exam'],
-  therapy: ['therapy', 'therapist', 'counseling', 'psychotherapy', 'cbt', 'dbt'],
-  psychiatry: ['psychiatrist', 'psychiatric', 'medication', 'antidepressant', 'ssri', 'mental illness'],
-  pediatrics: ['pediatrics', 'pediatrician', 'baby', 'infant', 'toddler', 'child health', 'kids health'],
-  veterinary: ['vet', 'veterinarian', 'pet health', 'dog health', 'cat health', 'animal doctor'],
-  dental: ['dentist', 'dental', 'teeth', 'tooth', 'cavity', 'oral health', 'gums'],
+  primary_care: [
+    'primary care',
+    'family doctor',
+    'physician',
+    'general practitioner',
+    'checkup',
+    'physical exam',
+  ],
+  therapy: [
+    'therapy',
+    'therapist',
+    'counseling',
+    'psychotherapy',
+    'cbt',
+    'dbt',
+  ],
+  psychiatry: [
+    'psychiatrist',
+    'psychiatric',
+    'medication',
+    'antidepressant',
+    'ssri',
+    'mental illness',
+  ],
+  pediatrics: [
+    'pediatrics',
+    'pediatrician',
+    'baby',
+    'infant',
+    'toddler',
+    'child health',
+    'kids health',
+  ],
+  veterinary: [
+    'vet',
+    'veterinarian',
+    'pet health',
+    'dog health',
+    'cat health',
+    'animal doctor',
+  ],
+  dental: [
+    'dentist',
+    'dental',
+    'teeth',
+    'tooth',
+    'cavity',
+    'oral health',
+    'gums',
+  ],
   dermatology: ['dermatologist', 'skin', 'acne', 'rash', 'eczema', 'psoriasis'],
-  nutrition: ['nutritionist', 'dietitian', 'nutrition', 'diet', 'meal plan', 'eating'],
+  nutrition: [
+    'nutritionist',
+    'dietitian',
+    'nutrition',
+    'diet',
+    'meal plan',
+    'eating',
+  ],
 
   // Financial Specialties
-  investing: ['investing', 'investment', 'portfolio', 'stocks', 'bonds', 'etf', 'wealth management'],
+  investing: [
+    'investing',
+    'investment',
+    'portfolio',
+    'stocks',
+    'bonds',
+    'etf',
+    'wealth management',
+  ],
   tax: ['tax', 'taxes', 'cpa', 'tax return', 'irs', 'deduction', 'refund'],
-  mortgage: ['mortgage', 'home loan', 'refinance', 'interest rate', 'down payment'],
-  insurance: ['insurance', 'life insurance', 'health insurance', 'coverage', 'premium', 'policy'],
-  estate_planning: ['estate', 'will', 'trust', 'inheritance', 'beneficiary', 'legacy'],
-  retirement: ['retirement', '401k', 'ira', 'pension', 'retire', 'social security'],
+  mortgage: [
+    'mortgage',
+    'home loan',
+    'refinance',
+    'interest rate',
+    'down payment',
+  ],
+  insurance: [
+    'insurance',
+    'life insurance',
+    'health insurance',
+    'coverage',
+    'premium',
+    'policy',
+  ],
+  estate_planning: [
+    'estate',
+    'will',
+    'trust',
+    'inheritance',
+    'beneficiary',
+    'legacy',
+  ],
+  retirement: [
+    'retirement',
+    '401k',
+    'ira',
+    'pension',
+    'retire',
+    'social security',
+  ],
 
   // Legal Specialties
-  family_law: ['divorce', 'custody', 'child support', 'adoption', 'family law', 'separation'],
-  immigration: ['immigration', 'visa', 'green card', 'citizenship', 'immigration lawyer'],
+  family_law: [
+    'divorce',
+    'custody',
+    'child support',
+    'adoption',
+    'family law',
+    'separation',
+  ],
+  immigration: [
+    'immigration',
+    'visa',
+    'green card',
+    'citizenship',
+    'immigration lawyer',
+  ],
   real_estate_law: ['real estate law', 'property law', 'closing', 'title'],
-  employment_law: ['employment law', 'wrongful termination', 'discrimination', 'workplace'],
+  employment_law: [
+    'employment law',
+    'wrongful termination',
+    'discrimination',
+    'workplace',
+  ],
   criminal: ['criminal', 'criminal defense', 'charges', 'dui', 'arrest'],
 
   // Family & Parenting
-  parenting: ['parenting', 'parent', 'raising children', 'child behavior', 'discipline'],
+  parenting: [
+    'parenting',
+    'parent',
+    'raising children',
+    'child behavior',
+    'discipline',
+  ],
   childcare: ['childcare', 'daycare', 'nanny', 'babysitter', 'preschool'],
-  elder_care: ['elder care', 'senior care', 'assisted living', 'nursing home', 'aging parent'],
+  elder_care: [
+    'elder care',
+    'senior care',
+    'assisted living',
+    'nursing home',
+    'aging parent',
+  ],
 
   // Real Estate
-  real_estate: ['real estate', 'house', 'home', 'property', 'buy house', 'sell house', 'realtor'],
-  property_management: ['property management', 'landlord', 'tenant', 'rental property'],
+  real_estate: [
+    'real estate',
+    'house',
+    'home',
+    'property',
+    'buy house',
+    'sell house',
+    'realtor',
+  ],
+  property_management: [
+    'property management',
+    'landlord',
+    'tenant',
+    'rental property',
+  ],
 
   // Creator Economy
   youtube: ['youtube', 'youtuber', 'channel', 'subscribers', 'video content'],
@@ -109,8 +546,20 @@ export const ExpertiseTaxonomy: Record<string, string[]> = {
   dropshipping: ['dropshipping', 'dropship'],
 
   // Creative
-  photography: ['photography', 'photographer', 'photos', 'camera', 'photoshoot'],
-  music_production: ['music production', 'producer', 'beat', 'mixing', 'mastering'],
+  photography: [
+    'photography',
+    'photographer',
+    'photos',
+    'camera',
+    'photoshoot',
+  ],
+  music_production: [
+    'music production',
+    'producer',
+    'beat',
+    'mixing',
+    'mastering',
+  ],
   video_editing: ['video editing', 'edit video', 'premiere', 'final cut'],
 
   // Automotive
@@ -138,8 +587,8 @@ export const RoleExpertiseMapping: Record<string, string[]> = {
   'frontend-engineer': ['software', 'design'],
   'backend-engineer': ['software', 'architecture'],
   'code-reviewer': ['software', 'testing'],
-  'debugger': ['software', 'testing'],
-  'architect': ['architecture', 'software'],
+  debugger: ['software', 'testing'],
+  architect: ['architecture', 'software'],
   'senior-software-engineer': ['software', 'architecture'],
   'senior-devops-engineer': ['devops', 'software'],
   'senior-qa-engineer': ['testing', 'software'],
@@ -150,17 +599,17 @@ export const RoleExpertiseMapping: Record<string, string[]> = {
   // Healthcare Specialists (NEW)
   'primary-care-physician': ['primary_care', 'health'],
   'mental-health-therapist': ['therapy', 'mental_health'],
-  'psychiatrist': ['psychiatry', 'mental_health'],
-  'pediatrician': ['pediatrics', 'health'],
-  'veterinarian': ['veterinary'],
-  'dentist': ['dental', 'health'],
-  'dermatologist': ['dermatology', 'health'],
-  'nutritionist': ['nutrition', 'health'],
+  psychiatrist: ['psychiatry', 'mental_health'],
+  pediatrician: ['pediatrics', 'health'],
+  veterinarian: ['veterinary'],
+  dentist: ['dental', 'health'],
+  dermatologist: ['dermatology', 'health'],
+  nutritionist: ['nutrition', 'health'],
   'physical-therapist': ['health', 'fitness'],
   'addiction-counselor': ['mental_health', 'therapy'],
-  'pharmacist': ['health'],
+  pharmacist: ['health'],
   'nurse-practitioner': ['primary_care', 'health'],
-  'chiropractor': ['health'],
+  chiropractor: ['health'],
   'sleep-specialist': ['health'],
   'pain-management-specialist': ['health'],
 
@@ -236,13 +685,13 @@ export const RoleExpertiseMapping: Record<string, string[]> = {
   'stress-management-coach': ['mental_health'],
 
   // Creative (NEW)
-  'photographer': ['photography'],
+  photographer: ['photography'],
   'music-producer': ['music_production'],
   'podcast-producer': ['podcast'],
   'video-editor': ['video_editing'],
-  'animator': ['design'],
+  animator: ['design'],
   'voice-actor': ['creative'],
-  'illustrator': ['design'],
+  illustrator: ['design'],
   '3d-artist': ['design'],
   'audio-engineer': ['music_production'],
   'music-teacher': ['education'],
@@ -303,7 +752,7 @@ export class IntelligentAgentRouter {
    * Register agents for routing
    */
   registerAgents(agents: AgentCapability[]): void {
-    agents.forEach(agent => {
+    agents.forEach((agent) => {
       this.agents.set(agent.agentId, agent);
     });
   }
@@ -330,14 +779,14 @@ export class IntelligentAgentRouter {
 
     // Filter by minimum confidence
     const confidenceThreshold = this.getConfidenceThreshold(minConfidence);
-    const qualified = scores.filter(s => s.score >= confidenceThreshold);
+    const qualified = scores.filter((s) => s.score >= confidenceThreshold);
 
     // Sort by score (highest first)
     qualified.sort((a, b) => b.score - a.score);
 
     // Return agent IDs
     const selected = qualified.slice(0, allowMultiple ? maxAgents : 1);
-    return selected.map(s => s.agentId);
+    return selected.map((s) => s.agentId);
   }
 
   /**
@@ -385,7 +834,9 @@ export class IntelligentAgentRouter {
           // - Partial match: +5 points
           // - First keyword match: Bonus +5 points
 
-          const wordBoundaryRegex = new RegExp(`\\b${keyword.toLowerCase()}\\b`);
+          const wordBoundaryRegex = new RegExp(
+            `\\b${keyword.toLowerCase()}\\b`
+          );
           if (wordBoundaryRegex.test(query)) {
             totalScore += 10;
             if (matchedKeywords.length === 1) {
@@ -399,14 +850,19 @@ export class IntelligentAgentRouter {
     }
 
     // Boost score if agent name is mentioned
-    if (query.includes(agent.name.toLowerCase()) ||
-        query.includes(`@${agent.agentId}`)) {
+    if (
+      query.includes(agent.name.toLowerCase()) ||
+      query.includes(`@${agent.agentId}`)
+    ) {
       totalScore += 50;
       matchedKeywords.push(`@${agent.name}`);
     }
 
     // Determine confidence level
-    const confidence = this.determineConfidence(totalScore, matchedKeywords.length);
+    const confidence = this.determineConfidence(
+      totalScore,
+      matchedKeywords.length
+    );
 
     return {
       agentId: agent.agentId,
@@ -441,7 +897,9 @@ export class IntelligentAgentRouter {
   /**
    * Get numeric threshold for confidence level
    */
-  private getConfidenceThreshold(confidence: 'high' | 'medium' | 'low'): number {
+  private getConfidenceThreshold(
+    confidence: 'high' | 'medium' | 'low'
+  ): number {
     switch (confidence) {
       case 'high':
         return 30;
@@ -462,10 +920,10 @@ export class IntelligentAgentRouter {
   } {
     const scores = this.analyzeQuery(query);
 
-    const primary = scores.filter(s => s.confidence === 'high').slice(0, 2);
+    const primary = scores.filter((s) => s.confidence === 'high').slice(0, 2);
     const alternatives = scores
-      .filter(s => s.confidence === 'medium' || s.confidence === 'high')
-      .filter(s => !primary.includes(s))
+      .filter((s) => s.confidence === 'medium' || s.confidence === 'high')
+      .filter((s) => !primary.includes(s))
       .slice(0, 3);
 
     let explanation = '';
@@ -478,7 +936,7 @@ export class IntelligentAgentRouter {
         explanation += ` **${agent2?.name}** could also help with this.`;
       }
     } else if (alternatives.length > 0) {
-      explanation = `Your query might relate to: ${alternatives.map(a => this.agents.get(a.agentId)?.name).join(', ')}. Could you provide more details?`;
+      explanation = `Your query might relate to: ${alternatives.map((a) => this.agents.get(a.agentId)?.name).join(', ')}. Could you provide more details?`;
     } else {
       explanation = `I'm not sure which expert would be best for this. Could you rephrase or provide more context?`;
     }
@@ -495,7 +953,7 @@ export class IntelligentAgentRouter {
    */
   needsMultipleAgents(query: string): boolean {
     const scores = this.scoreAllAgents(query);
-    const highConfidence = scores.filter(s => s.confidence === 'high');
+    const highConfidence = scores.filter((s) => s.confidence === 'high');
 
     // If multiple agents have high confidence, probably needs collaboration
     return highConfidence.length > 1;
@@ -534,26 +992,26 @@ export class IntelligentAgentRouter {
  */
 export const RoutingExamples = {
   // General-purpose queries
-  legal: "I need help reviewing a contract",
-  cooking: "How do I make pasta carbonara?",
-  health: "I have a persistent headache",
+  legal: 'I need help reviewing a contract',
+  cooking: 'How do I make pasta carbonara?',
+  health: 'I have a persistent headache',
   mental_health: "I've been feeling really anxious lately",
-  finance: "Should I invest in index funds or individual stocks?",
-  education: "Can you explain quadratic equations?",
-  fitness: "Create me a beginner workout plan",
-  travel: "Plan a 5-day trip to Tokyo",
-  career: "Help me prepare for a job interview",
-  tech_support: "My computer is running really slow",
+  finance: 'Should I invest in index funds or individual stocks?',
+  education: 'Can you explain quadratic equations?',
+  fitness: 'Create me a beginner workout plan',
+  travel: 'Plan a 5-day trip to Tokyo',
+  career: 'Help me prepare for a job interview',
+  tech_support: 'My computer is running really slow',
   life_coaching: "I want to change my life but don't know where to start",
-  home_improvement: "How do I fix a leaky faucet?",
+  home_improvement: 'How do I fix a leaky faucet?',
 
   // Specialized tech queries
-  software: "How do I fix this TypeError in JavaScript?",
-  devops: "How do I deploy a Docker container to Kubernetes?",
-  testing: "Write unit tests for this function",
-  design: "Review my UI design for accessibility",
-  product: "Create a PRD for a dark mode feature",
-  architecture: "Design a scalable microservices architecture",
+  software: 'How do I fix this TypeError in JavaScript?',
+  devops: 'How do I deploy a Docker container to Kubernetes?',
+  testing: 'Write unit tests for this function',
+  design: 'Review my UI design for accessibility',
+  product: 'Create a PRD for a dark mode feature',
+  architecture: 'Design a scalable microservices architecture',
 };
 
 export default IntelligentAgentRouter;

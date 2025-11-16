@@ -49,7 +49,10 @@ export type MessagePriority = 'low' | 'normal' | 'high' | 'urgent';
 export interface RoutingRule {
   id: string;
   name: string;
-  condition: (message: ChatMessage, participants: ConversationParticipant[]) => boolean;
+  condition: (
+    message: ChatMessage,
+    participants: ConversationParticipant[]
+  ) => boolean;
   action: (route: MessageRoute) => Promise<void>;
   priority: number; // Higher priority rules are evaluated first
   enabled: boolean;
@@ -226,12 +229,10 @@ export class MessageRoutingService {
     } else if (mentions.length > 1) {
       routeType = 'group';
       toIds = participants
-        .filter(
-          (p) =>
-            mentions.some(
-              (m) =>
-                m.toLowerCase() === p.name.toLowerCase() || m === p.id
-            )
+        .filter((p) =>
+          mentions.some(
+            (m) => m.toLowerCase() === p.name.toLowerCase() || m === p.id
+          )
         )
         .map((p) => p.id);
     } else if (mentions.includes('@all') || mentions.includes('@everyone')) {
@@ -252,7 +253,8 @@ export class MessageRoutingService {
       toIds,
       routeType,
       priority,
-      deliveryGuarantee: priority === 'urgent' ? 'exactly-once' : 'at-least-once',
+      deliveryGuarantee:
+        priority === 'urgent' ? 'exactly-once' : 'at-least-once',
       retryAttempts: 0,
       maxRetries: 3,
       timestamp: new Date(),
@@ -385,7 +387,9 @@ export class MessageRoutingService {
   private async priorityRoute(route: MessageRoute): Promise<void> {
     const store = useMultiAgentChatStore.getState();
 
-    console.log(`[MessageRouting] Priority routing for message ${route.messageId}`);
+    console.log(
+      `[MessageRouting] Priority routing for message ${route.messageId}`
+    );
 
     // Ensure immediate delivery
     route.maxRetries = 5; // More retries for urgent messages
@@ -410,7 +414,10 @@ export class MessageRoutingService {
   /**
    * Retry message delivery
    */
-  private async retryDelivery(route: MessageRoute, toId: string): Promise<void> {
+  private async retryDelivery(
+    route: MessageRoute,
+    toId: string
+  ): Promise<void> {
     console.log(
       `[MessageRouting] Retrying delivery to ${toId}, attempt ${route.retryAttempts}/${route.maxRetries}`
     );
@@ -537,7 +544,9 @@ export class MessageRoutingService {
     const rule = this.rules.find((r) => r.id === ruleId);
     if (rule) {
       rule.enabled = enabled;
-      console.log(`[MessageRouting] ${enabled ? 'Enabled' : 'Disabled'} rule: ${ruleId}`);
+      console.log(
+        `[MessageRouting] ${enabled ? 'Enabled' : 'Disabled'} rule: ${ruleId}`
+      );
     }
   }
 

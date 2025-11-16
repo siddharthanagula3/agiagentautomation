@@ -13,7 +13,12 @@ import type { ChatMessage } from '@features/chat/types';
 
 export interface QueuedOperation {
   id: string;
-  type: 'create_message' | 'update_message' | 'delete_message' | 'create_session' | 'update_session';
+  type:
+    | 'create_message'
+    | 'update_message'
+    | 'delete_message'
+    | 'create_session'
+    | 'update_session';
   payload: unknown;
   timestamp: number;
   attempts: number;
@@ -43,7 +48,8 @@ export class OfflineSyncManager {
   private readonly maxRetries = 3;
 
   private statusCallbacks: Set<(status: SyncStatus) => void> = new Set();
-  private connectionCallbacks: Set<(status: ConnectionStatus) => void> = new Set();
+  private connectionCallbacks: Set<(status: ConnectionStatus) => void> =
+    new Set();
 
   constructor() {
     this.loadQueue();
@@ -165,7 +171,9 @@ export class OfflineSyncManager {
   /**
    * Add operation to queue
    */
-  enqueue(operation: Omit<QueuedOperation, 'id' | 'timestamp' | 'attempts' | 'status'>): string {
+  enqueue(
+    operation: Omit<QueuedOperation, 'id' | 'timestamp' | 'attempts' | 'status'>
+  ): string {
     const id = `${operation.type}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
     const queuedOp: QueuedOperation = {
@@ -234,12 +242,16 @@ export class OfflineSyncManager {
 
         // Update error status
         operation.status = 'failed';
-        operation.error = error instanceof Error ? error.message : 'Unknown error';
+        operation.error =
+          error instanceof Error ? error.message : 'Unknown error';
         this.queue.set(operation.id, operation);
 
         // Remove if max retries exceeded
         if (operation.attempts >= this.maxRetries) {
-          console.warn(`Removing operation after ${this.maxRetries} failed attempts:`, operation.id);
+          console.warn(
+            `Removing operation after ${this.maxRetries} failed attempts:`,
+            operation.id
+          );
           this.dequeue(operation.id);
         }
       }
@@ -291,7 +303,11 @@ export class OfflineSyncManager {
     role: 'user' | 'assistant' | 'system';
     content: string;
   }): Promise<void> {
-    await chatPersistenceService.saveMessage(payload.sessionId, payload.role, payload.content);
+    await chatPersistenceService.saveMessage(
+      payload.sessionId,
+      payload.role,
+      payload.content
+    );
   }
 
   /**
@@ -301,13 +317,18 @@ export class OfflineSyncManager {
     messageId: string;
     content: string;
   }): Promise<void> {
-    await chatPersistenceService.updateMessage(payload.messageId, payload.content);
+    await chatPersistenceService.updateMessage(
+      payload.messageId,
+      payload.content
+    );
   }
 
   /**
    * Sync delete message operation
    */
-  private async syncDeleteMessage(payload: { messageId: string }): Promise<void> {
+  private async syncDeleteMessage(payload: {
+    messageId: string;
+  }): Promise<void> {
     await chatPersistenceService.deleteMessage(payload.messageId);
   }
 
@@ -319,7 +340,11 @@ export class OfflineSyncManager {
     title: string;
     metadata?: unknown;
   }): Promise<void> {
-    await chatPersistenceService.createSession(payload.userId, payload.title, payload.metadata);
+    await chatPersistenceService.createSession(
+      payload.userId,
+      payload.title,
+      payload.metadata
+    );
   }
 
   /**
@@ -374,14 +399,18 @@ export class OfflineSyncManager {
    * Get pending operations
    */
   getPendingOperations(): QueuedOperation[] {
-    return Array.from(this.queue.values()).filter((op) => op.status === 'pending');
+    return Array.from(this.queue.values()).filter(
+      (op) => op.status === 'pending'
+    );
   }
 
   /**
    * Get failed operations
    */
   getFailedOperations(): QueuedOperation[] {
-    return Array.from(this.queue.values()).filter((op) => op.status === 'failed');
+    return Array.from(this.queue.values()).filter(
+      (op) => op.status === 'failed'
+    );
   }
 
   /**

@@ -296,7 +296,7 @@ export const CollaborativeChatInterface: React.FC<
   };
 
   return (
-    <Card className={cn('flex flex-col h-full', className)}>
+    <Card className={cn('flex h-full flex-col', className)}>
       <CardHeader className="border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -336,7 +336,7 @@ export const CollaborativeChatInterface: React.FC<
         </div>
 
         {/* Active Agents */}
-        <div className="flex items-center space-x-2 mt-3">
+        <div className="mt-3 flex items-center space-x-2">
           <span className="text-sm text-muted-foreground">Active:</span>
           <div className="flex flex-wrap gap-2">
             <AnimatePresence>
@@ -355,7 +355,7 @@ export const CollaborativeChatInterface: React.FC<
                       {agent.avatar ? (
                         <AvatarImage src={agent.avatar} alt={agent.name} />
                       ) : (
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs">
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-xs text-white">
                           {agent.name.charAt(0)}
                         </AvatarFallback>
                       )}
@@ -374,8 +374,8 @@ export const CollaborativeChatInterface: React.FC<
               ))}
             </AnimatePresence>
             <Select onValueChange={addAgent}>
-              <SelectTrigger className="w-32 h-7">
-                <Plus className="h-3 w-3 mr-1" />
+              <SelectTrigger className="h-7 w-32">
+                <Plus className="mr-1 h-3 w-3" />
                 <SelectValue placeholder="Add agent" />
               </SelectTrigger>
               <SelectContent>
@@ -396,7 +396,7 @@ export const CollaborativeChatInterface: React.FC<
       </CardHeader>
 
       {isExpanded && (
-        <CardContent className="flex-1 flex flex-col p-0">
+        <CardContent className="flex flex-1 flex-col p-0">
           {/* Messages Area */}
           <ScrollArea ref={scrollRef} className="flex-1 p-4">
             <AnimatePresence>
@@ -413,7 +413,7 @@ export const CollaborativeChatInterface: React.FC<
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex items-center space-x-2 text-muted-foreground p-4"
+                className="flex items-center space-x-2 p-4 text-muted-foreground"
               >
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="text-sm">AI employees are thinking...</span>
@@ -425,7 +425,10 @@ export const CollaborativeChatInterface: React.FC<
           <div className="border-t p-4">
             {selectedMode === 'single' && (
               <div className="mb-3">
-                <Select value={selectedAgent || ''} onValueChange={setSelectedAgent}>
+                <Select
+                  value={selectedAgent || ''}
+                  onValueChange={setSelectedAgent}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select an agent to chat with" />
                   </SelectTrigger>
@@ -454,11 +457,17 @@ export const CollaborativeChatInterface: React.FC<
                       : 'Select an agent first...'
                 }
                 className="min-h-[80px] resize-none"
-                disabled={isProcessing || (selectedMode === 'single' && !selectedAgent)}
+                disabled={
+                  isProcessing || (selectedMode === 'single' && !selectedAgent)
+                }
               />
               <Button
                 onClick={handleSend}
-                disabled={!input.trim() || isProcessing || (selectedMode === 'single' && !selectedAgent)}
+                disabled={
+                  !input.trim() ||
+                  isProcessing ||
+                  (selectedMode === 'single' && !selectedAgent)
+                }
                 className="shrink-0"
               >
                 {isProcessing ? (
@@ -470,7 +479,9 @@ export const CollaborativeChatInterface: React.FC<
             </div>
 
             <div className="mt-2 text-xs text-muted-foreground">
-              <span>Tip: Use @AgentName to mention specific agents in team mode</span>
+              <span>
+                Tip: Use @AgentName to mention specific agents in team mode
+              </span>
             </div>
           </div>
         </CardContent>

@@ -84,7 +84,7 @@ export function EnhancedMessageInput({
   const mentionStartPos = useRef(0);
 
   // Filtered agents for mention autocomplete
-  const filteredAgents = agents.filter(agent =>
+  const filteredAgents = agents.filter((agent) =>
     agent.name.toLowerCase().includes(mentionQuery.toLowerCase())
   );
 
@@ -92,117 +92,135 @@ export function EnhancedMessageInput({
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 200) + 'px';
+      textareaRef.current.style.height =
+        Math.min(textareaRef.current.scrollHeight, 200) + 'px';
     }
   }, [content]);
 
   // Handle content change
-  const handleContentChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newContent = e.target.value;
-    if (newContent.length <= maxLength) {
-      setContent(newContent);
+  const handleContentChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const newContent = e.target.value;
+      if (newContent.length <= maxLength) {
+        setContent(newContent);
 
-      // Check for @ mention
-      const cursorPos = e.target.selectionStart;
-      const textBeforeCursor = newContent.substring(0, cursorPos);
-      const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+        // Check for @ mention
+        const cursorPos = e.target.selectionStart;
+        const textBeforeCursor = newContent.substring(0, cursorPos);
+        const lastAtIndex = textBeforeCursor.lastIndexOf('@');
 
-      if (lastAtIndex !== -1) {
-        const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
-        if (!textAfterAt.includes(' ')) {
-          setShowMentions(true);
-          setMentionQuery(textAfterAt);
-          mentionStartPos.current = lastAtIndex;
-          setMentionPosition(cursorPos);
-          setSelectedMentionIndex(0);
+        if (lastAtIndex !== -1) {
+          const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+          if (!textAfterAt.includes(' ')) {
+            setShowMentions(true);
+            setMentionQuery(textAfterAt);
+            mentionStartPos.current = lastAtIndex;
+            setMentionPosition(cursorPos);
+            setSelectedMentionIndex(0);
+          } else {
+            setShowMentions(false);
+          }
         } else {
           setShowMentions(false);
         }
-      } else {
-        setShowMentions(false);
       }
-    }
-  }, [maxLength]);
+    },
+    [maxLength]
+  );
 
   // Handle mention selection
-  const handleMentionSelect = useCallback((agent: Agent) => {
-    const before = content.substring(0, mentionStartPos.current);
-    const after = content.substring(mentionPosition);
-    const newContent = `${before}@${agent.name} ${after}`;
-    setContent(newContent);
-    setShowMentions(false);
+  const handleMentionSelect = useCallback(
+    (agent: Agent) => {
+      const before = content.substring(0, mentionStartPos.current);
+      const after = content.substring(mentionPosition);
+      const newContent = `${before}@${agent.name} ${after}`;
+      setContent(newContent);
+      setShowMentions(false);
 
-    // Focus back to textarea
-    setTimeout(() => {
-      textareaRef.current?.focus();
-      const newCursorPos = mentionStartPos.current + agent.name.length + 2;
-      textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
-    }, 0);
-  }, [content, mentionPosition]);
+      // Focus back to textarea
+      setTimeout(() => {
+        textareaRef.current?.focus();
+        const newCursorPos = mentionStartPos.current + agent.name.length + 2;
+        textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
+      }, 0);
+    },
+    [content, mentionPosition]
+  );
 
   // Handle file attachment
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const newAttachments: Attachment[] = files.map(file => {
-      const attachment: Attachment = {
-        file,
-        id: Math.random().toString(36).substring(7),
-      };
-
-      // Generate preview for images
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const result = e.target?.result as string;
-          setAttachments(prev =>
-            prev.map(a => a.id === attachment.id ? { ...a, preview: result } : a)
-          );
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      const newAttachments: Attachment[] = files.map((file) => {
+        const attachment: Attachment = {
+          file,
+          id: Math.random().toString(36).substring(7),
         };
-        reader.readAsDataURL(file);
+
+        // Generate preview for images
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const result = e.target?.result as string;
+            setAttachments((prev) =>
+              prev.map((a) =>
+                a.id === attachment.id ? { ...a, preview: result } : a
+              )
+            );
+          };
+          reader.readAsDataURL(file);
+        }
+
+        return attachment;
+      });
+
+      setAttachments((prev) => [...prev, ...newAttachments]);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
-
-      return attachment;
-    });
-
-    setAttachments(prev => [...prev, ...newAttachments]);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  }, []);
+    },
+    []
+  );
 
   // Remove attachment
   const handleRemoveAttachment = useCallback((id: string) => {
-    setAttachments(prev => prev.filter(a => a.id !== id));
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
   }, []);
 
   // Insert markdown formatting
-  const insertMarkdown = useCallback((prefix: string, suffix: string = prefix) => {
-    if (!textareaRef.current) return;
+  const insertMarkdown = useCallback(
+    (prefix: string, suffix: string = prefix) => {
+      if (!textareaRef.current) return;
 
-    const start = textareaRef.current.selectionStart;
-    const end = textareaRef.current.selectionEnd;
-    const selectedText = content.substring(start, end);
-    const newContent =
-      content.substring(0, start) +
-      prefix +
-      selectedText +
-      suffix +
-      content.substring(end);
+      const start = textareaRef.current.selectionStart;
+      const end = textareaRef.current.selectionEnd;
+      const selectedText = content.substring(start, end);
+      const newContent =
+        content.substring(0, start) +
+        prefix +
+        selectedText +
+        suffix +
+        content.substring(end);
 
-    setContent(newContent);
+      setContent(newContent);
 
-    // Restore cursor position
-    setTimeout(() => {
-      const newCursorPos = start + prefix.length + selectedText.length;
-      textareaRef.current?.focus();
-      textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
-    }, 0);
-  }, [content]);
+      // Restore cursor position
+      setTimeout(() => {
+        const newCursorPos = start + prefix.length + selectedText.length;
+        textareaRef.current?.focus();
+        textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
+      }, 0);
+    },
+    [content]
+  );
 
   // Handle send
   const handleSend = useCallback(() => {
     if (content.trim() || attachments.length > 0) {
-      onSend(content, attachments.map(a => a.file));
+      onSend(
+        content,
+        attachments.map((a) => a.file)
+      );
       setContent('');
       setAttachments([]);
       setShowPreview(false);
@@ -211,7 +229,7 @@ export function EnhancedMessageInput({
 
   // Handle voice recording (placeholder)
   const handleVoiceToggle = useCallback(() => {
-    setIsRecording(prev => !prev);
+    setIsRecording((prev) => !prev);
     // TODO: Implement actual voice recording
     console.log('Voice recording:', !isRecording);
   }, [isRecording]);
@@ -229,12 +247,12 @@ export function EnhancedMessageInput({
       if (showMentions) {
         if (e.key === 'ArrowDown') {
           e.preventDefault();
-          setSelectedMentionIndex(prev =>
+          setSelectedMentionIndex((prev) =>
             Math.min(prev + 1, filteredAgents.length - 1)
           );
         } else if (e.key === 'ArrowUp') {
           e.preventDefault();
-          setSelectedMentionIndex(prev => Math.max(prev - 1, 0));
+          setSelectedMentionIndex((prev) => Math.max(prev - 1, 0));
         } else if (e.key === 'Enter' || e.key === 'Tab') {
           e.preventDefault();
           if (filteredAgents[selectedMentionIndex]) {
@@ -269,7 +287,14 @@ export function EnhancedMessageInput({
       textarea.addEventListener('keydown', handleKeyDown);
       return () => textarea.removeEventListener('keydown', handleKeyDown);
     }
-  }, [showMentions, filteredAgents, selectedMentionIndex, handleSend, handleMentionSelect, insertMarkdown]);
+  }, [
+    showMentions,
+    filteredAgents,
+    selectedMentionIndex,
+    handleSend,
+    handleMentionSelect,
+    insertMarkdown,
+  ]);
 
   const charCount = content.length;
   const isNearLimit = charCount > maxLength * 0.9;
@@ -279,7 +304,7 @@ export function EnhancedMessageInput({
       {/* Attachments Preview */}
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {attachments.map(attachment => (
+          {attachments.map((attachment) => (
             <div
               key={attachment.id}
               className="group relative overflow-hidden rounded-lg border border-border bg-card"
@@ -314,12 +339,12 @@ export function EnhancedMessageInput({
       {showPreview && content && (
         <div className="rounded-lg border border-border bg-muted/50 p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-semibold text-muted-foreground">Preview</span>
+            <span className="text-xs font-semibold text-muted-foreground">
+              Preview
+            </span>
           </div>
           <div className="prose prose-sm dark:prose-invert max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {content}
-            </ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
           </div>
         </div>
       )}
@@ -385,16 +410,24 @@ export function EnhancedMessageInput({
               onClick={() => setShowPreview(!showPreview)}
               title={showPreview ? 'Hide preview' : 'Show preview'}
             >
-              {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPreview ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </Button>
           )}
 
           <div className="ml-auto flex items-center gap-2">
             {isNearLimit && (
-              <span className={cn(
-                'text-xs',
-                charCount >= maxLength ? 'text-destructive' : 'text-muted-foreground'
-              )}>
+              <span
+                className={cn(
+                  'text-xs',
+                  charCount >= maxLength
+                    ? 'text-destructive'
+                    : 'text-muted-foreground'
+                )}
+              >
                 {charCount} / {maxLength}
               </span>
             )}
@@ -438,8 +471,12 @@ export function EnhancedMessageInput({
                       </div>
                     </div>
                     <div className="flex-1 overflow-hidden">
-                      <div className="truncate text-sm font-medium">{agent.name}</div>
-                      <div className="truncate text-xs text-muted-foreground">{agent.role}</div>
+                      <div className="truncate text-sm font-medium">
+                        {agent.name}
+                      </div>
+                      <div className="truncate text-xs text-muted-foreground">
+                        {agent.role}
+                      </div>
                     </div>
                   </button>
                 ))}

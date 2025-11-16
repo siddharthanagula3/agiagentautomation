@@ -9,7 +9,10 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
-import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
+import type {
+  RealtimeChannel,
+  RealtimePostgresChangesPayload,
+} from '@supabase/supabase-js';
 import type { ChatMessage } from '../types';
 
 export interface TypingUser {
@@ -135,7 +138,11 @@ export class RealtimeCollaborationService {
   /**
    * Broadcast typing indicator
    */
-  async broadcastTyping(sessionId: string, userId: string, username: string): Promise<void> {
+  async broadcastTyping(
+    sessionId: string,
+    userId: string,
+    username: string
+  ): Promise<void> {
     const channel = this.channels.get(sessionId);
     if (!channel) {
       console.warn('Cannot broadcast typing: not subscribed to session');
@@ -182,7 +189,11 @@ export class RealtimeCollaborationService {
   /**
    * Stop typing indicator
    */
-  async stopTyping(sessionId: string, userId: string, username: string): Promise<void> {
+  async stopTyping(
+    sessionId: string,
+    userId: string,
+    username: string
+  ): Promise<void> {
     const channel = this.channels.get(sessionId);
     if (!channel) return;
 
@@ -229,7 +240,11 @@ export class RealtimeCollaborationService {
   /**
    * Broadcast custom event
    */
-  async broadcastEvent(sessionId: string, event: string, payload: any): Promise<void> {
+  async broadcastEvent(
+    sessionId: string,
+    event: string,
+    payload: any
+  ): Promise<void> {
     const channel = this.channels.get(sessionId);
     if (!channel) return;
 

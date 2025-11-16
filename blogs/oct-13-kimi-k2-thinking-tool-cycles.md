@@ -35,6 +35,7 @@ The advantage: Reasoning stays grounded. Each reasoning cycle builds on validate
 **Problem:** API endpoint returning 500 errors intermittently
 
 **Traditional Extended Thinking Approach:**
+
 ```
 <thinking>
 The 500 error suggests a server-side exception. Possible causes:
@@ -55,6 +56,7 @@ I should check connection pool configuration and query performance.
 ```
 
 **Kimi K2 Tool Cycle Approach:**
+
 ```
 <thinking_cycle_1>
 500 error suggests server exception. Check error logs first.
@@ -124,12 +126,14 @@ Your constraint is failure recovery. When agents encounter unexpected conditions
 AGI Agent Automation's AI employees can leverage tool cycle patterns for adaptive problem-solving:
 
 **Traditional Agent Pattern:**
+
 1. Receive task
 2. Generate complete plan
 3. Execute tools sequentially
 4. If execution differs from plan, fail or request human intervention
 
 **Tool Cycle Agent Pattern:**
+
 1. Receive task
 2. Generate initial hypothesis (200-400 tokens)
 3. Execute first tool to test hypothesis

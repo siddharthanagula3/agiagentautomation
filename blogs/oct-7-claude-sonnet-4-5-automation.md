@@ -68,6 +68,7 @@ Organizations using single-provider systems lock themselves into capability-cost
 **Real Implementation Example:**
 
 A customer support automation workflow uses four models strategically:
+
 - **Ticket analysis:** Claude Sonnet 4.5 ($0.003/1K tokens) — Structured extraction of customer issues
 - **Knowledge base search:** Perplexity ($0.001/1K tokens) — Real-time documentation retrieval
 - **Response planning:** GPT-5.1 ($0.006/1K tokens) — Multi-step resolution strategy

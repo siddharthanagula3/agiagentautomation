@@ -65,16 +65,21 @@ const DEFAULT_ROLLOUTS: Record<FeatureFlag, RolloutConfig> = {
  * In-memory feature flag storage
  * In production, use database or feature flag service (LaunchDarkly, etc.)
  */
-const rolloutConfigs: Record<FeatureFlag, RolloutConfig> = { ...DEFAULT_ROLLOUTS };
+const rolloutConfigs: Record<FeatureFlag, RolloutConfig> = {
+  ...DEFAULT_ROLLOUTS,
+};
 
 /**
  * Error tracking for auto-rollback
  */
-const errorTracking = new Map<FeatureFlag, {
-  errors: number;
-  requests: number;
-  lastCheck: Date;
-}>();
+const errorTracking = new Map<
+  FeatureFlag,
+  {
+    errors: number;
+    requests: number;
+    lastCheck: Date;
+  }
+>();
 
 /**
  * Check if feature is enabled for a user
@@ -132,7 +137,7 @@ function hashString(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return Math.abs(hash);
@@ -158,10 +163,7 @@ export function updateRollout(
  */
 export function enableForUsers(feature: FeatureFlag, userIds: string[]): void {
   const config = rolloutConfigs[feature];
-  config.targetUsers = [
-    ...(config.targetUsers || []),
-    ...userIds,
-  ];
+  config.targetUsers = [...(config.targetUsers || []), ...userIds];
 
   console.log(`[Gradual Rollout] Enabled ${feature} for users:`, userIds);
 }
@@ -171,10 +173,7 @@ export function enableForUsers(feature: FeatureFlag, userIds: string[]): void {
  */
 export function disableForUsers(feature: FeatureFlag, userIds: string[]): void {
   const config = rolloutConfigs[feature];
-  config.excludeUsers = [
-    ...(config.excludeUsers || []),
-    ...userIds,
-  ];
+  config.excludeUsers = [...(config.excludeUsers || []), ...userIds];
 
   console.log(`[Gradual Rollout] Disabled ${feature} for users:`, userIds);
 }
@@ -192,31 +191,38 @@ export function graduateRollout(
   const currentPercentage = config.percentage;
 
   if (currentPercentage >= targetPercentage) {
-    console.log(`[Gradual Rollout] ${feature} already at ${currentPercentage}%`);
+    console.log(
+      `[Gradual Rollout] ${feature} already at ${currentPercentage}%`
+    );
     return;
   }
 
   const increment = (targetPercentage - currentPercentage) / steps;
   let currentStep = 0;
 
-  const interval = setInterval(() => {
-    currentStep++;
-    const newPercentage = Math.min(
-      targetPercentage,
-      currentPercentage + (increment * currentStep)
-    );
+  const interval = setInterval(
+    () => {
+      currentStep++;
+      const newPercentage = Math.min(
+        targetPercentage,
+        currentPercentage + increment * currentStep
+      );
 
-    updateRollout(feature, { percentage: newPercentage });
+      updateRollout(feature, { percentage: newPercentage });
 
-    console.log(
-      `[Gradual Rollout] ${feature} now at ${newPercentage}% (step ${currentStep}/${steps})`
-    );
+      console.log(
+        `[Gradual Rollout] ${feature} now at ${newPercentage}% (step ${currentStep}/${steps})`
+      );
 
-    if (currentStep >= steps || newPercentage >= targetPercentage) {
-      clearInterval(interval);
-      console.log(`[Gradual Rollout] ${feature} rollout complete at ${newPercentage}%`);
-    }
-  }, intervalMinutes * 60 * 1000);
+      if (currentStep >= steps || newPercentage >= targetPercentage) {
+        clearInterval(interval);
+        console.log(
+          `[Gradual Rollout] ${feature} rollout complete at ${newPercentage}%`
+        );
+      }
+    },
+    intervalMinutes * 60 * 1000
+  );
 }
 
 /**
@@ -264,38 +270,47 @@ export function trackFeatureUsage(
 /**
  * Get all rollout statuses
  */
-export function getRolloutStatuses(): Record<FeatureFlag, {
-  config: RolloutConfig;
-  stats?: {
-    errors: number;
-    requests: number;
-    errorRate: number;
-  };
-}> {
-  const statuses: Record<string, unknown> = {};
-
-  for (const feature of Object.keys(rolloutConfigs) as FeatureFlag[]) {
-    const tracking = errorTracking.get(feature);
-    statuses[feature] = {
-      config: rolloutConfigs[feature],
-      stats: tracking ? {
-        errors: tracking.errors,
-        requests: tracking.requests,
-        errorRate: tracking.requests > 0
-          ? (tracking.errors / tracking.requests) * 100
-          : 0,
-      } : undefined,
-    };
-  }
-
-  return statuses as Record<FeatureFlag, {
+export function getRolloutStatuses(): Record<
+  FeatureFlag,
+  {
     config: RolloutConfig;
     stats?: {
       errors: number;
       requests: number;
       errorRate: number;
     };
-  }>;
+  }
+> {
+  const statuses: Record<string, unknown> = {};
+
+  for (const feature of Object.keys(rolloutConfigs) as FeatureFlag[]) {
+    const tracking = errorTracking.get(feature);
+    statuses[feature] = {
+      config: rolloutConfigs[feature],
+      stats: tracking
+        ? {
+            errors: tracking.errors,
+            requests: tracking.requests,
+            errorRate:
+              tracking.requests > 0
+                ? (tracking.errors / tracking.requests) * 100
+                : 0,
+          }
+        : undefined,
+    };
+  }
+
+  return statuses as Record<
+    FeatureFlag,
+    {
+      config: RolloutConfig;
+      stats?: {
+        errors: number;
+        requests: number;
+        errorRate: number;
+      };
+    }
+  >;
 }
 
 /**
@@ -361,17 +376,35 @@ export const ROLLOUT_STRATEGIES = {
   // Conservative: 5% → 10% → 25% → 50% → 100% over 5 hours
   conservative: (feature: FeatureFlag) => {
     updateRollout(feature, { percentage: 5 });
-    setTimeout(() => updateRollout(feature, { percentage: 10 }), 60 * 60 * 1000);
-    setTimeout(() => updateRollout(feature, { percentage: 25 }), 2 * 60 * 60 * 1000);
-    setTimeout(() => updateRollout(feature, { percentage: 50 }), 3 * 60 * 60 * 1000);
-    setTimeout(() => updateRollout(feature, { percentage: 100 }), 5 * 60 * 60 * 1000);
+    setTimeout(
+      () => updateRollout(feature, { percentage: 10 }),
+      60 * 60 * 1000
+    );
+    setTimeout(
+      () => updateRollout(feature, { percentage: 25 }),
+      2 * 60 * 60 * 1000
+    );
+    setTimeout(
+      () => updateRollout(feature, { percentage: 50 }),
+      3 * 60 * 60 * 1000
+    );
+    setTimeout(
+      () => updateRollout(feature, { percentage: 100 }),
+      5 * 60 * 60 * 1000
+    );
   },
 
   // Aggressive: 25% → 50% → 100% over 1 hour
   aggressive: (feature: FeatureFlag) => {
     updateRollout(feature, { percentage: 25 });
-    setTimeout(() => updateRollout(feature, { percentage: 50 }), 20 * 60 * 1000);
-    setTimeout(() => updateRollout(feature, { percentage: 100 }), 60 * 60 * 1000);
+    setTimeout(
+      () => updateRollout(feature, { percentage: 50 }),
+      20 * 60 * 1000
+    );
+    setTimeout(
+      () => updateRollout(feature, { percentage: 100 }),
+      60 * 60 * 1000
+    );
   },
 
   // Beta: Only specific users

@@ -88,35 +88,35 @@ Organizations deploying error recovery face four architectural decisions: retry 
 
 **Retry Policy Configuration:**
 
-*Immediate vs Delayed Retry:* Immediate retry (within milliseconds) works for transient failures (network timeouts, page load races). Delayed retry (seconds to minutes) works for external dependencies recovering slowly (database restarts, backend deployments).
+_Immediate vs Delayed Retry:_ Immediate retry (within milliseconds) works for transient failures (network timeouts, page load races). Delayed retry (seconds to minutes) works for external dependencies recovering slowly (database restarts, backend deployments).
 
-*Fixed vs Exponential Backoff:* Fixed interval retry (retry every 5 seconds) risks overwhelming recovering systems. Exponential backoff (1s, 2s, 4s, 8s) gives systems time to recover while maintaining progress.
+_Fixed vs Exponential Backoff:_ Fixed interval retry (retry every 5 seconds) risks overwhelming recovering systems. Exponential backoff (1s, 2s, 4s, 8s) gives systems time to recover while maintaining progress.
 
-*Maximum Retry Limits:* Infinite retries risk infinite loops on permanent failures. Typical maximum: 3-5 retries before escalating to next recovery level.
+_Maximum Retry Limits:_ Infinite retries risk infinite loops on permanent failures. Typical maximum: 3-5 retries before escalating to next recovery level.
 
 **Semantic Recovery Approaches:**
 
-*OCR-Based Element Location:* Scan screen for text matching expected button labels ("Submit," "Save," "Confirm"). Robust against position changes but vulnerable to label changes.
+_OCR-Based Element Location:_ Scan screen for text matching expected button labels ("Submit," "Save," "Confirm"). Robust against position changes but vulnerable to label changes.
 
-*Visual Pattern Matching:* Compare UI elements against reference screenshots using computer vision. Robust against text changes but vulnerable to visual redesigns.
+_Visual Pattern Matching:_ Compare UI elements against reference screenshots using computer vision. Robust against text changes but vulnerable to visual redesigns.
 
-*Hybrid Approach:* Combine OCR and vision—locate by text label, verify visual appearance matches expectations before interaction. Most robust—handles partial UI changes.
+_Hybrid Approach:_ Combine OCR and vision—locate by text label, verify visual appearance matches expectations before interaction. Most robust—handles partial UI changes.
 
 **Escalation Thresholds:**
 
-*Time-Based:* Escalate after N seconds of retry attempts (typically 30-120 seconds for interactive workflows, 5-15 minutes for batch processes).
+_Time-Based:_ Escalate after N seconds of retry attempts (typically 30-120 seconds for interactive workflows, 5-15 minutes for batch processes).
 
-*Attempt-Based:* Escalate after N retry attempts regardless of duration (typically 3-10 attempts depending on operation criticality).
+_Attempt-Based:_ Escalate after N retry attempts regardless of duration (typically 3-10 attempts depending on operation criticality).
 
-*Confidence-Based:* AI agents assess confidence in recovery success. Low confidence (<70%) triggers immediate escalation. High confidence (>90%) enables more retry attempts.
+_Confidence-Based:_ AI agents assess confidence in recovery success. Low confidence (<70%) triggers immediate escalation. High confidence (>90%) enables more retry attempts.
 
 **Learning Mechanisms:**
 
-*Failure Pattern Recognition:* System logs all failures with context. Machine learning identifies patterns (all failures occur after specific screen state, all failures correlate with specific error messages). Patterns inform new recovery strategies.
+_Failure Pattern Recognition:_ System logs all failures with context. Machine learning identifies patterns (all failures occur after specific screen state, all failures correlate with specific error messages). Patterns inform new recovery strategies.
 
-*Recovery Strategy Evolution:* Successful manual resolutions by humans become automated recovery strategies. Human solves CAPTCHA → system requests CAPTCHA exemption from vendor. Next occurrence bypasses CAPTCHA entirely through vendor API.
+_Recovery Strategy Evolution:_ Successful manual resolutions by humans become automated recovery strategies. Human solves CAPTCHA → system requests CAPTCHA exemption from vendor. Next occurrence bypasses CAPTCHA entirely through vendor API.
 
-*Predictive Failure Prevention:* Historical data identifies conditions predicting failures. System detects pre-failure conditions and switches to alternative workflows proactively—preventing failures rather than recovering from them.
+_Predictive Failure Prevention:_ Historical data identifies conditions predicting failures. System detects pre-failure conditions and switches to alternative workflows proactively—preventing failures rather than recovering from them.
 
 ## Looking Ahead to 2026
 

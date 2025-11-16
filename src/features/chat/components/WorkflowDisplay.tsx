@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { Progress } from '@shared/ui/progress';
-import {  Avatar, AvatarFallback, AvatarImage } from '@shared/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@shared/ui/avatar';
 import {
   CheckCircle2,
   Circle,
@@ -41,7 +41,10 @@ interface WorkflowDisplayProps {
   className?: string;
 }
 
-const ArtifactIcons: Record<ArtifactType, React.ComponentType<{ className?: string }>> = {
+const ArtifactIcons: Record<
+  ArtifactType,
+  React.ComponentType<{ className?: string }>
+> = {
   prd: FileText,
   architecture: Code,
   design: Palette,
@@ -69,7 +72,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
   const [expandedSteps, setExpandedSteps] = useState<Set<string>>(new Set());
 
   const toggleStep = (stepId: string) => {
-    setExpandedSteps(prev => {
+    setExpandedSteps((prev) => {
       const next = new Set(prev);
       if (next.has(stepId)) {
         next.delete(stepId);
@@ -112,7 +115,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
 
   const progress = (() => {
     const completed = workflow.steps.filter(
-      s => s.status === 'completed' || s.status === 'skipped'
+      (s) => s.status === 'completed' || s.status === 'skipped'
     ).length;
     const total = workflow.steps.length;
     return total > 0 ? (completed / total) * 100 : 0;
@@ -142,7 +145,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
         <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
-              {workflow.steps.filter(s => s.status === 'completed').length} of{' '}
+              {workflow.steps.filter((s) => s.status === 'completed').length} of{' '}
               {workflow.steps.length} steps completed
             </span>
             <span className="font-medium">{Math.round(progress)}%</span>
@@ -158,7 +161,8 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
               <span>
                 Completed: {workflow.completedAt.toLocaleTimeString()} (
                 {Math.round(
-                  (workflow.completedAt.getTime() - workflow.startedAt.getTime()) /
+                  (workflow.completedAt.getTime() -
+                    workflow.startedAt.getTime()) /
                     1000
                 )}
                 s)
@@ -173,8 +177,8 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
           {workflow.steps.map((step, index) => {
             const isExpanded = expandedSteps.has(step.id);
             const StatusIcon = StepStatusIcons[step.status];
-            const stepArtifacts = workflow.artifacts.filter(a =>
-              step.output?.some(o => o.id === a.id)
+            const stepArtifacts = workflow.artifacts.filter((a) =>
+              step.output?.some((o) => o.id === a.id)
             );
 
             return (
@@ -186,7 +190,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
               >
                 <Card
                   className={cn(
-                    'border transition-all cursor-pointer',
+                    'cursor-pointer border transition-all',
                     step.status === 'in_progress' &&
                       'border-blue-500/50 bg-blue-50/50 dark:bg-blue-900/10',
                     step.status === 'completed' &&
@@ -199,7 +203,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
                   <CardContent className="p-4">
                     {/* Step Header */}
                     <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-3 flex-1">
+                      <div className="flex flex-1 items-start space-x-3">
                         <div className="flex items-center space-x-2">
                           <StatusIcon
                             className={cn(
@@ -214,8 +218,10 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
                         </div>
 
                         <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h4 className="font-semibold">{step.description}</h4>
+                          <div className="mb-1 flex items-center space-x-2">
+                            <h4 className="font-semibold">
+                              {step.description}
+                            </h4>
                             <Badge variant="outline" className="text-xs">
                               {step.role.replace('_', ' ')}
                             </Badge>
@@ -223,7 +229,7 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
 
                           {/* Agent Info */}
                           {step.agentId && (
-                            <div className="flex items-center space-x-2 mt-2">
+                            <div className="mt-2 flex items-center space-x-2">
                               <Avatar className="h-6 w-6">
                                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-xs text-white">
                                   AI
@@ -245,8 +251,9 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
                           {/* Artifacts */}
                           {stepArtifacts.length > 0 && !isExpanded && (
                             <div className="mt-2 flex flex-wrap gap-1">
-                              {stepArtifacts.map(artifact => {
-                                const ArtifactIcon = ArtifactIcons[artifact.type];
+                              {stepArtifacts.map((artifact) => {
+                                const ArtifactIcon =
+                                  ArtifactIcons[artifact.type];
                                 return (
                                   <Badge
                                     key={artifact.id}
@@ -292,21 +299,23 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
                           {/* Dependencies */}
                           {step.dependencies.length > 0 && (
                             <div>
-                              <h5 className="text-sm font-medium mb-2">
+                              <h5 className="mb-2 text-sm font-medium">
                                 Dependencies
                               </h5>
                               <div className="space-y-1">
-                                {step.dependencies.map(depId => {
+                                {step.dependencies.map((depId) => {
                                   const depStep = workflow.steps.find(
-                                    s => s.id === depId
+                                    (s) => s.id === depId
                                   );
                                   return (
                                     <div
                                       key={depId}
-                                      className="text-sm text-muted-foreground flex items-center space-x-2"
+                                      className="flex items-center space-x-2 text-sm text-muted-foreground"
                                     >
                                       <CheckCircle2 className="h-3 w-3 text-green-500" />
-                                      <span>{depStep?.description || depId}</span>
+                                      <span>
+                                        {depStep?.description || depId}
+                                      </span>
                                     </div>
                                   );
                                 })}
@@ -317,12 +326,13 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
                           {/* Artifacts */}
                           {stepArtifacts.length > 0 && (
                             <div>
-                              <h5 className="text-sm font-medium mb-2">
+                              <h5 className="mb-2 text-sm font-medium">
                                 Artifacts
                               </h5>
                               <div className="space-y-2">
-                                {stepArtifacts.map(artifact => {
-                                  const ArtifactIcon = ArtifactIcons[artifact.type];
+                                {stepArtifacts.map((artifact) => {
+                                  const ArtifactIcon =
+                                    ArtifactIcons[artifact.type];
                                   return (
                                     <Card
                                       key={artifact.id}
@@ -331,9 +341,9 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
                                       <CardContent className="p-3">
                                         <div className="flex items-start justify-between">
                                           <div className="flex items-start space-x-2">
-                                            <ArtifactIcon className="h-4 w-4 mt-0.5 text-primary" />
+                                            <ArtifactIcon className="mt-0.5 h-4 w-4 text-primary" />
                                             <div>
-                                              <div className="font-medium text-sm">
+                                              <div className="text-sm font-medium">
                                                 {artifact.title}
                                               </div>
                                               <div className="text-xs text-muted-foreground">
@@ -365,13 +375,14 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
 
                           {/* Timing */}
                           {step.startTime && (
-                            <div className="text-xs text-muted-foreground space-y-1">
+                            <div className="space-y-1 text-xs text-muted-foreground">
                               <div>
                                 Started: {step.startTime.toLocaleTimeString()}
                               </div>
                               {step.endTime && (
                                 <div>
-                                  Completed: {step.endTime.toLocaleTimeString()} (
+                                  Completed: {step.endTime.toLocaleTimeString()}{' '}
+                                  (
                                   {Math.round(
                                     (step.endTime.getTime() -
                                       step.startTime.getTime()) /
@@ -395,20 +406,22 @@ export const WorkflowDisplay: React.FC<WorkflowDisplayProps> = ({
         {/* Artifacts Summary */}
         {workflow.artifacts.length > 0 && (
           <div className="mt-6">
-            <h4 className="font-semibold mb-3">All Artifacts ({workflow.artifacts.length})</h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {workflow.artifacts.map(artifact => {
+            <h4 className="mb-3 font-semibold">
+              All Artifacts ({workflow.artifacts.length})
+            </h4>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {workflow.artifacts.map((artifact) => {
                 const ArtifactIcon = ArtifactIcons[artifact.type];
                 return (
                   <Card
                     key={artifact.id}
-                    className="border-border/50 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+                    className="cursor-pointer border-border/50 bg-muted/30 transition-colors hover:bg-muted/50"
                     onClick={() => onArtifactClick?.(artifact)}
                   >
                     <CardContent className="p-3 text-center">
-                      <ArtifactIcon className="h-6 w-6 mx-auto mb-2 text-primary" />
+                      <ArtifactIcon className="mx-auto mb-2 h-6 w-6 text-primary" />
                       <div className="text-xs font-medium">{artifact.type}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
+                      <div className="mt-1 text-xs text-muted-foreground">
                         v{artifact.metadata.version}
                       </div>
                     </CardContent>

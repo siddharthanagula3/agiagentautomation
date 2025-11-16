@@ -45,8 +45,12 @@ describe('WorkforceOrchestrator', () => {
     orchestrator = new WorkforceOrchestratorRefactored();
 
     // Import mocked modules
-    const { unifiedLLMService } = await import('@core/ai/llm/unified-language-model');
-    const { systemPromptsService } = await import('@core/ai/employees/prompt-management');
+    const { unifiedLLMService } = await import(
+      '@core/ai/llm/unified-language-model'
+    );
+    const { systemPromptsService } = await import(
+      '@core/ai/employees/prompt-management'
+    );
 
     mockLLMService = unifiedLLMService;
     mockPromptService = systemPromptsService;
@@ -55,7 +59,10 @@ describe('WorkforceOrchestrator', () => {
     vi.mocked(mockPromptService.getAvailableEmployees).mockResolvedValue([
       createCodeReviewerEmployee(),
       createDebuggerEmployee(),
-      createMockEmployee({ name: 'general-assistant', tools: ['Read', 'Write'] }),
+      createMockEmployee({
+        name: 'general-assistant',
+        tools: ['Read', 'Write'],
+      }),
     ]);
 
     // Setup mock store
@@ -250,9 +257,7 @@ describe('WorkforceOrchestrator', () => {
       // debugger has Bash + Read + Edit + Grep
       // code-reviewer has Read + Grep + Glob
       const mockPlan = {
-        plan: [
-          { task: 'Debug the issue', tool_required: 'Bash' },
-        ],
+        plan: [{ task: 'Debug the issue', tool_required: 'Bash' }],
       };
 
       vi.mocked(mockLLMService.sendMessage).mockResolvedValue(
@@ -306,7 +311,10 @@ describe('WorkforceOrchestrator', () => {
 
       expect(mockLLMService.sendMessage).toHaveBeenCalledWith(
         expect.arrayContaining([
-          expect.objectContaining({ role: 'user', content: 'Previous message' }),
+          expect.objectContaining({
+            role: 'user',
+            content: 'Previous message',
+          }),
           expect.objectContaining({ content: 'Follow-up question' }),
         ])
       );

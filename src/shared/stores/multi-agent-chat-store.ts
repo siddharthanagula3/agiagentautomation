@@ -257,10 +257,16 @@ export interface MultiAgentChatActions {
   ) => void;
 
   // Message management
-  addMessage: (message: Omit<ChatMessage, 'id' | 'timestamp' | 'deliveryStatus' | 'readBy'>) => string;
+  addMessage: (
+    message: Omit<ChatMessage, 'id' | 'timestamp' | 'deliveryStatus' | 'readBy'>
+  ) => string;
   updateMessage: (messageId: string, updates: Partial<ChatMessage>) => void;
   deleteMessage: (conversationId: string, messageId: string) => void;
-  markMessageAsRead: (conversationId: string, messageId: string, userId: string) => void;
+  markMessageAsRead: (
+    conversationId: string,
+    messageId: string,
+    userId: string
+  ) => void;
   updateMessageDeliveryStatus: (
     conversationId: string,
     messageId: string,
@@ -293,8 +299,13 @@ export interface MultiAgentChatActions {
   // Synchronization
   setSyncing: (isSyncing: boolean) => void;
   recordSyncTimestamp: () => void;
-  addSyncConflict: (conflict: Omit<SyncConflict, 'id' | 'timestamp' | 'resolved'>) => void;
-  resolveSyncConflict: (conflictId: string, resolution: 'local' | 'remote' | 'merge') => void;
+  addSyncConflict: (
+    conflict: Omit<SyncConflict, 'id' | 'timestamp' | 'resolved'>
+  ) => void;
+  resolveSyncConflict: (
+    conflictId: string,
+    resolution: 'local' | 'remote' | 'merge'
+  ) => void;
   clearResolvedConflicts: () => void;
 
   // Search and filters
@@ -364,7 +375,8 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
                 lastSeen: now,
               })),
               messages: [],
-              createdBy: participants.find((p) => p.type === 'user')?.id || 'system',
+              createdBy:
+                participants.find((p) => p.type === 'user')?.id || 'system',
               createdAt: now,
               updatedAt: now,
               metadata: {
@@ -506,7 +518,8 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
               conversation.metadata.totalMessages += 1;
 
               if (message.metadata?.tokensUsed) {
-                conversation.metadata.totalTokens += message.metadata.tokensUsed;
+                conversation.metadata.totalTokens +=
+                  message.metadata.tokensUsed;
               }
               if (message.metadata?.cost) {
                 conversation.metadata.totalCost += message.metadata.cost;
@@ -520,7 +533,9 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
         updateMessage: (messageId, updates) =>
           set((state) => {
             for (const conversation of Object.values(state.conversations)) {
-              const message = conversation.messages.find((m) => m.id === messageId);
+              const message = conversation.messages.find(
+                (m) => m.id === messageId
+              );
               if (message) {
                 Object.assign(message, updates);
                 conversation.updatedAt = new Date();
@@ -533,7 +548,9 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
           set((state) => {
             const conversation = state.conversations[conversationId];
             if (conversation) {
-              const index = conversation.messages.findIndex((m) => m.id === messageId);
+              const index = conversation.messages.findIndex(
+                (m) => m.id === messageId
+              );
               if (index !== -1) {
                 conversation.messages.splice(index, 1);
                 conversation.metadata.totalMessages = Math.max(
@@ -549,7 +566,9 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
           set((state) => {
             const conversation = state.conversations[conversationId];
             if (conversation) {
-              const message = conversation.messages.find((m) => m.id === messageId);
+              const message = conversation.messages.find(
+                (m) => m.id === messageId
+              );
               if (message && !message.readBy.includes(userId)) {
                 message.readBy.push(userId);
                 message.deliveryStatus = 'read';
@@ -561,7 +580,9 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
           set((state) => {
             const conversation = state.conversations[conversationId];
             if (conversation) {
-              const message = conversation.messages.find((m) => m.id === messageId);
+              const message = conversation.messages.find(
+                (m) => m.id === messageId
+              );
               if (message) {
                 message.deliveryStatus = status;
               }
@@ -572,7 +593,9 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
           set((state) => {
             const conversation = state.conversations[conversationId];
             if (conversation) {
-              const message = conversation.messages.find((m) => m.id === messageId);
+              const message = conversation.messages.find(
+                (m) => m.id === messageId
+              );
               if (message) {
                 if (!message.reactions) {
                   message.reactions = [];
@@ -580,7 +603,8 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
 
                 // Remove existing reaction of same type by same user
                 message.reactions = message.reactions.filter(
-                  (r) => !(r.type === reaction.type && r.userId === reaction.userId)
+                  (r) =>
+                    !(r.type === reaction.type && r.userId === reaction.userId)
                 );
 
                 // Add new reaction
@@ -593,7 +617,12 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
         // TYPING INDICATORS
         // ====================================================================
 
-        setTypingIndicator: (conversationId, participantId, participantName, isTyping) =>
+        setTypingIndicator: (
+          conversationId,
+          participantId,
+          participantName,
+          isTyping
+        ) =>
           set((state) => {
             const indicators = state.typingIndicators.get(conversationId) || [];
 
@@ -696,7 +725,8 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
               // Attempt to send message (implementation depends on your sync service)
               // For now, just mark as delivered
               set((state) => {
-                const conversation = state.conversations[message.conversationId];
+                const conversation =
+                  state.conversations[message.conversationId];
                 if (conversation) {
                   const existingMessage = conversation.messages.find(
                     (m) => m.id === message.id
@@ -758,7 +788,9 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
 
         resolveSyncConflict: (conflictId, resolution) =>
           set((state) => {
-            const conflict = state.syncConflicts.find((c) => c.id === conflictId);
+            const conflict = state.syncConflicts.find(
+              (c) => c.id === conflictId
+            );
             if (conflict) {
               const conversation = state.conversations[conflict.conversationId];
               if (conversation) {
@@ -772,7 +804,8 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
                     conversation.messages[messageIndex] = conflict.localVersion;
                   } else if (resolution === 'remote') {
                     // Use remote version
-                    conversation.messages[messageIndex] = conflict.remoteVersion;
+                    conversation.messages[messageIndex] =
+                      conflict.remoteVersion;
                   } else if (resolution === 'merge') {
                     // Merge both versions (simple strategy: prefer remote content, keep local metadata)
                     conversation.messages[messageIndex] = {
@@ -792,7 +825,9 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
 
         clearResolvedConflicts: () =>
           set((state) => {
-            state.syncConflicts = state.syncConflicts.filter((c) => !c.resolved);
+            state.syncConflicts = state.syncConflicts.filter(
+              (c) => !c.resolved
+            );
           }),
 
         // ====================================================================
@@ -863,18 +898,18 @@ export const useActiveConversation = () =>
   });
 
 export const useConversationMessages = (conversationId: string) =>
-  useMultiAgentChatStore((state) =>
-    state.conversations[conversationId]?.messages || []
+  useMultiAgentChatStore(
+    (state) => state.conversations[conversationId]?.messages || []
   );
 
 export const useConversationParticipants = (conversationId: string) =>
-  useMultiAgentChatStore((state) =>
-    state.conversations[conversationId]?.participants || []
+  useMultiAgentChatStore(
+    (state) => state.conversations[conversationId]?.participants || []
   );
 
 export const useTypingIndicators = (conversationId: string) =>
-  useMultiAgentChatStore((state) =>
-    state.typingIndicators.get(conversationId) || []
+  useMultiAgentChatStore(
+    (state) => state.typingIndicators.get(conversationId) || []
   );
 
 export const useAgentPresence = (agentId: string) =>

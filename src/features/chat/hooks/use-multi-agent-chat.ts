@@ -74,8 +74,12 @@ export function useMultiAgentChat(
   // Mission store actions
   const setMode = useMissionStore((state) => state.setMode);
   const setChatSession = useMissionStore((state) => state.setChatSession);
-  const addCollaborativeAgent = useMissionStore((state) => state.addCollaborativeAgent);
-  const removeCollaborativeAgent = useMissionStore((state) => state.removeCollaborativeAgent);
+  const addCollaborativeAgent = useMissionStore(
+    (state) => state.addCollaborativeAgent
+  );
+  const removeCollaborativeAgent = useMissionStore(
+    (state) => state.removeCollaborativeAgent
+  );
   const startMission = useMissionStore((state) => state.startMission);
   const reset = useMissionStore((state) => state.reset);
 
@@ -83,7 +87,9 @@ export function useMultiAgentChat(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [availableAgents, setAvailableAgents] = useState<AIEmployee[]>([]);
-  const conversationHistoryRef = useRef<Array<{ role: string; content: string }>>([]);
+  const conversationHistoryRef = useRef<
+    Array<{ role: string; content: string }>
+  >([]);
 
   // Load available agents
   useEffect(() => {
@@ -177,7 +183,8 @@ export function useMultiAgentChat(
             : 'Message sent'
         );
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Failed to send message';
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to send message';
         setError(errorMsg);
         toast.error(errorMsg);
       } finally {

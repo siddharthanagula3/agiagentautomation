@@ -52,7 +52,10 @@ export interface AgentCapability {
 export class CollaborationProtocol {
   private context: CollaborationContext;
   private agents: Map<string, AgentCapability>;
-  private messageHandlers: Map<string, (message: AgentMessage) => Promise<void>>;
+  private messageHandlers: Map<
+    string,
+    (message: AgentMessage) => Promise<void>
+  >;
 
   constructor(context: CollaborationContext) {
     this.context = context;
@@ -154,10 +157,7 @@ export class CollaborationProtocol {
   /**
    * Create optimized system prompt for agent
    */
-  createAgentPrompt(
-    agentId: string,
-    isIntermediateResponse = false
-  ): string {
+  createAgentPrompt(agentId: string, isIntermediateResponse = false): string {
     const agent = this.agents.get(agentId);
     if (!agent) return '';
 
@@ -251,7 +251,10 @@ Provide comprehensive, detailed responses. Include:
     if (isAgentMention) return true;
 
     // Don't optimize final user-facing responses
-    if (message.content.includes('final') || message.content.includes('summary'))
+    if (
+      message.content.includes('final') ||
+      message.content.includes('summary')
+    )
       return false;
 
     return false;

@@ -91,6 +91,7 @@ You are an expert web application security analyst specializing in vulnerability
 ## Core Expertise
 
 **OWASP Top 10 (2023):**
+
 - SQL Injection and NoSQL Injection
 - Cross-Site Scripting (XSS): Stored, Reflected, DOM-based
 - Cross-Site Request Forgery (CSRF)
@@ -128,12 +129,14 @@ When analyzing codebases for security vulnerabilities:
 [2-3 sentence overview of security posture]
 
 **Critical Findings:**
+
 1. [Vulnerability Type] - [File:Line] - [Description] - [Remediation Code]
 
 **High Priority Findings:**
 [Grouped by vulnerability category]
 
 **Security Score:** [0-100] based on:
+
 - Critical findings: -25 points each
 - High findings: -10 points each
 - Medium findings: -5 points each
@@ -156,7 +159,9 @@ The prompt management service (`prompt-management.ts`) loads this file at runtim
 import matter from 'gray-matter';
 
 // Dynamic import using Vite's glob
-const employeeFiles = import.meta.glob('/../.agi/employees/*.md', { as: 'raw' });
+const employeeFiles = import.meta.glob('/../.agi/employees/*.md', {
+  as: 'raw',
+});
 
 async function loadEmployee(filename: string): Promise<AIEmployee> {
   const content = await employeeFiles[filename]();
@@ -167,7 +172,7 @@ async function loadEmployee(filename: string): Promise<AIEmployee> {
     description: data.description,
     tools: data.tools,
     model: data.model,
-    systemPrompt
+    systemPrompt,
   };
 }
 ```
@@ -208,13 +213,14 @@ EOF
 
 **Comparison:**
 
-| Approach | Time to Add Employee | Developer Time | Deployment Required |
-|----------|---------------------|----------------|---------------------|
-| Hardcoded Class | 75-150 minutes | Yes (30-90 min) | Yes |
-| File-Based (AGI) | 5-15 minutes | No | No |
-| **Efficiency Gain** | **10-30x faster** | **100% reduction** | **Zero friction** |
+| Approach            | Time to Add Employee | Developer Time     | Deployment Required |
+| ------------------- | -------------------- | ------------------ | ------------------- |
+| Hardcoded Class     | 75-150 minutes       | Yes (30-90 min)    | Yes                 |
+| File-Based (AGI)    | 5-15 minutes         | No                 | No                  |
+| **Efficiency Gain** | **10-30x faster**    | **100% reduction** | **Zero friction**   |
 
 This efficiency compounds. Adding 50 specialized employees:
+
 - **Hardcoded:** 3,750-7,500 minutes (62-125 hours) of engineering time
 - **File-based:** 250-750 minutes (4-12 hours) of content writing (no engineering required)
 
@@ -267,21 +273,25 @@ You are ACME Corp's internal compliance auditor...
 **ACME-Specific Requirements:**
 
 **Authentication:**
+
 - All API endpoints must use OAuth2 via acme-auth-lib v3.2+
 - JWT tokens must expire within 15 minutes (ACME security policy #AUTH-001)
 - Refresh tokens must rotate on each use (no persistent refresh tokens)
 
 **Data Handling:**
+
 - PII fields (email, SSN, address) must use acme-crypto-lib AES-256 encryption
 - Database queries must be parameterized (no string concatenation)
 - All queries must include tenant_id for multi-tenant isolation
 
 **Logging:**
+
 - Every operation must include trace_id for SIEM correlation
 - PII must be redacted from logs using acme-logger-lib
 - Error logs must include user_id, tenant_id, timestamp, stack_trace
 
 **Dependencies:**
+
 - All packages must be in /docs/approved-packages.md
 - No GPL-licensed dependencies (license compatibility policy #LEG-007)
 - Dependencies with known CVEs (CVSS >7.0) require security review ticket
@@ -320,6 +330,7 @@ This enables **rapid iteration** during employee development:
 **Iteration speed:** 10-15 minute cycles instead of 75-150 minute deployment cycles
 
 For a new employee requiring 6 iterations to optimize:
+
 - **Hardcoded:** 450-900 minutes (7.5-15 hours) of engineering time
 - **File-based:** 60-90 minutes of content iteration (no engineering)
 
@@ -345,11 +356,13 @@ base_template: senior-software-engineer
 ## Python-Specific Expertise
 
 **Framework Knowledge:**
+
 - Flask: Blueprint patterns, application factories, testing with pytest
 - Django: ORM optimization, middleware, class-based views
 - FastAPI: async patterns, dependency injection, Pydantic models
 
 **Python Best Practices:**
+
 - Type hints with mypy strict mode
 - Virtual environments (venv, conda)
 - Package management with Poetry or pipenv
@@ -359,12 +372,14 @@ base_template: senior-software-engineer
 ```
 
 The base template (`senior-software-engineer.md`) provides common guidelines:
+
 - Code review standards
 - Git commit message conventions
 - Testing expectations (>80% coverage)
 - Documentation requirements
 
 The specialized template adds Python-specific knowledge. This composition pattern:
+
 - **Reduces duplication:** Common guidelines defined once, inherited by 40+ language-specific engineers
 - **Ensures consistency:** All senior engineers follow same code review standards
 - **Simplifies updates:** Improve base template, all inheriting employees benefit
@@ -377,32 +392,32 @@ The specialized template adds Python-specific knowledge. This composition patter
 
 **Adding 10 new specialized employees:**
 
-| Metric | Hardcoded Approach | File-Based (AGI) | Improvement |
-|--------|-------------------|------------------|-------------|
-| Engineering time | 25-50 hours | 0 hours | 100% reduction |
-| Content creation time | N/A | 10-15 hours | Parallelizable by domain experts |
-| Deployment time | 750-1,500 minutes | 0 minutes | No deployment needed |
-| Testing/validation | 8-12 hours | 2-4 hours | Real-time iteration |
-| **Total time-to-production** | **41-75 hours** | **12-19 hours** | **68-75% faster** |
+| Metric                       | Hardcoded Approach | File-Based (AGI) | Improvement                      |
+| ---------------------------- | ------------------ | ---------------- | -------------------------------- |
+| Engineering time             | 25-50 hours        | 0 hours          | 100% reduction                   |
+| Content creation time        | N/A                | 10-15 hours      | Parallelizable by domain experts |
+| Deployment time              | 750-1,500 minutes  | 0 minutes        | No deployment needed             |
+| Testing/validation           | 8-12 hours         | 2-4 hours        | Real-time iteration              |
+| **Total time-to-production** | **41-75 hours**    | **12-19 hours**  | **68-75% faster**                |
 
 **Updating system prompts for 20 existing employees:**
 
-| Metric | Hardcoded Approach | File-Based (AGI) | Improvement |
-|--------|-------------------|------------------|-------------|
-| Developer time | 30-60 hours | 0 hours | 100% reduction |
-| Code review time | 10-20 hours | 0 hours | No code changes |
-| Deployment cycles | 20 deploys | 0 deploys | Zero friction |
-| Production validation | 20-30 hours | 3-5 hours | Instant updates |
-| **Total maintenance overhead** | **60-110 hours** | **3-5 hours** | **95-97% reduction** |
+| Metric                         | Hardcoded Approach | File-Based (AGI) | Improvement          |
+| ------------------------------ | ------------------ | ---------------- | -------------------- |
+| Developer time                 | 30-60 hours        | 0 hours          | 100% reduction       |
+| Code review time               | 10-20 hours        | 0 hours          | No code changes      |
+| Deployment cycles              | 20 deploys         | 0 deploys        | Zero friction        |
+| Production validation          | 20-30 hours        | 3-5 hours        | Instant updates      |
+| **Total maintenance overhead** | **60-110 hours**   | **3-5 hours**    | **95-97% reduction** |
 
 **Supporting 165 employees over 12 months:**
 
-| Metric | Hardcoded (estimated) | File-Based (AGI actual) | Improvement |
-|--------|----------------------|-------------------------|-------------|
-| Initial development | 250-400 hours | 100-150 hours | 60-62% reduction |
-| Monthly maintenance | 80-120 hours | 15-25 hours | 81-85% reduction |
-| Annual engineering cost | $150K-230K | $22K-37K | 85-90% reduction |
-| Time-to-add new employee | 2-5 days | 2-6 hours | 90-95% reduction |
+| Metric                   | Hardcoded (estimated) | File-Based (AGI actual) | Improvement      |
+| ------------------------ | --------------------- | ----------------------- | ---------------- |
+| Initial development      | 250-400 hours         | 100-150 hours           | 60-62% reduction |
+| Monthly maintenance      | 80-120 hours          | 15-25 hours             | 81-85% reduction |
+| Annual engineering cost  | $150K-230K            | $22K-37K                | 85-90% reduction |
+| Time-to-add new employee | 2-5 days              | 2-6 hours               | 90-95% reduction |
 
 These metrics explain how AGI Automation scales to 165+ employees while competing platforms struggle at 20-30. The architectural advantage is **non-linear**—file-based approach becomes exponentially more efficient as employee count grows.
 
@@ -421,6 +436,7 @@ Your current architecture likely hardcodes agent prompts in source code. This de
 Your internal stakeholders (legal, compliance, security, operations teams) want AI capabilities that encode institutional knowledge. Building 50+ hardcoded agents for department-specific workflows is infeasible with limited engineering resources.
 
 File-based architecture enables **self-service employee creation**:
+
 1. Engineering team builds the platform (orchestrator, tool execution, state management)
 2. Domain experts create department-specific employees (legal writes legal-contract-reviewer.md, security writes compliance-auditor.md)
 3. Employees deploy instantly without engineering bottleneck
@@ -447,21 +463,25 @@ You don't have resources to build 50+ specialized agents with hardcoded classes.
 Organizations deploying file-based employee systems report:
 
 **Specialization Scale:**
+
 - **Hardcoded platforms:** 15-30 employees average, 40 employees maximum observed
 - **File-based platforms (AGI):** 80-165 employees average, 200+ employees maximum observed
 - **Scaling advantage:** 5-7x more employees maintainable with file-based architecture
 
 **Maintenance Overhead:**
+
 - **Hardcoded:** 60-120 hours monthly engineering time for 30 employees
 - **File-based:** 15-30 hours monthly content time for 100 employees
 - **Efficiency gain:** 75-85% reduction in maintenance overhead
 
 **Time-to-Deploy New Employee:**
+
 - **Hardcoded:** 2-5 days (engineering, review, deploy, validate)
 - **File-based:** 2-6 hours (content creation, testing, commit)
 - **Speed advantage:** 10-20x faster deployment
 
 **Domain Expert Participation:**
+
 - **Hardcoded:** 0% (requires engineering skills)
 - **File-based:** 70-80% of employees created/improved by domain experts, not engineers
 - **Leverage effect:** Engineering team focuses on platform, domain experts create specialization
@@ -471,6 +491,7 @@ Organizations deploying file-based employee systems report:
 **Q1-Q2 2026: File-Based Architecture Becomes Industry Standard**
 
 Competing agentic AI platforms converge on file-based employee definitions. The architectural pattern proves superior for:
+
 - Scalability (100+ employees)
 - Maintainability (minimal engineering overhead)
 - Collaboration (domain experts contribute without engineering skills)
@@ -517,6 +538,7 @@ File-based architecture makes this accumulation feasible. Hardcoded approaches p
 Start by hiring 3 specialized employees from AGI Automation's 165+ marketplace specialists. See how markdown-based definitions enable instant deployment and iteration.
 
 Recommended starting portfolio:
+
 - **Senior Software Engineer** (implementation across multiple languages)
 - **Security Analyst** (vulnerability detection and remediation)
 - **Documentation Writer** (structured reports and technical documentation)

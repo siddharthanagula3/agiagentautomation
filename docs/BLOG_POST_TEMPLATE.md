@@ -75,9 +75,11 @@ Tags: [tag1], [tag2], [tag3]
 
 **[Optional: Callout Box]**
 ```
+
 💡 Key Insight: [Specific statistic, risk, or opportunity that deserves emphasis]
 
 Supporting detail explaining why this matters and what action it suggests.
+
 ```
 
 ## Looking Ahead to 2026
@@ -304,9 +306,10 @@ with 30-day feedback cycles instead of annual reviews. Specialization becomes qu
 **2027: Organizational Restructuring**
 
 Companies reorganize around AI teams. A "product team" means 1 Product Manager + 2 Senior Engineers
-+ 1 QA + 1 DevOps. A "creative team" means 1 Creative Lead + Video Editor + 3D Artist + Music
-Producer. Human roles focus on strategy, exception handling, creativity. AI Employees handle
-execution and optimization. The productivity gains compound as teams optimize AI Employee usage.
+
+- 1 QA + 1 DevOps. A "creative team" means 1 Creative Lead + Video Editor + 3D Artist + Music
+  Producer. Human roles focus on strategy, exception handling, creativity. AI Employees handle
+  execution and optimization. The productivity gains compound as teams optimize AI Employee usage.
 
 ## Key Takeaways
 

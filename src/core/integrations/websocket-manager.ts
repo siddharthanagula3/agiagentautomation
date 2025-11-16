@@ -114,8 +114,14 @@ const DEFAULT_CONFIG: Required<ConnectionConfig> = {
 
 export class WebSocketManager {
   private connections: Map<string, PooledConnection> = new Map();
-  private messageHandlers: Map<MessageType, Set<(message: WebSocketMessage) => void>> = new Map();
-  private globalListeners: Map<WebSocketEventType, Set<(event: WebSocketEvent) => void>> = new Map();
+  private messageHandlers: Map<
+    MessageType,
+    Set<(message: WebSocketMessage) => void>
+  > = new Map();
+  private globalListeners: Map<
+    WebSocketEventType,
+    Set<(event: WebSocketEvent) => void>
+  > = new Map();
   private config: Required<ConnectionConfig>;
 
   constructor(config: ConnectionConfig = {}) {
@@ -156,7 +162,9 @@ export class WebSocketManager {
     };
 
     this.connections.set(connectionId, connection);
-    this.emitEvent(connectionId, 'stateChange', { state: WebSocketState.CONNECTING });
+    this.emitEvent(connectionId, 'stateChange', {
+      state: WebSocketState.CONNECTING,
+    });
 
     try {
       if (this.config.useSupabaseRealtime) {
@@ -183,7 +191,10 @@ export class WebSocketManager {
   /**
    * Connect using Supabase Realtime
    */
-  private async connectSupabase(connection: PooledConnection, sessionId?: string): Promise<void> {
+  private async connectSupabase(
+    connection: PooledConnection,
+    sessionId?: string
+  ): Promise<void> {
     const channelName = sessionId || `global-${connection.id}`;
 
     connection.supabaseChannel = supabase
@@ -210,7 +221,9 @@ export class WebSocketManager {
       connection.metrics.connectedAt = Date.now();
       connection.metrics.reconnectAttempts = 0;
       this.emitEvent(connection.id, 'connected', { channelName });
-      this.emitEvent(connection.id, 'stateChange', { state: WebSocketState.CONNECTED });
+      this.emitEvent(connection.id, 'stateChange', {
+        state: WebSocketState.CONNECTED,
+      });
     } else {
       throw new Error(`Failed to subscribe to channel: ${status}`);
     }
@@ -231,7 +244,9 @@ export class WebSocketManager {
           connection.metrics.connectedAt = Date.now();
           connection.metrics.reconnectAttempts = 0;
           this.emitEvent(connection.id, 'connected', {});
-          this.emitEvent(connection.id, 'stateChange', { state: WebSocketState.CONNECTED });
+          this.emitEvent(connection.id, 'stateChange', {
+            state: WebSocketState.CONNECTED,
+          });
           resolve();
         };
 
@@ -253,7 +268,11 @@ export class WebSocketManager {
         };
 
         ws.onclose = (event) => {
-          console.log(`[WebSocket] Closed: ${connection.id}`, event.code, event.reason);
+          console.log(
+            `[WebSocket] Closed: ${connection.id}`,
+            event.code,
+            event.reason
+          );
           this.handleConnectionClose(connection, event.code, event.reason);
         };
       } catch (error) {
@@ -273,7 +292,9 @@ export class WebSocketManager {
     }
 
     connection.state = WebSocketState.DISCONNECTING;
-    this.emitEvent(connectionId, 'stateChange', { state: WebSocketState.DISCONNECTING });
+    this.emitEvent(connectionId, 'stateChange', {
+      state: WebSocketState.DISCONNECTING,
+    });
 
     // Stop heartbeat
     if (connection.heartbeatTimer) {
@@ -302,7 +323,9 @@ export class WebSocketManager {
     connection.metrics.state = WebSocketState.DISCONNECTED;
     connection.metrics.disconnectedAt = Date.now();
     this.emitEvent(connectionId, 'disconnected', {});
-    this.emitEvent(connectionId, 'stateChange', { state: WebSocketState.DISCONNECTED });
+    this.emitEvent(connectionId, 'stateChange', {
+      state: WebSocketState.DISCONNECTED,
+    });
 
     // Remove from pool
     this.connections.delete(connectionId);
@@ -312,7 +335,10 @@ export class WebSocketManager {
   /**
    * Send a message through WebSocket
    */
-  async send(connectionId: string, message: Omit<WebSocketMessage, 'id' | 'timestamp'>): Promise<void> {
+  async send(
+    connectionId: string,
+    message: Omit<WebSocketMessage, 'id' | 'timestamp'>
+  ): Promise<void> {
     const connection = this.connections.get(connectionId);
     if (!connection) {
       throw new Error(`Connection not found: ${connectionId}`);
@@ -329,7 +355,9 @@ export class WebSocketManager {
     if (connection.state !== WebSocketState.CONNECTED) {
       if (connection.messageQueue.length < this.config.messageQueueSize) {
         connection.messageQueue.push(fullMessage);
-        console.log(`[WebSocket] Message queued: ${connection.id}, queue size: ${connection.messageQueue.length}`);
+        console.log(
+          `[WebSocket] Message queued: ${connection.id}, queue size: ${connection.messageQueue.length}`
+        );
       } else {
         console.warn(`[WebSocket] Message queue full: ${connection.id}`);
       }
@@ -368,9 +396,11 @@ export class WebSocketManager {
   /**
    * Broadcast a message to all connections
    */
-  async broadcast(message: Omit<WebSocketMessage, 'id' | 'timestamp'>): Promise<void> {
-    const promises = Array.from(this.connections.keys()).map(connectionId =>
-      this.send(connectionId, message).catch(error =>
+  async broadcast(
+    message: Omit<WebSocketMessage, 'id' | 'timestamp'>
+  ): Promise<void> {
+    const promises = Array.from(this.connections.keys()).map((connectionId) =>
+      this.send(connectionId, message).catch((error) =>
         console.error(`Failed to broadcast to ${connectionId}`, error)
       )
     );
@@ -381,7 +411,10 @@ export class WebSocketManager {
   /**
    * Handle incoming message
    */
-  private handleMessage(connection: PooledConnection, message: WebSocketMessage): void {
+  private handleMessage(
+    connection: PooledConnection,
+    message: WebSocketMessage
+  ): void {
     connection.metrics.messagesReceived++;
 
     // Handle heartbeat responses
@@ -395,7 +428,7 @@ export class WebSocketManager {
     // Emit to specific message type handlers
     const handlers = this.messageHandlers.get(message.type);
     if (handlers) {
-      handlers.forEach(handler => {
+      handlers.forEach((handler) => {
         try {
           handler(message);
         } catch (error) {
@@ -411,37 +444,59 @@ export class WebSocketManager {
   /**
    * Handle connection close
    */
-  private handleConnectionClose(connection: PooledConnection, code: number, reason: string): void {
+  private handleConnectionClose(
+    connection: PooledConnection,
+    code: number,
+    reason: string
+  ): void {
     connection.state = WebSocketState.DISCONNECTED;
     connection.metrics.disconnectedAt = Date.now();
     this.emitEvent(connection.id, 'disconnected', { code, reason });
-    this.emitEvent(connection.id, 'stateChange', { state: WebSocketState.DISCONNECTED });
+    this.emitEvent(connection.id, 'stateChange', {
+      state: WebSocketState.DISCONNECTED,
+    });
 
     // Attempt reconnection if not a normal closure
-    if (code !== 1000 && connection.metrics.reconnectAttempts < this.config.maxReconnectAttempts) {
+    if (
+      code !== 1000 &&
+      connection.metrics.reconnectAttempts < this.config.maxReconnectAttempts
+    ) {
       this.scheduleReconnect(connection);
-    } else if (connection.metrics.reconnectAttempts >= this.config.maxReconnectAttempts) {
+    } else if (
+      connection.metrics.reconnectAttempts >= this.config.maxReconnectAttempts
+    ) {
       connection.state = WebSocketState.FAILED;
       connection.metrics.state = WebSocketState.FAILED;
-      this.emitEvent(connection.id, 'stateChange', { state: WebSocketState.FAILED });
-      console.error(`[WebSocket] Max reconnect attempts reached: ${connection.id}`);
+      this.emitEvent(connection.id, 'stateChange', {
+        state: WebSocketState.FAILED,
+      });
+      console.error(
+        `[WebSocket] Max reconnect attempts reached: ${connection.id}`
+      );
     }
   }
 
   /**
    * Handle connection error
    */
-  private handleConnectionError(connection: PooledConnection, error: unknown): void {
+  private handleConnectionError(
+    connection: PooledConnection,
+    error: unknown
+  ): void {
     connection.metrics.errors++;
     this.emitEvent(connection.id, 'error', { error });
 
     // Attempt reconnection
-    if (connection.metrics.reconnectAttempts < this.config.maxReconnectAttempts) {
+    if (
+      connection.metrics.reconnectAttempts < this.config.maxReconnectAttempts
+    ) {
       this.scheduleReconnect(connection);
     } else {
       connection.state = WebSocketState.FAILED;
       connection.metrics.state = WebSocketState.FAILED;
-      this.emitEvent(connection.id, 'stateChange', { state: WebSocketState.FAILED });
+      this.emitEvent(connection.id, 'stateChange', {
+        state: WebSocketState.FAILED,
+      });
     }
   }
 
@@ -455,15 +510,23 @@ export class WebSocketManager {
 
     connection.state = WebSocketState.RECONNECTING;
     connection.metrics.reconnectAttempts++;
-    this.emitEvent(connection.id, 'reconnecting', { attempt: connection.metrics.reconnectAttempts });
-    this.emitEvent(connection.id, 'stateChange', { state: WebSocketState.RECONNECTING });
+    this.emitEvent(connection.id, 'reconnecting', {
+      attempt: connection.metrics.reconnectAttempts,
+    });
+    this.emitEvent(connection.id, 'stateChange', {
+      state: WebSocketState.RECONNECTING,
+    });
 
     // Exponential backoff: 1s, 2s, 4s, 8s, 16s
-    const delay = this.config.reconnectInterval * Math.pow(2, connection.metrics.reconnectAttempts - 1);
-    console.log(`[WebSocket] Scheduling reconnect for ${connection.id} in ${delay}ms (attempt ${connection.metrics.reconnectAttempts})`);
+    const delay =
+      this.config.reconnectInterval *
+      Math.pow(2, connection.metrics.reconnectAttempts - 1);
+    console.log(
+      `[WebSocket] Scheduling reconnect for ${connection.id} in ${delay}ms (attempt ${connection.metrics.reconnectAttempts})`
+    );
 
     connection.reconnectTimer = setTimeout(() => {
-      this.connect(connection.id).catch(error => {
+      this.connect(connection.id).catch((error) => {
         console.error('[WebSocket] Reconnection failed', error);
       });
     }, delay);
@@ -482,7 +545,7 @@ export class WebSocketManager {
         this.send(connection.id, {
           type: MessageType.HEARTBEAT,
           payload: { ping: true },
-        }).catch(error => {
+        }).catch((error) => {
           console.error('[WebSocket] Heartbeat failed', error);
         });
       }
@@ -492,17 +555,27 @@ export class WebSocketManager {
   /**
    * Process queued messages
    */
-  private async processMessageQueue(connection: PooledConnection): Promise<void> {
-    if (connection.state !== WebSocketState.CONNECTED || connection.messageQueue.length === 0) {
+  private async processMessageQueue(
+    connection: PooledConnection
+  ): Promise<void> {
+    if (
+      connection.state !== WebSocketState.CONNECTED ||
+      connection.messageQueue.length === 0
+    ) {
       return;
     }
 
-    console.log(`[WebSocket] Processing ${connection.messageQueue.length} queued messages`);
+    console.log(
+      `[WebSocket] Processing ${connection.messageQueue.length} queued messages`
+    );
 
     // Sort by priority (high > normal > low)
     connection.messageQueue.sort((a, b) => {
       const priorityOrder = { high: 3, normal: 2, low: 1 };
-      return (priorityOrder[b.priority || 'normal'] || 2) - (priorityOrder[a.priority || 'normal'] || 2);
+      return (
+        (priorityOrder[b.priority || 'normal'] || 2) -
+        (priorityOrder[a.priority || 'normal'] || 2)
+      );
     });
 
     // Send all queued messages
@@ -535,7 +608,10 @@ export class WebSocketManager {
   /**
    * Handle Supabase presence join
    */
-  private handlePresenceJoin(connection: PooledConnection, payload: unknown): void {
+  private handlePresenceJoin(
+    connection: PooledConnection,
+    payload: unknown
+  ): void {
     this.emitEvent(connection.id, 'message', {
       type: MessageType.PRESENCE,
       payload: { event: 'join', ...payload },
@@ -545,7 +621,10 @@ export class WebSocketManager {
   /**
    * Handle Supabase presence leave
    */
-  private handlePresenceLeave(connection: PooledConnection, payload: unknown): void {
+  private handlePresenceLeave(
+    connection: PooledConnection,
+    payload: unknown
+  ): void {
     this.emitEvent(connection.id, 'message', {
       type: MessageType.PRESENCE,
       payload: { event: 'leave', ...payload },
@@ -555,7 +634,10 @@ export class WebSocketManager {
   /**
    * Register message handler for specific message type
    */
-  onMessage(type: MessageType, handler: (message: WebSocketMessage) => void): () => void {
+  onMessage(
+    type: MessageType,
+    handler: (message: WebSocketMessage) => void
+  ): () => void {
     if (!this.messageHandlers.has(type)) {
       this.messageHandlers.set(type, new Set());
     }
@@ -605,7 +687,10 @@ export class WebSocketManager {
   /**
    * Register global event listener (all connections)
    */
-  onGlobal(event: WebSocketEventType, handler: (event: WebSocketEvent) => void): () => void {
+  onGlobal(
+    event: WebSocketEventType,
+    handler: (event: WebSocketEvent) => void
+  ): () => void {
     if (!this.globalListeners.has(event)) {
       this.globalListeners.set(event, new Set());
     }
@@ -625,7 +710,11 @@ export class WebSocketManager {
   /**
    * Emit event to listeners
    */
-  private emitEvent(connectionId: string, type: WebSocketEventType, data?: unknown): void {
+  private emitEvent(
+    connectionId: string,
+    type: WebSocketEventType,
+    data?: unknown
+  ): void {
     const event: WebSocketEvent = {
       type,
       connectionId,
@@ -638,7 +727,7 @@ export class WebSocketManager {
     if (connection) {
       const listeners = connection.listeners.get(type);
       if (listeners) {
-        listeners.forEach(handler => {
+        listeners.forEach((handler) => {
           try {
             handler(event);
           } catch (error) {
@@ -651,7 +740,7 @@ export class WebSocketManager {
     // Emit to global listeners
     const globalListeners = this.globalListeners.get(type);
     if (globalListeners) {
-      globalListeners.forEach(handler => {
+      globalListeners.forEach((handler) => {
         try {
           handler(event);
         } catch (error) {
@@ -708,7 +797,7 @@ export class WebSocketManager {
    * Clean up all connections
    */
   async cleanup(): Promise<void> {
-    const promises = Array.from(this.connections.keys()).map(connectionId =>
+    const promises = Array.from(this.connections.keys()).map((connectionId) =>
       this.disconnect(connectionId)
     );
 

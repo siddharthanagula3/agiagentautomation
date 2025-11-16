@@ -1,4 +1,5 @@
 # Backend Fixes - Quick Reference Card
+
 **Print this and check off as you go**
 
 ---
@@ -6,15 +7,19 @@
 ## Critical Fixes (Do Today - 1.5 hours total)
 
 ### ☐ Fix #1: Token Tracking Authentication (5 min)
+
 **File:** `netlify/functions/utils/token-tracking.ts`
 **Line:** 101
 **Change:**
+
 ```diff
 - const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 + const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 ```
+
 **Deploy:** Push to git → Netlify auto-deploys
 **Test:**
+
 ```sql
 SELECT COUNT(*) FROM token_usage WHERE created_at > NOW() - '1 hour';
 -- Should show > 0 after making LLM request
@@ -23,12 +28,15 @@ SELECT COUNT(*) FROM token_usage WHERE created_at > NOW() - '1 hour';
 ---
 
 ### ☐ Fix #2: Database Performance Indexes (10 min)
+
 **File:** `supabase/migrations/20250113000003_add_critical_performance_indexes.sql`
 **Action:**
+
 1. Open Supabase dashboard → SQL Editor
 2. Paste entire migration file
 3. Click "Run"
-**Test:**
+   **Test:**
+
 ```sql
 EXPLAIN ANALYZE SELECT * FROM chat_messages
 WHERE session_id = 'xxx' ORDER BY created_at DESC LIMIT 50;
@@ -38,17 +46,21 @@ WHERE session_id = 'xxx' ORDER BY created_at DESC LIMIT 50;
 ---
 
 ### ☐ Fix #3: Verify Rate Limiting (15 min)
+
 **Action:**
+
 1. Go to Netlify → Site settings → Environment variables
 2. Check if these exist:
    - `UPSTASH_REDIS_REST_URL`
    - `UPSTASH_REDIS_REST_TOKEN`
 
 **If Missing:**
+
 - **Option A:** Set up Upstash Redis (https://upstash.com)
 - **Option B:** Deploy fallback limiter (see CRITICAL_SECURITY_FIXES.md)
 
 **Test:**
+
 ```bash
 # Make 11 requests in 1 minute
 for i in {1..11}; do
@@ -60,9 +72,11 @@ done
 ---
 
 ### ☐ Fix #4: Add LLM Proxy Authentication (30 min)
+
 **Create:** `netlify/functions/utils/auth-middleware.ts` (see CRITICAL_SECURITY_FIXES.md)
 **Update:** `anthropic-proxy.ts`, `openai-proxy.ts`, `google-proxy.ts`
 **Change:**
+
 ```diff
 - const anthropicHandler: Handler = async (event: HandlerEvent) => {
 + import { withAuth } from './utils/auth-middleware';
@@ -73,7 +87,9 @@ done
 - export const handler = withRateLimit(anthropicHandler);
 + export const handler = withAuth(withRateLimit(anthropicHandler));
 ```
+
 **Test:**
+
 ```bash
 # Without token
 curl -X POST https://your-site/.netlify/functions/anthropic-proxy
@@ -88,8 +104,10 @@ curl -X POST https://your-site/.netlify/functions/anthropic-proxy \
 ---
 
 ### ☐ Fix #5: Marketplace Data Integrity (20 min)
+
 **Create:** `supabase/migrations/20250113000004_fix_marketplace_integrity.sql`
 **Content:**
+
 ```sql
 -- Add employee_id column to ai_employees
 ALTER TABLE ai_employees ADD COLUMN IF NOT EXISTS employee_id TEXT UNIQUE;
@@ -109,7 +127,9 @@ ADD CONSTRAINT fk_purchased_employees_employee_id
 FOREIGN KEY (employee_id) REFERENCES ai_employees(employee_id)
 ON DELETE RESTRICT;
 ```
+
 **Test:**
+
 ```sql
 SELECT COUNT(*) FROM purchased_employees pe
 LEFT JOIN ai_employees ae ON pe.employee_id = ae.employee_id
@@ -124,12 +144,14 @@ WHERE ae.id IS NULL;
 After deploying all fixes, run these checks:
 
 ### ☐ Token Tracking Working
+
 ```sql
 SELECT COUNT(*), MAX(created_at) FROM token_usage;
 -- Should have recent entries
 ```
 
 ### ☐ Indexes Created
+
 ```sql
 SELECT COUNT(*) FROM pg_indexes
 WHERE schemaname = 'public' AND indexname LIKE 'idx_%';
@@ -137,18 +159,21 @@ WHERE schemaname = 'public' AND indexname LIKE 'idx_%';
 ```
 
 ### ☐ Rate Limiting Active
+
 ```bash
 # Make 11 rapid requests
 # Should get 429 Too Many Requests on 11th
 ```
 
 ### ☐ Auth Required on Proxies
+
 ```bash
 curl -X POST https://your-site/.netlify/functions/anthropic-proxy
 # Should return 401 without token
 ```
 
 ### ☐ No Orphaned Employees
+
 ```sql
 SELECT COUNT(*) FROM purchased_employees pe
 LEFT JOIN ai_employees ae ON pe.employee_id = ae.employee_id
@@ -157,6 +182,7 @@ WHERE ae.id IS NULL;
 ```
 
 ### ☐ Query Performance Improved
+
 ```sql
 EXPLAIN ANALYZE SELECT * FROM chat_messages
 WHERE session_id = 'test' ORDER BY created_at DESC LIMIT 50;
@@ -168,6 +194,7 @@ WHERE session_id = 'test' ORDER BY created_at DESC LIMIT 50;
 ## Environment Variables Checklist
 
 ### ☐ Netlify Environment Variables
+
 ```
 ✓ VITE_SUPABASE_URL
 ✓ VITE_SUPABASE_ANON_KEY
@@ -199,6 +226,7 @@ WHERE session_id = 'test' ORDER BY created_at DESC LIMIT 50;
 ## Success Criteria
 
 After all fixes:
+
 - ✓ Token usage data is being saved to database
 - ✓ All queries run 5-10x faster
 - ✓ Rate limiting prevents abuse
@@ -211,21 +239,25 @@ After all fixes:
 ## If Something Breaks
 
 ### Token tracking still not working?
+
 1. Check Netlify logs for errors
 2. Verify `SUPABASE_SERVICE_ROLE_KEY` is set
 3. Make sure RLS policies exist on `token_usage` table
 
 ### Rate limiting not working?
+
 1. Check if Upstash Redis env vars are set
 2. Try fallback in-memory limiter
 3. Check Netlify function logs for rate limit errors
 
 ### Auth causing 401 errors for valid users?
+
 1. Check Supabase JWT is being passed in `Authorization` header
 2. Verify token is not expired
 3. Check auth middleware logic
 
 ### Database migration failed?
+
 1. Check for syntax errors
 2. Verify table/column names match schema
 3. Roll back if needed: `DROP INDEX idx_name CASCADE;`

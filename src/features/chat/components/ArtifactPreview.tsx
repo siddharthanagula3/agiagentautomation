@@ -23,7 +23,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@shared/ui/dropdown-menu';
-import { sanitizeArtifact, sanitizeSVG, hasXSSRisk } from '@shared/utils/html-sanitizer';
+import {
+  sanitizeArtifact,
+  sanitizeSVG,
+  hasXSSRisk,
+} from '@shared/utils/html-sanitizer';
 import { Alert, AlertDescription } from '@shared/ui/alert';
 
 export interface ArtifactVersion {
@@ -446,8 +450,9 @@ export function ArtifactPreview({
         <Alert className="m-4 border-yellow-500 bg-yellow-50">
           <Shield className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-800">
-            <strong>Security Notice:</strong> This artifact contains potentially risky content.
-            It has been sanitized for your protection, but some functionality may be limited.
+            <strong>Security Notice:</strong> This artifact contains potentially
+            risky content. It has been sanitized for your protection, but some
+            functionality may be limited.
           </AlertDescription>
         </Alert>
       )}

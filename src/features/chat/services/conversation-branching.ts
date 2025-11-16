@@ -35,13 +35,17 @@ export class ConversationBranchingService {
   ): Promise<ChatSession> {
     try {
       // Get the original session
-      const originalSession = await chatPersistenceService.getSession(sessionId, userId);
+      const originalSession = await chatPersistenceService.getSession(
+        sessionId,
+        userId
+      );
       if (!originalSession) {
         throw new Error('Original session not found');
       }
 
       // Get all messages from the original session
-      const allMessages = await chatPersistenceService.getSessionMessages(sessionId);
+      const allMessages =
+        await chatPersistenceService.getSessionMessages(sessionId);
 
       // Find the branch point message
       const branchPointIndex = allMessages.findIndex(
@@ -57,17 +61,26 @@ export class ConversationBranchingService {
 
       // Create a new session for the branch
       const branchTitle =
-        newTitle || `${originalSession.title} (Branch from message ${branchPointIndex + 1})`;
+        newTitle ||
+        `${originalSession.title} (Branch from message ${branchPointIndex + 1})`;
 
-      const branchSession = await chatPersistenceService.createSession(userId, branchTitle, {
-        employeeId: originalSession.metadata?.employeeId as string,
-        role: originalSession.metadata?.role as string,
-        provider: originalSession.metadata?.provider as string,
-      });
+      const branchSession = await chatPersistenceService.createSession(
+        userId,
+        branchTitle,
+        {
+          employeeId: originalSession.metadata?.employeeId as string,
+          role: originalSession.metadata?.role as string,
+          provider: originalSession.metadata?.provider as string,
+        }
+      );
 
       // Copy messages to the new branch
       if (messagesUpToBranch.length > 0) {
-        await chatPersistenceService.copySessionMessages(sessionId, branchSession.id, userId);
+        await chatPersistenceService.copySessionMessages(
+          sessionId,
+          branchSession.id,
+          userId
+        );
       }
 
       // Store branch metadata in the new session
@@ -113,7 +126,10 @@ export class ConversationBranchingService {
   /**
    * Get all branches for a session
    */
-  async getBranches(sessionId: string, userId: string): Promise<ConversationBranch[]> {
+  async getBranches(
+    sessionId: string,
+    userId: string
+  ): Promise<ConversationBranch[]> {
     // This would query a branches table or metadata
     // For now, returning empty array as placeholder
     // In production, implement proper branch tracking
@@ -125,8 +141,14 @@ export class ConversationBranchingService {
    * Get the conversation tree for a session
    * Shows the root session and all its branches
    */
-  async getConversationTree(sessionId: string, userId: string): Promise<ConversationTree> {
-    const rootSession = await chatPersistenceService.getSession(sessionId, userId);
+  async getConversationTree(
+    sessionId: string,
+    userId: string
+  ): Promise<ConversationTree> {
+    const rootSession = await chatPersistenceService.getSession(
+      sessionId,
+      userId
+    );
     if (!rootSession) {
       throw new Error('Session not found');
     }
@@ -150,7 +172,10 @@ export class ConversationBranchingService {
   ): Promise<ChatSession> {
     try {
       // Get the original session
-      const originalSession = await chatPersistenceService.getSession(sessionId, userId);
+      const originalSession = await chatPersistenceService.getSession(
+        sessionId,
+        userId
+      );
       if (!originalSession) {
         throw new Error('Original session not found');
       }
@@ -158,14 +183,22 @@ export class ConversationBranchingService {
       // Create a new session
       const duplicateTitle = newTitle || `${originalSession.title} (Copy)`;
 
-      const duplicateSession = await chatPersistenceService.createSession(userId, duplicateTitle, {
-        employeeId: originalSession.metadata?.employeeId as string,
-        role: originalSession.metadata?.role as string,
-        provider: originalSession.metadata?.provider as string,
-      });
+      const duplicateSession = await chatPersistenceService.createSession(
+        userId,
+        duplicateTitle,
+        {
+          employeeId: originalSession.metadata?.employeeId as string,
+          role: originalSession.metadata?.role as string,
+          provider: originalSession.metadata?.provider as string,
+        }
+      );
 
       // Copy all messages
-      await chatPersistenceService.copySessionMessages(sessionId, duplicateSession.id, userId);
+      await chatPersistenceService.copySessionMessages(
+        sessionId,
+        duplicateSession.id,
+        userId
+      );
 
       return duplicateSession;
     } catch (error) {
@@ -204,13 +237,18 @@ export class ConversationBranchingService {
       ]);
 
       // Create a new session for the merge
-      const mergeTitle = newTitle || `Merged: ${session1.title} + ${session2.title}`;
+      const mergeTitle =
+        newTitle || `Merged: ${session1.title} + ${session2.title}`;
 
-      const mergeSession = await chatPersistenceService.createSession(userId, mergeTitle, {
-        employeeId: session1.metadata?.employeeId as string,
-        role: session1.metadata?.role as string,
-        provider: session1.metadata?.provider as string,
-      });
+      const mergeSession = await chatPersistenceService.createSession(
+        userId,
+        mergeTitle,
+        {
+          employeeId: session1.metadata?.employeeId as string,
+          role: session1.metadata?.role as string,
+          provider: session1.metadata?.provider as string,
+        }
+      );
 
       // Combine messages (you might want to sort by timestamp or use a different strategy)
       const combinedMessages = [...messages1, ...messages2].sort(
@@ -233,7 +271,10 @@ export class ConversationBranchingService {
   /**
    * Get the parent session of a branch
    */
-  async getParentSession(branchSessionId: string, userId: string): Promise<ChatSession | null> {
+  async getParentSession(
+    branchSessionId: string,
+    userId: string
+  ): Promise<ChatSession | null> {
     // This would look up the parent from branch metadata
     // For now, returning null as placeholder
 
@@ -253,7 +294,10 @@ export class ConversationBranchingService {
   /**
    * Get all descendants of a session (branches and their branches)
    */
-  async getDescendants(sessionId: string, userId: string): Promise<ChatSession[]> {
+  async getDescendants(
+    sessionId: string,
+    userId: string
+  ): Promise<ChatSession[]> {
     // This would recursively get all branches and sub-branches
     // For now, returning empty array as placeholder
 

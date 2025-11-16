@@ -28,6 +28,7 @@ The application has **385 source files** but only **2 unit test files** in src/ 
 ### Existing Test Coverage
 
 #### Unit Tests (2 files, 92 passing tests)
+
 1. **C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\core\auth\authentication-manager.test.ts**
    - ✅ Quality: EXCELLENT (17 comprehensive tests)
    - ✅ Covers: login, register, logout, password reset, profile updates
@@ -46,6 +47,7 @@ The application has **385 source files** but only **2 unit test files** in src/ 
    - ⚠️ Gap: Missing persistence, state transitions, concurrent operations
 
 #### E2E Tests (8 files, status unknown)
+
 1. **simple.spec.ts** - Basic smoke tests (2 tests)
    - ✅ Homepage loading
    - ✅ Navigation to login
@@ -83,6 +85,7 @@ The application has **385 source files** but only **2 unit test files** in src/ 
 ### Test Quality Issues
 
 #### Critical Problems
+
 1. **Hardcoded Production Credentials** in E2E tests
    - Security risk: credentials in source control
    - Test pollution: modifies production data
@@ -137,6 +140,7 @@ The application has **385 source files** but only **2 unit test files** in src/ 
 ```
 
 **Target:**
+
 - **Unit Tests:** 150-200 test files (70-80% of testing effort)
 - **Integration Tests:** 40-60 test files (15-20% of effort)
 - **E2E Tests:** 15-20 critical journey tests (5-10% of effort)
@@ -148,11 +152,13 @@ The application has **385 source files** but only **2 unit test files** in src/ 
 ### Priority 1: MISSION-CRITICAL BUSINESS LOGIC (NO TESTS)
 
 #### 1.1 Workforce Orchestrator (ZERO TESTS)
+
 **File:** `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\core\ai\orchestration\workforce-orchestrator.ts`
 
 **Risk:** EXTREME - Core product functionality completely untested
 
 **Required Tests:**
+
 - Plan generation from natural language input
 - Employee selection algorithm
 - Task delegation logic
@@ -162,6 +168,7 @@ The application has **385 source files** but only **2 unit test files** in src/ 
 - Conversation history handling
 
 **Test Approach:**
+
 ```typescript
 // Unit tests with mocked LLM responses
 describe('WorkforceOrchestrator', () => {
@@ -176,11 +183,13 @@ describe('WorkforceOrchestrator', () => {
 ```
 
 #### 1.2 Mission Control Store (ZERO TESTS)
+
 **File:** `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\shared\stores\mission-control-store.ts`
 
 **Risk:** EXTREME - Real-time state management untested
 
 **Required Tests:**
+
 - Task status transitions (pending → in_progress → completed)
 - Employee status updates
 - Message queue operations
@@ -190,13 +199,16 @@ describe('WorkforceOrchestrator', () => {
 - Immer immutability guarantees
 
 #### 1.3 AI Employee System (ZERO TESTS)
+
 **Files:**
+
 - `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\core\ai\employees\prompt-management.ts`
 - `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\core\ai\employees\employee-executor.ts`
 
 **Risk:** HIGH - File-based configuration system can break silently
 
 **Required Tests:**
+
 - Employee markdown file parsing
 - YAML frontmatter validation
 - System prompt loading
@@ -206,13 +218,16 @@ describe('WorkforceOrchestrator', () => {
 - Error handling for malformed files
 
 #### 1.4 LLM Provider Integration (ZERO TESTS)
+
 **Files:**
+
 - `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\core\ai\llm\unified-language-model.ts`
 - `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\core\ai\llm\providers\*.ts`
 
 **Risk:** HIGH - External API failures can crash orchestration
 
 **Required Tests:**
+
 - Provider fallback logic
 - API error handling (rate limits, timeouts, invalid keys)
 - Message format conversions
@@ -223,11 +238,13 @@ describe('WorkforceOrchestrator', () => {
 ### Priority 2: DATABASE & STORAGE (NO INTEGRATION TESTS)
 
 #### 2.1 Supabase Workforce Database (ZERO TESTS)
+
 **File:** `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\core\storage\supabase\workforce-database.ts`
 
 **Risk:** HIGH - Data corruption, RLS policy failures
 
 **Required Integration Tests:**
+
 - Employee hiring flow (database → Zustand store sync)
 - RLS policies enforcement (users can only see their employees)
 - Concurrent purchases (race conditions)
@@ -235,13 +252,16 @@ describe('WorkforceOrchestrator', () => {
 - Webhook audit logging
 
 #### 2.2 Chat History Persistence (ZERO TESTS)
+
 **Files:**
+
 - `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\core\storage\chat\chat-history-persistence.ts`
 - `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\core\storage\chat\multi-agent-chat-database.ts`
 
 **Risk:** MEDIUM - Conversation loss, sync failures
 
 **Required Tests:**
+
 - Message persistence with attachments
 - Multi-agent conversation threading
 - Real-time subscription updates
@@ -251,13 +271,16 @@ describe('WorkforceOrchestrator', () => {
 ### Priority 3: BILLING & PAYMENTS (SHALLOW TESTS)
 
 #### 3.1 Stripe Payment Flow (E2E ONLY, NO INTEGRATION)
+
 **Files:**
+
 - `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\features\billing\services\stripe-payments.ts`
 - `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\netlify\functions\stripe-webhook.ts`
 
 **Risk:** HIGH - Revenue loss, subscription state corruption
 
 **Required Integration Tests:**
+
 - Webhook signature verification
 - Subscription lifecycle (created → active → canceled)
 - Payment failure handling
@@ -266,16 +289,19 @@ describe('WorkforceOrchestrator', () => {
 - Idempotency for duplicate webhooks
 
 **Existing E2E Issues:**
+
 - Mocks payment without verifying backend state
 - Doesn't test webhook processing
 - No Stripe CLI integration
 
 #### 3.2 Token Enforcement (ZERO TESTS)
+
 **File:** `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\core\billing\token-enforcement-service.ts`
 
 **Risk:** MEDIUM - Usage limit bypass, billing disputes
 
 **Required Tests:**
+
 - Token consumption tracking
 - Rate limiting enforcement
 - Plan tier restrictions
@@ -285,9 +311,11 @@ describe('WorkforceOrchestrator', () => {
 ### Priority 4: SECURITY (NO TESTS)
 
 #### 4.1 Authentication Edge Cases (PARTIAL TESTS)
+
 **Risk:** MEDIUM - Existing auth tests are good but incomplete
 
 **Missing Tests:**
+
 - Session hijacking prevention
 - Password reset token expiration
 - Concurrent login sessions
@@ -295,11 +323,13 @@ describe('WorkforceOrchestrator', () => {
 - OAuth provider integration (if planned)
 
 #### 4.2 Prompt Injection Detection (ZERO TESTS)
+
 **File:** `C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\src\core\security\prompt-injection-detector.ts`
 
 **Risk:** MEDIUM - Security bypass, abuse
 
 **Required Tests:**
+
 - Known injection patterns detection
 - Jailbreak attempt blocking
 - System prompt leakage prevention
@@ -311,6 +341,7 @@ describe('WorkforceOrchestrator', () => {
 **Gap:** 50+ feature components untested
 
 **Critical Components Needing Tests:**
+
 - ChatInterface (message sending, streaming, error states)
 - EmployeeMarketplace (filtering, hiring, purchases)
 - MissionControlDashboard (real-time updates, task monitoring)
@@ -389,24 +420,28 @@ describe('WorkforceOrchestrator', () => {
 ## Test Implementation Priorities (Ranked)
 
 ### Tier 1: IMMEDIATE (Blocks Production)
+
 1. ✅ WorkforceOrchestrator unit tests
 2. ✅ MissionStore unit tests
 3. ✅ Stripe webhook integration tests
 4. ✅ RLS policy verification tests
 
 ### Tier 2: HIGH (Production Ready)
+
 5. ⚠️ LLM provider unit tests
 6. ⚠️ AI employee system unit tests
 7. ⚠️ Workforce database integration tests
 8. ⚠️ Chat persistence integration tests
 
 ### Tier 3: MEDIUM (Quality Improvement)
+
 9. ⚠️ Refactor E2E tests (remove credentials, add data-testid)
 10. ⚠️ Token enforcement tests
 11. ⚠️ Critical component tests (ChatInterface, Marketplace)
 12. ⚠️ Security tests (prompt injection, rate limiting)
 
 ### Tier 4: LOW (Nice to Have)
+
 13. ℹ️ Utility function tests (expand coverage)
 14. ℹ️ UI component tests (non-critical components)
 15. ℹ️ Performance tests (load testing)
@@ -439,6 +474,7 @@ test.beforeEach(async ({ page }) => {
 ```
 
 **Files to update:**
+
 - C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation\tests\e2e\playwright\core-functionality.spec.ts
 
 ### 2. Add data-testid Attributes
@@ -454,20 +490,19 @@ await page.click('[data-testid="sign-in-button"]');
 ```
 
 **Components to update:**
+
 - Login/Register forms
 - Marketplace employee cards
 - Chat interface elements
 - Billing dashboard components
 
 **Implementation:**
+
 ```tsx
 // Example: EmployeeMarketplace.tsx
 <div data-testid="employee-card" key={employee.id}>
   <h3 data-testid="employee-name">{employee.name}</h3>
-  <button
-    data-testid="hire-button"
-    onClick={() => handleHire(employee.id)}
-  >
+  <button data-testid="hire-button" onClick={() => handleHire(employee.id)}>
     Hire
   </button>
 </div>
@@ -524,7 +559,10 @@ export const createMockMissionPlan = (taskCount = 3) => ({
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import { workforceDatabase } from '@core/storage/supabase/workforce-database';
-import { createMockUser, createMockEmployee } from '../fixtures/test-data-factory';
+import {
+  createMockUser,
+  createMockEmployee,
+} from '../fixtures/test-data-factory';
 
 describe('Workforce Database Integration', () => {
   let testSupabase;
@@ -558,14 +596,18 @@ describe('Workforce Database Integration', () => {
     await workforceDatabase.hireEmployee(testUser.id, employee.id);
 
     // Verify user can see their hired employee
-    const hiredEmployees = await workforceDatabase.getHiredEmployees(testUser.id);
+    const hiredEmployees = await workforceDatabase.getHiredEmployees(
+      testUser.id
+    );
     expect(hiredEmployees).toContainEqual(
       expect.objectContaining({ id: employee.id })
     );
 
     // Verify other users cannot see this employee
     const otherUser = await createMockUser();
-    const otherUserEmployees = await workforceDatabase.getHiredEmployees(otherUser.id);
+    const otherUserEmployees = await workforceDatabase.getHiredEmployees(
+      otherUser.id
+    );
     expect(otherUserEmployees).not.toContainEqual(
       expect.objectContaining({ id: employee.id })
     );
@@ -592,7 +634,10 @@ describe('Workforce Database Integration', () => {
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WorkforceOrchestratorRefactored } from './workforce-orchestrator';
 import { useMissionStore } from '@shared/stores/mission-control-store';
-import { createMockMissionPlan, createMockEmployee } from '../../../tests/fixtures/test-data-factory';
+import {
+  createMockMissionPlan,
+  createMockEmployee,
+} from '../../../tests/fixtures/test-data-factory';
 
 // Mock dependencies
 vi.mock('@core/ai/llm/unified-language-model');
@@ -615,7 +660,10 @@ describe('WorkforceOrchestrator', () => {
 
     mockPromptService = {
       getAvailableEmployees: vi.fn().mockResolvedValue([
-        createMockEmployee({ name: 'code-reviewer', tools: ['Read', 'Grep'] }),
+        createMockEmployee({
+          name: 'code-reviewer',
+          tools: ['Read', 'Grep'],
+        }),
         createMockEmployee({ name: 'debugger', tools: ['Bash', 'Read'] }),
       ]),
     };
@@ -849,9 +897,18 @@ export async function cleanupTestDatabase() {
     process.env.TEST_SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  await supabase.from('purchased_employees').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-  await supabase.from('chat_messages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-  await supabase.from('chat_sessions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  await supabase
+    .from('purchased_employees')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000');
+  await supabase
+    .from('chat_messages')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000');
+  await supabase
+    .from('chat_sessions')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000');
 }
 ```
 
@@ -892,16 +949,19 @@ export const handlers = [
 ### Coverage Goals
 
 **Phase 1 (Week 2):**
+
 - Overall coverage: 30-40%
 - Core orchestration: 70%+
 - Critical stores: 80%+
 
 **Phase 2 (Week 4):**
+
 - Overall coverage: 50-60%
 - Database operations: 70%+
 - Billing logic: 80%+
 
 **Phase 3 (Week 6):**
+
 - Overall coverage: 70%+ (line coverage)
 - Critical paths: 90%+ (branch coverage)
 - E2E critical journeys: 100% (happy path + major error scenarios)
@@ -943,25 +1003,28 @@ export const handlers = [
 ```markdown
 # Quarantined Tests
 
-| Test File | Test Name | Quarantined Date | Issue | Status |
-|-----------|-----------|------------------|-------|--------|
-| billing.spec.ts | "should complete payment flow" | 2025-11-10 | #234 | Investigating |
+| Test File       | Test Name                      | Quarantined Date | Issue | Status        |
+| --------------- | ------------------------------ | ---------------- | ----- | ------------- |
+| billing.spec.ts | "should complete payment flow" | 2025-11-10       | #234  | Investigating |
 ```
 
 ### When to Add/Modify/Remove Tests
 
 **Add tests when:**
+
 - New feature added
 - Bug fixed (regression test)
 - Edge case discovered
 - Refactoring business logic
 
 **Modify tests when:**
+
 - Requirements change
 - API contracts updated
 - Test is flaky (fix or remove)
 
 **Remove tests when:**
+
 - Feature removed
 - Test provides no value (redundant coverage)
 - Test has been quarantined > 2 sprints
@@ -973,18 +1036,21 @@ export const handlers = [
 ### Warning Signs
 
 🚨 **CRITICAL:**
+
 - Coverage dropping > 5% in a PR
 - E2E tests taking > 10 minutes
 - Flaky test rate > 5%
 - Tests disabled in CI
 
 ⚠️ **WARNING:**
+
 - New feature without tests
 - Test execution time increasing
 - Mocks not updated with API changes
 - Duplicate test logic
 
 ℹ️ **INFO:**
+
 - Coverage plateau (no improvement)
 - Skipped tests accumulating
 - Test data factory needs refresh
@@ -1018,6 +1084,7 @@ The AGI Agent Automation Platform has **critically low test coverage** (0.38%) f
 5. Establish CI/CD pipeline with test gates
 
 The investment in testing will pay dividends in:
+
 - Reduced production bugs
 - Faster development velocity
 - Confident refactoring

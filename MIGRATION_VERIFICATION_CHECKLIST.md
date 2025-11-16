@@ -1,9 +1,11 @@
 # Multi-Agent Chat Migration Verification Checklist
 
 ## Overview
+
 This checklist helps verify that the multi-agent chat tables have been successfully migrated to the remote Supabase database.
 
 ## Migration Details
+
 - **Migration File:** `supabase/migrations/20250113000002_add_multi_agent_chat_tables.sql`
 - **Date Created:** January 13, 2025
 - **Tables Created:** 5 new tables
@@ -12,6 +14,7 @@ This checklist helps verify that the multi-agent chat tables have been successfu
 ## Current Status
 
 ### Local Environment
+
 - ✅ Migration file created and committed
 - ✅ TypeScript types defined
 - ✅ Service layer implemented
@@ -20,6 +23,7 @@ This checklist helps verify that the multi-agent chat tables have been successfu
 - ✅ Build successful (0 errors)
 
 ### Remote Database
+
 - ⚠️ **NOT YET VERIFIED** - Awaiting Supabase MCP connection
 
 ## Tables to Verify
@@ -27,9 +31,11 @@ This checklist helps verify that the multi-agent chat tables have been successfu
 Use Supabase MCP or Supabase Studio to verify these tables exist:
 
 ### 1. multi_agent_conversations
+
 **Purpose:** Stores conversation sessions with multiple AI agents
 
 **Key Columns:**
+
 - `id` (UUID, PK)
 - `user_id` (UUID, FK → auth.users)
 - `title`, `description`
@@ -44,6 +50,7 @@ Use Supabase MCP or Supabase Studio to verify these tables exist:
 - Timestamps: `started_at`, `last_message_at`, `completed_at`, `created_at`, `updated_at`
 
 **Indexes:**
+
 - `idx_multi_agent_conversations_user_id`
 - `idx_multi_agent_conversations_status`
 - `idx_multi_agent_conversations_type`
@@ -53,6 +60,7 @@ Use Supabase MCP or Supabase Studio to verify these tables exist:
 - `idx_multi_agent_conversations_metadata` (GIN)
 
 **RLS Policies:**
+
 - ✅ Users can view own conversations
 - ✅ Users can create own conversations
 - ✅ Users can update own conversations
@@ -61,9 +69,11 @@ Use Supabase MCP or Supabase Studio to verify these tables exist:
 ---
 
 ### 2. conversation_participants
+
 **Purpose:** Tracks which AI agents are participating in each conversation
 
 **Key Columns:**
+
 - `id` (UUID, PK)
 - `conversation_id` (UUID, FK → multi_agent_conversations)
 - `employee_id`, `employee_name`, `employee_role`, `employee_provider`
@@ -76,6 +86,7 @@ Use Supabase MCP or Supabase Studio to verify these tables exist:
 - Timestamps: `joined_at`, `left_at`, `created_at`, `updated_at`
 
 **Indexes:**
+
 - `idx_conversation_participants_conversation`
 - `idx_conversation_participants_employee`
 - `idx_conversation_participants_status`
@@ -84,20 +95,24 @@ Use Supabase MCP or Supabase Studio to verify these tables exist:
 - `idx_conversation_participants_capabilities` (GIN)
 
 **RLS Policies:**
+
 - ✅ Users can view participants of own conversations
 - ✅ Users can add participants to own conversations
 - ✅ Users can update participants in own conversations
 - ✅ Users can remove participants from own conversations
 
 **Constraints:**
+
 - UNIQUE(conversation_id, employee_id)
 
 ---
 
 ### 3. agent_collaborations
+
 **Purpose:** Records collaborative sessions between multiple agents on specific tasks
 
 **Key Columns:**
+
 - `id` (UUID, PK)
 - `conversation_id` (UUID, FK → multi_agent_conversations)
 - `session_name`, `session_type` (task_based | brainstorming | review | problem_solving | research)
@@ -110,6 +125,7 @@ Use Supabase MCP or Supabase Studio to verify these tables exist:
 - Timestamps: `started_at`, `completed_at`, `created_at`, `updated_at`
 
 **Indexes:**
+
 - `idx_agent_collaborations_conversation`
 - `idx_agent_collaborations_status`
 - `idx_agent_collaborations_type`
@@ -117,6 +133,7 @@ Use Supabase MCP or Supabase Studio to verify these tables exist:
 - `idx_agent_collaborations_participants` (GIN)
 
 **RLS Policies:**
+
 - ✅ Users can view collaborations in own conversations
 - ✅ Users can create collaborations in own conversations
 - ✅ Users can update collaborations in own conversations
@@ -125,9 +142,11 @@ Use Supabase MCP or Supabase Studio to verify these tables exist:
 ---
 
 ### 4. message_reactions
+
 **Purpose:** User reactions and feedback on conversation messages
 
 **Key Columns:**
+
 - `id` (UUID, PK)
 - `message_id` (UUID, FK → chat_messages)
 - `user_id` (UUID, FK → auth.users)
@@ -136,26 +155,31 @@ Use Supabase MCP or Supabase Studio to verify these tables exist:
 - Timestamps: `created_at`, `updated_at`
 
 **Indexes:**
+
 - `idx_message_reactions_message`
 - `idx_message_reactions_user`
 - `idx_message_reactions_type`
 - `idx_message_reactions_created`
 
 **RLS Policies:**
+
 - ✅ Anyone can view reactions (public)
 - ✅ Users can create own reactions
 - ✅ Users can update own reactions
 - ✅ Users can delete own reactions
 
 **Constraints:**
+
 - UNIQUE(message_id, user_id, reaction_type)
 
 ---
 
 ### 5. conversation_metadata
+
 **Purpose:** Extended metadata, sharing settings, and UI preferences for conversations
 
 **Key Columns:**
+
 - `id` (UUID, PK)
 - `conversation_id` (UUID, FK → multi_agent_conversations, UNIQUE)
 - `user_id` (UUID, FK → auth.users)
@@ -167,6 +191,7 @@ Use Supabase MCP or Supabase Studio to verify these tables exist:
 - Timestamps: `last_viewed_at`, `created_at`, `updated_at`
 
 **Indexes:**
+
 - `idx_conversation_metadata_conversation`
 - `idx_conversation_metadata_user`
 - `idx_conversation_metadata_pinned` (WHERE is_pinned = TRUE)
@@ -175,6 +200,7 @@ Use Supabase MCP or Supabase Studio to verify these tables exist:
 - `idx_conversation_metadata_share_token` (WHERE share_token IS NOT NULL)
 
 **RLS Policies:**
+
 - ✅ Users can view metadata of own conversations
 - ✅ Users can create metadata for own conversations
 - ✅ Users can update metadata of own conversations
@@ -185,10 +211,12 @@ Use Supabase MCP or Supabase Studio to verify these tables exist:
 ## Functions and Triggers
 
 ### Auto-Update Triggers
+
 - ✅ `update_updated_at_column()` - Updates `updated_at` on all tables
 - ✅ `update_conversation_active_agents_count()` - Maintains accurate agent count
 
 ### Triggers Applied To:
+
 1. `multi_agent_conversations` - updated_at trigger
 2. `conversation_participants` - updated_at trigger + active_agents_count trigger
 3. `agent_collaborations` - updated_at trigger
@@ -276,6 +304,7 @@ This will check table existence and report status.
 ## Expected Output
 
 ### ✅ Success Indicators
+
 - All 5 tables exist in `public` schema
 - RLS is enabled on all tables
 - All indexes are created
@@ -283,6 +312,7 @@ This will check table existence and report status.
 - Policies allow proper user access
 
 ### ❌ Failure Indicators
+
 - Tables missing from remote database
 - RLS not enabled
 - Missing indexes or triggers
@@ -295,12 +325,14 @@ This will check table existence and report status.
 ### If Tables Don't Exist
 
 **Option 1: Use Supabase CLI**
+
 ```bash
 cd "C:\Users\SIDDHARTHA NAGULA\Desktop\agi\agiagentautomation"
 supabase db push --linked
 ```
 
 **Option 2: Manual SQL Execution**
+
 1. Open Supabase Studio: https://lywdzvfibhzbljrgovwr.supabase.co
 2. Go to SQL Editor
 3. Copy contents of `supabase/migrations/20250113000002_add_multi_agent_chat_tables.sql`
@@ -308,6 +340,7 @@ supabase db push --linked
 5. Verify tables are created
 
 **Option 3: Reset and Apply All Migrations**
+
 ```bash
 # Be careful - this resets the entire database
 supabase db reset --linked

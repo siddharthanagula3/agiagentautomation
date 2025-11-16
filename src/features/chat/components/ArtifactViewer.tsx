@@ -22,7 +22,10 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
-import { Artifact, ArtifactType } from '@core/ai/orchestration/workflow-orchestration';
+import {
+  Artifact,
+  ArtifactType,
+} from '@core/ai/orchestration/workflow-orchestration';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -33,7 +36,10 @@ interface ArtifactViewerProps {
   className?: string;
 }
 
-const ArtifactIcons: Record<ArtifactType, React.ComponentType<{ className?: string }>> = {
+const ArtifactIcons: Record<
+  ArtifactType,
+  React.ComponentType<{ className?: string }>
+> = {
   prd: FileText,
   architecture: Code,
   design: Palette,
@@ -100,9 +106,9 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className={cn('w-full h-full', className)}
+      className={cn('h-full w-full', className)}
     >
-      <Card className="border-border bg-card h-full flex flex-col">
+      <Card className="flex h-full flex-col border-border bg-card">
         <CardHeader>
           {/* Header */}
           <div className="flex items-start justify-between">
@@ -136,11 +142,7 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
             </div>
 
             <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopy}
-              >
+              <Button variant="ghost" size="sm" onClick={handleCopy}>
                 {isCopied ? (
                   <Check className="mr-2 h-4 w-4" />
                 ) : (
@@ -148,20 +150,12 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
                 )}
                 {isCopied ? 'Copied!' : 'Copy'}
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDownload}
-              >
+              <Button variant="ghost" size="sm" onClick={handleDownload}>
                 <Download className="mr-2 h-4 w-4" />
                 Download
               </Button>
               {onClose && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onClose}
-                >
+                <Button variant="ghost" size="sm" onClick={onClose}>
                   Close
                 </Button>
               )}
@@ -172,10 +166,17 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
         <CardContent className="flex-1 overflow-auto">
           {/* Sections or Full Content */}
           {artifact.sections && Object.keys(artifact.sections).length > 0 ? (
-            <Tabs defaultValue={Object.keys(artifact.sections)[0]} className="w-full">
+            <Tabs
+              defaultValue={Object.keys(artifact.sections)[0]}
+              className="w-full"
+            >
               <TabsList className="w-full justify-start overflow-x-auto">
                 {Object.keys(artifact.sections).map((section) => (
-                  <TabsTrigger key={section} value={section} className="capitalize">
+                  <TabsTrigger
+                    key={section}
+                    value={section}
+                    className="capitalize"
+                  >
                     {section.replace(/_/g, ' ')}
                   </TabsTrigger>
                 ))}
@@ -271,8 +272,8 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
 
           {/* Dependencies */}
           {artifact.metadata.dependencies.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-border">
-              <h3 className="text-sm font-semibold mb-3">Dependencies</h3>
+            <div className="mt-6 border-t border-border pt-6">
+              <h3 className="mb-3 text-sm font-semibold">Dependencies</h3>
               <div className="space-y-2">
                 {artifact.metadata.dependencies.map((depId) => (
                   <div
@@ -288,8 +289,8 @@ export const ArtifactViewer: React.FC<ArtifactViewerProps> = ({
           )}
 
           {/* Metadata */}
-          <div className="mt-6 pt-6 border-t border-border">
-            <h3 className="text-sm font-semibold mb-3">Metadata</h3>
+          <div className="mt-6 border-t border-border pt-6">
+            <h3 className="mb-3 text-sm font-semibold">Metadata</h3>
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <div>
                 <dt className="text-muted-foreground">Created</dt>

@@ -96,7 +96,10 @@ export interface AgentSubscription {
 /**
  * Workflow Templates inspired by MetaGPT
  */
-export const WorkflowTemplates: Record<WorkflowType, Omit<Workflow, 'id' | 'createdAt' | 'status' | 'artifacts' | 'messages'>> = {
+export const WorkflowTemplates: Record<
+  WorkflowType,
+  Omit<Workflow, 'id' | 'createdAt' | 'status' | 'artifacts' | 'messages'>
+> = {
   software_development: {
     type: 'software_development',
     name: 'Full Software Development Lifecycle',
@@ -310,7 +313,7 @@ export class WorkflowOrchestrator {
     const workflow: Workflow = {
       id: `workflow-${Date.now()}`,
       ...template,
-      steps: customSteps || template.steps.map(step => ({ ...step })),
+      steps: customSteps || template.steps.map((step) => ({ ...step })),
       status: 'created',
       createdAt: new Date(),
       artifacts: [],
@@ -375,13 +378,13 @@ export class WorkflowOrchestrator {
     const workflow = this.workflows.get(workflowId);
     if (!workflow) return [];
 
-    return workflow.steps.filter(step => {
+    return workflow.steps.filter((step) => {
       // Skip non-pending steps
       if (step.status !== 'pending') return false;
 
       // Check all dependencies are completed
-      const dependenciesComplete = step.dependencies.every(depId => {
-        const depStep = workflow.steps.find(s => s.id === depId);
+      const dependenciesComplete = step.dependencies.every((depId) => {
+        const depStep = workflow.steps.find((s) => s.id === depId);
         return depStep?.status === 'completed';
       });
 
@@ -411,7 +414,7 @@ export class WorkflowOrchestrator {
     const workflow = this.workflows.get(workflowId);
     if (!workflow) throw new Error('Workflow not found');
 
-    const step = workflow.steps.find(s => s.id === stepId);
+    const step = workflow.steps.find((s) => s.id === stepId);
     if (!step) throw new Error('Step not found');
 
     // Assign agent to step
@@ -456,7 +459,7 @@ export class WorkflowOrchestrator {
     if (!workflow) return;
 
     const allComplete = workflow.steps.every(
-      step => step.status === 'completed' || step.status === 'skipped'
+      (step) => step.status === 'completed' || step.status === 'skipped'
     );
 
     if (allComplete) {
@@ -512,7 +515,7 @@ export class WorkflowOrchestrator {
     if (!workflow) return { completed: 0, total: 0, percentage: 0 };
 
     const completed = workflow.steps.filter(
-      s => s.status === 'completed' || s.status === 'skipped'
+      (s) => s.status === 'completed' || s.status === 'skipped'
     ).length;
     const total = workflow.steps.length;
     const percentage = total > 0 ? (completed / total) * 100 : 0;
@@ -524,7 +527,10 @@ export class WorkflowOrchestrator {
 /**
  * Artifact Templates
  */
-export const ArtifactTemplates: Record<ArtifactType, (data: Partial<Artifact>) => Artifact> = {
+export const ArtifactTemplates: Record<
+  ArtifactType,
+  (data: Partial<Artifact>) => Artifact
+> = {
   prd: (data) => ({
     id: data.id || `artifact-${Date.now()}`,
     type: 'prd',

@@ -91,43 +91,43 @@ Organizations deploying file transfer infrastructure face five architectural dec
 
 **Chunking Strategy:**
 
-*Fixed-Size Chunks* (1MB, 5MB, 10MB): Simplest implementation. All files split into identical-sized chunks. Optimal for homogeneous file types.
+_Fixed-Size Chunks_ (1MB, 5MB, 10MB): Simplest implementation. All files split into identical-sized chunks. Optimal for homogeneous file types.
 
-*Content-Aware Chunks* (Variable-size based on content structure): More sophisticated. PDFs chunk at page boundaries. Videos chunk at keyframe boundaries. Enables more efficient delta sync but requires format-specific logic.
+_Content-Aware Chunks_ (Variable-size based on content structure): More sophisticated. PDFs chunk at page boundaries. Videos chunk at keyframe boundaries. Enables more efficient delta sync but requires format-specific logic.
 
-*Adaptive Chunks* (Size adjusts based on network conditions): Most complex. Small chunks (512KB) on unstable networks minimize retry overhead. Large chunks (20MB) on stable high-bandwidth networks maximize throughput.
+_Adaptive Chunks_ (Size adjusts based on network conditions): Most complex. Small chunks (512KB) on unstable networks minimize retry overhead. Large chunks (20MB) on stable high-bandwidth networks maximize throughput.
 
 **Resumption Approach:**
 
-*Client-Tracked Resumption:* Client stores upload progress locally. If upload fails, client queries server for last successful chunk and resumes from that point. Works across browser sessions but requires client-side storage.
+_Client-Tracked Resumption:_ Client stores upload progress locally. If upload fails, client queries server for last successful chunk and resumes from that point. Works across browser sessions but requires client-side storage.
 
-*Server-Tracked Resumption:* Server tracks upload progress in database. Client requests resume offset from server. Simpler client implementation but requires server-side state management.
+_Server-Tracked Resumption:_ Server tracks upload progress in database. Client requests resume offset from server. Simpler client implementation but requires server-side state management.
 
-*Hybrid Resumption:* Client tracks locally, server provides fallback. Optimizes for common case (client resume) while handling edge cases (client lost state).
+_Hybrid Resumption:_ Client tracks locally, server provides fallback. Optimizes for common case (client resume) while handling edge cases (client lost state).
 
 **Encryption Model:**
 
-*Transport Encryption* (TLS/HTTPS): Encrypts data in transit between client and server. Standard for all modern deployments. Prevents network eavesdropping.
+_Transport Encryption_ (TLS/HTTPS): Encrypts data in transit between client and server. Standard for all modern deployments. Prevents network eavesdropping.
 
-*At-Rest Encryption* (AES-256): Encrypts data in storage. Required for compliance. Prevents unauthorized access to storage backends.
+_At-Rest Encryption_ (AES-256): Encrypts data in storage. Required for compliance. Prevents unauthorized access to storage backends.
 
-*End-to-End Encryption* (E2EE): Encrypts data client-side before transmission. Only recipient can decrypt. Prevents server operators from accessing file contents. Required for highest-sensitivity scenarios (medical records, legal documents).
+_End-to-End Encryption_ (E2EE): Encrypts data client-side before transmission. Only recipient can decrypt. Prevents server operators from accessing file contents. Required for highest-sensitivity scenarios (medical records, legal documents).
 
 **Retention Policies:**
 
-*Time-Based:* Delete files after N days (7, 30, 90, 365 days). Simplest policy. Works for ephemeral data.
+_Time-Based:_ Delete files after N days (7, 30, 90, 365 days). Simplest policy. Works for ephemeral data.
 
-*Access-Based:* Archive/delete files after N days without access. Optimizes storage costs for rarely-accessed data.
+_Access-Based:_ Archive/delete files after N days without access. Optimizes storage costs for rarely-accessed data.
 
-*Compliance-Based:* Retain files for regulatory minimums (7 years HIPAA, indefinite for some legal scenarios). Prevent premature deletion.
+_Compliance-Based:_ Retain files for regulatory minimums (7 years HIPAA, indefinite for some legal scenarios). Prevent premature deletion.
 
 **Cost Optimization:**
 
-*Deduplication:* Detect duplicate files across all users. Store single copy with multiple references. Reduces storage costs 30-50% in organizations with shared datasets.
+_Deduplication:_ Detect duplicate files across all users. Store single copy with multiple references. Reduces storage costs 30-50% in organizations with shared datasets.
 
-*Compression:* Compress files before storage. Text and structured data compress 60-90%. Images and video compress 5-20%. Reduces storage and transfer costs proportionally.
+_Compression:_ Compress files before storage. Text and structured data compress 60-90%. Images and video compress 5-20%. Reduces storage and transfer costs proportionally.
 
-*Lifecycle Policies:* Automatically migrate files to cheaper storage tiers based on age or access patterns. Hot storage ($0.023/GB/month) → Cool storage ($0.01/GB/month) → Archive storage ($0.004/GB/month). Reduces costs 50-80% for long-retention data.
+_Lifecycle Policies:_ Automatically migrate files to cheaper storage tiers based on age or access patterns. Hot storage ($0.023/GB/month) → Cool storage ($0.01/GB/month) → Archive storage ($0.004/GB/month). Reduces costs 50-80% for long-retention data.
 
 ## Looking Ahead to 2026
 

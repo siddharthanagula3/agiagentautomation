@@ -33,7 +33,9 @@ type ParticipantUpdateCallback = (update: RealtimeParticipantUpdate) => void;
 type MessageCallback = (payload: RealtimePostgresChangesPayload<any>) => void;
 type TypingCallback = (indicator: TypingIndicator) => void;
 type PresenceCallback = (state: PresenceState[]) => void;
-type ConnectionStateCallback = (state: 'connected' | 'disconnected' | 'reconnecting') => void;
+type ConnectionStateCallback = (
+  state: 'connected' | 'disconnected' | 'reconnecting'
+) => void;
 
 // =============================================
 // SUBSCRIPTION MANAGER CLASS
@@ -126,7 +128,8 @@ export class ChatRealtimeSubscriptionManager {
           filter: `conversation_id=eq.${conversationId}`,
         },
         (payload) => {
-          const participant = (payload.new || payload.old) as ConversationParticipant;
+          const participant = (payload.new ||
+            payload.old) as ConversationParticipant;
           const update: RealtimeParticipantUpdate = {
             participant_id: participant.id,
             conversation_id: conversationId,
@@ -248,7 +251,11 @@ export class ChatRealtimeSubscriptionManager {
 
         if (status === 'CHANNEL_ERROR') {
           this.handleReconnect(channelName, () =>
-            this.subscribeToMessages(conversationId, onMessage, onConnectionStateChange)
+            this.subscribeToMessages(
+              conversationId,
+              onMessage,
+              onConnectionStateChange
+            )
           );
         }
       });
@@ -269,13 +276,11 @@ export class ChatRealtimeSubscriptionManager {
 
     this.unsubscribe(channelName);
 
-    const channel = supabase.channel(channelName).on(
-      'broadcast',
-      { event: 'typing' },
-      (payload) => {
+    const channel = supabase
+      .channel(channelName)
+      .on('broadcast', { event: 'typing' }, (payload) => {
         onTyping(payload.payload as TypingIndicator);
-      }
-    );
+      });
 
     channel.subscribe();
 
@@ -480,12 +485,15 @@ export class ChatRealtimeSubscriptionManager {
     if (attempts < this.maxReconnectAttempts) {
       this.reconnectAttempts.set(channelName, attempts + 1);
 
-      setTimeout(() => {
-        console.log(
-          `Reconnecting channel ${channelName} (attempt ${attempts + 1}/${this.maxReconnectAttempts})`
-        );
-        reconnectFn();
-      }, this.reconnectDelay * Math.pow(2, attempts)); // Exponential backoff
+      setTimeout(
+        () => {
+          console.log(
+            `Reconnecting channel ${channelName} (attempt ${attempts + 1}/${this.maxReconnectAttempts})`
+          );
+          reconnectFn();
+        },
+        this.reconnectDelay * Math.pow(2, attempts)
+      ); // Exponential backoff
     } else {
       console.error(
         `Max reconnection attempts reached for channel ${channelName}`
@@ -612,7 +620,12 @@ export async function broadcastTypingStatus(
   isTyping: boolean
 ): Promise<void> {
   const manager = getSubscriptionManager();
-  await manager.broadcastTyping(conversationId, participantId, employeeName, isTyping);
+  await manager.broadcastTyping(
+    conversationId,
+    participantId,
+    employeeName,
+    isTyping
+  );
 }
 
 /**

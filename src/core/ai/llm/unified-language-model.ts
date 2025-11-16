@@ -232,7 +232,10 @@ export class UnifiedLLMService {
 
     try {
       // SECURITY LAYER 1: Prompt Injection Detection
-      if (actualUserId && isFeatureEnabled('prompt_injection_detection', actualUserId)) {
+      if (
+        actualUserId &&
+        isFeatureEnabled('prompt_injection_detection', actualUserId)
+      ) {
         for (const message of messages) {
           if (message.role === 'user') {
             const injectionCheck = checkUserInput(message.content);
@@ -247,7 +250,8 @@ export class UnifiedLLMService {
               });
 
               throw new UnifiedLLMError(
-                injectionCheck.reason || 'Input blocked due to security concerns',
+                injectionCheck.reason ||
+                  'Input blocked due to security concerns',
                 'PROMPT_INJECTION_DETECTED',
                 targetProvider,
                 false
@@ -263,7 +267,10 @@ export class UnifiedLLMService {
       }
 
       // SECURITY LAYER 2: API Abuse Prevention
-      if (actualUserId && isFeatureEnabled('api_abuse_prevention', actualUserId)) {
+      if (
+        actualUserId &&
+        isFeatureEnabled('api_abuse_prevention', actualUserId)
+      ) {
         const totalInputLength = messages.reduce(
           (sum, msg) => sum + msg.content.length,
           0

@@ -58,7 +58,9 @@ export class AttachmentHandler {
   async initializeBucket(): Promise<void> {
     const { data: buckets } = await supabase.storage.listBuckets();
 
-    const bucketExists = buckets?.some((bucket) => bucket.name === this.bucketName);
+    const bucketExists = buckets?.some(
+      (bucket) => bucket.name === this.bucketName
+    );
 
     if (!bucketExists) {
       const { error } = await supabase.storage.createBucket(this.bucketName, {
@@ -96,7 +98,15 @@ export class AttachmentHandler {
 
     // Check filename for malicious patterns
     const filename = file.name.toLowerCase();
-    const dangerousExtensions = ['.exe', '.bat', '.cmd', '.sh', '.ps1', '.app', '.dmg'];
+    const dangerousExtensions = [
+      '.exe',
+      '.bat',
+      '.cmd',
+      '.sh',
+      '.ps1',
+      '.app',
+      '.dmg',
+    ];
 
     if (dangerousExtensions.some((ext) => filename.endsWith(ext))) {
       return {
@@ -154,7 +164,12 @@ export class AttachmentHandler {
       // Create thumbnail for images
       let thumbnailUrl: string | undefined;
       if (file.type.startsWith('image/')) {
-        thumbnailUrl = await this.createThumbnail(file, safeFilename, userId, sessionId);
+        thumbnailUrl = await this.createThumbnail(
+          file,
+          safeFilename,
+          userId,
+          sessionId
+        );
       }
 
       // Create attachment object
@@ -292,7 +307,9 @@ export class AttachmentHandler {
    * Delete a file from storage
    */
   async deleteFile(filePath: string): Promise<void> {
-    const { error } = await supabase.storage.from(this.bucketName).remove([filePath]);
+    const { error } = await supabase.storage
+      .from(this.bucketName)
+      .remove([filePath]);
 
     if (error) {
       throw new Error(`Failed to delete file: ${error.message}`);
@@ -312,7 +329,9 @@ export class AttachmentHandler {
     type: string;
     url: string;
   } | null> {
-    const { data, error } = await supabase.storage.from(this.bucketName).list(filePath);
+    const { data, error } = await supabase.storage
+      .from(this.bucketName)
+      .list(filePath);
 
     if (error || !data || data.length === 0) {
       return null;
@@ -336,7 +355,10 @@ export class AttachmentHandler {
   /**
    * Refresh signed URL for an attachment
    */
-  async refreshSignedUrl(filePath: string, expiresIn: number = 3600): Promise<string> {
+  async refreshSignedUrl(
+    filePath: string,
+    expiresIn: number = 3600
+  ): Promise<string> {
     const { data, error } = await supabase.storage
       .from(this.bucketName)
       .createSignedUrl(filePath, expiresIn);
@@ -351,10 +373,15 @@ export class AttachmentHandler {
   /**
    * Get all attachments for a session
    */
-  async getSessionAttachments(userId: string, sessionId: string): Promise<Attachment[]> {
+  async getSessionAttachments(
+    userId: string,
+    sessionId: string
+  ): Promise<Attachment[]> {
     const folderPath = `${userId}/${sessionId}`;
 
-    const { data, error } = await supabase.storage.from(this.bucketName).list(folderPath);
+    const { data, error } = await supabase.storage
+      .from(this.bucketName)
+      .list(folderPath);
 
     if (error) {
       console.error('Failed to list attachments:', error);
@@ -403,7 +430,9 @@ export class AttachmentHandler {
    * Download a file
    */
   async downloadFile(filePath: string, filename: string): Promise<void> {
-    const { data, error } = await supabase.storage.from(this.bucketName).download(filePath);
+    const { data, error } = await supabase.storage
+      .from(this.bucketName)
+      .download(filePath);
 
     if (error || !data) {
       throw new Error('Failed to download file');

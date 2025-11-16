@@ -28,7 +28,10 @@ import { AdvancedMessageList } from './AdvancedMessageList';
 import { EnhancedMessageInput } from './EnhancedMessageInput';
 import { AgentParticipantPanel } from './AgentParticipantPanel';
 import { CollaborativeTaskView } from './CollaborativeTaskView';
-import { useMissionStore, useActiveEmployees } from '@shared/stores/mission-control-store';
+import {
+  useMissionStore,
+  useActiveEmployees,
+} from '@shared/stores/mission-control-store';
 import type { MissionMessage } from '@shared/stores/mission-control-store';
 
 export interface Agent {
@@ -96,7 +99,9 @@ export function MultiAgentChatInterface({
   // State management
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
-  const [rightPanelTab, setRightPanelTab] = useState<'tasks' | 'participants' | 'settings'>('tasks');
+  const [rightPanelTab, setRightPanelTab] = useState<
+    'tasks' | 'participants' | 'settings'
+  >('tasks');
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [typingAgents, setTypingAgents] = useState<Set<string>>(new Set());
 
@@ -106,46 +111,65 @@ export function MultiAgentChatInterface({
   const missionPlan = useMissionStore((state) => state.missionPlan);
 
   // Convert mission store data to chat format
-  const agents: Agent[] = externalAgents.length > 0 ? externalAgents : Array.from(activeEmployees.values()).map((emp) => ({
-    id: emp.name,
-    name: emp.name,
-    role: 'AI Employee',
-    color: getAgentColor(emp.name),
-    status: emp.status === 'thinking' ? 'thinking' :
-            emp.status === 'using_tool' ? 'active' :
-            emp.status === 'error' ? 'offline' : 'idle',
-    currentTask: emp.currentTask || undefined,
-    progress: emp.progress,
-  }));
+  const agents: Agent[] =
+    externalAgents.length > 0
+      ? externalAgents
+      : Array.from(activeEmployees.values()).map((emp) => ({
+          id: emp.name,
+          name: emp.name,
+          role: 'AI Employee',
+          color: getAgentColor(emp.name),
+          status:
+            emp.status === 'thinking'
+              ? 'thinking'
+              : emp.status === 'using_tool'
+                ? 'active'
+                : emp.status === 'error'
+                  ? 'offline'
+                  : 'idle',
+          currentTask: emp.currentTask || undefined,
+          progress: emp.progress,
+        }));
 
-  const messages: ChatMessage[] = externalMessages.length > 0 ? externalMessages : missionMessages.map((msg) => ({
-    ...msg,
-    agentId: msg.from === 'user' ? undefined : msg.from,
-    agentName: msg.from === 'user' ? undefined : msg.from,
-    agentColor: msg.from === 'user' ? undefined : getAgentColor(msg.from),
-  }));
+  const messages: ChatMessage[] =
+    externalMessages.length > 0
+      ? externalMessages
+      : missionMessages.map((msg) => ({
+          ...msg,
+          agentId: msg.from === 'user' ? undefined : msg.from,
+          agentName: msg.from === 'user' ? undefined : msg.from,
+          agentColor: msg.from === 'user' ? undefined : getAgentColor(msg.from),
+        }));
 
   // Typing indicator simulation
   useEffect(() => {
     const interval = setInterval(() => {
-      const thinkingAgents = agents.filter(a => a.status === 'thinking' || a.status === 'typing');
-      setTypingAgents(new Set(thinkingAgents.map(a => a.id)));
+      const thinkingAgents = agents.filter(
+        (a) => a.status === 'thinking' || a.status === 'typing'
+      );
+      setTypingAgents(new Set(thinkingAgents.map((a) => a.id)));
     }, 500);
 
     return () => clearInterval(interval);
   }, [agents]);
 
   // Handle message send
-  const handleSendMessage = useCallback((content: string, attachments?: File[]) => {
-    const mentions = extractMentions(content);
-    onSendMessage?.(content, mentions);
-  }, [onSendMessage]);
+  const handleSendMessage = useCallback(
+    (content: string, attachments?: File[]) => {
+      const mentions = extractMentions(content);
+      onSendMessage?.(content, mentions);
+    },
+    [onSendMessage]
+  );
 
   // Handle agent selection
-  const handleAgentSelect = useCallback((agentId: string) => {
-    setSelectedAgent(agentId === selectedAgent ? null : agentId);
-    onAgentSelect?.(agentId);
-  }, [selectedAgent, onAgentSelect]);
+  const handleAgentSelect = useCallback(
+    (agentId: string) => {
+      setSelectedAgent(agentId === selectedAgent ? null : agentId);
+      onAgentSelect?.(agentId);
+    },
+    [selectedAgent, onAgentSelect]
+  );
 
   // Handle message reactions
   const handleReaction = useCallback((messageId: string, emoji: string) => {
@@ -158,11 +182,11 @@ export function MultiAgentChatInterface({
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
         e.preventDefault();
-        setLeftPanelOpen(prev => !prev);
+        setLeftPanelOpen((prev) => !prev);
       }
       if ((e.ctrlKey || e.metaKey) && e.key === '.') {
         e.preventDefault();
-        setRightPanelOpen(prev => !prev);
+        setRightPanelOpen((prev) => !prev);
       }
     };
 
@@ -187,7 +211,11 @@ export function MultiAgentChatInterface({
             onClick={() => setLeftPanelOpen(!leftPanelOpen)}
             aria-label={leftPanelOpen ? 'Close sidebar' : 'Open sidebar'}
           >
-            {leftPanelOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            {leftPanelOpen ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
           </Button>
           <MessageSquare className="h-5 w-5 text-muted-foreground" />
           <div>
@@ -231,7 +259,11 @@ export function MultiAgentChatInterface({
             onClick={onToggleFullscreen}
             aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
           >
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </div>
@@ -265,17 +297,25 @@ export function MultiAgentChatInterface({
                         </div>
                       </div>
                       <div className="flex-1 overflow-hidden">
-                        <div className="truncate text-sm font-medium">{agent.name}</div>
-                        <div className="truncate text-xs text-muted-foreground">{agent.role}</div>
+                        <div className="truncate text-sm font-medium">
+                          {agent.name}
+                        </div>
+                        <div className="truncate text-xs text-muted-foreground">
+                          {agent.role}
+                        </div>
                       </div>
-                      <div className={cn(
-                        'h-2 w-2 rounded-full',
-                        agent.status === 'active' && 'bg-green-500',
-                        agent.status === 'thinking' && 'bg-blue-500 animate-pulse',
-                        agent.status === 'typing' && 'bg-yellow-500 animate-pulse',
-                        agent.status === 'idle' && 'bg-gray-400',
-                        agent.status === 'offline' && 'bg-red-500'
-                      )} />
+                      <div
+                        className={cn(
+                          'h-2 w-2 rounded-full',
+                          agent.status === 'active' && 'bg-green-500',
+                          agent.status === 'thinking' &&
+                            'animate-pulse bg-blue-500',
+                          agent.status === 'typing' &&
+                            'animate-pulse bg-yellow-500',
+                          agent.status === 'idle' && 'bg-gray-400',
+                          agent.status === 'offline' && 'bg-red-500'
+                        )}
+                      />
                     </button>
                   ))}
                 </div>
@@ -391,7 +431,9 @@ function getAgentColor(agentName: string): string {
     '#14b8a6', // teal
   ];
 
-  const hash = agentName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const hash = agentName
+    .split('')
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return colors[hash % colors.length];
 }
 

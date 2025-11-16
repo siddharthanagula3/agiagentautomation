@@ -89,6 +89,7 @@ Client-side rendering (browser/app renders avatars locally) reduces server costs
 
 **Privacy and Data Handling:**
 Organizations in regulated industries (finance, healthcare, legal) require strict privacy controls. Video calling systems must ensure:
+
 - No recording without explicit consent
 - End-to-end encryption for video streams
 - On-device processing for sensitive conversations

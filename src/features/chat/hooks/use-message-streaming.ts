@@ -5,7 +5,10 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useMissionStore } from '@shared/stores/mission-control-store';
-import type { MissionMessage, ActiveEmployee } from '@shared/stores/mission-control-store';
+import type {
+  MissionMessage,
+  ActiveEmployee,
+} from '@shared/stores/mission-control-store';
 
 export interface StreamingState {
   isStreaming: boolean;
@@ -64,13 +67,19 @@ export function useMessageStreaming(): UseMessageStreamingReturn {
 
   // Monitor streaming state from mission store
   useEffect(() => {
-    const isActivelyStreaming = isOrchestrating && missionStatus === 'executing';
+    const isActivelyStreaming =
+      isOrchestrating && missionStatus === 'executing';
 
     if (!isActivelyStreaming && streamingState.isStreaming) {
       // Streaming stopped
       completeStreaming();
     }
-  }, [isOrchestrating, missionStatus, streamingState.isStreaming, completeStreaming]);
+  }, [
+    isOrchestrating,
+    missionStatus,
+    streamingState.isStreaming,
+    completeStreaming,
+  ]);
 
   // Start streaming callback
   const startStreaming = useCallback((agentName: string) => {
@@ -198,8 +207,7 @@ export function useMessageStreaming(): UseMessageStreamingReturn {
         .reverse()
         .find(
           (msg) =>
-            msg.from === agentName ||
-            msg.metadata?.employeeName === agentName
+            msg.from === agentName || msg.metadata?.employeeName === agentName
         );
     },
     [messages]

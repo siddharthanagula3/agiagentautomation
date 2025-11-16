@@ -34,18 +34,18 @@ class RateLimiterService {
 
   constructor() {
     // Cleanup expired entries every 5 minutes
-    this.cleanupInterval = setInterval(() => {
-      this.cleanup();
-    }, 5 * 60 * 1000);
+    this.cleanupInterval = setInterval(
+      () => {
+        this.cleanup();
+      },
+      5 * 60 * 1000
+    );
   }
 
   /**
    * Check if request is allowed under rate limit
    */
-  async check(
-    key: string,
-    config: RateLimitConfig
-  ): Promise<RateLimitResult> {
+  async check(key: string, config: RateLimitConfig): Promise<RateLimitResult> {
     const now = Date.now();
     const entry = this.store.get(key);
 
@@ -160,7 +160,10 @@ class RateLimiterService {
 
     for (const [key, entry] of this.store.entries()) {
       // Remove if reset time passed and not blocked
-      if (entry.resetAt < now && (!entry.blockedUntil || entry.blockedUntil < now)) {
+      if (
+        entry.resetAt < now &&
+        (!entry.blockedUntil || entry.blockedUntil < now)
+      ) {
         this.store.delete(key);
         cleaned++;
       }

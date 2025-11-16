@@ -108,7 +108,8 @@ export class EnhancedAgentCollaborationManager {
   private employees: AIEmployee[] = [];
   private employeesLoaded = false;
   private activeCollaborations: Map<string, CollaborationContext> = new Map();
-  private agentMessageQueue: Map<string, AgentCommunicationMessage[]> = new Map();
+  private agentMessageQueue: Map<string, AgentCommunicationMessage[]> =
+    new Map();
 
   /**
    * Initialize the collaboration manager
@@ -212,11 +213,7 @@ export class EnhancedAgentCollaborationManager {
           throw new Error(`Agent ${agentId} not found in context`);
         }
 
-        const result = await this.executeSingleAgentTask(
-          task,
-          agent,
-          context
-        );
+        const result = await this.executeSingleAgentTask(task, agent, context);
 
         task.status = 'completed';
         task.completedAt = new Date();
@@ -225,10 +222,7 @@ export class EnhancedAgentCollaborationManager {
         return result;
       } else {
         // Multi-agent collaboration
-        const results = await this.executeMultiAgentTask(
-          task,
-          context
-        );
+        const results = await this.executeMultiAgentTask(task, context);
 
         task.status = 'completed';
         task.completedAt = new Date();
@@ -237,10 +231,7 @@ export class EnhancedAgentCollaborationManager {
         return results;
       }
     } catch (error) {
-      console.error(
-        `[CollaborationManager] Task execution failed:`,
-        error
-      );
+      console.error(`[CollaborationManager] Task execution failed:`, error);
 
       task.status = 'failed';
       task.completedAt = new Date();
@@ -261,12 +252,7 @@ export class EnhancedAgentCollaborationManager {
     const store = useMultiAgentChatStore.getState();
 
     // Update agent status
-    this.updateAgentPresence(
-      agent.id,
-      agent.name,
-      'busy',
-      task.description
-    );
+    this.updateAgentPresence(agent.id, agent.name, 'busy', task.description);
 
     // Set typing indicator
     store.setTypingIndicator(
@@ -417,10 +403,7 @@ export class EnhancedAgentCollaborationManager {
           context
         );
       } catch (error) {
-        console.error(
-          `[CollaborationManager] Agent ${agentId} failed:`,
-          error
-        );
+        console.error(`[CollaborationManager] Agent ${agentId} failed:`, error);
         results.set(
           agentId,
           `Error: ${error instanceof Error ? error.message : 'Unknown error'}`

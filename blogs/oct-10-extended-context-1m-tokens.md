@@ -17,6 +17,7 @@ Extended context architecture looks like this: User question → Pass to LLM wit
 RAG systems incur costs invisible in simple comparisons:
 
 **Infrastructure Complexity:**
+
 - Vector database (Pinecone, Weaviate, Chroma) with hosting costs
 - Embedding model inference (ada-002, text-embedding-3) for all documents
 - Periodic re-indexing as content changes
@@ -24,12 +25,14 @@ RAG systems incur costs invisible in simple comparisons:
 - Chunking strategies and overlap management
 
 **Quality Degradation:**
+
 - Retrieved chunks miss context from surrounding sections
 - Ranking algorithms prioritize keyword matches over semantic relevance
 - Top-k limits exclude relevant but not top-ranked information
 - Chunking boundaries split concepts across retrievals
 
 **Operational Overhead:**
+
 - Monitoring retrieval quality and adjusting parameters
 - Debugging "why didn't it retrieve the right information?"
 - Managing embedding drift as document content evolves
@@ -62,6 +65,7 @@ These workflows were impossible with 8K or even 32K context. RAG retrieval might
 Multi-agent systems require persistent memory—conversation history, task outcomes, learned patterns. Traditional architecture stores this in databases and retrieves it via RAG. Extended context enables a simpler pattern: include all history in context.
 
 An AI employee handling customer support might maintain:
+
 - Complete conversation history with this customer (50K tokens)
 - Previous interactions with similar issues (100K tokens)
 - Product documentation and FAQs (200K tokens)

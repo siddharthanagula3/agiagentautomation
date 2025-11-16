@@ -101,7 +101,9 @@ const LoginPage: React.FC = () => {
       // Rate limit counter incremented automatically
       const remaining = rateLimitResult.remaining - 1;
       if (remaining <= 2 && remaining > 0) {
-        toast.warning(`Login failed. ${remaining} attempts remaining before temporary lockout.`);
+        toast.warning(
+          `Login failed. ${remaining} attempts remaining before temporary lockout.`
+        );
       }
     }
   };

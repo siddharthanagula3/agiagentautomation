@@ -56,7 +56,7 @@ export class SSEHandler {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'text/event-stream',
+          Accept: 'text/event-stream',
           ...this.options.headers,
         },
         body: JSON.stringify(this.options.body),
@@ -64,7 +64,9 @@ export class SSEHandler {
       });
 
       if (!response.ok) {
-        throw new Error(`SSE connection failed: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `SSE connection failed: ${response.status} ${response.statusText}`
+        );
       }
 
       if (!response.body) {
@@ -219,11 +221,16 @@ export class SSEHandler {
     this.options.onError?.(error);
 
     // Attempt reconnection if enabled
-    if (this.shouldReconnect && this.reconnectAttempts < this.maxReconnectAttempts) {
+    if (
+      this.shouldReconnect &&
+      this.reconnectAttempts < this.maxReconnectAttempts
+    ) {
       this.reconnectAttempts++;
       const delay = this.reconnectDelay * this.reconnectAttempts; // Exponential backoff
 
-      console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+      console.log(
+        `Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
+      );
 
       setTimeout(() => {
         if (!this.isClosed) {
@@ -268,7 +275,9 @@ export class SSEHandler {
 /**
  * Convenience function to create and start an SSE connection
  */
-export async function createSSEConnection(options: SSEOptions): Promise<SSEHandler> {
+export async function createSSEConnection(
+  options: SSEOptions
+): Promise<SSEHandler> {
   const handler = new SSEHandler(options);
   await handler.connect();
   return handler;

@@ -22,7 +22,11 @@ export function ensureValidDate(value: unknown): Date {
   }
 
   // Log error for debugging
-  console.error('[DateUtils] Invalid date value:', value, 'falling back to current date');
+  console.error(
+    '[DateUtils] Invalid date value:',
+    value,
+    'falling back to current date'
+  );
 
   // Fallback to current date
   return new Date();

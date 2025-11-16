@@ -114,6 +114,7 @@ The delegation algorithm (`employee-selection.ts`) uses three matching criteria:
 **1. Description Overlap (Keyword Matching)**
 
 For task 2 ("Analyze component render patterns to detect unnecessary re-renders"), the algorithm searches employee descriptions for overlapping keywords:
+
 - "component render" matches frontend-performance-engineer (8 points)
 - "React" matches react-specialist (6 points)
 - "performance" matches frontend-performance-engineer (4 points)
@@ -127,6 +128,7 @@ Task 4 requires "Edit" tool. Only employees with Edit in their tools array quali
 **3. Specialization Priority (Tiebreaker)**
 
 When multiple employees match equally, specialists rank higher than generalists:
+
 - frontend-performance-engineer (specialist) > senior-software-engineer (generalist)
 - security-analyst (specialist) > code-reviewer (generalist)
 
@@ -150,8 +152,8 @@ With plan and delegation complete, the execution engine activates. The orchestra
 Tasks 1 and 3 have no dependencies (`depends_on: []`), so they execute simultaneously using `Promise.all()`:
 
 ```typescript
-const parallelTasks = tasks.filter(t => t.depends_on.length === 0);
-await Promise.all(parallelTasks.map(task => executeTask(task)));
+const parallelTasks = tasks.filter((t) => t.depends_on.length === 0);
+await Promise.all(parallelTasks.map((task) => executeTask(task)));
 ```
 
 frontend-engineer and devops-engineer start working concurrently. The mission control dashboard shows both as "working" status with real-time tool usage indicators.
@@ -160,9 +162,9 @@ frontend-engineer and devops-engineer start working concurrently. The mission co
 Task 2 depends on task 1 completing. The orchestrator waits for task 1's completion event before starting task 2:
 
 ```typescript
-const task2 = tasks.find(t => t.id === 2);
+const task2 = tasks.find((t) => t.id === 2);
 const dependencies = task2.depends_on; // [1]
-await Promise.all(dependencies.map(id => waitForCompletion(id)));
+await Promise.all(dependencies.map((id) => waitForCompletion(id)));
 // Task 1 completed, now execute task 2
 await executeTask(task2);
 ```
@@ -172,13 +174,18 @@ Every execution event updates the mission-control-store via Zustand actions:
 
 ```typescript
 // When employee starts task
-updateEmployeeStatus('frontend-performance-engineer', 'working', 'Read', 'Analyze component render patterns');
+updateEmployeeStatus(
+  'frontend-performance-engineer',
+  'working',
+  'Read',
+  'Analyze component render patterns'
+);
 
 // When employee completes task
 updateTaskStatus(2, 'completed');
 addEmployeeLog('frontend-performance-engineer', {
   timestamp: Date.now(),
-  action: 'Completed task 2: Found 12 components with unnecessary re-renders'
+  action: 'Completed task 2: Found 12 components with unnecessary re-renders',
 });
 
 // When all tasks complete
@@ -198,6 +205,7 @@ The Zustand store triggers UI re-renders in <1 second. Users watching the missio
 ### Conversational AI: Human-in-the-Loop Execution
 
 **ChatGPT Workflow:**
+
 1. User: "Optimize my React app performance"
 2. ChatGPT: "Here are 8 steps you should take: 1) Run profiler, 2) Identify bottlenecks, 3) Implement React.memo..."
 3. User manually executes step 1, copies results back to ChatGPT
@@ -212,6 +220,7 @@ The Zustand store triggers UI re-renders in <1 second. Users watching the missio
 ### Agentic AI: Fully Autonomous Execution
 
 **AGI Automation Workflow:**
+
 1. User: "Optimize my React app performance"
 2. System: Plans 7 tasks, delegates to 5 specialized employees, executes with tools
 3. [12 minutes later] System: "Completed. Implemented React.memo in 12 components, added lazy loading for 6 routes, reduced bundle size by 34%. Performance report generated."
@@ -227,6 +236,7 @@ The Plan-Delegate-Execute pattern eliminates the human-in-the-loop bottleneck. I
 ### If You're Building SaaS Products
 
 Your current development workflow likely involves:
+
 - Product Manager writes PRD (3-5 days)
 - Engineering team estimates and plans sprint (1-2 days)
 - Developers implement features (2-4 weeks)
@@ -236,6 +246,7 @@ Your current development workflow likely involves:
 **Total timeline:** 6-8 weeks from concept to production
 
 With Plan-Delegate-Execute orchestration:
+
 - Submit PRD to mission control (2 minutes)
 - System plans 40-task execution workflow (3 minutes)
 - 8 AI employees execute in parallel: Product Manager → Senior Software Engineer → Frontend Engineer → Backend Engineer → QA Engineer → DevOps Engineer → Documentation Writer (5-7 days)
@@ -250,6 +261,7 @@ With Plan-Delegate-Execute orchestration:
 ### If You're Managing Engineering Teams
 
 Your primary pain points are:
+
 - Task assignment and coordination overhead (20-30% of team capacity)
 - Context switching when developers juggle multiple projects
 - Knowledge silos when specialist team members are unavailable
@@ -264,6 +276,7 @@ Plan-Delegate-Execute orchestration eliminates coordination overhead. Instead of
 ### If You're Running an Agency
 
 Your constraint is simultaneous project management. Each client project requires:
+
 - 1 project manager (coordination)
 - 2-4 developers (implementation)
 - 1 QA engineer (testing)
@@ -282,6 +295,7 @@ AGI Automation's orchestrator enables you to run 10 concurrent projects with 10 
 Real-world deployment metrics from organizations using AGI Automation's orchestration pattern:
 
 **Enterprise Adoption (500+ employees):**
+
 - 23% have deployed agentic AI orchestration platforms as of November 2025
 - 88% report positive ROI within 90 days
 - Average 40-60% reduction in software delivery timelines
@@ -289,12 +303,14 @@ Real-world deployment metrics from organizations using AGI Automation's orchestr
 - 12-month competitive advantage vs late 2026 adopters
 
 **Startup Adoption (10-50 employees):**
+
 - 31% of Series A+ startups using AI employees for implementation work
 - 3-5x feature velocity improvements (6-8 week cycles → 1-2 weeks)
 - $500K-900K annual payroll savings per 6-person AI team vs traditional hiring
 - 4-month acceleration in time-to-market for new products
 
 **Agency Adoption (consulting, software development):**
+
 - 18% of agencies deployed multi-agent orchestration systems
 - 4-8x project volume capacity increases
 - 300-500% margin improvements on existing projects
@@ -309,6 +325,7 @@ Real-world deployment metrics from organizations using AGI Automation's orchestr
 Current deployments handle 10-20 task workflows reliably. Claude Opus 4, GPT-6, and Gemini 3.0 (expected Q1 2026) will support 30-50 step workflows with complex branching logic and dynamic replanning.
 
 AGI Automation's orchestrator will support:
+
 - **Adaptive planning:** LLMs that replan workflows based on intermediate results
 - **Self-healing execution:** Automatic error recovery and alternative approach generation
 - **Multi-day projects:** Persistent state across sessions, enabling week-long autonomous workflows
@@ -320,11 +337,13 @@ Organizations will report 100% autonomous project completion from specification 
 Current implementations require human approval at key checkpoints (before deploying, before external API calls). By late 2026, trust in autonomous execution reaches levels where humans define guardrails and review outputs asynchronously.
 
 The shift from:
+
 - "AI proposes, human approves each step" (2024-2025)
 - "AI executes, human reviews final output" (2026)
 - "AI executes, human audits periodically" (2027)
 
 AGI Automation's mission control will support:
+
 - **Autonomous authorization:** AI employees approve each other's work based on quality metrics
 - **Confidence scoring:** LLMs provide certainty levels (95%+ = auto-proceed, 70-95% = flag for review)
 - **Continuous deployment:** Workflows that execute → test → deploy without human checkpoints
@@ -363,6 +382,7 @@ Companies redesign processes around AI employee capabilities rather than retrofi
 Start with one complex workflow you currently execute manually. Submit it to AGI Automation's mission control. Watch the system plan, delegate, and execute autonomously.
 
 Common starting workflows:
+
 - "Analyze codebase for security vulnerabilities and generate remediation plan"
 - "Create comprehensive API documentation from OpenAPI specification"
 - "Build landing page from Figma design with responsive layout and SEO optimization"

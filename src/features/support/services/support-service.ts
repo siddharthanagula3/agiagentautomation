@@ -48,7 +48,9 @@ class SupportService {
     message: string;
   }): Promise<{ data: SupportTicket | null; error?: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const { data, error } = await supabase
         .from('support_tickets')
@@ -92,7 +94,9 @@ class SupportService {
     error?: string;
   }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         return { data: [], error: 'User not authenticated' };
       }
@@ -174,7 +178,9 @@ class SupportService {
     message: string
   ): Promise<{ data: TicketReply | null; error?: string }> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         return { data: null, error: 'User not authenticated' };
       }
@@ -278,7 +284,9 @@ class SupportService {
   ): Promise<void> {
     // TODO: Implement email notification via Netlify function
     // or third-party service (SendGrid, Resend, etc.)
-    console.log(`Ticket notification would be sent to ${email} for ticket ${ticketId}`);
+    console.log(
+      `Ticket notification would be sent to ${email} for ticket ${ticketId}`
+    );
   }
 }
 

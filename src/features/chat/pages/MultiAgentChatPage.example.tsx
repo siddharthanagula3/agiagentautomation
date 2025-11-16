@@ -21,8 +21,8 @@ export default function MultiAgentChatPage() {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
 
   // Mission store state
-  const missionStatus = useMissionStore(state => state.missionStatus);
-  const addMessage = useMissionStore(state => state.addMessage);
+  const missionStatus = useMissionStore((state) => state.missionStatus);
+  const addMessage = useMissionStore((state) => state.addMessage);
 
   // Handle sending messages
   const handleSendMessage = async (content: string, mentions?: string[]) => {
@@ -67,7 +67,7 @@ export default function MultiAgentChatPage() {
 
   // Handle fullscreen toggle
   const handleToggleFullscreen = () => {
-    setIsFullscreen(prev => !prev);
+    setIsFullscreen((prev) => !prev);
   };
 
   // Keyboard shortcuts
@@ -78,7 +78,7 @@ export default function MultiAgentChatPage() {
       }
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
         e.preventDefault();
-        setIsFullscreen(prev => !prev);
+        setIsFullscreen((prev) => !prev);
       }
     };
 
@@ -127,7 +127,8 @@ export default function MultiAgentChatPage() {
               </span>
               {selectedAgent && (
                 <span>
-                  Direct messaging: <span className="font-medium">{selectedAgent}</span>
+                  Direct messaging:{' '}
+                  <span className="font-medium">{selectedAgent}</span>
                 </span>
               )}
             </div>

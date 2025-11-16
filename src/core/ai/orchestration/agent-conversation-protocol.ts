@@ -5,7 +5,7 @@
 
 import { unifiedLLMService } from '../llm/unified-language-model';
 import type { AIEmployee } from '@core/types/ai-employee';
-import { missionControlStore } from '@shared/stores/mission-control-store';
+import { useMissionStore } from '@shared/stores/mission-control-store';
 
 export interface AgentMessage {
   id: string;
@@ -170,7 +170,7 @@ export class AgentConversationProtocol {
       state.turnCount++;
 
       // Update UI with current turn
-      missionControlStore.getState().addMessage({
+      useMissionStore.getState().addMessage({
         id: crypto.randomUUID(),
         type: 'status',
         content: `Turn ${state.turnCount}/${MAX_TURNS}`,
@@ -221,7 +221,7 @@ export class AgentConversationProtocol {
       });
 
       // Update mission control UI
-      missionControlStore.getState().addEmployeeLog(nextEmployee.name, {
+      useMissionStore.getState().addEmployeeLog(nextEmployee.name, {
         timestamp: new Date(),
         message: response,
         type: 'contribution',
@@ -420,10 +420,7 @@ Synthesize a clear, comprehensive final answer. Focus on directly answering the 
 
     // Check if last two messages are very similar
     for (let i = 0; i < contents.length - 1; i++) {
-      const similarity = this.calculateSimilarity(
-        contents[i],
-        contents[i + 1]
-      );
+      const similarity = this.calculateSimilarity(contents[i], contents[i + 1]);
       if (similarity > MAX_REPETITION_THRESHOLD) {
         return true;
       }
@@ -483,7 +480,7 @@ Synthesize a clear, comprehensive final answer. Focus on directly answering the 
     state.messages.push(message);
 
     // Also update mission control store for real-time UI
-    missionControlStore.getState().addMessage({
+    useMissionStore.getState().addMessage({
       id: message.id,
       type: 'agent',
       content: message.content,

@@ -24,14 +24,14 @@ import {
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import {
-  AI_EMPLOYEES,
   categories,
   providerInfo,
-  getEmployeesByCategory,
   type AIEmployee,
 } from '@/data/marketplace-employees';
 import { toast } from 'sonner';
 import { useAuthStore } from '@shared/stores/authentication-store';
+import { supabase } from '@shared/lib/supabase-client';
+import { useQuery } from '@tanstack/react-query';
 import {
   isEmployeePurchased,
   listPurchasedEmployees,
@@ -91,13 +91,64 @@ export const MarketplacePublicPage: React.FC = () => {
     };
   }, [user?.id]);
 
-  const filteredEmployees = getEmployeesByCategory(selectedCategory).filter(
-    (emp) =>
-      emp.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      emp.skills.some((skill) =>
-        skill.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-  );
+  // Fetch employees from database
+  const { data: dbEmployees = [], isLoading: isLoadingEmployees } = useQuery<AIEmployee[]>({
+    queryKey: ['public-marketplace-employees', selectedCategory, searchQuery],
+    queryFn: async () => {
+      let query = supabase
+        .from('ai_employees')
+        .select('*')
+        .eq('status', 'active');
+
+      // Apply category filter
+      if (selectedCategory !== 'all') {
+        query = query.eq('category', selectedCategory);
+      }
+
+      // Apply search filter
+      if (searchQuery) {
+        const searchTerm = searchQuery.toLowerCase();
+        query = query.or(
+          `name.ilike.%${searchTerm}%,role.ilike.%${searchTerm}%,department.ilike.%${searchTerm}%`
+        );
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching employees:', error);
+        toast.error('Failed to load employees');
+        return [];
+      }
+
+      // Transform database employees to marketplace format
+      return (data || []).map((dbEmp): AIEmployee => {
+        const cost = dbEmp.cost || { monthly: 0, yearly: 0 };
+        const monthlyPrice = typeof cost === 'object' && cost.monthly ? cost.monthly : 0;
+        const yearlyPrice = typeof cost === 'object' && cost.yearly ? cost.yearly : 0;
+
+        return {
+          id: dbEmp.employee_id || dbEmp.id,
+          name: dbEmp.name,
+          role: dbEmp.role,
+          category: dbEmp.category || 'general',
+          description: dbEmp.system_prompt?.slice(0, 150) || `Expert ${dbEmp.role}`,
+          provider: 'claude' as const,
+          price: monthlyPrice,
+          originalPrice: monthlyPrice * 2,
+          yearlyPrice: yearlyPrice,
+          avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${dbEmp.employee_id}&backgroundColor=EEF2FF%2CE0F2FE%2CF0F9FF&radius=50&size=128`,
+          skills: Array.isArray(dbEmp.capabilities) ? dbEmp.capabilities : [],
+          specialty: dbEmp.department || dbEmp.category || 'General',
+          fitLevel: 'excellent' as const,
+          popular: dbEmp.level === 'senior',
+        };
+      });
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const filteredEmployees = dbEmployees;
 
   const handlePurchase = async (employee: AIEmployee) => {
     try {
@@ -199,7 +250,7 @@ export const MarketplacePublicPage: React.FC = () => {
                   <span className="bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text font-extrabold text-transparent">
                     FREE
                   </span>{' '}
-                  per month • {AI_EMPLOYEES.length} available
+                  per month • {isLoadingEmployees ? '...' : dbEmployees.length} available
                 </p>
               </div>
             </div>

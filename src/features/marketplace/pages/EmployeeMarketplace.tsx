@@ -32,10 +32,7 @@ import {
   ShoppingCart,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
-import {
-  AI_EMPLOYEES,
-  type AIEmployee as BaseAIEmployee,
-} from '@/data/marketplace-employees';
+import type { AIEmployee as BaseAIEmployee } from '@/data/marketplace-employees';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { useWorkforceStore } from '@shared/stores/workforce-store';
 import { useBusinessMetrics } from '@shared/hooks/useAnalytics';
@@ -59,13 +56,13 @@ interface MarketplacePageProps {
 
 const categories = [
   { id: 'all', label: 'All', icon: Bot },
-  { id: 'development', label: 'Development', icon: Code },
+  { id: 'engineering', label: 'Engineering', icon: Code },
   { id: 'design', label: 'Design', icon: Palette },
-  { id: 'marketing', label: 'Marketing', icon: BarChart3 },
-  { id: 'writing', label: 'Writing', icon: FileText },
-  { id: 'media', label: 'Media', icon: Camera },
-  { id: 'entertainment', label: 'Entertainment', icon: Music },
-  { id: 'gaming', label: 'Gaming', icon: Gamepad2 },
+  { id: 'product', label: 'Product', icon: TrendingUp },
+  { id: 'data', label: 'Data & Analytics', icon: BarChart3 },
+  { id: 'marketing', label: 'Marketing', icon: Camera },
+  { id: 'sales', label: 'Sales', icon: DollarSign },
+  { id: 'general', label: 'General', icon: Bot },
 ];
 
 export const MarketplacePage: React.FC<MarketplacePageProps> = ({
@@ -122,7 +119,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
     };
   };
 
-  // Fetch AI employees
+  // Fetch AI employees from Supabase database
   const { data: employees = [], isLoading } = useQuery<AIEmployee[]>({
     queryKey: [
       'marketplace-employees',
@@ -132,49 +129,88 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       purchasedEmployeeIds.size,
     ],
     queryFn: async () => {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      let filteredEmployees = AI_EMPLOYEES.map(transformEmployeeData);
-
-      // Apply search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filteredEmployees = filteredEmployees.filter(
-          (emp) =>
-            emp.name.toLowerCase().includes(query) ||
-            emp.role.toLowerCase().includes(query) ||
-            emp.skills.some((skill) => skill.toLowerCase().includes(query)) ||
-            emp.description.toLowerCase().includes(query)
-        );
-      }
+      // Fetch from Supabase ai_employees table
+      let query = supabase
+        .from('ai_employees')
+        .select('*')
+        .eq('status', 'active');
 
       // Apply category filter
       if (selectedCategory !== 'all') {
-        filteredEmployees = filteredEmployees.filter(
-          (emp) => emp.category.toLowerCase() === selectedCategory.toLowerCase()
+        query = query.eq('category', selectedCategory);
+      }
+
+      // Apply search filter
+      if (searchQuery) {
+        const searchTerm = searchQuery.toLowerCase();
+        query = query.or(
+          `name.ilike.%${searchTerm}%,role.ilike.%${searchTerm}%,department.ilike.%${searchTerm}%`
         );
       }
+
+      const { data: dbEmployees, error } = await query;
+
+      if (error) {
+        console.error('Error fetching employees:', error);
+        toast.error('Failed to load employees', {
+          description: error.message,
+        });
+        return [];
+      }
+
+      // Transform database employees to marketplace format
+      let transformedEmployees = (dbEmployees || []).map((dbEmp) => {
+        // Get cost from database or use defaults
+        const cost = dbEmp.cost || { monthly: 99, yearly: 999 };
+        const monthlyPrice = typeof cost === 'object' && cost.monthly ? cost.monthly : 99;
+        const yearlyPrice = typeof cost === 'object' && cost.yearly ? cost.yearly : 999;
+
+        return {
+          id: dbEmp.employee_id || dbEmp.id,
+          name: dbEmp.name,
+          role: dbEmp.role,
+          category: dbEmp.category || 'general',
+          description: dbEmp.system_prompt?.slice(0, 150) || `Expert ${dbEmp.role}`,
+          provider: 'claude' as const, // Default provider
+          price: monthlyPrice,
+          originalPrice: monthlyPrice * 2,
+          yearlyPrice: yearlyPrice,
+          avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${dbEmp.employee_id}&backgroundColor=EEF2FF%2CE0F2FE%2CF0F9FF&radius=50&size=128`,
+          skills: dbEmp.capabilities || [],
+          specialty: dbEmp.department || dbEmp.category || 'General',
+          fitLevel: 'excellent' as const,
+          popular: dbEmp.level === 'senior',
+          defaultTools: dbEmp.tools || [],
+          isHired: purchasedEmployeeIds.has(dbEmp.employee_id || dbEmp.id),
+          rating: 4.5 + Math.random() * 0.5,
+          reviews: Math.floor(Math.random() * 100) + 10,
+          successRate: 85 + Math.floor(Math.random() * 15),
+          avgResponseTime: `${Math.floor(Math.random() * 30) + 5}s`,
+          examples: [
+            `Help with ${dbEmp.role.toLowerCase()} tasks`,
+            `Provide expert advice on ${dbEmp.category || 'general'} topics`,
+            `Assist with complex ${dbEmp.department || dbEmp.role} projects`,
+          ],
+        };
+      });
 
       // Apply sorting
       switch (sortBy) {
         case 'rating':
-          filteredEmployees.sort((a, b) => b.rating - a.rating);
+          transformedEmployees.sort((a, b) => b.rating - a.rating);
           break;
         case 'price-low':
-          filteredEmployees.sort((a, b) => a.price - b.price);
+          transformedEmployees.sort((a, b) => a.price - b.price);
           break;
         case 'price-high':
-          filteredEmployees.sort((a, b) => b.price - a.price);
+          transformedEmployees.sort((a, b) => b.price - a.price);
           break;
         case 'newest':
-          // Sort by ID (assuming newer employees have higher IDs)
-          filteredEmployees.sort((a, b) => b.id.localeCompare(a.id));
+          transformedEmployees.sort((a, b) => b.id.localeCompare(a.id));
           break;
         case 'popular':
         default:
-          // Sort by popularity (popular flag + rating)
-          filteredEmployees.sort((a, b) => {
+          transformedEmployees.sort((a, b) => {
             const aScore = (a.popular ? 1 : 0) + a.rating;
             const bScore = (b.popular ? 1 : 0) + b.rating;
             return bScore - aScore;
@@ -182,7 +218,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           break;
       }
 
-      return filteredEmployees;
+      return transformedEmployees;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });

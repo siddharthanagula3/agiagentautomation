@@ -194,7 +194,7 @@ export function estimateTokensForRequest(
 
 /**
  * Check subscription allowances (free tier limits)
- * Free tier: 50K tokens/month
+ * Free tier: 1M tokens/month (matches billing dashboard display)
  * Pro tier: Unlimited with balance
  */
 export async function checkMonthlyAllowance(
@@ -251,7 +251,7 @@ export async function checkMonthlyAllowance(
       return {
         allowed: false,
         used: 0,
-        limit: 50000,
+        limit: 1000000,
         resetDate: new Date(
           startOfMonth.getFullYear(),
           startOfMonth.getMonth() + 1,
@@ -263,7 +263,7 @@ export async function checkMonthlyAllowance(
     const used = Math.abs(
       transactions?.reduce((sum, tx) => sum + tx.tokens, 0) || 0
     );
-    const limit = 50000; // 50K tokens/month for free tier
+    const limit = 1000000; // 1M tokens/month for free tier (matches billing dashboard)
 
     return {
       allowed: used < limit,
@@ -280,7 +280,7 @@ export async function checkMonthlyAllowance(
     return {
       allowed: false,
       used: 0,
-      limit: 50000,
+      limit: 1000000,
       resetDate: new Date(),
     };
   }

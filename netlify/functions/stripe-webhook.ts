@@ -569,6 +569,77 @@ async function processStripeEvent(
           );
         }
 
+        // Grant tokens based on plan
+        const tokenGrant = plan === 'pro' ? 10000000 : plan === 'max' ? 10000000 : 0; // 10M tokens for Pro/Max
+
+        if (tokenGrant > 0) {
+          try {
+            logger.info(`Granting ${tokenGrant} tokens for ${plan} plan`, {
+              userId,
+              plan,
+              tokenGrant,
+            });
+
+            const { data: newBalance, error: tokenError } = await supabase.rpc(
+              'update_user_token_balance',
+              {
+                p_user_id: userId,
+                p_tokens: tokenGrant,
+                p_transaction_type: 'subscription_grant',
+                p_transaction_id: session.id,
+                p_description: `${plan.toUpperCase()} plan token grant - ${(tokenGrant / 1000000).toFixed(0)}M tokens`,
+                p_metadata: {
+                  plan,
+                  subscriptionId,
+                  customerId,
+                  billingPeriod: billingPeriod || 'monthly',
+                  sessionId: session.id,
+                },
+              }
+            );
+
+            if (tokenError) {
+              logger.error('Failed to grant subscription tokens:', {
+                userId,
+                plan,
+                tokenGrant,
+                error: tokenError,
+              });
+              // Don't throw - plan upgrade succeeded, token grant is supplementary
+            } else {
+              logger.info('Successfully granted subscription tokens', {
+                userId,
+                plan,
+                tokenGrant,
+                newBalance,
+              });
+
+              // Log audit trail
+              await logAuditTrail(
+                requestId,
+                stripeEvent.id,
+                'subscription_token_grant',
+                'tokens_granted',
+                {
+                  userId,
+                  plan,
+                  tokenGrant,
+                  newBalance,
+                  subscriptionId,
+                }
+              );
+            }
+          } catch (error) {
+            logger.error('Error granting subscription tokens:', {
+              userId,
+              plan,
+              tokenGrant,
+              error,
+            });
+            // Don't throw - plan upgrade succeeded, token grant is supplementary
+          }
+        }
+
         break;
       }
 
@@ -669,6 +740,21 @@ async function processStripeEvent(
 
       if (subscriptionId) {
         try {
+          // Get user details to check plan and grant monthly tokens
+          const { data: user, error: userFetchError } = await supabase
+            .from('users')
+            .select('id, plan')
+            .eq('stripe_subscription_id', subscriptionId)
+            .single();
+
+          if (userFetchError || !user) {
+            logger.error('Failed to fetch user for subscription:', {
+              subscriptionId,
+              error: userFetchError,
+            });
+            throw userFetchError || new Error('User not found');
+          }
+
           // Update user subscription status to active
           const { error } = await supabase
             .from('users')
@@ -685,6 +771,80 @@ async function processStripeEvent(
             logger.info('Successfully updated user subscription to active', {
               subscriptionId,
             });
+          }
+
+          // Grant monthly tokens for Pro/Max plans (recurring payment)
+          // Skip the first invoice (handled in checkout.session.completed)
+          const isFirstInvoice = invoice.billing_reason === 'subscription_create';
+
+          if (!isFirstInvoice && (user.plan === 'pro' || user.plan === 'max')) {
+            const monthlyTokens = 10000000; // 10M tokens for Pro/Max
+
+            logger.info('Granting monthly token allocation', {
+              userId: user.id,
+              plan: user.plan,
+              monthlyTokens,
+              invoiceId: invoice.id,
+            });
+
+            try {
+              const { data: newBalance, error: tokenError } = await supabase.rpc(
+                'update_user_token_balance',
+                {
+                  p_user_id: user.id,
+                  p_tokens: monthlyTokens,
+                  p_transaction_type: 'subscription_grant',
+                  p_transaction_id: invoice.id,
+                  p_description: `Monthly ${user.plan.toUpperCase()} plan token allocation - ${(monthlyTokens / 1000000).toFixed(0)}M tokens`,
+                  p_metadata: {
+                    plan: user.plan,
+                    subscriptionId,
+                    invoiceId: invoice.id,
+                    billingReason: invoice.billing_reason,
+                    periodStart: invoice.period_start,
+                    periodEnd: invoice.period_end,
+                  },
+                }
+              );
+
+              if (tokenError) {
+                logger.error('Failed to grant monthly tokens:', {
+                  userId: user.id,
+                  plan: user.plan,
+                  error: tokenError,
+                });
+                // Don't throw - payment processing succeeded
+              } else {
+                logger.info('Successfully granted monthly tokens', {
+                  userId: user.id,
+                  plan: user.plan,
+                  monthlyTokens,
+                  newBalance,
+                });
+
+                // Log audit trail
+                await logAuditTrail(
+                  requestId,
+                  stripeEvent.id,
+                  'monthly_token_grant',
+                  'tokens_granted',
+                  {
+                    userId: user.id,
+                    plan: user.plan,
+                    monthlyTokens,
+                    newBalance,
+                    invoiceId: invoice.id,
+                  }
+                );
+              }
+            } catch (error) {
+              logger.error('Error granting monthly tokens:', {
+                userId: user.id,
+                plan: user.plan,
+                error,
+              });
+              // Don't throw - payment processing succeeded
+            }
           }
         } catch (error) {
           logger.error('Error processing payment succeeded event:', error);

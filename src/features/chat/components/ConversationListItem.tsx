@@ -13,6 +13,16 @@ import {
   DropdownMenuTrigger,
 } from '@shared/ui/dropdown-menu';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@shared/ui/alert-dialog';
+import {
   MessageSquare,
   Star,
   Pin,
@@ -68,8 +78,10 @@ export function ConversationListItem({
   onDuplicate,
 }: ConversationListItemProps) {
   const [showActions, setShowActions] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   return (
+    <>
     <div
       className={cn(
         'group relative flex cursor-pointer flex-col gap-1 rounded-lg p-3 transition-all',
@@ -215,7 +227,7 @@ export function ConversationListItem({
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (confirm('Delete this conversation?')) onDelete();
+                  setShowDeleteDialog(true);
                 }}
                 className="text-destructive focus:text-destructive"
               >
@@ -259,5 +271,34 @@ export function ConversationListItem({
         </div>
       )}
     </div>
+
+    {/* Delete Confirmation Dialog */}
+    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Conversation?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete this
+            conversation and all of its messages.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete?.();
+              setShowDeleteDialog(false);
+            }}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

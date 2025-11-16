@@ -91,16 +91,24 @@ test.describe('AGI Agent Automation - Complete Platform Tests', () => {
     await page.locator('input[type="email"]').fill(TEST_USER.email);
     await page.locator('input[type="password"]').fill(TEST_USER.password);
     await page.locator('button[type="submit"]').first().click();
-    await page.waitForURL(/\//, { timeout: 15000 });
 
-    // Navigate to dashboard
-    await page.goto(`${BASE_URL}/dashboard`);
+    // Wait for successful authentication and redirect
+    await page.waitForURL(/\/(dashboard|home|chat|vibe|mission-control)/, { timeout: 15000 });
     await waitForPageLoad(page);
+
+    // If not already on dashboard, navigate there
+    if (!page.url().includes('/dashboard')) {
+      await page.goto(`${BASE_URL}/dashboard`);
+      await waitForPageLoad(page);
+    }
+
     await captureScreenshot(page, '05-dashboard');
 
-    // Verify dashboard elements
-    const heading = page.locator('h1, h2').first();
-    await expect(heading).toBeVisible();
+    // Verify we're on dashboard (not login page)
+    expect(page.url()).toContain('/dashboard');
+
+    // Check for any text content (more flexible than specific h1/h2)
+    await expect(page.locator('body')).toContainText(/Dashboard|Welcome|Overview/i, { timeout: 10000 });
 
     console.log('✅ Dashboard loaded successfully');
   });

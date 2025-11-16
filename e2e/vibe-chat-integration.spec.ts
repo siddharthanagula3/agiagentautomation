@@ -17,7 +17,7 @@ const __dirname = dirname(__filename);
 const BASE_URL = 'https://agiagentautomation.com';
 const TEST_USER = {
   email: 'siddharthanagula3@gmail.com',
-  password: 'Sid@8790',
+  password: 'Sid@1234',
 };
 
 // Helper to take full page screenshots

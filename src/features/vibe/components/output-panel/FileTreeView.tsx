@@ -263,17 +263,14 @@ export function FileTreeView() {
   ];
 
   const handleFileClick = (item: FileItem) => {
-    console.log('View file:', item.path);
     // TODO: Open file in editor view
   };
 
   const handleDownload = (item: FileItem) => {
-    console.log('Download file:', item.path);
     // TODO: Download file
   };
 
   const handleDelete = (item: FileItem) => {
-    console.log('Delete file:', item.path);
     // TODO: Confirm and delete file
   };
 

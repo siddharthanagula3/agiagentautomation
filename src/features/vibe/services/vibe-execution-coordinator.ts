@@ -58,10 +58,6 @@ export class VibeExecutionCoordinator {
         .map(id => tasks.find(t => t.id === id))
         .filter((t): t is VibeTask => t !== undefined);
 
-      console.log(
-        `Executing level ${levelIndex + 1}/${executionPlan.execution_order.length} with ${levelTasks.length} tasks`
-      );
-
       // Execute all tasks in this level in parallel
       const promises = levelTasks.map(task => this.executeTask(task, userMessage));
 

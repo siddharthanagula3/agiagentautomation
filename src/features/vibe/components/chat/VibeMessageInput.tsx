@@ -3,7 +3,13 @@
  * Enhanced input component with # and @ autocomplete for the VIBE interface
  */
 
-import React, { useState, useRef, useEffect, KeyboardEvent, ChangeEvent } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  KeyboardEvent,
+  ChangeEvent,
+} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Paperclip, X, Hash, AtSign } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
@@ -37,12 +43,17 @@ export const VibeMessageInput: React.FC<VibeMessageInputProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const autocompleteRef = useRef<HTMLDivElement>(null);
 
-  const { input, setInput, selectedFiles, setSelectedFiles, resetInput } = useVibeChatStore();
+  const { input, setInput, selectedFiles, setSelectedFiles, resetInput } =
+    useVibeChatStore();
 
   const [showAutocomplete, setShowAutocomplete] = useState(false);
-  const [autocompleteType, setAutocompleteType] = useState<AutocompleteType>(null);
+  const [autocompleteType, setAutocompleteType] =
+    useState<AutocompleteType>(null);
   const [autocompleteQuery, setAutocompleteQuery] = useState('');
-  const [autocompletePosition, setAutocompletePosition] = useState({ top: 0, left: 0 });
+  const [autocompletePosition, setAutocompletePosition] = useState({
+    top: 0,
+    left: 0,
+  });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [localFiles, setLocalFiles] = useState<File[]>([]);
 
@@ -52,9 +63,12 @@ export const VibeMessageInput: React.FC<VibeMessageInputProps> = ({
 
     if (autocompleteType === 'agent') {
       return availableEmployees
-        .filter((emp) =>
-          emp.name.toLowerCase().includes(autocompleteQuery.toLowerCase()) ||
-          emp.description.toLowerCase().includes(autocompleteQuery.toLowerCase())
+        .filter(
+          (emp) =>
+            emp.name.toLowerCase().includes(autocompleteQuery.toLowerCase()) ||
+            emp.description
+              .toLowerCase()
+              .includes(autocompleteQuery.toLowerCase())
         )
         .slice(0, 5)
         .map((emp) => ({
@@ -158,7 +172,9 @@ export const VibeMessageInput: React.FC<VibeMessageInputProps> = ({
         setSelectedIndex((prev) => (prev + 1) % matches.length);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedIndex((prev) => (prev - 1 + matches.length) % matches.length);
+        setSelectedIndex(
+          (prev) => (prev - 1 + matches.length) % matches.length
+        );
       } else if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         selectAutocompleteItem(matches[selectedIndex]);
@@ -237,14 +253,14 @@ export const VibeMessageInput: React.FC<VibeMessageInputProps> = ({
         {showAutocomplete && matches.length > 0 && (
           <motion.div
             ref={autocompleteRef}
-            className="absolute bottom-full left-0 right-0 mb-2 mx-4 bg-popover border rounded-lg shadow-lg max-h-64 overflow-y-auto z-50"
+            className="absolute bottom-full left-0 right-0 z-50 mx-4 mb-2 max-h-64 overflow-y-auto rounded-lg border bg-popover shadow-lg"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.15 }}
           >
             <div className="p-2">
-              <div className="text-xs text-muted-foreground px-2 py-1 flex items-center gap-2">
+              <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
                 {autocompleteType === 'agent' ? (
                   <>
                     <Hash className="h-3 w-3" />
@@ -260,7 +276,7 @@ export const VibeMessageInput: React.FC<VibeMessageInputProps> = ({
               {matches.map((match, index) => (
                 <button
                   key={match.value}
-                  className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                  className={`w-full rounded-md px-3 py-2 text-left transition-colors ${
                     index === selectedIndex
                       ? 'bg-accent text-accent-foreground'
                       : 'hover:bg-accent/50'
@@ -268,9 +284,9 @@ export const VibeMessageInput: React.FC<VibeMessageInputProps> = ({
                   onClick={() => selectAutocompleteItem(match)}
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
-                  <div className="font-medium text-sm">{match.text}</div>
+                  <div className="text-sm font-medium">{match.text}</div>
                   {match.description && (
-                    <div className="text-xs text-muted-foreground truncate">
+                    <div className="truncate text-xs text-muted-foreground">
                       {match.description}
                     </div>
                   )}
@@ -283,14 +299,18 @@ export const VibeMessageInput: React.FC<VibeMessageInputProps> = ({
 
       {/* Selected Files */}
       {localFiles.length > 0 && (
-        <div className="px-4 pt-3 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 px-4 pt-3">
           {localFiles.map((file, index) => (
-            <Badge key={index} variant="secondary" className="flex items-center gap-2">
+            <Badge
+              key={index}
+              variant="secondary"
+              className="flex items-center gap-2"
+            >
               <Paperclip className="h-3 w-3" />
               <span className="max-w-[150px] truncate">{file.name}</span>
               <button
                 onClick={() => removeFile(index)}
-                className="hover:text-destructive transition-colors"
+                className="transition-colors hover:text-destructive"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -301,7 +321,7 @@ export const VibeMessageInput: React.FC<VibeMessageInputProps> = ({
 
       {/* Input Area */}
       <div
-        className="p-4 flex gap-3 items-end"
+        className="flex items-end gap-3 p-4"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
@@ -311,7 +331,7 @@ export const VibeMessageInput: React.FC<VibeMessageInputProps> = ({
             type="file"
             multiple
             onChange={handleFileSelect}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             disabled={isDisabled}
             aria-label="Upload files"
           />
@@ -334,7 +354,7 @@ export const VibeMessageInput: React.FC<VibeMessageInputProps> = ({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={isDisabled}
-          className="flex-1 resize-none bg-transparent border-0 focus:outline-none focus:ring-0 min-h-[40px] max-h-[200px] py-2 px-3 rounded-lg"
+          className="max-h-[200px] min-h-[40px] flex-1 resize-none rounded-lg border-0 bg-transparent px-3 py-2 focus:outline-none focus:ring-0"
           rows={1}
           aria-label="Message input"
         />

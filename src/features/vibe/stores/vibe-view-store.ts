@@ -98,8 +98,13 @@ interface VibeViewStore {
 
   // Terminal state
   terminalState: TerminalState;
-  addTerminalCommand: (command: Omit<TerminalCommand, 'id' | 'timestamp'>) => string;
-  updateTerminalCommand: (id: string, updates: Partial<TerminalCommand>) => void;
+  addTerminalCommand: (
+    command: Omit<TerminalCommand, 'id' | 'timestamp'>
+  ) => string;
+  updateTerminalCommand: (
+    id: string,
+    updates: Partial<TerminalCommand>
+  ) => void;
   clearTerminalHistory: () => void;
 
   // App Viewer state
@@ -166,59 +171,70 @@ export const useVibeViewStore = create<VibeViewStore>()(
     ...initialState,
 
     // View management
-    setActiveView: (view) => set((state) => {
-      state.activeView = view;
-    }),
+    setActiveView: (view) =>
+      set((state) => {
+        state.activeView = view;
+      }),
 
     // Split layout
-    updateSplitLayout: (leftWidth) => set((state) => {
-      state.splitLayout.leftWidth = leftWidth;
-      state.splitLayout.rightWidth = 100 - leftWidth;
-    }),
+    updateSplitLayout: (leftWidth) =>
+      set((state) => {
+        state.splitLayout.leftWidth = leftWidth;
+        state.splitLayout.rightWidth = 100 - leftWidth;
+      }),
 
     // Following agent
-    toggleFollowAgent: () => set((state) => {
-      state.followingAgent = !state.followingAgent;
-    }),
+    toggleFollowAgent: () =>
+      set((state) => {
+        state.followingAgent = !state.followingAgent;
+      }),
 
-    setFollowingAgent: (following) => set((state) => {
-      state.followingAgent = following;
-    }),
+    setFollowingAgent: (following) =>
+      set((state) => {
+        state.followingAgent = following;
+      }),
 
     // Editor state
-    updateEditorState: (updates) => set((state) => {
-      state.editorState = { ...state.editorState, ...updates };
-    }),
+    updateEditorState: (updates) =>
+      set((state) => {
+        state.editorState = { ...state.editorState, ...updates };
+      }),
 
-    openFile: (filePath, content, language) => set((state) => {
-      if (!state.editorState.openFiles.includes(filePath)) {
-        state.editorState.openFiles.push(filePath);
-      }
-      state.editorState.currentFile = filePath;
-      state.editorState.content = content;
-      state.editorState.language = language;
-    }),
+    openFile: (filePath, content, language) =>
+      set((state) => {
+        if (!state.editorState.openFiles.includes(filePath)) {
+          state.editorState.openFiles.push(filePath);
+        }
+        state.editorState.currentFile = filePath;
+        state.editorState.content = content;
+        state.editorState.language = language;
+      }),
 
-    closeFile: (filePath) => set((state) => {
-      state.editorState.openFiles = state.editorState.openFiles.filter(
-        (f) => f !== filePath
-      );
-      if (state.editorState.currentFile === filePath) {
-        state.editorState.currentFile = state.editorState.openFiles[0] || null;
-      }
-    }),
+    closeFile: (filePath) =>
+      set((state) => {
+        state.editorState.openFiles = state.editorState.openFiles.filter(
+          (f) => f !== filePath
+        );
+        if (state.editorState.currentFile === filePath) {
+          state.editorState.currentFile =
+            state.editorState.openFiles[0] || null;
+        }
+      }),
 
-    setCurrentFile: (filePath) => set((state) => {
-      state.editorState.currentFile = filePath;
-    }),
+    setCurrentFile: (filePath) =>
+      set((state) => {
+        state.editorState.currentFile = filePath;
+      }),
 
-    updateEditorContent: (content) => set((state) => {
-      state.editorState.content = content;
-    }),
+    updateEditorContent: (content) =>
+      set((state) => {
+        state.editorState.content = content;
+      }),
 
-    updateCursor: (line, column) => set((state) => {
-      state.editorState.cursor = { line, column };
-    }),
+    updateCursor: (line, column) =>
+      set((state) => {
+        state.editorState.cursor = { line, column };
+      }),
 
     // Terminal state
     addTerminalCommand: (command) => {
@@ -236,82 +252,97 @@ export const useVibeViewStore = create<VibeViewStore>()(
       return commandId;
     },
 
-    updateTerminalCommand: (id, updates) => set((state) => {
-      const command = state.terminalState.history.find((c) => c.id === id);
-      if (command) {
-        Object.assign(command, updates);
-      }
-      if (updates.status === 'completed' || updates.status === 'failed') {
-        state.terminalState.activeCommand = null;
-      }
-    }),
+    updateTerminalCommand: (id, updates) =>
+      set((state) => {
+        const command = state.terminalState.history.find((c) => c.id === id);
+        if (command) {
+          Object.assign(command, updates);
+        }
+        if (updates.status === 'completed' || updates.status === 'failed') {
+          state.terminalState.activeCommand = null;
+        }
+      }),
 
-    clearTerminalHistory: () => set((state) => {
-      state.terminalState.history = [];
-      state.terminalState.activeCommand = null;
-    }),
+    clearTerminalHistory: () =>
+      set((state) => {
+        state.terminalState.history = [];
+        state.terminalState.activeCommand = null;
+      }),
 
     // App Viewer state
-    updateAppViewerState: (updates) => set((state) => {
-      state.appViewerState = { ...state.appViewerState, ...updates };
-    }),
+    updateAppViewerState: (updates) =>
+      set((state) => {
+        state.appViewerState = { ...state.appViewerState, ...updates };
+      }),
 
-    setAppViewerUrl: (url) => set((state) => {
-      state.appViewerState.url = url;
-      state.appViewerState.isLoading = true;
-    }),
+    setAppViewerUrl: (url) =>
+      set((state) => {
+        state.appViewerState.url = url;
+        state.appViewerState.isLoading = true;
+      }),
 
-    setViewport: (viewport) => set((state) => {
-      state.appViewerState.viewport = viewport;
-    }),
+    setViewport: (viewport) =>
+      set((state) => {
+        state.appViewerState.viewport = viewport;
+      }),
 
     // Planner state
-    updatePlannerState: (updates) => set((state) => {
-      state.plannerState = { ...state.plannerState, ...updates };
-    }),
+    updatePlannerState: (updates) =>
+      set((state) => {
+        state.plannerState = { ...state.plannerState, ...updates };
+      }),
 
-    addTask: (task) => set((state) => {
-      state.plannerState.tasks.push(task);
-    }),
+    addTask: (task) =>
+      set((state) => {
+        state.plannerState.tasks.push(task);
+      }),
 
-    updateTask: (taskId, updates) => set((state) => {
-      const task = state.plannerState.tasks.find((t) => t.id === taskId);
-      if (task) {
-        Object.assign(task, updates);
-      }
-    }),
+    updateTask: (taskId, updates) =>
+      set((state) => {
+        const task = state.plannerState.tasks.find((t) => t.id === taskId);
+        if (task) {
+          Object.assign(task, updates);
+        }
+      }),
 
-    setCurrentTask: (taskId) => set((state) => {
-      state.plannerState.currentTaskId = taskId;
-    }),
+    setCurrentTask: (taskId) =>
+      set((state) => {
+        state.plannerState.currentTaskId = taskId;
+      }),
 
     // File tree
-    setFileTree: (tree) => set((state) => {
-      state.fileTree = tree;
-    }),
+    setFileTree: (tree) =>
+      set((state) => {
+        state.fileTree = tree;
+      }),
 
-    expandFolder: (folderId) => set((state) => {
-      // Implementation for expanding folders in tree
-      // This would need recursive logic to find and update the folder
-    }),
+    expandFolder: (folderId) =>
+      set((state) => {
+        // Implementation for expanding folders in tree
+        // This would need recursive logic to find and update the folder
+      }),
 
-    collapseFolder: (folderId) => set((state) => {
-      // Implementation for collapsing folders in tree
-    }),
+    collapseFolder: (folderId) =>
+      set((state) => {
+        // Implementation for collapsing folders in tree
+      }),
 
-    setFileMetadata: (metadata) => set((state) => {
-      state.fileMetadata = new Map(
-        metadata.map((entry) => [entry.path, entry])
-      );
-    }),
+    setFileMetadata: (metadata) =>
+      set((state) => {
+        state.fileMetadata = new Map(
+          metadata.map((entry) => [entry.path, entry])
+        );
+      }),
 
-    upsertFileMetadata: (metadata) => set((state) => {
-      state.fileMetadata.set(metadata.path, metadata);
-    }),
+    upsertFileMetadata: (metadata) =>
+      set((state) => {
+        state.fileMetadata.set(metadata.path, metadata);
+      }),
 
-    removeFileMetadata: (path) => set((state) => {
-      state.fileMetadata.delete(path);
-    }),
+    removeFileMetadata: (path) =>
+      set((state) => {
+        state.fileMetadata.delete(path);
+      }),
 
     getFileMetadata: (path) => {
       return get().fileMetadata.get(path);

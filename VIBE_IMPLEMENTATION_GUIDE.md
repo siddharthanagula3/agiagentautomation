@@ -1,4 +1,5 @@
 # VIBE Implementation Guide
+
 ## Complete Supabase Integration with Workforce Orchestrator
 
 This guide documents the complete implementation of VIBE (Visual Interactive Build Environment) with Supabase database integration and workforce orchestrator coordination.
@@ -49,9 +50,11 @@ VIBE is a multi-agent collaborative workspace that enables AI agents to work tog
 ### 2. Service Layer
 
 #### VibeMessageService
+
 **File:** `src/features/vibe/services/vibe-message-service.ts`
 
 Complete CRUD operations for messages:
+
 - `getMessages(sessionId)` - Fetch all messages
 - `createMessage(params)` - Create new message
 - `updateMessage(messageId, updates)` - Update existing message
@@ -62,9 +65,11 @@ Complete CRUD operations for messages:
 - `clearSessionMessages(sessionId)` - Bulk delete
 
 #### VibeAgentActionService
+
 **File:** `src/features/vibe/services/vibe-agent-action-service.ts`
 
 Complete action logging system:
+
 - `createAction(params)` - Log new action
 - `updateAction(actionId, updates)` - Update action status
 - `completeAction(actionId, result)` - Mark as completed
@@ -75,6 +80,7 @@ Complete action logging system:
 - `getActionStats(sessionId)` - Statistics and analytics
 
 **Helper Methods:**
+
 - `logFileEdit()` - Log file modifications
 - `logCommandExecution()` - Log terminal commands
 - `logAppPreview()` - Log app preview URLs
@@ -84,9 +90,11 @@ Complete action logging system:
 ### 3. React Hooks
 
 #### useVibeMessages
+
 **File:** `src/features/vibe/hooks/use-vibe-messages.ts`
 
 Hook for message management:
+
 ```typescript
 const {
   messages,
@@ -95,20 +103,23 @@ const {
   loadMessages,
   createMessage,
   clearMessages,
-  refresh
+  refresh,
 } = useVibeMessages({ sessionId });
 ```
 
 Features:
+
 - Automatic real-time subscription
 - Optimistic UI updates
 - Error handling
 - Auto-load on mount
 
 #### useVibeAgentActions
+
 **File:** `src/features/vibe/hooks/use-vibe-agent-actions.ts`
 
 Hook for action tracking:
+
 ```typescript
 const {
   actions,
@@ -118,11 +129,12 @@ const {
   logAppPreview,
   logToolExecution,
   clearActions,
-  refresh
+  refresh,
 } = useVibeAgentActions({ sessionId, agentName });
 ```
 
 Features:
+
 - Real-time action updates
 - Statistics calculation
 - Helper methods for common actions
@@ -133,6 +145,7 @@ Features:
 **File:** `src/features/vibe/pages/VibeDashboard.tsx`
 
 Refactored to use service layer:
+
 - Cleaner code structure
 - Better error handling
 - Improved type safety
@@ -143,6 +156,7 @@ Refactored to use service layer:
 **File:** `src/features/vibe/examples/workforce-integration-example.ts`
 
 Complete working examples:
+
 - `processUserRequestExample()` - Full message flow
 - `agentExecutionExample()` - Action logging patterns
 - `streamingResponseExample()` - Response streaming
@@ -154,6 +168,7 @@ Complete working examples:
 **File:** `src/features/vibe/README.md`
 
 Complete documentation including:
+
 - Architecture overview
 - Database schema
 - Component hierarchy
@@ -214,17 +229,19 @@ CREATE TABLE vibe_agent_actions (
 ### VibeMessageService API
 
 #### Create Message
+
 ```typescript
 const message = await VibeMessageService.createMessage({
   sessionId: 'session-123',
   userId: 'user-456',
   role: 'user',
   content: 'Hello, VIBE!',
-  metadata: { source: 'web' }
+  metadata: { source: 'web' },
 });
 ```
 
 #### Process User Message (Complete Workflow)
+
 ```typescript
 const result = await VibeMessageService.processUserMessage({
   sessionId,
@@ -242,11 +259,12 @@ const result = await VibeMessageService.processUserMessage({
   onError: (error) => {
     // Handle error
     console.error('Error:', error);
-  }
+  },
 });
 ```
 
 #### Subscribe to Real-time Updates
+
 ```typescript
 const unsubscribe = VibeMessageService.subscribeToMessages(
   sessionId,
@@ -266,12 +284,13 @@ unsubscribe();
 ### VibeAgentActionService API
 
 #### Log File Edit
+
 ```typescript
 const fileEdit = await VibeAgentActionService.logFileEdit({
   sessionId,
   agentName: 'code-reviewer',
   filePath: 'src/App.tsx',
-  changes: 'Added error boundary'
+  changes: 'Added error boundary',
 });
 
 // Later, when edit completes
@@ -282,12 +301,13 @@ await fileEdit.fail('Permission denied');
 ```
 
 #### Log Command Execution
+
 ```typescript
 const command = await VibeAgentActionService.logCommandExecution({
   sessionId,
   agentName: 'debugger',
   command: 'npm test',
-  cwd: '/workspace'
+  cwd: '/workspace',
 });
 
 // When command completes
@@ -298,16 +318,18 @@ await command.fail('Tests failed: 3 errors', 1);
 ```
 
 #### Log App Preview
+
 ```typescript
 const preview = await VibeAgentActionService.logAppPreview({
   sessionId,
   agentName: 'developer',
   previewUrl: 'http://localhost:3000',
-  port: 3000
+  port: 3000,
 });
 ```
 
 #### Get Action Statistics
+
 ```typescript
 const stats = await VibeAgentActionService.getActionStats(sessionId);
 
@@ -439,7 +461,7 @@ async function handleUserMessage(params: {
     sessionId: params.sessionId,
     conversationHistory: [
       ...params.conversationHistory,
-      { role: 'user', content: params.userInput }
+      { role: 'user', content: params.userInput },
     ],
   });
 
@@ -449,7 +471,7 @@ async function handleUserMessage(params: {
 
   // 3. Create assistant message with streaming
   let currentContent = '';
-  const chunks = response.chatResponse.split(/(\s+)/).filter(p => p.length);
+  const chunks = response.chatResponse.split(/(\s+)/).filter((p) => p.length);
 
   const assistantMessage = await VibeMessageService.createMessage({
     sessionId: params.sessionId,
@@ -466,7 +488,7 @@ async function handleUserMessage(params: {
     await VibeMessageService.updateMessage(assistantMessage.id, {
       content: currentContent,
     });
-    await new Promise(resolve => setTimeout(resolve, 40));
+    await new Promise((resolve) => setTimeout(resolve, 40));
   }
 
   // 5. Mark complete
@@ -620,6 +642,7 @@ This implementation provides a complete, production-ready integration of VIBE wi
 ### Files Created/Modified
 
 **New Files:**
+
 - `supabase/migrations/20251116000002_add_user_id_to_vibe_messages.sql`
 - `src/features/vibe/services/vibe-message-service.ts`
 - `src/features/vibe/services/vibe-agent-action-service.ts`
@@ -630,6 +653,7 @@ This implementation provides a complete, production-ready integration of VIBE wi
 - `VIBE_IMPLEMENTATION_GUIDE.md`
 
 **Modified Files:**
+
 - `src/features/vibe/pages/VibeDashboard.tsx` (refactored to use services)
 
 ### Next Steps
@@ -645,6 +669,7 @@ This implementation provides a complete, production-ready integration of VIBE wi
 ## Support
 
 For questions or issues:
+
 - Review the complete documentation in `src/features/vibe/README.md`
 - Check the examples in `src/features/vibe/examples/`
 - See CLAUDE.md for project-wide guidelines

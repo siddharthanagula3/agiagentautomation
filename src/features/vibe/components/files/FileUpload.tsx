@@ -102,7 +102,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       // Errors are already shown in UI via error messages
     },
-    [uploadedFiles.length, maxFiles, maxFileSize, acceptedFileTypes, onFilesSelected]
+    [
+      uploadedFiles.length,
+      maxFiles,
+      maxFileSize,
+      acceptedFileTypes,
+      onFilesSelected,
+    ]
   );
 
   // Drag and drop handlers
@@ -154,11 +160,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       {/* Drop Zone */}
       <Card
         className={cn(
-          'relative overflow-hidden transition-all duration-200 cursor-pointer',
+          'relative cursor-pointer overflow-hidden transition-all duration-200',
           compact ? 'p-4' : 'p-6',
           isDragging
-            ? 'border-primary border-2 bg-primary/5'
-            : 'border-dashed border-2 hover:border-primary/50'
+            ? 'border-2 border-primary bg-primary/5'
+            : 'border-2 border-dashed hover:border-primary/50'
         )}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -170,7 +176,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           ref={fileInputRef}
           type="file"
           multiple
-          accept={acceptedFileTypes.length > 0 ? acceptedFileTypes.map(t => `.${t}`).join(',') : undefined}
+          accept={
+            acceptedFileTypes.length > 0
+              ? acceptedFileTypes.map((t) => `.${t}`).join(',')
+              : undefined
+          }
           onChange={handleFileInputChange}
           className="hidden"
         />
@@ -189,15 +199,20 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             />
           </motion.div>
 
-          <p className={cn('font-medium mb-1', compact ? 'text-sm' : 'text-base')}>
+          <p
+            className={cn(
+              'mb-1 font-medium',
+              compact ? 'text-sm' : 'text-base'
+            )}
+          >
             {isDragging ? 'Drop files here' : 'Drag & drop files here'}
           </p>
-          <p className="text-xs text-muted-foreground mb-3">
+          <p className="mb-3 text-xs text-muted-foreground">
             or click to browse
           </p>
 
           {/* File Info */}
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex flex-wrap justify-center gap-2">
             {maxFiles && (
               <Badge variant="secondary" className="text-xs">
                 Max {maxFiles} files
@@ -272,28 +287,28 @@ const FileUploadItem: React.FC<FileUploadItemProps> = ({
           </div>
 
           {/* File Info */}
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <p className={cn('truncate', compact ? 'text-xs' : 'text-sm')}>
                 {file.name}
               </p>
               <StatusIcon status={status} />
             </div>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="mt-1 flex items-center gap-2">
               <p className="text-xs text-muted-foreground">
                 {formatFileSize(file.size)}
               </p>
               {error && (
                 <>
                   <span className="text-xs text-muted-foreground">•</span>
-                  <p className="text-xs text-destructive truncate">{error}</p>
+                  <p className="truncate text-xs text-destructive">{error}</p>
                 </>
               )}
             </div>
 
             {/* Progress Bar */}
             {status === 'uploading' && (
-              <Progress value={progress} className="h-1 mt-2" />
+              <Progress value={progress} className="mt-2 h-1" />
             )}
           </div>
 
@@ -315,10 +330,12 @@ const FileUploadItem: React.FC<FileUploadItemProps> = ({
 /**
  * Status Icon Component
  */
-const StatusIcon: React.FC<{ status: UploadedFile['status'] }> = ({ status }) => {
+const StatusIcon: React.FC<{ status: UploadedFile['status'] }> = ({
+  status,
+}) => {
   switch (status) {
     case 'uploading':
-      return <Loader2 className="h-4 w-4 text-primary animate-spin" />;
+      return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
     case 'success':
       return <CheckCircle2 className="h-4 w-4 text-green-500" />;
     case 'error':

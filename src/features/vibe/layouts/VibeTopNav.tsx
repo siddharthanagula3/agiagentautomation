@@ -14,22 +14,22 @@ export function VibeTopNav() {
   const { selectedModel, setSelectedModel } = useVibeChatStore();
 
   return (
-    <header className="h-14 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 bg-background">
+    <header className="flex h-14 items-center justify-between border-b border-gray-200 bg-background px-6 dark:border-gray-800">
       {/* Left: Title + Dashboard Link */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-primary" />
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <Sparkles className="h-5 w-5 text-primary" />
+          <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent">
             VIBE
           </h1>
         </div>
 
         <Link
           to="/dashboard"
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <span>Dashboard</span>
-          <ExternalLink className="w-3.5 h-3.5" />
+          <ExternalLink className="h-3.5 w-3.5" />
         </Link>
       </div>
 

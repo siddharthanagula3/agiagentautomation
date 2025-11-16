@@ -1,7 +1,4 @@
-import type {
-  FileMetadata,
-  FileTreeItem,
-} from '../stores/vibe-view-store';
+import type { FileMetadata, FileTreeItem } from '../stores/vibe-view-store';
 
 export interface VibeFileRow {
   id: string;
@@ -49,7 +46,10 @@ const EXTENSION_LANGUAGE_MAP: Record<string, string> = {
 const sanitizePath = (value: string): string =>
   value.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\s+/g, ' ');
 
-export const normalizeFilePath = (rawPath: string, fallbackName: string): string => {
+export const normalizeFilePath = (
+  rawPath: string,
+  fallbackName: string
+): string => {
   if (!rawPath) {
     return fallbackName;
   }

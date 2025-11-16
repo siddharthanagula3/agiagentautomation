@@ -7,11 +7,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useVibeAgentStore } from '../stores/vibe-agent-store';
 import { useVibeChatStore } from '../stores/vibe-chat-store';
 import type { AIEmployee } from '@core/types/ai-employee';
-import type {
-  RoutingResult,
-  AgentMatch,
-  TaskComplexity,
-} from '../types';
+import type { RoutingResult, AgentMatch, TaskComplexity } from '../types';
 
 export interface AgentSelectionOptions {
   employees: AIEmployee[];
@@ -37,10 +33,7 @@ export interface UseAgentSelectionReturn {
 
   // Utilities
   getAgentByName: (name: string) => AIEmployee | undefined;
-  getTopMatches: (
-    userMessage: string,
-    limit?: number
-  ) => Promise<AgentMatch[]>;
+  getTopMatches: (userMessage: string, limit?: number) => Promise<AgentMatch[]>;
   analyzeComplexity: (userMessage: string) => Promise<TaskComplexity>;
 }
 
@@ -83,10 +76,7 @@ export function useAgentSelection(): UseAgentSelectionReturn {
    * Fast pattern matching against employee descriptions
    */
   const keywordMatch = useCallback(
-    (
-      userMessage: string,
-      employees: AIEmployee[]
-    ): AgentMatch | null => {
+    (userMessage: string, employees: AIEmployee[]): AgentMatch | null => {
       const lowerMessage = userMessage.toLowerCase();
       const matches: Array<{ employee: AIEmployee; score: number }> = [];
 
@@ -202,15 +192,7 @@ export function useAgentSelection(): UseAgentSelectionReturn {
     async (userMessage: string): Promise<TaskComplexity> => {
       // Simple heuristics for complexity analysis
       const complexityIndicators = {
-        simple: [
-          'review',
-          'check',
-          'explain',
-          'what',
-          'how',
-          'why',
-          'show me',
-        ],
+        simple: ['review', 'check', 'explain', 'what', 'how', 'why', 'show me'],
         complex: [
           'build',
           'create',
@@ -237,7 +219,11 @@ export function useAgentSelection(): UseAgentSelectionReturn {
       const wordCount = userMessage.split(/\s+/).length;
       const hasMultipleSentences = userMessage.split(/[.!?]+/).length > 2;
 
-      if (complexCount > simpleCount || wordCount > 50 || hasMultipleSentences) {
+      if (
+        complexCount > simpleCount ||
+        wordCount > 50 ||
+        hasMultipleSentences
+      ) {
         return 'COMPLEX';
       }
 
@@ -250,10 +236,7 @@ export function useAgentSelection(): UseAgentSelectionReturn {
    * Get top agent matches for a message
    */
   const getTopMatches = useCallback(
-    async (
-      userMessage: string,
-      limit: number = 5
-    ): Promise<AgentMatch[]> => {
+    async (userMessage: string, limit: number = 5): Promise<AgentMatch[]> => {
       const employees = useVibeAgentStore.getState().activeAgents;
       const employeeList = Array.from(employees.values()).map(
         (ae) => ae.employee
@@ -391,12 +374,7 @@ export function useAgentSelection(): UseAgentSelectionReturn {
         setIsAnalyzing(false);
       }
     },
-    [
-      keywordMatch,
-      semanticMatch,
-      analyzeComplexity,
-      setPrimaryAgent,
-    ]
+    [keywordMatch, semanticMatch, analyzeComplexity, setPrimaryAgent]
   );
 
   /**
@@ -435,16 +413,13 @@ export function useAgentSelection(): UseAgentSelectionReturn {
   /**
    * Get agent by name
    */
-  const getAgentByName = useCallback(
-    (name: string): AIEmployee | undefined => {
-      const employees = useVibeAgentStore.getState().activeAgents;
-      const agent = Array.from(employees.values()).find(
-        (ae) => ae.employee.name === name
-      );
-      return agent?.employee;
-    },
-    []
-  );
+  const getAgentByName = useCallback((name: string): AIEmployee | undefined => {
+    const employees = useVibeAgentStore.getState().activeAgents;
+    const agent = Array.from(employees.values()).find(
+      (ae) => ae.employee.name === name
+    );
+    return agent?.employee;
+  }, []);
 
   // Update selected agent when chat store changes
   useEffect(() => {

@@ -143,14 +143,19 @@ export class VibeFileManager {
       const file = files[i];
 
       try {
-        const vibeFile = await this.uploadFile(file, userId, sessionId, progress => {
-          if (onProgress) {
-            // Calculate overall progress
-            const fileProgress = progress / files.length;
-            const totalProgress = (i / files.length) * 100 + fileProgress;
-            onProgress(totalProgress);
+        const vibeFile = await this.uploadFile(
+          file,
+          userId,
+          sessionId,
+          (progress) => {
+            if (onProgress) {
+              // Calculate overall progress
+              const fileProgress = progress / files.length;
+              const totalProgress = (i / files.length) * 100 + fileProgress;
+              onProgress(totalProgress);
+            }
           }
-        });
+        );
 
         uploadedFiles.push(vibeFile);
       } catch (error) {
@@ -180,7 +185,7 @@ export class VibeFileManager {
 
       if (!data) return [];
 
-      return data.map(row => ({
+      return data.map((row) => ({
         id: row.id,
         name: row.name,
         type: row.type,
@@ -344,7 +349,7 @@ export class VibeFileManager {
 
       // Delete from storage
       const filePaths = files
-        .map(f => f.metadata?.original_path)
+        .map((f) => f.metadata?.original_path)
         .filter((path): path is string => !!path);
 
       if (filePaths.length > 0) {
@@ -383,7 +388,7 @@ export class VibeFileManager {
       const files = await this.getFiles(sessionId);
       const normalizedQuery = query.toLowerCase();
 
-      return files.filter(file =>
+      return files.filter((file) =>
         file.name.toLowerCase().includes(normalizedQuery)
       );
     } catch (error) {
@@ -422,9 +427,7 @@ export class VibeFileManager {
    */
   private sanitizeFileName(fileName: string): string {
     // Remove special characters and spaces
-    return fileName
-      .replace(/[^a-zA-Z0-9.-]/g, '_')
-      .replace(/_{2,}/g, '_');
+    return fileName.replace(/[^a-zA-Z0-9.-]/g, '_').replace(/_{2,}/g, '_');
   }
 
   /**
@@ -434,10 +437,35 @@ export class VibeFileManager {
    */
   private isTextFile(fileName: string): boolean {
     const textExtensions = [
-      '.txt', '.md', '.json', '.xml', '.html', '.css', '.js', '.ts',
-      '.tsx', '.jsx', '.py', '.java', '.c', '.cpp', '.h', '.cs',
-      '.go', '.rs', '.rb', '.php', '.sh', '.yaml', '.yml', '.toml',
-      '.ini', '.conf', '.log', '.csv', '.sql',
+      '.txt',
+      '.md',
+      '.json',
+      '.xml',
+      '.html',
+      '.css',
+      '.js',
+      '.ts',
+      '.tsx',
+      '.jsx',
+      '.py',
+      '.java',
+      '.c',
+      '.cpp',
+      '.h',
+      '.cs',
+      '.go',
+      '.rs',
+      '.rb',
+      '.php',
+      '.sh',
+      '.yaml',
+      '.yml',
+      '.toml',
+      '.ini',
+      '.conf',
+      '.log',
+      '.csv',
+      '.sql',
     ];
 
     const ext = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();

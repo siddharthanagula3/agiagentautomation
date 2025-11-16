@@ -66,29 +66,43 @@ export const TaskBreakdown: React.FC<TaskBreakdownProps> = ({
     <div className={cn('space-y-4', className)}>
       {/* Header with Progress */}
       <Card className="p-4">
-        <div className="flex items-center justify-between mb-3">
+        <div className="mb-3 flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold">Task Breakdown</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="mt-0.5 text-sm text-muted-foreground">
               {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} total
             </p>
           </div>
 
           {/* Status Summary */}
           <div className="flex items-center gap-3">
-            <StatusBadge status="completed" count={tasksByStatus.completed.length} />
-            <StatusBadge status="running" count={tasksByStatus.running.length} />
-            <StatusBadge status="pending" count={tasksByStatus.pending.length} />
+            <StatusBadge
+              status="completed"
+              count={tasksByStatus.completed.length}
+            />
+            <StatusBadge
+              status="running"
+              count={tasksByStatus.running.length}
+            />
+            <StatusBadge
+              status="pending"
+              count={tasksByStatus.pending.length}
+            />
             {tasksByStatus.failed.length > 0 && (
-              <StatusBadge status="failed" count={tasksByStatus.failed.length} />
+              <StatusBadge
+                status="failed"
+                count={tasksByStatus.failed.length}
+              />
             )}
           </div>
         </div>
 
         {/* Overall Progress */}
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Overall Progress</span>
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
+              Overall Progress
+            </span>
             <span className="text-sm font-medium">{progress}%</span>
           </div>
           <Progress value={progress} className="h-2" />
@@ -111,7 +125,7 @@ export const TaskBreakdown: React.FC<TaskBreakdownProps> = ({
       {/* Timeline View */}
       {showTimeline && tasks.length > 0 && (
         <Card className="p-4">
-          <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+          <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
             <Clock className="h-4 w-4" />
             Execution Timeline
           </h4>
@@ -154,35 +168,39 @@ const TaskCard: React.FC<TaskCardProps> = ({
       >
         <div className="flex items-start gap-3">
           {/* Status Icon */}
-          <div className="flex-shrink-0 mt-0.5">
+          <div className="mt-0.5 flex-shrink-0">
             <statusConfig.icon
               className={cn('h-5 w-5', statusConfig.iconColor)}
             />
           </div>
 
           {/* Task Content */}
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             {/* Task Description */}
-            <div className="flex items-start justify-between gap-3 mb-2">
+            <div className="mb-2 flex items-start justify-between gap-3">
               <p className="text-sm font-medium">{task.description}</p>
-              <Badge variant={statusConfig.variant} className="text-xs flex-shrink-0">
+              <Badge
+                variant={statusConfig.variant}
+                className="flex-shrink-0 text-xs"
+              >
                 {statusConfig.label}
               </Badge>
             </div>
 
             {/* Assigned Employee */}
             {employee && (
-              <div className="flex items-center gap-2 mb-2">
+              <div className="mb-2 flex items-center gap-2">
                 <User className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">
-                  Assigned to <span className="font-medium">{employee.name}</span>
+                  Assigned to{' '}
+                  <span className="font-medium">{employee.name}</span>
                 </span>
               </div>
             )}
 
             {/* Dependencies */}
             {showDependencies && task.dependencies.length > 0 && (
-              <div className="flex items-center gap-2 mb-2">
+              <div className="mb-2 flex items-center gap-2">
                 <GitBranch className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">
                   Depends on {task.dependencies.length}{' '}
@@ -193,15 +211,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
             {/* Error Message */}
             {task.error && (
-              <div className="mt-2 p-2 bg-destructive/10 rounded-md">
+              <div className="mt-2 rounded-md bg-destructive/10 p-2">
                 <p className="text-xs text-destructive">{task.error}</p>
               </div>
             )}
 
             {/* Result Preview */}
             {task.result && task.status === 'completed' && (
-              <div className="mt-2 p-2 bg-muted/50 rounded-md">
-                <p className="text-xs text-muted-foreground line-clamp-2">
+              <div className="mt-2 rounded-md bg-muted/50 p-2">
+                <p className="line-clamp-2 text-xs text-muted-foreground">
                   {typeof task.result === 'string'
                     ? task.result
                     : JSON.stringify(task.result)}
@@ -210,7 +228,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
             )}
 
             {/* Timestamps */}
-            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+            <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
               <span>Created {formatTimestamp(task.created_at)}</span>
               {task.completed_at && (
                 <>
@@ -274,14 +292,14 @@ const TaskTimeline: React.FC<TaskTimelineProps> = ({ tasks }) => {
                 className={cn('h-4 w-4 flex-shrink-0', statusConfig.iconColor)}
               />
               {index < sortedTasks.length - 1 && (
-                <div className="w-0.5 h-8 bg-border mt-1" />
+                <div className="mt-1 h-8 w-0.5 bg-border" />
               )}
             </div>
 
             {/* Timeline Content */}
             <div className="flex-1 pb-2">
               <p className="text-sm font-medium">{task.description}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="mt-0.5 text-xs text-muted-foreground">
                 {formatTimestamp(task.created_at)}
               </p>
             </div>

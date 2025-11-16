@@ -205,7 +205,10 @@ export function useAutocomplete(
    * Detect autocomplete trigger in input
    */
   const detectTrigger = useCallback(
-    (value: string, cursorPosition: number): {
+    (
+      value: string,
+      cursorPosition: number
+    ): {
       type: AutocompleteType;
       query: string;
       position: number;

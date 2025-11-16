@@ -157,8 +157,22 @@ function App() {
                   <Route path="dashboard" element={<DashboardHomePage />} />
 
                   {/* Chat Interface - Main Feature */}
-                  <Route path="chat" element={<ChatPage />} />
-                  <Route path="chat/:sessionId" element={<ChatPage />} />
+                  <Route
+                    path="chat"
+                    element={
+                      <ErrorBoundary>
+                        <ChatPage />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="chat/:sessionId"
+                    element={
+                      <ErrorBoundary>
+                        <ChatPage />
+                      </ErrorBoundary>
+                    }
+                  />
 
                   {/* Optional Features - Comment out to disable */}
                   <Route

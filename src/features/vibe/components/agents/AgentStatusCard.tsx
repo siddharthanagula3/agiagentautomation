@@ -48,7 +48,7 @@ export const AgentStatusCard: React.FC<AgentStatusCardProps> = ({
         {/* Agent Avatar with Status Indicator */}
         <div className="relative">
           <Avatar className={cn(compact ? 'h-10 w-10' : 'h-12 w-12')}>
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5 text-primary font-semibold">
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5 font-semibold text-primary">
               {agent.employee.name.charAt(0).toUpperCase()}
             </div>
           </Avatar>
@@ -92,15 +92,23 @@ export const AgentStatusCard: React.FC<AgentStatusCardProps> = ({
         </div>
 
         {/* Agent Info */}
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           {/* Name and Status */}
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className={cn('font-medium truncate', compact ? 'text-sm' : 'text-base')}>
+          <div className="mb-1 flex items-center gap-2">
+            <h4
+              className={cn(
+                'truncate font-medium',
+                compact ? 'text-sm' : 'text-base'
+              )}
+            >
               {agent.employee.name}
             </h4>
             <Badge
               variant={statusConfig.variant}
-              className={cn('flex items-center gap-1', compact ? 'text-xs' : 'text-xs')}
+              className={cn(
+                'flex items-center gap-1',
+                compact ? 'text-xs' : 'text-xs'
+              )}
             >
               <statusConfig.icon className="h-3 w-3" />
               {statusConfig.label}
@@ -109,35 +117,39 @@ export const AgentStatusCard: React.FC<AgentStatusCardProps> = ({
 
           {/* Description/Role */}
           {!compact && (
-            <p className="text-xs text-muted-foreground line-clamp-1 mb-2">
+            <p className="mb-2 line-clamp-1 text-xs text-muted-foreground">
               {agent.employee.description}
             </p>
           )}
 
           {/* Current Task */}
           {agent.current_task && (
-            <div className="flex items-start gap-2 mt-2">
-              <Activity className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-muted-foreground line-clamp-2">
+            <div className="mt-2 flex items-start gap-2">
+              <Activity className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+              <p className="line-clamp-2 text-xs text-muted-foreground">
                 {agent.current_task}
               </p>
             </div>
           )}
 
           {/* Progress Bar */}
-          {showProgress && agent.progress !== undefined && agent.progress > 0 && (
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-muted-foreground">Progress</span>
-                <span className="text-xs font-medium">{agent.progress}%</span>
+          {showProgress &&
+            agent.progress !== undefined &&
+            agent.progress > 0 && (
+              <div className="mt-3">
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">
+                    Progress
+                  </span>
+                  <span className="text-xs font-medium">{agent.progress}%</span>
+                </div>
+                <Progress value={agent.progress} className="h-1.5" />
               </div>
-              <Progress value={agent.progress} className="h-1.5" />
-            </div>
-          )}
+            )}
 
           {/* Last Activity */}
           {agent.last_activity && !compact && (
-            <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
+            <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
               <Clock className="h-3 w-3" />
               <span>{formatLastActivity(agent.last_activity)}</span>
             </div>

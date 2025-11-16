@@ -22,6 +22,7 @@ export interface VibeChatState {
   input: string;
   selectedFiles: string[];
   selectedAgent: string | null;
+  selectedModel: string;
 
   // Actions
   setCurrentSession: (sessionId: string) => void;
@@ -47,6 +48,7 @@ export interface VibeChatState {
   setInput: (input: string) => void;
   setSelectedFiles: (files: string[]) => void;
   setSelectedAgent: (agentId: string | null) => void;
+  setSelectedModel: (model: string) => void;
   resetInput: () => void;
 
   // Utility
@@ -73,6 +75,7 @@ export const useVibeChatStore = create<VibeChatState>()(
       input: '',
       selectedFiles: [],
       selectedAgent: null,
+      selectedModel: 'claude-sonnet-4',
 
       // Session actions
       setCurrentSession: (sessionId) => {
@@ -217,6 +220,12 @@ export const useVibeChatStore = create<VibeChatState>()(
       setSelectedAgent: (agentId) => {
         set((state) => {
           state.selectedAgent = agentId;
+        });
+      },
+
+      setSelectedModel: (model) => {
+        set((state) => {
+          state.selectedModel = model;
         });
       },
 

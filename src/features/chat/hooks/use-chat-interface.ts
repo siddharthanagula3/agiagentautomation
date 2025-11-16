@@ -218,9 +218,9 @@ export const useChat = (sessionId?: string) => {
         setError(err.message || 'Failed to send message');
         toast.error(err.message || 'Failed to send message');
 
-        // Remove the placeholder assistant message on error
+        // Remove the placeholder assistant message on error (only empty ones)
         setMessages((prev) =>
-          prev.filter((msg) => msg.content !== '' || msg.role !== 'assistant')
+          prev.filter((msg) => msg.role !== 'assistant' || msg.content !== '')
         );
       } finally {
         setIsLoading(false);

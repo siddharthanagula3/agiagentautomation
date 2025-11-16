@@ -1,15 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests/e2e',
-  fullyParallel: true,
+  testDir: './e2e',
+  fullyParallel: false, // Run tests sequentially for better screenshots
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  retries: process.env.CI ? 2 : 1,
+  workers: 1, // Single worker for consistent screenshots
+  reporter: [['html'], ['list']],
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173',
-    trace: 'on-first-retry',
+    trace: 'on',
+    screenshot: 'on', // Capture screenshots on failure
+    video: 'retain-on-failure', // Capture video on failure
   },
   projects: [
     {

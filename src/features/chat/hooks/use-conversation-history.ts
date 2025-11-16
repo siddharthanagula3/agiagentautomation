@@ -250,14 +250,15 @@ export const useChatHistory = () => {
       // Persist star state to database
       try {
         const user = await getCurrentUser();
+        const newState = !current?.isStarred;
         if (user) {
           await chatPersistenceService.updateSessionStarred(
             sessionId,
-            !current?.isStarred,
+            newState,
             user.id
           );
         }
-        toast.success('Chat starred');
+        toast.success(newState ? 'Chat starred' : 'Chat unstarred');
       } catch (error) {
         console.error('Failed to update starred state:', error);
         toast.error('Failed to update starred state');
@@ -288,14 +289,15 @@ export const useChatHistory = () => {
       // Persist pin state to database
       try {
         const user = await getCurrentUser();
+        const newState = !current?.isPinned;
         if (user) {
           await chatPersistenceService.updateSessionPinned(
             sessionId,
-            !current?.isPinned,
+            newState,
             user.id
           );
         }
-        toast.success('Chat pinned');
+        toast.success(newState ? 'Chat pinned' : 'Chat unpinned');
       } catch (error) {
         console.error('Failed to update pinned state:', error);
         toast.error('Failed to update pinned state');
@@ -326,14 +328,15 @@ export const useChatHistory = () => {
       // Persist archive state to database
       try {
         const user = await getCurrentUser();
+        const newState = !current?.isArchived;
         if (user) {
           await chatPersistenceService.updateSessionArchived(
             sessionId,
-            !current?.isArchived,
+            newState,
             user.id
           );
         }
-        toast.success('Chat archived');
+        toast.success(newState ? 'Chat archived' : 'Chat unarchived');
       } catch (error) {
         console.error('Failed to update archived state:', error);
         toast.error('Failed to update archived state');
@@ -407,7 +410,8 @@ export const useChatHistory = () => {
   // Load sessions on mount
   useEffect(() => {
     loadSessions();
-  }, [loadSessions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount to avoid infinite loop
 
   return {
     sessions,

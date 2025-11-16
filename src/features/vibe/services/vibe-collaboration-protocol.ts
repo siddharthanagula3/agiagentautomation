@@ -286,11 +286,6 @@ export class AgentCollaborationManager {
     const task = message.content.task;
     if (!task) return;
 
-    console.log(
-      `[${this.employeeName}] Received task assignment:`,
-      task.description
-    );
-
     // Emit event for external handling (e.g., by execution coordinator)
     messagePool.emit('task_assigned', {
       agentName: this.employeeName,
@@ -307,11 +302,6 @@ export class AgentCollaborationManager {
   private handleQuestion(message: VibeAgentMessage): void {
     const question = message.content.question;
     if (!question) return;
-
-    console.log(
-      `[${this.employeeName}] Received question from ${message.from_agent}:`,
-      question.question
-    );
 
     // Emit event for external handling
     messagePool.emit('question_received', {
@@ -331,11 +321,6 @@ export class AgentCollaborationManager {
     const resource = message.content.resource;
     if (!resource) return;
 
-    console.log(
-      `[${this.employeeName}] Received resource request from ${message.from_agent}:`,
-      resource.description
-    );
-
     // Emit event for external handling
     messagePool.emit('resource_requested', {
       agentName: this.employeeName,
@@ -353,11 +338,6 @@ export class AgentCollaborationManager {
   private handleHandoff(message: VibeAgentMessage): void {
     const handoff = message.content.handoff;
     if (!handoff) return;
-
-    console.log(
-      `[${this.employeeName}] Received handoff from ${message.from_agent}:`,
-      handoff.reason
-    );
 
     // Emit event for external handling
     messagePool.emit('handoff_received', {
@@ -377,11 +357,6 @@ export class AgentCollaborationManager {
     const status = message.content.status;
     if (!status) return;
 
-    console.log(
-      `[${this.employeeName}] Received status update from ${message.from_agent}:`,
-      status.state
-    );
-
     // Emit event for external handling (e.g., for UI updates)
     messagePool.emit('status_updated', {
       agentName: message.from_agent,
@@ -398,11 +373,6 @@ export class AgentCollaborationManager {
   private handleTaskResult(message: VibeAgentMessage): void {
     const result = message.content.result;
     if (!result) return;
-
-    console.log(
-      `[${this.employeeName}] Received task result from ${message.from_agent}:`,
-      result.task_id
-    );
 
     // Emit event for external handling
     messagePool.emit('task_completed', {

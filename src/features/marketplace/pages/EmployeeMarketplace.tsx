@@ -354,6 +354,11 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               isHiringAll || employees.filter((e) => !e.isHired).length === 0
             }
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            aria-label={
+              isHiringAll
+                ? `Hiring all employees: ${hiringProgress.current} of ${hiringProgress.total} complete`
+                : `Hire all ${employees.filter((e) => !e.isHired).length} available AI employees`
+            }
           >
             {isHiringAll ? (
               <>
@@ -383,6 +388,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="border-border bg-background pl-10"
+                  aria-label="Search AI employees by name, role, or skills"
                 />
               </div>
             </div>
@@ -400,6 +406,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                     size="sm"
                     onClick={() => setSelectedCategory(category.id)}
                     className="whitespace-nowrap"
+                    aria-label={`Filter by ${category.label} category`}
+                    aria-pressed={selectedCategory === category.id}
                   >
                     <Icon className="mr-1 h-4 w-4" />
                     {category.label}
@@ -414,6 +422,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                aria-label="Sort employees by criteria"
               >
                 <option value="popular">Most Popular</option>
                 <option value="rating">Highest Rated</option>
@@ -429,6 +438,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                   setViewMode(viewMode === 'grid' ? 'list' : 'grid')
                 }
                 className="border-border"
+                aria-label={`Switch to ${viewMode === 'grid' ? 'list' : 'grid'} view`}
               >
                 {viewMode === 'grid' ? 'List View' : 'Grid View'}
               </Button>
@@ -480,6 +490,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 variant="default"
                 onClick={() => window.location.reload()}
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
+                aria-label="Reload page to check for new AI employees"
               >
                 <Search className="mr-2 h-4 w-4" />
                 Check Again
@@ -488,6 +499,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 variant="outline"
                 onClick={() => setSearchQuery('')}
                 className="border-border hover:bg-accent hover:text-accent-foreground"
+                aria-label="Clear all search filters"
               >
                 Clear Filters
               </Button>
@@ -642,6 +654,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                       toast.info(`Viewing details for ${employee.name}`);
                     }}
                     className="border-border hover:bg-accent hover:text-accent-foreground"
+                    aria-label={`View detailed information about ${employee.name}, ${employee.role}`}
                   >
                     <Eye className="mr-1 h-4 w-4" />
                     View Details

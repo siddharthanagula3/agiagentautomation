@@ -59,7 +59,8 @@ interface Attachment {
   preview?: string;
 }
 
-export function EnhancedMessageInput({
+// Updated: Nov 16th 2025 - Added React.memo for performance
+export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
   agents,
   onSend,
   placeholder = 'Type a message...',
@@ -524,4 +525,4 @@ export function EnhancedMessageInput({
       />
     </div>
   );
-}
+});

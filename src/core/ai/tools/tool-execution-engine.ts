@@ -1,6 +1,8 @@
 /**
  * Enhanced Tool Executor Service
  * Comprehensive tool execution system with MCP protocol support
+ *
+ * Updated: Nov 16th 2025 - Replaced fake tool responses with descriptive errors to prevent confusion
  */
 
 import { mcpService, type MCPTool } from './mcp-service';
@@ -459,34 +461,18 @@ class ToolExecutorService {
     query: string,
     maxResults: number
   ): Promise<unknown> {
-    // TODO: Integrate with actual search API (Google, Bing, or Perplexity)
-    console.log('Executing web search:', query);
-
-    // Simulated response
-    return {
-      query,
-      results: [
-        {
-          title: 'Result 1',
-          url: 'https://example.com/1',
-          snippet: 'This is a search result snippet...',
-        },
-      ],
-    };
+    throw new Error(
+      'Web search is not yet implemented. Please integrate with a search API provider (Google, Bing, or Perplexity).'
+    );
   }
 
   /**
    * Code Execution Implementation
    */
   private async executeCode(language: string, code: string): Promise<unknown> {
-    // TODO: Implement sandboxed code execution
-    console.log('Executing code:', language, code);
-
-    return {
-      output: 'Code execution result',
-      errors: [],
-      executionTime: 123,
-    };
+    throw new Error(
+      'Code execution is not yet implemented. This feature requires a sandboxed execution environment for security.'
+    );
   }
 
   /**
@@ -496,14 +482,9 @@ class ToolExecutorService {
     fileUrl: string,
     analysisType: string
   ): Promise<unknown> {
-    // TODO: Implement file analysis
-    console.log('Analyzing file:', fileUrl, analysisType);
-
-    return {
-      fileType: 'pdf',
-      pageCount: 10,
-      content: 'Extracted content...',
-    };
+    throw new Error(
+      'File analysis is not yet implemented. Please integrate with a document processing service.'
+    );
   }
 
   /**
@@ -514,14 +495,9 @@ class ToolExecutorService {
     chartType: string,
     title?: string
   ): Promise<unknown> {
-    // TODO: Implement visualization generation
-    console.log('Creating visualization:', chartType);
-
-    return {
-      chartUrl: 'https://example.com/chart.png',
-      chartType,
-      title,
-    };
+    throw new Error(
+      'Data visualization is not yet implemented. Please integrate with a charting library (Chart.js, D3, etc.).'
+    );
   }
 
   /**
@@ -560,13 +536,9 @@ class ToolExecutorService {
     query: string,
     database?: string
   ): Promise<unknown> {
-    // TODO: Implement database querying (Supabase)
-    console.log('Querying database:', query);
-
-    return {
-      rows: [],
-      rowCount: 0,
-    };
+    throw new Error(
+      'Database querying is not yet implemented. Consider using Supabase client directly instead.'
+    );
   }
 
   /**

@@ -61,6 +61,7 @@ export function EmployeeSelector({
       <div className="flex items-center space-x-2">
         <button
           onClick={onToggleMode}
+          aria-label={`Toggle between single employee and team mode. Currently in ${mode === 'single' ? 'one-on-one' : 'team'} mode`}
           className={cn(
             'rounded-full px-3 py-1 text-xs font-medium transition-colors',
             mode === 'single'
@@ -80,6 +81,8 @@ export function EmployeeSelector({
               <TooltipTrigger asChild>
                 <button
                   onClick={() => handleEmployeeClick(employee.id)}
+                  aria-label={`${selectedEmployees.includes(employee.id) ? 'Deselect' : 'Select'} ${employee.name}, ${employee.description}. Status: ${employee.status}`}
+                  aria-pressed={selectedEmployees.includes(employee.id)}
                   className={cn(
                     'relative transition-all duration-200 hover:scale-110',
                     selectedEmployees.includes(employee.id) &&
@@ -107,6 +110,7 @@ export function EmployeeSelector({
                       employee.status === 'thinking' && 'bg-yellow-500',
                       employee.status === 'idle' && 'bg-gray-400'
                     )}
+                    aria-hidden="true"
                   />
                 </button>
               </TooltipTrigger>
@@ -129,6 +133,7 @@ export function EmployeeSelector({
             <TooltipTrigger asChild>
               <button
                 onClick={onAddEmployee}
+                aria-label="Add AI Employee to your team"
                 className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-dashed border-gray-300 transition-colors hover:border-purple-500 hover:bg-purple-50 dark:border-gray-600 dark:hover:bg-purple-900/20"
               >
                 <Plus className="h-4 w-4 text-gray-400" />

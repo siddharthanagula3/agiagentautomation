@@ -27,7 +27,11 @@ const LoginForm: React.FC = () => {
     setError('');
 
     try {
-      const result = await login(formData.email, formData.password);
+      // Updated: Nov 16th 2025 - Fixed incorrect API call signature (object-based instead of parameter-based)
+      const result = await login({
+        email: formData.email,
+        password: formData.password,
+      });
       if (result.success) {
         navigate(from, { replace: true });
       } else {

@@ -1,5 +1,6 @@
-import { Handler, HandlerEvent } from '@netlify/functions';
+import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import Stripe from 'stripe';
+import { withAuth } from './utils/auth-middleware';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia',
@@ -17,7 +18,8 @@ const PLAN_PRICES = {
   },
 };
 
-export const handler: Handler = async (event: HandlerEvent) => {
+// Updated: Nov 16th 2025 - Fixed missing authentication on Stripe payment endpoint
+const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; email?: string } }, context: HandlerContext) => {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {
@@ -39,6 +41,16 @@ export const handler: Handler = async (event: HandlerEvent) => {
         statusCode: 400,
         body: JSON.stringify({
           error: 'Missing required fields: userId, userEmail',
+        }),
+      };
+    }
+
+    // Updated: Nov 16th 2025 - Fixed missing authentication - verify userId matches authenticated user
+    if (event.user.id !== userId) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          error: 'Forbidden: User ID mismatch',
         }),
       };
     }
@@ -161,3 +173,6 @@ export const handler: Handler = async (event: HandlerEvent) => {
     };
   }
 };
+
+// Updated: Nov 16th 2025 - Fixed missing authentication - wrap handler with withAuth
+export const handler: Handler = withAuth(authenticatedHandler);

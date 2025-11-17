@@ -122,13 +122,13 @@ const PricingPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isCreatingSubscription, setIsCreatingSubscription] = useState(false);
 
+  // Updated: Nov 16th 2025 - Removed console statements for production
   const loadPlans = useCallback(async () => {
     try {
       setLoading(true);
       // Use fallback plans since marketing endpoints were archived
       setPlans(FALLBACK_PLANS);
     } catch (error) {
-      console.error('Error loading pricing plans:', error);
       // Fallback to hardcoded plans if fetch fails
       setPlans(FALLBACK_PLANS);
     } finally {
@@ -178,7 +178,6 @@ const PricingPage: React.FC = () => {
         throw new Error('Invalid plan selected');
       }
     } catch (error) {
-      console.error('Error creating subscription:', error);
       toast.error(
         error instanceof Error
           ? error.message

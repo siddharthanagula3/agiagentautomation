@@ -19,6 +19,11 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
 
   return (
     <div className="flex-1 space-y-4 overflow-y-auto p-4">
+      {messages.length === 0 && (
+        <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
+          <p>No mission logs yet. Submit a mission to see activity here.</p>
+        </div>
+      )}
       {messages.map((message) => (
         <div
           key={message.id}

@@ -1,5 +1,5 @@
 import { Handler, HandlerEvent, HandlerContext, HandlerResponse } from '@netlify/functions';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Authentication Middleware for Netlify Functions
@@ -19,6 +19,25 @@ type AuthenticatedHandler = (
   event: AuthenticatedEvent,
   context: HandlerContext
 ) => Promise<HandlerResponse>;
+
+// Updated: Nov 16th 2025 - Fixed Supabase client memory leak - create singleton client
+let supabaseClient: SupabaseClient | null = null;
+
+function getSupabaseClient(): SupabaseClient {
+  if (supabaseClient) {
+    return supabaseClient;
+  }
+
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase configuration missing');
+  }
+
+  supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+  return supabaseClient;
+}
 
 /**
  * Wraps a Netlify function handler with authentication
@@ -59,11 +78,11 @@ export function withAuth(handler: AuthenticatedHandler): Handler {
         };
       }
 
-      // Verify token with Supabase
-      const supabaseUrl = process.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
-
-      if (!supabaseUrl || !supabaseAnonKey) {
+      // Updated: Nov 16th 2025 - Fixed Supabase client memory leak - use singleton client
+      let supabase;
+      try {
+        supabase = getSupabaseClient();
+      } catch (error) {
         console.error('[Auth Middleware] Supabase not configured');
         return {
           statusCode: 500,
@@ -75,8 +94,6 @@ export function withAuth(handler: AuthenticatedHandler): Handler {
           }),
         };
       }
-
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
       // Verify the token and get user
       const { data: { user }, error } = await supabase.auth.getUser(token);

@@ -1,12 +1,28 @@
-import { Handler } from '@netlify/functions';
+import { Handler, HandlerContext, HandlerEvent } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
+import { withAuth } from './utils/auth-middleware';
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export const handler: Handler = async (event) => {
+// Updated: Nov 16th 2025 - Fixed unauthenticated schema modification endpoint
+const authenticatedHandler: Handler = async (
+  event: HandlerEvent & { user: { id: string; email?: string } },
+  context: HandlerContext
+) => {
+  // Disable in production for security
+  if (process.env.NODE_ENV === 'production' || process.env.NETLIFY_ENV === 'production') {
+    return {
+      statusCode: 403,
+      body: JSON.stringify({
+        error: 'Forbidden',
+        message: 'Schema modification is disabled in production for security reasons',
+      }),
+    };
+  }
+
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -77,3 +93,6 @@ export const handler: Handler = async (event) => {
     };
   }
 };
+
+// Updated: Nov 16th 2025 - Fixed unauthenticated schema modification endpoint - require authentication
+export const handler: Handler = withAuth(authenticatedHandler);

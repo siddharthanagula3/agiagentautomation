@@ -538,7 +538,8 @@ async function updateSubscriptionUsage(
   tokensUsed: number
 ): Promise<boolean> {
   try {
-    // Updated: Nov 16th 2025 - Fixed race condition with atomic increment using RPC
+    // Updated: Nov 17th 2025 - Fixed race condition with atomic increment using RPC
+    // Migration: 20250116000002_add_increment_token_usage_rpc.sql
     // Use PostgreSQL's atomic increment to prevent race conditions
     const { error } = await supabase.rpc('increment_token_usage', {
       p_user_id: userId,
@@ -548,7 +549,7 @@ async function updateSubscriptionUsage(
     if (error) {
       // If RPC doesn't exist, fall back to non-atomic update with a warning
       console.warn(
-        'RPC increment_token_usage not found, using non-atomic fallback. Create the RPC function in Supabase for atomic updates.'
+        'RPC increment_token_usage not found, using non-atomic fallback. Run migration 20250116000002_add_increment_token_usage_rpc.sql'
       );
 
       const { data: subscription } = await supabase

@@ -84,12 +84,11 @@ const RouteLoadingSpinner = () => (
   </div>
 );
 
+// Updated: Nov 16th 2025 - Removed console statements for production
 function App() {
   // Simple initialization
   useEffect(() => {
-    if (import.meta.env.DEV) {
-      console.log('✓ App initialized successfully');
-    }
+    // App initialization complete
   }, []);
 
   return (

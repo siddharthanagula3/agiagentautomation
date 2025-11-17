@@ -19,7 +19,8 @@ export interface VibeMessage {
   employee_name?: string | null;
   employee_role?: string | null;
   timestamp?: string | null;
-  metadata?: Record<string, any> | null;
+  // Updated: Nov 16th 2025 - Fixed any type
+  metadata?: Record<string, unknown> | null;
   is_streaming?: boolean | null;
 }
 
@@ -30,7 +31,7 @@ export interface CreateMessageParams {
   content: string;
   employeeName?: string;
   employeeRole?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   isStreaming?: boolean;
 }
 

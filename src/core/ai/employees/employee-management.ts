@@ -55,7 +55,9 @@ class AIEmployeeService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -71,7 +73,9 @@ class AIEmployeeService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -93,7 +97,9 @@ class AIEmployeeService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -113,7 +119,9 @@ class AIEmployeeService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -128,7 +136,9 @@ class AIEmployeeService {
       if (error) throw error;
       return { data: true, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -184,7 +194,9 @@ class AIEmployeeService {
 
       return { data: filteredEmployees, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -227,7 +239,9 @@ class AIEmployeeService {
 
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -243,7 +257,9 @@ class AIEmployeeService {
       if (error) throw error;
       return { data: data?.performance, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -263,7 +279,9 @@ class AIEmployeeService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -290,7 +308,9 @@ class AIEmployeeService {
       if (error) throw error;
       return { data: data?.tools || [], error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -310,7 +330,9 @@ class AIEmployeeService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -326,7 +348,9 @@ class AIEmployeeService {
       if (error) throw error;
       return { data: data?.workflows || [], error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -349,7 +373,9 @@ class AIEmployeeService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -381,7 +407,9 @@ class AIEmployeeService {
 
       return { data: matchedEmployees, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -397,7 +425,9 @@ class AIEmployeeService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 
@@ -434,7 +464,9 @@ class AIEmployeeService {
 
       return { data: stats, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error.message };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { data: null, error: message };
     }
   }
 

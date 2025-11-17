@@ -11,6 +11,19 @@
 import { chatPersistenceService } from '@features/chat/services/conversation-storage';
 import type { ChatMessage } from '@features/chat/types';
 
+// Updated: Nov 16th 2025 - Fixed any type
+// Network Information API types (not in standard TypeScript lib)
+interface NetworkInformation extends EventTarget {
+  effectiveType?: '2g' | 'slow-2g' | '3g' | '4g';
+  downlink?: number;
+  rtt?: number;
+  saveData?: boolean;
+}
+
+interface NavigatorWithConnection extends Navigator {
+  connection?: NetworkInformation;
+}
+
 export interface QueuedOperation {
   id: string;
   type:
@@ -78,7 +91,7 @@ export class OfflineSyncManager {
 
     // Monitor connection quality
     if ('connection' in navigator) {
-      const connection = (navigator as any).connection;
+      const connection = (navigator as NavigatorWithConnection).connection;
       connection?.addEventListener('change', () => {
         this.updateConnectionType();
       });
@@ -102,7 +115,7 @@ export class OfflineSyncManager {
     }
 
     if ('connection' in navigator) {
-      const connection = (navigator as any).connection;
+      const connection = (navigator as NavigatorWithConnection).connection;
       const effectiveType = connection?.effectiveType;
 
       if (effectiveType === '2g' || effectiveType === 'slow-2g') {
@@ -291,7 +304,9 @@ export class OfflineSyncManager {
         break;
 
       default:
-        throw new Error(`Unknown operation type: ${(operation as any).type}`);
+        throw new Error(
+          `Unknown operation type: ${(operation as QueuedOperation).type}`
+        );
     }
   }
 

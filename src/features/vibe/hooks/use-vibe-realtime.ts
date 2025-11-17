@@ -15,9 +15,10 @@ export interface VibeAgentActionRow {
   agent_name: string;
   action_type: string;
   timestamp: string;
-  metadata?: Record<string, any> | null;
+  // Updated: Nov 16th 2025 - Fixed any type
+  metadata?: Record<string, unknown> | null;
   status?: AgentActionStatus | null;
-  result?: Record<string, any> | null;
+  result?: Record<string, unknown> | null;
   error?: string | null;
 }
 
@@ -147,6 +148,7 @@ export function useVibeRealtime({
     // Defensive: Ensure sessionId is a valid string
     if (!sessionId || typeof sessionId !== 'string') return;
 
+    // Updated: Nov 16th 2025 - Fixed memory leak by clearing completed commands after delay
     const handleCommandAction = (action: VibeAgentActionRow) => {
       if (action.action_type !== 'command_execution') return;
 
@@ -186,6 +188,16 @@ export function useVibeRealtime({
               action.metadata?.code,
           });
         }
+      }
+
+      // Clear completed commands from map after 5 minutes to prevent memory leak
+      if (action.status === 'completed' || action.status === 'failed') {
+        setTimeout(
+          () => {
+            commandMap.current.delete(action.id);
+          },
+          5 * 60 * 1000
+        );
       }
     };
 

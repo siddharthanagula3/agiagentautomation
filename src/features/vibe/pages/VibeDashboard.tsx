@@ -34,7 +34,8 @@ interface VibeMessageRow {
   employee_name?: string | null;
   employee_role?: string | null;
   timestamp?: string | null;
-  metadata?: Record<string, any> | null;
+  // Updated: Nov 16th 2025 - Fixed any type
+  metadata?: Record<string, unknown> | null;
   is_streaming?: boolean | null;
 }
 

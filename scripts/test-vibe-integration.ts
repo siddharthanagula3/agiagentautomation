@@ -186,10 +186,14 @@ async function testVibeIntegration() {
       completed:
         sessionActions?.filter((a) => a.status === 'completed').length || 0,
       failed: sessionActions?.filter((a) => a.status === 'failed').length || 0,
-      by_type: sessionActions?.reduce((acc: any, action) => {
-        acc[action.action_type] = (acc[action.action_type] || 0) + 1;
-        return acc;
-      }, {}),
+      // Updated: Nov 16th 2025 - Fixed any type
+      by_type: sessionActions?.reduce(
+        (acc: Record<string, number>, action) => {
+          acc[action.action_type] = (acc[action.action_type] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
     };
 
     console.log('📊 Action Statistics:');

@@ -506,7 +506,13 @@ test.describe('Bug Detection Tests', () => {
   test('BUG CHECK: Failed network requests', async ({ page }) => {
     console.log('\n🐛 BUG CHECK: Network Requests');
 
-    const failedRequests: any[] = [];
+    // Updated: Nov 16th 2025 - Fixed any type
+    interface FailedRequest {
+      url: string;
+      method: string;
+      failure: string;
+    }
+    const failedRequests: FailedRequest[] = [];
 
     // Capture failed requests
     page.on('requestfailed', (request) => {

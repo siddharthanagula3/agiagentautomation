@@ -5,12 +5,13 @@ import {
   extractRequestMetadata,
 } from './utils/token-tracking';
 import { withRateLimit } from './utils/rate-limiter';
+import { withAuth } from './utils/auth-middleware';
 
 /**
  * Netlify Function to proxy Anthropic Claude API calls
  * This solves CORS issues by making API calls server-side
  * Includes token usage tracking for billing and analytics
- * SECURITY: Rate limited to 10 requests per minute per user
+ * SECURITY: Rate limited to 10 requests per minute per user + Authentication required
  */
 const anthropicHandler: Handler = async (event: HandlerEvent) => {
   // Only allow POST requests
@@ -133,5 +134,6 @@ const anthropicHandler: Handler = async (event: HandlerEvent) => {
   }
 };
 
-// Export handler with rate limiting middleware
-export const handler = withRateLimit(anthropicHandler);
+// Updated: Nov 16th 2025 - Fixed authentication bypass by adding auth middleware
+// Export handler with both authentication and rate limiting middleware
+export const handler = withAuth(withRateLimit(anthropicHandler));

@@ -58,11 +58,12 @@ export class AgentCollaborationManager {
    * @param metadata - Optional metadata
    * @returns Promise that resolves when message is sent
    */
+  // Updated: Nov 16th 2025 - Fixed any type
   async send(
     type: AgentMessageType,
     to: string[],
     content: MessageContent,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     const message: VibeAgentMessage = {
       id: crypto.randomUUID(),
@@ -114,7 +115,7 @@ export class AgentCollaborationManager {
   async sendTaskResult(
     toAgent: string,
     taskId: string,
-    output: any,
+    output: unknown,
     artifacts: string[] = []
   ): Promise<void> {
     await this.send('task_result', [toAgent], {

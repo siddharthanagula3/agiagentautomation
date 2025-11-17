@@ -162,7 +162,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       }
 
       // Transform database employees to marketplace format
-      let transformedEmployees = (dbEmployees || []).map((dbEmp) => {
+      // Updated: Nov 16th 2025 - Fixed prefer-const ESLint error
+      const transformedEmployees = (dbEmployees || []).map((dbEmp) => {
         // Get cost from database or use defaults
         const cost = dbEmp.cost || { monthly: 99, yearly: 999 };
         const monthlyPrice =

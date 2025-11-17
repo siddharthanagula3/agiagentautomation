@@ -1,4 +1,4 @@
-import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import { Handler, HandlerEvent, HandlerContext, HandlerResponse } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 
 /**
@@ -14,10 +14,11 @@ interface AuthenticatedEvent extends HandlerEvent {
   };
 }
 
+// Updated: Nov 16th 2025 - Fixed any type
 type AuthenticatedHandler = (
   event: AuthenticatedEvent,
   context: HandlerContext
-) => Promise<any>;
+) => Promise<HandlerResponse>;
 
 /**
  * Wraps a Netlify function handler with authentication

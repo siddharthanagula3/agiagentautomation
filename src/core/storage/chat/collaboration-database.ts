@@ -255,9 +255,10 @@ export async function startCollaboration(
 /**
  * Completes a collaboration session
  */
+// Updated: Nov 16th 2025 - Fixed any type
 export async function completeCollaboration(
   collaborationId: string,
-  result?: any,
+  result?: unknown,
   artifacts?: unknown[]
 ): Promise<AgentCollaboration> {
   return updateCollaboration(collaborationId, {
@@ -271,9 +272,10 @@ export async function completeCollaboration(
 /**
  * Fails a collaboration session
  */
+// Updated: Nov 16th 2025 - Fixed any type
 export async function failCollaboration(
   collaborationId: string,
-  errorDetails?: any
+  errorDetails?: unknown
 ): Promise<AgentCollaboration> {
   return updateCollaboration(collaborationId, {
     task_status: 'failed',
@@ -317,7 +319,7 @@ export async function advanceWorkflowStep(
     }
 
     const nextStep = collaboration.current_step + 1;
-    const workflowSteps = collaboration.workflow_steps as any[];
+    const workflowSteps = collaboration.workflow_steps as unknown[];
 
     // Check if we've reached the end
     if (nextStep >= workflowSteps.length) {
@@ -357,7 +359,7 @@ export async function setWorkflowStep(
       );
     }
 
-    const workflowSteps = collaboration.workflow_steps as any[];
+    const workflowSteps = collaboration.workflow_steps as unknown[];
     if (stepIndex < 0 || stepIndex >= workflowSteps.length) {
       throw new MultiAgentChatError(
         'Invalid workflow step index',
@@ -634,7 +636,7 @@ export async function addOutputArtifacts(
       );
     }
 
-    const existingArtifacts = collaboration.output_artifacts as any[];
+    const existingArtifacts = collaboration.output_artifacts as unknown[];
     const updatedArtifacts = [...existingArtifacts, ...artifacts];
 
     return updateCollaboration(collaborationId, {

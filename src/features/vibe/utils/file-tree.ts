@@ -1,10 +1,11 @@
 import type { FileMetadata, FileTreeItem } from '../stores/vibe-view-store';
 
+// Updated: Nov 16th 2025 - Fixed any type
 export interface VibeFileRow {
   id: string;
   name: string;
   url: string;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
   size?: number | null;
   uploaded_at?: string | null;
 }
@@ -110,7 +111,7 @@ interface TreeNode {
   type: 'file' | 'folder';
   path: string;
   children?: Record<string, TreeNode>;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 const sortNodes = (a: TreeNode, b: TreeNode) => {

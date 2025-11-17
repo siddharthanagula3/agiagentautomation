@@ -55,7 +55,8 @@ export interface FileTreeItem {
   children?: FileTreeItem[];
   size?: number;
   modified?: Date;
-  metadata?: Record<string, any>;
+  // Updated: Nov 16th 2025 - Fixed any type
+  metadata?: Record<string, unknown>;
 }
 
 export interface FileMetadata {

@@ -24,6 +24,24 @@ import type {
 // TYPE DEFINITIONS
 // ============================================================================
 
+// Updated: Nov 16th 2025 - Fixed any type
+interface DatabaseChatMessage {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  sender_name: string;
+  sender_type: string;
+  content: string;
+  timestamp: string;
+  delivery_status?: string;
+  read_by?: string[];
+  reply_to?: string;
+  metadata?: Record<string, unknown>;
+  reactions?: unknown[];
+  is_streaming?: boolean;
+  tool_calls?: unknown[];
+}
+
 /**
  * Sync status
  */
@@ -179,7 +197,7 @@ export class EnhancedChatSynchronizationService {
           },
           (payload) => {
             console.log('[ChatSync] New message received:', payload);
-            this.handleRemoteInsert(payload.new as any);
+            this.handleRemoteInsert(payload.new as DatabaseChatMessage);
           }
         )
         .on(
@@ -192,7 +210,10 @@ export class EnhancedChatSynchronizationService {
           },
           (payload) => {
             console.log('[ChatSync] Message updated:', payload);
-            this.handleRemoteUpdate(payload.new as any, payload.old as any);
+            this.handleRemoteUpdate(
+              payload.new as DatabaseChatMessage,
+              payload.old as DatabaseChatMessage
+            );
           }
         )
         .on(
@@ -205,7 +226,7 @@ export class EnhancedChatSynchronizationService {
           },
           (payload) => {
             console.log('[ChatSync] Message deleted:', payload);
-            this.handleRemoteDelete(payload.old as any);
+            this.handleRemoteDelete(payload.old as DatabaseChatMessage);
           }
         )
         .subscribe((status) => {
@@ -246,7 +267,7 @@ export class EnhancedChatSynchronizationService {
   /**
    * Handle remote insert (new message from server)
    */
-  private handleRemoteInsert(remoteData: any): void {
+  private handleRemoteInsert(remoteData: DatabaseChatMessage): void {
     const store = useMultiAgentChatStore.getState();
     const conversation = store.conversations[remoteData.conversation_id];
 
@@ -282,7 +303,10 @@ export class EnhancedChatSynchronizationService {
   /**
    * Handle remote update (message updated on server)
    */
-  private handleRemoteUpdate(remoteData: any, oldData: any): void {
+  private handleRemoteUpdate(
+    remoteData: DatabaseChatMessage,
+    oldData: DatabaseChatMessage
+  ): void {
     const store = useMultiAgentChatStore.getState();
     const conversation = store.conversations[remoteData.conversation_id];
 
@@ -325,7 +349,7 @@ export class EnhancedChatSynchronizationService {
   /**
    * Handle remote delete (message deleted on server)
    */
-  private handleRemoteDelete(remoteData: any): void {
+  private handleRemoteDelete(remoteData: DatabaseChatMessage): void {
     const store = useMultiAgentChatStore.getState();
 
     store.deleteMessage(remoteData.conversation_id, remoteData.id);
@@ -363,7 +387,8 @@ export class EnhancedChatSynchronizationService {
         }
         break;
 
-      case 'merge':
+      case 'merge': {
+        // Updated: Nov 16th 2025 - Fixed no-case-declarations by adding block scope
         // Merge both versions (prefer remote content, keep local metadata)
         const merged: ChatMessage = {
           ...remote,
@@ -376,6 +401,7 @@ export class EnhancedChatSynchronizationService {
         store.updateMessage(local.id, merged);
         console.log('[ChatSync] Conflict resolved: merged');
         break;
+      }
 
       case 'manual':
         // Record conflict for manual resolution
@@ -531,7 +557,7 @@ export class EnhancedChatSynchronizationService {
         type: 'delete',
         entity: 'message',
         conversationId,
-        data: { id: messageId } as any,
+        data: { id: messageId },
         timestamp: new Date(),
         status: 'pending',
         retryCount: 0,
@@ -635,7 +661,7 @@ export class EnhancedChatSynchronizationService {
   /**
    * Transform local message to database format
    */
-  private transformLocalMessage(message: ChatMessage): any {
+  private transformLocalMessage(message: ChatMessage): DatabaseChatMessage {
     return {
       id: message.id,
       conversation_id: message.conversationId,
@@ -657,7 +683,7 @@ export class EnhancedChatSynchronizationService {
   /**
    * Transform remote message to local format
    */
-  private transformRemoteMessage(data: any): ChatMessage {
+  private transformRemoteMessage(data: DatabaseChatMessage): ChatMessage {
     return {
       id: data.id,
       conversationId: data.conversation_id,

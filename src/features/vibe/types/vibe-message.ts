@@ -14,7 +14,8 @@ export interface VibeMessage {
   employee_name?: string;
   employee_role?: string;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  // Updated: Nov 16th 2025 - Fixed any type
+  metadata?: Record<string, unknown>;
   is_streaming?: boolean;
 }
 
@@ -33,8 +34,8 @@ export interface VibeAgentMessage {
   from_agent: string;
   to_agents: string[];
   timestamp: Date;
-  content: Record<string, any>;
-  metadata?: Record<string, any>;
+  content: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface MessageContent {
@@ -46,7 +47,7 @@ export interface MessageContent {
   };
   result?: {
     task_id: string;
-    output: any;
+    output: unknown;
     artifacts?: string[];
   };
   status?: {

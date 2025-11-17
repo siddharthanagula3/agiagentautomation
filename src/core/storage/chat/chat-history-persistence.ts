@@ -40,7 +40,8 @@ export class ChatPersistenceService {
   private static instance: ChatPersistenceService;
   private supabase: unknown;
   private state: ChatState;
-  private syncInterval: NodeJS.Timeout | null = null;
+  // Updated: Nov 16th 2025 - Fixed NodeJS.Timeout type mismatch for browser compatibility
+  private syncInterval: ReturnType<typeof setInterval> | null = null;
   private isOnline: boolean = true;
 
   constructor() {
@@ -81,25 +82,12 @@ export class ChatPersistenceService {
   /**
    * Setup event listeners for online/offline detection
    */
+  // Updated: Nov 16th 2025 - Use bound handlers for proper cleanup
   private setupEventListeners(): void {
-    window.addEventListener('online', () => {
-      this.isOnline = true;
-      this.syncToServer();
-    });
-
-    window.addEventListener('offline', () => {
-      this.isOnline = false;
-    });
-
-    // Save state before page unload
-    window.addEventListener('beforeunload', () => {
-      this.saveToLocalStorage();
-    });
-
-    // Load state on page load
-    window.addEventListener('load', () => {
-      this.loadFromLocalStorage();
-    });
+    window.addEventListener('online', this.handleOnline);
+    window.addEventListener('offline', this.handleOffline);
+    window.addEventListener('beforeunload', this.handleBeforeUnload);
+    window.addEventListener('load', this.handleLoad);
   }
 
   /**
@@ -122,8 +110,9 @@ export class ChatPersistenceService {
     role: string,
     provider: string
   ): Promise<ChatSession> {
+    // Updated: Nov 16th 2025 - Fixed deprecated substr() method
     const session: ChatSession = {
-      id: `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `session-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       userId,
       employeeId,
       role,
@@ -170,8 +159,9 @@ export class ChatPersistenceService {
     content: string,
     metadata?: unknown
   ): Promise<ChatMessage> {
+    // Updated: Nov 16th 2025 - Fixed deprecated substr() method
     const message: ChatMessage = {
-      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       sessionId,
       role,
       content,
@@ -492,11 +482,36 @@ export class ChatPersistenceService {
   /**
    * Cleanup
    */
+  // Updated: Nov 16th 2025 - Fixed memory leak by removing event listeners
   destroy(): void {
     if (this.syncInterval) {
       clearInterval(this.syncInterval);
     }
+
+    // Remove event listeners
+    window.removeEventListener('online', this.handleOnline);
+    window.removeEventListener('offline', this.handleOffline);
+    window.removeEventListener('beforeunload', this.handleBeforeUnload);
+    window.removeEventListener('load', this.handleLoad);
   }
+
+  // Store bound handlers for proper removal
+  private handleOnline = () => {
+    this.isOnline = true;
+    this.syncToServer();
+  };
+
+  private handleOffline = () => {
+    this.isOnline = false;
+  };
+
+  private handleBeforeUnload = () => {
+    this.saveToLocalStorage();
+  };
+
+  private handleLoad = () => {
+    this.loadFromLocalStorage();
+  };
 }
 
 // Export singleton instance

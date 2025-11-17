@@ -25,9 +25,10 @@ export interface VibeAgentAction {
   agent_name: string;
   action_type: AgentActionType;
   timestamp: string;
-  metadata?: Record<string, any>;
+  // Updated: Nov 16th 2025 - Fixed any type
+  metadata?: Record<string, unknown>;
   status: AgentActionStatus;
-  result?: Record<string, any>;
+  result?: Record<string, unknown>;
   error?: string | null;
 }
 
@@ -35,15 +36,15 @@ export interface CreateAgentActionParams {
   sessionId: string;
   agentName: string;
   actionType: AgentActionType;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   status?: AgentActionStatus;
 }
 
 export interface UpdateAgentActionParams {
   status?: AgentActionStatus;
-  result?: Record<string, any>;
+  result?: Record<string, unknown>;
   error?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -111,7 +112,7 @@ export class VibeAgentActionService {
    */
   static async completeAction(
     actionId: string,
-    result?: Record<string, any>
+    result?: Record<string, unknown>
   ): Promise<VibeAgentAction> {
     return this.updateAction(actionId, {
       status: 'completed',
@@ -304,7 +305,7 @@ export class VibeAgentActionService {
     sessionId: string;
     agentName: string;
     toolName: string;
-    toolInput: Record<string, any>;
+    toolInput: Record<string, unknown>;
   }) {
     const action = await this.createAction({
       sessionId: params.sessionId,
@@ -318,7 +319,7 @@ export class VibeAgentActionService {
 
     return {
       actionId: action.id,
-      complete: (toolOutput: any) =>
+      complete: (toolOutput: unknown) =>
         this.completeAction(action.id, {
           tool_output: toolOutput,
           output: JSON.stringify(toolOutput),
@@ -334,7 +335,7 @@ export class VibeAgentActionService {
     sessionId: string;
     agentName: string;
     taskDescription: string;
-    plan: any;
+    plan: unknown;
   }) {
     const action = await this.createAction({
       sessionId: params.sessionId,

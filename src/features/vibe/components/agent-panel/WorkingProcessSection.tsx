@@ -32,7 +32,8 @@ export interface WorkingStep {
     type: 'file' | 'command' | 'code' | 'tool';
     label: string;
     onClick: () => void;
-    metadata?: Record<string, any>;
+    // Updated: Nov 16th 2025 - Fixed any type
+    metadata?: Record<string, unknown>;
   };
   timestamp?: Date;
   result?: string;

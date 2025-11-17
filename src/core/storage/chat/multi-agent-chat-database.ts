@@ -257,8 +257,13 @@ export async function listConversations(
     }
 
     if (filters.search_query) {
+      // Updated: Nov 16th 2025 - Fixed SQL injection by sanitizing user input
+      // Escape special characters that could be used for SQL injection
+      const sanitized = filters.search_query
+        .replace(/[%_\\]/g, '\\$&') // Escape LIKE wildcards and backslash
+        .replace(/'/g, "''"); // Escape single quotes
       query = query.or(
-        `title.ilike.%${filters.search_query}%,description.ilike.%${filters.search_query}%`
+        `title.ilike.%${sanitized}%,description.ilike.%${sanitized}%`
       );
     }
 

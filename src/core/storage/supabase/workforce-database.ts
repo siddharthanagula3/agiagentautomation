@@ -538,29 +538,43 @@ async function updateSubscriptionUsage(
   tokensUsed: number
 ): Promise<boolean> {
   try {
-    const { data: subscription } = await supabase
-      .from('user_subscriptions')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-
-    if (!subscription) {
-      return false;
-    }
-
-    const newUsedTokens = subscription.used_tokens + tokensUsed;
-
-    const { error } = await supabase
-      .from('user_subscriptions')
-      .update({
-        used_tokens: newUsedTokens,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('user_id', userId);
+    // Updated: Nov 16th 2025 - Fixed race condition with atomic increment using RPC
+    // Use PostgreSQL's atomic increment to prevent race conditions
+    const { error } = await supabase.rpc('increment_token_usage', {
+      p_user_id: userId,
+      p_tokens_used: tokensUsed,
+    });
 
     if (error) {
-      console.error('Error updating subscription usage:', error);
-      return false;
+      // If RPC doesn't exist, fall back to non-atomic update with a warning
+      console.warn(
+        'RPC increment_token_usage not found, using non-atomic fallback. Create the RPC function in Supabase for atomic updates.'
+      );
+
+      const { data: subscription } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (!subscription) {
+        return false;
+      }
+
+      const newUsedTokens = subscription.used_tokens + tokensUsed;
+
+      const { error: updateError } = await supabase
+        .from('user_subscriptions')
+        .update({
+          used_tokens: newUsedTokens,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId);
+
+      if (updateError) {
+        console.error('Error updating subscription usage:', updateError);
+        return false;
+      }
     }
 
     return true;

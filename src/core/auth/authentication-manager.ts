@@ -72,15 +72,17 @@ class AuthService {
 
       return { user: authUser, error: null };
     } catch (error) {
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
       // On timeout or error, clear invalid auth data
-      if (error.message?.includes('timeout')) {
+      if (message?.includes('timeout')) {
         try {
           await supabase.auth.signOut();
         } catch (e) {
           // Ignore signout errors
         }
       }
-      return { user: null, error: error.message || 'Failed to get user' };
+      return { user: null, error: message };
     }
   }
 
@@ -112,7 +114,9 @@ class AuthService {
 
       return { user: authUser, error: null };
     } catch (error) {
-      return { user: null, error: error.message || 'Login failed' };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { user: null, error: message };
     }
   }
 
@@ -151,7 +155,9 @@ class AuthService {
 
       return { user: authUser, error: null };
     } catch (error) {
-      return { user: null, error: error.message || 'Registration failed' };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { user: null, error: message };
     }
   }
 
@@ -163,7 +169,9 @@ class AuthService {
       }
       return { error: null };
     } catch (error) {
-      return { error: error.message || 'Logout failed' };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { error: message };
     }
   }
 
@@ -177,7 +185,9 @@ class AuthService {
       }
       return { error: null };
     } catch (error) {
-      return { error: error.message || 'Password reset failed' };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { error: message };
     }
   }
 
@@ -191,7 +201,9 @@ class AuthService {
       }
       return { error: null };
     } catch (error) {
-      return { error: error.message || 'Password update failed' };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { error: message };
     }
   }
 
@@ -227,7 +239,9 @@ class AuthService {
 
       return { user: authUser, error: null };
     } catch (error) {
-      return { user: null, error: error.message || 'Profile update failed' };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { user: null, error: message };
     }
   }
 
@@ -262,9 +276,15 @@ class AuthService {
         return { error: error.message };
       }
 
+      // Updated: Nov 16th 2025 - Fixed password change doesn't invalidate old sessions
+      // Invalidate all existing sessions for security
+      await supabase.auth.signOut({ scope: 'global' });
+
       return { error: null };
     } catch (error) {
-      return { error: error.message || 'Password change failed' };
+      // Updated: Nov 16th 2025 - Fixed missing error type check
+      const message = error instanceof Error ? error.message : String(error);
+      return { error: message };
     }
   }
 }

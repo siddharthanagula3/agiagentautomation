@@ -28,6 +28,23 @@ export interface PresenceState {
   lastSeen: number;
 }
 
+// Updated: Nov 16th 2025 - Fixed any type
+interface TypingBroadcastPayload {
+  userId: string;
+  username: string;
+  timestamp: number;
+  isTyping: boolean;
+}
+
+interface DatabaseChatMessage {
+  id: string;
+  session_id: string;
+  role: string;
+  content: string;
+  timestamp?: string;
+  metadata?: Record<string, unknown>;
+}
+
 export type MessageChangeType = 'INSERT' | 'UPDATE' | 'DELETE';
 
 export interface MessageChange {
@@ -75,7 +92,7 @@ export class RealtimeCollaborationService {
           table: 'chat_messages',
           filter: `session_id=eq.${sessionId}`,
         },
-        (payload: RealtimePostgresChangesPayload<any>) => {
+        (payload: RealtimePostgresChangesPayload<DatabaseChatMessage>) => {
           this.handleMessageChange(payload, callbacks.onMessageChange);
         }
       )
@@ -243,7 +260,7 @@ export class RealtimeCollaborationService {
   async broadcastEvent(
     sessionId: string,
     event: string,
-    payload: any
+    payload: unknown
   ): Promise<void> {
     const channel = this.channels.get(sessionId);
     if (!channel) return;
@@ -259,7 +276,7 @@ export class RealtimeCollaborationService {
    * Handle message change from Postgres
    */
   private handleMessageChange(
-    payload: RealtimePostgresChangesPayload<any>,
+    payload: RealtimePostgresChangesPayload<DatabaseChatMessage>,
     callback?: (change: MessageChange) => void
   ): void {
     if (!callback) return;
@@ -299,7 +316,7 @@ export class RealtimeCollaborationService {
    * Handle typing broadcast
    */
   private handleTypingBroadcast(
-    payload: any,
+    payload: TypingBroadcastPayload,
     callback?: (users: TypingUser[]) => void
   ): void {
     if (!callback) return;
@@ -323,13 +340,13 @@ export class RealtimeCollaborationService {
   /**
    * Map presence state to PresenceState array
    */
-  private mapPresenceState(state: Record<string, any[]>): PresenceState[] {
+  private mapPresenceState(state: Record<string, unknown[]>): PresenceState[] {
     const users: PresenceState[] = [];
 
     Object.keys(state).forEach((key) => {
       const presences = state[key];
       if (presences && presences.length > 0) {
-        const presence = presences[0];
+        const presence = presences[0] as PresenceState;
         users.push({
           userId: presence.userId,
           username: presence.username,

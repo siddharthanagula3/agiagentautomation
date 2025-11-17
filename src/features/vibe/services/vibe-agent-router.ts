@@ -135,9 +135,10 @@ export class VibeAgentRouter {
       }
 
       // Calculate confidence based on match score and total keywords
-      const confidence = employeeKeywords.length > 0
-        ? Math.min(matchScore / (employeeKeywords.length * 1.5), 1.0)
-        : 0;
+      const confidence =
+        employeeKeywords.length > 0
+          ? Math.min(matchScore / (employeeKeywords.length * 1.5), 1.0)
+          : 0;
 
       if (confidence > bestMatch.confidence) {
         bestMatch = {
@@ -164,7 +165,7 @@ export class VibeAgentRouter {
     const descWords = employee.description
       .toLowerCase()
       .split(/[\s,.:;]+/)
-      .filter(w => w.length > 4);
+      .filter((w) => w.length > 4);
     keywords.push(...descWords);
 
     // Add keywords from name
@@ -173,16 +174,27 @@ export class VibeAgentRouter {
 
     // Add tool names as keywords
     if (employee.tools && Array.isArray(employee.tools)) {
-      keywords.push(...employee.tools.map(t => t.toLowerCase()));
+      keywords.push(...employee.tools.map((t) => t.toLowerCase()));
     }
 
     // Remove common stop words
     const stopWords = new Set([
-      'will', 'with', 'from', 'that', 'this', 'have', 'been',
-      'were', 'your', 'their', 'about', 'would', 'there',
+      'will',
+      'with',
+      'from',
+      'that',
+      'this',
+      'have',
+      'been',
+      'were',
+      'your',
+      'their',
+      'about',
+      'would',
+      'there',
     ]);
 
-    const filtered = keywords.filter(k => !stopWords.has(k));
+    const filtered = keywords.filter((k) => !stopWords.has(k));
 
     // Remove duplicates
     return [...new Set(filtered)];
@@ -208,7 +220,7 @@ export class VibeAgentRouter {
 
     const recentContext = conversationHistory
       .slice(-3)
-      .map(msg => `${msg.role}: ${msg.content}`)
+      .map((msg) => `${msg.role}: ${msg.content}`)
       .join('\n');
 
     const prompt = `You are an intelligent routing system for AI employees. Analyze the user's message and determine which AI employee is best suited to handle it.
@@ -285,7 +297,11 @@ Respond in JSON format:
     const supervisor = this.findSupervisor(hiredEmployees);
 
     // Use LLM to break down task into subtasks
-    const tasks = await this.decomposeTask(userMessage, requiredDomains, hiredEmployees);
+    const tasks = await this.decomposeTask(
+      userMessage,
+      requiredDomains,
+      hiredEmployees
+    );
 
     // Determine execution strategy
     const executionStrategy = this.determineExecutionStrategy(tasks);
@@ -304,14 +320,20 @@ Respond in JSON format:
    */
   private findSupervisor(hiredEmployees: AIEmployee[]): AIEmployee {
     // Look for employees with supervisor/coordinator keywords
-    const supervisorKeywords = ['supervisor', 'coordinator', 'manager', 'orchestrator', 'team lead'];
+    const supervisorKeywords = [
+      'supervisor',
+      'coordinator',
+      'manager',
+      'orchestrator',
+      'team lead',
+    ];
 
-    const supervisor = hiredEmployees.find(emp => {
+    const supervisor = hiredEmployees.find((emp) => {
       const empName = emp.name.toLowerCase();
       const empDesc = emp.description.toLowerCase();
 
       return supervisorKeywords.some(
-        keyword => empName.includes(keyword) || empDesc.includes(keyword)
+        (keyword) => empName.includes(keyword) || empDesc.includes(keyword)
       );
     });
 
@@ -330,7 +352,7 @@ Respond in JSON format:
     hiredEmployees: AIEmployee[]
   ): Promise<TaskAssignment[]> {
     const employeeDescriptions = hiredEmployees
-      .map(emp => `- ${emp.name}: ${emp.description}`)
+      .map((emp) => `- ${emp.name}: ${emp.description}`)
       .join('\n');
 
     const prompt = `Break down this complex task into specific subtasks that can be assigned to specialists.
@@ -383,9 +405,9 @@ Respond in JSON format:
         const taskId = `task-${Date.now()}-${idx}`;
         taskIdMap.set(task.description, taskId);
 
-        const assignedEmployee = hiredEmployees.find(
-          emp => emp.name === task.assigned_to
-        ) || hiredEmployees[0];
+        const assignedEmployee =
+          hiredEmployees.find((emp) => emp.name === task.assigned_to) ||
+          hiredEmployees[0];
 
         tasks.push({
           id: taskId,
@@ -437,7 +459,7 @@ Respond in JSON format:
     }
 
     // Check if any tasks have dependencies
-    const hasDependencies = tasks.some(task => task.dependencies.length > 0);
+    const hasDependencies = tasks.some((task) => task.dependencies.length > 0);
 
     if (!hasDependencies) {
       // All tasks are independent - can run in parallel
@@ -469,7 +491,7 @@ Respond in JSON format:
     const currentDomain = this.extractKeywords(currentAgent);
 
     // Check if new topic matches current agent's domain
-    const topicMatch = currentDomain.some(keyword =>
+    const topicMatch = currentDomain.some((keyword) =>
       newTopic.toLowerCase().includes(keyword.toLowerCase())
     );
 
@@ -485,15 +507,33 @@ Respond in JSON format:
   private extractTopic(message: string): string {
     // Remove common stop words
     const stopWords = new Set([
-      'the', 'a', 'an', 'is', 'are', 'was', 'were', 'can', 'you',
-      'help', 'me', 'please', 'could', 'would', 'should', 'will',
-      'now', 'just', 'also', 'want', 'need',
+      'the',
+      'a',
+      'an',
+      'is',
+      'are',
+      'was',
+      'were',
+      'can',
+      'you',
+      'help',
+      'me',
+      'please',
+      'could',
+      'would',
+      'should',
+      'will',
+      'now',
+      'just',
+      'also',
+      'want',
+      'need',
     ]);
 
     const words = message
       .toLowerCase()
       .split(/\s+/)
-      .filter(w => w.length > 3 && !stopWords.has(w));
+      .filter((w) => w.length > 3 && !stopWords.has(w));
 
     // Return first 3 meaningful words as topic
     return words.slice(0, 3).join(' ');
@@ -512,7 +552,7 @@ Respond in JSON format:
   ): AIEmployee | undefined {
     const normalized = agentName.toLowerCase().trim();
 
-    return hiredEmployees.find(emp => {
+    return hiredEmployees.find((emp) => {
       const empName = emp.name.toLowerCase();
       return empName === normalized || empName.includes(normalized);
     });

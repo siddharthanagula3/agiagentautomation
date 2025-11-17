@@ -15,16 +15,16 @@ import { Send, Paperclip } from 'lucide-react';
 // Placeholder for VibeMessageList - to be implemented later
 const VibeMessageList: React.FC<{ messages: any[] }> = ({ messages }) => {
   return (
-    <div className="px-6 py-4 space-y-4">
+    <div className="space-y-4 px-6 py-4">
       {messages.length === 0 ? (
-        <div className="flex items-center justify-center h-full text-center">
+        <div className="flex h-full items-center justify-center text-center">
           <div className="max-w-md space-y-4">
             <h2 className="text-2xl font-semibold text-muted-foreground">
               Start a conversation
             </h2>
             <p className="text-sm text-muted-foreground">
-              Type a message below to begin working with your AI employees. Use # to
-              mention specific agents and @ to reference files.
+              Type a message below to begin working with your AI employees. Use
+              # to mention specific agents and @ to reference files.
             </p>
           </div>
         </div>
@@ -35,24 +35,26 @@ const VibeMessageList: React.FC<{ messages: any[] }> = ({ messages }) => {
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[85%] px-4 py-3 rounded-2xl ${
+              className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                 message.role === 'user'
-                  ? 'bg-primary text-primary-foreground rounded-br-sm'
-                  : 'bg-card border border-border rounded-bl-sm'
+                  ? 'rounded-br-sm bg-primary text-primary-foreground'
+                  : 'rounded-bl-sm border border-border bg-card'
               }`}
             >
               {message.employee_name && (
-                <div className="text-xs font-medium mb-1 opacity-70">
+                <div className="mb-1 text-xs font-medium opacity-70">
                   {message.employee_name}
                   {message.employee_role && (
-                    <span className="ml-2 opacity-60">• {message.employee_role}</span>
+                    <span className="ml-2 opacity-60">
+                      • {message.employee_role}
+                    </span>
                   )}
                 </div>
               )}
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed">
                 {message.content}
               </p>
-              <div className="text-xs opacity-60 mt-1">
+              <div className="mt-1 text-xs opacity-60">
                 {new Date(message.timestamp).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -142,9 +144,9 @@ const VibeChatCanvas: React.FC = () => {
   const activeAgentsList = Array.from(activeAgents.values());
 
   return (
-    <div className="flex-1 flex flex-col h-screen">
+    <div className="flex h-screen flex-1 flex-col">
       {/* Header */}
-      <header className="border-b border-border px-6 py-4 bg-card/50 backdrop-blur-sm shrink-0">
+      <header className="shrink-0 border-b border-border bg-card/50 px-6 py-4 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold">AI Workforce Vibe</h1>
@@ -164,7 +166,7 @@ const VibeChatCanvas: React.FC = () => {
       </ScrollArea>
 
       {/* Input */}
-      <div className="border-t border-border p-4 bg-card/50 backdrop-blur-sm shrink-0">
+      <div className="shrink-0 border-t border-border bg-card/50 p-4 backdrop-blur-sm">
         <VibeMessageInput onSend={handleSendMessage} />
       </div>
     </div>

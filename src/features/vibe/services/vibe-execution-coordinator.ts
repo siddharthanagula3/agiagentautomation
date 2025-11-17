@@ -7,7 +7,12 @@ import { unifiedLLMService } from '@core/ai/llm/unified-language-model';
 import { messagePool } from './vibe-message-pool';
 import { createCollaborationManager } from './vibe-collaboration-protocol';
 import type { AIEmployee } from '@core/types/ai-employee';
-import type { VibeTask, TaskStatus, TaskResult, ExecutionPlan } from '../types/vibe-task';
+import type {
+  VibeTask,
+  TaskStatus,
+  TaskResult,
+  ExecutionPlan,
+} from '../types/vibe-task';
 import type { SupervisorPlan } from '../types/vibe-agent';
 
 /**
@@ -52,14 +57,20 @@ export class VibeExecutionCoordinator {
     const results = new Map<string, TaskResult>();
 
     // Execute level by level
-    for (let levelIndex = 0; levelIndex < executionPlan.execution_order.length; levelIndex++) {
+    for (
+      let levelIndex = 0;
+      levelIndex < executionPlan.execution_order.length;
+      levelIndex++
+    ) {
       const levelTaskIds = executionPlan.execution_order[levelIndex];
       const levelTasks = levelTaskIds
-        .map(id => tasks.find(t => t.id === id))
+        .map((id) => tasks.find((t) => t.id === id))
         .filter((t): t is VibeTask => t !== undefined);
 
       // Execute all tasks in this level in parallel
-      const promises = levelTasks.map(task => this.executeTask(task, userMessage));
+      const promises = levelTasks.map((task) =>
+        this.executeTask(task, userMessage)
+      );
 
       // Wait for all tasks in this level to complete
       const levelResults = await Promise.allSettled(promises);
@@ -116,7 +127,10 @@ export class VibeExecutionCoordinator {
    *
    * @private
    */
-  private async executeTask(task: VibeTask, userMessage: string): Promise<TaskResult> {
+  private async executeTask(
+    task: VibeTask,
+    userMessage: string
+  ): Promise<TaskResult> {
     const startTime = Date.now();
 
     // Update task status
@@ -140,13 +154,27 @@ export class VibeExecutionCoordinator {
       );
 
       // Send status update
-      await collaborationManager.sendStatusUpdate('supervisor', 'working', 0, task.description);
+      await collaborationManager.sendStatusUpdate(
+        'supervisor',
+        'working',
+        0,
+        task.description
+      );
 
       // Execute task via LLM with employee's system prompt
-      const result = await this.executeLLMTask(employee, task.description, userMessage);
+      const result = await this.executeLLMTask(
+        employee,
+        task.description,
+        userMessage
+      );
 
       // Send task result
-      await collaborationManager.sendTaskResult('supervisor', task.id, result, []);
+      await collaborationManager.sendTaskResult(
+        'supervisor',
+        task.id,
+        result,
+        []
+      );
 
       // Cleanup
       collaborationManager.destroy();
@@ -208,7 +236,9 @@ export class VibeExecutionCoordinator {
    *
    * @private
    */
-  private async getEmployeeById(employeeId: string): Promise<AIEmployee | null> {
+  private async getEmployeeById(
+    employeeId: string
+  ): Promise<AIEmployee | null> {
     // TODO: Integrate with workforce store to get actual employee
     // For now, return null to indicate not found
     return null;
@@ -219,8 +249,11 @@ export class VibeExecutionCoordinator {
    *
    * @private
    */
-  private convertPlanToTasks(plan: SupervisorPlan, sessionId: string): VibeTask[] {
-    return plan.tasks.map(assignment => ({
+  private convertPlanToTasks(
+    plan: SupervisorPlan,
+    sessionId: string
+  ): VibeTask[] {
+    return plan.tasks.map((assignment) => ({
       id: assignment.id,
       session_id: sessionId,
       description: assignment.description,
@@ -240,7 +273,7 @@ export class VibeExecutionCoordinator {
     const dependencyGraph = new Map<string, string[]>();
 
     // Build dependency graph
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
       dependencyGraph.set(task.id, task.dependencies);
     });
 
@@ -269,7 +302,7 @@ export class VibeExecutionCoordinator {
     const taskMap = new Map<string, VibeTask>();
 
     // Build task map
-    tasks.forEach(task => taskMap.set(task.id, task));
+    tasks.forEach((task) => taskMap.set(task.id, task));
 
     while (completed.size < tasks.length) {
       const currentLevel: string[] = [];
@@ -279,7 +312,7 @@ export class VibeExecutionCoordinator {
         if (completed.has(task.id)) continue;
 
         const deps = graph.get(task.id) || [];
-        const allDepsCompleted = deps.every(depId => completed.has(depId));
+        const allDepsCompleted = deps.every((depId) => completed.has(depId));
 
         if (allDepsCompleted) {
           currentLevel.push(task.id);
@@ -289,9 +322,9 @@ export class VibeExecutionCoordinator {
 
       if (currentLevel.length === 0 && completed.size < tasks.length) {
         // Circular dependency detected
-        const remaining = tasks.filter(t => !completed.has(t.id));
+        const remaining = tasks.filter((t) => !completed.has(t.id));
         throw new Error(
-          `Circular dependency detected. Remaining tasks: ${remaining.map(t => t.description).join(', ')}`
+          `Circular dependency detected. Remaining tasks: ${remaining.map((t) => t.description).join(', ')}`
         );
       }
 
@@ -330,11 +363,11 @@ export class VibeExecutionCoordinator {
     progress: number;
   } {
     const completed = Array.from(this.completedTasks.values()).filter(
-      t => t.status === 'completed'
+      (t) => t.status === 'completed'
     ).length;
 
     const failed = Array.from(this.completedTasks.values()).filter(
-      t => t.status === 'failed'
+      (t) => t.status === 'failed'
     ).length;
 
     const total = this.activeTasks.size + this.completedTasks.size;

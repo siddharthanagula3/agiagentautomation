@@ -4,7 +4,11 @@
  */
 
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/shared/components/ui/avatar';
 import { Badge } from '@/shared/components/ui/badge';
 import { Bot, Circle } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
@@ -67,24 +71,24 @@ export function AgentStatusCard({ agent, className }: AgentStatusCardProps) {
   return (
     <div
       className={cn(
-        'border-b border-gray-200 dark:border-gray-800 p-4 bg-background',
+        'border-b border-gray-200 bg-background p-4 dark:border-gray-800',
         className
       )}
     >
       <div className="flex items-start gap-3">
         {/* Avatar */}
-        <Avatar className="w-10 h-10">
+        <Avatar className="h-10 w-10">
           <AvatarImage src={agent.avatar} alt={agent.name} />
           <AvatarFallback className="bg-primary/10 text-primary">
-            {agent.avatar ? initials : <Bot className="w-5 h-5" />}
+            {agent.avatar ? initials : <Bot className="h-5 w-5" />}
           </AvatarFallback>
         </Avatar>
 
         {/* Agent Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-sm truncate">{agent.name}</h3>
-            <Badge variant={config.badgeVariant} className="text-xs shrink-0">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center gap-2">
+            <h3 className="truncate text-sm font-semibold">{agent.name}</h3>
+            <Badge variant={config.badgeVariant} className="shrink-0 text-xs">
               {agent.role}
             </Badge>
           </div>
@@ -93,7 +97,7 @@ export function AgentStatusCard({ agent, className }: AgentStatusCardProps) {
           <div className="flex items-center gap-2">
             <Circle
               className={cn(
-                'w-2 h-2 fill-current',
+                'h-2 w-2 fill-current',
                 config.dotColor,
                 agent.status === 'working' && 'animate-pulse'
               )}
@@ -105,7 +109,7 @@ export function AgentStatusCard({ agent, className }: AgentStatusCardProps) {
 
           {/* Current Task */}
           {agent.currentTask && (
-            <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
+            <p className="mt-1.5 line-clamp-2 text-xs text-muted-foreground">
               {agent.currentTask}
             </p>
           )}

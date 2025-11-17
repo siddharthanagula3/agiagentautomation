@@ -65,44 +65,39 @@ const HelpSupportPage: React.FC = () => {
   const [isLoadingFAQs, setIsLoadingFAQs] = useState(true);
   const [faqs, setFaqs] = useState<FAQItem[]>([]);
 
-  const faqs: FAQItem[] = [
-    {
-      category: 'Getting Started',
-      question: 'How do I hire my first AI employee?',
-      answer:
-        'Visit the Marketplace page, browse available AI employees, and click "Hire Now" on the employee you want. AI Employees are FREE to hire - there is no cost to hire them. You only pay for tokens used. Free plan includes 1M tokens/month (250K each for OpenAI, Claude, Perplexity, Gemini). Pro plan ($29/month) includes 10M tokens/month (2.5M each).',
-    },
-    {
-      category: 'Getting Started',
-      question: 'What AI providers are supported?',
-      answer:
-        'We support ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), and Perplexity. You need to add at least one API key in your .env file to use the chat functionality.',
-    },
-    {
-      category: 'Chat',
-      question: 'How do I start a chat with an AI employee?',
-      answer:
-        'Go to the Chat page, click the "New Chat" button, select an employee from your purchased list, and start chatting. Each employee uses their configured AI provider.',
-    },
-    {
-      category: 'Billing',
-      question: 'How much does it cost?',
-      answer:
-        "AI Employees are FREE to hire - there is no cost to hire them. You only pay for tokens used. Free plan includes 1M tokens/month (250K each for OpenAI, Claude, Perplexity, Gemini). Pro plan ($29/month) includes 10M tokens/month (2.5M each). The actual AI API costs depend on your usage and the provider you're using, but you get generous token allowances included with each plan.",
-    },
-    {
-      category: 'Technical',
-      question: 'Is my data secure?',
-      answer:
-        'Yes! We use Supabase for secure data storage with row-level security. Your conversations and data are encrypted and only accessible to you.',
-    },
-    {
-      category: 'Automation',
-      question: 'How do I create a workflow?',
-      answer:
-        'Go to Automation > Designer, use the visual workflow builder to create your automation by connecting nodes, and click "Save" when done.',
-    },
-  ];
+  // Load FAQs from database on mount
+  useEffect(() => {
+    const loadFAQs = async () => {
+      try {
+        setIsLoadingFAQs(true);
+        const { data, error } = await supportService.getFAQs();
+
+        if (error) {
+          console.error('Failed to load FAQs:', error);
+          toast.error('Failed to load FAQs');
+          // Fall back to empty array
+          setFaqs([]);
+        } else {
+          // Map FAQ type to FAQItem (only keep relevant fields)
+          const faqItems: FAQItem[] = data
+            .filter((faq) => faq.is_published)
+            .map((faq) => ({
+              category: faq.category,
+              question: faq.question,
+              answer: faq.answer,
+            }));
+          setFaqs(faqItems);
+        }
+      } catch (error) {
+        console.error('Error loading FAQs:', error);
+        setFaqs([]);
+      } finally {
+        setIsLoadingFAQs(false);
+      }
+    };
+
+    loadFAQs();
+  }, []);
 
   const filteredFaqs = faqs.filter(
     (faq) =>

@@ -35,7 +35,7 @@ async function testVibeIntegration() {
       .insert({
         user_id: testUserId,
         title: 'Test VIBE Session',
-        metadata: { test: true }
+        metadata: { test: true },
       })
       .select()
       .single();
@@ -57,7 +57,7 @@ async function testVibeIntegration() {
         user_id: testUserId,
         role: 'user',
         content: 'Create a React component for user profiles',
-        metadata: { test: true }
+        metadata: { test: true },
       })
       .select()
       .single();
@@ -80,17 +80,21 @@ async function testVibeIntegration() {
         session_id: session.id,
         user_id: testUserId,
         role: 'assistant',
-        content: 'I\'ll help you create a user profile component. Let me start by analyzing the requirements...',
+        content:
+          "I'll help you create a user profile component. Let me start by analyzing the requirements...",
         employee_name: 'code-reviewer',
         employee_role: 'Senior Developer',
         is_streaming: false,
-        metadata: { test: true }
+        metadata: { test: true },
       })
       .select()
       .single();
 
     if (assistantError) {
-      console.error('❌ Failed to create assistant message:', assistantError.message);
+      console.error(
+        '❌ Failed to create assistant message:',
+        assistantError.message
+      );
       throw assistantError;
     }
 
@@ -107,7 +111,7 @@ async function testVibeIntegration() {
         action_type: 'file_read',
         status: 'completed',
         metadata: { file_path: 'src/components/UserProfile.tsx' },
-        result: { lines: 150, summary: 'Analyzed component structure' }
+        result: { lines: 150, summary: 'Analyzed component structure' },
       },
       {
         session_id: session.id,
@@ -116,9 +120,9 @@ async function testVibeIntegration() {
         status: 'completed',
         metadata: {
           file_path: 'src/components/UserProfile.tsx',
-          changes: 'Added TypeScript types and props validation'
+          changes: 'Added TypeScript types and props validation',
         },
-        result: { success: true }
+        result: { success: true },
       },
       {
         session_id: session.id,
@@ -126,8 +130,8 @@ async function testVibeIntegration() {
         action_type: 'command_execution',
         status: 'completed',
         metadata: { command: 'npm run type-check' },
-        result: { exit_code: 0, output: 'Type checking passed' }
-      }
+        result: { exit_code: 0, output: 'Type checking passed' },
+      },
     ];
 
     const { data: createdActions, error: actionsError } = await supabase
@@ -158,7 +162,9 @@ async function testVibeIntegration() {
 
     console.log('✅ Messages verified:', allMessages?.length);
     allMessages?.forEach((msg, idx) => {
-      console.log(`   ${idx + 1}. ${msg.role}: ${msg.content.substring(0, 50)}...`);
+      console.log(
+        `   ${idx + 1}. ${msg.role}: ${msg.content.substring(0, 50)}...`
+      );
       console.log(`      user_id: ${msg.user_id ? '✓' : '✗'}`);
     });
 
@@ -177,12 +183,13 @@ async function testVibeIntegration() {
 
     const stats = {
       total: sessionActions?.length || 0,
-      completed: sessionActions?.filter(a => a.status === 'completed').length || 0,
-      failed: sessionActions?.filter(a => a.status === 'failed').length || 0,
+      completed:
+        sessionActions?.filter((a) => a.status === 'completed').length || 0,
+      failed: sessionActions?.filter((a) => a.status === 'failed').length || 0,
       by_type: sessionActions?.reduce((acc: any, action) => {
         acc[action.action_type] = (acc[action.action_type] || 0) + 1;
         return acc;
-      }, {})
+      }, {}),
     };
 
     console.log('📊 Action Statistics:');
@@ -205,8 +212,9 @@ async function testVibeIntegration() {
       console.log('✅ Test data cleaned up');
     }
 
-    console.log('\n✅ All tests passed! VIBE integration is working correctly.');
-
+    console.log(
+      '\n✅ All tests passed! VIBE integration is working correctly.'
+    );
   } catch (error) {
     console.error('\n❌ Test failed:', error);
     process.exit(1);

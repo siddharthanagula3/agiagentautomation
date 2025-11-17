@@ -285,7 +285,10 @@ export class VibeToolOrchestrator {
       }
 
       // Execute tool (mock implementation - would integrate with actual tool execution)
-      const output = await this.executeToolImpl(request.tool_name, request.parameters);
+      const output = await this.executeToolImpl(
+        request.tool_name,
+        request.parameters
+      );
 
       const result: ToolResult = {
         request_id: request.id,
@@ -324,7 +327,7 @@ export class VibeToolOrchestrator {
   ): Promise<any> {
     // Mock implementation - would integrate with actual tool execution engine
     // Simulate async execution
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     return {
       tool: toolName,
@@ -442,8 +445,8 @@ export class VibeToolOrchestrator {
     const results = Array.from(this.executionHistory.values());
     const toolUsage: Record<string, number> = {};
 
-    const successful = results.filter(r => r.success).length;
-    const failed = results.filter(r => !r.success).length;
+    const successful = results.filter((r) => r.success).length;
+    const failed = results.filter((r) => !r.success).length;
 
     return {
       totalExecutions: results.length,

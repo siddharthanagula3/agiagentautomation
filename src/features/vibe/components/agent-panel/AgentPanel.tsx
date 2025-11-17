@@ -5,7 +5,10 @@
 
 import React from 'react';
 import { AgentStatusCard, type AgentStatus } from './AgentStatusCard';
-import { WorkingProcessSection, type WorkingStep } from './WorkingProcessSection';
+import {
+  WorkingProcessSection,
+  type WorkingStep,
+} from './WorkingProcessSection';
 import { AgentMessageList, type AgentMessage } from './AgentMessageList';
 
 interface AgentPanelProps {
@@ -18,10 +21,10 @@ export function AgentPanel({ agent, workingSteps, messages }: AgentPanelProps) {
   // No agent selected state
   if (!agent) {
     return (
-      <div className="h-full flex flex-col">
-        <div className="flex-1 flex items-center justify-center p-8 text-center">
+      <div className="flex h-full flex-col">
+        <div className="flex flex-1 items-center justify-center p-8 text-center">
           <div>
-            <h3 className="text-lg font-semibold mb-2">No Active Agent</h3>
+            <h3 className="mb-2 text-lg font-semibold">No Active Agent</h3>
             <p className="text-sm text-muted-foreground">
               Send a message to start working with AI agents
             </p>
@@ -32,7 +35,7 @@ export function AgentPanel({ agent, workingSteps, messages }: AgentPanelProps) {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex h-full flex-col">
       {/* Agent Status */}
       <AgentStatusCard agent={agent} />
 

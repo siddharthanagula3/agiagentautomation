@@ -6,7 +6,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/components/ui/collapsible';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/shared/components/ui/collapsible';
 import {
   ChevronDown,
   Sparkles,
@@ -41,10 +45,10 @@ interface WorkingProcessSectionProps {
 }
 
 const statusIcons = {
-  pending: <div className="w-2 h-2 rounded-full bg-gray-300" />,
-  in_progress: <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />,
-  completed: <Check className="w-4 h-4 text-green-500" />,
-  failed: <AlertCircle className="w-4 h-4 text-red-500" />,
+  pending: <div className="h-2 w-2 rounded-full bg-gray-300" />,
+  in_progress: <Loader2 className="h-4 w-4 animate-spin text-blue-500" />,
+  completed: <Check className="h-4 w-4 text-green-500" />,
+  failed: <AlertCircle className="h-4 w-4 text-red-500" />,
 };
 
 const actionIcons = {
@@ -74,13 +78,13 @@ export function WorkingProcessSection({
       onOpenChange={setIsOpen}
       className={cn('border-b border-gray-200 dark:border-gray-800', className)}
     >
-      <div className="p-4 bg-background">
+      <div className="bg-background p-4">
         {/* Header */}
         <CollapsibleTrigger asChild>
-          <button className="flex items-center justify-between w-full text-left group">
+          <button className="group flex w-full items-center justify-between text-left">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="font-medium text-sm">Working Process</span>
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">Working Process</span>
               {totalCount > 0 && (
                 <Badge variant="secondary" className="text-xs">
                   {completedCount}/{totalCount}
@@ -89,7 +93,7 @@ export function WorkingProcessSection({
             </div>
             <ChevronDown
               className={cn(
-                'w-4 h-4 text-muted-foreground transition-transform',
+                'h-4 w-4 text-muted-foreground transition-transform',
                 isOpen && 'rotate-180'
               )}
             />
@@ -100,17 +104,17 @@ export function WorkingProcessSection({
         <CollapsibleContent className="mt-4">
           <div className="space-y-3">
             {steps.map((step, index) => (
-              <div key={step.id} className="flex items-start gap-3 group">
+              <div key={step.id} className="group flex items-start gap-3">
                 {/* Status Indicator */}
                 <div className="flex flex-col items-center gap-1 pt-1.5">
                   {statusIcons[step.status]}
                   {index < steps.length - 1 && (
-                    <div className="w-px h-full min-h-[20px] bg-gray-200 dark:bg-gray-800" />
+                    <div className="h-full min-h-[20px] w-px bg-gray-200 dark:bg-gray-800" />
                   )}
                 </div>
 
                 {/* Step Content */}
-                <div className="flex-1 min-w-0 pb-3">
+                <div className="min-w-0 flex-1 pb-3">
                   <p
                     className={cn(
                       'text-sm',
@@ -127,27 +131,26 @@ export function WorkingProcessSection({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 mt-1.5 text-xs gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="mt-1.5 h-7 gap-1.5 text-xs opacity-0 transition-opacity group-hover:opacity-100"
                       onClick={step.action.onClick}
                     >
-                      {React.createElement(
-                        actionIcons[step.action.type],
-                        { className: 'w-3.5 h-3.5' }
-                      )}
+                      {React.createElement(actionIcons[step.action.type], {
+                        className: 'w-3.5 h-3.5',
+                      })}
                       {step.action.label}
                     </Button>
                   )}
 
                   {/* Result */}
                   {step.result && step.status === 'completed' && (
-                    <div className="mt-1.5 p-2 bg-muted/50 rounded text-xs text-muted-foreground font-mono">
+                    <div className="mt-1.5 rounded bg-muted/50 p-2 font-mono text-xs text-muted-foreground">
                       {step.result}
                     </div>
                   )}
 
                   {/* Timestamp */}
                   {step.timestamp && (
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {step.timestamp.toLocaleTimeString()}
                     </p>
                   )}

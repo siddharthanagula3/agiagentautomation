@@ -33,16 +33,14 @@ export function VibeSplitView({ children }: VibeSplitViewProps) {
         maxSize={60}
         className="h-full"
       >
-        <div className="h-full overflow-hidden bg-background">
-          {leftPanel}
-        </div>
+        <div className="h-full overflow-hidden bg-background">{leftPanel}</div>
       </Panel>
 
       {/* Resize Handle */}
-      <PanelResizeHandle className="w-1 bg-border hover:bg-primary transition-colors relative group">
-        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="p-1 bg-background border border-border rounded-sm shadow-lg">
-            <GripVertical className="w-4 h-4 text-muted-foreground" />
+      <PanelResizeHandle className="group relative w-1 bg-border transition-colors hover:bg-primary">
+        <div className="absolute inset-y-0 left-1/2 flex -translate-x-1/2 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="rounded-sm border border-border bg-background p-1 shadow-lg">
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
           </div>
         </div>
       </PanelResizeHandle>
@@ -54,9 +52,7 @@ export function VibeSplitView({ children }: VibeSplitViewProps) {
         maxSize={70}
         className="h-full"
       >
-        <div className="h-full overflow-hidden bg-muted/30">
-          {rightPanel}
-        </div>
+        <div className="h-full overflow-hidden bg-muted/30">{rightPanel}</div>
       </Panel>
     </PanelGroup>
   );

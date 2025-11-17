@@ -30,7 +30,10 @@ export class VibeComplexityAnalyzer {
     const heuristicResult = this.heuristicComplexityCheck(userMessage);
 
     // If very clearly simple, skip LLM call
-    if (heuristicResult.confidence > 0.9 && heuristicResult.complexity === 'SIMPLE') {
+    if (
+      heuristicResult.confidence > 0.9 &&
+      heuristicResult.complexity === 'SIMPLE'
+    ) {
       return heuristicResult;
     }
 
@@ -48,7 +51,9 @@ export class VibeComplexityAnalyzer {
    *
    * @private
    */
-  private heuristicComplexityCheck(userMessage: string): ComplexityAnalysis & { confidence: number } {
+  private heuristicComplexityCheck(
+    userMessage: string
+  ): ComplexityAnalysis & { confidence: number } {
     const normalized = userMessage.toLowerCase();
 
     // Simple task indicators
@@ -86,16 +91,19 @@ export class VibeComplexityAnalyzer {
       'production ready',
     ];
 
-    const hasSimpleIndicator = simpleIndicators.some(indicator =>
+    const hasSimpleIndicator = simpleIndicators.some((indicator) =>
       normalized.includes(indicator)
     );
 
-    const hasComplexIndicator = complexIndicators.some(indicator =>
+    const hasComplexIndicator = complexIndicators.some((indicator) =>
       normalized.includes(indicator)
     );
 
     // Count steps mentioned
-    const stepIndicators = normalized.match(/\b(first|second|third|then|next|finally|step \d+)\b/g) || [];
+    const stepIndicators =
+      normalized.match(
+        /\b(first|second|third|then|next|finally|step \d+)\b/g
+      ) || [];
     const impliedSteps = stepIndicators.length;
 
     // Check for multiple domains
@@ -159,7 +167,7 @@ export class VibeComplexityAnalyzer {
   ): Promise<ComplexityAnalysis> {
     const recentContext = conversationHistory
       .slice(-5)
-      .map(msg => `${msg.role}: ${msg.content}`)
+      .map((msg) => `${msg.role}: ${msg.content}`)
       .join('\n');
 
     const prompt = `Analyze this user request and determine its complexity for AI agent task execution.
@@ -226,22 +234,107 @@ Respond in JSON format:
    */
   private extractDomains(normalizedMessage: string): string[] {
     const domainKeywords = {
-      'code': ['code', 'programming', 'bug', 'debug', 'function', 'class', 'api', 'software', 'development'],
-      'design': ['design', 'ui', 'ux', 'interface', 'mockup', 'wireframe', 'visual', 'layout'],
-      'data': ['data', 'analytics', 'chart', 'graph', 'sql', 'database', 'analysis', 'statistics'],
-      'marketing': ['marketing', 'campaign', 'seo', 'social media', 'content', 'advertising', 'promotion'],
-      'writing': ['write', 'document', 'article', 'blog', 'content', 'copy', 'draft', 'email'],
-      'business': ['business', 'strategy', 'plan', 'proposal', 'revenue', 'sales', 'customer'],
-      'health': ['health', 'medical', 'healthcare', 'doctor', 'patient', 'diagnosis', 'treatment'],
-      'legal': ['legal', 'contract', 'attorney', 'law', 'compliance', 'regulation', 'policy'],
-      'finance': ['finance', 'budget', 'investment', 'tax', 'accounting', 'financial', 'money'],
-      'web': ['website', 'web', 'frontend', 'backend', 'server', 'deploy', 'hosting'],
+      code: [
+        'code',
+        'programming',
+        'bug',
+        'debug',
+        'function',
+        'class',
+        'api',
+        'software',
+        'development',
+      ],
+      design: [
+        'design',
+        'ui',
+        'ux',
+        'interface',
+        'mockup',
+        'wireframe',
+        'visual',
+        'layout',
+      ],
+      data: [
+        'data',
+        'analytics',
+        'chart',
+        'graph',
+        'sql',
+        'database',
+        'analysis',
+        'statistics',
+      ],
+      marketing: [
+        'marketing',
+        'campaign',
+        'seo',
+        'social media',
+        'content',
+        'advertising',
+        'promotion',
+      ],
+      writing: [
+        'write',
+        'document',
+        'article',
+        'blog',
+        'content',
+        'copy',
+        'draft',
+        'email',
+      ],
+      business: [
+        'business',
+        'strategy',
+        'plan',
+        'proposal',
+        'revenue',
+        'sales',
+        'customer',
+      ],
+      health: [
+        'health',
+        'medical',
+        'healthcare',
+        'doctor',
+        'patient',
+        'diagnosis',
+        'treatment',
+      ],
+      legal: [
+        'legal',
+        'contract',
+        'attorney',
+        'law',
+        'compliance',
+        'regulation',
+        'policy',
+      ],
+      finance: [
+        'finance',
+        'budget',
+        'investment',
+        'tax',
+        'accounting',
+        'financial',
+        'money',
+      ],
+      web: [
+        'website',
+        'web',
+        'frontend',
+        'backend',
+        'server',
+        'deploy',
+        'hosting',
+      ],
     };
 
     const foundDomains: string[] = [];
 
     for (const [domain, keywords] of Object.entries(domainKeywords)) {
-      const hasKeyword = keywords.some(keyword =>
+      const hasKeyword = keywords.some((keyword) =>
         normalizedMessage.includes(keyword)
       );
 
@@ -262,17 +355,17 @@ Respond in JSON format:
     const tools: string[] = [];
 
     const toolPatterns = {
-      'Read': ['read', 'review', 'analyze', 'check', 'examine'],
-      'Write': ['write', 'create', 'generate', 'draft', 'compose'],
-      'Bash': ['run', 'execute', 'command', 'script', 'terminal'],
-      'Edit': ['edit', 'modify', 'change', 'update', 'fix'],
-      'Grep': ['search', 'find', 'locate', 'grep'],
-      'Glob': ['list', 'files', 'directory', 'folder'],
-      'WebSearch': ['search web', 'google', 'online', 'internet', 'web search'],
+      Read: ['read', 'review', 'analyze', 'check', 'examine'],
+      Write: ['write', 'create', 'generate', 'draft', 'compose'],
+      Bash: ['run', 'execute', 'command', 'script', 'terminal'],
+      Edit: ['edit', 'modify', 'change', 'update', 'fix'],
+      Grep: ['search', 'find', 'locate', 'grep'],
+      Glob: ['list', 'files', 'directory', 'folder'],
+      WebSearch: ['search web', 'google', 'online', 'internet', 'web search'],
     };
 
     for (const [tool, keywords] of Object.entries(toolPatterns)) {
-      const hasKeyword = keywords.some(keyword =>
+      const hasKeyword = keywords.some((keyword) =>
         normalizedMessage.includes(keyword)
       );
 
@@ -307,9 +400,11 @@ Respond in JSON format:
    * @returns True if supervisor is needed
    */
   needsSupervisor(complexity: ComplexityAnalysis): boolean {
-    return complexity.complexity === 'COMPLEX' ||
-           complexity.factors.knowledge_domains.length > 2 ||
-           complexity.factors.steps > 5;
+    return (
+      complexity.complexity === 'COMPLEX' ||
+      complexity.factors.knowledge_domains.length > 2 ||
+      complexity.factors.steps > 5
+    );
   }
 }
 

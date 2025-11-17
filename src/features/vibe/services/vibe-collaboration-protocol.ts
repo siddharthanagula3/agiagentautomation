@@ -224,7 +224,10 @@ export class AgentCollaborationManager {
    * @param type - Message type
    * @param content - Message content
    */
-  async broadcast(type: AgentMessageType, content: MessageContent): Promise<void> {
+  async broadcast(
+    type: AgentMessageType,
+    content: MessageContent
+  ): Promise<void> {
     await this.send(type, ['broadcast'], content);
   }
 
@@ -245,7 +248,7 @@ export class AgentCollaborationManager {
    */
   getMessagesByType(type: AgentMessageType): VibeAgentMessage[] {
     const allMessages = this.getMessages();
-    return allMessages.filter(msg => msg.type === type);
+    return allMessages.filter((msg) => msg.type === type);
   }
 
   /**

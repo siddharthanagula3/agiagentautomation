@@ -87,6 +87,7 @@ VIBE is a multi-agent collaborative workspace inspired by MGX.dev and MetaGPT. I
 VIBE uses Supabase Realtime to provide live updates across three channels:
 
 #### 1. Message Subscription (VibeDashboard.tsx)
+
 ```typescript
 // Subscribes to vibe_messages table
 // Updates AgentPanel message list when new messages arrive
@@ -97,6 +98,7 @@ supabase
 ```
 
 #### 2. File Subscription (use-vibe-realtime.ts)
+
 ```typescript
 // Subscribes to vibe_files table
 // Updates file tree when files are created/modified/deleted
@@ -107,6 +109,7 @@ supabase
 ```
 
 #### 3. Agent Action Subscription (use-vibe-realtime.ts)
+
 ```typescript
 // Subscribes to vibe_agent_actions table
 // Updates WorkingStep timeline and terminal logs
@@ -121,11 +124,13 @@ supabase
 ### Page Components
 
 #### VibeDashboard.tsx
+
 **Location:** `src/features/vibe/pages/VibeDashboard.tsx`
 
 **Purpose:** Main orchestration component for VIBE interface
 
 **Key Responsibilities:**
+
 - Session management (create/load sessions)
 - Message handling (send/receive/stream)
 - Workforce orchestrator integration
@@ -133,6 +138,7 @@ supabase
 - State synchronization between UI and database
 
 **Key Functions:**
+
 - `ensureSession()`: Creates or loads user's VIBE session
 - `handleSendMessage()`: Processes user input through workforce orchestrator
 - `streamAssistantResponse()`: Chunks AI responses for real-time display
@@ -141,11 +147,13 @@ supabase
 ### Layout Components
 
 #### VibeLayout.tsx
+
 **Location:** `src/features/vibe/layouts/VibeLayout.tsx`
 
 **Purpose:** Provides the main container and navigation for VIBE
 
 #### VibeSplitView.tsx
+
 **Location:** `src/features/vibe/layouts/VibeSplitView.tsx`
 
 **Purpose:** Implements resizable split pane layout for agent panel and output panel
@@ -153,26 +161,31 @@ supabase
 ### Feature Components
 
 #### AgentPanel
+
 **Location:** `src/features/vibe/components/agent-panel/AgentPanel.tsx`
 
 **Purpose:** Displays active agent status, working steps, and message history
 
 **Sub-components:**
+
 - `AgentStatusCard`: Shows current agent status (idle/working/completed/error)
 - `WorkingProcessSection`: Displays task execution timeline
 - `AgentMessageList`: Renders conversation history with streaming support
 
 #### OutputPanel
+
 **Location:** `src/features/vibe/pages/VibeDashboard.tsx:39-51`
 
 **Purpose:** Container for editor and app viewer
 
 **Sub-components:**
+
 - `ViewSelector`: Switches between editor and app viewer modes
 - `EditorView`: Monaco-based code editor with file tree
 - `AppViewerView`: Live app preview with responsive viewport controls
 
 #### VibeMessageInput
+
 **Location:** `src/features/vibe/components/input/VibeMessageInput.tsx`
 
 **Purpose:** Message input with file attachment support
@@ -180,15 +193,18 @@ supabase
 ### Hooks
 
 #### useVibeRealtime
+
 **Location:** `src/features/vibe/hooks/use-vibe-realtime.ts`
 
 **Purpose:** Manages all real-time subscriptions for VIBE
 
 **Subscriptions:**
+
 1. **vibe_files**: Updates file tree metadata
 2. **vibe_agent_actions**: Hydrates terminal logs and working steps
 
 **Features:**
+
 - Automatic reconnection on error
 - Initial data loading
 - File tree synchronization
@@ -198,6 +214,7 @@ supabase
 ## Services
 
 ### VibeMessageService
+
 **Location:** `src/features/vibe/services/vibe-message-service.ts`
 
 **Purpose:** Complete CRUD operations for vibe_messages
@@ -205,16 +222,21 @@ supabase
 **Key Methods:**
 
 #### getMessages(sessionId)
+
 Fetches all messages for a session, ordered chronologically
 
 #### createMessage(params)
+
 Creates a new message in the database with proper typing
 
 #### updateMessage(messageId, updates)
+
 Updates an existing message (used for streaming updates)
 
 #### processUserMessage(params)
+
 **Complete message processing flow:**
+
 1. Creates user message in database
 2. Calls workforce orchestrator with conversation history
 3. Streams response chunks with callbacks
@@ -222,6 +244,7 @@ Updates an existing message (used for streaming updates)
 5. Handles errors gracefully
 
 **Parameters:**
+
 ```typescript
 {
   sessionId: string;
@@ -235,17 +258,21 @@ Updates an existing message (used for streaming updates)
 ```
 
 #### subscribeToMessages(sessionId, onMessage, onError)
+
 Creates real-time subscription with cleanup function
 
 #### getRecentMessages(sessionId, limit)
+
 Fetches latest N messages for session
 
 #### clearSessionMessages(sessionId)
+
 Deletes all messages for a session
 
 ## State Management
 
 ### useVibeViewStore
+
 **Location:** `src/features/vibe/stores/vibe-view-store.ts`
 
 **Purpose:** Manages all UI state for VIBE workspace
@@ -278,11 +305,13 @@ Deletes all messages for a session
    - `fileMetadata`: Map<path, metadata> for fast lookups
 
 ### useVibeChatStore
+
 **Location:** `src/features/vibe/stores/vibe-chat-store.ts`
 
 **Purpose:** Manages session state
 
 **State:**
+
 - `currentSessionId`: Active VIBE session
 - Session metadata
 
@@ -297,7 +326,7 @@ const response = await workforceOrchestratorRefactored.processRequest({
   input: content,
   mode: 'chat',
   sessionId,
-  conversationHistory: [...messages, newUserMessage]
+  conversationHistory: [...messages, newUserMessage],
 });
 
 // 2. Orchestrator returns response
@@ -309,7 +338,7 @@ if (response.success && response.chatResponse) {
   await supabase.from('vibe_messages').insert({
     role: 'assistant',
     content: response.chatResponse,
-    employee_name: response.assignedEmployee
+    employee_name: response.assignedEmployee,
   });
 }
 ```
@@ -327,8 +356,8 @@ await supabase.from('vibe_agent_actions').insert({
   status: 'in_progress',
   metadata: {
     file_path: 'src/app.ts',
-    changes: 'Added error handling'
-  }
+    changes: 'Added error handling',
+  },
 });
 
 // Frontend (useVibeRealtime receives update)
@@ -350,7 +379,7 @@ const result = await VibeMessageService.processUserMessage({
   conversationHistory: messages,
   onChunk: (chunk) => console.log('Chunk:', chunk),
   onComplete: (response) => console.log('Done:', response),
-  onError: (error) => console.error('Failed:', error)
+  onError: (error) => console.error('Failed:', error),
 });
 ```
 
@@ -388,15 +417,16 @@ await supabase.from('vibe_agent_actions').insert({
   status: 'in_progress',
   metadata: {
     command: 'npm test',
-    description: 'Running test suite'
-  }
+    description: 'Running test suite',
+  },
 });
 
 // Update when complete
-await supabase.from('vibe_agent_actions')
+await supabase
+  .from('vibe_agent_actions')
   .update({
     status: 'completed',
-    result: { exit_code: 0, output: 'All tests passed' }
+    result: { exit_code: 0, output: 'All tests passed' },
   })
   .eq('id', actionId);
 ```
@@ -452,21 +482,25 @@ CREATE POLICY "Users can view messages from their sessions"
 ### Common Issues
 
 #### Messages not appearing in UI
+
 - **Check:** Realtime subscription is active
 - **Check:** User has permission to view messages (RLS policy)
 - **Fix:** Verify `currentSessionId` matches messages in database
 
 #### Streaming not working
+
 - **Check:** `is_streaming` flag set correctly
 - **Check:** Message updates trigger UI re-render
 - **Fix:** Ensure `streamAssistantResponse()` updates message content incrementally
 
 #### Agent actions not showing
+
 - **Check:** `vibe_agent_actions` subscription active
 - **Check:** Actions have correct session_id
 - **Fix:** Verify `handleAgentAction()` callback registered
 
 #### File tree not updating
+
 - **Check:** `vibe_files` subscription active
 - **Check:** File metadata map updates trigger tree rebuild
 - **Fix:** Call `rebuildTree()` after file operations

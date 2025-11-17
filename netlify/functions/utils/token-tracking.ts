@@ -50,8 +50,29 @@ export function calculateTokenCost(
   inputTokens: number,
   outputTokens: number
 ): TokenUsage {
+  // Updated: Nov 16th 2025 - Fixed token pricing access without null check
+  // Add null safety check for provider pricing object
+  const providerPricing = TOKEN_PRICING[provider];
+  if (!providerPricing) {
+    console.warn(
+      `[Token Tracking] Unknown provider: ${provider}, using default pricing`
+    );
+    // Default pricing if provider not found
+    const defaultPricing = { input: 1.0, output: 2.0 };
+    return {
+      inputTokens,
+      outputTokens,
+      totalTokens: inputTokens + outputTokens,
+      inputCost: (inputTokens / 1_000_000) * defaultPricing.input,
+      outputCost: (outputTokens / 1_000_000) * defaultPricing.output,
+      totalCost:
+        (inputTokens / 1_000_000) * defaultPricing.input +
+        (outputTokens / 1_000_000) * defaultPricing.output,
+    };
+  }
+
   const pricing =
-    TOKEN_PRICING[provider][
+    providerPricing[
       model as keyof (typeof TOKEN_PRICING)[typeof provider]
     ];
 

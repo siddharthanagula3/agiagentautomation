@@ -9,6 +9,8 @@ import { useMissionStore } from '@shared/stores/mission-control-store';
 import type { Task } from '@shared/stores/mission-control-store';
 import type { AIEmployee } from '@core/types/ai-employee';
 import { agentConversationProtocol } from './agent-conversation-protocol';
+import { supabase } from '@shared/lib/supabase-client';
+import { useAuthStore } from '@shared/stores/authentication-store';
 
 export interface WorkforceRequest {
   userId: string;
@@ -275,11 +277,54 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
       return null;
     }
 
+    // Updated: Nov 16th 2025 - Fixed employee selection to check user permissions
+    // Get user's hired employees from database to enforce permissions
+    const { user } = useAuthStore.getState();
+    let availableEmployees = this.employees;
+
+    if (user) {
+      try {
+        const { data: hiredEmployees, error } = await supabase
+          .from('purchased_employees')
+          .select('employee_id, ai_employees(name)')
+          .eq('user_id', user.id)
+          .eq('is_active', true);
+
+        if (!error && hiredEmployees && hiredEmployees.length > 0) {
+          // Create set of hired employee names for quick lookup
+          const hiredNames = new Set(
+            hiredEmployees
+              .map((e) => (e.ai_employees as { name: string } | null)?.name)
+              .filter((name): name is string => name !== null)
+          );
+
+          // Filter to only employees user has hired (or free employees with price 0)
+          availableEmployees = this.employees.filter(
+            (emp) => hiredNames.has(emp.name) || emp.price === 0
+          );
+
+          if (availableEmployees.length === 0) {
+            console.warn(
+              '⚠️ User has no hired employees available for task assignment'
+            );
+            return null;
+          }
+
+          console.log(
+            `✓ Filtered to ${availableEmployees.length} hired employee(s)`
+          );
+        }
+      } catch (error) {
+        console.error('Error fetching hired employees:', error);
+        // On error, continue with all employees (degraded mode)
+      }
+    }
+
     // Simple matching: find employee whose description best matches the task
     let bestMatch: AIEmployee | null = null;
     let bestScore = 0;
 
-    for (const employee of this.employees) {
+    for (const employee of availableEmployees) {
       let score = 0;
 
       // Check if task mentions any tools the employee has
@@ -314,7 +359,7 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
     }
 
     // If no good match, use first available employee
-    return bestMatch || this.employees[0] || null;
+    return bestMatch || availableEmployees[0] || null;
   }
 
   /**
@@ -327,6 +372,13 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
     const store = useMissionStore.getState();
 
     for (const task of tasks) {
+      // Updated: Nov 16th 2025 - Fixed mission pause/resume to actually stop execution
+      // Check if mission is paused before executing each task
+      if (useMissionStore.getState().isPaused) {
+        console.log('Mission paused, stopping execution');
+        return;
+      }
+
       if (!task.assignedTo) {
         store.updateTaskStatus(
           task.id,
@@ -419,7 +471,17 @@ ${task.toolRequired ? `Tool to use: ${task.toolRequired}` : ''}
 Please complete this task according to your role and capabilities.`;
 
     try {
-      const response = await unifiedLLMService.sendMessage({
+      // Updated: Nov 16th 2025 - Fixed long-running task timeout to prevent indefinite hangs
+      // Add 2-minute timeout to prevent tasks from hanging indefinitely
+      const TASK_TIMEOUT = 120000; // 2 minutes
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Task execution timeout (2 minutes)')),
+          TASK_TIMEOUT
+        )
+      );
+
+      const executionPromise = unifiedLLMService.sendMessage({
         provider: 'anthropic',
         messages: [
           { role: 'system', content: employee.systemPrompt },
@@ -431,6 +493,8 @@ Please complete this task according to your role and capabilities.`;
             : employee.model,
         temperature: 0.7,
       });
+
+      const response = await Promise.race([executionPromise, timeoutPromise]);
 
       return response.content;
     } catch (error) {

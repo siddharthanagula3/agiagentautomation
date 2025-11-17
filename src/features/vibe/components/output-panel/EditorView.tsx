@@ -38,7 +38,12 @@ interface FileTreeItemProps {
   selectedFile: string | null;
 }
 
-function FileTreeItem({ item, level, onFileClick, selectedFile }: FileTreeItemProps) {
+function FileTreeItem({
+  item,
+  level,
+  onFileClick,
+  selectedFile,
+}: FileTreeItemProps) {
   const [isOpen, setIsOpen] = useState(level === 0);
 
   const handleClick = () => {
@@ -54,28 +59,28 @@ function FileTreeItem({ item, level, onFileClick, selectedFile }: FileTreeItemPr
       <button
         onClick={handleClick}
         className={cn(
-          'w-full flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-muted transition-colors',
-          selectedFile === item.path && 'bg-primary/10 text-primary font-medium'
+          'flex w-full items-center gap-2 px-2 py-1.5 text-sm transition-colors hover:bg-muted',
+          selectedFile === item.path && 'bg-primary/10 font-medium text-primary'
         )}
         style={{ paddingLeft: `${level * 12 + 8}px` }}
       >
         {item.type === 'folder' ? (
           <>
             {isOpen ? (
-              <ChevronDown className="w-3.5 h-3.5 shrink-0" />
+              <ChevronDown className="h-3.5 w-3.5 shrink-0" />
             ) : (
-              <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+              <ChevronRight className="h-3.5 w-3.5 shrink-0" />
             )}
             {isOpen ? (
-              <FolderOpen className="w-4 h-4 shrink-0 text-blue-500" />
+              <FolderOpen className="h-4 w-4 shrink-0 text-blue-500" />
             ) : (
-              <Folder className="w-4 h-4 shrink-0 text-blue-500" />
+              <Folder className="h-4 w-4 shrink-0 text-blue-500" />
             )}
           </>
         ) : (
           <>
             <div className="w-3.5" />
-            <File className="w-4 h-4 shrink-0 text-muted-foreground" />
+            <File className="h-4 w-4 shrink-0 text-muted-foreground" />
           </>
         )}
         <span className="truncate">{item.name}</span>
@@ -165,16 +170,16 @@ export function EditorView() {
   };
 
   return (
-    <div className="h-full flex">
+    <div className="flex h-full">
       {/* File Tree Sidebar */}
-      <div className="w-64 border-r border-gray-200 dark:border-gray-800 bg-background">
-        <div className="p-3 border-b border-gray-200 dark:border-gray-800">
+      <div className="w-64 border-r border-gray-200 bg-background dark:border-gray-800">
+        <div className="border-b border-gray-200 p-3 dark:border-gray-800">
           <h3 className="text-sm font-semibold">Project Files</h3>
         </div>
         {fileTree.length === 0 ? (
-          <div className="h-[calc(100%-49px)] flex items-center justify-center p-4 text-center text-xs text-muted-foreground">
+          <div className="flex h-[calc(100%-49px)] items-center justify-center p-4 text-center text-xs text-muted-foreground">
             <div>
-              <Folder className="w-8 h-8 mx-auto mb-2 opacity-60" />
+              <Folder className="mx-auto mb-2 h-8 w-8 opacity-60" />
               <p>No files yet.</p>
               <p className="mt-1 opacity-75">
                 Agent-created files will appear here automatically.
@@ -199,17 +204,17 @@ export function EditorView() {
       </div>
 
       {/* Editor Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-1 flex-col">
         {/* Open Files Tabs */}
         {editorState.openFiles.length > 0 && (
-          <div className="flex items-center gap-1 px-2 py-1 border-b border-gray-200 dark:border-gray-800 bg-muted/30">
+          <div className="flex items-center gap-1 border-b border-gray-200 bg-muted/30 px-2 py-1 dark:border-gray-800">
             {editorState.openFiles.map((file) => (
               <div
                 key={file}
                 className={cn(
-                  'flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors group',
+                  'group flex items-center gap-2 rounded-md px-3 py-1.5 text-xs transition-colors',
                   editorState.currentFile === file
-                    ? 'bg-background border border-border'
+                    ? 'border border-border bg-background'
                     : 'hover:bg-background/50'
                 )}
               >
@@ -217,16 +222,16 @@ export function EditorView() {
                   onClick={() => setCurrentFile(file)}
                   className="flex items-center gap-2"
                 >
-                  <File className="w-3.5 h-3.5" />
+                  <File className="h-3.5 w-3.5" />
                   <span className="max-w-[120px] truncate">
                     {file.split('/').pop()}
                   </span>
                 </button>
                 <button
                   onClick={() => closeFileInStore(file)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive"
+                  className="opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </div>
             ))}
@@ -235,13 +240,16 @@ export function EditorView() {
 
         {/* Editor Toolbar */}
         {editorState.currentFile && (
-          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-background">
+          <div className="flex items-center justify-between border-b border-gray-200 bg-background px-4 py-2 dark:border-gray-800">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
                 {editorState.currentFile}
               </span>
               {followingAgent && (
-                <Badge variant="secondary" className="bg-purple-500/10 text-purple-600 text-xs">
+                <Badge
+                  variant="secondary"
+                  className="bg-purple-500/10 text-xs text-purple-600"
+                >
                   Following Agent
                 </Badge>
               )}
@@ -255,12 +263,12 @@ export function EditorView() {
               >
                 {copied ? (
                   <>
-                    <Check className="w-3.5 h-3.5 mr-1.5" />
+                    <Check className="mr-1.5 h-3.5 w-3.5" />
                     Copied
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3.5 h-3.5 mr-1.5" />
+                    <Copy className="mr-1.5 h-3.5 w-3.5" />
                     Copy
                   </>
                 )}
@@ -271,7 +279,7 @@ export function EditorView() {
                 onClick={handleDownload}
                 className="h-8 text-xs"
               >
-                <Download className="w-3.5 h-3.5 mr-1.5" />
+                <Download className="mr-1.5 h-3.5 w-3.5" />
                 Download
               </Button>
             </div>
@@ -279,18 +287,18 @@ export function EditorView() {
         )}
 
         {loadError && (
-          <div className="px-4 py-2 text-xs text-destructive bg-destructive/5">
+          <div className="bg-destructive/5 px-4 py-2 text-xs text-destructive">
             {loadError}
           </div>
         )}
 
         {/* Monaco Editor */}
         {editorState.currentFile ? (
-          <div className="flex-1 relative">
+          <div className="relative flex-1">
             {isFetchingFile && (
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80">
                 <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
                   <span>Loading file…</span>
                 </div>
               </div>
@@ -314,13 +322,13 @@ export function EditorView() {
             />
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-center p-8">
+          <div className="flex flex-1 items-center justify-center p-8 text-center">
             <div>
-              <File className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+              <File className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
               <p className="text-sm text-muted-foreground">
                 Select a file to view or edit
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Files will appear here as agents work
               </p>
             </div>

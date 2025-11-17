@@ -67,6 +67,7 @@ User Input → Agent Router → [Single Agent | Supervisor Team] → Execution �
 ### Technology Stack
 
 **Frontend**:
+
 - React 18 with TypeScript
 - Zustand (state management - ✅ stores created)
 - Tailwind CSS + shadcn/ui components
@@ -74,12 +75,14 @@ User Input → Agent Router → [Single Agent | Supervisor Team] → Execution �
 - React Markdown (message rendering)
 
 **Backend**:
+
 - Netlify Functions (serverless)
 - Supabase (database ✅ + realtime)
 - Existing workforce orchestrator
 - Unified LLM service
 
 **Key Services to Build**:
+
 1. `vibe-agent-router.ts` - 3-stage agent selection
 2. `vibe-collaboration-protocol.ts` - Structured communication
 3. `vibe-execution-coordinator.ts` - Parallel task execution
@@ -147,7 +150,6 @@ export class VibeAgentRouter {
     conversationHistory: VibeMessage[],
     hiredEmployees: AIEmployee[]
   ): Promise<RoutingResult> {
-
     // STAGE 1: Fast keyword matching
     const keywordMatch = this.keywordMatch(userMessage, hiredEmployees);
 
@@ -224,11 +226,13 @@ export class VibeAgentRouter {
       }
     }
 
-    return bestMatch || {
-      employee: hiredEmployees[0],
-      confidence: 0,
-      reasoning: 'No keyword matches found',
-    };
+    return (
+      bestMatch || {
+        employee: hiredEmployees[0],
+        confidence: 0,
+        reasoning: 'No keyword matches found',
+      }
+    );
   }
 
   /**
@@ -239,13 +243,13 @@ export class VibeAgentRouter {
     conversationHistory: VibeMessage[],
     hiredEmployees: AIEmployee[]
   ): Promise<AgentMatch> {
-    const employeeDescriptions = hiredEmployees.map(emp =>
-      `- ${emp.name}: ${emp.description}`
-    ).join('\n');
+    const employeeDescriptions = hiredEmployees
+      .map((emp) => `- ${emp.name}: ${emp.description}`)
+      .join('\n');
 
     const recentContext = conversationHistory
       .slice(-5)
-      .map(msg => `${msg.role}: ${msg.content}`)
+      .map((msg) => `${msg.role}: ${msg.content}`)
       .join('\n');
 
     const prompt = `You are an intelligent agent router. Select the best AI employee for this task.
@@ -266,12 +270,12 @@ Respond with ONLY this JSON:
 }`;
 
     const response = await unifiedLLMService.sendMessage([
-      { role: 'user', content: prompt }
+      { role: 'user', content: prompt },
     ]);
 
     const result = JSON.parse(response.content);
     const selectedEmployee = hiredEmployees.find(
-      emp => emp.name === result.selected_employee
+      (emp) => emp.name === result.selected_employee
     );
 
     return {
@@ -306,7 +310,7 @@ Respond with JSON:
 }`;
 
     const response = await unifiedLLMService.sendMessage([
-      { role: 'user', content: prompt }
+      { role: 'user', content: prompt },
     ]);
 
     const analysis = JSON.parse(response.content);
@@ -353,7 +357,9 @@ export class MessagePool extends EventEmitter {
   private subscriptions: Map<string, Set<string>> = new Map();
   private supabase = createClient();
 
-  async publish(message: Omit<VibeAgentMessage, 'id' | 'timestamp'>): Promise<void> {
+  async publish(
+    message: Omit<VibeAgentMessage, 'id' | 'timestamp'>
+  ): Promise<void> {
     const fullMessage: VibeAgentMessage = {
       ...message,
       id: crypto.randomUUID(),
@@ -371,15 +377,19 @@ export class MessagePool extends EventEmitter {
       this.subscriptions.set(agentName, new Set());
     }
 
-    messageTypes.forEach(type => {
+    messageTypes.forEach((type) => {
       this.subscriptions.get(agentName)!.add(type);
     });
   }
 
-  getMessagesFor(agentName: string, types?: AgentMessageType[]): VibeAgentMessage[] {
-    return Array.from(this.messages.values()).filter(msg => {
-      const isRecipient = msg.to_agents.includes(agentName) ||
-                         msg.to_agents.includes('broadcast');
+  getMessagesFor(
+    agentName: string,
+    types?: AgentMessageType[]
+  ): VibeAgentMessage[] {
+    return Array.from(this.messages.values()).filter((msg) => {
+      const isRecipient =
+        msg.to_agents.includes(agentName) ||
+        msg.to_agents.includes('broadcast');
       const matchesType = !types || types.includes(msg.type);
       return isRecipient && matchesType;
     });
@@ -399,7 +409,7 @@ export class MessagePool extends EventEmitter {
   }
 
   private notifySubscribers(message: VibeAgentMessage): void {
-    message.to_agents.forEach(agentName => {
+    message.to_agents.forEach((agentName) => {
       const subscriptions = this.subscriptions.get(agentName);
       if (subscriptions && subscriptions.has(message.type)) {
         this.emit(`message:${agentName}`, message);
@@ -436,7 +446,7 @@ export class VibeExecutionCoordinator {
 
     // Execute each level (tasks in same level run in parallel)
     for (const level of executionLevels) {
-      const levelPromises = level.map(task =>
+      const levelPromises = level.map((task) =>
         this.executeTask(task, sessionId, results)
       );
 
@@ -459,9 +469,11 @@ export class VibeExecutionCoordinator {
     return results;
   }
 
-  private buildDependencyGraph(tasks: TaskAssignment[]): Map<string, Set<string>> {
+  private buildDependencyGraph(
+    tasks: TaskAssignment[]
+  ): Map<string, Set<string>> {
     const graph = new Map<string, Set<string>>();
-    tasks.forEach(task => graph.set(task.id, new Set(task.dependencies)));
+    tasks.forEach((task) => graph.set(task.id, new Set(task.dependencies)));
     return graph;
   }
 
@@ -475,7 +487,7 @@ export class VibeExecutionCoordinator {
       for (const [taskId, dependencies] of graph.entries()) {
         if (completed.has(taskId)) continue;
 
-        const allDepsCompleted = Array.from(dependencies).every(dep =>
+        const allDepsCompleted = Array.from(dependencies).every((dep) =>
           completed.has(dep)
         );
 
@@ -489,7 +501,7 @@ export class VibeExecutionCoordinator {
       }
 
       levels.push(currentLevel);
-      currentLevel.forEach(id => completed.add(id));
+      currentLevel.forEach((id) => completed.add(id));
     }
 
     return levels;
@@ -509,7 +521,7 @@ export class VibeExecutionCoordinator {
         task: {
           id: task.id,
           description: task.description,
-          requirements: task.dependencies.map(depId => {
+          requirements: task.dependencies.map((depId) => {
             const result = previousResults.get(depId);
             return result?.output;
           }),
@@ -620,7 +632,11 @@ export class VibeToolOrchestrator {
 export class VibeFileManager {
   private supabase = createClient();
 
-  async uploadFile(file: File, sessionId: string, userId: string): Promise<string> {
+  async uploadFile(
+    file: File,
+    sessionId: string,
+    userId: string
+  ): Promise<string> {
     const fileName = `${sessionId}/${Date.now()}_${file.name}`;
 
     const { data, error } = await this.supabase.storage
@@ -764,7 +780,7 @@ export class VibeStreamingHandler {
         if (done) break;
 
         const chunk = decoder.decode(value);
-        setContent(prev => prev + chunk);
+        setContent((prev) => prev + chunk);
       }
 
       setIsStreaming(false);
@@ -841,7 +857,7 @@ async function handleFallback(
 
   if (hiredEmployees.length === 0) {
     return await unifiedLLMService.sendMessage([
-      { role: 'user', content: userMessage }
+      { role: 'user', content: userMessage },
     ]);
   }
 
@@ -856,12 +872,14 @@ async function handleFallback(
 ## Updated Implementation Roadmap
 
 ### ✅ Phase 1: Foundation (COMPLETED)
+
 - Database schema migration
 - TypeScript type definitions
 - Zustand stores (chat, agent)
 - Directory structure
 
 ### ⏳ Phase 2: Core Services (Week 2-4)
+
 - [ ] `vibe-agent-router.ts` - 3-stage routing
 - [ ] `vibe-complexity-analyzer.ts` - Task analysis
 - [ ] `vibe-collaboration-protocol.ts` - Message pool
@@ -869,6 +887,7 @@ async function handleFallback(
 - [ ] `vibe-tool-orchestrator.ts` - Tool execution
 
 ### ⏳ Phase 3: UI Components (Week 4-6)
+
 - [ ] VibeDashboard page
 - [ ] VibeSidebar (minimal)
 - [ ] VibeChatCanvas
@@ -877,18 +896,21 @@ async function handleFallback(
 - [ ] Agent and file selectors
 
 ### ⏳ Phase 4: Execution & Streaming (Week 6-8)
+
 - [ ] `vibe-execution-coordinator.ts` - Parallel execution
 - [ ] `vibe-streaming-handler.ts` - SSE streaming
 - [ ] Netlify functions (chat, upload, stream)
 - [ ] Real-time status updates
 
 ### ⏳ Phase 5: Integration & Testing (Week 8-10)
+
 - [ ] Connect to existing workforce orchestrator
 - [ ] Integrate with Supabase realtime
 - [ ] E2E testing
 - [ ] Performance optimization
 
 ### ⏳ Phase 6: Polish & Launch (Week 10-12)
+
 - [ ] Animations and transitions
 - [ ] Error handling
 - [ ] Documentation

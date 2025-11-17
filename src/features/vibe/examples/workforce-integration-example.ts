@@ -43,7 +43,10 @@ export async function processUserRequestExample(params: {
       input: userInput,
       mode: 'chat',
       sessionId,
-      conversationHistory: [...conversationHistory, { role: 'user', content: userInput }],
+      conversationHistory: [
+        ...conversationHistory,
+        { role: 'user', content: userInput },
+      ],
     });
 
   if (!orchestratorResponse.success || !orchestratorResponse.chatResponse) {

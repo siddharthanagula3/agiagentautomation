@@ -112,15 +112,11 @@ export function useVibeRealtime({
         },
         (payload) => {
           if (payload.eventType === 'INSERT' && payload.new) {
-            const metadata = mapFileRowToMetadata(
-              payload.new as VibeFileRow
-            );
+            const metadata = mapFileRowToMetadata(payload.new as VibeFileRow);
             upsertFileMetadata(metadata);
             rebuildTree();
           } else if (payload.eventType === 'UPDATE' && payload.new) {
-            const metadata = mapFileRowToMetadata(
-              payload.new as VibeFileRow
-            );
+            const metadata = mapFileRowToMetadata(payload.new as VibeFileRow);
             upsertFileMetadata(metadata);
             rebuildTree();
           } else if (payload.eventType === 'DELETE' && payload.old) {
@@ -139,7 +135,13 @@ export function useVibeRealtime({
     return () => {
       supabase.removeChannel(filesChannel);
     };
-  }, [loadInitialFiles, rebuildTree, removeFileMetadata, sessionId, upsertFileMetadata]);
+  }, [
+    loadInitialFiles,
+    rebuildTree,
+    removeFileMetadata,
+    sessionId,
+    upsertFileMetadata,
+  ]);
 
   useEffect(() => {
     // Defensive: Ensure sessionId is a valid string

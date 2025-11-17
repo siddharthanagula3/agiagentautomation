@@ -14,6 +14,7 @@ Complete set of utilities for managing VIBE database migrations, testing, and de
 Applies the user_id migration to vibe_messages table using the Netlify `run-sql` function.
 
 **Features:**
+
 - ✅ Works without local Docker/Supabase
 - ✅ Uses production Netlify function
 - ✅ Verifies schema changes
@@ -21,11 +22,13 @@ Applies the user_id migration to vibe_messages table using the Netlify `run-sql`
 - ✅ Handles errors gracefully
 
 **Usage:**
+
 ```bash
 npm run vibe:migrate
 ```
 
 **Output:**
+
 ```
 🚀 Applying VIBE migration via Netlify function...
 
@@ -71,6 +74,7 @@ npm run vibe:migrate
 Applies migration using local Supabase instance.
 
 **Features:**
+
 - ✅ Uses service role key (bypasses RLS)
 - ✅ Checks existing schema
 - ✅ Provides SQL for manual application
@@ -78,11 +82,13 @@ Applies migration using local Supabase instance.
 - ✅ Gets table statistics
 
 **Requirements:**
+
 - Docker Desktop running
 - Local Supabase instance: `supabase start`
 - `SUPABASE_SERVICE_ROLE_KEY` environment variable
 
 **Usage:**
+
 ```bash
 # Start Supabase
 supabase start
@@ -101,6 +107,7 @@ tsx scripts/apply-vibe-migration.ts
 Tests complete VIBE workflow end-to-end.
 
 **Test Flow:**
+
 1. ✅ Create test session
 2. ✅ Create user message
 3. ✅ Create assistant message (simulating orchestrator)
@@ -110,11 +117,13 @@ Tests complete VIBE workflow end-to-end.
 7. ✅ Cleanup test data
 
 **Usage:**
+
 ```bash
 npm run vibe:test
 ```
 
 **Output:**
+
 ```
 🧪 Testing VIBE Integration...
 
@@ -167,6 +176,7 @@ Step 7: Cleaning up test data...
 Complete deployment workflow with all checks.
 
 **Workflow Steps:**
+
 1. ✅ TypeScript type checking
 2. ✅ Database migrations (if Supabase available)
 3. ✅ Integration tests (optional)
@@ -175,11 +185,13 @@ Complete deployment workflow with all checks.
 6. ✅ Auto-deploy to Netlify
 
 **Usage:**
+
 ```bash
 npm run vibe:deploy
 ```
 
 **Output:**
+
 ```
 🚀 VIBE Deployment Workflow
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -267,6 +279,7 @@ npm run vibe:test
 ```
 
 **What to verify:**
+
 - ✅ `user_id` column exists in `vibe_messages` table
 - ✅ `idx_vibe_messages_user` index created
 - ✅ Existing messages have `user_id` populated
@@ -280,6 +293,7 @@ npm run vibe:test
 ### Migration fails with "permission denied"
 
 **Solution:** Use service role key instead of anon key
+
 ```bash
 export SUPABASE_SERVICE_ROLE_KEY="your-service-key"
 tsx scripts/apply-vibe-migration.ts
@@ -288,6 +302,7 @@ tsx scripts/apply-vibe-migration.ts
 ### Docker not running
 
 **Solution:** Use Netlify function method
+
 ```bash
 npm run vibe:migrate
 ```
@@ -295,6 +310,7 @@ npm run vibe:migrate
 ### Type check fails
 
 **Solution:** Fix TypeScript errors first
+
 ```bash
 npm run type-check
 # Fix reported errors
@@ -303,6 +319,7 @@ npm run type-check
 ### Build fails
 
 **Solution:** Check console errors
+
 ```bash
 npm run build
 # Review error messages
@@ -311,6 +328,7 @@ npm run build
 ### Netlify function not found
 
 **Solution:** Deploy functions first
+
 ```bash
 npm run build
 git push origin main
@@ -324,6 +342,7 @@ git push origin main
 ### Required for Scripts
 
 **Local Development:**
+
 ```env
 VITE_SUPABASE_URL=http://localhost:54321
 VITE_SUPABASE_ANON_KEY=your-local-anon-key
@@ -331,6 +350,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-local-service-key
 ```
 
 **Production (via Netlify function):**
+
 ```env
 # No local env vars needed
 # Uses deployed Netlify function
@@ -412,6 +432,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-local-service-key
    - Monitor agent actions table
    - Verify message delivery
 4. **Update agent code** to log actions:
+
    ```typescript
    import { VibeAgentActionService } from '@features/vibe/services';
 
@@ -419,7 +440,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-local-service-key
      sessionId,
      agentName: 'code-reviewer',
      filePath: 'src/App.tsx',
-     changes: 'Added error boundary'
+     changes: 'Added error boundary',
    });
    ```
 

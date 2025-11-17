@@ -31,7 +31,9 @@ async function login(page: Page) {
   await page.locator('input[type="email"]').fill(TEST_USER.email);
   await page.locator('input[type="password"]').fill(TEST_USER.password);
   await page.locator('button[type="submit"]').first().click();
-  await page.waitForURL(/\/(dashboard|home|chat|vibe|mission-control)/, { timeout: 15000 });
+  await page.waitForURL(/\/(dashboard|home|chat|vibe|mission-control)/, {
+    timeout: 15000,
+  });
   await waitForPageLoad(page);
   console.log('✅ Login successful');
 }
@@ -61,7 +63,7 @@ test.describe('Chat Interface - Deep Feature Tests', () => {
     let messageInput = null;
     for (const selector of inputSelectors) {
       const element = page.locator(selector).first();
-      if (await element.count() > 0) {
+      if ((await element.count()) > 0) {
         try {
           await element.waitFor({ state: 'visible', timeout: 5000 });
           messageInput = element;
@@ -75,9 +77,16 @@ test.describe('Chat Interface - Deep Feature Tests', () => {
 
     if (!messageInput) {
       console.log('❌ CRITICAL: No message input field found!');
-      console.log('Available inputs:', await page.locator('textarea, input[type="text"], [contenteditable]').count());
+      console.log(
+        'Available inputs:',
+        await page
+          .locator('textarea, input[type="text"], [contenteditable]')
+          .count()
+      );
       await captureScreenshot(page, 'chat-01-no-input-error');
-      throw new Error('Message input field not found - Chat feature may be broken');
+      throw new Error(
+        'Message input field not found - Chat feature may be broken'
+      );
     }
 
     await captureScreenshot(page, 'chat-01-input-found');
@@ -95,7 +104,8 @@ test.describe('Chat Interface - Deep Feature Tests', () => {
     await messageInput.waitFor({ state: 'visible', timeout: 10000 });
 
     // Type a test message
-    const testMessage = 'Hello, this is a test message. Please respond with "Test received".';
+    const testMessage =
+      'Hello, this is a test message. Please respond with "Test received".';
     await messageInput.fill(testMessage);
     await captureScreenshot(page, 'chat-02-message-typed');
 
@@ -111,7 +121,7 @@ test.describe('Chat Interface - Deep Feature Tests', () => {
     let sendButton = null;
     for (const selector of sendButtonSelectors) {
       const button = page.locator(selector).first();
-      if (await button.count() > 0 && await button.isVisible()) {
+      if ((await button.count()) > 0 && (await button.isVisible())) {
         sendButton = button;
         console.log(`✅ Found send button: ${selector}`);
         break;
@@ -132,10 +142,13 @@ test.describe('Chat Interface - Deep Feature Tests', () => {
 
     try {
       // Wait for response message to appear
-      await page.waitForSelector('[class*="message"], [class*="chat"], div[role="article"]', {
-        timeout: 30000,
-        state: 'visible'
-      });
+      await page.waitForSelector(
+        '[class*="message"], [class*="chat"], div[role="article"]',
+        {
+          timeout: 30000,
+          state: 'visible',
+        }
+      );
 
       await page.waitForTimeout(3000); // Wait for streaming to complete
       await captureScreenshot(page, 'chat-02-response-received');
@@ -156,14 +169,18 @@ test.describe('Chat Interface - Deep Feature Tests', () => {
     await waitForPageLoad(page);
 
     // Count initial messages
-    const initialMessageCount = await page.locator('[class*="message"], div[role="article"]').count();
+    const initialMessageCount = await page
+      .locator('[class*="message"], div[role="article"]')
+      .count();
     console.log(`📊 Initial message count: ${initialMessageCount}`);
 
     // Send a message
     const messageInput = page.locator('textarea, input[type="text"]').first();
     await messageInput.fill('Test message for history check');
 
-    const sendButton = page.locator('button[type="submit"], button:has-text("Send")').first();
+    const sendButton = page
+      .locator('button[type="submit"], button:has-text("Send")')
+      .first();
     await sendButton.click();
 
     await page.waitForTimeout(5000); // Wait for message to be saved
@@ -175,12 +192,18 @@ test.describe('Chat Interface - Deep Feature Tests', () => {
     await captureScreenshot(page, 'chat-03-after-reload');
 
     // Check if messages persisted
-    const afterReloadCount = await page.locator('[class*="message"], div[role="article"]').count();
+    const afterReloadCount = await page
+      .locator('[class*="message"], div[role="article"]')
+      .count();
     console.log(`📊 After reload message count: ${afterReloadCount}`);
 
     if (afterReloadCount === 0) {
-      console.log('❌ CRITICAL: No messages found after reload - History not persisting!');
-      throw new Error('Chat history not persisting - Database integration may be broken');
+      console.log(
+        '❌ CRITICAL: No messages found after reload - History not persisting!'
+      );
+      throw new Error(
+        'Chat history not persisting - Database integration may be broken'
+      );
     }
 
     if (afterReloadCount < initialMessageCount) {
@@ -280,7 +303,7 @@ test.describe('VIBE Workspace - Deep Feature Tests', () => {
     let addButton = null;
     for (const selector of addAgentSelectors) {
       const button = page.locator(selector).first();
-      if (await button.count() > 0) {
+      if ((await button.count()) > 0) {
         try {
           await button.waitFor({ state: 'visible', timeout: 3000 });
           addButton = button;
@@ -313,7 +336,9 @@ test.describe('VIBE Workspace - Deep Feature Tests', () => {
     await captureScreenshot(page, 'vibe-03-initial');
 
     // Look for message input
-    const messageInput = page.locator('textarea, input[type="text"], [contenteditable="true"]').first();
+    const messageInput = page
+      .locator('textarea, input[type="text"], [contenteditable="true"]')
+      .first();
 
     try {
       await messageInput.waitFor({ state: 'visible', timeout: 10000 });
@@ -324,9 +349,11 @@ test.describe('VIBE Workspace - Deep Feature Tests', () => {
       await captureScreenshot(page, 'vibe-03-message-typed');
 
       // Look for send button
-      const sendButton = page.locator('button[type="submit"], button:has-text("Send")').first();
+      const sendButton = page
+        .locator('button[type="submit"], button:has-text("Send")')
+        .first();
 
-      if (await sendButton.count() > 0) {
+      if ((await sendButton.count()) > 0) {
         await sendButton.click();
         await page.waitForTimeout(5000);
         await captureScreenshot(page, 'vibe-03-message-sent');
@@ -338,7 +365,9 @@ test.describe('VIBE Workspace - Deep Feature Tests', () => {
     } catch (e) {
       console.log('❌ CRITICAL: Cannot find message input in VIBE workspace!');
       await captureScreenshot(page, 'vibe-03-no-input');
-      throw new Error('VIBE message input not found - Collaboration feature broken');
+      throw new Error(
+        'VIBE message input not found - Collaboration feature broken'
+      );
     }
   });
 
@@ -417,7 +446,9 @@ test.describe('VIBE Workspace - Deep Feature Tests', () => {
     await waitForPageLoad(page);
 
     // Get initial state
-    const initialElements = await page.locator('[class*="agent"], [class*="message"]').count();
+    const initialElements = await page
+      .locator('[class*="agent"], [class*="message"]')
+      .count();
     console.log(`📊 Initial workspace elements: ${initialElements}`);
     await captureScreenshot(page, 'vibe-06-before-reload');
 
@@ -427,7 +458,9 @@ test.describe('VIBE Workspace - Deep Feature Tests', () => {
     await captureScreenshot(page, 'vibe-06-after-reload');
 
     // Check state after reload
-    const afterReloadElements = await page.locator('[class*="agent"], [class*="message"]').count();
+    const afterReloadElements = await page
+      .locator('[class*="agent"], [class*="message"]')
+      .count();
     console.log(`📊 After reload elements: ${afterReloadElements}`);
 
     if (afterReloadElements === 0 && initialElements > 0) {
@@ -450,7 +483,7 @@ test.describe('Bug Detection - Feature-Specific Issues', () => {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.type() === 'error') {
         errors.push(msg.text());
       } else if (msg.type() === 'warning') {
@@ -491,7 +524,7 @@ test.describe('Bug Detection - Feature-Specific Issues', () => {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.type() === 'error') {
         errors.push(msg.text());
       } else if (msg.type() === 'warning') {
@@ -530,11 +563,11 @@ test.describe('Bug Detection - Feature-Specific Issues', () => {
 
     const failedRequests: any[] = [];
 
-    page.on('requestfailed', request => {
+    page.on('requestfailed', (request) => {
       failedRequests.push({
         url: request.url(),
         method: request.method(),
-        failure: request.failure()?.errorText || 'Unknown error'
+        failure: request.failure()?.errorText || 'Unknown error',
       });
     });
 
@@ -570,11 +603,11 @@ test.describe('Bug Detection - Feature-Specific Issues', () => {
 
     const failedRequests: any[] = [];
 
-    page.on('requestfailed', request => {
+    page.on('requestfailed', (request) => {
       failedRequests.push({
         url: request.url(),
         method: request.method(),
-        failure: request.failure()?.errorText || 'Unknown error'
+        failure: request.failure()?.errorText || 'Unknown error',
       });
     });
 

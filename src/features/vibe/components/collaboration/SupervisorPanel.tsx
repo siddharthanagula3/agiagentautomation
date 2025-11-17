@@ -18,13 +18,21 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import type { ActiveAgent, SupervisorPlan, TaskAssignment } from '@features/vibe/types';
+import type {
+  ActiveAgent,
+  SupervisorPlan,
+  TaskAssignment,
+} from '@features/vibe/types';
 import { Card } from '@/shared/components/ui/card';
 import { Badge } from '@/shared/components/ui/badge';
 import { Avatar } from '@/shared/components/ui/avatar';
 import { Progress } from '@/shared/components/ui/progress';
 import { Separator } from '@/shared/components/ui/separator';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/components/ui/collapsible';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/shared/components/ui/collapsible';
 import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/shared/lib/utils';
 
@@ -59,16 +67,16 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
   return (
     <Card className={cn('overflow-hidden', className)}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-4 py-3 border-b">
+      <div className="border-b bg-gradient-to-r from-primary/10 to-primary/5 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
               <Avatar className="h-10 w-10">
-                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-semibold">
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-primary/70 font-semibold text-primary-foreground">
                   {supervisor.employee.name.charAt(0).toUpperCase()}
                 </div>
               </Avatar>
-              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-background" />
+              <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-background bg-green-500" />
             </div>
 
             <div>
@@ -78,8 +86,9 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
                   Active
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {supervisor.employee.name} coordinating {activeAgents.length} agents
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {supervisor.employee.name} coordinating {activeAgents.length}{' '}
+                agents
               </p>
             </div>
           </div>
@@ -106,23 +115,23 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="p-4 space-y-4">
+            <div className="space-y-4 p-4">
               {/* Execution Strategy */}
               <div>
-                <div className="flex items-center gap-2 mb-3">
+                <div className="mb-3 flex items-center gap-2">
                   <strategyConfig.icon className="h-4 w-4 text-primary" />
                   <h4 className="text-sm font-semibold">Execution Strategy</h4>
-                  <Badge variant="secondary" className="text-xs ml-auto">
+                  <Badge variant="secondary" className="ml-auto text-xs">
                     {strategyConfig.label}
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground mb-3">
+                <p className="mb-3 text-xs text-muted-foreground">
                   {strategyConfig.description}
                 </p>
 
                 {/* Progress */}
                 <div>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2 flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">
                       Overall Progress
                     </span>
@@ -136,10 +145,10 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
 
               {/* Active Agents */}
               <div>
-                <div className="flex items-center gap-2 mb-3">
+                <div className="mb-3 flex items-center gap-2">
                   <Users className="h-4 w-4 text-primary" />
                   <h4 className="text-sm font-semibold">Active Agents</h4>
-                  <Badge variant="secondary" className="text-xs ml-auto">
+                  <Badge variant="secondary" className="ml-auto text-xs">
                     {activeAgents.length}
                   </Badge>
                 </div>
@@ -155,10 +164,10 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
 
               {/* Task Distribution */}
               <div>
-                <div className="flex items-center gap-2 mb-3">
+                <div className="mb-3 flex items-center gap-2">
                   <GitBranch className="h-4 w-4 text-primary" />
                   <h4 className="text-sm font-semibold">Task Distribution</h4>
-                  <Badge variant="secondary" className="text-xs ml-auto">
+                  <Badge variant="secondary" className="ml-auto text-xs">
                     {plan.tasks.length} tasks
                   </Badge>
                 </div>
@@ -169,7 +178,7 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
                   ))}
 
                   {plan.tasks.length > 3 && (
-                    <p className="text-xs text-muted-foreground text-center py-2">
+                    <p className="py-2 text-center text-xs text-muted-foreground">
                       +{plan.tasks.length - 3} more tasks
                     </p>
                   )}
@@ -181,7 +190,7 @@ export const SupervisorPanel: React.FC<SupervisorPanelProps> = ({
                 <>
                   <Separator />
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="mb-2 flex items-center gap-2">
                       <MessageSquare className="h-4 w-4 text-primary" />
                       <h4 className="text-sm font-semibold">Communication</h4>
                     </div>
@@ -219,10 +228,10 @@ const AgentItem: React.FC<AgentItemProps> = ({ agent }) => {
   const statusColor = getStatusColor(agent.status);
 
   return (
-    <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+    <div className="flex items-center gap-2 rounded-lg bg-muted/30 p-2 transition-colors hover:bg-muted/50">
       <div className="relative">
         <Avatar className="h-7 w-7">
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5 text-primary font-semibold text-xs">
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5 text-xs font-semibold text-primary">
             {agent.employee.name.charAt(0).toUpperCase()}
           </div>
         </Avatar>
@@ -234,10 +243,10 @@ const AgentItem: React.FC<AgentItemProps> = ({ agent }) => {
         />
       </div>
 
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium truncate">{agent.employee.name}</p>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-xs font-medium">{agent.employee.name}</p>
         {agent.current_task && (
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="truncate text-xs text-muted-foreground">
             {agent.current_task}
           </p>
         )}
@@ -263,13 +272,15 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
   const priorityConfig = getPriorityConfig(task.priority);
 
   return (
-    <div className="flex items-start gap-2 p-2 rounded-lg bg-muted/30">
-      <priorityConfig.icon className={cn('h-4 w-4 mt-0.5', priorityConfig.color)} />
+    <div className="flex items-start gap-2 rounded-lg bg-muted/30 p-2">
+      <priorityConfig.icon
+        className={cn('mt-0.5 h-4 w-4', priorityConfig.color)}
+      />
 
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium line-clamp-2">{task.description}</p>
-        <div className="flex items-center gap-2 mt-1">
-          <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4">
+      <div className="min-w-0 flex-1">
+        <p className="line-clamp-2 text-xs font-medium">{task.description}</p>
+        <div className="mt-1 flex items-center gap-2">
+          <Badge variant="secondary" className="h-4 px-1.5 py-0 text-xs">
             {task.assigned_to.name}
           </Badge>
           {task.dependencies.length > 0 && (
@@ -293,8 +304,8 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ icon: Icon, label, value }) => (
-  <div className="p-3 rounded-lg bg-muted/30">
-    <div className="flex items-center gap-2 mb-1">
+  <div className="rounded-lg bg-muted/30 p-3">
+    <div className="mb-1 flex items-center gap-2">
       <Icon className="h-3.5 w-3.5 text-muted-foreground" />
       <span className="text-xs text-muted-foreground">{label}</span>
     </div>

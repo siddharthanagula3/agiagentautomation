@@ -4,7 +4,11 @@
  */
 
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@shared/components/ui/avatar';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@shared/components/ui/avatar';
 import { Badge } from '@shared/components/ui/badge';
 import {
   Tooltip,
@@ -50,14 +54,15 @@ const getStatusAnimation = (status: string): string => {
 const VibeStatusBar: React.FC<VibeStatusBarProps> = ({ agents }) => {
   // Only show agents that are active or thinking
   const activeAgents = agents.filter(
-    (agent) => agent.status === 'active' || agent.status === 'thinking' || agent.status === 'working'
+    (agent) =>
+      agent.status === 'active' ||
+      agent.status === 'thinking' ||
+      agent.status === 'working'
   );
 
   if (activeAgents.length === 0) {
     return (
-      <div className="text-xs text-muted-foreground">
-        No active agents
-      </div>
+      <div className="text-xs text-muted-foreground">No active agents</div>
     );
   }
 
@@ -67,7 +72,7 @@ const VibeStatusBar: React.FC<VibeStatusBarProps> = ({ agents }) => {
         {activeAgents.map((agent) => (
           <Tooltip key={agent.employee.name}>
             <TooltipTrigger asChild>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 hover:bg-muted rounded-md transition-colors cursor-default">
+              <div className="flex cursor-default items-center gap-2 rounded-md bg-muted/50 px-3 py-1.5 transition-colors hover:bg-muted">
                 {/* Agent Avatar with Status Indicator */}
                 <div className="relative">
                   <Avatar className="h-6 w-6">
@@ -75,7 +80,7 @@ const VibeStatusBar: React.FC<VibeStatusBarProps> = ({ agents }) => {
                       src={agent.employee.avatar_url}
                       alt={agent.employee.name}
                     />
-                    <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                    <AvatarFallback className="bg-primary text-xs text-primary-foreground">
                       {agent.employee.name[0].toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -101,9 +106,7 @@ const VibeStatusBar: React.FC<VibeStatusBarProps> = ({ agents }) => {
             <TooltipContent side="bottom" className="max-w-xs">
               <div className="space-y-1">
                 <p className="font-semibold">{agent.employee.name}</p>
-                <p className="text-xs opacity-80">
-                  Status: {agent.status}
-                </p>
+                <p className="text-xs opacity-80">Status: {agent.status}</p>
                 {agent.current_task && (
                   <p className="text-xs opacity-60">
                     Task: {agent.current_task}

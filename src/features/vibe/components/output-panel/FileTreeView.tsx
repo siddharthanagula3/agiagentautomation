@@ -64,12 +64,12 @@ function FileTreeItem({
         onMouseLeave={() => setIsHovered(false)}
       >
         <div
-          className="flex items-center gap-2 px-2 py-1.5 hover:bg-muted transition-colors rounded-md cursor-pointer"
+          className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted"
           style={{ paddingLeft: `${level * 16 + 8}px` }}
         >
           {/* Expand/Collapse & Icon */}
           <div
-            className="flex items-center gap-1.5 flex-1 min-w-0"
+            className="flex min-w-0 flex-1 items-center gap-1.5"
             onClick={() => {
               if (item.type === 'folder') {
                 setIsOpen(!isOpen);
@@ -81,27 +81,27 @@ function FileTreeItem({
             {item.type === 'folder' ? (
               <>
                 {isOpen ? (
-                  <ChevronDown className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+                  <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 ) : (
-                  <ChevronRight className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+                  <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 )}
                 {isOpen ? (
-                  <FolderOpen className="w-4 h-4 shrink-0 text-blue-500" />
+                  <FolderOpen className="h-4 w-4 shrink-0 text-blue-500" />
                 ) : (
-                  <Folder className="w-4 h-4 shrink-0 text-blue-500" />
+                  <Folder className="h-4 w-4 shrink-0 text-blue-500" />
                 )}
               </>
             ) : (
               <>
                 <div className="w-3.5" />
-                <File className="w-4 h-4 shrink-0 text-muted-foreground" />
+                <File className="h-4 w-4 shrink-0 text-muted-foreground" />
               </>
             )}
 
-            <span className="text-sm truncate">{item.name}</span>
+            <span className="truncate text-sm">{item.name}</span>
 
             {item.type === 'file' && item.size && (
-              <span className="text-xs text-muted-foreground shrink-0">
+              <span className="shrink-0 text-xs text-muted-foreground">
                 {formatFileSize(item.size)}
               </span>
             )}
@@ -109,7 +109,7 @@ function FileTreeItem({
 
           {/* Actions */}
           {item.type === 'file' && isHovered && (
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex shrink-0 items-center gap-1">
               <Button
                 variant="ghost"
                 size="sm"
@@ -119,7 +119,7 @@ function FileTreeItem({
                 }}
                 className="h-6 w-6 p-0"
               >
-                <Eye className="w-3.5 h-3.5" />
+                <Eye className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="ghost"
@@ -130,7 +130,7 @@ function FileTreeItem({
                 }}
                 className="h-6 w-6 p-0"
               >
-                <Download className="w-3.5 h-3.5" />
+                <Download className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="ghost"
@@ -141,7 +141,7 @@ function FileTreeItem({
                 }}
                 className="h-6 w-6 p-0 text-destructive hover:text-destructive"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
           )}
@@ -285,31 +285,31 @@ export function FileTreeView() {
   const fileCount = totalFiles(mockFileTree);
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="flex h-full flex-col bg-background">
       {/* Header */}
-      <div className="p-3 border-b border-gray-200 dark:border-gray-800 space-y-3">
+      <div className="space-y-3 border-b border-gray-200 p-3 dark:border-gray-800">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-sm">Project Files</h3>
+            <h3 className="text-sm font-semibold">Project Files</h3>
             <Badge variant="secondary" className="text-xs">
               {fileCount} files
             </Badge>
           </div>
           <Button variant="ghost" size="sm" className="h-8">
-            <Plus className="w-3.5 h-3.5 mr-1.5" />
+            <Plus className="mr-1.5 h-3.5 w-3.5" />
             New
           </Button>
         </div>
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search files..."
-            className="w-full pl-8 pr-3 py-1.5 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full rounded-md border border-input bg-background py-1.5 pl-8 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
       </div>
@@ -331,8 +331,8 @@ export function FileTreeView() {
       </ScrollArea>
 
       {/* Footer Info */}
-      <div className="p-3 border-t border-gray-200 dark:border-gray-800 bg-muted/30">
-        <div className="text-xs text-muted-foreground text-center">
+      <div className="border-t border-gray-200 bg-muted/30 p-3 dark:border-gray-800">
+        <div className="text-center text-xs text-muted-foreground">
           Last updated: {new Date().toLocaleString()}
         </div>
       </div>

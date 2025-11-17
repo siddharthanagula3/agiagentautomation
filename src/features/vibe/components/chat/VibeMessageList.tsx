@@ -68,19 +68,21 @@ export const VibeMessageList: React.FC<VibeMessageListProps> = ({
   const thinkingAgent = getThinkingAgent();
 
   return (
-    <div className={`flex flex-col h-full ${className}`}>
+    <div className={`flex h-full flex-col ${className}`}>
       <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
-        <div className="py-4 space-y-2">
+        <div className="space-y-2 py-4">
           {messages.length === 0 && !isLoading ? (
-            <div className="flex items-center justify-center h-64 text-muted-foreground">
+            <div className="flex h-64 items-center justify-center text-muted-foreground">
               <div className="text-center">
-                <p className="text-lg font-medium mb-2">Welcome to VIBE</p>
+                <p className="mb-2 text-lg font-medium">Welcome to VIBE</p>
                 <p className="text-sm">
                   Start a conversation with your AI workforce
                 </p>
-                <p className="text-xs mt-2">
-                  Use <code className="bg-muted px-1 py-0.5 rounded">#</code> to mention agents
-                  or <code className="bg-muted px-1 py-0.5 rounded">@</code> to reference files
+                <p className="mt-2 text-xs">
+                  Use <code className="rounded bg-muted px-1 py-0.5">#</code> to
+                  mention agents or{' '}
+                  <code className="rounded bg-muted px-1 py-0.5">@</code> to
+                  reference files
                 </p>
               </div>
             </div>
@@ -102,8 +104,9 @@ export const VibeMessageList: React.FC<VibeMessageListProps> = ({
 
           {/* Thinking Indicator */}
           {thinkingAgent && (
-            <div className="flex gap-3 mb-4">
-              <div className="flex-shrink-0 w-10" /> {/* Spacer for alignment */}
+            <div className="mb-4 flex gap-3">
+              <div className="w-10 flex-shrink-0" />{' '}
+              {/* Spacer for alignment */}
               <div className="flex-1">
                 <VibeThinkingIndicator
                   agentName={thinkingAgent.employee.name}

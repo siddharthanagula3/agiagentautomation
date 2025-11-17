@@ -44,12 +44,12 @@ export function TerminalView() {
   const failedCount = history.filter((c) => c.status === 'failed').length;
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="flex h-full flex-col bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex items-center justify-between border-b border-gray-200 p-3 dark:border-gray-800">
         <div className="flex items-center gap-2">
-          <TerminalIcon className="w-4 h-4" />
-          <h3 className="font-semibold text-sm">Terminal</h3>
+          <TerminalIcon className="h-4 w-4" />
+          <h3 className="text-sm font-semibold">Terminal</h3>
           <Badge variant="secondary" className="text-xs">
             {history.length} commands
           </Badge>
@@ -61,7 +61,7 @@ export function TerminalView() {
           disabled={history.length === 0}
           className="h-8"
         >
-          <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+          <Trash2 className="mr-1.5 h-3.5 w-3.5" />
           Clear
         </Button>
       </div>
@@ -70,16 +70,16 @@ export function TerminalView() {
       <ScrollArea className="flex-1">
         <div
           ref={scrollRef}
-          className="p-4 font-mono text-sm space-y-4 bg-gray-950 text-gray-100"
+          className="space-y-4 bg-gray-950 p-4 font-mono text-sm text-gray-100"
         >
           {history.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-center py-12">
+            <div className="flex h-full items-center justify-center py-12 text-center">
               <div>
-                <TerminalIcon className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                <TerminalIcon className="mx-auto mb-3 h-12 w-12 text-gray-600" />
                 <p className="text-sm text-gray-400">
                   No commands executed yet
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="mt-1 text-xs text-gray-500">
                   Command output will appear here as agents work
                 </p>
               </div>
@@ -88,22 +88,24 @@ export function TerminalView() {
             history.map((cmd) => (
               <div
                 key={cmd.id}
-                className="group border border-gray-800 rounded-lg overflow-hidden hover:border-gray-700 transition-colors"
+                className="group overflow-hidden rounded-lg border border-gray-800 transition-colors hover:border-gray-700"
               >
                 {/* Command Header */}
-                <div className="flex items-center justify-between p-3 bg-gray-900 border-b border-gray-800">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex items-center justify-between border-b border-gray-800 bg-gray-900 p-3">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
                     {cmd.status === 'running' && (
-                      <Loader2 className="w-4 h-4 text-blue-400 animate-spin shrink-0" />
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin text-blue-400" />
                     )}
                     {cmd.status === 'completed' && cmd.exitCode === 0 && (
-                      <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-green-400" />
                     )}
                     {cmd.status === 'failed' && (
-                      <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+                      <XCircle className="h-4 w-4 shrink-0 text-red-400" />
                     )}
-                    <span className="text-blue-400 truncate">$ {cmd.command}</span>
-                    <span className="text-xs text-gray-500 shrink-0">
+                    <span className="truncate text-blue-400">
+                      $ {cmd.command}
+                    </span>
+                    <span className="shrink-0 text-xs text-gray-500">
                       {cmd.timestamp.toLocaleTimeString()}
                     </span>
                   </div>
@@ -111,23 +113,23 @@ export function TerminalView() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleCopy(cmd.output, cmd.id)}
-                    className="h-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-7 opacity-0 transition-opacity group-hover:opacity-100"
                   >
                     {copied === cmd.id ? (
-                      <Check className="w-3.5 h-3.5" />
+                      <Check className="h-3.5 w-3.5" />
                     ) : (
-                      <Copy className="w-3.5 h-3.5" />
+                      <Copy className="h-3.5 w-3.5" />
                     )}
                   </Button>
                 </div>
 
                 {/* Output */}
-                <div className="p-3 bg-black/40">
-                  <pre className="whitespace-pre-wrap text-xs text-gray-300 leading-relaxed">
+                <div className="bg-black/40 p-3">
+                  <pre className="whitespace-pre-wrap text-xs leading-relaxed text-gray-300">
                     {cmd.output}
                   </pre>
                   {cmd.status === 'completed' && cmd.exitCode !== undefined && (
-                    <div className="mt-2 pt-2 border-t border-gray-800">
+                    <div className="mt-2 border-t border-gray-800 pt-2">
                       <span
                         className={cn(
                           'text-xs',
@@ -146,14 +148,18 @@ export function TerminalView() {
       </ScrollArea>
 
       {/* Footer Stats */}
-      <div className="p-3 border-t border-gray-200 dark:border-gray-800 bg-muted/30">
+      <div className="border-t border-gray-200 bg-muted/30 p-3 dark:border-gray-800">
         <div className="grid grid-cols-3 gap-4 text-center text-xs">
           <div>
-            <div className="text-lg font-bold text-green-600">{successCount}</div>
+            <div className="text-lg font-bold text-green-600">
+              {successCount}
+            </div>
             <div className="text-muted-foreground">Success</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-blue-600">{runningCount}</div>
+            <div className="text-lg font-bold text-blue-600">
+              {runningCount}
+            </div>
             <div className="text-muted-foreground">Running</div>
           </div>
           <div>

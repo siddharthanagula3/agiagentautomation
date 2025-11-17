@@ -4,7 +4,11 @@
  */
 
 import React, { useRef, useEffect } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/shared/components/ui/avatar';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { Bot, User } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
@@ -25,7 +29,10 @@ interface AgentMessageListProps {
   className?: string;
 }
 
-export function AgentMessageList({ messages, className }: AgentMessageListProps) {
+export function AgentMessageList({
+  messages,
+  className,
+}: AgentMessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
@@ -37,13 +44,13 @@ export function AgentMessageList({ messages, className }: AgentMessageListProps)
 
   if (messages.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center p-8 text-center">
+      <div className="flex flex-1 items-center justify-center p-8 text-center">
         <div>
-          <Bot className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+          <Bot className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
           <p className="text-sm text-muted-foreground">
             Start a conversation with your AI employees
           </p>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="mt-1 text-xs text-muted-foreground">
             Type @ to mention an agent
           </p>
         </div>
@@ -53,7 +60,7 @@ export function AgentMessageList({ messages, className }: AgentMessageListProps)
 
   return (
     <ScrollArea className={cn('flex-1', className)}>
-      <div ref={scrollRef} className="p-4 space-y-4">
+      <div ref={scrollRef} className="space-y-4 p-4">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -63,18 +70,18 @@ export function AgentMessageList({ messages, className }: AgentMessageListProps)
             )}
           >
             {/* Avatar */}
-            <Avatar className="w-8 h-8 shrink-0">
+            <Avatar className="h-8 w-8 shrink-0">
               {message.role === 'user' ? (
                 <>
                   <AvatarFallback className="bg-primary/10 text-primary">
-                    <User className="w-4 h-4" />
+                    <User className="h-4 w-4" />
                   </AvatarFallback>
                 </>
               ) : (
                 <>
                   <AvatarImage src={undefined} alt={message.agentName} />
                   <AvatarFallback className="bg-blue-500/10 text-blue-600">
-                    <Bot className="w-4 h-4" />
+                    <Bot className="h-4 w-4" />
                   </AvatarFallback>
                 </>
               )}
@@ -83,14 +90,16 @@ export function AgentMessageList({ messages, className }: AgentMessageListProps)
             {/* Message Content */}
             <div
               className={cn(
-                'flex-1 min-w-0',
+                'min-w-0 flex-1',
                 message.role === 'user' && 'flex flex-col items-end'
               )}
             >
               {/* Agent Name & Role (for assistant messages) */}
               {message.role === 'assistant' && message.agentName && (
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-semibold">{message.agentName}</span>
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="text-xs font-semibold">
+                    {message.agentName}
+                  </span>
                   {message.agentRole && (
                     <span className="text-xs text-muted-foreground">
                       {message.agentRole}
@@ -102,18 +111,18 @@ export function AgentMessageList({ messages, className }: AgentMessageListProps)
               {/* Message Bubble */}
               <div
                 className={cn(
-                  'rounded-lg p-3 text-sm break-words',
+                  'break-words rounded-lg p-3 text-sm',
                   message.role === 'user'
-                    ? 'bg-primary text-primary-foreground ml-12'
-                    : 'bg-muted mr-12'
+                    ? 'ml-12 bg-primary text-primary-foreground'
+                    : 'mr-12 bg-muted'
                 )}
               >
                 {message.isStreaming ? (
                   <div className="flex items-center gap-2">
                     <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]" />
-                      <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.15s]" />
-                      <div className="w-2 h-2 bg-current rounded-full animate-bounce" />
+                      <div className="h-2 w-2 animate-bounce rounded-full bg-current [animation-delay:-0.3s]" />
+                      <div className="h-2 w-2 animate-bounce rounded-full bg-current [animation-delay:-0.15s]" />
+                      <div className="h-2 w-2 animate-bounce rounded-full bg-current" />
                     </div>
                     <span className="text-xs opacity-70">Thinking...</span>
                   </div>
@@ -121,14 +130,16 @@ export function AgentMessageList({ messages, className }: AgentMessageListProps)
                   <ReactMarkdown
                     className="prose prose-sm dark:prose-invert max-w-none"
                     components={{
-                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                      p: ({ children }) => (
+                        <p className="mb-2 last:mb-0">{children}</p>
+                      ),
                       code: ({ children }) => (
-                        <code className="bg-background/50 px-1 py-0.5 rounded text-xs">
+                        <code className="rounded bg-background/50 px-1 py-0.5 text-xs">
                           {children}
                         </code>
                       ),
                       pre: ({ children }) => (
-                        <pre className="bg-background/50 p-2 rounded text-xs overflow-x-auto my-2">
+                        <pre className="my-2 overflow-x-auto rounded bg-background/50 p-2 text-xs">
                           {children}
                         </pre>
                       ),
@@ -140,7 +151,7 @@ export function AgentMessageList({ messages, className }: AgentMessageListProps)
               </div>
 
               {/* Timestamp */}
-              <span className="text-xs text-muted-foreground mt-1 block">
+              <span className="mt-1 block text-xs text-muted-foreground">
                 {message.timestamp.toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',

@@ -90,8 +90,10 @@ async function applyMigration() {
       console.log(`   Found ${messages?.length || 0} messages in database`);
 
       if (messages && messages.length > 0) {
-        const withUserId = messages.filter(m => m.user_id).length;
-        console.log(`   Messages with user_id: ${withUserId}/${messages.length}`);
+        const withUserId = messages.filter((m) => m.user_id).length;
+        console.log(
+          `   Messages with user_id: ${withUserId}/${messages.length}`
+        );
       }
     }
 
@@ -116,7 +118,6 @@ async function applyMigration() {
     console.log(`   Total Agent Actions: ${totalActions || 0}`);
 
     console.log('\n✅ Migration check complete!');
-
   } catch (error) {
     console.error('\n❌ Migration failed:', error);
     process.exit(1);

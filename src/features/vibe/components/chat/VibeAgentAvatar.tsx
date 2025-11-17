@@ -5,7 +5,11 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Avatar, AvatarFallback, AvatarImage } from '@shared/components/ui/avatar';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@shared/components/ui/avatar';
 import type { AIEmployee } from '@core/types/ai-employee';
 import type { AgentStatus } from '../../types/vibe-agent';
 
@@ -77,8 +81,11 @@ export const VibeAgentAvatar: React.FC<VibeAgentAvatarProps> = ({
     <div className="relative inline-block">
       {/* Avatar */}
       <Avatar className={sizeClasses[size]}>
-        <AvatarImage src={`/employees/${employee.name}.png`} alt={employee.name} />
-        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+        <AvatarImage
+          src={`/employees/${employee.name}.png`}
+          alt={employee.name}
+        />
+        <AvatarFallback className="bg-primary/10 font-semibold text-primary">
           {getInitials(employee.name)}
         </AvatarFallback>
       </Avatar>

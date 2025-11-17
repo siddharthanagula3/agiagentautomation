@@ -32,14 +32,8 @@ export interface VibeChatState {
 
   // Message actions
   addMessage: (message: Omit<VibeMessage, 'id' | 'timestamp'>) => void;
-  updateMessage: (
-    messageId: string,
-    updates: Partial<VibeMessage>
-  ) => void;
-  startStreamingMessage: (
-    messageId: string,
-    initialContent: string
-  ) => void;
+  updateMessage: (messageId: string, updates: Partial<VibeMessage>) => void;
+  startStreamingMessage: (messageId: string, initialContent: string) => void;
   appendToStreamingMessage: (content: string) => void;
   finishStreamingMessage: () => void;
   clearMessages: () => void;

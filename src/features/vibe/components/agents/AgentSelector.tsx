@@ -7,7 +7,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Zap, CheckCircle2 } from 'lucide-react';
 import type { AIEmployee } from '@core/types/ai-employee';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/shared/components/ui/command';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/shared/components/ui/command';
 import { Badge } from '@/shared/components/ui/badge';
 import { Avatar } from '@/shared/components/ui/avatar';
 import { cn } from '@/shared/lib/utils';
@@ -92,73 +99,78 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
       <CommandList className="max-h-[300px]">
         <CommandEmpty>
           <div className="flex flex-col items-center justify-center py-6 text-center">
-            <Search className="h-8 w-8 text-muted-foreground mb-2" />
+            <Search className="mb-2 h-8 w-8 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">No agents found</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="mt-1 text-xs text-muted-foreground">
               Try a different search term
             </p>
           </div>
         </CommandEmpty>
 
-        {Object.entries(groupedEmployees).map(([category, categoryEmployees]) => (
-          <CommandGroup key={category} heading={category}>
-            {categoryEmployees.map((employee) => (
-              <CommandItem
-                key={employee.name}
-                value={employee.name}
-                onSelect={() => handleSelect(employee)}
-                className="flex items-start gap-3 px-3 py-2 cursor-pointer"
-              >
-                {/* Agent Avatar */}
-                <Avatar className="h-8 w-8 mt-0.5">
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5 text-primary font-semibold text-sm">
-                    {employee.name.charAt(0).toUpperCase()}
-                  </div>
-                </Avatar>
+        {Object.entries(groupedEmployees).map(
+          ([category, categoryEmployees]) => (
+            <CommandGroup key={category} heading={category}>
+              {categoryEmployees.map((employee) => (
+                <CommandItem
+                  key={employee.name}
+                  value={employee.name}
+                  onSelect={() => handleSelect(employee)}
+                  className="flex cursor-pointer items-start gap-3 px-3 py-2"
+                >
+                  {/* Agent Avatar */}
+                  <Avatar className="mt-0.5 h-8 w-8">
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5 text-sm font-semibold text-primary">
+                      {employee.name.charAt(0).toUpperCase()}
+                    </div>
+                  </Avatar>
 
-                {/* Agent Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm truncate">
-                      {employee.name}
-                    </span>
-                    {selectedAgent === employee.name && (
-                      <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                    {employee.description}
-                  </p>
-
-                  {/* Tools */}
-                  {employee.tools.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {employee.tools.slice(0, 3).map((tool) => (
-                        <Badge
-                          key={tool}
-                          variant="secondary"
-                          className="text-xs px-1.5 py-0 h-5"
-                        >
-                          {tool}
-                        </Badge>
-                      ))}
-                      {employee.tools.length > 3 && (
-                        <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
-                          +{employee.tools.length - 3}
-                        </Badge>
+                  {/* Agent Info */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-sm font-medium">
+                        {employee.name}
+                      </span>
+                      {selectedAgent === employee.name && (
+                        <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-primary" />
                       )}
                     </div>
-                  )}
-                </div>
+                    <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+                      {employee.description}
+                    </p>
 
-                {/* Quick Indicator */}
-                <div className="flex-shrink-0">
-                  <Zap className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        ))}
+                    {/* Tools */}
+                    {employee.tools.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {employee.tools.slice(0, 3).map((tool) => (
+                          <Badge
+                            key={tool}
+                            variant="secondary"
+                            className="h-5 px-1.5 py-0 text-xs"
+                          >
+                            {tool}
+                          </Badge>
+                        ))}
+                        {employee.tools.length > 3 && (
+                          <Badge
+                            variant="secondary"
+                            className="h-5 px-1.5 py-0 text-xs"
+                          >
+                            +{employee.tools.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quick Indicator */}
+                  <div className="flex-shrink-0">
+                    <Zap className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )
+        )}
       </CommandList>
     </Command>
   );
@@ -171,22 +183,46 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
 function extractCategory(description: string): string {
   const lowerDesc = description.toLowerCase();
 
-  if (lowerDesc.includes('code') || lowerDesc.includes('develop') || lowerDesc.includes('engineer')) {
+  if (
+    lowerDesc.includes('code') ||
+    lowerDesc.includes('develop') ||
+    lowerDesc.includes('engineer')
+  ) {
     return 'Development';
   }
-  if (lowerDesc.includes('design') || lowerDesc.includes('ui') || lowerDesc.includes('ux')) {
+  if (
+    lowerDesc.includes('design') ||
+    lowerDesc.includes('ui') ||
+    lowerDesc.includes('ux')
+  ) {
     return 'Design';
   }
-  if (lowerDesc.includes('data') || lowerDesc.includes('analytics') || lowerDesc.includes('research')) {
+  if (
+    lowerDesc.includes('data') ||
+    lowerDesc.includes('analytics') ||
+    lowerDesc.includes('research')
+  ) {
     return 'Data & Research';
   }
-  if (lowerDesc.includes('market') || lowerDesc.includes('sales') || lowerDesc.includes('business')) {
+  if (
+    lowerDesc.includes('market') ||
+    lowerDesc.includes('sales') ||
+    lowerDesc.includes('business')
+  ) {
     return 'Business';
   }
-  if (lowerDesc.includes('test') || lowerDesc.includes('qa') || lowerDesc.includes('quality')) {
+  if (
+    lowerDesc.includes('test') ||
+    lowerDesc.includes('qa') ||
+    lowerDesc.includes('quality')
+  ) {
     return 'Quality Assurance';
   }
-  if (lowerDesc.includes('write') || lowerDesc.includes('content') || lowerDesc.includes('document')) {
+  if (
+    lowerDesc.includes('write') ||
+    lowerDesc.includes('content') ||
+    lowerDesc.includes('document')
+  ) {
     return 'Content & Documentation';
   }
 

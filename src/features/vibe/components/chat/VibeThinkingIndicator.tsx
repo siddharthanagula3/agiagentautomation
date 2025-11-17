@@ -39,12 +39,12 @@ export const VibeThinkingIndicator: React.FC<VibeThinkingIndicatorProps> = ({
   return (
     <div className="flex items-center gap-2">
       {agentName && (
-        <span className="text-sm text-muted-foreground font-medium">
+        <span className="text-sm font-medium text-muted-foreground">
           {agentName} is thinking
         </span>
       )}
       <motion.div
-        className="flex gap-1 items-center"
+        className="flex items-center gap-1"
         variants={containerVariants}
         initial="initial"
         animate="animate"
@@ -53,7 +53,7 @@ export const VibeThinkingIndicator: React.FC<VibeThinkingIndicatorProps> = ({
         {[0, 1, 2].map((index) => (
           <motion.div
             key={index}
-            className={`${dotSizes[size]} bg-primary rounded-full`}
+            className={`${dotSizes[size]} rounded-full bg-primary`}
             variants={dotVariants}
             transition={{
               duration: 0.5,

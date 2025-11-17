@@ -561,7 +561,13 @@ test.describe('Bug Detection - Feature-Specific Issues', () => {
   test('9. BUG CHECK: Network failures in Chat', async ({ page }) => {
     console.log('\n🐛 BUG CHECK: Chat Network Requests');
 
-    const failedRequests: any[] = [];
+    // Updated: Nov 16th 2025 - Fixed any type
+    interface FailedRequest {
+      url: string;
+      method: string;
+      failure: string;
+    }
+    const failedRequests: FailedRequest[] = [];
 
     page.on('requestfailed', (request) => {
       failedRequests.push({
@@ -601,7 +607,13 @@ test.describe('Bug Detection - Feature-Specific Issues', () => {
   test('10. BUG CHECK: Network failures in VIBE', async ({ page }) => {
     console.log('\n🐛 BUG CHECK: VIBE Network Requests');
 
-    const failedRequests: any[] = [];
+    // Updated: Nov 16th 2025 - Fixed any type
+    interface FailedRequest {
+      url: string;
+      method: string;
+      failure: string;
+    }
+    const failedRequests: FailedRequest[] = [];
 
     page.on('requestfailed', (request) => {
       failedRequests.push({

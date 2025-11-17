@@ -10,11 +10,12 @@ import type { VibeFile } from '../stores/vibe-file-store';
 
 export type AutocompleteType = 'agent' | 'file' | null;
 
+// Updated: Nov 16th 2025 - Fixed any type
 export interface AutocompleteMatch {
   id: string;
   label: string;
   description?: string;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 export interface AutocompleteState {
@@ -451,7 +452,8 @@ export function useAutocompleteKeyboard(
           return true;
 
         case 'Enter':
-        case 'Tab':
+        case 'Tab': {
+          // Updated: Nov 16th 2025 - Fixed no-case-declarations by adding block scope
           event.preventDefault();
           const newValue = autocomplete.selectByIndex(
             autocomplete.selectedIndex
@@ -460,6 +462,7 @@ export function useAutocompleteKeyboard(
             onSelect(newValue);
           }
           return true;
+        }
 
         case 'Escape':
           event.preventDefault();

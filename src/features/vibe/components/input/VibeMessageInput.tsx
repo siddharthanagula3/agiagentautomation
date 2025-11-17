@@ -9,7 +9,10 @@
 
 import React, { useState, useRef, KeyboardEvent, useEffect } from 'react';
 import { useWorkforceStore } from '@shared/stores/employee-management-store';
-import { useVibeViewStore } from '../../stores/vibe-view-store';
+import {
+  useVibeViewStore,
+  type FileTreeItem,
+} from '../../stores/vibe-view-store';
 import { Button } from '@/shared/components/ui/button';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import {
@@ -77,10 +80,11 @@ export function VibeMessageInput({
     }
   };
 
+  // Updated: Nov 16th 2025 - Fixed any type
   // Extract all files from file tree recursively
-  const getAllFiles = (tree: any[]): MentionSuggestion[] => {
+  const getAllFiles = (tree: FileTreeItem[]): MentionSuggestion[] => {
     const files: MentionSuggestion[] = [];
-    const traverse = (items: any[]) => {
+    const traverse = (items: FileTreeItem[]) => {
       items.forEach((item) => {
         if (item.type === 'file') {
           files.push({

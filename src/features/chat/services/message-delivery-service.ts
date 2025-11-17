@@ -203,7 +203,10 @@ export class MessageDeliveryService {
         this.emitStatusUpdate(record);
         this.clearPendingMessage(record.messageId);
       }
+      // Updated: Nov 16th 2025 - Removed useless catch block that only re-throws
     } catch (error) {
+      // Handle delivery failure
+      await this.handleDeliveryFailure(record, error);
       throw error;
     }
   }

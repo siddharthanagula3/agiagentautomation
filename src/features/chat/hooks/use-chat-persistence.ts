@@ -66,13 +66,15 @@ export function useChatPersistence(
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
 
   // Load session on mount
+  // Updated: Nov 16th 2025 - Added loadSession to deps (stable with useCallback)
   useEffect(() => {
     if (sessionId) {
       loadSession(sessionId);
     }
-  }, [sessionId]);
+  }, [sessionId, loadSession]);
 
   // Auto-save messages periodically
+  // Updated: Nov 16th 2025 - Added saveMessages to deps
   useEffect(() => {
     if (!autoSaveEnabled || !currentSession) return;
 
@@ -81,7 +83,7 @@ export function useChatPersistence(
     }, 30000); // Save every 30 seconds
 
     return () => clearInterval(interval);
-  }, [autoSaveEnabled, currentSession, messages]);
+  }, [autoSaveEnabled, currentSession, messages, saveMessages]);
 
   // Create new session
   const createSession = useCallback(

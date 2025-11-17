@@ -20,13 +20,21 @@ export interface Task {
   completedAt?: Date;
 }
 
+// Updated: Nov 16th 2025 - Fixed type mismatch bug - log now accepts objects or strings
+export interface EmployeeLogEntry {
+  timestamp: Date;
+  message: string;
+  type: 'contribution' | 'tool_use' | 'error' | 'status';
+  metadata?: Record<string, unknown>;
+}
+
 // Active employee status
 export interface ActiveEmployee {
   name: string;
   status: 'thinking' | 'using_tool' | 'idle' | 'error';
   currentTool: string | null;
   currentTask: string | null;
-  log: string[];
+  log: (string | EmployeeLogEntry)[]; // Accepts both strings and structured entries
   progress: number; // 0-100
 }
 

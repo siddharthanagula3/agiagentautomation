@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 
+// Updated: Nov 16th 2025 - Fixed any type
 const viewportSizes = {
   desktop: { width: '100%', height: '100%', icon: Monitor, label: 'Desktop' },
   tablet: { width: '768px', height: '1024px', icon: Tablet, label: 'Tablet' },
@@ -26,7 +27,9 @@ const viewportSizes = {
     icon: Smartphone,
     label: 'Mobile',
   },
-};
+} as const;
+
+type ViewportKey = keyof typeof viewportSizes;
 
 export function AppViewerView() {
   const { appViewerState, setViewport, setAppViewerUrl } = useVibeViewStore();
@@ -65,7 +68,7 @@ export function AppViewerView() {
                     appViewerState.viewport === key ? 'default' : 'ghost'
                   }
                   size="sm"
-                  onClick={() => setViewport(key as any)}
+                  onClick={() => setViewport(key as ViewportKey)}
                   className="h-8"
                 >
                   <Icon className="mr-1.5 h-4 w-4" />

@@ -53,13 +53,14 @@ export interface UseVibeAgentActionsReturn {
     previewUrl: string;
     port?: number;
   }) => Promise<VibeAgentAction>;
+  // Updated: Nov 16th 2025 - Fixed any type
   logToolExecution: (params: {
     agentName: string;
     toolName: string;
-    toolInput: Record<string, any>;
+    toolInput: Record<string, unknown>;
   }) => Promise<{
     actionId: string;
-    complete: (toolOutput: any) => Promise<VibeAgentAction>;
+    complete: (toolOutput: unknown) => Promise<VibeAgentAction>;
     fail: (error: string) => Promise<VibeAgentAction>;
   }>;
   clearActions: () => Promise<void>;
@@ -174,7 +175,7 @@ export function useVibeAgentActions(
     async (params: {
       agentName: string;
       toolName: string;
-      toolInput: Record<string, any>;
+      toolInput: Record<string, unknown>;
     }) => {
       if (!sessionId) {
         throw new Error('Session ID required to log action');

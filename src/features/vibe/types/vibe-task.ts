@@ -12,7 +12,8 @@ export interface VibeTask {
   assigned_to: string; // employee ID
   dependencies: string[]; // task IDs
   status: TaskStatus;
-  result?: any;
+  // Updated: Nov 16th 2025 - Fixed any type
+  result?: unknown;
   error?: string;
   created_at: Date;
   completed_at?: Date;
@@ -21,10 +22,10 @@ export interface VibeTask {
 export interface TaskResult {
   task_id: string;
   status: TaskStatus;
-  output?: any;
+  output?: unknown;
   error?: string;
   artifacts?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ExecutionPlan {

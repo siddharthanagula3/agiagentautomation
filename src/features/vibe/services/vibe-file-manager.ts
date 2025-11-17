@@ -17,7 +17,8 @@ export interface VibeFile {
   uploaded_at: Date;
   uploaded_by: string;
   session_id: string;
-  metadata?: Record<string, any>;
+  // Updated: Nov 16th 2025 - Fixed any type
+  metadata?: Record<string, unknown>;
 }
 
 /**

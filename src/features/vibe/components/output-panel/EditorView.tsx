@@ -25,13 +25,14 @@ import {
 import { cn } from '@shared/lib/utils';
 import { inferLanguageFromPath } from '../../utils/file-tree';
 
+// Updated: Nov 16th 2025 - Fixed any type
 interface FileTreeItemProps {
   item: {
     id: string;
     name: string;
     type: 'file' | 'folder';
     path: string;
-    children?: any[];
+    children?: FileTreeItemProps['item'][];
   };
   level: number;
   onFileClick: (path: string) => void;

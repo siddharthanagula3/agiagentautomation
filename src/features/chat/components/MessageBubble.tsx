@@ -181,7 +181,8 @@ const markdownComponents: Components = {
   ),
 };
 
-export function MessageBubble({
+// Updated: Nov 16th 2025 - Added React.memo for performance
+export const MessageBubble = React.memo(function MessageBubble({
   message,
   onEdit,
   onRegenerate,
@@ -510,4 +511,4 @@ export function MessageBubble({
       </div>
     </div>
   );
-}
+});

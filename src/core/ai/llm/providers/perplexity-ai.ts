@@ -1,6 +1,7 @@
 /**
  * Perplexity Provider
  * Official SDK integration for Perplexity AI models
+ * Updated: Nov 16th 2025 - Clarified that proxy implementation is complete (removed misleading TODO)
  */
 
 import { Perplexity } from '@perplexity-ai/perplexity_ai';
@@ -16,7 +17,7 @@ import { supabase } from '@shared/lib/supabase-client';
 // Initialize clients - DISABLED for security
 const perplexity = null; // Client-side SDK disabled - use Netlify proxy instead
 
-// TODO: Refactor all provider calls to use Netlify proxy functions
+// ✅ IMPLEMENTED: All API calls use Netlify proxy functions for security
 // Proxy endpoints: /.netlify/functions/perplexity-proxy
 
 // Using centralized Supabase client

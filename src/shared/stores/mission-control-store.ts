@@ -232,6 +232,11 @@ export const useMissionStore = create<MissionState>()(
       // Start mission
       startMission: (missionId, mode = 'mission') =>
         set((state) => {
+          // Updated: Nov 16th 2025 - Fixed concurrent mission state corruption with mutex check
+          // Prevent concurrent mission starts from corrupting state
+          if (state.isOrchestrating) {
+            throw new Error('Mission already in progress');
+          }
           state.currentMissionId = missionId;
           state.missionStatus = 'executing';
           state.isOrchestrating = true;

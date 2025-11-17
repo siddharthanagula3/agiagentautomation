@@ -1,3 +1,4 @@
+// Updated: Nov 16th 2025 - Added error boundary
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Separator } from '@shared/ui/separator';
@@ -29,6 +30,7 @@ import {
 } from '../components/UsageWarningBanner';
 import { UsageWarningModal } from '../components/UsageWarningModal';
 import { useUsageWarningStore } from '@shared/stores/usage-warning-store';
+import ErrorBoundary from '@shared/components/ErrorBoundary';
 
 const ChatPage: React.FC = () => {
   const { sessionId } = useParams<{ sessionId?: string }>();
@@ -311,107 +313,124 @@ const ChatPage: React.FC = () => {
   });
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar - Collapsible with smooth transition */}
-      <div
-        className={cn(
-          'border-r border-border bg-card/50 backdrop-blur-sm transition-all duration-300 ease-in-out',
-          sidebarOpen ? 'w-80 md:w-80' : 'w-0',
-          'overflow-hidden' // Prevent content overflow when collapsed
-        )}
-      >
-        {sidebarOpen && (
-          <ChatSidebar
-            sessions={sessions}
-            currentSession={currentSession}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onNewChat={handleNewChat}
-            onSessionSelect={handleSessionSelect}
-            onSessionRename={handleSessionRename}
-            onSessionDelete={handleSessionDelete}
-            onSessionStar={toggleStarSession}
-            onSessionPin={togglePinSession}
-            onSessionArchive={toggleArchiveSession}
-            onSessionShare={shareSession}
-            onSessionDuplicate={duplicateSession}
+    <ErrorBoundary
+      fallback={
+        <div className="flex h-screen items-center justify-center bg-background p-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold">Chat interface error</h2>
+            <p className="mt-2 text-muted-foreground">
+              Something went wrong with the chat interface. Please refresh the
+              page.
+            </p>
+            <Button onClick={() => window.location.reload()} className="mt-4">
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+      }
+    >
+      <div className="flex h-screen bg-background">
+        {/* Sidebar - Collapsible with smooth transition */}
+        <div
+          className={cn(
+            'border-r border-border bg-card/50 backdrop-blur-sm transition-all duration-300 ease-in-out',
+            sidebarOpen ? 'w-80 md:w-80' : 'w-0',
+            'overflow-hidden' // Prevent content overflow when collapsed
+          )}
+        >
+          {sidebarOpen && (
+            <ChatSidebar
+              sessions={sessions}
+              currentSession={currentSession}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onNewChat={handleNewChat}
+              onSessionSelect={handleSessionSelect}
+              onSessionRename={handleSessionRename}
+              onSessionDelete={handleSessionDelete}
+              onSessionStar={toggleStarSession}
+              onSessionPin={togglePinSession}
+              onSessionArchive={toggleArchiveSession}
+              onSessionShare={shareSession}
+              onSessionDuplicate={duplicateSession}
+              onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            />
+          )}
+        </div>
+
+        {/* Main Chat Area - Optimized for full screen usage */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Header - Compact and clean */}
+          <ChatHeader
+            session={currentSession}
+            onRename={(title) =>
+              currentSession && handleSessionRename(currentSession.id, title)
+            }
+            onShare={handleShare}
+            onExport={() => handleExport('markdown')}
+            onSettings={() => {
+              navigate('/settings');
+            }}
             onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           />
-        )}
-      </div>
 
-      {/* Main Chat Area - Optimized for full screen usage */}
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* Header - Compact and clean */}
-        <ChatHeader
-          session={currentSession}
-          onRename={(title) =>
-            currentSession && handleSessionRename(currentSession.id, title)
-          }
-          onShare={handleShare}
-          onExport={() => handleExport('markdown')}
-          onSettings={() => {
-            navigate('/settings');
-          }}
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        />
+          {/* Usage Warning Banner */}
+          {usageData.length > 0 && (
+            <div className="border-b border-border px-4 py-2">
+              <UsageWarningBanner usageData={usageData} />
+            </div>
+          )}
 
-        {/* Usage Warning Banner */}
-        {usageData.length > 0 && (
-          <div className="border-b border-border px-4 py-2">
-            <UsageWarningBanner usageData={usageData} />
-          </div>
-        )}
-
-        {/* Message List - Maximum vertical space */}
-        <div className="flex-1 overflow-hidden">
-          <MessageList
-            messages={messages}
-            isLoading={isLoading}
-            onRegenerate={regenerateMessage}
-            onEdit={editMessage}
-            onDelete={deleteMessage}
-            onToolExecute={handleToolExecute}
-            toolResults={toolResults}
-            activeTool={activeTool}
-          />
-        </div>
-
-        {/* Composer - Sticky at bottom with backdrop */}
-        <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="mx-auto max-w-4xl p-4">
-            <ChatComposer
-              onSendMessage={handleSendMessage}
+          {/* Message List - Maximum vertical space */}
+          <div className="flex-1 overflow-hidden">
+            <MessageList
+              messages={messages}
               isLoading={isLoading}
-              availableTools={availableTools}
-              onToolToggle={(toolId) => {
-                // Tool toggle is handled by the ChatComposer component internally
-                // This callback can be used for future tool management features
-              }}
-              selectedMode={selectedMode}
-              onModeChange={setSelectedMode}
+              onRegenerate={regenerateMessage}
+              onEdit={editMessage}
+              onDelete={deleteMessage}
+              onToolExecute={handleToolExecute}
+              toolResults={toolResults}
+              activeTool={activeTool}
             />
           </div>
+
+          {/* Composer - Sticky at bottom with backdrop */}
+          <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="mx-auto max-w-4xl p-4">
+              <ChatComposer
+                onSendMessage={handleSendMessage}
+                isLoading={isLoading}
+                availableTools={availableTools}
+                onToolToggle={(toolId) => {
+                  // Tool toggle is handled by the ChatComposer component internally
+                  // This callback can be used for future tool management features
+                }}
+                selectedMode={selectedMode}
+                onModeChange={setSelectedMode}
+              />
+            </div>
+          </div>
         </div>
+
+        {/* Keyboard Shortcuts Dialog */}
+        <KeyboardShortcutsDialog
+          open={shortcutsDialogOpen}
+          onOpenChange={setShortcutsDialogOpen}
+          shortcuts={shortcuts}
+        />
+
+        {/* Usage Warning Modal - Pops up at 85% and 95% */}
+        <UsageWarningModal
+          open={warningModalOpen}
+          onOpenChange={setWarningModalOpen}
+          threshold={warningThreshold}
+          currentUsage={currentUsage}
+          totalLimit={totalLimit}
+          usagePercentage={usagePercentage}
+        />
       </div>
-
-      {/* Keyboard Shortcuts Dialog */}
-      <KeyboardShortcutsDialog
-        open={shortcutsDialogOpen}
-        onOpenChange={setShortcutsDialogOpen}
-        shortcuts={shortcuts}
-      />
-
-      {/* Usage Warning Modal - Pops up at 85% and 95% */}
-      <UsageWarningModal
-        open={warningModalOpen}
-        onOpenChange={setWarningModalOpen}
-        threshold={warningThreshold}
-        currentUsage={currentUsage}
-        totalLimit={totalLimit}
-        usagePercentage={usagePercentage}
-      />
-    </div>
+    </ErrorBoundary>
   );
 };
 

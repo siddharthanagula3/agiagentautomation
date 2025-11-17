@@ -671,6 +671,7 @@ export async function updateParticipantActivity(
 
 /**
  * Increments participant statistics
+ * Updated: Nov 17th 2025 - Fixed race condition with atomic RPC function
  */
 export async function incrementParticipantStats(
   participantId: string,
@@ -682,41 +683,55 @@ export async function incrementParticipantStats(
   }
 ): Promise<void> {
   try {
-    // Use RPC function for atomic increment (would need to create this)
-    // For now, fetch and update
-    const { data: participant, error: fetchError } = await supabase
-      .from('conversation_participants')
-      .select('message_count, tokens_used, cost_incurred, tasks_completed')
-      .eq('id', participantId)
-      .single();
+    // Updated: Nov 17th 2025 - Use RPC function for atomic increment to prevent race conditions
+    const { error } = await supabase.rpc('increment_participant_stats', {
+      p_participant_id: participantId,
+      p_message_count: stats.message_count || 0,
+      p_tokens_used: stats.tokens_used || 0,
+      p_cost_incurred: stats.cost_incurred || 0,
+      p_tasks_completed: stats.tasks_completed || 0,
+    });
 
-    if (fetchError) {
-      throw new MultiAgentChatError(
-        'Failed to fetch participant for stats update',
-        'PARTICIPANT_STATS_FETCH_ERROR',
-        fetchError
+    if (error) {
+      // If RPC doesn't exist, fall back to non-atomic update with warning
+      console.warn(
+        'RPC increment_participant_stats not found, using non-atomic fallback. Run migration 20250116000003_add_participant_stats_rpc.sql'
       );
-    }
 
-    const updates: Partial<ConversationParticipant> = {
-      message_count: participant.message_count + (stats.message_count || 0),
-      tokens_used: participant.tokens_used + (stats.tokens_used || 0),
-      cost_incurred: participant.cost_incurred + (stats.cost_incurred || 0),
-      tasks_completed:
-        participant.tasks_completed + (stats.tasks_completed || 0),
-    };
+      const { data: participant, error: fetchError } = await supabase
+        .from('conversation_participants')
+        .select('message_count, tokens_used, cost_incurred, tasks_completed')
+        .eq('id', participantId)
+        .single();
 
-    const { error: updateError } = await supabase
-      .from('conversation_participants')
-      .update(updates)
-      .eq('id', participantId);
+      if (fetchError) {
+        throw new MultiAgentChatError(
+          'Failed to fetch participant for stats update',
+          'PARTICIPANT_STATS_FETCH_ERROR',
+          fetchError
+        );
+      }
 
-    if (updateError) {
-      throw new MultiAgentChatError(
-        'Failed to update participant stats',
-        'PARTICIPANT_STATS_UPDATE_ERROR',
-        updateError
-      );
+      const updates: Partial<ConversationParticipant> = {
+        message_count: participant.message_count + (stats.message_count || 0),
+        tokens_used: participant.tokens_used + (stats.tokens_used || 0),
+        cost_incurred: participant.cost_incurred + (stats.cost_incurred || 0),
+        tasks_completed:
+          participant.tasks_completed + (stats.tasks_completed || 0),
+      };
+
+      const { error: updateError } = await supabase
+        .from('conversation_participants')
+        .update(updates)
+        .eq('id', participantId);
+
+      if (updateError) {
+        throw new MultiAgentChatError(
+          'Failed to update participant stats',
+          'PARTICIPANT_STATS_UPDATE_ERROR',
+          updateError
+        );
+      }
     }
   } catch (error) {
     if (error instanceof MultiAgentChatError) {

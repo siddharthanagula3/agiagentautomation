@@ -5,6 +5,7 @@
 
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { getApiHeaders, handleCorsPreflightRequest } from './_shared/cors';
+import { withAuth } from './utils/auth-middleware';
 
 interface CreateSessionRequest {
   employeeId: string;
@@ -13,7 +14,8 @@ interface CreateSessionRequest {
   employeeName: string;
 }
 
-const handler: Handler = async (
+// Updated: Nov 16th 2025 - Fixed missing auth on ChatKit session creation by adding withAuth wrapper
+const chatkitHandler: Handler = async (
   event: HandlerEvent,
   context: HandlerContext
 ) => {
@@ -129,4 +131,6 @@ const handler: Handler = async (
   }
 };
 
-export { handler };
+// Updated: Nov 16th 2025 - Fixed missing auth on ChatKit session creation
+// Export handler with authentication middleware to prevent unauthorized access
+export const handler = withAuth(chatkitHandler);

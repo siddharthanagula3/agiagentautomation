@@ -18,10 +18,14 @@ function initializeRateLimiter() {
   const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL;
   const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
+  // Updated: Nov 16th 2025 - Fixed in-memory rate limiting warning for serverless
   // If Redis is not configured, return a pass-through rate limiter (for local dev)
   if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) {
     console.warn(
-      '[Rate Limiter] Redis not configured. Rate limiting is DISABLED. Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in production.'
+      '[Rate Limiter] Redis not configured. Rate limiting is DISABLED. ' +
+      'Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in production. ' +
+      'WARNING: In-memory rate limiting does not work in serverless environments ' +
+      'as each function invocation is stateless. Use Redis for production.'
     );
     return null;
   }
@@ -60,8 +64,12 @@ function getUserIdentifier(event: HandlerEvent): string {
       // JWT format: header.payload.signature
       const parts = token.split('.');
       if (parts.length === 3) {
-        // Decode the payload (second part)
-        const payload = Buffer.from(parts[1], 'base64').toString('utf-8');
+        // Updated: Nov 16th 2025 - Fixed JWT Base64 decoding error - use base64url encoding
+        // JWT uses base64url encoding (RFC 7515), not standard base64
+        // Convert base64url to base64: replace - with +, _ with /, and add padding
+        const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const padding = '='.repeat((4 - (base64.length % 4)) % 4);
+        const payload = Buffer.from(base64 + padding, 'base64').toString('utf-8');
         const decoded = JSON.parse(payload);
 
         // Extract user ID from JWT payload

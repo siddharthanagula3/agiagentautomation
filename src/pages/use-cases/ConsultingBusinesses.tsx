@@ -144,11 +144,21 @@ const ConsultingBusinessesPage: React.FC = () => {
                   size="lg"
                   className="bg-gradient-to-r from-primary to-accent"
                   onClick={handleStartTrial}
+                  aria-label={
+                    user
+                      ? 'Go to your dashboard'
+                      : 'Start free trial of AI employees for consulting businesses'
+                  }
                 >
                   {user ? 'Go to Dashboard' : 'Start Free Trial'}
                   <ArrowRight className="ml-2" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={handleWatchDemo}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={handleWatchDemo}
+                  aria-label="Watch demonstration video of AI employees for consulting"
+                >
                   Watch Demo
                 </Button>
               </div>
@@ -160,7 +170,7 @@ const ConsultingBusinessesPage: React.FC = () => {
             >
               <img
                 src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop"
-                alt="Consulting"
+                alt="Professional consulting team collaborating on business strategy and analysis"
                 className="rounded-3xl"
               />
             </motion.div>
@@ -343,7 +353,16 @@ const ConsultingBusinessesPage: React.FC = () => {
               Join 800+ consulting firms using AI to serve more clients
               profitably
             </p>
-            <Button size="lg" variant="secondary" onClick={handleStartTrial}>
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={handleStartTrial}
+              aria-label={
+                user
+                  ? 'Go to your dashboard'
+                  : 'Start free trial to scale your consulting practice'
+              }
+            >
               {user ? 'Go to Dashboard' : 'Start Free Trial'}
             </Button>
           </motion.div>

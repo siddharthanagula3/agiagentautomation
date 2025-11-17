@@ -8,13 +8,29 @@ import { Handler } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
+// Updated: Nov 16th 2025 - Fixed missing environment variable validation
+// Validate environment variables
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const openaiApiKey = process.env.OPENAI_API_KEY;
+
+if (!supabaseUrl) {
+  throw new Error('SUPABASE_URL environment variable is required');
+}
+
+if (!supabaseServiceKey) {
+  throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is required');
+}
+
+if (!openaiApiKey) {
+  throw new Error('OPENAI_API_KEY environment variable is required');
+}
+
 // Initialize clients
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
+  apiKey: openaiApiKey,
 });
 
 interface ExecuteRequest {
@@ -128,14 +144,25 @@ export const handler: Handler = async (event) => {
       assistant_id: assistantId,
     });
 
-    // Poll for completion (for non-streaming)
+    // Updated: Nov 16th 2025 - Fixed infinite loop risk by adding max poll attempts
+    // Poll for completion (for non-streaming) with timeout protection
     let runStatus = run;
+    const MAX_POLL_ATTEMPTS = 120; // 2 minutes maximum (120 seconds)
+    let pollAttempts = 0;
+
     while (
-      runStatus.status === 'queued' ||
-      runStatus.status === 'in_progress'
+      (runStatus.status === 'queued' ||
+      runStatus.status === 'in_progress') &&
+      pollAttempts < MAX_POLL_ATTEMPTS
     ) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       runStatus = await openai.beta.threads.runs.retrieve(threadId, run.id);
+      pollAttempts++;
+    }
+
+    // Check if we timed out
+    if (pollAttempts >= MAX_POLL_ATTEMPTS) {
+      throw new Error(`Agent execution timeout after ${MAX_POLL_ATTEMPTS} seconds`);
     }
 
     if (runStatus.status === 'completed') {
@@ -152,6 +179,8 @@ export const handler: Handler = async (event) => {
         responseText = assistantMessage.content[0].text.value;
       }
 
+      // Updated: Nov 16th 2025 - Fixed hardcoded model in agent metadata
+      // Use actual model from run status instead of hardcoding
       // Save assistant response to database
       const { data: agentMessage, error: agentMessageError } = await supabase
         .from('messages')
@@ -162,7 +191,7 @@ export const handler: Handler = async (event) => {
           metadata: {
             threadMessageId: assistantMessage.id,
             runId: run.id,
-            model: 'gpt-4o',
+            model: runStatus.model || 'gpt-4o', // Use actual model from response
           },
           user_id: userId,
         })

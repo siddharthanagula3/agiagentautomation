@@ -75,7 +75,13 @@ export function ChatSidebar({
               </span>
             </div>
           )}
-          <Button variant="ghost" size="sm" onClick={onToggle} className="p-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="p-2"
+            aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
             {isOpen ? (
               <ChevronLeft className="h-4 w-4" />
             ) : (
@@ -90,6 +96,7 @@ export function ChatSidebar({
         <Button
           onClick={onNewChat}
           className="w-full bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600"
+          aria-label="Start a new chat conversation"
         >
           <Plus className="mr-2 h-4 w-4" />
           {isOpen && 'New Chat'}
@@ -106,6 +113,7 @@ export function ChatSidebar({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
+              aria-label="Search chat conversations"
             />
           </div>
         </div>
@@ -119,16 +127,23 @@ export function ChatSidebar({
               Recent Chats
             </div>
           )}
+          {filteredSessions.length === 0 && isOpen && (
+            <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
+              <p>No conversations yet. Start a new chat to begin!</p>
+            </div>
+          )}
           {filteredSessions.map((session) => (
-            <div
+            <button
               key={session.id}
               onClick={() => onSelectSession(session.id)}
               className={cn(
-                'cursor-pointer rounded-lg p-3 transition-colors',
+                'w-full cursor-pointer rounded-lg p-3 text-left transition-colors',
                 currentSessionId === session.id
                   ? 'border border-purple-200 bg-purple-50 dark:border-purple-700 dark:bg-purple-900/20'
                   : 'hover:bg-gray-50 dark:hover:bg-gray-700'
               )}
+              aria-label={`${isOpen ? `Select chat: ${session.title}` : 'Select chat'}`}
+              aria-pressed={currentSessionId === session.id}
             >
               {isOpen ? (
                 <div>
@@ -145,7 +160,7 @@ export function ChatSidebar({
               ) : (
                 <MessageSquare className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               )}
-            </div>
+            </button>
           ))}
         </div>
       </ScrollArea>
@@ -174,7 +189,12 @@ export function ChatSidebar({
                     {user.plan} Plan
                   </div>
                 </div>
-                <Button variant="ghost" size="sm" className="p-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-1"
+                  aria-label="Open settings"
+                >
                   <Settings className="h-4 w-4" />
                 </Button>
               </div>
@@ -203,6 +223,7 @@ export function ChatSidebar({
             size="sm"
             className="w-full justify-start text-gray-600 dark:text-gray-400"
             onClick={() => window.open('https://docs.mgx.dev/', '_blank')}
+            aria-label="Open documentation in new tab"
           >
             <HelpCircle className="mr-2 h-4 w-4" />
             Documentation

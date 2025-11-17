@@ -70,10 +70,10 @@ const HelpSupportPage: React.FC = () => {
     const loadFAQs = async () => {
       try {
         setIsLoadingFAQs(true);
+        // Updated: Nov 16th 2025 - Removed console statements for production
         const { data, error } = await supportService.getFAQs();
 
         if (error) {
-          console.error('Failed to load FAQs:', error);
           toast.error('Failed to load FAQs');
           // Fall back to empty array
           setFaqs([]);
@@ -89,7 +89,6 @@ const HelpSupportPage: React.FC = () => {
           setFaqs(faqItems);
         }
       } catch (error) {
-        console.error('Error loading FAQs:', error);
         setFaqs([]);
       } finally {
         setIsLoadingFAQs(false);
@@ -141,7 +140,6 @@ const HelpSupportPage: React.FC = () => {
       });
 
       if (error) {
-        console.error('Error submitting ticket:', error);
         toast.error('Failed to send message. Please try again.');
         return;
       }
@@ -154,7 +152,6 @@ const HelpSupportPage: React.FC = () => {
         message: '',
       });
     } catch (error) {
-      console.error('Error submitting ticket:', error);
       toast.error('Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);

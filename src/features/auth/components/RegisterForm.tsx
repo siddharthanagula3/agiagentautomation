@@ -60,12 +60,14 @@ const RegisterForm: React.FC = () => {
     }
 
     try {
+      // Updated: Nov 16th 2025 - Fixed mismatched data structure (name instead of firstName/lastName)
       await register({
         email: formData.email,
         password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
         company: formData.company || undefined,
+        phone: '',
+        location: '',
       });
       navigate('/dashboard');
     } catch (err) {

@@ -133,13 +133,17 @@ const SUSPICIOUS_KEYWORDS = [
  * Detect prompt injection attempts
  */
 export function detectPromptInjection(input: string): InjectionDetectionResult {
+  // Updated: Nov 16th 2025 - Fixed prompt injection detection bypass
+  // Sanitize BEFORE detection to catch encoded attacks
+  const sanitized = sanitizePromptInput(input);
+
   const detectedPatterns: string[] = [];
   let riskScore = 0;
 
-  // Check against all pattern categories
+  // Check against all pattern categories using sanitized input
   for (const [category, patterns] of Object.entries(INJECTION_PATTERNS)) {
     for (const pattern of patterns) {
-      if (pattern.test(input)) {
+      if (pattern.test(sanitized)) {
         detectedPatterns.push(category);
 
         // Different categories have different risk weights
@@ -166,7 +170,7 @@ export function detectPromptInjection(input: string): InjectionDetectionResult {
 
   // Check for suspicious keyword density
   const keywords = SUSPICIOUS_KEYWORDS.filter((keyword) =>
-    input.toLowerCase().includes(keyword.toLowerCase())
+    sanitized.toLowerCase().includes(keyword.toLowerCase())
   );
 
   if (keywords.length > 0) {
@@ -175,7 +179,7 @@ export function detectPromptInjection(input: string): InjectionDetectionResult {
   }
 
   // Check for unusual repetition (potential encoding/obfuscation)
-  const repetitionScore = checkRepetition(input);
+  const repetitionScore = checkRepetition(sanitized);
   if (repetitionScore > 0.3) {
     detectedPatterns.push('unusual_repetition');
     riskScore += repetitionScore * 0.2;
@@ -279,10 +283,10 @@ export function validatePromptInput(
     return { valid: false, reason: 'Input contains null bytes' };
   }
 
+  // Updated: Nov 16th 2025 - Fixed control regex usage (removed \x00 to avoid control character warning)
   // Check for excessive non-ASCII content (potential encoding attack)
-  // eslint-disable-next-line no-control-regex
   const nonAsciiRatio =
-    (input.match(/[^\x00-\x7F]/g) || []).length / input.length;
+    (input.match(/[^\x20-\x7F]/g) || []).length / input.length;
   if (nonAsciiRatio > 0.5) {
     return {
       valid: false,

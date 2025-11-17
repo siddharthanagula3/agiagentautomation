@@ -210,11 +210,12 @@ export class VibeExecutionCoordinator {
    *
    * @private
    */
+  // Updated: Nov 16th 2025 - Fixed any type
   private async executeLLMTask(
     employee: AIEmployee,
     taskDescription: string,
     userMessage: string
-  ): Promise<any> {
+  ): Promise<unknown> {
     const messages = [
       {
         role: 'system' as const,
@@ -239,9 +240,37 @@ export class VibeExecutionCoordinator {
   private async getEmployeeById(
     employeeId: string
   ): Promise<AIEmployee | null> {
-    // TODO: Integrate with workforce store to get actual employee
-    // For now, return null to indicate not found
-    return null;
+    // Updated: Nov 16th 2025 - Fixed employee lookup always returning null
+    try {
+      // Import workforce store dynamically to avoid circular dependencies
+      const { useWorkforceManagementStore } = await import(
+        '@shared/stores/employee-management-store'
+      );
+      const store = useWorkforceManagementStore.getState();
+
+      // Try to find employee in purchased employees
+      const employee = store.purchasedEmployees.find(
+        (emp) => emp.id === employeeId
+      );
+
+      if (employee) {
+        return employee;
+      }
+
+      // If not found, try loading from database
+      await store.loadPurchasedEmployees();
+      const refreshedEmployee = store.purchasedEmployees.find(
+        (emp) => emp.id === employeeId
+      );
+
+      return refreshedEmployee || null;
+    } catch (error) {
+      console.error(
+        '[VibeExecutionCoordinator] Error loading employee:',
+        error
+      );
+      return null;
+    }
   }
 
   /**

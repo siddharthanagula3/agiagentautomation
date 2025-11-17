@@ -3,7 +3,7 @@
  * Manages file uploads, selection, and references in VIBE interface
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useVibeFileStore } from '../stores/vibe-file-store';
 import { useVibeChatStore } from '../stores/vibe-chat-store';
 import { supabase } from '@shared/lib/supabase-client';
@@ -83,6 +83,18 @@ export function useFileUpload(): UseFileUploadReturn {
   const uploadAbortControllers = useRef<Map<string, AbortController>>(
     new Map()
   );
+
+  // Updated: Nov 16th 2025 - Fixed memory leak by cleaning up abort controllers on unmount
+  useEffect(() => {
+    const controllers = uploadAbortControllers;
+    return () => {
+      // Abort all pending uploads and clear controllers on unmount
+      controllers.current.forEach((controller) => {
+        controller.abort();
+      });
+      controllers.current.clear();
+    };
+  }, []);
 
   // Get current user ID
   const getCurrentUserId = async (): Promise<string> => {

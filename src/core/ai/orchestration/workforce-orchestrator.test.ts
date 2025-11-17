@@ -37,9 +37,10 @@ vi.mock('@shared/stores/mission-control-store', () => ({
 
 describe('WorkforceOrchestrator', () => {
   let orchestrator: WorkforceOrchestratorRefactored;
-  let mockLLMService: any;
-  let mockPromptService: any;
-  let mockStore: any;
+  // Updated: Nov 16th 2025 - Fixed any type
+  let mockLLMService: typeof import('@core/ai/llm/unified-language-model').unifiedLLMService;
+  let mockPromptService: typeof import('@core/ai/employees/prompt-management').promptManagement;
+  let mockStore: ReturnType<typeof useMissionStore>;
 
   beforeEach(async () => {
     orchestrator = new WorkforceOrchestratorRefactored();
@@ -372,8 +373,11 @@ describe('WorkforceOrchestrator', () => {
 
     it('should handle malformed employee data', async () => {
       vi.mocked(mockPromptService.getAvailableEmployees).mockResolvedValue([
-        // Missing required fields
-        { name: 'broken-employee' } as any,
+        // Updated: Nov 16th 2025 - Fixed any type
+        // Missing required fields - intentionally malformed for testing
+        { name: 'broken-employee' } as unknown as Awaited<
+          ReturnType<typeof mockPromptService.getAvailableEmployees>
+        >[0],
       ]);
 
       const result = await orchestrator.processRequest({

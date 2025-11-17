@@ -5,6 +5,13 @@
  * This works even without local Docker/Supabase running
  */
 
+// Updated: Nov 16th 2025 - Fixed any type
+interface DatabaseColumn {
+  column_name: string;
+  data_type?: string;
+  is_nullable?: string;
+}
+
 const NETLIFY_FUNCTION_URL = process.env.NETLIFY_DEV
   ? 'http://localhost:8888/.netlify/functions/run-sql'
   : 'https://agiagentautomation.com/.netlify/functions/run-sql';
@@ -89,7 +96,7 @@ async function applyMigration() {
 
       // Check if user_id column exists
       const hasUserId = schemaResult.some(
-        (col: any) => col.column_name === 'user_id'
+        (col: DatabaseColumn) => col.column_name === 'user_id'
       );
       if (hasUserId) {
         console.log('\n✅ user_id column confirmed in vibe_messages table');

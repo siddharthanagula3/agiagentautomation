@@ -114,10 +114,12 @@ export function AgentParticipantPanel({
   };
 
   // Expand all groups initially
+  // Updated: Nov 16th 2025 - Adding expandedGroups.size would cause infinite loop
   React.useEffect(() => {
     if (groupedAgents && expandedGroups.size === 0) {
       setExpandedGroups(new Set(groupedAgents.map((g) => g.role)));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupedAgents]);
 
   // Status counts

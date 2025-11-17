@@ -5,7 +5,8 @@
 
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
-import { HandlerEvent } from '@netlify/functions';
+import { HandlerEvent, HandlerResponse } from '@netlify/functions';
+import crypto from 'crypto';
 
 // Initialize Redis client
 let redis: Redis | null = null;
@@ -51,12 +52,29 @@ function getUserIdentifier(event: HandlerEvent): string {
   // Try to get user ID from auth header
   const authHeader = event.headers.authorization || event.headers.Authorization;
   if (authHeader) {
-    // Extract user ID from JWT or session token
+    // Updated: Nov 16th 2025 - Fixed weak rate limiting by properly decoding JWT
     try {
       const token = authHeader.replace('Bearer ', '');
-      // For now, use the token itself as identifier
-      // In production, you'd decode the JWT and extract user ID
-      return `user:${token.substring(0, 16)}`;
+
+      // Decode JWT to extract user ID (without verification for rate limiting purposes)
+      // JWT format: header.payload.signature
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        // Decode the payload (second part)
+        const payload = Buffer.from(parts[1], 'base64').toString('utf-8');
+        const decoded = JSON.parse(payload);
+
+        // Extract user ID from JWT payload
+        const userId = decoded.sub || decoded.user_id || decoded.id;
+        if (userId) {
+          return `user:${userId}`;
+        }
+      }
+
+      // If JWT decoding fails, use a hash of the token for consistency
+      // This prevents token manipulation while maintaining uniqueness
+      const hash = crypto.createHash('sha256').update(token).digest('hex');
+      return `token:${hash.substring(0, 32)}`;
     } catch (error) {
       console.error('[Rate Limiter] Failed to parse auth token:', error);
     }
@@ -138,9 +156,10 @@ export async function checkRateLimit(event: HandlerEvent): Promise<{
  * Rate limit middleware wrapper
  * Usage: export const handler = withRateLimit(yourHandler);
  */
+// Updated: Nov 16th 2025 - Fixed any type
 export function withRateLimit(
-  handler: (event: HandlerEvent) => Promise<any>
-): (event: HandlerEvent) => Promise<any> {
+  handler: (event: HandlerEvent) => Promise<HandlerResponse>
+): (event: HandlerEvent) => Promise<HandlerResponse> {
   return async (event: HandlerEvent) => {
     const rateLimitResult = await checkRateLimit(event);
 

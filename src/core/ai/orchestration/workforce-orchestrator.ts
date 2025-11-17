@@ -55,13 +55,19 @@ export class WorkforceOrchestratorRefactored {
     const mode = request.mode || 'mission';
 
     try {
+      // Updated: Nov 16th 2025 - Fixed empty employee handling to prevent setting loaded flag on failure
       // Load employees if not already loaded
       if (!this.employeesLoaded) {
         this.employees = await systemPromptsService.getAvailableEmployees();
-        this.employeesLoaded = true;
-        console.log(
-          `📋 Loaded ${this.employees.length} AI employees from .agi/employees/`
-        );
+        // Only set loaded flag if we actually got employees
+        if (this.employees.length > 0) {
+          this.employeesLoaded = true;
+          console.log(
+            `📋 Loaded ${this.employees.length} AI employees from .agi/employees/`
+          );
+        } else {
+          console.warn('⚠️ No employees loaded from .agi/employees/');
+        }
       }
 
       // CHAT MODE: Direct conversational response
@@ -229,7 +235,26 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
         jsonText = jsonText.replace(/```\n?/g, '').replace(/```\n?$/g, '');
       }
 
-      const plan = JSON.parse(jsonText) as MissionPlan;
+      // Updated: Nov 16th 2025 - Fixed unsafe JSON parsing with validation
+      const parsed = JSON.parse(jsonText);
+
+      // Validate the parsed structure
+      if (!parsed || typeof parsed !== 'object') {
+        throw new Error('Invalid plan structure: not an object');
+      }
+
+      if (!parsed.plan || !Array.isArray(parsed.plan)) {
+        throw new Error('Invalid plan structure: plan is not an array');
+      }
+
+      // Validate each task in the plan
+      for (const task of parsed.plan) {
+        if (!task.task || typeof task.task !== 'string') {
+          throw new Error('Invalid plan structure: task description missing');
+        }
+      }
+
+      const plan = parsed as MissionPlan;
       return plan;
     } catch (error) {
       console.error('Error generating plan:', error);

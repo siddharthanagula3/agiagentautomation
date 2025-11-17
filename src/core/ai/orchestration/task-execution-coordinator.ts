@@ -292,6 +292,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
   /**
    * Execute a single task
    */
+  // Updated: Nov 16th 2025 - Fixed recursive retry logic to use iteration to prevent stack overflow
   private async executeTask(
     context: ExecutionContext,
     task: Task
@@ -301,86 +302,93 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
     );
 
     context.currentTask = task;
-    task.status = 'in_progress';
-    task.startedAt = new Date();
 
-    this.emitUpdate({
-      type: 'task_start',
-      executionId: context.id,
-      timestamp: new Date(),
-      data: {
-        task: task.id,
-        title: task.title,
-        agent: task.requiredAgent,
-      },
-    });
+    // Use iteration instead of recursion for retries
+    while (task.retryCount < task.maxRetries) {
+      task.status = 'in_progress';
+      task.startedAt = new Date();
 
-    try {
-      // Get agent worker
-      const agent = this.agentPool.get(task.requiredAgent);
-      if (!agent) {
-        throw new Error(`Agent ${task.requiredAgent} not available`);
-      }
+      this.emitUpdate({
+        type: 'task_start',
+        executionId: context.id,
+        timestamp: new Date(),
+        data: {
+          task: task.id,
+          title: task.title,
+          agent: task.requiredAgent,
+        },
+      });
 
-      // Check if agent is available
-      if (!agent.available) {
-        // Wait for agent to become available
-        await this.waitForAgent(agent, 30000); // 30s timeout
-      }
+      try {
+        // Get agent worker
+        const agent = this.agentPool.get(task.requiredAgent);
+        if (!agent) {
+          throw new Error(`Agent ${task.requiredAgent} not available`);
+        }
 
-      // Mark agent as busy
-      agent.available = false;
-      agent.currentTask = task.id;
+        // Check if agent is available
+        if (!agent.available) {
+          // Wait for agent to become available
+          await this.waitForAgent(agent, 30000); // 30s timeout
+        }
 
-      // Execute task with agent
-      const result = await this.executeWithAgent(agent, task, context);
+        // Mark agent as busy
+        agent.available = false;
+        agent.currentTask = task.id;
 
-      // Mark task as complete
-      task.status = 'completed';
-      task.completedAt = new Date();
-      task.actualTime =
-        (task.completedAt.getTime() - task.startedAt!.getTime()) / 1000 / 60; // minutes
-      task.result = result;
+        // Execute task with agent
+        const result = await this.executeWithAgent(agent, task, context);
 
-      // Mark agent as available
-      agent.available = true;
-      agent.currentTask = undefined;
-      agent.tasksCompleted++;
+        // Mark task as complete
+        task.status = 'completed';
+        task.completedAt = new Date();
+        task.actualTime =
+          (task.completedAt.getTime() - task.startedAt!.getTime()) / 1000 / 60; // minutes
+        task.result = result;
 
-      return result;
-    } catch (error) {
-      console.error(`❌ Task ${task.title} failed:`, error);
-
-      task.status = 'failed';
-      task.error = (error as Error).message;
-      task.retryCount++;
-
-      // Retry logic
-      if (task.retryCount < task.maxRetries) {
-        console.log(
-          `🔄 Retrying task ${task.title} (${task.retryCount}/${task.maxRetries})...`
-        );
-
-        // Wait before retry
-        await new Promise((resolve) =>
-          setTimeout(resolve, 2000 * task.retryCount)
-        );
-
-        // Reset status and retry
-        task.status = 'pending';
-        return this.executeTask(context, task);
-      }
-
-      // Mark agent as available even on failure
-      const agent = this.agentPool.get(task.requiredAgent);
-      if (agent) {
+        // Mark agent as available
         agent.available = true;
         agent.currentTask = undefined;
-        agent.tasksFailed++;
-      }
+        agent.tasksCompleted++;
 
-      throw error;
+        return result;
+      } catch (error) {
+        console.error(`❌ Task ${task.title} failed:`, error);
+
+        task.status = 'failed';
+        task.error = (error as Error).message;
+        task.retryCount++;
+
+        // Retry logic with iteration instead of recursion
+        if (task.retryCount < task.maxRetries) {
+          console.log(
+            `🔄 Retrying task ${task.title} (${task.retryCount}/${task.maxRetries})...`
+          );
+
+          // Wait before retry
+          await new Promise((resolve) =>
+            setTimeout(resolve, 2000 * task.retryCount)
+          );
+
+          // Reset status and continue loop for retry
+          task.status = 'pending';
+          continue;
+        }
+
+        // Mark agent as available even on failure
+        const agent = this.agentPool.get(task.requiredAgent);
+        if (agent) {
+          agent.available = true;
+          agent.currentTask = undefined;
+          agent.tasksFailed++;
+        }
+
+        throw error;
+      }
     }
+
+    // Should never reach here, but TypeScript needs a return
+    throw new Error(`Task ${task.title} exceeded max retries`);
   }
 
   /**
@@ -638,8 +646,9 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
   /**
    * Generate unique execution ID
    */
+  // Updated: Nov 16th 2025 - Fixed deprecated substr() method
   private generateExecutionId(): string {
-    return `exec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `exec-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**

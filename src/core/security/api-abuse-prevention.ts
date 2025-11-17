@@ -179,8 +179,14 @@ export async function checkApiAbuse(
     };
   }
 
-  // Check concurrent requests
-  if (metrics.concurrentRequests >= limits.maxConcurrent) {
+  // Updated: Nov 16th 2025 - Fixed race condition by incrementing before check
+  // Atomically increment concurrent requests before checking limit
+  metrics.concurrentRequests++;
+
+  // Check concurrent requests (after increment)
+  if (metrics.concurrentRequests > limits.maxConcurrent) {
+    // Rollback the increment since we're rejecting the request
+    metrics.concurrentRequests--;
     return {
       allowed: false,
       reason: `Too many concurrent requests (${metrics.concurrentRequests}/${limits.maxConcurrent})`,
@@ -241,7 +247,9 @@ export function trackRequestStart(
     model,
   });
 
-  metrics.concurrentRequests++;
+  // Updated: Nov 16th 2025 - Removed duplicate increment (now handled in checkRateLimit)
+  // Concurrent requests are now incremented atomically in checkRateLimit before the check
+  // metrics.concurrentRequests++; // Removed - increment happens in checkRateLimit
 }
 
 /**

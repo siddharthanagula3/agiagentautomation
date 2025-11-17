@@ -66,20 +66,9 @@ export const CollaborativeChatInterface: React.FC<
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Initialize collaboration protocol
-  useEffect(() => {
-    if (!user) return;
-
-    const context = createCollaborationContext(user.id, sessionId);
-    const collab = new CollaborationProtocol(context);
-    setProtocol(collab);
-
-    // Load available AI employees
-    loadAvailableEmployees();
-  }, [user, sessionId]);
-
   // Load available AI employees from system
-  const loadAvailableEmployees = async () => {
+  // Updated: Nov 16th 2025 - Wrapped in useCallback to fix React hooks warning
+  const loadAvailableEmployees = useCallback(async () => {
     try {
       const employees = await promptManagement.getAvailableEmployees();
       const agents: AgentCapability[] = employees.map((emp) => ({
@@ -109,7 +98,19 @@ export const CollaborativeChatInterface: React.FC<
       console.error('Failed to load AI employees:', error);
       toast.error('Failed to load AI employees');
     }
-  };
+  }, [initialAgents, protocol]);
+
+  // Initialize collaboration protocol
+  useEffect(() => {
+    if (!user) return;
+
+    const context = createCollaborationContext(user.id, sessionId);
+    const collab = new CollaborationProtocol(context);
+    setProtocol(collab);
+
+    // Load available AI employees
+    loadAvailableEmployees();
+  }, [user, sessionId, loadAvailableEmployees]);
 
   // Add agent to conversation
   const addAgent = (agentId: string) => {

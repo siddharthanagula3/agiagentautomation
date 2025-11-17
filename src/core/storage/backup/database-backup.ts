@@ -39,7 +39,8 @@ type BackupTableData = Record<string, unknown[]>;
 class BackupService {
   private isInitialized = false;
   private config: BackupConfig;
-  private backupInterval: NodeJS.Timeout | null = null;
+  // Updated: Nov 16th 2025 - Fixed NodeJS.Timeout type mismatch for browser compatibility
+  private backupInterval: ReturnType<typeof setInterval> | null = null;
   private backups: BackupMetadata[] = [];
 
   constructor() {
@@ -537,8 +538,9 @@ class BackupService {
   /**
    * Generate backup ID
    */
+  // Updated: Nov 16th 2025 - Fixed deprecated substr() method
   private generateBackupId(): string {
-    return `backup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `backup_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
@@ -551,9 +553,10 @@ class BackupService {
   /**
    * Calculate checksum
    */
+  // Updated: Nov 16th 2025 - Fixed deprecated substr() method
   private calculateChecksum(data: BackupTableData): string {
     // Simple checksum - in production, use a proper hash function
-    return btoa(JSON.stringify(data)).substr(0, 16);
+    return btoa(JSON.stringify(data)).substring(0, 16);
   }
 
   /**

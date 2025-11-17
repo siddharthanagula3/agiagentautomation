@@ -13,10 +13,11 @@ import type { AIEmployee } from '@core/types/ai-employee';
 let idCounter = 0;
 const generateId = () => `test-${Date.now()}-${idCounter++}`;
 
+// Updated: Nov 16th 2025 - Fixed any type
 /**
  * User Factory
  */
-export const createMockUser = (overrides: Partial<any> = {}) => ({
+export const createMockUser = (overrides: Record<string, unknown> = {}) => ({
   id: generateId(),
   email: `test-${generateId()}@example.com`,
   name: 'Test User',
@@ -235,7 +236,9 @@ export const createDebugPlan = (): MockMissionPlan => ({
 /**
  * Supabase Test Data Factory
  */
-export const createMockSupabaseEmployee = (overrides: Partial<any> = {}) => ({
+export const createMockSupabaseEmployee = (
+  overrides: Record<string, unknown> = {}
+) => ({
   id: generateId(),
   name: 'Test Employee',
   description: 'A test AI employee',
@@ -250,7 +253,7 @@ export const createMockSupabaseEmployee = (overrides: Partial<any> = {}) => ({
 export const createMockPurchasedEmployee = (
   userId: string,
   employeeId: string,
-  overrides: Partial<any> = {}
+  overrides: Record<string, unknown> = {}
 ) => ({
   id: generateId(),
   user_id: userId,
@@ -262,7 +265,9 @@ export const createMockPurchasedEmployee = (
 /**
  * Stripe Test Data Factory
  */
-export const createMockStripeSession = (overrides: Partial<any> = {}) => ({
+export const createMockStripeSession = (
+  overrides: Record<string, unknown> = {}
+) => ({
   id: `cs_test_${generateId()}`,
   object: 'checkout.session',
   mode: 'subscription',
@@ -273,7 +278,9 @@ export const createMockStripeSession = (overrides: Partial<any> = {}) => ({
   ...overrides,
 });
 
-export const createMockStripeSubscription = (overrides: Partial<any> = {}) => ({
+export const createMockStripeSubscription = (
+  overrides: Record<string, unknown> = {}
+) => ({
   id: `sub_${generateId()}`,
   object: 'subscription',
   customer: `cus_${generateId()}`,
@@ -283,7 +290,7 @@ export const createMockStripeSubscription = (overrides: Partial<any> = {}) => ({
   ...overrides,
 });
 
-export const createMockStripeWebhookEvent = (type: string, data: any) => ({
+export const createMockStripeWebhookEvent = (type: string, data: unknown) => ({
   id: `evt_${generateId()}`,
   object: 'event',
   type,
@@ -296,7 +303,7 @@ export const createMockStripeWebhookEvent = (type: string, data: any) => ({
  */
 export const createMockLLMResponse = (
   content: string,
-  overrides: Partial<any> = {}
+  overrides: Record<string, unknown> = {}
 ) => ({
   content: [{ text: content, type: 'text' }],
   usage: {
@@ -313,7 +320,7 @@ export const createMockLLMResponse = (
  */
 export const createMockChatSession = (
   userId: string,
-  overrides: Partial<any> = {}
+  overrides: Record<string, unknown> = {}
 ) => ({
   id: generateId(),
   user_id: userId,
@@ -325,7 +332,7 @@ export const createMockChatSession = (
 
 export const createMockChatMessage = (
   sessionId: string,
-  overrides: Partial<any> = {}
+  overrides: Record<string, unknown> = {}
 ) => ({
   id: generateId(),
   session_id: sessionId,

@@ -28,7 +28,8 @@ export interface UseVibeMessagesReturn {
     content: string;
     employeeName?: string;
     employeeRole?: string;
-    metadata?: Record<string, any>;
+    // Updated: Nov 16th 2025 - Fixed any type
+    metadata?: Record<string, unknown>;
   }) => Promise<VibeMessage>;
   clearMessages: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -72,7 +73,7 @@ export function useVibeMessages(
       content: string;
       employeeName?: string;
       employeeRole?: string;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
     }) => {
       if (!sessionId || !user) {
         throw new Error('Session ID and user required to create message');

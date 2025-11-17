@@ -397,37 +397,53 @@ Respond in JSON format:
 
       const result = JSON.parse(jsonMatch[0]);
 
+      // Updated: Nov 16th 2025 - Fixed any type
       // Convert to TaskAssignment format
       const tasks: TaskAssignment[] = [];
       const taskIdMap = new Map<string, string>();
 
-      result.tasks.forEach((task: any, idx: number) => {
-        const taskId = `task-${Date.now()}-${idx}`;
-        taskIdMap.set(task.description, taskId);
+      result.tasks.forEach(
+        (
+          task: {
+            description: string;
+            assigned_to?: string;
+            priority?: string;
+            dependencies?: string[];
+          },
+          idx: number
+        ) => {
+          const taskId = `task-${Date.now()}-${idx}`;
+          taskIdMap.set(task.description, taskId);
 
-        const assignedEmployee =
-          hiredEmployees.find((emp) => emp.name === task.assigned_to) ||
-          hiredEmployees[0];
+          const assignedEmployee =
+            hiredEmployees.find((emp) => emp.name === task.assigned_to) ||
+            hiredEmployees[0];
 
-        tasks.push({
-          id: taskId,
-          description: task.description,
-          assigned_to: assignedEmployee,
-          dependencies: [], // Will be populated below
-          priority: task.priority || 'medium',
-        });
-      });
+          tasks.push({
+            id: taskId,
+            description: task.description,
+            assigned_to: assignedEmployee,
+            dependencies: [], // Will be populated below
+            priority: task.priority || 'medium',
+          });
+        }
+      );
 
       // Populate dependencies
-      result.tasks.forEach((task: any, idx: number) => {
-        if (task.dependencies && task.dependencies.length > 0) {
-          const dependencyIds = task.dependencies
-            .map((dep: string) => taskIdMap.get(dep))
-            .filter((id: string | undefined) => id !== undefined);
+      result.tasks.forEach(
+        (
+          task: { description: string; dependencies?: string[] },
+          idx: number
+        ) => {
+          if (task.dependencies && task.dependencies.length > 0) {
+            const dependencyIds = task.dependencies
+              .map((dep: string) => taskIdMap.get(dep))
+              .filter((id: string | undefined) => id !== undefined);
 
-          tasks[idx].dependencies = dependencyIds;
+            tasks[idx].dependencies = dependencyIds;
+          }
         }
-      });
+      );
 
       return tasks;
     } catch (error) {

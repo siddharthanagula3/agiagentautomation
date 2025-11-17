@@ -32,7 +32,8 @@ class CacheService {
   private memoryCache = new Map<string, CacheEntry<unknown>>();
   private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
   private readonly CLEANUP_INTERVAL = 60 * 1000; // 1 minute
-  private cleanupTimer?: NodeJS.Timeout;
+  // Updated: Nov 16th 2025 - Fixed NodeJS.Timeout type mismatch for browser compatibility
+  private cleanupTimer?: ReturnType<typeof setInterval>;
 
   constructor() {
     this.startCleanupTimer();
@@ -408,10 +409,14 @@ class CacheService {
   /**
    * Stop cleanup timer (for cleanup)
    */
+  // Updated: Nov 16th 2025 - Fixed memory leak by clearing memory cache on destroy
   destroy(): void {
     if (this.cleanupTimer) {
       clearInterval(this.cleanupTimer);
+      this.cleanupTimer = undefined;
     }
+    // Clear memory cache to prevent memory leaks
+    this.memoryCache.clear();
   }
 }
 

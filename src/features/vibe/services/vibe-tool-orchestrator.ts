@@ -6,11 +6,12 @@
 /**
  * Tool request from an AI agent
  */
+// Updated: Nov 16th 2025 - Fixed any type
 export interface ToolRequest {
   id: string;
   agent_name: string;
   tool_name: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   timestamp: Date;
   session_id: string;
 }
@@ -21,10 +22,10 @@ export interface ToolRequest {
 export interface ToolResult {
   request_id: string;
   success: boolean;
-  output?: any;
+  output?: unknown;
   error?: string;
   execution_time: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -323,8 +324,8 @@ export class VibeToolOrchestrator {
    */
   private async executeToolImpl(
     toolName: string,
-    parameters: Record<string, any>
-  ): Promise<any> {
+    parameters: Record<string, unknown>
+  ): Promise<unknown> {
     // Mock implementation - would integrate with actual tool execution engine
     // Simulate async execution
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -352,7 +353,7 @@ export class VibeToolOrchestrator {
    */
   private validateParameters(
     toolName: string,
-    parameters: Record<string, any>
+    parameters: Record<string, unknown>
   ): void {
     const tool = this.tools.get(toolName);
     if (!tool) {

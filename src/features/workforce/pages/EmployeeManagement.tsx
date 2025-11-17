@@ -76,21 +76,9 @@ const EmployeeManagement: React.FC = () => {
     );
   }
 
+  // Updated: Nov 16th 2025 - Removed console statements for production
   const totalEmployees = hiredEmployees.length;
   const activeEmployees = hiredEmployees.filter((emp) => emp.is_active).length;
-
-  console.log('[EmployeeManagement] 📊 Current state:', {
-    userId: user.id,
-    totalEmployees,
-    activeEmployees,
-    hiredEmployees: hiredEmployees.map((emp) => ({
-      id: emp.id,
-      employee_id: emp.employee_id,
-      name: emp.name,
-      role: emp.role,
-      is_active: emp.is_active,
-    })),
-  });
 
   return (
     <div className="min-h-screen space-y-6 p-6">

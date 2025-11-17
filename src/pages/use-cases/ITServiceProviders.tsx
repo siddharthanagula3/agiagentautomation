@@ -140,6 +140,11 @@ const ITServiceProvidersPage: React.FC = () => {
                   size="lg"
                   className="bg-gradient-to-r from-primary to-accent"
                   onClick={handleStartTrial}
+                  aria-label={
+                    user
+                      ? 'Go to your dashboard'
+                      : 'Start free trial of AI employees for IT service providers'
+                  }
                 >
                   {user ? 'Go to Dashboard' : 'Start Free Trial'}
                   <ArrowRight className="ml-2" />
@@ -148,6 +153,7 @@ const ITServiceProvidersPage: React.FC = () => {
                   size="lg"
                   variant="outline"
                   onClick={handleScheduleDemo}
+                  aria-label="Schedule a demonstration of AI employees for IT services"
                 >
                   Schedule Demo
                 </Button>
@@ -160,7 +166,7 @@ const ITServiceProvidersPage: React.FC = () => {
             >
               <img
                 src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=600&fit=crop"
-                alt="IT Operations"
+                alt="IT professionals managing server infrastructure and network operations"
                 className="rounded-3xl"
               />
             </motion.div>
@@ -261,7 +267,16 @@ const ITServiceProvidersPage: React.FC = () => {
               Join 500+ IT providers using AI to deliver better service at lower
               cost
             </p>
-            <Button size="lg" variant="secondary" onClick={handleStartTrial}>
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={handleStartTrial}
+              aria-label={
+                user
+                  ? 'Go to your dashboard'
+                  : 'Start free trial to scale your IT services'
+              }
+            >
               {user ? 'Go to Dashboard' : 'Start Free Trial'}
             </Button>
           </motion.div>

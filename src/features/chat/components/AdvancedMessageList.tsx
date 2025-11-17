@@ -78,7 +78,8 @@ interface TimeGroup {
 
 const CLUSTER_TIME_THRESHOLD = 5 * 60 * 1000; // 5 minutes
 
-export function AdvancedMessageList({
+// Updated: Nov 16th 2025 - Added React.memo for performance
+export const AdvancedMessageList = React.memo(function AdvancedMessageList({
   messages,
   agents,
   currentUserId,
@@ -180,7 +181,7 @@ export function AdvancedMessageList({
       </div>
     </ScrollArea>
   );
-}
+});
 
 // Message Cluster Component
 interface MessageClusterComponentProps {

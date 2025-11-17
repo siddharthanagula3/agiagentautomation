@@ -53,9 +53,9 @@ export const useChat = (sessionId?: string) => {
           createdAt = new Date();
         }
 
+        // Updated: Nov 16th 2025 - Removed console statements for production
         // Validate date - if invalid, use current date
         if (isNaN(createdAt.getTime())) {
-          console.warn('Invalid createdAt for message:', msg.id, msg.createdAt);
           createdAt = new Date();
         }
 
@@ -86,7 +86,6 @@ export const useChat = (sessionId?: string) => {
       setMessages(sortedMessages);
       setError(null);
     } catch (error) {
-      console.error('Failed to load messages:', error);
       setError('Failed to load messages');
       toast.error('Failed to load chat history');
     } finally {
@@ -298,7 +297,6 @@ export const useChat = (sessionId?: string) => {
           await chatPersistenceService.deleteMessage(messageId);
           toast.success('Message deleted');
         } catch (error) {
-          console.error('Failed to delete message:', error);
           toast.error('Failed to delete message');
         }
       }

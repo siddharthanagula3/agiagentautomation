@@ -109,10 +109,10 @@ const ArtifactGalleryPage: React.FC = () => {
 
       query = query.limit(50);
 
+      // Updated: Nov 16th 2025 - Removed console statements for production
       const { data, error } = await query;
 
       if (error) {
-        console.error('[Artifact Gallery] Error loading artifacts:', error);
         // FIXED: Don't silently fall back to demo data
         // Show empty state instead to indicate the feature needs setup
         setArtifacts([]);
@@ -141,7 +141,6 @@ const ArtifactGalleryPage: React.FC = () => {
         setArtifacts(mappedArtifacts);
       }
     } catch (error) {
-      console.error('[Artifact Gallery] Error:', error);
       // FIXED: Show empty state on error, not demo data
       setArtifacts([]);
     } finally {

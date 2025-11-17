@@ -78,11 +78,12 @@ export const MarketplacePublicPage: React.FC = () => {
           setPurchasedEmployees(new Set());
           return;
         }
+        // Updated: Nov 16th 2025 - Removed console statements for production
         const rows = await listPurchasedEmployees(user.id);
         if (!isMounted) return;
         setPurchasedEmployees(new Set(rows.map((r) => r.employee_id)));
       } catch (err) {
-        console.error('Failed to load purchases', err);
+        // Failed to load purchases
       }
     }
     loadPurchased();
@@ -118,7 +119,6 @@ export const MarketplacePublicPage: React.FC = () => {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching employees:', error);
         toast.error('Failed to load employees');
         return [];
       }
@@ -185,8 +185,6 @@ export const MarketplacePublicPage: React.FC = () => {
         },
       });
     } catch (err) {
-      console.error('Purchase failed', err);
-
       // Check if it's a database setup error
       if (
         err instanceof Error &&

@@ -1,6 +1,8 @@
 /**
  * Artifact Service - Claude-style Artifacts
  * Create and manage interactive content artifacts
+ *
+ * Updated: Nov 16th 2025 - Replaced silent failures with descriptive errors for unimplemented features
  */
 
 export type ArtifactType =
@@ -218,24 +220,27 @@ class ArtifactService {
    * Generate React component preview
    */
   private generateReactPreview(code: string): string {
-    // TODO: Implement React component rendering in sandbox
-    return '';
+    throw new Error(
+      'React component preview is not yet implemented. This feature requires a sandboxed rendering environment.'
+    );
   }
 
   /**
    * Generate chart preview
    */
   private generateChartPreview(data: string): string {
-    // TODO: Implement chart rendering
-    return '';
+    throw new Error(
+      'Chart preview is not yet implemented. This feature requires chart rendering library integration.'
+    );
   }
 
   /**
    * Generate Mermaid diagram preview
    */
   private generateMermaidPreview(mermaidCode: string): string {
-    // TODO: Implement Mermaid rendering
-    return '';
+    throw new Error(
+      'Mermaid diagram preview is not yet implemented. This feature requires Mermaid.js integration.'
+    );
   }
 
   /**

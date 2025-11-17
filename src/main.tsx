@@ -62,21 +62,13 @@ if (!rootElement) {
   );
 }
 
-if (import.meta.env.DEV) {
-  console.log('Starting AGI Agent Automation app...');
-  console.log('Environment:', {
-    mode: import.meta.env.MODE,
-    dev: import.meta.env.DEV,
-    supabaseUrl: import.meta.env.VITE_SUPABASE_URL ? 'Set' : 'Missing',
-    demoMode: import.meta.env.VITE_DEMO_MODE,
-  });
-}
+// Updated: Nov 16th 2025 - Removed console statements for production
 
 try {
   const root = createRoot(rootElement);
 
   const renderTimeout = setTimeout(() => {
-    console.warn('App initialization is taking longer than expected');
+    // App initialization timeout check
   }, 10000);
 
   root.render(<Main />);
@@ -98,11 +90,9 @@ try {
     document.body.classList.add('app-loaded');
   }, 500);
 
-  if (import.meta.env.DEV) {
-    console.log('App rendering initiated');
-  }
+  // App rendering initiated
 } catch (error) {
-  console.error('Failed to initialize application:', error);
+  // Application initialization error
   const errorMessage =
     error instanceof Error ? error.message : 'Unknown error occurred';
   const errorName = error instanceof Error ? error.name : 'Unknown';

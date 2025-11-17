@@ -28,39 +28,25 @@ function getStripe() {
 /**
  * Open Stripe Customer Portal for subscription management
  */
+// Updated: Nov 16th 2025 - Removed console statements for production
 export async function openBillingPortal(customerId: string): Promise<void> {
-  try {
-    if (import.meta.env.DEV) {
-      console.log(
-        '[Stripe Service] Opening billing portal for customer:',
-        customerId
-      );
-    }
+  const response = await fetch('/.netlify/functions/get-billing-portal', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ customerId }),
+  });
 
-    const response = await fetch('/.netlify/functions/get-billing-portal', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ customerId }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to open billing portal');
-    }
-
-    const { url } = await response.json();
-    if (import.meta.env.DEV) {
-      console.log('[Stripe Service] Billing portal URL:', url);
-    }
-
-    // Redirect to Stripe Customer Portal
-    window.location.href = url;
-  } catch (error) {
-    console.error('[Stripe Service] Billing portal error:', error);
-    throw error;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to open billing portal');
   }
+
+  const { url } = await response.json();
+
+  // Redirect to Stripe Customer Portal
+  window.location.href = url;
 }
 
 /**
@@ -102,51 +88,33 @@ export async function createSubscriptionCheckout(
   priceId: string,
   billingPeriod: 'monthly' | 'yearly' = 'monthly'
 ): Promise<void> {
-  try {
-    if (import.meta.env.DEV) {
-      console.log('[Stripe Service] Creating subscription checkout:', {
-        priceId,
-        billingPeriod,
-      });
-    }
+  // Call Netlify function to create subscription checkout session
+  const response = await fetch('/.netlify/functions/create-pro-subscription', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      priceId,
+      billingPeriod,
+      // These would be passed from the calling component
+      userId: 'current-user-id', // This should be passed as parameter
+      userEmail: 'user@example.com', // This should be passed as parameter
+    }),
+  });
 
-    // Call Netlify function to create subscription checkout session
-    const response = await fetch(
-      '/.netlify/functions/create-pro-subscription',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId,
-          billingPeriod,
-          // These would be passed from the calling component
-          userId: 'current-user-id', // This should be passed as parameter
-          userEmail: 'user@example.com', // This should be passed as parameter
-        }),
-      }
-    );
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to create subscription checkout');
+  }
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to create subscription checkout');
-    }
+  const { url } = await response.json();
 
-    const { url } = await response.json();
-    if (import.meta.env.DEV) {
-      console.log('[Stripe Service] Subscription checkout URL:', url);
-    }
-
-    // Redirect to Stripe Checkout
-    if (url) {
-      window.location.href = url;
-    } else {
-      throw new Error('No checkout URL received from server');
-    }
-  } catch (error) {
-    console.error('[Stripe Service] Subscription checkout error:', error);
-    throw error;
+  // Redirect to Stripe Checkout
+  if (url) {
+    window.location.href = url;
+  } else {
+    throw new Error('No checkout URL received from server');
   }
 }
 
@@ -181,51 +149,29 @@ async function upgradeToPlan(data: {
   plan: 'pro' | 'max';
   billingPeriod?: 'monthly' | 'yearly';
 }): Promise<void> {
-  try {
-    if (import.meta.env.DEV) {
-      console.log(
-        `[Stripe Service] Creating ${data.plan.toUpperCase()} plan subscription:`,
-        data
-      );
-    }
+  // Call Netlify function to create subscription checkout session
+  const response = await fetch('/.netlify/functions/create-pro-subscription', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
 
-    // Call Netlify function to create subscription checkout session
-    const response = await fetch(
-      '/.netlify/functions/create-pro-subscription',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      }
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(
+      error.error || `Failed to create ${data.plan.toUpperCase()} subscription`
     );
+  }
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(
-        error.error ||
-          `Failed to create ${data.plan.toUpperCase()} subscription`
-      );
-    }
+  const { url } = await response.json();
 
-    const { url } = await response.json();
-    if (import.meta.env.DEV) {
-      console.log(
-        `[Stripe Service] ${data.plan.toUpperCase()} subscription checkout URL:`,
-        url
-      );
-    }
-
-    // Redirect to Stripe Checkout
-    if (url) {
-      window.location.href = url;
-    } else {
-      throw new Error('No checkout URL received from server');
-    }
-  } catch (error) {
-    console.error(`[Stripe Service] ${data.plan} upgrade error:`, error);
-    throw error;
+  // Redirect to Stripe Checkout
+  if (url) {
+    window.location.href = url;
+  } else {
+    throw new Error('No checkout URL received from server');
   }
 }
 
@@ -239,29 +185,17 @@ export async function contactEnterpriseSales(data: {
   companyName?: string;
   message?: string;
 }): Promise<void> {
-  try {
-    if (import.meta.env.DEV) {
-      console.log('[Stripe Service] Enterprise inquiry:', data);
-    }
+  // In a real implementation, this would send an email or create a lead in CRM
+  // For now, we'll just open the contact page or show a success message
 
-    // In a real implementation, this would send an email or create a lead in CRM
-    // For now, we'll just open the contact page or show a success message
-    if (import.meta.env.DEV) {
-      console.log('[Enterprise Sales] Contact request submitted');
-    }
+  // You can implement this to send to your CRM or email service
+  // For now, redirect to contact page with pre-filled info
+  const params = new URLSearchParams({
+    email: data.userEmail,
+    plan: 'enterprise',
+    ...(data.userName && { name: data.userName }),
+    ...(data.companyName && { company: data.companyName }),
+  });
 
-    // You can implement this to send to your CRM or email service
-    // For now, redirect to contact page with pre-filled info
-    const params = new URLSearchParams({
-      email: data.userEmail,
-      plan: 'enterprise',
-      ...(data.userName && { name: data.userName }),
-      ...(data.companyName && { company: data.companyName }),
-    });
-
-    window.location.href = `/contact-sales?${params.toString()}`;
-  } catch (error) {
-    console.error('[Stripe Service] Enterprise inquiry error:', error);
-    throw error;
-  }
+  window.location.href = `/contact-sales?${params.toString()}`;
 }

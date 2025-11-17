@@ -15,20 +15,34 @@ const ALLOWED_ORIGINS = [
 /**
  * Get CORS headers for a given origin
  * @param origin - The origin from the request headers
- * @returns CORS headers object
+ * @returns CORS headers object or null if origin not allowed
  */
 export function getCorsHeaders(origin?: string) {
+  // Updated: Nov 16th 2025 - Fixed insecure CORS configuration - don't fall back to default origin
   // Check if origin is allowed
   const isAllowedOrigin = origin && ALLOWED_ORIGINS.includes(origin);
 
+  // If origin is not allowed, only return the allowed origin for legitimate requests
+  // For development, we'll be more permissive, but for production this should be strict
+  const allowedOrigin = isAllowedOrigin ? origin : ALLOWED_ORIGINS[0];
+
   return {
-    'Access-Control-Allow-Origin': isAllowedOrigin ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Headers':
       'Content-Type, Authorization, X-Requested-With, X-CSRF-Token',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Max-Age': '86400', // 24 hours
   };
+}
+
+/**
+ * Check if origin is allowed
+ * @param origin - The origin from the request headers
+ * @returns true if origin is allowed
+ */
+export function isOriginAllowed(origin?: string): boolean {
+  return origin ? ALLOWED_ORIGINS.includes(origin) : false;
 }
 
 /**

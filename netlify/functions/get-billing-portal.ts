@@ -1,11 +1,14 @@
-import { Handler, HandlerEvent } from '@netlify/functions';
+import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import Stripe from 'stripe';
+import { withAuth } from './utils/auth-middleware';
+import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia',
 });
 
-export const handler: Handler = async (event: HandlerEvent) => {
+// Updated: Nov 16th 2025 - Fixed missing authentication on Stripe payment endpoint
+const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; email?: string } }, context: HandlerContext) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -20,6 +23,27 @@ export const handler: Handler = async (event: HandlerEvent) => {
       return {
         statusCode: 400,
         body: JSON.stringify({ error: 'Missing customerId' }),
+      };
+    }
+
+    // Updated: Nov 16th 2025 - Fixed missing authentication - verify customer belongs to authenticated user
+    const supabase = createClient(
+      process.env.VITE_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { data: subscription } = await supabase
+      .from('user_subscriptions')
+      .select('user_id')
+      .eq('stripe_customer_id', customerId)
+      .single();
+
+    if (!subscription || subscription.user_id !== event.user.id) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          error: 'Forbidden: Customer ID does not belong to authenticated user',
+        }),
       };
     }
 
@@ -51,3 +75,6 @@ export const handler: Handler = async (event: HandlerEvent) => {
     };
   }
 };
+
+// Updated: Nov 16th 2025 - Fixed missing authentication - wrap handler with withAuth
+export const handler: Handler = withAuth(authenticatedHandler);

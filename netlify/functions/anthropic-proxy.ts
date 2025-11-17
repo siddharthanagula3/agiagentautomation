@@ -15,9 +15,15 @@ import { withAuth } from './utils/auth-middleware';
  */
 const anthropicHandler: Handler = async (event: HandlerEvent) => {
   // Only allow POST requests
+  // Updated: Nov 16th 2025 - Fixed missing CORS headers on error responses
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      },
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
@@ -28,6 +34,9 @@ const anthropicHandler: Handler = async (event: HandlerEvent) => {
   if (!ANTHROPIC_API_KEY) {
     return {
       statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
       body: JSON.stringify({
         error:
           'Anthropic API key not configured in Netlify environment variables',
@@ -36,6 +45,22 @@ const anthropicHandler: Handler = async (event: HandlerEvent) => {
   }
 
   try {
+    // Updated: Nov 16th 2025 - Fixed missing request size validation
+    // Validate request body size (max 1MB)
+    const MAX_REQUEST_SIZE = 1024 * 1024; // 1MB
+    if (event.body && event.body.length > MAX_REQUEST_SIZE) {
+      return {
+        statusCode: 413,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          error: 'Request payload too large',
+          maxSize: '1MB',
+        }),
+      };
+    }
+
     // Parse request body
     const body = JSON.parse(event.body || '{}');
     const {
@@ -45,6 +70,22 @@ const anthropicHandler: Handler = async (event: HandlerEvent) => {
       system,
       temperature = 0.7,
     } = body;
+
+    // Validate message count (max 100 messages per request)
+    const MAX_MESSAGES = 100;
+    if (messages && Array.isArray(messages) && messages.length > MAX_MESSAGES) {
+      return {
+        statusCode: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          error: 'Too many messages in request',
+          maxMessages: MAX_MESSAGES,
+          received: messages.length,
+        }),
+      };
+    }
 
     console.log('[Anthropic Proxy] Received request:', {
       model,
@@ -75,6 +116,9 @@ const anthropicHandler: Handler = async (event: HandlerEvent) => {
       console.error('[Anthropic Proxy] API Error:', data);
       return {
         statusCode: response.status,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
         body: JSON.stringify({
           error: data.error?.message || 'Anthropic API error',
           details: data,
@@ -115,10 +159,14 @@ const anthropicHandler: Handler = async (event: HandlerEvent) => {
       ? data.content[0]?.text || data.output_text
       : data.output_text || data.content;
     const normalized = { ...data, content };
+    // Updated: Nov 16th 2025 - Fixed missing CORS headers in API proxy responses
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
       },
       body: JSON.stringify(normalized),
     };
@@ -126,6 +174,9 @@ const anthropicHandler: Handler = async (event: HandlerEvent) => {
     console.error('[Anthropic Proxy] Error:', error);
     return {
       statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
       body: JSON.stringify({
         error: 'Failed to process request',
         message: error instanceof Error ? error.message : 'Unknown error',

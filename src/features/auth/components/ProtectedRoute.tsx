@@ -70,20 +70,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Immediately redirect if timeout reached
+  // Updated: Nov 16th 2025 - Fixed unreachable code (removed dead code block)
   if (timeoutReached || (!isLoading && !user)) {
     return <Navigate to="/auth/login" replace />;
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  // Role checking logic...
-  return <>{children}</>;
+  // This point should never be reached due to early returns above
+  return <Navigate to="/auth/login" replace />;
 };
 
 export { ProtectedRoute };

@@ -1,5 +1,6 @@
 import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import Stripe from 'stripe';
+import { withAuth } from './utils/auth-middleware';
 
 interface BuyTokenPackRequest {
   userId: string;
@@ -15,8 +16,9 @@ interface BuyTokenPackRequest {
  * Creates a Stripe checkout session for one-time token pack purchases.
  * Similar to create-pro-subscription but for one-time payments instead of recurring.
  */
-export const handler: Handler = async (
-  event: HandlerEvent,
+// Updated: Nov 16th 2025 - Fixed missing authentication on Stripe payment endpoint
+const authenticatedHandler: Handler = async (
+  event: HandlerEvent & { user: { id: string; email?: string } },
   context: HandlerContext
 ) => {
   // Only allow POST requests
@@ -36,6 +38,16 @@ export const handler: Handler = async (
       return {
         statusCode: 400,
         body: JSON.stringify({ error: 'Missing required fields' }),
+      };
+    }
+
+    // Updated: Nov 16th 2025 - Fixed missing authentication - verify userId matches authenticated user
+    if (event.user.id !== userId) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          error: 'Forbidden: User ID mismatch',
+        }),
       };
     }
 
@@ -117,3 +129,6 @@ export const handler: Handler = async (
     };
   }
 };
+
+// Updated: Nov 16th 2025 - Fixed missing authentication - wrap handler with withAuth
+export const handler: Handler = withAuth(authenticatedHandler);

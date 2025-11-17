@@ -242,6 +242,42 @@ function parseRobotsTxt(robotsText: string, path: string): boolean {
 }
 
 /**
+ * Updated: Nov 16th 2025 - Fixed SSRF vulnerability - validate IP addresses
+ * Check if hostname resolves to a private/internal IP address
+ */
+async function isPrivateOrInternalIP(hostname: string): Promise<boolean> {
+  try {
+    const dns = await import('dns').then((m) => m.promises);
+    const addresses = await dns.resolve4(hostname).catch(() => [] as string[]);
+
+    for (const address of addresses) {
+      const octets = address.split('.').map(Number);
+
+      // Check for private IP ranges
+      // 10.0.0.0/8
+      if (octets[0] === 10) return true;
+      // 172.16.0.0/12
+      if (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) return true;
+      // 192.168.0.0/16
+      if (octets[0] === 192 && octets[1] === 168) return true;
+      // 127.0.0.0/8 (localhost)
+      if (octets[0] === 127) return true;
+      // 169.254.0.0/16 (link-local)
+      if (octets[0] === 169 && octets[1] === 254) return true;
+      // 0.0.0.0/8
+      if (octets[0] === 0) return true;
+    }
+
+    return false;
+  } catch (error) {
+    // If DNS resolution fails, allow the request (fail open)
+    // but log the error for monitoring
+    console.warn('[Fetch Page] DNS resolution failed:', error);
+    return false;
+  }
+}
+
+/**
  * Fetch page content with sanitization
  */
 async function fetchPageContent(url: URL): Promise<{
@@ -255,6 +291,14 @@ async function fetchPageContent(url: URL): Promise<{
   error?: string;
 }> {
   try {
+    // Updated: Nov 16th 2025 - Fixed SSRF vulnerability - block private/internal IP addresses
+    const isPrivate = await isPrivateOrInternalIP(url.hostname);
+    if (isPrivate) {
+      throw new Error(
+        'Access to private/internal IP addresses is not allowed for security reasons'
+      );
+    }
+
     const response = await fetch(url.toString(), {
       method: 'GET',
       headers: {

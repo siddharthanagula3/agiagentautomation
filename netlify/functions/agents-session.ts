@@ -8,13 +8,29 @@ import { Handler } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
+// Updated: Nov 16th 2025 - Fixed missing environment variable validation
+// Validate environment variables
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const openaiApiKey = process.env.OPENAI_API_KEY;
+
+if (!supabaseUrl) {
+  throw new Error('SUPABASE_URL environment variable is required');
+}
+
+if (!supabaseServiceKey) {
+  throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is required');
+}
+
+if (!openaiApiKey) {
+  throw new Error('OPENAI_API_KEY environment variable is required');
+}
+
 // Initialize clients
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
+  apiKey: openaiApiKey,
 });
 
 interface SessionRequest {

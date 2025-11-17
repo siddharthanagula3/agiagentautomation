@@ -14,10 +14,16 @@ import { withAuth } from './utils/auth-middleware';
  * SECURITY: Rate limited to 10 requests per minute per user + Authentication required
  */
 const openaiHandler: Handler = async (event: HandlerEvent) => {
+  // Updated: Nov 16th 2025 - Fixed missing CORS headers on error responses
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      },
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
@@ -28,6 +34,9 @@ const openaiHandler: Handler = async (event: HandlerEvent) => {
   if (!OPENAI_API_KEY) {
     return {
       statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
       body: JSON.stringify({
         error: 'OpenAI API key not configured in Netlify environment variables',
       }),
@@ -35,6 +44,22 @@ const openaiHandler: Handler = async (event: HandlerEvent) => {
   }
 
   try {
+    // Updated: Nov 16th 2025 - Fixed missing request size validation
+    // Validate request body size (max 1MB)
+    const MAX_REQUEST_SIZE = 1024 * 1024; // 1MB
+    if (event.body && event.body.length > MAX_REQUEST_SIZE) {
+      return {
+        statusCode: 413,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          error: 'Request payload too large',
+          maxSize: '1MB',
+        }),
+      };
+    }
+
     // Parse request body
     const body = JSON.parse(event.body || '{}');
     const {
@@ -43,6 +68,22 @@ const openaiHandler: Handler = async (event: HandlerEvent) => {
       temperature = 0.7,
       max_tokens = 4000,
     } = body;
+
+    // Validate message count (max 100 messages per request)
+    const MAX_MESSAGES = 100;
+    if (messages && Array.isArray(messages) && messages.length > MAX_MESSAGES) {
+      return {
+        statusCode: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({
+          error: 'Too many messages in request',
+          maxMessages: MAX_MESSAGES,
+          received: messages.length,
+        }),
+      };
+    }
 
     console.log('[OpenAI Proxy] Received request:', {
       model,
@@ -73,6 +114,9 @@ const openaiHandler: Handler = async (event: HandlerEvent) => {
       console.error('[OpenAI Proxy] API Error:', data);
       return {
         statusCode: response.status,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
         body: JSON.stringify({
           error: data.error?.message || 'OpenAI API error',
           details: data,
@@ -111,10 +155,14 @@ const openaiHandler: Handler = async (event: HandlerEvent) => {
     // Normalize content for UI consumers
     const content = data.choices?.[0]?.message?.content || data.content;
     const normalized = { ...data, content };
+    // Updated: Nov 16th 2025 - Fixed missing CORS headers in API proxy responses
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
       },
       body: JSON.stringify(normalized),
     };
@@ -122,6 +170,9 @@ const openaiHandler: Handler = async (event: HandlerEvent) => {
     console.error('[OpenAI Proxy] Error:', error);
     return {
       statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
       body: JSON.stringify({
         error: 'Failed to process request',
         message: error instanceof Error ? error.message : 'Unknown error',

@@ -3,6 +3,7 @@ import { ScrollArea } from '@shared/ui/scroll-area';
 import { Loader2, Bot } from 'lucide-react';
 import type { ChatMessage } from '../../types';
 import { MessageBubble } from '../MessageBubble';
+import { EmployeeThinkingIndicator } from '../EmployeeThinkingIndicator';
 import { useChatStore } from '@shared/stores/chat-store';
 
 interface MessageListProps {
@@ -63,6 +64,18 @@ export const MessageList: React.FC<MessageListProps> = ({
               ? message.createdAt
               : new Date(message.createdAt || Date.now());
 
+          // Check if this is a thinking/processing indicator message
+          if (message.metadata?.isThinking || message.metadata?.isSearching || message.metadata?.isToolProcessing) {
+            return (
+              <EmployeeThinkingIndicator
+                key={message.id}
+                employeeName={message.metadata?.employeeName as string | undefined}
+                employeeAvatar={message.metadata?.employeeAvatar as string | undefined}
+                message={message.content}
+              />
+            );
+          }
+
           return (
             <MessageBubble
               key={message.id}
@@ -75,9 +88,12 @@ export const MessageList: React.FC<MessageListProps> = ({
                 employeeName: message.metadata?.employeeName as
                   | string
                   | undefined,
+                employeeAvatar: message.metadata?.employeeAvatar as
+                  | string
+                  | undefined,
                 reactions: [],
                 metadata: {
-                  tokensUsed: message.metadata?.tokens,
+                  tokensUsed: message.metadata?.tokens || message.metadata?.tokensUsed,
                   inputTokens: message.metadata?.inputTokens as
                     | number
                     | undefined,
@@ -87,6 +103,12 @@ export const MessageList: React.FC<MessageListProps> = ({
                   model: message.metadata?.model,
                   cost: message.metadata?.cost,
                   isPinned: message.metadata?.isPinned as boolean | undefined,
+                  selectionReason: message.metadata?.selectionReason as
+                    | string
+                    | undefined,
+                  thinkingSteps: message.metadata?.thinkingSteps as
+                    | string[]
+                    | undefined,
                 },
               }}
               onEdit={handleEdit}
@@ -98,25 +120,9 @@ export const MessageList: React.FC<MessageListProps> = ({
           );
         })}
 
-        {/* Loading indicator */}
-        {isLoading && (
-          <div className="flex gap-4 p-4">
-            <div className="mr-4 flex-shrink-0">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                <Bot className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="flex-1">
-              <div className="inline-block rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3">
-                <div className="flex items-center space-x-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm text-muted-foreground">
-                    Thinking...
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Loading indicator - fallback if not using thinking indicator */}
+        {isLoading && messages.every(m => !m.metadata?.isThinking) && (
+          <EmployeeThinkingIndicator message="Processing your request..." />
         )}
       </div>
     </ScrollArea>

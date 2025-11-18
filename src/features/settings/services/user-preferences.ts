@@ -45,6 +45,13 @@ export interface UserSettings {
   backup_frequency?: string;
   retention_period?: number;
   max_concurrent_jobs?: number;
+
+  // AI preferences
+  default_ai_provider?: 'openai' | 'anthropic' | 'google' | 'perplexity';
+  default_ai_model?: string;
+  prefer_streaming?: boolean;
+  ai_temperature?: number;
+  ai_max_tokens?: number;
 }
 
 export interface APIKey {
@@ -188,6 +195,11 @@ class SettingsService {
             backup_frequency: 'daily',
             retention_period: 30,
             max_concurrent_jobs: 10,
+            default_ai_provider: 'openai',
+            default_ai_model: 'gpt-4o',
+            prefer_streaming: true,
+            ai_temperature: 0.7,
+            ai_max_tokens: 4000,
           },
         };
       }

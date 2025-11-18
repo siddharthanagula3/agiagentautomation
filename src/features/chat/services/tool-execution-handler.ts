@@ -1,5 +1,6 @@
 // Tools execution service - handles actual tool execution
 import type { Tool, ToolCall } from '../types';
+import { webSearch, type SearchResponse } from '@core/integrations/web-search-handler';
 
 export class ToolsExecutionService {
   /**
@@ -66,27 +67,27 @@ export class ToolsExecutionService {
    */
   private async executeWebSearch(
     args: Record<string, unknown>
-  ): Promise<unknown> {
+  ): Promise<SearchResponse> {
     const query = args.query as string;
+    const maxResults = (args.maxResults as number) || 10;
+    const provider = args.provider as 'perplexity' | 'google' | 'duckduckgo' | undefined;
+
     if (!query) throw new Error('Search query is required');
 
-    // TODO: Integrate with actual web search API (e.g., Google, Bing, Perplexity)
-    // For now, return mock data
-    return {
-      query,
-      results: [
-        {
-          title: 'Example Result 1',
-          url: 'https://example.com/1',
-          snippet: 'This is an example search result',
-        },
-        {
-          title: 'Example Result 2',
-          url: 'https://example.com/2',
-          snippet: 'Another example result',
-        },
-      ],
-    };
+    try {
+      // Use the web search handler to perform actual search
+      const searchResponse = await webSearch(query, maxResults, provider);
+
+      if (import.meta.env.DEV) {
+        console.log(`[WebSearch] Query: "${query}" returned ${searchResponse.results.length} results`);
+      }
+
+      return searchResponse;
+    } catch (error) {
+      console.error('[WebSearch] Search failed:', error);
+      // Provide a more user-friendly error
+      throw new Error(`Web search failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   /**
@@ -181,12 +182,22 @@ export class ToolsExecutionService {
       {
         id: 'web_search',
         name: 'Web Search',
-        description: 'Search the web for information',
+        description: 'Search the web for current information, news, facts, and real-time data. Use when you need up-to-date information or to verify facts.',
         parameters: {
           query: {
             type: 'string',
             description: 'The search query',
             required: true,
+          },
+          maxResults: {
+            type: 'number',
+            description: 'Maximum number of results to return (default: 10)',
+            required: false,
+          },
+          provider: {
+            type: 'string',
+            description: 'Search provider to use (perplexity, google, duckduckgo)',
+            required: false,
           },
         },
         category: 'search',

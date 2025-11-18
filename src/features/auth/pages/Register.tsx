@@ -124,7 +124,7 @@ const RegisterPage: React.FC = () => {
             scale: [1, 1.1, 1],
           }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute left-20 top-20 h-96 w-96 rounded-full bg-primary/20 blur-3xl"
+          className="absolute left-20 top-20 h-64 md:h-96 w-64 md:w-96 rounded-full bg-primary/20 blur-3xl"
         />
         <motion.div
           animate={{
@@ -133,7 +133,7 @@ const RegisterPage: React.FC = () => {
             scale: [1, 1.15, 1],
           }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute bottom-20 right-20 h-96 w-96 rounded-full bg-accent/20 blur-3xl"
+          className="absolute bottom-20 right-20 h-64 md:h-96 w-64 md:w-96 rounded-full bg-accent/20 blur-3xl"
         />
       </div>
 
@@ -176,7 +176,7 @@ const RegisterPage: React.FC = () => {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <div className="relative">

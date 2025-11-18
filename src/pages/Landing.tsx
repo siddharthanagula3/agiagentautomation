@@ -250,7 +250,7 @@ const LandingPage: React.FC = () => {
               Your Complete AI Workforce - Available Now
             </Badge>
 
-            <h1 className="mb-8 text-6xl font-bold leading-tight md:text-8xl">
+            <h1 className="mb-8 text-3xl font-bold leading-tight sm:text-5xl md:text-6xl lg:text-8xl">
               <motion.span
                 className="mb-2 block"
                 initial={{ opacity: 0, y: 20 }}
@@ -401,7 +401,7 @@ const LandingPage: React.FC = () => {
               <Users className="mr-2 h-4 w-4" />
               AI Marketplace
             </Badge>
-            <h2 className="mb-6 text-5xl font-bold md:text-6xl">
+            <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
               <AnimatedGradientText>Hire Your AI Team</AnimatedGradientText>
             </h2>
             <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
@@ -601,7 +601,7 @@ const LandingPage: React.FC = () => {
               <Zap className="mr-2 h-4 w-4" />
               Powerful Features
             </Badge>
-            <h2 className="mb-6 text-5xl font-bold md:text-6xl">
+            <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
               Everything You Need to Scale
             </h2>
             <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
@@ -655,7 +655,7 @@ const LandingPage: React.FC = () => {
                 <Video className="mr-2 h-4 w-4" />
                 See It In Action
               </Badge>
-              <h2 className="mb-6 text-4xl font-bold md:text-5xl">
+              <h2 className="mb-6 text-2xl font-bold sm:text-3xl md:text-4xl lg:text-5xl">
                 Watch Your AI Team Work
               </h2>
               <p className="mb-8 text-xl text-muted-foreground">
@@ -737,7 +737,7 @@ const LandingPage: React.FC = () => {
               <Star className="mr-2 h-4 w-4" />
               Testimonials
             </Badge>
-            <h2 className="mb-6 text-5xl font-bold md:text-6xl">
+            <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
               Loved by 10,000+ Companies
             </h2>
             <p className="text-xl text-muted-foreground">
@@ -835,7 +835,7 @@ const LandingPage: React.FC = () => {
               <Target className="mr-2 h-4 w-4" />
               Use Cases
             </Badge>
-            <h2 className="mb-6 text-5xl font-bold md:text-6xl">
+            <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
               How Teams Use AI Employees
             </h2>
             <p className="text-xl text-muted-foreground">
@@ -962,7 +962,7 @@ const LandingPage: React.FC = () => {
               <MessageSquare className="mr-2 h-4 w-4" />
               FAQ
             </Badge>
-            <h2 className="mb-6 text-5xl font-bold md:text-6xl">
+            <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
               Common Questions
             </h2>
             <p className="text-xl text-muted-foreground">
@@ -1007,7 +1007,7 @@ const LandingPage: React.FC = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="mb-6 text-5xl font-bold md:text-6xl">
+            <h2 className="mb-6 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
               Ready to Build Your AI Workforce?
             </h2>
             <p className="mx-auto mb-12 max-w-3xl text-xl opacity-90 md:text-2xl">

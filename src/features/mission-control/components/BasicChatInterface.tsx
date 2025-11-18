@@ -32,7 +32,7 @@ interface StandardChatProps {
 }
 
 export const StandardChat: React.FC<StandardChatProps> = ({
-  provider = 'anthropic',
+  provider = 'openai',
   model,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -110,15 +110,15 @@ export const StandardChat: React.FC<StandardChatProps> = ({
   return (
     <div className="flex h-full flex-col">
       {/* Messages Area */}
-      <Card className="mb-4 flex flex-1 flex-col border-border bg-card">
-        <CardContent className="flex-1 space-y-4 overflow-y-auto p-6">
+      <Card className="mb-3 flex flex-1 flex-col border-border bg-card sm:mb-4">
+        <CardContent className="flex-1 space-y-3 overflow-y-auto p-3 sm:space-y-4 sm:p-4 md:p-6">
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
-              <Bot className="mb-4 h-16 w-16 text-muted-foreground opacity-50" />
-              <h3 className="mb-2 text-lg font-semibold text-foreground">
+              <Bot className="mb-3 h-12 w-12 text-muted-foreground opacity-50 sm:mb-4 sm:h-16 sm:w-16" />
+              <h3 className="mb-2 text-base font-semibold text-foreground sm:text-lg">
                 Start a Conversation
               </h3>
-              <p className="max-w-sm text-sm text-muted-foreground">
+              <p className="max-w-sm px-4 text-xs text-muted-foreground sm:px-0 sm:text-sm">
                 Ask me anything. I'm here to help with your questions and tasks.
               </p>
             </div>
@@ -146,7 +146,7 @@ export const StandardChat: React.FC<StandardChatProps> = ({
 
                   <div
                     className={cn(
-                      'max-w-[80%] rounded-lg p-4',
+                      'max-w-[90%] rounded-lg p-3 sm:max-w-[80%] sm:p-4',
                       message.role === 'user'
                         ? 'bg-primary text-primary-foreground'
                         : 'border border-border bg-card'
@@ -155,7 +155,7 @@ export const StandardChat: React.FC<StandardChatProps> = ({
                     {message.role === 'user' ? (
                       <p className="text-sm">{message.content}</p>
                     ) : (
-                      <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <div className="prose prose-sm dark:prose-invert max-w-full overflow-x-auto">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {message.content}
                         </ReactMarkdown>
@@ -204,17 +204,17 @@ export const StandardChat: React.FC<StandardChatProps> = ({
 
       {/* Input Area */}
       <Card className="border-border bg-card">
-        <CardContent className="p-4">
-          <div className="space-y-3">
+        <CardContent className="p-3 sm:p-4">
+          <div className="space-y-2 sm:space-y-3">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your message... (Cmd/Ctrl + Enter to send)"
-              className="min-h-[100px] resize-none"
+              className="min-h-[80px] resize-none sm:min-h-[100px]"
               disabled={isLoading}
             />
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs text-muted-foreground">
                 {isLoading
                   ? 'Waiting for response...'
@@ -223,7 +223,7 @@ export const StandardChat: React.FC<StandardChatProps> = ({
               <Button
                 onClick={handleSend}
                 disabled={isLoading || !input.trim()}
-                className="gap-2"
+                className="h-11 w-full gap-2 sm:w-auto"
               >
                 {isLoading ? (
                   <>

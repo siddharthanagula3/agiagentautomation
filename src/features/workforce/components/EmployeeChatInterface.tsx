@@ -152,7 +152,7 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
   return (
     <div className="flex h-full flex-col rounded-lg border bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between border-b bg-muted/50 p-4">
+      <div className="flex flex-col gap-3 border-b bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center space-x-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
             {employee.name
@@ -183,7 +183,7 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
             className={`flex ${message.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] rounded-lg px-4 py-2 ${
+              className={`max-w-full rounded-lg px-4 py-2 sm:max-w-[80%] ${
                 message.sender_type === 'user'
                   ? 'bg-primary text-primary-foreground'
                   : message.message_type === 'tool_result'
@@ -237,7 +237,7 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
 
       {/* Input */}
       <div className="border-t bg-muted/25 p-4">
-        <div className="flex space-x-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:space-x-2">
           <input
             type="text"
             value={inputMessage}
@@ -250,7 +250,7 @@ export const AIEmployeeChat: React.FC<AIEmployeeChatProps> = ({
           <button
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || isLoading}
-            className="rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-11 min-w-[80px] rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? 'Sending...' : 'Send'}
           </button>

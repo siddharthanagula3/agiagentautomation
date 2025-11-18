@@ -18,9 +18,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   useEffect(() => {
     if (isLoading) {
       const timeout = setTimeout(() => {
-        console.error(
-          'ProtectedRoute: Auth loading timed out, redirecting to login'
-        );
         setTimeoutReached(true);
       }, 5000); // Reduce to 5 seconds
 
@@ -30,38 +27,25 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }, [isLoading]);
 
-  console.log('🛡️ ProtectedRoute render:', {
-    hasUser: !!user,
-    isLoading,
-    timeoutReached,
-    userEmail: user?.email,
-  });
-
   // If we have a user, allow access (check role if needed)
   if (user) {
-    console.log('✅ User authenticated, checking role');
-
     if (
       requiredRole === 'admin' &&
       user.role !== 'admin' &&
       user.role !== 'super_admin'
     ) {
-      console.log('❌ Insufficient permissions for admin route');
       return <Navigate to="/dashboard" replace />;
     }
 
     if (requiredRole === 'super_admin' && user.role !== 'super_admin') {
-      console.log('❌ Insufficient permissions for super_admin route');
       return <Navigate to="/dashboard" replace />;
     }
 
-    console.log('✅ Access granted');
     return <>{children}</>;
   }
 
   // If we're still loading and haven't timed out, show loading spinner
   if (isLoading && !timeoutReached) {
-    console.log('⏳ Still loading, showing spinner');
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>

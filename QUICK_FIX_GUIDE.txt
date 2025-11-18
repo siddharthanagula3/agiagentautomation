@@ -1,0 +1,143 @@
+QUICK FIX GUIDE - API PROXY ISSUES
+═══════════════════════════════════════════════════════════════════════════════
+
+CRITICAL FIX #1: Import Path Mismatch (3 files)
+───────────────────────────────────────────────────────────────────────────────
+
+File 1: /home/user/agiagentautomation/src/services/enhanced-ai-chat-service-v2.ts
+Line 6:
+  CHANGE FROM: import { unifiedLLMService } from '@core/ai/llm/unified-llm-service';
+  CHANGE TO:   import { unifiedLLMService } from '@core/ai/llm/unified-language-model';
+
+File 2: /home/user/agiagentautomation/src/core/integrations/chat-completion-handler.ts
+Line 6:
+  CHANGE FROM: import { unifiedLLMService } from '@core/ai/llm/unified-llm-service';
+  CHANGE TO:   import { unifiedLLMService } from '@core/ai/llm/unified-language-model';
+
+File 3: /home/user/agiagentautomation/src/core/integrations/token-usage-tracker.ts
+Line 7:
+  CHANGE FROM: import type { LLMProvider } from './llm/unified-llm-service';
+  CHANGE TO:   import type { LLMProvider } from './llm/unified-language-model';
+
+STATUS: These changes are REQUIRED for compilation
+
+
+CRITICAL FIX #2: Create Missing Perplexity Proxy
+───────────────────────────────────────────────────────────────────────────────
+
+Create new file: /home/user/agiagentautomation/netlify/functions/perplexity-proxy.ts
+
+Base template from: anthropic-proxy.ts or google-proxy.ts
+
+Key requirements:
+  - Handler function for POST requests
+  - withAuth middleware
+  - withRateLimit middleware
+  - Token tracking (calculateTokenCost, storeTokenUsage)
+  - CORS headers
+  - Error handling
+  - Perplexity API endpoint: https://api.perplexity.ai/openai/
+
+Expected configuration:
+  - Models: 'llama-3.1-sonar-small-128k-online', 
+            'llama-3.1-sonar-large-128k-online',
+            'llama-3.1-sonar-huge-128k-online'
+  - Default model: 'llama-3.1-sonar-large-128k-online'
+  - Environment variable: VITE_PERPLEXITY_API_KEY
+
+STATUS: REQUIRED for Perplexity model support
+
+
+CRITICAL FIX #3: Remove Direct API Key Usage
+───────────────────────────────────────────────────────────────────────────────
+
+File 1: /home/user/agiagentautomation/src/features/mission-control/services/message-streaming.ts
+Lines 36-47: Remove all API key definitions
+Lines 52-153: Refactor streamOpenAI() - always use proxy
+Lines 158-220: Refactor streamAnthropic() - always use proxy
+Lines 220+: Refactor streamGoogle() - always use proxy
+
+Changes needed:
+  - Remove DEV conditional branches
+  - Always use /.netlify/functions/[provider]-proxy
+  - Add authentication headers if required
+
+File 2: /home/user/agiagentautomation/src/core/integrations/media-generation-handler.ts
+Remove direct GOOGLE_API_KEY usage
+  - Replace with proxy function call or remove feature
+
+STATUS: CRITICAL SECURITY ISSUE
+
+
+IMPORTANT: Token Pricing Consolidation
+───────────────────────────────────────────────────────────────────────────────
+
+Two token pricing tables exist with different values:
+
+File 1 (ACTIVE): netlify/functions/utils/token-tracking.ts
+  - gpt-4o: input 2.5, output 10.0
+  - Used by proxy functions
+  - This is the correct source
+
+File 2 (INACTIVE): src/core/integrations/token-usage-tracker.ts
+  - gpt-4o: input 5.0, output 15.0
+  - Not integrated
+  - Consolidate or remove
+
+Recommendation: Use File 1 as source of truth
+  - Export TOKEN_PRICING from netlify function
+  - Remove duplicate from src/core/integrations/
+
+
+VERIFICATION COMMANDS
+───────────────────────────────────────────────────────────────────────────────
+
+Check import paths:
+  grep -r "unified-llm-service" /home/user/agiagentautomation/src
+
+Check for direct API usage:
+  grep -r "VITE_.*API_KEY" /home/user/agiagentautomation/src/features/mission-control
+  grep -r "import.meta.env.DEV" /home/user/agiagentautomation/src
+
+Check perplexity implementation:
+  ls -la /home/user/agiagentautomation/netlify/functions/perplexity-proxy.ts
+
+Compile check (after fixes):
+  npm run type-check
+
+
+DEPLOYMENT CHECKLIST
+───────────────────────────────────────────────────────────────────────────────
+
+Before deploying to production:
+  [ ] Fix all 3 import paths
+  [ ] Create perplexity-proxy.ts
+  [ ] Remove direct API calls from message-streaming.ts
+  [ ] Remove direct API calls from media-generation-handler.ts
+  [ ] Run: npm run type-check (must pass)
+  [ ] Run: npm run build (must succeed)
+  [ ] Verify VITE_*_API_KEY are NOT in production .env
+  [ ] Verify Netlify has server-side API keys configured
+  [ ] Verify Upstash Redis credentials in Netlify
+  [ ] Test proxy endpoints with authentication
+  [ ] Test token tracking and billing
+
+
+IMPACT ASSESSMENT
+───────────────────────────────────────────────────────────────────────────────
+
+If NOT fixed:
+  - Chat interface: Will fail to compile (import error)
+  - Token tracking: Will fail to compile (import error)
+  - Perplexity models: Will always throw error
+  - Development security: API keys exposed in browser
+  - Production security: Potentially compromised dev setup
+
+After fixes:
+  - All modules compile successfully
+  - All providers work correctly
+  - Token tracking works consistently
+  - Secure development environment
+  - Production-ready configuration
+
+═══════════════════════════════════════════════════════════════════════════════

@@ -144,19 +144,19 @@ export const MissionLogEnhanced: React.FC = () => {
 
   return (
     <Card className="flex h-full flex-col border-border bg-card">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <ListTodo className="h-5 w-5 text-primary" />
+      <CardHeader className="p-3 pb-2 sm:pb-3 sm:p-4">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <ListTodo className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
           Mission Log
         </CardTitle>
         {hasPlan && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground sm:text-sm">
             {completedTasks} of {totalTasks} tasks completed
           </p>
         )}
       </CardHeader>
 
-      <CardContent className="flex-1 space-y-4 overflow-y-auto">
+      <CardContent className="flex-1 space-y-3 overflow-y-auto p-3 sm:space-y-4 sm:p-4">
         {/* Mission Plan Accordion */}
         {hasPlan && (
           <Accordion type="single" collapsible defaultValue="plan">
@@ -179,29 +179,29 @@ export const MissionLogEnhanced: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        'rounded-lg border p-3 transition-all',
+                        'rounded-lg border p-2 transition-all sm:p-3',
                         getTaskStatusColor(task.status)
                       )}
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start gap-2 sm:gap-3">
                         {getTaskStatusIcon(task.status)}
                         <div className="flex-1 space-y-1">
-                          <p className="text-sm font-medium">
+                          <p className="text-xs font-medium sm:text-sm">
                             {task.description}
                           </p>
                           {task.assignedTo && (
-                            <p className="text-xs opacity-75">
+                            <p className="text-[10px] opacity-75 sm:text-xs">
                               Assigned to: {task.assignedTo}
                             </p>
                           )}
                           {task.result && (
-                            <div className="mt-2 rounded bg-background/50 p-2">
-                              <p className="text-xs">{task.result}</p>
+                            <div className="mt-1 rounded bg-background/50 p-1.5 sm:mt-2 sm:p-2">
+                              <p className="text-[10px] sm:text-xs">{task.result}</p>
                             </div>
                           )}
                           {task.error && (
-                            <div className="mt-2 rounded bg-red-500/10 p-2">
-                              <p className="text-xs text-red-400">
+                            <div className="mt-1 rounded bg-red-500/10 p-1.5 sm:mt-2 sm:p-2">
+                              <p className="text-[10px] text-red-400 sm:text-xs">
                                 Error: {task.error}
                               </p>
                             </div>
@@ -217,21 +217,21 @@ export const MissionLogEnhanced: React.FC = () => {
         )}
 
         {/* Activity Log */}
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {messages.length === 0 ? (
-            <div className="flex h-64 flex-col items-center justify-center text-center">
-              <Sparkles className="mb-4 h-12 w-12 text-muted-foreground opacity-50" />
-              <h3 className="mb-2 text-lg font-semibold text-foreground">
+            <div className="flex h-48 flex-col items-center justify-center text-center sm:h-64">
+              <Sparkles className="mb-3 h-10 w-10 text-muted-foreground opacity-50 sm:mb-4 sm:h-12 sm:w-12" />
+              <h3 className="mb-2 text-base font-semibold text-foreground sm:text-lg">
                 Mission Control Ready
               </h3>
-              <p className="max-w-sm text-sm text-muted-foreground">
+              <p className="max-w-sm px-4 text-xs text-muted-foreground sm:px-0 sm:text-sm">
                 Your AI Workforce Mission Control is ready. Start a mission to
                 deploy your AI employees.
               </p>
             </div>
           ) : (
             <>
-              <h4 className="text-sm font-semibold text-foreground">
+              <h4 className="text-xs font-semibold text-foreground sm:text-sm">
                 Activity Log
               </h4>
               <AnimatePresence mode="popLayout">
@@ -254,12 +254,12 @@ export const MissionLogEnhanced: React.FC = () => {
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ delay: index * 0.03 }}
                       className={cn(
-                        'flex items-start gap-3',
+                        'flex items-start gap-2 sm:gap-3',
                         message.type === 'user' && 'justify-end'
                       )}
                     >
                       {message.type !== 'user' && (
-                        <Avatar className="h-8 w-8 flex-shrink-0">
+                        <Avatar className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8">
                           <AvatarImage
                             src={
                               employeeAvatar ||
@@ -280,25 +280,25 @@ export const MissionLogEnhanced: React.FC = () => {
 
                       <div
                         className={cn(
-                          'max-w-[85%] flex-1',
+                          'max-w-[90%] flex-1 sm:max-w-[85%]',
                           message.type === 'user' && 'flex justify-end'
                         )}
                       >
                         {/* Message Sender */}
                         {message.from !== 'user' && (
-                          <div className="mb-1 flex items-center gap-2">
-                            <p className="text-xs font-semibold text-foreground">
+                          <div className="mb-1 flex flex-wrap items-center gap-1 sm:gap-2">
+                            <p className="text-[10px] font-semibold text-foreground sm:text-xs">
                               {employeeName}
                             </p>
                             {role && role !== 'user' && (
                               <Badge
                                 variant="outline"
-                                className="px-1.5 py-0 text-[10px]"
+                                className="px-1 py-0 text-[9px] sm:px-1.5 sm:text-[10px]"
                               >
                                 {role === 'supervisor' ? 'Supervisor' : 'Agent'}
                               </Badge>
                             )}
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-[10px] text-muted-foreground sm:text-xs">
                               {new Date(message.timestamp).toLocaleTimeString()}
                             </p>
                           </div>
@@ -307,14 +307,14 @@ export const MissionLogEnhanced: React.FC = () => {
                         {/* Message Content */}
                         <div
                           className={cn(
-                            'rounded-lg p-3',
+                            'rounded-lg p-2 sm:p-3',
                             getMessageColor(message.type, role)
                           )}
                         >
                           {message.type === 'user' ? (
-                            <p className="text-sm">{message.content}</p>
+                            <p className="text-xs sm:text-sm">{message.content}</p>
                           ) : (
-                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                            <div className="prose prose-sm dark:prose-invert max-w-full overflow-x-auto">
                               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {message.content}
                               </ReactMarkdown>
@@ -324,9 +324,9 @@ export const MissionLogEnhanced: React.FC = () => {
                       </div>
 
                       {message.type === 'user' && (
-                        <Avatar className="h-8 w-8 flex-shrink-0">
+                        <Avatar className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8">
                           <AvatarFallback className="bg-primary">
-                            <User className="h-4 w-4 text-primary-foreground" />
+                            <User className="h-3 w-3 text-primary-foreground sm:h-4 sm:w-4" />
                           </AvatarFallback>
                         </Avatar>
                       )}

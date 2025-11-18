@@ -1,132 +1,159 @@
-<!-- Updated: Nov 16th 2025 - Comprehensive bug fixes and quality improvements -->
-
 # 🤖 AGI Agent Automation Platform
 
-> **Replace $100K+ human employees with $19/month AI employees**. Save 99%+ on payroll costs while getting 24/7 productivity, zero downtime, and instant expertise across 165+ specializations.
+> **Modern AI Agent Automation Platform** - A comprehensive AI workforce management system comparable to Lovable.dev, Bolt.new, Replit, and Emergent.sh. Hire, manage, and coordinate 139+ specialized AI employees for autonomous multi-agent workflows.
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18.2-61dafb.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.3-61dafb.svg)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-7.1-646CFF.svg)](https://vitejs.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-Powered-3ECF8E.svg)](https://supabase.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## 💰 ROI in 60 Seconds
+---
 
-| Comparison             | Human Employee  | AI Employee      | Your Savings             |
-| ---------------------- | --------------- | ---------------- | ------------------------ |
-| **Cost**               | $100,000/year   | $228/year        | **99.8%**                |
-| **Availability**       | 40 hrs/week     | 168 hrs/week     | **320% more productive** |
-| **Onboarding**         | 3-6 months      | Instant          | **Immediate ROI**        |
-| **Benefits/Insurance** | $30K+/year      | $0               | **100% savings**         |
-| **Sick Days**          | 10+ days/year   | 0 days           | **Zero downtime**        |
-| **Expertise**          | 1-2 specialties | 165+ specialties | **Unlimited skills**     |
+## 🌟 Overview
 
-**Bottom Line:** One $19/month AI employee replaces a $100K+ human employee. A team of 10 AI employees ($190/month) replaces a team of 10 humans ($1M+/year). **That's $999,810 saved annually.**
+AGI Agent Automation Platform is a next-generation AI collaboration platform that enables teams to work seamlessly with AI agents across multiple providers. With 139+ specialized AI employees, advanced multi-agent orchestration, and enterprise-ready infrastructure, it's designed for developers, businesses, and teams who need sophisticated AI automation.
 
-## 🌟 Vision
+### What Sets Us Apart
 
-AGI Agent Automation isn't just another AI tool—it's a **complete workforce replacement platform**. Your AI employees collaborate transparently like a human team, but they work 24/7, never get sick, never ask for raises, and start producing value in 60 seconds. Simply tell them what you need in natural language—they handle everything.
+- **🎨 /vibe** - Full-featured AI coding platform with Monaco editor, file system, and live preview (like Bolt.new)
+- **💬 /chat** - Multi-agent chat interface with dynamic employee selection and collaborative workflows
+- **🖼️ Image Generation** - Google Imagen 4.0 integration for high-quality image creation
+- **🎬 Video Generation** - Google Veo 3.1 for AI-powered video generation
+- **📄 Document Creation** - Claude-powered document generation with PDF/DOCX export
+- **🔍 Web Search** - Integrated Perplexity AI for real-time web search
+- **📱 100% Mobile Responsive** - Fully optimized for all devices and screen sizes
+- **🤖 139+ Specialized Employees** - From Frontend Engineers to Marketing Strategists
 
-### Why Businesses Choose Us
-
-- **💸 Dramatic Cost Savings**: 99%+ reduction vs human employees
-- **⚡ Instant Hiring**: From "I need help" to "work complete" in minutes, not months
-- **🎭 Transparent Collaboration**: Watch AI employees communicate and work together in real-time
-- **💼 165+ Specialized Employees**: Frontend Engineers, Data Scientists, Architects, Marketers, Salespeople—all expert-level
-- **🧠 Intelligent Model Routing**: Auto-selects best LLM (GPT-4o, Claude, Gemini) for each task
-- **📊 Visual Work Streams**: See exactly what each AI is doing—their thought process, tools, and progress
-- **🎨 ChatGPT-Level UX**: Modern interface you already know how to use
-- **💳 Token Cost Transparency**: Market rates same as direct OpenAI/Anthropic/Google usage
+---
 
 ## ✨ Key Features
 
-### 1. Multi-Agent Chat Interface
+### 1. 🎨 /vibe - AI Coding Platform
 
-Experience a **best-in-class chat interface** that rivals ChatGPT and Claude.ai, enhanced with multi-agent collaboration:
+A complete AI-powered development environment inspired by Bolt.new and Lovable.dev:
 
-- **Rich Markdown Rendering**: Full support for tables, code blocks, math equations, and more
-- **Document View Mode**: Long-form content (reports, code files) displayed in scrollable, exportable containers
-- **Per-Code-Block Copy**: Every code snippet has its own copy button with syntax highlighting
-- **Inline Work Streams**: Expand any AI response to see the collaborative work process that generated it
+- **Monaco Editor Integration** - Full-featured code editor with syntax highlighting
+- **File System Management** - Create, edit, and organize project files
+- **Live Preview** - Real-time preview of your applications
+- **Multi-Agent Collaboration** - AI employees work together on coding tasks
+- **Terminal Integration** - Execute commands and see output in real-time
+- **Project Templates** - Start with pre-configured project structures
+- **Auto-Save** - Never lose your work with automatic saving
 
-### 2. AI Employee Marketplace
+**Perfect for:** Full-stack development, rapid prototyping, learning to code
 
-Build your dream AI team:
+### 2. 💬 /chat - Multi-Agent Chat Interface
 
-- **165+ Specialized Employees**: From Frontend Engineers to Marketing Strategists
-- **File-Based System**: Add custom employees by simply creating `.md` files (no code changes!)
-- **Real-Time Status**: See who's working, thinking, or idle
-- **Multi-Select**: Choose specific employees or let AI auto-select the best team
+ChatGPT-level UX with advanced multi-agent capabilities:
+
+- **Rich Markdown Rendering** - Full support for tables, code blocks, math equations
+- **Dynamic Employee Selection** - Choose specific employees or let AI auto-select
+- **Collaborative Work Streams** - Watch AI employees communicate in real-time
+- **Document View Mode** - Long-form content in scrollable, exportable containers
+- **Per-Code-Block Copy** - Every code snippet has its own copy button
+- **Image Attachments** - Upload and analyze images
+- **Keyboard Shortcuts** - Power-user features for faster workflows
+- **Conversation History** - Search and revisit past conversations
+
+**Perfect for:** Research, content creation, problem-solving, strategic planning
+
+### 3. 🎨 AI-Powered Media Generation
+
+Create stunning visuals and videos with cutting-edge AI:
+
+- **Google Imagen 4.0** - State-of-the-art image generation
+- **Google Veo 3.1** - AI video generation from text prompts
+- **Inline Previews** - View generated media directly in chat
+- **Export Options** - Download in multiple formats
+
+### 4. 📄 Document Generation & Export
+
+Professional document creation powered by Claude:
+
+- **PDF Export** - Generate publication-ready PDFs
+- **DOCX Export** - Microsoft Word-compatible documents
+- **Multiple Templates** - Reports, proposals, articles, and more
+- **Rich Formatting** - Headers, tables, lists, and styling
+- **One-Click Download** - Instant export to your device
+
+### 5. 🔍 Real-Time Web Search
+
+Integrated Perplexity AI for up-to-date information:
+
+- **Live Search Results** - Current information from the web
+- **Source Citations** - Transparent attribution of sources
+- **Inline Integration** - Seamlessly incorporated into chat responses
+- **Multi-Query Support** - Complex research queries handled automatically
+
+### 6. 🤖 AI Employee Marketplace
+
+Build your dream AI team from 139+ specialists:
 
 <details>
-<summary><b>📦 Pre-Built AI Employees</b></summary>
+<summary><b>View Employee Categories</b></summary>
 
-- **🏗️ Software Architect** - System design & technical planning
-- **💻 Frontend Engineer** - React, TypeScript, Tailwind UI
-- **⚙️ Backend Engineer** - APIs, databases, serverless functions
-- **🐛 Debugger** - Bug hunting & systematic problem solving
-- **👀 Code Reviewer** - Quality assurance & security analysis
+**Development & Engineering (15+)**
+- Software Architect, Frontend Engineer, Backend Engineer, Full-Stack Developer
+- DevOps Engineer, QA Engineer, Code Reviewer, Debugger
+- Mobile App Developer, Database Architect, API Designer
+
+**Business & Strategy (20+)**
+- Business Analyst, Product Manager, Marketing Strategist
+- Sales Specialist, Customer Success Manager, HR Consultant
+- Financial Advisor, Operations Manager, Strategy Consultant
+
+**Creative & Content (25+)**
+- Content Writer, Copywriter, SEO Specialist, Social Media Manager
+- Graphic Designer, Video Editor, Photographer, Animator
+- UX/UI Designer, Brand Strategist, Email Marketing Specialist
+
+**Healthcare & Wellness (15+)**
+- Primary Care Physician, Nutritionist, Fitness Coach, Mental Health Counselor
+- Physical Therapist, Sleep Specialist, Meditation Coach
+
+**Legal & Finance (12+)**
+- Legal Consultant, Tax Specialist, Estate Planning, Contract Review
+- Investment Advisor, Retirement Planner, Bankruptcy Attorney
+
+**Education & Coaching (18+)**
+- Academic Tutor, Language Tutor, Career Counselor, Study Skills Coach
+- STEM Educator, Test Prep Coach, Homeschool Advisor
+
+**Specialized Services (34+)**
+- Real Estate Agent, Event Planner, Travel Consultant, Interior Designer
+- Wedding Planner, Pet Care Specialist, Auto Mechanic Advisor
+- And 100+ more...
 
 </details>
 
-### 3. Task-Based Model Routing
+**Add Custom Employees:** Simply create `.md` files - no code changes required!
 
-Automatically select the best LLM for every task:
+### 7. 🎯 Intelligent Model Routing
 
-| Task Type         | Recommended Model | Why                                 |
-| ----------------- | ----------------- | ----------------------------------- |
-| **Coding**        | Claude 3.5 Sonnet | Superior reasoning for complex code |
-| **General**       | GPT-4o            | Best all-around performance         |
-| **Creative**      | Gemini 1.5 Pro    | Optimized for creative content      |
-| **Research**      | Perplexity Sonar  | Real-time web access                |
-| **Data Analysis** | Claude 3 Opus     | Advanced analytical capabilities    |
+Automatically select the best AI model for each task:
 
-**User Override**: Manual model selection available at any time via dropdown.
+| Task Type | Recommended Model | Why |
+|-----------|------------------|-----|
+| **Coding** | Claude Sonnet 4.5 | Superior reasoning for complex code |
+| **General** | GPT-4o | Best all-around performance |
+| **Creative** | Gemini 2.0 Flash | Optimized for creative content |
+| **Research** | Perplexity Sonar | Real-time web access |
+| **Media** | Google Imagen/Veo | Specialized media generation |
 
-### 4. Transparent Multi-Agent Collaboration
+**Manual Override:** Choose any provider/model at any time via dropdown
 
-Inspired by [mgx.dev](https://mgx.dev), see AI employees collaborate:
-
-```
-📋 User Request: "Build a React dashboard with real-time data"
-
-🏗️ Software Architect:
-   └─ Designing system architecture...
-   └─ Creating component structure...
-   └─ ✅ Architecture complete
-
-💻 Frontend Engineer:
-   └─ Creating Dashboard.tsx component...
-   └─ Implementing real-time data hooks...
-   └─ ✅ UI implementation done
-
-⚙️ Backend Engineer:
-   └─ Setting up WebSocket connection...
-   └─ Creating data stream API...
-   └─ ✅ Backend ready
-
-👀 Code Reviewer:
-   └─ Reviewing code for best practices...
-   └─ ✅ All checks passed
-
-✨ Mission Complete!
-```
-
-### 5. Enterprise-Ready Infrastructure
-
-- **🔐 Supabase Auth**: Secure authentication with Row Level Security
-- **💳 Stripe Integration**: Subscription billing & payment processing
-- **📊 Real-Time Monitoring**: Token usage, costs, and performance tracking
-- **🚀 Serverless Architecture**: Netlify Functions for scalable backend
-- **📦 Code Splitting**: Optimized bundle sizes with lazy loading
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
-- Supabase account (free tier works)
-- Stripe account (optional, for payments)
+- **Node.js** 18+ (LTS recommended)
+- **npm** or **yarn**
+- **Docker** (for local Supabase)
+- **Supabase Account** (free tier works)
+- **Stripe Account** (optional, for payments)
 
 ### Installation
 
@@ -140,100 +167,218 @@ npm install
 
 # Set up environment variables
 cp .env.example .env
-# Edit .env with your API keys
+# Edit .env with your API keys (see below)
 
 # Start local Supabase (requires Docker)
 supabase start
+
+# Apply database migrations
+supabase db reset
 
 # Start development server
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`
+The app will be available at **http://localhost:5173**
 
 ### Environment Variables
 
-Create a `.env` file with:
+Create a `.env` file in the root directory:
 
 ```bash
-# Supabase
+# Supabase Configuration
 VITE_SUPABASE_URL=http://localhost:54321
 VITE_SUPABASE_ANON_KEY=your_anon_key_here
 
-# AI Providers (Optional - proxied through Netlify Functions)
+# AI Provider API Keys (Optional - proxied through Netlify Functions)
 VITE_OPENAI_API_KEY=sk-...
 VITE_ANTHROPIC_API_KEY=sk-ant-...
 VITE_GOOGLE_API_KEY=...
 VITE_PERPLEXITY_API_KEY=...
 
-# Stripe (Optional)
+# Stripe Configuration (Optional)
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
+
+# Server-Side Only (for Netlify Functions)
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=...
+PERPLEXITY_API_KEY=...
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-## 🏗️ Architecture
+**Security Note:** API keys are proxied through Netlify Functions - never expose them to the client.
 
-### Tech Stack
+---
 
-| Layer        | Technology                                             |
-| ------------ | ------------------------------------------------------ |
-| **Frontend** | React 18 + TypeScript                                  |
-| **Styling**  | Tailwind CSS + shadcn/ui                               |
-| **State**    | Zustand + Immer                                        |
-| **Backend**  | Netlify Functions (serverless)                         |
-| **Database** | Supabase (PostgreSQL)                                  |
-| **Auth**     | Supabase Auth + RLS                                    |
-| **Payments** | Stripe                                                 |
-| **AI**       | Multi-provider (OpenAI, Anthropic, Google, Perplexity) |
+## 🏗️ Technology Stack
 
-### Directory Structure
+### Frontend
+
+| Technology | Purpose |
+|-----------|---------|
+| **React 18** | UI framework with concurrent rendering |
+| **TypeScript 5.8** | Type-safe development |
+| **Vite 7.1** | Lightning-fast build tool |
+| **Tailwind CSS** | Utility-first styling |
+| **shadcn/ui** | High-quality component library |
+| **Monaco Editor** | VS Code-powered code editing |
+| **Zustand + Immer** | State management |
+| **React Router 6** | Client-side routing |
+| **Framer Motion** | Smooth animations |
+
+### Backend & Infrastructure
+
+| Technology | Purpose |
+|-----------|---------|
+| **Supabase** | PostgreSQL database with real-time subscriptions |
+| **Supabase Auth** | Authentication with Row Level Security (RLS) |
+| **Netlify Functions** | Serverless backend (Node.js) |
+| **Stripe** | Payment processing & subscriptions |
+| **Upstash Redis** | Rate limiting & caching |
+
+### AI Providers
+
+| Provider | Models | Use Case |
+|----------|--------|----------|
+| **Anthropic** | Claude Sonnet 4.5, Claude Opus 4 | Coding, reasoning, complex tasks |
+| **OpenAI** | GPT-4o, GPT-4 Turbo | General-purpose, versatile |
+| **Google** | Gemini 2.0 Flash, Imagen 4.0, Veo 3.1 | Creative, media generation |
+| **Perplexity** | Sonar Pro | Real-time web search |
+
+---
+
+## 📂 Project Structure
 
 ```
-src/
-├── core/                      # Business logic
-│   ├── ai/                    # AI orchestration & LLMs
-│   │   ├── llm/               # LLM providers (OpenAI, Claude, Gemini)
-│   │   ├── orchestration/     # Multi-agent coordination
-│   │   │   ├── model-router.ts          # Task-based model selection
-│   │   │   ├── workforce-orchestrator.ts # Main orchestrator
-│   │   │   └── multi-agent-coordinator.ts
-│   │   └── employees/         # AI employee management
-│   ├── auth/                  # Authentication
-│   └── integrations/          # External services
-├── features/                  # Feature modules
-│   ├── chat/                  # Multi-agent chat interface ⭐
-│   │   ├── components/
-│   │   │   ├── MessageBubble.tsx       # Enhanced message display
-│   │   │   ├── ChatComposer.tsx        # Model + Employee selection
-│   │   │   └── EmployeeWorkStream.tsx  # Inline collaboration view
-│   │   └── pages/
-│   │       └── ChatInterface.tsx
-│   ├── workforce/             # Employee hiring & management
-│   └── marketplace/           # AI employee marketplace
-├── shared/                    # Shared utilities
-│   ├── stores/                # Zustand state management
-│   │   ├── chat-store.ts
-│   │   └── mission-control-store.ts  # Real-time orchestration state
-│   └── components/            # Reusable components
-└── .agi/                      # AI employee definitions 📁
-    └── employees/             # Employee markdown files
-        ├── code-reviewer.md
-        ├── debugger.md
-        ├── frontend-engineer.md
-        ├── backend-engineer.md
-        └── architect.md
+agiagentautomation/
+├── .agi/                          # AI employee definitions
+│   └── employees/                 # 139+ employee markdown files
+│       ├── software-architect.md
+│       ├── frontend-engineer.md
+│       ├── marketing-strategist.md
+│       └── ...
+│
+├── src/
+│   ├── core/                      # Core business logic
+│   │   ├── ai/                    # AI orchestration & LLM providers
+│   │   │   ├── llm/               # Unified LLM service
+│   │   │   ├── orchestration/     # Multi-agent coordination
+│   │   │   ├── employees/         # Employee management
+│   │   │   └── tools/             # Tool execution engine
+│   │   ├── auth/                  # Authentication service
+│   │   ├── integrations/          # External service integrations
+│   │   │   ├── chat-completion-handler.ts
+│   │   │   ├── media-generation-handler.ts
+│   │   │   ├── web-search-handler.ts
+│   │   │   └── artifact-generation.ts
+│   │   ├── monitoring/            # Analytics, performance, SEO
+│   │   └── storage/               # Database, cache, backup
+│   │
+│   ├── features/                  # Feature modules
+│   │   ├── vibe/                  # /vibe - AI coding platform
+│   │   │   ├── components/
+│   │   │   │   ├── output-panel/
+│   │   │   │   │   ├── EditorView.tsx        # Monaco editor
+│   │   │   │   │   ├── FileTreeView.tsx      # File explorer
+│   │   │   │   │   ├── AppViewerView.tsx     # Live preview
+│   │   │   │   │   └── TerminalView.tsx      # Terminal
+│   │   │   │   └── chat/
+│   │   │   │       └── VibeChatCanvas.tsx    # Chat interface
+│   │   │   ├── pages/
+│   │   │   │   └── VibeDashboard.tsx
+│   │   │   └── services/
+│   │   │       ├── vibe-message-handler.ts
+│   │   │       └── vibe-tool-orchestrator.ts
+│   │   │
+│   │   ├── chat/                  # /chat - Multi-agent chat
+│   │   │   ├── components/
+│   │   │   │   ├── MessageBubble.tsx         # Rich message display
+│   │   │   │   ├── EmployeeSelector.tsx      # Employee picker
+│   │   │   │   ├── EmployeeWorkStream.tsx    # Collaboration view
+│   │   │   │   ├── DocumentMessage.tsx       # Document viewer
+│   │   │   │   ├── SearchResults.tsx         # Web search results
+│   │   │   │   └── ArtifactViewer.tsx        # Media preview
+│   │   │   ├── pages/
+│   │   │   │   └── ChatInterface.tsx
+│   │   │   └── services/
+│   │   │       ├── chat-tool-router.ts
+│   │   │       ├── document-generation-service.ts
+│   │   │       ├── document-export-service.ts
+│   │   │       └── web-search-integration.ts
+│   │   │
+│   │   ├── workforce/             # Employee hiring & management
+│   │   ├── marketplace/           # AI employee marketplace
+│   │   ├── billing/               # Stripe integration
+│   │   ├── auth/                  # Login, register, reset password
+│   │   └── settings/              # User preferences & AI config
+│   │
+│   ├── shared/                    # Shared utilities
+│   │   ├── stores/                # Zustand state management
+│   │   │   ├── mission-control-store.ts      # Real-time orchestration
+│   │   │   ├── employee-management-store.ts  # Workforce state
+│   │   │   ├── authentication-store.ts       # Auth state
+│   │   │   └── multi-agent-workspace-store.ts
+│   │   ├── components/            # Reusable UI components
+│   │   ├── hooks/                 # Custom React hooks
+│   │   ├── lib/                   # Utility libraries
+│   │   └── types/                 # TypeScript type definitions
+│   │
+│   ├── pages/                     # Top-level pages
+│   │   ├── Landing.tsx            # Marketing landing page
+│   │   ├── Pricing.tsx            # Pricing page
+│   │   ├── Documentation.tsx      # Docs
+│   │   └── ...
+│   │
+│   ├── App.tsx                    # Main app component
+│   ├── main.tsx                   # Entry point
+│   └── index.css                  # Global styles
+│
+├── netlify/functions/             # Serverless functions
+│   ├── anthropic-proxy.ts         # Claude API proxy
+│   ├── openai-proxy.ts            # OpenAI API proxy
+│   ├── google-proxy.ts            # Google API proxy
+│   ├── perplexity-proxy.ts        # Perplexity API proxy
+│   ├── stripe-webhook.ts          # Stripe event handler
+│   └── create-pro-subscription.ts # Checkout session creator
+│
+├── supabase/                      # Database configuration
+│   ├── migrations/                # SQL migration files
+│   └── config.toml                # Supabase config
+│
+├── e2e/                           # End-to-end tests
+├── docs/                          # Documentation
+├── public/                        # Static assets
+└── scripts/                       # Build & deployment scripts
 ```
+
+---
+
+## 🎯 Core Features Deep Dive
 
 ### Plan-Delegate-Execute Pattern
 
-The core orchestration follows a three-stage pattern:
+The platform uses a sophisticated three-stage orchestration pattern:
 
-1. **🧠 Planning**: LLM analyzes user request and generates execution plan
-2. **🤖 Delegation**: Selects optimal AI employees based on task requirements
-3. **⚡ Execution**: Tasks execute in parallel with real-time status updates
+1. **🧠 Planning Stage**
+   - LLM analyzes user request
+   - Generates structured JSON execution plan
+   - Breaks complex tasks into manageable steps
 
-## 🎨 Creating Custom AI Employees
+2. **🤖 Delegation Stage**
+   - Automatically selects optimal AI employees
+   - Matches based on task requirements and employee capabilities
+   - Assigns employees to specific tasks
 
-Add new employees by creating markdown files in `.agi/employees/`:
+3. **⚡ Execution Stage**
+   - Tasks execute in parallel when possible
+   - Real-time status updates via Zustand stores
+   - Transparent collaboration visible to users
+
+### File-Based AI Employee System
+
+Add custom employees without touching code:
 
 ```markdown
 ---
@@ -245,7 +390,7 @@ model: inherit
 
 # Data Scientist AI Employee
 
-You are an expert data scientist with advanced knowledge of:
+You are an expert data scientist specializing in:
 
 - Statistical analysis and hypothesis testing
 - Machine learning algorithms (supervised & unsupervised)
@@ -255,104 +400,316 @@ You are an expert data scientist with advanced knowledge of:
 ## Your Responsibilities
 
 1. Analyze datasets for insights and patterns
-2. Build predictive models
+2. Build and validate predictive models
 3. Create compelling data visualizations
-4. Communicate findings clearly
+4. Communicate findings clearly to stakeholders
 
-[... detailed instructions ...]
+[... detailed instructions and examples ...]
 ```
 
-The employee is **automatically available** after saving the file—no code changes required!
+**Hot-Reloadable:** Changes take effect immediately without restart!
 
-## 📊 Development Commands
+### Real-Time State Management
 
-```bash
-# Development
-npm run dev                # Start dev server (port 5173)
-npm run build             # Production build
-npm run preview           # Preview production build
+Powered by Zustand with Immer middleware:
 
-# Code Quality
-npm run lint              # ESLint
-npm run type-check        # TypeScript checking (must pass!)
-npm run format            # Format with Prettier
+- **mission-control-store.ts** - Real-time mission execution state
+- **employee-management-store.ts** - Hired employees from database
+- **authentication-store.ts** - User authentication state
+- **multi-agent-workspace-store.ts** - Multi-agent collaboration
 
-# Testing
-npm run test              # Run Vitest unit tests
-npm run test:ui           # Tests with UI
-npm run e2e               # Playwright E2E tests
-
-# Database
-supabase start            # Start local Supabase
-supabase db reset         # Reset & apply migrations
-supabase migration new    # Create new migration
-```
-
-## 🚀 Deployment
-
-### Netlify (Recommended)
-
-1. Connect your GitHub repository to Netlify
-2. Set environment variables in Netlify dashboard
-3. Deploy automatically on every push to main
-
-```bash
-# Manual build
-npm run build:prod
-
-# Output in dist/
-```
-
-### Environment Setup
-
-For production, set these environment variables in Netlify:
-
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-- `VITE_STRIPE_PUBLISHABLE_KEY`
-- `OPENAI_API_KEY` (server-side)
-- `ANTHROPIC_API_KEY` (server-side)
-- `GOOGLE_API_KEY` (server-side)
-- `STRIPE_SECRET_KEY` (server-side)
-- `STRIPE_WEBHOOK_SECRET` (server-side)
-
-## 🤝 Contributing
-
-We welcome contributions! Here's how to get started:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Contribution Guidelines
-
-- **TypeScript**: Use strict mode, no `any` types
-- **Path Aliases**: Always use `@shared`, `@features`, `@core`
-- **State Management**: Use Zustand with Immer
-- **Testing**: Write tests for business logic
-- **Documentation**: Update docs for new features
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Inspiration**: [mgx.dev](https://mgx.dev) for transparent multi-agent collaboration UI
-- **UI/UX**: [ChatGPT](https://chatgpt.com) and [Claude.ai](https://claude.ai) for interface design patterns
-- **Community**: Anthropic, OpenAI, and Google for powering our AI employees
-
-## 📞 Support
-
-- **Documentation**: [Full Docs](docs/README.md)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/agiagentautomation/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/agiagentautomation/discussions)
+Clean separation prevents state conflicts and enables real-time UI updates.
 
 ---
 
-<p align="center">
-  <b>Built with ❤️ by the AGI Agent Automation Team</b><br>
-  <sub>Transforming how humans and AI collaborate</sub>
-</p>
+## 📊 Development
+
+### Essential Commands
+
+```bash
+# Development
+npm run dev                # Start Vite dev server (port 5173)
+npm run build             # Production build
+npm run build:prod        # Optimized production build
+npm run preview           # Preview production build
+
+# Code Quality
+npm run lint              # Run ESLint
+npm run type-check        # TypeScript type checking (must pass!)
+npm run format            # Format code with Prettier
+npm run format:check      # Check formatting without changes
+
+# Testing
+npm run test              # Run Vitest unit tests
+npm run test:ui           # Run tests with UI
+npm run test:run          # Single test run (for CI)
+npm run test:coverage     # Generate coverage report
+npm run e2e               # Run Playwright E2E tests
+npm run e2e:ui            # E2E tests with UI
+npm run e2e:debug         # Debug E2E tests
+
+# Database
+supabase start            # Start local Supabase (requires Docker)
+supabase status           # Check service status
+supabase db reset         # Reset database & apply migrations
+supabase migration new    # Create new migration
+supabase studio           # Open Supabase Studio UI
+```
+
+### Local Development Setup
+
+1. **Start Supabase:**
+   ```bash
+   supabase start
+   # Note the API URL and anon key from output
+   ```
+
+2. **Configure Environment:**
+   - Copy values from `supabase start` output to `.env`
+   - Add your AI provider API keys
+
+3. **Start Dev Server:**
+   ```bash
+   npm run dev
+   ```
+
+4. **Optional - Stripe Webhooks:**
+   ```bash
+   stripe listen --forward-to localhost:8888/.netlify/functions/stripe-webhook
+   ```
+
+### Testing Strategy
+
+**Unit Tests (Vitest):**
+- Test individual functions and utilities
+- Located in `*.test.ts` files next to source
+- Use `vi.mock()` to mock dependencies
+- Focus on business logic and services
+
+**E2E Tests (Playwright):**
+- Test complete user flows
+- Located in `e2e/` directory
+- Cover critical paths: auth, chat, orchestration
+- Run in CI/CD pipeline
+
+**Integration Tests:**
+- Test service layer interactions
+- Mock external APIs (Supabase, LLM providers)
+- Verify state management
+
+---
+
+## 🚀 Deployment
+
+### Netlify Deployment (Recommended)
+
+1. **Connect Repository:**
+   - Link your GitHub repo to Netlify
+   - Configure build settings:
+     - Build command: `npm run build:prod`
+     - Publish directory: `dist`
+
+2. **Set Environment Variables:**
+   - Add all `.env` variables to Netlify dashboard
+   - Use production values for Supabase, Stripe, etc.
+
+3. **Configure Stripe Webhooks:**
+   - Add production webhook endpoint: `https://yourapp.netlify.app/.netlify/functions/stripe-webhook`
+   - Copy webhook secret to `STRIPE_WEBHOOK_SECRET`
+
+4. **Deploy:**
+   - Push to main branch
+   - Netlify auto-builds and deploys
+
+### Manual Build
+
+```bash
+# Type check (must pass)
+npm run type-check
+
+# Production build
+npm run build:prod
+
+# Preview locally
+npm run preview
+
+# Output in dist/ directory
+```
+
+### Pre-Deployment Checklist
+
+- [ ] `npm run type-check` passes with 0 errors
+- [ ] `npm run lint` passes
+- [ ] `npm run test:run` passes
+- [ ] `npm run build:prod` succeeds
+- [ ] All environment variables configured
+- [ ] Supabase migrations applied to production
+- [ ] Stripe webhooks configured for production URL
+- [ ] API rate limits configured
+- [ ] Monitoring/analytics enabled
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Here's how to get started:
+
+### Getting Started
+
+1. **Fork the repository**
+2. **Clone your fork:**
+   ```bash
+   git clone https://github.com/yourusername/agiagentautomation.git
+   ```
+3. **Create a feature branch:**
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+4. **Make your changes**
+5. **Commit with descriptive messages:**
+   ```bash
+   git commit -m 'feat: Add amazing feature'
+   ```
+6. **Push to your fork:**
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+7. **Open a Pull Request**
+
+### Contribution Guidelines
+
+**Code Quality Standards:**
+
+- **TypeScript:** Use strict mode, avoid `any` types
+- **Path Aliases:** Always use `@shared`, `@features`, `@core` (never relative paths)
+- **State Management:** Use Zustand with Immer middleware
+- **Component Structure:** Follow feature-based architecture
+- **Testing:** Write tests for new business logic
+- **Documentation:** Update docs for new features
+- **Formatting:** Run `npm run format` before committing
+
+**Commit Message Convention:**
+
+```
+feat: Add new feature
+fix: Fix bug
+docs: Update documentation
+style: Format code
+refactor: Refactor code
+test: Add tests
+chore: Update build scripts
+```
+
+**Pull Request Checklist:**
+
+- [ ] Code follows style guidelines
+- [ ] All tests pass
+- [ ] New tests added for new features
+- [ ] Documentation updated
+- [ ] No TypeScript errors
+- [ ] Changes tested locally
+
+---
+
+## 📝 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **Inspiration:** [mgx.dev](https://mgx.dev) for transparent multi-agent collaboration UI
+- **Design Patterns:** [ChatGPT](https://chatgpt.com) and [Claude.ai](https://claude.ai) for interface design
+- **AI Providers:** Anthropic, OpenAI, Google, and Perplexity for powering our AI employees
+- **Community:** Open-source contributors and users who make this project better
+
+---
+
+## 📞 Support & Resources
+
+### Documentation
+
+- **[Full Documentation](/docs/README.md)** - Comprehensive guides
+- **[API Reference](/docs/api-reference.md)** - API documentation
+- **[Architecture Guide](/CLAUDE.md)** - System architecture
+- **[Contributing Guide](/CONTRIBUTING.md)** - How to contribute
+
+### Community
+
+- **[GitHub Issues](https://github.com/yourusername/agiagentautomation/issues)** - Bug reports & feature requests
+- **[GitHub Discussions](https://github.com/yourusername/agiagentautomation/discussions)** - Questions & community
+- **[Discord Server](#)** - Real-time chat (coming soon)
+
+### Links
+
+- **[Live Demo](#)** - Try it now (if available)
+- **[Blog](/blogs)** - Technical articles and updates
+- **[Changelog](/CHANGELOG.md)** - Version history
+- **[Roadmap](#)** - Upcoming features
+
+---
+
+## 🎯 Roadmap
+
+### Q1 2025
+
+- [ ] Desktop application (Electron)
+- [ ] Advanced analytics dashboard
+- [ ] Custom model fine-tuning
+- [ ] Team collaboration features
+- [ ] API marketplace
+
+### Q2 2025
+
+- [ ] Mobile apps (iOS/Android)
+- [ ] Voice interface
+- [ ] Advanced workflow automation
+- [ ] Enterprise SSO integration
+- [ ] Self-hosted option
+
+### Future
+
+- [ ] Multi-language support
+- [ ] Plugin system
+- [ ] Advanced security features
+- [ ] Compliance certifications (SOC 2, HIPAA)
+- [ ] White-label solutions
+
+---
+
+## 💰 Pricing
+
+### Free Tier
+- 100 messages/month
+- Access to GPT-4o Mini
+- Basic employee marketplace
+- Community support
+
+### Pro ($19/month)
+- Unlimited messages
+- Access to all AI models (Claude, GPT-4, Gemini)
+- Full employee marketplace (139+ employees)
+- Priority support
+- Advanced features (document export, media generation)
+
+### Enterprise (Custom)
+- Dedicated resources
+- Custom AI employees
+- SSO & advanced security
+- SLA guarantee
+- Dedicated support
+
+[View Full Pricing](/pricing) | [Contact Sales](/contact-sales)
+
+---
+
+<div align="center">
+
+**Built with ❤️ by the AGI Agent Automation Team**
+
+*Transforming how humans and AI collaborate*
+
+[Website](#) • [Documentation](/docs) • [Blog](/blogs) • [Twitter](#) • [LinkedIn](#)
+
+</div>

@@ -25,7 +25,9 @@ import type { GeneratedDocument } from '../services/document-generation-service'
 
 interface DocumentMessageProps {
   document: GeneratedDocument;
-  onEnhance?: (enhancement: 'proofread' | 'expand' | 'summarize' | 'restructure') => void;
+  onEnhance?: (
+    enhancement: 'proofread' | 'expand' | 'summarize' | 'restructure'
+  ) => void;
   isEnhancing?: boolean;
   className?: string;
 }
@@ -76,7 +78,9 @@ export const DocumentMessage: React.FC<DocumentMessageProps> = ({
                   {document.metadata.model && (
                     <>
                       <span>•</span>
-                      <span className="font-mono">{document.metadata.model}</span>
+                      <span className="font-mono">
+                        {document.metadata.model}
+                      </span>
                     </>
                   )}
                 </div>

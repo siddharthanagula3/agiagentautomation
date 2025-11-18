@@ -66,7 +66,9 @@ export async function loadUserAIPreferences(): Promise<{
  * Get the default provider and model for a specific task type
  * This allows overriding user preferences for specialized tasks
  */
-export function getProviderForTaskType(taskType: 'chat' | 'document' | 'image' | 'video' | 'code'): {
+export function getProviderForTaskType(
+  taskType: 'chat' | 'document' | 'image' | 'video' | 'code'
+): {
   provider: LLMProvider;
   model: string;
 } {

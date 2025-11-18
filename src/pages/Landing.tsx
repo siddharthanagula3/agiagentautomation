@@ -388,7 +388,10 @@ const LandingPage: React.FC = () => {
       <ExpandableChatDemo />
 
       {/* AI Employees Marketplace Preview */}
-      <section ref={employeesRef} className="relative w-full max-w-full overflow-hidden py-12 sm:py-20">
+      <section
+        ref={employeesRef}
+        className="relative w-full max-w-full overflow-hidden py-12 sm:py-20"
+      >
         <Particles className="absolute inset-0 opacity-20" quantity={50} />
         <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div

@@ -54,30 +54,57 @@ class MultiAgentCollaborationService {
 
     this.employees = await systemPromptsService.getAvailableEmployees();
     this.employeesLoaded = true;
-    console.log(`[MultiAgentCollaborationService] Loaded ${this.employees.length} employees`);
+    console.log(
+      `[MultiAgentCollaborationService] Loaded ${this.employees.length} employees`
+    );
   }
 
   /**
    * Analyze task complexity to determine if multi-agent collaboration is needed
    */
-  async analyzeComplexity(userMessage: string): Promise<TaskComplexityAnalysis> {
+  async analyzeComplexity(
+    userMessage: string
+  ): Promise<TaskComplexityAnalysis> {
     const messageLower = userMessage.toLowerCase();
 
     // Complexity indicators
     const complexityKeywords = [
-      'build', 'create', 'develop', 'design', 'implement', 'architect',
-      'system', 'platform', 'application', 'full', 'complete', 'entire',
-      'comprehensive', 'end-to-end', 'full-stack', 'production-ready'
+      'build',
+      'create',
+      'develop',
+      'design',
+      'implement',
+      'architect',
+      'system',
+      'platform',
+      'application',
+      'full',
+      'complete',
+      'entire',
+      'comprehensive',
+      'end-to-end',
+      'full-stack',
+      'production-ready',
     ];
 
     const multiDomainKeywords = [
-      'frontend and backend', 'ui and api', 'design and code',
-      'security and performance', 'database and api', 'test and deploy'
+      'frontend and backend',
+      'ui and api',
+      'design and code',
+      'security and performance',
+      'database and api',
+      'test and deploy',
     ];
 
     const technicalDepthKeywords = [
-      'scalable', 'production', 'enterprise', 'distributed',
-      'microservices', 'infrastructure', 'architecture', 'deployment'
+      'scalable',
+      'production',
+      'enterprise',
+      'distributed',
+      'microservices',
+      'infrastructure',
+      'architecture',
+      'deployment',
     ];
 
     // Check for complexity indicators
@@ -86,7 +113,7 @@ class MultiAgentCollaborationService {
     const requiredExpertise: string[] = [];
 
     // Check for build/create keywords
-    const hasBuildKeywords = complexityKeywords.some(keyword => {
+    const hasBuildKeywords = complexityKeywords.some((keyword) => {
       if (messageLower.includes(keyword)) {
         detectedKeywords.push(keyword);
         complexityScore += 2;
@@ -96,7 +123,7 @@ class MultiAgentCollaborationService {
     });
 
     // Check for multi-domain requirements
-    const hasMultiDomain = multiDomainKeywords.some(keyword => {
+    const hasMultiDomain = multiDomainKeywords.some((keyword) => {
       if (messageLower.includes(keyword)) {
         detectedKeywords.push(keyword);
         complexityScore += 3;
@@ -106,7 +133,7 @@ class MultiAgentCollaborationService {
     });
 
     // Check for technical depth
-    const hasTechnicalDepth = technicalDepthKeywords.some(keyword => {
+    const hasTechnicalDepth = technicalDepthKeywords.some((keyword) => {
       if (messageLower.includes(keyword)) {
         detectedKeywords.push(keyword);
         complexityScore += 2;
@@ -151,7 +178,10 @@ class MultiAgentCollaborationService {
 
     // Determine if complex
     const isComplex = complexityScore >= 5 || requiredExpertise.length >= 2;
-    const estimatedEmployeeCount = Math.min(Math.max(requiredExpertise.length, 2), 4);
+    const estimatedEmployeeCount = Math.min(
+      Math.max(requiredExpertise.length, 2),
+      4
+    );
 
     let reason = '';
     if (isComplex) {
@@ -165,7 +195,7 @@ class MultiAgentCollaborationService {
       isComplex,
       reason,
       requiredExpertise,
-      estimatedEmployeeCount
+      estimatedEmployeeCount,
     };
   }
 
@@ -191,8 +221,10 @@ class MultiAgentCollaborationService {
       complexity
     );
 
-    console.log(`[Collaboration] Selected ${selectedEmployees.length} employees:`,
-      selectedEmployees.map(e => e.name));
+    console.log(
+      `[Collaboration] Selected ${selectedEmployees.length} employees:`,
+      selectedEmployees.map((e) => e.name)
+    );
 
     const collaborationMessages: CollaborationMessage[] = [];
     const employeeResponses: Map<string, string> = new Map();
@@ -206,14 +238,15 @@ class MultiAgentCollaborationService {
       );
 
       employeeResponses.set(employee.name, contribution.content);
-      employeeContributions[employee.name] = (employeeContributions[employee.name] || 0) + 1;
+      employeeContributions[employee.name] =
+        (employeeContributions[employee.name] || 0) + 1;
 
       collaborationMessages.push({
         from: employee.name,
         fromAvatar: this.getEmployeeAvatar(employee.name),
         content: contribution.content,
         type: 'contribution',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       totalTokens += contribution.tokensUsed || 0;
@@ -241,11 +274,12 @@ class MultiAgentCollaborationService {
             to: otherEmployee.name,
             content: discussion.content,
             type: 'discussion',
-            timestamp: new Date()
+            timestamp: new Date(),
           });
 
           totalTokens += discussion.tokensUsed || 0;
-          employeeContributions[employee.name] = (employeeContributions[employee.name] || 0) + 1;
+          employeeContributions[employee.name] =
+            (employeeContributions[employee.name] || 0) + 1;
         }
       }
     }
@@ -263,7 +297,7 @@ class MultiAgentCollaborationService {
       fromAvatar: this.getEmployeeAvatar('supervisor'),
       content: synthesis.content,
       type: 'synthesis',
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     totalTokens += synthesis.tokensUsed || 0;
@@ -279,8 +313,8 @@ class MultiAgentCollaborationService {
       metadata: {
         totalTokens,
         duration,
-        employeeContributions
-      }
+        employeeContributions,
+      },
     };
   }
 
@@ -296,7 +330,7 @@ class MultiAgentCollaborationService {
     const maxEmployees = complexity.estimatedEmployeeCount;
 
     // Score employees based on relevance
-    const scoredEmployees = this.employees.map(employee => {
+    const scoredEmployees = this.employees.map((employee) => {
       let score = 0;
       const descLower = employee.description.toLowerCase();
       const nameLower = employee.name.toLowerCase();
@@ -304,18 +338,27 @@ class MultiAgentCollaborationService {
       // Match expertise areas
       for (const expertise of complexity.requiredExpertise) {
         const expertiseLower = expertise.toLowerCase();
-        if (descLower.includes(expertiseLower) || nameLower.includes(expertiseLower)) {
+        if (
+          descLower.includes(expertiseLower) ||
+          nameLower.includes(expertiseLower)
+        ) {
           score += 10;
         }
       }
 
       // Keyword matching
-      if (messageLower.includes('frontend') && descLower.includes('frontend')) score += 8;
-      if (messageLower.includes('backend') && descLower.includes('backend')) score += 8;
-      if (messageLower.includes('design') && descLower.includes('design')) score += 8;
-      if (messageLower.includes('database') && descLower.includes('database')) score += 8;
-      if (messageLower.includes('security') && descLower.includes('security')) score += 8;
-      if (messageLower.includes('test') && descLower.includes('test')) score += 6;
+      if (messageLower.includes('frontend') && descLower.includes('frontend'))
+        score += 8;
+      if (messageLower.includes('backend') && descLower.includes('backend'))
+        score += 8;
+      if (messageLower.includes('design') && descLower.includes('design'))
+        score += 8;
+      if (messageLower.includes('database') && descLower.includes('database'))
+        score += 8;
+      if (messageLower.includes('security') && descLower.includes('security'))
+        score += 8;
+      if (messageLower.includes('test') && descLower.includes('test'))
+        score += 6;
 
       // Tool availability
       score += employee.tools.length * 0.5;
@@ -336,7 +379,7 @@ class MultiAgentCollaborationService {
     if (selected.length === 0 && this.employees.length >= 2) {
       selected.push(this.employees[0], this.employees[1]);
     } else if (selected.length === 1 && this.employees.length >= 2) {
-      const second = this.employees.find(e => e.name !== selected[0].name);
+      const second = this.employees.find((e) => e.name !== selected[0].name);
       if (second) selected.push(second);
     }
 
@@ -365,22 +408,25 @@ Focus on your area of expertise and provide actionable insights. Keep it concise
         messages: [
           { role: 'system', content: employee.systemPrompt },
           ...conversationHistory,
-          { role: 'user', content: prompt }
+          { role: 'user', content: prompt },
         ],
-        model: employee.model === 'inherit' ? 'claude-3-5-sonnet-20241022' : employee.model,
+        model:
+          employee.model === 'inherit'
+            ? 'claude-3-5-sonnet-20241022'
+            : employee.model,
         temperature: 0.7,
-        maxTokens: 1000
+        maxTokens: 1000,
       });
 
       return {
         content: response.content,
-        tokensUsed: response.usage?.totalTokens
+        tokensUsed: response.usage?.totalTokens,
       };
     } catch (error) {
       console.error(`Error getting contribution from ${employee.name}:`, error);
       return {
         content: `I'm ${employee.name}, and I'm ready to contribute my expertise in ${employee.description}.`,
-        tokensUsed: 0
+        tokensUsed: 0,
       };
     }
   }
@@ -405,22 +451,25 @@ Based on your expertise in ${employee.description}, provide a brief response or 
         provider: 'anthropic',
         messages: [
           { role: 'system', content: employee.systemPrompt },
-          { role: 'user', content: prompt }
+          { role: 'user', content: prompt },
         ],
-        model: employee.model === 'inherit' ? 'claude-3-5-sonnet-20241022' : employee.model,
+        model:
+          employee.model === 'inherit'
+            ? 'claude-3-5-sonnet-20241022'
+            : employee.model,
         temperature: 0.7,
-        maxTokens: 500
+        maxTokens: 500,
       });
 
       return {
         content: response.content,
-        tokensUsed: response.usage?.totalTokens
+        tokensUsed: response.usage?.totalTokens,
       };
     } catch (error) {
       console.error(`Error getting discussion from ${employee.name}:`, error);
       return {
         content: `Good points from ${otherEmployeeName}.`,
-        tokensUsed: 0
+        tokensUsed: 0,
       };
     }
   }
@@ -461,19 +510,19 @@ Provide the final synthesized answer:`;
         messages: [
           {
             role: 'system',
-            content: `You are an expert supervisor coordinating AI employees. Your role is to synthesize multiple expert contributions into a clear, comprehensive answer.`
+            content: `You are an expert supervisor coordinating AI employees. Your role is to synthesize multiple expert contributions into a clear, comprehensive answer.`,
           },
           ...conversationHistory,
-          { role: 'user', content: supervisorPrompt }
+          { role: 'user', content: supervisorPrompt },
         ],
         model: 'claude-3-5-sonnet-20241022',
         temperature: 0.6,
-        maxTokens: 2000
+        maxTokens: 2000,
       });
 
       return {
         content: response.content,
-        tokensUsed: response.usage?.totalTokens
+        tokensUsed: response.usage?.totalTokens,
       };
     } catch (error) {
       console.error('Error synthesizing final answer:', error);
@@ -483,7 +532,7 @@ Provide the final synthesized answer:`;
 
       return {
         content: fallback,
-        tokensUsed: 0
+        tokensUsed: 0,
       };
     }
   }
@@ -524,4 +573,5 @@ Provide the final synthesized answer:`;
 }
 
 // Export singleton instance
-export const multiAgentCollaborationService = new MultiAgentCollaborationService();
+export const multiAgentCollaborationService =
+  new MultiAgentCollaborationService();

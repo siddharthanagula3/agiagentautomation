@@ -309,7 +309,9 @@ const ContactSalesPage: React.FC = () => {
               viewport={{ once: true }}
               className="rounded-3xl border border-border/40 bg-background/60 p-4 backdrop-blur-xl sm:p-6 md:p-8"
             >
-              <h2 className="mb-6 text-2xl font-bold sm:text-3xl">Get in Touch</h2>
+              <h2 className="mb-6 text-2xl font-bold sm:text-3xl">
+                Get in Touch
+              </h2>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
@@ -500,7 +502,9 @@ const ContactSalesPage: React.FC = () => {
               </div>
 
               <div className="rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-4 backdrop-blur-xl sm:p-6 md:p-8">
-                <h3 className="mb-4 text-lg font-bold sm:text-xl">What Happens Next?</h3>
+                <h3 className="mb-4 text-lg font-bold sm:text-xl">
+                  What Happens Next?
+                </h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/20">

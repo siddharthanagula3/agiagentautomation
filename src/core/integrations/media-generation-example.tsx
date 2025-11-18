@@ -59,7 +59,9 @@ export interface UseMediaGenerationReturn {
 export function useMediaGeneration(
   options: UseMediaGenerationOptions = {}
 ): UseMediaGenerationReturn {
-  const [generatedMedia, setGeneratedMedia] = useState<MediaGenerationResult[]>([]);
+  const [generatedMedia, setGeneratedMedia] = useState<MediaGenerationResult[]>(
+    []
+  );
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentProgress, setCurrentProgress] = useState(0);
 
@@ -82,7 +84,13 @@ export function useMediaGeneration(
           // Generate image
           result = await mediaGenerationService.generateImage({
             prompt: detection.prompt,
-            aspectRatio: detection.params.aspectRatio as '1:1' | '16:9' | '9:16' | '4:3' | '3:4' | undefined,
+            aspectRatio: detection.params.aspectRatio as
+              | '1:1'
+              | '16:9'
+              | '9:16'
+              | '4:3'
+              | '3:4'
+              | undefined,
             numberOfImages: detection.params.numberOfImages,
             seed: Math.floor(Math.random() * 1000000),
           });
@@ -91,8 +99,17 @@ export function useMediaGeneration(
           result = await mediaGenerationService.generateVideo(
             {
               prompt: detection.prompt,
-              aspectRatio: detection.params.aspectRatio as '16:9' | '9:16' | '1:1' | '4:3' | undefined,
-              resolution: detection.params.resolution as '720p' | '1080p' | '4k' | undefined,
+              aspectRatio: detection.params.aspectRatio as
+                | '16:9'
+                | '9:16'
+                | '1:1'
+                | '4:3'
+                | undefined,
+              resolution: detection.params.resolution as
+                | '720p'
+                | '1080p'
+                | '4k'
+                | undefined,
               duration: detection.params.duration,
               seed: Math.floor(Math.random() * 1000000),
             },
@@ -111,7 +128,8 @@ export function useMediaGeneration(
 
         return result;
       } catch (error) {
-        const err = error instanceof Error ? error : new Error('Media generation failed');
+        const err =
+          error instanceof Error ? error : new Error('Media generation failed');
         options.onError?.(err);
         throw err;
       } finally {
@@ -157,15 +175,30 @@ export async function generateMediaFromMessage(
   if (detection.toolType === 'imagen') {
     return await mediaGenerationService.generateImage({
       prompt: detection.prompt,
-      aspectRatio: detection.params.aspectRatio as '1:1' | '16:9' | '9:16' | '4:3' | '3:4' | undefined,
+      aspectRatio: detection.params.aspectRatio as
+        | '1:1'
+        | '16:9'
+        | '9:16'
+        | '4:3'
+        | '3:4'
+        | undefined,
       numberOfImages: detection.params.numberOfImages,
     });
   } else if (detection.toolType === 'veo') {
     return await mediaGenerationService.generateVideo(
       {
         prompt: detection.prompt,
-        aspectRatio: detection.params.aspectRatio as '16:9' | '9:16' | '1:1' | '4:3' | undefined,
-        resolution: detection.params.resolution as '720p' | '1080p' | '4k' | undefined,
+        aspectRatio: detection.params.aspectRatio as
+          | '16:9'
+          | '9:16'
+          | '1:1'
+          | '4:3'
+          | undefined,
+        resolution: detection.params.resolution as
+          | '720p'
+          | '1080p'
+          | '4k'
+          | undefined,
         duration: detection.params.duration,
       },
       onProgress
@@ -212,7 +245,9 @@ export function getMediaGenerationErrorMessage(error: unknown): string {
 /**
  * Example: Extract media type from detection
  */
-export function getMediaTypeFromMessage(message: string): 'image' | 'video' | 'none' {
+export function getMediaTypeFromMessage(
+  message: string
+): 'image' | 'video' | 'none' {
   const toolType = mediaToolDetector.getSuggestedToolType(message);
   if (toolType === 'imagen') return 'image';
   if (toolType === 'veo') return 'video';

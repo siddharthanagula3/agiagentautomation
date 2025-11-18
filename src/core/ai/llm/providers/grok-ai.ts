@@ -73,7 +73,8 @@ export class GrokProvider {
       model: 'grok-beta',
       maxTokens: 4000,
       temperature: 0.7,
-      systemPrompt: 'You are Grok, an AI assistant with access to real-time information from X (Twitter).',
+      systemPrompt:
+        'You are Grok, an AI assistant with access to real-time information from X (Twitter).',
       includeRealTimeData: true,
       ...config,
     };
@@ -226,7 +227,8 @@ export class GrokProvider {
       }
 
       const data = await response.json();
-      const fullContent = data.choices?.[0]?.message?.content || data.content || '';
+      const fullContent =
+        data.choices?.[0]?.message?.content || data.content || '';
       const usage = data.usage;
 
       // Yield the full response at once (simulating streaming)
@@ -299,7 +301,8 @@ export class GrokProvider {
     const response = await this.sendMessage([
       {
         role: 'system',
-        content: 'You are Grok, specialized in analyzing social media trends, public opinion, and sentiment from X (Twitter). Provide structured analysis with data-driven insights.',
+        content:
+          'You are Grok, specialized in analyzing social media trends, public opinion, and sentiment from X (Twitter). Provide structured analysis with data-driven insights.',
       },
       {
         role: 'user',
@@ -330,7 +333,9 @@ export class GrokProvider {
 
     if (query.sentiment) {
       parts.push('\n\n**Sentiment Analysis Required:**');
-      parts.push('- Calculate percentage of positive, negative, and neutral mentions');
+      parts.push(
+        '- Calculate percentage of positive, negative, and neutral mentions'
+      );
       parts.push('- Identify key sentiment drivers');
     }
 
@@ -346,19 +351,29 @@ export class GrokProvider {
       parts.push('- Show follower counts and engagement metrics');
     }
 
-    parts.push('\n\n**Format your response as JSON with the following structure:**');
+    parts.push(
+      '\n\n**Format your response as JSON with the following structure:**'
+    );
     parts.push('```json');
     parts.push('{');
     parts.push('  "summary": "Brief overview of findings",');
     if (query.sentiment) {
-      parts.push('  "sentiment": { "positive": 0-100, "negative": 0-100, "neutral": 0-100 },');
+      parts.push(
+        '  "sentiment": { "positive": 0-100, "negative": 0-100, "neutral": 0-100 },'
+      );
     }
     if (query.trends) {
-      parts.push('  "trends": [{ "topic": "", "volume": 0, "growth": "+/-X%" }],');
+      parts.push(
+        '  "trends": [{ "topic": "", "volume": 0, "growth": "+/-X%" }],'
+      );
     }
-    parts.push('  "topPosts": [{ "content": "", "author": "", "engagement": 0 }]');
+    parts.push(
+      '  "topPosts": [{ "content": "", "author": "", "engagement": 0 }]'
+    );
     if (query.influencers) {
-      parts.push('  "influencers": [{ "username": "", "followers": 0, "relevance": "" }]');
+      parts.push(
+        '  "influencers": [{ "username": "", "followers": 0, "relevance": "" }]'
+      );
     }
     parts.push('}');
     parts.push('```');
@@ -374,11 +389,17 @@ export class GrokProvider {
     sentiment?: { positive: number; negative: number; neutral: number };
     trends?: Array<{ topic: string; volume: number; growth: string }>;
     topPosts?: Array<{ content: string; author: string; engagement: number }>;
-    influencers?: Array<{ username: string; followers: number; relevance: string }>;
+    influencers?: Array<{
+      username: string;
+      followers: number;
+      relevance: string;
+    }>;
   } {
     try {
       // Extract JSON from markdown code blocks
-      const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/```\n([\s\S]*?)\n```/);
+      const jsonMatch =
+        content.match(/```json\n([\s\S]*?)\n```/) ||
+        content.match(/```\n([\s\S]*?)\n```/);
 
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[1]);

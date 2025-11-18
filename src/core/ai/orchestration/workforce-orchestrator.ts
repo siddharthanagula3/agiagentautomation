@@ -97,7 +97,11 @@ export class WorkforceOrchestratorRefactored {
         content: '🧠 Analyzing request and creating execution plan...',
       });
 
-      const plan = await this.generatePlan(request.input, request.sessionId, request.userId);
+      const plan = await this.generatePlan(
+        request.input,
+        request.sessionId,
+        request.userId
+      );
 
       if (!plan || plan.plan.length === 0) {
         throw new Error('Failed to generate execution plan');
@@ -169,7 +173,12 @@ export class WorkforceOrchestratorRefactored {
         content: '⚡ Beginning task execution...',
       });
 
-      await this.executeTasks(tasks, request.input, request.sessionId, request.userId);
+      await this.executeTasks(
+        tasks,
+        request.input,
+        request.sessionId,
+        request.userId
+      );
 
       store.completeMission();
       store.addMessage({
@@ -205,7 +214,11 @@ export class WorkforceOrchestratorRefactored {
   /**
    * PLANNING STAGE: Generate structured plan using LLM
    */
-  private async generatePlan(userInput: string, sessionId?: string, userId?: string): Promise<MissionPlan> {
+  private async generatePlan(
+    userInput: string,
+    sessionId?: string,
+    userId?: string
+  ): Promise<MissionPlan> {
     const plannerPrompt = `You are a strategic AI planner. Given a user request, create a detailed step-by-step execution plan.
 
 Return your response ONLY as valid JSON in this exact format:
@@ -623,7 +636,11 @@ Please complete this task according to your role and capabilities.`;
 
     try {
       // AUTO-SELECT: Analyze query and select best employee(s)
-      const selectedEmployees = await this.autoSelectEmployees(request.input, request.sessionId, request.userId);
+      const selectedEmployees = await this.autoSelectEmployees(
+        request.input,
+        request.sessionId,
+        request.userId
+      );
 
       if (selectedEmployees.length === 0) {
         throw new Error('No suitable employees found for this request');
@@ -706,7 +723,11 @@ Please complete this task according to your role and capabilities.`;
    * AUTO-SELECT: Automatically select best employee(s) for a query
    * Uses LLM to analyze query and match with employee capabilities
    */
-  private async autoSelectEmployees(query: string, sessionId?: string, userId?: string): Promise<AIEmployee[]> {
+  private async autoSelectEmployees(
+    query: string,
+    sessionId?: string,
+    userId?: string
+  ): Promise<AIEmployee[]> {
     // Build employee directory
     const employeeDirectory = this.employees
       .map((e) => `- ${e.name}: ${e.description}`)

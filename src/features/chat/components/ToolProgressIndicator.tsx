@@ -4,7 +4,16 @@
  */
 
 import React from 'react';
-import { Loader2, Image, Video, FileText, Search, Users, Code, MessageSquare } from 'lucide-react';
+import {
+  Loader2,
+  Image,
+  Video,
+  FileText,
+  Search,
+  Users,
+  Code,
+  MessageSquare,
+} from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import type { ToolType } from '../services/chat-tool-router';
 
@@ -21,7 +30,7 @@ const toolIcons: Record<ToolType, React.ReactNode> = {
   'web-search': <Search className="h-4 w-4" />,
   'multi-agent': <Users className="h-4 w-4" />,
   'code-generation': <Code className="h-4 w-4" />,
-  'general-chat': <MessageSquare className="h-4 w-4" />
+  'general-chat': <MessageSquare className="h-4 w-4" />,
 };
 
 const toolNames: Record<ToolType, string> = {
@@ -31,7 +40,7 @@ const toolNames: Record<ToolType, string> = {
   'web-search': 'Web Search',
   'multi-agent': 'Multi-Agent Collaboration',
   'code-generation': 'Code Generation',
-  'general-chat': 'General Chat'
+  'general-chat': 'General Chat',
 };
 
 const toolColors: Record<ToolType, string> = {
@@ -41,20 +50,25 @@ const toolColors: Record<ToolType, string> = {
   'web-search': 'text-green-500',
   'multi-agent': 'text-orange-500',
   'code-generation': 'text-cyan-500',
-  'general-chat': 'text-gray-500'
+  'general-chat': 'text-gray-500',
 };
 
 export const ToolProgressIndicator: React.FC<ToolProgressIndicatorProps> = ({
   activeTools,
   toolProgress,
-  className
+  className,
 }) => {
   if (activeTools.length === 0) {
     return null;
   }
 
   return (
-    <div className={cn('rounded-lg border border-border bg-card p-4 shadow-sm', className)}>
+    <div
+      className={cn(
+        'rounded-lg border border-border bg-card p-4 shadow-sm',
+        className
+      )}
+    >
       <div className="mb-3 flex items-center gap-2 text-sm font-medium">
         <Loader2 className="h-4 w-4 animate-spin text-primary" />
         <span>Active Tools</span>
@@ -69,9 +83,7 @@ export const ToolProgressIndicator: React.FC<ToolProgressIndicatorProps> = ({
           return (
             <div key={toolType} className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className={cn('flex-shrink-0', color)}>
-                  {icon}
-                </div>
+                <div className={cn('flex-shrink-0', color)}>{icon}</div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium">{name}</span>

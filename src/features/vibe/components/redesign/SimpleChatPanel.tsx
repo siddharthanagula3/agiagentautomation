@@ -14,7 +14,10 @@ import type { AgentMessage } from '../../components/agent-panel/AgentMessageList
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { parseCodeBlocks, extractFileOperations } from '../../utils/code-parser';
+import {
+  parseCodeBlocks,
+  extractFileOperations,
+} from '../../utils/code-parser';
 import { vibeFileSystem } from '@features/mission-control/services/vibe-file-system';
 import { toast } from 'sonner';
 
@@ -24,7 +27,11 @@ interface SimpleChatPanelProps {
   onFileCreated?: (filePath: string) => void;
 }
 
-export function SimpleChatPanel({ messages, isLoading, onFileCreated }: SimpleChatPanelProps) {
+export function SimpleChatPanel({
+  messages,
+  isLoading,
+  onFileCreated,
+}: SimpleChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
@@ -47,7 +54,10 @@ export function SimpleChatPanel({ messages, isLoading, onFileCreated }: SimpleCh
     const parseResult = parseCodeBlocks(lastMessage.content);
 
     if (parseResult.hasFiles) {
-      const operations = extractFileOperations(lastMessage.content, parseResult.codeBlocks);
+      const operations = extractFileOperations(
+        lastMessage.content,
+        parseResult.codeBlocks
+      );
 
       // Create/update files
       for (const operation of operations) {
@@ -57,13 +67,22 @@ export function SimpleChatPanel({ messages, isLoading, onFileCreated }: SimpleCh
             try {
               vibeFileSystem.readFile(operation.filePath);
               // File exists, update it instead
-              vibeFileSystem.updateFile(operation.filePath, operation.content || '');
+              vibeFileSystem.updateFile(
+                operation.filePath,
+                operation.content || ''
+              );
             } catch {
               // File doesn't exist, create it
-              vibeFileSystem.createFile(operation.filePath, operation.content || '');
+              vibeFileSystem.createFile(
+                operation.filePath,
+                operation.content || ''
+              );
             }
           } else if (operation.action === 'update') {
-            vibeFileSystem.updateFile(operation.filePath, operation.content || '');
+            vibeFileSystem.updateFile(
+              operation.filePath,
+              operation.content || ''
+            );
           }
 
           // Notify parent component
@@ -78,7 +97,7 @@ export function SimpleChatPanel({ messages, isLoading, onFileCreated }: SimpleCh
         toast.success(
           `${operations.length} file${operations.length > 1 ? 's' : ''} ${operations[0].action}d`,
           {
-            description: operations.map(op => op.filePath).join(', '),
+            description: operations.map((op) => op.filePath).join(', '),
           }
         );
       }
@@ -105,7 +124,9 @@ export function SimpleChatPanel({ messages, isLoading, onFileCreated }: SimpleCh
             <div className="flex h-full min-h-[300px] items-center justify-center text-center">
               <div>
                 <Bot className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
-                <h3 className="mb-2 text-sm font-medium">Start a conversation</h3>
+                <h3 className="mb-2 text-sm font-medium">
+                  Start a conversation
+                </h3>
                 <p className="text-xs text-muted-foreground">
                   Ask me to build an app, write code, or create something
                 </p>
@@ -161,10 +182,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
 
       {/* Message Content */}
       <div
-        className={cn(
-          'flex max-w-[85%] flex-col gap-1',
-          isUser && 'items-end'
-        )}
+        className={cn('flex max-w-[85%] flex-col gap-1', isUser && 'items-end')}
       >
         {/* Agent Name/Role */}
         {!isUser && message.agentName && (
@@ -194,7 +212,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
                 ) : (
                   <CheckCircle className="h-3 w-3" />
                 )}
-                <span className="truncate max-w-[150px]">{op.filePath}</span>
+                <span className="max-w-[150px] truncate">{op.filePath}</span>
               </Badge>
             ))}
           </div>

@@ -45,7 +45,9 @@ export const TokenUsageDisplay: React.FC<TokenUsageDisplayProps> = ({
     <div className="flex items-center gap-3 rounded-md bg-muted/50 px-3 py-1.5 text-xs">
       <div className="flex items-center gap-1.5">
         <Zap className="h-3.5 w-3.5 text-yellow-500" />
-        <span className="font-medium">{usage.totalTokens.toLocaleString()}</span>
+        <span className="font-medium">
+          {usage.totalTokens.toLocaleString()}
+        </span>
         <span className="text-muted-foreground">tokens</span>
       </div>
       <div className="h-3 w-px bg-border" />

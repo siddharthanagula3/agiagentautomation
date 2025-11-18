@@ -25,12 +25,8 @@ export function useEnhancedChatWithDocuments(sessionId?: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    isGenerating,
-    generateDocument,
-    enhanceDocument,
-    isDocumentRequest,
-  } = useDocumentGeneration();
+  const { isGenerating, generateDocument, enhanceDocument, isDocumentRequest } =
+    useDocumentGeneration();
 
   /**
    * Send message handler with document generation support
@@ -140,7 +136,9 @@ export function useEnhancedChatWithDocuments(sessionId?: string) {
  */
 export const DocumentAwareMessageRenderer: React.FC<{
   message: ChatMessage;
-  onEnhance?: (enhancement: 'proofread' | 'expand' | 'summarize' | 'restructure') => void;
+  onEnhance?: (
+    enhancement: 'proofread' | 'expand' | 'summarize' | 'restructure'
+  ) => void;
   isEnhancing?: boolean;
 }> = ({ message, onEnhance, isEnhancing }) => {
   // Check if this message contains a document

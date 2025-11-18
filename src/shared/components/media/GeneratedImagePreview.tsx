@@ -60,7 +60,7 @@ export const GeneratedImagePreview: React.FC<GeneratedImagePreviewProps> = ({
     <>
       <Card className={cn('overflow-hidden', className)}>
         <CardContent className="p-0">
-          <div className="relative group">
+          <div className="group relative">
             {/* Image */}
             <div className="relative bg-gray-100 dark:bg-gray-800">
               {!imageLoaded && (
@@ -72,7 +72,7 @@ export const GeneratedImagePreview: React.FC<GeneratedImagePreviewProps> = ({
                 src={imageUrl}
                 alt={prompt}
                 className={cn(
-                  'w-full h-auto object-contain transition-opacity duration-300',
+                  'h-auto w-full object-contain transition-opacity duration-300',
                   imageLoaded ? 'opacity-100' : 'opacity-0'
                 )}
                 onLoad={() => setImageLoaded(true)}
@@ -81,13 +81,13 @@ export const GeneratedImagePreview: React.FC<GeneratedImagePreviewProps> = ({
             </div>
 
             {/* Overlay with actions */}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200">
-              <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/40">
+              <div className="absolute right-2 top-2 flex gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                 <Button
                   size="sm"
                   variant="secondary"
                   onClick={handleFullscreen}
-                  className="bg-white/90 hover:bg-white text-gray-900"
+                  className="bg-white/90 text-gray-900 hover:bg-white"
                 >
                   <Maximize2 className="h-4 w-4" />
                 </Button>
@@ -96,7 +96,7 @@ export const GeneratedImagePreview: React.FC<GeneratedImagePreviewProps> = ({
                   variant="secondary"
                   onClick={handleDownload}
                   disabled={isDownloading}
-                  className="bg-white/90 hover:bg-white text-gray-900"
+                  className="bg-white/90 text-gray-900 hover:bg-white"
                 >
                   {isDownloading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -109,24 +109,24 @@ export const GeneratedImagePreview: React.FC<GeneratedImagePreviewProps> = ({
           </div>
 
           {/* Metadata */}
-          <div className="p-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+          <div className="border-t border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-900">
+            <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
               {prompt}
             </p>
             {(model || metadata) && (
-              <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500 dark:text-gray-500">
+              <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-500">
                 {model && (
-                  <span className="px-2 py-1 bg-gray-200 dark:bg-gray-800 rounded">
+                  <span className="rounded bg-gray-200 px-2 py-1 dark:bg-gray-800">
                     {model}
                   </span>
                 )}
                 {metadata?.aspectRatio && (
-                  <span className="px-2 py-1 bg-gray-200 dark:bg-gray-800 rounded">
+                  <span className="rounded bg-gray-200 px-2 py-1 dark:bg-gray-800">
                     {metadata.aspectRatio}
                   </span>
                 )}
                 {metadata?.seed && (
-                  <span className="px-2 py-1 bg-gray-200 dark:bg-gray-800 rounded">
+                  <span className="rounded bg-gray-200 px-2 py-1 dark:bg-gray-800">
                     Seed: {metadata.seed}
                   </span>
                 )}
@@ -139,21 +139,21 @@ export const GeneratedImagePreview: React.FC<GeneratedImagePreviewProps> = ({
       {/* Fullscreen Modal */}
       {isFullscreen && (
         <div
-          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
           onClick={handleCloseFullscreen}
         >
           <Button
             size="sm"
             variant="ghost"
             onClick={handleCloseFullscreen}
-            className="absolute top-4 right-4 text-white hover:bg-white/10"
+            className="absolute right-4 top-4 text-white hover:bg-white/10"
           >
             <X className="h-6 w-6" />
           </Button>
           <img
             src={imageUrl}
             alt={prompt}
-            className="max-w-full max-h-full object-contain"
+            className="max-h-full max-w-full object-contain"
             onClick={(e) => e.stopPropagation()}
           />
         </div>

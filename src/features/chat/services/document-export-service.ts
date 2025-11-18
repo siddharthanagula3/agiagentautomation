@@ -6,7 +6,18 @@
  */
 
 import jsPDF from 'jspdf';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell, WidthType } from 'docx';
+import {
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  HeadingLevel,
+  AlignmentType,
+  Table,
+  TableRow,
+  TableCell,
+  WidthType,
+} from 'docx';
 import type { DocumentFormat } from './document-generation-service';
 
 export interface ExportOptions {
@@ -54,7 +65,7 @@ export async function downloadAsPDF(
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
   const margin = 20;
-  const maxWidth = pageWidth - (margin * 2);
+  const maxWidth = pageWidth - margin * 2;
   let yPosition = margin;
 
   // Add title if provided
@@ -159,10 +170,12 @@ export async function downloadAsDOCX(
   const sections = parseMarkdownForDOCX(content, options);
 
   const doc = new Document({
-    sections: [{
-      properties: {},
-      children: sections,
-    }],
+    sections: [
+      {
+        properties: {},
+        children: sections,
+      },
+    ],
     creator: options?.author || 'AGI Agent Automation',
     title: options?.title || 'Document',
     description: 'Generated document from chat',
@@ -227,8 +240,8 @@ function parseMarkdownForPDF(content: string): Array<{
       // Regular text - strip markdown formatting for PDF
       const cleanText = line
         .replace(/\*\*(.+?)\*\*/g, '$1') // Bold
-        .replace(/\*(.+?)\*/g, '$1')     // Italic
-        .replace(/`(.+?)`/g, '$1')       // Inline code
+        .replace(/\*(.+?)\*/g, '$1') // Italic
+        .replace(/`(.+?)`/g, '$1') // Inline code
         .replace(/\[(.+?)\]\(.+?\)/g, '$1'); // Links
 
       parsed.push({ type: 'text', text: cleanText });
@@ -241,7 +254,10 @@ function parseMarkdownForPDF(content: string): Array<{
 /**
  * Parses markdown content for DOCX rendering
  */
-function parseMarkdownForDOCX(content: string, options?: ExportOptions): Paragraph[] {
+function parseMarkdownForDOCX(
+  content: string,
+  options?: ExportOptions
+): Paragraph[] {
   const lines = content.split('\n');
   const paragraphs: Paragraph[] = [];
 

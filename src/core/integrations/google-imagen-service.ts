@@ -11,13 +11,19 @@
 
 export interface ImagenGenerationRequest {
   prompt: string;
-  model?: 'imagen-4.0-generate-001' | 'imagen-4.0-ultra-generate-001' | 'imagen-4.0-fast-generate-001';
+  model?:
+    | 'imagen-4.0-generate-001'
+    | 'imagen-4.0-ultra-generate-001'
+    | 'imagen-4.0-fast-generate-001';
   numberOfImages?: number; // 1-4
   aspectRatio?: '1:1' | '3:4' | '4:3' | '9:16' | '16:9';
   negativePrompt?: string;
   seed?: number;
   language?: string;
-  safetyFilterLevel?: 'block_low_and_above' | 'block_medium_and_above' | 'block_only_high';
+  safetyFilterLevel?:
+    | 'block_low_and_above'
+    | 'block_medium_and_above'
+    | 'block_only_high';
   personGeneration?: 'dont_allow' | 'allow_adult' | 'allow_all';
 }
 
@@ -166,7 +172,8 @@ export class GoogleImagenService {
         negativePrompt: request.negativePrompt,
         seed: request.seed,
         language: request.language || 'auto',
-        safetyFilterLevel: request.safetyFilterLevel || 'block_medium_and_above',
+        safetyFilterLevel:
+          request.safetyFilterLevel || 'block_medium_and_above',
         personGeneration: request.personGeneration || 'allow_adult',
       },
     };
@@ -184,7 +191,8 @@ export class GoogleImagenService {
       const errorData = await apiResponse.json().catch(() => ({}));
       throw this.createError(
         'API_ERROR',
-        errorData.error?.message || `Imagen API error: ${apiResponse.statusText}`,
+        errorData.error?.message ||
+          `Imagen API error: ${apiResponse.statusText}`,
         errorData
       );
     }
@@ -193,13 +201,18 @@ export class GoogleImagenService {
 
     // Process predictions
     const predictions = data.predictions || [];
-    response.images = predictions.map((prediction: { bytesBase64Encoded?: string; mimeType?: string }, index: number) => ({
-      url: prediction.bytesBase64Encoded
-        ? `data:${prediction.mimeType || 'image/png'};base64,${prediction.bytesBase64Encoded}`
-        : '',
-      mimeType: prediction.mimeType || 'image/png',
-      bytesBase64Encoded: prediction.bytesBase64Encoded,
-    }));
+    response.images = predictions.map(
+      (
+        prediction: { bytesBase64Encoded?: string; mimeType?: string },
+        index: number
+      ) => ({
+        url: prediction.bytesBase64Encoded
+          ? `data:${prediction.mimeType || 'image/png'};base64,${prediction.bytesBase64Encoded}`
+          : '',
+        mimeType: prediction.mimeType || 'image/png',
+        bytesBase64Encoded: prediction.bytesBase64Encoded,
+      })
+    );
 
     // Calculate cost and token usage
     const numberOfImages = request.numberOfImages || 1;
@@ -300,7 +313,10 @@ export class GoogleImagenService {
   /**
    * Download image from data URL or URL
    */
-  async downloadImage(imageUrl: string, filename: string = 'imagen-generated.png'): Promise<void> {
+  async downloadImage(
+    imageUrl: string,
+    filename: string = 'imagen-generated.png'
+  ): Promise<void> {
     try {
       if (imageUrl.startsWith('data:')) {
         // Data URL - convert to blob and download
@@ -366,7 +382,8 @@ export class GoogleImagenService {
       {
         id: 'imagen-4.0-generate-001',
         name: 'Imagen 4.0 Standard',
-        description: 'Best quality text-to-image model with improved text rendering',
+        description:
+          'Best quality text-to-image model with improved text rendering',
         pricing: IMAGEN_PRICING['imagen-4.0-generate-001'],
       },
       {

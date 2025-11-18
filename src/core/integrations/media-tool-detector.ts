@@ -71,7 +71,10 @@ const VIDEO_KEYWORDS = [
 const ASPECT_RATIO_PATTERNS = [
   { pattern: /\b(square|1:1|1x1)\b/i, value: '1:1' },
   { pattern: /\b(portrait|9:16|9x16|vertical)\b/i, value: '9:16' },
-  { pattern: /\b(landscape|16:9|16x9|horizontal|widescreen)\b/i, value: '16:9' },
+  {
+    pattern: /\b(landscape|16:9|16x9|horizontal|widescreen)\b/i,
+    value: '16:9',
+  },
   { pattern: /\b(4:3|4x3)\b/i, value: '4:3' },
   { pattern: /\b(3:4|3x4)\b/i, value: '3:4' },
 ];
@@ -93,7 +96,10 @@ const STYLE_PATTERNS = [
 ];
 
 const NUMBER_PATTERNS = [
-  { pattern: /\b(\d+)\s*(images?|pictures?|photos?)\b/i, type: 'numberOfImages' },
+  {
+    pattern: /\b(\d+)\s*(images?|pictures?|photos?)\b/i,
+    type: 'numberOfImages',
+  },
   { pattern: /\b(\d+)\s*seconds?\b/i, type: 'duration' },
 ];
 
@@ -267,7 +273,8 @@ export class MediaToolDetector {
   } {
     const detection = this.detect(message);
     return {
-      shouldGenerate: detection.toolType !== 'none' && detection.confidence > 0.5,
+      shouldGenerate:
+        detection.toolType !== 'none' && detection.confidence > 0.5,
       toolType: detection.toolType,
       prompt: detection.extractedPrompt || message,
       params: detection.suggestedParams || {},

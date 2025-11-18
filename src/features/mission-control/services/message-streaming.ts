@@ -373,7 +373,10 @@ export async function streamPerplexity(
     });
     if (!response.ok) {
       const data: ErrorResponse = await response.json().catch((err) => {
-        console.error('[Perplexity Proxy] Failed to parse error response:', err);
+        console.error(
+          '[Perplexity Proxy] Failed to parse error response:',
+          err
+        );
         return {} as ErrorResponse;
       });
       throw new Error(

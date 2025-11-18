@@ -3,6 +3,7 @@
 ## Overview
 
 The Vibe dashboard is a modern AI development environment with three main panels:
+
 1. **Chat Panel** (left) - Interact with AI agents
 2. **Code Editor** (top right) - View and edit code with Monaco Editor
 3. **Live Preview** (bottom right) - See real-time application previews
@@ -67,6 +68,7 @@ src/features/vibe/
 **Location:** Left panel (30% width)
 
 **Usage:**
+
 ```typescript
 <SimpleChatPanel
   messages={messages}      // Array of AgentMessage
@@ -75,11 +77,13 @@ src/features/vibe/
 ```
 
 **Message Types:**
+
 - `user` - User messages (blue, right-aligned)
 - `assistant` - Agent messages (purple, left-aligned with markdown)
 - `system` - System messages (gray)
 
 **Features:**
+
 - Auto-scroll to latest message
 - Markdown rendering with code syntax highlighting
 - Agent name/role badges
@@ -90,6 +94,7 @@ src/features/vibe/
 **Location:** Top right panel (60% of right side)
 
 **Features:**
+
 - Monaco Editor (VS Code engine)
 - File tree sidebar (collapsible)
 - Multiple file tabs
@@ -97,12 +102,14 @@ src/features/vibe/
 - Copy and download actions
 
 **Keyboard Shortcuts:**
+
 - `Cmd/Ctrl + S` - Save file (coming soon)
 - `Cmd/Ctrl + F` - Find in file
 - `Cmd/Ctrl + P` - Quick file open (coming soon)
 
 **Supported Languages:**
 Auto-detected by file extension:
+
 - `.ts/.tsx` → TypeScript
 - `.js/.jsx` → JavaScript
 - `.py` → Python
@@ -117,6 +124,7 @@ Auto-detected by file extension:
 **Location:** Bottom right panel (40% of right side)
 
 **Features:**
+
 - Sandboxed iframe for security
 - Viewport controls (Desktop/Tablet/Mobile)
 - Custom URL loading
@@ -124,11 +132,13 @@ Auto-detected by file extension:
 - Console output panel
 
 **Viewport Sizes:**
+
 - Desktop: 100% × 100%
 - Tablet: 768px × 1024px
 - Mobile: 375px × 667px
 
 **Console Panel:**
+
 - Toggle with "Console" button
 - Categorized messages (log, info, warn, error)
 - Timestamp for each message
@@ -164,12 +174,14 @@ const { currentSessionId, setCurrentSession } = useVibeChatStore();
 ### Adjusting Panel Sizes
 
 **Default sizes:**
+
 - Left panel: 30% (min: 25%, max: 40%)
 - Right panel: 70%
   - Code editor: 60% (min: 40%, max: 80%)
   - Live preview: 40% (min: 20%, max: 60%)
 
 **Change defaults** in `VibeDashboard.tsx`:
+
 ```typescript
 <Panel defaultSize={30} minSize={25} maxSize={40}>
   {/* Adjust defaultSize, minSize, maxSize */}
@@ -181,6 +193,7 @@ const { currentSessionId, setCurrentSession } = useVibeChatStore();
 **Current:** `vs-dark` (Visual Studio Dark)
 
 **Change** in `CodeEditorPanel.tsx`:
+
 ```typescript
 <Editor
   theme="vs-dark"  // Options: 'vs-dark', 'vs-light', 'hc-black'
@@ -191,6 +204,7 @@ const { currentSessionId, setCurrentSession } = useVibeChatStore();
 ### Customizing Console Colors
 
 **Edit** in `LivePreviewPanel.tsx`:
+
 ```typescript
 const iconMap = {
   log: { icon: '>', color: 'text-gray-400' },
@@ -230,6 +244,7 @@ npm run build
 ### Debugging
 
 **Console Logs:**
+
 ```typescript
 // Check store state
 console.log(useVibeViewStore.getState());
@@ -242,6 +257,7 @@ console.log(fileTree);
 ```
 
 **React DevTools:**
+
 - Install React DevTools browser extension
 - Inspect component props and state
 - Track re-renders
@@ -249,11 +265,13 @@ console.log(fileTree);
 ## Responsive Behavior
 
 ### Desktop (≥768px)
+
 - Three-panel layout with resizable dividers
 - Full Monaco Editor with file tree
 - All features visible
 
 ### Mobile (<768px)
+
 - Vertical stack layout
 - Equal height panels (33% each)
 - File tree hidden by default (toggle button)
@@ -270,9 +288,9 @@ const openFile = useVibeViewStore((state) => state.openFile);
 
 // Open file programmatically
 openFile(
-  '/path/to/file.ts',  // File path
-  'const x = 1;',      // Content
-  'typescript'         // Language
+  '/path/to/file.ts', // File path
+  'const x = 1;', // Content
+  'typescript' // Language
 );
 ```
 
@@ -291,11 +309,14 @@ setAppViewerUrl('http://localhost:3000');
 
 ```typescript
 // Send postMessage from preview iframe
-window.parent.postMessage({
-  type: 'console',
-  level: 'log',  // 'log' | 'info' | 'warn' | 'error'
-  message: 'Your message here'
-}, '*');
+window.parent.postMessage(
+  {
+    type: 'console',
+    level: 'log', // 'log' | 'info' | 'warn' | 'error'
+    message: 'Your message here',
+  },
+  '*'
+);
 ```
 
 ### Creating New Files
@@ -306,12 +327,15 @@ import { useVibeViewStore } from '../stores/vibe-view-store';
 const { setFileTree, openFile } = useVibeViewStore();
 
 // Add to file tree
-const newTree = [...fileTree, {
-  id: crypto.randomUUID(),
-  name: 'new-file.ts',
-  type: 'file',
-  path: '/src/new-file.ts'
-}];
+const newTree = [
+  ...fileTree,
+  {
+    id: crypto.randomUUID(),
+    name: 'new-file.ts',
+    type: 'file',
+    path: '/src/new-file.ts',
+  },
+];
 setFileTree(newTree);
 
 // Open in editor
@@ -325,6 +349,7 @@ openFile('/src/new-file.ts', '', 'typescript');
 **Issue:** White screen or "Loading..." forever
 
 **Solution:**
+
 ```bash
 # Reinstall Monaco Editor
 npm install @monaco-editor/react@latest
@@ -339,6 +364,7 @@ npm run dev
 **Issue:** Iframe shows "Failed to load"
 
 **Solution:**
+
 - Check URL is valid and accessible
 - Check CORS headers if loading external site
 - Check browser console for errors
@@ -349,10 +375,13 @@ npm run dev
 **Issue:** "No files yet" even after creating files
 
 **Solution:**
+
 ```typescript
 // Ensure files are added to store
 const { setFileTree } = useVibeViewStore();
-setFileTree([/* your file tree */]);
+setFileTree([
+  /* your file tree */
+]);
 
 // Or check if fileTree is populated
 console.log(useVibeViewStore.getState().fileTree);
@@ -363,6 +392,7 @@ console.log(useVibeViewStore.getState().fileTree);
 **Issue:** Chat shows empty even after sending message
 
 **Solution:**
+
 - Check `messages` array is being passed to `SimpleChatPanel`
 - Verify message format matches `AgentMessage` type
 - Check browser console for errors
@@ -381,6 +411,7 @@ console.log(useVibeViewStore.getState().fileTree);
 ### Iframe Sandbox
 
 The preview iframe uses these sandbox permissions:
+
 - `allow-scripts` - JavaScript execution
 - `allow-same-origin` - Same-origin requests
 - `allow-forms` - Form submissions
@@ -388,6 +419,7 @@ The preview iframe uses these sandbox permissions:
 - `allow-modals` - Modal dialogs
 
 **Never add:**
+
 - `allow-top-navigation` - Could redirect parent page
 - `allow-pointer-lock` - Security risk
 

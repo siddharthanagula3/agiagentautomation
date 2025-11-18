@@ -52,73 +52,84 @@ export function CodeEditorPanel() {
 
   const currentFile = currentFilePath ? openFiles.get(currentFilePath) : null;
 
-  const handleFileClick = useCallback((path: string) => {
-    try {
-      // Check if already open
-      if (openFiles.has(path)) {
+  const handleFileClick = useCallback(
+    (path: string) => {
+      try {
+        // Check if already open
+        if (openFiles.has(path)) {
+          setCurrentFilePath(path);
+          return;
+        }
+
+        // Load file content from file system
+        const content = vibeFileSystem.readFile(path);
+        const file = vibeFileSystem.openFile(path);
+
+        const openFile: OpenFile = {
+          path,
+          content,
+          language: file.language || 'plaintext',
+          isDirty: false,
+        };
+
+        setOpenFiles((prev) => new Map(prev).set(path, openFile));
         setCurrentFilePath(path);
-        return;
+      } catch (error) {
+        toast.error('Failed to open file');
+        console.error('[VIBE] Failed to open file', error);
       }
+    },
+    [openFiles]
+  );
 
-      // Load file content from file system
-      const content = vibeFileSystem.readFile(path);
-      const file = vibeFileSystem.openFile(path);
-
-      const openFile: OpenFile = {
-        path,
-        content,
-        language: file.language || 'plaintext',
-        isDirty: false,
-      };
-
-      setOpenFiles((prev) => new Map(prev).set(path, openFile));
-      setCurrentFilePath(path);
-    } catch (error) {
-      toast.error('Failed to open file');
-      console.error('[VIBE] Failed to open file', error);
-    }
-  }, [openFiles]);
-
-  const handleCloseFile = useCallback((path: string) => {
-    setOpenFiles((prev) => {
-      const next = new Map(prev);
-      next.delete(path);
-      return next;
-    });
-
-    vibeFileSystem.closeFile(path);
-
-    // Switch to another open file if available
-    if (currentFilePath === path) {
-      const remaining = Array.from(openFiles.keys()).filter((p) => p !== path);
-      setCurrentFilePath(remaining.length > 0 ? remaining[0] : null);
-    }
-  }, [currentFilePath, openFiles]);
-
-  const handleSaveFile = useCallback((path: string) => {
-    const file = openFiles.get(path);
-    if (!file) return;
-
-    try {
-      vibeFileSystem.updateFile(path, file.content);
-      vibeFileSystem.markClean(path);
-
-      // Update dirty flag
+  const handleCloseFile = useCallback(
+    (path: string) => {
       setOpenFiles((prev) => {
         const next = new Map(prev);
-        const updated = next.get(path);
-        if (updated) {
-          updated.isDirty = false;
-        }
+        next.delete(path);
         return next;
       });
 
-      toast.success('File saved');
-    } catch (error) {
-      toast.error('Failed to save file');
-      console.error('[VIBE] Failed to save file', error);
-    }
-  }, [openFiles]);
+      vibeFileSystem.closeFile(path);
+
+      // Switch to another open file if available
+      if (currentFilePath === path) {
+        const remaining = Array.from(openFiles.keys()).filter(
+          (p) => p !== path
+        );
+        setCurrentFilePath(remaining.length > 0 ? remaining[0] : null);
+      }
+    },
+    [currentFilePath, openFiles]
+  );
+
+  const handleSaveFile = useCallback(
+    (path: string) => {
+      const file = openFiles.get(path);
+      if (!file) return;
+
+      try {
+        vibeFileSystem.updateFile(path, file.content);
+        vibeFileSystem.markClean(path);
+
+        // Update dirty flag
+        setOpenFiles((prev) => {
+          const next = new Map(prev);
+          const updated = next.get(path);
+          if (updated) {
+            updated.isDirty = false;
+          }
+          return next;
+        });
+
+        toast.success('File saved');
+      } catch (error) {
+        toast.error('Failed to save file');
+        console.error('[VIBE] Failed to save file', error);
+      }
+    },
+    [openFiles]
+  );
 
   const handleCopyCode = async () => {
     if (currentFile?.content) {
@@ -141,85 +152,97 @@ export function CodeEditorPanel() {
     }
   };
 
-  const handleEditorChange = useCallback((value: string | undefined) => {
-    if (value !== undefined && currentFilePath) {
-      setOpenFiles((prev) => {
-        const next = new Map(prev);
-        const file = next.get(currentFilePath);
-        if (file) {
-          file.content = value;
-          file.isDirty = true;
-        }
-        return next;
-      });
-    }
-  }, [currentFilePath]);
-
-  const handleFileCreate = useCallback((parentPath: string, type: 'file' | 'folder') => {
-    const name = prompt(`Enter ${type} name:`);
-    if (!name) return;
-
-    try {
-      const newPath = `${parentPath === '/' ? '' : parentPath}/${name}`;
-
-      if (type === 'file') {
-        vibeFileSystem.createFile(newPath, '');
-        handleFileClick(newPath);
-      } else {
-        vibeFileSystem.createFolder(newPath);
-      }
-
-      refreshFileTree();
-      toast.success(`${type} created`);
-    } catch (error) {
-      toast.error(`Failed to create ${type}`);
-      console.error('[VIBE] Failed to create', error);
-    }
-  }, [handleFileClick, refreshFileTree]);
-
-  const handleFileDelete = useCallback((path: string) => {
-    if (!confirm(`Delete ${path}?`)) return;
-
-    try {
-      vibeFileSystem.deleteFile(path);
-      handleCloseFile(path);
-      refreshFileTree();
-      toast.success('File deleted');
-    } catch (error) {
-      toast.error('Failed to delete file');
-      console.error('[VIBE] Failed to delete file', error);
-    }
-  }, [handleCloseFile, refreshFileTree]);
-
-  const handleFileRename = useCallback((path: string, newName: string) => {
-    try {
-      const parentPath = path.substring(0, path.lastIndexOf('/')) || '/';
-      const newPath = `${parentPath === '/' ? '' : parentPath}/${newName}`;
-
-      vibeFileSystem.renameFile(path, newPath);
-
-      // Update open files
-      if (openFiles.has(path)) {
-        const file = openFiles.get(path)!;
+  const handleEditorChange = useCallback(
+    (value: string | undefined) => {
+      if (value !== undefined && currentFilePath) {
         setOpenFiles((prev) => {
           const next = new Map(prev);
-          next.delete(path);
-          next.set(newPath, { ...file, path: newPath });
+          const file = next.get(currentFilePath);
+          if (file) {
+            file.content = value;
+            file.isDirty = true;
+          }
           return next;
         });
-
-        if (currentFilePath === path) {
-          setCurrentFilePath(newPath);
-        }
       }
+    },
+    [currentFilePath]
+  );
 
-      refreshFileTree();
-      toast.success('File renamed');
-    } catch (error) {
-      toast.error('Failed to rename file');
-      console.error('[VIBE] Failed to rename file', error);
-    }
-  }, [currentFilePath, openFiles, refreshFileTree]);
+  const handleFileCreate = useCallback(
+    (parentPath: string, type: 'file' | 'folder') => {
+      const name = prompt(`Enter ${type} name:`);
+      if (!name) return;
+
+      try {
+        const newPath = `${parentPath === '/' ? '' : parentPath}/${name}`;
+
+        if (type === 'file') {
+          vibeFileSystem.createFile(newPath, '');
+          handleFileClick(newPath);
+        } else {
+          vibeFileSystem.createFolder(newPath);
+        }
+
+        refreshFileTree();
+        toast.success(`${type} created`);
+      } catch (error) {
+        toast.error(`Failed to create ${type}`);
+        console.error('[VIBE] Failed to create', error);
+      }
+    },
+    [handleFileClick, refreshFileTree]
+  );
+
+  const handleFileDelete = useCallback(
+    (path: string) => {
+      if (!confirm(`Delete ${path}?`)) return;
+
+      try {
+        vibeFileSystem.deleteFile(path);
+        handleCloseFile(path);
+        refreshFileTree();
+        toast.success('File deleted');
+      } catch (error) {
+        toast.error('Failed to delete file');
+        console.error('[VIBE] Failed to delete file', error);
+      }
+    },
+    [handleCloseFile, refreshFileTree]
+  );
+
+  const handleFileRename = useCallback(
+    (path: string, newName: string) => {
+      try {
+        const parentPath = path.substring(0, path.lastIndexOf('/')) || '/';
+        const newPath = `${parentPath === '/' ? '' : parentPath}/${newName}`;
+
+        vibeFileSystem.renameFile(path, newPath);
+
+        // Update open files
+        if (openFiles.has(path)) {
+          const file = openFiles.get(path)!;
+          setOpenFiles((prev) => {
+            const next = new Map(prev);
+            next.delete(path);
+            next.set(newPath, { ...file, path: newPath });
+            return next;
+          });
+
+          if (currentFilePath === path) {
+            setCurrentFilePath(newPath);
+          }
+        }
+
+        refreshFileTree();
+        toast.success('File renamed');
+      } catch (error) {
+        toast.error('Failed to rename file');
+        console.error('[VIBE] Failed to rename file', error);
+      }
+    },
+    [currentFilePath, openFiles, refreshFileTree]
+  );
 
   const handleFileDownload = useCallback((path: string) => {
     try {
@@ -328,7 +351,10 @@ export function CodeEditorPanel() {
                     {path.split('/').pop()}
                   </span>
                   {file.isDirty && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary" title="Unsaved changes" />
+                    <span
+                      className="h-1.5 w-1.5 rounded-full bg-primary"
+                      title="Unsaved changes"
+                    />
                   )}
                 </button>
                 <button
@@ -426,9 +452,7 @@ export function CodeEditorPanel() {
           <div className="flex flex-1 items-center justify-center bg-muted/20">
             <div className="text-center">
               <File className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-40" />
-              <p className="text-sm text-muted-foreground">
-                No file selected
-              </p>
+              <p className="text-sm text-muted-foreground">No file selected</p>
               <p className="mt-1 text-xs text-muted-foreground/70">
                 Select a file from the sidebar or ask the agent to create one
               </p>

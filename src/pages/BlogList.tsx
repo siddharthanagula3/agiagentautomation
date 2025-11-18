@@ -313,7 +313,7 @@ const BlogPage: React.FC = () => {
             </motion.div>
           ) : regularPosts.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:gap-8 lg:grid-cols-3">
                 {regularPosts.map((post, idx) => (
                   <BlogPostCard key={post.id} post={post} index={idx} />
                 ))}
@@ -368,7 +368,9 @@ const BlogPage: React.FC = () => {
             className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6 backdrop-blur-xl sm:p-8 md:p-12"
           >
             <div className="text-center">
-              <h2 className="mb-4 text-2xl font-bold sm:text-3xl">Never Miss an Update</h2>
+              <h2 className="mb-4 text-2xl font-bold sm:text-3xl">
+                Never Miss an Update
+              </h2>
               <p className="mx-auto mb-8 max-w-2xl text-muted-foreground">
                 Get the latest insights on AI automation, productivity tips, and
                 case studies delivered to your inbox every week.

@@ -7,12 +7,12 @@
 import {
   googleImagenService,
   type ImagenGenerationRequest as GoogleImagenRequest,
-  type ImagenGenerationResponse
+  type ImagenGenerationResponse,
 } from './google-imagen-service';
 import {
   googleVeoService,
   type VeoGenerationRequest as GoogleVeoRequest,
-  type VeoGenerationResponse
+  type VeoGenerationResponse,
 } from './google-veo-service';
 
 export interface ImageGenerationRequest {
@@ -26,7 +26,10 @@ export interface ImageGenerationRequest {
   steps?: number;
   guidance?: number;
   numberOfImages?: number;
-  model?: 'imagen-4.0-generate-001' | 'imagen-4.0-ultra-generate-001' | 'imagen-4.0-fast-generate-001';
+  model?:
+    | 'imagen-4.0-generate-001'
+    | 'imagen-4.0-ultra-generate-001'
+    | 'imagen-4.0-fast-generate-001';
 }
 
 export interface VideoGenerationRequest {
@@ -128,7 +131,11 @@ export class MediaGenerationService {
       // Prepare Imagen request
       const imagenRequest: GoogleImagenRequest = {
         prompt: request.prompt,
-        model: request.model || (request.quality === 'hd' ? 'imagen-4.0-ultra-generate-001' : 'imagen-4.0-generate-001'),
+        model:
+          request.model ||
+          (request.quality === 'hd'
+            ? 'imagen-4.0-ultra-generate-001'
+            : 'imagen-4.0-generate-001'),
         numberOfImages: request.numberOfImages || 1,
         aspectRatio: aspectRatio || '1:1',
         negativePrompt: request.negativePrompt,
@@ -137,11 +144,14 @@ export class MediaGenerationService {
 
       // Enhance prompt if GOOGLE_API_KEY is available
       if (GOOGLE_API_KEY) {
-        imagenRequest.prompt = await googleImagenService.enhancePrompt(request.prompt);
+        imagenRequest.prompt = await googleImagenService.enhancePrompt(
+          request.prompt
+        );
       }
 
       // Generate image
-      const imagenResponse = await googleImagenService.generateImage(imagenRequest);
+      const imagenResponse =
+        await googleImagenService.generateImage(imagenRequest);
 
       // Convert to MediaGenerationResult
       const result: MediaGenerationResult = {
@@ -200,11 +210,16 @@ export class MediaGenerationService {
 
       // Enhance prompt if GOOGLE_API_KEY is available
       if (GOOGLE_API_KEY) {
-        veoRequest.prompt = await googleVeoService.enhancePrompt(request.prompt);
+        veoRequest.prompt = await googleVeoService.enhancePrompt(
+          request.prompt
+        );
       }
 
       // Generate video with progress callback
-      const veoResponse = await googleVeoService.generateVideo(veoRequest, onProgress);
+      const veoResponse = await googleVeoService.generateVideo(
+        veoRequest,
+        onProgress
+      );
 
       // Convert to MediaGenerationResult
       const result: MediaGenerationResult = {
@@ -237,7 +252,6 @@ export class MediaGenerationService {
       );
     }
   }
-
 
   /**
    * Get generation history

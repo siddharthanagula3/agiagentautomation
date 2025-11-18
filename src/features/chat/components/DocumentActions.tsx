@@ -35,7 +35,9 @@ interface DocumentActionsProps {
   content: string;
   title?: string;
   author?: string;
-  onEnhance?: (enhancement: 'proofread' | 'expand' | 'summarize' | 'restructure') => void;
+  onEnhance?: (
+    enhancement: 'proofread' | 'expand' | 'summarize' | 'restructure'
+  ) => void;
   className?: string;
   variant?: 'default' | 'compact';
 }

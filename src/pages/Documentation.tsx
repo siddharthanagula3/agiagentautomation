@@ -137,7 +137,9 @@ const DocumentationPage: React.FC = () => {
             viewport={{ once: true }}
             className="mb-12 text-center"
           >
-            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">Quick Start</h2>
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
+              Quick Start
+            </h2>
             <p className="text-xl text-muted-foreground">
               Get up and running in minutes
             </p>
@@ -178,10 +180,12 @@ const DocumentationPage: React.FC = () => {
             viewport={{ once: true }}
             className="mb-16 text-center"
           >
-            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">Browse Documentation</h2>
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
+              Browse Documentation
+            </h2>
           </motion.div>
 
-          <div className="grid gap-4 sm:gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
             {categories.map((category, idx) => (
               <motion.div
                 key={idx}
@@ -224,7 +228,9 @@ const DocumentationPage: React.FC = () => {
             viewport={{ once: true }}
           >
             <HelpCircle className="mx-auto mb-4 h-12 w-12 text-primary" />
-            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">Need Help?</h2>
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
+              Need Help?
+            </h2>
             <p className="mb-8 text-lg text-muted-foreground">
               Can't find what you're looking for? Our support team is here to
               help.

@@ -1,6 +1,9 @@
 // Tools execution service - handles actual tool execution
 import type { Tool, ToolCall } from '../types';
-import { webSearch, type SearchResponse } from '@core/integrations/web-search-handler';
+import {
+  webSearch,
+  type SearchResponse,
+} from '@core/integrations/web-search-handler';
 
 export class ToolsExecutionService {
   /**
@@ -70,7 +73,11 @@ export class ToolsExecutionService {
   ): Promise<SearchResponse> {
     const query = args.query as string;
     const maxResults = (args.maxResults as number) || 10;
-    const provider = args.provider as 'perplexity' | 'google' | 'duckduckgo' | undefined;
+    const provider = args.provider as
+      | 'perplexity'
+      | 'google'
+      | 'duckduckgo'
+      | undefined;
 
     if (!query) throw new Error('Search query is required');
 
@@ -79,14 +86,18 @@ export class ToolsExecutionService {
       const searchResponse = await webSearch(query, maxResults, provider);
 
       if (import.meta.env.DEV) {
-        console.log(`[WebSearch] Query: "${query}" returned ${searchResponse.results.length} results`);
+        console.log(
+          `[WebSearch] Query: "${query}" returned ${searchResponse.results.length} results`
+        );
       }
 
       return searchResponse;
     } catch (error) {
       console.error('[WebSearch] Search failed:', error);
       // Provide a more user-friendly error
-      throw new Error(`Web search failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Web search failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -182,7 +193,8 @@ export class ToolsExecutionService {
       {
         id: 'web_search',
         name: 'Web Search',
-        description: 'Search the web for current information, news, facts, and real-time data. Use when you need up-to-date information or to verify facts.',
+        description:
+          'Search the web for current information, news, facts, and real-time data. Use when you need up-to-date information or to verify facts.',
         parameters: {
           query: {
             type: 'string',
@@ -196,7 +208,8 @@ export class ToolsExecutionService {
           },
           provider: {
             type: 'string',
-            description: 'Search provider to use (perplexity, google, duckduckgo)',
+            description:
+              'Search provider to use (perplexity, google, duckduckgo)',
             required: false,
           },
         },

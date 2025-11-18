@@ -157,7 +157,7 @@ const LoginPage: React.FC = () => {
             scale: [1, 1.1, 1],
           }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute left-20 top-20 h-64 md:h-96 w-64 md:w-96 rounded-full bg-primary/20 blur-3xl"
+          className="absolute left-20 top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl md:h-96 md:w-96"
         />
         <motion.div
           animate={{
@@ -166,7 +166,7 @@ const LoginPage: React.FC = () => {
             scale: [1, 1.15, 1],
           }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute bottom-20 right-20 h-64 md:h-96 w-64 md:w-96 rounded-full bg-accent/20 blur-3xl"
+          className="absolute bottom-20 right-20 h-64 w-64 rounded-full bg-accent/20 blur-3xl md:h-96 md:w-96"
         />
       </div>
 

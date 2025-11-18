@@ -391,7 +391,7 @@ const ResourcesPage: React.FC = () => {
       {/* Resource Grid */}
       <section className="px-4 pb-24 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
             {filteredResources.slice(1).map((resource, idx) => (
               <ResourceCard key={resource.id} resource={resource} index={idx} />
             ))}
@@ -408,7 +408,9 @@ const ResourcesPage: React.FC = () => {
             viewport={{ once: true }}
             className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6 text-center backdrop-blur-xl sm:p-8 md:p-12"
           >
-            <h2 className="mb-4 text-2xl font-bold sm:text-3xl">Need Custom Resources?</h2>
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl">
+              Need Custom Resources?
+            </h2>
             <p className="mx-auto mb-8 max-w-2xl text-muted-foreground">
               Our team can create tailored guides, templates, and training
               materials for your specific use case.

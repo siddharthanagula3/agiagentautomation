@@ -10,7 +10,11 @@ import {
   performWebSearch,
   isWebSearchAvailable,
 } from '../services/web-search-integration';
-import { chatToolRouter, type ToolType, type ToolRouterResult } from '../services/chat-tool-router';
+import {
+  chatToolRouter,
+  type ToolType,
+  type ToolRouterResult,
+} from '../services/chat-tool-router';
 import type { ChatMessage, ChatMode, StreamingUpdate } from '../types';
 import type { SearchResponse } from '@core/integrations/web-search-handler';
 import type { MediaGenerationResult } from '@core/integrations/media-generation-handler';
@@ -35,7 +39,9 @@ export const useChat = (sessionId?: string) => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string | null>(null);
   const [activeTools, setActiveTools] = useState<ToolType[]>([]);
-  const [toolProgress, setToolProgress] = useState<Record<ToolType, { status: string; progress?: number }>>({});
+  const [toolProgress, setToolProgress] = useState<
+    Record<ToolType, { status: string; progress?: number }>
+  >({});
 
   // Get current user
   const getCurrentUser = async () => {
@@ -190,32 +196,37 @@ export const useChat = (sessionId?: string) => {
         // Route and execute tools
         let toolRouterResult: ToolRouterResult | undefined;
         try {
-          toolRouterResult = await chatToolRouter.routeAndExecuteTools(content, {
-            userId: user.id,
-            sessionId,
-            conversationHistory,
-            onProgress: (toolType, status, progress) => {
-              setActiveTools((prev) => {
-                if (!prev.includes(toolType)) {
-                  return [...prev, toolType];
-                }
-                return prev;
-              });
-              setToolProgress((prev) => ({
-                ...prev,
-                [toolType]: { status, progress }
-              }));
+          toolRouterResult = await chatToolRouter.routeAndExecuteTools(
+            content,
+            {
+              userId: user.id,
+              sessionId,
+              conversationHistory,
+              onProgress: (toolType, status, progress) => {
+                setActiveTools((prev) => {
+                  if (!prev.includes(toolType)) {
+                    return [...prev, toolType];
+                  }
+                  return prev;
+                });
+                setToolProgress((prev) => ({
+                  ...prev,
+                  [toolType]: { status, progress },
+                }));
+              },
             }
-          });
+          );
 
           console.log('[Chat] Tool router result:', {
             detectedTools: toolRouterResult.detectedTools,
             executionResults: toolRouterResult.executionResults.length,
-            shouldContinueToLLM: toolRouterResult.shouldContinueToLLM
+            shouldContinueToLLM: toolRouterResult.shouldContinueToLLM,
           });
 
           // Remove tool indicator
-          setMessages((prev) => prev.filter((msg) => msg.id !== toolIndicatorId));
+          setMessages((prev) =>
+            prev.filter((msg) => msg.id !== toolIndicatorId)
+          );
 
           // Display tool results
           for (const result of toolRouterResult.executionResults) {
@@ -234,8 +245,8 @@ export const useChat = (sessionId?: string) => {
                     toolResult: true,
                     toolType: 'image-generation',
                     imageUrl: imageData.url,
-                    imageData: imageData
-                  }
+                    imageData: imageData,
+                  },
                 };
               } else if (result.toolType === 'video-generation') {
                 const videoData = result.data as MediaGenerationResult;
@@ -249,8 +260,8 @@ export const useChat = (sessionId?: string) => {
                     toolType: 'video-generation',
                     videoUrl: videoData.url,
                     thumbnailUrl: videoData.thumbnailUrl,
-                    videoData: videoData
-                  }
+                    videoData: videoData,
+                  },
                 };
               } else if (result.toolType === 'document-creation') {
                 const docData = result.data as GeneratedDocument;
@@ -263,21 +274,23 @@ export const useChat = (sessionId?: string) => {
                     toolResult: true,
                     toolType: 'document-creation',
                     documentTitle: docData.title,
-                    documentData: docData
-                  }
+                    documentData: docData,
+                  },
                 };
               } else if (result.toolType === 'web-search') {
                 const searchData = result.data as SearchResponse;
                 toolResultMessage = {
                   id: toolResultMessageId,
                   role: 'assistant',
-                  content: searchData.answer || `Found ${searchData.results.length} search results`,
+                  content:
+                    searchData.answer ||
+                    `Found ${searchData.results.length} search results`,
                   createdAt: new Date(),
                   metadata: {
                     toolResult: true,
                     toolType: 'web-search',
-                    searchResults: searchData
-                  }
+                    searchResults: searchData,
+                  },
                 };
               } else {
                 // Generic tool result
@@ -289,8 +302,8 @@ export const useChat = (sessionId?: string) => {
                   metadata: {
                     toolResult: true,
                     toolType: result.toolType,
-                    toolData: result.data
-                  }
+                    toolData: result.data,
+                  },
                 };
               }
 
@@ -306,16 +319,16 @@ export const useChat = (sessionId?: string) => {
               duration: 5000,
               action: {
                 label: 'Go to Vibe',
-                onClick: () => window.location.href = '/vibe'
-              }
+                onClick: () => (window.location.href = '/vibe'),
+              },
             });
           } else if (toolRouterResult.suggestedRoute === '/mission-control') {
             toast.info('For complex multi-step tasks, try Mission Control', {
               duration: 5000,
               action: {
                 label: 'Go to Mission Control',
-                onClick: () => window.location.href = '/mission-control'
-              }
+                onClick: () => (window.location.href = '/mission-control'),
+              },
             });
           }
 
@@ -327,11 +340,12 @@ export const useChat = (sessionId?: string) => {
             setToolProgress({});
             return;
           }
-
         } catch (error) {
           console.error('[Chat] Tool router error:', error);
           // Remove tool indicator
-          setMessages((prev) => prev.filter((msg) => msg.id !== toolIndicatorId));
+          setMessages((prev) =>
+            prev.filter((msg) => msg.id !== toolIndicatorId)
+          );
           // Continue to LLM even if tools fail
         }
 
@@ -342,7 +356,9 @@ export const useChat = (sessionId?: string) => {
         // Check if web search is needed (legacy support, now handled by tool router)
         let searchResults: SearchResponse | undefined;
         if (toolRouterResult?.executionResults) {
-          const searchResult = toolRouterResult.executionResults.find(r => r.toolType === 'web-search');
+          const searchResult = toolRouterResult.executionResults.find(
+            (r) => r.toolType === 'web-search'
+          );
           if (searchResult && searchResult.status === 'success') {
             searchResults = searchResult.data as SearchResponse;
           }
@@ -379,30 +395,33 @@ export const useChat = (sessionId?: string) => {
         );
 
         // Remove thinking message
-        setMessages((prev) => prev.filter((msg) => msg.id !== thinkingMessageId));
+        setMessages((prev) =>
+          prev.filter((msg) => msg.id !== thinkingMessageId)
+        );
 
         // Check if this was a multi-agent collaboration
         if (result.metadata.isMultiAgent && result.collaborationMessages) {
           // Add all collaboration messages to show the discussion
-          const collaborationChatMessages: ChatMessage[] = result.collaborationMessages.map((collab, idx) => ({
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: collab.content,
-            createdAt: new Date(Date.now() + idx), // Slight offset for ordering
-            metadata: {
-              mode,
-              model: result.metadata.model,
-              temperature,
-              employeeName: collab.employeeName,
-              employeeId: collab.employeeName,
-              employeeAvatar: collab.employeeAvatar,
-              isCollaboration: true,
-              collaborationType: collab.messageType,
-              collaborationTo: collab.to,
-              isMultiAgent: true,
-              employeesInvolved: result.metadata.employeesInvolved,
-            },
-          }));
+          const collaborationChatMessages: ChatMessage[] =
+            result.collaborationMessages.map((collab, idx) => ({
+              id: crypto.randomUUID(),
+              role: 'assistant',
+              content: collab.content,
+              createdAt: new Date(Date.now() + idx), // Slight offset for ordering
+              metadata: {
+                mode,
+                model: result.metadata.model,
+                temperature,
+                employeeName: collab.employeeName,
+                employeeId: collab.employeeName,
+                employeeAvatar: collab.employeeAvatar,
+                isCollaboration: true,
+                collaborationType: collab.messageType,
+                collaborationTo: collab.to,
+                isMultiAgent: true,
+                employeesInvolved: result.metadata.employeesInvolved,
+              },
+            }));
 
           // Add collaboration messages
           setMessages((prev) => [...prev, ...collaborationChatMessages]);
@@ -413,7 +432,9 @@ export const useChat = (sessionId?: string) => {
             id: assistantMessageId,
             role: 'assistant',
             content: result.response,
-            createdAt: new Date(Date.now() + result.collaborationMessages.length + 1),
+            createdAt: new Date(
+              Date.now() + result.collaborationMessages.length + 1
+            ),
             metadata: {
               mode,
               model: result.metadata.model,
@@ -456,7 +477,9 @@ export const useChat = (sessionId?: string) => {
               employeeName: result.selectedEmployee?.name,
               employeeId: result.selectedEmployee?.name,
               employeeAvatar: result.selectedEmployee
-                ? employeeChatService.getEmployeeAvatar(result.selectedEmployee.name)
+                ? employeeChatService.getEmployeeAvatar(
+                    result.selectedEmployee.name
+                  )
                 : undefined,
               selectionReason: result.selectionReason,
               thinkingSteps: result.thinkingSteps,

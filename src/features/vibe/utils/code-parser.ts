@@ -42,7 +42,7 @@ export function parseCodeBlocks(content: string): ParseResult {
     const code = match[3].trim();
 
     // Only include blocks with file paths
-    if (filePath && filePath.includes('/') || filePath?.includes('.')) {
+    if ((filePath && filePath.includes('/')) || filePath?.includes('.')) {
       codeBlocks.push({
         filePath: normalizeFilePath(filePath),
         language: normalizeLanguage(language),
@@ -56,7 +56,8 @@ export function parseCodeBlocks(content: string): ParseResult {
   // <!-- FILE: path/to/file.ext -->
   // ... code ...
   // <!-- END FILE -->
-  const htmlCommentRegex = /<!--\s*FILE:\s*([\w\-./]+)\s*-->\s*([\s\S]*?)(?:<!--\s*END FILE\s*-->|(?=<!--\s*FILE:))/gi;
+  const htmlCommentRegex =
+    /<!--\s*FILE:\s*([\w\-./]+)\s*-->\s*([\s\S]*?)(?:<!--\s*END FILE\s*-->|(?=<!--\s*FILE:))/gi;
 
   while ((match = htmlCommentRegex.exec(content)) !== null) {
     const filePath = match[1];
@@ -162,7 +163,10 @@ export interface FileOperation {
   content?: string;
 }
 
-export function extractFileOperations(content: string, codeBlocks: ParsedCodeBlock[]): FileOperation[] {
+export function extractFileOperations(
+  content: string,
+  codeBlocks: ParsedCodeBlock[]
+): FileOperation[] {
   const operations: FileOperation[] = [];
 
   // Map code blocks to create operations
@@ -256,8 +260,10 @@ export function hasCodeBlocks(content: string): boolean {
 /**
  * Extract plain code blocks (without file paths)
  */
-export function extractPlainCodeBlocks(content: string): Array<{language: string; content: string}> {
-  const blocks: Array<{language: string; content: string}> = [];
+export function extractPlainCodeBlocks(
+  content: string
+): Array<{ language: string; content: string }> {
+  const blocks: Array<{ language: string; content: string }> = [];
   const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
 
   let match;

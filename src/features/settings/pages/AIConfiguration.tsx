@@ -143,11 +143,15 @@ const AIConfigurationPage: React.FC = () => {
     const loadUserPreferences = async () => {
       const { data, error } = await settingsService.getSettings();
       if (!error && data) {
-        if (data.default_ai_provider) setDefaultProvider(data.default_ai_provider);
+        if (data.default_ai_provider)
+          setDefaultProvider(data.default_ai_provider);
         if (data.default_ai_model) setDefaultModel(data.default_ai_model);
-        if (data.prefer_streaming !== undefined) setPreferStreaming(data.prefer_streaming);
-        if (data.ai_temperature !== undefined) setAiTemperature(data.ai_temperature);
-        if (data.ai_max_tokens !== undefined) setAiMaxTokens(data.ai_max_tokens);
+        if (data.prefer_streaming !== undefined)
+          setPreferStreaming(data.prefer_streaming);
+        if (data.ai_temperature !== undefined)
+          setAiTemperature(data.ai_temperature);
+        if (data.ai_max_tokens !== undefined)
+          setAiMaxTokens(data.ai_max_tokens);
       }
     };
 
@@ -239,7 +243,11 @@ const AIConfigurationPage: React.FC = () => {
     setIsSavingPreferences(true);
     try {
       const { error } = await settingsService.updateSettings({
-        default_ai_provider: defaultProvider as 'openai' | 'anthropic' | 'google' | 'perplexity',
+        default_ai_provider: defaultProvider as
+          | 'openai'
+          | 'anthropic'
+          | 'google'
+          | 'perplexity',
         default_ai_model: defaultModel,
         prefer_streaming: preferStreaming,
         ai_temperature: aiTemperature,
@@ -328,7 +336,7 @@ const AIConfigurationPage: React.FC = () => {
         {/* API Key Input */}
         <div className="space-y-2">
           <Label htmlFor={`api-key-${provider}`}>API Key</Label>
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Input
               id={`api-key-${provider}`}
               type={showApiKeys[provider] ? 'text' : 'password'}
@@ -416,14 +424,14 @@ const AIConfigurationPage: React.FC = () => {
   );
 
   return (
-    <div className="container mx-auto space-y-4 md:space-y-6 p-4 md:p-6">
+    <div className="container mx-auto space-y-4 p-4 md:space-y-6 md:p-6">
       <div className="mb-6 flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
           <Settings className="h-6 w-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">AI Configuration</h1>
-          <p className="text-sm md:text-base text-muted-foreground">
+          <h1 className="text-2xl font-bold md:text-3xl">AI Configuration</h1>
+          <p className="text-sm text-muted-foreground md:text-base">
             Configure your AI providers and advanced settings
           </p>
         </div>
@@ -435,10 +443,18 @@ const AIConfigurationPage: React.FC = () => {
         className="space-y-6"
       >
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
-          <TabsTrigger value="overview" className="text-xs md:text-sm">Overview</TabsTrigger>
-          <TabsTrigger value="providers" className="text-xs md:text-sm">Providers</TabsTrigger>
-          <TabsTrigger value="advanced" className="text-xs md:text-sm">Advanced</TabsTrigger>
-          <TabsTrigger value="usage" className="text-xs md:text-sm">Usage</TabsTrigger>
+          <TabsTrigger value="overview" className="text-xs md:text-sm">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="providers" className="text-xs md:text-sm">
+            Providers
+          </TabsTrigger>
+          <TabsTrigger value="advanced" className="text-xs md:text-sm">
+            Advanced
+          </TabsTrigger>
+          <TabsTrigger value="usage" className="text-xs md:text-sm">
+            Usage
+          </TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -580,7 +596,9 @@ const AIConfigurationPage: React.FC = () => {
             <CardContent className="space-y-6">
               <Alert>
                 <AlertDescription>
-                  These settings will be used as defaults for general chat. Specific features may override these settings based on task requirements.
+                  These settings will be used as defaults for general chat.
+                  Specific features may override these settings based on task
+                  requirements.
                 </AlertDescription>
               </Alert>
 
@@ -603,7 +621,9 @@ const AIConfigurationPage: React.FC = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="openai">OpenAI (ChatGPT)</SelectItem>
-                      <SelectItem value="anthropic">Anthropic (Claude)</SelectItem>
+                      <SelectItem value="anthropic">
+                        Anthropic (Claude)
+                      </SelectItem>
                       <SelectItem value="google">Google (Gemini)</SelectItem>
                       <SelectItem value="perplexity">Perplexity</SelectItem>
                     </SelectContent>
@@ -615,10 +635,7 @@ const AIConfigurationPage: React.FC = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="default-model">Default AI Model</Label>
-                  <Select
-                    value={defaultModel}
-                    onValueChange={setDefaultModel}
-                  >
+                  <Select value={defaultModel} onValueChange={setDefaultModel}>
                     <SelectTrigger id="default-model">
                       <SelectValue placeholder="Select model" />
                     </SelectTrigger>
@@ -636,7 +653,9 @@ const AIConfigurationPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="ai-temperature">Temperature ({aiTemperature})</Label>
+                  <Label htmlFor="ai-temperature">
+                    Temperature ({aiTemperature})
+                  </Label>
                   <Input
                     id="ai-temperature"
                     type="number"
@@ -644,7 +663,9 @@ const AIConfigurationPage: React.FC = () => {
                     max="2"
                     step="0.1"
                     value={aiTemperature}
-                    onChange={(e) => setAiTemperature(parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      setAiTemperature(parseFloat(e.target.value))
+                    }
                   />
                   <p className="text-sm text-muted-foreground">
                     Controls randomness (0 = focused, 2 = creative)

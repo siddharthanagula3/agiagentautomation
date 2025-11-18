@@ -110,7 +110,11 @@ export function LivePreviewPanel() {
   const [autoPreview, setAutoPreview] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const previewUrl = appViewerState.url || (generatedHtml ? 'data:text/html;charset=utf-8,' + encodeURIComponent(generatedHtml) : 'about:blank');
+  const previewUrl =
+    appViewerState.url ||
+    (generatedHtml
+      ? 'data:text/html;charset=utf-8,' + encodeURIComponent(generatedHtml)
+      : 'about:blank');
   const currentViewport = viewportDimensions[appViewerState.viewport];
 
   // Auto-generate preview when files change
@@ -261,10 +265,7 @@ export function LivePreviewPanel() {
               <Terminal className="mr-1.5 h-3.5 w-3.5" />
               Console
               {consoleOutput.length > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="ml-1.5 h-4 px-1 text-xs"
-                >
+                <Badge variant="secondary" className="ml-1.5 h-4 px-1 text-xs">
                   {consoleOutput.length}
                 </Badge>
               )}

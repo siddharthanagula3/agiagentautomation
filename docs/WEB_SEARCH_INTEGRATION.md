@@ -123,12 +123,14 @@ VITE_GOOGLE_CX=your_custom_search_engine_id
 ### Getting API Keys
 
 **Perplexity AI:**
+
 1. Visit https://www.perplexity.ai/
 2. Sign up for an account
 3. Go to Settings → API
 4. Generate an API key
 
 **Google Custom Search:**
+
 1. Visit https://console.cloud.google.com/
 2. Create a new project
 3. Enable "Custom Search API"
@@ -144,6 +146,7 @@ VITE_GOOGLE_CX=your_custom_search_engine_id
 **User:** "What's the latest news about AI?"
 
 **System:**
+
 1. Detects search trigger: "latest news"
 2. Performs web search: "latest news about AI"
 3. Displays search results with recent articles
@@ -154,6 +157,7 @@ VITE_GOOGLE_CX=your_custom_search_engine_id
 **User:** "When was ChatGPT released?"
 
 **System:**
+
 1. Detects factual question pattern
 2. Searches for: "when was ChatGPT released"
 3. Shows results from reliable sources
@@ -164,6 +168,7 @@ VITE_GOOGLE_CX=your_custom_search_engine_id
 **User:** "What's the weather in San Francisco?"
 
 **System:**
+
 1. Detects real-time query: "weather"
 2. Searches for current weather data
 3. Displays results with current conditions
@@ -174,6 +179,7 @@ VITE_GOOGLE_CX=your_custom_search_engine_id
 **User:** "Search for best practices in React development"
 
 **System:**
+
 1. Detects explicit search command
 2. Performs comprehensive web search
 3. Shows multiple relevant results
@@ -184,6 +190,7 @@ VITE_GOOGLE_CX=your_custom_search_engine_id
 ### SearchResults Component
 
 Displays complete search results with:
+
 - Query header with timestamp
 - AI-generated summary (if available)
 - Numbered result cards
@@ -191,36 +198,31 @@ Displays complete search results with:
 - Expandable snippets
 
 ```tsx
-<SearchResults
-  searchResponse={searchResponse}
-  showAnswer={true}
-/>
+<SearchResults searchResponse={searchResponse} showAnswer={true} />
 ```
 
 ### CompactSearchResults Component
 
 Inline display for space-constrained areas:
+
 - Compact result badges
 - Quick source links
 - Minimal visual footprint
 
 ```tsx
-<CompactSearchResults
-  searchResponse={searchResponse}
-/>
+<CompactSearchResults searchResponse={searchResponse} />
 ```
 
 ### SearchingIndicator Component
 
 Shows search in progress:
+
 - Animated search icon
 - Current query display
 - Loading state
 
 ```tsx
-<SearchingIndicator
-  query="latest AI news"
-/>
+<SearchingIndicator query="latest AI news" />
 ```
 
 ## Integration with AI Employees
@@ -261,6 +263,7 @@ Shows search in progress:
 ### For Developers
 
 1. **Extend Search Indicators**: Add domain-specific triggers
+
    ```typescript
    // In web-search-integration.ts
    const SEARCH_INDICATORS = {
@@ -306,6 +309,7 @@ Shows search in progress:
 **Issue**: Web search doesn't activate automatically
 
 **Solutions**:
+
 1. Check if query matches detection patterns
 2. Try explicit search command: "search for..."
 3. Verify API keys are configured
@@ -316,6 +320,7 @@ Shows search in progress:
 **Issue**: Search completes but shows no results
 
 **Solutions**:
+
 1. Try different search provider
 2. Refine query to be more specific
 3. Check network connectivity
@@ -326,6 +331,7 @@ Shows search in progress:
 **Issue**: "Rate limit exceeded" error
 
 **Solutions**:
+
 1. Wait for rate limit reset
 2. Use alternative search provider
 3. Upgrade API plan
@@ -336,6 +342,7 @@ Shows search in progress:
 **Issue**: Search completes but results don't show
 
 **Solutions**:
+
 1. Check MessageBubble component integration
 2. Verify searchResults metadata is passed
 3. Check browser console for rendering errors
@@ -348,6 +355,7 @@ Shows search in progress:
 Determines if a message requires web search.
 
 **Parameters:**
+
 - `message`: User's chat message
 
 **Returns:** `true` if search is needed, `false` otherwise
@@ -357,6 +365,7 @@ Determines if a message requires web search.
 Performs web search for given query.
 
 **Parameters:**
+
 - `message`: Search query
 - `options.maxResults`: Maximum results (default: 10)
 - `options.provider`: Specific provider to use
@@ -368,6 +377,7 @@ Performs web search for given query.
 Formats search results for LLM context.
 
 **Parameters:**
+
 - `searchResponse`: SearchResponse object
 
 **Returns:** Formatted context string
@@ -375,6 +385,7 @@ Formats search results for LLM context.
 ## Support
 
 For issues, questions, or contributions:
+
 - GitHub Issues: [Link to repo issues]
 - Documentation: `/docs`
 - Examples: `/examples`

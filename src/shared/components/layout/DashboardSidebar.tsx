@@ -160,7 +160,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             <button
               onClick={() => toggleGroup(item.name)}
               className={cn(
-                'flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300 min-h-11',
+                'flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300',
                 'hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10',
                 isActive
                   ? 'bg-gradient-to-r from-primary/10 to-primary/5 text-primary shadow-sm'
@@ -259,7 +259,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             to={item.href}
             className={({ isActive: linkActive }) =>
               cn(
-                'group relative flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300 min-h-11',
+                'group relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300',
                 'hover:bg-gradient-to-r hover:from-primary/5 hover:to-primary/10',
                 collapsed ? 'justify-center' : '',
                 linkActive || isActive
@@ -405,7 +405,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={cn(
-                'w-full min-h-11 rounded-lg py-2.5 pl-10 pr-3',
+                'min-h-11 w-full rounded-lg py-2.5 pl-10 pr-3',
                 'bg-muted/50 hover:bg-muted/70 focus:bg-muted',
                 'border border-border/50 focus:border-primary/50',
                 'text-sm placeholder:text-muted-foreground',

@@ -9,7 +9,10 @@ import { Card } from '@shared/ui/card';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { cn } from '@shared/lib/utils';
-import type { SearchResult, SearchResponse } from '@core/integrations/web-search-handler';
+import type {
+  SearchResult,
+  SearchResponse,
+} from '@core/integrations/web-search-handler';
 
 interface SearchResultsProps {
   searchResponse: SearchResponse;
@@ -107,7 +110,10 @@ interface SearchResultCardProps {
   index: number;
 }
 
-const SearchResultCard: React.FC<SearchResultCardProps> = ({ result, index }) => {
+const SearchResultCard: React.FC<SearchResultCardProps> = ({
+  result,
+  index,
+}) => {
   const { title, url, snippet, source, publishedDate, favicon } = result;
 
   return (
@@ -121,7 +127,7 @@ const SearchResultCard: React.FC<SearchResultCardProps> = ({ result, index }) =>
         <div className="space-y-2">
           {/* Result Header */}
           <div className="flex items-start justify-between gap-3">
-            <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
               {/* Favicon or Globe Icon */}
               <div className="mt-0.5 flex-shrink-0">
                 {favicon ? (
@@ -139,8 +145,8 @@ const SearchResultCard: React.FC<SearchResultCardProps> = ({ result, index }) =>
               </div>
 
               {/* Title and Source */}
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+              <div className="min-w-0 flex-1">
+                <h3 className="line-clamp-2 text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
                   {title}
                 </h3>
                 {source && (
@@ -149,7 +155,9 @@ const SearchResultCard: React.FC<SearchResultCardProps> = ({ result, index }) =>
                     {publishedDate && (
                       <>
                         <span>•</span>
-                        <span>{new Date(publishedDate).toLocaleDateString()}</span>
+                        <span>
+                          {new Date(publishedDate).toLocaleDateString()}
+                        </span>
                       </>
                     )}
                   </div>
@@ -158,24 +166,24 @@ const SearchResultCard: React.FC<SearchResultCardProps> = ({ result, index }) =>
             </div>
 
             {/* Result Number and External Link */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex flex-shrink-0 items-center gap-2">
               <Badge variant="outline" className="text-xs">
                 {index + 1}
               </Badge>
-              <ExternalLink className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+              <ExternalLink className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-primary" />
             </div>
           </div>
 
           {/* Snippet */}
           {snippet && (
-            <p className="text-sm text-muted-foreground line-clamp-3 pl-7">
+            <p className="line-clamp-3 pl-7 text-sm text-muted-foreground">
               {snippet}
             </p>
           )}
 
           {/* URL */}
           <div className="flex items-center gap-2 pl-7">
-            <span className="text-xs text-muted-foreground/70 truncate">
+            <span className="truncate text-xs text-muted-foreground/70">
               {url}
             </span>
           </div>
@@ -215,7 +223,7 @@ export const CompactSearchResults: React.FC<SearchResultsProps> = ({
           >
             <a href={result.url} target="_blank" rel="noopener noreferrer">
               <span className="flex items-center gap-1.5">
-                <span className="truncate max-w-[200px]">{result.title}</span>
+                <span className="max-w-[200px] truncate">{result.title}</span>
                 <ExternalLink className="h-3 w-3 flex-shrink-0" />
               </span>
             </a>
@@ -236,7 +244,7 @@ export const SearchingIndicator: React.FC<{
   return (
     <div className={cn('flex items-center gap-3 p-4', className)}>
       <div className="relative">
-        <Search className="h-5 w-5 text-primary animate-pulse" />
+        <Search className="h-5 w-5 animate-pulse text-primary" />
         <div className="absolute inset-0 animate-ping">
           <Search className="h-5 w-5 text-primary opacity-20" />
         </div>

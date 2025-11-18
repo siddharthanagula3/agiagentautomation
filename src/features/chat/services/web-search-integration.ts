@@ -3,7 +3,10 @@
  * Detects when web search is needed and performs searches automatically
  */
 
-import { webSearch, type SearchResponse } from '@core/integrations/web-search-handler';
+import {
+  webSearch,
+  type SearchResponse,
+} from '@core/integrations/web-search-handler';
 
 /**
  * Keywords and patterns that indicate a need for web search
@@ -68,22 +71,32 @@ export function shouldPerformWebSearch(message: string): boolean {
   const lowerMessage = message.toLowerCase();
 
   // Check explicit search indicators
-  if (SEARCH_INDICATORS.explicit.some((keyword) => lowerMessage.includes(keyword))) {
+  if (
+    SEARCH_INDICATORS.explicit.some((keyword) => lowerMessage.includes(keyword))
+  ) {
     return true;
   }
 
   // Check current events indicators
-  if (SEARCH_INDICATORS.current.some((keyword) => lowerMessage.includes(keyword))) {
+  if (
+    SEARCH_INDICATORS.current.some((keyword) => lowerMessage.includes(keyword))
+  ) {
     return true;
   }
 
   // Check factual questions
-  if (SEARCH_INDICATORS.factual.some((keyword) => lowerMessage.startsWith(keyword))) {
+  if (
+    SEARCH_INDICATORS.factual.some((keyword) =>
+      lowerMessage.startsWith(keyword)
+    )
+  ) {
     return true;
   }
 
   // Check real-time information requests
-  if (SEARCH_INDICATORS.realtime.some((keyword) => lowerMessage.includes(keyword))) {
+  if (
+    SEARCH_INDICATORS.realtime.some((keyword) => lowerMessage.includes(keyword))
+  ) {
     return true;
   }
 
@@ -110,7 +123,13 @@ export function extractSearchQuery(message: string): string {
   let query = message;
 
   // Remove explicit search commands
-  const searchCommands = ['search for', 'search', 'google', 'find information about', 'look up'];
+  const searchCommands = [
+    'search for',
+    'search',
+    'google',
+    'find information about',
+    'look up',
+  ];
   for (const command of searchCommands) {
     const regex = new RegExp(`^${command}\\s+`, 'i');
     query = query.replace(regex, '');
@@ -159,7 +178,9 @@ export async function performWebSearch(
 /**
  * Formats search results into a context string for LLM
  */
-export function formatSearchResultsForContext(searchResponse: SearchResponse): string {
+export function formatSearchResultsForContext(
+  searchResponse: SearchResponse
+): string {
   const { query, results, answer } = searchResponse;
 
   let context = `# Web Search Results for: "${query}"\n\n`;
@@ -232,7 +253,10 @@ export async function enhanceMessageWithSearch(
       searchQuery: extractSearchQuery(message),
     };
   } catch (error) {
-    console.error('[WebSearchIntegration] Failed to enhance message with search:', error);
+    console.error(
+      '[WebSearchIntegration] Failed to enhance message with search:',
+      error
+    );
     // Return original message if search fails
     return {
       content: message,
@@ -247,8 +271,7 @@ export async function enhanceMessageWithSearch(
 export function isWebSearchAvailable(): boolean {
   const hasPerplexity = !!import.meta.env.VITE_PERPLEXITY_API_KEY;
   const hasGoogle =
-    !!import.meta.env.VITE_GOOGLE_API_KEY &&
-    !!import.meta.env.VITE_GOOGLE_CX;
+    !!import.meta.env.VITE_GOOGLE_API_KEY && !!import.meta.env.VITE_GOOGLE_CX;
   // DuckDuckGo is always available as it doesn't require API keys
 
   return hasPerplexity || hasGoogle || true; // true because DDG is free
@@ -257,7 +280,10 @@ export function isWebSearchAvailable(): boolean {
 /**
  * Get the available search provider
  */
-export function getPreferredSearchProvider(): 'perplexity' | 'google' | 'duckduckgo' {
+export function getPreferredSearchProvider():
+  | 'perplexity'
+  | 'google'
+  | 'duckduckgo' {
   if (import.meta.env.VITE_PERPLEXITY_API_KEY) {
     return 'perplexity';
   }

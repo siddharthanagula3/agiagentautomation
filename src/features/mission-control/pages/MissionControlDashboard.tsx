@@ -220,13 +220,17 @@ const MissionControlPageRefactored: React.FC = () => {
                       {currentMode === 'mission' ? (
                         <>
                           <MessageSquare className="mr-2 h-4 w-4" />
-                          <span className="hidden sm:inline">Switch to Chat</span>
+                          <span className="hidden sm:inline">
+                            Switch to Chat
+                          </span>
                           <span className="sm:hidden">Chat</span>
                         </>
                       ) : (
                         <>
                           <Layers className="mr-2 h-4 w-4" />
-                          <span className="hidden sm:inline">Switch to Mission</span>
+                          <span className="hidden sm:inline">
+                            Switch to Mission
+                          </span>
                           <span className="sm:hidden">Mission</span>
                         </>
                       )}
@@ -246,7 +250,11 @@ const MissionControlPageRefactored: React.FC = () => {
               {status !== 'idle' && (
                 <>
                   {status === 'completed' || status === 'failed' ? (
-                    <Button variant="outline" onClick={handleReset} className="h-10">
+                    <Button
+                      variant="outline"
+                      onClick={handleReset}
+                      className="h-10"
+                    >
                       <RotateCcw className="mr-2 h-4 w-4" />
                       Reset
                     </Button>
@@ -259,7 +267,11 @@ const MissionControlPageRefactored: React.FC = () => {
                       Resume
                     </Button>
                   ) : (
-                    <Button variant="outline" onClick={handlePause} className="h-10">
+                    <Button
+                      variant="outline"
+                      onClick={handlePause}
+                      className="h-10"
+                    >
                       <Pause className="mr-2 h-4 w-4" />
                       Pause
                     </Button>

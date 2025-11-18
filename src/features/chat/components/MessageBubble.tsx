@@ -229,7 +229,9 @@ export const MessageBubble = React.memo(function MessageBubble({
   const isDocument = message.metadata?.isDocument;
   const hasWorkStream = message.metadata?.hasWorkStream;
   const isThinking = message.metadata?.isThinking;
-  const hasThinkingSteps = message.metadata?.thinkingSteps && message.metadata.thinkingSteps.length > 0;
+  const hasThinkingSteps =
+    message.metadata?.thinkingSteps &&
+    message.metadata.thinkingSteps.length > 0;
 
   // Artifact detection and management
   const { addArtifact, shareArtifact, setCurrentVersion, getMessageArtifacts } =
@@ -303,7 +305,8 @@ export const MessageBubble = React.memo(function MessageBubble({
     : 'AI';
 
   // Get employee color
-  const employeeColor = message.employeeAvatar ||
+  const employeeColor =
+    message.employeeAvatar ||
     employeeChatService.getEmployeeAvatar(message.employeeName || '');
 
   return (
@@ -318,8 +321,18 @@ export const MessageBubble = React.memo(function MessageBubble({
         {/* Avatar - only show for assistant messages */}
         {!isUser && (
           <div className="flex-shrink-0">
-            <Avatar className="h-9 w-9 ring-2 ring-offset-1" style={{ ringColor: employeeColor }}>
-              <AvatarImage src={typeof message.employeeAvatar === 'string' && message.employeeAvatar.startsWith('/') ? message.employeeAvatar : undefined} />
+            <Avatar
+              className="h-9 w-9 ring-2 ring-offset-1"
+              style={{ ringColor: employeeColor }}
+            >
+              <AvatarImage
+                src={
+                  typeof message.employeeAvatar === 'string' &&
+                  message.employeeAvatar.startsWith('/')
+                    ? message.employeeAvatar
+                    : undefined
+                }
+              />
               <AvatarFallback
                 className="text-xs font-semibold text-white"
                 style={{
@@ -343,40 +356,52 @@ export const MessageBubble = React.memo(function MessageBubble({
           {!isUser && message.employeeName && (
             <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
               <div className="flex items-center gap-2">
-                <span className="font-semibold" style={{ color: employeeColor }}>
-                  {message.employeeName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                <span
+                  className="font-semibold"
+                  style={{ color: employeeColor }}
+                >
+                  {message.employeeName
+                    .split('-')
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ')}
                 </span>
-                {message.metadata?.selectionReason && !message.metadata?.isCollaboration && (
-                  <span
-                    className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
-                    style={{ backgroundColor: employeeColor }}
-                  >
-                    <Sparkles className="mr-0.5 inline-block h-2.5 w-2.5" />
-                    {message.metadata.selectionReason}
-                  </span>
-                )}
+                {message.metadata?.selectionReason &&
+                  !message.metadata?.isCollaboration && (
+                    <span
+                      className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
+                      style={{ backgroundColor: employeeColor }}
+                    >
+                      <Sparkles className="mr-0.5 inline-block h-2.5 w-2.5" />
+                      {message.metadata.selectionReason}
+                    </span>
+                  )}
                 {message.metadata?.isCollaboration && (
                   <span
                     className="rounded-full px-2 py-0.5 text-[10px] font-medium"
                     style={{
-                      backgroundColor: message.metadata.collaborationType === 'synthesis' ? '#4f46e5' : employeeColor,
-                      color: 'white'
+                      backgroundColor:
+                        message.metadata.collaborationType === 'synthesis'
+                          ? '#4f46e5'
+                          : employeeColor,
+                      color: 'white',
                     }}
                   >
-                    {message.metadata.collaborationType === 'contribution' && '💭 Contribution'}
-                    {message.metadata.collaborationType === 'discussion' && '💬 Discussion'}
-                    {message.metadata.collaborationType === 'synthesis' && '📋 Final Synthesis'}
+                    {message.metadata.collaborationType === 'contribution' &&
+                      '💭 Contribution'}
+                    {message.metadata.collaborationType === 'discussion' &&
+                      '💬 Discussion'}
+                    {message.metadata.collaborationType === 'synthesis' &&
+                      '📋 Final Synthesis'}
                   </span>
                 )}
-                {message.metadata?.isMultiAgent && message.metadata?.employeesInvolved && (
-                  <span
-                    className="rounded-full px-2 py-0.5 text-[10px] font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-                  >
-                    🤝 Team of {message.metadata.employeesInvolved.length}
-                  </span>
-                )}
+                {message.metadata?.isMultiAgent &&
+                  message.metadata?.employeesInvolved && (
+                    <span className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-2 py-0.5 text-[10px] font-medium text-white">
+                      🤝 Team of {message.metadata.employeesInvolved.length}
+                    </span>
+                  )}
                 {message.metadata?.collaborationTo && (
-                  <span className="text-muted-foreground text-[10px]">
+                  <span className="text-[10px] text-muted-foreground">
                     → {message.metadata.collaborationTo}
                   </span>
                 )}
@@ -388,7 +413,7 @@ export const MessageBubble = React.memo(function MessageBubble({
               {message.metadata?.model && (
                 <>
                   <span className="text-muted-foreground/50">•</span>
-                  <span className="text-muted-foreground/60 text-[10px]">
+                  <span className="text-[10px] text-muted-foreground/60">
                     {message.metadata.model}
                   </span>
                 </>
@@ -509,133 +534,156 @@ export const MessageBubble = React.memo(function MessageBubble({
           )}
 
           {/* Image Generation Result */}
-          {!isUser && message.metadata?.toolType === 'image-generation' && message.metadata?.imageUrl && (
-            <div className="mt-3 w-full">
-              <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                <div className="mb-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-purple-500" />
-                    <span className="text-sm font-medium">Generated Image</span>
-                  </div>
-                  {message.metadata?.imageData && (
-                    <div className="text-xs text-muted-foreground">
-                      {message.metadata.imageData.metadata.aspectRatio} • {message.metadata.imageData.model}
+          {!isUser &&
+            message.metadata?.toolType === 'image-generation' &&
+            message.metadata?.imageUrl && (
+              <div className="mt-3 w-full">
+                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-purple-500" />
+                      <span className="text-sm font-medium">
+                        Generated Image
+                      </span>
                     </div>
-                  )}
-                </div>
-                <div className="overflow-hidden rounded-lg">
-                  <img
-                    src={message.metadata.imageUrl}
-                    alt={message.metadata?.imageData?.prompt || 'Generated image'}
-                    className="w-full h-auto object-contain max-h-[600px]"
-                  />
-                </div>
-                {message.metadata?.imageData?.images && message.metadata.imageData.images.length > 1 && (
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    {message.metadata.imageData.images.slice(1).map((img, idx) => (
-                      <div key={idx} className="overflow-hidden rounded-lg border border-border">
-                        <img
-                          src={img.url}
-                          alt={`Variant ${idx + 2}`}
-                          className="w-full h-auto object-contain"
-                        />
+                    {message.metadata?.imageData && (
+                      <div className="text-xs text-muted-foreground">
+                        {message.metadata.imageData.metadata.aspectRatio} •{' '}
+                        {message.metadata.imageData.model}
                       </div>
-                    ))}
+                    )}
                   </div>
-                )}
-                <div className="mt-3 flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const a = document.createElement('a');
-                      a.href = message.metadata!.imageUrl!;
-                      a.download = 'generated-image.png';
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                    }}
-                    className="h-8 text-xs"
-                  >
-                    <Download className="mr-1 h-3 w-3" />
-                    Download
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(message.metadata!.imageUrl!);
-                      toast.success('Image URL copied');
-                    }}
-                    className="h-8 text-xs"
-                  >
-                    <Copy className="mr-1 h-3 w-3" />
-                    Copy URL
-                  </Button>
+                  <div className="overflow-hidden rounded-lg">
+                    <img
+                      src={message.metadata.imageUrl}
+                      alt={
+                        message.metadata?.imageData?.prompt || 'Generated image'
+                      }
+                      className="h-auto max-h-[600px] w-full object-contain"
+                    />
+                  </div>
+                  {message.metadata?.imageData?.images &&
+                    message.metadata.imageData.images.length > 1 && (
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        {message.metadata.imageData.images
+                          .slice(1)
+                          .map((img, idx) => (
+                            <div
+                              key={idx}
+                              className="overflow-hidden rounded-lg border border-border"
+                            >
+                              <img
+                                src={img.url}
+                                alt={`Variant ${idx + 2}`}
+                                className="h-auto w-full object-contain"
+                              />
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  <div className="mt-3 flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const a = document.createElement('a');
+                        a.href = message.metadata!.imageUrl!;
+                        a.download = 'generated-image.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                      }}
+                      className="h-8 text-xs"
+                    >
+                      <Download className="mr-1 h-3 w-3" />
+                      Download
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          message.metadata!.imageUrl!
+                        );
+                        toast.success('Image URL copied');
+                      }}
+                      className="h-8 text-xs"
+                    >
+                      <Copy className="mr-1 h-3 w-3" />
+                      Copy URL
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Video Generation Result */}
-          {!isUser && message.metadata?.toolType === 'video-generation' && message.metadata?.videoUrl && (
-            <div className="mt-3 w-full">
-              <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                <div className="mb-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-pink-500" />
-                    <span className="text-sm font-medium">Generated Video</span>
-                  </div>
-                  {message.metadata?.videoData && (
-                    <div className="text-xs text-muted-foreground">
-                      {message.metadata.videoData.metadata.duration}s • {message.metadata.videoData.metadata.resolution} • {message.metadata.videoData.model}
+          {!isUser &&
+            message.metadata?.toolType === 'video-generation' &&
+            message.metadata?.videoUrl && (
+              <div className="mt-3 w-full">
+                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-pink-500" />
+                      <span className="text-sm font-medium">
+                        Generated Video
+                      </span>
                     </div>
-                  )}
-                </div>
-                <div className="overflow-hidden rounded-lg bg-black">
-                  <video
-                    src={message.metadata.videoUrl}
-                    controls
-                    poster={message.metadata?.thumbnailUrl}
-                    className="w-full h-auto"
-                    style={{ maxHeight: '600px' }}
-                  >
-                    Your browser does not support the video tag.
-                  </video>
-                </div>
-                <div className="mt-3 flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const a = document.createElement('a');
-                      a.href = message.metadata!.videoUrl!;
-                      a.download = 'generated-video.mp4';
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                    }}
-                    className="h-8 text-xs"
-                  >
-                    <Download className="mr-1 h-3 w-3" />
-                    Download
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(message.metadata!.videoUrl!);
-                      toast.success('Video URL copied');
-                    }}
-                    className="h-8 text-xs"
-                  >
-                    <Copy className="mr-1 h-3 w-3" />
-                    Copy URL
-                  </Button>
+                    {message.metadata?.videoData && (
+                      <div className="text-xs text-muted-foreground">
+                        {message.metadata.videoData.metadata.duration}s •{' '}
+                        {message.metadata.videoData.metadata.resolution} •{' '}
+                        {message.metadata.videoData.model}
+                      </div>
+                    )}
+                  </div>
+                  <div className="overflow-hidden rounded-lg bg-black">
+                    <video
+                      src={message.metadata.videoUrl}
+                      controls
+                      poster={message.metadata?.thumbnailUrl}
+                      className="h-auto w-full"
+                      style={{ maxHeight: '600px' }}
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const a = document.createElement('a');
+                        a.href = message.metadata!.videoUrl!;
+                        a.download = 'generated-video.mp4';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                      }}
+                      className="h-8 text-xs"
+                    >
+                      <Download className="mr-1 h-3 w-3" />
+                      Download
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          message.metadata!.videoUrl!
+                        );
+                        toast.success('Video URL copied');
+                      }}
+                      className="h-8 text-xs"
+                    >
+                      <Copy className="mr-1 h-3 w-3" />
+                      Copy URL
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Web Search Results */}
           {!isUser && message.metadata?.searchResults && (

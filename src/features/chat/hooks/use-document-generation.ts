@@ -17,7 +17,10 @@ import { toast } from 'sonner';
 interface UseDocumentGenerationReturn {
   isGenerating: boolean;
   error: string | null;
-  generateDocument: (message: string, sessionId?: string) => Promise<GeneratedDocument | null>;
+  generateDocument: (
+    message: string,
+    sessionId?: string
+  ) => Promise<GeneratedDocument | null>;
   enhanceDocument: (
     content: string,
     enhancement: 'proofread' | 'expand' | 'summarize' | 'restructure',
@@ -89,13 +92,12 @@ export function useDocumentGeneration(): UseDocumentGenerationReturn {
       setError(null);
 
       try {
-        const enhancedContent =
-          await documentGenerationService.enhanceDocument(
-            content,
-            enhancement,
-            user?.id,
-            sessionId
-          );
+        const enhancedContent = await documentGenerationService.enhanceDocument(
+          content,
+          enhancement,
+          user?.id,
+          sessionId
+        );
 
         const enhancementLabels = {
           proofread: 'Proofread',

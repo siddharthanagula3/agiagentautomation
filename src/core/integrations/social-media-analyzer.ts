@@ -305,7 +305,9 @@ export class SocialMediaAnalyzer {
       parts.push(
         `- Overall sentiment (positive/negative/neutral/mixed) with percentage scores`
       );
-      parts.push(`- Key sentiment drivers (what's making people feel this way)`);
+      parts.push(
+        `- Key sentiment drivers (what's making people feel this way)`
+      );
       parts.push(`- Emotional tone breakdown (joy, anger, fear, etc.)`);
       parts.push(`- Example posts for each sentiment category`);
     }
@@ -343,16 +345,26 @@ export class SocialMediaAnalyzer {
     if (analysisTypes.includes('sentiment') || analysisTypes.includes('all')) {
       parts.push(`  "sentiment": {`);
       parts.push(`    "overall": "positive|negative|neutral|mixed",`);
-      parts.push(`    "scores": { "positive": 0-100, "negative": 0-100, "neutral": 0-100 },`);
-      parts.push(`    "drivers": [{ "sentiment": "positive|negative", "topic": "...", "mentions": 0, "examples": ["..."] }],`);
+      parts.push(
+        `    "scores": { "positive": 0-100, "negative": 0-100, "neutral": 0-100 },`
+      );
+      parts.push(
+        `    "drivers": [{ "sentiment": "positive|negative", "topic": "...", "mentions": 0, "examples": ["..."] }],`
+      );
       parts.push(`    "emotionalTone": { "joy": 0-100, "anger": 0-100, ... }`);
       parts.push(`  },`);
     }
     if (analysisTypes.includes('trends') || analysisTypes.includes('all')) {
       parts.push(`  "trends": {`);
-      parts.push(`    "trending": [{ "topic": "...", "volume": 0, "growth": "+X%", "category": "..." }],`);
-      parts.push(`    "emerging": [{ "topic": "...", "currentVolume": 0, "projectedGrowth": "+X%", "confidence": "high|medium|low" }],`);
-      parts.push(`    "declining": [{ "topic": "...", "previousVolume": 0, "currentVolume": 0, "decline": "-X%" }]`);
+      parts.push(
+        `    "trending": [{ "topic": "...", "volume": 0, "growth": "+X%", "category": "..." }],`
+      );
+      parts.push(
+        `    "emerging": [{ "topic": "...", "currentVolume": 0, "projectedGrowth": "+X%", "confidence": "high|medium|low" }],`
+      );
+      parts.push(
+        `    "declining": [{ "topic": "...", "previousVolume": 0, "currentVolume": 0, "decline": "-X%" }]`
+      );
       parts.push(`  },`);
     }
     if (
@@ -360,20 +372,32 @@ export class SocialMediaAnalyzer {
       analysisTypes.includes('all')
     ) {
       parts.push(`  "influencers": {`);
-      parts.push(`    "topInfluencers": [{ "username": "...", "platform": "...", "followers": 0, "engagement": 0, "relevance": "high|medium|low", "sentiment": "..." }],`);
-      parts.push(`    "risingVoices": [{ "username": "...", "growthRate": "+X%", "niche": "..." }]`);
+      parts.push(
+        `    "topInfluencers": [{ "username": "...", "platform": "...", "followers": 0, "engagement": 0, "relevance": "high|medium|low", "sentiment": "..." }],`
+      );
+      parts.push(
+        `    "risingVoices": [{ "username": "...", "growthRate": "+X%", "niche": "..." }]`
+      );
       parts.push(`  },`);
     }
     parts.push(`  "topContent": {`);
-    parts.push(`    "posts": [{ "content": "...", "author": "...", "engagement": { "likes": 0, "shares": 0, "comments": 0, "total": 0 }, "sentiment": "..." }],`);
-    parts.push(`    "viralContent": [{ "content": "...", "viralityScore": 0-100, "shareVelocity": "...", "reachEstimate": 0 }]`);
+    parts.push(
+      `    "posts": [{ "content": "...", "author": "...", "engagement": { "likes": 0, "shares": 0, "comments": 0, "total": 0 }, "sentiment": "..." }],`
+    );
+    parts.push(
+      `    "viralContent": [{ "content": "...", "viralityScore": 0-100, "shareVelocity": "...", "reachEstimate": 0 }]`
+    );
     parts.push(`  },`);
     parts.push(`  "insights": ["key insight 1", "key insight 2", ...],`);
-    parts.push(`  "recommendations": ["recommendation 1", "recommendation 2", ...]`);
+    parts.push(
+      `  "recommendations": ["recommendation 1", "recommendation 2", ...]`
+    );
     parts.push(`}`);
     parts.push(`\`\`\``);
 
-    parts.push(`\n**Important:** Use your real-time access to X (Twitter) to provide actual current data, not hypothetical examples.`);
+    parts.push(
+      `\n**Important:** Use your real-time access to X (Twitter) to provide actual current data, not hypothetical examples.`
+    );
 
     return parts.join('\n');
   }
@@ -521,10 +545,7 @@ Your analysis should be data-driven, actionable, and insightful.`;
       });
 
       if (error) {
-        console.error(
-          '[SocialMediaAnalyzer] Error storing analysis:',
-          error
-        );
+        console.error('[SocialMediaAnalyzer] Error storing analysis:', error);
       }
     } catch (error) {
       console.error(

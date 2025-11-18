@@ -5,6 +5,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 **Recent Updates:**
+
 - Nov 18th 2025: 12 critical fixes applied (employee loading, mobile responsiveness, vibe token tracking)
 - Nov 16th 2025: Comprehensive codebase audit, 48+ bug fixes, security improvements
 - See `CRITICAL_FIXES_SUMMARY.md` and `COMPREHENSIVE_BUG_FIXES_REPORT.md` for details
@@ -308,9 +309,11 @@ Always use path aliases for imports. Never use relative paths across feature bou
 ## Critical Fixes Applied (Nov 2025)
 
 ### Overview
+
 12 critical production-blocking issues were identified and fixed. All fixes are documented in `CRITICAL_FIXES_SUMMARY.md`. Key highlights:
 
 **Critical Bugs Fixed (12/12):**
+
 1. ✅ AI employee loading (glob pattern fixed - 139 employees now load)
 2. ✅ Missing avatars (AnimatedAvatar component loading state fixed)
 3. ✅ Supabase 406 error (changed `.single()` to `.maybeSingle()`)
@@ -325,6 +328,7 @@ Always use path aliases for imports. Never use relative paths across feature bou
 12. ✅ Vibe token tracking missing (migration + UI display added)
 
 **Quality Metrics After Fixes:**
+
 - ✅ TypeScript errors: 0
 - ✅ ESLint warnings: 0
 - ✅ Production build: Success (34s)
@@ -334,11 +338,13 @@ Always use path aliases for imports. Never use relative paths across feature bou
 
 **Database Migrations Required:**
 Three new migrations must be applied (see Database Migrations section below):
+
 - `20251118000002_add_vibe_token_tracking.sql` - Token usage tracking
 - `20251118000003_add_handle_new_user_trigger.sql` - Auto user provisioning
 - `20251118000004_backfill_existing_users.sql` - Backfill missing records
 
 **Additional Fixes (Nov 16th):**
+
 - 48+ bugs fixed across security, performance, and reliability
 - 18/18 critical security vulnerabilities patched
 - 18/18 high-severity bugs resolved
@@ -435,6 +441,7 @@ const employees = await promptManagement.getAvailableEmployees();
 VIBE is a standalone AI-powered code editor inspired by Lovable.dev, Bolt.new, and Replit. It runs **outside** the dashboard layout for maximum workspace.
 
 **Key Features:**
+
 - **Standalone Layout**: No dashboard sidebars, full-screen workspace
 - **3-Panel Layout**:
   - Left (30%): Chat interface with AI agents
@@ -465,6 +472,7 @@ Located: `src/features/vibe/services/vibe-token-tracker.ts`
 ```
 
 **Route Configuration:**
+
 ```typescript
 // App.tsx - OUTSIDE DashboardLayout
 <Route path="/vibe" element={
@@ -477,6 +485,7 @@ Located: `src/features/vibe/services/vibe-token-tracker.ts`
 ```
 
 **Important Notes:**
+
 - VIBE is **protected** (requires login) but **standalone** (no dashboard chrome)
 - Session creation happens automatically on first visit
 - All LLM calls are logged to `vibe_sessions` table with token costs
@@ -488,6 +497,7 @@ Located: `src/features/vibe/services/vibe-token-tracker.ts`
 Multi-agent chat interface with supervisor coordination and tool integration. Runs **inside** the dashboard layout.
 
 **Key Features:**
+
 - **Multi-Agent Collaboration**: Supervisor agent coordinates multiple AI employees
 - **Dynamic Employee Selection**: Automatically selects best employee for each task
 - **Tool Integration**: Image generation, video creation, document analysis, web search
@@ -495,6 +505,7 @@ Multi-agent chat interface with supervisor coordination and tool integration. Ru
 - **Session Management**: Create, rename, delete, star chat sessions
 
 **Multi-Agent Architecture:**
+
 ```typescript
 // 1. User sends message
 // 2. Supervisor analyzes task
@@ -507,18 +518,21 @@ Multi-agent chat interface with supervisor coordination and tool integration. Ru
 Located: `src/features/chat/hooks/use-tool-integration.ts`
 
 Supported tools:
+
 - **Image Generation**: DALL-E, Stable Diffusion
 - **Video Generation**: Text-to-video models
 - **Document Analysis**: PDF parsing, text extraction
 - **Web Search**: Real-time web data via Perplexity
 
 **Components:**
+
 - `MultiAgentChatInterface.tsx` - Coordinates multiple agents
 - `CollaborativeChatInterface.tsx` - Real-time collaboration UI
 - `ToolProgressIndicator.tsx` - Shows tool execution status
 - `ChatComposer.tsx` - Rich message input with attachments
 
 **Route Configuration:**
+
 ```typescript
 // App.tsx - INSIDE DashboardLayout
 <Route path="chat" element={<ErrorBoundary><ChatPage /></ErrorBoundary>} />
@@ -538,6 +552,7 @@ Supported tools:
 - `webhook_audit_log` - Stripe webhook event tracking
 
 **VIBE Tables (New):**
+
 - `vibe_sessions` - Coding session metadata with token tracking
   - Columns: `total_input_tokens`, `total_output_tokens`, `total_tokens`, `total_cost`
 - `vibe_messages` - Chat messages within vibe sessions
@@ -545,6 +560,7 @@ Supported tools:
 - `vibe_agent_actions` - Agent action history for replay
 
 **Token Tracking:**
+
 - RPC Function: `increment_vibe_session_tokens(p_session_id, p_input_tokens, p_output_tokens, p_cost)`
 - Atomic updates prevent race conditions
 - Indexed by `total_tokens DESC` and `total_cost DESC` for analytics
@@ -555,6 +571,7 @@ All tables have RLS policies. Users can only access their own data. The `service
 **Database Migrations:**
 
 Recent migrations (Nov 2025):
+
 - `20251118000002_add_vibe_token_tracking.sql` - Vibe token tracking
 - `20251118000003_add_handle_new_user_trigger.sql` - Auto user provisioning
 - `20251118000004_backfill_existing_users.sql` - Backfill existing users
@@ -590,6 +607,7 @@ Located: `netlify/functions/`
 - `run-sql.ts` - Admin SQL execution (requires auth)
 
 **Security Improvements (Nov 16th):**
+
 - All payment endpoints now require authentication (`withAuth` wrapper)
 - Request size validation (1MB limit, 100 message limit)
 - SSRF protection (blocks private IP ranges)
@@ -872,23 +890,23 @@ npm run dev
 
 ```javascript
 // Check Zustand stores
-window.__ZUSTAND__ // View all Zustand stores
+window.__ZUSTAND__; // View all Zustand stores
 
 // Check auth state
 import { useAuthStore } from '@shared/stores/authentication-store';
-useAuthStore.getState()
+useAuthStore.getState();
 
 // Check mission state
 import { useMissionStore } from '@shared/stores/mission-control-store';
-useMissionStore.getState()
+useMissionStore.getState();
 
 // Test employee loading
 import { promptManagement } from '@core/ai/employees/prompt-management';
-await promptManagement.getAvailableEmployees()
+await promptManagement.getAvailableEmployees();
 
 // Check Supabase connection
 import { supabase } from '@shared/lib/supabase-client';
-await supabase.auth.getUser()
+await supabase.auth.getUser();
 ```
 
 ## Performance Considerations

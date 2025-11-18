@@ -3,18 +3,23 @@
 ## 🚀 5-Minute Setup
 
 ### 1. Get API Key (1 minute)
+
 Visit https://aistudio.google.com/app/apikey and create a free API key.
 
 ### 2. Configure Environment (1 minute)
+
 Add to `.env`:
+
 ```bash
 VITE_GOOGLE_API_KEY=your-api-key-here
 ```
 
 ### 3. Test in Chat (3 minutes)
+
 Restart dev server and try these commands in your chat:
 
 **Images:**
+
 ```
 Create an image of a sunset over mountains in 16:9
 Generate 3 pictures of cute cats in cartoon style
@@ -22,6 +27,7 @@ Make a photorealistic image of a futuristic city
 ```
 
 **Videos:**
+
 ```
 Create a video of ocean waves crashing on a beach
 Generate an 8-second cinematic video of a forest
@@ -103,6 +109,7 @@ console.log('Video URL:', result.video.url);
 ## 🎯 Common Use Cases
 
 ### Chat Integration
+
 ```typescript
 import { mediaToolDetector } from '@core/integrations/media-tool-detector';
 
@@ -115,6 +122,7 @@ function handleUserMessage(message: string) {
 ```
 
 ### Batch Generation
+
 ```typescript
 const prompts = [
   'A sunrise over mountains',
@@ -129,6 +137,7 @@ for (const prompt of prompts) {
 ```
 
 ### Progress Tracking
+
 ```typescript
 await googleVeoService.generateVideo(
   { prompt: 'Drone over forest' },
@@ -144,6 +153,7 @@ await googleVeoService.generateVideo(
 ## 💡 Tips & Tricks
 
 ### Better Prompts
+
 ```typescript
 // Enhance prompts automatically
 const enhanced = await googleImagenService.enhancePrompt('sunset');
@@ -151,15 +161,17 @@ const enhanced = await googleImagenService.enhancePrompt('sunset');
 ```
 
 ### Cost Control
+
 ```typescript
 // Use Fast model for prototyping
-model: 'imagen-4.0-fast-generate-001'  // $0.001 vs $0.002
+model: 'imagen-4.0-fast-generate-001'; // $0.001 vs $0.002
 
 // Use 720p for videos
-resolution: '720p'  // $0.05 vs $0.08
+resolution: '720p'; // $0.05 vs $0.08
 ```
 
 ### Download Images/Videos
+
 ```typescript
 await googleImagenService.downloadImage(imageUrl, 'my-image.png');
 await googleVeoService.downloadVideo(videoUrl, 'my-video.mp4');
@@ -169,18 +181,19 @@ await googleVeoService.downloadVideo(videoUrl, 'my-video.mp4');
 
 ## 🐛 Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| "API key not configured" | Add `VITE_GOOGLE_API_KEY` to `.env` |
-| "Quota exceeded" | Check usage at https://aistudio.google.com |
-| "Safety filter blocked" | Modify prompt to avoid policy violations |
-| Video timeout | Try simpler prompt or check network |
+| Issue                    | Solution                                   |
+| ------------------------ | ------------------------------------------ |
+| "API key not configured" | Add `VITE_GOOGLE_API_KEY` to `.env`        |
+| "Quota exceeded"         | Check usage at https://aistudio.google.com |
+| "Safety filter blocked"  | Modify prompt to avoid policy violations   |
+| Video timeout            | Try simpler prompt or check network        |
 
 ---
 
 ## 📱 Supported Features
 
 ### Images (Imagen 4.0)
+
 - ✅ Aspect ratios: 1:1, 3:4, 4:3, 9:16, 16:9
 - ✅ Multiple images: 1-4 per request
 - ✅ Quality: Standard, Ultra, Fast
@@ -188,6 +201,7 @@ await googleVeoService.downloadVideo(videoUrl, 'my-video.mp4');
 - ✅ Seed control
 
 ### Videos (Veo 3.1)
+
 - ✅ Resolutions: 720p, 1080p
 - ✅ Duration: 5-8 seconds
 - ✅ Native audio: Yes

@@ -5,6 +5,7 @@
 ### Prerequisites
 
 1. **Set up environment variables:**
+
 ```bash
 # Required for image/video generation
 VITE_GOOGLE_API_KEY=your_google_api_key
@@ -18,6 +19,7 @@ VITE_DEMO_MODE=true
 ```
 
 2. **Start the development server:**
+
 ```bash
 npm run dev
 ```
@@ -29,22 +31,26 @@ npm run dev
 ### Test 1: Image Generation ✨
 
 **Input:**
+
 ```
 Generate a realistic image of a sunset over mountains
 ```
 
 **Expected Behavior:**
+
 1. Shows "🔄 Analyzing your request and selecting tools..."
 2. Tool progress indicator appears with "Image Generation"
 3. Image appears in chat with download/copy buttons
 4. No LLM response (tool handled everything)
 
 **Advanced Test:**
+
 ```
 Create a photographic quality image of a cat in 16:9 aspect ratio
 ```
 
 **Verify:**
+
 - Aspect ratio is correctly parsed (16:9)
 - Quality setting is "hd"
 - Image displays properly
@@ -54,11 +60,13 @@ Create a photographic quality image of a cat in 16:9 aspect ratio
 ### Test 2: Video Generation 🎬
 
 **Input:**
+
 ```
 Generate a 10 second cinematic video of ocean waves
 ```
 
 **Expected Behavior:**
+
 1. Tool progress indicator shows "Video Generation"
 2. Progress bar updates (0% → 100%)
 3. Video player appears with controls
@@ -66,11 +74,13 @@ Generate a 10 second cinematic video of ocean waves
 5. Download/copy URL buttons work
 
 **Advanced Test:**
+
 ```
 Create a 15 second video of a forest in 1080p high definition
 ```
 
 **Verify:**
+
 - Duration is 15 seconds
 - Resolution is 1080p
 - Video plays smoothly
@@ -80,11 +90,13 @@ Create a 15 second video of a forest in 1080p high definition
 ### Test 3: Document Creation 📄
 
 **Input:**
+
 ```
 Create a comprehensive report on AI safety with sections on ethics, risks, and regulations
 ```
 
 **Expected Behavior:**
+
 1. Tool processes document creation
 2. Markdown document appears with proper formatting
 3. Export .md button appears
@@ -92,11 +104,13 @@ Create a comprehensive report on AI safety with sections on ethics, risks, and r
 5. No additional LLM response
 
 **Advanced Test:**
+
 ```
 Write a technical documentation for a REST API with examples and best practices
 ```
 
 **Verify:**
+
 - Document type is "documentation"
 - Technical tone is used
 - Code examples are included
@@ -106,22 +120,26 @@ Write a technical documentation for a REST API with examples and best practices
 ### Test 4: Web Search 🔍
 
 **Input:**
+
 ```
 What are the latest developments in quantum computing this week?
 ```
 
 **Expected Behavior:**
+
 1. Shows "Searching the web..."
 2. Search results appear with citations
 3. AI synthesizes results into comprehensive answer
 4. Source URLs are clickable
 
 **Advanced Test:**
+
 ```
 Search for current AI news and summarize the top trends
 ```
 
 **Verify:**
+
 - Recent/current results are shown
 - AI summary references sources
 - Citations use [1], [2] format
@@ -131,22 +149,26 @@ Search for current AI news and summarize the top trends
 ### Test 5: Multi-Tool Request 🔗
 
 **Input:**
+
 ```
 Search for the latest AI art trends and generate an image based on what you find
 ```
 
 **Expected Behavior:**
+
 1. Tool progress shows both "Web Search" and "Image Generation"
 2. Search results appear first
 3. Generated image appears second
 4. AI provides contextual explanation
 
 **Advanced Test:**
+
 ```
 Find information about cyberpunk aesthetics and create a cyberpunk-style image
 ```
 
 **Verify:**
+
 - Search informs image prompt
 - Both results display properly
 - LLM ties them together
@@ -156,16 +178,19 @@ Find information about cyberpunk aesthetics and create a cyberpunk-style image
 ### Test 6: Code Generation (Suggestion) 💻
 
 **Input:**
+
 ```
 Write a React component for a user profile card with avatar and bio
 ```
 
 **Expected Behavior:**
+
 1. Toast notification: "For better code generation experience, try /vibe"
 2. Chat still generates code with syntax highlighting
 3. Toast has "Go to Vibe" action button
 
 **Verify:**
+
 - Suggestion appears
 - Code is still generated
 - User can click to navigate to /vibe
@@ -175,11 +200,13 @@ Write a React component for a user profile card with avatar and bio
 ### Test 7: Complex Multi-Agent Task 🤝
 
 **Input:**
+
 ```
 Build a complete authentication system with frontend forms, backend API, database schema, and security best practices
 ```
 
 **Expected Behavior:**
+
 1. Tool detects complexity
 2. Toast: "For complex multi-step tasks, try Mission Control"
 3. Multiple AI employees collaborate
@@ -187,6 +214,7 @@ Build a complete authentication system with frontend forms, backend API, databas
 5. Final synthesis provides comprehensive answer
 
 **Verify:**
+
 - Multiple employees involved
 - Collaboration badges show
 - Supervisor synthesis appears
@@ -197,16 +225,19 @@ Build a complete authentication system with frontend forms, backend API, databas
 ### Test 8: General Chat (Fallback) 💬
 
 **Input:**
+
 ```
 How are you doing today?
 ```
 
 **Expected Behavior:**
+
 1. No special tools detected
 2. Goes straight to LLM
 3. Normal chat response
 
 **Verify:**
+
 - No tool progress indicator
 - Immediate response
 - Conversational reply
@@ -218,11 +249,13 @@ How are you doing today?
 ### Test E1: Invalid Tool Request
 
 **Input:**
+
 ```
 Generate a video of something impossible
 ```
 
 **Expected:**
+
 - Tool attempts execution
 - Error toast appears
 - Falls back to LLM response
@@ -230,11 +263,13 @@ Generate a video of something impossible
 ### Test E2: No API Keys
 
 **Input:**
+
 ```
 Generate an image
 ```
 
 **Without VITE_GOOGLE_API_KEY:**
+
 - Clear error message
 - Instructions to get API key
 - Link to Google AI Studio
@@ -242,6 +277,7 @@ Generate an image
 ### Test E3: Network Failure
 
 **Expected:**
+
 - Graceful error handling
 - User-friendly error message
 - Retry suggestion
@@ -251,6 +287,7 @@ Generate an image
 ## Performance Benchmarks
 
 ### Expected Timings:
+
 - Image generation: 3-8 seconds
 - Video generation: 30-120 seconds
 - Document creation: 5-15 seconds
@@ -258,6 +295,7 @@ Generate an image
 - Multi-agent: 10-30 seconds
 
 ### Tool Progress Updates:
+
 - Should update every 0.5-1 seconds
 - Progress bars should be smooth
 - No UI freezing during execution
@@ -267,6 +305,7 @@ Generate an image
 ## UI/UX Checks
 
 ### Visual Elements:
+
 - ✅ Tool progress indicator appears
 - ✅ Progress bars animate smoothly
 - ✅ Tool icons display correctly
@@ -278,6 +317,7 @@ Generate an image
 - ✅ Error messages are clear
 
 ### Accessibility:
+
 - ✅ Keyboard navigation works
 - ✅ Screen reader friendly
 - ✅ High contrast mode supported
@@ -288,6 +328,7 @@ Generate an image
 ## Browser Compatibility
 
 Test in:
+
 - ✅ Chrome/Edge (latest)
 - ✅ Firefox (latest)
 - ✅ Safari (latest)
@@ -301,6 +342,7 @@ Test in:
 
 1. **Open browser console** (F12)
 2. **Look for [ToolRouter] logs:**
+
 ```
 [ToolRouter] Execution completed in 4532ms {
   detectedTools: ['image-generation'],
@@ -310,6 +352,7 @@ Test in:
 ```
 
 3. **Check for errors:**
+
 ```
 [Chat] Tool router error: ...
 ```
@@ -317,16 +360,19 @@ Test in:
 ### Common Issues:
 
 **Issue: Tool not detected**
+
 - Check keyword matching
 - Try more explicit request
 - Check console for detection result
 
 **Issue: Tool execution fails**
+
 - Verify API keys in .env
 - Check network connection
 - Look for error in toast
 
 **Issue: Progress not updating**
+
 - Check browser console
 - Verify React DevTools
 - Look for state updates
@@ -373,6 +419,7 @@ If you encounter issues:
 ## Next Steps
 
 After testing:
+
 1. ✅ Verify all tools work
 2. ✅ Test error scenarios
 3. ✅ Check mobile responsiveness

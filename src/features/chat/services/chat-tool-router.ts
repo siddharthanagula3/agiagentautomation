@@ -1,13 +1,14 @@
 /**
  * Chat Tool Router
  * Analyzes user messages and routes to appropriate tools
- * Handles image generation, video generation, document creation, web search, multi-agent tasks, and more
+ * Handles image generation, video generation, document creation, web search, multi-agent tasks, social media analysis, and more
  */
 
 import { mediaGenerationService, type ImageGenerationRequest, type VideoGenerationRequest, type MediaGenerationResult } from '@core/integrations/media-generation-handler';
 import { documentGenerationService, type DocumentRequest, type GeneratedDocument } from './document-generation-service';
 import { webSearch, type SearchResponse } from '@core/integrations/web-search-handler';
 import { multiAgentCollaborationService, type CollaborationResult } from './multi-agent-collaboration-service';
+import { socialMediaAnalyzer, type SocialMediaAnalysisResult, type SocialMediaQuery } from '@core/integrations/social-media-analyzer';
 
 export type ToolType =
   | 'image-generation'
@@ -15,6 +16,7 @@ export type ToolType =
   | 'document-creation'
   | 'web-search'
   | 'multi-agent'
+  | 'social-media-analysis'
   | 'code-generation'
   | 'general-chat';
 
@@ -28,7 +30,7 @@ export interface ToolDetectionResult {
 export interface ToolExecutionResult {
   toolType: ToolType;
   status: 'success' | 'failed' | 'processing';
-  data?: MediaGenerationResult | GeneratedDocument | SearchResponse | CollaborationResult | unknown;
+  data?: MediaGenerationResult | GeneratedDocument | SearchResponse | CollaborationResult | SocialMediaAnalysisResult | unknown;
   error?: string;
   metadata?: {
     tokensUsed?: number;
@@ -120,6 +122,26 @@ export function analyzeMessage(message: string): ToolDetectionResult {
     detectedTools.push('web-search');
     confidence += 20;
     reasons.push('Web search needed for current/recent information');
+  }
+
+  // Social media analysis detection (Grok-powered)
+  const socialMediaKeywords = [
+    'social media', 'twitter', 'x.com', 'what people think', 'public opinion',
+    'sentiment', 'trending', 'viral', 'what\'s trending', 'twitter sentiment',
+    'what are people saying', 'social reaction', 'twitter reaction',
+    'how is the public reacting', 'social media response', 'online discussion',
+    'twitter discussion', 'x discussion', 'tweets about', 'hashtag',
+    'influencers', 'social media influencers', 'twitter influencers',
+    'online sentiment', 'social sentiment', 'public perception',
+    'what\'s the buzz', 'social buzz', 'reddit discussion', 'linkedin discussion',
+    'analyze social media', 'analyze twitter', 'analyze sentiment'
+  ];
+
+  const hasSocialMediaRequest = socialMediaKeywords.some(keyword => messageLower.includes(keyword));
+  if (hasSocialMediaRequest) {
+    detectedTools.push('social-media-analysis');
+    confidence += 30;
+    reasons.push('Social media analysis required - using Grok for real-time X/Twitter data');
   }
 
   // Multi-agent collaboration detection
@@ -316,6 +338,69 @@ async function executeWebSearch(
 }
 
 /**
+ * Executes social media analysis using Grok
+ */
+async function executeSocialMediaAnalysis(
+  message: string,
+  userId?: string,
+  onProgress?: (status: string) => void
+): Promise<ToolExecutionResult> {
+  try {
+    onProgress?.('Analyzing social media with Grok...');
+
+    // Extract topic from message
+    const topic = message.replace(/analyze\s+(social\s+media|twitter|sentiment)\s+(about|for|on)?\s*/i, '').trim();
+
+    // Build query
+    const query: SocialMediaQuery = {
+      topic: topic || message,
+      platforms: ['twitter', 'x'],
+      timeframe: '24h',
+      analysisType: ['all'], // sentiment, trends, influencers
+    };
+
+    // Detect specific requests
+    if (message.toLowerCase().includes('sentiment')) {
+      query.analysisType = ['sentiment'];
+    } else if (message.toLowerCase().includes('trending') || message.toLowerCase().includes('trends')) {
+      query.analysisType = ['trends'];
+    } else if (message.toLowerCase().includes('influencers')) {
+      query.analysisType = ['influencers'];
+    }
+
+    // Detect timeframe
+    if (message.toLowerCase().includes('last hour') || message.toLowerCase().includes('past hour')) {
+      query.timeframe = '1h';
+    } else if (message.toLowerCase().includes('today') || message.toLowerCase().includes('24 hours')) {
+      query.timeframe = '24h';
+    } else if (message.toLowerCase().includes('this week') || message.toLowerCase().includes('7 days')) {
+      query.timeframe = '7d';
+    } else if (message.toLowerCase().includes('this month') || message.toLowerCase().includes('30 days')) {
+      query.timeframe = '30d';
+    }
+
+    const result = await socialMediaAnalyzer.analyze(query, userId);
+
+    return {
+      toolType: 'social-media-analysis',
+      status: 'success',
+      data: result,
+      metadata: {
+        tokensUsed: result.metadata.dataSourcesCount * 100, // Estimate
+        duration: 0,
+        cost: 0
+      }
+    };
+  } catch (error) {
+    return {
+      toolType: 'social-media-analysis',
+      status: 'failed',
+      error: error instanceof Error ? error.message : 'Social media analysis failed'
+    };
+  }
+}
+
+/**
  * Executes multi-agent collaboration
  */
 async function executeMultiAgentCollaboration(
@@ -405,6 +490,16 @@ export async function routeAndExecuteTools(
         break;
       }
 
+      case 'social-media-analysis': {
+        const socialResult = await executeSocialMediaAnalysis(
+          message,
+          options?.userId,
+          (status) => options?.onProgress?.(toolType, status)
+        );
+        executionResults.push(socialResult);
+        break;
+      }
+
       case 'multi-agent': {
         const multiAgentResult = await executeMultiAgentCollaboration(
           message,
@@ -455,6 +550,41 @@ export async function routeAndExecuteTools(
         const docData = result.data as GeneratedDocument;
         enhancedContext += `\nDocument created: ${docData.title}\n`;
         enhancedContext += `Word count: ${docData.metadata.wordCount}\n`;
+      } else if (result.toolType === 'social-media-analysis' && result.data) {
+        const socialData = result.data as SocialMediaAnalysisResult;
+        enhancedContext += `\nSocial Media Analysis for "${socialData.query.topic}":\n`;
+        enhancedContext += `Summary: ${socialData.summary}\n\n`;
+
+        if (socialData.sentiment) {
+          enhancedContext += `Sentiment Analysis:\n`;
+          enhancedContext += `  Overall: ${socialData.sentiment.overall}\n`;
+          enhancedContext += `  Positive: ${socialData.sentiment.scores.positive}%\n`;
+          enhancedContext += `  Negative: ${socialData.sentiment.scores.negative}%\n`;
+          enhancedContext += `  Neutral: ${socialData.sentiment.scores.neutral}%\n\n`;
+        }
+
+        if (socialData.trends && socialData.trends.trending.length > 0) {
+          enhancedContext += `Trending Topics:\n`;
+          socialData.trends.trending.slice(0, 5).forEach((trend, i) => {
+            enhancedContext += `  ${i + 1}. ${trend.topic} (${trend.growth}, volume: ${trend.volume})\n`;
+          });
+          enhancedContext += '\n';
+        }
+
+        if (socialData.influencers && socialData.influencers.topInfluencers.length > 0) {
+          enhancedContext += `Top Influencers:\n`;
+          socialData.influencers.topInfluencers.slice(0, 3).forEach((inf, i) => {
+            enhancedContext += `  ${i + 1}. @${inf.username} (${inf.followers.toLocaleString()} followers, ${inf.relevance} relevance)\n`;
+          });
+          enhancedContext += '\n';
+        }
+
+        if (socialData.insights.length > 0) {
+          enhancedContext += `Key Insights:\n`;
+          socialData.insights.forEach((insight, i) => {
+            enhancedContext += `  ${i + 1}. ${insight}\n`;
+          });
+        }
       }
     }
   }
@@ -464,6 +594,7 @@ export async function routeAndExecuteTools(
     detection.tools.includes('general-chat') ||
     detection.tools.includes('code-generation') ||
     detection.tools.includes('web-search') || // Continue to LLM to synthesize search results
+    detection.tools.includes('social-media-analysis') || // Continue to LLM to synthesize social media analysis
     executionResults.some(r => r.status === 'failed'); // Continue if any tool failed
 
   const duration = Date.now() - startTime;

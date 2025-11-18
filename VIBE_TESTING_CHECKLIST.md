@@ -341,7 +341,7 @@ Before deploying to production:
 - [ ] Security reviewed
 - [ ] Documentation complete
 
-**Tested by:** ******\_******
-**Date:** ******\_******
-**Version:** ******\_******
-**Approved by:** ******\_******
+**Tested by:** **\*\***\_**\*\***
+**Date:** **\*\***\_**\*\***
+**Version:** **\*\***\_**\*\***
+**Approved by:** **\*\***\_**\*\***

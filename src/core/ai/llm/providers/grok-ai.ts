@@ -421,7 +421,7 @@ export class GrokProvider {
   /**
    * Extract source citations from Grok response
    */
-  private extractSources(data: any): Array<{
+  private extractSources(data: Record<string, unknown>): Array<{
     type: 'tweet' | 'trend' | 'news';
     url?: string;
     timestamp?: string;

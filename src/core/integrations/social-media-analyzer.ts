@@ -441,12 +441,12 @@ Your analysis should be data-driven, actionable, and insightful.`;
         content.match(/```json\n([\s\S]*?)\n```/) ||
         content.match(/```\n([\s\S]*?)\n```/);
 
-      let parsed: any;
+      let parsed: Record<string, unknown>;
       if (jsonMatch) {
-        parsed = JSON.parse(jsonMatch[1]);
+        parsed = JSON.parse(jsonMatch[1]) as Record<string, unknown>;
       } else {
         // Try parsing the entire content as JSON
-        parsed = JSON.parse(content);
+        parsed = JSON.parse(content) as Record<string, unknown>;
       }
 
       return {
@@ -492,7 +492,7 @@ Your analysis should be data-driven, actionable, and insightful.`;
   /**
    * Estimate number of data sources analyzed
    */
-  private estimateDataSources(parsed: any): number {
+  private estimateDataSources(parsed: Record<string, unknown>): number {
     let count = 0;
 
     if (parsed.topContent?.posts) {
@@ -511,7 +511,7 @@ Your analysis should be data-driven, actionable, and insightful.`;
   /**
    * Calculate confidence score based on data completeness
    */
-  private calculateConfidenceScore(parsed: any): number {
+  private calculateConfidenceScore(parsed: Record<string, unknown>): number {
     let score = 50; // Base score
 
     if (parsed.sentiment?.scores) score += 10;

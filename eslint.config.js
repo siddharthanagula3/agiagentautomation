@@ -14,6 +14,7 @@ export default tseslint.config(
       '**/.venv/**',
       '**/node_modules/**',
       '**/test-results/**',
+      'coverage/**',
     ],
   },
   {

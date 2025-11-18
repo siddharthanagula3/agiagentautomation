@@ -11,6 +11,8 @@ import type { AIEmployee } from '@core/types/ai-employee';
 import { agentConversationProtocol } from './agent-conversation-protocol';
 import { supabase } from '@shared/lib/supabase-client';
 import { useAuthStore } from '@shared/stores/authentication-store';
+import { tokenLogger } from '@core/integrations/token-usage-tracker';
+import { updateVibeSessionTokens } from '@features/vibe/services/vibe-token-tracker';
 
 export interface WorkforceRequest {
   userId: string;
@@ -95,7 +97,7 @@ export class WorkforceOrchestratorRefactored {
         content: '🧠 Analyzing request and creating execution plan...',
       });
 
-      const plan = await this.generatePlan(request.input);
+      const plan = await this.generatePlan(request.input, request.sessionId, request.userId);
 
       if (!plan || plan.plan.length === 0) {
         throw new Error('Failed to generate execution plan');
@@ -167,7 +169,7 @@ export class WorkforceOrchestratorRefactored {
         content: '⚡ Beginning task execution...',
       });
 
-      await this.executeTasks(tasks, request.input);
+      await this.executeTasks(tasks, request.input, request.sessionId, request.userId);
 
       store.completeMission();
       store.addMessage({
@@ -203,7 +205,7 @@ export class WorkforceOrchestratorRefactored {
   /**
    * PLANNING STAGE: Generate structured plan using LLM
    */
-  private async generatePlan(userInput: string): Promise<MissionPlan> {
+  private async generatePlan(userInput: string, sessionId?: string, userId?: string): Promise<MissionPlan> {
     const plannerPrompt = `You are a strategic AI planner. Given a user request, create a detailed step-by-step execution plan.
 
 Return your response ONLY as valid JSON in this exact format:
@@ -227,7 +229,39 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
         messages: [{ role: 'user', content: plannerPrompt }],
         model: 'claude-3-5-sonnet-20241022',
         temperature: 0.3,
+        userId,
+        sessionId,
       });
+
+      // Track token usage
+      if (response.usage && userId) {
+        await tokenLogger.logTokenUsage(
+          response.model,
+          response.usage.totalTokens,
+          userId,
+          sessionId,
+          'planner',
+          'AI Planner',
+          response.usage.promptTokens,
+          response.usage.completionTokens,
+          'Planning stage - generating execution plan'
+        );
+
+        // Update vibe session if sessionId provided
+        if (sessionId) {
+          const cost = tokenLogger.calculateCost(
+            response.model,
+            response.usage.promptTokens,
+            response.usage.completionTokens
+          );
+          await updateVibeSessionTokens(
+            sessionId,
+            response.usage.promptTokens,
+            response.usage.completionTokens,
+            cost
+          );
+        }
+      }
 
       // Extract JSON from response (handle markdown code blocks)
       let jsonText = response.content.trim();
@@ -367,7 +401,9 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
    */
   private async executeTasks(
     tasks: Task[],
-    originalInput: string
+    originalInput: string,
+    sessionId?: string,
+    userId?: string
   ): Promise<void> {
     const store = useMissionStore.getState();
 
@@ -414,7 +450,9 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
         const result = await this.executeWithEmployee(
           employee,
           task,
-          originalInput
+          originalInput,
+          sessionId,
+          userId
         );
 
         store.updateEmployeeProgress(task.assignedTo, 100);
@@ -460,7 +498,9 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
   private async executeWithEmployee(
     employee: AIEmployee,
     task: Task,
-    originalContext: string
+    originalContext: string,
+    sessionId?: string,
+    userId?: string
   ): Promise<string> {
     const prompt = `Original request: ${originalContext}
 
@@ -492,9 +532,41 @@ Please complete this task according to your role and capabilities.`;
             ? 'claude-3-5-sonnet-20241022'
             : employee.model,
         temperature: 0.7,
+        userId,
+        sessionId,
       });
 
       const response = await Promise.race([executionPromise, timeoutPromise]);
+
+      // Track token usage
+      if (response.usage && userId) {
+        await tokenLogger.logTokenUsage(
+          response.model,
+          response.usage.totalTokens,
+          userId,
+          sessionId,
+          employee.name,
+          employee.name,
+          response.usage.promptTokens,
+          response.usage.completionTokens,
+          `Task execution: ${task.description.slice(0, 100)}`
+        );
+
+        // Update vibe session if sessionId provided
+        if (sessionId) {
+          const cost = tokenLogger.calculateCost(
+            response.model,
+            response.usage.promptTokens,
+            response.usage.completionTokens
+          );
+          await updateVibeSessionTokens(
+            sessionId,
+            response.usage.promptTokens,
+            response.usage.completionTokens,
+            cost
+          );
+        }
+      }
 
       return response.content;
     } catch (error) {
@@ -551,7 +623,7 @@ Please complete this task according to your role and capabilities.`;
 
     try {
       // AUTO-SELECT: Analyze query and select best employee(s)
-      const selectedEmployees = await this.autoSelectEmployees(request.input);
+      const selectedEmployees = await this.autoSelectEmployees(request.input, request.sessionId, request.userId);
 
       if (selectedEmployees.length === 0) {
         throw new Error('No suitable employees found for this request');
@@ -634,7 +706,7 @@ Please complete this task according to your role and capabilities.`;
    * AUTO-SELECT: Automatically select best employee(s) for a query
    * Uses LLM to analyze query and match with employee capabilities
    */
-  private async autoSelectEmployees(query: string): Promise<AIEmployee[]> {
+  private async autoSelectEmployees(query: string, sessionId?: string, userId?: string): Promise<AIEmployee[]> {
     // Build employee directory
     const employeeDirectory = this.employees
       .map((e) => `- ${e.name}: ${e.description}`)
@@ -664,10 +736,40 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
     try {
       const response = await unifiedLLMService.sendMessage(
         [{ role: 'user', content: selectionPrompt }],
-        undefined,
-        undefined,
+        sessionId,
+        userId,
         'anthropic'
       );
+
+      // Track token usage
+      if (response.usage && userId) {
+        await tokenLogger.logTokenUsage(
+          response.model,
+          response.usage.totalTokens,
+          userId,
+          sessionId,
+          'auto-selector',
+          'Auto Selector',
+          response.usage.promptTokens,
+          response.usage.completionTokens,
+          'Auto-selecting employees for query'
+        );
+
+        // Update vibe session if sessionId provided
+        if (sessionId) {
+          const cost = tokenLogger.calculateCost(
+            response.model,
+            response.usage.promptTokens,
+            response.usage.completionTokens
+          );
+          await updateVibeSessionTokens(
+            sessionId,
+            response.usage.promptTokens,
+            response.usage.completionTokens,
+            cost
+          );
+        }
+      }
 
       // Parse response to extract employee names
       const selectedNames = response.content
@@ -754,7 +856,9 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
   async routeMessageToEmployee(
     employeeName: string,
     message: string,
-    conversationHistory?: Array<{ role: string; content: string }>
+    conversationHistory?: Array<{ role: string; content: string }>,
+    sessionId?: string,
+    userId?: string
   ): Promise<string> {
     const employee = this.employees.find((e) => e.name === employeeName);
 
@@ -786,7 +890,39 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
             ? 'claude-3-5-sonnet-20241022'
             : employee.model,
         temperature: 0.7,
+        userId,
+        sessionId,
       });
+
+      // Track token usage
+      if (response.usage && userId) {
+        await tokenLogger.logTokenUsage(
+          response.model,
+          response.usage.totalTokens,
+          userId,
+          sessionId,
+          employee.name,
+          employee.name,
+          response.usage.promptTokens,
+          response.usage.completionTokens,
+          `Routing message to ${employee.name}`
+        );
+
+        // Update vibe session if sessionId provided
+        if (sessionId) {
+          const cost = tokenLogger.calculateCost(
+            response.model,
+            response.usage.promptTokens,
+            response.usage.completionTokens
+          );
+          await updateVibeSessionTokens(
+            sessionId,
+            response.usage.promptTokens,
+            response.usage.completionTokens,
+            cost
+          );
+        }
+      }
 
       store.updateEmployeeStatus(employee.name, 'idle');
       store.addEmployeeLog(

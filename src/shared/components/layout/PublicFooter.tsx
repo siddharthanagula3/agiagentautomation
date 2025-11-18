@@ -49,11 +49,11 @@ const PublicFooter: React.FC = () => {
   ];
 
   return (
-    <footer className="relative border-t border-border bg-card">
+    <footer className="relative w-full max-w-full overflow-x-hidden border-t border-border bg-card">
       {/* Gradient Overlay */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-primary/5"></div>
 
-      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+      <div className="relative mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
         {/* Top Section */}
         <div className="mb-8 grid grid-cols-1 gap-8 sm:mb-12 sm:gap-12 md:grid-cols-2 lg:grid-cols-6">
           {/* Brand Column */}

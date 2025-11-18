@@ -526,27 +526,27 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-white sm:text-3xl">
             AI Employee Marketplace
           </h1>
-          <p className="mt-1 text-slate-400">
+          <p className="mt-1 text-sm text-slate-400 sm:text-base">
             Discover and hire specialized AI employees for your workforce
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-2">
           <Button
             variant="ghost"
             onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-            className="text-slate-400 hover:text-white"
+            className="h-11 w-full text-slate-400 hover:text-white sm:w-auto"
           >
             {viewMode === 'grid' ? 'List View' : 'Grid View'}
           </Button>
           <Button
             onClick={() => (window.location.href = '/workforce')}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            className="h-11 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 sm:w-auto"
           >
             <Users className="mr-2 h-4 w-4" />
             My Team
@@ -573,7 +573,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
                     }
                     onClick={() => setSelectedCategory(category.id)}
                     className={cn(
-                      'flex items-center space-x-2',
+                      'flex h-auto min-h-[44px] items-center space-x-2 whitespace-nowrap px-3 py-2 sm:px-4',
                       selectedCategory === category.id
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
                         : 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
@@ -600,7 +600,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
       >
         <Card className="border-slate-700/50 bg-slate-800/50 backdrop-blur-xl">
           <CardContent className="p-4">
-            <div className="flex flex-col gap-4 lg:flex-row">
+            <div className="flex flex-col gap-4 sm:flex-row">
               {/* Search */}
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-slate-400" />
@@ -613,12 +613,12 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
               </div>
 
               {/* Filters */}
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-2">
                 <Select
                   value={sortBy}
                   onValueChange={(value: unknown) => setSortBy(value)}
                 >
-                  <SelectTrigger className="w-40 border-slate-600/30 bg-slate-700/30 text-slate-300">
+                  <SelectTrigger className="w-full border-slate-600/30 bg-slate-700/30 text-slate-300 sm:w-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="border-slate-700 bg-slate-800">
@@ -629,28 +629,30 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
                   </SelectContent>
                 </Select>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() =>
-                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-                  }
-                  className="text-slate-400 hover:text-white"
-                >
-                  {sortOrder === 'asc' ? (
-                    <SortAsc className="h-4 w-4" />
-                  ) : (
-                    <SortDesc className="h-4 w-4" />
-                  )}
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() =>
+                      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+                    }
+                    className="h-11 w-11 text-slate-400 hover:text-white"
+                  >
+                    {sortOrder === 'asc' ? (
+                      <SortAsc className="h-5 w-5" />
+                    ) : (
+                      <SortDesc className="h-5 w-5" />
+                    )}
+                  </Button>
 
-                <Button
-                  variant="ghost"
-                  className="text-slate-400 hover:text-white"
-                >
-                  <Filter className="mr-2 h-4 w-4" />
-                  Filters
-                </Button>
+                  <Button
+                    variant="ghost"
+                    className="flex-1 text-slate-400 hover:text-white sm:flex-initial"
+                  >
+                    <Filter className="mr-2 h-4 w-4" />
+                    Filters
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -760,7 +762,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
 
       {/* Employee Details Dialog */}
       <Dialog open={showEmployeeDetails} onOpenChange={setShowEmployeeDetails}>
-        <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto border-slate-700 bg-slate-800">
+        <DialogContent className="mx-4 max-h-[90vh] max-w-full overflow-y-auto border-slate-700 bg-slate-800 sm:mx-auto sm:max-w-2xl md:max-w-3xl lg:max-w-4xl">
           {selectedEmployee && (
             <EmployeeDetailsView
               employee={selectedEmployee}
@@ -774,7 +776,7 @@ export const AIEmployeeMarketplace: React.FC<AIEmployeeMarketplaceProps> = ({
 
       {/* Hire Confirmation Dialog */}
       <Dialog open={showHireDialog} onOpenChange={setShowHireDialog}>
-        <DialogContent className="max-w-md border-slate-700 bg-slate-800">
+        <DialogContent className="mx-4 max-w-full border-slate-700 bg-slate-800 sm:mx-auto sm:max-w-md">
           {selectedEmployee && (
             <HireConfirmationDialog
               employee={selectedEmployee}
@@ -835,8 +837,8 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
   if (viewMode === 'list') {
     return (
       <Card className="group cursor-pointer border-slate-700/50 bg-slate-800/50 backdrop-blur-xl transition-all duration-200 hover:bg-slate-800/70">
-        <CardContent className="p-6" onClick={onClick}>
-          <div className="flex items-center justify-between">
+        <CardContent className="p-4 sm:p-6" onClick={onClick}>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center space-x-4">
               {/* Avatar */}
               <div className="relative">
@@ -901,8 +903,8 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
             </div>
 
             {/* Skills & Pricing */}
-            <div className="flex items-center space-x-6">
-              <div className="flex max-w-xs flex-wrap gap-1">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:space-x-6">
+              <div className="flex flex-wrap gap-1">
                 {employee.skills.slice(0, 3).map((skill) => (
                   <Badge
                     key={skill.id}
@@ -922,17 +924,67 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
                 )}
               </div>
 
-              <div className="text-right">
-                <p className="text-lg font-semibold text-white">
-                  {formatCurrency(employee.hourlyRate)}/hr
-                </p>
-                <p className="text-sm text-slate-400">
-                  {employee.availability.workingHours}
-                </p>
+              <div className="flex items-center justify-between lg:flex-col lg:text-right">
+                <div>
+                  <p className="text-lg font-semibold text-white">
+                    {formatCurrency(employee.hourlyRate)}/hr
+                  </p>
+                  <p className="text-sm text-slate-400">
+                    {employee.availability.workingHours}
+                  </p>
+                </div>
+
+                {/* Actions - Mobile */}
+                <div className="flex items-center space-x-2 lg:hidden">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleFavorite();
+                        }}
+                        className="h-11 w-11 text-slate-400 hover:text-red-400"
+                      >
+                        <Heart
+                          className={cn(
+                            'h-5 w-5',
+                            isFavorite && 'fill-red-400 text-red-400'
+                          )}
+                        />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onHire();
+                    }}
+                    disabled={isHired || employee.status !== 'available'}
+                    className="h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  >
+                    {isHired ? (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Hired
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Hire Now
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center space-x-2">
+              {/* Actions - Desktop */}
+              <div className="hidden items-center space-x-2 lg:flex">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -1201,9 +1253,9 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:space-x-4">
+          <div className="relative mx-auto sm:mx-0">
             <Avatar className="h-20 w-20">
               <AvatarImage src={employee.avatar} alt={employee.name} />
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-2xl font-semibold text-white">
@@ -1225,8 +1277,8 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
               </div>
             )}
           </div>
-          <div>
-            <div className="mb-1 flex items-center space-x-2">
+          <div className="text-center sm:text-left">
+            <div className="mb-1 flex flex-wrap items-center justify-center gap-2 sm:justify-start sm:space-x-2">
               <h2 className="text-2xl font-bold text-white">{employee.name}</h2>
               {employee.featured && (
                 <Badge className="border-yellow-500/30 bg-yellow-500/20 text-yellow-400">
@@ -1243,8 +1295,8 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
             </div>
             <p className="text-lg text-slate-300">{employee.title}</p>
             <p className="text-slate-400">{employee.department}</p>
-            <div className="mt-2 flex items-center space-x-4 text-sm">
-              <div className="flex items-center space-x-1">
+            <div className="mt-2 flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:space-x-4">
+              <div className="flex items-center justify-center space-x-1 sm:justify-start">
                 <Star className="h-4 w-4 text-yellow-400" />
                 <span className="font-medium text-white">
                   {employee.rating}
@@ -1253,14 +1305,14 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
                   ({employee.reviewCount} reviews)
                 </span>
               </div>
-              <div className="flex items-center space-x-1 text-slate-400">
+              <div className="flex items-center justify-center space-x-1 text-slate-400 sm:justify-start">
                 <MapPin className="h-4 w-4" />
                 <span>{employee.availability.timezone}</span>
               </div>
             </div>
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-center sm:text-right">
           <p className="text-3xl font-bold text-white">
             {formatCurrency(employee.hourlyRate)}/hr
           </p>
@@ -1268,7 +1320,7 @@ const EmployeeDetailsView: React.FC<EmployeeDetailsViewProps> = ({
           <Button
             onClick={onHire}
             disabled={isHired || employee.status !== 'available'}
-            className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            className="mt-4 h-11 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 sm:w-auto"
           >
             {isHired ? (
               <>
@@ -1640,27 +1692,27 @@ const HireConfirmationDialog: React.FC<HireConfirmationDialogProps> = ({
         {/* Pricing */}
         <div className="rounded-lg bg-slate-700/30 p-4">
           <h4 className="mb-3 font-medium text-white">Pricing Options</h4>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-slate-400">Hourly Rate</span>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="flex justify-between sm:flex-col">
+              <span className="text-sm text-slate-400">Hourly Rate</span>
               <span className="font-medium text-white">
                 {formatCurrency(employee.pricing.hourly)}/hr
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Daily Rate</span>
+            <div className="flex justify-between sm:flex-col">
+              <span className="text-sm text-slate-400">Daily Rate</span>
               <span className="font-medium text-white">
                 {formatCurrency(employee.pricing.daily)}/day
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Weekly Rate</span>
+            <div className="flex justify-between sm:flex-col">
+              <span className="text-sm text-slate-400">Weekly Rate</span>
               <span className="font-medium text-white">
                 {formatCurrency(employee.pricing.weekly)}/week
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Monthly Rate</span>
+            <div className="flex justify-between sm:flex-col">
+              <span className="text-sm text-slate-400">Monthly Rate</span>
               <span className="font-medium text-white">
                 {formatCurrency(employee.pricing.monthly)}/month
               </span>
@@ -1680,18 +1732,18 @@ const HireConfirmationDialog: React.FC<HireConfirmationDialogProps> = ({
         </div>
       </div>
 
-      <div className="flex space-x-3 pt-4">
+      <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:space-x-3">
         <Button
           variant="ghost"
           onClick={onCancel}
-          className="flex-1 text-slate-400 hover:text-white"
+          className="w-full text-slate-400 hover:text-white sm:flex-1"
           disabled={isLoading}
         >
           Cancel
         </Button>
         <Button
           onClick={onConfirm}
-          className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 sm:flex-1"
           disabled={isLoading || isHired}
         >
           {isHired ? (

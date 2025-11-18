@@ -98,7 +98,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       await logout();
       navigate('/auth/login');
     } catch (error) {
-      console.error('Logout error:', error);
+      // Logout failed, but redirect anyway to ensure clean state
       navigate('/auth/login');
     }
   };
@@ -271,7 +271,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="glass-strong absolute right-0 mt-2 w-80 overflow-hidden rounded-2xl border border-border shadow-2xl"
+                  className="glass-strong absolute right-0 mt-2 w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-border shadow-2xl sm:w-80 sm:max-w-none"
                 >
                   <div className="flex items-center justify-between border-b border-border p-4">
                     <h3 className="font-semibold">Notifications</h3>
@@ -362,7 +362,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="glass-strong absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-border shadow-2xl"
+                  className="glass-strong absolute right-0 mt-2 w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-border shadow-2xl sm:w-56 sm:max-w-none"
                 >
                   <div className="border-b border-border p-4">
                     <div className="flex items-center gap-3">

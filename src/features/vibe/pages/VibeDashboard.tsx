@@ -1,3 +1,15 @@
+/**
+ * VibeDashboard - Redesigned AI Development Agent Interface
+ * Inspired by: Lovable.dev, Bolt.new, Replit.com, Emergent.sh
+ *
+ * Layout:
+ * - Left (30%): Chat interface only
+ * - Right (70%): Split into Code Editor (60%) + Live Preview (40%)
+ * - Mobile: Stack vertically
+ *
+ * Updated: Nov 18th 2025 - Complete redesign
+ */
+
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/authentication-store';
@@ -5,13 +17,12 @@ import { useWorkforceStore } from '@shared/stores/employee-management-store';
 import { useVibeChatStore } from '../stores/vibe-chat-store';
 import { useVibeViewStore } from '../stores/vibe-view-store';
 import { VibeLayout } from '../layouts/VibeLayout';
-import { VibeSplitView } from '../layouts/VibeSplitView';
-import { AgentPanel } from '../components/agent-panel/AgentPanel';
+import { SimpleChatPanel } from '../components/redesign/SimpleChatPanel';
+import { CodeEditorPanel } from '../components/redesign/CodeEditorPanel';
+import { LivePreviewPanel } from '../components/redesign/LivePreviewPanel';
 import { VibeMessageInput } from '../components/input/VibeMessageInput';
-import { ViewSelector } from '../components/output-panel/ViewSelector';
-import { EditorView } from '../components/output-panel/EditorView';
-import { AppViewerView } from '../components/output-panel/AppViewerView';
-import { Loader2 } from 'lucide-react';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+import { Loader2, GripVertical, Sparkles } from 'lucide-react';
 import type { AgentStatus } from '../components/agent-panel/AgentStatusCard';
 import type { WorkingStep } from '../components/agent-panel/WorkingProcessSection';
 import type { AgentMessage } from '../components/agent-panel/AgentMessageList';
@@ -22,6 +33,7 @@ import {
   type VibeAgentActionRow,
 } from '../hooks/use-vibe-realtime';
 import { VibeMessageService } from '../services/vibe-message-service';
+import { vibeMessageHandler } from '../services/vibe-message-handler';
 import { toast } from 'sonner';
 
 interface VibeMessageRow {
@@ -39,19 +51,7 @@ interface VibeMessageRow {
   is_streaming?: boolean | null;
 }
 
-const OutputPanel = () => {
-  const { activeView } = useVibeViewStore();
-
-  return (
-    <div className="flex h-full flex-col bg-background">
-      <ViewSelector />
-      <div className="flex-1 overflow-hidden">
-        {activeView === 'editor' && <EditorView />}
-        {activeView === 'app-viewer' && <AppViewerView />}
-      </div>
-    </div>
-  );
-};
+// Removed OutputPanel - using new CodeEditorPanel and LivePreviewPanel instead
 
 const VibeDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -417,6 +417,31 @@ const VibeDashboard: React.FC = () => {
           orchestratorResponse.chatResponse
         );
 
+        // Process AI response for code files
+        try {
+          const parseResult = await vibeMessageHandler.handleAIResponse(
+            orchestratorResponse.chatResponse,
+            sessionId
+          );
+
+          if (parseResult.filesCreated > 0) {
+            console.log(
+              `[VIBE] Created ${parseResult.filesCreated} files:`,
+              parseResult.files.map(f => f.path)
+            );
+
+            // If project structure detected, show info
+            if (parseResult.projectInfo.type !== 'unknown') {
+              toast.success(
+                `Detected ${parseResult.projectInfo.type} project with ${parseResult.filesCreated} files`
+              );
+            }
+          }
+        } catch (parseError) {
+          console.error('[VIBE] Failed to parse code from response:', parseError);
+          // Don't fail the whole message if parsing fails
+        }
+
         // Save final assistant message to database
         await VibeMessageService.createMessage({
           sessionId,
@@ -478,18 +503,83 @@ const VibeDashboard: React.FC = () => {
   return (
     <VibeLayout>
       <div className="flex h-full flex-col">
-        <div className="flex-1 overflow-hidden">
-          <VibeSplitView>
-            <AgentPanel
-              agent={activeAgent}
-              workingSteps={workingSteps}
-              messages={messages}
-            />
-            <OutputPanel />
-          </VibeSplitView>
+        {/* Header */}
+        <div className="border-b border-border bg-gradient-to-r from-purple-600/10 to-blue-600/10 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h1 className="text-lg font-bold">Vibe</h1>
+            <span className="text-sm text-muted-foreground">
+              AI Development Agent
+            </span>
+          </div>
         </div>
 
-        <VibeMessageInput onSend={handleSendMessage} isLoading={isLoading} />
+        {/* Main Content - 3 Panel Layout */}
+        <div className="flex-1 overflow-hidden">
+          {/* Desktop Layout: Horizontal split */}
+          <div className="hidden h-full md:block">
+            <PanelGroup direction="horizontal">
+              {/* Left Panel - Chat (30%) */}
+              <Panel defaultSize={30} minSize={25} maxSize={40}>
+                <SimpleChatPanel messages={messages} isLoading={isLoading} />
+              </Panel>
+
+              <PanelResizeHandle className="group relative w-1 bg-border transition-colors hover:bg-primary">
+                <div className="absolute inset-y-0 left-1/2 flex -translate-x-1/2 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="rounded-sm border border-border bg-background p-1 shadow-lg">
+                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+              </PanelResizeHandle>
+
+              {/* Right Panel - Code + Preview (70%) */}
+              <Panel defaultSize={70} minSize={60}>
+                <PanelGroup direction="vertical">
+                  {/* Code Editor (60%) */}
+                  <Panel defaultSize={60} minSize={40} maxSize={80}>
+                    <CodeEditorPanel />
+                  </Panel>
+
+                  <PanelResizeHandle className="group relative h-1 bg-border transition-colors hover:bg-primary">
+                    <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                      <div className="rounded-sm border border-border bg-background px-1 py-0.5 shadow-lg">
+                        <GripVertical className="h-4 w-4 rotate-90 text-muted-foreground" />
+                      </div>
+                    </div>
+                  </PanelResizeHandle>
+
+                  {/* Live Preview (40%) */}
+                  <Panel defaultSize={40} minSize={20} maxSize={60}>
+                    <LivePreviewPanel />
+                  </Panel>
+                </PanelGroup>
+              </Panel>
+            </PanelGroup>
+          </div>
+
+          {/* Mobile Layout: Vertical stack */}
+          <div className="flex h-full flex-col md:hidden">
+            {/* Chat */}
+            <div className="flex-1 overflow-hidden border-b border-border">
+              <SimpleChatPanel messages={messages} isLoading={isLoading} />
+            </div>
+
+            {/* Code Editor */}
+            <div className="flex-1 overflow-hidden border-b border-border">
+              <CodeEditorPanel />
+            </div>
+
+            {/* Preview */}
+            <div className="flex-1 overflow-hidden">
+              <LivePreviewPanel />
+            </div>
+          </div>
+        </div>
+
+        {/* Message Input - Fixed at bottom */}
+        <div className="border-t border-border bg-background">
+          <VibeMessageInput onSend={handleSendMessage} isLoading={isLoading} />
+        </div>
       </div>
     </VibeLayout>
   );

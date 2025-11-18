@@ -332,19 +332,19 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   };
 
   return (
-    <div className={cn('space-y-6 p-6', className)}>
+    <div className={cn('space-y-4 md:space-y-6 p-4 md:p-6', className)}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
             AI Employee Marketplace
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm md:text-base text-muted-foreground">
             Browse and hire specialized AI employees for your projects.
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="border-border text-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline" className="border-border text-xs md:text-sm">
             <Users className="mr-1 h-3 w-3" />
             {employees.length} Available
           </Badge>
@@ -353,6 +353,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
             disabled={
               isHiringAll || employees.filter((e) => !e.isHired).length === 0
             }
+            size="sm"
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             aria-label={
               isHiringAll
@@ -363,7 +364,8 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
             {isHiringAll ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Hiring {hiringProgress.current}/{hiringProgress.total}
+                <span className="hidden sm:inline">Hiring </span>
+                {hiringProgress.current}/{hiringProgress.total}
               </>
             ) : (
               <>
@@ -377,24 +379,24 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
 
       {/* Search and Filters */}
       <Card className="border-border bg-card">
-        <CardContent className="p-6">
+        <CardContent className="p-4 md:p-6">
           <div className="flex flex-col gap-4 lg:flex-row">
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
                 <Input
-                  placeholder="Search employees by name, role, or skills..."
+                  placeholder="Search employees..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-border bg-background pl-10"
+                  className="border-border bg-background pl-10 text-sm"
                   aria-label="Search AI employees by name, role, or skills"
                 />
               </div>
             </div>
 
             {/* Category Filter */}
-            <div className="flex gap-2 overflow-x-auto">
+            <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
               {categories.map((category) => {
                 const Icon = category.icon;
                 return (
@@ -405,12 +407,13 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                     }
                     size="sm"
                     onClick={() => setSelectedCategory(category.id)}
-                    className="whitespace-nowrap"
+                    className="whitespace-nowrap text-xs md:text-sm"
                     aria-label={`Filter by ${category.label} category`}
                     aria-pressed={selectedCategory === category.id}
                   >
-                    <Icon className="mr-1 h-4 w-4" />
-                    {category.label}
+                    <Icon className="mr-1 h-3 w-3 md:h-4 md:w-4" />
+                    <span className="hidden sm:inline">{category.label}</span>
+                    <span className="sm:hidden">{category.id === 'all' ? 'All' : category.id === 'engineering' ? 'Eng' : category.id === 'design' ? 'Design' : category.id === 'product' ? 'Prod' : category.id === 'data' ? 'Data' : category.id === 'marketing' ? 'Mktg' : category.id === 'sales' ? 'Sales' : 'Gen'}</span>
                   </Button>
                 );
               })}
@@ -421,7 +424,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                className="rounded-md border border-border bg-background px-2 md:px-3 py-2 text-xs md:text-sm text-foreground"
                 aria-label="Sort employees by criteria"
               >
                 <option value="popular">Most Popular</option>
@@ -437,7 +440,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 onClick={() =>
                   setViewMode(viewMode === 'grid' ? 'list' : 'grid')
                 }
-                className="border-border"
+                className="border-border hidden md:flex"
                 aria-label={`Switch to ${viewMode === 'grid' ? 'list' : 'grid'} view`}
               >
                 {viewMode === 'grid' ? 'List View' : 'Grid View'}

@@ -357,6 +357,98 @@ export async function streamGoogle(
 }
 
 /**
+ * Stream responses from Perplexity
+ */
+export async function streamPerplexity(
+  messages: Array<{ role: string; content: string }>,
+  onChunk: StreamCallback,
+  model: string = 'llama-3.1-sonar-large-128k-online'
+) {
+  // In production, use Netlify proxy (non-stream)
+  if (import.meta.env.PROD) {
+    const response = await fetch('/.netlify/functions/perplexity-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model, messages, temperature: 0.7 }),
+    });
+    if (!response.ok) {
+      const data: ErrorResponse = await response.json().catch((err) => {
+        console.error('[Perplexity Proxy] Failed to parse error response:', err);
+        return {} as ErrorResponse;
+      });
+      throw new Error(
+        data?.error || `Perplexity proxy error: ${response.statusText}`
+      );
+    }
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || data.content;
+    if (content) onChunk({ type: 'content', content });
+    onChunk({ type: 'done' });
+    return;
+  }
+
+  // Development: stream directly from provider API
+  if (!PERPLEXITY_API_KEY) {
+    throw new Error('Perplexity API key not configured');
+  }
+
+  const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      stream: true,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Perplexity API error: ${response.statusText}`);
+  }
+
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder();
+
+  if (!reader) {
+    throw new Error('Response body is not readable');
+  }
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        onChunk({ type: 'done' });
+        break;
+      }
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n').filter((line) => line.trim() !== '');
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6);
+        if (data === '[DONE]') {
+          onChunk({ type: 'done' });
+          continue;
+        }
+        try {
+          const parsed = JSON.parse(data);
+          const delta = parsed.choices[0]?.delta;
+          if (delta?.content)
+            onChunk({ type: 'content', content: delta.content });
+        } catch (e) {
+          console.warn('Failed to parse SSE chunk:', e);
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+/**
  * Main streaming function that routes to appropriate provider
  */
 export async function streamAIResponse(
@@ -379,8 +471,7 @@ export async function streamAIResponse(
       return streamGoogle(messages, onChunk);
 
     case 'perplexity':
-      // Perplexity doesn't support streaming yet, fall back to regular
-      throw new Error('Perplexity streaming not yet supported');
+      return streamPerplexity(messages, onChunk);
 
     default:
       throw new Error(`Unsupported provider: ${provider}`);

@@ -86,10 +86,10 @@ export const CookieConsent = () => {
             className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6"
           >
             <div className="mx-auto max-w-7xl">
-              <div className="relative rounded-lg border bg-card p-4 shadow-2xl backdrop-blur-sm md:p-6">
+              <div className="relative rounded-lg border bg-card p-3 shadow-2xl backdrop-blur-sm sm:p-4 md:p-6">
                 <button
                   onClick={() => setShowBanner(false)}
-                  className="absolute right-2 top-2 rounded-full p-1 hover:bg-muted"
+                  className="absolute right-2 top-2 flex h-11 w-11 items-center justify-center rounded-full hover:bg-muted"
                   aria-label="Close banner"
                 >
                   <X className="h-4 w-4" />

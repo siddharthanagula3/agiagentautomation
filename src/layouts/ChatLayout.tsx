@@ -15,12 +15,12 @@ export function ChatLayout({
   sidebarOpen = true,
 }: ChatLayoutProps) {
   return (
-    <div className="flex h-screen bg-background text-foreground">
+    <div className="flex h-[100dvh] bg-background text-foreground">
       {/* Collapsible Sidebar */}
       <aside
         className={cn(
           'border-r border-gray-200 transition-all duration-300 ease-in-out dark:border-gray-700',
-          sidebarOpen ? 'w-64' : 'w-12'
+          sidebarOpen ? 'w-full sm:w-64 md:w-80' : 'w-12'
         )}
       >
         {sidebar}

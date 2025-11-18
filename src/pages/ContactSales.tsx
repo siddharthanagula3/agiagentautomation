@@ -258,7 +258,7 @@ const ContactSalesPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="mx-auto max-w-3xl text-center"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
+            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
               Let's Talk About Your AI Automation Needs
             </h1>
             <p className="text-xl text-muted-foreground">
@@ -307,11 +307,11 @@ const ContactSalesPage: React.FC = () => {
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="rounded-3xl border border-border/40 bg-background/60 p-8 backdrop-blur-xl"
+              className="rounded-3xl border border-border/40 bg-background/60 p-4 backdrop-blur-xl sm:p-6 md:p-8"
             >
-              <h2 className="mb-6 text-3xl font-bold">Get in Touch</h2>
+              <h2 className="mb-6 text-2xl font-bold sm:text-3xl">Get in Touch</h2>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label className="mb-2 block text-sm font-medium">
                       First Name *
@@ -474,8 +474,8 @@ const ContactSalesPage: React.FC = () => {
               viewport={{ once: true }}
               className="space-y-6"
             >
-              <div className="rounded-3xl border border-border/40 bg-background/60 p-8 backdrop-blur-xl">
-                <h2 className="mb-6 text-3xl font-bold">
+              <div className="rounded-3xl border border-border/40 bg-background/60 p-4 backdrop-blur-xl sm:p-6 md:p-8">
+                <h2 className="mb-6 text-2xl font-bold sm:text-3xl">
                   Other Ways to Reach Us
                 </h2>
                 <div className="space-y-6">
@@ -499,8 +499,8 @@ const ContactSalesPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-8 backdrop-blur-xl">
-                <h3 className="mb-4 text-xl font-bold">What Happens Next?</h3>
+              <div className="rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-4 backdrop-blur-xl sm:p-6 md:p-8">
+                <h3 className="mb-4 text-lg font-bold sm:text-xl">What Happens Next?</h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/20">

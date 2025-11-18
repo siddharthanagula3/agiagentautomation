@@ -125,7 +125,7 @@ const ConsultingBusinessesPage: React.FC = () => {
                 <Briefcase size={16} />
                 For Consulting Businesses
               </div>
-              <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
+              <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
                 Replace $120K Consultants with $29/Month AI ($24.99/month if
                 billed yearly)
               </h1>
@@ -185,7 +185,7 @@ const ConsultingBusinessesPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-16 text-center text-4xl font-bold"
+            className="mb-8 text-center text-2xl font-bold sm:mb-12 sm:text-3xl md:text-4xl"
           >
             Why Consultants Choose AI Employees
           </motion.h2>
@@ -223,7 +223,7 @@ const ConsultingBusinessesPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-16 text-center text-4xl font-bold"
+            className="mb-8 text-center text-2xl font-bold sm:mb-12 sm:text-3xl md:text-4xl"
           >
             AI for Every Consulting Function
           </motion.h2>
@@ -262,7 +262,7 @@ const ConsultingBusinessesPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-16 text-center text-4xl font-bold"
+            className="mb-8 text-center text-2xl font-bold sm:mb-12 sm:text-3xl md:text-4xl"
           >
             Perfect for All Consulting Types
           </motion.h2>
@@ -344,9 +344,9 @@ const ConsultingBusinessesPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-12 text-center text-white"
+            className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-6 text-center text-white sm:p-8 md:p-12"
           >
-            <h2 className="mb-4 text-4xl font-bold">
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Ready to Scale Your Practice?
             </h2>
             <p className="mb-8 text-xl opacity-90">

@@ -4,7 +4,17 @@ import { supabase } from '@shared/lib/supabase-client';
 import { useChatStore } from '@shared/stores/chat-store';
 import { chatPersistenceService } from '../services/conversation-storage';
 import { chatStreamingService } from '../services/streaming-response-handler';
+import { employeeChatService } from '../services/employee-chat-service';
+import {
+  shouldPerformWebSearch,
+  performWebSearch,
+  isWebSearchAvailable,
+} from '../services/web-search-integration';
+import { chatToolRouter, type ToolType, type ToolRouterResult } from '../services/chat-tool-router';
 import type { ChatMessage, ChatMode, StreamingUpdate } from '../types';
+import type { SearchResponse } from '@core/integrations/web-search-handler';
+import type { MediaGenerationResult } from '@core/integrations/media-generation-handler';
+import type { GeneratedDocument } from '../services/document-generation-service';
 
 interface SendMessageParams {
   content: string;
@@ -22,6 +32,10 @@ export const useChat = (sessionId?: string) => {
   const [error, setError] = useState<string | null>(null);
   const [streamingContent, setStreamingContent] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string | null>(null);
+  const [activeTools, setActiveTools] = useState<ToolType[]>([]);
+  const [toolProgress, setToolProgress] = useState<Record<ToolType, { status: string; progress?: number }>>({});
 
   // Get current user
   const getCurrentUser = async () => {
@@ -100,7 +114,7 @@ export const useChat = (sessionId?: string) => {
     }
   }, [sessionId, loadMessages]);
 
-  // Send message with streaming
+  // Send message with dynamic employee selection
   const sendMessage = useCallback(
     async ({
       content,
@@ -153,75 +167,328 @@ export const useChat = (sessionId?: string) => {
           await chatPersistenceService.saveMessage(sessionId, 'user', content);
         }
 
-        // Create assistant message placeholder
-        const assistantMessageId = crypto.randomUUID();
-        const assistantMessage: ChatMessage = {
-          id: assistantMessageId,
+        // UNIFIED TOOL ROUTER - Analyze and execute tools
+        const toolIndicatorId = crypto.randomUUID();
+        const toolIndicatorMessage: ChatMessage = {
+          id: toolIndicatorId,
           role: 'assistant',
-          content: '',
+          content: '🔄 Analyzing your request and selecting tools...',
           createdAt: new Date(),
           metadata: {
-            mode,
-            model,
-            temperature,
+            isToolProcessing: true,
           },
         };
 
-        setMessages((prev) => [...prev, assistantMessage]);
+        setMessages((prev) => [...prev, toolIndicatorMessage]);
 
-        // Stream the response
-        const conversationHistory = [
-          ...messages.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-          { role: 'user', content },
-        ];
+        // Build conversation history
+        const conversationHistory = messages.map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        }));
 
-        let fullResponse = '';
-
-        // Use streaming service
-        for await (const update of chatStreamingService.streamMessage(
-          conversationHistory,
-          {
-            sessionId,
+        // Route and execute tools
+        let toolRouterResult: ToolRouterResult | undefined;
+        try {
+          toolRouterResult = await chatToolRouter.routeAndExecuteTools(content, {
             userId: user.id,
-            provider: 'openai',
-          }
-        )) {
-          if (update.type === 'content' && update.content) {
-            fullResponse += update.content;
-            setStreamingContent(fullResponse);
+            sessionId,
+            conversationHistory,
+            onProgress: (toolType, status, progress) => {
+              setActiveTools((prev) => {
+                if (!prev.includes(toolType)) {
+                  return [...prev, toolType];
+                }
+                return prev;
+              });
+              setToolProgress((prev) => ({
+                ...prev,
+                [toolType]: { status, progress }
+              }));
+            }
+          });
 
-            // Update the assistant message in real-time
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === assistantMessageId
-                  ? { ...msg, content: fullResponse }
-                  : msg
-              )
-            );
-          } else if (update.type === 'error') {
-            throw new Error(update.error);
+          console.log('[Chat] Tool router result:', {
+            detectedTools: toolRouterResult.detectedTools,
+            executionResults: toolRouterResult.executionResults.length,
+            shouldContinueToLLM: toolRouterResult.shouldContinueToLLM
+          });
+
+          // Remove tool indicator
+          setMessages((prev) => prev.filter((msg) => msg.id !== toolIndicatorId));
+
+          // Display tool results
+          for (const result of toolRouterResult.executionResults) {
+            if (result.status === 'success' && result.data) {
+              const toolResultMessageId = crypto.randomUUID();
+              let toolResultMessage: ChatMessage;
+
+              if (result.toolType === 'image-generation') {
+                const imageData = result.data as MediaGenerationResult;
+                toolResultMessage = {
+                  id: toolResultMessageId,
+                  role: 'assistant',
+                  content: `Generated image: ${imageData.prompt}`,
+                  createdAt: new Date(),
+                  metadata: {
+                    toolResult: true,
+                    toolType: 'image-generation',
+                    imageUrl: imageData.url,
+                    imageData: imageData
+                  }
+                };
+              } else if (result.toolType === 'video-generation') {
+                const videoData = result.data as MediaGenerationResult;
+                toolResultMessage = {
+                  id: toolResultMessageId,
+                  role: 'assistant',
+                  content: `Generated video: ${videoData.prompt}`,
+                  createdAt: new Date(),
+                  metadata: {
+                    toolResult: true,
+                    toolType: 'video-generation',
+                    videoUrl: videoData.url,
+                    thumbnailUrl: videoData.thumbnailUrl,
+                    videoData: videoData
+                  }
+                };
+              } else if (result.toolType === 'document-creation') {
+                const docData = result.data as GeneratedDocument;
+                toolResultMessage = {
+                  id: toolResultMessageId,
+                  role: 'assistant',
+                  content: docData.content,
+                  createdAt: new Date(),
+                  metadata: {
+                    toolResult: true,
+                    toolType: 'document-creation',
+                    documentTitle: docData.title,
+                    documentData: docData
+                  }
+                };
+              } else if (result.toolType === 'web-search') {
+                const searchData = result.data as SearchResponse;
+                toolResultMessage = {
+                  id: toolResultMessageId,
+                  role: 'assistant',
+                  content: searchData.answer || `Found ${searchData.results.length} search results`,
+                  createdAt: new Date(),
+                  metadata: {
+                    toolResult: true,
+                    toolType: 'web-search',
+                    searchResults: searchData
+                  }
+                };
+              } else {
+                // Generic tool result
+                toolResultMessage = {
+                  id: toolResultMessageId,
+                  role: 'assistant',
+                  content: `Tool executed: ${result.toolType}`,
+                  createdAt: new Date(),
+                  metadata: {
+                    toolResult: true,
+                    toolType: result.toolType,
+                    toolData: result.data
+                  }
+                };
+              }
+
+              setMessages((prev) => [...prev, toolResultMessage]);
+            } else if (result.status === 'failed') {
+              toast.error(`${result.toolType} failed: ${result.error}`);
+            }
+          }
+
+          // Show suggestion if code generation detected
+          if (toolRouterResult.suggestedRoute === '/vibe') {
+            toast.info('For better code generation experience, try /vibe', {
+              duration: 5000,
+              action: {
+                label: 'Go to Vibe',
+                onClick: () => window.location.href = '/vibe'
+              }
+            });
+          } else if (toolRouterResult.suggestedRoute === '/mission-control') {
+            toast.info('For complex multi-step tasks, try Mission Control', {
+              duration: 5000,
+              action: {
+                label: 'Go to Mission Control',
+                onClick: () => window.location.href = '/mission-control'
+              }
+            });
+          }
+
+          // If tools handled everything, don't continue to LLM
+          if (!toolRouterResult.shouldContinueToLLM) {
+            setIsLoading(false);
+            setIsStreaming(false);
+            setActiveTools([]);
+            setToolProgress({});
+            return;
+          }
+
+        } catch (error) {
+          console.error('[Chat] Tool router error:', error);
+          // Remove tool indicator
+          setMessages((prev) => prev.filter((msg) => msg.id !== toolIndicatorId));
+          // Continue to LLM even if tools fail
+        }
+
+        // Reset tool state
+        setActiveTools([]);
+        setToolProgress({});
+
+        // Check if web search is needed (legacy support, now handled by tool router)
+        let searchResults: SearchResponse | undefined;
+        if (toolRouterResult?.executionResults) {
+          const searchResult = toolRouterResult.executionResults.find(r => r.toolType === 'web-search');
+          if (searchResult && searchResult.status === 'success') {
+            searchResults = searchResult.data as SearchResponse;
           }
         }
 
-        // Save assistant response to database
-        if (sessionId && fullResponse) {
-          await chatPersistenceService.saveMessage(
+        // Create thinking indicator message
+        const thinkingMessageId = crypto.randomUUID();
+        const thinkingMessage: ChatMessage = {
+          id: thinkingMessageId,
+          role: 'assistant',
+          content: '🤔 Analyzing your message and selecting best employee...',
+          createdAt: new Date(),
+          metadata: {
+            isThinking: true,
+          },
+        };
+
+        setMessages((prev) => [...prev, thinkingMessage]);
+
+        // Enhance user message with tool results if available
+        let enhancedContent = content;
+        if (toolRouterResult?.enhancedContext) {
+          enhancedContent = content + toolRouterResult.enhancedContext;
+        }
+
+        // Use employee chat service for dynamic selection
+        const result = await employeeChatService.sendMessage(
+          enhancedContent,
+          conversationHistory,
+          {
+            userId: user.id,
             sessionId,
-            'assistant',
-            fullResponse
-          );
+          }
+        );
+
+        // Remove thinking message
+        setMessages((prev) => prev.filter((msg) => msg.id !== thinkingMessageId));
+
+        // Check if this was a multi-agent collaboration
+        if (result.metadata.isMultiAgent && result.collaborationMessages) {
+          // Add all collaboration messages to show the discussion
+          const collaborationChatMessages: ChatMessage[] = result.collaborationMessages.map((collab, idx) => ({
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: collab.content,
+            createdAt: new Date(Date.now() + idx), // Slight offset for ordering
+            metadata: {
+              mode,
+              model: result.metadata.model,
+              temperature,
+              employeeName: collab.employeeName,
+              employeeId: collab.employeeName,
+              employeeAvatar: collab.employeeAvatar,
+              isCollaboration: true,
+              collaborationType: collab.messageType,
+              collaborationTo: collab.to,
+              isMultiAgent: true,
+              employeesInvolved: result.metadata.employeesInvolved,
+            },
+          }));
+
+          // Add collaboration messages
+          setMessages((prev) => [...prev, ...collaborationChatMessages]);
+
+          // Add final synthesized answer as the main response
+          const assistantMessageId = crypto.randomUUID();
+          const assistantMessage: ChatMessage = {
+            id: assistantMessageId,
+            role: 'assistant',
+            content: result.response,
+            createdAt: new Date(Date.now() + result.collaborationMessages.length + 1),
+            metadata: {
+              mode,
+              model: result.metadata.model,
+              temperature,
+              employeeName: 'Supervisor',
+              employeeId: 'supervisor',
+              employeeAvatar: '#4f46e5', // Indigo for supervisor
+              selectionReason: result.selectionReason,
+              thinkingSteps: result.thinkingSteps,
+              tokensUsed: result.metadata.tokensUsed,
+              isMultiAgent: true,
+              employeesInvolved: result.metadata.employeesInvolved,
+              isSynthesis: true,
+              searchResults, // Include search results if available
+            },
+          };
+
+          setMessages((prev) => [...prev, assistantMessage]);
+
+          // Save only the final synthesized answer to database
+          if (sessionId && result.response) {
+            await chatPersistenceService.saveMessage(
+              sessionId,
+              'assistant',
+              result.response
+            );
+          }
+        } else {
+          // Single employee response
+          const assistantMessageId = crypto.randomUUID();
+          const assistantMessage: ChatMessage = {
+            id: assistantMessageId,
+            role: 'assistant',
+            content: result.response,
+            createdAt: new Date(),
+            metadata: {
+              mode,
+              model: result.metadata.model,
+              temperature,
+              employeeName: result.selectedEmployee?.name,
+              employeeId: result.selectedEmployee?.name,
+              employeeAvatar: result.selectedEmployee
+                ? employeeChatService.getEmployeeAvatar(result.selectedEmployee.name)
+                : undefined,
+              selectionReason: result.selectionReason,
+              thinkingSteps: result.thinkingSteps,
+              tokensUsed: result.metadata.tokensUsed,
+              isMultiAgent: false,
+              searchResults, // Include search results if available
+            },
+          };
+
+          setMessages((prev) => [...prev, assistantMessage]);
+
+          // Save assistant response to database
+          if (sessionId && result.response) {
+            await chatPersistenceService.saveMessage(
+              sessionId,
+              'assistant',
+              result.response
+            );
+          }
         }
       } catch (error) {
         const err = error as { message?: string };
         setError(err.message || 'Failed to send message');
         toast.error(err.message || 'Failed to send message');
 
-        // Remove the placeholder assistant message on error (only empty ones)
+        // Remove any thinking/placeholder messages on error
         setMessages((prev) =>
-          prev.filter((msg) => msg.role !== 'assistant' || msg.content !== '')
+          prev.filter(
+            (msg) =>
+              msg.role !== 'assistant' ||
+              (msg.content !== '' && !msg.metadata?.isThinking)
+          )
         );
       } finally {
         setIsLoading(false);
@@ -315,6 +582,10 @@ export const useChat = (sessionId?: string) => {
     error,
     streamingContent,
     isStreaming,
+    isSearching,
+    searchQuery,
+    activeTools,
+    toolProgress,
     sendMessage,
     regenerateMessage,
     editMessage,

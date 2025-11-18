@@ -43,13 +43,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     >
       <div
         className={cn(
-          'max-w-[80%] rounded-lg p-4',
+          'max-w-[90%] rounded-lg p-3 sm:max-w-[80%] sm:p-4',
           message.type === 'user'
             ? 'bg-primary text-primary-foreground'
             : 'bg-muted'
         )}
       >
-        <div className="mb-2 flex items-center space-x-2">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
           {message.type === 'user' ? (
             <User className="h-4 w-4" />
           ) : (
@@ -59,22 +59,27 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             {message.type === 'user' ? 'You' : employeeName}
           </span>
           {message.status && (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-[10px] sm:text-xs">
               {message.status}
             </Badge>
           )}
         </div>
 
-        <div className="whitespace-pre-wrap">{message.content}</div>
+        <div className="max-w-full overflow-x-auto whitespace-pre-wrap break-words">
+          {message.content}
+        </div>
 
         {/* Tool Calls */}
         {message.toolCalls && message.toolCalls.length > 0 && (
-          <div className="mt-3 space-y-2">
-            <p className="text-sm font-medium">Tools Used:</p>
+          <div className="mt-2 space-y-2 sm:mt-3">
+            <p className="text-xs font-medium sm:text-sm">Tools Used:</p>
             {message.toolCalls.map((toolCall, index) => (
-              <div key={index} className="rounded bg-background p-2 text-sm">
-                <div className="flex items-center space-x-2">
-                  <Wrench className="h-3 w-3" />
+              <div
+                key={index}
+                className="rounded bg-background p-2 text-xs sm:text-sm"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <Wrench className="h-3 w-3 flex-shrink-0" />
                   <span className="font-medium">{toolCall.tool}</span>
                   <Badge
                     variant={
@@ -82,7 +87,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                         ? 'default'
                         : 'destructive'
                     }
-                    className="text-xs"
+                    className="text-[10px] sm:text-xs"
                   >
                     {toolCall.status}
                   </Badge>

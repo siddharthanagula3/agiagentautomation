@@ -551,18 +551,19 @@ const BillingPage: React.FC = () => {
         </div>
       }
     >
-      <div className="space-y-8 p-6">
+      <div className="space-y-4 md:space-y-8 p-4 md:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Billing</h1>
-            <p className="mt-2 text-muted-foreground">
+            <h1 className="text-2xl md:text-3xl font-bold">Billing</h1>
+            <p className="mt-2 text-sm md:text-base text-muted-foreground">
               Manage your subscription and billing information.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
+              size="sm"
               onClick={handleRefreshBilling}
               disabled={isLoading}
               className="flex items-center gap-2"
@@ -570,27 +571,31 @@ const BillingPage: React.FC = () => {
               <RefreshCw
                 className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
               />
-              Refresh
+              <span className="hidden sm:inline">Refresh</span>
             </Button>
             {billing?.plan !== 'free' && stripeCustomerId && (
               <Button
                 variant="outline"
+                size="sm"
                 onClick={handleManageBilling}
                 disabled={isManagingBilling}
                 className="flex items-center gap-2"
               >
                 <Settings className="h-4 w-4" />
-                {isManagingBilling ? 'Opening...' : 'Manage Billing'}
+                <span className="hidden sm:inline">{isManagingBilling ? 'Opening...' : 'Manage Billing'}</span>
+                <span className="sm:hidden">Manage</span>
                 <ExternalLink className="h-4 w-4" />
               </Button>
             )}
             {billing?.plan === 'free' && (
               <Button
                 onClick={() => handleUpgrade('pro')}
+                size="sm"
                 className="gradient-primary"
               >
                 <Crown className="mr-2 h-4 w-4" />
-                Upgrade to Pro
+                <span className="hidden sm:inline">Upgrade to Pro</span>
+                <span className="sm:hidden">Upgrade</span>
               </Button>
             )}
           </div>

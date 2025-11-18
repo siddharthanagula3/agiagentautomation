@@ -28,20 +28,21 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="border-t bg-card p-4">
-      <div className="flex space-x-2">
+    <div className="border-t bg-card p-3 sm:p-4">
+      <div className="flex gap-2">
         <Input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           onKeyPress={handleKeyPress}
           disabled={isLoading || disabled}
-          className="flex-1"
+          className="h-10 flex-1"
         />
         <Button
           onClick={onSend}
           disabled={!value.trim() || isLoading || disabled}
           size="sm"
+          className="h-10 w-10 p-0"
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />

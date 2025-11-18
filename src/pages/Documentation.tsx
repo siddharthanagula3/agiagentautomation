@@ -103,7 +103,7 @@ const DocumentationPage: React.FC = () => {
               <BookOpen className="mr-2 h-4 w-4" />
               Documentation
             </Badge>
-            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-7xl">
+            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
               Everything You Need to Know
             </h1>
             <p className="mb-8 text-xl text-muted-foreground">
@@ -137,13 +137,13 @@ const DocumentationPage: React.FC = () => {
             viewport={{ once: true }}
             className="mb-12 text-center"
           >
-            <h2 className="mb-4 text-4xl font-bold">Quick Start</h2>
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">Quick Start</h2>
             <p className="text-xl text-muted-foreground">
               Get up and running in minutes
             </p>
           </motion.div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
             {quickStart.map((item, idx) => (
               <motion.div
                 key={idx}
@@ -178,10 +178,10 @@ const DocumentationPage: React.FC = () => {
             viewport={{ once: true }}
             className="mb-16 text-center"
           >
-            <h2 className="mb-4 text-4xl font-bold">Browse Documentation</h2>
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">Browse Documentation</h2>
           </motion.div>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
             {categories.map((category, idx) => (
               <motion.div
                 key={idx}
@@ -224,7 +224,7 @@ const DocumentationPage: React.FC = () => {
             viewport={{ once: true }}
           >
             <HelpCircle className="mx-auto mb-4 h-12 w-12 text-primary" />
-            <h2 className="mb-4 text-4xl font-bold">Need Help?</h2>
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">Need Help?</h2>
             <p className="mb-8 text-lg text-muted-foreground">
               Can't find what you're looking for? Our support team is here to
               help.

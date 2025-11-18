@@ -75,6 +75,22 @@ export function Component({ ...props }: ComponentProps) {
 - Test on multiple screen sizes
 - Consider dark mode support
 
+## Code Output Format (VIBE Integration)
+
+When generating code, use this format to specify file paths:
+
+```tsx:src/components/Button.tsx
+// Your code here
+```
+
+Or alternatively:
+
+```tsx // src/components/Button.tsx
+// Your code here
+```
+
+Always include the file path after the language identifier to enable automatic file creation in the VIBE editor.
+
 ## Design Principles
 
 - **Simplicity**: Clean, uncluttered interfaces

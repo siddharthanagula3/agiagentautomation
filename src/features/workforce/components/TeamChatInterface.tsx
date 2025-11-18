@@ -353,7 +353,7 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
 
       {/* Input Area */}
       <div className="border-t border-slate-700 p-4">
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -365,27 +365,29 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
             disabled={isProcessing || !!executionState}
           />
 
-          <Button
-            onClick={handlePreview}
-            disabled={!input.trim() || isProcessing || !!executionState}
-            variant="outline"
-            className="border-slate-600"
-          >
-            <Clock className="mr-2 h-4 w-4" />
-            Preview
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={handlePreview}
+              disabled={!input.trim() || isProcessing || !!executionState}
+              variant="outline"
+              className="h-11 flex-1 border-slate-600 sm:flex-initial"
+            >
+              <Clock className="mr-2 h-4 w-4" />
+              Preview
+            </Button>
 
-          <Button
-            onClick={handleExecute}
-            disabled={!input.trim() || isProcessing || !!executionState}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {isProcessing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
+            <Button
+              onClick={handleExecute}
+              disabled={!input.trim() || isProcessing || !!executionState}
+              className="h-11 w-11 bg-blue-600 hover:bg-blue-700 sm:w-auto"
+            >
+              {isProcessing ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Send className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -483,7 +485,7 @@ const ExecutionStateCard: React.FC<{
           <Progress value={state.progress} className="h-2" />
         </div>
 
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-1 gap-4 text-center sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <div className="text-2xl font-bold text-white">
               {state.tasks.length}
@@ -590,7 +592,7 @@ const PreviewCard: React.FC<{
         Execution Preview
       </h3>
 
-      <div className="mb-4 grid grid-cols-3 gap-4">
+      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="text-center">
           <div className="text-2xl font-bold text-white">
             {preview.plan.tasks.length}

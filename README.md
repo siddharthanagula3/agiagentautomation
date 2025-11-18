@@ -22,8 +22,9 @@ AGI Agent Automation Platform is a next-generation AI collaboration platform tha
 - **🎬 Video Generation** - Google Veo 3.1 for AI-powered video generation
 - **📄 Document Creation** - Claude-powered document generation with PDF/DOCX export
 - **🔍 Web Search** - Integrated Perplexity AI for real-time web search
+- **📊 Social Media Analysis** - Grok AI for real-time Twitter/X sentiment and trend analysis
 - **📱 100% Mobile Responsive** - Fully optimized for all devices and screen sizes
-- **🤖 139+ Specialized Employees** - From Frontend Engineers to Marketing Strategists
+- **🤖 140+ Specialized Employees** - From Frontend Engineers to Social Media Analysts
 
 ---
 
@@ -86,7 +87,22 @@ Integrated Perplexity AI for up-to-date information:
 - **Inline Integration** - Seamlessly incorporated into chat responses
 - **Multi-Query Support** - Complex research queries handled automatically
 
-### 6. 🤖 AI Employee Marketplace
+### 6. 📊 Social Media Analysis (Powered by Grok)
+
+Real-time X (Twitter) analysis using xAI's Grok for social media intelligence:
+
+- **Sentiment Analysis** - Track public opinion (positive/negative/neutral) with percentage breakdowns
+- **Trend Detection** - Identify trending topics, hashtags, and emerging discussions
+- **Influencer Tracking** - Find top voices and rising influencers in any niche
+- **Viral Content Analysis** - Discover high-engagement posts and viral patterns
+- **Real-Time Data** - Live access to X (Twitter) conversations and discussions
+- **Multi-Platform Support** - Analyze Twitter/X, Reddit, LinkedIn discussions
+- **Timeframe Selection** - Analyze from 1 hour to 30 days of social activity
+- **Automated Reports** - Structured JSON output with metrics and insights
+
+**Use Cases:** Brand monitoring, market research, crisis management, political analysis, campaign tracking
+
+### 7. 🤖 AI Employee Marketplace
 
 Build your dream AI team from 139+ specialists:
 
@@ -246,6 +262,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 | **OpenAI** | GPT-4o, GPT-4 Turbo | General-purpose, versatile |
 | **Google** | Gemini 2.0 Flash, Imagen 4.0, Veo 3.1 | Creative, media generation |
 | **Perplexity** | Sonar Pro | Real-time web search |
+| **xAI Grok** | Grok Beta, Grok 2 Latest | Social media analysis, X/Twitter data |
 
 ---
 

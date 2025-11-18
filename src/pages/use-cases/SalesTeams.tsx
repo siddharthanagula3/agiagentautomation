@@ -126,7 +126,7 @@ const SalesTeamsPage: React.FC = () => {
                 <TrendingUp size={16} />
                 For Sales Teams
               </div>
-              <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
+              <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
                 Replace $80K+ Sales Reps with $29/Month AI ($24.99/month if
                 billed yearly)
               </h1>
@@ -175,7 +175,7 @@ const SalesTeamsPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-16 text-center text-4xl font-bold"
+            className="mb-8 text-center text-2xl font-bold sm:mb-12 sm:text-3xl md:text-4xl"
           >
             Supercharge Your Sales Performance
           </motion.h2>
@@ -213,7 +213,7 @@ const SalesTeamsPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-16 text-center text-4xl font-bold"
+            className="mb-8 text-center text-2xl font-bold sm:mb-12 sm:text-3xl md:text-4xl"
           >
             AI for the Entire Sales Cycle
           </motion.h2>
@@ -252,7 +252,7 @@ const SalesTeamsPage: React.FC = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-3xl border border-border/40 bg-background/60 p-12 backdrop-blur-xl"
+            className="rounded-3xl border border-border/40 bg-background/60 p-6 backdrop-blur-xl sm:p-8 md:p-12"
           >
             <div className="mb-6 text-4xl opacity-20">"</div>
             <p className="mb-8 text-2xl font-medium">
@@ -280,9 +280,9 @@ const SalesTeamsPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-12 text-center text-white"
+            className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-6 text-center text-white sm:p-8 md:p-12"
           >
-            <h2 className="mb-4 text-4xl font-bold">
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Save $119K+ Per Sales Rep Starting Today
             </h2>
             <p className="mb-2 text-2xl font-semibold opacity-95">

@@ -79,7 +79,7 @@ const AIProjectManagerPage: React.FC = () => {
                 <Briefcase size={16} />
                 AI Project Manager
               </div>
-              <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
+              <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
                 Deliver Projects On Time, Every Time
               </h1>
               <p className="mb-8 text-xl text-muted-foreground">
@@ -125,7 +125,7 @@ const AIProjectManagerPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-16 text-center text-4xl font-bold"
+            className="mb-8 text-center text-2xl font-bold sm:mb-12 sm:text-3xl md:text-4xl"
           >
             AI-Powered Project Intelligence
           </motion.h2>
@@ -162,9 +162,9 @@ const AIProjectManagerPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-12 text-center text-white"
+            className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-6 text-center text-white sm:p-8 md:p-12"
           >
-            <h2 className="mb-4 text-4xl font-bold">
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Ready to Ship Projects Faster?
             </h2>
             <p className="mb-8 text-xl opacity-90">

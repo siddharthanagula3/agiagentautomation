@@ -53,9 +53,9 @@ const PublicFooter: React.FC = () => {
       {/* Gradient Overlay */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-primary/5"></div>
 
-      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
         {/* Top Section */}
-        <div className="mb-12 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-6">
+        <div className="mb-8 grid grid-cols-1 gap-8 sm:mb-12 sm:gap-12 md:grid-cols-2 lg:grid-cols-6">
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link to="/" className="group mb-6 flex items-center space-x-3">
@@ -125,7 +125,7 @@ const PublicFooter: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="glass-strong mb-12 rounded-2xl p-8"
+          className="glass-strong mb-8 rounded-2xl p-4 sm:mb-12 sm:p-6 md:p-8"
         >
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex-1">
@@ -152,7 +152,7 @@ const PublicFooter: React.FC = () => {
         </motion.div>
 
         {/* Bottom Bar */}
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:pt-8 md:flex-row">
           <p className="text-center text-sm text-muted-foreground md:text-left">
             © {currentYear} AGI Workforce. All rights reserved. Built with AI
             for the AI age.

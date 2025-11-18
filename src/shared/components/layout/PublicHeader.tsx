@@ -201,8 +201,9 @@ const PublicHeader: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="rounded-lg p-2 transition-colors hover:bg-muted/50 md:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-muted/50 md:hidden"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {isMenuOpen ? (
               <X className="h-6 w-6" />
@@ -221,7 +222,7 @@ const PublicHeader: React.FC = () => {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden md:hidden"
             >
-              <nav className="space-y-2 border-t border-border py-6">
+              <nav className="space-y-2 border-t border-border px-4 py-6 sm:px-6">
                 <MobileDropdown
                   label="Product"
                   items={productMenu}
@@ -335,7 +336,7 @@ const HeaderDropdown: React.FC<HeaderDropdownProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 top-full mt-2 w-72 overflow-hidden rounded-xl border border-border/40 bg-background/95 shadow-2xl backdrop-blur-xl"
+            className="absolute left-0 top-full mt-2 w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border/40 bg-background/95 shadow-2xl backdrop-blur-xl sm:w-72 sm:max-w-none"
           >
             <div className="p-2">
               {items.map((item, idx) => (

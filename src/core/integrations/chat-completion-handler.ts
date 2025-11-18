@@ -3,7 +3,8 @@
  * Provides unified interface for sending messages to AI providers
  */
 
-import { unifiedLLMService } from '@core/ai/llm/unified-llm-service';
+import { unifiedLLMService } from '@core/ai/llm/unified-language-model';
+import { loadUserAIPreferences } from '@core/ai/llm/user-ai-preferences';
 
 export interface AIMessage {
   id?: string;

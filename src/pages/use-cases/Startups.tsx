@@ -182,7 +182,7 @@ const StartupsPage: React.FC = () => {
                 <Rocket size={16} />
                 For Startups
               </div>
-              <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
+              <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
                 Compete with $10M Funded Startups for $190/Month
               </h1>
               <p className="mb-4 text-2xl font-semibold text-foreground">
@@ -247,7 +247,7 @@ const StartupsPage: React.FC = () => {
             viewport={{ once: true }}
             className="mb-16 text-center"
           >
-            <h2 className="mb-4 text-4xl font-bold">
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Why Startups Choose AI Employees
             </h2>
             <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
@@ -273,7 +273,7 @@ const StartupsPage: React.FC = () => {
             viewport={{ once: true }}
             className="mb-16 text-center"
           >
-            <h2 className="mb-4 text-4xl font-bold">
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               AI Employees for Every Function
             </h2>
             <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
@@ -299,7 +299,7 @@ const StartupsPage: React.FC = () => {
             viewport={{ once: true }}
             className="mb-16 text-center"
           >
-            <h2 className="mb-4 text-4xl font-bold">
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               AI for Every Stage of Your Journey
             </h2>
             <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
@@ -330,9 +330,9 @@ const StartupsPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-12 text-center text-white"
+            className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-6 text-center text-white sm:p-8 md:p-12"
           >
-            <h2 className="mb-4 text-4xl font-bold">
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Save $999,810/Year. Start in 60 Seconds.
             </h2>
             <p className="mb-2 text-2xl font-semibold opacity-95">
@@ -470,7 +470,7 @@ const TestimonialCard: React.FC<{ testimonial: Testimonial }> = ({
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6 }}
-      className="relative overflow-hidden rounded-3xl border border-border/40 bg-background/60 p-12 backdrop-blur-xl"
+      className="relative overflow-hidden rounded-3xl border border-border/40 bg-background/60 p-6 backdrop-blur-xl sm:p-8 md:p-12"
     >
       <div className="mb-6 text-4xl opacity-20">"</div>
       <p className="mb-8 text-2xl font-medium leading-relaxed">

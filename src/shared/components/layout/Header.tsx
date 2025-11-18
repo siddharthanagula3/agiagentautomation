@@ -199,7 +199,7 @@ const Header: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="p-2 text-foreground/80 hover:text-foreground lg:hidden"
+            className="flex h-11 w-11 items-center justify-center text-foreground/80 hover:text-foreground lg:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-menu"
@@ -221,7 +221,7 @@ const Header: React.FC = () => {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden lg:hidden"
             >
-              <div className="space-y-4 py-4">
+              <div className="space-y-4 px-4 py-4 sm:px-6">
                 {/* Mobile Product */}
                 <MobileDropdown
                   label="Product"
@@ -335,7 +335,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 top-full mt-2 w-72 overflow-hidden rounded-xl border border-border/40 bg-background/95 shadow-2xl backdrop-blur-xl"
+            className="absolute left-0 top-full mt-2 w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border/40 bg-background/95 shadow-2xl backdrop-blur-xl sm:w-72 sm:max-w-none"
           >
             <div className="p-2">
               {items.map((item, idx) => (

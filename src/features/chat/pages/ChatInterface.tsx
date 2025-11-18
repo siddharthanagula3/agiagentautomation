@@ -7,12 +7,14 @@ import { useChatHistory } from '../hooks/use-conversation-history';
 import { useTools } from '../hooks/use-tool-integration';
 import { useExport } from '../hooks/use-export-conversation';
 import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts';
+import { useAIPreferences } from '../hooks/use-ai-preferences';
 import { ChatSidebar } from '../components/Sidebar/ChatSidebar';
 import { ChatHeader } from '../components/Main/ChatHeader';
 import { MessageList } from '../components/Main/MessageList';
 import { ChatComposer } from '../components/Composer/ChatComposer';
 import { ModeSelector } from '../components/Tools/ModeSelector';
 import { KeyboardShortcutsDialog } from '../components/KeyboardShortcutsDialog';
+import { ToolProgressIndicator } from '../components/ToolProgressIndicator';
 import type { ChatSession, ChatMessage, ChatMode } from '../types';
 import {
   DropdownMenu,
@@ -36,11 +38,16 @@ const ChatPage: React.FC = () => {
   const { sessionId } = useParams<{ sessionId?: string }>();
   const navigate = useNavigate();
 
+  // Load user AI preferences (applies to LLM service on mount)
+  const aiPreferences = useAIPreferences();
+
   // Chat state management
   const {
     messages: rawMessages,
     isLoading,
     error,
+    activeTools,
+    toolProgress,
     sendMessage,
     regenerateMessage,
     editMessage,
@@ -334,7 +341,7 @@ const ChatPage: React.FC = () => {
         <div
           className={cn(
             'border-r border-border bg-card/50 backdrop-blur-sm transition-all duration-300 ease-in-out',
-            sidebarOpen ? 'w-80 md:w-80' : 'w-0',
+            sidebarOpen ? 'w-0 sm:w-64 md:w-80' : 'w-0',
             'overflow-hidden' // Prevent content overflow when collapsed
           )}
         >
@@ -393,11 +400,21 @@ const ChatPage: React.FC = () => {
               toolResults={toolResults}
               activeTool={activeTool}
             />
+
+            {/* Tool Progress Indicator - Shows active tools */}
+            {activeTools && activeTools.length > 0 && (
+              <div className="p-4">
+                <ToolProgressIndicator
+                  activeTools={activeTools}
+                  toolProgress={toolProgress || {}}
+                />
+              </div>
+            )}
           </div>
 
           {/* Composer - Sticky at bottom with backdrop */}
           <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="mx-auto max-w-4xl p-4">
+            <div className="mx-auto max-w-4xl p-3 sm:p-4">
               <ChatComposer
                 onSendMessage={handleSendMessage}
                 isLoading={isLoading}

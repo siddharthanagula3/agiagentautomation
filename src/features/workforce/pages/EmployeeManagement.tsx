@@ -81,31 +81,31 @@ const EmployeeManagement: React.FC = () => {
   const activeEmployees = hiredEmployees.filter((emp) => emp.is_active).length;
 
   return (
-    <div className="min-h-screen space-y-6 p-6">
+    <div className="min-h-screen space-y-4 md:space-y-6 p-4 md:p-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-strong relative overflow-hidden rounded-3xl p-8"
+        className="glass-strong relative overflow-hidden rounded-3xl p-4 md:p-8"
       >
         <Particles className="absolute inset-0" quantity={30} ease={20} />
         <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
         <div className="relative z-10">
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-start sm:justify-between">
             <div>
               <Badge className="glass mb-4">
                 <Users className="mr-2 h-3 w-3" />
                 AI Workforce Management
               </Badge>
-              <h1 className="mb-2 text-4xl font-bold">Your AI Workforce</h1>
-              <p className="text-xl text-muted-foreground">
+              <h1 className="mb-2 text-2xl md:text-4xl font-bold">Your AI Workforce</h1>
+              <p className="text-base md:text-xl text-muted-foreground">
                 Manage your AI team and track performance in real-time
               </p>
             </div>
-            <Link to="/marketplace">
+            <Link to="/marketplace" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="btn-glow gradient-primary text-white"
+                className="btn-glow gradient-primary text-white w-full"
               >
                 <Plus className="mr-2 h-5 w-5" />
                 Hire AI Employee

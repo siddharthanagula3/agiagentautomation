@@ -15,6 +15,9 @@ import {
   ChevronUp,
   Check,
   Copy,
+  Sparkles,
+  Brain,
+  Wrench,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import ReactMarkdown from 'react-markdown';
@@ -35,6 +38,11 @@ import {
   removeArtifactBlocks,
 } from '../utils/artifact-detector';
 import { useArtifactStore } from '@shared/stores/artifact-store';
+import { employeeChatService } from '../services/employee-chat-service';
+import { SearchResults } from './SearchResults';
+import type { SearchResponse } from '@core/integrations/web-search-handler';
+import type { MediaGenerationResult } from '@core/integrations/media-generation-handler';
+import type { GeneratedDocument } from '../services/document-generation-service';
 
 interface Attachment {
   id: string;
@@ -69,6 +77,30 @@ interface Message {
     outputTokens?: number;
     model?: string;
     cost?: number;
+    // Employee selection metadata
+    selectionReason?: string;
+    thinkingSteps?: string[];
+    isThinking?: boolean;
+    // Multi-agent collaboration metadata
+    isCollaboration?: boolean;
+    collaborationType?: 'contribution' | 'discussion' | 'synthesis';
+    collaborationTo?: string;
+    isMultiAgent?: boolean;
+    employeesInvolved?: string[];
+    isSynthesis?: boolean;
+    // Web search metadata
+    searchResults?: SearchResponse;
+    isSearching?: boolean;
+    // Tool result metadata
+    toolResult?: boolean;
+    toolType?: string;
+    imageUrl?: string;
+    imageData?: MediaGenerationResult;
+    videoUrl?: string;
+    thumbnailUrl?: string;
+    videoData?: MediaGenerationResult;
+    documentData?: GeneratedDocument;
+    documentTitle?: string;
   };
 }
 
@@ -192,9 +224,12 @@ export const MessageBubble = React.memo(function MessageBubble({
 }: MessageBubbleProps) {
   const [documentExpanded, setDocumentExpanded] = useState(false);
   const [workStreamExpanded, setWorkStreamExpanded] = useState(true);
+  const [thinkingExpanded, setThinkingExpanded] = useState(false);
   const isUser = message.role === 'user';
   const isDocument = message.metadata?.isDocument;
   const hasWorkStream = message.metadata?.hasWorkStream;
+  const isThinking = message.metadata?.isThinking;
+  const hasThinkingSteps = message.metadata?.thinkingSteps && message.metadata.thinkingSteps.length > 0;
 
   // Artifact detection and management
   const { addArtifact, shareArtifact, setCurrentVersion, getMessageArtifacts } =
@@ -262,6 +297,15 @@ export const MessageBubble = React.memo(function MessageBubble({
   const shouldShowInline = !isUser && !isDocument;
   const maxHeight = isDocument && !documentExpanded ? '300px' : 'none';
 
+  // Get employee initials for avatar fallback
+  const employeeInitials = message.employeeName
+    ? employeeChatService.getEmployeeInitials(message.employeeName)
+    : 'AI';
+
+  // Get employee color
+  const employeeColor = message.employeeAvatar ||
+    employeeChatService.getEmployeeAvatar(message.employeeName || '');
+
   return (
     <div className="group relative">
       <div
@@ -274,26 +318,17 @@ export const MessageBubble = React.memo(function MessageBubble({
         {/* Avatar - only show for assistant messages */}
         {!isUser && (
           <div className="flex-shrink-0">
-            {message.employeeAvatar || message.employeeName ? (
-              <Avatar className="h-9 w-9">
-                <AvatarImage src={message.employeeAvatar} />
-                <AvatarFallback
-                  className="text-xs font-semibold text-white"
-                  style={{
-                    backgroundColor: message.employeeColor || '#6366f1',
-                  }}
-                >
-                  {message.employeeName
-                    ?.split(' ')
-                    .map((n) => n[0])
-                    .join('') || 'AI'}
-                </AvatarFallback>
-              </Avatar>
-            ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500 shadow-md">
-                <Bot className="h-5 w-5 text-white" />
-              </div>
-            )}
+            <Avatar className="h-9 w-9 ring-2 ring-offset-1" style={{ ringColor: employeeColor }}>
+              <AvatarImage src={typeof message.employeeAvatar === 'string' && message.employeeAvatar.startsWith('/') ? message.employeeAvatar : undefined} />
+              <AvatarFallback
+                className="text-xs font-semibold text-white"
+                style={{
+                  backgroundColor: employeeColor,
+                }}
+              >
+                {employeeInitials}
+              </AvatarFallback>
+            </Avatar>
           </div>
         )}
 
@@ -304,14 +339,60 @@ export const MessageBubble = React.memo(function MessageBubble({
             isUser ? 'max-w-[85%] items-end' : 'max-w-full items-start'
           )}
         >
-          {/* Employee Name & Timestamp */}
+          {/* Employee Name, Badge & Timestamp */}
           {!isUser && message.employeeName && (
-            <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
-              <span>{message.employeeName}</span>
+            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold" style={{ color: employeeColor }}>
+                  {message.employeeName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                </span>
+                {message.metadata?.selectionReason && !message.metadata?.isCollaboration && (
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
+                    style={{ backgroundColor: employeeColor }}
+                  >
+                    <Sparkles className="mr-0.5 inline-block h-2.5 w-2.5" />
+                    {message.metadata.selectionReason}
+                  </span>
+                )}
+                {message.metadata?.isCollaboration && (
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                    style={{
+                      backgroundColor: message.metadata.collaborationType === 'synthesis' ? '#4f46e5' : employeeColor,
+                      color: 'white'
+                    }}
+                  >
+                    {message.metadata.collaborationType === 'contribution' && '💭 Contribution'}
+                    {message.metadata.collaborationType === 'discussion' && '💬 Discussion'}
+                    {message.metadata.collaborationType === 'synthesis' && '📋 Final Synthesis'}
+                  </span>
+                )}
+                {message.metadata?.isMultiAgent && message.metadata?.employeesInvolved && (
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[10px] font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                  >
+                    🤝 Team of {message.metadata.employeesInvolved.length}
+                  </span>
+                )}
+                {message.metadata?.collaborationTo && (
+                  <span className="text-muted-foreground text-[10px]">
+                    → {message.metadata.collaborationTo}
+                  </span>
+                )}
+              </div>
               <span className="text-muted-foreground/50">•</span>
               <span className="text-muted-foreground/70">
                 {formatTime(message.timestamp)}
               </span>
+              {message.metadata?.model && (
+                <>
+                  <span className="text-muted-foreground/50">•</span>
+                  <span className="text-muted-foreground/60 text-[10px]">
+                    {message.metadata.model}
+                  </span>
+                </>
+              )}
             </div>
           )}
 
@@ -424,6 +505,196 @@ export const MessageBubble = React.memo(function MessageBubble({
                   onShare={() => handleShareArtifact(artifact.id)}
                 />
               ))}
+            </div>
+          )}
+
+          {/* Image Generation Result */}
+          {!isUser && message.metadata?.toolType === 'image-generation' && message.metadata?.imageUrl && (
+            <div className="mt-3 w-full">
+              <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-purple-500" />
+                    <span className="text-sm font-medium">Generated Image</span>
+                  </div>
+                  {message.metadata?.imageData && (
+                    <div className="text-xs text-muted-foreground">
+                      {message.metadata.imageData.metadata.aspectRatio} • {message.metadata.imageData.model}
+                    </div>
+                  )}
+                </div>
+                <div className="overflow-hidden rounded-lg">
+                  <img
+                    src={message.metadata.imageUrl}
+                    alt={message.metadata?.imageData?.prompt || 'Generated image'}
+                    className="w-full h-auto object-contain max-h-[600px]"
+                  />
+                </div>
+                {message.metadata?.imageData?.images && message.metadata.imageData.images.length > 1 && (
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {message.metadata.imageData.images.slice(1).map((img, idx) => (
+                      <div key={idx} className="overflow-hidden rounded-lg border border-border">
+                        <img
+                          src={img.url}
+                          alt={`Variant ${idx + 2}`}
+                          className="w-full h-auto object-contain"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-3 flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const a = document.createElement('a');
+                      a.href = message.metadata!.imageUrl!;
+                      a.download = 'generated-image.png';
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                    }}
+                    className="h-8 text-xs"
+                  >
+                    <Download className="mr-1 h-3 w-3" />
+                    Download
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(message.metadata!.imageUrl!);
+                      toast.success('Image URL copied');
+                    }}
+                    className="h-8 text-xs"
+                  >
+                    <Copy className="mr-1 h-3 w-3" />
+                    Copy URL
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Video Generation Result */}
+          {!isUser && message.metadata?.toolType === 'video-generation' && message.metadata?.videoUrl && (
+            <div className="mt-3 w-full">
+              <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-pink-500" />
+                    <span className="text-sm font-medium">Generated Video</span>
+                  </div>
+                  {message.metadata?.videoData && (
+                    <div className="text-xs text-muted-foreground">
+                      {message.metadata.videoData.metadata.duration}s • {message.metadata.videoData.metadata.resolution} • {message.metadata.videoData.model}
+                    </div>
+                  )}
+                </div>
+                <div className="overflow-hidden rounded-lg bg-black">
+                  <video
+                    src={message.metadata.videoUrl}
+                    controls
+                    poster={message.metadata?.thumbnailUrl}
+                    className="w-full h-auto"
+                    style={{ maxHeight: '600px' }}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const a = document.createElement('a');
+                      a.href = message.metadata!.videoUrl!;
+                      a.download = 'generated-video.mp4';
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                    }}
+                    className="h-8 text-xs"
+                  >
+                    <Download className="mr-1 h-3 w-3" />
+                    Download
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(message.metadata!.videoUrl!);
+                      toast.success('Video URL copied');
+                    }}
+                    className="h-8 text-xs"
+                  >
+                    <Copy className="mr-1 h-3 w-3" />
+                    Copy URL
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Web Search Results */}
+          {!isUser && message.metadata?.searchResults && (
+            <div className="mt-3 w-full">
+              <SearchResults
+                searchResponse={message.metadata.searchResults}
+                showAnswer={true}
+              />
+            </div>
+          )}
+
+          {/* Thinking Process Display */}
+          {hasThinkingSteps && (
+            <div className="mt-3 w-full">
+              <div className="mb-2 flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setThinkingExpanded(!thinkingExpanded)}
+                  className="h-7 px-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  {thinkingExpanded ? (
+                    <>
+                      <ChevronUp className="mr-1 h-3 w-3" />
+                      Hide Thinking Process
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="mr-1 h-3 w-3" />
+                      <Brain className="mr-1 h-3 w-3" />
+                      Show Thinking Process
+                    </>
+                  )}
+                </Button>
+              </div>
+              {thinkingExpanded && (
+                <div className="rounded-lg border border-border bg-muted/30 p-3">
+                  <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                    <Brain className="h-3.5 w-3.5" />
+                    Reasoning Steps
+                  </div>
+                  <div className="space-y-2">
+                    {message.metadata?.thinkingSteps?.map((step, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start gap-2 text-xs text-muted-foreground"
+                      >
+                        <div
+                          className="mt-1 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-[9px] font-semibold text-white"
+                          style={{ backgroundColor: employeeColor }}
+                        >
+                          {index + 1}
+                        </div>
+                        <span className="flex-1 leading-relaxed">{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

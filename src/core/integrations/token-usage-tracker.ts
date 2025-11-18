@@ -4,7 +4,7 @@
  */
 
 import { UsageTracker } from '@features/billing/services/usage-monitor';
-import type { LLMProvider } from './llm/unified-llm-service';
+import type { LLMProvider } from '@core/ai/llm/unified-language-model';
 
 export interface TokenLogEntry {
   userId: string;

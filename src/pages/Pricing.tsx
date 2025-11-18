@@ -293,7 +293,7 @@ const PricingPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-background">
       <SEOHead
         title="AI Employee Pricing | Free Forever to $99/mo | Save 99% vs Human Employees"
         description="Hire Free AI Employees. Free plan: 1M tokens/month (250K per provider). Pro plan: 10M tokens/month (2.5M per provider). Token costs at market rates. Save 99%+ on payroll. Start in 60 seconds!"

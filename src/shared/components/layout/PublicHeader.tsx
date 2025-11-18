@@ -121,13 +121,13 @@ const PublicHeader: React.FC = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className={cn(
-        'fixed left-0 right-0 top-0 z-50 transition-all duration-300',
+        'fixed left-0 right-0 top-0 z-50 w-full max-w-full overflow-x-hidden transition-all duration-300',
         scrolled
           ? 'glass-strong border-b border-border shadow-lg'
           : 'bg-transparent'
       )}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="group flex items-center space-x-3">

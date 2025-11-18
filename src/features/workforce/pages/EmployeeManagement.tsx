@@ -301,6 +301,11 @@ const EmployeeManagement: React.FC = () => {
                         const emp = AI_EMPLOYEES.find(
                           (e) => e.id === rec.employee_id
                         );
+                        // Fallback values when employee data is not found
+                        const displayName = emp?.role || rec.role || 'AI Employee';
+                        const displayAvatar = emp?.avatar;
+                        const displaySpecialty = emp?.specialty || emp?.description || 'AI specialist ready to assist';
+
                         return (
                           <BentoCard
                             key={rec.id}
@@ -316,8 +321,8 @@ const EmployeeManagement: React.FC = () => {
                               <div className="mb-4 flex items-start gap-4">
                                 <InteractiveHoverCard>
                                   <AnimatedAvatar
-                                    src={emp?.avatar}
-                                    alt={emp?.role || rec.role}
+                                    src={displayAvatar}
+                                    alt={displayName}
                                     size="lg"
                                     className="h-14 w-14 flex-shrink-0 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20"
                                   />
@@ -325,7 +330,7 @@ const EmployeeManagement: React.FC = () => {
                                 <div className="min-w-0 flex-1">
                                   <div className="mb-1 flex items-center gap-2">
                                     <h3 className="truncate text-lg font-semibold transition-colors group-hover:text-primary">
-                                      {emp?.role || rec.role}
+                                      {displayName}
                                     </h3>
                                     {emp?.popular && (
                                       <Badge
@@ -343,8 +348,7 @@ const EmployeeManagement: React.FC = () => {
                               </div>
 
                               <p className="mb-4 line-clamp-2 flex-grow text-sm text-muted-foreground">
-                                {emp?.specialty ||
-                                  'AI specialist ready to assist'}
+                                {displaySpecialty}
                               </p>
 
                               <div className="flex gap-2">

@@ -35,6 +35,7 @@ import {
 import { VibeMessageService } from '../services/vibe-message-service';
 import { vibeMessageHandler } from '../services/vibe-message-handler';
 import { toast } from 'sonner';
+import { TokenUsageDisplay } from '../components/TokenUsageDisplay';
 
 interface VibeMessageRow {
   id: string;
@@ -505,12 +506,15 @@ const VibeDashboard: React.FC = () => {
       <div className="flex h-full flex-col">
         {/* Header */}
         <div className="border-b border-border bg-gradient-to-r from-purple-600/10 to-blue-600/10 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <h1 className="text-lg font-bold">Vibe</h1>
-            <span className="text-sm text-muted-foreground">
-              AI Development Agent
-            </span>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <h1 className="text-lg font-bold">Vibe</h1>
+              <span className="text-sm text-muted-foreground">
+                AI Development Agent
+              </span>
+            </div>
+            <TokenUsageDisplay sessionId={currentSessionId} />
           </div>
         </div>
 

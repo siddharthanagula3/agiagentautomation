@@ -193,7 +193,7 @@ const LandingPage: React.FC = () => {
   }, [displayedEmployees.length]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden">
       <SEOHead
         title="AGI Agent Automation | #1 AI Employees Platform USA | Hire 165+ AI Agents"
         description="Hire Free AI Employees. Free plan: 1M tokens/month (250K per provider). Pro plan: 10M tokens/month (2.5M per provider). 165+ specialized AI agents. Best AI workforce platform. 24/7 operation. Start free today!"
@@ -215,7 +215,7 @@ const LandingPage: React.FC = () => {
       />
 
       {/* Hero Section */}
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden pt-16">
+      <section className="relative flex min-h-screen w-full max-w-full items-center justify-center overflow-hidden pt-16">
         <Particles className="absolute inset-0 z-0" quantity={100} />
         <Spotlight className="absolute inset-0 z-0" />
         <div className="gradient-mesh absolute inset-0"></div>
@@ -224,17 +224,17 @@ const LandingPage: React.FC = () => {
           <motion.div
             animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
             transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute left-20 top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl"
+            className="absolute left-4 top-20 h-32 w-32 rounded-full bg-primary/10 blur-3xl sm:left-20 sm:h-72 sm:w-72"
           />
           <motion.div
             animate={{ y: [0, 20, 0], x: [0, -10, 0] }}
             transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute bottom-20 right-20 h-96 w-96 rounded-full bg-accent/10 blur-3xl"
+            className="absolute bottom-20 right-4 h-40 w-40 rounded-full bg-accent/10 blur-3xl sm:right-20 sm:h-96 sm:w-96"
           />
           <motion.div
             animate={{ y: [0, -15, 0], x: [0, -15, 0] }}
             transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute right-1/3 top-1/2 h-64 w-64 rounded-full bg-secondary/10 blur-3xl"
+            className="absolute right-1/3 top-1/2 h-24 w-24 rounded-full bg-secondary/10 blur-3xl sm:h-64 sm:w-64"
           />
         </div>
 
@@ -388,9 +388,9 @@ const LandingPage: React.FC = () => {
       <ExpandableChatDemo />
 
       {/* AI Employees Marketplace Preview */}
-      <section ref={employeesRef} className="relative overflow-hidden py-20">
+      <section ref={employeesRef} className="relative w-full max-w-full overflow-hidden py-12 sm:py-20">
         <Particles className="absolute inset-0 opacity-20" quantity={50} />
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={employeesInView ? { opacity: 1, y: 0 } : {}}
@@ -411,17 +411,18 @@ const LandingPage: React.FC = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid w-full max-w-full grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {displayedEmployees.map((employee, idx) => (
               <motion.div
                 key={employee.id}
                 initial={{ opacity: 0, y: 50 }}
                 animate={employeesInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
+                className="w-full max-w-full"
               >
                 <Card
                   className={cn(
-                    'glass-strong card-hover group relative h-full overflow-hidden border-2 transition-all duration-300',
+                    'glass-strong card-hover group relative h-full w-full max-w-full overflow-hidden border-2 transition-all duration-300',
                     'hover:shadow-2xl hover:shadow-primary/20',
                     activeEmployee === idx
                       ? 'border-primary/50'
@@ -586,12 +587,12 @@ const LandingPage: React.FC = () => {
       {/* Features Section */}
       <section
         ref={featuresRef}
-        className="relative overflow-hidden bg-muted/30 py-20"
+        className="relative w-full max-w-full overflow-hidden bg-muted/30 py-12 sm:py-20"
       >
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
         </div>
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={featuresInView ? { opacity: 1, y: 0 } : {}}
@@ -610,13 +611,14 @@ const LandingPage: React.FC = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid w-full max-w-full grid-cols-1 gap-4 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 50 }}
                 animate={featuresInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
+                className="w-full max-w-full"
               >
                 <Card className="group h-full border-2 border-border/50 p-6 transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
                   <motion.div
@@ -641,9 +643,9 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Product Demo Section */}
-      <section className="relative overflow-hidden py-20">
+      <section className="relative w-full max-w-full overflow-hidden py-12 sm:py-20">
         <Spotlight className="absolute inset-0" />
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -724,9 +726,9 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="relative overflow-hidden py-20">
+      <section className="relative w-full max-w-full overflow-hidden py-12 sm:py-20">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -745,7 +747,7 @@ const LandingPage: React.FC = () => {
             </p>
           </motion.div>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid w-full max-w-full gap-4 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
             {[
               {
                 name: 'Sarah Chen',
@@ -823,8 +825,8 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Use Cases Section */}
-      <section className="relative overflow-hidden py-20">
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="relative w-full max-w-full overflow-hidden py-12 sm:py-20">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -843,7 +845,7 @@ const LandingPage: React.FC = () => {
             </p>
           </motion.div>
 
-          <div className="grid gap-8 lg:grid-cols-2">
+          <div className="grid w-full max-w-full gap-4 sm:gap-8 lg:grid-cols-2">
             {[
               {
                 title: 'E-commerce Automation',
@@ -950,8 +952,8 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="relative overflow-hidden py-20">
-        <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <section className="relative w-full max-w-full overflow-hidden py-12 sm:py-20">
+        <div className="relative z-10 mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -997,10 +999,10 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Final CTA */}
-      <section className="relative overflow-hidden py-20">
+      <section className="relative w-full max-w-full overflow-hidden py-12 sm:py-20">
         <div className="gradient-primary absolute inset-0 opacity-90"></div>
         <Particles className="absolute inset-0" quantity={100} />
-        <div className="relative z-10 mx-auto max-w-5xl px-4 text-center text-white sm:px-6 lg:px-8">
+        <div className="relative z-10 mx-auto w-full max-w-5xl px-4 text-center text-white sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

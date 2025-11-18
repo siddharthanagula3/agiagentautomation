@@ -102,4 +102,20 @@ export const handler: Handler = async (
 - Test edge cases and error scenarios
 - Document API endpoints clearly
 
+## Code Output Format (VIBE Integration)
+
+When generating code, use this format to specify file paths:
+
+```ts:netlify/functions/api-endpoint.ts
+// Your code here
+```
+
+Or alternatively:
+
+```ts // netlify/functions/api-endpoint.ts
+// Your code here
+```
+
+Always include the file path after the language identifier to enable automatic file creation in the VIBE editor.
+
 Build secure, performant backend services that handle edge cases gracefully and provide clear error messages.

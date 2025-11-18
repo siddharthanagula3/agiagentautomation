@@ -313,7 +313,7 @@ const BlogPage: React.FC = () => {
             </motion.div>
           ) : regularPosts.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 {regularPosts.map((post, idx) => (
                   <BlogPostCard key={post.id} post={post} index={idx} />
                 ))}
@@ -365,10 +365,10 @@ const BlogPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-12 backdrop-blur-xl"
+            className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6 backdrop-blur-xl sm:p-8 md:p-12"
           >
             <div className="text-center">
-              <h2 className="mb-4 text-3xl font-bold">Never Miss an Update</h2>
+              <h2 className="mb-4 text-2xl font-bold sm:text-3xl">Never Miss an Update</h2>
               <p className="mx-auto mb-8 max-w-2xl text-muted-foreground">
                 Get the latest insights on AI automation, productivity tips, and
                 case studies delivered to your inbox every week.
@@ -412,7 +412,7 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
       onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
     >
       <div className="grid gap-0 md:grid-cols-2">
-        <div className="relative h-64 overflow-hidden md:h-full">
+        <div className="relative h-48 overflow-hidden sm:h-64 md:h-full">
           <img
             src={
               post.image_url ||
@@ -427,8 +427,8 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
             </span>
           </div>
         </div>
-        <div className="flex flex-col justify-center p-8 md:p-12">
-          <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-col justify-center p-4 sm:p-6 md:p-8 lg:p-12">
+          <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground sm:gap-4">
             <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
               {post.category.name}
             </span>
@@ -498,7 +498,7 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
       whileHover={{ y: -8 }}
       onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
     >
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-40 overflow-hidden sm:h-48">
         <img
           src={
             post.image_url ||
@@ -513,7 +513,7 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
           </span>
         </div>
       </div>
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
           <Calendar size={12} />
           {new Date(post.published_at).toLocaleDateString('en-US', {

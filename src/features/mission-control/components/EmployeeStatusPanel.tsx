@@ -106,17 +106,17 @@ export const AgentStatusPanel: React.FC = () => {
 
   return (
     <Card className="h-full border-border bg-card">
-      <CardHeader className="border-b border-border pb-4">
-        <CardTitle className="flex items-center gap-2 text-foreground">
-          <Zap className="h-5 w-5 text-primary" />
+      <CardHeader className="border-b border-border p-3 sm:pb-4 sm:p-4">
+        <CardTitle className="flex items-center gap-2 text-sm text-foreground sm:text-base">
+          <Zap className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
           AI Team ({assignedAgents.length})
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="p-3 sm:p-4">
         {assignedAgents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Bot className="mb-4 h-12 w-12 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col items-center justify-center py-8 text-center sm:py-12">
+            <Bot className="mb-3 h-10 w-10 text-muted-foreground sm:mb-4 sm:h-12 sm:w-12" />
+            <p className="text-xs text-muted-foreground sm:text-sm">
               No AI employees assigned yet
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -124,7 +124,7 @@ export const AgentStatusPanel: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <AnimatePresence mode="popLayout">
               {assignedAgents.map((agent, index) => (
                 <motion.div
@@ -134,7 +134,7 @@ export const AgentStatusPanel: React.FC = () => {
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ delay: index * 0.1 }}
                   className={cn(
-                    'rounded-lg border p-3 transition-all',
+                    'rounded-lg border p-2 transition-all sm:p-3',
                     'bg-card/50 backdrop-blur-sm',
                     agent.status === 'working' &&
                       'border-blue-500/50 shadow-lg shadow-blue-500/10',
@@ -143,22 +143,22 @@ export const AgentStatusPanel: React.FC = () => {
                   )}
                 >
                   {/* Agent Header */}
-                  <div className="mb-2 flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
+                      <Avatar className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8">
                         <AvatarImage
                           src={`https://api.dicebear.com/7.x/bottts/svg?seed=${agent.agentId}`}
                           alt={agent.agentName}
                         />
                         <AvatarFallback>
-                          <Bot className="h-4 w-4" />
+                          <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-foreground">
+                        <p className="truncate text-xs font-semibold text-foreground sm:text-sm">
                           {agent.agentName}
                         </p>
-                        <p className="truncate text-xs text-muted-foreground">
+                        <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
                           {agent.role}
                         </p>
                       </div>
@@ -167,17 +167,20 @@ export const AgentStatusPanel: React.FC = () => {
                   </div>
 
                   {/* Status Badge */}
-                  <div className="mb-2 flex items-center justify-between gap-2">
+                  <div className="mb-2 flex flex-wrap items-center gap-1 sm:gap-2">
                     <Badge
                       variant="outline"
-                      className={cn('text-xs', getStatusColor(agent.status))}
+                      className={cn(
+                        'text-[10px] sm:text-xs',
+                        getStatusColor(agent.status)
+                      )}
                     >
                       {getStatusLabel(agent.status)}
                     </Badge>
                     <Badge
                       variant="outline"
                       className={cn(
-                        'text-xs',
+                        'text-[10px] sm:text-xs',
                         getProviderColor(agent.provider)
                       )}
                     >
@@ -187,7 +190,7 @@ export const AgentStatusPanel: React.FC = () => {
 
                   {/* Current Task */}
                   {agent.currentTask && (
-                    <p className="mb-2 line-clamp-2 text-xs text-muted-foreground">
+                    <p className="mb-2 line-clamp-2 text-[10px] text-muted-foreground sm:text-xs">
                       {agent.currentTask}
                     </p>
                   )}
@@ -196,7 +199,7 @@ export const AgentStatusPanel: React.FC = () => {
                   {agent.status === 'working' && (
                     <div className="space-y-1">
                       <Progress value={agent.progress} className="h-1" />
-                      <p className="text-right text-xs text-muted-foreground">
+                      <p className="text-right text-[10px] text-muted-foreground sm:text-xs">
                         {agent.progress}%
                       </p>
                     </div>
@@ -205,18 +208,21 @@ export const AgentStatusPanel: React.FC = () => {
                   {/* Tools Using */}
                   {agent.toolsUsing && agent.toolsUsing.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1">
-                      {agent.toolsUsing.slice(0, 3).map((tool, idx) => (
+                      {agent.toolsUsing.slice(0, 2).map((tool, idx) => (
                         <Badge
                           key={idx}
                           variant="secondary"
-                          className="text-xs"
+                          className="text-[10px] sm:text-xs"
                         >
                           {tool}
                         </Badge>
                       ))}
-                      {agent.toolsUsing.length > 3 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{agent.toolsUsing.length - 3}
+                      {agent.toolsUsing.length > 2 && (
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] sm:text-xs"
+                        >
+                          +{agent.toolsUsing.length - 2}
                         </Badge>
                       )}
                     </div>
@@ -225,7 +231,9 @@ export const AgentStatusPanel: React.FC = () => {
                   {/* Error Message */}
                   {agent.error && (
                     <div className="mt-2 rounded bg-red-500/10 p-2">
-                      <p className="text-xs text-red-400">{agent.error}</p>
+                      <p className="text-[10px] text-red-400 sm:text-xs">
+                        {agent.error}
+                      </p>
                     </div>
                   )}
                 </motion.div>

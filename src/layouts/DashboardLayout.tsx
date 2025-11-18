@@ -123,7 +123,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
             <h2 className="text-lg font-semibold">AGI Platform</h2>
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={() => setMobileMenuOpen(false)}
               aria-label="Close menu"
             >
@@ -153,7 +153,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
       </div>
 
       {/* Floating Action Button (Mobile) */}
-      <div className="fixed bottom-6 right-6 z-40 lg:hidden">
+      <div className="fixed bottom-6 right-6 z-40 pb-safe lg:hidden">
         <Button
           onClick={() => setMobileMenuOpen(true)}
           className="gradient-primary h-14 w-14 rounded-full text-white shadow-lg"

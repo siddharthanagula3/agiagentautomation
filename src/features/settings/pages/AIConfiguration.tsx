@@ -33,6 +33,7 @@ import {
   DollarSign,
   Clock,
   Users,
+  Save,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
@@ -41,6 +42,14 @@ import {
   getAvailableModels,
   createCustomSystemPrompt,
 } from '@/services/enhanced-ai-chat-service-v2';
+import { settingsService } from '@features/settings/services/user-preferences';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@shared/ui/select';
 
 interface ProviderConfig {
   name: string;
@@ -62,7 +71,7 @@ const PROVIDER_CONFIGS: Record<
   OpenAI: {
     name: 'OpenAI (ChatGPT)',
     models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-    defaultModel: 'gpt-4o-mini',
+    defaultModel: 'gpt-4o',
     costPerToken: 0.000002,
     maxTokens: 4096,
     features: ['Streaming', 'Function Calling', 'Vision', 'Code Generation'],
@@ -120,6 +129,30 @@ const AIConfigurationPage: React.FC = () => {
   const [testResults, setTestResults] = useState<
     Record<string, 'pending' | 'success' | 'error'>
   >({});
+
+  // User AI preferences
+  const [defaultProvider, setDefaultProvider] = useState<string>('openai');
+  const [defaultModel, setDefaultModel] = useState<string>('gpt-4o');
+  const [preferStreaming, setPreferStreaming] = useState<boolean>(true);
+  const [aiTemperature, setAiTemperature] = useState<number>(0.7);
+  const [aiMaxTokens, setAiMaxTokens] = useState<number>(4000);
+  const [isSavingPreferences, setIsSavingPreferences] = useState(false);
+
+  // Load user preferences
+  useEffect(() => {
+    const loadUserPreferences = async () => {
+      const { data, error } = await settingsService.getSettings();
+      if (!error && data) {
+        if (data.default_ai_provider) setDefaultProvider(data.default_ai_provider);
+        if (data.default_ai_model) setDefaultModel(data.default_ai_model);
+        if (data.prefer_streaming !== undefined) setPreferStreaming(data.prefer_streaming);
+        if (data.ai_temperature !== undefined) setAiTemperature(data.ai_temperature);
+        if (data.ai_max_tokens !== undefined) setAiMaxTokens(data.ai_max_tokens);
+      }
+    };
+
+    loadUserPreferences();
+  }, []);
 
   // Initialize configurations
   useEffect(() => {
@@ -202,6 +235,35 @@ const AIConfigurationPage: React.FC = () => {
     toast.success(`${provider} API key cleared`);
   };
 
+  const handleSaveAIPreferences = async () => {
+    setIsSavingPreferences(true);
+    try {
+      const { error } = await settingsService.updateSettings({
+        default_ai_provider: defaultProvider as 'openai' | 'anthropic' | 'google' | 'perplexity',
+        default_ai_model: defaultModel,
+        prefer_streaming: preferStreaming,
+        ai_temperature: aiTemperature,
+        ai_max_tokens: aiMaxTokens,
+      });
+
+      if (error) {
+        toast.error(`Failed to save AI preferences: ${error}`);
+      } else {
+        toast.success('AI preferences saved successfully!');
+      }
+    } catch (error) {
+      toast.error('Failed to save AI preferences');
+      console.error('Error saving AI preferences:', error);
+    } finally {
+      setIsSavingPreferences(false);
+    }
+  };
+
+  const getModelsForProvider = (provider: string): string[] => {
+    const config = PROVIDER_CONFIGS[provider];
+    return config ? config.models : [];
+  };
+
   const configuredProviders = Object.values(configs).filter(
     (config) => config.isConfigured
   );
@@ -266,7 +328,7 @@ const AIConfigurationPage: React.FC = () => {
         {/* API Key Input */}
         <div className="space-y-2">
           <Label htmlFor={`api-key-${provider}`}>API Key</Label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               id={`api-key-${provider}`}
               type={showApiKeys[provider] ? 'text' : 'password'}
@@ -275,40 +337,46 @@ const AIConfigurationPage: React.FC = () => {
               placeholder={`Enter your ${provider} API key...`}
               className="flex-1"
             />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setShowApiKeys((prev) => ({
-                  ...prev,
-                  [provider]: !prev[provider],
-                }))
-              }
-            >
-              {showApiKeys[provider] ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setShowApiKeys((prev) => ({
+                    ...prev,
+                    [provider]: !prev[provider],
+                  }))
+                }
+                className="flex-1 sm:flex-none"
+              >
+                {showApiKeys[provider] ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
+              {config.apiKey && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleCopyApiKey(config.apiKey)}
+                    className="flex-1 sm:flex-none"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleClearApiKey(provider)}
+                    className="flex-1 sm:flex-none"
+                  >
+                    <span className="hidden sm:inline">Clear</span>
+                    <span className="sm:hidden">X</span>
+                  </Button>
+                </>
               )}
-            </Button>
-            {config.apiKey && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleCopyApiKey(config.apiKey)}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleClearApiKey(provider)}
-                >
-                  Clear
-                </Button>
-              </>
-            )}
+            </div>
           </div>
         </div>
 
@@ -348,14 +416,14 @@ const AIConfigurationPage: React.FC = () => {
   );
 
   return (
-    <div className="container mx-auto space-y-6 p-6">
+    <div className="container mx-auto space-y-4 md:space-y-6 p-4 md:p-6">
       <div className="mb-6 flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
           <Settings className="h-6 w-6 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold">AI Configuration</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold">AI Configuration</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             Configure your AI providers and advanced settings
           </p>
         </div>
@@ -366,11 +434,11 @@ const AIConfigurationPage: React.FC = () => {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="providers">Providers</TabsTrigger>
-          <TabsTrigger value="advanced">Advanced</TabsTrigger>
-          <TabsTrigger value="usage">Usage</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+          <TabsTrigger value="overview" className="text-xs md:text-sm">Overview</TabsTrigger>
+          <TabsTrigger value="providers" className="text-xs md:text-sm">Providers</TabsTrigger>
+          <TabsTrigger value="advanced" className="text-xs md:text-sm">Advanced</TabsTrigger>
+          <TabsTrigger value="usage" className="text-xs md:text-sm">Usage</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -486,6 +554,135 @@ const AIConfigurationPage: React.FC = () => {
 
         {/* Advanced Tab */}
         <TabsContent value="advanced" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Default AI Settings</CardTitle>
+                <Button
+                  onClick={handleSaveAIPreferences}
+                  disabled={isSavingPreferences}
+                  size="sm"
+                >
+                  {isSavingPreferences ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Preferences
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Alert>
+                <AlertDescription>
+                  These settings will be used as defaults for general chat. Specific features may override these settings based on task requirements.
+                </AlertDescription>
+              </Alert>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="default-provider">Default AI Provider</Label>
+                  <Select
+                    value={defaultProvider}
+                    onValueChange={(value) => {
+                      setDefaultProvider(value);
+                      // Update model to match the provider's default
+                      const providerConfig = PROVIDER_CONFIGS[value];
+                      if (providerConfig) {
+                        setDefaultModel(providerConfig.defaultModel);
+                      }
+                    }}
+                  >
+                    <SelectTrigger id="default-provider">
+                      <SelectValue placeholder="Select provider" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="openai">OpenAI (ChatGPT)</SelectItem>
+                      <SelectItem value="anthropic">Anthropic (Claude)</SelectItem>
+                      <SelectItem value="google">Google (Gemini)</SelectItem>
+                      <SelectItem value="perplexity">Perplexity</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground">
+                    Provider for general chat conversations
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="default-model">Default AI Model</Label>
+                  <Select
+                    value={defaultModel}
+                    onValueChange={setDefaultModel}
+                  >
+                    <SelectTrigger id="default-model">
+                      <SelectValue placeholder="Select model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getModelsForProvider(defaultProvider).map((model) => (
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground">
+                    Model to use for the selected provider
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ai-temperature">Temperature ({aiTemperature})</Label>
+                  <Input
+                    id="ai-temperature"
+                    type="number"
+                    min="0"
+                    max="2"
+                    step="0.1"
+                    value={aiTemperature}
+                    onChange={(e) => setAiTemperature(parseFloat(e.target.value))}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Controls randomness (0 = focused, 2 = creative)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ai-max-tokens">Max Tokens</Label>
+                  <Input
+                    id="ai-max-tokens"
+                    type="number"
+                    min="100"
+                    max="32000"
+                    step="100"
+                    value={aiMaxTokens}
+                    onChange={(e) => setAiMaxTokens(parseInt(e.target.value))}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Maximum response length
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Enable Streaming</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Stream responses in real-time as they're generated
+                  </p>
+                </div>
+                <Switch
+                  checked={preferStreaming}
+                  onCheckedChange={setPreferStreaming}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>System Prompts</CardTitle>

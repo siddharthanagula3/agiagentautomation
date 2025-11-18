@@ -245,7 +245,7 @@ export const MarketplacePublicPage: React.FC = () => {
                   <Bot className="mr-2 h-3 w-3" />
                   AI Marketplace
                 </Badge>
-                <h1 className="mb-2 text-4xl font-bold">
+                <h1 className="mb-2 text-2xl font-bold sm:text-3xl md:text-4xl">
                   Hire Your AI Workforce
                 </h1>
                 <p className="text-xl text-muted-foreground">
@@ -608,9 +608,9 @@ export const MarketplacePublicPage: React.FC = () => {
         >
           <Card className="card-premium relative overflow-hidden">
             <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-primary/10 blur-3xl"></div>
-            <CardContent className="relative z-10 p-12 text-center">
+            <CardContent className="relative z-10 p-6 text-center sm:p-8 md:p-12">
               <Sparkles className="mx-auto mb-4 h-12 w-12 text-primary" />
-              <h3 className="mb-4 text-3xl font-bold">
+              <h3 className="mb-4 text-xl font-bold sm:text-2xl md:text-3xl">
                 You've Hired {purchasedEmployees.size} AI{' '}
                 {purchasedEmployees.size === 1 ? 'Employee' : 'Employees'}!
               </h3>

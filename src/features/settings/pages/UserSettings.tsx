@@ -382,7 +382,7 @@ const SettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-screen space-y-6 p-6">
+    <div className="relative min-h-screen space-y-4 md:space-y-6 p-4 md:p-6">
       {/* Subtle Background Particles */}
       <Particles
         className="pointer-events-none absolute inset-0 opacity-20"
@@ -395,17 +395,18 @@ const SettingsPage: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative flex items-center justify-between"
+        className="relative flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between"
       >
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-          <p className="mt-1 text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Settings</h1>
+          <p className="mt-1 text-sm md:text-base text-muted-foreground">
             Manage your account, preferences, and system configuration
           </p>
         </div>
-        <Badge variant="outline" className="border-green-500/50 text-green-400">
+        <Badge variant="outline" className="border-green-500/50 text-green-400 w-fit">
           <CheckCircle className="mr-1 h-3 w-3" />
-          Real Data
+          <span className="hidden sm:inline">Real Data</span>
+          <span className="sm:hidden">Live</span>
         </Badge>
       </motion.div>
 
@@ -425,34 +426,34 @@ const SettingsPage: React.FC = () => {
           className="space-y-6"
         >
           {/* Glassmorphism Tabs with enhanced styling */}
-          <TabsList className="border border-border/50 bg-card/50 p-1 shadow-lg backdrop-blur-xl">
+          <TabsList className="border border-border/50 bg-card/50 p-1 shadow-lg backdrop-blur-xl grid grid-cols-2 md:grid-cols-4">
             <TabsTrigger
               value="profile"
-              className="transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm"
+              className="transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm text-xs md:text-sm"
             >
-              <User className="mr-2 h-4 w-4" />
-              Profile
+              <User className="h-4 w-4 md:mr-2" />
+              <span className="hidden sm:inline">Profile</span>
             </TabsTrigger>
             <TabsTrigger
               value="notifications"
-              className="transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm"
+              className="transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm text-xs md:text-sm"
             >
-              <Bell className="mr-2 h-4 w-4" />
-              Notifications
+              <Bell className="h-4 w-4 md:mr-2" />
+              <span className="hidden sm:inline">Notifications</span>
             </TabsTrigger>
             <TabsTrigger
               value="security"
-              className="transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm"
+              className="transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm text-xs md:text-sm"
             >
-              <Shield className="mr-2 h-4 w-4" />
-              Security
+              <Shield className="h-4 w-4 md:mr-2" />
+              <span className="hidden sm:inline">Security</span>
             </TabsTrigger>
             <TabsTrigger
               value="system"
-              className="transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm"
+              className="transition-all duration-300 hover:bg-accent/40 data-[state=active]:bg-accent/80 data-[state=active]:backdrop-blur-sm text-xs md:text-sm"
             >
-              <Settings className="mr-2 h-4 w-4" />
-              System
+              <Settings className="h-4 w-4 md:mr-2" />
+              <span className="hidden sm:inline">System</span>
             </TabsTrigger>
           </TabsList>
 

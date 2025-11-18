@@ -338,7 +338,7 @@ const ResourcesPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="mx-auto max-w-3xl text-center"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
+            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
               Resources & Learning Center
             </h1>
             <p className="text-xl text-muted-foreground">
@@ -391,7 +391,7 @@ const ResourcesPage: React.FC = () => {
       {/* Resource Grid */}
       <section className="px-4 pb-24 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-7xl">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filteredResources.slice(1).map((resource, idx) => (
               <ResourceCard key={resource.id} resource={resource} index={idx} />
             ))}
@@ -406,9 +406,9 @@ const ResourcesPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-12 text-center backdrop-blur-xl"
+            className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6 text-center backdrop-blur-xl sm:p-8 md:p-12"
           >
-            <h2 className="mb-4 text-3xl font-bold">Need Custom Resources?</h2>
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl">Need Custom Resources?</h2>
             <p className="mx-auto mb-8 max-w-2xl text-muted-foreground">
               Our team can create tailored guides, templates, and training
               materials for your specific use case.
@@ -443,7 +443,7 @@ const FeaturedResourceCard: React.FC<{ resource: Resource }> = ({
       className="group relative overflow-hidden rounded-3xl border border-border/40 bg-background/60 backdrop-blur-xl transition-all hover:border-primary/50"
     >
       <div className="grid gap-0 md:grid-cols-2">
-        <div className="relative h-64 overflow-hidden md:h-full">
+        <div className="relative h-48 overflow-hidden sm:h-64 md:h-full">
           {resource.thumbnail && (
             <img
               src={resource.thumbnail}
@@ -458,7 +458,7 @@ const FeaturedResourceCard: React.FC<{ resource: Resource }> = ({
             </span>
           </div>
         </div>
-        <div className="flex flex-col justify-center p-8 md:p-12">
+        <div className="flex flex-col justify-center p-4 sm:p-6 md:p-8 lg:p-12">
           <div className="mb-4 flex items-center gap-3">
             <div
               className={`rounded-xl bg-gradient-to-br p-3 ${resource.color} text-white`}
@@ -506,7 +506,7 @@ const ResourceCard: React.FC<{ resource: Resource; index: number }> = ({
       className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border/40 bg-background/60 backdrop-blur-xl transition-all hover:border-primary/50"
       whileHover={{ y: -8 }}
     >
-      <div className="relative h-40 overflow-hidden">
+      <div className="relative h-32 overflow-hidden sm:h-40">
         {resource.thumbnail && (
           <img
             src={resource.thumbnail}
@@ -526,7 +526,7 @@ const ResourceCard: React.FC<{ resource: Resource; index: number }> = ({
           <Icon size={20} />
         </div>
       </div>
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <h3 className="mb-2 line-clamp-2 text-lg font-bold transition-colors group-hover:text-primary">
           {resource.title}
         </h3>

@@ -9,11 +9,17 @@ export interface AIEmployee {
   tools: string[];
   model: string;
   systemPrompt: string;
+  avatar?: string;
+  price?: number;
+  expertise?: string[];
 }
 
 export interface AIEmployeeFrontmatter {
   name: string;
   description: string;
-  tools: string;
+  tools: string | string[];
   model: string;
+  avatar?: string;
+  price?: number;
+  expertise?: string[];
 }

@@ -225,7 +225,7 @@ const HelpPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
+            <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
               How Can We Help?
             </h1>
             <p className="mb-8 text-xl text-muted-foreground">
@@ -243,7 +243,7 @@ const HelpPage: React.FC = () => {
                 placeholder="Search for help articles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-14 border-border/40 bg-background/60 pl-12 text-lg backdrop-blur-xl"
+                className="h-12 border-border/40 bg-background/60 pl-12 text-base backdrop-blur-xl sm:h-14 sm:text-lg"
               />
             </div>
           </motion.div>
@@ -261,7 +261,7 @@ const HelpPage: React.FC = () => {
           >
             Browse by Category
           </motion.h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {supportCategories.map((category, idx) => (
               <CategoryCard key={category.id} category={category} index={idx} />
             ))}
@@ -329,7 +329,7 @@ const HelpPage: React.FC = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
             <ContactCard
               icon={MessageSquare}
               title="Live Chat"

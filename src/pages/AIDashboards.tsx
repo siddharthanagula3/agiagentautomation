@@ -78,7 +78,7 @@ const AIDashboardsPage: React.FC = () => {
                 <LayoutDashboard size={16} />
                 AI Dashboards
               </div>
-              <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-5xl font-bold text-transparent md:text-6xl">
+              <h1 className="mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
                 Make Data-Driven Decisions Instantly
               </h1>
               <p className="mb-8 text-xl text-muted-foreground">
@@ -120,7 +120,7 @@ const AIDashboardsPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-16 text-center text-4xl font-bold"
+            className="mb-8 text-center text-2xl font-bold sm:mb-12 sm:text-3xl md:text-4xl"
           >
             Turn Data Into Insights
           </motion.h2>
@@ -157,9 +157,9 @@ const AIDashboardsPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-12 text-center text-white"
+            className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-6 text-center text-white sm:p-8 md:p-12"
           >
-            <h2 className="mb-4 text-4xl font-bold">
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
               Ready to See the Bigger Picture?
             </h2>
             <p className="mb-8 text-xl opacity-90">

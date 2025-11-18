@@ -718,7 +718,7 @@ const WorkforceCard: React.FC<WorkforceCardProps> = ({
     >
       <CardContent className="p-6">
         {/* Header */}
-        <div className="mb-4 flex items-start justify-between">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex-1">
             <div className="mb-2 flex items-center space-x-2">
               <h3 className="text-lg font-semibold text-white transition-colors group-hover:text-blue-400">
@@ -740,9 +740,9 @@ const WorkforceCard: React.FC<WorkforceCardProps> = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-slate-400 opacity-0 transition-opacity hover:text-white group-hover:opacity-100"
+                className="h-11 w-11 text-slate-400 transition-opacity hover:text-white lg:h-auto lg:w-auto lg:opacity-0 lg:group-hover:opacity-100"
               >
-                <MoreVertical className="h-4 w-4" />
+                <MoreVertical className="h-5 w-5 lg:h-4 lg:w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="border-slate-700 bg-slate-800">
@@ -801,7 +801,7 @@ const WorkforceCard: React.FC<WorkforceCardProps> = ({
         </div>
 
         {/* Metrics */}
-        <div className="mb-4 grid grid-cols-2 gap-4">
+        <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <p className="text-xs text-slate-400">Projects</p>
             <p className="text-sm font-medium text-white">
@@ -854,18 +854,18 @@ const WorkforceCard: React.FC<WorkforceCardProps> = ({
         </div>
 
         {/* Actions */}
-        <div className="flex space-x-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:space-x-2">
           <Button
             variant="ghost"
             size="sm"
-            className="flex-1 border border-slate-600 text-slate-400 hover:border-slate-500 hover:text-white"
+            className="h-11 w-full border border-slate-600 text-slate-400 hover:border-slate-500 hover:text-white sm:flex-1"
           >
             <Eye className="mr-2 h-4 w-4" />
             View Details
           </Button>
           <Button
             size="sm"
-            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            className="h-11 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 sm:flex-1"
           >
             <Settings className="mr-2 h-4 w-4" />
             Manage
@@ -914,15 +914,15 @@ const TeamDetailView: React.FC<TeamDetailViewProps> = ({ workforce }) => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-2">
               <Button
                 variant="ghost"
-                className="text-slate-400 hover:text-white"
+                className="h-11 w-full text-slate-400 hover:text-white sm:w-auto"
               >
                 <UserPlus className="mr-2 h-4 w-4" />
                 Add Member
               </Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Button className="h-11 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 sm:w-auto">
                 <Settings className="mr-2 h-4 w-4" />
                 Team Settings
               </Button>

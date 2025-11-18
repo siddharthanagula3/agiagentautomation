@@ -166,7 +166,10 @@ function App() {
                   <Route path="gallery" element={<ArtifactGalleryPage />} />
 
                   {/* Legal Pages */}
-                  <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
+                  <Route
+                    path="privacy-policy"
+                    element={<PrivacyPolicyPage />}
+                  />
                   <Route
                     path="terms-of-service"
                     element={<TermsOfServicePage />}
@@ -320,7 +323,10 @@ function App() {
                   <Route path="billing" element={<BillingPage />} />
 
                   {/* Marketplace - Available in Dashboard */}
-                  <Route path="marketplace" element={<PublicMarketplacePage />} />
+                  <Route
+                    path="marketplace"
+                    element={<PublicMarketplacePage />}
+                  />
 
                   {/* Support Center */}
                   <Route

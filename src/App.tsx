@@ -37,6 +37,44 @@ const ArtifactGalleryPage = lazyWithRetry(
 );
 const SupportCenterPage = lazyWithRetry(() => import('./pages/SupportCenter'));
 
+// === LEGAL PAGES ===
+const PrivacyPolicyPage = lazyWithRetry(
+  () => import('./pages/legal/PrivacyPolicy')
+);
+const TermsOfServicePage = lazyWithRetry(
+  () => import('./pages/legal/TermsOfService')
+);
+const CookiePolicyPage = lazyWithRetry(
+  () => import('./pages/legal/CookiePolicy')
+);
+const BusinessLegalPage = lazyWithRetry(
+  () => import('./pages/legal/BusinessLegalPage')
+);
+
+// === FEATURE PAGES ===
+const AIChatInterfacePage = lazyWithRetry(
+  () => import('./pages/AIChatInterface')
+);
+const AIDashboardsPage = lazyWithRetry(() => import('./pages/AIDashboards'));
+const AIProjectManagerPage = lazyWithRetry(
+  () => import('./pages/AIProjectManager')
+);
+
+// === USE CASE PAGES ===
+const StartupsPage = lazyWithRetry(() => import('./pages/use-cases/Startups'));
+const ConsultingBusinessesPage = lazyWithRetry(
+  () => import('./pages/use-cases/ConsultingBusinesses')
+);
+const ITServiceProvidersPage = lazyWithRetry(
+  () => import('./pages/use-cases/ITServiceProviders')
+);
+const SalesTeamsPage = lazyWithRetry(
+  () => import('./pages/use-cases/SalesTeams')
+);
+
+// === RESOURCES PAGE ===
+const ResourcesPage = lazyWithRetry(() => import('./pages/Resources'));
+
 // === AUTH PAGES ===
 const LoginPage = lazyWithRetry(() => import('@features/auth/pages/Login'));
 const RegisterPage = lazyWithRetry(
@@ -126,6 +164,50 @@ function App() {
                   <Route path="api-reference" element={<ApiReferencePage />} />
                   <Route path="security" element={<SecurityPage />} />
                   <Route path="gallery" element={<ArtifactGalleryPage />} />
+
+                  {/* Legal Pages */}
+                  <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
+                  <Route
+                    path="terms-of-service"
+                    element={<TermsOfServicePage />}
+                  />
+                  <Route path="cookie-policy" element={<CookiePolicyPage />} />
+                  <Route path="legal" element={<BusinessLegalPage />} />
+
+                  {/* Feature Pages */}
+                  <Route
+                    path="features/ai-chat"
+                    element={<AIChatInterfacePage />}
+                  />
+                  <Route
+                    path="features/ai-dashboards"
+                    element={<AIDashboardsPage />}
+                  />
+                  <Route
+                    path="features/ai-project-manager"
+                    element={<AIProjectManagerPage />}
+                  />
+
+                  {/* Use Case Pages */}
+                  <Route path="use-cases/startups" element={<StartupsPage />} />
+                  <Route
+                    path="use-cases/consulting"
+                    element={<ConsultingBusinessesPage />}
+                  />
+                  <Route
+                    path="use-cases/it-providers"
+                    element={<ITServiceProvidersPage />}
+                  />
+                  <Route
+                    path="use-cases/sales-teams"
+                    element={<SalesTeamsPage />}
+                  />
+
+                  {/* Resources */}
+                  <Route path="resources" element={<ResourcesPage />} />
+
+                  {/* Demo - Redirect to Contact Sales */}
+                  <Route path="demo" element={<ContactSalesPage />} />
                 </Route>
 
                 {/* ===== AUTH ROUTES ===== */}
@@ -236,6 +318,9 @@ function App() {
 
                   {/* Billing */}
                   <Route path="billing" element={<BillingPage />} />
+
+                  {/* Marketplace - Available in Dashboard */}
+                  <Route path="marketplace" element={<PublicMarketplacePage />} />
 
                   {/* Support Center */}
                   <Route

@@ -226,7 +226,7 @@ export const MarketplacePublicPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 pt-24">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden p-4 pt-24 sm:p-6">
       {/* Hero Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

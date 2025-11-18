@@ -56,7 +56,7 @@ const MAIN_NAVIGATION: NavigationItem[] = [
     name: 'VIBE',
     href: '/vibe',
     icon: Zap,
-    description: 'Multi-agent workspace',
+    description: 'Standalone dev workspace',
     badge: 'New',
     badgeVariant: 'default',
     isNew: true,

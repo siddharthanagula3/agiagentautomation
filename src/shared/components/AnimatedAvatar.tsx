@@ -39,13 +39,17 @@ export const AnimatedAvatar: React.FC<AnimatedAvatarProps> = ({
   showFallbackOnError = true,
 }) => {
   const [imageError, setImageError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!!src);
 
   // Reset error state when src changes
   useEffect(() => {
     if (src) {
       setImageError(false);
       setIsLoading(true);
+    } else {
+      // If no src, immediately show fallback (not loading)
+      setIsLoading(false);
+      setImageError(false);
     }
   }, [src]);
 
@@ -64,12 +68,16 @@ export const AnimatedAvatar: React.FC<AnimatedAvatarProps> = ({
   const getFallbackText = () => {
     if (fallback) return fallback;
 
+    // Handle empty or missing alt text
+    if (!alt || alt.trim() === '') return '??';
+
     // Extract initials from alt text
-    const words = alt.split(' ');
+    const words = alt.trim().split(/\s+/);
     if (words.length >= 2) {
       return `${words[0][0]}${words[1][0]}`.toUpperCase();
     }
-    return alt.slice(0, 2).toUpperCase();
+    // For single word or short text, take first 2 characters
+    return alt.trim().slice(0, 2).toUpperCase();
   };
 
   // Determine what to show
@@ -91,7 +99,7 @@ export const AnimatedAvatar: React.FC<AnimatedAvatarProps> = ({
       {shouldShowFallback && (
         <AvatarFallback
           className={cn(
-            'bg-gradient-to-br from-primary/20 to-accent/20 font-semibold text-primary',
+            'bg-gradient-to-br from-blue-500 to-purple-600 font-semibold text-white',
             fallbackSizeClasses[size],
             isLoading && 'animate-pulse'
           )}

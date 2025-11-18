@@ -444,10 +444,14 @@ export class SystemPromptsService {
 
       if (typeof window !== 'undefined') {
         // Browser environment - use import.meta.glob for Vite
-        const employeeFiles = import.meta.glob('/../.agi/employees/*.md', {
+        const employeeFiles = import.meta.glob('/.agi/employees/*.md', {
           as: 'raw',
           eager: false,
         });
+
+        console.log(
+          `[SystemPromptsService] Found ${Object.keys(employeeFiles).length} employee files`
+        );
 
         for (const [path, loader] of Object.entries(employeeFiles)) {
           try {
@@ -472,6 +476,10 @@ export class SystemPromptsService {
             console.error(`Failed to parse employee file ${path}:`, err);
           }
         }
+
+        console.log(
+          `[SystemPromptsService] Successfully loaded ${employees.length} employees`
+        );
       }
 
       return employees;

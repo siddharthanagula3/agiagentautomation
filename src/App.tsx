@@ -35,6 +35,9 @@ const SecurityPage = lazyWithRetry(() => import('./pages/Security'));
 const ArtifactGalleryPage = lazyWithRetry(
   () => import('./pages/ArtifactGallery')
 );
+const SupportCenterPage = lazyWithRetry(
+  () => import('./pages/SupportCenter')
+);
 
 // === AUTH PAGES ===
 const LoginPage = lazyWithRetry(() => import('@features/auth/pages/Login'));
@@ -113,7 +116,14 @@ function App() {
                   <Route path="blog" element={<BlogListPage />} />
                   <Route path="blog/:slug" element={<BlogPostPage />} />
                   <Route path="contact-sales" element={<ContactSalesPage />} />
-                  <Route path="help" element={<HelpCenterPage />} />
+                  <Route
+                    path="help"
+                    element={
+                      <ErrorBoundary>
+                        <HelpCenterPage />
+                      </ErrorBoundary>
+                    }
+                  />
                   <Route path="documentation" element={<DocumentationPage />} />
                   <Route path="api-reference" element={<ApiReferencePage />} />
                   <Route path="security" element={<SecurityPage />} />
@@ -142,6 +152,18 @@ function App() {
                   element={<ForgotPasswordPage />}
                 />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+                {/* ===== VIBE - Standalone Multi-Agent Workspace (Protected) ===== */}
+                <Route
+                  path="/vibe"
+                  element={
+                    <ProtectedRoute>
+                      <ErrorBoundary>
+                        <VibeDashboard />
+                      </ErrorBoundary>
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* ===== PROTECTED ROUTES (Requires Login) ===== */}
                 <Route
@@ -188,26 +210,44 @@ function App() {
                   />
                   <Route path="company-hub" element={<MissionControlPage />} />
 
-                  {/* VIBE - Multi-Agent Collaborative Interface */}
+                  {/* Settings */}
                   <Route
-                    path="vibe"
+                    path="settings"
                     element={
                       <ErrorBoundary>
-                        <VibeDashboard />
+                        <SettingsPage />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="settings/ai-configuration"
+                    element={
+                      <ErrorBoundary>
+                        <AIConfigurationPage />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="settings/:section"
+                    element={
+                      <ErrorBoundary>
+                        <SettingsPage />
                       </ErrorBoundary>
                     }
                   />
 
-                  {/* Settings */}
-                  <Route path="settings" element={<SettingsPage />} />
-                  <Route
-                    path="settings/ai-configuration"
-                    element={<AIConfigurationPage />}
-                  />
-                  <Route path="settings/:section" element={<SettingsPage />} />
-
                   {/* Billing */}
                   <Route path="billing" element={<BillingPage />} />
+
+                  {/* Support Center */}
+                  <Route
+                    path="support"
+                    element={
+                      <ErrorBoundary>
+                        <SupportCenterPage />
+                      </ErrorBoundary>
+                    }
+                  />
                 </Route>
 
                 {/* ===== 404 ROUTE ===== */}

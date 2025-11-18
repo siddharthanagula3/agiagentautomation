@@ -159,7 +159,7 @@ The prompt management service (`prompt-management.ts`) loads this file at runtim
 import matter from 'gray-matter';
 
 // Dynamic import using Vite's glob
-const employeeFiles = import.meta.glob('/../.agi/employees/*.md', {
+const employeeFiles = import.meta.glob('/.agi/employees/*.md', {
   as: 'raw',
 });
 

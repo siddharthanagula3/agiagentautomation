@@ -80,7 +80,7 @@ class SettingsService {
         .from('user_profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching profile:', error);
@@ -165,10 +165,9 @@ class SettingsService {
         .from('user_settings')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 = no rows returned
+      if (error) {
         console.error('Error fetching settings:', error);
         return { data: {}, error: error.message };
       }

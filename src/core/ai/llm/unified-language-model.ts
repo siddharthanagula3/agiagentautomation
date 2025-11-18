@@ -33,6 +33,13 @@ import {
   PerplexityConfig,
 } from './providers/perplexity-ai';
 import {
+  grokProvider,
+  GrokProvider,
+  GrokMessage,
+  GrokResponse,
+  GrokConfig,
+} from './providers/grok-ai';
+import {
   canUserMakeRequest,
   estimateTokensForRequest,
   deductTokens,
@@ -49,12 +56,13 @@ import {
 } from '@core/security/api-abuse-prevention';
 import { isFeatureEnabled } from '@core/security/gradual-rollout';
 
-export type LLMProvider = 'anthropic' | 'openai' | 'google' | 'perplexity';
+export type LLMProvider = 'anthropic' | 'openai' | 'google' | 'perplexity' | 'grok';
 type ProviderInstance =
   | AnthropicProvider
   | OpenAIProvider
   | GoogleProvider
-  | PerplexityProvider;
+  | PerplexityProvider
+  | GrokProvider;
 
 const ANTHROPIC_MODELS: AnthropicConfig['model'][] =
   AnthropicProvider.getAvailableModels() as AnthropicConfig['model'][];
@@ -74,6 +82,10 @@ const PERPLEXITY_MODELS: PerplexityConfig['model'][] = [
   'llama-3.1-sonar-large-128k-online',
   'llama-3.1-sonar-huge-128k-online',
 ];
+const GROK_MODELS: GrokConfig['model'][] = [
+  'grok-beta',
+  'grok-2-latest',
+];
 
 const isAnthropicModel = (model: string): model is AnthropicConfig['model'] =>
   ANTHROPIC_MODELS.includes(model as AnthropicConfig['model']);
@@ -86,6 +98,9 @@ const isGoogleModel = (model: string): model is GoogleConfig['model'] =>
 
 const isPerplexityModel = (model: string): model is PerplexityConfig['model'] =>
   PERPLEXITY_MODELS.includes(model as PerplexityConfig['model']);
+
+const isGrokModel = (model: string): model is GrokConfig['model'] =>
+  GROK_MODELS.includes(model as GrokConfig['model']);
 
 export interface UnifiedMessage {
   role: 'user' | 'assistant' | 'system';
@@ -134,6 +149,9 @@ export interface UnifiedConfig {
     searchDomain?: string;
     searchRecencyFilter?: 'day' | 'week' | 'month' | 'year';
   };
+  grok?: {
+    includeRealTimeData?: boolean;
+  };
 }
 
 export class UnifiedLLMError extends Error {
@@ -167,6 +185,7 @@ export class UnifiedLLMService {
     this.providers.set('openai', openaiProvider);
     this.providers.set('google', googleProvider);
     this.providers.set('perplexity', perplexityProvider);
+    this.providers.set('grok', grokProvider);
   }
 
   /**
@@ -387,6 +406,13 @@ export class UnifiedLLMService {
             actualUserId
           );
           break;
+        case 'grok':
+          response = await (providerInstance as GrokProvider).sendMessage(
+            providerMessages as GrokMessage[],
+            actualSessionId,
+            actualUserId
+          );
+          break;
         default:
           throw new UnifiedLLMError(
             `Unsupported provider: ${targetProvider}`,
@@ -519,6 +545,13 @@ export class UnifiedLLMService {
         case 'perplexity':
           stream = (providerInstance as PerplexityProvider).streamMessage(
             providerMessages as PerplexityMessage[],
+            sessionId,
+            userId
+          );
+          break;
+        case 'grok':
+          stream = (providerInstance as GrokProvider).streamMessage(
+            providerMessages as GrokMessage[],
             sessionId,
             userId
           );
@@ -675,6 +708,20 @@ export class UnifiedLLMService {
           (providerInstance as PerplexityProvider).updateConfig(update);
         }
         break;
+      case 'grok':
+        {
+          const update: Partial<GrokConfig> = {
+            maxTokens: this.config.maxTokens,
+            temperature: this.config.temperature,
+            systemPrompt: this.config.systemPrompt,
+            includeRealTimeData: this.config.grok?.includeRealTimeData,
+          };
+          if (isGrokModel(this.config.model)) {
+            update.model = this.config.model;
+          }
+          (providerInstance as GrokProvider).updateConfig(update);
+        }
+        break;
     }
   }
 
@@ -708,6 +755,8 @@ export class UnifiedLLMService {
         return (providerInstance as GoogleProvider).isConfigured();
       case 'perplexity':
         return (providerInstance as PerplexityProvider).isConfigured();
+      case 'grok':
+        return (providerInstance as GrokProvider).isConfigured();
       default:
         return false;
     }
@@ -735,6 +784,8 @@ export class UnifiedLLMService {
         return GoogleProvider.getAvailableModels();
       case 'perplexity':
         return PerplexityProvider.getAvailableModels();
+      case 'grok':
+        return GrokProvider.getAvailableModels();
       default:
         return [];
     }
@@ -745,7 +796,7 @@ export class UnifiedLLMService {
    */
   getProvider(
     provider: LLMProvider
-  ): AnthropicProvider | GoogleProvider | OpenAIProvider | PerplexityProvider {
+  ): AnthropicProvider | GoogleProvider | OpenAIProvider | PerplexityProvider | GrokProvider {
     return this.providers.get(provider);
   }
 }

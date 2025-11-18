@@ -1,6 +1,7 @@
 # Critical Fixes Summary - November 18, 2025
 
 ## Overview
+
 This document summarizes all critical bug fixes applied to resolve production-blocking issues in the AGI Agent Automation Platform.
 
 ---
@@ -8,20 +9,25 @@ This document summarizes all critical bug fixes applied to resolve production-bl
 ## 🔴 Critical Issues Fixed
 
 ### 1. ✅ "No AI Employees Available" Error
+
 **Problem:** Chat interface showed error: "No AI employees available. Please check .agi/employees/"
+
 - Console logged: `[EmployeeChatService] Loaded 0 employees`
 - 139 employee files existed in `.agi/employees/` but weren't loading
 
 **Root Cause:** Incorrect glob pattern in `prompt-management.ts`
+
 - Used: `import.meta.glob('/../.agi/employees/*.md')` ❌
 - Resolved to: `/home/user/.agi/employees/*.md` (outside project)
 
 **Fix Applied:**
+
 - Changed to: `import.meta.glob('/.agi/employees/*.md')` ✅
 - Now resolves to: `/home/user/agiagentautomation/.agi/employees/*.md`
 - Added debug logging to show employee count
 
 **Files Modified:**
+
 - `/src/core/ai/employees/prompt-management.ts` (line 447)
 - `/blogs/aug-14-file-based-employee-architecture.md` (documentation)
 
@@ -30,19 +36,23 @@ This document summarizes all critical bug fixes applied to resolve production-bl
 ---
 
 ### 2. ✅ Missing Avatars in AI Workforce Page
+
 **Problem:** Hired AI employees displayed without avatars, showing loading spinner indefinitely
 
 **Root Cause:** `AnimatedAvatar` component bug
+
 - When no `src` provided, `isLoading` state remained `true` forever
 - `useEffect` only handled truthy `src`, ignored undefined case
 
 **Fix Applied:**
+
 - Initialize `isLoading` based on `src` presence: `const [isLoading, setIsLoading] = useState(!!src)`
 - Added else clause to set `isLoading = false` when no `src`
 - Enhanced fallback text generation for edge cases
 - Changed fallback gradient from subtle to vibrant: `from-blue-500 to-purple-600`
 
 **Files Modified:**
+
 - `/src/shared/components/AnimatedAvatar.tsx`
 - `/src/features/workforce/pages/EmployeeManagement.tsx`
 
@@ -51,15 +61,18 @@ This document summarizes all critical bug fixes applied to resolve production-bl
 ---
 
 ### 3. ✅ Supabase 406 Error on user_settings
+
 **Problem:** Error: `GET /rest/v1/user_settings?select=*&id=eq.{uuid} 406 (Not Acceptable)`
 
 **Root Cause:** Using `.single()` which throws 406 when no row exists for new users
 
 **Fix Applied:**
+
 - Changed to `.maybeSingle()` in both `getProfile()` and `getSettings()` methods
 - Returns `null` gracefully when no data exists instead of throwing error
 
 **Files Modified:**
+
 - `/src/features/settings/services/user-preferences.ts` (lines 83, 168)
 
 **Result:** Settings page loads without errors for all users
@@ -67,17 +80,21 @@ This document summarizes all critical bug fixes applied to resolve production-bl
 ---
 
 ### 4. ✅ vibe_sessions Foreign Key Constraint Error
+
 **Problem:** Error when creating vibe sessions:
+
 ```
 insert or update on table "vibe_sessions" violates foreign key constraint "vibe_sessions_user_id_fkey"
 Key is not present in table "users"
 ```
 
 **Root Cause:** Users in `auth.users` not automatically created in `public.users`
+
 - `vibe_sessions` references `public.users(id)`
 - New signups get `auth.users` entry but not `public.users`
 
 **Fix Applied:**
+
 1. **Created automatic provisioning trigger:**
    - New migration: `20251118000003_add_handle_new_user_trigger.sql`
    - Function: `handle_new_user()` auto-creates:
@@ -92,6 +109,7 @@ Key is not present in table "users"
    - Uses `ON CONFLICT DO NOTHING` for safety
 
 **Files Created:**
+
 - `/supabase/migrations/20251118000003_add_handle_new_user_trigger.sql`
 - `/supabase/migrations/20251118000004_backfill_existing_users.sql`
 - `/scripts/apply-database-fixes.sh` (helper script)
@@ -103,21 +121,26 @@ Key is not present in table "users"
 ---
 
 ### 5. ✅ Content Security Policy Violation for iframe
+
 **Problem:** LivePreviewPanel iframe blocked by CSP:
+
 ```
 Framing '' violates the following Content Security Policy directive: "frame-src https://js.stripe.com https://hooks.stripe.com"
 ```
 
 **Root Cause:** CSP only allowed Stripe domains for iframes
+
 - LivePreviewPanel uses `data:` and `blob:` URLs
 - Not included in original CSP
 
 **Fix Applied:**
+
 - Updated `frame-src` directive in `netlify.toml`:
   - Before: `frame-src https://js.stripe.com https://hooks.stripe.com;`
   - After: `frame-src 'self' blob: data: https://js.stripe.com https://hooks.stripe.com;`
 
 **Files Modified:**
+
 - `/netlify.toml` (line 43)
 
 **Result:** LivePreviewPanel iframe now loads correctly with sandboxed content
@@ -125,9 +148,11 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
 ---
 
 ### 6. ✅ Settings Page Not Working
+
 **Problem:** `/settings` route existed but had no error boundary, could crash entire app
 
 **Fix Applied:**
+
 - Added `ErrorBoundary` wrapper to all settings routes:
   - `/settings`
   - `/settings/ai-configuration`
@@ -135,6 +160,7 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
 - Verified all dependencies exist and compile correctly
 
 **Files Modified:**
+
 - `/src/App.tsx` (lines 207-230)
 
 **Result:** Settings page now fails gracefully with error UI instead of crashing
@@ -142,16 +168,20 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
 ---
 
 ### 7. ✅ Support Page Not Accessible
+
 **Problem:** SupportCenter.tsx existed but had no route in App.tsx
+
 - Page completely inaccessible to users
 - No navigation link anywhere
 
 **Fix Applied:**
+
 - Added lazy-loaded import for `SupportCenterPage`
 - Added protected route at `/support` inside DashboardLayout
 - Wrapped in ErrorBoundary
 
 **Files Modified:**
+
 - `/src/App.tsx` (lines 38-40, 217-225)
 
 **Result:** Support Center now accessible at `/support` (requires login)
@@ -159,12 +189,15 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
 ---
 
 ### 8. ✅ Help Page Missing Error Boundary
+
 **Problem:** `/help` route lacked error boundary protection
 
 **Fix Applied:**
+
 - Added `ErrorBoundary` wrapper to `/help` route
 
 **Files Modified:**
+
 - `/src/App.tsx` (lines 119-126)
 
 **Result:** Help page now protected from crashes
@@ -172,17 +205,21 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
 ---
 
 ### 9. ✅ /vibe Page Inside Dashboard Layout
+
 **Problem:** /vibe rendered inside dashboard with sidebars
+
 - Cramped workspace not optimized for coding
 - Should be standalone like marketplace
 
 **Fix Applied:**
+
 - Moved /vibe route outside DashboardLayout in App.tsx
 - Now renders as standalone page with VibeLayout
 - Still protected by ProtectedRoute (requires login)
 - Updated navigation description to clarify standalone status
 
 **Files Modified:**
+
 - `/src/App.tsx` (routing structure)
 - `/src/shared/components/layout/DashboardSidebar.tsx` (navigation)
 
@@ -191,13 +228,16 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
 ---
 
 ### 10. ✅ Mobile Responsiveness Issues
+
 **Problems:**
+
 - Content jiggling/shifting left to right on mobile
 - AI employees section showing black screen on landing page
 - Large empty black spaces
 - Fixed-width elements causing horizontal overflow
 
 **Fixes Applied:**
+
 1. **Global overflow prevention:**
    - Added `overflow-x-hidden` to html and body
    - Added `max-width: 100vw` globally
@@ -216,6 +256,7 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
    - Fixed all grid layouts with proper width constraints
 
 **Files Modified:**
+
 - `/src/index.css`
 - `/src/pages/Landing.tsx`
 - `/src/layouts/PublicLayout.tsx`
@@ -225,6 +266,7 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
 - `/src/pages/PublicMarketplace.tsx`
 
 **Result:**
+
 - ✅ No more content jiggling on mobile
 - ✅ AI employees section displays correctly
 - ✅ Proper spacing on all screen sizes
@@ -233,15 +275,19 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
 ---
 
 ### 11. ✅ Vibe Session Initialization Error
+
 **Problem:** Console error: `[VIBE] Failed to initialize session`
 
 **Root Cause:** Zustand store bug in `vibe-view-store.ts`
+
 - Invalid use of `get()` function inside immer middleware
 
 **Fix Applied:**
+
 - Changed `getFileMetadata` to use `useVibeViewStore.getState()` instead of `get()`
 
 **Files Modified:**
+
 - `/src/features/vibe/stores/vibe-view-store.ts` (line 349)
 
 **Result:** Vibe sessions now initialize correctly without errors
@@ -249,9 +295,11 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
 ---
 
 ### 12. ✅ Vibe Token Tracking Missing
+
 **Problem:** Token usage not tracked for vibe coding sessions
 
 **Fix Applied:**
+
 1. **Database changes:**
    - New migration: `20251118000002_add_vibe_token_tracking.sql`
    - Added columns: `total_input_tokens`, `total_output_tokens`, `total_tokens`, `total_cost`
@@ -267,12 +315,14 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
    - Format: `⚡ 1,234 tokens | $ 0.0456`
 
 **Files Created:**
+
 - `/supabase/migrations/20251118000002_add_vibe_token_tracking.sql`
 - `/src/features/vibe/services/vibe-token-tracker.ts`
 - `/src/features/vibe/components/TokenUsageDisplay.tsx`
 - `/VIBE_TOKEN_TRACKING_IMPLEMENTATION.md`
 
 **Files Modified:**
+
 - `/src/core/ai/orchestration/workforce-orchestrator.ts`
 - `/src/features/vibe/pages/VibeDashboard.tsx`
 
@@ -283,6 +333,7 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
 ## 📊 Quality Metrics
 
 ### Before Fixes
+
 - ❌ TypeScript errors: Unknown (broken code)
 - ❌ Chat interface: Not working (no employees loaded)
 - ❌ Settings page: Throwing 406 errors
@@ -292,6 +343,7 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
 - ❌ Support page: Completely inaccessible
 
 ### After Fixes
+
 - ✅ TypeScript errors: 0
 - ✅ ESLint warnings: 0
 - ✅ Build: Successful (34s)
@@ -310,6 +362,7 @@ Framing '' violates the following Content Security Policy directive: "frame-src 
 **Important:** These migrations must be applied to fix database-related errors:
 
 ### Local Development:
+
 ```bash
 # If Supabase CLI is installed:
 supabase db reset
@@ -319,12 +372,15 @@ supabase migration up
 ```
 
 ### Production:
+
 Via Supabase Dashboard → SQL Editor, run in order:
+
 1. `20251118000002_add_vibe_token_tracking.sql`
 2. `20251118000003_add_handle_new_user_trigger.sql`
 3. `20251118000004_backfill_existing_users.sql`
 
 Or use the helper script:
+
 ```bash
 chmod +x scripts/apply-database-fixes.sh
 ./scripts/apply-database-fixes.sh
@@ -335,6 +391,7 @@ chmod +x scripts/apply-database-fixes.sh
 ## 📁 Files Modified Summary
 
 ### Critical Code Fixes (8 files):
+
 1. `/src/core/ai/employees/prompt-management.ts` - Fixed employee loading
 2. `/src/shared/components/AnimatedAvatar.tsx` - Fixed avatar display
 3. `/src/features/workforce/pages/EmployeeManagement.tsx` - Added fallbacks
@@ -345,6 +402,7 @@ chmod +x scripts/apply-database-fixes.sh
 8. `/src/core/ai/orchestration/workforce-orchestrator.ts` - Added token tracking
 
 ### Mobile Responsiveness Fixes (7 files):
+
 1. `/src/index.css` - Global overflow prevention
 2. `/src/pages/Landing.tsx` - Responsive sections
 3. `/src/layouts/PublicLayout.tsx` - Removed extra container
@@ -354,15 +412,18 @@ chmod +x scripts/apply-database-fixes.sh
 7. `/src/pages/PublicMarketplace.tsx` - Width constraints
 
 ### New Database Migrations (3 files):
+
 1. `/supabase/migrations/20251118000002_add_vibe_token_tracking.sql`
 2. `/supabase/migrations/20251118000003_add_handle_new_user_trigger.sql`
 3. `/supabase/migrations/20251118000004_backfill_existing_users.sql`
 
 ### New Services (2 files):
+
 1. `/src/features/vibe/services/vibe-token-tracker.ts`
 2. `/src/features/vibe/components/TokenUsageDisplay.tsx`
 
 ### Documentation (5 files):
+
 1. `/CRITICAL_FIXES_SUMMARY.md` (this file)
 2. `/DATABASE_ERRORS_FIXED.md`
 3. `/DATABASE_FIX_QUICK_REFERENCE.md`
@@ -376,12 +437,14 @@ chmod +x scripts/apply-database-fixes.sh
 ## ✅ Testing Checklist
 
 ### Code Quality
+
 - [x] TypeScript compilation: 0 errors
 - [x] ESLint: 0 warnings
 - [x] Production build: Success (34s)
 - [x] All imports resolve correctly
 
 ### Functional Testing
+
 - [x] Chat interface loads 139 employees
 - [x] Settings page loads without 406 errors
 - [x] Support page accessible at `/support`
@@ -393,6 +456,7 @@ chmod +x scripts/apply-database-fixes.sh
 - [x] Token tracking works in vibe
 
 ### Database
+
 - [x] Migrations created and documented
 - [x] Helper script provided
 - [x] Backfill strategy defined
@@ -403,6 +467,7 @@ chmod +x scripts/apply-database-fixes.sh
 ## 🚀 Deployment Checklist
 
 ### Before Deploying:
+
 - [x] All code changes committed
 - [x] TypeScript compilation passes
 - [x] Production build succeeds
@@ -411,6 +476,7 @@ chmod +x scripts/apply-database-fixes.sh
 - [ ] Verify all critical paths work
 
 ### After Deploying:
+
 - [ ] Verify employee loading works
 - [ ] Test user signup creates all records
 - [ ] Verify settings page loads
@@ -423,6 +489,7 @@ chmod +x scripts/apply-database-fixes.sh
 ## 📝 Known Issues (Non-Critical)
 
 ### Items Documented in TOKEN_BILLING_AUDIT_REPORT.md:
+
 - Pricing inconsistencies between files (needs consolidation)
 - Legacy streaming functions missing token tracking (use unified service instead)
 - Billing dashboard queries wrong table (cosmetic, doesn't affect functionality)
@@ -434,6 +501,7 @@ These are **documentation issues** that don't block production but should be add
 ## 🎉 Summary
 
 All critical production-blocking issues have been resolved:
+
 - ✅ Chat interface fully functional
 - ✅ All pages accessible and working
 - ✅ Database errors fixed with automatic provisioning

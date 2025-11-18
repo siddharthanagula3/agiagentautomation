@@ -288,12 +288,15 @@ export class GoogleVeoService {
     for (let attempt = 0; attempt < this.maxPollingAttempts; attempt++) {
       await new Promise((resolve) => setTimeout(resolve, this.pollingInterval));
 
-      const pollResponse = await fetch(`${operationEndpoint}?key=${this.apiKey}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const pollResponse = await fetch(
+        `${operationEndpoint}?key=${this.apiKey}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       if (!pollResponse.ok) {
         throw this.createError(
@@ -305,7 +308,10 @@ export class GoogleVeoService {
       const operationData = await pollResponse.json();
 
       // Update progress
-      const progress = Math.min(20 + (attempt / this.maxPollingAttempts) * 70, 90);
+      const progress = Math.min(
+        20 + (attempt / this.maxPollingAttempts) * 70,
+        90
+      );
       response.progress = progress;
       onProgress?.(progress, 'Processing video...');
 
@@ -320,7 +326,8 @@ export class GoogleVeoService {
         }
 
         // Extract video data
-        const videoData = operationData.response?.candidates?.[0]?.content?.parts?.[0];
+        const videoData =
+          operationData.response?.candidates?.[0]?.content?.parts?.[0];
 
         if (videoData?.inlineData) {
           response.video = {

@@ -4,7 +4,16 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { Download, Maximize2, X, Play, Pause, Volume2, VolumeX, Loader2 } from 'lucide-react';
+import {
+  Download,
+  Maximize2,
+  X,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Loader2,
+} from 'lucide-react';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent } from '@shared/ui/card';
 import { Progress } from '@shared/ui/progress';
@@ -145,7 +154,7 @@ export const GeneratedVideoPreview: React.FC<GeneratedVideoPreviewProps> = ({
               </div>
               <Progress value={progress} className="h-2" />
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-center line-clamp-2">
+            <p className="line-clamp-2 text-center text-sm text-gray-500 dark:text-gray-400">
               {prompt}
             </p>
           </div>
@@ -158,14 +167,14 @@ export const GeneratedVideoPreview: React.FC<GeneratedVideoPreviewProps> = ({
     <>
       <Card className={cn('overflow-hidden', className)}>
         <CardContent className="p-0">
-          <div className="relative group">
+          <div className="group relative">
             {/* Video Player */}
             <div className="relative bg-black">
               <video
                 ref={videoRef}
                 src={videoUrl}
                 poster={thumbnailUrl}
-                className="w-full h-auto"
+                className="h-auto w-full"
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 onEnded={() => setIsPlaying(false)}
@@ -177,17 +186,17 @@ export const GeneratedVideoPreview: React.FC<GeneratedVideoPreviewProps> = ({
               {/* Play/Pause Overlay */}
               {!isPlaying && (
                 <div
-                  className="absolute inset-0 flex items-center justify-center cursor-pointer bg-black/20 hover:bg-black/30 transition-colors"
+                  className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/20 transition-colors hover:bg-black/30"
                   onClick={handlePlayPause}
                 >
-                  <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
-                    <Play className="h-8 w-8 text-gray-900 ml-1" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-lg">
+                    <Play className="ml-1 h-8 w-8 text-gray-900" />
                   </div>
                 </div>
               )}
 
               {/* Controls Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
                 {/* Progress Bar */}
                 <Slider
                   value={[currentTime]}
@@ -237,7 +246,7 @@ export const GeneratedVideoPreview: React.FC<GeneratedVideoPreviewProps> = ({
                       </div>
                     )}
 
-                    <span className="text-white text-sm ml-2">
+                    <span className="ml-2 text-sm text-white">
                       {formatTime(currentTime)} / {formatTime(duration)}
                     </span>
                   </div>
@@ -272,34 +281,34 @@ export const GeneratedVideoPreview: React.FC<GeneratedVideoPreviewProps> = ({
           </div>
 
           {/* Metadata */}
-          <div className="p-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+          <div className="border-t border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-900">
+            <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
               {prompt}
             </p>
             {(model || metadata) && (
-              <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500 dark:text-gray-500">
+              <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-500">
                 {model && (
-                  <span className="px-2 py-1 bg-gray-200 dark:bg-gray-800 rounded">
+                  <span className="rounded bg-gray-200 px-2 py-1 dark:bg-gray-800">
                     {model}
                   </span>
                 )}
                 {metadata?.resolution && (
-                  <span className="px-2 py-1 bg-gray-200 dark:bg-gray-800 rounded">
+                  <span className="rounded bg-gray-200 px-2 py-1 dark:bg-gray-800">
                     {metadata.resolution}
                   </span>
                 )}
                 {metadata?.duration && (
-                  <span className="px-2 py-1 bg-gray-200 dark:bg-gray-800 rounded">
+                  <span className="rounded bg-gray-200 px-2 py-1 dark:bg-gray-800">
                     {metadata.duration}s
                   </span>
                 )}
                 {metadata?.fps && (
-                  <span className="px-2 py-1 bg-gray-200 dark:bg-gray-800 rounded">
+                  <span className="rounded bg-gray-200 px-2 py-1 dark:bg-gray-800">
                     {metadata.fps} FPS
                   </span>
                 )}
                 {metadata?.hasAudio && (
-                  <span className="px-2 py-1 bg-gray-200 dark:bg-gray-800 rounded">
+                  <span className="rounded bg-gray-200 px-2 py-1 dark:bg-gray-800">
                     Audio
                   </span>
                 )}
@@ -312,14 +321,14 @@ export const GeneratedVideoPreview: React.FC<GeneratedVideoPreviewProps> = ({
       {/* Fullscreen Modal */}
       {isFullscreen && (
         <div
-          className="fixed inset-0 z-50 bg-black flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black"
           onClick={handleCloseFullscreen}
         >
           <Button
             size="sm"
             variant="ghost"
             onClick={handleCloseFullscreen}
-            className="absolute top-4 right-4 text-white hover:bg-white/10"
+            className="absolute right-4 top-4 text-white hover:bg-white/10"
           >
             <X className="h-6 w-6" />
           </Button>
@@ -327,7 +336,7 @@ export const GeneratedVideoPreview: React.FC<GeneratedVideoPreviewProps> = ({
             src={videoUrl}
             controls
             autoPlay
-            className="max-w-full max-h-full"
+            className="max-h-full max-w-full"
             onClick={(e) => e.stopPropagation()}
           >
             Your browser does not support the video tag.

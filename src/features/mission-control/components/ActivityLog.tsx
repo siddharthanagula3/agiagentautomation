@@ -144,7 +144,7 @@ export const MissionLogEnhanced: React.FC = () => {
 
   return (
     <Card className="flex h-full flex-col border-border bg-card">
-      <CardHeader className="p-3 pb-2 sm:pb-3 sm:p-4">
+      <CardHeader className="p-3 pb-2 sm:p-4 sm:pb-3">
         <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
           <ListTodo className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
           Mission Log
@@ -196,7 +196,9 @@ export const MissionLogEnhanced: React.FC = () => {
                           )}
                           {task.result && (
                             <div className="mt-1 rounded bg-background/50 p-1.5 sm:mt-2 sm:p-2">
-                              <p className="text-[10px] sm:text-xs">{task.result}</p>
+                              <p className="text-[10px] sm:text-xs">
+                                {task.result}
+                              </p>
                             </div>
                           )}
                           {task.error && (
@@ -312,7 +314,9 @@ export const MissionLogEnhanced: React.FC = () => {
                           )}
                         >
                           {message.type === 'user' ? (
-                            <p className="text-xs sm:text-sm">{message.content}</p>
+                            <p className="text-xs sm:text-sm">
+                              {message.content}
+                            </p>
                           ) : (
                             <div className="prose prose-sm dark:prose-invert max-w-full overflow-x-auto">
                               <ReactMarkdown remarkPlugins={[remarkGfm]}>

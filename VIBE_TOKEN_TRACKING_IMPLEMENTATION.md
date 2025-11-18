@@ -14,12 +14,14 @@ Comprehensive token tracking has been implemented for the /vibe page. Every LLM 
 **File:** `/home/user/agiagentautomation/supabase/migrations/20251118000002_add_vibe_token_tracking.sql`
 
 Added token tracking columns to `vibe_sessions` table:
+
 - `total_input_tokens` (BIGINT) - Cumulative input tokens
 - `total_output_tokens` (BIGINT) - Cumulative output tokens
 - `total_tokens` (BIGINT) - Total tokens (input + output)
 - `total_cost` (NUMERIC) - Total cost in USD
 
 Created RPC function for atomic token updates:
+
 ```sql
 increment_vibe_session_tokens(
   p_session_id UUID,
@@ -34,6 +36,7 @@ increment_vibe_session_tokens(
 **File:** `/home/user/agiagentautomation/src/features/vibe/services/vibe-token-tracker.ts`
 
 Created service to sync token usage to vibe_sessions:
+
 - `updateVibeSessionTokens()` - Updates session with new token usage via RPC
 - `getSessionTokenUsage()` - Retrieves real-time usage from tokenLogger
 - `getSessionSummary()` - Gets detailed session summary
@@ -46,26 +49,31 @@ Created service to sync token usage to vibe_sessions:
 Added token tracking to ALL LLM calls in the orchestrator:
 
 #### a) Planning Stage (`generatePlan`)
+
 - Tracks tokens when generating execution plans
 - Model: `claude-3-5-sonnet-20241022`
 - Agent: "AI Planner"
 
 #### b) Task Execution (`executeWithEmployee`)
+
 - Tracks tokens for each employee task execution
 - Uses employee's configured model
 - Includes task description in tracking metadata
 
 #### c) Auto-Selection (`autoSelectEmployees`)
+
 - Tracks tokens when auto-selecting employees
 - Model: Anthropic Claude
 - Agent: "Auto Selector"
 
 #### d) Message Routing (`routeMessageToEmployee`)
+
 - Tracks tokens for multi-agent chat
 - Per-employee tracking
 - Includes conversation history context
 
 **Each tracking call:**
+
 1. Logs to tokenLogger (in-memory + database via UsageTracker)
 2. Calculates cost using model pricing
 3. Updates vibe_sessions table via RPC function
@@ -75,6 +83,7 @@ Added token tracking to ALL LLM calls in the orchestrator:
 **File:** `/home/user/agiagentautomation/src/features/vibe/components/TokenUsageDisplay.tsx`
 
 Created real-time token usage display component:
+
 - Shows total tokens used in session
 - Shows total cost in USD
 - Updates every 2 seconds via polling
@@ -82,6 +91,7 @@ Created real-time token usage display component:
 - Auto-hides when no usage data
 
 **Visual Design:**
+
 ```
 ⚡ 1,234 tokens  |  $ 0.0456
 ```
@@ -91,6 +101,7 @@ Created real-time token usage display component:
 **File:** `/home/user/agiagentautomation/src/features/vibe/pages/VibeDashboard.tsx`
 
 Added token display to header:
+
 - Positioned in top-right of header
 - Shows live updates during conversations
 - Persists across page reloads (reads from tokenLogger cache)
@@ -100,14 +111,17 @@ Added token display to header:
 All pricing is defined in `/home/user/agiagentautomation/src/core/integrations/token-usage-tracker.ts`:
 
 **Anthropic Models (used in Vibe):**
+
 - `claude-3-5-sonnet-20241022`: $3.00/M input, $15.00/M output
 - `claude-3-5-haiku-20241022`: $1.00/M input, $5.00/M output
 
 **OpenAI Models:**
+
 - `gpt-4o`: $5.00/M input, $15.00/M output
 - `gpt-4o-mini`: $0.15/M input, $0.60/M output
 
 **Google Models:**
+
 - `gemini-1.5-pro`: $3.50/M input, $10.50/M output
 - `gemini-1.5-flash`: $0.075/M input, $0.30/M output
 
@@ -135,12 +149,15 @@ Display updates in real-time
 ## Testing Checklist
 
 ### Prerequisites
+
 1. Run database migrations:
+
    ```bash
    supabase db reset
    ```
 
 2. Ensure you have API keys configured:
+
    ```bash
    VITE_ANTHROPIC_API_KEY=sk-ant-...
    ```
@@ -150,6 +167,7 @@ Display updates in real-time
 ### Test Scenarios
 
 #### Test 1: Basic Token Tracking
+
 1. Navigate to `/vibe`
 2. Send a simple message: "Hello, can you help me?"
 3. ✅ Verify token display appears in header
@@ -157,6 +175,7 @@ Display updates in real-time
 5. ✅ Check cost is > $0.00
 
 #### Test 2: Multi-Turn Conversation
+
 1. Send first message: "Create a React component"
 2. Note the token count (e.g., 1,234 tokens)
 3. Send second message: "Add error handling"
@@ -164,12 +183,14 @@ Display updates in real-time
 5. ✅ Verify cost increased
 
 #### Test 3: Complex Request
+
 1. Send: "Build a complete login system with React, authentication, and error handling"
 2. ✅ Verify planning stage tokens tracked
 3. ✅ Verify execution stage tokens tracked
 4. ✅ Verify total is sum of all stages
 
 #### Test 4: Database Persistence
+
 1. Send a message and note token count
 2. Refresh the page
 3. ✅ Verify token count persists (loaded from tokenLogger)
@@ -181,6 +202,7 @@ Display updates in real-time
 5. ✅ Verify database values match display
 
 #### Test 5: Cost Calculation Accuracy
+
 1. Send a simple 10-word message
 2. Note the response token count (e.g., 500 tokens)
 3. Manual calculation for Claude 3.5 Sonnet:
@@ -190,6 +212,7 @@ Display updates in real-time
 4. ✅ Verify displayed cost matches calculation (±10%)
 
 #### Test 6: Real-Time Updates
+
 1. Send a long request that takes 10+ seconds
 2. Watch the token display
 3. ✅ Verify it updates during the response
@@ -198,6 +221,7 @@ Display updates in real-time
 ## Database Queries for Verification
 
 ### Check session tokens
+
 ```sql
 SELECT
   id,
@@ -213,6 +237,7 @@ LIMIT 5;
 ```
 
 ### Check detailed token logs
+
 ```sql
 SELECT
   model_name as model,
@@ -228,6 +253,7 @@ ORDER BY created_at DESC;
 ```
 
 ### Verify token totals match
+
 ```sql
 SELECT
   vs.id,

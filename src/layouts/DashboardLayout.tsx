@@ -153,7 +153,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
       </div>
 
       {/* Floating Action Button (Mobile) */}
-      <div className="fixed bottom-6 right-6 z-40 pb-safe lg:hidden">
+      <div className="pb-safe fixed bottom-6 right-6 z-40 lg:hidden">
         <Button
           onClick={() => setMobileMenuOpen(true)}
           className="gradient-primary h-14 w-14 rounded-full text-white shadow-lg"

@@ -135,7 +135,7 @@ class PathUtils {
     path = path.replace(/\/+/g, '/');
 
     // Handle . and ..
-    const parts = path.split('/').filter(p => p && p !== '.');
+    const parts = path.split('/').filter((p) => p && p !== '.');
     const normalized: string[] = [];
 
     for (const part of parts) {
@@ -229,30 +229,39 @@ export class VibeFileSystem {
       this.createFolder('/public');
 
       // Create package.json
-      this.createFile('/package.json', JSON.stringify({
-        name: 'vibe-project',
-        version: '1.0.0',
-        type: 'module',
-        scripts: {
-          dev: 'vite',
-          build: 'vite build',
-          preview: 'vite preview'
-        },
-        dependencies: {
-          react: '^18.2.0',
-          'react-dom': '^18.2.0'
-        },
-        devDependencies: {
-          '@types/react': '^18.2.0',
-          '@types/react-dom': '^18.2.0',
-          '@vitejs/plugin-react': '^4.0.0',
-          typescript: '^5.0.0',
-          vite: '^5.0.0'
-        }
-      }, null, 2));
+      this.createFile(
+        '/package.json',
+        JSON.stringify(
+          {
+            name: 'vibe-project',
+            version: '1.0.0',
+            type: 'module',
+            scripts: {
+              dev: 'vite',
+              build: 'vite build',
+              preview: 'vite preview',
+            },
+            dependencies: {
+              react: '^18.2.0',
+              'react-dom': '^18.2.0',
+            },
+            devDependencies: {
+              '@types/react': '^18.2.0',
+              '@types/react-dom': '^18.2.0',
+              '@vitejs/plugin-react': '^4.0.0',
+              typescript: '^5.0.0',
+              vite: '^5.0.0',
+            },
+          },
+          null,
+          2
+        )
+      );
 
       // Create index.html
-      this.createFile('/index.html', `<!DOCTYPE html>
+      this.createFile(
+        '/index.html',
+        `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -263,10 +272,13 @@ export class VibeFileSystem {
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
-</html>`);
+</html>`
+      );
 
       // Create main.tsx
-      this.createFile('/src/main.tsx', `import React from 'react';
+      this.createFile(
+        '/src/main.tsx',
+        `import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
@@ -275,10 +287,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
-);`);
+);`
+      );
 
       // Create App.tsx
-      this.createFile('/src/App.tsx', `import { useState } from 'react';
+      this.createFile(
+        '/src/App.tsx',
+        `import { useState } from 'react';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -294,10 +309,13 @@ function App() {
   );
 }
 
-export default App;`);
+export default App;`
+      );
 
       // Create index.css
-      this.createFile('/src/index.css', `* {
+      this.createFile(
+        '/src/index.css',
+        `* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -329,38 +347,49 @@ button {
 
 button:hover {
   background: #0056b3;
-}`);
+}`
+      );
 
       // Create vite.config.ts
-      this.createFile('/vite.config.ts', `import { defineConfig } from 'vite';
+      this.createFile(
+        '/vite.config.ts',
+        `import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-});`);
+});`
+      );
 
       // Create tsconfig.json
-      this.createFile('/tsconfig.json', JSON.stringify({
-        compilerOptions: {
-          target: 'ES2020',
-          useDefineForClassFields: true,
-          lib: ['ES2020', 'DOM', 'DOM.Iterable'],
-          module: 'ESNext',
-          skipLibCheck: true,
-          moduleResolution: 'bundler',
-          allowImportingTsExtensions: true,
-          resolveJsonModule: true,
-          isolatedModules: true,
-          noEmit: true,
-          jsx: 'react-jsx',
-          strict: true,
-          noUnusedLocals: true,
-          noUnusedParameters: true,
-          noFallthroughCasesInSwitch: true
-        },
-        include: ['src'],
-        references: [{ path: './tsconfig.node.json' }]
-      }, null, 2));
+      this.createFile(
+        '/tsconfig.json',
+        JSON.stringify(
+          {
+            compilerOptions: {
+              target: 'ES2020',
+              useDefineForClassFields: true,
+              lib: ['ES2020', 'DOM', 'DOM.Iterable'],
+              module: 'ESNext',
+              skipLibCheck: true,
+              moduleResolution: 'bundler',
+              allowImportingTsExtensions: true,
+              resolveJsonModule: true,
+              isolatedModules: true,
+              noEmit: true,
+              jsx: 'react-jsx',
+              strict: true,
+              noUnusedLocals: true,
+              noUnusedParameters: true,
+              noFallthroughCasesInSwitch: true,
+            },
+            include: ['src'],
+            references: [{ path: './tsconfig.node.json' }],
+          },
+          null,
+          2
+        )
+      );
 
       // Save to storage
       this.saveToStorage();
@@ -377,7 +406,11 @@ export default defineConfig({
     const normalizedPath = PathUtils.normalize(path);
 
     if (!PathUtils.isValid(normalizedPath)) {
-      throw new FileSystemException('INVALID_PATH', `Invalid path: ${path}`, path);
+      throw new FileSystemException(
+        'INVALID_PATH',
+        `Invalid path: ${path}`,
+        path
+      );
     }
 
     if (this.files.has(normalizedPath)) {
@@ -509,7 +542,9 @@ export default defineConfig({
     const parentPath = PathUtils.dirname(normalizedPath);
     const parent = this.files.get(parentPath);
     if (parent && parent.children) {
-      parent.children = parent.children.filter(child => child.path !== normalizedPath);
+      parent.children = parent.children.filter(
+        (child) => child.path !== normalizedPath
+      );
     }
 
     // Remove from maps
@@ -573,7 +608,11 @@ export default defineConfig({
     const normalizedPath = PathUtils.normalize(path);
 
     if (!PathUtils.isValid(normalizedPath)) {
-      throw new FileSystemException('INVALID_PATH', `Invalid path: ${path}`, path);
+      throw new FileSystemException(
+        'INVALID_PATH',
+        `Invalid path: ${path}`,
+        path
+      );
     }
 
     if (this.files.has(normalizedPath)) {
@@ -635,7 +674,7 @@ export default defineConfig({
       );
     }
 
-    return folder.children?.map(child => child.path) || [];
+    return folder.children?.map((child) => child.path) || [];
   }
 
   // --------------------------------------------------------------------------
@@ -788,11 +827,13 @@ export default defineConfig({
       const state = JSON.parse(stored);
 
       // Restore files map
-      this.files = new Map(state.files.map(([path, node]: [string, FileNode]) => {
-        // Convert date strings back to Date objects
-        node.lastModified = new Date(node.lastModified);
-        return [path, node];
-      }));
+      this.files = new Map(
+        state.files.map(([path, node]: [string, FileNode]) => {
+          // Convert date strings back to Date objects
+          node.lastModified = new Date(node.lastModified);
+          return [path, node];
+        })
+      );
 
       // Restore sets
       this.openFiles = new Set(state.openFiles);

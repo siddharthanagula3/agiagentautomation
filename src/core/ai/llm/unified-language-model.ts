@@ -56,7 +56,12 @@ import {
 } from '@core/security/api-abuse-prevention';
 import { isFeatureEnabled } from '@core/security/gradual-rollout';
 
-export type LLMProvider = 'anthropic' | 'openai' | 'google' | 'perplexity' | 'grok';
+export type LLMProvider =
+  | 'anthropic'
+  | 'openai'
+  | 'google'
+  | 'perplexity'
+  | 'grok';
 type ProviderInstance =
   | AnthropicProvider
   | OpenAIProvider
@@ -82,10 +87,7 @@ const PERPLEXITY_MODELS: PerplexityConfig['model'][] = [
   'llama-3.1-sonar-large-128k-online',
   'llama-3.1-sonar-huge-128k-online',
 ];
-const GROK_MODELS: GrokConfig['model'][] = [
-  'grok-beta',
-  'grok-2-latest',
-];
+const GROK_MODELS: GrokConfig['model'][] = ['grok-beta', 'grok-2-latest'];
 
 const isAnthropicModel = (model: string): model is AnthropicConfig['model'] =>
   ANTHROPIC_MODELS.includes(model as AnthropicConfig['model']);
@@ -796,7 +798,12 @@ export class UnifiedLLMService {
    */
   getProvider(
     provider: LLMProvider
-  ): AnthropicProvider | GoogleProvider | OpenAIProvider | PerplexityProvider | GrokProvider {
+  ):
+    | AnthropicProvider
+    | GoogleProvider
+    | OpenAIProvider
+    | PerplexityProvider
+    | GrokProvider {
     return this.providers.get(provider);
   }
 }

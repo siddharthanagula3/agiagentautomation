@@ -428,7 +428,7 @@ const VibeDashboard: React.FC = () => {
           if (parseResult.filesCreated > 0) {
             console.log(
               `[VIBE] Created ${parseResult.filesCreated} files:`,
-              parseResult.files.map(f => f.path)
+              parseResult.files.map((f) => f.path)
             );
 
             // If project structure detected, show info
@@ -439,7 +439,10 @@ const VibeDashboard: React.FC = () => {
             }
           }
         } catch (parseError) {
-          console.error('[VIBE] Failed to parse code from response:', parseError);
+          console.error(
+            '[VIBE] Failed to parse code from response:',
+            parseError
+          );
           // Don't fail the whole message if parsing fails
         }
 

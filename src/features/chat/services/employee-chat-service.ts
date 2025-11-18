@@ -49,7 +49,9 @@ export class EmployeeChatService {
     this.employees = await systemPromptsService.getAvailableEmployees();
     this.employeesLoaded = true;
 
-    console.log(`[EmployeeChatService] Loaded ${this.employees.length} employees`);
+    console.log(
+      `[EmployeeChatService] Loaded ${this.employees.length} employees`
+    );
   }
 
   /**
@@ -80,7 +82,9 @@ export class EmployeeChatService {
     await this.initialize();
 
     if (this.employees.length === 0) {
-      throw new Error('No AI employees available. Please check .agi/employees/ directory.');
+      throw new Error(
+        'No AI employees available. Please check .agi/employees/ directory.'
+      );
     }
 
     const store = useMissionStore.getState();
@@ -92,15 +96,24 @@ export class EmployeeChatService {
       content: '🔍 Analyzing task complexity...',
     });
 
-    const complexity = await multiAgentCollaborationService.analyzeComplexity(userMessage);
+    const complexity =
+      await multiAgentCollaborationService.analyzeComplexity(userMessage);
 
     // STEP 2: Route based on complexity
     if (complexity.isComplex) {
       // COMPLEX TASK: Multi-agent collaboration
-      return await this.handleComplexTask(userMessage, conversationHistory, complexity.reason);
+      return await this.handleComplexTask(
+        userMessage,
+        conversationHistory,
+        complexity.reason
+      );
     } else {
       // SIMPLE TASK: Single employee
-      return await this.handleSimpleTask(userMessage, conversationHistory, complexity.reason);
+      return await this.handleSimpleTask(
+        userMessage,
+        conversationHistory,
+        complexity.reason
+      );
     }
   }
 
@@ -131,7 +144,10 @@ export class EmployeeChatService {
       content: `✓ Simple task - selecting single employee...`,
     });
 
-    const selection = await this.selectEmployeeForMessage(userMessage, conversationHistory);
+    const selection = await this.selectEmployeeForMessage(
+      userMessage,
+      conversationHistory
+    );
 
     // Show employee selection
     store.addMessage({
@@ -154,13 +170,16 @@ export class EmployeeChatService {
     const thinkingSteps: string[] = [];
 
     try {
-      thinkingSteps.push(`Analyzing query with ${selection.employee.description}`);
-
-      const response = await workforceOrchestratorRefactored.routeMessageToEmployee(
-        selection.employee.name,
-        userMessage,
-        conversationHistory
+      thinkingSteps.push(
+        `Analyzing query with ${selection.employee.description}`
       );
+
+      const response =
+        await workforceOrchestratorRefactored.routeMessageToEmployee(
+          selection.employee.name,
+          userMessage,
+          conversationHistory
+        );
 
       store.updateEmployeeStatus(selection.employee.name, 'idle');
 
@@ -172,10 +191,11 @@ export class EmployeeChatService {
         selectionReason: selection.reason,
         thinkingSteps,
         metadata: {
-          model: selection.employee.model === 'inherit'
-            ? 'claude-3-5-sonnet-20241022'
-            : selection.employee.model,
-          isMultiAgent: false
+          model:
+            selection.employee.model === 'inherit'
+              ? 'claude-3-5-sonnet-20241022'
+              : selection.employee.model,
+          isMultiAgent: false,
         },
       };
     } catch (error) {
@@ -221,7 +241,7 @@ export class EmployeeChatService {
     const thinkingSteps: string[] = [
       'Complex task detected',
       'Analyzing required expertise',
-      'Selecting optimal team of AI employees'
+      'Selecting optimal team of AI employees',
     ];
 
     try {
@@ -232,7 +252,9 @@ export class EmployeeChatService {
       );
 
       // Show assigned team
-      const employeeNames = collaboration.employeesInvolved.map(e => e.name).join(', ');
+      const employeeNames = collaboration.employeesInvolved
+        .map((e) => e.name)
+        .join(', ');
       store.addMessage({
         from: 'system',
         type: 'status',
@@ -240,33 +262,40 @@ export class EmployeeChatService {
       });
 
       // Update all employee statuses
-      collaboration.employeesInvolved.forEach(emp => {
-        store.updateEmployeeStatus(emp.name, 'thinking', null, 'Contributing expertise');
+      collaboration.employeesInvolved.forEach((emp) => {
+        store.updateEmployeeStatus(
+          emp.name,
+          'thinking',
+          null,
+          'Contributing expertise'
+        );
       });
 
       thinkingSteps.push(`Team assembled: ${employeeNames}`);
       thinkingSteps.push('Employees collaborating...');
 
       // Convert collaboration messages to chat messages
-      const collaborationMessages: EmployeeChatMessage[] = collaboration.collaborationMessages.map(msg => ({
-        role: 'collaboration' as const,
-        content: msg.content,
-        employeeName: msg.from,
-        employeeAvatar: msg.fromAvatar,
-        to: msg.to,
-        messageType: msg.type,
-        metadata: {
-          isMultiAgent: true
-        }
-      }));
+      const collaborationMessages: EmployeeChatMessage[] =
+        collaboration.collaborationMessages.map((msg) => ({
+          role: 'collaboration' as const,
+          content: msg.content,
+          employeeName: msg.from,
+          employeeAvatar: msg.fromAvatar,
+          to: msg.to,
+          messageType: msg.type,
+          metadata: {
+            isMultiAgent: true,
+          },
+        }));
 
       // Show collaboration messages in the UI
-      collaboration.collaborationMessages.forEach(msg => {
-        const label = msg.type === 'synthesis'
-          ? '📋 **Supervisor Synthesis**'
-          : msg.to
-            ? `💬 ${msg.from} → ${msg.to}`
-            : `💭 ${msg.from}`;
+      collaboration.collaborationMessages.forEach((msg) => {
+        const label =
+          msg.type === 'synthesis'
+            ? '📋 **Supervisor Synthesis**'
+            : msg.to
+              ? `💬 ${msg.from} → ${msg.to}`
+              : `💭 ${msg.from}`;
 
         store.addMessage({
           from: msg.from,
@@ -275,13 +304,13 @@ export class EmployeeChatService {
           metadata: {
             employeeName: msg.from,
             collaborationType: msg.type,
-            isCollaboration: true
-          }
+            isCollaboration: true,
+          },
         });
       });
 
       // Update all employees to idle
-      collaboration.employeesInvolved.forEach(emp => {
+      collaboration.employeesInvolved.forEach((emp) => {
         store.updateEmployeeStatus(emp.name, 'idle');
       });
 
@@ -297,7 +326,7 @@ export class EmployeeChatService {
           model: 'claude-3-5-sonnet-20241022', // Collaboration uses Claude
           tokensUsed: collaboration.metadata.totalTokens,
           isMultiAgent: true,
-          employeesInvolved: collaboration.employeesInvolved.map(e => e.name)
+          employeesInvolved: collaboration.employeesInvolved.map((e) => e.name),
         },
       };
     } catch (error) {
@@ -310,7 +339,11 @@ export class EmployeeChatService {
         content: '⚠️ Collaboration failed. Falling back to single employee...',
       });
 
-      return await this.handleSimpleTask(userMessage, conversationHistory, 'Fallback to single employee');
+      return await this.handleSimpleTask(
+        userMessage,
+        conversationHistory,
+        'Fallback to single employee'
+      );
     }
   }
 
@@ -367,7 +400,10 @@ export class EmployeeChatService {
         score += 10;
         reasons.push('business knowledge');
       }
-      if (messageLower.includes('marketing') && descLower.includes('marketing')) {
+      if (
+        messageLower.includes('marketing') &&
+        descLower.includes('marketing')
+      ) {
         score += 12;
         reasons.push('marketing expertise');
       }
@@ -388,7 +424,10 @@ export class EmployeeChatService {
       // Context analysis from conversation history
       if (conversationHistory.length > 0) {
         const lastMessages = conversationHistory.slice(-3);
-        const contextText = lastMessages.map((m) => m.content).join(' ').toLowerCase();
+        const contextText = lastMessages
+          .map((m) => m.content)
+          .join(' ')
+          .toLowerCase();
 
         if (contextText.includes(nameLower.replace(/-/g, ' '))) {
           score += 8;
@@ -418,9 +457,10 @@ export class EmployeeChatService {
     });
 
     const confidence = Math.min(bestScore / 20, 1.0);
-    const reason = bestReasons.length > 0
-      ? bestReasons.slice(0, 2).join(', ')
-      : 'general capabilities';
+    const reason =
+      bestReasons.length > 0
+        ? bestReasons.slice(0, 2).join(', ')
+        : 'general capabilities';
 
     return {
       employee: bestEmployee,

@@ -4,11 +4,30 @@
  * Handles image generation, video generation, document creation, web search, multi-agent tasks, social media analysis, and more
  */
 
-import { mediaGenerationService, type ImageGenerationRequest, type VideoGenerationRequest, type MediaGenerationResult } from '@core/integrations/media-generation-handler';
-import { documentGenerationService, type DocumentRequest, type GeneratedDocument } from './document-generation-service';
-import { webSearch, type SearchResponse } from '@core/integrations/web-search-handler';
-import { multiAgentCollaborationService, type CollaborationResult } from './multi-agent-collaboration-service';
-import { socialMediaAnalyzer, type SocialMediaAnalysisResult, type SocialMediaQuery } from '@core/integrations/social-media-analyzer';
+import {
+  mediaGenerationService,
+  type ImageGenerationRequest,
+  type VideoGenerationRequest,
+  type MediaGenerationResult,
+} from '@core/integrations/media-generation-handler';
+import {
+  documentGenerationService,
+  type DocumentRequest,
+  type GeneratedDocument,
+} from './document-generation-service';
+import {
+  webSearch,
+  type SearchResponse,
+} from '@core/integrations/web-search-handler';
+import {
+  multiAgentCollaborationService,
+  type CollaborationResult,
+} from './multi-agent-collaboration-service';
+import {
+  socialMediaAnalyzer,
+  type SocialMediaAnalysisResult,
+  type SocialMediaQuery,
+} from '@core/integrations/social-media-analyzer';
 
 export type ToolType =
   | 'image-generation'
@@ -30,7 +49,13 @@ export interface ToolDetectionResult {
 export interface ToolExecutionResult {
   toolType: ToolType;
   status: 'success' | 'failed' | 'processing';
-  data?: MediaGenerationResult | GeneratedDocument | SearchResponse | CollaborationResult | SocialMediaAnalysisResult | unknown;
+  data?:
+    | MediaGenerationResult
+    | GeneratedDocument
+    | SearchResponse
+    | CollaborationResult
+    | SocialMediaAnalysisResult
+    | unknown;
   error?: string;
   metadata?: {
     tokensUsed?: number;
@@ -59,14 +84,33 @@ export function analyzeMessage(message: string): ToolDetectionResult {
 
   // Image generation detection
   const imageKeywords = [
-    'generate image', 'create image', 'make image', 'draw', 'picture of',
-    'generate a picture', 'create a picture', 'make a picture',
-    'visualize', 'illustration', 'artwork', 'render', 'design an image',
-    'generate photo', 'create photo', 'make photo', 'imagen', 'dall-e',
-    'image of', 'picture showing', 'visual of', 'graphic of'
+    'generate image',
+    'create image',
+    'make image',
+    'draw',
+    'picture of',
+    'generate a picture',
+    'create a picture',
+    'make a picture',
+    'visualize',
+    'illustration',
+    'artwork',
+    'render',
+    'design an image',
+    'generate photo',
+    'create photo',
+    'make photo',
+    'imagen',
+    'dall-e',
+    'image of',
+    'picture showing',
+    'visual of',
+    'graphic of',
   ];
 
-  const hasImageRequest = imageKeywords.some(keyword => messageLower.includes(keyword));
+  const hasImageRequest = imageKeywords.some((keyword) =>
+    messageLower.includes(keyword)
+  );
   if (hasImageRequest) {
     detectedTools.push('image-generation');
     confidence += 30;
@@ -75,13 +119,28 @@ export function analyzeMessage(message: string): ToolDetectionResult {
 
   // Video generation detection
   const videoKeywords = [
-    'generate video', 'create video', 'make video', 'video of',
-    'animate', 'animation', 'movie', 'clip', 'footage',
-    'generate a video', 'create a video', 'make a video',
-    'video showing', 'veo', 'video clip', 'motion', 'cinematic'
+    'generate video',
+    'create video',
+    'make video',
+    'video of',
+    'animate',
+    'animation',
+    'movie',
+    'clip',
+    'footage',
+    'generate a video',
+    'create a video',
+    'make a video',
+    'video showing',
+    'veo',
+    'video clip',
+    'motion',
+    'cinematic',
   ];
 
-  const hasVideoRequest = videoKeywords.some(keyword => messageLower.includes(keyword));
+  const hasVideoRequest = videoKeywords.some((keyword) =>
+    messageLower.includes(keyword)
+  );
   if (hasVideoRequest) {
     detectedTools.push('video-generation');
     confidence += 30;
@@ -90,16 +149,31 @@ export function analyzeMessage(message: string): ToolDetectionResult {
 
   // Document creation detection
   const documentKeywords = [
-    'create document', 'write document', 'generate document',
-    'write report', 'create report', 'generate report',
-    'write article', 'create article', 'write proposal',
-    'draft proposal', 'write summary', 'create summary',
-    'write documentation', 'create documentation',
-    'generate pdf', 'create pdf', 'make a document',
-    'compose document', 'draft document', 'prepare document'
+    'create document',
+    'write document',
+    'generate document',
+    'write report',
+    'create report',
+    'generate report',
+    'write article',
+    'create article',
+    'write proposal',
+    'draft proposal',
+    'write summary',
+    'create summary',
+    'write documentation',
+    'create documentation',
+    'generate pdf',
+    'create pdf',
+    'make a document',
+    'compose document',
+    'draft document',
+    'prepare document',
   ];
 
-  const hasDocumentRequest = documentKeywords.some(keyword => messageLower.includes(keyword));
+  const hasDocumentRequest = documentKeywords.some((keyword) =>
+    messageLower.includes(keyword)
+  );
   if (hasDocumentRequest) {
     detectedTools.push('document-creation');
     confidence += 25;
@@ -108,15 +182,31 @@ export function analyzeMessage(message: string): ToolDetectionResult {
 
   // Web search detection
   const searchKeywords = [
-    'search for', 'find information', 'look up', 'what is the latest',
-    'current', 'recent news', 'latest news', 'today\'s',
-    'what happened', 'real-time', 'live data', 'up to date',
-    'what are the current', 'tell me about recent', 'search the web',
-    'google', 'find out', 'research'
+    'search for',
+    'find information',
+    'look up',
+    'what is the latest',
+    'current',
+    'recent news',
+    'latest news',
+    "today's",
+    'what happened',
+    'real-time',
+    'live data',
+    'up to date',
+    'what are the current',
+    'tell me about recent',
+    'search the web',
+    'google',
+    'find out',
+    'research',
   ];
 
-  const hasSearchRequest = searchKeywords.some(keyword => messageLower.includes(keyword));
-  const hasDateReference = /\b(today|yesterday|this week|this month|2024|2025)\b/.test(messageLower);
+  const hasSearchRequest = searchKeywords.some((keyword) =>
+    messageLower.includes(keyword)
+  );
+  const hasDateReference =
+    /\b(today|yesterday|this week|this month|2024|2025)\b/.test(messageLower);
 
   if (hasSearchRequest || hasDateReference) {
     detectedTools.push('web-search');
@@ -126,33 +216,78 @@ export function analyzeMessage(message: string): ToolDetectionResult {
 
   // Social media analysis detection (Grok-powered)
   const socialMediaKeywords = [
-    'social media', 'twitter', 'x.com', 'what people think', 'public opinion',
-    'sentiment', 'trending', 'viral', 'what\'s trending', 'twitter sentiment',
-    'what are people saying', 'social reaction', 'twitter reaction',
-    'how is the public reacting', 'social media response', 'online discussion',
-    'twitter discussion', 'x discussion', 'tweets about', 'hashtag',
-    'influencers', 'social media influencers', 'twitter influencers',
-    'online sentiment', 'social sentiment', 'public perception',
-    'what\'s the buzz', 'social buzz', 'reddit discussion', 'linkedin discussion',
-    'analyze social media', 'analyze twitter', 'analyze sentiment'
+    'social media',
+    'twitter',
+    'x.com',
+    'what people think',
+    'public opinion',
+    'sentiment',
+    'trending',
+    'viral',
+    "what's trending",
+    'twitter sentiment',
+    'what are people saying',
+    'social reaction',
+    'twitter reaction',
+    'how is the public reacting',
+    'social media response',
+    'online discussion',
+    'twitter discussion',
+    'x discussion',
+    'tweets about',
+    'hashtag',
+    'influencers',
+    'social media influencers',
+    'twitter influencers',
+    'online sentiment',
+    'social sentiment',
+    'public perception',
+    "what's the buzz",
+    'social buzz',
+    'reddit discussion',
+    'linkedin discussion',
+    'analyze social media',
+    'analyze twitter',
+    'analyze sentiment',
   ];
 
-  const hasSocialMediaRequest = socialMediaKeywords.some(keyword => messageLower.includes(keyword));
+  const hasSocialMediaRequest = socialMediaKeywords.some((keyword) =>
+    messageLower.includes(keyword)
+  );
   if (hasSocialMediaRequest) {
     detectedTools.push('social-media-analysis');
     confidence += 30;
-    reasons.push('Social media analysis required - using Grok for real-time X/Twitter data');
+    reasons.push(
+      'Social media analysis required - using Grok for real-time X/Twitter data'
+    );
   }
 
   // Multi-agent collaboration detection
   const complexityKeywords = [
-    'build', 'create', 'develop', 'design', 'implement', 'architect',
-    'system', 'platform', 'application', 'full', 'complete', 'entire',
-    'comprehensive', 'end-to-end', 'full-stack', 'production-ready',
-    'frontend and backend', 'ui and api', 'design and code'
+    'build',
+    'create',
+    'develop',
+    'design',
+    'implement',
+    'architect',
+    'system',
+    'platform',
+    'application',
+    'full',
+    'complete',
+    'entire',
+    'comprehensive',
+    'end-to-end',
+    'full-stack',
+    'production-ready',
+    'frontend and backend',
+    'ui and api',
+    'design and code',
   ];
 
-  const hasComplexRequest = complexityKeywords.filter(keyword => messageLower.includes(keyword)).length >= 2;
+  const hasComplexRequest =
+    complexityKeywords.filter((keyword) => messageLower.includes(keyword))
+      .length >= 2;
   const isLongRequest = message.split(/\s+/).length > 40;
 
   if (hasComplexRequest || isLongRequest) {
@@ -163,18 +298,37 @@ export function analyzeMessage(message: string): ToolDetectionResult {
 
   // Code generation detection (suggest /vibe)
   const codeKeywords = [
-    'write code', 'create code', 'generate code', 'implement',
-    'function', 'class', 'component', 'algorithm', 'script',
-    'build a', 'create a', 'make a', 'develop a',
-    'react component', 'typescript', 'javascript', 'python',
-    'api endpoint', 'database schema', 'sql query'
+    'write code',
+    'create code',
+    'generate code',
+    'implement',
+    'function',
+    'class',
+    'component',
+    'algorithm',
+    'script',
+    'build a',
+    'create a',
+    'make a',
+    'develop a',
+    'react component',
+    'typescript',
+    'javascript',
+    'python',
+    'api endpoint',
+    'database schema',
+    'sql query',
   ];
 
-  const hasCodeRequest = codeKeywords.some(keyword => messageLower.includes(keyword));
+  const hasCodeRequest = codeKeywords.some((keyword) =>
+    messageLower.includes(keyword)
+  );
   if (hasCodeRequest && !hasImageRequest && !hasVideoRequest) {
     detectedTools.push('code-generation');
     confidence += 15;
-    reasons.push('Code generation detected - consider using /vibe for better experience');
+    reasons.push(
+      'Code generation detected - consider using /vibe for better experience'
+    );
   }
 
   // Default to general chat if no specific tools detected
@@ -186,9 +340,16 @@ export function analyzeMessage(message: string): ToolDetectionResult {
 
   // Determine suggested route
   let suggestedRoute: '/vibe' | '/mission-control' | undefined;
-  if (detectedTools.includes('code-generation') && !hasImageRequest && !hasVideoRequest) {
+  if (
+    detectedTools.includes('code-generation') &&
+    !hasImageRequest &&
+    !hasVideoRequest
+  ) {
     suggestedRoute = '/vibe';
-  } else if (detectedTools.includes('multi-agent') || (hasComplexRequest && isLongRequest)) {
+  } else if (
+    detectedTools.includes('multi-agent') ||
+    (hasComplexRequest && isLongRequest)
+  ) {
     suggestedRoute = '/mission-control';
   }
 
@@ -196,7 +357,7 @@ export function analyzeMessage(message: string): ToolDetectionResult {
     tools: detectedTools,
     confidence: Math.min(confidence, 100),
     reasoning: reasons.join('; '),
-    suggestedRoute
+    suggestedRoute,
   };
 }
 
@@ -213,9 +374,13 @@ async function executeImageGeneration(
     // Parse image request from message
     const request: ImageGenerationRequest = {
       prompt: message,
-      quality: message.toLowerCase().includes('high quality') || message.toLowerCase().includes('hd') ? 'hd' : 'standard',
+      quality:
+        message.toLowerCase().includes('high quality') ||
+        message.toLowerCase().includes('hd')
+          ? 'hd'
+          : 'standard',
       numberOfImages: 1,
-      aspectRatio: parseAspectRatio(message)
+      aspectRatio: parseAspectRatio(message),
     };
 
     const result = await mediaGenerationService.generateImage(request);
@@ -226,14 +391,14 @@ async function executeImageGeneration(
       data: result,
       metadata: {
         tokensUsed: result.tokensUsed,
-        cost: result.cost
-      }
+        cost: result.cost,
+      },
     };
   } catch (error) {
     return {
       toolType: 'image-generation',
       status: 'failed',
-      error: error instanceof Error ? error.message : 'Image generation failed'
+      error: error instanceof Error ? error.message : 'Image generation failed',
     };
   }
 }
@@ -253,7 +418,7 @@ async function executeVideoGeneration(
       prompt: message,
       duration: parseDuration(message),
       resolution: parseResolution(message),
-      aspectRatio: parseAspectRatio(message) as '16:9' | '9:16' | '1:1' | '4:3'
+      aspectRatio: parseAspectRatio(message) as '16:9' | '9:16' | '1:1' | '4:3',
     };
 
     const result = await mediaGenerationService.generateVideo(
@@ -267,14 +432,14 @@ async function executeVideoGeneration(
       data: result,
       metadata: {
         tokensUsed: result.tokensUsed,
-        cost: result.cost
-      }
+        cost: result.cost,
+      },
     };
   } catch (error) {
     return {
       toolType: 'video-generation',
       status: 'failed',
-      error: error instanceof Error ? error.message : 'Video generation failed'
+      error: error instanceof Error ? error.message : 'Video generation failed',
     };
   }
 }
@@ -292,7 +457,11 @@ async function executeDocumentGeneration(
     onProgress?.('Generating document...');
 
     const request = documentGenerationService.parseDocumentRequest(message);
-    const result = await documentGenerationService.generateDocument(request, userId, sessionId);
+    const result = await documentGenerationService.generateDocument(
+      request,
+      userId,
+      sessionId
+    );
 
     return {
       toolType: 'document-creation',
@@ -300,13 +469,14 @@ async function executeDocumentGeneration(
       data: result,
       metadata: {
         tokensUsed: result.metadata.tokensUsed,
-      }
+      },
     };
   } catch (error) {
     return {
       toolType: 'document-creation',
       status: 'failed',
-      error: error instanceof Error ? error.message : 'Document generation failed'
+      error:
+        error instanceof Error ? error.message : 'Document generation failed',
     };
   }
 }
@@ -326,13 +496,13 @@ async function executeWebSearch(
     return {
       toolType: 'web-search',
       status: 'success',
-      data: result
+      data: result,
     };
   } catch (error) {
     return {
       toolType: 'web-search',
       status: 'failed',
-      error: error instanceof Error ? error.message : 'Web search failed'
+      error: error instanceof Error ? error.message : 'Web search failed',
     };
   }
 }
@@ -349,7 +519,12 @@ async function executeSocialMediaAnalysis(
     onProgress?.('Analyzing social media with Grok...');
 
     // Extract topic from message
-    const topic = message.replace(/analyze\s+(social\s+media|twitter|sentiment)\s+(about|for|on)?\s*/i, '').trim();
+    const topic = message
+      .replace(
+        /analyze\s+(social\s+media|twitter|sentiment)\s+(about|for|on)?\s*/i,
+        ''
+      )
+      .trim();
 
     // Build query
     const query: SocialMediaQuery = {
@@ -362,20 +537,35 @@ async function executeSocialMediaAnalysis(
     // Detect specific requests
     if (message.toLowerCase().includes('sentiment')) {
       query.analysisType = ['sentiment'];
-    } else if (message.toLowerCase().includes('trending') || message.toLowerCase().includes('trends')) {
+    } else if (
+      message.toLowerCase().includes('trending') ||
+      message.toLowerCase().includes('trends')
+    ) {
       query.analysisType = ['trends'];
     } else if (message.toLowerCase().includes('influencers')) {
       query.analysisType = ['influencers'];
     }
 
     // Detect timeframe
-    if (message.toLowerCase().includes('last hour') || message.toLowerCase().includes('past hour')) {
+    if (
+      message.toLowerCase().includes('last hour') ||
+      message.toLowerCase().includes('past hour')
+    ) {
       query.timeframe = '1h';
-    } else if (message.toLowerCase().includes('today') || message.toLowerCase().includes('24 hours')) {
+    } else if (
+      message.toLowerCase().includes('today') ||
+      message.toLowerCase().includes('24 hours')
+    ) {
       query.timeframe = '24h';
-    } else if (message.toLowerCase().includes('this week') || message.toLowerCase().includes('7 days')) {
+    } else if (
+      message.toLowerCase().includes('this week') ||
+      message.toLowerCase().includes('7 days')
+    ) {
       query.timeframe = '7d';
-    } else if (message.toLowerCase().includes('this month') || message.toLowerCase().includes('30 days')) {
+    } else if (
+      message.toLowerCase().includes('this month') ||
+      message.toLowerCase().includes('30 days')
+    ) {
       query.timeframe = '30d';
     }
 
@@ -388,14 +578,15 @@ async function executeSocialMediaAnalysis(
       metadata: {
         tokensUsed: result.metadata.dataSourcesCount * 100, // Estimate
         duration: 0,
-        cost: 0
-      }
+        cost: 0,
+      },
     };
   } catch (error) {
     return {
       toolType: 'social-media-analysis',
       status: 'failed',
-      error: error instanceof Error ? error.message : 'Social media analysis failed'
+      error:
+        error instanceof Error ? error.message : 'Social media analysis failed',
     };
   }
 }
@@ -411,7 +602,10 @@ async function executeMultiAgentCollaboration(
   try {
     onProgress?.('Coordinating AI team...');
 
-    const result = await multiAgentCollaborationService.collaborate(message, conversationHistory);
+    const result = await multiAgentCollaborationService.collaborate(
+      message,
+      conversationHistory
+    );
 
     return {
       toolType: 'multi-agent',
@@ -419,14 +613,17 @@ async function executeMultiAgentCollaboration(
       data: result,
       metadata: {
         tokensUsed: result.metadata.totalTokens,
-        duration: result.metadata.duration
-      }
+        duration: result.metadata.duration,
+      },
     };
   } catch (error) {
     return {
       toolType: 'multi-agent',
       status: 'failed',
-      error: error instanceof Error ? error.message : 'Multi-agent collaboration failed'
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Multi-agent collaboration failed',
     };
   }
 }
@@ -440,7 +637,11 @@ export async function routeAndExecuteTools(
     userId?: string;
     sessionId?: string;
     conversationHistory?: Array<{ role: string; content: string }>;
-    onProgress?: (toolType: ToolType, status: string, progress?: number) => void;
+    onProgress?: (
+      toolType: ToolType,
+      status: string,
+      progress?: number
+    ) => void;
   }
 ): Promise<ToolRouterResult> {
   const startTime = Date.now();
@@ -453,9 +654,8 @@ export async function routeAndExecuteTools(
   for (const toolType of detection.tools) {
     switch (toolType) {
       case 'image-generation': {
-        const imageResult = await executeImageGeneration(
-          message,
-          (status) => options?.onProgress?.(toolType, status)
+        const imageResult = await executeImageGeneration(message, (status) =>
+          options?.onProgress?.(toolType, status)
         );
         executionResults.push(imageResult);
         break;
@@ -464,7 +664,8 @@ export async function routeAndExecuteTools(
       case 'video-generation': {
         const videoResult = await executeVideoGeneration(
           message,
-          (progress, status) => options?.onProgress?.(toolType, status, progress)
+          (progress, status) =>
+            options?.onProgress?.(toolType, status, progress)
         );
         executionResults.push(videoResult);
         break;
@@ -482,9 +683,8 @@ export async function routeAndExecuteTools(
       }
 
       case 'web-search': {
-        const searchResult = await executeWebSearch(
-          message,
-          (status) => options?.onProgress?.(toolType, status)
+        const searchResult = await executeWebSearch(message, (status) =>
+          options?.onProgress?.(toolType, status)
         );
         executionResults.push(searchResult);
         break;
@@ -523,7 +723,9 @@ export async function routeAndExecuteTools(
 
   // Step 3: Build enhanced context from tool results
   let enhancedContext = '';
-  const successfulResults = executionResults.filter(r => r.status === 'success');
+  const successfulResults = executionResults.filter(
+    (r) => r.status === 'success'
+  );
 
   if (successfulResults.length > 0) {
     enhancedContext = '\n\n--- Tool Results ---\n';
@@ -571,11 +773,16 @@ export async function routeAndExecuteTools(
           enhancedContext += '\n';
         }
 
-        if (socialData.influencers && socialData.influencers.topInfluencers.length > 0) {
+        if (
+          socialData.influencers &&
+          socialData.influencers.topInfluencers.length > 0
+        ) {
           enhancedContext += `Top Influencers:\n`;
-          socialData.influencers.topInfluencers.slice(0, 3).forEach((inf, i) => {
-            enhancedContext += `  ${i + 1}. @${inf.username} (${inf.followers.toLocaleString()} followers, ${inf.relevance} relevance)\n`;
-          });
+          socialData.influencers.topInfluencers
+            .slice(0, 3)
+            .forEach((inf, i) => {
+              enhancedContext += `  ${i + 1}. @${inf.username} (${inf.followers.toLocaleString()} followers, ${inf.relevance} relevance)\n`;
+            });
           enhancedContext += '\n';
         }
 
@@ -595,13 +802,13 @@ export async function routeAndExecuteTools(
     detection.tools.includes('code-generation') ||
     detection.tools.includes('web-search') || // Continue to LLM to synthesize search results
     detection.tools.includes('social-media-analysis') || // Continue to LLM to synthesize social media analysis
-    executionResults.some(r => r.status === 'failed'); // Continue if any tool failed
+    executionResults.some((r) => r.status === 'failed'); // Continue if any tool failed
 
   const duration = Date.now() - startTime;
   console.log(`[ToolRouter] Execution completed in ${duration}ms`, {
     detectedTools: detection.tools,
     executedTools: executionResults.length,
-    successful: successfulResults.length
+    successful: successfulResults.length,
   });
 
   return {
@@ -610,18 +817,28 @@ export async function routeAndExecuteTools(
     reasoning: detection.reasoning,
     suggestedRoute: detection.suggestedRoute,
     shouldContinueToLLM,
-    enhancedContext
+    enhancedContext,
   };
 }
 
 /**
  * Helper: Parse aspect ratio from message
  */
-function parseAspectRatio(message: string): '1:1' | '16:9' | '9:16' | '4:3' | '3:4' {
+function parseAspectRatio(
+  message: string
+): '1:1' | '16:9' | '9:16' | '4:3' | '3:4' {
   const messageLower = message.toLowerCase();
-  if (messageLower.includes('16:9') || messageLower.includes('widescreen') || messageLower.includes('landscape')) {
+  if (
+    messageLower.includes('16:9') ||
+    messageLower.includes('widescreen') ||
+    messageLower.includes('landscape')
+  ) {
     return '16:9';
-  } else if (messageLower.includes('9:16') || messageLower.includes('portrait') || messageLower.includes('vertical')) {
+  } else if (
+    messageLower.includes('9:16') ||
+    messageLower.includes('portrait') ||
+    messageLower.includes('vertical')
+  ) {
     return '9:16';
   } else if (messageLower.includes('4:3')) {
     return '4:3';
@@ -649,7 +866,11 @@ function parseResolution(message: string): '720p' | '1080p' | '4k' {
   const messageLower = message.toLowerCase();
   if (messageLower.includes('4k') || messageLower.includes('ultra hd')) {
     return '4k';
-  } else if (messageLower.includes('1080p') || messageLower.includes('full hd') || messageLower.includes('hd')) {
+  } else if (
+    messageLower.includes('1080p') ||
+    messageLower.includes('full hd') ||
+    messageLower.includes('hd')
+  ) {
     return '1080p';
   }
   return '720p'; // default
@@ -690,7 +911,7 @@ export function getToolStatus(): Record<ToolType, boolean> {
     'web-search': isToolAvailable('web-search'),
     'multi-agent': isToolAvailable('multi-agent'),
     'code-generation': isToolAvailable('code-generation'),
-    'general-chat': isToolAvailable('general-chat')
+    'general-chat': isToolAvailable('general-chat'),
   };
 }
 
@@ -699,5 +920,5 @@ export const chatToolRouter = {
   analyzeMessage,
   routeAndExecuteTools,
   isToolAvailable,
-  getToolStatus
+  getToolStatus,
 };

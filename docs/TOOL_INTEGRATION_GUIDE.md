@@ -13,10 +13,11 @@ The Unified Tool Integration System automatically detects user intent and routes
 **Core Functions:**
 
 #### `analyzeMessage(message: string): ToolDetectionResult`
+
 Analyzes user messages to detect which tools are needed.
 
 ```typescript
-const detection = analyzeMessage("Generate an image of a sunset");
+const detection = analyzeMessage('Generate an image of a sunset');
 // Returns: {
 //   tools: ['image-generation'],
 //   confidence: 100,
@@ -26,6 +27,7 @@ const detection = analyzeMessage("Generate an image of a sunset");
 ```
 
 **Detection Logic:**
+
 - **Image Generation**: Keywords like "generate image", "create picture", "draw", "visualize"
 - **Video Generation**: Keywords like "generate video", "create video", "animate", "video of"
 - **Document Creation**: Keywords like "create document", "write report", "generate pdf"
@@ -34,6 +36,7 @@ const detection = analyzeMessage("Generate an image of a sunset");
 - **Code Generation**: Keywords like "write code", "implement", "function", "component"
 
 #### `routeAndExecuteTools(message: string, options): Promise<ToolRouterResult>`
+
 Executes detected tools and returns results.
 
 ```typescript
@@ -51,6 +54,7 @@ const result = await chatToolRouter.routeAndExecuteTools(
 ```
 
 **Returns:**
+
 ```typescript
 {
   detectedTools: ['image-generation'],
@@ -82,12 +86,13 @@ const result = await chatToolRouter.routeAndExecuteTools(
 6. **Final Response** → Display AI response with tool results
 
 **New State:**
+
 ```typescript
 const {
   messages,
   isLoading,
-  activeTools,           // NEW: Currently executing tools
-  toolProgress,          // NEW: Progress for each tool
+  activeTools, // NEW: Currently executing tools
+  toolProgress, // NEW: Progress for each tool
   sendMessage,
   // ... other methods
 } = useChat(sessionId);
@@ -98,30 +103,38 @@ const {
 **Tool Result Display:**
 
 #### Image Generation Results
+
 ```tsx
-{message.metadata?.toolType === 'image-generation' && (
-  <div className="rounded-lg border bg-card p-4">
-    <img src={imageUrl} alt="Generated image" />
-    <Button onClick={downloadImage}>Download</Button>
-  </div>
-)}
+{
+  message.metadata?.toolType === 'image-generation' && (
+    <div className="rounded-lg border bg-card p-4">
+      <img src={imageUrl} alt="Generated image" />
+      <Button onClick={downloadImage}>Download</Button>
+    </div>
+  );
+}
 ```
 
 #### Video Generation Results
+
 ```tsx
-{message.metadata?.toolType === 'video-generation' && (
-  <div className="rounded-lg border bg-card p-4">
-    <video src={videoUrl} controls poster={thumbnailUrl} />
-    <Button onClick={downloadVideo}>Download</Button>
-  </div>
-)}
+{
+  message.metadata?.toolType === 'video-generation' && (
+    <div className="rounded-lg border bg-card p-4">
+      <video src={videoUrl} controls poster={thumbnailUrl} />
+      <Button onClick={downloadVideo}>Download</Button>
+    </div>
+  );
+}
 ```
 
 #### Document Generation Results
+
 - Already handled by existing `isDocument` logic
 - Displays markdown content with export options
 
 #### Web Search Results
+
 - Already handled by existing `SearchResults` component
 - Shows search results with AI-generated summary
 
@@ -134,12 +147,13 @@ const {
   activeTools={['image-generation', 'web-search']}
   toolProgress={{
     'image-generation': { status: 'Generating image...', progress: 75 },
-    'web-search': { status: 'Searching the web...', progress: undefined }
+    'web-search': { status: 'Searching the web...', progress: undefined },
   }}
 />
 ```
 
 **Features:**
+
 - Shows active tools with icons
 - Displays progress bars for supported tools (image/video generation)
 - Updates in real-time during execution
@@ -149,11 +163,13 @@ const {
 ### Example 1: Image Generation
 
 **User Input:**
+
 ```
 Generate a realistic image of a sunset over mountains in 16:9 aspect ratio
 ```
 
 **System Behavior:**
+
 1. Tool Router detects `image-generation`
 2. Parses aspect ratio from message (16:9)
 3. Calls Google Imagen API
@@ -163,11 +179,13 @@ Generate a realistic image of a sunset over mountains in 16:9 aspect ratio
 ### Example 2: Video Generation
 
 **User Input:**
+
 ```
 Create a 10 second cinematic video of waves crashing on a beach
 ```
 
 **System Behavior:**
+
 1. Tool Router detects `video-generation`
 2. Parses duration (10s) and style (cinematic)
 3. Calls Google Veo API
@@ -177,11 +195,13 @@ Create a 10 second cinematic video of waves crashing on a beach
 ### Example 3: Document Creation
 
 **User Input:**
+
 ```
 Write a comprehensive report on AI safety with sections on ethics, risks, and regulations
 ```
 
 **System Behavior:**
+
 1. Tool Router detects `document-creation`
 2. Parses document type (report) and sections
 3. Uses Claude to generate structured document
@@ -191,11 +211,13 @@ Write a comprehensive report on AI safety with sections on ethics, risks, and re
 ### Example 4: Web Search + Analysis
 
 **User Input:**
+
 ```
 What are the latest developments in quantum computing this week?
 ```
 
 **System Behavior:**
+
 1. Tool Router detects `web-search` (keyword: "latest")
 2. Performs web search
 3. Displays search results
@@ -205,11 +227,13 @@ What are the latest developments in quantum computing this week?
 ### Example 5: Multi-Tool Request
 
 **User Input:**
+
 ```
 Search for the latest AI art trends and generate an image based on what you find
 ```
 
 **System Behavior:**
+
 1. Tool Router detects `web-search` + `image-generation`
 2. Executes web search first
 3. Uses search results to enhance image prompt
@@ -220,11 +244,13 @@ Search for the latest AI art trends and generate an image based on what you find
 ### Example 6: Code Generation (Suggestion)
 
 **User Input:**
+
 ```
 Write a React component for a user profile card
 ```
 
 **System Behavior:**
+
 1. Tool Router detects `code-generation`
 2. Shows toast suggestion: "For better code generation experience, try /vibe"
 3. CONTINUES to LLM (can still handle in chat)
@@ -233,11 +259,13 @@ Write a React component for a user profile card
 ### Example 7: Complex Multi-Agent Task
 
 **User Input:**
+
 ```
 Build a complete authentication system with frontend, backend, database schema, and security best practices
 ```
 
 **System Behavior:**
+
 1. Tool Router detects `multi-agent` (complex, multiple domains)
 2. Shows toast suggestion: "For complex multi-step tasks, try Mission Control"
 3. CONTINUES to multi-agent collaboration service
@@ -250,6 +278,7 @@ Build a complete authentication system with frontend, backend, database schema, 
 ### Enable/Disable Tools
 
 Check tool availability:
+
 ```typescript
 import { chatToolRouter } from '@features/chat/services/chat-tool-router';
 
@@ -268,17 +297,20 @@ const status = chatToolRouter.getToolStatus();
 ### Environment Variables
 
 **Required for Image/Video Generation:**
+
 ```bash
 VITE_GOOGLE_API_KEY=your_google_api_key
 ```
 
 **Optional for Enhanced Web Search:**
+
 ```bash
 VITE_PERPLEXITY_API_KEY=your_perplexity_key
 VITE_GOOGLE_CX=your_google_custom_search_engine_id
 ```
 
 **Demo Mode (No API Keys):**
+
 ```bash
 VITE_DEMO_MODE=true
 ```
@@ -288,19 +320,18 @@ VITE_DEMO_MODE=true
 ### Adding a New Tool
 
 1. **Update ToolType:**
+
 ```typescript
 // chat-tool-router.ts
-export type ToolType =
-  | 'image-generation'
-  | 'video-generation'
-  | 'new-tool'; // Add here
+export type ToolType = 'image-generation' | 'video-generation' | 'new-tool'; // Add here
 ```
 
 2. **Add Detection Logic:**
+
 ```typescript
 // In analyzeMessage()
 const newToolKeywords = ['keyword1', 'keyword2'];
-const hasNewToolRequest = newToolKeywords.some(k => messageLower.includes(k));
+const hasNewToolRequest = newToolKeywords.some((k) => messageLower.includes(k));
 if (hasNewToolRequest) {
   detectedTools.push('new-tool');
   confidence += 20;
@@ -309,6 +340,7 @@ if (hasNewToolRequest) {
 ```
 
 3. **Add Execution Logic:**
+
 ```typescript
 // In routeAndExecuteTools()
 case 'new-tool':
@@ -318,6 +350,7 @@ case 'new-tool':
 ```
 
 4. **Add UI Display:**
+
 ```typescript
 // In MessageBubble.tsx
 {message.metadata?.toolType === 'new-tool' && (
@@ -354,6 +387,7 @@ if (hasImageRequest) {
 ### Tool Execution Failures
 
 Tools handle errors gracefully:
+
 ```typescript
 try {
   const result = await executeImageGeneration(message);
@@ -362,12 +396,13 @@ try {
   return {
     toolType: 'image-generation',
     status: 'failed',
-    error: error.message
+    error: error.message,
   };
 }
 ```
 
 **User Experience:**
+
 - Failed tools show error toast
 - Chat continues to LLM for fallback response
 - User can retry or rephrase request
@@ -375,12 +410,13 @@ try {
 ### API Key Missing
 
 If API keys are not configured:
+
 ```typescript
 throw new Error(
   'Google Imagen service not configured.\n\n' +
-  '✅ Get a FREE key at: https://aistudio.google.com/app/apikey\n' +
-  '📝 Add to .env file: VITE_GOOGLE_API_KEY=your_key_here\n' +
-  '💡 Or enable demo mode: VITE_DEMO_MODE=true'
+    '✅ Get a FREE key at: https://aistudio.google.com/app/apikey\n' +
+    '📝 Add to .env file: VITE_GOOGLE_API_KEY=your_key_here\n' +
+    '💡 Or enable demo mode: VITE_DEMO_MODE=true'
 );
 ```
 
@@ -389,24 +425,26 @@ throw new Error(
 ### Parallel Tool Execution
 
 Tools execute in parallel when multiple are detected:
+
 ```typescript
 const results = await Promise.all([
   executeImageGeneration(message),
-  executeWebSearch(message)
+  executeWebSearch(message),
 ]);
 ```
 
 ### Progress Callbacks
 
 Real-time progress updates:
+
 ```typescript
 onProgress: (toolType, status, progress) => {
   // Update UI immediately
-  setToolProgress(prev => ({
+  setToolProgress((prev) => ({
     ...prev,
-    [toolType]: { status, progress }
+    [toolType]: { status, progress },
   }));
-}
+};
 ```
 
 ### Caching
@@ -429,7 +467,9 @@ describe('Tool Router', () => {
   });
 
   it('detects multiple tools', () => {
-    const result = analyzeMessage('Search for AI art trends and generate an image');
+    const result = analyzeMessage(
+      'Search for AI art trends and generate an image'
+    );
     expect(result.tools).toContain('web-search');
     expect(result.tools).toContain('image-generation');
   });
@@ -445,7 +485,7 @@ describe('Tool Execution', () => {
   it('executes image generation', async () => {
     const result = await routeAndExecuteTools('Generate an image of a sunset', {
       userId: 'test-user',
-      sessionId: 'test-session'
+      sessionId: 'test-session',
     });
 
     expect(result.executionResults[0].status).toBe('success');
@@ -459,17 +499,19 @@ describe('Tool Execution', () => {
 ### Enable Debug Logging
 
 Tool router logs to console:
+
 ```typescript
 console.log('[ToolRouter] Execution completed', {
   detectedTools: detection.tools,
   executedTools: executionResults.length,
-  successful: successfulResults.length
+  successful: successfulResults.length,
 });
 ```
 
 ### Browser DevTools
 
 Monitor tool execution in real-time:
+
 1. Open DevTools Console
 2. Look for `[ToolRouter]` prefix
 3. Check execution times and results
@@ -477,14 +519,17 @@ Monitor tool execution in real-time:
 ### Common Issues
 
 **Issue:** Tool not detected
+
 - **Solution:** Check keyword matching in `analyzeMessage()`
 - **Debug:** Log `detection.tools` and `detection.reasoning`
 
 **Issue:** Tool execution fails
+
 - **Solution:** Check API keys in `.env`
 - **Debug:** Check error message in execution result
 
 **Issue:** UI not updating
+
 - **Solution:** Check `toolProgress` state updates
 - **Debug:** Log `activeTools` and `toolProgress` in ChatInterface
 
@@ -501,20 +546,25 @@ Monitor tool execution in real-time:
 ## API Reference
 
 ### `chatToolRouter.analyzeMessage(message: string)`
+
 Analyzes a message and returns detected tools.
 
 ### `chatToolRouter.routeAndExecuteTools(message, options)`
+
 Executes detected tools and returns results.
 
 ### `chatToolRouter.isToolAvailable(toolType)`
+
 Checks if a specific tool is available.
 
 ### `chatToolRouter.getToolStatus()`
+
 Returns availability status for all tools.
 
 ## Support
 
 For issues or questions:
+
 1. Check console logs for errors
 2. Verify API keys are configured
 3. Test with simple requests first
@@ -523,6 +573,7 @@ For issues or questions:
 ## Changelog
 
 **v1.0.0 (Nov 2025)**
+
 - Initial unified tool integration system
 - Support for 7 tool types
 - Real-time progress indicators

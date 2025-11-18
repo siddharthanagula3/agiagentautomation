@@ -332,14 +332,14 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   };
 
   return (
-    <div className={cn('space-y-4 md:space-y-6 p-4 md:p-6', className)}>
+    <div className={cn('space-y-4 p-4 md:space-y-6 md:p-6', className)}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
             AI Employee Marketplace
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground">
+          <p className="text-sm text-muted-foreground md:text-base">
             Browse and hire specialized AI employees for your projects.
           </p>
         </div>
@@ -413,7 +413,23 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                   >
                     <Icon className="mr-1 h-3 w-3 md:h-4 md:w-4" />
                     <span className="hidden sm:inline">{category.label}</span>
-                    <span className="sm:hidden">{category.id === 'all' ? 'All' : category.id === 'engineering' ? 'Eng' : category.id === 'design' ? 'Design' : category.id === 'product' ? 'Prod' : category.id === 'data' ? 'Data' : category.id === 'marketing' ? 'Mktg' : category.id === 'sales' ? 'Sales' : 'Gen'}</span>
+                    <span className="sm:hidden">
+                      {category.id === 'all'
+                        ? 'All'
+                        : category.id === 'engineering'
+                          ? 'Eng'
+                          : category.id === 'design'
+                            ? 'Design'
+                            : category.id === 'product'
+                              ? 'Prod'
+                              : category.id === 'data'
+                                ? 'Data'
+                                : category.id === 'marketing'
+                                  ? 'Mktg'
+                                  : category.id === 'sales'
+                                    ? 'Sales'
+                                    : 'Gen'}
+                    </span>
                   </Button>
                 );
               })}
@@ -424,7 +440,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="rounded-md border border-border bg-background px-2 md:px-3 py-2 text-xs md:text-sm text-foreground"
+                className="rounded-md border border-border bg-background px-2 py-2 text-xs text-foreground md:px-3 md:text-sm"
                 aria-label="Sort employees by criteria"
               >
                 <option value="popular">Most Popular</option>
@@ -440,7 +456,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
                 onClick={() =>
                   setViewMode(viewMode === 'grid' ? 'list' : 'grid')
                 }
-                className="border-border hidden md:flex"
+                className="hidden border-border md:flex"
                 aria-label={`Switch to ${viewMode === 'grid' ? 'list' : 'grid'} view`}
               >
                 {viewMode === 'grid' ? 'List View' : 'Grid View'}

@@ -956,7 +956,9 @@ const EmployeeCard: React.FC<EmployeeCardProps> = ({
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                      {isFavorite
+                        ? 'Remove from favorites'
+                        : 'Add to favorites'}
                     </TooltipContent>
                   </Tooltip>
 

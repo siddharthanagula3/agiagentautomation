@@ -17,7 +17,9 @@ describe('PathUtils', () => {
       expect(PathUtils.normalize('src/App.tsx')).toBe('/src/App.tsx');
       expect(PathUtils.normalize('/src//App.tsx')).toBe('/src/App.tsx');
       expect(PathUtils.normalize('/src/./App.tsx')).toBe('/src/App.tsx');
-      expect(PathUtils.normalize('/src/components/../App.tsx')).toBe('/src/App.tsx');
+      expect(PathUtils.normalize('/src/components/../App.tsx')).toBe(
+        '/src/App.tsx'
+      );
       expect(PathUtils.normalize('/src/App.tsx/')).toBe('/src/App.tsx');
     });
   });
@@ -33,7 +35,9 @@ describe('PathUtils', () => {
   describe('dirname', () => {
     it('should get directory name correctly', () => {
       expect(PathUtils.dirname('/src/App.tsx')).toBe('/src');
-      expect(PathUtils.dirname('/src/components/Button.tsx')).toBe('/src/components');
+      expect(PathUtils.dirname('/src/components/Button.tsx')).toBe(
+        '/src/components'
+      );
       expect(PathUtils.dirname('/App.tsx')).toBe('/');
       expect(PathUtils.dirname('/')).toBe('/');
     });
@@ -42,7 +46,9 @@ describe('PathUtils', () => {
   describe('basename', () => {
     it('should get base name correctly', () => {
       expect(PathUtils.basename('/src/App.tsx')).toBe('App.tsx');
-      expect(PathUtils.basename('/src/components/Button.tsx')).toBe('Button.tsx');
+      expect(PathUtils.basename('/src/components/Button.tsx')).toBe(
+        'Button.tsx'
+      );
       expect(PathUtils.basename('/App.tsx')).toBe('App.tsx');
     });
   });
@@ -109,10 +115,15 @@ describe('VibeFileSystem', () => {
     });
 
     it('should create parent folders automatically', () => {
-      const file = fs.createFile('/src/components/Button.tsx', 'export const Button = () => {}');
+      const file = fs.createFile(
+        '/src/components/Button.tsx',
+        'export const Button = () => {}'
+      );
 
       expect(file.path).toBe('/src/components/Button.tsx');
-      expect(fs.listFiles('/src/components')).toContain('/src/components/Button.tsx');
+      expect(fs.listFiles('/src/components')).toContain(
+        '/src/components/Button.tsx'
+      );
     });
 
     it('should throw error if file already exists', () => {
@@ -172,10 +183,12 @@ describe('VibeFileSystem', () => {
       const originalTime = file.lastModified;
 
       // Wait a bit to ensure timestamp changes
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       const updated = fs.updateFile('/test.txt', 'World');
-      expect(updated.lastModified.getTime()).toBeGreaterThan(originalTime.getTime());
+      expect(updated.lastModified.getTime()).toBeGreaterThan(
+        originalTime.getTime()
+      );
     });
 
     it('should throw error if file does not exist', () => {
@@ -308,7 +321,7 @@ describe('VibeFileSystem', () => {
       const tree = fs.getFileTree();
 
       expect(tree).toHaveLength(2); // package.json and src
-      const srcNode = tree.find(node => node.name === 'src');
+      const srcNode = tree.find((node) => node.name === 'src');
       expect(srcNode?.children).toHaveLength(2); // App.tsx and components
     });
   });
@@ -388,7 +401,7 @@ describe('VibeFileSystem', () => {
 
       const results = fs.searchFiles('test');
       expect(results).toHaveLength(2);
-      expect(results.map(f => f.name)).toEqual(['test.txt', 'test2.txt']);
+      expect(results.map((f) => f.name)).toEqual(['test.txt', 'test2.txt']);
     });
 
     it('should search files by content', () => {

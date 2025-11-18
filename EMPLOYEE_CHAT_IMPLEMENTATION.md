@@ -16,6 +16,7 @@ Successfully redesigned the `/chat` page to implement dynamic AI employee select
 - **Employee Metadata**: Provides avatar colors, initials, and selection reasoning
 
 **Key Features:**
+
 ```typescript
 // Automatically selects best employee for message
 await employeeChatService.sendMessage(message, conversationHistory);
@@ -37,6 +38,7 @@ await employeeChatService.sendMessage(message, conversationHistory);
 - Captures and displays employee metadata in message objects
 
 **Flow:**
+
 1. User sends message
 2. Show "thinking" indicator with employee selection status
 3. Employee chat service analyzes message and selects optimal employee
@@ -54,16 +56,17 @@ await employeeChatService.sendMessage(message, conversationHistory);
 - **Visual Branding**: Each employee has a consistent color theme
 
 **New Metadata Fields:**
+
 ```typescript
 interface Message {
   // ... existing fields
   metadata?: {
-    selectionReason?: string;      // Why this employee was chosen
-    thinkingSteps?: string[];      // Reasoning process
-    employeeName?: string;         // Employee identifier
-    employeeAvatar?: string;       // Avatar URL
-    model?: string;                // AI model used
-  }
+    selectionReason?: string; // Why this employee was chosen
+    thinkingSteps?: string[]; // Reasoning process
+    employeeName?: string; // Employee identifier
+    employeeAvatar?: string; // Avatar URL
+    model?: string; // AI model used
+  };
 }
 ```
 
@@ -97,9 +100,9 @@ export interface AIEmployee {
   tools: string[];
   model: string;
   systemPrompt: string;
-  avatar?: string;           // NEW: Custom avatar path
-  price?: number;            // NEW: Employee pricing
-  expertise?: string[];      // NEW: Expertise keywords
+  avatar?: string; // NEW: Custom avatar path
+  price?: number; // NEW: Employee pricing
+  expertise?: string[]; // NEW: Expertise keywords
 }
 ```
 
@@ -142,6 +145,7 @@ export interface AIEmployee {
 The service uses a multi-criteria scoring system:
 
 ### Scoring Factors:
+
 1. **Keyword Matching** (0-15 points): Matches message keywords to employee expertise
 2. **Description Relevance** (0-12 points): Semantic matching with employee description
 3. **Direct Mentions** (20 points): User explicitly mentions employee name
@@ -150,17 +154,18 @@ The service uses a multi-criteria scoring system:
 
 ### Example Matches:
 
-| User Message | Selected Employee | Reason |
-|-------------|-------------------|--------|
-| "I have a headache" | Health Advisor | health-related query |
-| "Review my code" | Code Reviewer | coding expertise |
-| "Debug this error" | Debugger | debugging skills |
-| "Design a logo" | Illustrator | design expertise |
-| "Legal advice needed" | AI Lawyer | legal knowledge |
+| User Message          | Selected Employee | Reason               |
+| --------------------- | ----------------- | -------------------- |
+| "I have a headache"   | Health Advisor    | health-related query |
+| "Review my code"      | Code Reviewer     | coding expertise     |
+| "Debug this error"    | Debugger          | debugging skills     |
+| "Design a logo"       | Illustrator       | design expertise     |
+| "Legal advice needed" | AI Lawyer         | legal knowledge      |
 
 ## Integration with Existing Systems
 
 ### Works With:
+
 ✅ **Mission Control Store**: Uses existing employee status tracking
 ✅ **Workforce Orchestrator**: Leverages `routeMessageToEmployee()`
 ✅ **Employee Files**: Reads from `.agi/employees/*.md`
@@ -168,6 +173,7 @@ The service uses a multi-criteria scoring system:
 ✅ **Multi-Agent Protocol**: Compatible with conversation protocol
 
 ### Maintains:
+
 ✅ All existing chat features (export, share, reactions)
 ✅ Token tracking and usage monitoring
 ✅ Message history and persistence
@@ -178,6 +184,7 @@ The service uses a multi-criteria scoring system:
 ### Test Scenarios:
 
 1. **Health Query**:
+
    ```
    User: "I have a persistent headache"
    Expected: Health Advisor selected
@@ -185,6 +192,7 @@ The service uses a multi-criteria scoring system:
    ```
 
 2. **Code Review**:
+
    ```
    User: "Can you review this React component?"
    Expected: Code Reviewer selected
@@ -192,6 +200,7 @@ The service uses a multi-criteria scoring system:
    ```
 
 3. **Legal Question**:
+
    ```
    User: "What are my rights as a tenant?"
    Expected: AI Lawyer or Landlord Advisor selected
@@ -217,14 +226,15 @@ name: employee-name
 description: Brief role description
 tools: Read, Write, Bash
 model: claude-3-5-sonnet
-avatar: /avatars/employee-name.png  # Optional
-expertise: [keyword1, keyword2]      # Optional
+avatar: /avatars/employee-name.png # Optional
+expertise: [keyword1, keyword2] # Optional
 ---
 
 System prompt content here...
 ```
 
 The chat service will automatically:
+
 - Load the new employee
 - Include them in selection logic
 - Generate color theme
@@ -260,6 +270,7 @@ Potential improvements:
 ## Type Safety
 
 All code passes TypeScript strict mode:
+
 ```bash
 npm run type-check  # ✅ Passes with 0 errors
 ```
@@ -269,6 +280,7 @@ npm run type-check  # ✅ Passes with 0 errors
 The chat interface now provides an intelligent, visually appealing, and user-friendly experience that automatically routes messages to the most appropriate AI employee. The implementation is fully integrated with the existing codebase, maintains all existing functionality, and adds significant value through better employee utilization and transparency.
 
 Users can now see:
+
 - **Which employee** is handling their request
 - **Why that employee** was selected
 - **How the employee** is thinking through their question

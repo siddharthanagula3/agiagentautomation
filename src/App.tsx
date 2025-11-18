@@ -35,9 +35,7 @@ const SecurityPage = lazyWithRetry(() => import('./pages/Security'));
 const ArtifactGalleryPage = lazyWithRetry(
   () => import('./pages/ArtifactGallery')
 );
-const SupportCenterPage = lazyWithRetry(
-  () => import('./pages/SupportCenter')
-);
+const SupportCenterPage = lazyWithRetry(() => import('./pages/SupportCenter'));
 
 // === AUTH PAGES ===
 const LoginPage = lazyWithRetry(() => import('@features/auth/pages/Login'));

@@ -551,12 +551,12 @@ const BillingPage: React.FC = () => {
         </div>
       }
     >
-      <div className="space-y-4 md:space-y-8 p-4 md:p-6">
+      <div className="space-y-4 p-4 md:space-y-8 md:p-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Billing</h1>
-            <p className="mt-2 text-sm md:text-base text-muted-foreground">
+            <h1 className="text-2xl font-bold md:text-3xl">Billing</h1>
+            <p className="mt-2 text-sm text-muted-foreground md:text-base">
               Manage your subscription and billing information.
             </p>
           </div>
@@ -582,7 +582,9 @@ const BillingPage: React.FC = () => {
                 className="flex items-center gap-2"
               >
                 <Settings className="h-4 w-4" />
-                <span className="hidden sm:inline">{isManagingBilling ? 'Opening...' : 'Manage Billing'}</span>
+                <span className="hidden sm:inline">
+                  {isManagingBilling ? 'Opening...' : 'Manage Billing'}
+                </span>
                 <span className="sm:hidden">Manage</span>
                 <ExternalLink className="h-4 w-4" />
               </Button>

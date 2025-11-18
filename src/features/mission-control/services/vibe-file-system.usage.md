@@ -14,7 +14,10 @@ vibeFileSystem.createFile('/src/App.tsx', 'const App = () => <div>Hello</div>');
 const content = vibeFileSystem.readFile('/src/App.tsx');
 
 // Update a file
-vibeFileSystem.updateFile('/src/App.tsx', 'const App = () => <div>Updated</div>');
+vibeFileSystem.updateFile(
+  '/src/App.tsx',
+  'const App = () => <div>Updated</div>'
+);
 
 // Delete a file
 vibeFileSystem.deleteFile('/src/App.tsx');
@@ -29,13 +32,19 @@ vibeFileSystem.deleteFile('/src/App.tsx');
 vibeFileSystem.createFolder('/src');
 
 // Create nested folders (automatic parent creation)
-vibeFileSystem.createFile('/src/components/Button.tsx', 'export const Button = () => {}');
+vibeFileSystem.createFile(
+  '/src/components/Button.tsx',
+  'export const Button = () => {}'
+);
 // This automatically creates /src and /src/components
 
 // Create files with different types
 vibeFileSystem.createFile('/src/App.tsx', 'const App = () => {}');
 vibeFileSystem.createFile('/src/style.css', '.app { color: red; }');
-vibeFileSystem.createFile('/package.json', JSON.stringify({ name: 'app' }, null, 2));
+vibeFileSystem.createFile(
+  '/package.json',
+  JSON.stringify({ name: 'app' }, null, 2)
+);
 ```
 
 ### Reading and Updating Files
@@ -45,7 +54,10 @@ vibeFileSystem.createFile('/package.json', JSON.stringify({ name: 'app' }, null,
 const content = vibeFileSystem.readFile('/src/App.tsx');
 
 // Update file content
-vibeFileSystem.updateFile('/src/App.tsx', 'const App = () => <div>New Content</div>');
+vibeFileSystem.updateFile(
+  '/src/App.tsx',
+  'const App = () => <div>New Content</div>'
+);
 
 // Check if file has unsaved changes
 if (vibeFileSystem.hasUnsavedChanges()) {
@@ -384,7 +396,10 @@ function useKeyboardShortcuts(activeFile: string) {
 ## Error Handling
 
 ```typescript
-import { vibeFileSystem, FileSystemException } from '@features/mission-control/services/vibe-file-system';
+import {
+  vibeFileSystem,
+  FileSystemException,
+} from '@features/mission-control/services/vibe-file-system';
 
 function handleFileOperation() {
   try {

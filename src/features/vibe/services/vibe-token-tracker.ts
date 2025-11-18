@@ -27,7 +27,10 @@ export async function updateVibeSessionTokens(
     });
 
     if (error) {
-      console.error('[VibeTokenTracker] Failed to update session tokens:', error);
+      console.error(
+        '[VibeTokenTracker] Failed to update session tokens:',
+        error
+      );
       throw error;
     }
 

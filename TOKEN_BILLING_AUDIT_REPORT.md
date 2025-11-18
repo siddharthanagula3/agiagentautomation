@@ -74,37 +74,45 @@ Database (api_usage table)
 Two different pricing tables exist with conflicting values:
 
 **File 1:** `/src/core/integrations/token-usage-tracker.ts` (Lines 48-118)
+
 ```typescript
 const TOKEN_PRICING = {
   'gpt-4o': { input: 5.0, output: 15.0, provider: 'openai' },
   'gpt-4o-mini': { input: 0.15, output: 0.6, provider: 'openai' },
-  'claude-3-5-sonnet-20241022': { input: 3.0, output: 15.0, provider: 'anthropic' },
+  'claude-3-5-sonnet-20241022': {
+    input: 3.0,
+    output: 15.0,
+    provider: 'anthropic',
+  },
   'gemini-1.5-pro': { input: 3.5, output: 10.5, provider: 'google' },
   // ... more models
-}
+};
 ```
 
 **File 2:** `/src/features/billing/services/credit-tracking.ts` (Lines 52-73)
+
 ```typescript
 const PRICING = {
   openai: {
-    'gpt-4o': { input: 2.5, output: 10 },  // ❌ DIFFERENT!
-    'gpt-4o-mini': { input: 0.15, output: 0.6 },  // ✅ Same
+    'gpt-4o': { input: 2.5, output: 10 }, // ❌ DIFFERENT!
+    'gpt-4o-mini': { input: 0.15, output: 0.6 }, // ✅ Same
   },
   anthropic: {
-    'claude-3-5-sonnet-20241022': { input: 3, output: 15 },  // ✅ Same
+    'claude-3-5-sonnet-20241022': { input: 3, output: 15 }, // ✅ Same
   },
   google: {
-    'gemini-1.5-pro': { input: 1.25, output: 10 },  // ❌ DIFFERENT!
+    'gemini-1.5-pro': { input: 1.25, output: 10 }, // ❌ DIFFERENT!
   },
-}
+};
 ```
 
 **Discrepancies:**
+
 - `gpt-4o`: Input cost differs by **2x** (5.0 vs 2.5)
 - `gemini-1.5-pro`: Input cost differs by **2.8x** (3.5 vs 1.25)
 
 **Recommendation:**
+
 1. Use a SINGLE source of truth for pricing
 2. Verify all prices against official API documentation (as of Nov 2025):
    - OpenAI: https://openai.com/pricing
@@ -139,11 +147,13 @@ export async function streamOpenAI(
 ```
 
 **Impact:**
+
 - All tokens used via these streaming functions are NOT billed
 - Potential revenue loss if these functions are actively used
 - Incomplete usage analytics
 
 **Recommendation:**
+
 1. Add token tracking to each streaming function
 2. Extract usage data from streaming responses
 3. Call `tokenLogger.logTokenUsage()` after stream completes
@@ -164,14 +174,15 @@ The Billing Dashboard queries the wrong table with wrong column names:
 ```typescript
 // ❌ WRONG TABLE NAME
 const { data: usageData, error: usageError } = await supabase
-  .from('token_usage')  // ❌ Should be 'api_usage'
+  .from('token_usage') // ❌ Should be 'api_usage'
   .select(
-    'provider, input_tokens, output_tokens, total_tokens, total_cost'  // ❌ Wrong columns
+    'provider, input_tokens, output_tokens, total_tokens, total_cost' // ❌ Wrong columns
   )
   .eq('user_id', user.id);
 ```
 
 **Actual Database Schema** (`api_usage` table):
+
 ```sql
 CREATE TABLE public.api_usage (
   id UUID PRIMARY KEY,
@@ -190,10 +201,11 @@ CREATE TABLE public.api_usage (
 ```
 
 **Fix Required:**
+
 ```typescript
 const { data: usageData, error: usageError } = await supabase
-  .from('api_usage')  // ✅ Correct table
-  .select('provider, input_tokens, output_tokens, tokens_used, cost')  // ✅ Correct columns
+  .from('api_usage') // ✅ Correct table
+  .select('provider, input_tokens, output_tokens, tokens_used, cost') // ✅ Correct columns
   .eq('user_id', user.id);
 ```
 
@@ -208,6 +220,7 @@ const { data: usageData, error: usageError } = await supabase
 Individual provider files (`anthropic-claude.ts`, `openai-gpt.ts`, etc.) don't explicitly track tokens. They only return usage data and save messages to database.
 
 **Current Flow:**
+
 ```
 Provider → Returns usage → Unified Service → Tracks tokens
 ```
@@ -216,6 +229,7 @@ Provider → Returns usage → Unified Service → Tracks tokens
 If the unified service fails to track (e.g., exception thrown), tokens are lost.
 
 **Recommendation:**
+
 - Add defensive token tracking at provider level as backup
 - Implement idempotency checks to prevent double-billing
 
@@ -232,6 +246,7 @@ Some LLM calls don't pass `sessionId`, `userId`, or `taskDescription`:
 **Examples:**
 
 1. **Workforce Orchestrator** - Planning stage (Line 225-230):
+
 ```typescript
 const response = await unifiedLLMService.sendMessage({
   provider: 'anthropic',
@@ -243,19 +258,21 @@ const response = await unifiedLLMService.sendMessage({
 ```
 
 2. **Agent Conversation Protocol** - Supervisor analysis (Line 270-278):
+
 ```typescript
 const response = await unifiedLLMService.sendMessage(
   [
     { role: 'system', content: supervisor.systemPrompt },
     { role: 'user', content: prompt },
   ],
-  state.id,    // ✅ sessionId passed
-  userId,      // ✅ userId passed
+  state.id, // ✅ sessionId passed
+  userId, // ✅ userId passed
   'anthropic'
 );
 ```
 
 **Recommendation:**
+
 - Ensure ALL LLM calls include sessionId and userId
 - Add task descriptions for better analytics
 
@@ -270,11 +287,13 @@ const response = await unifiedLLMService.sendMessage(
 Pricing data in `token-usage-tracker.ts` claims to be "as of 2025" but should be verified against current rates.
 
 **Models to Verify:**
+
 - `gpt-5-thinking`: Listed as $15 input / $45 output (is this model even available?)
 - `claude-sonnet-4-5-thinking`: Listed as $4 input / $20 output
 - `gemini-2-5-pro`: Listed as $5 input / $15 output
 
 **Recommendation:**
+
 - Verify all pricing against official documentation
 - Add "last updated" date to pricing table
 - Implement automated pricing updates or alerts when providers change prices
@@ -301,7 +320,10 @@ if (actualUserId && unifiedResponse.usage) {
   });
 
   if (!deductionResult.success) {
-    console.error('[Unified LLM Service] Token deduction failed:', deductionResult.error);
+    console.error(
+      '[Unified LLM Service] Token deduction failed:',
+      deductionResult.error
+    );
   }
 }
 ```
@@ -509,6 +531,7 @@ Before deploying fixes, verify:
 ## Official Pricing Reference (November 2025)
 
 ### OpenAI Pricing (per 1M tokens)
+
 - GPT-4o: $2.50 input / $10.00 output
 - GPT-4o-mini: $0.15 input / $0.60 output
 - GPT-4-turbo: $10.00 input / $30.00 output
@@ -517,6 +540,7 @@ Before deploying fixes, verify:
 Source: https://openai.com/pricing (verify current)
 
 ### Anthropic Pricing (per 1M tokens)
+
 - Claude 3.5 Sonnet: $3.00 input / $15.00 output
 - Claude 3 Opus: $15.00 input / $75.00 output
 - Claude 3.5 Haiku: $1.00 input / $5.00 output
@@ -525,12 +549,14 @@ Source: https://openai.com/pricing (verify current)
 Source: https://www.anthropic.com/pricing (verify current)
 
 ### Google Pricing (per 1M tokens)
+
 - Gemini 1.5 Pro: $1.25 input / $5.00 output (≤128k), $2.50/$10.00 (>128k)
 - Gemini 1.5 Flash: $0.075 input / $0.30 output (≤128k), $0.15/$0.60 (>128k)
 
 Source: https://ai.google.dev/pricing (verify current)
 
 ### Perplexity Pricing (per 1M tokens)
+
 - Sonar Small: $0.20 input / $0.20 output
 - Sonar Large: $1.00 input / $1.00 output
 - Sonar Huge: $5.00 input / $5.00 output

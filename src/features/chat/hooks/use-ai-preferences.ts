@@ -49,7 +49,10 @@ export function useAIPreferences() {
           setPreferences((prev) => ({
             ...prev,
             isLoading: false,
-            error: error instanceof Error ? error.message : 'Failed to load preferences',
+            error:
+              error instanceof Error
+                ? error.message
+                : 'Failed to load preferences',
           }));
         }
       }

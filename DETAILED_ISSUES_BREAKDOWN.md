@@ -3,6 +3,7 @@
 ## CRITICAL ISSUE #1: Import Path Mismatch
 
 ### File 1: src/services/enhanced-ai-chat-service-v2.ts
+
 ```typescript
 Line 6:
 ❌ import { unifiedLLMService } from '@core/ai/llm/unified-llm-service';
@@ -14,6 +15,7 @@ Impact: testProviderConnection() function will fail
 ```
 
 ### File 2: src/core/integrations/chat-completion-handler.ts
+
 ```typescript
 Line 6:
 ❌ import { unifiedLLMService } from '@core/ai/llm/unified-llm-service';
@@ -25,6 +27,7 @@ Impact: sendAIMessage() function will fail
 ```
 
 ### File 3: src/core/integrations/token-usage-tracker.ts
+
 ```typescript
 Line 7:
 ❌ import type { LLMProvider } from './llm/unified-llm-service';
@@ -40,6 +43,7 @@ Impact: Type definitions missing, TokenLogEntry interface fails
 ## CRITICAL ISSUE #2: Missing Perplexity Proxy
 
 ### Current Problem
+
 The perplexity-ai provider is imported and initialized but immediately throws an error:
 
 ```typescript
@@ -51,13 +55,14 @@ async sendMessage(
 ): Promise<PerplexityResponse> {
   try {
     throw new PerplexityError(
-      'Direct Perplexity API calls are disabled for security. 
+      'Direct Perplexity API calls are disabled for security.
        Use /.netlify/functions/perplexity-proxy instead.',
       'DIRECT_API_DISABLED'
     );
 ```
 
 ### What's Expected
+
 The unified LLM service initializes it:
 
 ```typescript
@@ -67,14 +72,18 @@ this.providers.set('perplexity', perplexityProvider);
 ```
 
 ### What's Missing
+
 `netlify/functions/perplexity-proxy.ts` does NOT exist
 
 ### Files That Need It
+
 - Any code using `provider: 'perplexity'` in sendMessage calls
 - Models: 'llama-3.1-sonar-small-128k-online', 'llama-3.1-sonar-large-128k-online'
 
 ### Required Template
+
 Follow the pattern from google-proxy.ts:
+
 1. Extract messages and model from request body
 2. Call Perplexity API endpoint
 3. Format response for UI consumption
@@ -87,21 +96,22 @@ Follow the pattern from google-proxy.ts:
 ## CRITICAL ISSUE #3: Direct API Key Usage in Development
 
 ### Problem Location 1: message-streaming.ts
+
 ```typescript
 // src/features/mission-control/services/message-streaming.ts lines 36-48
 
 // ⚠️ SECURITY ISSUE: API keys exposed in development mode
 const OPENAI_API_KEY = import.meta.env.DEV
-  ? import.meta.env.VITE_OPENAI_API_KEY || ''  // Exposed in dev!
+  ? import.meta.env.VITE_OPENAI_API_KEY || '' // Exposed in dev!
   : '';
 const ANTHROPIC_API_KEY = import.meta.env.DEV
-  ? import.meta.env.VITE_ANTHROPIC_API_KEY || ''  // Exposed in dev!
+  ? import.meta.env.VITE_ANTHROPIC_API_KEY || '' // Exposed in dev!
   : '';
 const GOOGLE_API_KEY = import.meta.env.DEV
-  ? import.meta.env.VITE_GOOGLE_API_KEY || ''  // Exposed in dev!
+  ? import.meta.env.VITE_GOOGLE_API_KEY || '' // Exposed in dev!
   : '';
 const PERPLEXITY_API_KEY = import.meta.env.DEV
-  ? import.meta.env.VITE_PERPLEXITY_API_KEY || ''  // Exposed in dev!
+  ? import.meta.env.VITE_PERPLEXITY_API_KEY || '' // Exposed in dev!
   : '';
 
 // Then later in streamOpenAI function:
@@ -116,7 +126,7 @@ if (import.meta.env.PROD) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${OPENAI_API_KEY}`,  // Key exposed
+      Authorization: `Bearer ${OPENAI_API_KEY}`, // Key exposed
     },
     // ...
   });
@@ -124,22 +134,25 @@ if (import.meta.env.PROD) {
 ```
 
 **Why This Is Bad:**
+
 - Vite's dev bundle includes the secret keys
 - Chrome DevTools → Sources shows the API keys in plaintext
 - Anyone with access to dev machine can extract keys
 - Different security model vs production
 
 **Affected Functions:**
+
 - streamOpenAI() - lines 52-153
 - streamAnthropic() - lines 158-220+ (similar pattern)
 - streamGoogle() - similar pattern
 
 ### Problem Location 2: media-generation-handler.ts
+
 ```typescript
 // src/core/integrations/media-generation-handler.ts
 
 const GOOGLE_API_KEY = import.meta.env.DEV
-  ? import.meta.env.VITE_GOOGLE_API_KEY || ''  // Exposed
+  ? import.meta.env.VITE_GOOGLE_API_KEY || '' // Exposed
   : '';
 
 // Used in image generation - direct API call bypasses proxy
@@ -180,6 +193,7 @@ Incorrect Flow (Message Streaming):
 ## TOKEN TRACKING INCONSISTENCY
 
 ### Source 1: Proxy Function Token Tracking
+
 **File**: `netlify/functions/utils/token-tracking.ts`
 
 ```typescript
@@ -202,6 +216,7 @@ const TOKEN_PRICING = {
 ```
 
 ### Source 2: Integration Token Tracker
+
 **File**: `src/core/integrations/token-usage-tracker.ts`
 
 ```typescript
@@ -219,6 +234,7 @@ const TOKEN_PRICING: Record<string, ...> = {
 ```
 
 ### Issue
+
 - Two different pricing tables
 - Different prices for same models (gpt-4o: 2.5 vs 5.0)
 - Inconsistent billing calculations
@@ -227,7 +243,8 @@ const TOKEN_PRICING: Record<string, ...> = {
 
 ## ENVIRONMENT VARIABLE SECURITY
 
-### Problem: VITE_ prefix means public
+### Problem: VITE\_ prefix means public
+
 ```
 VITE_* variables are embedded in the JavaScript bundle
 In production build, these should be EMPTY/MISSING
@@ -247,7 +264,8 @@ Current setup:
 ```
 
 ### Ideal Solution
-- Remove all VITE_ API keys from .env
+
+- Remove all VITE\_ API keys from .env
 - Use environment-specific configuration
 - Always use proxies, never direct API calls
 - Keys only in Netlify server-side environment
@@ -257,33 +275,34 @@ Current setup:
 ## AUTHENTICATION FLOW
 
 ### Current Implementation (auth-middleware.ts)
+
 ```typescript
 export function withAuth(handler: AuthenticatedHandler): Handler {
   return async (event: HandlerEvent, context: HandlerContext) => {
     try {
       // 1. Extract token from Authorization header
       const authHeader = event.headers.authorization || event.headers.Authorization;
-      
+
       if (!authHeader) {
         return { statusCode: 401, ... }; // Reject
       }
-      
+
       // 2. Remove 'Bearer ' prefix
       const token = authHeader.replace(/^Bearer\s+/i, '');
-      
+
       // 3. Verify with Supabase
       const { data: { user }, error } = await supabase.auth.getUser(token);
-      
+
       if (error || !user) {
         return { statusCode: 401, ... }; // Reject
       }
-      
+
       // 4. Attach user to event
       const authenticatedEvent: AuthenticatedEvent = {
         ...event,
         user: { id: user.id, email: user.email },
       };
-      
+
       // 5. Call handler with authenticated event
       return await handler(authenticatedEvent, context);
     } catch (error) {
@@ -294,12 +313,14 @@ export function withAuth(handler: AuthenticatedHandler): Handler {
 ```
 
 ### Applied To:
+
 - ✅ anthropic-proxy.ts
 - ✅ openai-proxy.ts
 - ✅ google-proxy.ts
 - ❌ perplexity-proxy.ts (doesn't exist yet)
 
 ### Issue
+
 Development mode may require auth tokens that aren't available,
 blocking legitimate development requests.
 
@@ -308,6 +329,7 @@ blocking legitimate development requests.
 ## RATE LIMITING CONFIGURATION
 
 ### Current Logic (rate-limiter.ts)
+
 ```typescript
 function initializeRateLimiter() {
   if (ratelimit) return ratelimit;
@@ -318,7 +340,7 @@ function initializeRateLimiter() {
   // If Redis not configured:
   if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) {
     console.warn('[Rate Limiter] Redis not configured...');
-    return null;  // Returns null, no rate limiting!
+    return null; // Returns null, no rate limiting!
   }
 
   // Creates rate limiter with 10 requests per 1 minute
@@ -334,6 +356,7 @@ function initializeRateLimiter() {
 ```
 
 ### Middleware Usage
+
 ```typescript
 export function withRateLimit(handler) {
   return async (event: HandlerEvent) => {
@@ -349,7 +372,9 @@ export function withRateLimit(handler) {
 ```
 
 ### Configuration Dependency
+
 If Netlify environment doesn't have:
+
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
 
@@ -362,6 +387,7 @@ Then rate limiting is completely disabled. All requests pass through.
 ### Deployment Readiness
 
 **Environment Variables** - Production Netlify
+
 - [ ] VITE_ANTHROPIC_API_KEY = (UNSET/EMPTY)
 - [ ] VITE_OPENAI_API_KEY = (UNSET/EMPTY)
 - [ ] VITE_GOOGLE_API_KEY = (UNSET/EMPTY)
@@ -376,6 +402,7 @@ Then rate limiting is completely disabled. All requests pass through.
 - [ ] UPSTASH_REDIS_REST_TOKEN = configured (for rate limiting)
 
 **Code Fixes Required**
+
 - [ ] Fix import paths (3 files)
 - [ ] Create perplexity-proxy.ts
 - [ ] Remove direct API calls from message-streaming.ts
@@ -383,9 +410,9 @@ Then rate limiting is completely disabled. All requests pass through.
 - [ ] Consolidate token pricing tables
 
 **Testing**
+
 - [ ] Test all three proxy functions with auth token
 - [ ] Test rate limiting with Redis
 - [ ] Test token tracking and billing
 - [ ] Test streaming responses
 - [ ] Test error handling and recovery
-

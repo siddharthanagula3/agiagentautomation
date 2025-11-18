@@ -259,7 +259,9 @@ export async function searchAndSummarize(
 
   // If no answer, generate one using AI
   try {
-    const { unifiedLLMService } = await import('@core/ai/llm/unified-language-model');
+    const { unifiedLLMService } = await import(
+      '@core/ai/llm/unified-language-model'
+    );
 
     const context = searchResponse.results
       .map((r, i) => `[${i + 1}] ${r.title}\n${r.snippet}\nSource: ${r.url}`)
@@ -267,12 +269,21 @@ export async function searchAndSummarize(
 
     const prompt = `Based on the following search results, provide a comprehensive answer to the query: "${query}"\n\nSearch Results:\n${context}\n\nProvide a well-structured answer and cite your sources using [1], [2], etc.`;
 
-    const provider = aiProvider === 'chatgpt' ? 'openai' : aiProvider === 'claude' ? 'anthropic' : 'google';
+    const provider =
+      aiProvider === 'chatgpt'
+        ? 'openai'
+        : aiProvider === 'claude'
+          ? 'anthropic'
+          : 'google';
 
     const aiResponse = await unifiedLLMService.sendMessage(
       [
-        { role: 'system', content: 'You are a helpful assistant that provides accurate, cited information.' },
-        { role: 'user', content: prompt }
+        {
+          role: 'system',
+          content:
+            'You are a helpful assistant that provides accurate, cited information.',
+        },
+        { role: 'user', content: prompt },
       ],
       undefined,
       undefined,

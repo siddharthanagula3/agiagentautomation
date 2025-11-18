@@ -24,7 +24,8 @@ export const EmployeeThinkingIndicator: React.FC<
   message = 'Analyzing your message and selecting best employee...',
   className,
 }) => {
-  const employeeInitials = employeeChatService.getEmployeeInitials(employeeName);
+  const employeeInitials =
+    employeeChatService.getEmployeeInitials(employeeName);
   const employeeColor = employeeChatService.getEmployeeAvatar(employeeName);
 
   return (
@@ -32,7 +33,10 @@ export const EmployeeThinkingIndicator: React.FC<
       {/* Employee Avatar */}
       <div className="flex-shrink-0">
         <div className="relative">
-          <Avatar className="h-9 w-9 ring-2 ring-offset-1" style={{ ringColor: employeeColor }}>
+          <Avatar
+            className="h-9 w-9 ring-2 ring-offset-1"
+            style={{ ringColor: employeeColor }}
+          >
             <AvatarImage
               src={
                 typeof employeeAvatar === 'string' &&

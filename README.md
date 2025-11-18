@@ -110,33 +110,40 @@ Build your dream AI team from 139+ specialists:
 <summary><b>View Employee Categories</b></summary>
 
 **Development & Engineering (15+)**
+
 - Software Architect, Frontend Engineer, Backend Engineer, Full-Stack Developer
 - DevOps Engineer, QA Engineer, Code Reviewer, Debugger
 - Mobile App Developer, Database Architect, API Designer
 
 **Business & Strategy (20+)**
+
 - Business Analyst, Product Manager, Marketing Strategist
 - Sales Specialist, Customer Success Manager, HR Consultant
 - Financial Advisor, Operations Manager, Strategy Consultant
 
 **Creative & Content (25+)**
+
 - Content Writer, Copywriter, SEO Specialist, Social Media Manager
 - Graphic Designer, Video Editor, Photographer, Animator
 - UX/UI Designer, Brand Strategist, Email Marketing Specialist
 
 **Healthcare & Wellness (15+)**
+
 - Primary Care Physician, Nutritionist, Fitness Coach, Mental Health Counselor
 - Physical Therapist, Sleep Specialist, Meditation Coach
 
 **Legal & Finance (12+)**
+
 - Legal Consultant, Tax Specialist, Estate Planning, Contract Review
 - Investment Advisor, Retirement Planner, Bankruptcy Attorney
 
 **Education & Coaching (18+)**
+
 - Academic Tutor, Language Tutor, Career Counselor, Study Skills Coach
 - STEM Educator, Test Prep Coach, Homeschool Advisor
 
 **Specialized Services (34+)**
+
 - Real Estate Agent, Event Planner, Travel Consultant, Interior Designer
 - Wedding Planner, Pet Care Specialist, Auto Mechanic Advisor
 - And 100+ more...
@@ -149,13 +156,13 @@ Build your dream AI team from 139+ specialists:
 
 Automatically select the best AI model for each task:
 
-| Task Type | Recommended Model | Why |
-|-----------|------------------|-----|
-| **Coding** | Claude Sonnet 4.5 | Superior reasoning for complex code |
-| **General** | GPT-4o | Best all-around performance |
-| **Creative** | Gemini 2.0 Flash | Optimized for creative content |
-| **Research** | Perplexity Sonar | Real-time web access |
-| **Media** | Google Imagen/Veo | Specialized media generation |
+| Task Type    | Recommended Model | Why                                 |
+| ------------ | ----------------- | ----------------------------------- |
+| **Coding**   | Claude Sonnet 4.5 | Superior reasoning for complex code |
+| **General**  | GPT-4o            | Best all-around performance         |
+| **Creative** | Gemini 2.0 Flash  | Optimized for creative content      |
+| **Research** | Perplexity Sonar  | Real-time web access                |
+| **Media**    | Google Imagen/Veo | Specialized media generation        |
 
 **Manual Override:** Choose any provider/model at any time via dropdown
 
@@ -232,37 +239,37 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 ### Frontend
 
-| Technology | Purpose |
-|-----------|---------|
-| **React 18** | UI framework with concurrent rendering |
-| **TypeScript 5.8** | Type-safe development |
-| **Vite 7.1** | Lightning-fast build tool |
-| **Tailwind CSS** | Utility-first styling |
-| **shadcn/ui** | High-quality component library |
-| **Monaco Editor** | VS Code-powered code editing |
-| **Zustand + Immer** | State management |
-| **React Router 6** | Client-side routing |
-| **Framer Motion** | Smooth animations |
+| Technology          | Purpose                                |
+| ------------------- | -------------------------------------- |
+| **React 18**        | UI framework with concurrent rendering |
+| **TypeScript 5.8**  | Type-safe development                  |
+| **Vite 7.1**        | Lightning-fast build tool              |
+| **Tailwind CSS**    | Utility-first styling                  |
+| **shadcn/ui**       | High-quality component library         |
+| **Monaco Editor**   | VS Code-powered code editing           |
+| **Zustand + Immer** | State management                       |
+| **React Router 6**  | Client-side routing                    |
+| **Framer Motion**   | Smooth animations                      |
 
 ### Backend & Infrastructure
 
-| Technology | Purpose |
-|-----------|---------|
-| **Supabase** | PostgreSQL database with real-time subscriptions |
-| **Supabase Auth** | Authentication with Row Level Security (RLS) |
-| **Netlify Functions** | Serverless backend (Node.js) |
-| **Stripe** | Payment processing & subscriptions |
-| **Upstash Redis** | Rate limiting & caching |
+| Technology            | Purpose                                          |
+| --------------------- | ------------------------------------------------ |
+| **Supabase**          | PostgreSQL database with real-time subscriptions |
+| **Supabase Auth**     | Authentication with Row Level Security (RLS)     |
+| **Netlify Functions** | Serverless backend (Node.js)                     |
+| **Stripe**            | Payment processing & subscriptions               |
+| **Upstash Redis**     | Rate limiting & caching                          |
 
 ### AI Providers
 
-| Provider | Models | Use Case |
-|----------|--------|----------|
-| **Anthropic** | Claude Sonnet 4.5, Claude Opus 4 | Coding, reasoning, complex tasks |
-| **OpenAI** | GPT-4o, GPT-4 Turbo | General-purpose, versatile |
-| **Google** | Gemini 2.0 Flash, Imagen 4.0, Veo 3.1 | Creative, media generation |
-| **Perplexity** | Sonar Pro | Real-time web search |
-| **xAI Grok** | Grok Beta, Grok 2 Latest | Social media analysis, X/Twitter data |
+| Provider       | Models                                | Use Case                              |
+| -------------- | ------------------------------------- | ------------------------------------- |
+| **Anthropic**  | Claude Sonnet 4.5, Claude Opus 4      | Coding, reasoning, complex tasks      |
+| **OpenAI**     | GPT-4o, GPT-4 Turbo                   | General-purpose, versatile            |
+| **Google**     | Gemini 2.0 Flash, Imagen 4.0, Veo 3.1 | Creative, media generation            |
+| **Perplexity** | Sonar Pro                             | Real-time web search                  |
+| **xAI Grok**   | Grok Beta, Grok 2 Latest              | Social media analysis, X/Twitter data |
 
 ---
 
@@ -476,6 +483,7 @@ supabase studio           # Open Supabase Studio UI
 ### Local Development Setup
 
 1. **Start Supabase:**
+
    ```bash
    supabase start
    # Note the API URL and anon key from output
@@ -486,6 +494,7 @@ supabase studio           # Open Supabase Studio UI
    - Add your AI provider API keys
 
 3. **Start Dev Server:**
+
    ```bash
    npm run dev
    ```
@@ -498,18 +507,21 @@ supabase studio           # Open Supabase Studio UI
 ### Testing Strategy
 
 **Unit Tests (Vitest):**
+
 - Test individual functions and utilities
 - Located in `*.test.ts` files next to source
 - Use `vi.mock()` to mock dependencies
 - Focus on business logic and services
 
 **E2E Tests (Playwright):**
+
 - Test complete user flows
 - Located in `e2e/` directory
 - Cover critical paths: auth, chat, orchestration
 - Run in CI/CD pipeline
 
 **Integration Tests:**
+
 - Test service layer interactions
 - Mock external APIs (Supabase, LLM providers)
 - Verify state management
@@ -698,12 +710,14 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ## 💰 Pricing
 
 ### Free Tier
+
 - 100 messages/month
 - Access to GPT-4o Mini
 - Basic employee marketplace
 - Community support
 
 ### Pro ($19/month)
+
 - Unlimited messages
 - Access to all AI models (Claude, GPT-4, Gemini)
 - Full employee marketplace (139+ employees)
@@ -711,6 +725,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - Advanced features (document export, media generation)
 
 ### Enterprise (Custom)
+
 - Dedicated resources
 - Custom AI employees
 - SSO & advanced security
@@ -725,7 +740,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 **Built with ❤️ by the AGI Agent Automation Team**
 
-*Transforming how humans and AI collaborate*
+_Transforming how humans and AI collaborate_
 
 [Website](#) • [Documentation](/docs) • [Blog](/blogs) • [Twitter](#) • [LinkedIn](#)
 

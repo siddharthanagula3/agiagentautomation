@@ -415,8 +415,12 @@ const PricingPage: React.FC = () => {
                   <th className="px-2 py-3 text-left text-sm font-semibold sm:px-4 md:px-6 md:py-4">
                     Features
                   </th>
-                  <th className="px-2 py-3 text-center text-sm font-semibold sm:px-4 md:px-6 md:py-4">Pro</th>
-                  <th className="px-2 py-3 text-center text-sm font-semibold sm:px-4 md:px-6 md:py-4">Max</th>
+                  <th className="px-2 py-3 text-center text-sm font-semibold sm:px-4 md:px-6 md:py-4">
+                    Pro
+                  </th>
+                  <th className="px-2 py-3 text-center text-sm font-semibold sm:px-4 md:px-6 md:py-4">
+                    Max
+                  </th>
                   <th className="px-2 py-3 text-center text-sm font-semibold sm:px-4 md:px-6 md:py-4">
                     Enterprise
                   </th>
@@ -426,7 +430,10 @@ const PricingPage: React.FC = () => {
                 {comparisonFeatures.map((category, catIdx) => (
                   <React.Fragment key={catIdx}>
                     <tr className="bg-accent/5">
-                      <td colSpan={4} className="px-2 py-2 text-xs font-bold sm:px-4 sm:py-3 sm:text-sm md:px-6">
+                      <td
+                        colSpan={4}
+                        className="px-2 py-2 text-xs font-bold sm:px-4 sm:py-3 sm:text-sm md:px-6"
+                      >
                         {category.category}
                       </td>
                     </tr>
@@ -435,7 +442,9 @@ const PricingPage: React.FC = () => {
                         key={featIdx}
                         className="border-b border-border/20 hover:bg-accent/5"
                       >
-                        <td className="px-2 py-2 text-xs sm:px-4 sm:py-3 sm:text-sm md:px-6">{feature.name}</td>
+                        <td className="px-2 py-2 text-xs sm:px-4 sm:py-3 sm:text-sm md:px-6">
+                          {feature.name}
+                        </td>
                         <td className="px-2 py-2 text-center sm:px-4 sm:py-3 md:px-6">
                           {typeof feature.starter === 'boolean' ? (
                             feature.starter ? (
@@ -450,7 +459,9 @@ const PricingPage: React.FC = () => {
                               />
                             )
                           ) : (
-                            <span className="text-xs sm:text-sm">{feature.starter}</span>
+                            <span className="text-xs sm:text-sm">
+                              {feature.starter}
+                            </span>
                           )}
                         </td>
                         <td className="px-2 py-2 text-center sm:px-4 sm:py-3 md:px-6">
@@ -467,7 +478,9 @@ const PricingPage: React.FC = () => {
                               />
                             )
                           ) : (
-                            <span className="text-xs sm:text-sm">{feature.pro}</span>
+                            <span className="text-xs sm:text-sm">
+                              {feature.pro}
+                            </span>
                           )}
                         </td>
                         <td className="px-2 py-2 text-center sm:px-4 sm:py-3 md:px-6">
@@ -555,7 +568,9 @@ const PricingPage: React.FC = () => {
             viewport={{ once: true }}
             className="rounded-3xl bg-gradient-to-r from-primary via-accent to-secondary p-6 text-center text-white sm:p-8 md:p-12"
           >
-            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">Still Have Questions?</h2>
+            <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
+              Still Have Questions?
+            </h2>
             <p className="mb-8 text-xl opacity-90">
               Our team is here to help you find the perfect plan
             </p>
@@ -590,7 +605,7 @@ const PricingCard: React.FC<{
       transition={{ duration: 0.6, delay: index * 0.1 }}
       className={`relative overflow-hidden rounded-3xl border p-4 backdrop-blur-xl sm:p-6 md:p-8 ${
         plan.popular
-          ? 'sm:scale-105 border-primary bg-gradient-to-b from-primary/10 to-accent/10 shadow-2xl'
+          ? 'border-primary bg-gradient-to-b from-primary/10 to-accent/10 shadow-2xl sm:scale-105'
           : 'border-border/40 bg-background/60'
       }`}
       whileHover={{ y: -8 }}

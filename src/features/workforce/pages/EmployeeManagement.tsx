@@ -81,7 +81,7 @@ const EmployeeManagement: React.FC = () => {
   const activeEmployees = hiredEmployees.filter((emp) => emp.is_active).length;
 
   return (
-    <div className="min-h-screen space-y-4 md:space-y-6 p-4 md:p-6">
+    <div className="min-h-screen space-y-4 p-4 md:space-y-6 md:p-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -91,21 +91,23 @@ const EmployeeManagement: React.FC = () => {
         <Particles className="absolute inset-0" quantity={30} ease={20} />
         <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl"></div>
         <div className="relative z-10">
-          <div className="flex flex-col sm:flex-row gap-4 sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <Badge className="glass mb-4">
                 <Users className="mr-2 h-3 w-3" />
                 AI Workforce Management
               </Badge>
-              <h1 className="mb-2 text-2xl md:text-4xl font-bold">Your AI Workforce</h1>
-              <p className="text-base md:text-xl text-muted-foreground">
+              <h1 className="mb-2 text-2xl font-bold md:text-4xl">
+                Your AI Workforce
+              </h1>
+              <p className="text-base text-muted-foreground md:text-xl">
                 Manage your AI team and track performance in real-time
               </p>
             </div>
             <Link to="/marketplace" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="btn-glow gradient-primary text-white w-full"
+                className="btn-glow gradient-primary w-full text-white"
               >
                 <Plus className="mr-2 h-5 w-5" />
                 Hire AI Employee
@@ -302,9 +304,13 @@ const EmployeeManagement: React.FC = () => {
                           (e) => e.id === rec.employee_id
                         );
                         // Fallback values when employee data is not found
-                        const displayName = emp?.role || rec.role || 'AI Employee';
+                        const displayName =
+                          emp?.role || rec.role || 'AI Employee';
                         const displayAvatar = emp?.avatar;
-                        const displaySpecialty = emp?.specialty || emp?.description || 'AI specialist ready to assist';
+                        const displaySpecialty =
+                          emp?.specialty ||
+                          emp?.description ||
+                          'AI specialist ready to assist';
 
                         return (
                           <BentoCard

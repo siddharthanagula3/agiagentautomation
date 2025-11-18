@@ -2,20 +2,22 @@
 
 ## What Was Fixed
 
-| Error | Root Cause | Fix |
-|-------|------------|-----|
-| `user_settings 406 Not Acceptable` | Using `.single()` when row might not exist | Changed to `.maybeSingle()` |
+| Error                                  | Root Cause                                     | Fix                                       |
+| -------------------------------------- | ---------------------------------------------- | ----------------------------------------- |
+| `user_settings 406 Not Acceptable`     | Using `.single()` when row might not exist     | Changed to `.maybeSingle()`               |
 | `vibe_sessions foreign key constraint` | User in `auth.users` but not in `public.users` | Added trigger to auto-create user records |
-| `Existing users missing records` | Users signed up before trigger existed | Backfill migration |
+| `Existing users missing records`       | Users signed up before trigger existed         | Backfill migration                        |
 
 ## Files Changed
 
 ### Code Changes
+
 - `/src/features/settings/services/user-preferences.ts`
   - Line 83: Changed `.single()` → `.maybeSingle()`
   - Line 168: Changed `.single()` → `.maybeSingle()`
 
 ### New Migrations
+
 1. `/supabase/migrations/20251118000003_add_handle_new_user_trigger.sql`
    - Creates `handle_new_user()` function
    - Creates `on_auth_user_created` trigger
@@ -28,18 +30,21 @@
 ## Quick Apply
 
 ### Option 1: Using Script
+
 ```bash
 ./scripts/apply-database-fixes.sh
 # Follow prompts to choose local or production
 ```
 
 ### Option 2: Manual (Local)
+
 ```bash
 supabase start
 supabase migration up
 ```
 
 ### Option 3: Manual (Production)
+
 ```bash
 # Via Supabase Dashboard SQL Editor
 # Copy and run each migration file
@@ -48,11 +53,13 @@ supabase migration up
 ## Verification Commands
 
 ### Check trigger exists
+
 ```sql
 SELECT * FROM pg_trigger WHERE tgname = 'on_auth_user_created';
 ```
 
 ### Check all users backfilled
+
 ```sql
 -- Should return 0
 SELECT COUNT(*) FROM auth.users au
@@ -60,6 +67,7 @@ WHERE NOT EXISTS (SELECT 1 FROM public.users WHERE id = au.id);
 ```
 
 ### Test new user creation
+
 ```sql
 -- Sign up a new user, then check:
 SELECT au.email,
@@ -73,11 +81,13 @@ ORDER BY au.created_at DESC LIMIT 1;
 ## Impact
 
 ### Before
+
 - ❌ VIBE sessions fail to create
 - ❌ Settings page throws 406 errors
 - ❌ Inconsistent user data
 
 ### After
+
 - ✅ VIBE sessions create successfully
 - ✅ Settings page loads without errors
 - ✅ All users have complete records
@@ -99,12 +109,14 @@ DROP FUNCTION IF EXISTS public.handle_new_user();
 ```
 
 Then revert code changes in `user-preferences.ts`:
+
 - Change `.maybeSingle()` back to `.single()`
 - Add back PGRST116 error handling
 
 ## Support
 
 For detailed information, see:
+
 - `DATABASE_ERRORS_FIXED.md` - Complete documentation
 - Migration files in `/supabase/migrations/`
 - Code changes in `/src/features/settings/services/user-preferences.ts`

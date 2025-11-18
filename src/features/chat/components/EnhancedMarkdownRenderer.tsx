@@ -166,13 +166,7 @@ const LinkComponent = ({
 };
 
 // Custom image component with lazy loading
-const ImageComponent = ({
-  src,
-  alt,
-}: {
-  src?: string;
-  alt?: string;
-}) => (
+const ImageComponent = ({ src, alt }: { src?: string; alt?: string }) => (
   <img
     src={src}
     alt={alt}
@@ -189,9 +183,7 @@ const BlockquoteComponent = ({ children }: { children: React.ReactNode }) => (
 );
 
 // Custom horizontal rule
-const HorizontalRule = () => (
-  <hr className="my-8 border-t border-border" />
-);
+const HorizontalRule = () => <hr className="my-8 border-t border-border" />;
 
 // Custom list components
 const OrderedList = ({ children }: { children: React.ReactNode }) => (
@@ -271,9 +263,14 @@ const markdownComponents: Components = {
   tr: TableRow as React.ComponentType<{ children: React.ReactNode }>,
   th: TableHeader as React.ComponentType<{ children: React.ReactNode }>,
   td: TableCell as React.ComponentType<{ children: React.ReactNode }>,
-  a: LinkComponent as React.ComponentType<{ href?: string; children: React.ReactNode }>,
+  a: LinkComponent as React.ComponentType<{
+    href?: string;
+    children: React.ReactNode;
+  }>,
   img: ImageComponent as React.ComponentType<{ src?: string; alt?: string }>,
-  blockquote: BlockquoteComponent as React.ComponentType<{ children: React.ReactNode }>,
+  blockquote: BlockquoteComponent as React.ComponentType<{
+    children: React.ReactNode;
+  }>,
   hr: HorizontalRule as React.ComponentType<Record<string, never>>,
   ol: OrderedList as React.ComponentType<{ children: React.ReactNode }>,
   ul: UnorderedList as React.ComponentType<{ children: React.ReactNode }>,
@@ -289,12 +286,7 @@ const markdownComponents: Components = {
 
 export const EnhancedMarkdownRenderer: React.FC<
   EnhancedMarkdownRendererProps
-> = ({
-  content,
-  className,
-  enableMath = true,
-  enableCodeCopy = true,
-}) => {
+> = ({ content, className, enableMath = true, enableCodeCopy = true }) => {
   // Build remark plugins
   const remarkPlugins = [remarkGfm, remarkBreaks];
   if (enableMath) {

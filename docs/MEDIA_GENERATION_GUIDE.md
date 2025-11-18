@@ -26,6 +26,7 @@ The platform integrates with Google AI Studio to provide:
 ### Features
 
 **Imagen 4.0:**
+
 - Multiple quality tiers (Standard, Ultra, Fast)
 - Aspect ratios: 1:1, 3:4, 4:3, 9:16, 16:9
 - 1-4 images per request
@@ -34,6 +35,7 @@ The platform integrates with Google AI Studio to provide:
 - Safety filtering
 
 **Veo 3.1:**
+
 - 720p or 1080p resolution
 - 5-8 second duration
 - Native audio generation
@@ -56,6 +58,7 @@ VITE_GOOGLE_API_KEY=your-google-api-key-here
 ```
 
 This single key enables:
+
 - Gemini (chat)
 - Imagen 4.0 (image generation)
 - Veo 3.1 (video generation)
@@ -92,13 +95,13 @@ console.log('Cost:', result.cost);
 
 ```typescript
 // Standard quality (recommended)
-model: 'imagen-4.0-generate-001' // $0.002 per image
+model: 'imagen-4.0-generate-001'; // $0.002 per image
 
 // Ultra quality (best results)
-model: 'imagen-4.0-ultra-generate-001' // $0.004 per image
+model: 'imagen-4.0-ultra-generate-001'; // $0.004 per image
 
 // Fast generation (quick results)
-model: 'imagen-4.0-fast-generate-001' // $0.001 per image
+model: 'imagen-4.0-fast-generate-001'; // $0.001 per image
 ```
 
 ### Advanced Options
@@ -198,7 +201,7 @@ The platform automatically detects when users want to generate media:
 ```typescript
 import { mediaToolDetector } from '@core/integrations/media-tool-detector';
 
-const message = "Create an image of a sunset over mountains";
+const message = 'Create an image of a sunset over mountains';
 const detection = mediaToolDetector.detect(message);
 
 console.log(detection);
@@ -213,6 +216,7 @@ console.log(detection);
 ### Detection Keywords
 
 **Images:**
+
 - "create image/picture/photo"
 - "generate image/picture/photo"
 - "make image/picture/photo"
@@ -221,6 +225,7 @@ console.log(detection);
 - "visualize", "illustrate"
 
 **Videos:**
+
 - "create video/animation/clip"
 - "generate video/animation/clip"
 - "make video/animation/clip"
@@ -232,7 +237,7 @@ console.log(detection);
 Users can specify parameters in natural language:
 
 ```typescript
-const message = "Create 3 images of cats in 16:9 portrait style";
+const message = 'Create 3 images of cats in 16:9 portrait style';
 const info = mediaToolDetector.extractMediaInfo(message);
 
 console.log(info);
@@ -372,7 +377,9 @@ class GoogleImagenService {
   isAvailable(): boolean;
 
   // Generate image
-  generateImage(request: ImagenGenerationRequest): Promise<ImagenGenerationResponse>;
+  generateImage(
+    request: ImagenGenerationRequest
+  ): Promise<ImagenGenerationResponse>;
 
   // Enhance prompt
   enhancePrompt(prompt: string): Promise<string>;
@@ -531,6 +538,7 @@ async function handleChatMessage(message: string) {
 **Error:** "Google API key not configured"
 
 **Solution:**
+
 1. Get key from https://aistudio.google.com/app/apikey
 2. Add to `.env`: `VITE_GOOGLE_API_KEY=your-key-here`
 3. Restart dev server
@@ -540,6 +548,7 @@ async function handleChatMessage(message: string) {
 **Error:** "quota exceeded"
 
 **Solution:**
+
 - Check usage at https://aistudio.google.com
 - Upgrade to paid plan if needed
 - Wait for quota reset (daily/monthly)
@@ -549,6 +558,7 @@ async function handleChatMessage(message: string) {
 **Error:** "Content was blocked by safety filters"
 
 **Solution:**
+
 - Modify prompt to avoid triggering filters
 - Use less specific or controversial content
 - Check Google's content policies
@@ -558,6 +568,7 @@ async function handleChatMessage(message: string) {
 **Error:** "Video generation timed out"
 
 **Solution:**
+
 - Check internet connection
 - Try simpler prompt
 - Retry the request

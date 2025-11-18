@@ -7,6 +7,7 @@ The Document Generation feature enables users to create high-quality documents d
 ## Features
 
 ### 1. Document Types Supported
+
 - **Reports**: Comprehensive reports with executive summaries and recommendations
 - **Articles**: Engaging articles with clear structure
 - **Summaries**: Concise summaries of information
@@ -15,11 +16,13 @@ The Document Generation feature enables users to create high-quality documents d
 - **General Documents**: Well-structured general-purpose documents
 
 ### 2. Export Formats
+
 - **Markdown (.md)**: Native markdown format with YAML frontmatter
 - **PDF (.pdf)**: Professional PDF documents with formatting
 - **Word (.docx)**: Microsoft Word documents with styles
 
 ### 3. Enhanced Markdown Rendering
+
 The feature includes a comprehensive markdown renderer with support for:
 
 - **Headers**: H1-H6 with consistent styling
@@ -40,7 +43,9 @@ The feature includes a comprehensive markdown renderer with support for:
 - **Footnotes**: GitHub Flavored Markdown footnotes
 
 ### 4. AI Enhancement Options
+
 Documents can be enhanced using Claude:
+
 - **Proofread**: Fix grammatical errors and typos
 - **Expand**: Add more details and examples
 - **Summarize**: Create concise version
@@ -68,6 +73,7 @@ src/features/chat/
 ### Service Layer
 
 #### document-generation-service.ts
+
 ```typescript
 // Detects document requests
 isDocumentRequest(message: string): boolean
@@ -83,6 +89,7 @@ enhanceDocument(content: string, enhancement: 'proofread' | 'expand' | 'summariz
 ```
 
 #### document-export-service.ts
+
 ```typescript
 // Export to markdown
 downloadAsMarkdown(content: string, filename: string, options?: ExportOptions): Promise<void>
@@ -129,14 +136,14 @@ The system automatically detects document requests using keywords:
 
 ```typescript
 // These phrases trigger document generation:
-"create document"
-"write document"
-"generate document"
-"write report"
-"create article"
-"draft proposal"
-"write summary"
-"create documentation"
+'create document';
+'write document';
+'generate document';
+'write report';
+'create article';
+'draft proposal';
+'write summary';
+'create documentation';
 // ... and many more
 ```
 
@@ -167,7 +174,7 @@ const document = await generateDocument(
 ```typescript
 const enhancedContent = await enhanceDocument(
   originalContent,
-  'proofread',  // or 'expand', 'summarize', 'restructure'
+  'proofread', // or 'expand', 'summarize', 'restructure'
   sessionId
 );
 ```
@@ -178,37 +185,25 @@ const enhancedContent = await enhanceDocument(
 import { documentExportService } from '@features/chat/services/document-export-service';
 
 // Export as PDF
-await documentExportService.downloadAsPDF(
-  content,
-  'my-document.pdf',
-  {
-    title: 'My Document',
-    author: 'John Doe'
-  }
-);
+await documentExportService.downloadAsPDF(content, 'my-document.pdf', {
+  title: 'My Document',
+  author: 'John Doe',
+});
 
 // Export as Word
-await documentExportService.downloadAsDOCX(
-  content,
-  'my-document.docx',
-  {
-    title: 'My Document',
-    author: 'John Doe'
-  }
-);
+await documentExportService.downloadAsDOCX(content, 'my-document.docx', {
+  title: 'My Document',
+  author: 'John Doe',
+});
 
 // Export as Markdown
-await documentExportService.downloadAsMarkdown(
-  content,
-  'my-document.md',
-  {
-    metadata: {
-      title: 'My Document',
-      author: 'John Doe',
-      date: new Date().toISOString()
-    }
-  }
-);
+await documentExportService.downloadAsMarkdown(content, 'my-document.md', {
+  metadata: {
+    title: 'My Document',
+    author: 'John Doe',
+    date: new Date().toISOString(),
+  },
+});
 ```
 
 ### Complete Integration Example
@@ -310,6 +305,7 @@ Renders markdown with full feature support.
 ```
 
 **Props:**
+
 - `content` (string): Markdown content to render
 - `className?` (string): Additional CSS classes
 - `enableMath?` (boolean): Enable KaTeX math rendering (default: true)
@@ -329,6 +325,7 @@ Displays a generated document with all features.
 ```
 
 **Props:**
+
 - `document` (GeneratedDocument): The generated document object
 - `onEnhance?` (function): Callback for document enhancement
 - `isEnhancing?` (boolean): Whether document is being enhanced
@@ -350,6 +347,7 @@ Provides download and enhancement actions.
 ```
 
 **Props:**
+
 - `content` (string): Document content
 - `title?` (string): Document title
 - `author?` (string): Document author
@@ -421,6 +419,7 @@ reader interest throughout."
 ### 1. Document Request Formatting
 
 Be specific in your requests:
+
 ```
 ✅ "Create a technical report on machine learning best practices with code examples"
 ✅ "Write a formal proposal for implementing AI in customer service"
@@ -431,6 +430,7 @@ Be specific in your requests:
 ### 2. Document Enhancement
 
 Use enhancement features strategically:
+
 - **Proofread**: Before finalizing documents
 - **Expand**: When you need more detail
 - **Summarize**: For executive summaries
@@ -474,7 +474,9 @@ try {
 import { documentGenerationService } from './document-generation-service';
 
 test('detects document requests', () => {
-  expect(documentGenerationService.isDocumentRequest('create a report')).toBe(true);
+  expect(documentGenerationService.isDocumentRequest('create a report')).toBe(
+    true
+  );
   expect(documentGenerationService.isDocumentRequest('hello')).toBe(false);
 });
 

@@ -106,7 +106,7 @@ export const AgentStatusPanel: React.FC = () => {
 
   return (
     <Card className="h-full border-border bg-card">
-      <CardHeader className="border-b border-border p-3 sm:pb-4 sm:p-4">
+      <CardHeader className="border-b border-border p-3 sm:p-4 sm:pb-4">
         <CardTitle className="flex items-center gap-2 text-sm text-foreground sm:text-base">
           <Zap className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
           AI Team ({assignedAgents.length})

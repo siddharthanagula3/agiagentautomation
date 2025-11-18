@@ -3,6 +3,7 @@
 ## Pre-Deployment Checklist
 
 ### Build & Compilation
+
 - [x] TypeScript compilation passes (`npm run type-check`)
 - [x] ESLint passes with no errors (`npm run lint`)
 - [x] Production build succeeds (`npm run build`)
@@ -12,6 +13,7 @@
 ### Component Testing
 
 #### SimpleChatPanel
+
 - [ ] Messages display correctly (user and agent)
 - [ ] Avatar colors are correct (blue for user, purple for agent)
 - [ ] Agent name and role badges show up
@@ -23,6 +25,7 @@
 - [ ] Timestamps display correctly
 
 #### CodeEditorPanel
+
 - [ ] Monaco Editor loads without errors
 - [ ] File tree displays when files exist
 - [ ] File tree is collapsible (show/hide button works)
@@ -40,6 +43,7 @@
 - [ ] Minimap shows on the right
 
 #### LivePreviewPanel
+
 - [ ] Preview iframe loads correctly
 - [ ] URL input accepts and loads URLs
 - [ ] Refresh button reloads iframe
@@ -57,6 +61,7 @@
 ### Layout Testing
 
 #### Desktop (≥768px)
+
 - [ ] Three panels visible simultaneously
 - [ ] Left panel (chat) is ~30% width
 - [ ] Right panel is ~70% width
@@ -69,6 +74,7 @@
 - [ ] Layout persists after refresh (optional)
 
 #### Mobile (<768px)
+
 - [ ] Panels stack vertically
 - [ ] Each panel is equal height (33%)
 - [ ] Chat is on top
@@ -81,6 +87,7 @@
 ### Integration Testing
 
 #### Message Flow
+
 - [ ] User can send messages
 - [ ] Messages appear in chat panel
 - [ ] Agent responses stream correctly
@@ -89,6 +96,7 @@
 - [ ] Real-time updates work (Supabase subscription)
 
 #### File Operations
+
 - [ ] Files created by agent appear in tree
 - [ ] File content displays in editor
 - [ ] File content updates in real-time
@@ -96,6 +104,7 @@
 - [ ] File metadata is preserved
 
 #### Agent Orchestration
+
 - [ ] Workforce orchestrator still works
 - [ ] Agent selection logic intact
 - [ ] Task execution runs correctly
@@ -105,12 +114,14 @@
 ### Browser Compatibility
 
 #### Desktop Browsers
+
 - [ ] Chrome/Edge (latest)
 - [ ] Firefox (latest)
 - [ ] Safari (latest)
 - [ ] Opera (latest)
 
 #### Mobile Browsers
+
 - [ ] Chrome Mobile
 - [ ] Safari Mobile
 - [ ] Firefox Mobile
@@ -119,18 +130,21 @@
 ### Performance Testing
 
 #### Load Time
+
 - [ ] Initial page load < 3 seconds
 - [ ] Monaco Editor loads < 2 seconds
 - [ ] Chat messages render < 100ms
 - [ ] File tree renders < 500ms
 
 #### Runtime Performance
+
 - [ ] No memory leaks after 10 minutes
 - [ ] Smooth scrolling in all panels
 - [ ] No UI freezes during operations
 - [ ] Resize operations are smooth (60fps)
 
 #### Large Data Sets
+
 - [ ] 100+ messages render correctly
 - [ ] 50+ files in file tree
 - [ ] Large files (>1MB) load correctly
@@ -139,6 +153,7 @@
 ### Accessibility Testing
 
 #### Keyboard Navigation
+
 - [ ] Tab order is logical
 - [ ] All buttons accessible via keyboard
 - [ ] Enter/Space activate buttons
@@ -146,6 +161,7 @@
 - [ ] Cmd/Ctrl+Enter sends messages
 
 #### Screen Readers
+
 - [ ] Messages are announced
 - [ ] Buttons have proper labels
 - [ ] Form inputs have labels
@@ -153,6 +169,7 @@
 - [ ] Error messages are announced
 
 #### Visual
+
 - [ ] Text contrast ratio meets WCAG AA
 - [ ] Focus indicators visible
 - [ ] Text is readable at 200% zoom
@@ -162,6 +179,7 @@
 ### Security Testing
 
 #### Iframe Sandbox
+
 - [ ] Preview cannot access parent window
 - [ ] Preview cannot navigate parent page
 - [ ] Preview cannot read cookies from parent
@@ -169,6 +187,7 @@
 - [ ] Forms can submit within iframe
 
 #### XSS Prevention
+
 - [ ] HTML in messages is sanitized
 - [ ] Script tags don't execute
 - [ ] Event handlers are stripped
@@ -176,6 +195,7 @@
 - [ ] Code blocks are safe (no execution)
 
 #### Data Validation
+
 - [ ] File paths are validated
 - [ ] URLs are validated
 - [ ] User input is sanitized
@@ -185,6 +205,7 @@
 ### Error Handling
 
 #### Network Errors
+
 - [ ] Offline state handled gracefully
 - [ ] Failed API calls show error message
 - [ ] Retry logic works correctly
@@ -192,6 +213,7 @@
 - [ ] Connection loss is detected
 
 #### User Errors
+
 - [ ] Invalid URLs show error
 - [ ] Missing files show error
 - [ ] Empty messages are prevented
@@ -199,6 +221,7 @@
 - [ ] Navigation errors are caught
 
 #### System Errors
+
 - [ ] JavaScript errors don't crash app
 - [ ] Render errors show fallback UI
 - [ ] Database errors show message
@@ -208,6 +231,7 @@
 ### User Experience
 
 #### First-Time User
+
 - [ ] Empty states are helpful
 - [ ] Instructions are clear
 - [ ] Actions are discoverable
@@ -215,6 +239,7 @@
 - [ ] No confusion about purpose
 
 #### Power User
+
 - [ ] Keyboard shortcuts work
 - [ ] Quick actions available
 - [ ] Settings are accessible
@@ -222,6 +247,7 @@
 - [ ] Advanced features discoverable
 
 #### Edge Cases
+
 - [ ] No internet connection
 - [ ] Very long messages
 - [ ] Special characters in filenames
@@ -231,6 +257,7 @@
 ## Post-Deployment Verification
 
 ### Production Environment
+
 - [ ] All environment variables set
 - [ ] API keys configured
 - [ ] Database migrations applied
@@ -239,6 +266,7 @@
 - [ ] Domain configured correctly
 
 ### Monitoring
+
 - [ ] Error tracking enabled (Sentry)
 - [ ] Analytics tracking works
 - [ ] Performance monitoring active
@@ -246,6 +274,7 @@
 - [ ] Alerts configured for errors
 
 ### Documentation
+
 - [ ] README updated
 - [ ] API docs accurate
 - [ ] Component docs complete
@@ -312,7 +341,7 @@ Before deploying to production:
 - [ ] Security reviewed
 - [ ] Documentation complete
 
-**Tested by:** _____________
-**Date:** _____________
-**Version:** _____________
-**Approved by:** _____________
+**Tested by:** ******\_******
+**Date:** ******\_******
+**Version:** ******\_******
+**Approved by:** ******\_******

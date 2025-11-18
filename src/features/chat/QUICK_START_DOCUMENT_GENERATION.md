@@ -92,7 +92,7 @@ import { documentExportService } from '@features/chat/services/document-export-s
 // Export as PDF
 await documentExportService.downloadAsPDF(content, 'document.pdf', {
   title: 'My Document',
-  author: 'Your Name'
+  author: 'Your Name',
 });
 ```
 
@@ -199,29 +199,35 @@ export function DocumentChat() {
 These phrases will automatically trigger document generation:
 
 **General Documents:**
+
 - "create document"
 - "write document"
 - "generate document"
 - "make a document"
 
 **Reports:**
+
 - "create report"
 - "write report"
 - "generate report"
 
 **Articles:**
+
 - "write article"
 - "create article"
 
 **Proposals:**
+
 - "write proposal"
 - "draft proposal"
 
 **Documentation:**
+
 - "write documentation"
 - "create docs"
 
 **Summaries:**
+
 - "write summary"
 - "create summary"
 - "summarize this"
@@ -255,19 +261,14 @@ These phrases will automatically trigger document generation:
 ### Custom Export Options
 
 ```typescript
-await documentExportService.exportDocument(
-  content,
-  'pdf',
-  'my-document',
-  {
-    title: 'Custom Title',
-    author: 'Your Name',
-    metadata: {
-      company: 'Your Company',
-      date: new Date().toISOString()
-    }
-  }
-);
+await documentExportService.exportDocument(content, 'pdf', 'my-document', {
+  title: 'Custom Title',
+  author: 'Your Name',
+  metadata: {
+    company: 'Your Company',
+    date: new Date().toISOString(),
+  },
+});
 ```
 
 ## Troubleshooting
@@ -289,12 +290,14 @@ await documentExportService.exportDocument(
 ### Styling Issues?
 
 1. Import required CSS files:
+
 ```typescript
 import 'highlight.js/styles/github-dark.css';
 import 'katex/dist/katex.min.css';
 ```
 
 2. Ensure Tailwind prose plugin is configured in `tailwind.config.js`:
+
 ```javascript
 plugins: [
   require('@tailwindcss/typography'),
@@ -347,6 +350,7 @@ plugins: [
 ## Support
 
 For issues or questions:
+
 - Check the [troubleshooting section](#troubleshooting)
 - Review the [full documentation](./DOCUMENT_GENERATION.md)
 - File an issue on GitHub

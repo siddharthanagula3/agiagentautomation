@@ -65,12 +65,20 @@ export const MessageList: React.FC<MessageListProps> = ({
               : new Date(message.createdAt || Date.now());
 
           // Check if this is a thinking/processing indicator message
-          if (message.metadata?.isThinking || message.metadata?.isSearching || message.metadata?.isToolProcessing) {
+          if (
+            message.metadata?.isThinking ||
+            message.metadata?.isSearching ||
+            message.metadata?.isToolProcessing
+          ) {
             return (
               <EmployeeThinkingIndicator
                 key={message.id}
-                employeeName={message.metadata?.employeeName as string | undefined}
-                employeeAvatar={message.metadata?.employeeAvatar as string | undefined}
+                employeeName={
+                  message.metadata?.employeeName as string | undefined
+                }
+                employeeAvatar={
+                  message.metadata?.employeeAvatar as string | undefined
+                }
                 message={message.content}
               />
             );
@@ -93,7 +101,8 @@ export const MessageList: React.FC<MessageListProps> = ({
                   | undefined,
                 reactions: [],
                 metadata: {
-                  tokensUsed: message.metadata?.tokens || message.metadata?.tokensUsed,
+                  tokensUsed:
+                    message.metadata?.tokens || message.metadata?.tokensUsed,
                   inputTokens: message.metadata?.inputTokens as
                     | number
                     | undefined,
@@ -121,7 +130,7 @@ export const MessageList: React.FC<MessageListProps> = ({
         })}
 
         {/* Loading indicator - fallback if not using thinking indicator */}
-        {isLoading && messages.every(m => !m.metadata?.isThinking) && (
+        {isLoading && messages.every((m) => !m.metadata?.isThinking) && (
           <EmployeeThinkingIndicator message="Processing your request..." />
         )}
       </div>

@@ -11,7 +11,13 @@ import type { UnifiedMessage } from '@core/ai/llm/unified-language-model';
 export type DocumentFormat = 'markdown' | 'pdf' | 'docx';
 
 export interface DocumentRequest {
-  type: 'report' | 'article' | 'summary' | 'proposal' | 'documentation' | 'general';
+  type:
+    | 'report'
+    | 'article'
+    | 'summary'
+    | 'proposal'
+    | 'documentation'
+    | 'general';
   topic: string;
   requirements?: string;
   tone?: 'formal' | 'casual' | 'technical' | 'creative';
@@ -65,7 +71,7 @@ export function isDocumentRequest(message: string): boolean {
   ];
 
   const lowerMessage = message.toLowerCase();
-  return documentKeywords.some(keyword => lowerMessage.includes(keyword));
+  return documentKeywords.some((keyword) => lowerMessage.includes(keyword));
 }
 
 /**
@@ -80,18 +86,29 @@ export function parseDocumentRequest(message: string): DocumentRequest {
   else if (lowerMessage.includes('article')) type = 'article';
   else if (lowerMessage.includes('summary')) type = 'summary';
   else if (lowerMessage.includes('proposal')) type = 'proposal';
-  else if (lowerMessage.includes('documentation') || lowerMessage.includes('docs')) type = 'documentation';
+  else if (
+    lowerMessage.includes('documentation') ||
+    lowerMessage.includes('docs')
+  )
+    type = 'documentation';
 
   // Detect tone
   let tone: DocumentRequest['tone'] = 'formal';
-  if (lowerMessage.includes('casual') || lowerMessage.includes('informal')) tone = 'casual';
+  if (lowerMessage.includes('casual') || lowerMessage.includes('informal'))
+    tone = 'casual';
   else if (lowerMessage.includes('technical')) tone = 'technical';
   else if (lowerMessage.includes('creative')) tone = 'creative';
 
   // Detect length
   let length: DocumentRequest['length'] = 'medium';
-  if (lowerMessage.includes('short') || lowerMessage.includes('brief')) length = 'short';
-  else if (lowerMessage.includes('long') || lowerMessage.includes('detailed') || lowerMessage.includes('comprehensive')) length = 'long';
+  if (lowerMessage.includes('short') || lowerMessage.includes('brief'))
+    length = 'short';
+  else if (
+    lowerMessage.includes('long') ||
+    lowerMessage.includes('detailed') ||
+    lowerMessage.includes('comprehensive')
+  )
+    length = 'long';
 
   return {
     type,
@@ -137,7 +154,9 @@ export async function generateDocument(
 
     // Extract title from content (first # heading)
     const titleMatch = response.content.match(/^#\s+(.+)$/m);
-    const title = titleMatch ? titleMatch[1] : `${request.type.charAt(0).toUpperCase() + request.type.slice(1)} Document`;
+    const title = titleMatch
+      ? titleMatch[1]
+      : `${request.type.charAt(0).toUpperCase() + request.type.slice(1)} Document`;
 
     // Calculate word count
     const wordCount = response.content.split(/\s+/).length;
@@ -175,15 +194,24 @@ function buildDocumentGenerationPrompt(request: DocumentRequest): string {
   };
 
   const toneGuidance: Record<NonNullable<DocumentRequest['tone']>, string> = {
-    formal: 'Use formal, professional language appropriate for business or academic contexts.',
-    casual: 'Use conversational, friendly language while maintaining clarity and professionalism.',
-    technical: 'Use precise technical language with appropriate terminology and detailed explanations.',
-    creative: 'Use engaging, creative language while maintaining clarity and purpose.',
+    formal:
+      'Use formal, professional language appropriate for business or academic contexts.',
+    casual:
+      'Use conversational, friendly language while maintaining clarity and professionalism.',
+    technical:
+      'Use precise technical language with appropriate terminology and detailed explanations.',
+    creative:
+      'Use engaging, creative language while maintaining clarity and purpose.',
   };
 
-  const lengthGuidance: Record<NonNullable<DocumentRequest['length']>, string> = {
-    short: 'Keep the document concise (500-1000 words). Focus on essential information.',
-    medium: 'Create a moderately detailed document (1000-2500 words) with comprehensive coverage.',
+  const lengthGuidance: Record<
+    NonNullable<DocumentRequest['length']>,
+    string
+  > = {
+    short:
+      'Keep the document concise (500-1000 words). Focus on essential information.',
+    medium:
+      'Create a moderately detailed document (1000-2500 words) with comprehensive coverage.',
     long: 'Develop a comprehensive, detailed document (2500+ words) with thorough analysis.',
   };
 
@@ -225,7 +253,7 @@ function buildDocumentRequest(request: DocumentRequest): string {
   }
 
   if (request.sections && request.sections.length > 0) {
-    message += `\n\nRequired Sections:\n${request.sections.map(s => `- ${s}`).join('\n')}`;
+    message += `\n\nRequired Sections:\n${request.sections.map((s) => `- ${s}`).join('\n')}`;
   }
 
   return message;
@@ -241,10 +269,14 @@ export async function enhanceDocument(
   sessionId?: string
 ): Promise<string> {
   const enhancementPrompts = {
-    proofread: 'Proofread this document and fix any grammatical errors, typos, or formatting issues. Maintain the original tone and structure.',
-    expand: 'Expand this document with more details, examples, and comprehensive coverage while maintaining the original structure and tone.',
-    summarize: 'Create a concise summary of this document, capturing the key points and main ideas.',
-    restructure: 'Restructure this document for better flow and organization while preserving all content.',
+    proofread:
+      'Proofread this document and fix any grammatical errors, typos, or formatting issues. Maintain the original tone and structure.',
+    expand:
+      'Expand this document with more details, examples, and comprehensive coverage while maintaining the original structure and tone.',
+    summarize:
+      'Create a concise summary of this document, capturing the key points and main ideas.',
+    restructure:
+      'Restructure this document for better flow and organization while preserving all content.',
   };
 
   const messages: UnifiedMessage[] = [

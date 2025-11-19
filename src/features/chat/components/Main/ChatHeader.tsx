@@ -9,6 +9,7 @@ import {
   Edit3,
   Check,
   X,
+  Search,
 } from 'lucide-react';
 import type { ChatSession } from '../../types';
 import { TokenUsageDisplay } from '../TokenUsageDisplay';
@@ -21,6 +22,7 @@ interface ChatHeaderProps {
   onExport: () => void;
   onSettings: () => void;
   onToggleSidebar: () => void;
+  onSearch?: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -30,6 +32,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onExport,
   onSettings,
   onToggleSidebar,
+  onSearch,
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [editTitle, setEditTitle] = React.useState(session?.title || '');
@@ -125,6 +128,19 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
               variant="compact"
               className="hidden lg:flex"
             />
+          )}
+
+          {onSearch && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onSearch}
+              className="hidden md:flex"
+              title="Global search (Cmd+K)"
+            >
+              <Search className="mr-2 h-4 w-4" />
+              <span className="hidden lg:inline">Search</span>
+            </Button>
           )}
 
           <Button

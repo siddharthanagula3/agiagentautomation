@@ -130,6 +130,24 @@ const ChatPage: React.FC = () => {
   const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [warningThreshold, setWarningThreshold] = useState<85 | 95>(85);
 
+  // Filter sessions based on search query
+  const filteredSessions = React.useMemo(() => {
+    if (!searchQuery.trim()) {
+      return sessions;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return sessions.filter((session) => {
+      const titleMatch = session.title.toLowerCase().includes(query);
+      const summaryMatch = session.summary?.toLowerCase().includes(query);
+      const tagsMatch = session.tags?.some((tag) =>
+        tag.toLowerCase().includes(query)
+      );
+
+      return titleMatch || summaryMatch || tagsMatch;
+    });
+  }, [sessions, searchQuery]);
+
   // Refs
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
@@ -347,7 +365,7 @@ const ChatPage: React.FC = () => {
         >
           {sidebarOpen && (
             <ChatSidebar
-              sessions={sessions}
+              sessions={filteredSessions}
               currentSession={currentSession}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}

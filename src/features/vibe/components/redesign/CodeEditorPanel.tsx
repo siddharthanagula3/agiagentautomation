@@ -434,17 +434,66 @@ export function CodeEditorPanel() {
               theme="vs-dark"
               onMount={setEditorInstance}
               options={{
+                // Visual
                 fontSize: 13,
+                fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace",
                 lineNumbers: 'on',
-                minimap: { enabled: true },
+                lineNumbersMinChars: 3,
+                lineDecorationsWidth: 10,
+                lineHeight: 20,
+                minimap: { enabled: true, maxColumn: 80 },
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
+                renderLineHighlight: 'all',
+                renderWhitespace: 'selection',
+                renderIndentGuides: true,
+                highlightActiveIndentGuide: true,
+                cursorBlinking: 'smooth',
+                cursorSmoothCaretAnimation: 'on',
+                smoothScrolling: true,
+
+                // Editing
                 tabSize: 2,
+                insertSpaces: true,
                 wordWrap: 'on',
+                autoIndent: 'full',
                 formatOnPaste: true,
                 formatOnType: true,
+                autoClosingBrackets: 'always',
+                autoClosingQuotes: 'always',
+                autoSurround: 'languageDefined',
+                bracketPairColorization: { enabled: true },
+                matchBrackets: 'always',
+                folding: true,
+                foldingStrategy: 'indentation',
+
+                // IntelliSense
                 suggestOnTriggerCharacters: true,
-                quickSuggestions: true,
+                quickSuggestions: {
+                  other: true,
+                  comments: false,
+                  strings: true,
+                },
+                suggest: {
+                  showWords: true,
+                  showSnippets: true,
+                },
+                parameterHints: { enabled: true },
+                hover: { enabled: true },
+
+                // Multi-cursor and selection
+                multiCursorModifier: 'ctrlCmd',
+                selectionHighlight: true,
+                occurrencesHighlight: 'singleFile',
+                find: {
+                  autoFindInSelection: 'never',
+                  seedSearchStringFromSelection: 'selection',
+                },
+
+                // Context menu and minimap
+                contextmenu: true,
+                links: true,
+                mouseWheelZoom: true,
               }}
             />
           </div>

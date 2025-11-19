@@ -11,6 +11,7 @@ import {
   X,
   Search,
   BarChart3,
+  Bookmark,
 } from 'lucide-react';
 import type { ChatSession } from '../../types';
 import { TokenUsageDisplay } from '../TokenUsageDisplay';
@@ -26,6 +27,7 @@ interface ChatHeaderProps {
   onToggleSidebar: () => void;
   onSearch?: () => void;
   onAnalytics?: () => void;
+  onBookmarks?: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -37,6 +39,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onToggleSidebar,
   onSearch,
   onAnalytics,
+  onBookmarks,
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [editTitle, setEditTitle] = React.useState(session?.title || '');
@@ -157,6 +160,19 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             >
               <BarChart3 className="mr-2 h-4 w-4" />
               <span className="hidden lg:inline">Analytics</span>
+            </Button>
+          )}
+
+          {onBookmarks && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onBookmarks}
+              className="hidden md:flex"
+              title="Bookmarked messages"
+            >
+              <Bookmark className="mr-2 h-4 w-4" />
+              <span className="hidden lg:inline">Bookmarks</span>
             </Button>
           )}
 

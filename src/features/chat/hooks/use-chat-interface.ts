@@ -19,6 +19,7 @@ import type { ChatMessage, ChatMode, StreamingUpdate } from '../types';
 import type { SearchResponse } from '@core/integrations/web-search-handler';
 import type { MediaGenerationResult } from '@core/integrations/media-generation-handler';
 import type { GeneratedDocument } from '../services/document-generation-service';
+import { retryWithBackoff, parseErrorMessage, isRetryableError } from '../utils/retry-handler';
 
 interface SendMessageParams {
   content: string;
@@ -404,13 +405,19 @@ export const useChat = (sessionId?: string) => {
           enhancedContent = content + toolRouterResult.enhancedContext;
         }
 
-        // Use employee chat service for dynamic selection
-        const result = await employeeChatService.sendMessage(
-          enhancedContent,
-          conversationHistory,
+        // Use employee chat service for dynamic selection with retry logic
+        const result = await retryWithBackoff(
+          () =>
+            employeeChatService.sendMessage(enhancedContent, conversationHistory, {
+              userId: user.id,
+              sessionId,
+            }),
           {
-            userId: user.id,
-            sessionId,
+            maxRetries: 3,
+            onRetry: (attempt, error) => {
+              console.log(`Retry attempt ${attempt} after error:`, error.message);
+              toast.info(`Retrying... (Attempt ${attempt}/3)`);
+            },
           }
         );
 
@@ -568,9 +575,26 @@ export const useChat = (sessionId?: string) => {
           }
         }
       } catch (error) {
-        const err = error as { message?: string };
-        setError(err.message || 'Failed to send message');
-        toast.error(err.message || 'Failed to send message');
+        const err = error instanceof Error ? error : new Error('Unknown error');
+        const userFriendlyMessage = parseErrorMessage(err);
+        const retryable = isRetryableError(err);
+
+        setError(userFriendlyMessage);
+
+        // Show user-friendly error message
+        toast.error(userFriendlyMessage, {
+          description: retryable
+            ? 'This error is temporary. You can try again.'
+            : undefined,
+          action: retryable
+            ? {
+                label: 'Retry',
+                onClick: () => {
+                  sendMessage({ content, mode, model, temperature, tools });
+                },
+              }
+            : undefined,
+        });
 
         // Remove any thinking/placeholder messages on error
         setMessages((prev) =>

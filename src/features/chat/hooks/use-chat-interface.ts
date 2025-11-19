@@ -421,40 +421,22 @@ export const useChat = (sessionId?: string) => {
 
         // Check if this was a multi-agent collaboration
         if (result.metadata.isMultiAgent && result.collaborationMessages) {
-          // Add all collaboration messages to show the discussion
-          const collaborationChatMessages: ChatMessage[] =
-            result.collaborationMessages.map((collab, idx) => ({
-              id: crypto.randomUUID(),
-              role: 'assistant',
-              content: collab.content,
-              createdAt: new Date(Date.now() + idx), // Slight offset for ordering
-              metadata: {
-                mode,
-                model: result.metadata.model,
-                temperature,
-                employeeName: collab.employeeName,
-                employeeId: collab.employeeName,
-                employeeAvatar: collab.employeeAvatar,
-                isCollaboration: true,
-                collaborationType: collab.messageType,
-                collaborationTo: collab.to,
-                isMultiAgent: true,
-                employeesInvolved: result.metadata.employeesInvolved,
-              },
-            }));
+          // Store collaboration messages in metadata (collapsed by default)
+          const collaborationData = result.collaborationMessages.map((collab) => ({
+            employeeName: collab.employeeName,
+            employeeAvatar: collab.employeeAvatar,
+            content: collab.content,
+            messageType: collab.messageType,
+            to: collab.to,
+          }));
 
-          // Add collaboration messages
-          setMessages((prev) => [...prev, ...collaborationChatMessages]);
-
-          // Add final synthesized answer with streaming
+          // Add final synthesized answer with streaming (includes collapsed contributions)
           const assistantMessageId = crypto.randomUUID();
           const assistantMessage: ChatMessage = {
             id: assistantMessageId,
             role: 'assistant',
             content: '',
-            createdAt: new Date(
-              Date.now() + result.collaborationMessages.length + 1
-            ),
+            createdAt: new Date(),
             metadata: {
               mode,
               model: result.metadata.model,
@@ -468,6 +450,7 @@ export const useChat = (sessionId?: string) => {
               isMultiAgent: true,
               employeesInvolved: result.metadata.employeesInvolved,
               isSynthesis: true,
+              collaborationMessages: collaborationData, // Store for expandable view
               searchResults, // Include search results if available
               isStreaming: true, // Mark as streaming
             },

@@ -11,6 +11,8 @@ import {
   X,
 } from 'lucide-react';
 import type { ChatSession } from '../../types';
+import { TokenUsageDisplay } from '../TokenUsageDisplay';
+import { useSessionTokens } from '../../hooks/use-session-tokens';
 
 interface ChatHeaderProps {
   session: ChatSession | null;
@@ -31,6 +33,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [editTitle, setEditTitle] = React.useState(session?.title || '');
+
+  // Get session token usage
+  const { totalTokens, inputTokens, outputTokens, totalCost } = useSessionTokens(session?.id);
 
   React.useEffect(() => {
     setEditTitle(session?.title || '');
@@ -109,7 +114,19 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
+          {/* Token Usage Display - only show if session has tokens */}
+          {session && totalTokens > 0 && (
+            <TokenUsageDisplay
+              tokensUsed={totalTokens}
+              inputTokens={inputTokens}
+              outputTokens={outputTokens}
+              cost={totalCost}
+              variant="compact"
+              className="hidden md:flex"
+            />
+          )}
+
           <Button
             variant="ghost"
             size="sm"

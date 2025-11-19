@@ -27,6 +27,10 @@ import {
   Plus,
   ChevronDown,
   Zap,
+  Image as ImageIcon,
+  Video,
+  FileText,
+  Search,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import type { ChatMode, Tool } from '../../types';
@@ -137,6 +141,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([
     'auto',
   ]);
+  const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [textareaHeight, setTextareaHeight] = useState(80);
   const [showPromptShortcuts, setShowPromptShortcuts] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -157,13 +162,18 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
     if (!message.trim() && attachments.length === 0) return;
 
     try {
-      await onSendMessage(message, {
+      // Prefix message with tool indicators
+      const toolPrefix = getToolPromptPrefix();
+      const finalMessage = toolPrefix + message;
+
+      await onSendMessage(finalMessage, {
         attachments,
         // Model selection removed - AI employees use their own configured models
         employees: selectedEmployees,
       });
       setMessage('');
       setAttachments([]);
+      setSelectedTools([]); // Clear selected tools after sending
     } catch (error) {
       console.error('Failed to send message:', error);
     }
@@ -198,6 +208,29 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
         }
       });
     }
+  };
+
+  const toggleTool = (toolId: string) => {
+    setSelectedTools((prev) => {
+      if (prev.includes(toolId)) {
+        return prev.filter((id) => id !== toolId);
+      } else {
+        return [...prev, toolId];
+      }
+    });
+  };
+
+  const getToolPromptPrefix = () => {
+    if (selectedTools.length === 0) return '';
+
+    const toolPrefixes: Record<string, string> = {
+      image: '🖼️ [Generate Image] ',
+      video: '🎥 [Generate Video] ',
+      document: '📄 [Create Document] ',
+      search: '🔍 [Web Search] ',
+    };
+
+    return selectedTools.map((tool) => toolPrefixes[tool] || '').join('');
   };
 
   const handleSelectPrompt = (prompt: string) => {
@@ -324,6 +357,123 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
           )}
       </div>
 
+      {/* Tool Selection Strip */}
+      <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2 py-2 sm:px-3">
+        <span className="hidden text-xs font-medium text-muted-foreground sm:inline">Tools:</span>
+        <TooltipProvider delayDuration={200}>
+          {/* Image Generation */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={selectedTools.includes('image') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => toggleTool('image')}
+                className={cn(
+                  'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
+                  selectedTools.includes('image') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
+                )}
+                disabled={isLoading}
+              >
+                <ImageIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div>
+                <div className="font-medium">Image Generation</div>
+                <div className="text-xs text-muted-foreground">
+                  Generate images with DALL-E
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Video Generation */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={selectedTools.includes('video') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => toggleTool('video')}
+                className={cn(
+                  'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
+                  selectedTools.includes('video') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
+                )}
+                disabled={isLoading}
+              >
+                <Video className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div>
+                <div className="font-medium">Video Generation</div>
+                <div className="text-xs text-muted-foreground">
+                  Generate videos from text
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Document Generation */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={selectedTools.includes('document') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => toggleTool('document')}
+                className={cn(
+                  'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
+                  selectedTools.includes('document') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
+                )}
+                disabled={isLoading}
+              >
+                <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div>
+                <div className="font-medium">Document Generation</div>
+                <div className="text-xs text-muted-foreground">
+                  Create documents with Claude AI
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Web Search */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={selectedTools.includes('search') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => toggleTool('search')}
+                className={cn(
+                  'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
+                  selectedTools.includes('search') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
+                )}
+                disabled={isLoading}
+              >
+                <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div>
+                <div className="font-medium">Web Search</div>
+                <div className="text-xs text-muted-foreground">
+                  Search the web for real-time information
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* Active Tools Indicator */}
+        {selectedTools.length > 0 && (
+          <Badge variant="secondary" className="ml-auto text-xs">
+            {selectedTools.length} selected
+          </Badge>
+        )}
+      </div>
+
       {/* Attachments Preview */}
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-2 rounded-md border border-border bg-muted/30 p-2">
@@ -398,7 +548,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
 
       {/* Helper Text */}
       <div className="flex items-center justify-between px-1 text-xs text-muted-foreground">
-        <span>
+        <span className="hidden sm:inline">
           Press{' '}
           <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
             Enter
@@ -411,7 +561,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
         </span>
         {message.length > 0 && (
           <span className="text-muted-foreground/70">
-            {message.length} characters
+            {message.length} char{message.length !== 1 && 's'}
           </span>
         )}
       </div>

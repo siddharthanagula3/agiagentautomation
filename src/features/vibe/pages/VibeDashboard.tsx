@@ -36,6 +36,8 @@ import { VibeMessageService } from '../services/vibe-message-service';
 import { vibeMessageHandler } from '../services/vibe-message-handler';
 import { toast } from 'sonner';
 import { TokenUsageDisplay } from '../components/TokenUsageDisplay';
+import { useVibeKeyboardShortcuts } from '../hooks/use-vibe-keyboard-shortcuts';
+import { VibeKeyboardShortcutsDialog } from '../components/VibeKeyboardShortcutsDialog';
 
 interface VibeMessageRow {
   id: string;
@@ -64,10 +66,29 @@ const VibeDashboard: React.FC = () => {
   const [workingSteps, setWorkingSteps] = useState<WorkingStep[]>([]);
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
+  const [previewKey, setPreviewKey] = useState(0);
 
   const messageIdsRef = useRef<Set<string>>(new Set());
   const messagesRef = useRef<AgentMessage[]>([]);
   const workingStepsMapRef = useRef<Map<string, WorkingStep>>(new Map());
+
+  // Keyboard shortcuts
+  const { shortcuts } = useVibeKeyboardShortcuts({
+    onSaveFile: () => {
+      toast.info('Save functionality coming soon');
+    },
+    onRefreshPreview: () => {
+      setPreviewKey((prev) => prev + 1);
+      toast.success('Preview refreshed');
+    },
+    onNewFile: () => {
+      toast.info('New file functionality coming soon');
+    },
+    onShowShortcuts: () => {
+      setShortcutsDialogOpen(true);
+    },
+  });
 
   const mapRowToMessage = useCallback((row: VibeMessageRow): AgentMessage => {
     return {
@@ -557,7 +578,7 @@ const VibeDashboard: React.FC = () => {
 
                   {/* Live Preview (40%) */}
                   <Panel defaultSize={40} minSize={20} maxSize={60}>
-                    <LivePreviewPanel />
+                    <LivePreviewPanel key={previewKey} />
                   </Panel>
                 </PanelGroup>
               </Panel>
@@ -578,7 +599,7 @@ const VibeDashboard: React.FC = () => {
 
             {/* Preview */}
             <div className="flex-1 overflow-hidden">
-              <LivePreviewPanel />
+              <LivePreviewPanel key={previewKey} />
             </div>
           </div>
         </div>
@@ -588,6 +609,13 @@ const VibeDashboard: React.FC = () => {
           <VibeMessageInput onSend={handleSendMessage} isLoading={isLoading} />
         </div>
       </div>
+
+      {/* Keyboard Shortcuts Dialog */}
+      <VibeKeyboardShortcutsDialog
+        open={shortcutsDialogOpen}
+        onOpenChange={setShortcutsDialogOpen}
+        shortcuts={shortcuts}
+      />
     </VibeLayout>
   );
 };

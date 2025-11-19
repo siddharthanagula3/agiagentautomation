@@ -178,9 +178,10 @@ class MultiAgentCollaborationService {
 
     // Determine if complex
     const isComplex = complexityScore >= 5 || requiredExpertise.length >= 2;
+    // Cap at 3 employees for better quality and cost control
     const estimatedEmployeeCount = Math.min(
       Math.max(requiredExpertise.length, 2),
-      4
+      3
     );
 
     let reason = '';
@@ -366,10 +367,11 @@ class MultiAgentCollaborationService {
       return { employee, score };
     });
 
-    // Sort by score and select top N
+    // Sort by score and select top N (hard cap at 3 for quality and cost control)
     scoredEmployees.sort((a, b) => b.score - a.score);
 
-    for (let i = 0; i < Math.min(maxEmployees, scoredEmployees.length); i++) {
+    const MAX_EMPLOYEES = 3; // Hard cap at 3 employees
+    for (let i = 0; i < Math.min(maxEmployees, scoredEmployees.length, MAX_EMPLOYEES); i++) {
       if (scoredEmployees[i].score > 0) {
         selected.push(scoredEmployees[i].employee);
       }

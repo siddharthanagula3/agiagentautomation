@@ -19,6 +19,7 @@ import type { ChatMessage, ChatMode, StreamingUpdate } from '../types';
 import type { SearchResponse } from '@core/integrations/web-search-handler';
 import type { MediaGenerationResult } from '@core/integrations/media-generation-handler';
 import type { GeneratedDocument } from '../services/document-generation-service';
+import { retryWithBackoff, parseErrorMessage, isRetryableError } from '../utils/retry-handler';
 
 interface SendMessageParams {
   content: string;
@@ -49,6 +50,26 @@ export const useChat = (sessionId?: string) => {
       data: { user },
     } = await supabase.auth.getUser();
     return user;
+  };
+
+  /**
+   * Stream text word-by-word for better UX
+   * Simulates real-time streaming even when we have the full response
+   */
+  const streamText = async (
+    text: string,
+    onChunk: (chunk: string, accumulated: string) => void,
+    delayMs: number = 30
+  ): Promise<void> => {
+    const words = text.split(' ');
+    let accumulated = '';
+
+    for (let i = 0; i < words.length; i++) {
+      const chunk = words[i] + (i < words.length - 1 ? ' ' : '');
+      accumulated += chunk;
+      onChunk(chunk, accumulated);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
   };
 
   // Load messages from database
@@ -384,13 +405,19 @@ export const useChat = (sessionId?: string) => {
           enhancedContent = content + toolRouterResult.enhancedContext;
         }
 
-        // Use employee chat service for dynamic selection
-        const result = await employeeChatService.sendMessage(
-          enhancedContent,
-          conversationHistory,
+        // Use employee chat service for dynamic selection with retry logic
+        const result = await retryWithBackoff(
+          () =>
+            employeeChatService.sendMessage(enhancedContent, conversationHistory, {
+              userId: user.id,
+              sessionId,
+            }),
           {
-            userId: user.id,
-            sessionId,
+            maxRetries: 3,
+            onRetry: (attempt, error) => {
+              console.log(`Retry attempt ${attempt} after error:`, error.message);
+              toast.info(`Retrying... (Attempt ${attempt}/3)`);
+            },
           }
         );
 
@@ -401,40 +428,22 @@ export const useChat = (sessionId?: string) => {
 
         // Check if this was a multi-agent collaboration
         if (result.metadata.isMultiAgent && result.collaborationMessages) {
-          // Add all collaboration messages to show the discussion
-          const collaborationChatMessages: ChatMessage[] =
-            result.collaborationMessages.map((collab, idx) => ({
-              id: crypto.randomUUID(),
-              role: 'assistant',
-              content: collab.content,
-              createdAt: new Date(Date.now() + idx), // Slight offset for ordering
-              metadata: {
-                mode,
-                model: result.metadata.model,
-                temperature,
-                employeeName: collab.employeeName,
-                employeeId: collab.employeeName,
-                employeeAvatar: collab.employeeAvatar,
-                isCollaboration: true,
-                collaborationType: collab.messageType,
-                collaborationTo: collab.to,
-                isMultiAgent: true,
-                employeesInvolved: result.metadata.employeesInvolved,
-              },
-            }));
+          // Store collaboration messages in metadata (collapsed by default)
+          const collaborationData = result.collaborationMessages.map((collab) => ({
+            employeeName: collab.employeeName,
+            employeeAvatar: collab.employeeAvatar,
+            content: collab.content,
+            messageType: collab.messageType,
+            to: collab.to,
+          }));
 
-          // Add collaboration messages
-          setMessages((prev) => [...prev, ...collaborationChatMessages]);
-
-          // Add final synthesized answer as the main response
+          // Add final synthesized answer with streaming (includes collapsed contributions)
           const assistantMessageId = crypto.randomUUID();
           const assistantMessage: ChatMessage = {
             id: assistantMessageId,
             role: 'assistant',
-            content: result.response,
-            createdAt: new Date(
-              Date.now() + result.collaborationMessages.length + 1
-            ),
+            content: '',
+            createdAt: new Date(),
             metadata: {
               mode,
               model: result.metadata.model,
@@ -448,11 +457,43 @@ export const useChat = (sessionId?: string) => {
               isMultiAgent: true,
               employeesInvolved: result.metadata.employeesInvolved,
               isSynthesis: true,
+              collaborationMessages: collaborationData, // Store for expandable view
               searchResults, // Include search results if available
+              isStreaming: true, // Mark as streaming
             },
           };
 
+          // Add empty message to show typing indicator
           setMessages((prev) => [...prev, assistantMessage]);
+
+          // Stream the synthesized response word-by-word
+          await streamText(result.response, (chunk, accumulated) => {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantMessageId
+                  ? {
+                      ...msg,
+                      content: accumulated,
+                    }
+                  : msg
+              )
+            );
+          });
+
+          // Mark streaming as complete
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? {
+                    ...msg,
+                    metadata: {
+                      ...msg.metadata,
+                      isStreaming: false,
+                    },
+                  }
+                : msg
+            )
+          );
 
           // Save only the final synthesized answer to database
           if (sessionId && result.response) {
@@ -463,12 +504,14 @@ export const useChat = (sessionId?: string) => {
             );
           }
         } else {
-          // Single employee response
+          // Single employee response - STREAM IT!
           const assistantMessageId = crypto.randomUUID();
+
+          // Create initial message with typing indicator
           const assistantMessage: ChatMessage = {
             id: assistantMessageId,
             role: 'assistant',
-            content: result.response,
+            content: '',
             createdAt: new Date(),
             metadata: {
               mode,
@@ -486,10 +529,41 @@ export const useChat = (sessionId?: string) => {
               tokensUsed: result.metadata.tokensUsed,
               isMultiAgent: false,
               searchResults, // Include search results if available
+              isStreaming: true, // Mark as streaming
             },
           };
 
+          // Add empty message to show typing indicator
           setMessages((prev) => [...prev, assistantMessage]);
+
+          // Stream the response word-by-word
+          await streamText(result.response, (chunk, accumulated) => {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantMessageId
+                  ? {
+                      ...msg,
+                      content: accumulated,
+                    }
+                  : msg
+              )
+            );
+          });
+
+          // Mark streaming as complete
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? {
+                    ...msg,
+                    metadata: {
+                      ...msg.metadata,
+                      isStreaming: false,
+                    },
+                  }
+                : msg
+            )
+          );
 
           // Save assistant response to database
           if (sessionId && result.response) {
@@ -501,9 +575,26 @@ export const useChat = (sessionId?: string) => {
           }
         }
       } catch (error) {
-        const err = error as { message?: string };
-        setError(err.message || 'Failed to send message');
-        toast.error(err.message || 'Failed to send message');
+        const err = error instanceof Error ? error : new Error('Unknown error');
+        const userFriendlyMessage = parseErrorMessage(err);
+        const retryable = isRetryableError(err);
+
+        setError(userFriendlyMessage);
+
+        // Show user-friendly error message
+        toast.error(userFriendlyMessage, {
+          description: retryable
+            ? 'This error is temporary. You can try again.'
+            : undefined,
+          action: retryable
+            ? {
+                label: 'Retry',
+                onClick: () => {
+                  sendMessage({ content, mode, model, temperature, tools });
+                },
+              }
+            : undefined,
+        });
 
         // Remove any thinking/placeholder messages on error
         setMessages((prev) =>
@@ -554,26 +645,52 @@ export const useChat = (sessionId?: string) => {
     [messages, sendMessage, sessionId]
   );
 
-  // Edit a message
+  // Edit a message and re-run from that point
   const editMessage = useCallback(
     async (messageId: string, newContent: string) => {
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === messageId
-            ? {
-                ...msg,
-                content: newContent,
-                isEdited: true,
-                editedAt: new Date(),
-              }
-            : msg
-        )
+      const messageIndex = messages.findIndex((msg) => msg.id === messageId);
+      if (messageIndex === -1) return;
+
+      const editedMessage = messages[messageIndex];
+
+      // Only allow editing user messages
+      if (editedMessage.role !== 'user') {
+        toast.error('Can only edit your own messages');
+        return;
+      }
+
+      // Update the edited message and remove all messages after it
+      const messagesUpToEdit = messages.slice(0, messageIndex + 1);
+      const updatedMessages = messagesUpToEdit.map((msg) =>
+        msg.id === messageId
+          ? {
+              ...msg,
+              content: newContent,
+              edited: true,
+              editCount: (msg.editCount || 0) + 1,
+              updatedAt: new Date(),
+            }
+          : msg
       );
 
-      // TODO: Update in database
-      toast.success('Message updated');
+      setMessages(updatedMessages);
+
+      // Update in database if session exists
+      if (sessionId) {
+        try {
+          await chatPersistenceService.updateMessage(messageId, newContent);
+        } catch (error) {
+          console.error('Failed to update message in database:', error);
+        }
+      }
+
+      toast.success('Message updated. Regenerating response...');
+
+      // Re-run the conversation from the edited message
+      // Use the same sendMessage logic but with the updated context
+      await sendMessage(newContent);
     },
-    []
+    [messages, sendMessage, sessionId]
   );
 
   // Delete a message

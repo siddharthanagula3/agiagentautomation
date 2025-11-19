@@ -44,6 +44,7 @@ import { SearchResults } from './SearchResults';
 import type { SearchResponse } from '@core/integrations/web-search-handler';
 import type { MediaGenerationResult } from '@core/integrations/media-generation-handler';
 import type { GeneratedDocument } from '../services/document-generation-service';
+import { documentGenerationService } from '../services/document-generation-service';
 
 interface Attachment {
   id: string;
@@ -294,6 +295,48 @@ export const MessageBubble = React.memo(function MessageBubble({
     URL.revokeObjectURL(url);
   };
 
+  const handleExportPDF = async () => {
+    try {
+      const generatedDoc: GeneratedDocument = {
+        title: message.metadata?.documentTitle || 'Document',
+        content: message.content,
+        metadata: {
+          type: 'general',
+          generatedAt: message.timestamp,
+          wordCount: message.content.split(/\s+/).length,
+          tokensUsed: message.metadata?.tokensUsed,
+          model: message.metadata?.model,
+        },
+      };
+      await documentGenerationService.exportDocumentToPDF(generatedDoc);
+      toast.success('PDF exported successfully');
+    } catch (error) {
+      console.error('PDF export failed:', error);
+      toast.error('Failed to export PDF');
+    }
+  };
+
+  const handleExportDOCX = async () => {
+    try {
+      const generatedDoc: GeneratedDocument = {
+        title: message.metadata?.documentTitle || 'Document',
+        content: message.content,
+        metadata: {
+          type: 'general',
+          generatedAt: message.timestamp,
+          wordCount: message.content.split(/\s+/).length,
+          tokensUsed: message.metadata?.tokensUsed,
+          model: message.metadata?.model,
+        },
+      };
+      await documentGenerationService.exportDocumentToDOCX(generatedDoc);
+      toast.success('DOCX exported successfully');
+    } catch (error) {
+      console.error('DOCX export failed:', error);
+      toast.error('Failed to export DOCX');
+    }
+  };
+
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
@@ -430,15 +473,38 @@ export const MessageBubble = React.memo(function MessageBubble({
               <span className="flex-1 text-sm font-medium">
                 {message.metadata?.documentTitle || 'Document'}
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleExportDocument}
-                className="h-7 px-2 text-xs"
-              >
-                <Download className="mr-1 h-3 w-3" />
-                Export .md
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExportDocument}
+                  className="h-7 px-2 text-xs"
+                  title="Export as Markdown"
+                >
+                  <Download className="mr-1 h-3 w-3" />
+                  .md
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExportPDF}
+                  className="h-7 px-2 text-xs"
+                  title="Export as PDF"
+                >
+                  <Download className="mr-1 h-3 w-3" />
+                  .pdf
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExportDOCX}
+                  className="h-7 px-2 text-xs"
+                  title="Export as DOCX"
+                >
+                  <Download className="mr-1 h-3 w-3" />
+                  .docx
+                </Button>
+              </div>
             </div>
           )}
 

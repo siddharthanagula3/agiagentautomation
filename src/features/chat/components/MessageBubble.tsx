@@ -6,6 +6,7 @@ import {
 } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
+import { Badge } from '@/shared/components/ui/badge';
 import {
   User,
   Bot,
@@ -18,6 +19,7 @@ import {
   Sparkles,
   Brain,
   Wrench,
+  Users,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import ReactMarkdown from 'react-markdown';
@@ -228,6 +230,7 @@ export const MessageBubble = React.memo(function MessageBubble({
   const [documentExpanded, setDocumentExpanded] = useState(false);
   const [workStreamExpanded, setWorkStreamExpanded] = useState(true);
   const [thinkingExpanded, setThinkingExpanded] = useState(false);
+  const [collaborationsExpanded, setCollaborationsExpanded] = useState(false);
   const isUser = message.role === 'user';
   const isDocument = message.metadata?.isDocument;
   const hasWorkStream = message.metadata?.hasWorkStream;
@@ -235,6 +238,10 @@ export const MessageBubble = React.memo(function MessageBubble({
   const hasThinkingSteps =
     message.metadata?.thinkingSteps &&
     message.metadata.thinkingSteps.length > 0;
+  const hasCollaborations =
+    message.metadata?.isMultiAgent &&
+    message.metadata?.collaborationMessages &&
+    message.metadata.collaborationMessages.length > 0;
 
   // Artifact detection and management
   const { addArtifact, shareArtifact, setCurrentVersion, getMessageArtifacts } =
@@ -608,6 +615,75 @@ export const MessageBubble = React.memo(function MessageBubble({
                   onShare={() => handleShareArtifact(artifact.id)}
                 />
               ))}
+            </div>
+          )}
+
+          {/* Agent Contributions (Collapsible) */}
+          {hasCollaborations && (
+            <div className="mt-3 w-full">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCollaborationsExpanded(!collaborationsExpanded)}
+                className="w-full justify-start gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs hover:bg-muted/50"
+              >
+                {collaborationsExpanded ? (
+                  <ChevronUp className="h-3 w-3" />
+                ) : (
+                  <ChevronDown className="h-3 w-3" />
+                )}
+                <Users className="h-3 w-3" />
+                <span>
+                  {collaborationsExpanded
+                    ? 'Hide Agent Contributions'
+                    : `Show Agent Contributions (${message.metadata.collaborationMessages.length} agents)`}
+                </span>
+              </Button>
+
+              {collaborationsExpanded && (
+                <div className="mt-2 space-y-2">
+                  {message.metadata.collaborationMessages.map((collab, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-lg border border-border bg-card p-3 shadow-sm"
+                    >
+                      <div className="mb-2 flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarFallback
+                            className="text-xs font-semibold text-white"
+                            style={{ backgroundColor: collab.employeeAvatar }}
+                          >
+                            {collab.employeeName
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium">
+                          {collab.employeeName}
+                        </span>
+                        {collab.messageType && (
+                          <Badge
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {collab.messageType}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
+                          rehypePlugins={[rehypeHighlight, rehypeRaw]}
+                          components={markdownComponents}
+                        >
+                          {collab.content}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

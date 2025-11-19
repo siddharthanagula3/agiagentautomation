@@ -14,6 +14,7 @@ import {
 import type { ChatSession } from '../../types';
 import { TokenUsageDisplay } from '../TokenUsageDisplay';
 import { useSessionTokens } from '../../hooks/use-session-tokens';
+import { ThemeToggle } from '@shared/ui/theme-toggle';
 
 interface ChatHeaderProps {
   session: ChatSession | null;
@@ -162,6 +163,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             <Download className="mr-2 h-4 w-4" />
             <span className="hidden lg:inline">Export</span>
           </Button>
+
+          <ThemeToggle />
 
           <Button variant="ghost" size="sm" onClick={onSettings}>
             <Settings className="h-4 w-4" />

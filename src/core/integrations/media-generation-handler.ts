@@ -14,6 +14,11 @@ import {
   type VeoGenerationRequest as GoogleVeoRequest,
   type VeoGenerationResponse,
 } from './google-veo-service';
+import {
+  dallEImageService,
+  type DallEGenerationRequest,
+  type ImageGenerationResult as DallEImageResult,
+} from './dalle-image-service';
 
 export interface ImageGenerationRequest {
   prompt: string;
@@ -104,71 +109,52 @@ export class MediaGenerationService {
   }
 
   /**
-   * Generate image using Google Imagen API
+   * Generate image using OpenAI DALL-E API
+   * Uses DALL-E 3 for high-quality image generation
    */
   async generateImage(
     request: ImageGenerationRequest
   ): Promise<MediaGenerationResult> {
-    if (!googleImagenService.isAvailable()) {
-      throw new Error(
-        'Google Imagen service not configured.\n\n' +
-          '✅ Get a FREE key at: https://aistudio.google.com/app/apikey\n' +
-          '📝 Add to .env file: VITE_GOOGLE_API_KEY=your_key_here\n' +
-          '💡 Or enable demo mode: VITE_DEMO_MODE=true'
-      );
-    }
-
     try {
-      // Map aspect ratio from size if not provided
-      let aspectRatio = request.aspectRatio;
-      if (!aspectRatio && request.size) {
-        const [width, height] = request.size.split('x').map(Number);
-        if (width === height) aspectRatio = '1:1';
-        else if (width > height) aspectRatio = '16:9';
-        else aspectRatio = '9:16';
-      }
-
-      // Prepare Imagen request
-      const imagenRequest: GoogleImagenRequest = {
+      // Map request to DALL-E format
+      const dallERequest: DallEGenerationRequest = {
         prompt: request.prompt,
-        model:
-          request.model ||
-          (request.quality === 'hd'
-            ? 'imagen-4.0-ultra-generate-001'
-            : 'imagen-4.0-generate-001'),
-        numberOfImages: request.numberOfImages || 1,
-        aspectRatio: aspectRatio || '1:1',
-        negativePrompt: request.negativePrompt,
-        seed: request.seed,
+        size: request.size || '1024x1024',
+        quality: request.quality || 'standard',
+        style: request.style === 'realistic' || request.style === 'photographic'
+          ? 'natural'
+          : 'vivid',
+        n: 1, // DALL-E 3 only supports 1 image at a time
+        model: request.quality === 'hd' ? 'dall-e-3' : 'dall-e-3',
       };
 
-      // Enhance prompt if GOOGLE_API_KEY is available
-      if (GOOGLE_API_KEY) {
-        imagenRequest.prompt = await googleImagenService.enhancePrompt(
-          request.prompt
-        );
-      }
+      // Generate image with DALL-E
+      const dallEResults = await dallEImageService.generateImage(dallERequest);
+      const dallEResult = dallEResults[0]; // DALL-E 3 returns array with 1 item
 
-      // Generate image
-      const imagenResponse =
-        await googleImagenService.generateImage(imagenRequest);
+      // Estimate cost
+      const cost = dallEImageService.estimateCost(dallERequest);
 
       // Convert to MediaGenerationResult
       const result: MediaGenerationResult = {
-        id: imagenResponse.id,
+        id: dallEResult.id,
         type: 'image',
-        url: imagenResponse.images[0]?.url || '',
-        prompt: imagenResponse.prompt,
+        url: dallEResult.url,
+        prompt: dallEResult.prompt,
         metadata: {
-          aspectRatio: imagenResponse.metadata.aspectRatio,
-          seed: imagenResponse.metadata.seed,
-          model: imagenResponse.model,
+          size: dallEResult.size,
+          model: dallEResult.model,
+          style: dallEResult.style,
+          revisedPrompt: dallEResult.revisedPrompt,
         },
-        cost: imagenResponse.cost,
-        tokensUsed: imagenResponse.tokensUsed,
-        createdAt: imagenResponse.createdAt,
-        status: imagenResponse.status,
-        images: imagenResponse.images,
+        cost,
+        tokensUsed: 0, // DALL-E doesn't report tokens for image generation
+        createdAt: dallEResult.createdAt,
+        status: 'completed',
+        images: [{
+          url: dallEResult.url,
+          mimeType: 'image/png',
+        }],
       };
 
       this.generationHistory.push(result);

@@ -259,7 +259,7 @@ const ChatPage: React.FC = () => {
 
   const handleShare = async () => {
     if (!currentSession) return;
-    await generateShareLink(currentSession.id);
+    await shareSession(currentSession.id);
   };
 
   const handleCopyToClipboard = async () => {

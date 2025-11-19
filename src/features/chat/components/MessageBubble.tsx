@@ -758,7 +758,8 @@ export const MessageBubble = React.memo(function MessageBubble({
             </div>
           )}
 
-          {/* Work Stream (Agent Collaboration) */}
+          {/* Work Stream - HIDDEN (not implemented yet) */}
+          {/* TODO: Implement work stream visualization before enabling
           {hasWorkStream && message.metadata?.workStreamData && (
             <div className="mt-3 w-full">
               <div className="mb-2 flex items-center gap-2">
@@ -786,6 +787,7 @@ export const MessageBubble = React.memo(function MessageBubble({
               )}
             </div>
           )}
+          */}
 
           {/* Action Buttons & Token Usage */}
           <div

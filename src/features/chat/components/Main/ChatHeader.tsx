@@ -56,19 +56,19 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   return (
     <div className="border-b border-border bg-card/50 p-4 backdrop-blur-sm">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:space-x-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={onToggleSidebar}
-            className="lg:hidden"
+            className="flex-shrink-0 lg:hidden"
           >
             <Menu className="h-4 w-4" />
           </Button>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex min-w-0 flex-1 items-center space-x-2">
             {isEditing ? (
-              <div className="flex items-center space-x-2">
+              <div className="flex min-w-0 flex-1 items-center space-x-2">
                 <Input
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
@@ -83,7 +83,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleRename}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 flex-shrink-0 p-0"
                 >
                   <Check className="h-3 w-3" />
                 </Button>
@@ -91,21 +91,21 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleCancel}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 flex-shrink-0 p-0"
                 >
                   <X className="h-3 w-3" />
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
-                <h1 className="max-w-xs truncate text-lg font-semibold">
+              <div className="flex min-w-0 flex-1 items-center space-x-2">
+                <h1 className="min-w-0 max-w-[150px] truncate text-base font-semibold sm:max-w-xs sm:text-lg">
                   {session?.title || 'New Chat'}
                 </h1>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsEditing(true)}
-                  className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="hidden h-6 w-6 flex-shrink-0 p-0 opacity-0 transition-opacity group-hover:opacity-100 sm:block"
                 >
                   <Edit3 className="h-3 w-3" />
                 </Button>
@@ -114,7 +114,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-shrink-0 items-center gap-1 sm:gap-2 sm:space-x-3">
           {/* Token Usage Display - only show if session has tokens */}
           {session && totalTokens > 0 && (
             <TokenUsageDisplay
@@ -123,7 +123,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
               outputTokens={outputTokens}
               cost={totalCost}
               variant="compact"
-              className="hidden md:flex"
+              className="hidden lg:flex"
             />
           )}
 
@@ -131,20 +131,20 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             variant="ghost"
             size="sm"
             onClick={onShare}
-            className="hidden sm:flex"
+            className="hidden md:flex"
           >
             <Share2 className="mr-2 h-4 w-4" />
-            Share
+            <span className="hidden lg:inline">Share</span>
           </Button>
 
           <Button
             variant="ghost"
             size="sm"
             onClick={onExport}
-            className="hidden sm:flex"
+            className="hidden md:flex"
           >
             <Download className="mr-2 h-4 w-4" />
-            Export
+            <span className="hidden lg:inline">Export</span>
           </Button>
 
           <Button variant="ghost" size="sm" onClick={onSettings}>

@@ -358,8 +358,8 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
       </div>
 
       {/* Tool Selection Strip */}
-      <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2">
-        <span className="text-xs font-medium text-muted-foreground">Tools:</span>
+      <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2 py-2 sm:px-3">
+        <span className="hidden text-xs font-medium text-muted-foreground sm:inline">Tools:</span>
         <TooltipProvider delayDuration={200}>
           {/* Image Generation */}
           <Tooltip>
@@ -369,12 +369,12 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
                 size="sm"
                 onClick={() => toggleTool('image')}
                 className={cn(
-                  'h-8 w-8 p-0 transition-all',
-                  selectedTools.includes('image') && 'ring-2 ring-primary ring-offset-2'
+                  'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
+                  selectedTools.includes('image') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
                 )}
                 disabled={isLoading}
               >
-                <ImageIcon className="h-4 w-4" />
+                <ImageIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -395,12 +395,12 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
                 size="sm"
                 onClick={() => toggleTool('video')}
                 className={cn(
-                  'h-8 w-8 p-0 transition-all',
-                  selectedTools.includes('video') && 'ring-2 ring-primary ring-offset-2'
+                  'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
+                  selectedTools.includes('video') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
                 )}
                 disabled={isLoading}
               >
-                <Video className="h-4 w-4" />
+                <Video className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -421,12 +421,12 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
                 size="sm"
                 onClick={() => toggleTool('document')}
                 className={cn(
-                  'h-8 w-8 p-0 transition-all',
-                  selectedTools.includes('document') && 'ring-2 ring-primary ring-offset-2'
+                  'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
+                  selectedTools.includes('document') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
                 )}
                 disabled={isLoading}
               >
-                <FileText className="h-4 w-4" />
+                <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -447,12 +447,12 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
                 size="sm"
                 onClick={() => toggleTool('search')}
                 className={cn(
-                  'h-8 w-8 p-0 transition-all',
-                  selectedTools.includes('search') && 'ring-2 ring-primary ring-offset-2'
+                  'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
+                  selectedTools.includes('search') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
                 )}
                 disabled={isLoading}
               >
-                <Search className="h-4 w-4" />
+                <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -548,7 +548,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
 
       {/* Helper Text */}
       <div className="flex items-center justify-between px-1 text-xs text-muted-foreground">
-        <span>
+        <span className="hidden sm:inline">
           Press{' '}
           <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
             Enter
@@ -561,7 +561,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
         </span>
         {message.length > 0 && (
           <span className="text-muted-foreground/70">
-            {message.length} characters
+            {message.length} char{message.length !== 1 && 's'}
           </span>
         )}
       </div>

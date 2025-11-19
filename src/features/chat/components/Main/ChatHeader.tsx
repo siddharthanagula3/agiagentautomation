@@ -10,6 +10,7 @@ import {
   Check,
   X,
   Search,
+  BarChart3,
 } from 'lucide-react';
 import type { ChatSession } from '../../types';
 import { TokenUsageDisplay } from '../TokenUsageDisplay';
@@ -24,6 +25,7 @@ interface ChatHeaderProps {
   onSettings: () => void;
   onToggleSidebar: () => void;
   onSearch?: () => void;
+  onAnalytics?: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -34,6 +36,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onSettings,
   onToggleSidebar,
   onSearch,
+  onAnalytics,
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [editTitle, setEditTitle] = React.useState(session?.title || '');
@@ -141,6 +144,19 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             >
               <Search className="mr-2 h-4 w-4" />
               <span className="hidden lg:inline">Search</span>
+            </Button>
+          )}
+
+          {onAnalytics && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onAnalytics}
+              className="hidden md:flex"
+              title="Token usage analytics"
+            >
+              <BarChart3 className="mr-2 h-4 w-4" />
+              <span className="hidden lg:inline">Analytics</span>
             </Button>
           )}
 

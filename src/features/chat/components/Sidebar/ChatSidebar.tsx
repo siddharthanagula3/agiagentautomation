@@ -7,11 +7,13 @@ import { Badge } from '@shared/ui/badge';
 import { Plus, Search, MessageSquare, MoreHorizontal } from 'lucide-react';
 import type { ChatSession } from '../../types';
 import { ConversationListItem } from '../ConversationListItem';
+import { FolderManagement } from './FolderManagement';
 
 interface ChatSidebarProps {
   sessions: ChatSession[];
   currentSession: ChatSession | null;
   searchQuery: string;
+  selectedFolderId?: string | null;
   onSearchChange: (query: string) => void;
   onNewChat: () => void;
   onSessionSelect: (session: ChatSession) => void;
@@ -23,12 +25,15 @@ interface ChatSidebarProps {
   onSessionArchive?: (sessionId: string) => void;
   onSessionShare?: (sessionId: string) => void;
   onSessionDuplicate?: (sessionId: string) => void;
+  onFolderSelect?: (folderId: string | null) => void;
+  onMoveSessionToFolder?: (sessionId: string, folderId: string | null) => void;
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   sessions,
   currentSession,
   searchQuery,
+  selectedFolderId,
   onSearchChange,
   onNewChat,
   onSessionSelect,
@@ -40,6 +45,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onSessionArchive,
   onSessionShare,
   onSessionDuplicate,
+  onFolderSelect,
+  onMoveSessionToFolder,
 }) => {
   return (
     <div className="flex h-full flex-col bg-card/50 backdrop-blur-sm">
@@ -74,6 +81,21 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Folder Management */}
+      {onFolderSelect && onMoveSessionToFolder && (
+        <>
+          <Separator />
+          <div className="py-2">
+            <FolderManagement
+              selectedFolderId={selectedFolderId || null}
+              onFolderSelect={onFolderSelect}
+              onMoveSession={onMoveSessionToFolder}
+            />
+          </div>
+          <Separator />
+        </>
+      )}
 
       {/* Sessions List */}
       <ScrollArea className="flex-1">

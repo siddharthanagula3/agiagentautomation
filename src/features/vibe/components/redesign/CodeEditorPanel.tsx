@@ -18,11 +18,13 @@ import {
   Download,
   Plus,
   Save,
+  LayoutTemplate,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
 import { vibeFileSystem } from '@features/mission-control/services/vibe-file-system';
 import { FileTreeView } from './FileTreeView';
+import { VibeTemplateSelector } from '../VibeTemplateSelector';
 import JSZip from 'jszip';
 
 interface OpenFile {
@@ -40,6 +42,7 @@ export function CodeEditorPanel() {
   const [openFiles, setOpenFiles] = useState<Map<string, OpenFile>>(new Map());
   const [currentFilePath, setCurrentFilePath] = useState<string | null>(null);
   const [fileTree, setFileTree] = useState(vibeFileSystem.getFileTree());
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   // Refresh file tree when files change
   const refreshFileTree = useCallback(() => {
@@ -316,6 +319,15 @@ export function CodeEditorPanel() {
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6"
+                onClick={() => setShowTemplateSelector(true)}
+                title="New from Template"
+              >
+                <LayoutTemplate className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
                 onClick={handleExportAllAsZip}
                 title="Export all files as ZIP"
               >
@@ -562,6 +574,16 @@ export function CodeEditorPanel() {
           </div>
         )}
       </div>
+
+      {/* Template Selector Dialog */}
+      <VibeTemplateSelector
+        open={showTemplateSelector}
+        onOpenChange={setShowTemplateSelector}
+        onTemplateSelected={(templateId) => {
+          console.log('[VIBE] Template selected:', templateId);
+          refreshFileTree();
+        }}
+      />
     </div>
   );
 }

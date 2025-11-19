@@ -18,11 +18,14 @@ import {
   Download,
   Plus,
   Save,
+  LayoutTemplate,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
 import { vibeFileSystem } from '@features/mission-control/services/vibe-file-system';
 import { FileTreeView } from './FileTreeView';
+import { VibeTemplateSelector } from '../VibeTemplateSelector';
+import JSZip from 'jszip';
 
 interface OpenFile {
   path: string;
@@ -39,6 +42,7 @@ export function CodeEditorPanel() {
   const [openFiles, setOpenFiles] = useState<Map<string, OpenFile>>(new Map());
   const [currentFilePath, setCurrentFilePath] = useState<string | null>(null);
   const [fileTree, setFileTree] = useState(vibeFileSystem.getFileTree());
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   // Refresh file tree when files change
   const refreshFileTree = useCallback(() => {
@@ -261,6 +265,48 @@ export function CodeEditorPanel() {
     }
   }, []);
 
+  const handleExportAllAsZip = useCallback(async () => {
+    try {
+      const zip = new JSZip();
+
+      // Get all files from the file system
+      const allFiles = vibeFileSystem.searchFiles('');
+
+      if (allFiles.length === 0) {
+        toast.info('No files to export');
+        return;
+      }
+
+      // Add each file to the ZIP
+      for (const file of allFiles) {
+        try {
+          const content = vibeFileSystem.readFile(file.path);
+          // Remove leading slash for ZIP paths
+          const zipPath = file.path.startsWith('/') ? file.path.slice(1) : file.path;
+          zip.file(zipPath, content);
+        } catch (error) {
+          console.error(`Failed to add file ${file.path} to ZIP:`, error);
+        }
+      }
+
+      // Generate ZIP file
+      const blob = await zip.generateAsync({ type: 'blob' });
+
+      // Download ZIP
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vibe-project-${Date.now()}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      toast.success(`Exported ${allFiles.length} files as ZIP`);
+    } catch (error) {
+      toast.error('Failed to export files');
+      console.error('[VIBE] Failed to export files as ZIP', error);
+    }
+  }, []);
+
   return (
     <div className="flex h-full bg-background">
       {/* File Tree Sidebar - Collapsible */}
@@ -269,6 +315,24 @@ export function CodeEditorPanel() {
           <div className="flex items-center justify-between border-b border-border px-3 py-2">
             <span className="text-xs font-semibold">FILES</span>
             <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => setShowTemplateSelector(true)}
+                title="New from Template"
+              >
+                <LayoutTemplate className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={handleExportAllAsZip}
+                title="Export all files as ZIP"
+              >
+                <Download className="h-3 w-3" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -283,6 +347,7 @@ export function CodeEditorPanel() {
                 size="icon"
                 className="h-6 w-6"
                 onClick={() => setShowFileTree(false)}
+                title="Hide file tree"
               >
                 <X className="h-3 w-3" />
               </Button>
@@ -434,17 +499,66 @@ export function CodeEditorPanel() {
               theme="vs-dark"
               onMount={setEditorInstance}
               options={{
+                // Visual
                 fontSize: 13,
+                fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace",
                 lineNumbers: 'on',
-                minimap: { enabled: true },
+                lineNumbersMinChars: 3,
+                lineDecorationsWidth: 10,
+                lineHeight: 20,
+                minimap: { enabled: true, maxColumn: 80 },
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
+                renderLineHighlight: 'all',
+                renderWhitespace: 'selection',
+                renderIndentGuides: true,
+                highlightActiveIndentGuide: true,
+                cursorBlinking: 'smooth',
+                cursorSmoothCaretAnimation: 'on',
+                smoothScrolling: true,
+
+                // Editing
                 tabSize: 2,
+                insertSpaces: true,
                 wordWrap: 'on',
+                autoIndent: 'full',
                 formatOnPaste: true,
                 formatOnType: true,
+                autoClosingBrackets: 'always',
+                autoClosingQuotes: 'always',
+                autoSurround: 'languageDefined',
+                bracketPairColorization: { enabled: true },
+                matchBrackets: 'always',
+                folding: true,
+                foldingStrategy: 'indentation',
+
+                // IntelliSense
                 suggestOnTriggerCharacters: true,
-                quickSuggestions: true,
+                quickSuggestions: {
+                  other: true,
+                  comments: false,
+                  strings: true,
+                },
+                suggest: {
+                  showWords: true,
+                  showSnippets: true,
+                },
+                parameterHints: { enabled: true },
+                hover: { enabled: true },
+
+                // Multi-cursor and selection
+                multiCursorModifier: 'ctrlCmd',
+                selectionHighlight: true,
+                occurrencesHighlight: 'singleFile',
+                find: {
+                  autoFindInSelection: 'never',
+                  seedSearchStringFromSelection: 'selection',
+                },
+
+                // Context menu and minimap
+                contextmenu: true,
+                links: true,
+                mouseWheelZoom: true,
               }}
             />
           </div>
@@ -460,6 +574,16 @@ export function CodeEditorPanel() {
           </div>
         )}
       </div>
+
+      {/* Template Selector Dialog */}
+      <VibeTemplateSelector
+        open={showTemplateSelector}
+        onOpenChange={setShowTemplateSelector}
+        onTemplateSelected={(templateId) => {
+          console.log('[VIBE] Template selected:', templateId);
+          refreshFileTree();
+        }}
+      />
     </div>
   );
 }

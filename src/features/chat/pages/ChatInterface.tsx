@@ -14,6 +14,10 @@ import { MessageList } from '../components/Main/MessageList';
 import { ChatComposer } from '../components/Composer/ChatComposer';
 import { ModeSelector } from '../components/Tools/ModeSelector';
 import { KeyboardShortcutsDialog } from '../components/KeyboardShortcutsDialog';
+import { GlobalSearchDialog } from '../components/GlobalSearchDialog';
+import { TokenAnalyticsDialog } from '../components/TokenAnalyticsDialog';
+import { EnhancedExportDialog } from '../components/EnhancedExportDialog';
+import { BookmarksDialog } from '../components/BookmarksDialog';
 import { ToolProgressIndicator } from '../components/ToolProgressIndicator';
 import type { ChatSession, ChatMessage, ChatMode } from '../types';
 import {
@@ -127,8 +131,30 @@ const ChatPage: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<ChatMode>('team');
   // Models are automatically managed by AI employees - each employee uses their configured model
   const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [bookmarksOpen, setBookmarksOpen] = useState(false);
   const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [warningThreshold, setWarningThreshold] = useState<85 | 95>(85);
+
+  // Filter sessions based on search query
+  const filteredSessions = React.useMemo(() => {
+    if (!searchQuery.trim()) {
+      return sessions;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return sessions.filter((session) => {
+      const titleMatch = session.title.toLowerCase().includes(query);
+      const summaryMatch = session.summary?.toLowerCase().includes(query);
+      const tagsMatch = session.tags?.some((tag) =>
+        tag.toLowerCase().includes(query)
+      );
+
+      return titleMatch || summaryMatch || tagsMatch;
+    });
+  }, [sessions, searchQuery]);
 
   // Refs
   const composerRef = useRef<HTMLTextAreaElement>(null);
@@ -241,7 +267,7 @@ const ChatPage: React.FC = () => {
 
   const handleShare = async () => {
     if (!currentSession) return;
-    await generateShareLink(currentSession.id);
+    await shareSession(currentSession.id);
   };
 
   const handleCopyToClipboard = async () => {
@@ -347,7 +373,7 @@ const ChatPage: React.FC = () => {
         >
           {sidebarOpen && (
             <ChatSidebar
-              sessions={sessions}
+              sessions={filteredSessions}
               currentSession={currentSession}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -374,11 +400,14 @@ const ChatPage: React.FC = () => {
               currentSession && handleSessionRename(currentSession.id, title)
             }
             onShare={handleShare}
-            onExport={() => handleExport('markdown')}
+            onExport={() => setExportDialogOpen(true)}
             onSettings={() => {
               navigate('/settings');
             }}
             onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            onSearch={() => setGlobalSearchOpen(true)}
+            onAnalytics={() => setAnalyticsOpen(true)}
+            onBookmarks={() => setBookmarksOpen(true)}
           />
 
           {/* Usage Warning Banner */}
@@ -435,6 +464,32 @@ const ChatPage: React.FC = () => {
           open={shortcutsDialogOpen}
           onOpenChange={setShortcutsDialogOpen}
           shortcuts={shortcuts}
+        />
+
+        {/* Global Search Dialog */}
+        <GlobalSearchDialog
+          open={globalSearchOpen}
+          onOpenChange={setGlobalSearchOpen}
+        />
+
+        {/* Token Analytics Dialog */}
+        <TokenAnalyticsDialog
+          open={analyticsOpen}
+          onOpenChange={setAnalyticsOpen}
+        />
+
+        {/* Enhanced Export Dialog */}
+        <EnhancedExportDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+          session={currentSession}
+          messages={messages}
+        />
+
+        {/* Bookmarks Dialog */}
+        <BookmarksDialog
+          open={bookmarksOpen}
+          onOpenChange={setBookmarksOpen}
         />
 
         {/* Usage Warning Modal - Pops up at 85% and 95% */}

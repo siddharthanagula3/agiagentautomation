@@ -113,7 +113,8 @@ export function MessageActions({
           )}
         </Button>
 
-        {/* Reaction Buttons (for assistant messages) */}
+        {/* Reaction Buttons - HIDDEN (not implemented yet) */}
+        {/* TODO: Implement reaction system before enabling
         {!isUser && onReact && (
           <>
             <Button
@@ -143,6 +144,7 @@ export function MessageActions({
             </Button>
           </>
         )}
+        */}
       </div>
 
       {/* More Actions Menu */}
@@ -221,7 +223,8 @@ export function MessageActions({
             </DropdownMenuItem>
           )}
 
-          {/* Mark as helpful (assistant messages only) */}
+          {/* Mark as helpful - HIDDEN (not implemented yet) */}
+          {/* TODO: Implement reaction system before enabling
           {!isUser && onReact && (
             <DropdownMenuItem
               onClick={() => {
@@ -234,6 +237,7 @@ export function MessageActions({
               Mark as helpful
             </DropdownMenuItem>
           )}
+          */}
 
           {/* Delete */}
           {onDelete && (

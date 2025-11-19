@@ -6,6 +6,7 @@ import {
 } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
+import { Badge } from '@/shared/components/ui/badge';
 import {
   User,
   Bot,
@@ -18,6 +19,7 @@ import {
   Sparkles,
   Brain,
   Wrench,
+  Users,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import ReactMarkdown from 'react-markdown';
@@ -31,6 +33,7 @@ import { EmployeeWorkStream } from './EmployeeWorkStream';
 import { TokenUsageDisplay } from './TokenUsageDisplay';
 import { MessageActions } from './MessageActions';
 import { ImageAttachmentPreview } from './ImageAttachmentPreview';
+import { TypingIndicator } from './TypingIndicator';
 import { toast } from 'sonner';
 import { ArtifactPreview } from './ArtifactPreview';
 import {
@@ -43,6 +46,7 @@ import { SearchResults } from './SearchResults';
 import type { SearchResponse } from '@core/integrations/web-search-handler';
 import type { MediaGenerationResult } from '@core/integrations/media-generation-handler';
 import type { GeneratedDocument } from '../services/document-generation-service';
+import { documentGenerationService } from '../services/document-generation-service';
 
 interface Attachment {
   id: string;
@@ -81,6 +85,7 @@ interface Message {
     selectionReason?: string;
     thinkingSteps?: string[];
     isThinking?: boolean;
+    isStreaming?: boolean; // Streaming indicator
     // Multi-agent collaboration metadata
     isCollaboration?: boolean;
     collaborationType?: 'contribution' | 'discussion' | 'synthesis';
@@ -225,6 +230,7 @@ export const MessageBubble = React.memo(function MessageBubble({
   const [documentExpanded, setDocumentExpanded] = useState(false);
   const [workStreamExpanded, setWorkStreamExpanded] = useState(true);
   const [thinkingExpanded, setThinkingExpanded] = useState(false);
+  const [collaborationsExpanded, setCollaborationsExpanded] = useState(false);
   const isUser = message.role === 'user';
   const isDocument = message.metadata?.isDocument;
   const hasWorkStream = message.metadata?.hasWorkStream;
@@ -232,6 +238,10 @@ export const MessageBubble = React.memo(function MessageBubble({
   const hasThinkingSteps =
     message.metadata?.thinkingSteps &&
     message.metadata.thinkingSteps.length > 0;
+  const hasCollaborations =
+    message.metadata?.isMultiAgent &&
+    message.metadata?.collaborationMessages &&
+    message.metadata.collaborationMessages.length > 0;
 
   // Artifact detection and management
   const { addArtifact, shareArtifact, setCurrentVersion, getMessageArtifacts } =
@@ -290,6 +300,48 @@ export const MessageBubble = React.memo(function MessageBubble({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleExportPDF = async () => {
+    try {
+      const generatedDoc: GeneratedDocument = {
+        title: message.metadata?.documentTitle || 'Document',
+        content: message.content,
+        metadata: {
+          type: 'general',
+          generatedAt: message.timestamp,
+          wordCount: message.content.split(/\s+/).length,
+          tokensUsed: message.metadata?.tokensUsed,
+          model: message.metadata?.model,
+        },
+      };
+      await documentGenerationService.exportDocumentToPDF(generatedDoc);
+      toast.success('PDF exported successfully');
+    } catch (error) {
+      console.error('PDF export failed:', error);
+      toast.error('Failed to export PDF');
+    }
+  };
+
+  const handleExportDOCX = async () => {
+    try {
+      const generatedDoc: GeneratedDocument = {
+        title: message.metadata?.documentTitle || 'Document',
+        content: message.content,
+        metadata: {
+          type: 'general',
+          generatedAt: message.timestamp,
+          wordCount: message.content.split(/\s+/).length,
+          tokensUsed: message.metadata?.tokensUsed,
+          model: message.metadata?.model,
+        },
+      };
+      await documentGenerationService.exportDocumentToDOCX(generatedDoc);
+      toast.success('DOCX exported successfully');
+    } catch (error) {
+      console.error('DOCX export failed:', error);
+      toast.error('Failed to export DOCX');
+    }
   };
 
   const formatTime = (date: Date) => {
@@ -428,15 +480,38 @@ export const MessageBubble = React.memo(function MessageBubble({
               <span className="flex-1 text-sm font-medium">
                 {message.metadata?.documentTitle || 'Document'}
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleExportDocument}
-                className="h-7 px-2 text-xs"
-              >
-                <Download className="mr-1 h-3 w-3" />
-                Export .md
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExportDocument}
+                  className="h-7 px-2 text-xs"
+                  title="Export as Markdown"
+                >
+                  <Download className="mr-1 h-3 w-3" />
+                  .md
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExportPDF}
+                  className="h-7 px-2 text-xs"
+                  title="Export as PDF"
+                >
+                  <Download className="mr-1 h-3 w-3" />
+                  .pdf
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExportDOCX}
+                  className="h-7 px-2 text-xs"
+                  title="Export as DOCX"
+                >
+                  <Download className="mr-1 h-3 w-3" />
+                  .docx
+                </Button>
+              </div>
             </div>
           )}
 
@@ -474,15 +549,25 @@ export const MessageBubble = React.memo(function MessageBubble({
                   !isUser && 'prose-p:leading-relaxed'
                 )}
               >
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-                  rehypePlugins={[rehypeHighlight, rehypeRaw]}
-                  components={markdownComponents}
-                >
-                  {cleanedContent}
-                </ReactMarkdown>
-                {message.isStreaming && (
-                  <span className="ml-1 inline-block h-4 w-2 animate-pulse rounded-sm bg-current" />
+                {/* Show typing indicator when streaming with no content */}
+                {message.isStreaming && !cleanedContent.trim() ? (
+                  <TypingIndicator
+                    agentName={message.employeeName || 'AI Assistant'}
+                  />
+                ) : (
+                  <>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
+                      rehypePlugins={[rehypeHighlight, rehypeRaw]}
+                      components={markdownComponents}
+                    >
+                      {cleanedContent}
+                    </ReactMarkdown>
+                    {/* Show cursor when streaming with content */}
+                    {message.isStreaming && cleanedContent.trim() && (
+                      <span className="ml-1 inline-block h-4 w-2 animate-pulse rounded-sm bg-current" />
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -530,6 +615,75 @@ export const MessageBubble = React.memo(function MessageBubble({
                   onShare={() => handleShareArtifact(artifact.id)}
                 />
               ))}
+            </div>
+          )}
+
+          {/* Agent Contributions (Collapsible) */}
+          {hasCollaborations && (
+            <div className="mt-3 w-full">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCollaborationsExpanded(!collaborationsExpanded)}
+                className="w-full justify-start gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs hover:bg-muted/50"
+              >
+                {collaborationsExpanded ? (
+                  <ChevronUp className="h-3 w-3" />
+                ) : (
+                  <ChevronDown className="h-3 w-3" />
+                )}
+                <Users className="h-3 w-3" />
+                <span>
+                  {collaborationsExpanded
+                    ? 'Hide Agent Contributions'
+                    : `Show Agent Contributions (${message.metadata.collaborationMessages.length} agents)`}
+                </span>
+              </Button>
+
+              {collaborationsExpanded && (
+                <div className="mt-2 space-y-2">
+                  {message.metadata.collaborationMessages.map((collab, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-lg border border-border bg-card p-3 shadow-sm"
+                    >
+                      <div className="mb-2 flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarFallback
+                            className="text-xs font-semibold text-white"
+                            style={{ backgroundColor: collab.employeeAvatar }}
+                          >
+                            {collab.employeeName
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium">
+                          {collab.employeeName}
+                        </span>
+                        {collab.messageType && (
+                          <Badge
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {collab.messageType}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
+                          rehypePlugins={[rehypeHighlight, rehypeRaw]}
+                          components={markdownComponents}
+                        >
+                          {collab.content}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -746,7 +900,8 @@ export const MessageBubble = React.memo(function MessageBubble({
             </div>
           )}
 
-          {/* Work Stream (Agent Collaboration) */}
+          {/* Work Stream - HIDDEN (not implemented yet) */}
+          {/* TODO: Implement work stream visualization before enabling
           {hasWorkStream && message.metadata?.workStreamData && (
             <div className="mt-3 w-full">
               <div className="mb-2 flex items-center gap-2">
@@ -774,6 +929,7 @@ export const MessageBubble = React.memo(function MessageBubble({
               )}
             </div>
           )}
+          */}
 
           {/* Action Buttons & Token Usage */}
           <div

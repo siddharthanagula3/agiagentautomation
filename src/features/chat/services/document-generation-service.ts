@@ -7,6 +7,7 @@
 
 import { unifiedLLMService } from '@core/ai/llm/unified-language-model';
 import type { UnifiedMessage } from '@core/ai/llm/unified-language-model';
+import { exportToPDF, exportToDOCX, downloadBlob } from './document-export';
 
 export type DocumentFormat = 'markdown' | 'pdf' | 'docx';
 
@@ -305,9 +306,43 @@ export async function enhanceDocument(
   }
 }
 
+/**
+ * Exports a generated document to PDF format
+ */
+async function exportDocumentToPDF(
+  document: GeneratedDocument,
+  author?: string
+): Promise<void> {
+  const blob = await exportToPDF({
+    title: document.title,
+    content: document.content,
+    date: document.metadata.generatedAt,
+    author,
+  });
+  downloadBlob(blob, `${document.title}.pdf`);
+}
+
+/**
+ * Exports a generated document to DOCX format
+ */
+async function exportDocumentToDOCX(
+  document: GeneratedDocument,
+  author?: string
+): Promise<void> {
+  const blob = await exportToDOCX({
+    title: document.title,
+    content: document.content,
+    date: document.metadata.generatedAt,
+    author,
+  });
+  downloadBlob(blob, `${document.title}.docx`);
+}
+
 export const documentGenerationService = {
   isDocumentRequest,
   parseDocumentRequest,
   generateDocument,
   enhanceDocument,
+  exportDocumentToPDF,
+  exportDocumentToDOCX,
 };

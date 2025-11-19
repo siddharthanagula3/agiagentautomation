@@ -31,6 +31,7 @@ import { EmployeeWorkStream } from './EmployeeWorkStream';
 import { TokenUsageDisplay } from './TokenUsageDisplay';
 import { MessageActions } from './MessageActions';
 import { ImageAttachmentPreview } from './ImageAttachmentPreview';
+import { TypingIndicator } from './TypingIndicator';
 import { toast } from 'sonner';
 import { ArtifactPreview } from './ArtifactPreview';
 import {
@@ -81,6 +82,7 @@ interface Message {
     selectionReason?: string;
     thinkingSteps?: string[];
     isThinking?: boolean;
+    isStreaming?: boolean; // Streaming indicator
     // Multi-agent collaboration metadata
     isCollaboration?: boolean;
     collaborationType?: 'contribution' | 'discussion' | 'synthesis';
@@ -474,15 +476,25 @@ export const MessageBubble = React.memo(function MessageBubble({
                   !isUser && 'prose-p:leading-relaxed'
                 )}
               >
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-                  rehypePlugins={[rehypeHighlight, rehypeRaw]}
-                  components={markdownComponents}
-                >
-                  {cleanedContent}
-                </ReactMarkdown>
-                {message.isStreaming && (
-                  <span className="ml-1 inline-block h-4 w-2 animate-pulse rounded-sm bg-current" />
+                {/* Show typing indicator when streaming with no content */}
+                {message.isStreaming && !cleanedContent.trim() ? (
+                  <TypingIndicator
+                    agentName={message.employeeName || 'AI Assistant'}
+                  />
+                ) : (
+                  <>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
+                      rehypePlugins={[rehypeHighlight, rehypeRaw]}
+                      components={markdownComponents}
+                    >
+                      {cleanedContent}
+                    </ReactMarkdown>
+                    {/* Show cursor when streaming with content */}
+                    {message.isStreaming && cleanedContent.trim() && (
+                      <span className="ml-1 inline-block h-4 w-2 animate-pulse rounded-sm bg-current" />
+                    )}
+                  </>
                 )}
               </div>
             )}

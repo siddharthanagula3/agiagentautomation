@@ -621,26 +621,52 @@ export const useChat = (sessionId?: string) => {
     [messages, sendMessage, sessionId]
   );
 
-  // Edit a message
+  // Edit a message and re-run from that point
   const editMessage = useCallback(
     async (messageId: string, newContent: string) => {
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === messageId
-            ? {
-                ...msg,
-                content: newContent,
-                isEdited: true,
-                editedAt: new Date(),
-              }
-            : msg
-        )
+      const messageIndex = messages.findIndex((msg) => msg.id === messageId);
+      if (messageIndex === -1) return;
+
+      const editedMessage = messages[messageIndex];
+
+      // Only allow editing user messages
+      if (editedMessage.role !== 'user') {
+        toast.error('Can only edit your own messages');
+        return;
+      }
+
+      // Update the edited message and remove all messages after it
+      const messagesUpToEdit = messages.slice(0, messageIndex + 1);
+      const updatedMessages = messagesUpToEdit.map((msg) =>
+        msg.id === messageId
+          ? {
+              ...msg,
+              content: newContent,
+              edited: true,
+              editCount: (msg.editCount || 0) + 1,
+              updatedAt: new Date(),
+            }
+          : msg
       );
 
-      // TODO: Update in database
-      toast.success('Message updated');
+      setMessages(updatedMessages);
+
+      // Update in database if session exists
+      if (sessionId) {
+        try {
+          await chatPersistenceService.updateMessage(messageId, newContent);
+        } catch (error) {
+          console.error('Failed to update message in database:', error);
+        }
+      }
+
+      toast.success('Message updated. Regenerating response...');
+
+      // Re-run the conversation from the edited message
+      // Use the same sendMessage logic but with the updated context
+      await sendMessage(newContent);
     },
-    []
+    [messages, sendMessage, sessionId]
   );
 
   // Delete a message

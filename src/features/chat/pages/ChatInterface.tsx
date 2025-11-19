@@ -16,6 +16,7 @@ import { ModeSelector } from '../components/Tools/ModeSelector';
 import { KeyboardShortcutsDialog } from '../components/KeyboardShortcutsDialog';
 import { GlobalSearchDialog } from '../components/GlobalSearchDialog';
 import { TokenAnalyticsDialog } from '../components/TokenAnalyticsDialog';
+import { EnhancedExportDialog } from '../components/EnhancedExportDialog';
 import { ToolProgressIndicator } from '../components/ToolProgressIndicator';
 import type { ChatSession, ChatMessage, ChatMode } from '../types';
 import {
@@ -131,6 +132,7 @@ const ChatPage: React.FC = () => {
   const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [warningThreshold, setWarningThreshold] = useState<85 | 95>(85);
 
@@ -396,7 +398,7 @@ const ChatPage: React.FC = () => {
               currentSession && handleSessionRename(currentSession.id, title)
             }
             onShare={handleShare}
-            onExport={() => handleExport('markdown')}
+            onExport={() => setExportDialogOpen(true)}
             onSettings={() => {
               navigate('/settings');
             }}
@@ -471,6 +473,14 @@ const ChatPage: React.FC = () => {
         <TokenAnalyticsDialog
           open={analyticsOpen}
           onOpenChange={setAnalyticsOpen}
+        />
+
+        {/* Enhanced Export Dialog */}
+        <EnhancedExportDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+          session={currentSession}
+          messages={messages}
         />
 
         {/* Usage Warning Modal - Pops up at 85% and 95% */}

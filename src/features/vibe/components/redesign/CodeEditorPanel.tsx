@@ -23,6 +23,7 @@ import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
 import { vibeFileSystem } from '@features/mission-control/services/vibe-file-system';
 import { FileTreeView } from './FileTreeView';
+import JSZip from 'jszip';
 
 interface OpenFile {
   path: string;
@@ -261,6 +262,48 @@ export function CodeEditorPanel() {
     }
   }, []);
 
+  const handleExportAllAsZip = useCallback(async () => {
+    try {
+      const zip = new JSZip();
+
+      // Get all files from the file system
+      const allFiles = vibeFileSystem.searchFiles('');
+
+      if (allFiles.length === 0) {
+        toast.info('No files to export');
+        return;
+      }
+
+      // Add each file to the ZIP
+      for (const file of allFiles) {
+        try {
+          const content = vibeFileSystem.readFile(file.path);
+          // Remove leading slash for ZIP paths
+          const zipPath = file.path.startsWith('/') ? file.path.slice(1) : file.path;
+          zip.file(zipPath, content);
+        } catch (error) {
+          console.error(`Failed to add file ${file.path} to ZIP:`, error);
+        }
+      }
+
+      // Generate ZIP file
+      const blob = await zip.generateAsync({ type: 'blob' });
+
+      // Download ZIP
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vibe-project-${Date.now()}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      toast.success(`Exported ${allFiles.length} files as ZIP`);
+    } catch (error) {
+      toast.error('Failed to export files');
+      console.error('[VIBE] Failed to export files as ZIP', error);
+    }
+  }, []);
+
   return (
     <div className="flex h-full bg-background">
       {/* File Tree Sidebar - Collapsible */}
@@ -269,6 +312,15 @@ export function CodeEditorPanel() {
           <div className="flex items-center justify-between border-b border-border px-3 py-2">
             <span className="text-xs font-semibold">FILES</span>
             <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={handleExportAllAsZip}
+                title="Export all files as ZIP"
+              >
+                <Download className="h-3 w-3" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -283,6 +335,7 @@ export function CodeEditorPanel() {
                 size="icon"
                 className="h-6 w-6"
                 onClick={() => setShowFileTree(false)}
+                title="Hide file tree"
               >
                 <X className="h-3 w-3" />
               </Button>

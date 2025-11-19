@@ -51,6 +51,26 @@ export const useChat = (sessionId?: string) => {
     return user;
   };
 
+  /**
+   * Stream text word-by-word for better UX
+   * Simulates real-time streaming even when we have the full response
+   */
+  const streamText = async (
+    text: string,
+    onChunk: (chunk: string, accumulated: string) => void,
+    delayMs: number = 30
+  ): Promise<void> => {
+    const words = text.split(' ');
+    let accumulated = '';
+
+    for (let i = 0; i < words.length; i++) {
+      const chunk = words[i] + (i < words.length - 1 ? ' ' : '');
+      accumulated += chunk;
+      onChunk(chunk, accumulated);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  };
+
   // Load messages from database
   const loadMessages = useCallback(async (sid: string) => {
     try {
@@ -426,12 +446,12 @@ export const useChat = (sessionId?: string) => {
           // Add collaboration messages
           setMessages((prev) => [...prev, ...collaborationChatMessages]);
 
-          // Add final synthesized answer as the main response
+          // Add final synthesized answer with streaming
           const assistantMessageId = crypto.randomUUID();
           const assistantMessage: ChatMessage = {
             id: assistantMessageId,
             role: 'assistant',
-            content: result.response,
+            content: '',
             createdAt: new Date(
               Date.now() + result.collaborationMessages.length + 1
             ),
@@ -449,10 +469,41 @@ export const useChat = (sessionId?: string) => {
               employeesInvolved: result.metadata.employeesInvolved,
               isSynthesis: true,
               searchResults, // Include search results if available
+              isStreaming: true, // Mark as streaming
             },
           };
 
+          // Add empty message to show typing indicator
           setMessages((prev) => [...prev, assistantMessage]);
+
+          // Stream the synthesized response word-by-word
+          await streamText(result.response, (chunk, accumulated) => {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantMessageId
+                  ? {
+                      ...msg,
+                      content: accumulated,
+                    }
+                  : msg
+              )
+            );
+          });
+
+          // Mark streaming as complete
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? {
+                    ...msg,
+                    metadata: {
+                      ...msg.metadata,
+                      isStreaming: false,
+                    },
+                  }
+                : msg
+            )
+          );
 
           // Save only the final synthesized answer to database
           if (sessionId && result.response) {
@@ -463,12 +514,14 @@ export const useChat = (sessionId?: string) => {
             );
           }
         } else {
-          // Single employee response
+          // Single employee response - STREAM IT!
           const assistantMessageId = crypto.randomUUID();
+
+          // Create initial message with typing indicator
           const assistantMessage: ChatMessage = {
             id: assistantMessageId,
             role: 'assistant',
-            content: result.response,
+            content: '',
             createdAt: new Date(),
             metadata: {
               mode,
@@ -486,10 +539,41 @@ export const useChat = (sessionId?: string) => {
               tokensUsed: result.metadata.tokensUsed,
               isMultiAgent: false,
               searchResults, // Include search results if available
+              isStreaming: true, // Mark as streaming
             },
           };
 
+          // Add empty message to show typing indicator
           setMessages((prev) => [...prev, assistantMessage]);
+
+          // Stream the response word-by-word
+          await streamText(result.response, (chunk, accumulated) => {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === assistantMessageId
+                  ? {
+                      ...msg,
+                      content: accumulated,
+                    }
+                  : msg
+              )
+            );
+          });
+
+          // Mark streaming as complete
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? {
+                    ...msg,
+                    metadata: {
+                      ...msg.metadata,
+                      isStreaming: false,
+                    },
+                  }
+                : msg
+            )
+          );
 
           // Save assistant response to database
           if (sessionId && result.response) {

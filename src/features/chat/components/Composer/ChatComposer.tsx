@@ -27,6 +27,10 @@ import {
   Plus,
   ChevronDown,
   Zap,
+  Image as ImageIcon,
+  Video,
+  FileText,
+  Search,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import type { ChatMode, Tool } from '../../types';
@@ -137,6 +141,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([
     'auto',
   ]);
+  const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [textareaHeight, setTextareaHeight] = useState(80);
   const [showPromptShortcuts, setShowPromptShortcuts] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -157,13 +162,18 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
     if (!message.trim() && attachments.length === 0) return;
 
     try {
-      await onSendMessage(message, {
+      // Prefix message with tool indicators
+      const toolPrefix = getToolPromptPrefix();
+      const finalMessage = toolPrefix + message;
+
+      await onSendMessage(finalMessage, {
         attachments,
         // Model selection removed - AI employees use their own configured models
         employees: selectedEmployees,
       });
       setMessage('');
       setAttachments([]);
+      setSelectedTools([]); // Clear selected tools after sending
     } catch (error) {
       console.error('Failed to send message:', error);
     }
@@ -198,6 +208,29 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
         }
       });
     }
+  };
+
+  const toggleTool = (toolId: string) => {
+    setSelectedTools((prev) => {
+      if (prev.includes(toolId)) {
+        return prev.filter((id) => id !== toolId);
+      } else {
+        return [...prev, toolId];
+      }
+    });
+  };
+
+  const getToolPromptPrefix = () => {
+    if (selectedTools.length === 0) return '';
+
+    const toolPrefixes: Record<string, string> = {
+      image: '🖼️ [Generate Image] ',
+      video: '🎥 [Generate Video] ',
+      document: '📄 [Create Document] ',
+      search: '🔍 [Web Search] ',
+    };
+
+    return selectedTools.map((tool) => toolPrefixes[tool] || '').join('');
   };
 
   const handleSelectPrompt = (prompt: string) => {
@@ -322,6 +355,123 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
               Team
             </Badge>
           )}
+      </div>
+
+      {/* Tool Selection Strip */}
+      <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2">
+        <span className="text-xs font-medium text-muted-foreground">Tools:</span>
+        <TooltipProvider delayDuration={200}>
+          {/* Image Generation */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={selectedTools.includes('image') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => toggleTool('image')}
+                className={cn(
+                  'h-8 w-8 p-0 transition-all',
+                  selectedTools.includes('image') && 'ring-2 ring-primary ring-offset-2'
+                )}
+                disabled={isLoading}
+              >
+                <ImageIcon className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div>
+                <div className="font-medium">Image Generation</div>
+                <div className="text-xs text-muted-foreground">
+                  Generate images with DALL-E
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Video Generation */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={selectedTools.includes('video') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => toggleTool('video')}
+                className={cn(
+                  'h-8 w-8 p-0 transition-all',
+                  selectedTools.includes('video') && 'ring-2 ring-primary ring-offset-2'
+                )}
+                disabled={isLoading}
+              >
+                <Video className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div>
+                <div className="font-medium">Video Generation</div>
+                <div className="text-xs text-muted-foreground">
+                  Generate videos from text
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Document Generation */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={selectedTools.includes('document') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => toggleTool('document')}
+                className={cn(
+                  'h-8 w-8 p-0 transition-all',
+                  selectedTools.includes('document') && 'ring-2 ring-primary ring-offset-2'
+                )}
+                disabled={isLoading}
+              >
+                <FileText className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div>
+                <div className="font-medium">Document Generation</div>
+                <div className="text-xs text-muted-foreground">
+                  Create documents with Claude AI
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Web Search */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={selectedTools.includes('search') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => toggleTool('search')}
+                className={cn(
+                  'h-8 w-8 p-0 transition-all',
+                  selectedTools.includes('search') && 'ring-2 ring-primary ring-offset-2'
+                )}
+                disabled={isLoading}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div>
+                <div className="font-medium">Web Search</div>
+                <div className="text-xs text-muted-foreground">
+                  Search the web for real-time information
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* Active Tools Indicator */}
+        {selectedTools.length > 0 && (
+          <Badge variant="secondary" className="ml-auto text-xs">
+            {selectedTools.length} selected
+          </Badge>
+        )}
       </div>
 
       {/* Attachments Preview */}

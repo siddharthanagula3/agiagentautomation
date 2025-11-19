@@ -15,6 +15,7 @@ import { ChatComposer } from '../components/Composer/ChatComposer';
 import { ModeSelector } from '../components/Tools/ModeSelector';
 import { KeyboardShortcutsDialog } from '../components/KeyboardShortcutsDialog';
 import { GlobalSearchDialog } from '../components/GlobalSearchDialog';
+import { TokenAnalyticsDialog } from '../components/TokenAnalyticsDialog';
 import { ToolProgressIndicator } from '../components/ToolProgressIndicator';
 import type { ChatSession, ChatMessage, ChatMode } from '../types';
 import {
@@ -129,6 +130,7 @@ const ChatPage: React.FC = () => {
   // Models are automatically managed by AI employees - each employee uses their configured model
   const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [warningThreshold, setWarningThreshold] = useState<85 | 95>(85);
 
@@ -400,6 +402,7 @@ const ChatPage: React.FC = () => {
             }}
             onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
             onSearch={() => setGlobalSearchOpen(true)}
+            onAnalytics={() => setAnalyticsOpen(true)}
           />
 
           {/* Usage Warning Banner */}
@@ -462,6 +465,12 @@ const ChatPage: React.FC = () => {
         <GlobalSearchDialog
           open={globalSearchOpen}
           onOpenChange={setGlobalSearchOpen}
+        />
+
+        {/* Token Analytics Dialog */}
+        <TokenAnalyticsDialog
+          open={analyticsOpen}
+          onOpenChange={setAnalyticsOpen}
         />
 
         {/* Usage Warning Modal - Pops up at 85% and 95% */}

@@ -106,7 +106,8 @@ export function useMissionChatBridge(conversationId: string | null) {
   useEffect(() => {
     if (!conversationId) return;
 
-    activeEmployees.forEach((employee) => {
+    // activeEmployees is now a Record, not a Map
+    Object.values(activeEmployees).forEach((employee) => {
       updateWorkingProcess(employee.name, {
         employeeId: employee.name,
         steps: employee.log.map((logEntry, index) => ({
@@ -134,7 +135,8 @@ export function useMissionChatBridge(conversationId: string | null) {
   return {
     missionStatus,
     isOrchestrating: useMissionStore((state) => state.isOrchestrating),
-    activeEmployeeCount: activeEmployees.size,
+    // activeEmployees is now a Record, not a Map
+    activeEmployeeCount: Object.keys(activeEmployees).length,
   };
 }
 

@@ -113,10 +113,11 @@ export function MultiAgentChatInterface({
   const missionPlan = useMissionStore((state) => state.missionPlan);
 
   // Convert mission store data to chat format
+  // activeEmployees is now a Record, not a Map
   const agents: Agent[] =
     externalAgents.length > 0
       ? externalAgents
-      : Array.from(activeEmployees.values()).map((emp) => ({
+      : Object.values(activeEmployees).map((emp) => ({
           id: emp.name,
           name: emp.name,
           role: 'AI Employee',

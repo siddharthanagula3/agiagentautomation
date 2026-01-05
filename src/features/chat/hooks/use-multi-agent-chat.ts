@@ -260,21 +260,19 @@ export function useMultiAgentChat(
     await sendMessage(lastUserMessage.content);
   }, [sendMessage]);
 
-  // Get active agents from activeEmployees map
-  const activeAgentsList = Array.from(activeEmployees.values()).map(
-    (employee) => {
-      const agentData = availableAgents.find((a) => a.name === employee.name);
-      return (
-        agentData || {
-          name: employee.name,
-          description: '',
-          tools: [],
-          model: 'inherit',
-          systemPrompt: '',
-        }
-      );
-    }
-  );
+  // Get active agents from activeEmployees Record (plain object, not Map)
+  const activeAgentsList = Object.values(activeEmployees).map((employee) => {
+    const agentData = availableAgents.find((a) => a.name === employee.name);
+    return (
+      agentData || {
+        name: employee.name,
+        description: '',
+        tools: [],
+        model: 'inherit',
+        systemPrompt: '',
+      }
+    );
+  });
 
   return {
     // State

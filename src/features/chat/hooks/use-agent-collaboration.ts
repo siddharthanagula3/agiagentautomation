@@ -28,8 +28,8 @@ export interface AgentStatus {
 export interface UseAgentCollaborationReturn {
   // State
   availableAgents: AIEmployee[];
-  selectedAgents: string[];
-  activeAgents: Map<string, AgentStatus>;
+  selectedAgents: string[];  // Changed from Set to array
+  activeAgents: Record<string, AgentStatus>;  // Changed from Map to Record
   collaborationStatus: 'idle' | 'active' | 'paused' | 'completed';
 
   // Actions
@@ -116,12 +116,13 @@ export function useAgentCollaboration(
   // Add agent to collaboration
   const addAgent = useCallback(
     (agentName: string) => {
-      if (collaborativeAgents.has(agentName)) {
+      // collaborativeAgents is now an array, not a Set
+      if (collaborativeAgents.includes(agentName)) {
         toast.info(`${agentName} is already selected`);
         return;
       }
 
-      if (collaborativeAgents.size >= maxConcurrentAgents) {
+      if (collaborativeAgents.length >= maxConcurrentAgents) {
         toast.warning(
           `Maximum of ${maxConcurrentAgents} agents can collaborate simultaneously`
         );
@@ -148,7 +149,8 @@ export function useAgentCollaboration(
   // Remove agent from collaboration
   const removeAgent = useCallback(
     (agentName: string) => {
-      if (!collaborativeAgents.has(agentName)) {
+      // collaborativeAgents is now an array, not a Set
+      if (!collaborativeAgents.includes(agentName)) {
         return;
       }
 
@@ -161,7 +163,8 @@ export function useAgentCollaboration(
   // Toggle agent selection
   const toggleAgent = useCallback(
     (agentName: string) => {
-      if (collaborativeAgents.has(agentName)) {
+      // collaborativeAgents is now an array, not a Set
+      if (collaborativeAgents.includes(agentName)) {
         removeAgent(agentName);
       } else {
         addAgent(agentName);
@@ -179,7 +182,8 @@ export function useAgentCollaboration(
   // Start collaboration
   const startCollaboration = useCallback(
     async (task: string) => {
-      if (collaborativeAgents.size === 0) {
+      // collaborativeAgents is now an array, not a Set
+      if (collaborativeAgents.length === 0) {
         toast.error('Please select at least one agent for collaboration');
         return;
       }
@@ -246,7 +250,8 @@ export function useAgentCollaboration(
   // Check if agent is selected
   const isAgentSelected = useCallback(
     (agentName: string) => {
-      return collaborativeAgents.has(agentName);
+      // collaborativeAgents is now an array, not a Set
+      return collaborativeAgents.includes(agentName);
     },
     [collaborativeAgents]
   );
@@ -254,7 +259,8 @@ export function useAgentCollaboration(
   // Get agent status
   const getAgentStatus = useCallback(
     (agentName: string) => {
-      return activeEmployees.get(agentName);
+      // activeEmployees is now a Record, not a Map
+      return activeEmployees[agentName];
     },
     [activeEmployees]
   );
@@ -268,10 +274,11 @@ export function useAgentCollaboration(
   })();
 
   // Check if can add more agents
-  const canAddMoreAgents = collaborativeAgents.size < maxConcurrentAgents;
+  // collaborativeAgents is now an array, not a Set
+  const canAddMoreAgents = collaborativeAgents.length < maxConcurrentAgents;
 
-  // Convert collaborativeAgents Set to array
-  const selectedAgentsArray = Array.from(collaborativeAgents);
+  // collaborativeAgents is already an array now
+  const selectedAgentsArray = collaborativeAgents;
 
   return {
     // State

@@ -117,7 +117,8 @@ export function useMessageStreaming(): UseMessageStreamingReturn {
   useEffect(() => {
     let activeStreamingAgent: ActiveEmployee | null = null;
 
-    activeEmployees.forEach((employee) => {
+    // activeEmployees is now a Record, not a Map
+    Object.values(activeEmployees).forEach((employee) => {
       if (employee.status === 'thinking' || employee.status === 'using_tool') {
         activeStreamingAgent = employee;
       }
@@ -184,7 +185,8 @@ export function useMessageStreaming(): UseMessageStreamingReturn {
   // Get agent progress
   const getAgentProgress = useCallback(
     (agentName: string): number => {
-      const agent = activeEmployees.get(agentName);
+      // activeEmployees is now a Record, not a Map
+      const agent = activeEmployees[agentName];
       return agent?.progress || 0;
     },
     [activeEmployees]
@@ -193,7 +195,8 @@ export function useMessageStreaming(): UseMessageStreamingReturn {
   // Check if agent is active
   const isAgentActive = useCallback(
     (agentName: string): boolean => {
-      const agent = activeEmployees.get(agentName);
+      // activeEmployees is now a Record, not a Map
+      const agent = activeEmployees[agentName];
       return agent?.status === 'thinking' || agent?.status === 'using_tool';
     },
     [activeEmployees]
@@ -244,7 +247,8 @@ export function useMessageStreaming(): UseMessageStreamingReturn {
  */
 export function useAgentActivity(agentName: string) {
   const activeEmployees = useMissionStore((state) => state.activeEmployees);
-  const agent = activeEmployees.get(agentName);
+  // activeEmployees is now a Record, not a Map
+  const agent = activeEmployees[agentName];
 
   const [activity, setActivity] = useState({
     isActive: false,

@@ -10,8 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@shared/ui/avatar';
 import { Badge } from '@shared/ui/badge';
 import { Progress } from '@shared/ui/progress';
 import { Bot, Loader2, CheckCircle2, AlertCircle, Wrench } from 'lucide-react';
-import { useActiveEmployees } from '@shared/stores/mission-store';
-import type { ActiveEmployee } from '@shared/stores/mission-store';
+import { useActiveEmployees } from '@shared/stores/mission-control-store';
+import type { ActiveEmployee } from '@shared/stores/mission-control-store';
 
 const getStatusColor = (status: ActiveEmployee['status']) => {
   switch (status) {
@@ -59,8 +59,9 @@ const getStatusLabel = (status: ActiveEmployee['status']) => {
 };
 
 export const WorkforceStatusPanel: React.FC = () => {
-  const activeEmployeesMap = useActiveEmployees();
-  const activeEmployees = Array.from(activeEmployeesMap.values());
+  const activeEmployeesRecord = useActiveEmployees();
+  // activeEmployees is now a Record, not a Map
+  const activeEmployees = Object.values(activeEmployeesRecord);
 
   return (
     <Card className="h-full border-border bg-card">

@@ -31,7 +31,8 @@ describe('Mission Control Store', () => {
       expect(state.missionPlan).toEqual([]);
       expect(state.currentMissionId).toBeNull();
       expect(state.missionStatus).toBe('idle');
-      expect(state.activeEmployees.size).toBe(0);
+      // activeEmployees is now a Record, not a Map
+      expect(Object.keys(state.activeEmployees).length).toBe(0);
       expect(state.messages).toEqual([]);
       expect(state.isOrchestrating).toBe(false);
       expect(state.isPaused).toBe(false);
@@ -117,7 +118,8 @@ describe('Mission Control Store', () => {
       expect(state.missionPlan).toEqual([]);
       expect(state.currentMissionId).toBeNull();
       expect(state.missionStatus).toBe('idle');
-      expect(state.activeEmployees.size).toBe(0);
+      // activeEmployees is now a Record, not a Map
+      expect(Object.keys(state.activeEmployees).length).toBe(0);
       expect(state.messages).toEqual([]);
       expect(state.error).toBeNull();
     });
@@ -238,7 +240,8 @@ describe('Mission Control Store', () => {
 
       state.updateEmployeeStatus('code-reviewer', 'thinking');
 
-      const employee = state.activeEmployees.get('code-reviewer');
+      // activeEmployees is now a Record, not a Map
+      const employee = state.activeEmployees['code-reviewer'];
       expect(employee).toBeDefined();
       expect(employee?.name).toBe('code-reviewer');
       expect(employee?.status).toBe('thinking');
@@ -250,7 +253,8 @@ describe('Mission Control Store', () => {
       state.updateEmployeeStatus('debugger', 'idle');
       state.updateEmployeeStatus('debugger', 'using_tool', 'Bash', 'Run tests');
 
-      const employee = state.activeEmployees.get('debugger');
+      // activeEmployees is now a Record, not a Map
+      const employee = state.activeEmployees['debugger'];
       expect(employee?.status).toBe('using_tool');
       expect(employee?.currentTool).toBe('Bash');
       expect(employee?.currentTask).toBe('Run tests');
@@ -261,7 +265,8 @@ describe('Mission Control Store', () => {
 
       state.updateEmployeeStatus('code-reviewer', 'error');
 
-      const employee = state.activeEmployees.get('code-reviewer');
+      // activeEmployees is now a Record, not a Map
+      const employee = state.activeEmployees['code-reviewer'];
       expect(employee?.status).toBe('error');
     });
 
@@ -272,7 +277,8 @@ describe('Mission Control Store', () => {
       state.addEmployeeLog('debugger', 'Starting code review');
       state.addEmployeeLog('debugger', 'Found 2 issues');
 
-      const employee = state.activeEmployees.get('debugger');
+      // activeEmployees is now a Record, not a Map
+      const employee = state.activeEmployees['debugger'];
       expect(employee?.log).toHaveLength(2);
       expect(employee?.log[0]).toBe('Starting code review');
       expect(employee?.log[1]).toBe('Found 2 issues');
@@ -284,7 +290,8 @@ describe('Mission Control Store', () => {
       state.updateEmployeeStatus('code-reviewer', 'thinking');
       state.updateEmployeeProgress('code-reviewer', 50);
 
-      const employee = state.activeEmployees.get('code-reviewer');
+      // activeEmployees is now a Record, not a Map
+      const employee = state.activeEmployees['code-reviewer'];
       expect(employee?.progress).toBe(50);
     });
 
@@ -480,7 +487,8 @@ describe('Mission Control Store', () => {
       state.updateEmployeeStatus('employee-2', 'using_tool', 'Bash');
       state.updateEmployeeStatus('employee-3', 'idle');
 
-      expect(state.activeEmployees.size).toBe(3);
+      // activeEmployees is now a Record, not a Map
+      expect(Object.keys(state.activeEmployees).length).toBe(3);
     });
   });
 
@@ -514,7 +522,8 @@ describe('Mission Control Store', () => {
 
       state.updateEmployeeStatus(longName, 'thinking');
 
-      expect(state.activeEmployees.has(longName)).toBe(true);
+      // activeEmployees is now a Record, not a Map
+      expect(longName in state.activeEmployees).toBe(true);
     });
 
     it('should handle special characters in messages', () => {
@@ -556,7 +565,8 @@ describe('Mission Control Store', () => {
       }
       const end = performance.now();
 
-      expect(state.activeEmployees.size).toBe(100);
+      // activeEmployees is now a Record, not a Map
+      expect(Object.keys(state.activeEmployees).length).toBe(100);
       expect(end - start).toBeLessThan(100);
     });
   });

@@ -219,9 +219,10 @@ export function useChatPersistence(
       if (saveError) throw saveError;
 
       // Update session metadata
+      // activeEmployees is now a Record, not a Map
       const agentsInvolved = Array.from(
         new Set(
-          Array.from(activeEmployees.keys()).concat(
+          Object.keys(activeEmployees).concat(
             currentSession.metadata.agentsInvolved || []
           )
         )

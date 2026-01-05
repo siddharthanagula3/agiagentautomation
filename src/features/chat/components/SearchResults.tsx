@@ -133,7 +133,7 @@ const SearchResultCard: React.FC<SearchResultCardProps> = ({
                 {favicon ? (
                   <img
                     src={favicon}
-                    alt=""
+                    alt={`${source} favicon`}
                     className="h-4 w-4 rounded"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';

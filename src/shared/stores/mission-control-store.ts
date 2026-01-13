@@ -20,12 +20,11 @@ export interface Task {
   completedAt?: Date;
 }
 
-// Updated: Nov 16th 2025 - Fixed type mismatch bug - log now accepts objects or strings
+// Employee log entry - standardized type for consistent logging
 export interface EmployeeLogEntry {
   timestamp: Date;
   message: string;
-  type: 'contribution' | 'tool_use' | 'error' | 'status';
-  metadata?: Record<string, unknown>;
+  type: 'info' | 'warning' | 'error' | 'success';
 }
 
 // Active employee status
@@ -34,7 +33,7 @@ export interface ActiveEmployee {
   status: 'thinking' | 'using_tool' | 'idle' | 'error';
   currentTool: string | null;
   currentTask: string | null;
-  log: (string | EmployeeLogEntry)[]; // Accepts both strings and structured entries
+  log: EmployeeLogEntry[];
   progress: number; // 0-100
 }
 
@@ -84,8 +83,8 @@ interface MissionState {
     | 'completed'
     | 'failed';
 
-  // Active employees
-  activeEmployees: Map<string, ActiveEmployee>;
+  // Active employees (using Record for Immer compatibility)
+  activeEmployees: Record<string, ActiveEmployee>;
 
   // Messages/logs
   messages: MissionMessage[];
@@ -98,7 +97,7 @@ interface MissionState {
   // NEW: Multi-agent chat integration
   mode: 'mission' | 'chat'; // Orchestration mode
   activeChatSession: string | null; // Active chat session ID
-  collaborativeAgents: Set<string>; // Agents in collaborative mode
+  collaborativeAgents: string[]; // Agents in collaborative mode (array for Immer compatibility)
 
   // Actions
   setMissionPlan: (plan: Task[]) => void;
@@ -115,7 +114,7 @@ interface MissionState {
     currentTool?: string,
     currentTask?: string
   ) => void;
-  addEmployeeLog: (employeeName: string, logEntry: string) => void;
+  addEmployeeLog: (employeeName: string, message: string, type?: 'info' | 'warning' | 'error' | 'success') => void;
   updateEmployeeProgress: (employeeName: string, progress: number) => void;
   addMessage: (message: Omit<MissionMessage, 'id' | 'timestamp'>) => void;
   startMission: (missionId: string, mode?: 'mission' | 'chat') => void;
@@ -143,14 +142,14 @@ export const useMissionStore = create<MissionState>()(
       missionPlan: [],
       currentMissionId: null,
       missionStatus: 'idle',
-      activeEmployees: new Map(),
+      activeEmployees: {},
       messages: [],
       isOrchestrating: false,
       isPaused: false,
       error: null,
       mode: 'mission',
       activeChatSession: null,
-      collaborativeAgents: new Set(),
+      collaborativeAgents: [],
 
       // Set mission plan from orchestrator
       setMissionPlan: (plan) =>
@@ -183,7 +182,7 @@ export const useMissionStore = create<MissionState>()(
       // Update employee status
       updateEmployeeStatus: (employeeName, status, currentTool, currentTask) =>
         set((state) => {
-          let employee = state.activeEmployees.get(employeeName);
+          let employee = state.activeEmployees[employeeName];
           if (!employee) {
             employee = {
               name: employeeName,
@@ -193,7 +192,7 @@ export const useMissionStore = create<MissionState>()(
               log: [],
               progress: 0,
             };
-            state.activeEmployees.set(employeeName, employee);
+            state.activeEmployees[employeeName] = employee;
           } else {
             employee.status = status;
             if (currentTool !== undefined) employee.currentTool = currentTool;
@@ -202,18 +201,22 @@ export const useMissionStore = create<MissionState>()(
         }),
 
       // Add log entry to employee
-      addEmployeeLog: (employeeName, logEntry) =>
+      addEmployeeLog: (employeeName: string, message: string, type: 'info' | 'warning' | 'error' | 'success' = 'info') =>
         set((state) => {
-          const employee = state.activeEmployees.get(employeeName);
+          const employee = state.activeEmployees[employeeName];
           if (employee) {
-            employee.log.push(logEntry);
+            employee.log.push({
+              timestamp: new Date(),
+              message,
+              type
+            });
           }
         }),
 
       // Update employee progress
       updateEmployeeProgress: (employeeName, progress) =>
         set((state) => {
-          const employee = state.activeEmployees.get(employeeName);
+          const employee = state.activeEmployees[employeeName];
           if (employee) {
             employee.progress = Math.min(100, Math.max(0, progress));
           }
@@ -281,14 +284,14 @@ export const useMissionStore = create<MissionState>()(
           state.missionPlan = [];
           state.currentMissionId = null;
           state.missionStatus = 'idle';
-          state.activeEmployees.clear();
+          state.activeEmployees = {};
           state.messages = [];
           state.isOrchestrating = false;
           state.isPaused = false;
           state.error = null;
           state.mode = 'mission';
           state.activeChatSession = null;
-          state.collaborativeAgents.clear();
+          state.collaborativeAgents = [];
         }),
 
       // Set orchestrating flag
@@ -316,12 +319,14 @@ export const useMissionStore = create<MissionState>()(
 
           // Remove idle employees that haven't been active for 1 hour
           const employeesToRemove: string[] = [];
-          state.activeEmployees.forEach((employee, name) => {
+          Object.entries(state.activeEmployees).forEach(([name, employee]) => {
             if (employee.status === 'idle' || employee.status === 'error') {
               // Check if employee has any log entries
               if (employee.log.length > 0) {
+                // Get the timestamp from the last log entry
+                const lastEntry = employee.log[employee.log.length - 1];
+                const lastLogTime = lastEntry.timestamp.getTime();
                 // If no recent activity, mark for removal
-                const lastLogTime = employee.log.length > 0 ? Date.now() : 0;
                 if (lastLogTime < oneHourAgo) {
                   employeesToRemove.push(name);
                 }
@@ -331,7 +336,7 @@ export const useMissionStore = create<MissionState>()(
 
           // Remove marked employees
           employeesToRemove.forEach((name) => {
-            state.activeEmployees.delete(name);
+            delete state.activeEmployees[name];
           });
 
           // Limit message history to last 100 messages
@@ -359,21 +364,25 @@ export const useMissionStore = create<MissionState>()(
 
       addCollaborativeAgent: (agentName: string) =>
         set((state) => {
-          state.collaborativeAgents.add(agentName);
+          if (!state.collaborativeAgents.includes(agentName)) {
+            state.collaborativeAgents.push(agentName);
+          }
         }),
 
       removeCollaborativeAgent: (agentName: string) =>
         set((state) => {
-          state.collaborativeAgents.delete(agentName);
+          state.collaborativeAgents = state.collaborativeAgents.filter(
+            (name) => name !== agentName
+          );
         }),
 
       clearCollaborativeAgents: () =>
         set((state) => {
-          state.collaborativeAgents.clear();
+          state.collaborativeAgents = [];
         }),
 
       getAgentStatus: (agentName: string) => {
-        return useMissionStore.getState().activeEmployees.get(agentName);
+        return useMissionStore.getState().activeEmployees[agentName];
       },
     })),
     { name: 'MissionStore' }
@@ -381,13 +390,43 @@ export const useMissionStore = create<MissionState>()(
 );
 
 // Setup periodic cleanup (runs every 5 minutes)
-if (typeof window !== 'undefined') {
-  setInterval(
-    () => {
-      useMissionStore.getState().cleanupCompletedTasks();
-    },
-    5 * 60 * 1000
-  ); // Every 5 minutes
+// Use a module-level flag to prevent multiple interval creation on HMR
+let cleanupIntervalId: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Start the periodic cleanup interval
+ * Call this when the app starts
+ */
+export function startMissionCleanupInterval(): void {
+  if (typeof window !== 'undefined' && !cleanupIntervalId) {
+    cleanupIntervalId = setInterval(
+      () => {
+        useMissionStore.getState().cleanupCompletedTasks();
+      },
+      5 * 60 * 1000
+    ); // Every 5 minutes
+  }
+}
+
+/**
+ * Stop the periodic cleanup interval
+ * Call this on logout or app shutdown to prevent memory leaks
+ */
+export function stopMissionCleanupInterval(): void {
+  if (cleanupIntervalId) {
+    clearInterval(cleanupIntervalId);
+    cleanupIntervalId = null;
+  }
+}
+
+// Initialize cleanup interval on module load
+if (typeof window !== 'undefined' && !cleanupIntervalId) {
+  startMissionCleanupInterval();
+
+  // Cleanup on page unload to prevent memory leaks
+  window.addEventListener('beforeunload', () => {
+    stopMissionCleanupInterval();
+  });
 }
 
 // Selector hooks for optimized re-renders

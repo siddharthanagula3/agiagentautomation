@@ -387,7 +387,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                     <button
                       onClick={() => {
                         setShowUserMenu(false);
-                        navigate('/settings/profile');
+                        navigate('/settings');
                       }}
                       className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-muted/50"
                     >

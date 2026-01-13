@@ -51,6 +51,7 @@ import {
 } from '../services/global-search-service';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { format } from 'date-fns';
+import ErrorBoundary from '@shared/components/ErrorBoundary';
 
 interface GlobalSearchDialogProps {
   open: boolean;
@@ -77,31 +78,6 @@ export function GlobalSearchDialog({
 
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Debounced search
-  useEffect(() => {
-    if (!query.trim() || query.length < 2) {
-      setResults([]);
-      setStats(null);
-      return;
-    }
-
-    // Clear previous timeout
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-
-    // Set new timeout for search
-    searchTimeoutRef.current = setTimeout(() => {
-      handleSearch();
-    }, 300); // 300ms debounce
-
-    return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, [query, roleFilter, startDate, endDate, includeArchived]);
-
   const handleSearch = useCallback(async () => {
     if (!user?.id || !query.trim()) return;
 
@@ -126,7 +102,32 @@ export function GlobalSearchDialog({
     } finally {
       setIsSearching(false);
     }
-  }, [user?.id, query, roleFilter, startDate, endDate, includeArchived]);
+  }, [user?.id, roleFilter, startDate, endDate, includeArchived]);
+
+  // Debounced search with 300ms delay
+  useEffect(() => {
+    if (!query.trim() || query.length < 2) {
+      setResults([]);
+      setStats(null);
+      return;
+    }
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Set new timeout for search (300ms debounce)
+    searchTimeoutRef.current = setTimeout(() => {
+      handleSearch();
+    }, 300);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [query, roleFilter, startDate, endDate, includeArchived, handleSearch]);
 
   const handleResultClick = (result: SearchResult) => {
     // Navigate to the chat session
@@ -159,23 +160,31 @@ export function GlobalSearchDialog({
   const highlightMatch = (text: string, match: string) => {
     if (!match) return text;
 
-    const parts = text.split(new RegExp(`(${match})`, 'gi'));
-    return (
-      <>
-        {parts.map((part, i) =>
-          part.toLowerCase() === match.toLowerCase() ? (
-            <mark
-              key={i}
-              className="bg-yellow-200 dark:bg-yellow-800/50 font-semibold"
-            >
-              {part}
-            </mark>
-          ) : (
-            part
-          )
-        )}
-      </>
-    );
+    try {
+      // Escape special regex characters to prevent errors
+      const escapedMatch = match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const parts = text.split(new RegExp(`(${escapedMatch})`, 'gi'));
+      return (
+        <>
+          {parts.map((part, i) =>
+            part.toLowerCase() === match.toLowerCase() ? (
+              <mark
+                key={i}
+                className="bg-yellow-200 dark:bg-yellow-800/50 font-semibold"
+              >
+                {part}
+              </mark>
+            ) : (
+              part
+            )
+          )}
+        </>
+      );
+    } catch (error) {
+      // If regex fails for any reason, return plain text
+      console.warn('[GlobalSearch] Highlight failed:', error);
+      return text;
+    }
   };
 
   const getRoleIcon = (role: string) => {
@@ -199,6 +208,21 @@ export function GlobalSearchDialog({
   ].filter(Boolean).length;
 
   return (
+    <ErrorBoundary
+      fallback={
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="max-w-3xl max-h-[80vh] p-0">
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <Search className="h-12 w-12 text-muted-foreground opacity-30 mb-3" />
+              <p className="text-sm font-medium">Search unavailable</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Something went wrong. Please close and try again.
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+      }
+    >
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[80vh] p-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b">
@@ -259,7 +283,7 @@ export function GlobalSearchDialog({
                   <Label className="text-xs">Message Type</Label>
                   <Select
                     value={roleFilter}
-                    onValueChange={(value: any) => setRoleFilter(value)}
+                    onValueChange={(value: 'all' | 'user' | 'assistant' | 'system') => setRoleFilter(value)}
                   >
                     <SelectTrigger className="h-9">
                       <SelectValue placeholder="All messages" />
@@ -397,7 +421,7 @@ export function GlobalSearchDialog({
                       {result.type === 'session' ? (
                         <MessageSquare className="h-4 w-4 text-primary shrink-0" />
                       ) : (
-                        getRoleIcon(result.role || 'assistant')}
+                        getRoleIcon(result.role || 'assistant')
                       )}
                       <span className="text-sm font-medium truncate">
                         {result.sessionTitle}
@@ -442,5 +466,6 @@ export function GlobalSearchDialog({
         </div>
       </DialogContent>
     </Dialog>
+    </ErrorBoundary>
   );
 }

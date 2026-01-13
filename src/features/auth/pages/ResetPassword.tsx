@@ -48,7 +48,7 @@ const ResetPasswordPage: React.FC = () => {
       const { error } = await authService.updatePassword(formData.password);
 
       if (error) {
-        setError(error.message);
+        setError(error);
       } else {
         // Success! Redirect to login
         setTimeout(() => {

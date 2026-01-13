@@ -17,12 +17,12 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import type { VibeTask, TaskStatus } from '@features/vibe/types';
-import { Card } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-import { Progress } from '@/shared/components/ui/progress';
-import { Avatar } from '@/shared/components/ui/avatar';
-import { Separator } from '@/shared/components/ui/separator';
-import { cn } from '@/shared/lib/utils';
+import { Card } from '@shared/ui/card';
+import { Badge } from '@shared/ui/badge';
+import { Progress } from '@shared/ui/progress';
+import { Avatar } from '@shared/ui/avatar';
+import { Separator } from '@shared/ui/separator';
+import { cn } from '@shared/lib/utils';
 
 export interface TaskBreakdownProps {
   tasks: VibeTask[];

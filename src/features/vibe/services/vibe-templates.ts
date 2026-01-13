@@ -543,6 +543,13 @@ const filterBtns = document.querySelectorAll('.filter-btn');
 const clearCompleted = document.getElementById('clearCompleted');
 const todoCount = document.getElementById('todoCount');
 
+// Escape HTML to prevent XSS attacks
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 function saveTodos() {
   localStorage.setItem('todos', JSON.stringify(todos));
 }
@@ -588,7 +595,7 @@ function renderTodos() {
     <li class="todo-item \${todo.completed ? 'completed' : ''}">
       <input type="checkbox" \${todo.completed ? 'checked' : ''}
              onchange="toggleTodo(\${todo.id})">
-      <span>\${todo.text}</span>
+      <span>\${escapeHtml(todo.text)}</span>
       <button class="delete-btn" onclick="deleteTodo(\${todo.id})">Delete</button>
     </li>
   \`).join('');

@@ -22,6 +22,120 @@ export interface VibeAgentActionRow {
   error?: string | null;
 }
 
+/**
+ * Type-safe interface for command action metadata fields
+ */
+interface CommandActionMetadata {
+  command?: string;
+  label?: string;
+  title?: string;
+  output?: string;
+  stdout?: string;
+  exit_code?: number;
+  code?: number;
+}
+
+/**
+ * Type-safe interface for command action result fields
+ */
+interface CommandActionResult {
+  output?: string;
+  exit_code?: number;
+}
+
+/**
+ * Type-safe interface for app preview metadata fields
+ */
+interface AppPreviewMetadata {
+  preview_url?: string;
+  url?: string;
+  endpoint?: string;
+}
+
+/**
+ * Type guard to safely extract command metadata from VibeAgentActionRow
+ */
+function getCommandMetadata(
+  metadata: Record<string, unknown> | null | undefined
+): CommandActionMetadata {
+  if (!metadata || typeof metadata !== 'object') {
+    return {};
+  }
+
+  const result: CommandActionMetadata = {};
+
+  if (typeof metadata.command === 'string') {
+    result.command = metadata.command;
+  }
+  if (typeof metadata.label === 'string') {
+    result.label = metadata.label;
+  }
+  if (typeof metadata.title === 'string') {
+    result.title = metadata.title;
+  }
+  if (typeof metadata.output === 'string') {
+    result.output = metadata.output;
+  }
+  if (typeof metadata.stdout === 'string') {
+    result.stdout = metadata.stdout;
+  }
+  if (typeof metadata.exit_code === 'number') {
+    result.exit_code = metadata.exit_code;
+  }
+  if (typeof metadata.code === 'number') {
+    result.code = metadata.code;
+  }
+
+  return result;
+}
+
+/**
+ * Type guard to safely extract command result from VibeAgentActionRow
+ */
+function getCommandResult(
+  result: Record<string, unknown> | null | undefined
+): CommandActionResult {
+  if (!result || typeof result !== 'object') {
+    return {};
+  }
+
+  const validated: CommandActionResult = {};
+
+  if (typeof result.output === 'string') {
+    validated.output = result.output;
+  }
+  if (typeof result.exit_code === 'number') {
+    validated.exit_code = result.exit_code;
+  }
+
+  return validated;
+}
+
+/**
+ * Type guard to safely extract app preview metadata from VibeAgentActionRow
+ */
+function getAppPreviewMetadata(
+  metadata: Record<string, unknown> | null | undefined
+): AppPreviewMetadata {
+  if (!metadata || typeof metadata !== 'object') {
+    return {};
+  }
+
+  const result: AppPreviewMetadata = {};
+
+  if (typeof metadata.preview_url === 'string') {
+    result.preview_url = metadata.preview_url;
+  }
+  if (typeof metadata.url === 'string') {
+    result.url = metadata.url;
+  }
+  if (typeof metadata.endpoint === 'string') {
+    result.endpoint = metadata.endpoint;
+  }
+
+  return result;
+}
+
 interface UseVibeRealtimeOptions {
   sessionId?: string | null;
   onAction?: (action: VibeAgentActionRow) => void;
@@ -149,26 +263,20 @@ export function useVibeRealtime({
     if (!sessionId || typeof sessionId !== 'string') return;
 
     // Updated: Nov 16th 2025 - Fixed memory leak by clearing completed commands after delay
+    // Updated: Jan 2026 - Added type guards to safely extract metadata and result
     const handleCommandAction = (action: VibeAgentActionRow) => {
       if (action.action_type !== 'command_execution') return;
 
+      // Use type guards to safely extract metadata and result
+      const meta = getCommandMetadata(action.metadata);
+      const result = getCommandResult(action.result);
+
       if (!commandMap.current.has(action.id)) {
         const newId = addTerminalCommand({
-          command:
-            action.metadata?.command ||
-            action.metadata?.label ||
-            action.metadata?.title ||
-            'Command',
-          output:
-            action.metadata?.output ||
-            action.result?.output ||
-            action.metadata?.stdout ||
-            '',
+          command: meta.command || meta.label || meta.title || 'Command',
+          output: meta.output || result.output || meta.stdout || '',
           status: toTerminalStatus(action.status),
-          exitCode:
-            action.metadata?.exit_code ??
-            action.result?.exit_code ??
-            action.metadata?.code,
+          exitCode: meta.exit_code ?? result.exit_code ?? meta.code,
         });
 
         commandMap.current.set(action.id, newId);
@@ -177,15 +285,8 @@ export function useVibeRealtime({
         if (commandId) {
           updateTerminalCommand(commandId, {
             status: toTerminalStatus(action.status),
-            output:
-              action.result?.output ||
-              action.metadata?.output ||
-              action.metadata?.stdout ||
-              '',
-            exitCode:
-              action.metadata?.exit_code ??
-              action.result?.exit_code ??
-              action.metadata?.code,
+            output: result.output || meta.output || meta.stdout || '',
+            exitCode: meta.exit_code ?? result.exit_code ?? meta.code,
           });
         }
       }
@@ -203,10 +304,10 @@ export function useVibeRealtime({
 
     const handleAppPreview = (action: VibeAgentActionRow) => {
       if (action.action_type !== 'app_preview') return;
-      const previewUrl =
-        action.metadata?.preview_url ||
-        action.metadata?.url ||
-        action.metadata?.endpoint;
+
+      // Use type guard to safely extract preview metadata
+      const meta = getAppPreviewMetadata(action.metadata);
+      const previewUrl = meta.preview_url || meta.url || meta.endpoint;
 
       if (previewUrl) {
         setAppViewerUrl(previewUrl);

@@ -43,6 +43,10 @@ interface DBBookmarkedMessage extends DBBookmark {
   session_created_at: string;
 }
 
+interface BookmarkWithTags {
+  tags: string[] | null;
+}
+
 class MessageBookmarksService {
   /**
    * Check if a message is bookmarked
@@ -82,11 +86,15 @@ class MessageBookmarksService {
         tags: options?.tags || [],
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('[Bookmarks] Failed to add bookmark:', error);
       throw new Error(`Failed to add bookmark: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error('Failed to add bookmark: No data returned');
     }
 
     return this.mapDBBookmarkToBookmark(data);
@@ -247,7 +255,7 @@ class MessageBookmarksService {
     }
 
     const allTags = new Set<string>();
-    (data || []).forEach((bookmark: any) => {
+    ((data || []) as BookmarkWithTags[]).forEach((bookmark) => {
       if (bookmark.tags && Array.isArray(bookmark.tags)) {
         bookmark.tags.forEach((tag: string) => allTags.add(tag));
       }

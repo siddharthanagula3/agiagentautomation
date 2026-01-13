@@ -83,7 +83,8 @@ export const MarketplacePublicPage: React.FC = () => {
         if (!isMounted) return;
         setPurchasedEmployees(new Set(rows.map((r) => r.employee_id)));
       } catch (err) {
-        // Failed to load purchases
+        console.warn('Failed to load purchases:', err);
+        // Non-critical error - user can still browse marketplace
       }
     }
     loadPurchased();

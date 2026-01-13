@@ -157,11 +157,12 @@ export async function hasPermission(
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   // Query user_profiles or permissions table
+  // Use .maybeSingle() to avoid 406 errors when profile doesn't exist
   const { data, error } = await supabase
     .from('user_profiles')
     .select('role, permissions')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
 
   if (error || !data) {
     return false;

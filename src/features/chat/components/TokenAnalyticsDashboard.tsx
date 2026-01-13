@@ -3,7 +3,7 @@
  * Displays usage trends, costs, and session breakdowns
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card } from '@shared/ui/card';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
@@ -62,6 +62,19 @@ interface DailyUsage {
   cost: number;
 }
 
+interface SessionWithTokens {
+  id: string;
+  title: string | null;
+  created_at: string;
+  provider: string | null;
+  chat_session_tokens: {
+    total_input_tokens: number;
+    total_output_tokens: number;
+    total_tokens: number;
+    total_cost: number;
+  } | null;
+}
+
 export function TokenAnalyticsDashboard() {
   const { user } = useAuthStore();
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
@@ -70,13 +83,7 @@ export function TokenAnalyticsDashboard() {
   const [dailyUsage, setDailyUsage] = useState<DailyUsage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (user?.id) {
-      loadAnalytics();
-    }
-  }, [user?.id, timeRange]);
-
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     if (!user?.id) return;
 
     setIsLoading(true);
@@ -120,15 +127,15 @@ export function TokenAnalyticsDashboard() {
       }
 
       // Process data
-      const processedData: TokenUsageData[] = (sessions || [])
-        .filter((s: any) => s.chat_session_tokens && s.chat_session_tokens.total_tokens > 0)
-        .map((s: any) => ({
+      const processedData: TokenUsageData[] = ((sessions || []) as SessionWithTokens[])
+        .filter((s) => s.chat_session_tokens && s.chat_session_tokens.total_tokens > 0)
+        .map((s) => ({
           sessionId: s.id,
           sessionTitle: s.title || 'Untitled',
-          totalTokens: s.chat_session_tokens.total_tokens || 0,
-          inputTokens: s.chat_session_tokens.total_input_tokens || 0,
-          outputTokens: s.chat_session_tokens.total_output_tokens || 0,
-          totalCost: s.chat_session_tokens.total_cost || 0,
+          totalTokens: s.chat_session_tokens!.total_tokens || 0,
+          inputTokens: s.chat_session_tokens!.total_input_tokens || 0,
+          outputTokens: s.chat_session_tokens!.total_output_tokens || 0,
+          totalCost: s.chat_session_tokens!.total_cost || 0,
           provider: s.provider || 'openai',
           createdAt: new Date(s.created_at),
         }));
@@ -180,7 +187,13 @@ export function TokenAnalyticsDashboard() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id, timeRange]);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadAnalytics();
+    }
+  }, [user?.id, timeRange, loadAnalytics]);
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('en-US').format(Math.round(num));
@@ -241,7 +254,7 @@ export function TokenAnalyticsDashboard() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Select value={timeRange} onValueChange={(v: any) => setTimeRange(v)}>
+          <Select value={timeRange} onValueChange={(v: '7d' | '30d' | '90d' | 'all') => setTimeRange(v)}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>

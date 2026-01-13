@@ -416,7 +416,7 @@ class BackupService {
         .from('backup_storage')
         .select('data')
         .eq('backup_id', backupId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { ChatMessage } from '@shared/hooks/useChat';
+import { ChatMessage } from '@shared/hooks/useChatState';
 import { User, Bot } from 'lucide-react';
 
 interface ChatMessageListProps {

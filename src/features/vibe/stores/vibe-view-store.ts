@@ -126,7 +126,7 @@ interface VibeViewStore {
   setFileTree: (tree: FileTreeItem[]) => void;
   expandFolder: (folderId: string) => void;
   collapseFolder: (folderId: string) => void;
-  fileMetadata: Map<string, FileMetadata>;
+  fileMetadata: Record<string, FileMetadata>;
   setFileMetadata: (metadata: FileMetadata[]) => void;
   upsertFileMetadata: (metadata: FileMetadata) => void;
   removeFileMetadata: (path: string) => void;
@@ -164,7 +164,7 @@ const initialState = {
     currentTaskId: null,
   },
   fileTree: [],
-  fileMetadata: new Map<string, FileMetadata>(),
+  fileMetadata: {} as Record<string, FileMetadata>,
 };
 
 export const useVibeViewStore = create<VibeViewStore>()(
@@ -255,9 +255,12 @@ export const useVibeViewStore = create<VibeViewStore>()(
 
     updateTerminalCommand: (id, updates) =>
       set((state) => {
-        const command = state.terminalState.history.find((c) => c.id === id);
-        if (command) {
-          Object.assign(command, updates);
+        const commandIndex = state.terminalState.history.findIndex((c) => c.id === id);
+        if (commandIndex !== -1) {
+          state.terminalState.history[commandIndex] = {
+            ...state.terminalState.history[commandIndex],
+            ...updates,
+          };
         }
         if (updates.status === 'completed' || updates.status === 'failed') {
           state.terminalState.activeCommand = null;
@@ -300,9 +303,12 @@ export const useVibeViewStore = create<VibeViewStore>()(
 
     updateTask: (taskId, updates) =>
       set((state) => {
-        const task = state.plannerState.tasks.find((t) => t.id === taskId);
-        if (task) {
-          Object.assign(task, updates);
+        const taskIndex = state.plannerState.tasks.findIndex((t) => t.id === taskId);
+        if (taskIndex !== -1) {
+          state.plannerState.tasks[taskIndex] = {
+            ...state.plannerState.tasks[taskIndex],
+            ...updates,
+          };
         }
       }),
 
@@ -330,33 +336,33 @@ export const useVibeViewStore = create<VibeViewStore>()(
 
     setFileMetadata: (metadata) =>
       set((state) => {
-        state.fileMetadata = new Map(
+        state.fileMetadata = Object.fromEntries(
           metadata.map((entry) => [entry.path, entry])
         );
       }),
 
     upsertFileMetadata: (metadata) =>
       set((state) => {
-        state.fileMetadata.set(metadata.path, metadata);
+        state.fileMetadata[metadata.path] = metadata;
       }),
 
     removeFileMetadata: (path) =>
       set((state) => {
-        state.fileMetadata.delete(path);
+        delete state.fileMetadata[path];
       }),
 
     getFileMetadata: (path) => {
       // Cannot use get() inside immer middleware
       // This function should be called from outside the store
       const state = useVibeViewStore.getState();
-      return state.fileMetadata.get(path);
+      return state.fileMetadata[path];
     },
 
     // Reset
     resetViewState: () =>
       set(() => ({
         ...initialState,
-        fileMetadata: new Map<string, FileMetadata>(),
+        fileMetadata: {} as Record<string, FileMetadata>,
       })),
   }))
 );

@@ -11,8 +11,14 @@ Visit https://aistudio.google.com/app/apikey and create a free API key.
 Add to `.env`:
 
 ```bash
+# Client-side (for local development)
 VITE_GOOGLE_API_KEY=your-api-key-here
+
+# Server-side (for Netlify Functions - recommended)
+GOOGLE_API_KEY=your-api-key-here
 ```
+
+**Note:** For production, use server-side keys via Netlify Functions.
 
 ### 3. Test in Chat (3 minutes)
 
@@ -43,7 +49,9 @@ That's it! 🎉
 ### Use in React Component
 
 ```typescript
-import { useMediaGeneration } from '@core/integrations/media-generation-example';
+// See google-imagen-service.ts and google-veo-service.ts for actual services
+import { googleImagenService } from '@core/integrations/google-imagen-service';
+import { googleVeoService } from '@core/integrations/google-veo-service';
 import { GeneratedImagePreview } from '@shared/components/media/GeneratedImagePreview';
 import { GeneratedVideoPreview } from '@shared/components/media/GeneratedVideoPreview';
 
@@ -215,6 +223,29 @@ await googleVeoService.downloadVideo(videoUrl, 'my-video.mp4');
 - **Full Guide:** `/docs/MEDIA_GENERATION_GUIDE.md`
 - **API Docs:** https://ai.google.dev/gemini-api/docs/imagen
 - **Get API Key:** https://aistudio.google.com/app/apikey
+
+---
+
+## 🔒 Security
+
+All media generation requests go through secure Netlify Functions with:
+
+- JWT authentication via Supabase
+- CORS origin whitelist (no wildcard `*`)
+- Rate limiting with Upstash Redis
+- Token balance enforcement
+
+## 📅 Changelog
+
+**v1.1.0 (Jan 2026)**
+
+- Enhanced security with CORS origin whitelist
+- JWT verification in rate limiter
+- Token enforcement with pre-flight balance checks
+
+**v1.0.0 (Nov 2025)**
+
+- Initial Imagen 4.0 and Veo 3.1 integration
 
 ---
 

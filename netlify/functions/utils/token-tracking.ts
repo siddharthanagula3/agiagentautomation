@@ -30,6 +30,19 @@ const TOKEN_PRICING = {
     'sonar-medium-chat': { input: 0.6, output: 0.6 },
     'sonar-large-chat': { input: 1.0, output: 1.0 },
   },
+  qwen: {
+    'qwen-turbo': { input: 0.3, output: 0.6 },
+    'qwen-plus': { input: 0.3, output: 0.6 },
+    'qwen-long': { input: 0.3, output: 0.6 },
+  },
+  grok: {
+    'grok-2': { input: 5.0, output: 15.0 },
+    'grok-3': { input: 5.0, output: 15.0 },
+  },
+  deepseek: {
+    'deepseek-chat': { input: 0.1, output: 0.2 },
+    'deepseek-reasoning': { input: 0.1, output: 0.2 },
+  },
 };
 
 interface TokenUsage {
@@ -45,7 +58,7 @@ interface TokenUsage {
  * Calculate token costs for a given provider and model
  */
 export function calculateTokenCost(
-  provider: 'openai' | 'anthropic' | 'google' | 'perplexity',
+  provider: 'openai' | 'anthropic' | 'google' | 'perplexity' | 'qwen' | 'grok' | 'deepseek',
   model: string,
   inputTokens: number,
   outputTokens: number
@@ -107,58 +120,95 @@ export function calculateTokenCost(
   };
 }
 
+export interface TokenStorageResult {
+  success: boolean;
+  error?: string;
+}
+
 /**
- * Store token usage in Supabase
+ * Store token usage in Supabase with timeout and retry
+ * Returns result indicating success/failure for caller awareness
  */
 export async function storeTokenUsage(
   provider: string,
   model: string,
   userId: string | null,
   sessionId: string | null,
-  usage: TokenUsage
-): Promise<void> {
-  try {
-    const supabaseUrl = process.env.VITE_SUPABASE_URL;
-    // CRITICAL FIX: Use service_role key for write access to token_usage table
-    // RLS policies prevent anon key from writing to this table
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  usage: TokenUsage,
+  options?: { timeout?: number; retries?: number }
+): Promise<TokenStorageResult> {
+  const timeout = options?.timeout || 5000; // 5 second default timeout
+  const maxRetries = options?.retries || 1;
 
-    if (!supabaseUrl || !supabaseKey) {
-      console.warn(
-        '[Token Tracking] Supabase not configured, skipping storage'
-      );
-      return;
-    }
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  // CRITICAL FIX: Use service_role key for write access to token_usage table
+  // RLS policies prevent anon key from writing to this table
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn(
+      '[Token Tracking] Supabase not configured, skipping storage'
+    );
+    return { success: false, error: 'Supabase not configured' };
+  }
 
-    const { error } = await supabase.from('token_usage').insert({
-      user_id: userId,
-      session_id: sessionId,
-      provider,
-      model,
-      input_tokens: usage.inputTokens,
-      output_tokens: usage.outputTokens,
-      total_tokens: usage.totalTokens,
-      input_cost: usage.inputCost,
-      output_cost: usage.outputCost,
-      total_cost: usage.totalCost,
-      created_at: new Date().toISOString(),
-    });
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
-    if (error) {
-      console.error('[Token Tracking] Failed to store usage:', error);
-    } else {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      // Create a timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Token storage timeout')), timeout);
+      });
+
+      // Create the storage promise
+      const storagePromise = supabase.from('token_usage').insert({
+        user_id: userId,
+        session_id: sessionId,
+        provider,
+        model,
+        input_tokens: usage.inputTokens,
+        output_tokens: usage.outputTokens,
+        total_tokens: usage.totalTokens,
+        input_cost: usage.inputCost,
+        output_cost: usage.outputCost,
+        total_cost: usage.totalCost,
+        created_at: new Date().toISOString(),
+      });
+
+      // Race between storage and timeout
+      const { error } = await Promise.race([storagePromise, timeoutPromise]);
+
+      if (error) {
+        console.error(`[Token Tracking] Failed to store usage (attempt ${attempt + 1}):`, error);
+        if (attempt === maxRetries) {
+          return { success: false, error: error.message };
+        }
+        // Wait briefly before retry
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        continue;
+      }
+
       console.log('[Token Tracking] Stored usage:', {
         provider,
         model,
         tokens: usage.totalTokens,
         cost: `$${usage.totalCost.toFixed(6)}`,
       });
+
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`[Token Tracking] Error storing usage (attempt ${attempt + 1}):`, errorMessage);
+      if (attempt === maxRetries) {
+        return { success: false, error: errorMessage };
+      }
+      // Wait briefly before retry
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
-  } catch (error) {
-    console.error('[Token Tracking] Error storing usage:', error);
   }
+
+  return { success: false, error: 'Max retries exceeded' };
 }
 
 /**

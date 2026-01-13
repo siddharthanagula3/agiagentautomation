@@ -91,11 +91,15 @@ export class VibeMessageService {
       .from('vibe_messages')
       .insert(message)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('[VibeMessageService] Failed to create message:', error);
       throw new Error(`Failed to create message: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error('Failed to create message: No data returned');
     }
 
     return data as VibeMessage;
@@ -113,11 +117,15 @@ export class VibeMessageService {
       .update(updates)
       .eq('id', messageId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('[VibeMessageService] Failed to update message:', error);
       throw new Error(`Failed to update message: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error('Message not found');
     }
 
     return data as VibeMessage;
@@ -159,6 +167,9 @@ export class VibeMessageService {
       onError,
     } = params;
 
+    // Track assistant message ID for cleanup on error
+    let assistantMessageId: string | null = null;
+
     try {
       // Step 1: Create user message
       const userMessage = await this.createMessage({
@@ -191,7 +202,6 @@ export class VibeMessageService {
       const fullResponse = orchestratorResponse.chatResponse;
 
       // Step 3: Create streaming assistant message
-      const assistantMessageId = crypto.randomUUID();
       const assistantMessage = await this.createMessage({
         sessionId,
         userId,
@@ -200,6 +210,7 @@ export class VibeMessageService {
         employeeName: orchestratorResponse.assignedEmployee || 'AI Assistant',
         isStreaming: true,
       });
+      assistantMessageId = assistantMessage.id;
 
       // Step 4: Stream response chunks
       let currentContent = '';
@@ -235,6 +246,19 @@ export class VibeMessageService {
       return finalMessage;
     } catch (error) {
       console.error('[VibeMessageService] Processing failed:', error);
+
+      // Reset streaming state if assistant message was created
+      if (assistantMessageId) {
+        try {
+          await this.updateMessage(assistantMessageId, {
+            is_streaming: false,
+            content: '[Error: Message generation failed]',
+          });
+        } catch (updateError) {
+          console.error('[VibeMessageService] Failed to reset streaming state:', updateError);
+        }
+      }
+
       if (onError && error instanceof Error) {
         onError(error);
       }

@@ -39,10 +39,9 @@ export class PermissionService {
         .eq('user_id', userId)
         .eq('resource', resource)
         .gte('expires_at', new Date().toISOString())
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        // Not found error
+      if (error) {
         throw error;
       }
 

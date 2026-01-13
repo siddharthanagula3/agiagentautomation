@@ -11,7 +11,7 @@ import type { VibeMessage } from '../types';
 export interface VibeChatState {
   // Session state
   currentSessionId: string | null;
-  sessions: Map<string, SessionMetadata>;
+  sessions: Record<string, SessionMetadata>;
 
   // Messages
   messages: VibeMessage[];
@@ -62,7 +62,7 @@ export const useVibeChatStore = create<VibeChatState>()(
     immer((set, get) => ({
       // Initial state
       currentSessionId: null,
-      sessions: new Map(),
+      sessions: {},
       messages: [],
       isLoading: false,
       streamingMessageId: null,
@@ -83,13 +83,13 @@ export const useVibeChatStore = create<VibeChatState>()(
         const now = new Date();
 
         set((state) => {
-          state.sessions.set(sessionId, {
+          state.sessions[sessionId] = {
             id: sessionId,
             title,
             created_at: now,
             updated_at: now,
             message_count: 0,
-          });
+          };
           state.currentSessionId = sessionId;
           state.messages = [];
         });
@@ -112,7 +112,7 @@ export const useVibeChatStore = create<VibeChatState>()(
 
       deleteSession: async (sessionId) => {
         set((state) => {
-          state.sessions.delete(sessionId);
+          delete state.sessions[sessionId];
           if (state.currentSessionId === sessionId) {
             state.currentSessionId = null;
             state.messages = [];
@@ -134,7 +134,7 @@ export const useVibeChatStore = create<VibeChatState>()(
           // Update session metadata
           const sessionId = state.currentSessionId;
           if (sessionId) {
-            const session = state.sessions.get(sessionId);
+            const session = state.sessions[sessionId];
             if (session) {
               session.message_count += 1;
               session.updated_at = new Date();
@@ -145,9 +145,12 @@ export const useVibeChatStore = create<VibeChatState>()(
 
       updateMessage: (messageId, updates) => {
         set((state) => {
-          const message = state.messages.find((m) => m.id === messageId);
-          if (message) {
-            Object.assign(message, updates);
+          const messageIndex = state.messages.findIndex((m) => m.id === messageId);
+          if (messageIndex !== -1) {
+            state.messages[messageIndex] = {
+              ...state.messages[messageIndex],
+              ...updates,
+            };
           }
         });
       },

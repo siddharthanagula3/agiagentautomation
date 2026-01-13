@@ -101,7 +101,7 @@ class ToolInvocationService {
       if (error) throw error;
       return { success: true, error: null };
     } catch (error: unknown) {
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
   }
 
@@ -145,7 +145,7 @@ class ToolInvocationService {
 
       return { success: true, error: null, result };
     } catch (error: unknown) {
-      return { success: false, error: error.message, result: null };
+      return { success: false, error: error instanceof Error ? error.message : String(error), result: null };
     }
   }
 
@@ -299,7 +299,7 @@ class ToolInvocationService {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: model || 'claude-3-sonnet-20240229',
+        model: model || 'claude-3-5-sonnet-20241022',
         max_tokens: maxTokens || 1000,
         ...parameters,
       }),

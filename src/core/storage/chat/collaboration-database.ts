@@ -48,13 +48,21 @@ export async function createCollaboration(
       .from('agent_collaborations')
       .insert(collaborationData)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       throw new MultiAgentChatError(
         'Failed to create collaboration',
         'COLLABORATION_CREATE_ERROR',
         error
+      );
+    }
+
+    if (!data) {
+      throw new MultiAgentChatError(
+        'Failed to create collaboration: No data returned',
+        'COLLABORATION_CREATE_ERROR',
+        null
       );
     }
 
@@ -82,12 +90,9 @@ export async function getCollaboration(
       .from('agent_collaborations')
       .select('*')
       .eq('id', collaborationId)
-      .single();
+      .maybeSingle();
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Not found
-      }
       throw new MultiAgentChatError(
         'Failed to fetch collaboration',
         'COLLABORATION_FETCH_ERROR',
@@ -182,13 +187,21 @@ export async function updateCollaboration(
       .update(updates)
       .eq('id', collaborationId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       throw new MultiAgentChatError(
         'Failed to update collaboration',
         'COLLABORATION_UPDATE_ERROR',
         error
+      );
+    }
+
+    if (!data) {
+      throw new MultiAgentChatError(
+        'Collaboration not found',
+        'COLLABORATION_NOT_FOUND',
+        null
       );
     }
 

@@ -49,26 +49,28 @@ export interface TokenStats {
   }>;
 }
 
-// Official pricing as of 2024 (per 1M tokens)
+// Official pricing as of Jan 2026 (per 1M tokens)
 const PRICING = {
   openai: {
-    'gpt-4o-mini': { input: 0.15, output: 0.6 },
     'gpt-4o': { input: 2.5, output: 10 },
-    'gpt-4': { input: 30, output: 60 },
-    'gpt-3.5-turbo': { input: 0.5, output: 1.5 },
+    'gpt-4o-mini': { input: 0.15, output: 0.6 },
+    'o1': { input: 15, output: 60 },
+    'o1-mini': { input: 3, output: 12 },
   },
   anthropic: {
+    'claude-sonnet-4-20250514': { input: 3, output: 15 },
     'claude-3-5-sonnet-20241022': { input: 3, output: 15 },
-    'claude-3-opus-20240229': { input: 15, output: 75 },
-    'claude-3-haiku-20240307': { input: 0.25, output: 1.25 },
+    'claude-3-5-haiku-20241022': { input: 0.25, output: 1.25 },
   },
   google: {
-    'gemini-2.0-flash': { input: 0.15, output: 0.6 },
+    'gemini-2.0-flash': { input: 0.1, output: 0.4 },
     'gemini-1.5-pro': { input: 1.25, output: 10 },
     'gemini-1.5-flash': { input: 0.075, output: 0.3 },
   },
   perplexity: {
-    'llama-3.1-sonar-large-128k-online': { input: 0.2, output: 0.2 },
+    'sonar-pro': { input: 3, output: 15 },
+    'sonar': { input: 1, output: 1 },
+    'sonar-reasoning': { input: 5, output: 20 },
   },
 };
 

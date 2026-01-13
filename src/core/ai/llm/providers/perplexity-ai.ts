@@ -1,11 +1,25 @@
 /**
  * Perplexity Provider
- * Official SDK integration for Perplexity AI models
- * Updated: Nov 16th 2025 - Clarified that proxy implementation is complete (removed misleading TODO)
+ * Official SDK integration for Perplexity AI Sonar models
+ * Updated: Jan 3rd 2026 - Updated to latest Sonar models
  */
 
-import { Perplexity } from '@perplexity-ai/perplexity_ai';
+import type { Perplexity } from '@perplexity-ai/perplexity_ai';
 import { supabase } from '@shared/lib/supabase-client';
+
+/**
+ * Helper function to get the current Supabase session token
+ * Required for authenticated API proxy calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('[Perplexity Provider] Failed to get auth token:', error);
+    return null;
+  }
+}
 
 // SECURITY WARNING: Client-side API initialization is disabled
 // All API calls should go through Netlify proxy functions instead
@@ -49,14 +63,17 @@ export interface PerplexityResponse {
 
 export interface PerplexityConfig {
   model:
-    | 'llama-3.1-sonar-small-128k-online'
-    | 'llama-3.1-sonar-large-128k-online'
-    | 'llama-3.1-sonar-huge-128k-online';
+    | 'sonar-pro'
+    | 'sonar'
+    | 'sonar-reasoning'
+    | 'sonar-reasoning-pro'
+    | 'sonar-deep-research';
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
   searchDomain?: string;
   searchRecencyFilter?: 'day' | 'week' | 'month' | 'year';
+  reasoningEffort?: 'low' | 'medium' | 'high'; // For deep-research model
 }
 
 export class PerplexityError extends Error {
@@ -75,7 +92,7 @@ export class PerplexityProvider {
 
   constructor(config: Partial<PerplexityConfig> = {}) {
     this.config = {
-      model: 'llama-3.1-sonar-small-128k-online',
+      model: 'sonar',
       maxTokens: 4000,
       temperature: 0.7,
       systemPrompt:
@@ -95,48 +112,61 @@ export class PerplexityProvider {
     userId?: string
   ): Promise<PerplexityResponse> {
     try {
-      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
-      throw new PerplexityError(
-        'Direct Perplexity API calls are disabled for security. Use /.netlify/functions/perplexity-proxy instead.',
-        'DIRECT_API_DISABLED'
-      );
+      // SECURITY: Use Netlify proxy to keep API keys secure
+      const proxyUrl = '/.netlify/functions/perplexity-proxy';
 
-      // Convert messages to Perplexity format
-      const prompt = this.convertMessagesToPerplexity(messages);
-
-      // Prepare the request
-      const request = {
-        model: this.config.model,
-        messages: [
-          {
-            role: 'system' as const,
-            content:
-              this.config.systemPrompt ||
-              'You are a helpful AI assistant with access to real-time web search.',
-          },
-          {
-            role: 'user' as const,
-            content: prompt,
-          },
-        ],
-        max_tokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-        search_domain_filter: this.config.searchDomain,
-        search_recency_filter: this.config.searchRecencyFilter,
-      };
-
-      // Make the API call
-      if (!perplexity) {
+      // Get auth token for authenticated proxy calls
+      const authToken = await getAuthToken();
+      if (!authToken) {
         throw new PerplexityError(
-          'Perplexity client not initialized. Please check your API key configuration.',
-          'CLIENT_NOT_INITIALIZED'
+          'User not authenticated. Please log in to use AI features.',
+          'NOT_AUTHENTICATED'
         );
       }
-      const response = await perplexity.chat.completions.create(request);
 
-      // Process the response
-      const content = this.extractContentFromResponse(response);
-      const usage = this.extractUsageFromResponse(response);
+      // Convert messages to Perplexity format
+      const perplexityMessages = messages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      }));
+
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          messages: perplexityMessages,
+          model: this.config.model,
+          max_tokens: this.config.maxTokens,
+          temperature: this.config.temperature,
+          system: this.config.systemPrompt,
+          search_domain_filter: this.config.searchDomain,
+          search_recency_filter: this.config.searchRecencyFilter,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new PerplexityError(
+          errorData.error || `HTTP error! status: ${response.status}`,
+          `HTTP_${response.status}`,
+          response.status === 429 || response.status === 503
+        );
+      }
+
+      const data = await response.json();
+
+      // Extract content and usage from proxy response
+      const content = data.content || data.choices?.[0]?.message?.content || '';
+      const usage = data.usage
+        ? {
+            promptTokens: data.usage.prompt_tokens || 0,
+            completionTokens: data.usage.completion_tokens || 0,
+            totalTokens: data.usage.total_tokens || 0,
+          }
+        : { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
 
       // Save to database
       if (sessionId && userId) {
@@ -163,9 +193,9 @@ export class PerplexityProvider {
         sessionId,
         userId,
         metadata: {
-          finishReason: response.choices[0]?.finish_reason,
-          usage: response.usage,
-          citations: this.extractCitationsFromResponse(response),
+          finishReason: data.choices?.[0]?.finish_reason,
+          usage: data.usage || usage,
+          citations: data.citations || [],
         },
       };
     } catch (error) {
@@ -351,10 +381,30 @@ export class PerplexityProvider {
   }
 
   /**
+   * Type for Perplexity API response structure
+   */
+  private isPerplexityApiResponse(
+    response: unknown
+  ): response is {
+    choices?: Array<{ message?: { content?: string } }>;
+    usage?: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      total_tokens?: number;
+    };
+    citations?: unknown[];
+  } {
+    return typeof response === 'object' && response !== null;
+  }
+
+  /**
    * Extract content from Perplexity response
    */
   private extractContentFromResponse(response: unknown): string {
-    return response.choices[0]?.message?.content || '';
+    if (!this.isPerplexityApiResponse(response)) {
+      return '';
+    }
+    return response.choices?.[0]?.message?.content || '';
   }
 
   /**
@@ -365,14 +415,14 @@ export class PerplexityProvider {
     completionTokens: number;
     totalTokens: number;
   } {
-    if (response.usage) {
-      return {
-        promptTokens: response.usage.prompt_tokens || 0,
-        completionTokens: response.usage.completion_tokens || 0,
-        totalTokens: response.usage.total_tokens || 0,
-      };
+    if (!this.isPerplexityApiResponse(response) || !response.usage) {
+      return { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
     }
-    return { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
+    return {
+      promptTokens: response.usage.prompt_tokens || 0,
+      completionTokens: response.usage.completion_tokens || 0,
+      totalTokens: response.usage.total_tokens || 0,
+    };
   }
 
   /**
@@ -381,6 +431,9 @@ export class PerplexityProvider {
   private extractCitationsFromResponse(response: unknown): unknown[] {
     // Perplexity responses may include citations from web search
     // This would need to be implemented based on the actual response structure
+    if (!this.isPerplexityApiResponse(response)) {
+      return [];
+    }
     return response.citations || [];
   }
 
@@ -434,18 +487,31 @@ export class PerplexityProvider {
    * SECURITY: Always returns false as direct API access is disabled
    */
   isConfigured(): boolean {
-    return false; // Direct API access disabled for security
+    return true; // Proxy-based access is always available
   }
 
   /**
-   * Get available models
+   * Get available models (Jan 2026)
    */
   static getAvailableModels(): string[] {
     return [
-      'llama-3.1-sonar-small-128k-online',
-      'llama-3.1-sonar-large-128k-online',
-      'llama-3.1-sonar-huge-128k-online',
+      'sonar-pro',
+      'sonar',
+      'sonar-reasoning',
+      'sonar-reasoning-pro',
+      'sonar-deep-research',
     ];
+  }
+
+  /**
+   * Get models by capability
+   */
+  static getModelsByCapability(): Record<string, string[]> {
+    return {
+      search: ['sonar', 'sonar-pro'],
+      reasoning: ['sonar-reasoning', 'sonar-reasoning-pro'],
+      research: ['sonar-deep-research'],
+    };
   }
 }
 

@@ -107,20 +107,11 @@ export class ToolsExecutionService {
   private async executeCodeRunner(
     args: Record<string, unknown>
   ): Promise<unknown> {
-    const code = args.code as string;
-    const language = args.language as string;
-
-    if (!code) throw new Error('Code is required');
-    if (!language) throw new Error('Language is required');
-
-    // TODO: Integrate with code execution service (e.g., Judge0, Piston, or custom sandbox)
-    // For now, return mock execution result
+    // TODO: Integrate with actual code execution service
     return {
-      language,
-      stdout: '// Code execution result would appear here',
-      stderr: '',
-      exitCode: 0,
-      executionTime: 0.5,
+      success: false,
+      error: 'Code execution is not yet implemented. This feature is coming soon.',
+      language: args.language || 'unknown'
     };
   }
 
@@ -130,20 +121,11 @@ export class ToolsExecutionService {
   private async executeImageGenerator(
     args: Record<string, unknown>
   ): Promise<unknown> {
-    const prompt = args.prompt as string;
-    if (!prompt) throw new Error('Image prompt is required');
-
-    // TODO: Integrate with image generation API (DALL-E, Stable Diffusion, Midjourney)
-    // For now, return mock image URL
+    // TODO: Integrate with DALL-E or Imagen service
     return {
-      prompt,
-      images: [
-        {
-          url: 'https://via.placeholder.com/512x512?text=Generated+Image',
-          width: 512,
-          height: 512,
-        },
-      ],
+      success: false,
+      error: 'Image generation from chat is not yet implemented. Use the dedicated image generation feature.',
+      prompt: args.prompt
     };
   }
 
@@ -153,15 +135,11 @@ export class ToolsExecutionService {
   private async executeFileReader(
     args: Record<string, unknown>
   ): Promise<unknown> {
-    const filePath = args.path as string;
-    if (!filePath) throw new Error('File path is required');
-
-    // TODO: Implement secure file reading with proper permissions
+    // TODO: Integrate with Vibe file system
     return {
-      path: filePath,
-      content: 'File content would be loaded here',
-      size: 1024,
-      mimeType: 'text/plain',
+      success: false,
+      error: 'File reading is not yet implemented in chat. Use the Vibe workspace for file operations.',
+      path: args.path
     };
   }
 
@@ -171,17 +149,11 @@ export class ToolsExecutionService {
   private async executeFileWriter(
     args: Record<string, unknown>
   ): Promise<unknown> {
-    const filePath = args.path as string;
-    const content = args.content as string;
-
-    if (!filePath) throw new Error('File path is required');
-    if (!content) throw new Error('Content is required');
-
-    // TODO: Implement secure file writing with proper permissions
+    // TODO: Integrate with Vibe file system
     return {
-      path: filePath,
-      bytesWritten: content.length,
-      success: true,
+      success: false,
+      error: 'File writing is not yet implemented in chat. Use the Vibe workspace for file operations.',
+      path: args.path
     };
   }
 

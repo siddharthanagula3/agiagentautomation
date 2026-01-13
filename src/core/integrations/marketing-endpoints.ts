@@ -275,7 +275,7 @@ export async function getHelpArticles(categorySlug?: string) {
       .from('support_categories')
       .select('id')
       .eq('slug', categorySlug)
-      .single();
+      .maybeSingle();
 
     if (category) {
       query = query.eq('category_id', category.id);

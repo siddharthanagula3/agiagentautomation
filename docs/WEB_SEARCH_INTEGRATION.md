@@ -390,6 +390,23 @@ For issues, questions, or contributions:
 - Documentation: `/docs`
 - Examples: `/examples`
 
+## Changelog
+
+**v1.1.0 (Jan 2026)**
+
+- Enhanced security with CORS origin whitelist validation
+- JWT verification via Supabase `auth.getUser()` in rate limiter
+- Added DeepSeek and Qwen as alternative LLM providers for search synthesis
+- Token enforcement with pre-flight balance checks
+- Employee memory context integration for personalized search results
+
+**v1.0.0 (Nov 2025)**
+
+- Initial web search integration
+- Multi-provider support (Perplexity, Google, DuckDuckGo)
+- Automatic search detection
+- Rich results display with citations
+
 ## License
 
 Same as parent project (AGI Agent Automation)

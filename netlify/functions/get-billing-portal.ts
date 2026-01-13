@@ -1,13 +1,19 @@
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import Stripe from 'stripe';
 import { withAuth } from './utils/auth-middleware';
+import { withRateLimitTier } from './utils/rate-limiter';
 import { createClient } from '@supabase/supabase-js';
+import {
+  billingPortalSchema,
+  formatValidationError,
+} from './utils/validation-schemas';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia',
 });
 
 // Updated: Nov 16th 2025 - Fixed missing authentication on Stripe payment endpoint
+// Updated: Jan 10th 2026 - Added rate limiting and Zod validation
 const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; email?: string } }, context: HandlerContext) => {
   if (event.httpMethod !== 'POST') {
     return {
@@ -17,14 +23,19 @@ const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; 
   }
 
   try {
-    const { customerId } = JSON.parse(event.body || '{}');
+    // SECURITY: Validate request body with Zod schema
+    const parseResult = billingPortalSchema.safeParse(
+      JSON.parse(event.body || '{}')
+    );
 
-    if (!customerId) {
+    if (!parseResult.success) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Missing customerId' }),
+        body: JSON.stringify(formatValidationError(parseResult.error)),
       };
     }
+
+    const { customerId } = parseResult.data;
 
     // Updated: Nov 16th 2025 - Fixed missing authentication - verify customer belongs to authenticated user
     const supabase = createClient(
@@ -32,11 +43,12 @@ const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; 
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // Use .maybeSingle() to avoid 406 errors when subscription doesn't exist
     const { data: subscription } = await supabase
       .from('user_subscriptions')
       .select('user_id')
       .eq('stripe_customer_id', customerId)
-      .single();
+      .maybeSingle();
 
     if (!subscription || subscription.user_id !== event.user.id) {
       return {
@@ -77,4 +89,7 @@ const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; 
 };
 
 // Updated: Nov 16th 2025 - Fixed missing authentication - wrap handler with withAuth
-export const handler: Handler = withAuth(authenticatedHandler);
+// Updated: Jan 10th 2026 - Added payment tier rate limiting (5 req/min)
+export const handler: Handler = withAuth(
+  withRateLimitTier('payment')(authenticatedHandler)
+);

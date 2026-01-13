@@ -347,10 +347,10 @@ const HelpSupportPage: React.FC = () => {
               {[
                 {
                   title: 'Email Support',
-                  desc: 'support@agiworkforce.com',
+                  desc: 'support@agiagentautomation.com',
                   icon: Mail,
                   action: 'Send Email',
-                  href: 'mailto:support@agiworkforce.com',
+                  href: 'mailto:support@agiagentautomation.com',
                 },
                 {
                   title: 'Live Chat',

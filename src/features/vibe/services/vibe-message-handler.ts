@@ -7,6 +7,31 @@
 
 import { vibeFileSystem } from '@features/mission-control/services/vibe-file-system';
 import { toast } from 'sonner';
+import { supabase } from '@shared/lib/supabase-client';
+
+/**
+ * Sync file to database for persistence across page refreshes
+ */
+async function syncFileToDatabase(sessionId: string, filePath: string, content: string): Promise<void> {
+  try {
+    const { error } = await supabase.from('vibe_files').upsert({
+      session_id: sessionId,
+      path: filePath,
+      content: content,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'session_id,path'
+    });
+
+    if (error) {
+      console.error('[Vibe] Failed to sync file to database:', error);
+    } else {
+      console.log(`[Vibe] Synced file to database: ${filePath}`);
+    }
+  } catch (err) {
+    console.error('[Vibe] Error syncing file:', err);
+  }
+}
 
 export interface ExtractedFile {
   path: string;
@@ -133,9 +158,9 @@ function mapLanguageToMonaco(language: string): string {
 }
 
 /**
- * Create files in vibeFileSystem
+ * Create files in vibeFileSystem and persist to database
  */
-export function createFilesInFileSystem(files: ExtractedFile[]): number {
+export async function createFilesInFileSystem(files: ExtractedFile[], sessionId?: string): Promise<number> {
   let created = 0;
 
   for (const file of files) {
@@ -155,6 +180,11 @@ export function createFilesInFileSystem(files: ExtractedFile[]): number {
         // File doesn't exist, create it
         vibeFileSystem.createFile(normalizedPath, file.content);
         console.log(`[VIBE] Created file: ${normalizedPath}`);
+      }
+
+      // Sync to database for persistence across page refreshes
+      if (sessionId) {
+        await syncFileToDatabase(sessionId, normalizedPath, file.content);
       }
 
       created++;
@@ -278,8 +308,8 @@ export async function processAIResponse(
 
   console.log(`[VIBE] Extracted ${files.length} files from AI response`);
 
-  // Create files in file system
-  const filesCreated = createFilesInFileSystem(files);
+  // Create files in file system and persist to database
+  const filesCreated = await createFilesInFileSystem(files, sessionId);
 
   // Detect project structure
   const projectInfo = detectProjectStructure(files);

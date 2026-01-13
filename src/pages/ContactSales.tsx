@@ -160,7 +160,7 @@ const ContactSalesPage: React.FC = () => {
     {
       icon: Mail,
       title: 'Email Us',
-      value: 'sales@agiworkforce.com',
+      value: 'sales@agiagentautomation.com',
       description: 'Get a response within 24 hours',
     },
     {

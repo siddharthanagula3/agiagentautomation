@@ -18,7 +18,6 @@ if (import.meta.env.DEV) {
   // In development, log errors but don't throw (allow development without all keys)
   validateAndLogEnvironment(false);
   logEnvironmentConfig();
-  void import('@shared/utils/test-supabase');
 } else {
   // In production, throw error if critical variables are missing
   validateAndLogEnvironment(true);

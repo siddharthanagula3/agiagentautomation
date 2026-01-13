@@ -68,7 +68,7 @@ class AIEmployeeService {
         .from('ai_employees')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return { data, error: null };
@@ -92,9 +92,10 @@ class AIEmployeeService {
           updated_at: new Date().toISOString(),
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Failed to create employee: No data returned');
       return { data, error: null };
     } catch (error: unknown) {
       // Updated: Nov 16th 2025 - Fixed missing error type check
@@ -114,9 +115,10 @@ class AIEmployeeService {
         })
         .eq('id', id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Employee not found or update failed');
       return { data, error: null };
     } catch (error: unknown) {
       // Updated: Nov 16th 2025 - Fixed missing error type check
@@ -230,9 +232,10 @@ class AIEmployeeService {
         .from('job_assignments')
         .insert(assignment)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Failed to create job assignment: No data returned');
 
       // Update employee status
       await this.updateEmployee(employeeId, { status: 'working' });
@@ -252,7 +255,7 @@ class AIEmployeeService {
         .from('ai_employees')
         .select('performance')
         .eq('id', employeeId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return { data: data?.performance, error: null };
@@ -274,9 +277,10 @@ class AIEmployeeService {
         })
         .eq('id', employeeId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Employee not found or performance update failed');
       return { data, error: null };
     } catch (error: unknown) {
       // Updated: Nov 16th 2025 - Fixed missing error type check
@@ -303,7 +307,7 @@ class AIEmployeeService {
         .from('ai_employees')
         .select('tools')
         .eq('id', employeeId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return { data: data?.tools || [], error: null };
@@ -325,9 +329,10 @@ class AIEmployeeService {
         })
         .eq('id', employeeId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Employee not found or tools update failed');
       return { data, error: null };
     } catch (error: unknown) {
       // Updated: Nov 16th 2025 - Fixed missing error type check
@@ -343,7 +348,7 @@ class AIEmployeeService {
         .from('ai_employees')
         .select('workflows')
         .eq('id', employeeId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return { data: data?.workflows || [], error: null };
@@ -368,9 +373,10 @@ class AIEmployeeService {
         })
         .eq('id', employeeId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Employee not found or workflows update failed');
       return { data, error: null };
     } catch (error: unknown) {
       // Updated: Nov 16th 2025 - Fixed missing error type check

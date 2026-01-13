@@ -16,11 +16,11 @@ import type {
  */
 
 interface ArtifactState {
-  // Artifacts by message ID
-  artifacts: Map<string, ArtifactData[]>;
+  // Artifacts by message ID (using Record for Immer compatibility)
+  artifacts: Record<string, ArtifactData[]>;
 
   // Shared artifacts (public access)
-  sharedArtifacts: Map<string, ArtifactData>;
+  sharedArtifacts: Record<string, ArtifactData>;
 
   // Current artifact being viewed in fullscreen
   activeArtifact: string | null;
@@ -53,15 +53,15 @@ interface ArtifactState {
 
 export const useArtifactStore = create<ArtifactState>()(
   immer((set, get) => ({
-    artifacts: new Map(),
-    sharedArtifacts: new Map(),
+    artifacts: {},
+    sharedArtifacts: {},
     activeArtifact: null,
 
     addArtifact: (messageId: string, artifact: ArtifactData) => {
       set((state) => {
-        const messageArtifacts = state.artifacts.get(messageId) || [];
+        const messageArtifacts = state.artifacts[messageId] || [];
         messageArtifacts.push(artifact);
-        state.artifacts.set(messageId, messageArtifacts);
+        state.artifacts[messageId] = messageArtifacts;
       });
     },
 
@@ -71,7 +71,7 @@ export const useArtifactStore = create<ArtifactState>()(
       updates: Partial<ArtifactData>
     ) => {
       set((state) => {
-        const messageArtifacts = state.artifacts.get(messageId);
+        const messageArtifacts = state.artifacts[messageId];
         if (!messageArtifacts) return;
 
         const artifactIndex = messageArtifacts.findIndex(
@@ -92,7 +92,7 @@ export const useArtifactStore = create<ArtifactState>()(
       version: ArtifactVersion
     ) => {
       set((state) => {
-        const messageArtifacts = state.artifacts.get(messageId);
+        const messageArtifacts = state.artifacts[messageId];
         if (!messageArtifacts) return;
 
         const artifact = messageArtifacts.find((a) => a.id === artifactId);
@@ -112,7 +112,7 @@ export const useArtifactStore = create<ArtifactState>()(
       versionIndex: number
     ) => {
       set((state) => {
-        const messageArtifacts = state.artifacts.get(messageId);
+        const messageArtifacts = state.artifacts[messageId];
         if (!messageArtifacts) return;
 
         const artifact = messageArtifacts.find((a) => a.id === artifactId);
@@ -129,7 +129,7 @@ export const useArtifactStore = create<ArtifactState>()(
       messageId: string,
       artifactId: string
     ): Promise<string> => {
-      const messageArtifacts = get().artifacts.get(messageId);
+      const messageArtifacts = get().artifacts[messageId];
       if (!messageArtifacts) {
         throw new Error('Message artifacts not found');
       }
@@ -143,7 +143,7 @@ export const useArtifactStore = create<ArtifactState>()(
       const shareId = `share-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
       set((state) => {
-        state.sharedArtifacts.set(shareId, artifact);
+        state.sharedArtifacts[shareId] = artifact;
       });
 
       // In production, this would call an API to create a shareable link
@@ -153,12 +153,12 @@ export const useArtifactStore = create<ArtifactState>()(
 
     unshareArtifact: (shareId: string) => {
       set((state) => {
-        state.sharedArtifacts.delete(shareId);
+        delete state.sharedArtifacts[shareId];
       });
     },
 
     getSharedArtifact: (shareId: string) => {
-      return get().sharedArtifacts.get(shareId);
+      return get().sharedArtifacts[shareId];
     },
 
     setActiveArtifact: (artifactId: string | null) => {
@@ -166,19 +166,19 @@ export const useArtifactStore = create<ArtifactState>()(
     },
 
     getMessageArtifacts: (messageId: string) => {
-      return get().artifacts.get(messageId) || [];
+      return get().artifacts[messageId] || [];
     },
 
     clearArtifacts: (messageId: string) => {
       set((state) => {
-        state.artifacts.delete(messageId);
+        delete state.artifacts[messageId];
       });
     },
 
     clearAllArtifacts: () => {
       set({
-        artifacts: new Map(),
-        sharedArtifacts: new Map(),
+        artifacts: {},
+        sharedArtifacts: {},
         activeArtifact: null,
       });
     },

@@ -40,24 +40,24 @@ export function VibeTopNav() {
             <SelectValue placeholder="Select model" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="claude-sonnet-4">
+            <SelectItem value="claude-sonnet-4-20250514">
               <div className="flex items-center gap-2">
-                <span className="font-medium">Claude Sonnet 4.5</span>
+                <span className="font-medium">Claude Sonnet 4</span>
               </div>
             </SelectItem>
-            <SelectItem value="gpt-4">
+            <SelectItem value="claude-3-5-sonnet-20241022">
               <div className="flex items-center gap-2">
-                <span className="font-medium">GPT-4</span>
+                <span className="font-medium">Claude 3.5 Sonnet</span>
               </div>
             </SelectItem>
-            <SelectItem value="gpt-4-turbo">
+            <SelectItem value="gpt-4o">
               <div className="flex items-center gap-2">
-                <span className="font-medium">GPT-4 Turbo</span>
+                <span className="font-medium">GPT-4o</span>
               </div>
             </SelectItem>
-            <SelectItem value="gemini-pro">
+            <SelectItem value="gemini-2.0-flash">
               <div className="flex items-center gap-2">
-                <span className="font-medium">Gemini Pro</span>
+                <span className="font-medium">Gemini 2.0 Flash</span>
               </div>
             </SelectItem>
           </SelectContent>

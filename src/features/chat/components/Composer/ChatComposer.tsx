@@ -89,8 +89,8 @@ const DEFAULT_MODELS: Model[] = [
     recommended: 'general',
   },
   {
-    id: 'claude-sonnet-4-5-thinking',
-    name: 'Claude Sonnet 4.5 Thinking',
+    id: 'claude-3-5-sonnet-thinking',
+    name: 'Claude 3.5 Sonnet (Extended)',
     description: 'Extended reasoning for complex coding tasks',
     provider: 'anthropic',
     recommended: 'coding',
@@ -103,8 +103,8 @@ const DEFAULT_MODELS: Model[] = [
     recommended: 'coding',
   },
   {
-    id: 'gemini-2-5-pro',
-    name: 'Gemini 2.5 Pro',
+    id: 'gemini-1-5-pro-latest',
+    name: 'Gemini 1.5 Pro',
     description: 'Advanced multimodal AI for creative tasks',
     provider: 'google',
     recommended: 'creative',
@@ -144,8 +144,55 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [textareaHeight, setTextareaHeight] = useState(80);
   const [showPromptShortcuts, setShowPromptShortcuts] = useState(false);
+  const [focusedEmployeeIndex, setFocusedEmployeeIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const employeeButtonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Keyboard navigation handler for employee selector
+  const handleEmployeeKeyDown = (e: React.KeyboardEvent, index: number) => {
+    const totalEmployees = availableEmployees.length + 1; // +1 for "Add Employee" button
+
+    switch (e.key) {
+      case 'ArrowRight':
+      case 'ArrowDown': {
+        e.preventDefault();
+        const nextIndex = (index + 1) % totalEmployees;
+        setFocusedEmployeeIndex(nextIndex);
+        employeeButtonRefs.current[nextIndex]?.focus();
+        break;
+      }
+      case 'ArrowLeft':
+      case 'ArrowUp': {
+        e.preventDefault();
+        const prevIndex = (index - 1 + totalEmployees) % totalEmployees;
+        setFocusedEmployeeIndex(prevIndex);
+        employeeButtonRefs.current[prevIndex]?.focus();
+        break;
+      }
+      case 'Home':
+        e.preventDefault();
+        setFocusedEmployeeIndex(0);
+        employeeButtonRefs.current[0]?.focus();
+        break;
+      case 'End': {
+        e.preventDefault();
+        const lastIndex = totalEmployees - 1;
+        setFocusedEmployeeIndex(lastIndex);
+        employeeButtonRefs.current[lastIndex]?.focus();
+        break;
+      }
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        if (index < availableEmployees.length) {
+          toggleEmployee(availableEmployees[index].id);
+        } else {
+          navigate('/marketplace');
+        }
+        break;
+    }
+  };
 
   // Auto-resize textarea
   useEffect(() => {
@@ -257,7 +304,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
               size="sm"
               className="h-8 gap-2 text-xs"
               disabled={isLoading}
-              title="Quick prompt shortcuts"
+              aria-label="Open prompt shortcuts"
             >
               <Zap className="h-3.5 w-3.5" />
               <span className="hidden md:inline">Prompts</span>
@@ -269,15 +316,26 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
         </Popover>
 
         {/* Employee Selector - Avatar Chips */}
-        <div className="flex flex-1 items-center gap-2 overflow-x-auto">
+        <div
+          role="listbox"
+          aria-label="Select AI employees"
+          aria-multiselectable="true"
+          className="flex flex-1 items-center gap-2 overflow-x-auto"
+        >
           <TooltipProvider delayDuration={200}>
-            {availableEmployees.map((employee) => {
+            {availableEmployees.map((employee, index) => {
               const isSelected = selectedEmployees.includes(employee.id);
               return (
                 <Tooltip key={employee.id}>
                   <TooltipTrigger asChild>
                     <button
+                      ref={(el) => (employeeButtonRefs.current[index] = el)}
+                      role="option"
+                      aria-selected={isSelected}
                       onClick={() => toggleEmployee(employee.id)}
+                      onKeyDown={(e) => handleEmployeeKeyDown(e, index)}
+                      aria-label={`Select ${employee.name}`}
+                      tabIndex={focusedEmployeeIndex === index ? 0 : -1}
                       className={cn(
                         'group relative flex-shrink-0 transition-all duration-200',
                         isSelected
@@ -328,9 +386,15 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
+                  ref={(el) => (employeeButtonRefs.current[availableEmployees.length] = el)}
+                  role="option"
+                  aria-selected={false}
                   onClick={() => {
                     navigate('/marketplace');
                   }}
+                  onKeyDown={(e) => handleEmployeeKeyDown(e, availableEmployees.length)}
+                  aria-label="Hire more AI employees"
+                  tabIndex={focusedEmployeeIndex === availableEmployees.length ? 0 : -1}
                   className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/30 transition-colors hover:border-primary hover:bg-muted"
                   disabled={isLoading}
                 >
@@ -368,6 +432,8 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
                 variant={selectedTools.includes('image') ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => toggleTool('image')}
+                aria-label="Toggle image generation tool"
+                aria-pressed={selectedTools.includes('image')}
                 className={cn(
                   'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
                   selectedTools.includes('image') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
@@ -394,6 +460,8 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
                 variant={selectedTools.includes('video') ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => toggleTool('video')}
+                aria-label="Toggle video generation tool"
+                aria-pressed={selectedTools.includes('video')}
                 className={cn(
                   'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
                   selectedTools.includes('video') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
@@ -420,6 +488,8 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
                 variant={selectedTools.includes('document') ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => toggleTool('document')}
+                aria-label="Toggle document generation tool"
+                aria-pressed={selectedTools.includes('document')}
                 className={cn(
                   'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
                   selectedTools.includes('document') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
@@ -446,6 +516,8 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
                 variant={selectedTools.includes('search') ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => toggleTool('search')}
+                aria-label="Toggle web search tool"
+                aria-pressed={selectedTools.includes('search')}
                 className={cn(
                   'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
                   selectedTools.includes('search') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'

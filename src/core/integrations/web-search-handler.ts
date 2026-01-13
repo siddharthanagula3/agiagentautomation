@@ -3,9 +3,35 @@
  * Provides real-time web search capabilities
  */
 
+import { fetchWithTimeout, TimeoutPresets } from '@shared/utils/error-handling';
+
 const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY || '';
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
 const GOOGLE_CX = import.meta.env.VITE_GOOGLE_CX || '';
+
+/**
+ * Validates if a value is a valid URL string
+ */
+function isValidUrl(url: unknown): url is string {
+  if (typeof url !== 'string' || !url.trim()) return false;
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Safely extracts hostname from URL, returns fallback if invalid
+ */
+function safeGetHostname(url: string, fallback: string = 'unknown'): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return fallback;
+  }
+}
 
 export interface SearchResult {
   title: string;
@@ -35,28 +61,32 @@ export async function searchWithPerplexity(
   }
 
   try {
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
+    const response = await fetchWithTimeout('https://api.perplexity.ai/chat/completions', {
+      timeoutMs: TimeoutPresets.SEARCH,
+      timeoutMessage: 'Perplexity search timed out',
+      fetchOptions: {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'sonar-pro',
+          messages: [
+            {
+              role: 'system',
+              content:
+                'You are a helpful assistant that provides accurate, cited information from the web. Always cite your sources.',
+            },
+            {
+              role: 'user',
+              content: query,
+            },
+          ],
+          temperature: 0.2,
+          max_tokens: 1000,
+        }),
       },
-      body: JSON.stringify({
-        model: 'llama-3.1-sonar-large-128k-online',
-        messages: [
-          {
-            role: 'system',
-            content:
-              'You are a helpful assistant that provides accurate, cited information from the web. Always cite your sources.',
-          },
-          {
-            role: 'user',
-            content: query,
-          },
-        ],
-        temperature: 0.2,
-        max_tokens: 1000,
-      }),
     });
 
     if (!response.ok) {
@@ -73,22 +103,35 @@ export async function searchWithPerplexity(
     );
     const sources = data.citations || [];
 
-    // Parse results
-    const results: SearchResult[] = sources.map(
-      (source: unknown, index: number) => ({
-        title: source.title || `Source ${index + 1}`,
+    // Parse results, filtering out entries with invalid URLs
+    const results: SearchResult[] = sources
+      .filter(
+        (source: unknown): source is { url: string; title?: string; snippet?: string; publishedDate?: string } =>
+          source !== null &&
+          typeof source === 'object' &&
+          isValidUrl((source as Record<string, unknown>).url)
+      )
+      .map((source, index: number) => ({
+        title: (source.title as string) || `Source ${index + 1}`,
         url: source.url,
-        snippet: source.snippet || '',
-        source: new URL(source.url).hostname,
-        publishedDate: source.publishedDate,
-      })
-    );
+        snippet: (source.snippet as string) || '',
+        source: safeGetHostname(source.url),
+        publishedDate: source.publishedDate as string | undefined,
+      }));
+
+    // Extract valid source URLs
+    const validSourceUrls = sources
+      .filter(
+        (s: unknown): s is { url: string } =>
+          s !== null && typeof s === 'object' && isValidUrl((s as Record<string, unknown>).url)
+      )
+      .map((s) => s.url);
 
     return {
       query,
       results,
       answer,
-      sources: sources.map((s: unknown) => s.url),
+      sources: validSourceUrls,
       timestamp: new Date(),
     };
   } catch (error) {
@@ -115,7 +158,10 @@ export async function searchWithGoogle(
     url.searchParams.append('q', query);
     url.searchParams.append('num', Math.min(maxResults, 10).toString());
 
-    const response = await fetch(url.toString());
+    const response = await fetchWithTimeout(url.toString(), {
+      timeoutMs: TimeoutPresets.SEARCH,
+      timeoutMessage: 'Google Search timed out',
+    });
 
     if (!response.ok) {
       throw new Error(`Google Search API error: ${response.statusText}`);
@@ -123,14 +169,25 @@ export async function searchWithGoogle(
 
     const data = await response.json();
 
-    const results: SearchResult[] = (data.items || []).map((item: unknown) => ({
-      title: item.title,
-      url: item.link,
-      snippet: item.snippet,
-      source: new URL(item.link).hostname,
-      publishedDate: item.pagemap?.metatags?.[0]?.['article:published_time'],
-      favicon: `https://www.google.com/s2/favicons?domain=${new URL(item.link).hostname}`,
-    }));
+    // Filter and map results, excluding items with invalid URLs
+    const results: SearchResult[] = (data.items || [])
+      .filter(
+        (item: unknown): item is { link: string; title?: string; snippet?: string; pagemap?: { metatags?: Array<Record<string, string>> } } =>
+          item !== null &&
+          typeof item === 'object' &&
+          isValidUrl((item as Record<string, unknown>).link)
+      )
+      .map((item) => {
+        const hostname = safeGetHostname(item.link);
+        return {
+          title: (item.title as string) || '',
+          url: item.link,
+          snippet: (item.snippet as string) || '',
+          source: hostname,
+          publishedDate: item.pagemap?.metatags?.[0]?.['article:published_time'],
+          favicon: `https://www.google.com/s2/favicons?domain=${hostname}`,
+        };
+      });
 
     return {
       query,
@@ -158,7 +215,10 @@ export async function searchWithDuckDuckGo(
     url.searchParams.append('no_html', '1');
     url.searchParams.append('skip_disambig', '1');
 
-    const response = await fetch(url.toString());
+    const response = await fetchWithTimeout(url.toString(), {
+      timeoutMs: TimeoutPresets.SEARCH,
+      timeoutMessage: 'DuckDuckGo search timed out',
+    });
 
     if (!response.ok) {
       throw new Error(`DuckDuckGo API error: ${response.statusText}`);
@@ -168,25 +228,25 @@ export async function searchWithDuckDuckGo(
 
     const results: SearchResult[] = [];
 
-    // Add abstract if available
-    if (data.Abstract) {
+    // Add abstract if available and URL is valid
+    if (data.Abstract && isValidUrl(data.AbstractURL)) {
       results.push({
         title: data.Heading || query,
         url: data.AbstractURL,
         snippet: data.Abstract,
-        source: data.AbstractSource,
+        source: data.AbstractSource || safeGetHostname(data.AbstractURL),
       });
     }
 
-    // Add related topics
+    // Add related topics with valid URLs
     if (data.RelatedTopics) {
       for (const topic of data.RelatedTopics.slice(0, maxResults - 1)) {
-        if (topic.Text && topic.FirstURL) {
+        if (topic.Text && isValidUrl(topic.FirstURL)) {
           results.push({
             title: topic.Text.split(' - ')[0],
             url: topic.FirstURL,
             snippet: topic.Text,
-            source: new URL(topic.FirstURL).hostname,
+            source: safeGetHostname(topic.FirstURL),
           });
         }
       }

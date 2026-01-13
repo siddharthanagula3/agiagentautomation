@@ -8,7 +8,7 @@ import {
   IntentType,
   DomainType,
   ComplexityLevel,
-} from './nlp-processor';
+} from './natural-language-processor';
 
 export type TaskStatus =
   | 'pending'

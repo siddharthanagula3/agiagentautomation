@@ -3,7 +3,7 @@
  * Enhanced chat service with provider configuration and model management
  */
 
-import { unifiedLLMService } from '@core/ai/llm/unified-llm-service';
+import { unifiedLLMService } from '@core/ai/llm/unified-language-model';
 
 export type AIProvider = 'openai' | 'anthropic' | 'google' | 'perplexity';
 
@@ -34,20 +34,14 @@ export function getConfiguredProviders(): AIProvider[] {
  */
 export function getAvailableModels(provider: AIProvider): string[] {
   const models: Record<AIProvider, string[]> = {
-    openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+    openai: ['gpt-4o', 'gpt-4o-mini', 'o1', 'o1-mini'],
     anthropic: [
+      'claude-sonnet-4-20250514',
       'claude-3-5-sonnet-20241022',
       'claude-3-5-haiku-20241022',
-      'claude-3-opus-20240229',
-      'claude-3-sonnet-20240229',
-      'claude-3-haiku-20240307',
     ],
-    google: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'],
-    perplexity: [
-      'llama-3.1-sonar-small-128k-online',
-      'llama-3.1-sonar-large-128k-online',
-      'llama-3.1-sonar-huge-128k-online',
-    ],
+    google: ['gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'],
+    perplexity: ['sonar-pro', 'sonar', 'sonar-reasoning'],
   };
 
   return models[provider] || [];

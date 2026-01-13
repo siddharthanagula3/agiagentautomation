@@ -61,7 +61,7 @@ class CacheService {
         .from('cache_entries')
         .select('*')
         .eq('cache_key', key)
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         return null;

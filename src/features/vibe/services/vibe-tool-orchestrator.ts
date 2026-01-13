@@ -3,6 +3,17 @@
  * Manages tool execution for AI employees with validation and security
  */
 
+// Virtual file system for in-session files
+export interface VirtualFile {
+  path: string;
+  content: string;
+  type: string;
+  lastModified: Date;
+}
+
+// Virtual file system storage
+const virtualFileSystem: Map<string, VirtualFile> = new Map();
+
 /**
  * Tool request from an AI agent
  */
@@ -318,7 +329,8 @@ export class VibeToolOrchestrator {
   }
 
   /**
-   * Execute tool implementation (mock)
+   * Execute tool implementation
+   * Routes to specific tool handlers based on tool name
    *
    * @private
    */
@@ -326,15 +338,347 @@ export class VibeToolOrchestrator {
     toolName: string,
     parameters: Record<string, unknown>
   ): Promise<unknown> {
-    // Mock implementation - would integrate with actual tool execution engine
-    // Simulate async execution
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    switch (toolName) {
+      case 'Read':
+        return this.executeRead(parameters);
+      case 'Write':
+        return this.executeWrite(parameters);
+      case 'Edit':
+        return this.executeEdit(parameters);
+      case 'Bash':
+        return this.executeBash(parameters);
+      case 'Grep':
+        return this.executeGrep(parameters);
+      case 'Glob':
+        return this.executeGlob(parameters);
+      case 'WebSearch':
+        return this.executeWebSearch(parameters);
+      case 'WebFetch':
+        return this.executeWebFetch(parameters);
+      default:
+        throw new Error(`Unsupported tool: ${toolName}`);
+    }
+  }
+
+  /**
+   * Execute Read tool - read file contents from virtual file system
+   */
+  private async executeRead(parameters: Record<string, unknown>): Promise<unknown> {
+    const filePath = parameters.file_path as string;
+    const offset = (parameters.offset as number) || 0;
+    const limit = (parameters.limit as number) || -1;
+
+    const file = virtualFileSystem.get(filePath);
+    if (!file) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
+    let content = file.content;
+
+    // Apply offset and limit (line-based)
+    if (offset > 0 || limit > 0) {
+      const lines = content.split('\n');
+      const startLine = offset;
+      const endLine = limit > 0 ? startLine + limit : lines.length;
+      content = lines.slice(startLine, endLine).join('\n');
+    }
 
     return {
-      tool: toolName,
-      result: 'Tool execution successful',
-      parameters,
+      file_path: filePath,
+      content,
+      type: file.type,
+      lastModified: file.lastModified,
     };
+  }
+
+  /**
+   * Execute Write tool - write content to virtual file system
+   */
+  private async executeWrite(parameters: Record<string, unknown>): Promise<unknown> {
+    const filePath = parameters.file_path as string;
+    const content = parameters.content as string;
+
+    // Determine file type from extension
+    const ext = filePath.split('.').pop()?.toLowerCase() || 'txt';
+    const typeMap: Record<string, string> = {
+      ts: 'text/typescript',
+      tsx: 'text/typescript',
+      js: 'text/javascript',
+      jsx: 'text/javascript',
+      json: 'application/json',
+      html: 'text/html',
+      css: 'text/css',
+      md: 'text/markdown',
+      txt: 'text/plain',
+    };
+
+    const file: VirtualFile = {
+      path: filePath,
+      content,
+      type: typeMap[ext] || 'text/plain',
+      lastModified: new Date(),
+    };
+
+    virtualFileSystem.set(filePath, file);
+
+    return {
+      success: true,
+      file_path: filePath,
+      bytes_written: content.length,
+    };
+  }
+
+  /**
+   * Execute Edit tool - find/replace in file
+   */
+  private async executeEdit(parameters: Record<string, unknown>): Promise<unknown> {
+    const filePath = parameters.file_path as string;
+    const oldString = parameters.old_string as string;
+    const newString = parameters.new_string as string;
+    const replaceAll = (parameters.replace_all as boolean) || false;
+
+    const file = virtualFileSystem.get(filePath);
+    if (!file) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
+    let newContent: string;
+    let replacements = 0;
+
+    if (replaceAll) {
+      const regex = new RegExp(this.escapeRegex(oldString), 'g');
+      const matches = file.content.match(regex);
+      replacements = matches?.length || 0;
+      newContent = file.content.replace(regex, newString);
+    } else {
+      if (file.content.includes(oldString)) {
+        newContent = file.content.replace(oldString, newString);
+        replacements = 1;
+      } else {
+        throw new Error(`String not found in file: "${oldString.substring(0, 50)}..."`);
+      }
+    }
+
+    // Update file
+    virtualFileSystem.set(filePath, {
+      ...file,
+      content: newContent,
+      lastModified: new Date(),
+    });
+
+    return {
+      success: true,
+      file_path: filePath,
+      replacements,
+    };
+  }
+
+  /**
+   * Execute Bash tool - simulate command execution in browser
+   * Note: Actual execution is sandboxed for security
+   */
+  private async executeBash(parameters: Record<string, unknown>): Promise<unknown> {
+    const command = parameters.command as string;
+    const timeout = (parameters.timeout as number) || 30000;
+
+    // Parse common commands and simulate output
+    const parts = command.trim().split(/\s+/);
+    const cmd = parts[0];
+
+    switch (cmd) {
+      case 'ls':
+        return this.simulateLs(parts.slice(1));
+      case 'cat':
+        return this.simulateCat(parts.slice(1));
+      case 'pwd':
+        return { output: '/vibe-workspace', exitCode: 0 };
+      case 'echo':
+        return { output: parts.slice(1).join(' '), exitCode: 0 };
+      case 'mkdir':
+        return { output: '', exitCode: 0, message: 'Directory created (simulated)' };
+      case 'touch': {
+        // Create empty file
+        const touchPath = parts[1] || 'untitled';
+        virtualFileSystem.set(touchPath, {
+          path: touchPath,
+          content: '',
+          type: 'text/plain',
+          lastModified: new Date(),
+        });
+        return { output: '', exitCode: 0 };
+      }
+      case 'rm': {
+        const rmPath = parts[1];
+        if (rmPath && virtualFileSystem.has(rmPath)) {
+          virtualFileSystem.delete(rmPath);
+          return { output: '', exitCode: 0 };
+        }
+        return { output: `rm: cannot remove '${rmPath}': No such file`, exitCode: 1 };
+      }
+      default:
+        return {
+          output: `Command '${cmd}' execution simulated in browser sandbox`,
+          exitCode: 0,
+          note: 'Full shell execution not available in browser environment',
+        };
+    }
+  }
+
+  /**
+   * Simulate ls command
+   */
+  private simulateLs(args: string[]): { output: string; exitCode: number } {
+    const path = args[0] || '.';
+    const showAll = args.includes('-a') || args.includes('-la');
+    const longFormat = args.includes('-l') || args.includes('-la');
+
+    const files = Array.from(virtualFileSystem.values())
+      .filter(f => {
+        if (path === '.' || path === '/') return true;
+        return f.path.startsWith(path);
+      })
+      .map(f => {
+        const name = f.path.split('/').pop() || f.path;
+        if (longFormat) {
+          const size = f.content.length;
+          const date = f.lastModified.toISOString().substring(0, 10);
+          return `-rw-r--r-- 1 user user ${size.toString().padStart(8)} ${date} ${name}`;
+        }
+        return name;
+      });
+
+    return {
+      output: files.length > 0 ? files.join('\n') : '',
+      exitCode: 0,
+    };
+  }
+
+  /**
+   * Simulate cat command
+   */
+  private simulateCat(args: string[]): { output: string; exitCode: number } {
+    const outputs: string[] = [];
+
+    for (const path of args) {
+      const file = virtualFileSystem.get(path);
+      if (file) {
+        outputs.push(file.content);
+      } else {
+        return { output: `cat: ${path}: No such file or directory`, exitCode: 1 };
+      }
+    }
+
+    return { output: outputs.join('\n'), exitCode: 0 };
+  }
+
+  /**
+   * Execute Grep tool - search for patterns in virtual files
+   */
+  private async executeGrep(parameters: Record<string, unknown>): Promise<unknown> {
+    const pattern = parameters.pattern as string;
+    const path = (parameters.path as string) || '.';
+    const outputMode = (parameters.output_mode as string) || 'files_with_matches';
+
+    const regex = new RegExp(pattern, 'gi');
+    const matches: { file: string; line: number; content: string }[] = [];
+    const filesWithMatches: string[] = [];
+
+    for (const [filePath, file] of virtualFileSystem) {
+      if (path !== '.' && !filePath.startsWith(path)) continue;
+
+      const lines = file.content.split('\n');
+      let fileHasMatch = false;
+
+      lines.forEach((line, index) => {
+        if (regex.test(line)) {
+          fileHasMatch = true;
+          matches.push({
+            file: filePath,
+            line: index + 1,
+            content: line,
+          });
+        }
+        regex.lastIndex = 0; // Reset regex state
+      });
+
+      if (fileHasMatch) {
+        filesWithMatches.push(filePath);
+      }
+    }
+
+    switch (outputMode) {
+      case 'files_with_matches':
+        return { files: filesWithMatches, count: filesWithMatches.length };
+      case 'count':
+        return { count: matches.length };
+      case 'content':
+      default:
+        return { matches };
+    }
+  }
+
+  /**
+   * Execute Glob tool - find files matching pattern
+   */
+  private async executeGlob(parameters: Record<string, unknown>): Promise<unknown> {
+    const pattern = parameters.pattern as string;
+    const basePath = (parameters.path as string) || '.';
+
+    // Convert glob pattern to regex
+    const regexPattern = pattern
+      .replace(/\*\*/g, '{{GLOBSTAR}}')
+      .replace(/\*/g, '[^/]*')
+      .replace(/\?/g, '[^/]')
+      .replace(/{{GLOBSTAR}}/g, '.*');
+
+    const regex = new RegExp(`^${regexPattern}$`);
+
+    const matchingFiles = Array.from(virtualFileSystem.keys())
+      .filter(filePath => {
+        const relativePath = basePath === '.' ? filePath : filePath.replace(basePath + '/', '');
+        return regex.test(relativePath) || regex.test(filePath);
+      });
+
+    return {
+      files: matchingFiles,
+      count: matchingFiles.length,
+    };
+  }
+
+  /**
+   * Execute WebSearch tool - search the web (requires backend)
+   */
+  private async executeWebSearch(parameters: Record<string, unknown>): Promise<unknown> {
+    const query = parameters.query as string;
+
+    // WebSearch requires server-side execution
+    // Return a message indicating this limitation
+    return {
+      success: false,
+      message: 'WebSearch requires server-side execution. Use the chat interface for web searches.',
+      query,
+    };
+  }
+
+  /**
+   * Execute WebFetch tool - fetch URL content (requires backend)
+   */
+  private async executeWebFetch(parameters: Record<string, unknown>): Promise<unknown> {
+    const url = parameters.url as string;
+
+    // WebFetch requires server-side execution due to CORS
+    return {
+      success: false,
+      message: 'WebFetch requires server-side execution due to CORS restrictions.',
+      url,
+    };
+  }
+
+  /**
+   * Escape special regex characters
+   */
+  private escapeRegex(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
   /**
@@ -467,3 +811,75 @@ export class VibeToolOrchestrator {
 
 // Export singleton instance
 export const vibeToolOrchestrator = new VibeToolOrchestrator();
+
+// Export virtual file system utilities for external integration
+export const vibeVirtualFS = {
+  /**
+   * Get all files in the virtual file system
+   */
+  getFiles(): VirtualFile[] {
+    return Array.from(virtualFileSystem.values());
+  },
+
+  /**
+   * Get a specific file
+   */
+  getFile(path: string): VirtualFile | undefined {
+    return virtualFileSystem.get(path);
+  },
+
+  /**
+   * Check if a file exists
+   */
+  exists(path: string): boolean {
+    return virtualFileSystem.has(path);
+  },
+
+  /**
+   * Write a file to the virtual file system
+   */
+  writeFile(path: string, content: string, type?: string): void {
+    virtualFileSystem.set(path, {
+      path,
+      content,
+      type: type || 'text/plain',
+      lastModified: new Date(),
+    });
+  },
+
+  /**
+   * Delete a file from the virtual file system
+   */
+  deleteFile(path: string): boolean {
+    return virtualFileSystem.delete(path);
+  },
+
+  /**
+   * Clear all files from the virtual file system
+   */
+  clear(): void {
+    virtualFileSystem.clear();
+  },
+
+  /**
+   * Get the size of the virtual file system
+   */
+  size(): number {
+    return virtualFileSystem.size;
+  },
+
+  /**
+   * Initialize the file system with starter files
+   */
+  initializeWorkspace(files: Array<{ path: string; content: string; type?: string }>): void {
+    virtualFileSystem.clear();
+    for (const file of files) {
+      virtualFileSystem.set(file.path, {
+        path: file.path,
+        content: file.content,
+        type: file.type || 'text/plain',
+        lastModified: new Date(),
+      });
+    }
+  },
+};

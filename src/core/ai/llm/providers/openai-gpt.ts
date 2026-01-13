@@ -1,11 +1,25 @@
 /**
  * OpenAI ChatGPT Provider
  * Official SDK integration for OpenAI GPT models
- * Updated: Nov 16th 2025 - Clarified that proxy implementation is complete (removed misleading TODO)
+ * Updated: Jan 3rd 2026 - Updated to GPT-5.2, o3, Sora 2, gpt-image-1.5
  */
 
 import OpenAI from 'openai';
 import { supabase } from '@shared/lib/supabase-client';
+
+/**
+ * Helper function to get the current Supabase session token
+ * Required for authenticated API proxy calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('[OpenAI Provider] Failed to get auth token:', error);
+    return null;
+  }
+}
 
 // SECURITY WARNING: Client-side API initialization is disabled
 // All API calls should go through Netlify proxy functions instead
@@ -48,7 +62,14 @@ export interface OpenAIResponse {
 }
 
 export interface OpenAIConfig {
-  model: 'gpt-4o' | 'gpt-4o-mini' | 'gpt-4-turbo' | 'gpt-3.5-turbo';
+  model:
+    | 'gpt-5.2'
+    | 'gpt-5.1'
+    | 'gpt-4.1'
+    | 'gpt-4o'
+    | 'gpt-4o-mini'
+    | 'o3'
+    | 'o3-mini';
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
@@ -71,7 +92,7 @@ export class OpenAIProvider {
 
   constructor(config: Partial<OpenAIConfig> = {}) {
     this.config = {
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       maxTokens: 4000,
       temperature: 0.7,
       systemPrompt: 'You are a helpful AI assistant.',
@@ -95,10 +116,20 @@ export class OpenAIProvider {
       // SECURITY: Use Netlify proxy to keep API keys secure
       const proxyUrl = '/.netlify/functions/openai-proxy';
 
+      // Get auth token for authenticated proxy calls
+      const authToken = await getAuthToken();
+      if (!authToken) {
+        throw new OpenAIError(
+          'User not authenticated. Please log in to use AI features.',
+          'NOT_AUTHENTICATED'
+        );
+      }
+
       const response = await fetch(proxyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: openaiMessages,
@@ -377,10 +408,39 @@ export class OpenAIProvider {
   }
 
   /**
-   * Get available models
+   * Get available models (Jan 2026)
    */
   static getAvailableModels(): string[] {
-    return ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'];
+    return [
+      'gpt-5.2',
+      'gpt-5.1',
+      'gpt-4.1',
+      'gpt-4o',
+      'gpt-4o-mini',
+      'o3',
+      'o3-mini',
+    ];
+  }
+
+  /**
+   * Get available image models
+   */
+  static getImageModels(): string[] {
+    return ['gpt-image-1.5', 'dall-e-3'];
+  }
+
+  /**
+   * Get available video models (Sora)
+   */
+  static getVideoModels(): string[] {
+    return ['sora-2', 'sora-2-pro'];
+  }
+
+  /**
+   * Get available audio models
+   */
+  static getAudioModels(): string[] {
+    return ['gpt-4o-transcribe', 'gpt-4o-mini-tts', 'whisper-1', 'tts-1-hd'];
   }
 }
 

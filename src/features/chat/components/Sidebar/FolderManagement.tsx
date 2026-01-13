@@ -3,7 +3,7 @@
  * Displays folder tree with create/rename/delete capabilities
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { Badge } from '@shared/ui/badge';
@@ -86,14 +86,7 @@ export function FolderManagement({
   const [folderColor, setFolderColor] = useState('gray');
   const [folderDescription, setFolderDescription] = useState('');
 
-  // Load folders
-  useEffect(() => {
-    if (user?.id) {
-      loadFolders();
-    }
-  }, [user?.id]);
-
-  const loadFolders = async () => {
+  const loadFolders = useCallback(async () => {
     if (!user?.id) return;
 
     try {
@@ -112,7 +105,14 @@ export function FolderManagement({
       console.error('[FolderManagement] Failed to load folders:', error);
       toast.error('Failed to load folders');
     }
-  };
+  }, [user?.id]);
+
+  // Load folders
+  useEffect(() => {
+    if (user?.id) {
+      loadFolders();
+    }
+  }, [user?.id, loadFolders]);
 
   const handleCreateFolder = async () => {
     if (!user?.id || !folderName.trim()) {

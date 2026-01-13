@@ -18,8 +18,8 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
+import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import { cn } from '@shared/lib/utils';
-import { ScrollArea } from '@shared/components/ui/scroll-area';
 import {
   Avatar,
   AvatarFallback,
@@ -27,16 +27,10 @@ import {
 } from '@shared/components/ui/avatar';
 import { Badge } from '@shared/components/ui/badge';
 import { Button } from '@shared/components/ui/button';
-import { Separator } from '@shared/components/ui/separator';
 import {
   User,
   Bot,
-  ThumbsUp,
-  ThumbsDown,
-  Heart,
-  Check,
   CheckCheck,
-  Loader2,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -76,9 +70,97 @@ interface TimeGroup {
   clusters: MessageCluster[];
 }
 
-const CLUSTER_TIME_THRESHOLD = 5 * 60 * 1000; // 5 minutes
+// Virtualization row types
+type VirtualizedRowType = 'time-header' | 'cluster' | 'typing-indicator';
 
-// Updated: Nov 16th 2025 - Added React.memo for performance
+interface VirtualizedRow {
+  type: VirtualizedRowType;
+  data: TimeGroup | MessageCluster | { typingAgents: Set<string> };
+  groupLabel?: string;
+}
+
+interface VirtualizedRowData {
+  rows: VirtualizedRow[];
+  agents: Agent[];
+  currentUserId: string;
+  onReaction?: (messageId: string, emoji: string) => void;
+  getAgent: (agentId: string) => Agent | undefined;
+}
+
+const CLUSTER_TIME_THRESHOLD = 5 * 60 * 1000; // 5 minutes
+const ITEM_SIZE = 120; // Estimated height per row in pixels
+
+// Row renderer for react-window
+const VirtualizedRowRenderer = React.memo(function VirtualizedRowRenderer({
+  index,
+  style,
+  data,
+}: ListChildComponentProps<VirtualizedRowData>) {
+  const { rows, currentUserId, onReaction, getAgent } = data;
+  const row = rows[index];
+
+  if (!row) return null;
+
+  return (
+    <div style={style} className="px-4">
+      {row.type === 'time-header' && (
+        <div className="flex items-center justify-center py-2">
+          <div className="rounded-full bg-muted px-3 py-1">
+            <span className="text-xs font-medium text-muted-foreground">
+              {row.groupLabel}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {row.type === 'cluster' && (
+        <MessageClusterComponent
+          cluster={row.data as MessageCluster}
+          agent={getAgent((row.data as MessageCluster).agentId)}
+          isUser={(row.data as MessageCluster).agentId === currentUserId}
+          onReaction={onReaction}
+        />
+      )}
+
+      {row.type === 'typing-indicator' && (
+        <TypingIndicator typingAgents={(row.data as { typingAgents: Set<string> }).typingAgents} />
+      )}
+    </div>
+  );
+});
+
+// Typing indicator component extracted for virtualization
+const TypingIndicator = React.memo(function TypingIndicator({
+  typingAgents,
+}: {
+  typingAgents: Set<string>;
+}) {
+  if (typingAgents.size === 0) return null;
+
+  return (
+    <div className="flex items-start gap-3 py-2">
+      <div className="flex-shrink-0">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500">
+          <Bot className="h-5 w-5 text-white" />
+        </div>
+      </div>
+      <div className="flex flex-col">
+        <div className="text-xs font-medium text-muted-foreground">
+          {Array.from(typingAgents).slice(0, 2).join(', ')}
+          {typingAgents.size > 2 && ` and ${typingAgents.size - 2} more`}
+          {typingAgents.size === 1 ? ' is typing' : ' are typing'}
+        </div>
+        <div className="mt-2 flex items-center gap-1">
+          <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
+          <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
+          <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// Updated: Jan 6th 2026 - Added react-window virtualization for 1000+ messages
 export const AdvancedMessageList = React.memo(function AdvancedMessageList({
   messages,
   agents,
@@ -88,34 +170,48 @@ export const AdvancedMessageList = React.memo(function AdvancedMessageList({
   autoScroll = true,
   className,
 }: AdvancedMessageListProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<List>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerHeight, setContainerHeight] = useState(500);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(autoScroll);
-  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 50 });
+  const prevMessageCountRef = useRef(messages.length);
 
   // Group messages by time and cluster by agent
   const timeGroups = useMemo(() => {
     return groupMessagesByTimeAndAgent(messages);
   }, [messages]);
 
-  // Auto-scroll to bottom on new messages
-  useEffect(() => {
-    if (shouldAutoScroll && scrollRef.current) {
-      const scrollElement = scrollRef.current.querySelector(
-        '[data-radix-scroll-area-viewport]'
-      );
-      if (scrollElement) {
-        scrollElement.scrollTop = scrollElement.scrollHeight;
-      }
-    }
-  }, [messages, shouldAutoScroll]);
+  // Flatten time groups into virtualized rows
+  const virtualizedRows = useMemo(() => {
+    const rows: VirtualizedRow[] = [];
 
-  // Handle scroll to detect manual scrolling
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLDivElement;
-    const isAtBottom =
-      target.scrollHeight - target.scrollTop - target.clientHeight < 100;
-    setShouldAutoScroll(isAtBottom);
-  }, []);
+    timeGroups.forEach((group) => {
+      // Add time header row
+      rows.push({
+        type: 'time-header',
+        data: group,
+        groupLabel: group.label,
+      });
+
+      // Add cluster rows
+      group.clusters.forEach((cluster) => {
+        rows.push({
+          type: 'cluster',
+          data: cluster,
+        });
+      });
+    });
+
+    // Add typing indicator if needed
+    if (typingAgents.size > 0) {
+      rows.push({
+        type: 'typing-indicator',
+        data: { typingAgents },
+      });
+    }
+
+    return rows;
+  }, [timeGroups, typingAgents]);
 
   // Get agent info
   const getAgent = useCallback(
@@ -125,61 +221,78 @@ export const AdvancedMessageList = React.memo(function AdvancedMessageList({
     [agents]
   );
 
+  // Item data for row renderer
+  const itemData = useMemo<VirtualizedRowData>(
+    () => ({
+      rows: virtualizedRows,
+      agents,
+      currentUserId,
+      onReaction,
+      getAgent,
+    }),
+    [virtualizedRows, agents, currentUserId, onReaction, getAgent]
+  );
+
+  // Measure container height
+  useEffect(() => {
+    const updateHeight = () => {
+      if (containerRef.current) {
+        const height = containerRef.current.clientHeight;
+        if (height > 0) {
+          setContainerHeight(height);
+        }
+      }
+    };
+
+    updateHeight();
+
+    const resizeObserver = new ResizeObserver(updateHeight);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    const messageCountChanged = messages.length !== prevMessageCountRef.current;
+    prevMessageCountRef.current = messages.length;
+
+    if (shouldAutoScroll && listRef.current && messageCountChanged) {
+      // Scroll to the last item
+      listRef.current.scrollToItem(virtualizedRows.length - 1, 'end');
+    }
+  }, [messages.length, virtualizedRows.length, shouldAutoScroll]);
+
+  // Handle scroll to detect manual scrolling
+  const handleScroll = useCallback(
+    ({ scrollOffset, scrollUpdateWasRequested }: { scrollOffset: number; scrollUpdateWasRequested: boolean }) => {
+      if (scrollUpdateWasRequested) return; // Ignore programmatic scrolls
+
+      const totalHeight = virtualizedRows.length * ITEM_SIZE;
+      const isAtBottom = totalHeight - scrollOffset - containerHeight < 150;
+      setShouldAutoScroll(isAtBottom);
+    },
+    [virtualizedRows.length, containerHeight]
+  );
+
   return (
-    <ScrollArea
-      ref={scrollRef}
-      className={cn('h-full w-full', className)}
-      onScrollCapture={handleScroll}
-    >
-      <div className="space-y-6 p-4">
-        {timeGroups.map((group, groupIndex) => (
-          <div key={`group-${groupIndex}`} className="space-y-4">
-            {/* Time Group Header */}
-            <div className="flex items-center justify-center">
-              <div className="rounded-full bg-muted px-3 py-1">
-                <span className="text-xs font-medium text-muted-foreground">
-                  {group.label}
-                </span>
-              </div>
-            </div>
-
-            {/* Message Clusters */}
-            {group.clusters.map((cluster, clusterIndex) => (
-              <MessageClusterComponent
-                key={`cluster-${groupIndex}-${clusterIndex}`}
-                cluster={cluster}
-                agent={getAgent(cluster.agentId)}
-                isUser={cluster.agentId === currentUserId}
-                onReaction={onReaction}
-              />
-            ))}
-          </div>
-        ))}
-
-        {/* Typing Indicators */}
-        {typingAgents.size > 0 && (
-          <div className="flex items-start gap-3 px-4 py-2">
-            <div className="flex-shrink-0">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500">
-                <Bot className="h-5 w-5 text-white" />
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <div className="text-xs font-medium text-muted-foreground">
-                {Array.from(typingAgents).slice(0, 2).join(', ')}
-                {typingAgents.size > 2 && ` and ${typingAgents.size - 2} more`}
-                {typingAgents.size === 1 ? ' is typing' : ' are typing'}
-              </div>
-              <div className="mt-2 flex items-center gap-1">
-                <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
-                <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
-                <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </ScrollArea>
+    <div ref={containerRef} className={cn('h-full w-full', className)}>
+      <List
+        ref={listRef}
+        height={containerHeight}
+        itemCount={virtualizedRows.length}
+        itemSize={ITEM_SIZE}
+        itemData={itemData}
+        width="100%"
+        onScroll={handleScroll}
+        overscanCount={5}
+        className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
+      >
+        {VirtualizedRowRenderer}
+      </List>
+    </div>
   );
 });
 

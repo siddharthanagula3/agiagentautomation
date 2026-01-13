@@ -133,7 +133,7 @@ export interface ChatState {
   // MGX-style interface state
   sidebarOpen: boolean;
   activeEmployees: string[];
-  workingProcesses: Map<string, WorkingProcess>;
+  workingProcesses: Record<string, WorkingProcess>;
   currentCheckpoint: string | null;
   checkpointHistory: Checkpoint[];
 }
@@ -249,12 +249,12 @@ const DEFAULT_MODELS: ChatModel[] = [
     enabled: true,
   },
   {
-    id: 'gpt-3.5-turbo',
-    name: 'GPT-3.5 Turbo',
+    id: 'gpt-4o-mini',
+    name: 'GPT-4o Mini',
     provider: 'OpenAI',
     description: 'Fast and efficient for most tasks',
-    maxTokens: 4096,
-    costPer1KTokens: 0.002,
+    maxTokens: 16384,
+    costPer1KTokens: 0.00015,
     features: ['text', 'code'],
     tier: 'free',
     enabled: true,
@@ -287,7 +287,7 @@ const INITIAL_STATE: ChatState = {
   isStreamingResponse: false,
   error: null,
   availableModels: DEFAULT_MODELS,
-  selectedModel: 'gpt-3.5-turbo',
+  selectedModel: 'gpt-4o-mini',
   defaultSettings: DEFAULT_SETTINGS,
   searchQuery: '',
   filterTags: [],
@@ -297,7 +297,7 @@ const INITIAL_STATE: ChatState = {
   // MGX-style interface state
   sidebarOpen: true,
   activeEmployees: [],
-  workingProcesses: new Map(),
+  workingProcesses: {},
   currentCheckpoint: null,
   checkpointHistory: [],
 };
@@ -430,11 +430,14 @@ export const useChatStore = create<ChatStore>()(
         updateMessage: (messageId: string, updates: Partial<Message>) =>
           set((state) => {
             for (const conversation of Object.values(state.conversations)) {
-              const message = conversation.messages.find(
+              const messageIndex = conversation.messages.findIndex(
                 (m) => m.id === messageId
               );
-              if (message) {
-                Object.assign(message, updates);
+              if (messageIndex !== -1) {
+                conversation.messages[messageIndex] = {
+                  ...conversation.messages[messageIndex],
+                  ...updates,
+                };
                 conversation.metadata.updatedAt = new Date();
                 break;
               }
@@ -584,8 +587,71 @@ export const useChatStore = create<ChatStore>()(
         },
 
         regenerateResponse: async (messageId: string) => {
-          // Find the message and regenerate the last assistant response
-          // Implementation would be similar to sendMessage
+          const { conversations, sendMessage, deleteMessage } = get();
+
+          // Find the conversation and message
+          let targetConversation: Conversation | null = null;
+          let assistantMessageIndex = -1;
+
+          for (const conversation of Object.values(conversations)) {
+            const index = conversation.messages.findIndex(
+              (m) => m.id === messageId
+            );
+            if (index !== -1) {
+              targetConversation = conversation;
+              assistantMessageIndex = index;
+              break;
+            }
+          }
+
+          if (!targetConversation || assistantMessageIndex === -1) {
+            set((state) => {
+              state.error = 'Message not found';
+            });
+            return;
+          }
+
+          const assistantMessage =
+            targetConversation.messages[assistantMessageIndex];
+
+          // Ensure it's an assistant message
+          if (assistantMessage.role !== 'assistant') {
+            set((state) => {
+              state.error = 'Can only regenerate assistant messages';
+            });
+            return;
+          }
+
+          // Find the preceding user message
+          let userMessage: Message | null = null;
+          for (let i = assistantMessageIndex - 1; i >= 0; i--) {
+            if (targetConversation.messages[i].role === 'user') {
+              userMessage = targetConversation.messages[i];
+              break;
+            }
+          }
+
+          if (!userMessage) {
+            set((state) => {
+              state.error = 'No user message found to regenerate from';
+            });
+            return;
+          }
+
+          // Delete the assistant message
+          deleteMessage(messageId);
+
+          // Regenerate by sending the user's original message again
+          await sendMessage(
+            targetConversation.id,
+            userMessage.content,
+            assistantMessage.metadata
+              ? {
+                  model: assistantMessage.metadata.model,
+                  temperature: assistantMessage.metadata.temperature,
+                }
+              : undefined
+          );
         },
 
         stopGeneration: () =>
@@ -658,7 +724,96 @@ export const useChatStore = create<ChatStore>()(
         },
 
         importConversations: (data: Conversation[]) => {
-          // Implementation for importing conversations
+          if (!Array.isArray(data)) {
+            set((state) => {
+              state.error = 'Invalid import data: expected an array of conversations';
+            });
+            return;
+          }
+
+          set((state) => {
+            let importedCount = 0;
+
+            for (const conversation of data) {
+              // Validate required fields
+              if (
+                !conversation ||
+                typeof conversation.id !== 'string' ||
+                typeof conversation.title !== 'string' ||
+                !Array.isArray(conversation.messages)
+              ) {
+                continue;
+              }
+
+              // Check for duplicate by ID - skip if already exists
+              if (state.conversations[conversation.id]) {
+                continue;
+              }
+
+              // Ensure all required fields have valid values
+              const validatedConversation: Conversation = {
+                id: conversation.id,
+                title: conversation.title || 'Imported Conversation',
+                summary: conversation.summary,
+                messages: conversation.messages.map((msg) => ({
+                  id: msg.id || crypto.randomUUID(),
+                  conversationId: conversation.id,
+                  role: msg.role || 'user',
+                  content: msg.content || '',
+                  timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+                  metadata: msg.metadata,
+                  toolCalls: msg.toolCalls,
+                  citations: msg.citations,
+                  attachments: msg.attachments,
+                  reactions: msg.reactions,
+                  isStreaming: false,
+                  streamingComplete: true,
+                  error: msg.error,
+                })),
+                participants: conversation.participants || [],
+                model: conversation.model || state.selectedModel,
+                systemPrompt: conversation.systemPrompt,
+                settings: {
+                  temperature:
+                    conversation.settings?.temperature ??
+                    state.defaultSettings.temperature,
+                  maxTokens:
+                    conversation.settings?.maxTokens ??
+                    state.defaultSettings.maxTokens,
+                  topP: conversation.settings?.topP ?? state.defaultSettings.topP,
+                  frequencyPenalty:
+                    conversation.settings?.frequencyPenalty ??
+                    state.defaultSettings.frequencyPenalty,
+                  presencePenalty:
+                    conversation.settings?.presencePenalty ??
+                    state.defaultSettings.presencePenalty,
+                },
+                metadata: {
+                  createdAt: conversation.metadata?.createdAt
+                    ? new Date(conversation.metadata.createdAt)
+                    : new Date(),
+                  updatedAt: new Date(),
+                  totalMessages:
+                    conversation.metadata?.totalMessages ??
+                    conversation.messages.length,
+                  totalTokens: conversation.metadata?.totalTokens ?? 0,
+                  totalCost: conversation.metadata?.totalCost ?? 0,
+                  tags: conversation.metadata?.tags || [],
+                  starred: conversation.metadata?.starred ?? false,
+                  pinned: conversation.metadata?.pinned ?? false,
+                  archived: conversation.metadata?.archived ?? false,
+                },
+              };
+
+              state.conversations[validatedConversation.id] = validatedConversation;
+              importedCount++;
+            }
+
+            // Clear any previous error on successful import
+            if (importedCount > 0) {
+              state.error = null;
+            }
+          });
         },
 
         clearHistory: () =>
@@ -743,7 +898,7 @@ export const useChatStore = create<ChatStore>()(
 
         updateWorkingProcess: (employeeId: string, process: WorkingProcess) =>
           set((state) => {
-            state.workingProcesses.set(employeeId, process);
+            state.workingProcesses[employeeId] = process;
           }),
 
         saveCheckpoint: (checkpoint: Checkpoint) =>

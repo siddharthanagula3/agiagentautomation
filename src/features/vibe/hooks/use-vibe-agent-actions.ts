@@ -252,7 +252,11 @@ export function useVibeAgentActions(
 
         // Recalculate stats
         if (sessionId) {
-          VibeAgentActionService.getActionStats(sessionId).then(setStats);
+          VibeAgentActionService.getActionStats(sessionId)
+            .then(setStats)
+            .catch((err) => {
+              console.warn('[useVibeAgentActions] Failed to fetch action stats:', err);
+            });
         }
       },
       (err) => {

@@ -255,7 +255,9 @@ console.log(info);
 ### Using the Hook
 
 ```typescript
-import { useMediaGeneration } from '@core/integrations/media-generation-example';
+// Example hook - see google-imagen-service.ts and google-veo-service.ts for actual implementation
+import { googleImagenService } from '@core/integrations/google-imagen-service';
+import { googleVeoService } from '@core/integrations/google-veo-service';
 
 function ChatComponent() {
   const {
@@ -516,12 +518,17 @@ function VideoGenerator() {
 
 ```typescript
 import { mediaToolDetector } from '@core/integrations/media-tool-detector';
-import { generateMediaFromMessage } from '@core/integrations/media-generation-example';
+import { googleImagenService } from '@core/integrations/google-imagen-service';
+import { googleVeoService } from '@core/integrations/google-veo-service';
 
 async function handleChatMessage(message: string) {
   // Check if it's a media request
-  if (mediaToolDetector.isMediaGenerationRequest(message)) {
-    const media = await generateMediaFromMessage(message);
+  const detection = mediaToolDetector.isMediaGenerationRequest(message);
+  if (detection) {
+    // Use appropriate service based on detection type
+    const media = detection.type === 'video'
+      ? await googleVeoService.generateVideo({ prompt: message })
+      : await googleImagenService.generateImage({ prompt: message });
     return { type: 'media', content: media };
   }
 
@@ -615,6 +622,31 @@ If you encounter CORS errors in development:
 - API Reference: https://cloud.google.com/vertex-ai/
 - GitHub Issues: [Repository Issues]
 - Discord: [Community Discord]
+
+## Security
+
+All media generation requests go through secure Netlify Functions:
+
+- **JWT Authentication**: Requests must include valid Supabase JWT
+- **CORS Validation**: Origin whitelist (no wildcard `*`)
+- **Rate Limiting**: Upstash Redis with verified user identity
+- **Token Enforcement**: Pre-flight balance check before API calls
+
+## Changelog
+
+**v1.1.0 (Jan 2026)**
+
+- Enhanced security with CORS origin whitelist validation
+- JWT verification via Supabase `auth.getUser()` in rate limiter
+- Token enforcement with pre-flight balance checks
+- Added integration with DeepSeek and Qwen for prompt enhancement
+
+**v1.0.0 (Nov 2025)**
+
+- Initial Imagen 4.0 and Veo 3.1 integration
+- Automatic tool detection in chat
+- React components for media display
+- Progress tracking for video generation
 
 ## License
 

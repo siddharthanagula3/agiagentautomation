@@ -20,17 +20,22 @@ import {
 } from '../../utils/code-parser';
 import { vibeFileSystem } from '@features/mission-control/services/vibe-file-system';
 import { toast } from 'sonner';
+import { VibeEmptyState } from './VibeEmptyState';
 
 interface SimpleChatPanelProps {
   messages: AgentMessage[];
   isLoading?: boolean;
   onFileCreated?: (filePath: string) => void;
+  onPromptSelect?: (prompt: string) => void;
+  showEmptyState?: boolean;
 }
 
 export function SimpleChatPanel({
   messages,
   isLoading,
   onFileCreated,
+  onPromptSelect,
+  showEmptyState = true,
 }: SimpleChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -120,7 +125,11 @@ export function SimpleChatPanel({
       {/* Messages Area */}
       <ScrollArea className="flex-1 px-4 py-4">
         <div className="space-y-4">
-          {messages.length === 0 && !isLoading && (
+          {messages.length === 0 && !isLoading && showEmptyState && onPromptSelect && (
+            <VibeEmptyState onPromptSelect={onPromptSelect} />
+          )}
+
+          {messages.length === 0 && !isLoading && (!showEmptyState || !onPromptSelect) && (
             <div className="flex h-full min-h-[300px] items-center justify-center text-center">
               <div>
                 <Bot className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />

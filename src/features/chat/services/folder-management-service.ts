@@ -102,11 +102,15 @@ class FolderManagementService {
         sort_order: 0, // New folders go to top by default
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('[FolderService] Failed to create folder:', error);
       throw new Error(`Failed to create folder: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error('Failed to create folder: No data returned');
     }
 
     return this.mapDBFolderToFolder(data);

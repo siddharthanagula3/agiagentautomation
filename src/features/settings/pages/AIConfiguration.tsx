@@ -64,61 +64,111 @@ interface ProviderConfig {
   pricing: string;
 }
 
+// Updated: Jan 3rd 2026 - All latest models from all providers
 const PROVIDER_CONFIGS: Record<
   string,
   Omit<ProviderConfig, 'apiKey' | 'isConfigured'>
 > = {
   OpenAI: {
-    name: 'OpenAI (ChatGPT)',
-    models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-    defaultModel: 'gpt-4o',
-    costPerToken: 0.000002,
-    maxTokens: 4096,
-    features: ['Streaming', 'Function Calling', 'Vision', 'Code Generation'],
+    name: 'OpenAI (GPT-5)',
+    models: ['gpt-5.2', 'gpt-5.1', 'gpt-4.1', 'gpt-4o', 'gpt-4o-mini', 'o3', 'o3-mini'],
+    defaultModel: 'gpt-5.2',
+    costPerToken: 0.00002,
+    maxTokens: 8192,
+    features: ['Streaming', 'Function Calling', 'Vision', 'Reasoning', 'Sora Video', 'Image Gen'],
     documentation: 'https://platform.openai.com/docs',
     pricing: 'https://openai.com/pricing',
   },
   Anthropic: {
-    name: 'Anthropic (Claude)',
+    name: 'Anthropic (Claude 4.5)',
     models: [
-      'claude-3-5-sonnet-20241022',
-      'claude-3-5-haiku-20241022',
-      'claude-3-opus-20240229',
+      'claude-opus-4-5-20251101',
+      'claude-sonnet-4-5-20250929',
+      'claude-haiku-4-5-20251001',
+      'claude-sonnet-4-20250514',
     ],
-    defaultModel: 'claude-3-5-sonnet-20241022',
+    defaultModel: 'claude-sonnet-4-5-20250929',
     costPerToken: 0.000003,
-    maxTokens: 4096,
-    features: ['Streaming', 'Long Context', 'Analysis', 'Safety'],
+    maxTokens: 8192,
+    features: ['Streaming', 'Computer Use', 'Extended Thinking', 'Vision', 'Long Context'],
     documentation: 'https://docs.anthropic.com',
     pricing: 'https://www.anthropic.com/pricing',
   },
   Google: {
-    name: 'Google (Gemini)',
+    name: 'Google (Gemini 3)',
     models: [
-      'gemini-2.0-flash',
+      'gemini-3-pro-preview',
+      'gemini-3-flash-preview',
+      'gemini-2.5-pro',
       'gemini-2.5-flash',
-      'gemini-1.5-pro',
-      'gemini-1.5-flash',
+      'gemini-2.0-flash',
     ],
-    defaultModel: 'gemini-2.0-flash',
-    costPerToken: 0.000001,
-    maxTokens: 4096,
-    features: ['Streaming', 'Vision', 'Multimodal', 'Free Tier'],
+    defaultModel: 'gemini-3-pro-preview',
+    costPerToken: 0.000005,
+    maxTokens: 8192,
+    features: ['Streaming', 'Thinking Mode', 'Vision', 'Veo 3.1 Video', 'Imagen 4'],
     documentation: 'https://ai.google.dev/docs',
     pricing: 'https://ai.google.dev/pricing',
   },
   Perplexity: {
-    name: 'Perplexity',
+    name: 'Perplexity (Sonar)',
     models: [
-      'llama-3.1-sonar-large-128k-online',
-      'llama-3.1-sonar-small-128k-online',
+      'sonar-deep-research',
+      'sonar-reasoning-pro',
+      'sonar-reasoning',
+      'sonar-pro',
+      'sonar',
     ],
-    defaultModel: 'llama-3.1-sonar-large-128k-online',
+    defaultModel: 'sonar-pro',
     costPerToken: 0.000005,
     maxTokens: 4096,
-    features: ['Web Search', 'Real-time Data', 'Research', 'Citations'],
+    features: ['Web Search', 'Real-time Data', 'Deep Research', 'Reasoning', 'Citations'],
     documentation: 'https://docs.perplexity.ai',
     pricing: 'https://www.perplexity.ai/pricing',
+  },
+  Grok: {
+    name: 'xAI (Grok 4)',
+    models: [
+      'grok-4',
+      'grok-4-1-fast-reasoning',
+      'grok-4-1-fast-non-reasoning',
+      'grok-3',
+      'grok-2-vision-1212',
+    ],
+    defaultModel: 'grok-4',
+    costPerToken: 0.00001,
+    maxTokens: 8192,
+    features: ['Streaming', 'Real-time X/Twitter', 'Agent Tools', 'Vision', 'Image Gen'],
+    documentation: 'https://docs.x.ai',
+    pricing: 'https://x.ai/pricing',
+  },
+  DeepSeek: {
+    name: 'DeepSeek',
+    models: ['deepseek-chat', 'deepseek-reasoner'],
+    defaultModel: 'deepseek-chat',
+    costPerToken: 0.0000014,
+    maxTokens: 8192,
+    features: ['Streaming', 'Chain-of-Thought', 'Coding', 'Tool Use', 'Cost Effective'],
+    documentation: 'https://platform.deepseek.com/docs',
+    pricing: 'https://platform.deepseek.com/pricing',
+  },
+  Qwen: {
+    name: 'Qwen (Alibaba)',
+    models: [
+      'qwen3-max',
+      'qwq-plus',
+      'qwen3-coder-plus',
+      'qwen3-coder-flash',
+      'qwen-plus',
+      'qwen-flash',
+      'qwen3-vl-plus',
+    ],
+    defaultModel: 'qwen-plus',
+    costPerToken: 0.000002,
+    maxTokens: 8192,
+    features: ['Streaming', 'Thinking Mode', 'Coding', 'Multilingual', 'Vision', 'Video Gen'],
+    documentation: 'https://help.aliyun.com/qwen',
+    pricing: 'https://www.alibabacloud.com/qwen/pricing',
   },
 };
 
@@ -161,11 +211,15 @@ const AIConfigurationPage: React.FC = () => {
   // Initialize configurations
   useEffect(() => {
     // Static mapping for environment variables (Vite requires static access)
+    // Updated Jan 2026: Added Grok, DeepSeek, Qwen providers
     const envKeyMapping: Record<string, boolean> = {
       OpenAI: !!import.meta.env.VITE_OPENAI_API_KEY,
       Anthropic: !!import.meta.env.VITE_ANTHROPIC_API_KEY,
       Google: !!import.meta.env.VITE_GOOGLE_API_KEY,
       Perplexity: !!import.meta.env.VITE_PERPLEXITY_API_KEY,
+      Grok: !!import.meta.env.VITE_GROK_API_KEY,
+      DeepSeek: !!import.meta.env.VITE_DEEPSEEK_API_KEY,
+      Qwen: !!import.meta.env.VITE_QWEN_API_KEY,
     };
 
     const initialConfigs: Record<string, ProviderConfig> = {};
@@ -247,7 +301,10 @@ const AIConfigurationPage: React.FC = () => {
           | 'openai'
           | 'anthropic'
           | 'google'
-          | 'perplexity',
+          | 'perplexity'
+          | 'grok'
+          | 'deepseek'
+          | 'qwen',
         default_ai_model: defaultModel,
         prefer_streaming: preferStreaming,
         ai_temperature: aiTemperature,
@@ -268,7 +325,18 @@ const AIConfigurationPage: React.FC = () => {
   };
 
   const getModelsForProvider = (provider: string): string[] => {
-    const config = PROVIDER_CONFIGS[provider];
+    // Map lowercase provider names to PROVIDER_CONFIGS keys
+    const providerMap: Record<string, string> = {
+      openai: 'OpenAI',
+      anthropic: 'Anthropic',
+      google: 'Google',
+      perplexity: 'Perplexity',
+      grok: 'Grok',
+      deepseek: 'DeepSeek',
+      qwen: 'Qwen',
+    };
+    const configKey = providerMap[provider.toLowerCase()] || provider;
+    const config = PROVIDER_CONFIGS[configKey];
     return config ? config.models : [];
   };
 
@@ -620,12 +688,15 @@ const AIConfigurationPage: React.FC = () => {
                       <SelectValue placeholder="Select provider" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="openai">OpenAI (ChatGPT)</SelectItem>
+                      <SelectItem value="openai">OpenAI (GPT-5)</SelectItem>
                       <SelectItem value="anthropic">
-                        Anthropic (Claude)
+                        Anthropic (Claude 4.5)
                       </SelectItem>
-                      <SelectItem value="google">Google (Gemini)</SelectItem>
-                      <SelectItem value="perplexity">Perplexity</SelectItem>
+                      <SelectItem value="google">Google (Gemini 3)</SelectItem>
+                      <SelectItem value="perplexity">Perplexity (Sonar)</SelectItem>
+                      <SelectItem value="grok">xAI (Grok 4)</SelectItem>
+                      <SelectItem value="deepseek">DeepSeek</SelectItem>
+                      <SelectItem value="qwen">Qwen (Alibaba)</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-sm text-muted-foreground">

@@ -215,7 +215,7 @@ export class VibeFileManager {
         .from('vibe_files')
         .select('*')
         .eq('id', fileId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       if (!data) return null;

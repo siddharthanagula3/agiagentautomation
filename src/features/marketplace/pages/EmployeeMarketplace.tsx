@@ -34,12 +34,13 @@ import {
 import { cn } from '@shared/lib/utils';
 import type { AIEmployee as BaseAIEmployee } from '@/data/marketplace-employees';
 import { useAuthStore } from '@shared/stores/authentication-store';
-import { useWorkforceStore } from '@shared/stores/workforce-store';
+import { useWorkforceStore } from '@shared/stores/employee-management-store';
 import { useBusinessMetrics } from '@shared/hooks/useAnalytics';
 import { HireButton } from '@shared/components/HireButton';
 import { AnimatedAvatar } from '@shared/components/AnimatedAvatar';
 import { supabase } from '@shared/lib/supabase-client';
 import { toast } from 'sonner';
+import ErrorBoundary from '@shared/components/ErrorBoundary';
 
 interface AIEmployee extends BaseAIEmployee {
   isHired: boolean;
@@ -266,7 +267,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
           .select('id')
           .eq('user_id', user.id)
           .eq('employee_id', employee.id)
-          .single();
+          .maybeSingle();
 
         if (!existingHire) {
           // Insert hire record
@@ -332,6 +333,21 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
   };
 
   return (
+    <ErrorBoundary
+      fallback={
+        <div className="flex min-h-[400px] items-center justify-center p-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold">Marketplace Unavailable</h2>
+            <p className="mt-2 text-muted-foreground">
+              Something went wrong loading the marketplace. Please refresh the page.
+            </p>
+            <Button onClick={() => window.location.reload()} className="mt-4">
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+      }
+    >
     <div className={cn('space-y-4 p-4 md:space-y-6 md:p-6', className)}>
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -701,5 +717,6 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
         </div>
       )}
     </div>
+    </ErrorBoundary>
   );
 };

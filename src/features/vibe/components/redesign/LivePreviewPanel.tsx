@@ -1,11 +1,20 @@
 /**
- * LivePreviewPanel - Live preview with iframe sandbox
+ * LivePreviewPanel - Live preview with multiple engines
  * Real-time preview of generated applications
  * Inspired by Bolt.new and Replit preview experiences
- * Integrated with vibeFileSystem for automatic HTML generation
+ *
+ * Supports two preview modes:
+ * 1. Sandpack (default) - Open source browser-native execution, works in Safari/iOS
+ * 2. Classic iframe - Simple HTML/CSS/JS with build service for React
+ *
+ * Sandpack chosen for 2026 because:
+ * - Open source (Apache 2.0) - important for the project
+ * - Safari/iOS support (no SharedArrayBuffer requirement)
+ * - Battle-tested by CodeSandbox (millions of users)
+ * - WASI 0.3 roadmap ready
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { ScrollArea } from '@shared/ui/scroll-area';
@@ -21,11 +30,32 @@ import {
   ChevronDown,
   ChevronUp,
   X,
+  Hammer,
+  Sparkles,
+  Layers,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { useVibeViewStore } from '../../stores/vibe-view-store';
 import { vibeFileSystem } from '@features/mission-control/services/vibe-file-system';
 import { toast } from 'sonner';
+import { SandpackPreviewPanel } from './SandpackPreviewPanel';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@shared/ui/tabs';
+
+// Build service API endpoint
+const BUILD_SERVICE_URL = '/.netlify/functions/vibe-build';
+
+interface BuildResult {
+  success: boolean;
+  html?: string;
+  error?: string;
+  warnings?: string[];
+  buildTime?: number;
+}
 
 type ViewportSize = 'desktop' | 'tablet' | 'mobile';
 
@@ -36,7 +66,80 @@ const viewportDimensions = {
 };
 
 /**
- * Generate HTML preview from file system
+ * Detect project type based on files
+ */
+function detectProjectType(): 'react' | 'typescript' | 'html' {
+  const allFiles = vibeFileSystem.listFiles('/');
+
+  const hasReact = allFiles.some(
+    (f) =>
+      f.path.endsWith('.tsx') ||
+      f.path.endsWith('.jsx') ||
+      f.path.includes('App.tsx') ||
+      f.path.includes('main.tsx')
+  );
+
+  if (hasReact) return 'react';
+
+  const hasTypeScript = allFiles.some((f) => f.path.endsWith('.ts'));
+  if (hasTypeScript) return 'typescript';
+
+  return 'html';
+}
+
+/**
+ * Collect all files from file system for build service
+ */
+function collectFilesForBuild(): Record<string, string> {
+  const files: Record<string, string> = {};
+  const allFiles = vibeFileSystem.listFiles('/');
+
+  for (const file of allFiles) {
+    if (file.type === 'file') {
+      try {
+        const content = vibeFileSystem.readFile(file.path);
+        files[file.path] = content;
+      } catch (error) {
+        console.error(`Failed to read file ${file.path}:`, error);
+      }
+    }
+  }
+
+  return files;
+}
+
+/**
+ * Call the build service to compile React/TypeScript
+ */
+async function buildWithService(
+  files: Record<string, string>,
+  projectType: 'react' | 'typescript' | 'html'
+): Promise<BuildResult> {
+  try {
+    const response = await fetch(BUILD_SERVICE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        files,
+        projectType,
+      }),
+    });
+
+    const result = await response.json();
+    return result as BuildResult;
+  } catch (error) {
+    console.error('Build service error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Build service unavailable',
+    };
+  }
+}
+
+/**
+ * Generate HTML preview from file system (for simple HTML projects)
  */
 function generateHtmlPreview(): string | null {
   try {
@@ -66,10 +169,12 @@ function generateHtmlPreview(): string | null {
       }
     }
 
-    // Collect JS files
+    // Collect JS files (only .js, not .ts/.tsx)
     const jsFiles: string[] = [];
     const jsFilesList = vibeFileSystem.searchFiles('.js');
     for (const file of jsFilesList) {
+      // Skip .ts and .tsx files
+      if (file.path.endsWith('.ts') || file.path.endsWith('.tsx')) continue;
       try {
         const content = vibeFileSystem.readFile(file.path);
         jsFiles.push(content);
@@ -100,16 +205,36 @@ function generateHtmlPreview(): string | null {
   }
 }
 
-export function LivePreviewPanel() {
+export type PreviewMode = 'sandpack' | 'classic';
+
+interface LivePreviewPanelProps {
+  defaultMode?: PreviewMode;
+}
+
+export function LivePreviewPanel({ defaultMode = 'sandpack' }: LivePreviewPanelProps) {
   const { appViewerState, setViewport, setAppViewerUrl } = useVibeViewStore();
+  const [previewMode, setPreviewMode] = useState<PreviewMode>(defaultMode);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isBuilding, setIsBuilding] = useState(false);
   const [customUrl, setCustomUrl] = useState('');
   const [showConsole, setShowConsole] = useState(false);
   const [consoleOutput, setConsoleOutput] = useState<ConsoleMessage[]>([]);
   const [generatedHtml, setGeneratedHtml] = useState<string | null>(null);
   const [autoPreview, setAutoPreview] = useState(true);
+  const [projectType, setProjectType] = useState<'react' | 'typescript' | 'html'>('html');
+  const [lastBuildTime, setLastBuildTime] = useState<number | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  // Helper functions (defined before hooks that use them)
+  const addConsoleMessage = useCallback((message: ConsoleMessage) => {
+    setConsoleOutput((prev) => [...prev.slice(-99), message]);
+  }, []);
+
+  const clearConsole = useCallback(() => {
+    setConsoleOutput([]);
+  }, []);
+
+  // Preview URL calculation
   const previewUrl =
     appViewerState.url ||
     (generatedHtml
@@ -120,6 +245,7 @@ export function LivePreviewPanel() {
   // Auto-generate preview when files change
   useEffect(() => {
     if (!autoPreview) return;
+    if (previewMode === 'sandpack') return; // Skip in sandpack mode
 
     const html = generateHtmlPreview();
     if (html) {
@@ -130,7 +256,141 @@ export function LivePreviewPanel() {
         timestamp: new Date(),
       });
     }
-  }, [autoPreview]); // Simplified dependency - in real implementation, watch file system changes
+  }, [autoPreview, previewMode, addConsoleMessage]);
+
+  // Listen for console messages from iframe (if supported)
+  useEffect(() => {
+    if (previewMode === 'sandpack') return; // Skip in sandpack mode
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'console') {
+        addConsoleMessage({
+          type: event.data.level || 'log',
+          message: event.data.message,
+          timestamp: new Date(),
+        });
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [previewMode, addConsoleMessage]);
+
+  // Generate preview callback
+  const handleGeneratePreview = useCallback(async () => {
+    // Detect project type
+    const detectedType = detectProjectType();
+    setProjectType(detectedType);
+
+    addConsoleMessage({
+      type: 'info',
+      message: `Detected project type: ${detectedType}`,
+      timestamp: new Date(),
+    });
+
+    // For React/TypeScript, use the build service
+    if (detectedType === 'react' || detectedType === 'typescript') {
+      setIsBuilding(true);
+      addConsoleMessage({
+        type: 'info',
+        message: `Building ${detectedType} project...`,
+        timestamp: new Date(),
+      });
+
+      try {
+        const files = collectFilesForBuild();
+        const result = await buildWithService(files, detectedType);
+
+        if (result.success && result.html) {
+          setGeneratedHtml(result.html);
+          setLastBuildTime(result.buildTime || null);
+          toast.success(`Build completed in ${result.buildTime}ms`);
+          addConsoleMessage({
+            type: 'info',
+            message: `Build successful (${result.buildTime}ms)`,
+            timestamp: new Date(),
+          });
+
+          // Show warnings if any
+          if (result.warnings && result.warnings.length > 0) {
+            for (const warning of result.warnings) {
+              addConsoleMessage({
+                type: 'warn',
+                message: warning,
+                timestamp: new Date(),
+              });
+            }
+          }
+        } else {
+          toast.error(result.error || 'Build failed');
+          addConsoleMessage({
+            type: 'error',
+            message: result.error || 'Build failed',
+            timestamp: new Date(),
+          });
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        toast.error(`Build error: ${errorMessage}`);
+        addConsoleMessage({
+          type: 'error',
+          message: `Build error: ${errorMessage}`,
+          timestamp: new Date(),
+        });
+      } finally {
+        setIsBuilding(false);
+      }
+    } else {
+      // For HTML projects, use simple injection
+      const html = generateHtmlPreview();
+      if (html) {
+        setGeneratedHtml(html);
+        toast.success('Preview generated from files');
+        addConsoleMessage({
+          type: 'info',
+          message: 'Generated preview from file system',
+          timestamp: new Date(),
+        });
+      } else {
+        toast.error('No HTML file found in project');
+        addConsoleMessage({
+          type: 'error',
+          message: 'Failed to find index.html or public/index.html',
+          timestamp: new Date(),
+        });
+      }
+    }
+  }, [addConsoleMessage]);
+
+  // Use Sandpack mode by default for better browser support
+  if (previewMode === 'sandpack') {
+    return (
+      <div className="flex h-full flex-col bg-background">
+        {/* Mode Toggle Header */}
+        <div className="flex items-center justify-between border-b border-border bg-muted/20 px-3 py-1.5">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-xs font-medium">Preview Engine</span>
+          </div>
+          <Tabs value={previewMode} onValueChange={(v) => setPreviewMode(v as PreviewMode)}>
+            <TabsList className="h-7">
+              <TabsTrigger value="sandpack" className="h-5 gap-1 px-2 text-xs">
+                <Sparkles className="h-3 w-3" />
+                Sandpack
+              </TabsTrigger>
+              <TabsTrigger value="classic" className="h-5 gap-1 px-2 text-xs">
+                <Layers className="h-3 w-3" />
+                Classic
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <SandpackPreviewPanel />
+        </div>
+      </div>
+    );
+  }
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -151,26 +411,6 @@ export function LivePreviewPanel() {
     setTimeout(() => setIsRefreshing(false), 500);
   };
 
-  const handleGeneratePreview = () => {
-    const html = generateHtmlPreview();
-    if (html) {
-      setGeneratedHtml(html);
-      toast.success('Preview generated from files');
-      addConsoleMessage({
-        type: 'info',
-        message: 'Generated preview from file system',
-        timestamp: new Date(),
-      });
-    } else {
-      toast.error('No HTML file found in project');
-      addConsoleMessage({
-        type: 'error',
-        message: 'Failed to find index.html or public/index.html',
-        timestamp: new Date(),
-      });
-    }
-  };
-
   const handleLoadUrl = () => {
     if (customUrl.trim()) {
       setAppViewerUrl(customUrl.trim());
@@ -184,32 +424,29 @@ export function LivePreviewPanel() {
     }
   };
 
-  // Listen for console messages from iframe (if supported)
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'console') {
-        addConsoleMessage({
-          type: event.data.level || 'log',
-          message: event.data.message,
-          timestamp: new Date(),
-        });
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
-
-  const addConsoleMessage = (message: ConsoleMessage) => {
-    setConsoleOutput((prev) => [...prev.slice(-99), message]);
-  };
-
-  const clearConsole = () => {
-    setConsoleOutput([]);
-  };
-
+  // Classic preview mode (iframe-based with build service)
   return (
     <div className="flex h-full flex-col bg-background">
+      {/* Mode Toggle Header */}
+      <div className="flex items-center justify-between border-b border-border bg-muted/20 px-3 py-1.5">
+        <div className="flex items-center gap-2">
+          <Layers className="h-4 w-4 text-muted-foreground" />
+          <span className="text-xs font-medium">Preview Engine</span>
+        </div>
+        <Tabs value={previewMode} onValueChange={(v) => setPreviewMode(v as PreviewMode)}>
+          <TabsList className="h-7">
+            <TabsTrigger value="sandpack" className="h-5 gap-1 px-2 text-xs">
+              <Sparkles className="h-3 w-3" />
+              Sandpack
+            </TabsTrigger>
+            <TabsTrigger value="classic" className="h-5 gap-1 px-2 text-xs">
+              <Layers className="h-3 w-3" />
+              Classic
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
       {/* Toolbar */}
       <div className="border-b border-border bg-muted/30 px-3 py-2">
         <div className="mb-2 flex items-center justify-between">
@@ -244,15 +481,37 @@ export function LivePreviewPanel() {
           </div>
 
           <div className="flex items-center gap-1">
-            {/* Generate Preview */}
+            {/* Project Type Badge */}
+            {projectType !== 'html' && (
+              <Badge variant="outline" className="h-6 text-xs">
+                {projectType === 'react' ? '⚛️ React' : '📘 TS'}
+              </Badge>
+            )}
+
+            {/* Build/Generate Preview */}
             <Button
               variant="default"
               size="sm"
               onClick={handleGeneratePreview}
+              disabled={isBuilding}
               className="h-7 text-xs"
             >
-              <Monitor className="mr-1.5 h-3.5 w-3.5" />
-              Generate
+              {isBuilding ? (
+                <>
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  Building...
+                </>
+              ) : projectType === 'react' || projectType === 'typescript' ? (
+                <>
+                  <Hammer className="mr-1.5 h-3.5 w-3.5" />
+                  Build
+                </>
+              ) : (
+                <>
+                  <Monitor className="mr-1.5 h-3.5 w-3.5" />
+                  Generate
+                </>
+              )}
             </Button>
 
             {/* Console Toggle */}

@@ -1,11 +1,25 @@
 /**
  * Anthropic Claude Provider
  * Official SDK integration for Claude AI models
- * Updated: Nov 16th 2025 - Clarified that proxy implementation is complete (removed misleading TODO)
+ * Updated: Jan 3rd 2026 - Updated to Claude 4.5 series (Opus, Sonnet, Haiku)
  */
 
 import Anthropic from '@anthropic-ai/sdk';
 import { supabase } from '@shared/lib/supabase-client';
+
+/**
+ * Helper function to get the current Supabase session token
+ * Required for authenticated API proxy calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('[Anthropic Provider] Failed to get auth token:', error);
+    return null;
+  }
+}
 
 // SECURITY WARNING: Client-side API initialization is disabled
 // All API calls should go through Netlify proxy functions instead
@@ -49,15 +63,17 @@ export interface AnthropicResponse {
 
 export interface AnthropicConfig {
   model:
-    | 'claude-3-5-sonnet-20241022'
-    | 'claude-3-5-haiku-20241022'
-    | 'claude-3-opus-20240229'
-    | 'claude-3-sonnet-20240229'
-    | 'claude-3-haiku-20240307';
+    | 'claude-opus-4-5-20251101'
+    | 'claude-sonnet-4-5-20250929'
+    | 'claude-haiku-4-5-20251001'
+    | 'claude-sonnet-4-20250514'
+    | 'claude-3-5-sonnet-20241022';
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
   tools?: Anthropic.Tool[];
+  computerUse?: boolean; // Enable computer use capabilities
+  extendedThinking?: boolean; // Enable extended thinking mode
 }
 
 export class AnthropicError extends Error {
@@ -76,11 +92,13 @@ export class AnthropicProvider {
 
   constructor(config: Partial<AnthropicConfig> = {}) {
     this.config = {
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-4-5-20250929',
       maxTokens: 4000,
       temperature: 0.7,
       systemPrompt: 'You are a helpful AI assistant.',
       tools: [],
+      computerUse: false,
+      extendedThinking: false,
       ...config,
     };
   }
@@ -100,10 +118,20 @@ export class AnthropicProvider {
       // SECURITY: Use Netlify proxy to keep API keys secure
       const proxyUrl = '/.netlify/functions/anthropic-proxy';
 
+      // Get auth token for authenticated proxy calls
+      const authToken = await getAuthToken();
+      if (!authToken) {
+        throw new AnthropicError(
+          'User not authenticated. Please log in to use AI features.',
+          'NOT_AUTHENTICATED'
+        );
+      }
+
       const response = await fetch(proxyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: anthropicMessages,
@@ -192,6 +220,8 @@ export class AnthropicProvider {
 
   /**
    * Stream a message from Claude
+   * Uses Netlify proxy with simulated streaming (full response yielded in chunks)
+   * Note: True SSE streaming through proxy is not yet supported by Netlify Functions
    */
   async *streamMessage(
     messages: AnthropicMessage[],
@@ -207,48 +237,74 @@ export class AnthropicProvider {
     };
   }> {
     try {
-      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
-      throw new AnthropicError(
-        'Direct Anthropic streaming is disabled for security. Use /.netlify/functions/anthropic-proxy instead.',
-        'DIRECT_API_DISABLED'
-      );
-
       // Convert messages to Anthropic format
       const anthropicMessages = this.convertMessagesToAnthropic(messages);
 
-      // Prepare the request
-      const request: Anthropic.Messages.MessageCreateParams = {
-        model: this.config.model,
-        max_tokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-        messages: anthropicMessages,
-        system: this.config.systemPrompt,
-        tools: this.config.tools.length > 0 ? this.config.tools : undefined,
-        stream: true,
-      };
+      // SECURITY: Use Netlify proxy to keep API keys secure
+      const proxyUrl = '/.netlify/functions/anthropic-proxy';
 
-      // Make the streaming API call
-      if (!anthropic) {
+      // Get auth token for authenticated proxy calls
+      const authToken = await getAuthToken();
+      if (!authToken) {
         throw new AnthropicError(
-          'Anthropic client not initialized. Please check your API key configuration.',
-          'CLIENT_NOT_INITIALIZED'
+          'User not authenticated. Please log in to use AI features.',
+          'NOT_AUTHENTICATED'
         );
       }
-      const stream = await anthropic.messages.create(request);
 
-      let fullContent = '';
-      let usage: unknown = null;
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          messages: anthropicMessages,
+          model: this.config.model,
+          max_tokens: this.config.maxTokens,
+          temperature: this.config.temperature,
+          system: this.config.systemPrompt,
+          tools:
+            this.config.tools && this.config.tools.length > 0
+              ? this.config.tools
+              : undefined,
+          // Note: Netlify proxy doesn't support true SSE streaming yet
+          // When proxy streaming is implemented, set stream: true here
+          stream: false,
+        }),
+      });
 
-      for await (const chunk of stream) {
-        if (chunk.type === 'content_block_delta') {
-          const content = chunk.delta.text;
-          fullContent += content;
-          yield { content, done: false };
-        } else if (chunk.type === 'message_stop') {
-          usage = chunk.usage;
-          yield { content: '', done: true, usage };
-        }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new AnthropicError(
+          errorData.error || `HTTP error! status: ${response.status}`,
+          `HTTP_${response.status}`,
+          response.status === 429 || response.status === 503
+        );
       }
+
+      const data = await response.json();
+
+      // Extract content from proxy response
+      const fullContent =
+        data.content ||
+        (Array.isArray(data.content) ? data.content[0]?.text : '') ||
+        '';
+
+      // Extract usage information
+      const usage = data.usage
+        ? {
+            prompt_tokens: data.usage.input_tokens || 0,
+            completion_tokens: data.usage.output_tokens || 0,
+            total_tokens:
+              (data.usage.input_tokens || 0) + (data.usage.output_tokens || 0),
+          }
+        : undefined;
+
+      // Yield the full response (simulating streaming)
+      // When true streaming is supported, this will yield chunks as they arrive
+      yield { content: fullContent, done: false };
+      yield { content: '', done: true, usage };
 
       // Save to database
       if (sessionId && userId) {
@@ -268,12 +324,9 @@ export class AnthropicProvider {
     } catch (error) {
       console.error('[Anthropic Provider] Streaming error:', error);
 
-      if (error instanceof Anthropic.APIError) {
-        throw new AnthropicError(
-          `Anthropic API error: ${error.message}`,
-          error.status?.toString() || 'API_ERROR',
-          error.status === 429 || error.status === 503
-        );
+      // Re-throw AnthropicError instances as-is
+      if (error instanceof AnthropicError) {
+        throw error;
       }
 
       throw new AnthropicError(
@@ -377,24 +430,46 @@ export class AnthropicProvider {
   }
 
   /**
-   * Check if API key is configured
-   * SECURITY: Always returns false as direct API access is disabled
+   * Check if provider is configured
+   * Returns true since we use Netlify proxy (API key is on server-side)
    */
   isConfigured(): boolean {
-    return false; // Direct API access disabled for security
+    return true; // Proxy-based access is always available
   }
 
   /**
-   * Get available models
+   * Get available models (Jan 2026 - Claude 4.5 series)
    */
   static getAvailableModels(): string[] {
     return [
+      'claude-opus-4-5-20251101',
+      'claude-sonnet-4-5-20250929',
+      'claude-haiku-4-5-20251001',
+      'claude-sonnet-4-20250514',
       'claude-3-5-sonnet-20241022',
-      'claude-3-5-haiku-20241022',
-      'claude-3-opus-20240229',
-      'claude-3-sonnet-20240229',
-      'claude-3-haiku-20240307',
     ];
+  }
+
+  /**
+   * Get models with computer use capability
+   */
+  static getComputerUseModels(): string[] {
+    return [
+      'claude-sonnet-4-5-20250929',
+      'claude-haiku-4-5-20251001',
+      'claude-opus-4-5-20251101',
+    ];
+  }
+
+  /**
+   * Get model aliases for convenience
+   */
+  static getModelAliases(): Record<string, string> {
+    return {
+      'claude-opus-4-5': 'claude-opus-4-5-20251101',
+      'claude-sonnet-4-5': 'claude-sonnet-4-5-20250929',
+      'claude-haiku-4-5': 'claude-haiku-4-5-20251001',
+    };
   }
 }
 

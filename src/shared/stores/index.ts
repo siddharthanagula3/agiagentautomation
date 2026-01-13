@@ -19,9 +19,6 @@ export { useChatStore } from './chat-store';
 // Workforce Store - AI workforce and job management
 export { useWorkforceStore } from './employee-management-store';
 
-// Employee Store - AI employee marketplace
-export { useEmployeeStore } from './ai-employee-store';
-
 // Notification Store - App notifications and toasts
 export { useNotificationStore } from './notification-store';
 
@@ -37,6 +34,35 @@ export {
   type ChatSession,
   type AgentMetrics,
 } from './agent-metrics-store';
+
+// Multi-Agent Chat Store - Multi-participant chat management
+export {
+  useMultiAgentChatStore,
+  type MultiAgentConversation,
+  type ChatMessage,
+  type ConversationParticipant,
+} from './multi-agent-chat-store';
+
+// Company Hub Store (Multi-Agent Workspace) - Workspace collaboration
+export { useCompanyHubStore } from './multi-agent-workspace-store';
+
+// Artifact Store - Code artifacts and generated content
+export { useArtifactStore } from './artifact-store';
+
+// Usage Warning Store - Token usage warnings and limits
+export { useUsageWarningStore } from './usage-warning-store';
+
+// Employee Metrics Store - Employee performance tracking
+export { useEmployeeMetricsStore } from './employee-metrics-store';
+
+// Mission Control Store - Mission orchestration state
+export {
+  useMissionStore,
+  useMissionStatus,
+  useMissionTasks,
+  useMissionEmployees,
+  useMissionMessages,
+} from './mission-control-store';
 
 // ========================================
 // React Query Configuration

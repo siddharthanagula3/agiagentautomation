@@ -20,7 +20,7 @@ import { VibeLayout } from '../layouts/VibeLayout';
 import { SimpleChatPanel } from '../components/redesign/SimpleChatPanel';
 import { CodeEditorPanel } from '../components/redesign/CodeEditorPanel';
 import { LivePreviewPanel } from '../components/redesign/LivePreviewPanel';
-import { VibeMessageInput } from '../components/input/VibeMessageInput';
+import { VibeEnhancedComposer, type VibeMode } from '../components/redesign/VibeEnhancedComposer';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { Loader2, GripVertical, Sparkles } from 'lucide-react';
 import type { AgentStatus } from '../components/agent-panel/AgentStatusCard';
@@ -35,9 +35,46 @@ import {
 import { VibeMessageService } from '../services/vibe-message-service';
 import { vibeMessageHandler } from '../services/vibe-message-handler';
 import { toast } from 'sonner';
+import { PhaseTimeline } from '../components/redesign/PhaseTimeline';
+import { useVibeOrchestrator } from '../services/vibe-phase-orchestrator';
 import { TokenUsageDisplay } from '../components/TokenUsageDisplay';
 import { useVibeKeyboardShortcuts } from '../hooks/use-vibe-keyboard-shortcuts';
 import { VibeKeyboardShortcutsDialog } from '../components/VibeKeyboardShortcutsDialog';
+import ErrorBoundary from '@shared/components/ErrorBoundary';
+import { Button } from '@shared/ui/button';
+import { AlertTriangle, RefreshCw, ArrowLeft } from 'lucide-react';
+
+// Error fallback component for Vibe page
+const VibeErrorFallback = () => (
+  <div className="flex h-screen w-screen items-center justify-center bg-background p-8">
+    <div className="max-w-md text-center">
+      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-destructive/10">
+        <AlertTriangle className="h-10 w-10 text-destructive" />
+      </div>
+      <h2 className="mb-2 text-2xl font-bold">Vibe Workspace Error</h2>
+      <p className="mb-6 text-muted-foreground">
+        Something went wrong in the Vibe AI development workspace. Your work may not have been saved.
+      </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+        <Button
+          onClick={() => window.location.reload()}
+          className="gap-2"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Reload Workspace
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => window.location.href = '/dashboard'}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
+      </div>
+    </div>
+  </div>
+);
 
 interface VibeMessageRow {
   id: string;
@@ -54,6 +91,90 @@ interface VibeMessageRow {
   is_streaming?: boolean | null;
 }
 
+/**
+ * Type-safe interface for VibeAgentAction metadata fields
+ */
+interface AgentActionMetadata {
+  summary?: string;
+  description?: string;
+  command?: string;
+  agent_role?: string;
+  is_streaming?: boolean;
+}
+
+/**
+ * Type-safe interface for VibeAgentAction result fields
+ */
+interface AgentActionResult {
+  output?: string;
+  summary?: string;
+}
+
+/**
+ * Type guard to safely extract metadata from VibeAgentActionRow
+ */
+function getValidatedActionMetadata(
+  metadata: Record<string, unknown> | null | undefined
+): AgentActionMetadata {
+  if (!metadata || typeof metadata !== 'object') {
+    return {};
+  }
+
+  const result: AgentActionMetadata = {};
+
+  if (typeof metadata.summary === 'string') {
+    result.summary = metadata.summary;
+  }
+  if (typeof metadata.description === 'string') {
+    result.description = metadata.description;
+  }
+  if (typeof metadata.command === 'string') {
+    result.command = metadata.command;
+  }
+  if (typeof metadata.agent_role === 'string') {
+    result.agent_role = metadata.agent_role;
+  }
+  if (typeof metadata.is_streaming === 'boolean') {
+    result.is_streaming = metadata.is_streaming;
+  }
+
+  return result;
+}
+
+/**
+ * Type guard to safely extract result from VibeAgentActionRow
+ */
+function getValidatedActionResult(
+  result: Record<string, unknown> | null | undefined
+): AgentActionResult {
+  if (!result || typeof result !== 'object') {
+    return {};
+  }
+
+  const validated: AgentActionResult = {};
+
+  if (typeof result.output === 'string') {
+    validated.output = result.output;
+  }
+  if (typeof result.summary === 'string') {
+    validated.summary = result.summary;
+  }
+
+  return validated;
+}
+
+/**
+ * Type guard to safely extract is_streaming from VibeMessageRow metadata
+ */
+function getMessageIsStreaming(
+  metadata: Record<string, unknown> | null | undefined
+): boolean {
+  if (!metadata || typeof metadata !== 'object') {
+    return false;
+  }
+  return typeof metadata.is_streaming === 'boolean' ? metadata.is_streaming : false;
+}
+
 // Removed OutputPanel - using new CodeEditorPanel and LivePreviewPanel instead
 
 const VibeDashboard: React.FC = () => {
@@ -62,12 +183,22 @@ const VibeDashboard: React.FC = () => {
   const { hiredEmployees } = useWorkforceStore();
   const { currentSessionId, setCurrentSession } = useVibeChatStore();
 
+  // Phase orchestrator for VibeSDK-style workflow tracking
+  const {
+    session: orchestratorSession,
+    initSession,
+    processEvent,
+    updatePhase,
+    reset: resetOrchestrator
+  } = useVibeOrchestrator();
+
   const [activeAgent, setActiveAgent] = useState<AgentStatus | null>(null);
   const [workingSteps, setWorkingSteps] = useState<WorkingStep[]>([]);
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
+  const [vibeMode, setVibeMode] = useState<VibeMode>('build');
 
   const messageIdsRef = useRef<Set<string>>(new Set());
   const messagesRef = useRef<AgentMessage[]>([]);
@@ -98,7 +229,7 @@ const VibeDashboard: React.FC = () => {
       agentName: row.employee_name || undefined,
       agentRole: row.employee_role || undefined,
       timestamp: row.timestamp ? new Date(row.timestamp) : new Date(),
-      isStreaming: Boolean(row.metadata?.is_streaming),
+      isStreaming: getMessageIsStreaming(row.metadata),
     };
   }, []);
 
@@ -214,10 +345,14 @@ const VibeDashboard: React.FC = () => {
             ? 'completed'
             : 'in_progress';
 
+      // Use type guards to safely extract metadata and result
+      const actionMetadata = getValidatedActionMetadata(action.metadata);
+      const actionResult = getValidatedActionResult(action.result);
+
       const description =
-        action.metadata?.summary ||
-        action.metadata?.description ||
-        action.metadata?.command ||
+        actionMetadata.summary ||
+        actionMetadata.description ||
+        actionMetadata.command ||
         `${action.agent_name} ${action.action_type.replace(/_/g, ' ')}`;
 
       workingStepsMapRef.current.set(action.id, {
@@ -225,11 +360,7 @@ const VibeDashboard: React.FC = () => {
         description,
         status,
         timestamp: action.timestamp ? new Date(action.timestamp) : undefined,
-        result:
-          action.result?.output ||
-          action.result?.summary ||
-          action.error ||
-          undefined,
+        result: actionResult.output || actionResult.summary || action.error || undefined,
       });
 
       const ordered = Array.from(workingStepsMapRef.current.values()).sort(
@@ -240,7 +371,7 @@ const VibeDashboard: React.FC = () => {
       setActiveAgent((prev) => ({
         name: action.agent_name,
         role:
-          action.metadata?.agent_role ||
+          actionMetadata.agent_role ||
           prev?.role ||
           hiredEmployees?.find((emp) => emp.name === action.agent_name)?.role ||
           'AI Agent',
@@ -363,6 +494,13 @@ const VibeDashboard: React.FC = () => {
         },
       ]);
 
+      // Initialize phase orchestrator (VibeSDK pattern)
+      if (!orchestratorSession) {
+        initSession('phasic');
+      }
+      processEvent({ type: 'connection_established', sessionId });
+      processEvent({ type: 'blueprint_generating' });
+
       try {
         // Create user message locally first
         const userMessage: AgentMessage = {
@@ -414,6 +552,9 @@ const VibeDashboard: React.FC = () => {
           )
         );
 
+        // Update phase orchestrator - blueprint complete, start implementation
+        processEvent({ type: 'generation_started' });
+
         // Create streaming assistant message
         const assistantMessageId = crypto.randomUUID();
         const assistantMessage: AgentMessage = {
@@ -452,6 +593,15 @@ const VibeDashboard: React.FC = () => {
               parseResult.files.map((f) => f.path)
             );
 
+            // Emit file generation events to phase orchestrator
+            for (const file of parseResult.files) {
+              processEvent({
+                type: 'file_generated',
+                filePath: file.path,
+                content: file.content,
+              });
+            }
+
             // If project structure detected, show info
             if (parseResult.projectInfo.type !== 'unknown') {
               toast.success(
@@ -459,6 +609,9 @@ const VibeDashboard: React.FC = () => {
               );
             }
           }
+
+          // Mark generation complete
+          processEvent({ type: 'generation_complete' });
         } catch (parseError) {
           console.error(
             '[VIBE] Failed to parse code from response:',
@@ -507,6 +660,9 @@ const VibeDashboard: React.FC = () => {
       currentSessionId,
       ensureSession,
       hiredEmployees,
+      initSession,
+      orchestratorSession,
+      processEvent,
       streamAssistantResponse,
       upsertMessage,
       user,
@@ -526,19 +682,29 @@ const VibeDashboard: React.FC = () => {
   }
 
   return (
+    <ErrorBoundary fallback={<VibeErrorFallback />}>
     <VibeLayout>
       <div className="flex h-full flex-col">
-        {/* Header */}
+        {/* Header with Phase Timeline */}
         <div className="border-b border-border bg-gradient-to-r from-purple-600/10 to-blue-600/10 px-4 py-3">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <h1 className="text-lg font-bold">Vibe</h1>
-              <span className="text-sm text-muted-foreground">
-                AI Development Agent
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <h1 className="text-lg font-bold">Vibe</h1>
+              </div>
+              {/* Compact Phase Timeline - VibeSDK-inspired */}
+              <div className="hidden sm:block">
+                <PhaseTimeline
+                  session={orchestratorSession}
+                  compact={true}
+                  className="ml-2"
+                />
+              </div>
             </div>
-            <TokenUsageDisplay sessionId={currentSessionId} />
+            <div className="flex items-center gap-3">
+              <TokenUsageDisplay sessionId={currentSessionId} />
+            </div>
           </div>
         </div>
 
@@ -549,7 +715,12 @@ const VibeDashboard: React.FC = () => {
             <PanelGroup direction="horizontal">
               {/* Left Panel - Chat (30%) */}
               <Panel defaultSize={30} minSize={25} maxSize={40}>
-                <SimpleChatPanel messages={messages} isLoading={isLoading} />
+                <SimpleChatPanel
+                  messages={messages}
+                  isLoading={isLoading}
+                  onPromptSelect={handleSendMessage}
+                  showEmptyState={messages.length === 0}
+                />
               </Panel>
 
               <PanelResizeHandle className="group relative w-1 bg-border transition-colors hover:bg-primary">
@@ -589,7 +760,12 @@ const VibeDashboard: React.FC = () => {
           <div className="flex h-full flex-col md:hidden">
             {/* Chat */}
             <div className="flex-1 overflow-hidden border-b border-border">
-              <SimpleChatPanel messages={messages} isLoading={isLoading} />
+              <SimpleChatPanel
+                messages={messages}
+                isLoading={isLoading}
+                onPromptSelect={handleSendMessage}
+                showEmptyState={messages.length === 0}
+              />
             </div>
 
             {/* Code Editor */}
@@ -604,10 +780,15 @@ const VibeDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Message Input - Fixed at bottom */}
-        <div className="border-t border-border bg-background">
-          <VibeMessageInput onSend={handleSendMessage} isLoading={isLoading} />
-        </div>
+        {/* Enhanced Message Composer - Fixed at bottom */}
+        <VibeEnhancedComposer
+          onSend={handleSendMessage}
+          isLoading={isLoading}
+          mode={vibeMode}
+          onModeChange={setVibeMode}
+          showModeToggle={messages.length > 0}
+          showQuickActions={messages.length > 0}
+        />
       </div>
 
       {/* Keyboard Shortcuts Dialog */}
@@ -617,6 +798,7 @@ const VibeDashboard: React.FC = () => {
         shortcuts={shortcuts}
       />
     </VibeLayout>
+    </ErrorBoundary>
   );
 };
 

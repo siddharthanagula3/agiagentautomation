@@ -40,7 +40,7 @@ import {
 } from '@core/ai/orchestration/agent-collaboration-protocol';
 import { CollaborativeMessageDisplay } from './CollaborativeMessageDisplay';
 import { useAuthStore } from '@shared/stores/authentication-store';
-import { promptManagement } from '@core/ai/employees/prompt-management';
+import { systemPromptsService } from '@core/ai/employees/prompt-management';
 import { unifiedLLMService } from '@core/ai/llm/unified-language-model';
 
 interface CollaborativeChatInterfaceProps {
@@ -70,7 +70,7 @@ export const CollaborativeChatInterface: React.FC<
   // Updated: Nov 16th 2025 - Wrapped in useCallback to fix React hooks warning
   const loadAvailableEmployees = useCallback(async () => {
     try {
-      const employees = await promptManagement.getAvailableEmployees();
+      const employees = await systemPromptsService.getAvailableEmployees();
       const agents: AgentCapability[] = employees.map((emp) => ({
         agentId: emp.name,
         name: emp.description || emp.name,

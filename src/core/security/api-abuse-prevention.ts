@@ -26,12 +26,12 @@ export interface AbusePrevention {
 }
 
 /**
- * Model cost tiers for throttling
+ * Model cost tiers for throttling (Updated: Jan 2026)
  */
 const MODEL_COST_TIERS = {
   // High-cost models (strict limits)
   high: {
-    models: ['gpt-4o', 'claude-3-opus-20240229', 'claude-3-5-sonnet-20241022'],
+    models: ['gpt-4o', 'o1', 'claude-sonnet-4-20250514', 'claude-3-5-sonnet-20241022', 'sonar-pro'],
     maxPerMinute: 10,
     maxPerHour: 100,
     maxConcurrent: 2,
@@ -39,7 +39,7 @@ const MODEL_COST_TIERS = {
 
   // Medium-cost models
   medium: {
-    models: ['gpt-4o-mini', 'claude-3-sonnet-20240229', 'gemini-1.5-pro'],
+    models: ['gpt-4o-mini', 'o1-mini', 'gemini-1.5-pro', 'sonar-reasoning'],
     maxPerMinute: 20,
     maxPerHour: 300,
     maxConcurrent: 3,
@@ -48,10 +48,12 @@ const MODEL_COST_TIERS = {
   // Low-cost models
   low: {
     models: [
-      'gpt-3.5-turbo',
-      'claude-3-haiku-20240307',
+      'claude-3-5-haiku-20241022',
       'gemini-1.5-flash',
       'gemini-2.0-flash',
+      'sonar',
+      'grok-2',
+      'grok-2-mini',
     ],
     maxPerMinute: 30,
     maxPerHour: 500,

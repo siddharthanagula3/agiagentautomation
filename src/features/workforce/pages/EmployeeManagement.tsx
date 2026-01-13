@@ -23,6 +23,7 @@ import { useAuthStore } from '@shared/stores/authentication-store';
 import {
   useWorkforceStore,
   setupWorkforceSubscription,
+  cleanupWorkforceSubscription,
 } from '@shared/stores/employee-management-store';
 import { AI_EMPLOYEES } from '@/data/marketplace-employees';
 import { AnimatedAvatar } from '@shared/components/AnimatedAvatar';
@@ -42,6 +43,37 @@ import {
   Code,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
+import ErrorBoundary from '@shared/components/ErrorBoundary';
+
+// Error fallback component for Workforce page
+const WorkforceErrorFallback = () => (
+  <div className="flex min-h-screen items-center justify-center p-8">
+    <Card className="glass-strong max-w-md text-center">
+      <CardHeader>
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+          <Users className="h-8 w-8 text-destructive" />
+        </div>
+        <CardTitle>Workforce Error</CardTitle>
+        <CardDescription>
+          Something went wrong while loading your AI workforce. Please try again.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Button
+          onClick={() => window.location.reload()}
+          className="gradient-primary w-full text-white"
+        >
+          Refresh Page
+        </Button>
+        <Link to="/dashboard">
+          <Button variant="outline" className="w-full">
+            Return to Dashboard
+          </Button>
+        </Link>
+      </CardContent>
+    </Card>
+  </div>
+);
 
 const EmployeeManagement: React.FC = () => {
   const { user } = useAuthStore();
@@ -49,11 +81,17 @@ const EmployeeManagement: React.FC = () => {
     useWorkforceStore();
 
   // Set up real-time subscription and fetch data on mount
+  // Clean up subscription on unmount to prevent memory leaks
   useEffect(() => {
     if (user) {
       setupWorkforceSubscription();
       fetchHiredEmployees();
     }
+
+    // Cleanup function - called when component unmounts or user changes
+    return () => {
+      cleanupWorkforceSubscription();
+    };
   }, [user, fetchHiredEmployees]);
 
   if (!user) {
@@ -81,6 +119,7 @@ const EmployeeManagement: React.FC = () => {
   const activeEmployees = hiredEmployees.filter((emp) => emp.is_active).length;
 
   return (
+    <ErrorBoundary fallback={<WorkforceErrorFallback />}>
     <div className="min-h-screen space-y-4 p-4 md:space-y-6 md:p-6">
       {/* Header */}
       <motion.div
@@ -468,7 +507,7 @@ const EmployeeManagement: React.FC = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      <Link to="/analytics" className="flex-1">
+                      <Link to="/billing" className="flex-1">
                         <Button variant="outline" className="w-full">
                           <BarChart3 className="mr-2 h-4 w-4" />
                           View Detailed Analytics
@@ -511,6 +550,7 @@ const EmployeeManagement: React.FC = () => {
         </div>
       </motion.div>
     </div>
+    </ErrorBoundary>
   );
 };
 

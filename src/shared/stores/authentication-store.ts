@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import {
   authService,
   AuthResponse,
@@ -7,6 +9,71 @@ import {
   RegisterData,
 } from '@core/auth/authentication-manager';
 import { logger } from '@shared/lib/logger';
+
+// Import cleanup function for workforce subscription
+import { cleanupWorkforceSubscription } from './employee-management-store';
+
+/**
+ * Central cleanup function to reset all stores on logout
+ * Prevents data leaks between user sessions
+ */
+async function cleanupAllStores(): Promise<void> {
+  try {
+    // Dynamically import stores to avoid circular dependencies
+    const [
+      { useWorkforceStore },
+      { useMissionStore, stopMissionCleanupInterval },
+      { useNotificationStore },
+      { useChatStore },
+      { useMultiAgentChatStore },
+      { useUsageWarningStore },
+      { useArtifactStore },
+    ] = await Promise.all([
+      import('./employee-management-store'),
+      import('./mission-control-store'),
+      import('./notification-store'),
+      import('./chat-store'),
+      import('./multi-agent-chat-store'),
+      import('./usage-warning-store'),
+      import('./artifact-store'),
+    ]);
+
+    // Reset all stores
+    useWorkforceStore.getState().reset();
+    useMissionStore.getState().reset();
+    useNotificationStore.getState().clearAll();
+    useChatStore.getState().clearHistory?.();
+    useMultiAgentChatStore.getState().reset?.();
+    useUsageWarningStore.getState().resetWarnings?.();
+    useArtifactStore.getState().clearAllArtifacts?.();
+
+    // Stop mission cleanup interval
+    stopMissionCleanupInterval();
+
+    // Cleanup real-time subscriptions
+    cleanupWorkforceSubscription();
+
+    // Clear persisted data from localStorage
+    const keysToRemove = [
+      'agi-chat-store',
+      'agi-notification-store',
+      'agi-multi-agent-chat-store',
+      'agi-usage-warning-store',
+      'agi-artifact-store',
+    ];
+    keysToRemove.forEach((key) => {
+      try {
+        localStorage.removeItem(key);
+      } catch (e) {
+        // Ignore localStorage errors
+      }
+    });
+
+    logger.auth('All stores cleaned up on logout');
+  } catch (error) {
+    logger.error('Error cleaning up stores on logout:', error);
+  }
+}
 
 interface AuthState {
   user: AuthUser | null;
@@ -41,7 +108,9 @@ interface AuthState {
   ) => Promise<{ success: boolean; error: string | null }>;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>()(
+  devtools(
+    immer((set, get) => ({
   user: null,
   isLoading: true,
   error: null,
@@ -142,8 +211,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     set({ isLoading: true });
+
+    // Clean up all stores to prevent data leaks between sessions
+    await cleanupAllStores();
+
+    // Logout from auth service
     await authService.logout();
-    set({ user: null, isAuthenticated: false, isLoading: false });
+
+    set({ user: null, isAuthenticated: false, isLoading: false, initialized: false });
+
+    logger.auth('User logged out, all stores reset');
   },
 
   fetchUser: async () => {
@@ -248,7 +325,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return { success: false, error };
     }
   },
-}));
+    })),
+    { name: 'AuthStore' }
+  )
+);
 
 // Auto-initialize the store when imported
 if (typeof window !== 'undefined') {

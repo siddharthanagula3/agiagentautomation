@@ -55,9 +55,10 @@ export class ChatPersistenceService {
         is_active: true,
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw new Error(`Failed to create session: ${error.message}`);
+    if (!data) throw new Error('Failed to create session: No data returned');
 
     return this.mapDBSessionToSession(data);
   }
@@ -93,10 +94,10 @@ export class ChatPersistenceService {
       query = query.eq('user_id', userId);
     }
 
-    const { data, error } = await query.single();
+    const { data, error } = await query.maybeSingle();
 
     if (error) {
-      if (error.code === 'PGRST116') return null; // Not found
+      // Note: PGRST116 is now handled by maybeSingle() returning null
       // RLS policy violation - user doesn't own this session
       if (
         error.code === '42501' ||
@@ -192,9 +193,10 @@ export class ChatPersistenceService {
         content,
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw new Error(`Failed to save message: ${error.message}`);
+    if (!data) throw new Error('Failed to save message: No data returned');
 
     // Update session's last_message_at
     await supabase
@@ -250,7 +252,7 @@ export class ChatPersistenceService {
       })
       .eq('id', messageId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       // RLS policy violation
@@ -261,6 +263,10 @@ export class ChatPersistenceService {
         throw new Error('You do not have permission to edit this message');
       }
       throw new Error(`Failed to update message: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error('Message not found or you do not have permission to edit it');
     }
 
     return this.mapDBMessageToMessage(data);

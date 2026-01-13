@@ -81,7 +81,7 @@ const BlogPostPage: React.FC = () => {
         )
         .eq('slug', postSlug)
         .eq('published', true)
-        .single();
+        .maybeSingle();
 
       if (error) {
         throw error;

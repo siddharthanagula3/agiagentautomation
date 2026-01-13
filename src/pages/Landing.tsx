@@ -457,7 +457,7 @@ const LandingPage: React.FC = () => {
                         >
                           <img
                             src={employee.avatar}
-                            alt={employee.role}
+                            alt={`Profile picture of ${employee.role}`}
                             className="h-full w-full object-cover"
                           />
                         </motion.div>

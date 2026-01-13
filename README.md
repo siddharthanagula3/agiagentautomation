@@ -1,6 +1,6 @@
 # 🤖 AGI Agent Automation Platform
 
-> **Modern AI Agent Automation Platform** - A comprehensive AI workforce management system comparable to Lovable.dev, Bolt.new, Replit, and Emergent.sh. Hire, manage, and coordinate 139+ specialized AI employees for autonomous multi-agent workflows.
+> **Modern AI Agent Automation Platform** - A comprehensive AI workforce management system comparable to Lovable.dev, Bolt.new, Replit, and Emergent.sh. Hire, manage, and coordinate 140+ specialized AI employees for autonomous multi-agent workflows.
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-61dafb.svg)](https://reactjs.org/)
@@ -12,7 +12,7 @@
 
 ## 🌟 Overview
 
-AGI Agent Automation Platform is a next-generation AI collaboration platform that enables teams to work seamlessly with AI agents across multiple providers. With 139+ specialized AI employees, advanced multi-agent orchestration, and enterprise-ready infrastructure, it's designed for developers, businesses, and teams who need sophisticated AI automation.
+AGI Agent Automation Platform is a next-generation AI collaboration platform that enables teams to work seamlessly with AI agents across multiple providers. With 140+ specialized AI employees, advanced multi-agent orchestration, and enterprise-ready infrastructure, it's designed for developers, businesses, and teams who need sophisticated AI automation.
 
 ### What Sets Us Apart
 
@@ -104,7 +104,7 @@ Real-time X (Twitter) analysis using xAI's Grok for social media intelligence:
 
 ### 7. 🤖 AI Employee Marketplace
 
-Build your dream AI team from 139+ specialists:
+Build your dream AI team from 140+ specialists:
 
 <details>
 <summary><b>View Employee Categories</b></summary>
@@ -156,13 +156,13 @@ Build your dream AI team from 139+ specialists:
 
 Automatically select the best AI model for each task:
 
-| Task Type    | Recommended Model | Why                                 |
-| ------------ | ----------------- | ----------------------------------- |
-| **Coding**   | Claude Sonnet 4.5 | Superior reasoning for complex code |
-| **General**  | GPT-4o            | Best all-around performance         |
-| **Creative** | Gemini 2.0 Flash  | Optimized for creative content      |
-| **Research** | Perplexity Sonar  | Real-time web access                |
-| **Media**    | Google Imagen/Veo | Specialized media generation        |
+| Task Type    | Recommended Model   | Why                                 |
+| ------------ | ------------------- | ----------------------------------- |
+| **Coding**   | Claude 3.5 Sonnet   | Superior reasoning for complex code |
+| **General**  | GPT-4o              | Best all-around performance         |
+| **Creative** | Gemini 1.5 Flash    | Optimized for creative content      |
+| **Research** | Perplexity Sonar    | Real-time web access                |
+| **Media**    | Google Imagen/Veo   | Specialized media generation        |
 
 **Manual Override:** Choose any provider/model at any time via dropdown
 
@@ -227,8 +227,14 @@ OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 GOOGLE_API_KEY=...
 PERPLEXITY_API_KEY=...
+GROK_API_KEY=xai-...
+DEEPSEEK_API_KEY=...
+QWEN_API_KEY=...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+SUPABASE_SERVICE_ROLE_KEY=...
+UPSTASH_REDIS_REST_URL=...
+UPSTASH_REDIS_REST_TOKEN=...
 ```
 
 **Security Note:** API keys are proxied through Netlify Functions - never expose them to the client.
@@ -263,13 +269,15 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 ### AI Providers
 
-| Provider       | Models                                | Use Case                              |
-| -------------- | ------------------------------------- | ------------------------------------- |
-| **Anthropic**  | Claude Sonnet 4.5, Claude Opus 4      | Coding, reasoning, complex tasks      |
-| **OpenAI**     | GPT-4o, GPT-4 Turbo                   | General-purpose, versatile            |
-| **Google**     | Gemini 2.0 Flash, Imagen 4.0, Veo 3.1 | Creative, media generation            |
-| **Perplexity** | Sonar Pro                             | Real-time web search                  |
-| **xAI Grok**   | Grok Beta, Grok 2 Latest              | Social media analysis, X/Twitter data |
+| Provider       | Models                                  | Use Case                              |
+| -------------- | --------------------------------------- | ------------------------------------- |
+| **Anthropic**  | Claude 3.5 Sonnet, Claude 3 Opus        | Coding, reasoning, complex tasks      |
+| **OpenAI**     | GPT-4o, GPT-4o-mini, o1, o3             | General-purpose, versatile            |
+| **Google**     | Gemini 2.0 Flash, Imagen 4.0, Veo 3.1   | Creative, media generation            |
+| **Perplexity** | Sonar Pro, Sonar Reasoning              | Real-time web search                  |
+| **xAI Grok**   | Grok 3, Grok 4                          | Social media analysis, X/Twitter data |
+| **DeepSeek**   | DeepSeek Chat, DeepSeek Coder           | Coding, reasoning (cost-effective)    |
+| **Qwen**       | Qwen-turbo, Qwen-plus, Qwen-max         | Multilingual, general-purpose         |
 
 ---
 
@@ -278,7 +286,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 agiagentautomation/
 ├── .agi/                          # AI employee definitions
-│   └── employees/                 # 139+ employee markdown files
+│   └── employees/                 # 140+ employee markdown files
 │       ├── software-architect.md
 │       ├── frontend-engineer.md
 │       ├── marketing-strategist.md
@@ -362,10 +370,19 @@ agiagentautomation/
 ├── netlify/functions/             # Serverless functions
 │   ├── anthropic-proxy.ts         # Claude API proxy
 │   ├── openai-proxy.ts            # OpenAI API proxy
-│   ├── google-proxy.ts            # Google API proxy
+│   ├── google-proxy.ts            # Google Gemini API proxy
+│   ├── grok-proxy.ts              # xAI Grok API proxy
 │   ├── perplexity-proxy.ts        # Perplexity API proxy
+│   ├── deepseek-proxy.ts          # DeepSeek API proxy
+│   ├── qwen-proxy.ts              # Alibaba Qwen API proxy
 │   ├── stripe-webhook.ts          # Stripe event handler
-│   └── create-pro-subscription.ts # Checkout session creator
+│   ├── create-pro-subscription.ts # Checkout session creator
+│   ├── vibe-build.ts              # Vibe project transpilation
+│   └── utils/
+│       ├── auth-middleware.ts     # JWT authentication
+│       ├── cors.ts                # CORS origin validation
+│       ├── rate-limiter.ts        # Upstash Redis rate limiting
+│       └── token-tracking.ts      # Token usage tracking
 │
 ├── supabase/                      # Database configuration
 │   ├── migrations/                # SQL migration files
@@ -441,8 +458,20 @@ Powered by Zustand with Immer middleware:
 - **employee-management-store.ts** - Hired employees from database
 - **authentication-store.ts** - User authentication state
 - **multi-agent-workspace-store.ts** - Multi-agent collaboration
+- **chat-store.ts** - Chat messages and conversation state
+- **vibe-chat-store.ts** - Vibe workspace chat state
+- **vibe-file-store.ts** - Vibe file system state
 
 Clean separation prevents state conflicts and enables real-time UI updates.
+
+### Security Features
+
+- **CORS Validation** - Origin whitelist enforcement (no wildcard `*`)
+- **JWT Verification** - All API proxies verify tokens via Supabase
+- **Rate Limiting** - Upstash Redis with verified user identity
+- **Token Enforcement** - Pre-flight balance checks before API calls
+- **RLS Policies** - Row Level Security on all Supabase tables
+- **Input Validation** - Request size limits and SSRF protection
 
 ---
 
@@ -659,29 +688,22 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ### Documentation
 
-- **[Full Documentation](/docs/README.md)** - Comprehensive guides
-- **[API Reference](/docs/api-reference.md)** - API documentation
-- **[Architecture Guide](/CLAUDE.md)** - System architecture
-- **[Contributing Guide](/CONTRIBUTING.md)** - How to contribute
+- **[Architecture Guide](/CLAUDE.md)** - System architecture and development patterns
+- **[Tool Integration Guide](/docs/TOOL_INTEGRATION_GUIDE.md)** - Chat tool router system
+- **[Web Search Integration](/docs/WEB_SEARCH_INTEGRATION.md)** - Web search implementation
+- **[Media Generation Guide](/docs/MEDIA_GENERATION_GUIDE.md)** - Image and video generation APIs
+- **[Environment Variables](/docs/operations/ENVIRONMENT_VARIABLES.md)** - Deployment configuration
 
 ### Community
 
 - **[GitHub Issues](https://github.com/yourusername/agiagentautomation/issues)** - Bug reports & feature requests
 - **[GitHub Discussions](https://github.com/yourusername/agiagentautomation/discussions)** - Questions & community
-- **[Discord Server](#)** - Real-time chat (coming soon)
-
-### Links
-
-- **[Live Demo](#)** - Try it now (if available)
-- **[Blog](/blogs)** - Technical articles and updates
-- **[Changelog](/CHANGELOG.md)** - Version history
-- **[Roadmap](#)** - Upcoming features
 
 ---
 
 ## 🎯 Roadmap
 
-### Q1 2025
+### Q1 2026
 
 - [ ] Desktop application (Electron)
 - [ ] Advanced analytics dashboard
@@ -689,7 +711,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 - [ ] Team collaboration features
 - [ ] API marketplace
 
-### Q2 2025
+### Q2 2026
 
 - [ ] Mobile apps (iOS/Android)
 - [ ] Voice interface
@@ -720,7 +742,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 - Unlimited messages
 - Access to all AI models (Claude, GPT-4, Gemini)
-- Full employee marketplace (139+ employees)
+- Full employee marketplace (140+ employees)
 - Priority support
 - Advanced features (document export, media generation)
 
@@ -745,3 +767,42 @@ _Transforming how humans and AI collaborate_
 [Website](#) • [Documentation](/docs) • [Blog](/blogs) • [Twitter](#) • [LinkedIn](#)
 
 </div>
+
+---
+
+## 📋 Changelog
+
+### v1.1.0 (January 2026)
+
+**New Features:**
+- Added DeepSeek AI provider (cost-effective coding/reasoning)
+- Added Alibaba Qwen provider (multilingual support)
+- Added employee memory system for context-aware responses
+- Vibe file persistence to database (survives page refresh)
+
+**Security Enhancements:**
+- CORS origin whitelist (no wildcard `*`)
+- JWT verification via Supabase `auth.getUser()` in rate limiter
+- Token enforcement with pre-flight balance checks
+- Demo mode requires explicit `VITE_DEMO_MODE=true`
+
+**Infrastructure:**
+- New `user_token_balances` table with RLS policies
+- Plan-aware token allocation (Pro=10M, Max=40M tokens/month)
+- Upstash Redis integration for rate limiting
+
+**Code Cleanup:**
+- Removed 9 orphaned files (unused stores, services, components)
+- Standardized employee types across codebase
+- Fixed Map/Set serialization issues in Zustand stores
+
+### v1.0.0 (November 2025)
+
+- Initial release
+- 140+ AI employees
+- Multi-provider LLM support (OpenAI, Anthropic, Google, Perplexity, Grok)
+- /vibe AI coding platform
+- /chat multi-agent interface
+- Image generation (Imagen 4.0)
+- Video generation (Veo 3.1)
+- Stripe billing integration

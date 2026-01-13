@@ -59,13 +59,21 @@ export async function createConversation(
       .from('multi_agent_conversations')
       .insert(conversationData)
       .select()
-      .single();
+      .maybeSingle();
 
     if (convError) {
       throw new MultiAgentChatError(
         'Failed to create conversation',
         'CONVERSATION_CREATE_ERROR',
         convError
+      );
+    }
+
+    if (!conversation) {
+      throw new MultiAgentChatError(
+        'Failed to create conversation: No data returned',
+        'CONVERSATION_CREATE_ERROR',
+        null
       );
     }
 
@@ -126,17 +134,18 @@ export async function getConversation(
       .select('*')
       .eq('id', conversationId)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (convError) {
-      if (convError.code === 'PGRST116') {
-        return null; // Not found
-      }
       throw new MultiAgentChatError(
         'Failed to fetch conversation',
         'CONVERSATION_FETCH_ERROR',
         convError
       );
+    }
+
+    if (!conversation) {
+      return null;
     }
 
     // Get participants
@@ -196,9 +205,9 @@ export async function getConversationWithDetails(
       .from('conversation_metadata')
       .select('*')
       .eq('conversation_id', conversationId)
-      .single();
+      .maybeSingle();
 
-    if (metaError && metaError.code !== 'PGRST116') {
+    if (metaError) {
       console.error('Failed to fetch metadata:', metaError);
     }
 
@@ -368,13 +377,21 @@ export async function updateConversation(
       .eq('id', conversationId)
       .eq('user_id', userId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       throw new MultiAgentChatError(
         'Failed to update conversation',
         'CONVERSATION_UPDATE_ERROR',
         error
+      );
+    }
+
+    if (!data) {
+      throw new MultiAgentChatError(
+        'Conversation not found or you do not have permission to update it',
+        'CONVERSATION_NOT_FOUND',
+        null
       );
     }
 
@@ -452,7 +469,7 @@ export async function addParticipant(
       .from('conversation_participants')
       .insert(participantData)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       if (error.code === '23505') {
@@ -467,6 +484,14 @@ export async function addParticipant(
         'Failed to add participant',
         'PARTICIPANT_ADD_ERROR',
         error
+      );
+    }
+
+    if (!data) {
+      throw new MultiAgentChatError(
+        'Failed to add participant: No data returned',
+        'PARTICIPANT_ADD_ERROR',
+        null
       );
     }
 
@@ -578,13 +603,21 @@ export async function updateParticipant(
       .update(updates)
       .eq('id', participantId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       throw new MultiAgentChatError(
         'Failed to update participant',
         'PARTICIPANT_UPDATE_ERROR',
         error
+      );
+    }
+
+    if (!data) {
+      throw new MultiAgentChatError(
+        'Participant not found',
+        'PARTICIPANT_NOT_FOUND',
+        null
       );
     }
 
@@ -670,8 +703,17 @@ export async function updateParticipantActivity(
 }
 
 /**
- * Increments participant statistics
- * Updated: Nov 17th 2025 - Fixed race condition with atomic RPC function
+ * Increments participant statistics using atomic database operations
+ * Updated: Jan 10th 2026 - Deep repair: removed race-prone fallback, added retry logic
+ *
+ * CRITICAL: This function uses PostgreSQL's atomic increment via RPC to prevent
+ * race conditions. The non-atomic fallback was removed because it caused data loss
+ * when concurrent updates occurred.
+ *
+ * @param participantId - The participant UUID to update
+ * @param stats - Statistics to increment (all values are additive)
+ * @param options - Optional retry configuration
+ * @throws MultiAgentChatError if the operation fails after retries
  */
 export async function incrementParticipantStats(
   participantId: string,
@@ -680,69 +722,170 @@ export async function incrementParticipantStats(
     tokens_used?: number;
     cost_incurred?: number;
     tasks_completed?: number;
-  }
-): Promise<void> {
-  try {
-    // Updated: Nov 17th 2025 - Use RPC function for atomic increment to prevent race conditions
-    const { error } = await supabase.rpc('increment_participant_stats', {
-      p_participant_id: participantId,
-      p_message_count: stats.message_count || 0,
-      p_tokens_used: stats.tokens_used || 0,
-      p_cost_incurred: stats.cost_incurred || 0,
-      p_tasks_completed: stats.tasks_completed || 0,
-    });
+  },
+  options: { maxRetries?: number; retryDelayMs?: number } = {}
+): Promise<{ success: boolean; retriesUsed: number }> {
+  const { maxRetries = 3, retryDelayMs = 100 } = options;
+  let lastError: Error | null = null;
+  let retriesUsed = 0;
 
-    if (error) {
-      // If RPC doesn't exist, fall back to non-atomic update with warning
-      console.warn(
-        'RPC increment_participant_stats not found, using non-atomic fallback. Run migration 20250116000003_add_participant_stats_rpc.sql'
-      );
-
-      const { data: participant, error: fetchError } = await supabase
-        .from('conversation_participants')
-        .select('message_count, tokens_used, cost_incurred, tasks_completed')
-        .eq('id', participantId)
-        .single();
-
-      if (fetchError) {
-        throw new MultiAgentChatError(
-          'Failed to fetch participant for stats update',
-          'PARTICIPANT_STATS_FETCH_ERROR',
-          fetchError
-        );
-      }
-
-      const updates: Partial<ConversationParticipant> = {
-        message_count: participant.message_count + (stats.message_count || 0),
-        tokens_used: participant.tokens_used + (stats.tokens_used || 0),
-        cost_incurred: participant.cost_incurred + (stats.cost_incurred || 0),
-        tasks_completed:
-          participant.tasks_completed + (stats.tasks_completed || 0),
-      };
-
-      const { error: updateError } = await supabase
-        .from('conversation_participants')
-        .update(updates)
-        .eq('id', participantId);
-
-      if (updateError) {
-        throw new MultiAgentChatError(
-          'Failed to update participant stats',
-          'PARTICIPANT_STATS_UPDATE_ERROR',
-          updateError
-        );
-      }
-    }
-  } catch (error) {
-    if (error instanceof MultiAgentChatError) {
-      throw error;
-    }
+  // Validate input
+  if (!participantId || typeof participantId !== 'string') {
     throw new MultiAgentChatError(
-      'Unexpected error incrementing participant stats',
-      'UNEXPECTED_ERROR',
-      error
+      'Invalid participantId provided',
+      'INVALID_PARTICIPANT_ID',
+      { participantId }
     );
   }
+
+  // Ensure at least one stat is being updated
+  const hasStats =
+    (stats.message_count && stats.message_count > 0) ||
+    (stats.tokens_used && stats.tokens_used > 0) ||
+    (stats.cost_incurred && stats.cost_incurred > 0) ||
+    (stats.tasks_completed && stats.tasks_completed > 0);
+
+  if (!hasStats) {
+    // No-op if no stats to update - return early
+    return { success: true, retriesUsed: 0 };
+  }
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      // Use atomic RPC function for increment - prevents race conditions
+      const { error } = await supabase.rpc('increment_participant_stats', {
+        p_participant_id: participantId,
+        p_message_count: stats.message_count || 0,
+        p_tokens_used: stats.tokens_used || 0,
+        p_cost_incurred: stats.cost_incurred || 0,
+        p_tasks_completed: stats.tasks_completed || 0,
+      });
+
+      if (error) {
+        // Categorize the error for proper handling
+        const errorMessage = error.message?.toLowerCase() || '';
+        const errorCode = error.code || '';
+
+        // Check if RPC function doesn't exist (migration not applied)
+        if (
+          errorMessage.includes('function') &&
+          (errorMessage.includes('does not exist') ||
+            errorMessage.includes('could not find'))
+        ) {
+          // CRITICAL: Do not fall back to non-atomic operations
+          // Instead, throw actionable error with migration instructions
+          throw new MultiAgentChatError(
+            'Database migration required: increment_participant_stats RPC function not found. ' +
+              'Run: supabase migration up 20251117000003_add_participant_stats_rpc.sql',
+            'MIGRATION_REQUIRED',
+            {
+              missingFunction: 'increment_participant_stats',
+              migrationFile: '20251117000003_add_participant_stats_rpc.sql',
+              originalError: error,
+            }
+          );
+        }
+
+        // Check if participant doesn't exist
+        if (
+          errorMessage.includes('participant not found') ||
+          errorCode === 'P0001' // PostgreSQL RAISE EXCEPTION code
+        ) {
+          throw new MultiAgentChatError(
+            `Participant not found: ${participantId}`,
+            'PARTICIPANT_NOT_FOUND',
+            { participantId, originalError: error }
+          );
+        }
+
+        // Check for transient errors that warrant retry
+        const isTransientError =
+          errorCode === '40001' || // Serialization failure
+          errorCode === '40P01' || // Deadlock detected
+          errorCode === '57P01' || // Admin shutdown
+          errorCode === '57P02' || // Crash shutdown
+          errorCode === '57P03' || // Cannot connect now
+          errorMessage.includes('connection') ||
+          errorMessage.includes('timeout') ||
+          errorMessage.includes('temporarily unavailable');
+
+        if (isTransientError && attempt < maxRetries) {
+          lastError = new Error(error.message);
+          retriesUsed = attempt + 1;
+          console.warn(
+            `[incrementParticipantStats] Transient error on attempt ${attempt + 1}/${maxRetries + 1}, retrying in ${retryDelayMs}ms:`,
+            error.message
+          );
+          await sleep(retryDelayMs * Math.pow(2, attempt)); // Exponential backoff
+          continue;
+        }
+
+        // Non-transient error or max retries exceeded
+        throw new MultiAgentChatError(
+          `Failed to increment participant stats: ${error.message}`,
+          'PARTICIPANT_STATS_UPDATE_ERROR',
+          {
+            participantId,
+            stats,
+            attemptsMade: attempt + 1,
+            errorCode,
+            originalError: error,
+          }
+        );
+      }
+
+      // Success - log for audit trail
+      console.log(
+        `[incrementParticipantStats] Successfully updated participant ${participantId}:`,
+        {
+          message_count: `+${stats.message_count || 0}`,
+          tokens_used: `+${stats.tokens_used || 0}`,
+          cost_incurred: `+${stats.cost_incurred || 0}`,
+          tasks_completed: `+${stats.tasks_completed || 0}`,
+          retriesUsed,
+        }
+      );
+
+      return { success: true, retriesUsed };
+    } catch (error) {
+      // Re-throw MultiAgentChatError as-is
+      if (error instanceof MultiAgentChatError) {
+        throw error;
+      }
+
+      // Handle unexpected errors
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      if (attempt < maxRetries) {
+        retriesUsed = attempt + 1;
+        console.warn(
+          `[incrementParticipantStats] Unexpected error on attempt ${attempt + 1}/${maxRetries + 1}:`,
+          lastError.message
+        );
+        await sleep(retryDelayMs * Math.pow(2, attempt));
+        continue;
+      }
+    }
+  }
+
+  // All retries exhausted
+  throw new MultiAgentChatError(
+    `Failed to increment participant stats after ${maxRetries + 1} attempts: ${lastError?.message || 'Unknown error'}`,
+    'MAX_RETRIES_EXCEEDED',
+    {
+      participantId,
+      stats,
+      maxRetries,
+      lastError: lastError?.message,
+    }
+  );
+}
+
+/**
+ * Helper function for async sleep with exponential backoff
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // =============================================
@@ -760,12 +903,9 @@ export async function getConversationMetadata(
       .from('conversation_metadata')
       .select('*')
       .eq('conversation_id', conversationId)
-      .single();
+      .maybeSingle();
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Not found
-      }
       throw new MultiAgentChatError(
         'Failed to fetch conversation metadata',
         'METADATA_FETCH_ERROR',
@@ -799,13 +939,21 @@ export async function updateConversationMetadata(
       .update(updates)
       .eq('conversation_id', conversationId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       throw new MultiAgentChatError(
         'Failed to update conversation metadata',
         'METADATA_UPDATE_ERROR',
         error
+      );
+    }
+
+    if (!data) {
+      throw new MultiAgentChatError(
+        'Conversation metadata not found',
+        'METADATA_NOT_FOUND',
+        null
       );
     }
 

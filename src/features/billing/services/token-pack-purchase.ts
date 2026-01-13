@@ -88,7 +88,7 @@ export async function addTokensToUserBalance(
       .from('users')
       .select('token_balance')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (fetchError) {
       console.error('[Add Tokens] Error fetching user:', fetchError);
@@ -150,7 +150,7 @@ export async function getUserTokenBalance(userId: string): Promise<number> {
       .from('users')
       .select('token_balance')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('[Get Token Balance] Error:', error);

@@ -39,18 +39,12 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation<LocationState>();
 
-  // Check if we're in demo mode
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  const isDemoMode =
-    !supabaseUrl ||
-    !supabaseKey ||
-    supabaseUrl.includes('your-project-url') ||
-    supabaseKey.includes('your-anon-key');
+  // Check if demo mode is explicitly enabled via environment variable
+  const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true';
 
   const [formData, setFormData] = useState({
-    email: isDemoMode ? 'demo@example.com' : '',
-    password: isDemoMode ? 'demo123' : '',
+    email: '',
+    password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -109,15 +103,24 @@ const LoginPage: React.FC = () => {
   };
 
   const handleDemoLogin = async () => {
+    // Only allow demo login if explicitly enabled via environment variable
+    if (!isDemoMode) {
+      console.warn('LoginPage: Demo login attempted but VITE_DEMO_MODE is not enabled');
+      return;
+    }
+
     console.log('LoginPage: Demo login triggered');
+    const demoEmail = import.meta.env.VITE_DEMO_EMAIL || 'demo@example.com';
+    const demoPassword = import.meta.env.VITE_DEMO_PASSWORD || 'demo123';
+
     setFormData({
-      email: 'demo@example.com',
-      password: 'demo123',
+      email: demoEmail,
+      password: demoPassword,
     });
 
     // Trigger login immediately with demo credentials
     try {
-      await login({ email: 'demo@example.com', password: 'demo123' });
+      await login({ email: demoEmail, password: demoPassword });
     } catch (err) {
       console.error('LoginPage: Demo login failed:', err);
     }

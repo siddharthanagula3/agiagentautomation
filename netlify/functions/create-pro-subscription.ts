@@ -1,6 +1,11 @@
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import Stripe from 'stripe';
 import { withAuth } from './utils/auth-middleware';
+import { withRateLimitTier } from './utils/rate-limiter';
+import {
+  createSubscriptionSchema,
+  formatValidationError,
+} from './utils/validation-schemas';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia',
@@ -19,6 +24,7 @@ const PLAN_PRICES = {
 };
 
 // Updated: Nov 16th 2025 - Fixed missing authentication on Stripe payment endpoint
+// Updated: Jan 10th 2026 - Added rate limiting and Zod validation
 const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; email?: string } }, context: HandlerContext) => {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
@@ -29,21 +35,19 @@ const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; 
   }
 
   try {
-    const {
-      userId,
-      userEmail,
-      billingPeriod = 'monthly',
-      plan = 'pro',
-    } = JSON.parse(event.body || '{}');
+    // SECURITY: Validate request body with Zod schema
+    const parseResult = createSubscriptionSchema.safeParse(
+      JSON.parse(event.body || '{}')
+    );
 
-    if (!userId || !userEmail) {
+    if (!parseResult.success) {
       return {
         statusCode: 400,
-        body: JSON.stringify({
-          error: 'Missing required fields: userId, userEmail',
-        }),
+        body: JSON.stringify(formatValidationError(parseResult.error)),
       };
     }
+
+    const { userId, userEmail, billingPeriod, plan } = parseResult.data;
 
     // Updated: Nov 16th 2025 - Fixed missing authentication - verify userId matches authenticated user
     if (event.user.id !== userId) {
@@ -51,15 +55,6 @@ const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; 
         statusCode: 403,
         body: JSON.stringify({
           error: 'Forbidden: User ID mismatch',
-        }),
-      };
-    }
-
-    if (!['pro', 'max'].includes(plan)) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          error: 'Invalid plan. Must be "pro" or "max"',
         }),
       };
     }
@@ -175,4 +170,7 @@ const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; 
 };
 
 // Updated: Nov 16th 2025 - Fixed missing authentication - wrap handler with withAuth
-export const handler: Handler = withAuth(authenticatedHandler);
+// Updated: Jan 10th 2026 - Added payment tier rate limiting (5 req/min)
+export const handler: Handler = withAuth(
+  withRateLimitTier('payment')(authenticatedHandler)
+);

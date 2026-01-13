@@ -3,8 +3,8 @@
  * Considers agent capabilities, cost, performance, and availability
  */
 
-import { Task, AgentType } from './task-decomposer';
-import { IntentType, DomainType, ComplexityLevel } from './nlp-processor';
+import { Task, AgentType } from './task-breakdown';
+import { IntentType, DomainType, ComplexityLevel } from './natural-language-processor';
 
 export interface AgentCapability {
   agentType: AgentType;

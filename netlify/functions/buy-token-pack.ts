@@ -1,14 +1,11 @@
 import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import Stripe from 'stripe';
 import { withAuth } from './utils/auth-middleware';
-
-interface BuyTokenPackRequest {
-  userId: string;
-  userEmail: string;
-  packId: string;
-  tokens: number;
-  price: number;
-}
+import { withRateLimitTier } from './utils/rate-limiter';
+import {
+  buyTokenPackSchema,
+  formatValidationError,
+} from './utils/validation-schemas';
 
 /**
  * Netlify Function: Buy Token Pack
@@ -17,6 +14,7 @@ interface BuyTokenPackRequest {
  * Similar to create-pro-subscription but for one-time payments instead of recurring.
  */
 // Updated: Nov 16th 2025 - Fixed missing authentication on Stripe payment endpoint
+// Updated: Jan 10th 2026 - Added rate limiting and Zod validation
 const authenticatedHandler: Handler = async (
   event: HandlerEvent & { user: { id: string; email?: string } },
   context: HandlerContext
@@ -30,16 +28,19 @@ const authenticatedHandler: Handler = async (
   }
 
   try {
-    const body = JSON.parse(event.body || '{}') as BuyTokenPackRequest;
-    const { userId, userEmail, packId, tokens, price } = body;
+    // SECURITY: Validate request body with Zod schema
+    const parseResult = buyTokenPackSchema.safeParse(
+      JSON.parse(event.body || '{}')
+    );
 
-    // Validate required fields
-    if (!userId || !userEmail || !packId || !tokens || !price) {
+    if (!parseResult.success) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Missing required fields' }),
+        body: JSON.stringify(formatValidationError(parseResult.error)),
       };
     }
+
+    const { userId, userEmail, packId, tokens, price } = parseResult.data;
 
     // Updated: Nov 16th 2025 - Fixed missing authentication - verify userId matches authenticated user
     if (event.user.id !== userId) {
@@ -131,4 +132,7 @@ const authenticatedHandler: Handler = async (
 };
 
 // Updated: Nov 16th 2025 - Fixed missing authentication - wrap handler with withAuth
-export const handler: Handler = withAuth(authenticatedHandler);
+// Updated: Jan 10th 2026 - Added payment tier rate limiting (5 req/min)
+export const handler: Handler = withAuth(
+  withRateLimitTier('payment')(authenticatedHandler)
+);

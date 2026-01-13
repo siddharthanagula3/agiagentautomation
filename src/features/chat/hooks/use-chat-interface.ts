@@ -19,7 +19,12 @@ import type { ChatMessage, ChatMode, StreamingUpdate } from '../types';
 import type { SearchResponse } from '@core/integrations/web-search-handler';
 import type { MediaGenerationResult } from '@core/integrations/media-generation-handler';
 import type { GeneratedDocument } from '../services/document-generation-service';
-import { retryWithBackoff, parseErrorMessage, isRetryableError } from '../utils/retry-handler';
+import {
+  retryWithBackoff,
+  getErrorMessage,
+  isRetryableError,
+  AppError,
+} from '@shared/utils/error-handling';
 
 interface SendMessageParams {
   content: string;
@@ -127,8 +132,12 @@ export const useChat = (sessionId?: string) => {
       setMessages(sortedMessages);
       setError(null);
     } catch (error) {
-      setError('Failed to load messages');
-      toast.error('Failed to load chat history');
+      const userFriendlyMessage = getErrorMessage(error);
+      console.error('[Chat] Error loading messages:', error);
+      setError(userFriendlyMessage);
+      toast.error('Failed to load chat history', {
+        description: isRetryableError(error) ? 'Please try refreshing the page.' : undefined,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -414,8 +423,9 @@ export const useChat = (sessionId?: string) => {
             }),
           {
             maxRetries: 3,
-            onRetry: (attempt, error) => {
-              console.log(`Retry attempt ${attempt} after error:`, error.message);
+            onRetry: (attempt, err) => {
+              const errMessage = err instanceof Error ? err.message : String(err);
+              console.log(`[Chat] Retry attempt ${attempt}/3 after error:`, errMessage);
               toast.info(`Retrying... (Attempt ${attempt}/3)`);
             },
           }
@@ -575,9 +585,15 @@ export const useChat = (sessionId?: string) => {
           }
         }
       } catch (error) {
-        const err = error instanceof Error ? error : new Error('Unknown error');
-        const userFriendlyMessage = parseErrorMessage(err);
-        const retryable = isRetryableError(err);
+        // Use standardized error handling utilities
+        const userFriendlyMessage = getErrorMessage(error);
+        const retryable = isRetryableError(error);
+
+        // Log technical details for debugging
+        console.error(
+          '[Chat] Error sending message:',
+          error instanceof Error ? error.message : error
+        );
 
         setError(userFriendlyMessage);
 
@@ -680,7 +696,8 @@ export const useChat = (sessionId?: string) => {
         try {
           await chatPersistenceService.updateMessage(messageId, newContent);
         } catch (error) {
-          console.error('Failed to update message in database:', error);
+          console.error('[Chat] Failed to update message in database:', error);
+          toast.error(getErrorMessage(error));
         }
       }
 
@@ -704,7 +721,8 @@ export const useChat = (sessionId?: string) => {
           await chatPersistenceService.deleteMessage(messageId);
           toast.success('Message deleted');
         } catch (error) {
-          toast.error('Failed to delete message');
+          console.error('[Chat] Failed to delete message:', error);
+          toast.error(getErrorMessage(error));
         }
       }
     },

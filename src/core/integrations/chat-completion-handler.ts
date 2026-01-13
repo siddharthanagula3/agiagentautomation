@@ -74,8 +74,8 @@ function getDefaultModel(provider: AIProvider): string {
   const defaultModels: Record<AIProvider, string> = {
     openai: 'gpt-4o',
     anthropic: 'claude-3-5-sonnet-20241022',
-    google: 'gemini-2.0-flash-exp',
-    perplexity: 'llama-3.1-sonar-large-128k-online',
+    google: 'gemini-2.0-flash',
+    perplexity: 'sonar-pro',
   };
 
   return defaultModels[provider];

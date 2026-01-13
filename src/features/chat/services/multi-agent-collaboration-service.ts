@@ -256,18 +256,36 @@ class MultiAgentCollaborationService {
     // Step 4: Cross-employee discussion (optional for very complex tasks)
     if (selectedEmployees.length >= 3) {
       // Have employees respond to each other's contributions
+      // Use Promise.allSettled to handle failures gracefully without stopping other discussions
+      const discussionPromises: Promise<{
+        employee: AIEmployee;
+        otherEmployee: AIEmployee;
+        result: { content: string; tokensUsed?: number };
+      }>[] = [];
+
       for (let i = 0; i < Math.min(selectedEmployees.length - 1, 2); i++) {
         const employee = selectedEmployees[i];
         const otherEmployee = selectedEmployees[i + 1];
         const otherContribution = employeeResponses.get(otherEmployee.name);
 
         if (otherContribution) {
-          const discussion = await this.getEmployeeDiscussion(
-            employee,
-            userMessage,
-            otherEmployee.name,
-            otherContribution
+          discussionPromises.push(
+            this.getEmployeeDiscussion(
+              employee,
+              userMessage,
+              otherEmployee.name,
+              otherContribution
+            ).then((result) => ({ employee, otherEmployee, result }))
           );
+        }
+      }
+
+      // Wait for all discussions to settle (success or failure)
+      const discussionResults = await Promise.allSettled(discussionPromises);
+
+      for (const result of discussionResults) {
+        if (result.status === 'fulfilled') {
+          const { employee, otherEmployee, result: discussion } = result.value;
 
           collaborationMessages.push({
             from: employee.name,
@@ -281,6 +299,12 @@ class MultiAgentCollaborationService {
           totalTokens += discussion.tokensUsed || 0;
           employeeContributions[employee.name] =
             (employeeContributions[employee.name] || 0) + 1;
+        } else {
+          // Log failed discussion but continue with other results
+          console.warn(
+            '[Collaboration] Discussion failed:',
+            result.reason
+          );
         }
       }
     }

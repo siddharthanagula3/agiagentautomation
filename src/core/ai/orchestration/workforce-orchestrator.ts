@@ -5,6 +5,15 @@
 
 import { unifiedLLMService } from '@core/ai/llm/unified-language-model';
 import { systemPromptsService } from '@core/ai/employees/prompt-management';
+import {
+  AppError,
+  ErrorCodes,
+  getErrorMessage,
+  withTimeout,
+  retryWithBackoff,
+  safeJsonParse,
+  isRetryableError,
+} from '@shared/utils/error-handling';
 import { useMissionStore } from '@shared/stores/mission-control-store';
 import type { Task } from '@shared/stores/mission-control-store';
 import type { AIEmployee } from '@core/types/ai-employee';
@@ -104,7 +113,13 @@ export class WorkforceOrchestratorRefactored {
       );
 
       if (!plan || plan.plan.length === 0) {
-        throw new Error('Failed to generate execution plan');
+        throw new AppError(
+          'Failed to generate execution plan',
+          ErrorCodes.PLAN_GENERATION_FAILED,
+          500,
+          true,
+          'Could not create an execution plan for your request. Please try again or rephrase your request.'
+        );
       }
 
       console.log('📋 Generated plan with', plan.plan.length, 'tasks');
@@ -193,20 +208,21 @@ export class WorkforceOrchestratorRefactored {
         plan: tasks,
       };
     } catch (error) {
-      const errorMessage =
+      const technicalMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      console.error('❌ Error processing request:', errorMessage);
+      const userMessage = getErrorMessage(error);
+      console.error('❌ Error processing request:', technicalMessage);
 
-      store.failMission(errorMessage);
+      store.failMission(userMessage);
       store.addMessage({
         from: 'system',
         type: 'error',
-        content: `❌ Mission failed: ${errorMessage}`,
+        content: `❌ Mission failed: ${userMessage}`,
       });
 
       return {
         success: false,
-        error: errorMessage,
+        error: userMessage,
       };
     }
   }
@@ -237,14 +253,26 @@ User request: ${userInput}
 Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
 
     try {
-      const response = await unifiedLLMService.sendMessage({
-        provider: 'anthropic',
-        messages: [{ role: 'user', content: plannerPrompt }],
-        model: 'claude-3-5-sonnet-20241022',
-        temperature: 0.3,
-        userId,
-        sessionId,
-      });
+      const response = await retryWithBackoff(
+        () =>
+          unifiedLLMService.sendMessage({
+            provider: 'anthropic',
+            messages: [{ role: 'user', content: plannerPrompt }],
+            model: 'claude-3-5-sonnet-20241022',
+            temperature: 0.3,
+            userId,
+            sessionId,
+          }),
+        {
+          maxRetries: 3,
+          onRetry: (attempt, err) => {
+            console.log(
+              `[Orchestrator] Plan generation failed (attempt ${attempt}/3), retrying...`,
+              err instanceof Error ? err.message : err
+            );
+          },
+        }
+      );
 
       // Track token usage
       if (response.usage && userId) {
@@ -284,27 +312,55 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
         jsonText = jsonText.replace(/```\n?/g, '').replace(/```\n?$/g, '');
       }
 
-      // Updated: Nov 16th 2025 - Fixed unsafe JSON parsing with validation
-      const parsed = JSON.parse(jsonText);
+      // Use safe JSON parsing with validation
+      const parseResult = safeJsonParse<MissionPlan>(jsonText);
+      if (!parseResult.success) {
+        throw new AppError(
+          'Failed to parse plan JSON',
+          ErrorCodes.VALIDATION_ERROR,
+          400,
+          false,
+          'Could not understand the generated plan. Please try again.'
+        );
+      }
+
+      const parsed = parseResult.data;
 
       // Validate the parsed structure
       if (!parsed || typeof parsed !== 'object') {
-        throw new Error('Invalid plan structure: not an object');
+        throw new AppError(
+          'Invalid plan structure: not an object',
+          ErrorCodes.VALIDATION_ERROR,
+          400,
+          false,
+          'Generated plan has an invalid format.'
+        );
       }
 
       if (!parsed.plan || !Array.isArray(parsed.plan)) {
-        throw new Error('Invalid plan structure: plan is not an array');
+        throw new AppError(
+          'Invalid plan structure: plan is not an array',
+          ErrorCodes.VALIDATION_ERROR,
+          400,
+          false,
+          'Generated plan is missing the task list.'
+        );
       }
 
       // Validate each task in the plan
       for (const task of parsed.plan) {
         if (!task.task || typeof task.task !== 'string') {
-          throw new Error('Invalid plan structure: task description missing');
+          throw new AppError(
+            'Invalid plan structure: task description missing',
+            ErrorCodes.VALIDATION_ERROR,
+            400,
+            false,
+            'One or more tasks in the plan are missing descriptions.'
+          );
         }
       }
 
-      const plan = parsed as MissionPlan;
-      return plan;
+      return parsed;
     } catch (error) {
       console.error('Error generating plan:', error);
       // Fallback: create simple single-task plan
@@ -410,7 +466,8 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
   }
 
   /**
-   * EXECUTION STAGE: Execute all tasks
+   * EXECUTION STAGE: Execute all tasks in parallel
+   * Updated: Jan 6th 2026 - Changed from sequential to parallel execution using Promise.allSettled
    */
   private async executeTasks(
     tasks: Task[],
@@ -420,12 +477,17 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
   ): Promise<void> {
     const store = useMissionStore.getState();
 
-    for (const task of tasks) {
-      // Updated: Nov 16th 2025 - Fixed mission pause/resume to actually stop execution
-      // Check if mission is paused before executing each task
+    // Check if mission is paused before starting execution
+    if (useMissionStore.getState().isPaused) {
+      console.log('Mission paused, stopping execution');
+      return;
+    }
+
+    // Execute tasks in parallel
+    const taskPromises = tasks.map(async (task) => {
+      // Check pause state at start of each task
       if (useMissionStore.getState().isPaused) {
-        console.log('Mission paused, stopping execution');
-        return;
+        return { taskId: task.id, status: 'skipped' as const, reason: 'Mission paused' };
       }
 
       if (!task.assignedTo) {
@@ -436,7 +498,7 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
           undefined,
           'No employee assigned'
         );
-        continue;
+        return { taskId: task.id, status: 'failed' as const, reason: 'No employee assigned' };
       }
 
       try {
@@ -456,7 +518,13 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
         const employee = this.employees.find((e) => e.name === task.assignedTo);
 
         if (!employee) {
-          throw new Error(`Employee ${task.assignedTo} not found`);
+          throw new AppError(
+            `Employee ${task.assignedTo} not found`,
+            ErrorCodes.EMPLOYEE_NOT_FOUND,
+            404,
+            false,
+            `The assigned AI employee "${task.assignedTo}" could not be found.`
+          );
         }
 
         // Execute using employee's system prompt
@@ -482,6 +550,8 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
           content: result,
           metadata: { taskId: task.id, employeeName: task.assignedTo },
         });
+
+        return { taskId: task.id, status: 'fulfilled' as const, result };
       } catch (error) {
         const errorMsg =
           error instanceof Error ? error.message : 'Unknown error';
@@ -501,8 +571,40 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
           content: `Task failed: ${errorMsg}`,
           metadata: { taskId: task.id, employeeName: task.assignedTo },
         });
+
+        return { taskId: task.id, status: 'rejected' as const, error: errorMsg };
       }
+    });
+
+    const results = await Promise.allSettled(taskPromises);
+
+    // Process results - handle partial failures
+    const processedResults = results.map((r) =>
+      r.status === 'fulfilled' ? r.value : { taskId: 'unknown', status: 'rejected' as const, error: 'Promise rejected' }
+    );
+
+    const failedTasks = processedResults.filter((r) => r.status === 'rejected' || r.status === 'failed');
+    const succeededTasks = processedResults.filter((r) => r.status === 'fulfilled');
+    const skippedTasks = processedResults.filter((r) => r.status === 'skipped');
+
+    // Report partial success/failure
+    if (failedTasks.length > 0 && succeededTasks.length > 0) {
+      store.addMessage({
+        from: 'system',
+        type: 'warning',
+        content: `⚠️ Partial completion: ${succeededTasks.length} task(s) succeeded, ${failedTasks.length} task(s) failed`,
+      });
     }
+
+    if (skippedTasks.length > 0) {
+      store.addMessage({
+        from: 'system',
+        type: 'system',
+        content: `⏸️ ${skippedTasks.length} task(s) skipped due to mission pause`,
+      });
+    }
+
+    console.log(`📊 Task execution complete: ${succeededTasks.length} succeeded, ${failedTasks.length} failed, ${skippedTasks.length} skipped`);
   }
 
   /**
@@ -524,32 +626,41 @@ ${task.toolRequired ? `Tool to use: ${task.toolRequired}` : ''}
 Please complete this task according to your role and capabilities.`;
 
     try {
-      // Updated: Nov 16th 2025 - Fixed long-running task timeout to prevent indefinite hangs
-      // Add 2-minute timeout to prevent tasks from hanging indefinitely
+      // Use withTimeout from shared utilities for consistent timeout handling
       const TASK_TIMEOUT = 120000; // 2 minutes
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(
-          () => reject(new Error('Task execution timeout (2 minutes)')),
-          TASK_TIMEOUT
-        )
+
+      const executionPromise = retryWithBackoff(
+        () =>
+          unifiedLLMService.sendMessage({
+            provider: 'anthropic',
+            messages: [
+              { role: 'system', content: employee.systemPrompt },
+              { role: 'user', content: prompt },
+            ],
+            model:
+              employee.model === 'inherit'
+                ? 'claude-3-5-sonnet-20241022'
+                : employee.model,
+            temperature: 0.7,
+            userId,
+            sessionId,
+          }),
+        {
+          maxRetries: 3,
+          onRetry: (attempt, err) => {
+            console.log(
+              `[Orchestrator] Task execution (${employee.name}) failed (attempt ${attempt}/3), retrying...`,
+              err instanceof Error ? err.message : err
+            );
+          },
+        }
       );
 
-      const executionPromise = unifiedLLMService.sendMessage({
-        provider: 'anthropic',
-        messages: [
-          { role: 'system', content: employee.systemPrompt },
-          { role: 'user', content: prompt },
-        ],
-        model:
-          employee.model === 'inherit'
-            ? 'claude-3-5-sonnet-20241022'
-            : employee.model,
-        temperature: 0.7,
-        userId,
-        sessionId,
-      });
-
-      const response = await Promise.race([executionPromise, timeoutPromise]);
+      const response = await withTimeout(
+        executionPromise,
+        TASK_TIMEOUT,
+        `Task execution timeout after ${TASK_TIMEOUT / 1000} seconds`
+      );
 
       // Track token usage
       if (response.usage && userId) {
@@ -583,8 +694,13 @@ Please complete this task according to your role and capabilities.`;
 
       return response.content;
     } catch (error) {
-      throw new Error(
-        `Employee execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      const userMessage = getErrorMessage(error);
+      throw new AppError(
+        `Employee execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        ErrorCodes.TASK_EXECUTION_FAILED,
+        500,
+        isRetryableError(error),
+        `${employee.name} encountered an error: ${userMessage}`
       );
     }
   }
@@ -643,7 +759,13 @@ Please complete this task according to your role and capabilities.`;
       );
 
       if (selectedEmployees.length === 0) {
-        throw new Error('No suitable employees found for this request');
+        throw new AppError(
+          'No suitable employees found for this request',
+          ErrorCodes.EMPLOYEE_NOT_FOUND,
+          404,
+          false,
+          'No AI employees are available to handle your request. Please try a different request or hire additional employees.'
+        );
       }
 
       // Show selected team to user
@@ -700,20 +822,21 @@ Please complete this task according to your role and capabilities.`;
         mode: 'chat',
       };
     } catch (error) {
-      const errorMessage =
+      const technicalMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      console.error('❌ Error processing chat request:', errorMessage);
+      const userMessage = getErrorMessage(error);
+      console.error('❌ Error processing chat request:', technicalMessage);
 
-      store.failMission(errorMessage);
+      store.failMission(userMessage);
       store.addMessage({
         from: 'system',
         type: 'error',
-        content: `❌ Chat failed: ${errorMessage}`,
+        content: `❌ Chat failed: ${userMessage}`,
       });
 
       return {
         success: false,
-        error: errorMessage,
+        error: userMessage,
         mode: 'chat',
       };
     }
@@ -755,11 +878,23 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
 **Your selection (names only, comma-separated):**`;
 
     try {
-      const response = await unifiedLLMService.sendMessage(
-        [{ role: 'user', content: selectionPrompt }],
-        sessionId,
-        userId,
-        'anthropic'
+      const response = await retryWithBackoff(
+        () =>
+          unifiedLLMService.sendMessage(
+            [{ role: 'user', content: selectionPrompt }],
+            sessionId,
+            userId,
+            'anthropic'
+          ),
+        {
+          maxRetries: 3,
+          onRetry: (attempt, err) => {
+            console.log(
+              `[Orchestrator] Employee auto-selection failed (attempt ${attempt}/3), retrying...`,
+              err instanceof Error ? err.message : err
+            );
+          },
+        }
       );
 
       // Track token usage
@@ -884,7 +1019,13 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
     const employee = this.employees.find((e) => e.name === employeeName);
 
     if (!employee) {
-      throw new Error(`Employee ${employeeName} not found`);
+      throw new AppError(
+        `Employee ${employeeName} not found`,
+        ErrorCodes.EMPLOYEE_NOT_FOUND,
+        404,
+        false,
+        `The AI employee "${employeeName}" could not be found. Please select a different employee.`
+      );
     }
 
     const store = useMissionStore.getState();
@@ -903,17 +1044,29 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
         { role: 'user', content: message },
       ];
 
-      const response = await unifiedLLMService.sendMessage({
-        provider: 'anthropic',
-        messages: conversationMessages,
-        model:
-          employee.model === 'inherit'
-            ? 'claude-3-5-sonnet-20241022'
-            : employee.model,
-        temperature: 0.7,
-        userId,
-        sessionId,
-      });
+      const response = await retryWithBackoff(
+        () =>
+          unifiedLLMService.sendMessage({
+            provider: 'anthropic',
+            messages: conversationMessages,
+            model:
+              employee.model === 'inherit'
+                ? 'claude-3-5-sonnet-20241022'
+                : employee.model,
+            temperature: 0.7,
+            userId,
+            sessionId,
+          }),
+        {
+          maxRetries: 3,
+          onRetry: (attempt, err) => {
+            console.log(
+              `[Orchestrator] Message routing (${employee.name}) failed (attempt ${attempt}/3), retrying...`,
+              err instanceof Error ? err.message : err
+            );
+          },
+        }
+      );
 
       // Track token usage
       if (response.usage && userId) {

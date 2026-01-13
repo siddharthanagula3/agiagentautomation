@@ -88,6 +88,10 @@ export async function checkTokenSufficiency(
 /**
  * Deduct tokens from user balance after an API call
  * MUST be called AFTER every API request completes
+ * Uses the deduct_user_tokens RPC function which:
+ * - Atomically deducts tokens from user_token_balances table
+ * - Logs the transaction to token_transactions table
+ * - Ensures balance never goes below 0
  */
 export async function deductTokens(
   userId: string,
@@ -97,33 +101,35 @@ export async function deductTokens(
     const { provider, model, inputTokens, outputTokens, totalTokens } =
       metadata;
 
-    // Use the database function to safely deduct tokens
+    // Use the deduct_user_tokens RPC function for atomic deduction
+    // This function handles balance updates and transaction logging
     const { data: newBalance, error } = await supabase.rpc(
-      'update_user_token_balance',
+      'deduct_user_tokens',
       {
         p_user_id: userId,
-        p_tokens: -totalTokens, // Negative value = deduction
-        p_transaction_type: 'usage',
-        p_description: `${provider} ${model} - ${inputTokens} in, ${outputTokens} out`,
-        p_metadata: {
-          provider,
-          model,
-          inputTokens,
-          outputTokens,
-          totalTokens,
-          sessionId: metadata.sessionId,
-          feature: metadata.feature,
-          timestamp: new Date().toISOString(),
-        },
+        p_tokens: totalTokens, // Positive value - function handles the deduction
+        p_provider: provider,
+        p_model: model,
       }
     );
 
     if (error) {
       console.error('[Token Enforcement] Error deducting tokens:', error);
+
+      // Log detailed error for debugging
+      console.error('[Token Enforcement] Deduction details:', {
+        userId,
+        provider,
+        model,
+        totalTokens,
+        errorCode: error.code,
+        errorMessage: error.message,
+      });
+
       return {
         success: false,
         newBalance: 0,
-        error: error.message,
+        error: `Token deduction failed: ${error.message}`,
       };
     }
 
@@ -147,32 +153,59 @@ export async function deductTokens(
 
 /**
  * Get user's current token balance
- * Queries user_token_balances table (correct table)
+ * Uses get_or_create_token_balance RPC to ensure balance record exists
+ * Falls back to direct query if RPC not available
  * Returns free tier default if no balance record exists
  */
 export async function getUserTokenBalance(
   userId: string
 ): Promise<number | null> {
   try {
-    // Query user_token_balances table (correct table)
+    // Try using the get_or_create_token_balance RPC function
+    // This ensures a balance record is created if it doesn't exist
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+      'get_or_create_token_balance',
+      { p_user_id: userId }
+    );
+
+    if (!rpcError && rpcData && rpcData.length > 0) {
+      const balance = Math.max(rpcData[0].current_balance || 0, 0);
+      console.log(`[Token Balance] Current balance (via RPC): ${balance.toLocaleString()}`);
+      return balance;
+    }
+
+    // Fallback: Query user_token_balances table directly
+    if (rpcError) {
+      console.warn(
+        '[Token Balance] RPC failed, falling back to direct query:',
+        rpcError.message
+      );
+    }
+
     const { data: balanceData, error: balanceError } = await supabase
       .from('user_token_balances')
       .select('current_balance')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
-    if (balanceError) {
-      console.warn(
-        '[Token Balance] No balance record found, checking user plan...',
-        balanceError.message
-      );
+    if (balanceError || !balanceData) {
+      if (balanceError) {
+        console.warn(
+          '[Token Balance] Error fetching balance record, checking user plan...',
+          balanceError.message
+        );
+      } else {
+        console.warn(
+          '[Token Balance] No balance record found, checking user plan...'
+        );
+      }
 
       // Get user's plan to determine appropriate default balance
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('plan')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (userError || !userData) {
         console.error('[Token Balance] Error fetching user plan:', userError);
@@ -239,10 +272,12 @@ export async function checkMonthlyAllowance(userId: string): Promise<{
       .from('users')
       .select('plan')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (error || !user) {
-      console.error('[Token Enforcement] Error fetching user:', error);
+      if (error) {
+        console.error('[Token Enforcement] Error fetching user:', error);
+      }
       // Return free tier defaults on error
       return {
         allowed: true, // Allow request but with free tier limits

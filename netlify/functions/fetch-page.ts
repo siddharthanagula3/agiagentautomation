@@ -5,6 +5,9 @@
 
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
+import { withAuth } from './utils/auth-middleware';
+import { withRateLimit, checkRateLimitWithTier } from './utils/rate-limiter';
+import { getCorsHeaders } from './utils/cors';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -12,22 +15,43 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Rate limiting storage (in production, use Redis or similar)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+/**
+ * SSRF Protection: Check if hostname is private/reserved (synchronous check)
+ * This blocks obvious private hosts before DNS resolution
+ */
+function isPrivateOrReservedHost(hostname: string): boolean {
+  // Block localhost variants
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
+    return true;
+  }
 
-export const handler: Handler = async (
+  // Block private IP ranges (when hostname is an IP address)
+  const privatePatterns = [
+    /^10\./,                                      // 10.0.0.0/8
+    /^172\.(1[6-9]|2\d|3[01])\./,                // 172.16.0.0/12
+    /^192\.168\./,                               // 192.168.0.0/16
+    /^169\.254\./,                               // Link-local 169.254.0.0/16
+    /^0\./,                                      // 0.0.0.0/8
+    /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./,  // Carrier-grade NAT 100.64.0.0/10
+    /^127\./,                                    // Loopback 127.0.0.0/8
+  ];
+
+  return privatePatterns.some(pattern => pattern.test(hostname));
+}
+
+const fetchPageHandler: Handler = async (
   event: HandlerEvent,
   context: HandlerContext
 ) => {
+  // Get origin for CORS validation
+  const origin = event.headers['origin'] || event.headers['Origin'];
+  const corsHeaders = getCorsHeaders(origin);
+
   // Handle CORS preflight requests
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      },
+      headers: corsHeaders,
       body: '',
     };
   }
@@ -37,7 +61,7 @@ export const handler: Handler = async (
     return {
       statusCode: 405,
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        ...corsHeaders,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ error: 'Method not allowed' }),
@@ -54,7 +78,7 @@ export const handler: Handler = async (
       return {
         statusCode: 400,
         headers: {
-          'Access-Control-Allow-Origin': '*',
+          ...corsHeaders,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ error: 'URL is required' }),
@@ -69,25 +93,50 @@ export const handler: Handler = async (
       return {
         statusCode: 400,
         headers: {
-          'Access-Control-Allow-Origin': '*',
+          ...corsHeaders,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ error: 'Invalid URL format' }),
       };
     }
 
-    // Check rate limits
-    const domain = parsedUrl.hostname;
-    if (!checkRateLimit(domain)) {
+    // SSRF Protection: Block requests to private/internal hosts
+    if (isPrivateOrReservedHost(parsedUrl.hostname)) {
       return {
-        statusCode: 429,
+        statusCode: 403,
         headers: {
-          'Access-Control-Allow-Origin': '*',
+          ...corsHeaders,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          error: 'Access denied',
+          message: 'Requests to private or internal hosts are not allowed.',
+        }),
+      };
+    }
+
+    // Check rate limits using Redis-backed rate limiter
+    // Use 'public' tier for domain-specific rate limiting (stricter than authenticated tier)
+    const rateLimitResult = await checkRateLimitWithTier(event, 'public');
+    if (!rateLimitResult.success) {
+      return {
+        statusCode: 429,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+          'X-RateLimit-Limit': rateLimitResult.limit?.toString() || '',
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': rateLimitResult.reset?.toString() || '',
+          'Retry-After': rateLimitResult.reset
+            ? Math.ceil((rateLimitResult.reset - Date.now()) / 1000).toString()
+            : '60',
+        },
+        body: JSON.stringify({
           error: 'Rate limit exceeded',
-          message: 'Too many requests to this domain. Please try again later.',
+          message: 'Too many requests. Please try again later.',
+          retryAfter: rateLimitResult.reset
+            ? Math.ceil((rateLimitResult.reset - Date.now()) / 1000)
+            : 60,
         }),
       };
     }
@@ -100,7 +149,7 @@ export const handler: Handler = async (
       return {
         statusCode: 403,
         headers: {
-          'Access-Control-Allow-Origin': '*',
+          ...corsHeaders,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -119,7 +168,7 @@ export const handler: Handler = async (
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        ...corsHeaders,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -138,7 +187,7 @@ export const handler: Handler = async (
     return {
       statusCode: 500,
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        ...corsHeaders,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -149,31 +198,7 @@ export const handler: Handler = async (
   }
 };
 
-/**
- * Check rate limits for domain
- */
-function checkRateLimit(domain: string): boolean {
-  const now = Date.now();
-  const key = `rate_limit_${domain}`;
-  const limit = rateLimitStore.get(key);
-
-  if (!limit || now > limit.resetTime) {
-    // Reset or initialize rate limit
-    rateLimitStore.set(key, {
-      count: 1,
-      resetTime: now + 60000, // 1 minute window
-    });
-    return true;
-  }
-
-  if (limit.count >= 10) {
-    // 10 requests per minute
-    return false;
-  }
-
-  limit.count++;
-  return true;
-}
+export const handler = withAuth(withRateLimit(fetchPageHandler));
 
 /**
  * Check robots.txt compliance
@@ -350,26 +375,18 @@ async function fetchPageContent(url: URL): Promise<{
  * Sanitize HTML content
  */
 function sanitizeHtml(html: string): string {
+  // SECURITY: Using non-backtracking [\s\S]*? patterns to prevent ReDoS
   // Remove script tags and their content
-  let sanitized = html.replace(
-    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-    ''
-  );
+  let sanitized = html.replace(/<script[\s\S]*?<\/script>/gi, '');
 
   // Remove style tags and their content
-  sanitized = sanitized.replace(
-    /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi,
-    ''
-  );
+  sanitized = sanitized.replace(/<style[\s\S]*?<\/style>/gi, '');
 
   // Remove comments
   sanitized = sanitized.replace(/<!--[\s\S]*?-->/g, '');
 
   // Remove noscript tags
-  sanitized = sanitized.replace(
-    /<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi,
-    ''
-  );
+  sanitized = sanitized.replace(/<noscript[\s\S]*?<\/noscript>/gi, '');
 
   // Remove potentially dangerous attributes
   sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');

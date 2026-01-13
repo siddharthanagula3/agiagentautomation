@@ -8,8 +8,8 @@ import {
   TaskStatus,
   AgentType,
   ExecutionPlan,
-} from '../reasoning/task-decomposer';
-import { agentCommunicator, AgentMessage } from './agent-protocol';
+} from './reasoning/task-breakdown';
+import { agentCommunicator, AgentMessage } from './agent-communication-protocol';
 
 // Simple browser-compatible EventEmitter
 class SimpleEventEmitter {

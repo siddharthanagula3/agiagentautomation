@@ -3,7 +3,7 @@
  * Allows agents to send messages, requests, and coordinate work
  */
 
-import { AgentType } from '../reasoning/task-decomposer';
+import { AgentType } from './reasoning/task-breakdown';
 
 export type MessageType =
   | 'request'

@@ -1,5 +1,5 @@
 // Updated: Nov 16th 2025 - Added error boundary
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Separator } from '@shared/ui/separator';
 import { useChat } from '../hooks/use-chat-interface';
@@ -36,11 +36,25 @@ import {
 } from '../components/UsageWarningBanner';
 import { UsageWarningModal } from '../components/UsageWarningModal';
 import { useUsageWarningStore } from '@shared/stores/usage-warning-store';
+import { useUserUsage } from '@shared/stores/user-profile-store';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
+import { useNotificationStore } from '@shared/stores/notification-store';
+
+// Default token limits by plan tier (fallback when user data not loaded)
+const DEFAULT_TOKEN_LIMITS = {
+  free: 10000,
+  pro: 100000,
+  enterprise: 500000,
+} as const;
+
+const FREE_TIER_DEFAULT_LIMIT = DEFAULT_TOKEN_LIMITS.free;
 
 const ChatPage: React.FC = () => {
   const { sessionId } = useParams<{ sessionId?: string }>();
   const navigate = useNavigate();
+
+  // Get user's token usage/limits from subscription
+  const userUsage = useUserUsage();
 
   // Load user AI preferences (applies to LLM service on mount)
   const aiPreferences = useAIPreferences();
@@ -124,8 +138,13 @@ const ChatPage: React.FC = () => {
   // Local state
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     // Persist sidebar state in localStorage
-    const stored = localStorage.getItem('chat-sidebar-open');
-    return stored !== null ? JSON.parse(stored) : true;
+    try {
+      const stored = localStorage.getItem('chat-sidebar-open');
+      return stored !== null ? JSON.parse(stored) : true;
+    } catch {
+      // If localStorage contains invalid JSON, return default value
+      return true;
+    }
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMode, setSelectedMode] = useState<ChatMode>('team');
@@ -212,11 +231,22 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  const handleNewChat = () => {
-    createSession('New Chat').then((session) => {
-      navigate(`/chat/${session.id}`);
-    });
-  };
+  // Get notification store for user feedback
+  const { showError, showSuccess } = useNotificationStore();
+
+  const handleNewChat = useCallback(() => {
+    createSession('New Chat')
+      .then((session) => {
+        navigate(`/chat/${session.id}`);
+      })
+      .catch((error) => {
+        console.error('Failed to create new chat session:', error);
+        showError(
+          'Unable to create a new chat. Please try again.',
+          'Chat Creation Failed'
+        );
+      });
+  }, [createSession, navigate, showError]);
 
   const handleSessionSelect = (session: ChatSession) => {
     navigate(`/chat/${session.id}`);
@@ -265,15 +295,33 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     if (!currentSession) return;
-    await shareSession(currentSession.id);
-  };
+    try {
+      await shareSession(currentSession.id);
+      showSuccess('Share link generated successfully', 'Session Shared');
+    } catch (error) {
+      console.error('Failed to share session:', error);
+      showError(
+        'Unable to generate share link. Please try again.',
+        'Share Failed'
+      );
+    }
+  }, [currentSession, shareSession, showSuccess, showError]);
 
-  const handleCopyToClipboard = async () => {
+  const handleCopyToClipboard = useCallback(async () => {
     if (!currentSession) return;
-    await copyToClipboard(currentSession, messages, 'markdown');
-  };
+    try {
+      await copyToClipboard(currentSession, messages, 'markdown');
+      showSuccess('Conversation copied to clipboard', 'Copied');
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      showError(
+        'Unable to copy to clipboard. Please try again.',
+        'Copy Failed'
+      );
+    }
+  }, [currentSession, messages, copyToClipboard, showSuccess, showError]);
 
   // Monitor token usage for warnings
   const { usageData } = useUsageMonitoring(currentSession?.userId || null);
@@ -292,7 +340,8 @@ const ChatPage: React.FC = () => {
   React.useEffect(() => {
     if (usageData.length > 0) {
       const totalUsed = usageData.reduce((sum, d) => sum + d.tokensUsed, 0);
-      const limit = 50000; // This should come from user's subscription plan
+      // Use user's subscription token limit, fallback to free tier default
+      const limit = userUsage?.tokensLimit ?? FREE_TIER_DEFAULT_LIMIT;
 
       updateUsage(totalUsed, limit);
 
@@ -307,33 +356,42 @@ const ChatPage: React.FC = () => {
         markWarningShown(85);
       }
     }
-  }, [usageData, updateUsage, shouldShowWarning, markWarningShown]);
+  }, [usageData, userUsage?.tokensLimit, updateUsage, shouldShowWarning, markWarningShown]);
 
-  // Keyboard shortcuts
-  const handleCopyLastMessage = () => {
+  // Keyboard shortcuts - memoized to prevent unnecessary re-renders
+  const handleCopyLastMessage = useCallback(async () => {
     const lastMessage = messages[messages.length - 1];
     if (lastMessage) {
-      navigator.clipboard.writeText(lastMessage.content);
+      try {
+        await navigator.clipboard.writeText(lastMessage.content);
+        showSuccess('Message copied to clipboard', 'Copied');
+      } catch (error) {
+        console.error('Failed to copy message:', error);
+        showError(
+          'Unable to copy message to clipboard.',
+          'Copy Failed'
+        );
+      }
     }
-  };
+  }, [messages, showSuccess, showError]);
 
-  const handleRegenerateLastMessage = () => {
+  const handleRegenerateLastMessage = useCallback(() => {
     const lastAssistantMessage = [...messages]
       .reverse()
       .find((m) => m.role === 'assistant');
     if (lastAssistantMessage) {
       regenerateMessage(lastAssistantMessage.id);
     }
-  };
+  }, [messages, regenerateMessage]);
 
-  const handleFocusComposer = () => {
+  const handleFocusComposer = useCallback(() => {
     composerRef.current?.focus();
-  };
+  }, []);
 
-  const handleShowSearch = () => {
+  const handleShowSearch = useCallback(() => {
     // TODO: Implement search modal
     setSearchQuery('');
-  };
+  }, []);
 
   const { shortcuts } = useKeyboardShortcuts({
     onNewChat: handleNewChat,

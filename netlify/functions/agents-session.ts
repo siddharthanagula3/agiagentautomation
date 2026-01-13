@@ -2,11 +2,19 @@
  * Agents Session Function
  * Creates or retrieves an OpenAI Agents SDK session
  * Uses OpenAI Assistants API v2 for agent orchestration
+ * Updated: Jan 10th 2026 - Added CORS validation, rate limiting, and Zod validation
  */
 
-import { Handler } from '@netlify/functions';
+import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
+import { withAuth } from './utils/auth-middleware';
+import { withRateLimit } from './utils/rate-limiter';
+import { getCorsHeaders, getMinimalCorsHeaders } from './utils/cors';
+import {
+  agentsSessionSchema,
+  formatValidationError,
+} from './utils/validation-schemas';
 
 // Updated: Nov 16th 2025 - Fixed missing environment variable validation
 // Validate environment variables
@@ -33,15 +41,6 @@ const openai = new OpenAI({
   apiKey: openaiApiKey,
 });
 
-interface SessionRequest {
-  userId: string;
-  employeeId: string;
-  employeeName: string;
-  employeeRole: string;
-  capabilities: string[];
-  sessionId?: string;
-}
-
 interface SessionResponse {
   success: boolean;
   conversationId?: string;
@@ -50,16 +49,19 @@ interface SessionResponse {
   error?: string;
 }
 
-export const handler: Handler = async (event) => {
-  // Handle CORS
+// Updated: Jan 10th 2026 - Refactored to use withAuth middleware
+const authenticatedHandler = async (
+  event: HandlerEvent & { user: { id: string; email?: string } },
+  context: HandlerContext
+) => {
+  const origin = event.headers.origin || event.headers.Origin || '';
+  const corsHeaders = getCorsHeaders(origin);
+
+  // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      },
+      headers: corsHeaders,
       body: '',
     };
   }
@@ -67,69 +69,46 @@ export const handler: Handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: getMinimalCorsHeaders(origin),
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
 
   try {
-    const {
-      userId,
-      employeeId,
-      employeeName,
-      employeeRole,
-      capabilities,
-      sessionId,
-    }: SessionRequest = JSON.parse(event.body || '{}');
+    // SECURITY: Validate request body with Zod schema
+    const parseResult = agentsSessionSchema.safeParse(
+      JSON.parse(event.body || '{}')
+    );
 
-    if (!userId || !employeeId || !employeeName) {
+    if (!parseResult.success) {
       return {
         statusCode: 400,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: 'Missing required fields' }),
+        headers: getMinimalCorsHeaders(origin),
+        body: JSON.stringify(formatValidationError(parseResult.error)),
       };
     }
 
-    // Verify authentication
-    const authHeader = event.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return {
-        statusCode: 401,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: 'Unauthorized' }),
-      };
-    }
+    const { userId, employeeId, employeeName, employeeRole, capabilities, sessionId } =
+      parseResult.data;
 
-    const token = authHeader.split(' ')[1];
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser(token);
-
-    if (authError || !user || user.id !== userId) {
+    // Verify userId matches authenticated user (withAuth already verified JWT)
+    if (event.user.id !== userId) {
       return {
-        statusCode: 401,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: 'Invalid authentication' }),
+        statusCode: 403,
+        headers: getMinimalCorsHeaders(origin),
+        body: JSON.stringify({ error: 'Forbidden: User ID mismatch' }),
       };
     }
 
     // Check if session exists
+    // Use .maybeSingle() to avoid 406 errors when conversation doesn't exist
     if (sessionId) {
       const { data: existingConversation } = await supabase
         .from('conversations')
         .select('*')
         .eq('id', sessionId)
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (existingConversation) {
         const response: SessionResponse = {
@@ -142,7 +121,7 @@ export const handler: Handler = async (event) => {
         return {
           statusCode: 200,
           headers: {
-            'Access-Control-Allow-Origin': '*',
+            ...corsHeaders,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(response),
@@ -153,11 +132,11 @@ export const handler: Handler = async (event) => {
     // Create OpenAI Assistant for this employee
     const assistant = await openai.beta.assistants.create({
       name: employeeName,
-      description: `AI Employee - ${employeeRole}`,
-      instructions: `You are ${employeeName}, a professional ${employeeRole}.
+      description: `AI Employee - ${employeeRole || 'General Assistant'}`,
+      instructions: `You are ${employeeName}, a professional ${employeeRole || 'assistant'}.
 
 Your capabilities include:
-${capabilities.map((cap) => `- ${cap}`).join('\n')}
+${(capabilities || []).map((cap) => `- ${cap}`).join('\n')}
 
 Respond naturally and professionally. Use your tools when needed to help the user achieve their goals.
 Always be helpful, accurate, and concise.`,
@@ -171,7 +150,7 @@ Always be helpful, accurate, and concise.`,
         userId,
         employeeId,
         employeeName,
-        employeeRole,
+        employeeRole: employeeRole || '',
       },
     });
 
@@ -184,10 +163,10 @@ Always be helpful, accurate, and concise.`,
         metadata: {
           employeeId,
           employeeName,
-          employeeRole,
+          employeeRole: employeeRole || '',
           threadId: thread.id,
           assistantId: assistant.id,
-          capabilities,
+          capabilities: capabilities || [],
         },
       })
       .select()
@@ -197,9 +176,7 @@ Always be helpful, accurate, and concise.`,
       console.error('Error creating conversation:', conversationError);
       return {
         statusCode: 500,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: getMinimalCorsHeaders(origin),
         body: JSON.stringify({ error: 'Failed to create conversation' }),
       };
     }
@@ -214,7 +191,7 @@ Always be helpful, accurate, and concise.`,
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        ...corsHeaders,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(response),
@@ -223,9 +200,7 @@ Always be helpful, accurate, and concise.`,
     console.error('Session creation error:', error);
     return {
       statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: getMinimalCorsHeaders(origin),
       body: JSON.stringify({
         error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error',
@@ -233,3 +208,6 @@ Always be helpful, accurate, and concise.`,
     };
   }
 };
+
+// Updated: Jan 10th 2026 - Added withAuth and withRateLimit middleware
+export const handler: Handler = withAuth(withRateLimit(authenticatedHandler));

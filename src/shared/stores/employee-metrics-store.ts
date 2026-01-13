@@ -4,7 +4,8 @@
  */
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { devtools, persist } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import type {
   AgentStatus,
   AgentCommunication,
@@ -60,8 +61,8 @@ export interface AgentMetrics {
     agentName?: string;
   }>;
 
-  // Agent status tracking
-  agentStatuses: Map<string, AgentStatus>;
+  // Agent status tracking (using Record for serialization compatibility)
+  agentStatuses: Record<string, AgentStatus>;
   agentCommunications: AgentCommunication[];
 }
 
@@ -119,13 +120,15 @@ const initialState: AgentMetrics = {
   currentSessions: [],
   recentActivity: [],
 
-  agentStatuses: new Map(),
+  agentStatuses: {},
   agentCommunications: [],
 };
 
 export const useAgentMetricsStore = create<AgentMetricsState>()(
-  persist(
-    (set, get) => ({
+  devtools(
+    immer(
+      persist(
+        (set, get) => ({
       ...initialState,
       isBackgroundServiceRunning: false,
 
@@ -205,15 +208,13 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
 
       updateAgentStatus: (agentName, status) => {
         set((state) => {
-          const newStatuses = new Map(state.agentStatuses);
-          const oldStatus = newStatuses.get(agentName);
-          newStatuses.set(agentName, status);
+          const newStatuses = { ...state.agentStatuses, [agentName]: status };
 
           // Count active vs idle agents
           let activeCount = 0;
           let idleCount = 0;
 
-          newStatuses.forEach((s) => {
+          Object.values(newStatuses).forEach((s) => {
             if (s.status === 'working' || s.status === 'analyzing') {
               activeCount++;
             } else if (s.status === 'idle') {
@@ -223,7 +224,7 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
 
           return {
             agentStatuses: newStatuses,
-            totalAgents: newStatuses.size,
+            totalAgents: Object.keys(newStatuses).length,
             activeAgents: activeCount,
             idleAgents: idleCount,
           };
@@ -296,17 +297,20 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
         });
       },
     }),
-    {
-      name: 'agent-metrics-storage',
-      partialize: (state) => ({
-        totalSessions: state.totalSessions,
-        completedTasks: state.completedTasks,
-        failedTasks: state.failedTasks,
-        totalTokensUsed: state.totalTokensUsed,
-        totalMessagesExchanged: state.totalMessagesExchanged,
-        currentSessions: state.currentSessions,
-        recentActivity: state.recentActivity,
-      }),
-    }
+        {
+          name: 'agent-metrics-storage',
+          partialize: (state) => ({
+            totalSessions: state.totalSessions,
+            completedTasks: state.completedTasks,
+            failedTasks: state.failedTasks,
+            totalTokensUsed: state.totalTokensUsed,
+            totalMessagesExchanged: state.totalMessagesExchanged,
+            currentSessions: state.currentSessions,
+            recentActivity: state.recentActivity,
+          }),
+        }
+      )
+    ),
+    { name: 'AgentMetricsStore' }
   )
 );

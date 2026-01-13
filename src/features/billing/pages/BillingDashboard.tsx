@@ -197,7 +197,7 @@ const BillingPage: React.FC = () => {
             .from('user_token_balances')
             .select('current_balance')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
 
           if (balanceError) {
             // User might not have a balance record yet - that's okay, use free tier defaults
@@ -268,7 +268,7 @@ const BillingPage: React.FC = () => {
             'plan, subscription_end_date, plan_status, stripe_customer_id, stripe_subscription_id, billing_period'
           )
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
         if (!userError && userData) {
           userPlan = userData.plan || 'free';
@@ -445,12 +445,20 @@ const BillingPage: React.FC = () => {
   };
 
   const handleRefreshBilling = async () => {
-    await loadBilling();
-    toast.success('Billing information refreshed');
+    try {
+      await loadBilling();
+      toast.success('Billing information refreshed');
+    } catch (err) {
+      toast.error('Failed to refresh billing information. Please try again.');
+    }
   };
 
   const handleDownloadInvoice = (invoiceId: string) => {
-    // In real implementation, this would download the invoice
+    // In a production environment, this would:
+    // 1. Call the backend to get a signed download URL
+    // 2. Trigger the download
+    // For now, show a message that this feature is coming soon
+    toast.info('Invoice download will be available soon');
   };
 
   const handleBuyTokenPack = async (pack: TokenPack) => {

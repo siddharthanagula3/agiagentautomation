@@ -28,10 +28,10 @@ export interface FileUploadProgress {
 
 export interface VibeFileState {
   // Files for current session
-  files: Map<string, VibeFile>;
+  files: Record<string, VibeFile>;
 
   // Upload progress tracking
-  uploadProgress: Map<string, FileUploadProgress>;
+  uploadProgress: Record<string, FileUploadProgress>;
 
   // Selected files for current message
   selectedFileIds: string[];
@@ -69,8 +69,8 @@ export const useVibeFileStore = create<VibeFileState>()(
   devtools(
     immer((set, get) => ({
       // Initial state
-      files: new Map(),
-      uploadProgress: new Map(),
+      files: {},
+      uploadProgress: {},
       selectedFileIds: [],
       isLoading: false,
       error: null,
@@ -78,14 +78,14 @@ export const useVibeFileStore = create<VibeFileState>()(
       // File actions
       addFile: (file) => {
         set((state) => {
-          state.files.set(file.id, file);
+          state.files[file.id] = file;
           state.error = null;
         });
       },
 
       removeFile: (fileId) => {
         set((state) => {
-          state.files.delete(fileId);
+          delete state.files[fileId];
           state.selectedFileIds = state.selectedFileIds.filter(
             (id) => id !== fileId
           );
@@ -94,9 +94,9 @@ export const useVibeFileStore = create<VibeFileState>()(
 
       clearFiles: () => {
         set((state) => {
-          state.files.clear();
+          state.files = {};
           state.selectedFileIds = [];
-          state.uploadProgress.clear();
+          state.uploadProgress = {};
           state.error = null;
         });
       },
@@ -133,18 +133,18 @@ export const useVibeFileStore = create<VibeFileState>()(
       // Upload progress actions
       startUpload: (fileId, fileName) => {
         set((state) => {
-          state.uploadProgress.set(fileId, {
+          state.uploadProgress[fileId] = {
             fileId,
             fileName,
             progress: 0,
             status: 'uploading',
-          });
+          };
         });
       },
 
       updateUploadProgress: (fileId, progress) => {
         set((state) => {
-          const upload = state.uploadProgress.get(fileId);
+          const upload = state.uploadProgress[fileId];
           if (upload) {
             upload.progress = progress;
           }
@@ -153,18 +153,18 @@ export const useVibeFileStore = create<VibeFileState>()(
 
       completeUpload: (fileId, file) => {
         set((state) => {
-          const upload = state.uploadProgress.get(fileId);
+          const upload = state.uploadProgress[fileId];
           if (upload) {
             upload.status = 'completed';
             upload.progress = 100;
           }
-          state.files.set(file.id, file);
+          state.files[file.id] = file;
         });
       },
 
       failUpload: (fileId, error) => {
         set((state) => {
-          const upload = state.uploadProgress.get(fileId);
+          const upload = state.uploadProgress[fileId];
           if (upload) {
             upload.status = 'failed';
             upload.error = error;
@@ -175,7 +175,7 @@ export const useVibeFileStore = create<VibeFileState>()(
 
       clearUploadProgress: (fileId) => {
         set((state) => {
-          state.uploadProgress.delete(fileId);
+          delete state.uploadProgress[fileId];
         });
       },
 
@@ -193,13 +193,13 @@ export const useVibeFileStore = create<VibeFileState>()(
       },
 
       getFile: (fileId) => {
-        return get().files.get(fileId);
+        return get().files[fileId];
       },
 
       getSelectedFiles: () => {
         const { files, selectedFileIds } = get();
         return selectedFileIds
-          .map((id) => files.get(id))
+          .map((id) => files[id])
           .filter((file): file is VibeFile => file !== undefined);
       },
     })),

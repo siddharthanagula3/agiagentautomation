@@ -1,11 +1,25 @@
 /**
  * xAI Grok Provider
  * Integration for Grok models with real-time X (Twitter) access
- * Specialized for social media analysis, public opinion, and trend detection
- * Created: Nov 18th 2025
+ * Specialized for social media analysis, agentic tasks, and trend detection
+ * Updated: Jan 3rd 2026 - Updated to Grok-4 series
  */
 
 import { supabase } from '@shared/lib/supabase-client';
+
+/**
+ * Helper function to get the current Supabase session token
+ * Required for authenticated API proxy calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('[Grok Provider] Failed to get auth token:', error);
+    return null;
+  }
+}
 
 // SECURITY: All API calls go through Netlify proxy functions
 // Environment variables with VITE_ prefix are exposed to the browser (security risk)
@@ -47,11 +61,18 @@ export interface GrokResponse {
 }
 
 export interface GrokConfig {
-  model: 'grok-beta' | 'grok-2-latest';
+  model:
+    | 'grok-4'
+    | 'grok-4-1-fast-reasoning'
+    | 'grok-4-1-fast-non-reasoning'
+    | 'grok-3'
+    | 'grok-3-mini'
+    | 'grok-2-vision-1212';
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
   includeRealTimeData?: boolean; // Access real-time X/Twitter data
+  useAgentTools?: boolean; // Enable xAI Agent Tools API
 }
 
 export class GrokError extends Error {
@@ -70,7 +91,7 @@ export class GrokProvider {
 
   constructor(config: Partial<GrokConfig> = {}) {
     this.config = {
-      model: 'grok-beta',
+      model: 'grok-4',
       maxTokens: 4000,
       temperature: 0.7,
       systemPrompt:
@@ -95,10 +116,20 @@ export class GrokProvider {
       // SECURITY: Use Netlify proxy to keep API keys secure
       const proxyUrl = '/.netlify/functions/grok-proxy';
 
+      // Get auth token for authenticated proxy calls
+      const authToken = await getAuthToken();
+      if (!authToken) {
+        throw new GrokError(
+          'User not authenticated. Please log in to use AI features.',
+          'NOT_AUTHENTICATED'
+        );
+      }
+
       const response = await fetch(proxyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: messages.map((msg) => ({
@@ -485,10 +516,38 @@ export class GrokProvider {
   }
 
   /**
-   * Get available models
+   * Get available models (Jan 2026 - Grok 4 series)
    */
   static getAvailableModels(): string[] {
-    return ['grok-beta', 'grok-2-latest'];
+    return [
+      'grok-4',
+      'grok-4-1-fast-reasoning',
+      'grok-4-1-fast-non-reasoning',
+      'grok-3',
+      'grok-3-mini',
+      'grok-2-vision-1212',
+    ];
+  }
+
+  /**
+   * Get vision-capable models
+   */
+  static getVisionModels(): string[] {
+    return ['grok-2-vision-1212', 'grok-4-1-fast-reasoning'];
+  }
+
+  /**
+   * Get image generation models
+   */
+  static getImageModels(): string[] {
+    return ['grok-2-image-1212'];
+  }
+
+  /**
+   * Get models optimized for tool calling
+   */
+  static getAgentModels(): string[] {
+    return ['grok-4-1-fast-reasoning', 'grok-4-1-fast-non-reasoning', 'grok-4'];
   }
 }
 

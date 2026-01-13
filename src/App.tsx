@@ -109,6 +109,9 @@ const MissionControlPage = lazyWithRetry(
 const BillingPage = lazyWithRetry(
   () => import('@features/billing/pages/BillingDashboard')
 );
+const EmployeeMarketplacePage = lazyWithRetry(
+  () => import('@features/marketplace/pages/EmployeeMarketplace')
+);
 const VibeDashboard = lazyWithRetry(
   () => import('@features/vibe/pages/VibeDashboard')
 );
@@ -227,15 +230,6 @@ function App() {
                   />
                 </Route>
 
-                {/* Root level auth routes for convenience */}
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route
-                  path="/forgot-password"
-                  element={<ForgotPasswordPage />}
-                />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-
                 {/* ===== VIBE - Standalone Multi-Agent Workspace (Protected) ===== */}
                 <Route
                   path="/vibe"
@@ -258,7 +252,14 @@ function App() {
                   }
                 >
                   {/* Dashboard */}
-                  <Route path="dashboard" element={<DashboardHomePage />} />
+                  <Route
+                    path="dashboard"
+                    element={
+                      <ErrorBoundary>
+                        <DashboardHomePage />
+                      </ErrorBoundary>
+                    }
+                  />
 
                   {/* Chat Interface - Main Feature */}
                   <Route
@@ -289,9 +290,30 @@ function App() {
                   />
                   <Route
                     path="mission-control"
-                    element={<MissionControlPage />}
+                    element={
+                      <ErrorBoundary>
+                        <MissionControlPage />
+                      </ErrorBoundary>
+                    }
                   />
-                  <Route path="company-hub" element={<MissionControlPage />} />
+                  <Route
+                    path="company-hub"
+                    element={
+                      <ErrorBoundary>
+                        <MissionControlPage />
+                      </ErrorBoundary>
+                    }
+                  />
+
+                  {/* Employee Marketplace (Protected) */}
+                  <Route
+                    path="marketplace"
+                    element={
+                      <ErrorBoundary>
+                        <EmployeeMarketplacePage />
+                      </ErrorBoundary>
+                    }
+                  />
 
                   {/* Settings */}
                   <Route
@@ -320,12 +342,13 @@ function App() {
                   />
 
                   {/* Billing */}
-                  <Route path="billing" element={<BillingPage />} />
-
-                  {/* Marketplace - Available in Dashboard */}
                   <Route
-                    path="marketplace"
-                    element={<PublicMarketplacePage />}
+                    path="billing"
+                    element={
+                      <ErrorBoundary>
+                        <BillingPage />
+                      </ErrorBoundary>
+                    }
                   />
 
                   {/* Support Center */}

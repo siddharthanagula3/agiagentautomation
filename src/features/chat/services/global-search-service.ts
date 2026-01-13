@@ -37,6 +37,19 @@ export interface SearchStats {
   searchTime: number; // in milliseconds
 }
 
+interface MessageWithSession {
+  id: string;
+  session_id: string;
+  role: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  chat_sessions: {
+    id: string;
+    title: string | null;
+  } | null;
+}
+
 class GlobalSearchService {
   private readonly CONTEXT_LENGTH = 50; // Characters of context before/after match
   private readonly DEFAULT_LIMIT = 50;
@@ -228,7 +241,7 @@ class GlobalSearchService {
       return [];
     }
 
-    return (data || []).map((message: any) => {
+    return ((data || []) as MessageWithSession[]).map((message) => {
       const match = this.extractMatch(message.content, filters.query);
 
       return {

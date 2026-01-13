@@ -53,7 +53,7 @@ export async function streamOpenAI(
   messages: Array<{ role: string; content: string }>,
   onChunk: StreamCallback,
   tools?: unknown[],
-  model: string = 'gpt-4-turbo-preview'
+  model: string = 'gpt-4o'
 ) {
   // In production, use Netlify proxy (non-stream) and emit a single chunk
   if (import.meta.env.PROD) {
@@ -362,7 +362,7 @@ export async function streamGoogle(
 export async function streamPerplexity(
   messages: Array<{ role: string; content: string }>,
   onChunk: StreamCallback,
-  model: string = 'llama-3.1-sonar-large-128k-online'
+  model: string = 'sonar-pro'
 ) {
   // In production, use Netlify proxy (non-stream)
   if (import.meta.env.PROD) {

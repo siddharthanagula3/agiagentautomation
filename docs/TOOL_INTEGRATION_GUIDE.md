@@ -309,6 +309,28 @@ VITE_PERPLEXITY_API_KEY=your_perplexity_key
 VITE_GOOGLE_CX=your_google_custom_search_engine_id
 ```
 
+**Server-Side LLM Proxies (Netlify Functions):**
+
+```bash
+# Primary Providers
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=...
+PERPLEXITY_API_KEY=...
+
+# Additional Providers
+GROK_API_KEY=xai-...
+DEEPSEEK_API_KEY=...
+QWEN_API_KEY=...
+
+# Rate Limiting
+UPSTASH_REDIS_REST_URL=...
+UPSTASH_REDIS_REST_TOKEN=...
+
+# Authentication
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
 **Demo Mode (No API Keys):**
 
 ```bash
@@ -571,6 +593,15 @@ For issues or questions:
 4. Review this guide for examples
 
 ## Changelog
+
+**v1.1.0 (Jan 2026)**
+
+- Added DeepSeek and Qwen LLM provider support
+- Enhanced CORS validation with origin whitelist (no wildcard)
+- JWT verification via Supabase `auth.getUser()` in rate limiter
+- Token enforcement with pre-flight balance checks
+- Employee memory system integration for context-aware responses
+- Improved security headers in Netlify functions
 
 **v1.0.0 (Nov 2025)**
 

@@ -342,12 +342,12 @@ const HelpPage: React.FC = () => {
             <ContactCard
               icon={Mail}
               title="Email Support"
-              description="support@agiworkforce.com"
+              description="support@agiagentautomation.com"
               cta="Send Email"
               color="from-purple-500 to-pink-500"
               index={1}
               onClick={() =>
-                (window.location.href = 'mailto:support@agiworkforce.com')
+                (window.location.href = 'mailto:support@agiagentautomation.com')
               }
             />
             <ContactCard

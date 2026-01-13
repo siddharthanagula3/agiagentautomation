@@ -222,7 +222,7 @@ class ChatSyncService {
         .select('*')
         .eq('user_id', userId)
         .eq('employee_id', employeeId)
-        .single();
+        .maybeSingle();
 
       if (existing && !findError) {
         return existing as SyncConversation;

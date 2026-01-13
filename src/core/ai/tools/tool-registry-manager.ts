@@ -3,7 +3,7 @@
  * Provides a unified interface for agents to use various tools
  */
 
-import { AgentType } from '../reasoning/task-decomposer';
+import { AgentType } from '../orchestration/reasoning/task-breakdown';
 
 export type ToolCategory =
   | 'code'

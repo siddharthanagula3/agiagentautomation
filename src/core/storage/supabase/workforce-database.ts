@@ -4,8 +4,8 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
-import type { ExecutionPlan, Task } from '../reasoning/task-decomposer';
-import type { AnalysisResult } from '../reasoning/nlp-processor';
+import type { ExecutionPlan, Task } from '@core/ai/orchestration/reasoning/task-breakdown';
+import type { AnalysisResult } from '@core/ai/orchestration/reasoning/natural-language-processor';
 
 // ================================================
 // TYPES
@@ -199,14 +199,14 @@ export async function getExecution(
       .from('workforce_executions')
       .select('*')
       .eq('id', executionId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('Error getting execution:', error);
       return null;
     }
 
-    return data;
+    return data || null;
   } catch (error) {
     console.error('Exception getting execution:', error);
     return null;
@@ -556,9 +556,10 @@ async function updateSubscriptionUsage(
         .from('user_subscriptions')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (!subscription) {
+        console.warn('[Subscription] No subscription record found for user:', userId);
         return false;
       }
 
@@ -594,14 +595,14 @@ export async function getUserSubscription(userId: string): Promise<unknown> {
       .from('user_subscriptions')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('Error getting subscription:', error);
       return null;
     }
 
-    return data;
+    return data || null;
   } catch (error) {
     console.error('Exception getting subscription:', error);
     return null;
@@ -630,7 +631,7 @@ export async function getDashboardStats(userId: string): Promise<{
       .from('user_dashboard_stats')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       return {

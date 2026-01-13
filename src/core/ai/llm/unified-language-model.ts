@@ -1,7 +1,8 @@
 /**
  * Unified LLM Service
- * Manages all LLM providers (Anthropic, OpenAI, Google, Perplexity)
+ * Manages all LLM providers (Anthropic, OpenAI, Google, Perplexity, Grok, DeepSeek, Qwen)
  * Provides a consistent interface for all AI models
+ * Updated: Jan 3rd 2026 - Added DeepSeek and Qwen providers
  */
 
 import {
@@ -40,6 +41,20 @@ import {
   GrokConfig,
 } from './providers/grok-ai';
 import {
+  deepseekProvider,
+  DeepSeekProvider,
+  DeepSeekMessage,
+  DeepSeekResponse,
+  DeepSeekConfig,
+} from './providers/deepseek-ai';
+import {
+  qwenProvider,
+  QwenProvider,
+  QwenMessage,
+  QwenResponse,
+  QwenConfig,
+} from './providers/qwen-ai';
+import {
   canUserMakeRequest,
   estimateTokensForRequest,
   deductTokens,
@@ -61,33 +76,33 @@ export type LLMProvider =
   | 'openai'
   | 'google'
   | 'perplexity'
-  | 'grok';
+  | 'grok'
+  | 'deepseek'
+  | 'qwen';
 type ProviderInstance =
   | AnthropicProvider
   | OpenAIProvider
   | GoogleProvider
   | PerplexityProvider
-  | GrokProvider;
+  | GrokProvider
+  | DeepSeekProvider
+  | QwenProvider;
 
+// Model arrays - Jan 2026 update
 const ANTHROPIC_MODELS: AnthropicConfig['model'][] =
   AnthropicProvider.getAvailableModels() as AnthropicConfig['model'][];
-const OPENAI_MODELS: OpenAIConfig['model'][] = [
-  'gpt-4o',
-  'gpt-4o-mini',
-  'gpt-4-turbo',
-  'gpt-3.5-turbo',
-];
-const GOOGLE_MODELS: GoogleConfig['model'][] = [
-  'gemini-1.5-pro',
-  'gemini-1.5-flash',
-  'gemini-1.0-pro',
-];
-const PERPLEXITY_MODELS: PerplexityConfig['model'][] = [
-  'llama-3.1-sonar-small-128k-online',
-  'llama-3.1-sonar-large-128k-online',
-  'llama-3.1-sonar-huge-128k-online',
-];
-const GROK_MODELS: GrokConfig['model'][] = ['grok-beta', 'grok-2-latest'];
+const OPENAI_MODELS: OpenAIConfig['model'][] =
+  OpenAIProvider.getAvailableModels() as OpenAIConfig['model'][];
+const GOOGLE_MODELS: GoogleConfig['model'][] =
+  GoogleProvider.getAvailableModels() as GoogleConfig['model'][];
+const PERPLEXITY_MODELS: PerplexityConfig['model'][] =
+  PerplexityProvider.getAvailableModels() as PerplexityConfig['model'][];
+const GROK_MODELS: GrokConfig['model'][] =
+  GrokProvider.getAvailableModels() as GrokConfig['model'][];
+const DEEPSEEK_MODELS: DeepSeekConfig['model'][] =
+  DeepSeekProvider.getAvailableModels() as DeepSeekConfig['model'][];
+const QWEN_MODELS: QwenConfig['model'][] =
+  QwenProvider.getAvailableModels() as QwenConfig['model'][];
 
 const isAnthropicModel = (model: string): model is AnthropicConfig['model'] =>
   ANTHROPIC_MODELS.includes(model as AnthropicConfig['model']);
@@ -103,6 +118,12 @@ const isPerplexityModel = (model: string): model is PerplexityConfig['model'] =>
 
 const isGrokModel = (model: string): model is GrokConfig['model'] =>
   GROK_MODELS.includes(model as GrokConfig['model']);
+
+const isDeepSeekModel = (model: string): model is DeepSeekConfig['model'] =>
+  DEEPSEEK_MODELS.includes(model as DeepSeekConfig['model']);
+
+const isQwenModel = (model: string): model is QwenConfig['model'] =>
+  QWEN_MODELS.includes(model as QwenConfig['model']);
 
 export interface UnifiedMessage {
   role: 'user' | 'assistant' | 'system';
@@ -188,6 +209,8 @@ export class UnifiedLLMService {
     this.providers.set('google', googleProvider);
     this.providers.set('perplexity', perplexityProvider);
     this.providers.set('grok', grokProvider);
+    this.providers.set('deepseek', deepseekProvider);
+    this.providers.set('qwen', qwenProvider);
   }
 
   /**
@@ -415,6 +438,20 @@ export class UnifiedLLMService {
             actualUserId
           );
           break;
+        case 'deepseek':
+          response = await (providerInstance as DeepSeekProvider).sendMessage(
+            providerMessages as DeepSeekMessage[],
+            actualSessionId,
+            actualUserId
+          );
+          break;
+        case 'qwen':
+          response = await (providerInstance as QwenProvider).sendMessage(
+            providerMessages as QwenMessage[],
+            actualSessionId,
+            actualUserId
+          );
+          break;
         default:
           throw new UnifiedLLMError(
             `Unsupported provider: ${targetProvider}`,
@@ -558,6 +595,20 @@ export class UnifiedLLMService {
             userId
           );
           break;
+        case 'deepseek':
+          stream = (providerInstance as DeepSeekProvider).streamMessage(
+            providerMessages as DeepSeekMessage[],
+            sessionId,
+            userId
+          );
+          break;
+        case 'qwen':
+          stream = (providerInstance as QwenProvider).streamMessage(
+            providerMessages as QwenMessage[],
+            sessionId,
+            userId
+          );
+          break;
         default:
           throw new UnifiedLLMError(
             `Unsupported provider: ${targetProvider}`,
@@ -607,20 +658,59 @@ export class UnifiedLLMService {
   }
 
   /**
+   * Type guard to check if response has the expected provider response shape
+   */
+  private isProviderResponse(
+    response: unknown
+  ): response is {
+    content: string;
+    model: string;
+    sessionId?: string;
+    userId?: string;
+    usage?: {
+      inputTokens?: number;
+      outputTokens?: number;
+      promptTokens?: number;
+      completionTokens?: number;
+      totalTokens?: number;
+    };
+    metadata?: Record<string, unknown>;
+  } {
+    return (
+      typeof response === 'object' &&
+      response !== null &&
+      'content' in response &&
+      typeof (response as Record<string, unknown>).content === 'string' &&
+      'model' in response &&
+      typeof (response as Record<string, unknown>).model === 'string'
+    );
+  }
+
+  /**
    * Convert provider response to unified format
    */
   private convertResponseToUnified(
     response: unknown,
     provider: LLMProvider
   ): UnifiedResponse {
+    // Validate response shape
+    if (!this.isProviderResponse(response)) {
+      throw new UnifiedLLMError(
+        'Invalid provider response format',
+        'INVALID_RESPONSE',
+        provider,
+        false
+      );
+    }
+
     // Normalize usage information
-    let usage;
+    let usage: UnifiedResponse['usage'];
     if (response.usage) {
       if (provider === 'anthropic') {
         usage = {
-          promptTokens: response.usage.inputTokens,
-          completionTokens: response.usage.outputTokens,
-          totalTokens: response.usage.totalTokens,
+          promptTokens: response.usage.inputTokens || 0,
+          completionTokens: response.usage.outputTokens || 0,
+          totalTokens: response.usage.totalTokens || 0,
         };
       } else {
         usage = {
@@ -724,6 +814,32 @@ export class UnifiedLLMService {
           (providerInstance as GrokProvider).updateConfig(update);
         }
         break;
+      case 'deepseek':
+        {
+          const update: Partial<DeepSeekConfig> = {
+            maxTokens: this.config.maxTokens,
+            temperature: this.config.temperature,
+            systemPrompt: this.config.systemPrompt,
+          };
+          if (isDeepSeekModel(this.config.model)) {
+            update.model = this.config.model;
+          }
+          (providerInstance as DeepSeekProvider).updateConfig(update);
+        }
+        break;
+      case 'qwen':
+        {
+          const update: Partial<QwenConfig> = {
+            maxTokens: this.config.maxTokens,
+            temperature: this.config.temperature,
+            systemPrompt: this.config.systemPrompt,
+          };
+          if (isQwenModel(this.config.model)) {
+            update.model = this.config.model;
+          }
+          (providerInstance as QwenProvider).updateConfig(update);
+        }
+        break;
     }
   }
 
@@ -759,6 +875,10 @@ export class UnifiedLLMService {
         return (providerInstance as PerplexityProvider).isConfigured();
       case 'grok':
         return (providerInstance as GrokProvider).isConfigured();
+      case 'deepseek':
+        return (providerInstance as DeepSeekProvider).isConfigured();
+      case 'qwen':
+        return (providerInstance as QwenProvider).isConfigured();
       default:
         return false;
     }
@@ -788,6 +908,10 @@ export class UnifiedLLMService {
         return PerplexityProvider.getAvailableModels();
       case 'grok':
         return GrokProvider.getAvailableModels();
+      case 'deepseek':
+        return DeepSeekProvider.getAvailableModels();
+      case 'qwen':
+        return QwenProvider.getAvailableModels();
       default:
         return [];
     }
@@ -803,8 +927,17 @@ export class UnifiedLLMService {
     | GoogleProvider
     | OpenAIProvider
     | PerplexityProvider
-    | GrokProvider {
+    | GrokProvider
+    | DeepSeekProvider
+    | QwenProvider {
     return this.providers.get(provider);
+  }
+
+  /**
+   * Get all available providers
+   */
+  static getAllProviders(): LLMProvider[] {
+    return ['anthropic', 'openai', 'google', 'perplexity', 'grok', 'deepseek', 'qwen'];
   }
 }
 

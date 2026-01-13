@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 const TermsOfServicePage: React.FC = () => {
-  const lastUpdated = 'January 15, 2025';
+  const lastUpdated = 'January 3, 2026';
 
   const sections = [
     {
@@ -187,11 +187,11 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
             </p>
             <div className="flex flex-col justify-center gap-4 text-sm sm:flex-row">
               <div>
-                <strong>Email:</strong> legal@agiworkforce.com
+                <strong>Email:</strong> legal@agiagentautomation.com
               </div>
               <div className="hidden text-muted-foreground sm:block">|</div>
               <div>
-                <strong>Support:</strong> support@agiworkforce.com
+                <strong>Support:</strong> support@agiagentautomation.com
               </div>
             </div>
           </motion.div>

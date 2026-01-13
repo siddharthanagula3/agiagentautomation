@@ -465,12 +465,20 @@ export class SystemPromptsService {
               ? frontmatter.tools // Already an array from YAML
               : frontmatter.tools.split(',').map((t) => t.trim()); // Parse comma-separated string
 
+            // Parse expertise field if present (can be array or undefined)
+            const expertise = Array.isArray(frontmatter.expertise)
+              ? frontmatter.expertise
+              : undefined;
+
             employees.push({
               name: frontmatter.name,
               description: frontmatter.description,
               tools,
               model: frontmatter.model || 'inherit',
               systemPrompt: parsed.content.trim(),
+              avatar: frontmatter.avatar,
+              price: frontmatter.price,
+              expertise,
             });
           } catch (err) {
             console.error(`Failed to parse employee file ${path}:`, err);

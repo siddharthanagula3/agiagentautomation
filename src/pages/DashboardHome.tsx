@@ -122,7 +122,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({
       icon: Zap,
       iconColor: 'text-success',
       bgColor: 'bg-success/10',
-      action: () => navigate('/automation'),
+      action: () => navigate('/mission-control'),
     },
     {
       id: 'analytics',
@@ -131,7 +131,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({
       icon: BarChart3,
       iconColor: 'text-warning',
       bgColor: 'bg-warning/10',
-      action: () => navigate('/analytics'),
+      action: () => navigate('/billing'),
     },
   ];
 

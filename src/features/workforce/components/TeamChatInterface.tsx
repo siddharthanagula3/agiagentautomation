@@ -28,7 +28,7 @@ import {
 import {
   Task,
   TaskStatus,
-} from '@core/ai/orchestration/reasoning/task-decomposer';
+} from '@core/ai/orchestration/reasoning/task-breakdown';
 import { Card } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';

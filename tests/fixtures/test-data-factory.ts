@@ -300,18 +300,19 @@ export const createMockStripeWebhookEvent = (type: string, data: unknown) => ({
 
 /**
  * LLM Response Factory
+ * Returns a UnifiedResponse-compatible object for mocking unifiedLLMService.sendMessage
  */
 export const createMockLLMResponse = (
   content: string,
   overrides: Record<string, unknown> = {}
 ) => ({
-  content: [{ text: content, type: 'text' }],
+  content, // UnifiedResponse expects content as a string, not array
   usage: {
-    input_tokens: 100,
-    output_tokens: 50,
+    promptTokens: 100,
+    completionTokens: 50,
+    totalTokens: 150,
   },
   model: 'claude-3-5-sonnet-20241022',
-  stop_reason: 'end_turn',
   ...overrides,
 });
 

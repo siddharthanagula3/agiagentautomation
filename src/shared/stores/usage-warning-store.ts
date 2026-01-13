@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { devtools, persist } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 
 /**
  * Usage Warning Store
@@ -28,8 +29,10 @@ interface UsageWarningState {
 }
 
 export const useUsageWarningStore = create<UsageWarningState>()(
-  persist(
-    (set, get) => ({
+  devtools(
+    immer(
+      persist(
+        (set, get) => ({
       hasShown85Warning: false,
       hasShown95Warning: false,
       lastWarningTime: null,
@@ -88,13 +91,16 @@ export const useUsageWarningStore = create<UsageWarningState>()(
         };
       },
     }),
-    {
-      name: 'usage-warning-storage',
-      partialize: (state) => ({
-        hasShown85Warning: state.hasShown85Warning,
-        hasShown95Warning: state.hasShown95Warning,
-        lastWarningTime: state.lastWarningTime,
-      }),
-    }
+        {
+          name: 'usage-warning-storage',
+          partialize: (state) => ({
+            hasShown85Warning: state.hasShown85Warning,
+            hasShown95Warning: state.hasShown95Warning,
+            lastWarningTime: state.lastWarningTime,
+          }),
+        }
+      )
+    ),
+    { name: 'UsageWarningStore' }
   )
 );

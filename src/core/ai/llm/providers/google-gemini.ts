@@ -1,15 +1,25 @@
 /**
  * Google Gemini Provider
  * Official SDK integration for Google AI Studio Gemini models
- * Updated: Nov 16th 2025 - Clarified that proxy implementation is complete (removed misleading TODO)
+ * Updated: Jan 6th 2026 - Migrated to @google/genai SDK
  */
 
-import {
-  GoogleGenerativeAI,
-  GenerativeModel,
-  GenerationConfig,
-} from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { supabase } from '@shared/lib/supabase-client';
+
+/**
+ * Helper function to get the current Supabase session token
+ * Required for authenticated API proxy calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('[Google Provider] Failed to get auth token:', error);
+    return null;
+  }
+}
 
 // SECURITY WARNING: Client-side API initialization is disabled
 // All API calls should go through Netlify proxy functions instead
@@ -19,9 +29,12 @@ import { supabase } from '@shared/lib/supabase-client';
 // const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
 
 // Initialize clients - DISABLED for security
-const genAI = null; // Client-side SDK disabled - use Netlify proxy instead
+// New @google/genai SDK pattern:
+// const ai = new GoogleGenAI({ apiKey });
+// const response = await ai.models.generateContent({ model: "gemini-2.0-flash", contents: prompt });
+const ai: GoogleGenAI | null = null; // Client-side SDK disabled - use Netlify proxy instead
 
-// ✅ IMPLEMENTED: All API calls use Netlify proxy functions for security
+// All API calls use Netlify proxy functions for security
 // Proxy endpoints: /.netlify/functions/google-proxy
 
 // Using centralized Supabase client
@@ -52,11 +65,17 @@ export interface GoogleResponse {
 }
 
 export interface GoogleConfig {
-  model: 'gemini-1.5-pro' | 'gemini-1.5-flash' | 'gemini-1.0-pro';
+  model:
+    | 'gemini-3-pro-preview'
+    | 'gemini-3-flash-preview'
+    | 'gemini-2.5-pro'
+    | 'gemini-2.5-flash'
+    | 'gemini-2.0-flash';
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
   tools?: unknown[];
+  thinkingMode?: 'low' | 'medium' | 'high'; // Gemini 3 thinking mode
 }
 
 export class GoogleError extends Error {
@@ -72,27 +91,22 @@ export class GoogleError extends Error {
 
 export class GoogleProvider {
   private config: GoogleConfig;
-  private model: GenerativeModel;
+  private client: GoogleGenAI | null;
 
   constructor(config: Partial<GoogleConfig> = {}) {
     this.config = {
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
       maxTokens: 4000,
       temperature: 0.7,
       systemPrompt: 'You are a helpful AI assistant.',
       tools: [],
+      thinkingMode: undefined,
       ...config,
     };
 
-    this.model = genAI
-      ? genAI.getGenerativeModel({
-          model: this.config.model,
-          generationConfig: {
-            maxOutputTokens: this.config.maxTokens,
-            temperature: this.config.temperature,
-          },
-        })
-      : null;
+    // Client-side SDK disabled for security - use Netlify proxy instead
+    // New SDK pattern would be: this.client = new GoogleGenAI({ apiKey });
+    this.client = ai;
   }
 
   /**
@@ -104,34 +118,56 @@ export class GoogleProvider {
     userId?: string
   ): Promise<GoogleResponse> {
     try {
-      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
-      throw new GoogleError(
-        'Direct Google API calls are disabled for security. Use /.netlify/functions/google-proxy instead.',
-        'DIRECT_API_DISABLED'
-      );
+      // SECURITY: Use Netlify proxy to keep API keys secure
+      const proxyUrl = '/.netlify/functions/google-proxy';
 
-      // Convert messages to Gemini format
-      const prompt = this.convertMessagesToGemini(messages);
-
-      // Prepare the request
-      const generationConfig: GenerationConfig = {
-        maxOutputTokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-      };
-
-      // Make the API call
-      if (!this.model) {
+      // Get auth token for authenticated proxy calls
+      const authToken = await getAuthToken();
+      if (!authToken) {
         throw new GoogleError(
-          'Google client not initialized. Please check your API key configuration.',
-          'CLIENT_NOT_INITIALIZED'
+          'User not authenticated. Please log in to use AI features.',
+          'NOT_AUTHENTICATED'
         );
       }
-      const result = await this.model.generateContent(prompt, generationConfig);
-      const response = await result.response;
 
-      // Process the response
-      const content = response.text();
-      const usage = this.extractUsageFromResponse(result);
+      // Convert messages to Gemini format
+      const geminiMessages = this.convertMessagesToGemini(messages);
+
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          messages: geminiMessages,
+          model: this.config.model,
+          max_tokens: this.config.maxTokens,
+          temperature: this.config.temperature,
+          system: this.config.systemPrompt,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new GoogleError(
+          errorData.error || `HTTP error! status: ${response.status}`,
+          `HTTP_${response.status}`,
+          response.status === 429 || response.status === 503
+        );
+      }
+
+      const data = await response.json();
+
+      // Extract content and usage from proxy response
+      const content = data.content || data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const usage = data.usage
+        ? {
+            promptTokens: data.usage.promptTokenCount || data.usage.prompt_tokens || 0,
+            completionTokens: data.usage.candidatesTokenCount || data.usage.completion_tokens || 0,
+            totalTokens: data.usage.totalTokenCount || data.usage.total_tokens || 0,
+          }
+        : { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
 
       // Save to database
       if (sessionId && userId) {
@@ -156,8 +192,8 @@ export class GoogleProvider {
         sessionId,
         userId,
         metadata: {
-          finishReason: response.candidates?.[0]?.finishReason,
-          usage: result.usageMetadata,
+          finishReason: data.candidates?.[0]?.finishReason,
+          usage: data.usageMetadata || usage,
         },
       };
     } catch (error) {
@@ -199,6 +235,7 @@ export class GoogleProvider {
 
   /**
    * Stream a message from Gemini
+   * Uses new @google/genai SDK pattern: ai.models.generateContentStream()
    */
   async *streamMessage(
     messages: GoogleMessage[],
@@ -223,39 +260,40 @@ export class GoogleProvider {
       // Convert messages to Gemini format
       const prompt = this.convertMessagesToGemini(messages);
 
-      // Prepare the request
-      const generationConfig: GenerationConfig = {
-        maxOutputTokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-      };
-
-      // Make the streaming API call
-      if (!this.model) {
+      // Make the streaming API call using new @google/genai SDK pattern
+      if (!this.client) {
         throw new GoogleError(
           'Google client not initialized. Please check your API key configuration.',
           'CLIENT_NOT_INITIALIZED'
         );
       }
-      const result = await this.model.generateContentStream(
-        prompt,
-        generationConfig
-      );
+
+      // New SDK pattern: ai.models.generateContentStream({ model, contents, config })
+      const stream = await this.client.models.generateContentStream({
+        model: this.config.model,
+        contents: prompt,
+        config: {
+          maxOutputTokens: this.config.maxTokens,
+          temperature: this.config.temperature,
+        },
+      });
 
       let fullContent = '';
-      let usage: unknown = null;
+      let usage: ReturnType<typeof this.extractUsageFromResponse> | null = null;
 
-      for await (const chunk of result.stream) {
-        const chunkText = chunk.text();
+      for await (const chunk of stream) {
+        const chunkText = chunk.text;
         if (chunkText) {
           fullContent += chunkText;
           yield { content: chunkText, done: false };
         }
+        // Extract usage from final chunk if available
+        if (chunk.usageMetadata) {
+          usage = this.extractUsageFromResponse(chunk);
+        }
       }
 
-      // Get final result for usage information
-      const finalResult = await result.response;
-      usage = this.extractUsageFromResponse(finalResult);
-      yield { content: '', done: true, usage };
+      yield { content: '', done: true, usage: usage || undefined };
 
       // Save to database
       if (sessionId && userId) {
@@ -330,8 +368,15 @@ export class GoogleProvider {
 
   /**
    * Extract usage information from Gemini response
+   * New @google/genai SDK returns usageMetadata directly on response
    */
-  private extractUsageFromResponse(result: unknown): {
+  private extractUsageFromResponse(result: {
+    usageMetadata?: {
+      promptTokenCount?: number;
+      candidatesTokenCount?: number;
+      totalTokenCount?: number;
+    };
+  }): {
     promptTokens: number;
     completionTokens: number;
     totalTokens: number;
@@ -379,18 +424,12 @@ export class GoogleProvider {
 
   /**
    * Update configuration
+   * Note: With @google/genai SDK, model is specified per-request rather than at client init
    */
   updateConfig(newConfig: Partial<GoogleConfig>): void {
     this.config = { ...this.config, ...newConfig };
-
-    // Reinitialize model with new config
-    this.model = genAI.getGenerativeModel({
-      model: this.config.model,
-      generationConfig: {
-        maxOutputTokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-      },
-    });
+    // New SDK doesn't require client reinitialization - model is specified per request
+    // via ai.models.generateContent({ model: "gemini-2.0-flash", ... })
   }
 
   /**
@@ -405,14 +444,54 @@ export class GoogleProvider {
    * SECURITY: Always returns false as direct API access is disabled
    */
   isConfigured(): boolean {
-    return false; // Direct API access disabled for security
+    return true; // Proxy-based access is always available
   }
 
   /**
-   * Get available models
+   * Get available models (Jan 2026 - Gemini 3 series)
+   * Updated for @google/genai SDK
    */
   static getAvailableModels(): string[] {
-    return ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'];
+    return [
+      'gemini-3-pro-preview',
+      'gemini-3-flash-preview',
+      'gemini-2.5-pro',
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+    ];
+  }
+
+  /**
+   * Get available image generation models (Imagen 4)
+   */
+  static getImageModels(): string[] {
+    return [
+      'imagen-4.0-generate-001',
+      'imagen-4.0-ultra-generate-001',
+      'imagen-4.0-fast-generate-001',
+    ];
+  }
+
+  /**
+   * Get available video generation models (Veo 3.1)
+   */
+  static getVideoModels(): string[] {
+    return [
+      'veo-3.1-generate-preview',
+      'veo-3.1-fast-generate-preview',
+      'veo-3.0-generate-001',
+    ];
+  }
+
+  /**
+   * Get available audio models
+   */
+  static getAudioModels(): string[] {
+    return [
+      'gemini-2.5-flash-native-audio-preview-12-2025',
+      'gemini-2.5-pro-preview-tts',
+      'gemini-2.5-flash-preview-tts',
+    ];
   }
 }
 

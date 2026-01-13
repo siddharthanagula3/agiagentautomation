@@ -539,16 +539,16 @@ class PrivacyService {
         .from('user_profiles')
         .select('*')
         .eq('id', userId)
-        .single();
-      userData.profile = profile;
+        .maybeSingle();
+      userData.profile = profile || null;
 
       // Export user settings
       const { data: settings } = await supabase
         .from('user_settings')
         .select('*')
         .eq('id', userId)
-        .single();
-      userData.settings = settings;
+        .maybeSingle();
+      userData.settings = settings || null;
 
       // Export chat sessions
       const { data: chatSessions } = await supabase

@@ -445,8 +445,12 @@ class PerformanceService {
     if ('caches' in window) {
       caches.keys().then((cacheNames) => {
         cacheNames.forEach((cacheName) => {
-          caches.delete(cacheName);
+          caches.delete(cacheName).catch((err) => {
+            console.warn('[PerformanceService] Failed to delete cache:', cacheName, err);
+          });
         });
+      }).catch((err) => {
+        console.warn('[PerformanceService] Failed to get cache names:', err);
       });
     }
   }

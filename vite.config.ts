@@ -119,39 +119,65 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       target: 'es2020',
+      // Use esbuild for minification - faster and simpler than Terser
+      // esbuild automatically handles console removal in production
       minify: 'esbuild',
       sourcemap: true,
-      terserOptions: {
-        compress: {
-          drop_console: mode === 'production',
-          drop_debugger: true,
-          pure_funcs:
-            mode === 'production'
-              ? ['console.log', 'console.debug', 'console.info']
-              : [],
-        },
-        format: {
-          comments: false,
-        },
-      },
       rollupOptions: {
         output: {
-          manualChunks: {
-            // Simplified chunking to avoid initialization issues
-            'react-vendor': ['react', 'react-dom', 'react-dom/client'],
-            router: ['react-router-dom'],
-            'ui-vendor': [
-              '@radix-ui/react-slot',
-              'lucide-react',
-              'framer-motion',
-            ],
-            supabase: ['@supabase/supabase-js'],
-            query: ['@tanstack/react-query'],
-            utils: ['zustand', 'clsx', 'tailwind-merge'],
-            'ai-vendor': ['openai', '@anthropic-ai/sdk'],
-            stripe: ['@stripe/stripe-js', '@stripe/react-stripe-js'],
-            sonner: ['sonner'],
-            workforce: ['@/features/workforce/pages/EmployeeManagement.tsx'],
+          manualChunks: (id) => {
+            // Vendor chunks - keep large libraries separate
+            if (id.includes('node_modules')) {
+              if (id.includes('react-dom') || id.includes('react/')) {
+                return 'react-vendor';
+              }
+              if (id.includes('react-router')) {
+                return 'router';
+              }
+              if (id.includes('@radix-ui') || id.includes('lucide-react') || id.includes('framer-motion')) {
+                return 'ui-vendor';
+              }
+              if (id.includes('@supabase')) {
+                return 'supabase';
+              }
+              if (id.includes('@tanstack/react-query')) {
+                return 'query';
+              }
+              if (id.includes('zustand') || id.includes('clsx') || id.includes('tailwind-merge')) {
+                return 'utils';
+              }
+              if (id.includes('openai') || id.includes('@anthropic-ai')) {
+                return 'ai-vendor';
+              }
+              if (id.includes('@stripe')) {
+                return 'stripe';
+              }
+              if (id.includes('marked') || id.includes('highlight.js') || id.includes('prismjs')) {
+                return 'markdown-vendor';
+              }
+              if (id.includes('@codemirror') || id.includes('@lezer')) {
+                return 'editor-vendor';
+              }
+              if (id.includes('sonner')) {
+                return 'sonner';
+              }
+            }
+            // Split large feature modules
+            if (id.includes('/features/chat/')) {
+              return 'chat';
+            }
+            if (id.includes('/features/vibe/')) {
+              return 'vibe';
+            }
+            if (id.includes('/features/workforce/')) {
+              return 'workforce';
+            }
+            if (id.includes('/features/marketplace/')) {
+              return 'marketplace';
+            }
+            if (id.includes('/core/ai/')) {
+              return 'ai-core';
+            }
           },
         },
       },

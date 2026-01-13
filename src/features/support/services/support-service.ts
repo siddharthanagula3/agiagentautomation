@@ -135,7 +135,7 @@ class SupportService {
         .from('support_tickets')
         .select('*')
         .eq('id', ticketId)
-        .single();
+        .maybeSingle();
 
       if (ticketError) {
         console.error('Error fetching ticket:', ticketError);
@@ -143,6 +143,14 @@ class SupportService {
           ticket: null,
           replies: [],
           error: ticketError.message,
+        };
+      }
+
+      if (!ticket) {
+        return {
+          ticket: null,
+          replies: [],
+          error: 'Ticket not found',
         };
       }
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Avatar,
   AvatarFallback,
@@ -248,25 +248,25 @@ export const MessageBubble = React.memo(function MessageBubble({
     useArtifactStore();
 
   // Extract artifacts from message content (only for assistant messages)
-  const artifacts = useMemo(() => {
+  const existingArtifacts = getMessageArtifacts(message.id);
+  const extractedArtifacts = useMemo(() => {
     if (isUser) return [];
+    return extractArtifacts(message.content);
+  }, [message.content, isUser]);
 
-    // Check if we already have artifacts for this message
-    const existingArtifacts = getMessageArtifacts(message.id);
-    if (existingArtifacts.length > 0) {
-      return existingArtifacts;
+  // Determine which artifacts to display
+  const artifacts = existingArtifacts.length > 0 ? existingArtifacts : extractedArtifacts;
+
+  // Store newly extracted artifacts in the store (side effect, not during render)
+  useEffect(() => {
+    if (isUser || existingArtifacts.length > 0 || extractedArtifacts.length === 0) {
+      return;
     }
-
-    // Extract new artifacts
-    const newArtifacts = extractArtifacts(message.content);
-
-    // Store artifacts in the store
-    newArtifacts.forEach((artifact) => {
+    // Store artifacts that haven't been stored yet
+    extractedArtifacts.forEach((artifact) => {
       addArtifact(message.id, artifact);
     });
-
-    return newArtifacts;
-  }, [message.id, message.content, isUser, getMessageArtifacts, addArtifact]);
+  }, [message.id, isUser, existingArtifacts.length, extractedArtifacts, addArtifact]);
 
   // Remove artifact code blocks from content to avoid duplication
   const cleanedContent = useMemo(() => {
@@ -740,12 +740,14 @@ export const MessageBubble = React.memo(function MessageBubble({
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        const a = document.createElement('a');
-                        a.href = message.metadata!.imageUrl!;
-                        a.download = 'generated-image.png';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
+                        if (message.metadata?.imageUrl) {
+                          const a = document.createElement('a');
+                          a.href = message.metadata.imageUrl;
+                          a.download = 'generated-image.png';
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                        }
                       }}
                       className="h-8 text-xs"
                     >
@@ -756,10 +758,12 @@ export const MessageBubble = React.memo(function MessageBubble({
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        navigator.clipboard.writeText(
-                          message.metadata!.imageUrl!
-                        );
-                        toast.success('Image URL copied');
+                        if (message.metadata?.imageUrl) {
+                          navigator.clipboard.writeText(
+                            message.metadata.imageUrl
+                          );
+                          toast.success('Image URL copied');
+                        }
                       }}
                       className="h-8 text-xs"
                     >
@@ -808,12 +812,14 @@ export const MessageBubble = React.memo(function MessageBubble({
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        const a = document.createElement('a');
-                        a.href = message.metadata!.videoUrl!;
-                        a.download = 'generated-video.mp4';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
+                        if (message.metadata?.videoUrl) {
+                          const a = document.createElement('a');
+                          a.href = message.metadata.videoUrl;
+                          a.download = 'generated-video.mp4';
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                        }
                       }}
                       className="h-8 text-xs"
                     >
@@ -824,10 +830,12 @@ export const MessageBubble = React.memo(function MessageBubble({
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        navigator.clipboard.writeText(
-                          message.metadata!.videoUrl!
-                        );
-                        toast.success('Video URL copied');
+                        if (message.metadata?.videoUrl) {
+                          navigator.clipboard.writeText(
+                            message.metadata.videoUrl
+                          );
+                          toast.success('Video URL copied');
+                        }
                       }}
                       className="h-8 text-xs"
                     >

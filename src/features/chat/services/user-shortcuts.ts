@@ -76,10 +76,15 @@ export async function createUserShortcut(
         updated_at: new Date().toISOString(),
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('[User Shortcuts] Error creating shortcut:', error);
+      return null;
+    }
+
+    if (!data) {
+      console.error('[User Shortcuts] No data returned after creating shortcut');
       return null;
     }
 

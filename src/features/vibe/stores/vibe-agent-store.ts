@@ -11,7 +11,7 @@ import type { AIEmployee } from '@core/types/ai-employee';
 
 export interface VibeAgentState {
   // Active agents
-  activeAgents: Map<string, ActiveAgent>;
+  activeAgents: Record<string, ActiveAgent>;
 
   // Current primary agent
   primaryAgent: ActiveAgent | null;
@@ -39,7 +39,7 @@ export const useVibeAgentStore = create<VibeAgentState>()(
   devtools(
     immer((set, get) => ({
       // Initial state
-      activeAgents: new Map(),
+      activeAgents: {},
       primaryAgent: null,
       isSupervisorMode: false,
       supervisorAgent: null,
@@ -52,19 +52,19 @@ export const useVibeAgentStore = create<VibeAgentState>()(
             status: 'idle',
             last_activity: new Date(),
           };
-          state.activeAgents.set(employee.name, activeAgent);
+          state.activeAgents[employee.name] = activeAgent;
         });
       },
 
       removeActiveAgent: (employeeId) => {
         set((state) => {
-          state.activeAgents.delete(employeeId);
+          delete state.activeAgents[employeeId];
         });
       },
 
       updateAgentStatus: (employeeId, status, currentTask, progress) => {
         set((state) => {
-          const agent = state.activeAgents.get(employeeId);
+          const agent = state.activeAgents[employeeId];
           if (agent) {
             agent.status = status;
             agent.last_activity = new Date();
@@ -88,8 +88,8 @@ export const useVibeAgentStore = create<VibeAgentState>()(
           state.primaryAgent = activeAgent;
 
           // Ensure agent is in active agents
-          if (!state.activeAgents.has(employee.name)) {
-            state.activeAgents.set(employee.name, activeAgent);
+          if (!(employee.name in state.activeAgents)) {
+            state.activeAgents[employee.name] = activeAgent;
           }
         });
       },
@@ -104,7 +104,7 @@ export const useVibeAgentStore = create<VibeAgentState>()(
               last_activity: new Date(),
             };
             // Add supervisor to active agents
-            state.activeAgents.set(supervisor.name, state.supervisorAgent);
+            state.activeAgents[supervisor.name] = state.supervisorAgent;
           } else {
             state.supervisorAgent = null;
           }
@@ -113,7 +113,7 @@ export const useVibeAgentStore = create<VibeAgentState>()(
 
       clearActiveAgents: () => {
         set((state) => {
-          state.activeAgents.clear();
+          state.activeAgents = {};
           state.primaryAgent = null;
           state.isSupervisorMode = false;
           state.supervisorAgent = null;
@@ -121,7 +121,7 @@ export const useVibeAgentStore = create<VibeAgentState>()(
       },
 
       getActiveAgent: (employeeId) => {
-        return get().activeAgents.get(employeeId);
+        return get().activeAgents[employeeId];
       },
     })),
     { name: 'VibeAgentStore' }

@@ -32,7 +32,7 @@ const ForgotPasswordPage: React.FC = () => {
       const { error } = await authService.resetPassword(email);
 
       if (error) {
-        setError(error.message);
+        setError(error);
       } else {
         setSuccess(true);
       }

@@ -7,7 +7,7 @@ describe('Input Component', () => {
     render(<Input />);
     const input = screen.getByRole('textbox');
     expect(input).toBeInTheDocument();
-    expect(input).toHaveClass('flex', 'h-9', 'w-full', 'sm:h-10');
+    expect(input).toHaveClass('flex', 'h-11', 'w-full');
   });
 
   it('should render with custom placeholder', () => {

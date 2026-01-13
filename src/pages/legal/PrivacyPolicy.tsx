@@ -5,7 +5,7 @@ import { SEOHead } from '@shared/components/seo/SEOHead';
 import { Shield, Lock, Eye, Server, UserCheck, FileText } from 'lucide-react';
 
 const PrivacyPolicyPage: React.FC = () => {
-  const lastUpdated = 'January 15, 2025';
+  const lastUpdated = 'January 3, 2026';
 
   const sections = [
     {
@@ -65,7 +65,7 @@ Your data is stored in secure, ISO 27001 certified data centers with 24/7 monito
 • Withdraw consent at any time
 • File a complaint with a supervisory authority
 
-Contact us at privacy@agiworkforce.com to exercise these rights.`,
+Contact us at privacy@agiagentautomation.com to exercise these rights.`,
     },
     {
       icon: FileText,
@@ -89,7 +89,7 @@ You can request early deletion by contacting support.`,
 • California Consumer Privacy Act (CCPA) for California residents
 • Other applicable data protection laws worldwide
 
-We have appointed a Data Protection Officer (DPO) available at dpo@agiworkforce.com.`,
+We have appointed a Data Protection Officer (DPO) available at dpo@agiagentautomation.com.`,
     },
   ];
 
@@ -148,7 +148,7 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiworkforce.
             className="prose prose-lg dark:prose-invert max-w-none"
           >
             <p className="text-lg leading-relaxed text-muted-foreground">
-              This Privacy Policy explains how AGI Workforce ("we", "us", "our")
+              This Privacy Policy explains how AGI Agent Automation ("we", "us", "our")
               collects, uses, discloses, and protects your personal information
               when you use our AI automation platform and services. By using our
               services, you agree to the collection and use of information in
@@ -203,15 +203,15 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiworkforce.
             </p>
             <div className="flex flex-col justify-center gap-4 text-sm sm:flex-row">
               <div>
-                <strong>Email:</strong> privacy@agiworkforce.com
+                <strong>Email:</strong> privacy@agiagentautomation.com
               </div>
               <div className="hidden text-muted-foreground sm:block">|</div>
               <div>
-                <strong>DPO:</strong> dpo@agiworkforce.com
+                <strong>DPO:</strong> dpo@agiagentautomation.com
               </div>
               <div className="hidden text-muted-foreground sm:block">|</div>
               <div>
-                <strong>Support:</strong> support@agiworkforce.com
+                <strong>Support:</strong> support@agiagentautomation.com
               </div>
             </div>
           </motion.div>

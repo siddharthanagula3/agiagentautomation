@@ -2,6 +2,7 @@ import { Handler, HandlerEvent } from '@netlify/functions';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { checkRateLimitWithTier } from './utils/rate-limiter';
 
 // Enhanced logging utility with structured logging
 const logger = {
@@ -145,39 +146,9 @@ async function markEventProcessed(
   }
 }
 
-// Rate limiting registry
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 100; // Max requests per minute per IP
-
-// Rate limiting function
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const clientData = rateLimitMap.get(ip);
-
-  if (!clientData || now > clientData.resetTime) {
-    // Reset or initialize
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return true;
-  }
-
-  if (clientData.count >= RATE_LIMIT_MAX_REQUESTS) {
-    return false;
-  }
-
-  clientData.count++;
-  return true;
-}
-
-// Clean up rate limit map periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, data] of rateLimitMap.entries()) {
-    if (now > data.resetTime) {
-      rateLimitMap.delete(ip);
-    }
-  }
-}, RATE_LIMIT_WINDOW);
+// SECURITY FIX: Jan 10th 2026 - Removed in-memory rate limiting
+// In-memory rate limiting doesn't work in serverless (stateless, resets on cold start)
+// Now using Redis-backed rate limiting via checkRateLimitWithTier('webhook')
 
 // Security headers
 const SECURITY_HEADERS = {
@@ -246,18 +217,27 @@ export const handler: Handler = async (event: HandlerEvent) => {
       timestamp: new Date().toISOString(),
     });
 
-    // Rate limiting check
-    if (!checkRateLimit(clientIP)) {
+    // Rate limiting check using Redis-backed rate limiter
+    // SECURITY: Uses 'webhook' tier (100 req/min per IP) for high-volume webhook traffic
+    const rateLimitResult = await checkRateLimitWithTier(event, 'webhook');
+    if (!rateLimitResult.success) {
       logger.warn(`Rate limit exceeded for IP: ${clientIP}`, { requestId });
       return {
         statusCode: 429,
         headers: {
           ...SECURITY_HEADERS,
-          'Retry-After': '60',
+          'Retry-After': rateLimitResult.reset
+            ? Math.ceil((rateLimitResult.reset - Date.now()) / 1000).toString()
+            : '60',
+          'X-RateLimit-Limit': rateLimitResult.limit?.toString() || '100',
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': rateLimitResult.reset?.toString() || '',
         },
         body: JSON.stringify({
           error: 'Rate limit exceeded',
-          retryAfter: 60,
+          retryAfter: rateLimitResult.reset
+            ? Math.ceil((rateLimitResult.reset - Date.now()) / 1000)
+            : 60,
         }),
       };
     }
@@ -569,8 +549,8 @@ async function processStripeEvent(
           );
         }
 
-        // Grant tokens based on plan
-        const tokenGrant = plan === 'pro' ? 10000000 : plan === 'max' ? 10000000 : 0; // 10M tokens for Pro/Max
+        // Grant tokens based on plan (Pro: 10M, Max: 40M)
+        const tokenGrant = plan === 'pro' ? 10000000 : plan === 'max' ? 40000000 : 0;
 
         if (tokenGrant > 0) {
           try {
@@ -741,11 +721,12 @@ async function processStripeEvent(
       if (subscriptionId) {
         try {
           // Get user details to check plan and grant monthly tokens
+          // Use .maybeSingle() to avoid 406 errors when user doesn't exist
           const { data: user, error: userFetchError } = await supabase
             .from('users')
             .select('id, plan')
             .eq('stripe_subscription_id', subscriptionId)
-            .single();
+            .maybeSingle();
 
           if (userFetchError || !user) {
             logger.error('Failed to fetch user for subscription:', {
@@ -778,7 +759,8 @@ async function processStripeEvent(
           const isFirstInvoice = invoice.billing_reason === 'subscription_create';
 
           if (!isFirstInvoice && (user.plan === 'pro' || user.plan === 'max')) {
-            const monthlyTokens = 10000000; // 10M tokens for Pro/Max
+            // Determine tokens based on plan type: Pro = 10M, Max = 40M
+            const monthlyTokens = user.plan === 'max' ? 40000000 : 10000000;
 
             logger.info('Granting monthly token allocation', {
               userId: user.id,

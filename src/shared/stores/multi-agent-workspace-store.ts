@@ -6,8 +6,8 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import type { AgentStatus } from '@core/ai/orchestration/multi-agent-orchestrator';
-import type { TokenUsageByModel } from '@core/integrations/token-logger';
+import type { AgentStatus } from '@core/ai/orchestration/agent-collaboration-manager';
+import type { TokenUsageByModel } from '@core/integrations/token-usage-tracker';
 
 export interface AgentAssignment {
   agentId: string;
@@ -75,9 +75,9 @@ interface CompanyHubState {
   activeSessionId: string | null;
   sessions: Record<string, CompanyHubSession>;
 
-  // Agent tracking
-  assignedAgents: Map<string, AgentAssignment>;
-  agentStatuses: Map<string, AgentStatus>;
+  // Agent tracking (using Record for Immer compatibility)
+  assignedAgents: Record<string, AgentAssignment>;
+  agentStatuses: Record<string, AgentStatus>;
 
   // Token usage
   tokenUsage: TokenUsageByModel;
@@ -151,8 +151,8 @@ export interface CompanyHubStore extends CompanyHubState, CompanyHubActions {}
 const INITIAL_STATE: CompanyHubState = {
   activeSessionId: null,
   sessions: {},
-  assignedAgents: new Map(),
-  agentStatuses: new Map(),
+  assignedAgents: {},
+  agentStatuses: {},
   tokenUsage: {},
   sessionTokens: 0,
   sessionCost: 0,
@@ -228,7 +228,19 @@ export const useCompanyHubStore = create<CompanyHubStore>()(
         // Agent management
         assignAgent: (agent: AgentAssignment) => {
           set((state) => {
-            state.assignedAgents.set(agent.agentId, agent);
+            // Check if agent already exists with same data (avoid unnecessary updates)
+            const existingAgent = state.assignedAgents[agent.agentId];
+            if (
+              existingAgent &&
+              existingAgent.status === agent.status &&
+              existingAgent.progress === agent.progress &&
+              existingAgent.currentTask === agent.currentTask
+            ) {
+              return; // Already assigned with same state, skip update
+            }
+
+            // Atomic update: update both assignedAgents and session.assignedAgents together
+            state.assignedAgents[agent.agentId] = agent;
             state.lastUpdate = new Date();
 
             // Update session
@@ -252,30 +264,49 @@ export const useCompanyHubStore = create<CompanyHubStore>()(
 
         updateAgentStatus: (agentId: string, status: Partial<AgentStatus>) => {
           set((state) => {
-            const agent = state.assignedAgents.get(agentId);
+            // Single source of truth: assignedAgents is the primary store
+            // agentStatuses is kept in sync for backward compatibility
+            const agent = state.assignedAgents[agentId];
             if (agent) {
-              Object.assign(agent, status);
-              state.assignedAgents.set(agentId, agent);
+              // Merge status into the agent assignment
+              const updatedAgent = { ...agent, ...status };
+              state.assignedAgents[agentId] = updatedAgent;
+
+              // Also update in session's assignedAgents for consistency
+              if (
+                state.activeSessionId &&
+                state.sessions[state.activeSessionId]
+              ) {
+                const session = state.sessions[state.activeSessionId];
+                const sessionAgentIndex = session.assignedAgents.findIndex(
+                  (a) => a.agentId === agentId
+                );
+                if (sessionAgentIndex >= 0) {
+                  session.assignedAgents[sessionAgentIndex] = updatedAgent;
+                }
+              }
+
               state.lastUpdate = new Date();
             }
 
-            // Update in agentStatuses map
-            const existingStatus = state.agentStatuses.get(agentId);
+            // Keep agentStatuses in sync (secondary store for status queries)
+            const existingStatus = state.agentStatuses[agentId];
             if (existingStatus) {
-              state.agentStatuses.set(agentId, {
+              state.agentStatuses[agentId] = {
                 ...existingStatus,
                 ...status,
-              } as AgentStatus);
-            } else {
-              state.agentStatuses.set(agentId, status as AgentStatus);
+              } as AgentStatus;
+            } else if (agent) {
+              // Only create agentStatuses entry if agent exists
+              state.agentStatuses[agentId] = status as AgentStatus;
             }
           });
         },
 
         removeAgent: (agentId: string) => {
           set((state) => {
-            state.assignedAgents.delete(agentId);
-            state.agentStatuses.delete(agentId);
+            delete state.assignedAgents[agentId];
+            delete state.agentStatuses[agentId];
             state.lastUpdate = new Date();
 
             // Update session
@@ -294,8 +325,8 @@ export const useCompanyHubStore = create<CompanyHubStore>()(
 
         clearAgents: () => {
           set((state) => {
-            state.assignedAgents.clear();
-            state.agentStatuses.clear();
+            state.assignedAgents = {};
+            state.agentStatuses = {};
             state.lastUpdate = new Date();
 
             // Update session
@@ -545,7 +576,7 @@ export const useActiveSession = () =>
   );
 
 export const useAssignedAgents = () =>
-  useCompanyHubStore((state) => Array.from(state.assignedAgents.values()));
+  useCompanyHubStore((state) => Object.values(state.assignedAgents));
 
 export const useTokenUsage = () =>
   useCompanyHubStore((state) => ({

@@ -49,17 +49,16 @@ const TOKEN_PRICING: Record<
   string,
   { input: number; output: number; provider: LLMProvider }
 > = {
-  // OpenAI - Latest Models (November 2024+)
-  'gpt-5-thinking': { input: 15.0, output: 45.0, provider: 'openai' },
-  'gpt-4o': { input: 5.0, output: 15.0, provider: 'openai' },
+  // OpenAI - Latest Models (Jan 2026)
+  'gpt-4o': { input: 2.5, output: 10.0, provider: 'openai' },
   'gpt-4o-mini': { input: 0.15, output: 0.6, provider: 'openai' },
-  'gpt-4-turbo': { input: 10.0, output: 30.0, provider: 'openai' },
-  'gpt-3.5-turbo': { input: 0.5, output: 1.5, provider: 'openai' },
+  'o1': { input: 15.0, output: 60.0, provider: 'openai' },
+  'o1-mini': { input: 3.0, output: 12.0, provider: 'openai' },
 
-  // Anthropic - Latest Models (November 2024+)
-  'claude-sonnet-4-5-thinking': {
-    input: 4.0,
-    output: 20.0,
+  // Anthropic - Latest Models (Jan 2026)
+  'claude-sonnet-4-20250514': {
+    input: 3.0,
+    output: 15.0,
     provider: 'anthropic',
   },
   'claude-3-5-sonnet-20241022': {
@@ -67,70 +66,117 @@ const TOKEN_PRICING: Record<
     output: 15.0,
     provider: 'anthropic',
   },
-  'claude-3-5-sonnet': {
-    input: 3.0,
-    output: 15.0,
-    provider: 'anthropic',
-  },
   'claude-3-5-haiku-20241022': {
-    input: 1.0,
-    output: 5.0,
-    provider: 'anthropic',
-  },
-  'claude-3-opus-20240229': {
-    input: 15.0,
-    output: 75.0,
-    provider: 'anthropic',
-  },
-  'claude-3-sonnet-20240229': {
-    input: 3.0,
-    output: 15.0,
-    provider: 'anthropic',
-  },
-  'claude-3-haiku-20240307': {
     input: 0.25,
     output: 1.25,
     provider: 'anthropic',
   },
 
-  // Google - Latest Models (November 2024+)
-  'gemini-2-5-pro': { input: 5.0, output: 15.0, provider: 'google' },
-  'gemini-1.5-pro': { input: 3.5, output: 10.5, provider: 'google' },
+  // Google - Latest Models (Jan 2026)
+  'gemini-2.0-flash': { input: 0.1, output: 0.4, provider: 'google' },
+  'gemini-1.5-pro': { input: 1.25, output: 10.0, provider: 'google' },
   'gemini-1.5-flash': { input: 0.075, output: 0.3, provider: 'google' },
-  'gemini-1.0-pro': { input: 0.5, output: 1.5, provider: 'google' },
 
-  // Perplexity
-  'llama-3.1-sonar-small-128k-online': {
-    input: 0.2,
-    output: 0.2,
+  // Perplexity - Latest Models (Jan 2026)
+  'sonar-pro': {
+    input: 3.0,
+    output: 15.0,
     provider: 'perplexity',
   },
-  'llama-3.1-sonar-large-128k-online': {
+  'sonar': {
     input: 1.0,
     output: 1.0,
     provider: 'perplexity',
   },
-  'llama-3.1-sonar-huge-128k-online': {
+  'sonar-reasoning': {
     input: 5.0,
-    output: 5.0,
+    output: 20.0,
     provider: 'perplexity',
   },
+
+  // Grok - Latest Models (Jan 2026)
+  'grok-2': {
+    input: 2.0,
+    output: 10.0,
+    provider: 'grok',
+  },
+  'grok-2-mini': {
+    input: 0.3,
+    output: 1.0,
+    provider: 'grok',
+  },
 };
+
+/**
+ * Simple mutex implementation for async operations
+ * Prevents race conditions in read-modify-write operations
+ */
+class AsyncMutex {
+  private locked = false;
+  private queue: Array<() => void> = [];
+
+  async acquire(): Promise<void> {
+    if (!this.locked) {
+      this.locked = true;
+      return;
+    }
+
+    return new Promise<void>((resolve) => {
+      this.queue.push(resolve);
+    });
+  }
+
+  release(): void {
+    if (this.queue.length > 0) {
+      const next = this.queue.shift()!;
+      next();
+    } else {
+      this.locked = false;
+    }
+  }
+
+  /**
+   * Execute a function with the lock held
+   */
+  async withLock<T>(fn: () => T | Promise<T>): Promise<T> {
+    await this.acquire();
+    try {
+      return await fn();
+    } finally {
+      this.release();
+    }
+  }
+}
 
 class TokenLoggerService {
   private usageTracker: UsageTracker;
   private sessionCache: Map<string, SessionTokenSummary>;
   private logEntries: Map<string, TokenLogEntry[]>; // sessionId -> entries
+  private sessionLocks: Map<string, AsyncMutex>; // Per-session locks to allow parallel updates to different sessions
 
   constructor() {
     this.usageTracker = new UsageTracker();
     this.sessionCache = new Map();
     this.logEntries = new Map();
+    this.sessionLocks = new Map();
+  }
+
+  /**
+   * Get or create a lock for a specific session
+   */
+  private getSessionLock(sessionId: string): AsyncMutex {
+    let lock = this.sessionLocks.get(sessionId);
+    if (!lock) {
+      lock = new AsyncMutex();
+      this.sessionLocks.set(sessionId, lock);
+    }
+    return lock;
   }
 
   /**
    * Log token usage for an LLM API call
    * This is the main function that external services will call
+   * Uses per-session locking to prevent race conditions during concurrent updates
    */
   async logTokenUsage(
     model: string,
@@ -143,80 +189,91 @@ class TokenLoggerService {
     outputTokens?: number,
     taskDescription?: string
   ): Promise<void> {
-    const pricing = TOKEN_PRICING[model] || {
-      input: 1.0,
-      output: 1.0,
-      provider: 'openai',
-    };
-    const provider = pricing.provider;
+    const effectiveSessionId = sessionId || 'default';
+    const lock = this.getSessionLock(effectiveSessionId);
 
-    // Calculate cost - use actual values if provided, otherwise estimate
-    // NOTE: All providers should provide actual input/output tokens from API responses
-    const actualInputTokens =
-      inputTokens ?? (tokensUsed > 0 ? Math.floor(tokensUsed * 0.4) : 0);
-    const actualOutputTokens =
-      outputTokens ?? (tokensUsed > 0 ? Math.ceil(tokensUsed * 0.6) : 0);
+    // Use lock to ensure atomic read-modify-write operations
+    await lock.withLock(async () => {
+      const pricing = TOKEN_PRICING[model] || {
+        input: 1.0,
+        output: 1.0,
+        provider: 'openai',
+      };
+      const provider = pricing.provider;
 
-    // Validate token values
-    if (tokensUsed > 0 && actualInputTokens === 0 && actualOutputTokens === 0) {
-      console.warn(
-        `[TokenLogger] ⚠️ No input/output tokens provided for ${model}, using estimation`
+      // Calculate cost - use actual values if provided, otherwise estimate
+      // NOTE: All providers should provide actual input/output tokens from API responses
+      const actualInputTokens =
+        inputTokens ?? (tokensUsed > 0 ? Math.floor(tokensUsed * 0.4) : 0);
+      const actualOutputTokens =
+        outputTokens ?? (tokensUsed > 0 ? Math.ceil(tokensUsed * 0.6) : 0);
+
+      // Validate token values
+      if (tokensUsed > 0 && actualInputTokens === 0 && actualOutputTokens === 0) {
+        console.warn(
+          `[TokenLogger] ⚠️ No input/output tokens provided for ${model}, using estimation`
+        );
+      }
+
+      // Validate that input + output equals total (with small tolerance for rounding)
+      const calculatedTotal = actualInputTokens + actualOutputTokens;
+      if (tokensUsed > 0 && Math.abs(calculatedTotal - tokensUsed) > 1) {
+        console.warn(
+          `[TokenLogger] ⚠️ Token mismatch for ${model}: input(${actualInputTokens}) + output(${actualOutputTokens}) = ${calculatedTotal}, but total = ${tokensUsed}`
+        );
+      }
+      const cost = this.calculateCost(
+        model,
+        actualInputTokens,
+        actualOutputTokens
       );
-    }
 
-    // Validate that input + output equals total (with small tolerance for rounding)
-    const calculatedTotal = actualInputTokens + actualOutputTokens;
-    if (tokensUsed > 0 && Math.abs(calculatedTotal - tokensUsed) > 1) {
-      console.warn(
-        `[TokenLogger] ⚠️ Token mismatch for ${model}: input(${actualInputTokens}) + output(${actualOutputTokens}) = ${calculatedTotal}, but total = ${tokensUsed}`
-      );
-    }
-    const cost = this.calculateCost(
-      model,
-      actualInputTokens,
-      actualOutputTokens
-    );
-
-    const entry: TokenLogEntry = {
-      userId,
-      sessionId: sessionId || 'default',
-      agentId: agentId || 'unknown',
-      agentName: agentName || 'Unknown Agent',
-      provider,
-      model,
-      inputTokens: actualInputTokens,
-      outputTokens: actualOutputTokens,
-      totalTokens: tokensUsed,
-      cost,
-      timestamp: new Date(),
-      taskDescription,
-    };
-
-    // Store in memory cache
-    const entries = this.logEntries.get(entry.sessionId) || [];
-    entries.push(entry);
-    this.logEntries.set(entry.sessionId, entries);
-
-    // Update session summary
-    this.updateSessionSummary(entry);
-
-    // Persist to database via UsageTracker
-    try {
-      await this.usageTracker.trackAPICall({
+      const entry: TokenLogEntry = {
         userId,
-        agentType: agentName || 'Unknown Agent',
-        provider: model,
-        tokensUsed,
+        sessionId: effectiveSessionId,
+        agentId: agentId || 'unknown',
+        agentName: agentName || 'Unknown Agent',
+        provider,
+        model,
         inputTokens: actualInputTokens,
         outputTokens: actualOutputTokens,
-        taskId: sessionId || 'default',
-        timestamp: entry.timestamp,
+        totalTokens: tokensUsed,
         cost,
-      });
-    } catch (error) {
-      console.error('[TokenLogger] Failed to persist to database:', error);
-      // Don't throw - continue even if DB persist fails
-    }
+        timestamp: new Date(),
+        taskDescription,
+      };
+
+      // Store in memory cache (atomic within lock)
+      let entries = this.logEntries.get(effectiveSessionId);
+      if (!entries) {
+        entries = [];
+        this.logEntries.set(effectiveSessionId, entries);
+      }
+      entries.push(entry);
+
+      // Update session summary (atomic within lock)
+      this.updateSessionSummary(entry);
+
+      // Persist to database via UsageTracker
+      // Note: This is still inside the lock to ensure ordering consistency
+      try {
+        await this.usageTracker.trackAPICall({
+          userId,
+          agentType: agentName || 'Unknown Agent',
+          provider: model,
+          tokensUsed,
+          inputTokens: actualInputTokens,
+          outputTokens: actualOutputTokens,
+          taskId: effectiveSessionId,
+          timestamp: entry.timestamp,
+          cost,
+        });
+      } catch (error) {
+        console.error('[TokenLogger] Failed to persist to database:', error);
+        // Don't throw - continue even if DB persist fails
+        // The in-memory tracking is still accurate
+      }
+    });
   }
 
   /**
@@ -323,6 +380,7 @@ class TokenLoggerService {
   clearSessionCache(sessionId: string): void {
     this.sessionCache.delete(sessionId);
     this.logEntries.delete(sessionId);
+    this.sessionLocks.delete(sessionId);
   }
 
   /**
@@ -331,6 +389,7 @@ class TokenLoggerService {
   clearAllCaches(): void {
     this.sessionCache.clear();
     this.logEntries.clear();
+    this.sessionLocks.clear();
   }
 
   /**

@@ -135,3 +135,4 @@ docs/drafts/
 .cursor/
 .aider/
 .copilot/
+.env

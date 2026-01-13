@@ -153,9 +153,12 @@ export function useChatPersistence(
         .from('chat_sessions')
         .select('*')
         .eq('id', sid)
-        .single();
+        .maybeSingle();
 
       if (sessionError) throw sessionError;
+      if (!sessionData) {
+        throw new Error('Session not found');
+      }
 
       const session: ChatSession = {
         id: sessionData.id,

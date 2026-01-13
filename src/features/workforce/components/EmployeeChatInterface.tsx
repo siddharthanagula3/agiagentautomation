@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { AIEmployee, ChatMessage, ToolResult } from '../../types';
-import { createAIEmployeeExecutor } from '@features/workforce/services/ai/ai-employee-executor';
+import { createAIEmployeeExecutor } from '@core/ai/employees/employee-executor';
 
 interface AIEmployeeChatProps {
   employee: AIEmployee;

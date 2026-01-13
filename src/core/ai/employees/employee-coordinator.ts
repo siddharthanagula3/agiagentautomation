@@ -3,8 +3,8 @@
  * Handles real API calls to various AI providers
  */
 
-import { Task } from '../reasoning/task-decomposer';
-import { AgentType } from '../reasoning/agent-selector';
+import { Task, AgentType } from '../orchestration/reasoning/task-breakdown';
+import { fetchWithTimeout, TimeoutPresets } from '@shared/utils/error-handling';
 
 // ================================================
 // TYPES
@@ -44,23 +44,27 @@ class ClaudeService {
     try {
       const prompt = this.buildPrompt(task);
 
-      const response = await fetch(`${this.baseURL}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': this.apiKey,
-          'anthropic-version': '2023-06-01',
+      const response = await fetchWithTimeout(`${this.baseURL}/messages`, {
+        timeoutMs: TimeoutPresets.AI_REQUEST,
+        timeoutMessage: 'Claude API request timed out',
+        fetchOptions: {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': this.apiKey,
+            'anthropic-version': '2023-06-01',
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 4096,
+            messages: [
+              {
+                role: 'user',
+                content: prompt,
+              },
+            ],
+          }),
         },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 4096,
-          messages: [
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-        }),
       });
 
       if (!response.ok) {
@@ -129,30 +133,34 @@ class GeminiService {
     try {
       const prompt = this.buildPrompt(task);
 
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `${this.baseURL}/models/gemini-2.0-flash-exp:generateContent?key=${this.apiKey}`,
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: prompt,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 8192,
+          timeoutMs: TimeoutPresets.AI_REQUEST,
+          timeoutMessage: 'Gemini API request timed out',
+          fetchOptions: {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
-          }),
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    {
+                      text: prompt,
+                    },
+                  ],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.7,
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 8192,
+              },
+            }),
+          },
         }
       );
 
@@ -220,27 +228,31 @@ class OpenAIService {
     try {
       const prompt = this.buildPrompt(task);
 
-      const response = await fetch(`${this.baseURL}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
+      const response = await fetchWithTimeout(`${this.baseURL}/chat/completions`, {
+        timeoutMs: TimeoutPresets.AI_REQUEST,
+        timeoutMessage: 'OpenAI API request timed out',
+        fetchOptions: {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.apiKey}`,
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [
+              {
+                role: 'system',
+                content: `You are an expert AI assistant specializing in ${task.domain}.`,
+              },
+              {
+                role: 'user',
+                content: prompt,
+              },
+            ],
+            max_tokens: 4096,
+            temperature: 0.7,
+          }),
         },
-        body: JSON.stringify({
-          model: 'gpt-4-turbo-preview',
-          messages: [
-            {
-              role: 'system',
-              content: `You are an expert AI assistant specializing in ${task.domain}.`,
-            },
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-          max_tokens: 4096,
-          temperature: 0.7,
-        }),
       });
 
       if (!response.ok) {
@@ -261,7 +273,7 @@ class OpenAIService {
         content,
         tokensUsed,
         cost,
-        model: 'gpt-4-turbo-preview',
+        model: 'gpt-4o',
         provider: 'openai',
       };
     } catch (error) {

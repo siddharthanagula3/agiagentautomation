@@ -1,0 +1,9 @@
+# Dependabot configuration - disabled
+# To re-enable, uncomment the updates section
+version: 2
+updates: []
+# Uncomment below to re-enable npm updates:
+#  - package-ecosystem: "npm"
+#    directory: "/"
+#    schedule:
+#      interval: "weekly"

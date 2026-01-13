@@ -189,9 +189,9 @@ export interface MultiAgentChatState {
   conversations: Record<string, MultiAgentConversation>;
   activeConversationId: string | null;
 
-  // Real-time tracking
-  typingIndicators: Map<string, TypingIndicator[]>;
-  agentPresence: Map<string, AgentPresence>;
+  // Real-time tracking (using Record for Immer compatibility)
+  typingIndicators: Record<string, TypingIndicator[]>;
+  agentPresence: Record<string, AgentPresence>;
 
   // Message queue for offline support
   messageQueue: ChatMessage[];
@@ -333,8 +333,8 @@ export type MultiAgentChatStore = MultiAgentChatState & MultiAgentChatActions;
 const INITIAL_STATE: MultiAgentChatState = {
   conversations: {},
   activeConversationId: null,
-  typingIndicators: new Map(),
-  agentPresence: new Map(),
+  typingIndicators: {},
+  agentPresence: {},
   messageQueue: [],
   isLoading: false,
   isSyncing: false,
@@ -408,10 +408,12 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
 
         updateConversation: (id, updates) =>
           set((state) => {
-            const conversation = state.conversations[id];
-            if (conversation) {
-              Object.assign(conversation, updates);
-              conversation.updatedAt = new Date();
+            if (state.conversations[id]) {
+              state.conversations[id] = {
+                ...state.conversations[id],
+                ...updates,
+                updatedAt: new Date(),
+              };
             }
           }),
 
@@ -533,11 +535,14 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
         updateMessage: (messageId, updates) =>
           set((state) => {
             for (const conversation of Object.values(state.conversations)) {
-              const message = conversation.messages.find(
+              const messageIndex = conversation.messages.findIndex(
                 (m) => m.id === messageId
               );
-              if (message) {
-                Object.assign(message, updates);
+              if (messageIndex !== -1) {
+                conversation.messages[messageIndex] = {
+                  ...conversation.messages[messageIndex],
+                  ...updates,
+                };
                 conversation.updatedAt = new Date();
                 break;
               }
@@ -624,7 +629,7 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
           isTyping
         ) =>
           set((state) => {
-            const indicators = state.typingIndicators.get(conversationId) || [];
+            const indicators = state.typingIndicators[conversationId] || [];
 
             if (isTyping) {
               // Add or update indicator
@@ -653,12 +658,14 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
                   participant.isTyping = true;
                 }
               }
+
+              state.typingIndicators[conversationId] = indicators;
             } else {
               // Remove indicator
               const filtered = indicators.filter(
                 (i) => i.participantId !== participantId
               );
-              state.typingIndicators.set(conversationId, filtered);
+              state.typingIndicators[conversationId] = filtered;
 
               // Update participant typing status
               const conversation = state.conversations[conversationId];
@@ -670,15 +677,12 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
                   participant.isTyping = false;
                 }
               }
-              return;
             }
-
-            state.typingIndicators.set(conversationId, indicators);
           }),
 
         clearTypingIndicators: (conversationId) =>
           set((state) => {
-            state.typingIndicators.delete(conversationId);
+            delete state.typingIndicators[conversationId];
 
             // Clear all participant typing statuses
             const conversation = state.conversations[conversationId];
@@ -695,12 +699,12 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
 
         updateAgentPresence: (presence) =>
           set((state) => {
-            state.agentPresence.set(presence.agentId, presence);
+            state.agentPresence[presence.agentId] = presence;
           }),
 
         removeAgentPresence: (agentId) =>
           set((state) => {
-            state.agentPresence.delete(agentId);
+            delete state.agentPresence[agentId];
           }),
 
         // ====================================================================
@@ -909,11 +913,11 @@ export const useConversationParticipants = (conversationId: string) =>
 
 export const useTypingIndicators = (conversationId: string) =>
   useMultiAgentChatStore(
-    (state) => state.typingIndicators.get(conversationId) || []
+    (state) => state.typingIndicators[conversationId] || []
   );
 
 export const useAgentPresence = (agentId: string) =>
-  useMultiAgentChatStore((state) => state.agentPresence.get(agentId));
+  useMultiAgentChatStore((state) => state.agentPresence[agentId]);
 
 export const useSyncState = () =>
   useMultiAgentChatStore((state) => ({

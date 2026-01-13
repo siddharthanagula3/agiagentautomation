@@ -3,7 +3,7 @@
  * Displays all saved messages with filtering and search
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
@@ -54,11 +54,32 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
   const [editingBookmark, setEditingBookmark] = useState<string | null>(null);
   const [editNote, setEditNote] = useState('');
 
+  const loadBookmarks = useCallback(async () => {
+    if (!user?.id) return;
+
+    setIsLoading(true);
+    try {
+      const [userBookmarks, tags] = await Promise.all([
+        messageBookmarksService.getUserBookmarks(user.id),
+        messageBookmarksService.getUserBookmarkTags(user.id),
+      ]);
+
+      setBookmarks(userBookmarks);
+      setFilteredBookmarks(userBookmarks);
+      setAllTags(tags);
+    } catch (error) {
+      console.error('[Bookmarks] Failed to load:', error);
+      toast.error('Failed to load bookmarks');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id]);
+
   useEffect(() => {
     if (open && user?.id) {
       loadBookmarks();
     }
-  }, [open, user?.id]);
+  }, [open, user?.id, loadBookmarks]);
 
   useEffect(() => {
     // Filter bookmarks by search query and tag
@@ -80,27 +101,6 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
 
     setFilteredBookmarks(filtered);
   }, [searchQuery, selectedTag, bookmarks]);
-
-  const loadBookmarks = async () => {
-    if (!user?.id) return;
-
-    setIsLoading(true);
-    try {
-      const [userBookmarks, tags] = await Promise.all([
-        messageBookmarksService.getUserBookmarks(user.id),
-        messageBookmarksService.getUserBookmarkTags(user.id),
-      ]);
-
-      setBookmarks(userBookmarks);
-      setFilteredBookmarks(userBookmarks);
-      setAllTags(tags);
-    } catch (error) {
-      console.error('[Bookmarks] Failed to load:', error);
-      toast.error('Failed to load bookmarks');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleRemoveBookmark = async (messageId: string) => {
     if (!user?.id) return;

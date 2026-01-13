@@ -7,6 +7,10 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
+// Track auto-close timeouts to prevent memory leaks
+const notificationTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
+const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
+
 export interface Notification {
   id: string;
   type: 'info' | 'success' | 'warning' | 'error';
@@ -207,11 +211,13 @@ export const useNotificationStore = create<NotificationStore>()(
             get().playNotificationSound();
           }
 
-          // Auto-remove if specified
+          // Auto-remove if specified (track timeout for cleanup)
           if (notification.autoClose) {
-            setTimeout(() => {
+            const timeoutId = setTimeout(() => {
+              notificationTimeouts.delete(id);
               get().removeNotification(id);
             }, notification.autoClose);
+            notificationTimeouts.set(id, timeoutId);
           }
 
           return id;
@@ -239,6 +245,12 @@ export const useNotificationStore = create<NotificationStore>()(
           set((state) => {
             const notification = state.notifications[id];
             if (notification) {
+              // Clear any pending auto-close timeout
+              const timeoutId = notificationTimeouts.get(id);
+              if (timeoutId) {
+                clearTimeout(timeoutId);
+                notificationTimeouts.delete(id);
+              }
               if (!notification.read) {
                 state.unreadCount = Math.max(0, state.unreadCount - 1);
               }
@@ -262,6 +274,12 @@ export const useNotificationStore = create<NotificationStore>()(
 
         clearAll: () =>
           set((state) => {
+            // Clear all pending auto-close timeouts to prevent memory leaks
+            notificationTimeouts.forEach((timeoutId) => {
+              clearTimeout(timeoutId);
+            });
+            notificationTimeouts.clear();
+
             state.notifications = {};
             state.unreadCount = 0;
           }),
@@ -300,30 +318,50 @@ export const useNotificationStore = create<NotificationStore>()(
             state.toasts[id] = toast;
           });
 
-          // Auto-remove after duration
-          setTimeout(() => {
+          // Auto-remove after duration - track timeout to prevent memory leaks
+          const timeoutId = setTimeout(() => {
+            // Clean up the timeout tracking
+            toastTimeouts.delete(id);
             get().removeToast(id);
           }, toast.duration);
+
+          // Track the timeout so it can be cleared on manual removal
+          toastTimeouts.set(id, timeoutId);
 
           return id;
         },
 
-        removeToast: (id: string) =>
+        removeToast: (id: string) => {
+          // Clear any pending auto-close timeout to prevent memory leaks
+          const timeoutId = toastTimeouts.get(id);
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            toastTimeouts.delete(id);
+          }
+
           set((state) => {
             const toast = state.toasts[id];
             if (toast?.onClose) {
               toast.onClose();
             }
             delete state.toasts[id];
-          }),
+          });
+        },
 
-        clearToasts: () =>
+        clearToasts: () => {
+          // Clear all pending auto-close timeouts to prevent memory leaks
+          toastTimeouts.forEach((timeoutId) => {
+            clearTimeout(timeoutId);
+          });
+          toastTimeouts.clear();
+
           set((state) => {
             Object.values(state.toasts).forEach((toast) => {
               if (toast.onClose) toast.onClose();
             });
             state.toasts = {};
-          }),
+          });
+        },
 
         // Quick notification methods
         showSuccess: (message: string, title?: string, options = {}) => {
@@ -501,6 +539,12 @@ export const useNotificationStore = create<NotificationStore>()(
         },
 
         cleanup: () => {
+          // Clear all pending auto-close timeouts
+          notificationTimeouts.forEach((timeoutId) => {
+            clearTimeout(timeoutId);
+          });
+          notificationTimeouts.clear();
+
           // Clean up old notifications (older than 30 days)
           get().clearOld(30);
 

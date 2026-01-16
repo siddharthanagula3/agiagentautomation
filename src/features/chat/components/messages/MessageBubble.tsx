@@ -1,26 +1,53 @@
+/**
+ * MessageBubble - Clean, minimal message display
+ *
+ * Redesigned with:
+ * - Progressive disclosure (details on hover/click)
+ * - Minimal metadata inline
+ * - Clean visual hierarchy
+ * - Token usage hidden by default
+ */
+
 import React, { useState, useMemo, useEffect } from 'react';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/shared/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
-import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import { Badge } from '@/shared/components/ui/badge';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@shared/ui/tooltip';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@shared/ui/collapsible';
+import {
   User,
-  Bot,
-  FileText,
-  Download,
-  ChevronDown,
-  ChevronUp,
-  Check,
   Copy,
+  Check,
+  ChevronDown,
+  ChevronRight,
   Sparkles,
   Brain,
-  Wrench,
-  Users,
+  Download,
+  MoreHorizontal,
+  Pin,
+  Pencil,
+  RefreshCw,
+  Trash2,
+  ThumbsUp,
+  ThumbsDown,
+  ExternalLink,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@shared/ui/dropdown-menu';
 import { cn } from '@shared/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -29,24 +56,15 @@ import remarkBreaks from 'remark-breaks';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';
 import type { Components } from 'react-markdown';
-import { EmployeeWorkStream } from '../agents/EmployeeWorkStream';
-import { TokenUsageDisplay } from '../tokens/TokenUsageDisplay';
-import { MessageActions } from './MessageActions';
-import { ImageAttachmentPreview } from '../artifacts/ImageAttachmentPreview';
-import { TypingIndicator } from './TypingIndicator';
 import { toast } from 'sonner';
 import { ArtifactPreview } from '../artifacts/ArtifactPreview';
-import {
-  extractArtifacts,
-  removeArtifactBlocks,
-} from '../../utils/artifact-detector';
+import { extractArtifacts, removeArtifactBlocks } from '../../utils/artifact-detector';
 import { useArtifactStore } from '@shared/stores/artifact-store';
 import { employeeChatService } from '../../services/employee-chat-service';
 import { SearchResults } from '../search/SearchResults';
 import type { SearchResponse } from '@core/integrations/web-search-handler';
 import type { MediaGenerationResult } from '@core/integrations/media-generation-handler';
 import type { GeneratedDocument } from '../../services/document-generation-service';
-import { documentGenerationService } from '../../services/document-generation-service';
 
 interface Attachment {
   id: string;
@@ -75,28 +93,23 @@ interface Message {
     hasWorkStream?: boolean;
     workStreamData?: Record<string, unknown>;
     isPinned?: boolean;
-    // Token tracking metadata
     tokensUsed?: number;
     inputTokens?: number;
     outputTokens?: number;
     model?: string;
     cost?: number;
-    // Employee selection metadata
     selectionReason?: string;
     thinkingSteps?: string[];
     isThinking?: boolean;
-    isStreaming?: boolean; // Streaming indicator
-    // Multi-agent collaboration metadata
+    isStreaming?: boolean;
     isCollaboration?: boolean;
     collaborationType?: 'contribution' | 'discussion' | 'synthesis';
     collaborationTo?: string;
     isMultiAgent?: boolean;
     employeesInvolved?: string[];
     isSynthesis?: boolean;
-    // Web search metadata
     searchResults?: SearchResponse;
     isSearching?: boolean;
-    // Tool result metadata
     toolResult?: boolean;
     toolType?: string;
     imageUrl?: string;
@@ -105,7 +118,12 @@ interface Message {
     thumbnailUrl?: string;
     videoData?: MediaGenerationResult;
     documentData?: GeneratedDocument;
-    documentTitle?: string;
+    collaborationMessages?: Array<{
+      employeeName: string;
+      employeeAvatar: string;
+      content: string;
+      messageType?: string;
+    }>;
   };
 }
 
@@ -115,21 +133,11 @@ interface MessageBubbleProps {
   onRegenerate?: (messageId: string) => void;
   onDelete?: (messageId: string) => void;
   onPin?: (messageId: string) => void;
-  onReact?: (
-    messageId: string,
-    reactionType: 'up' | 'down' | 'helpful'
-  ) => void;
+  onReact?: (messageId: string, reactionType: 'up' | 'down' | 'helpful') => void;
 }
 
-// Custom code block component with copy button
-const CodeBlock = ({
-  className,
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLElement> & {
-  inline?: boolean;
-  className?: string;
-}) => {
+// Code block with copy button
+const CodeBlock = ({ className, children }: { className?: string; children: React.ReactNode }) => {
   const [copied, setCopied] = useState(false);
   const match = /language-(\w+)/.exec(className || '');
   const language = match ? match[1] : '';
@@ -142,83 +150,55 @@ const CodeBlock = ({
   };
 
   if (!match) {
-    return (
-      <code className={className} {...props}>
-        {children}
-      </code>
-    );
+    return <code className="rounded bg-muted px-1.5 py-0.5 text-sm">{children}</code>;
   }
 
   return (
-    <div className="group relative">
-      <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100">
+    <div className="group relative my-3 overflow-hidden rounded-lg border border-border">
+      <div className="flex items-center justify-between bg-muted/50 px-4 py-2">
+        <span className="text-xs font-medium text-muted-foreground">{language}</span>
         <Button
-          variant="secondary"
+          variant="ghost"
           size="sm"
           onClick={handleCopy}
-          className="h-7 px-2 text-xs"
+          className="h-7 gap-1.5 px-2 text-xs opacity-0 transition-opacity group-hover:opacity-100"
         >
-          {copied ? (
-            <>
-              <Check className="mr-1 h-3 w-3" />
-              Copied
-            </>
-          ) : (
-            <>
-              <Copy className="mr-1 h-3 w-3" />
-              Copy
-            </>
-          )}
+          {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+          {copied ? 'Copied' : 'Copy'}
         </Button>
       </div>
-      <div className="overflow-x-auto rounded-lg bg-gray-900 p-4">
-        {language && (
-          <div className="mb-2 text-xs font-medium text-gray-400">
-            {language}
-          </div>
-        )}
-        <pre className="m-0">
-          <code className={className} {...props}>
-            {children}
-          </code>
-        </pre>
-      </div>
+      <pre className="overflow-x-auto bg-zinc-950 p-4">
+        <code className={className}>{children}</code>
+      </pre>
     </div>
   );
 };
 
-// Custom markdown components
 const markdownComponents: Components = {
-  code: CodeBlock as React.ComponentType<
-    React.HTMLAttributes<HTMLElement> & { inline?: boolean }
-  >,
-  h1: ({ children }) => (
-    <h1 className="mb-4 mt-6 text-2xl font-bold">{children}</h1>
-  ),
-  h2: ({ children }) => (
-    <h2 className="mb-3 mt-5 text-xl font-semibold">{children}</h2>
-  ),
-  h3: ({ children }) => (
-    <h3 className="mb-2 mt-4 text-lg font-semibold">{children}</h3>
-  ),
+  code: CodeBlock as any,
+  h1: ({ children }) => <h1 className="mb-4 mt-6 text-xl font-bold">{children}</h1>,
+  h2: ({ children }) => <h2 className="mb-3 mt-5 text-lg font-semibold">{children}</h2>,
+  h3: ({ children }) => <h3 className="mb-2 mt-4 text-base font-semibold">{children}</h3>,
+  p: ({ children }) => <p className="mb-3 leading-relaxed">{children}</p>,
+  ul: ({ children }) => <ul className="mb-3 list-disc pl-6">{children}</ul>,
+  ol: ({ children }) => <ol className="mb-3 list-decimal pl-6">{children}</ol>,
+  li: ({ children }) => <li className="mb-1">{children}</li>,
   table: ({ children }) => (
-    <div className="my-4 overflow-x-auto">
-      <table className="w-full border-collapse border border-border">
-        {children}
-      </table>
+    <div className="my-3 overflow-x-auto">
+      <table className="w-full border-collapse text-sm">{children}</table>
     </div>
   ),
   th: ({ children }) => (
-    <th className="border border-border bg-muted p-2 text-left font-semibold">
-      {children}
-    </th>
+    <th className="border border-border bg-muted px-3 py-2 text-left font-semibold">{children}</th>
   ),
-  td: ({ children }) => (
-    <td className="border border-border p-2">{children}</td>
+  td: ({ children }) => <td className="border border-border px-3 py-2">{children}</td>,
+  a: ({ href, children }) => (
+    <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
   ),
 };
 
-// Updated: Jan 15th 2026 - Added React.memo for performance
 export const MessageBubble = React.memo(function MessageBubble({
   message,
   onEdit,
@@ -227,770 +207,314 @@ export const MessageBubble = React.memo(function MessageBubble({
   onPin,
   onReact,
 }: MessageBubbleProps) {
-  const [documentExpanded, setDocumentExpanded] = useState(false);
-  const [workStreamExpanded, setWorkStreamExpanded] = useState(true);
-  const [thinkingExpanded, setThinkingExpanded] = useState(false);
-  const [collaborationsExpanded, setCollaborationsExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [showThinking, setShowThinking] = useState(false);
+  const [showContributions, setShowContributions] = useState(false);
   const isUser = message.role === 'user';
-  const isDocument = message.metadata?.isDocument;
-  const hasWorkStream = message.metadata?.hasWorkStream;
-  const isThinking = message.metadata?.isThinking;
-  const hasThinkingSteps =
-    message.metadata?.thinkingSteps &&
-    message.metadata.thinkingSteps.length > 0;
-  const hasCollaborations =
-    message.metadata?.isMultiAgent &&
-    message.metadata?.collaborationMessages &&
-    message.metadata.collaborationMessages.length > 0;
 
-  // Artifact detection and management
-  const { addArtifact, shareArtifact, setCurrentVersion, getMessageArtifacts } =
-    useArtifactStore();
+  const { addArtifact, getMessageArtifacts } = useArtifactStore();
 
-  // Extract artifacts from message content (only for assistant messages)
+  // Artifact handling
   const existingArtifacts = getMessageArtifacts(message.id);
   const extractedArtifacts = useMemo(() => {
     if (isUser) return [];
     return extractArtifacts(message.content);
   }, [message.content, isUser]);
 
-  // Determine which artifacts to display
   const artifacts = existingArtifacts.length > 0 ? existingArtifacts : extractedArtifacts;
 
-  // Store newly extracted artifacts in the store (side effect, not during render)
   useEffect(() => {
-    if (isUser || existingArtifacts.length > 0 || extractedArtifacts.length === 0) {
-      return;
-    }
-    // Store artifacts that haven't been stored yet
-    extractedArtifacts.forEach((artifact) => {
-      addArtifact(message.id, artifact);
-    });
+    if (isUser || existingArtifacts.length > 0 || extractedArtifacts.length === 0) return;
+    extractedArtifacts.forEach((artifact) => addArtifact(message.id, artifact));
   }, [message.id, isUser, existingArtifacts.length, extractedArtifacts, addArtifact]);
 
-  // Remove artifact code blocks from content to avoid duplication
   const cleanedContent = useMemo(() => {
     if (artifacts.length === 0) return message.content;
     return removeArtifactBlocks(message.content, artifacts);
   }, [message.content, artifacts]);
 
-  const handleShareArtifact = async (artifactId: string) => {
-    try {
-      const shareId = await shareArtifact(message.id, artifactId);
-      // In production, copy share URL to clipboard
-      const shareUrl = `${window.location.origin}/artifact/${shareId}`;
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success('Artifact link copied to clipboard');
-    } catch (error) {
-      console.error('Failed to share artifact:', error);
-    }
-  };
-
-  const handleVersionChange = (artifactId: string, versionIndex: number) => {
-    setCurrentVersion(message.id, artifactId, versionIndex);
-  };
-
-  const handleExportDocument = () => {
-    const blob = new Blob([message.content], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${message.metadata?.documentTitle || 'document'}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleExportPDF = async () => {
-    try {
-      const generatedDoc: GeneratedDocument = {
-        title: message.metadata?.documentTitle || 'Document',
-        content: message.content,
-        metadata: {
-          type: 'general',
-          generatedAt: message.timestamp,
-          wordCount: message.content.split(/\s+/).length,
-          tokensUsed: message.metadata?.tokensUsed,
-          model: message.metadata?.model,
-        },
-      };
-      await documentGenerationService.exportDocumentToPDF(generatedDoc);
-      toast.success('PDF exported successfully');
-    } catch (error) {
-      console.error('PDF export failed:', error);
-      toast.error('Failed to export PDF');
-    }
-  };
-
-  const handleExportDOCX = async () => {
-    try {
-      const generatedDoc: GeneratedDocument = {
-        title: message.metadata?.documentTitle || 'Document',
-        content: message.content,
-        metadata: {
-          type: 'general',
-          generatedAt: message.timestamp,
-          wordCount: message.content.split(/\s+/).length,
-          tokensUsed: message.metadata?.tokensUsed,
-          model: message.metadata?.model,
-        },
-      };
-      await documentGenerationService.exportDocumentToDOCX(generatedDoc);
-      toast.success('DOCX exported successfully');
-    } catch (error) {
-      console.error('DOCX export failed:', error);
-      toast.error('Failed to export DOCX');
-    }
-  };
+  // Employee info
+  const employeeInitials = message.employeeName
+    ? employeeChatService.getEmployeeInitials(message.employeeName)
+    : 'AI';
+  const employeeColor = message.employeeColor ||
+    employeeChatService.getEmployeeAvatar(message.employeeName || '');
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const shouldShowInline = !isUser && !isDocument;
-  const maxHeight = isDocument && !documentExpanded ? '300px' : 'none';
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(message.content);
+    setCopied(true);
+    toast.success('Copied to clipboard');
+    setTimeout(() => setCopied(false), 2000);
+  };
 
-  // Get employee initials for avatar fallback
-  const employeeInitials = message.employeeName
-    ? employeeChatService.getEmployeeInitials(message.employeeName)
-    : 'AI';
-
-  // Get employee color
-  const employeeColor =
-    message.employeeAvatar ||
-    employeeChatService.getEmployeeAvatar(message.employeeName || '');
+  const hasThinkingSteps = message.metadata?.thinkingSteps && message.metadata.thinkingSteps.length > 0;
+  const hasContributions = message.metadata?.isMultiAgent &&
+    message.metadata?.collaborationMessages &&
+    message.metadata.collaborationMessages.length > 0;
 
   return (
-    <div className="group relative">
-      <div
-        className={cn(
-          'flex gap-3 px-4 py-6',
-          isUser ? 'justify-end' : 'justify-start',
-          !isUser && 'transition-colors hover:bg-muted/30'
-        )}
-      >
-        {/* Avatar - only show for assistant messages */}
-        {!isUser && (
-          <div className="flex-shrink-0">
-            <Avatar
-              className="h-9 w-9 ring-2 ring-offset-1"
-              style={{ ringColor: employeeColor }}
-            >
-              <AvatarImage
-                src={
-                  typeof message.employeeAvatar === 'string' &&
-                  message.employeeAvatar.startsWith('/')
-                    ? message.employeeAvatar
-                    : undefined
-                }
-              />
+    <div className={cn('group px-4 py-4', !isUser && 'hover:bg-muted/30')}>
+      <div className={cn('mx-auto flex max-w-3xl gap-4', isUser && 'flex-row-reverse')}>
+        {/* Avatar */}
+        <Avatar className="h-8 w-8 flex-shrink-0">
+          {isUser ? (
+            <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600">
+              <User className="h-4 w-4 text-white" />
+            </AvatarFallback>
+          ) : (
+            <>
+              <AvatarImage src={message.employeeAvatar?.startsWith('/') ? message.employeeAvatar : undefined} />
               <AvatarFallback
                 className="text-xs font-semibold text-white"
-                style={{
-                  backgroundColor: employeeColor,
-                }}
+                style={{ backgroundColor: employeeColor }}
               >
                 {employeeInitials}
               </AvatarFallback>
-            </Avatar>
-          </div>
-        )}
-
-        {/* Message Content */}
-        <div
-          className={cn(
-            'flex min-w-0 flex-1 flex-col',
-            isUser ? 'max-w-[85%] items-end' : 'max-w-full items-start'
+            </>
           )}
-        >
-          {/* Employee Name, Badge & Timestamp */}
-          {!isUser && message.employeeName && (
-            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
-              <div className="flex items-center gap-2">
-                <span
-                  className="font-semibold"
-                  style={{ color: employeeColor }}
-                >
-                  {message.employeeName
-                    .split('-')
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(' ')}
-                </span>
-                {message.metadata?.selectionReason &&
-                  !message.metadata?.isCollaboration && (
-                    <span
-                      className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
-                      style={{ backgroundColor: employeeColor }}
-                    >
-                      <Sparkles className="mr-0.5 inline-block h-2.5 w-2.5" />
-                      {message.metadata.selectionReason}
-                    </span>
-                  )}
-                {message.metadata?.isCollaboration && (
-                  <span
-                    className="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                    style={{
-                      backgroundColor:
-                        message.metadata.collaborationType === 'synthesis'
-                          ? '#4f46e5'
-                          : employeeColor,
-                      color: 'white',
-                    }}
-                  >
-                    {message.metadata.collaborationType === 'contribution' &&
-                      '💭 Contribution'}
-                    {message.metadata.collaborationType === 'discussion' &&
-                      '💬 Discussion'}
-                    {message.metadata.collaborationType === 'synthesis' &&
-                      '📋 Final Synthesis'}
-                  </span>
-                )}
-                {message.metadata?.isMultiAgent &&
-                  message.metadata?.employeesInvolved && (
-                    <span className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-2 py-0.5 text-[10px] font-medium text-white">
-                      🤝 Team of {message.metadata.employeesInvolved.length}
-                    </span>
-                  )}
-                {message.metadata?.collaborationTo && (
-                  <span className="text-[10px] text-muted-foreground">
-                    → {message.metadata.collaborationTo}
-                  </span>
-                )}
-              </div>
-              <span className="text-muted-foreground/50">•</span>
-              <span className="text-muted-foreground/70">
-                {formatTime(message.timestamp)}
-              </span>
-              {message.metadata?.model && (
-                <>
-                  <span className="text-muted-foreground/50">•</span>
-                  <span className="text-[10px] text-muted-foreground/60">
-                    {message.metadata.model}
-                  </span>
-                </>
-              )}
-            </div>
-          )}
+        </Avatar>
 
-          {/* Document Header (if document) */}
-          {isDocument && (
-            <div className="mb-3 flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-4 py-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="flex-1 text-sm font-medium">
-                {message.metadata?.documentTitle || 'Document'}
-              </span>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleExportDocument}
-                  className="h-7 px-2 text-xs"
-                  title="Export as Markdown"
-                >
-                  <Download className="mr-1 h-3 w-3" />
-                  .md
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleExportPDF}
-                  className="h-7 px-2 text-xs"
-                  title="Export as PDF"
-                >
-                  <Download className="mr-1 h-3 w-3" />
-                  .pdf
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleExportDOCX}
-                  className="h-7 px-2 text-xs"
-                  title="Export as DOCX"
-                >
-                  <Download className="mr-1 h-3 w-3" />
-                  .docx
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Message Bubble or Document Container */}
-          <div
-            className={cn(
-              'w-full overflow-hidden',
-              isUser
-                ? 'rounded-2xl border border-border/50 bg-muted/30 px-4 py-3 shadow-sm'
-                : shouldShowInline
-                  ? 'px-1'
-                  : 'rounded-xl border border-border bg-card shadow-sm'
+        {/* Content */}
+        <div className={cn('min-w-0 flex-1', isUser && 'text-right')}>
+          {/* Header: Name + Time */}
+          <div className={cn('mb-1 flex items-center gap-2 text-sm', isUser && 'flex-row-reverse')}>
+            <span className="font-medium">
+              {isUser ? 'You' : message.employeeName?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'AI'}
+            </span>
+            <span className="text-xs text-muted-foreground">{formatTime(message.timestamp)}</span>
+            {message.metadata?.isPinned && (
+              <Pin className="h-3 w-3 text-amber-500" />
             )}
-          >
-            {/* Document View (scrollable, expandable) */}
-            {isDocument ? (
-              <ScrollArea className="w-full" style={{ maxHeight }}>
-                <div className="px-4 py-3">
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-                      rehypePlugins={[rehypeHighlight, rehypeRaw]}
-                      components={markdownComponents}
-                    >
-                      {cleanedContent}
-                    </ReactMarkdown>
-                  </div>
-                </div>
-              </ScrollArea>
+          </div>
+
+          {/* Message Content */}
+          <div className={cn(
+            'prose prose-sm dark:prose-invert max-w-none',
+            isUser && 'prose-p:text-right'
+          )}>
+            {message.isStreaming && !cleanedContent.trim() ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-primary" />
+                <span className="text-sm">Thinking...</span>
+              </div>
             ) : (
-              /* Regular Message Content */
-              <div
-                className={cn(
-                  'prose prose-sm dark:prose-invert max-w-none',
-                  !isUser && 'prose-p:leading-relaxed'
-                )}
-              >
-                {/* Show typing indicator when streaming with no content */}
-                {message.isStreaming && !cleanedContent.trim() ? (
-                  <TypingIndicator
-                    agentName={message.employeeName || 'AI Assistant'}
-                  />
-                ) : (
-                  <>
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-                      rehypePlugins={[rehypeHighlight, rehypeRaw]}
-                      components={markdownComponents}
-                    >
-                      {cleanedContent}
-                    </ReactMarkdown>
-                    {/* Show cursor when streaming with content */}
-                    {message.isStreaming && cleanedContent.trim() && (
-                      <span className="ml-1 inline-block h-4 w-2 animate-pulse rounded-sm bg-current" />
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* Document Expand/Collapse Button */}
-            {isDocument && message.content.length > 1000 && (
-              <div className="border-t border-border bg-muted/30 px-4 py-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setDocumentExpanded(!documentExpanded)}
-                  className="w-full text-xs"
+              <>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
+                  rehypePlugins={[rehypeHighlight, rehypeRaw]}
+                  components={markdownComponents}
                 >
-                  {documentExpanded ? (
-                    <>
-                      <ChevronUp className="mr-1 h-3 w-3" />
-                      Show Less
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="mr-1 h-3 w-3" />
-                      Show More
-                    </>
-                  )}
-                </Button>
-              </div>
+                  {cleanedContent}
+                </ReactMarkdown>
+                {message.isStreaming && cleanedContent.trim() && (
+                  <span className="ml-1 inline-block h-4 w-0.5 animate-pulse bg-primary" />
+                )}
+              </>
             )}
           </div>
 
-          {/* Image Attachments */}
-          {message.attachments && message.attachments.length > 0 && (
-            <ImageAttachmentPreview attachments={message.attachments} />
-          )}
-
-          {/* Artifacts - Live Interactive Previews (Claude Artifacts-like) */}
+          {/* Artifacts */}
           {!isUser && artifacts.length > 0 && (
-            <div className="mt-3 w-full space-y-3">
+            <div className="mt-4 space-y-3">
               {artifacts.map((artifact) => (
-                <ArtifactPreview
-                  key={artifact.id}
-                  artifact={artifact}
-                  onVersionChange={(versionIndex) =>
-                    handleVersionChange(artifact.id, versionIndex)
-                  }
-                  onShare={() => handleShareArtifact(artifact.id)}
-                />
+                <ArtifactPreview key={artifact.id} artifact={artifact} />
               ))}
             </div>
           )}
 
-          {/* Agent Contributions (Collapsible) */}
-          {hasCollaborations && (
-            <div className="mt-3 w-full">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setCollaborationsExpanded(!collaborationsExpanded)}
-                className="w-full justify-start gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs hover:bg-muted/50"
-              >
-                {collaborationsExpanded ? (
-                  <ChevronUp className="h-3 w-3" />
-                ) : (
-                  <ChevronDown className="h-3 w-3" />
-                )}
-                <Users className="h-3 w-3" />
-                <span>
-                  {collaborationsExpanded
-                    ? 'Hide Agent Contributions'
-                    : `Show Agent Contributions (${message.metadata.collaborationMessages.length} agents)`}
-                </span>
-              </Button>
+          {/* Image Result */}
+          {!isUser && message.metadata?.toolType === 'image-generation' && message.metadata?.imageUrl && (
+            <div className="mt-4">
+              <div className="overflow-hidden rounded-xl border border-border">
+                <img
+                  src={message.metadata.imageUrl}
+                  alt="Generated"
+                  className="max-h-96 w-auto"
+                />
+              </div>
+              <div className="mt-2 flex gap-2">
+                <Button variant="outline" size="sm" className="h-7 text-xs" asChild>
+                  <a href={message.metadata.imageUrl} download>
+                    <Download className="mr-1.5 h-3 w-3" />
+                    Download
+                  </a>
+                </Button>
+              </div>
+            </div>
+          )}
 
-              {collaborationsExpanded && (
-                <div className="mt-2 space-y-2">
-                  {message.metadata.collaborationMessages.map((collab, idx) => (
-                    <div
-                      key={idx}
-                      className="rounded-lg border border-border bg-card p-3 shadow-sm"
-                    >
-                      <div className="mb-2 flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarFallback
-                            className="text-xs font-semibold text-white"
-                            style={{ backgroundColor: collab.employeeAvatar }}
-                          >
-                            {collab.employeeName
-                              .split(' ')
-                              .map((n) => n[0])
-                              .join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm font-medium">
-                          {collab.employeeName}
-                        </span>
-                        {collab.messageType && (
-                          <Badge
-                            variant="secondary"
-                            className="text-xs"
-                          >
-                            {collab.messageType}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="prose prose-sm dark:prose-invert max-w-none">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-                          rehypePlugins={[rehypeHighlight, rehypeRaw]}
-                          components={markdownComponents}
-                        >
-                          {collab.content}
-                        </ReactMarkdown>
-                      </div>
+          {/* Video Result */}
+          {!isUser && message.metadata?.toolType === 'video-generation' && message.metadata?.videoUrl && (
+            <div className="mt-4">
+              <video
+                src={message.metadata.videoUrl}
+                controls
+                className="max-h-96 rounded-xl"
+                poster={message.metadata.thumbnailUrl}
+              />
+            </div>
+          )}
+
+          {/* Search Results */}
+          {!isUser && message.metadata?.searchResults && (
+            <div className="mt-4">
+              <SearchResults searchResponse={message.metadata.searchResults} showAnswer />
+            </div>
+          )}
+
+          {/* Thinking Steps (Collapsible) */}
+          {hasThinkingSteps && (
+            <Collapsible open={showThinking} onOpenChange={setShowThinking} className="mt-3">
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground">
+                  {showThinking ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                  <Brain className="h-3 w-3" />
+                  Thinking process ({message.metadata?.thinkingSteps?.length} steps)
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-2">
+                <div className="space-y-2 rounded-lg bg-muted/50 p-3">
+                  {message.metadata?.thinkingSteps?.map((step, i) => (
+                    <div key={i} className="flex gap-2 text-xs text-muted-foreground">
+                      <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-semibold text-primary">
+                        {i + 1}
+                      </span>
+                      <span>{step}</span>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
           )}
 
-          {/* Image Generation Result */}
-          {!isUser &&
-            message.metadata?.toolType === 'image-generation' &&
-            message.metadata?.imageUrl && (
-              <div className="mt-3 w-full">
-                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                  <div className="mb-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-purple-500" />
-                      <span className="text-sm font-medium">
-                        Generated Image
-                      </span>
-                    </div>
-                    {message.metadata?.imageData && (
-                      <div className="text-xs text-muted-foreground">
-                        {message.metadata.imageData.metadata.aspectRatio} •{' '}
-                        {message.metadata.imageData.model}
-                      </div>
-                    )}
-                  </div>
-                  <div className="overflow-hidden rounded-lg">
-                    <img
-                      src={message.metadata.imageUrl}
-                      alt={
-                        message.metadata?.imageData?.prompt || 'Generated image'
-                      }
-                      className="h-auto max-h-[600px] w-full object-contain"
-                    />
-                  </div>
-                  {message.metadata?.imageData?.images &&
-                    message.metadata.imageData.images.length > 1 && (
-                      <div className="mt-3 grid grid-cols-2 gap-2">
-                        {message.metadata.imageData.images
-                          .slice(1)
-                          .map((img, idx) => (
-                            <div
-                              key={idx}
-                              className="overflow-hidden rounded-lg border border-border"
-                            >
-                              <img
-                                src={img.url}
-                                alt={`Variant ${idx + 2}`}
-                                className="h-auto w-full object-contain"
-                              />
-                            </div>
-                          ))}
-                      </div>
-                    )}
-                  <div className="mt-3 flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        if (message.metadata?.imageUrl) {
-                          const a = document.createElement('a');
-                          a.href = message.metadata.imageUrl;
-                          a.download = 'generated-image.png';
-                          document.body.appendChild(a);
-                          a.click();
-                          document.body.removeChild(a);
-                        }
-                      }}
-                      className="h-8 text-xs"
-                    >
-                      <Download className="mr-1 h-3 w-3" />
-                      Download
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        if (message.metadata?.imageUrl) {
-                          navigator.clipboard.writeText(
-                            message.metadata.imageUrl
-                          );
-                          toast.success('Image URL copied');
-                        }
-                      }}
-                      className="h-8 text-xs"
-                    >
-                      <Copy className="mr-1 h-3 w-3" />
-                      Copy URL
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-          {/* Video Generation Result */}
-          {!isUser &&
-            message.metadata?.toolType === 'video-generation' &&
-            message.metadata?.videoUrl && (
-              <div className="mt-3 w-full">
-                <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                  <div className="mb-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-pink-500" />
-                      <span className="text-sm font-medium">
-                        Generated Video
-                      </span>
-                    </div>
-                    {message.metadata?.videoData && (
-                      <div className="text-xs text-muted-foreground">
-                        {message.metadata.videoData.metadata.duration}s •{' '}
-                        {message.metadata.videoData.metadata.resolution} •{' '}
-                        {message.metadata.videoData.model}
-                      </div>
-                    )}
-                  </div>
-                  <div className="overflow-hidden rounded-lg bg-black">
-                    <video
-                      src={message.metadata.videoUrl}
-                      controls
-                      poster={message.metadata?.thumbnailUrl}
-                      className="h-auto w-full"
-                      style={{ maxHeight: '600px' }}
-                    >
-                      Your browser does not support the video tag.
-                    </video>
-                  </div>
-                  <div className="mt-3 flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        if (message.metadata?.videoUrl) {
-                          const a = document.createElement('a');
-                          a.href = message.metadata.videoUrl;
-                          a.download = 'generated-video.mp4';
-                          document.body.appendChild(a);
-                          a.click();
-                          document.body.removeChild(a);
-                        }
-                      }}
-                      className="h-8 text-xs"
-                    >
-                      <Download className="mr-1 h-3 w-3" />
-                      Download
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        if (message.metadata?.videoUrl) {
-                          navigator.clipboard.writeText(
-                            message.metadata.videoUrl
-                          );
-                          toast.success('Video URL copied');
-                        }
-                      }}
-                      className="h-8 text-xs"
-                    >
-                      <Copy className="mr-1 h-3 w-3" />
-                      Copy URL
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-          {/* Web Search Results */}
-          {!isUser && message.metadata?.searchResults && (
-            <div className="mt-3 w-full">
-              <SearchResults
-                searchResponse={message.metadata.searchResults}
-                showAnswer={true}
-              />
-            </div>
-          )}
-
-          {/* Thinking Process Display */}
-          {hasThinkingSteps && (
-            <div className="mt-3 w-full">
-              <div className="mb-2 flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setThinkingExpanded(!thinkingExpanded)}
-                  className="h-7 px-2 text-xs font-medium text-muted-foreground hover:text-foreground"
-                >
-                  {thinkingExpanded ? (
-                    <>
-                      <ChevronUp className="mr-1 h-3 w-3" />
-                      Hide Thinking Process
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="mr-1 h-3 w-3" />
-                      <Brain className="mr-1 h-3 w-3" />
-                      Show Thinking Process
-                    </>
-                  )}
-                </Button>
-              </div>
-              {thinkingExpanded && (
-                <div className="rounded-lg border border-border bg-muted/30 p-3">
-                  <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                    <Brain className="h-3.5 w-3.5" />
-                    Reasoning Steps
-                  </div>
-                  <div className="space-y-2">
-                    {message.metadata?.thinkingSteps?.map((step, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start gap-2 text-xs text-muted-foreground"
-                      >
-                        <div
-                          className="mt-1 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-[9px] font-semibold text-white"
-                          style={{ backgroundColor: employeeColor }}
+          {/* Agent Contributions (Collapsible) */}
+          {hasContributions && (
+            <Collapsible open={showContributions} onOpenChange={setShowContributions} className="mt-3">
+              <CollapsibleTrigger asChild>
+                <button className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground">
+                  {showContributions ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                  <Sparkles className="h-3 w-3" />
+                  {message.metadata?.collaborationMessages?.length} agents contributed
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-2 space-y-2">
+                {message.metadata?.collaborationMessages?.map((collab, i) => (
+                  <div key={i} className="rounded-lg border border-border bg-card p-3">
+                    <div className="mb-2 flex items-center gap-2">
+                      <Avatar className="h-5 w-5">
+                        <AvatarFallback
+                          className="text-[10px] font-semibold text-white"
+                          style={{ backgroundColor: collab.employeeAvatar }}
                         >
-                          {index + 1}
-                        </div>
-                        <span className="flex-1 leading-relaxed">{step}</span>
-                      </div>
-                    ))}
+                          {collab.employeeName.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs font-medium">{collab.employeeName}</span>
+                      {collab.messageType && (
+                        <Badge variant="secondary" className="h-4 text-[10px]">{collab.messageType}</Badge>
+                      )}
+                    </div>
+                    <div className="prose prose-sm dark:prose-invert max-w-none text-xs">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{collab.content}</ReactMarkdown>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
           )}
 
-          {/* Work Stream - HIDDEN (not implemented yet) */}
-          {/* TODO: Implement work stream visualization before enabling
-          {hasWorkStream && message.metadata?.workStreamData && (
-            <div className="mt-3 w-full">
-              <div className="mb-2 flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setWorkStreamExpanded(!workStreamExpanded)}
-                  className="h-7 px-2 text-xs font-medium text-muted-foreground hover:text-foreground"
-                >
-                  {workStreamExpanded ? (
-                    <>
-                      <ChevronUp className="mr-1 h-3 w-3" />
-                      Hide Work Process
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="mr-1 h-3 w-3" />
-                      Show Work Process
-                    </>
-                  )}
-                </Button>
-              </div>
-              {workStreamExpanded && (
-                <EmployeeWorkStream {...message.metadata.workStreamData} />
-              )}
-            </div>
-          )}
-          */}
+          {/* Actions (show on hover) */}
+          {!message.isStreaming && (
+            <div className={cn(
+              'mt-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100',
+              isUser && 'flex-row-reverse'
+            )}>
+              <TooltipProvider delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCopy}>
+                      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Copy</TooltipContent>
+                </Tooltip>
 
-          {/* Action Buttons & Token Usage */}
-          <div
-            className={cn(
-              'mt-2 flex items-center gap-2',
-              isUser ? 'justify-end' : 'justify-between'
-            )}
-          >
-            {/* Token Usage Display (for assistant messages) */}
-            {!isUser && message.metadata?.tokensUsed && (
-              <TokenUsageDisplay
-                tokensUsed={message.metadata.tokensUsed}
-                inputTokens={message.metadata.inputTokens}
-                outputTokens={message.metadata.outputTokens}
-                model={message.metadata.model}
-                cost={message.metadata.cost}
-              />
-            )}
+                {!isUser && onReact && (
+                  <>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onReact(message.id, 'up')}>
+                          <ThumbsUp className="h-3.5 w-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Good response</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onReact(message.id, 'down')}>
+                          <ThumbsDown className="h-3.5 w-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Poor response</TooltipContent>
+                    </Tooltip>
+                  </>
+                )}
 
-            {/* Message Actions */}
-            <MessageActions
-              messageId={message.id}
-              content={message.content}
-              isUser={isUser}
-              isPinned={message.metadata?.isPinned}
-              reactions={message.reactions}
-              onEdit={onEdit}
-              onRegenerate={onRegenerate}
-              onDelete={onDelete}
-              onPin={onPin}
-              onReact={onReact}
-              className="opacity-0 transition-opacity group-hover:opacity-100"
-            />
-          </div>
-
-          {/* Timestamp for user messages */}
-          {isUser && (
-            <div className="mt-1 text-xs text-muted-foreground">
-              {formatTime(message.timestamp)}
+                {/* More actions menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                      <MoreHorizontal className="h-3.5 w-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align={isUser ? 'end' : 'start'}>
+                    {onPin && (
+                      <DropdownMenuItem onClick={() => onPin(message.id)}>
+                        <Pin className="mr-2 h-4 w-4" />
+                        {message.metadata?.isPinned ? 'Unpin' : 'Pin'}
+                      </DropdownMenuItem>
+                    )}
+                    {isUser && onEdit && (
+                      <DropdownMenuItem onClick={() => onEdit(message.id)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Edit
+                      </DropdownMenuItem>
+                    )}
+                    {!isUser && onRegenerate && (
+                      <DropdownMenuItem onClick={() => onRegenerate(message.id)}>
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Regenerate
+                      </DropdownMenuItem>
+                    )}
+                    {message.metadata?.tokensUsed && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                          {message.metadata.tokensUsed.toLocaleString()} tokens
+                          {message.metadata.model && ` · ${message.metadata.model}`}
+                        </div>
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
+                    {onDelete && (
+                      <DropdownMenuItem
+                        onClick={() => onDelete(message.id)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TooltipProvider>
             </div>
           )}
         </div>
-
-        {/* User Avatar - only show for user messages */}
-        {isUser && (
-          <div className="flex-shrink-0">
-            <Avatar className="h-9 w-9">
-              <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 shadow-md">
-                <User className="h-5 w-5 text-white" />
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        )}
       </div>
     </div>
   );

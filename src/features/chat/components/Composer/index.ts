@@ -1,1 +1,1 @@
-export { default as ChatComposer } from './ChatComposer';
+export { ChatComposer } from './ChatComposer';

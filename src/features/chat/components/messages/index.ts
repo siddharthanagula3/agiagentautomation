@@ -1,5 +1,5 @@
 export { default as AdvancedMessageList } from './AdvancedMessageList';
-export { default as MessageBubble } from './MessageBubble';
+export { MessageBubble } from './MessageBubble';
 export { default as MessageActions } from './MessageActions';
 export { default as EnhancedMessageInput } from './EnhancedMessageInput';
 export { default as ChatInput } from './ChatInput';

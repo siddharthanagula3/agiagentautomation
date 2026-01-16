@@ -28,6 +28,8 @@ interface UsageWarningState {
   getDismissedWarnings: () => { '85': boolean; '95': boolean };
 }
 
+const enableDevtools = import.meta.env.MODE !== 'production';
+
 export const useUsageWarningStore = create<UsageWarningState>()(
   devtools(
     immer(
@@ -101,6 +103,6 @@ export const useUsageWarningStore = create<UsageWarningState>()(
         }
       )
     ),
-    { name: 'UsageWarningStore' }
+    { name: 'UsageWarningStore', enabled: enableDevtools }
   )
 );

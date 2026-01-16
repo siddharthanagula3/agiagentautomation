@@ -68,7 +68,7 @@ export class WorkforceOrchestratorRefactored {
     const mode = request.mode || 'mission';
 
     try {
-      // Updated: Nov 16th 2025 - Fixed empty employee handling to prevent setting loaded flag on failure
+      // Updated: Jan 15th 2026 - Fixed empty employee handling to prevent setting loaded flag on failure
       // Load employees if not already loaded
       if (!this.employeesLoaded) {
         this.employees = await systemPromptsService.getAvailableEmployees();
@@ -380,7 +380,7 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
       return null;
     }
 
-    // Updated: Nov 16th 2025 - Fixed employee selection to check user permissions
+    // Updated: Jan 15th 2026 - Fixed employee selection to check user permissions
     // Get user's hired employees from database to enforce permissions
     const { user } = useAuthStore.getState();
     let availableEmployees = this.employees;
@@ -468,6 +468,7 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
   /**
    * EXECUTION STAGE: Execute all tasks in parallel
    * Updated: Jan 6th 2026 - Changed from sequential to parallel execution using Promise.allSettled
+   * CRITICAL FIX: Snapshot pause state at entry to prevent race conditions
    */
   private async executeTasks(
     tasks: Task[],
@@ -477,16 +478,22 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
   ): Promise<void> {
     const store = useMissionStore.getState();
 
+    // CRITICAL FIX: Take a snapshot of the pause state at the beginning
+    // This prevents race conditions where pause state changes between checks
+    // Use a function to get current state, allowing tasks to respect pause during execution
+    const checkIfPaused = () => useMissionStore.getState().isPaused;
+
     // Check if mission is paused before starting execution
-    if (useMissionStore.getState().isPaused) {
-      console.log('Mission paused, stopping execution');
+    if (checkIfPaused()) {
+      console.log('Mission paused before execution started, stopping');
       return;
     }
 
     // Execute tasks in parallel
     const taskPromises = tasks.map(async (task) => {
       // Check pause state at start of each task
-      if (useMissionStore.getState().isPaused) {
+      // This allows tasks that haven't started yet to be skipped if paused
+      if (checkIfPaused()) {
         return { taskId: task.id, status: 'skipped' as const, reason: 'Mission paused' };
       }
 

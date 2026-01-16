@@ -13,7 +13,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/authentication-store';
-import { useWorkforceStore } from '@shared/stores/employee-management-store';
+import { useWorkforceStore } from '@shared/stores/workforce-store';
 import { useVibeChatStore } from '../stores/vibe-chat-store';
 import { useVibeViewStore } from '../stores/vibe-view-store';
 import { VibeLayout } from '../layouts/VibeLayout';
@@ -86,7 +86,7 @@ interface VibeMessageRow {
   employee_name?: string | null;
   employee_role?: string | null;
   timestamp?: string | null;
-  // Updated: Nov 16th 2025 - Fixed any type
+  // Updated: Jan 15th 2026 - Fixed any type
   metadata?: Record<string, unknown> | null;
   is_streaming?: boolean | null;
 }

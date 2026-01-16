@@ -84,7 +84,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
       category: 'achievements',
       description:
         'Successfully launched a revolutionary AI workforce automation platform',
-      date: new Date('2024-01-15'),
+      date: new Date('2026-01-15'),
       evidence: [
         'platform-demo.mp4',
         'user-testimonials.pdf',
@@ -99,7 +99,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
       category: 'achievements',
       description:
         'Developed unique inter-agent communication system for AI employees',
-      date: new Date('2024-02-20'),
+      date: new Date('2026-02-20'),
       evidence: ['technical-specification.pdf', 'patent-application.pdf'],
       status: 'approved',
       importance: 'critical',
@@ -110,18 +110,18 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
       category: 'media',
       description:
         'Featured in TechCrunch for innovative AI automation approach',
-      date: new Date('2024-03-10'),
+      date: new Date('2026-03-10'),
       evidence: ['techcrunch-article.pdf', 'social-media-mentions.pdf'],
       status: 'approved',
       importance: 'high',
     },
     {
       id: '4',
-      title: 'AI Innovation Award 2024',
+      title: 'AI Innovation Award 2026',
       category: 'awards',
       description:
         'Received recognition for outstanding contribution to AI automation',
-      date: new Date('2024-04-05'),
+      date: new Date('2026-04-05'),
       evidence: ['award-certificate.pdf', 'award-ceremony-photos.pdf'],
       status: 'approved',
       importance: 'high',
@@ -132,7 +132,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
       category: 'testimonials',
       description:
         'Collected testimonials from industry leaders and AI experts',
-      date: new Date('2024-05-01'),
+      date: new Date('2026-05-01'),
       evidence: ['expert-testimonials.pdf', 'linkedin-recommendations.pdf'],
       status: 'approved',
       importance: 'medium',
@@ -149,7 +149,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
       priority: 'high',
       description:
         'Patent for inter-agent communication system in AI workforce management',
-      dueDate: new Date('2024-12-31'),
+      dueDate: new Date('2026-12-31'),
       documents: ['patent-application.pdf', 'technical-drawings.pdf'],
       notes: 'Filed with USPTO, awaiting examination',
     },
@@ -160,7 +160,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
       status: 'filed',
       priority: 'high',
       description: 'Trademark registration for business name and logo',
-      dueDate: new Date('2024-11-15'),
+      dueDate: new Date('2026-11-15'),
       documents: ['trademark-application.pdf', 'logo-designs.pdf'],
       notes: 'Trademark application submitted, under review',
     },
@@ -171,7 +171,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
       status: 'review',
       priority: 'medium',
       description: 'Updated privacy policy for GDPR and CCPA compliance',
-      dueDate: new Date('2024-10-01'),
+      dueDate: new Date('2026-10-01'),
       documents: ['privacy-policy-draft.pdf', 'legal-review.pdf'],
       notes: 'Under legal review, needs final approval',
     },
@@ -182,7 +182,7 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
       status: 'draft',
       priority: 'medium',
       description: 'Comprehensive terms of service for the platform',
-      dueDate: new Date('2024-09-30'),
+      dueDate: new Date('2026-09-30'),
       documents: ['terms-draft.pdf'],
       notes: 'Initial draft completed, needs legal review',
     },
@@ -193,9 +193,9 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
       status: 'review',
       priority: 'high',
       description: 'SOC 2 Type II compliance certification',
-      dueDate: new Date('2024-12-31'),
+      dueDate: new Date('2026-12-31'),
       documents: ['soc2-audit.pdf', 'security-policies.pdf'],
-      notes: 'Audit in progress, expected completion Q4 2024',
+      notes: 'Audit in progress, expected completion Q4 2026',
     },
   ];
 

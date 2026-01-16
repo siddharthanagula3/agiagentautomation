@@ -1,4 +1,4 @@
-// Updated: Nov 16th 2025 - Added error boundary
+// Updated: Jan 15th 2026 - Added error boundary
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Separator } from '@shared/ui/separator';
@@ -13,12 +13,12 @@ import { ChatHeader } from '../components/Main/ChatHeader';
 import { MessageList } from '../components/Main/MessageList';
 import { ChatComposer } from '../components/Composer/ChatComposer';
 import { ModeSelector } from '../components/Tools/ModeSelector';
-import { KeyboardShortcutsDialog } from '../components/KeyboardShortcutsDialog';
-import { GlobalSearchDialog } from '../components/GlobalSearchDialog';
-import { TokenAnalyticsDialog } from '../components/TokenAnalyticsDialog';
-import { EnhancedExportDialog } from '../components/EnhancedExportDialog';
-import { BookmarksDialog } from '../components/BookmarksDialog';
-import { ToolProgressIndicator } from '../components/ToolProgressIndicator';
+import { KeyboardShortcutsDialog } from '../components/dialogs/KeyboardShortcutsDialog';
+import { GlobalSearchDialog } from '../components/dialogs/GlobalSearchDialog';
+import { TokenAnalyticsDialog } from '../components/dialogs/TokenAnalyticsDialog';
+import { EnhancedExportDialog } from '../components/dialogs/EnhancedExportDialog';
+import { BookmarksDialog } from '../components/dialogs/BookmarksDialog';
+import { ToolProgressIndicator } from '../components/workflows/ToolProgressIndicator';
 import type { ChatSession, ChatMessage, ChatMode } from '../types';
 import {
   DropdownMenu,
@@ -33,8 +33,8 @@ import { cn } from '@shared/lib/utils';
 import {
   UsageWarningBanner,
   useUsageMonitoring,
-} from '../components/UsageWarningBanner';
-import { UsageWarningModal } from '../components/UsageWarningModal';
+} from '../components/tokens/UsageWarningBanner';
+import { UsageWarningModal } from '../components/dialogs/UsageWarningModal';
 import { useUsageWarningStore } from '@shared/stores/usage-warning-store';
 import { useUserUsage } from '@shared/stores/user-profile-store';
 import ErrorBoundary from '@shared/components/ErrorBoundary';

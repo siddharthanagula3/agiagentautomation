@@ -11,7 +11,7 @@ import {
 import { logger } from '@shared/lib/logger';
 
 // Import cleanup function for workforce subscription
-import { cleanupWorkforceSubscription } from './employee-management-store';
+import { cleanupWorkforceSubscription } from './workforce-store';
 
 /**
  * Central cleanup function to reset all stores on logout
@@ -29,7 +29,7 @@ async function cleanupAllStores(): Promise<void> {
       { useUsageWarningStore },
       { useArtifactStore },
     ] = await Promise.all([
-      import('./employee-management-store'),
+      import('./workforce-store'),
       import('./mission-control-store'),
       import('./notification-store'),
       import('./chat-store'),
@@ -108,6 +108,9 @@ interface AuthState {
   ) => Promise<{ success: boolean; error: string | null }>;
 }
 
+// SECURITY FIX: Only enable devtools in development, not production
+const enableDevtools = import.meta.env.MODE !== 'production';
+
 export const useAuthStore = create<AuthState>()(
   devtools(
     immer((set, get) => ({
@@ -185,8 +188,9 @@ export const useAuthStore = create<AuthState>()(
       }
       set({ user, isAuthenticated: !!user, isLoading: false });
       return { success: true, error: null };
-    } catch (err) {
-      const error = (err as Error).message;
+    } catch (err: unknown) {
+      // TYPESCRIPT FIX: Properly handle unknown error type
+      const error = err instanceof Error ? err.message : String(err);
       set({ error, isLoading: false, isAuthenticated: false, user: null });
       return { success: false, error };
     }
@@ -202,8 +206,9 @@ export const useAuthStore = create<AuthState>()(
       }
       set({ user, isAuthenticated: !!user, isLoading: false });
       return { success: true, error: null };
-    } catch (err) {
-      const error = (err as Error).message;
+    } catch (err: unknown) {
+      // TYPESCRIPT FIX: Properly handle unknown error type
+      const error = err instanceof Error ? err.message : String(err);
       set({ error, isLoading: false, isAuthenticated: false, user: null });
       return { success: false, error };
     }
@@ -265,8 +270,9 @@ export const useAuthStore = create<AuthState>()(
       }
       set({ isLoading: false });
       return { success: true, error: null };
-    } catch (err) {
-      const error = (err as Error).message;
+    } catch (err: unknown) {
+      // TYPESCRIPT FIX: Properly handle unknown error type
+      const error = err instanceof Error ? err.message : String(err);
       set({ error, isLoading: false });
       return { success: false, error };
     }
@@ -282,8 +288,9 @@ export const useAuthStore = create<AuthState>()(
       }
       set({ isLoading: false });
       return { success: true, error: null };
-    } catch (err) {
-      const error = (err as Error).message;
+    } catch (err: unknown) {
+      // TYPESCRIPT FIX: Properly handle unknown error type
+      const error = err instanceof Error ? err.message : String(err);
       set({ error, isLoading: false });
       return { success: false, error };
     }
@@ -302,8 +309,9 @@ export const useAuthStore = create<AuthState>()(
       }
       set({ isLoading: false });
       return { success: true, error: null };
-    } catch (err) {
-      const error = (err as Error).message;
+    } catch (err: unknown) {
+      // TYPESCRIPT FIX: Properly handle unknown error type
+      const error = err instanceof Error ? err.message : String(err);
       set({ error, isLoading: false });
       return { success: false, error };
     }
@@ -319,14 +327,15 @@ export const useAuthStore = create<AuthState>()(
       }
       set({ user, isAuthenticated: !!user, isLoading: false });
       return { success: true, error: null };
-    } catch (err) {
-      const error = (err as Error).message;
+    } catch (err: unknown) {
+      // TYPESCRIPT FIX: Properly handle unknown error type
+      const error = err instanceof Error ? err.message : String(err);
       set({ error, isLoading: false });
       return { success: false, error };
     }
   },
     })),
-    { name: 'AuthStore' }
+    { name: 'AuthStore', enabled: enableDevtools }
   )
 );
 

@@ -18,7 +18,7 @@ import {
   parseCodeBlocks,
   extractFileOperations,
 } from '../../utils/code-parser';
-import { vibeFileSystem } from '@features/mission-control/services/vibe-file-system';
+import { vibeFileSystem } from '@features/vibe/services/vibe-file-system';
 import { toast } from 'sonner';
 import { VibeEmptyState } from './VibeEmptyState';
 

@@ -209,8 +209,10 @@ export async function getUserTokenBalance(
 
       if (userError || !userData) {
         console.error('[Token Balance] Error fetching user plan:', userError);
-        // Default to free tier if we can't determine plan
-        return 1000000; // 1M tokens for free tier
+        // SECURITY FIX: Jan 15th 2026 - Fail closed on database errors
+        // Return null to trigger denial instead of allowing with default tokens
+        // This prevents exploitation via database errors
+        return null;
       }
 
       const isPro =
@@ -230,8 +232,9 @@ export async function getUserTokenBalance(
     return balance;
   } catch (error) {
     console.error('[Token Enforcement] Error:', error);
-    // Return free tier default on error
-    return 1000000;
+    // SECURITY FIX: Jan 15th 2026 - Fail closed on unexpected errors
+    // Return null to trigger denial instead of allowing with default tokens
+    return null;
   }
 }
 

@@ -459,7 +459,7 @@ export class SystemPromptsService {
             const parsed = matter(content);
             const frontmatter = parsed.data as AIEmployeeFrontmatter;
 
-            // Updated: Nov 16th 2025 - Fixed employee tools field parsing to support YAML arrays
+            // Updated: Jan 15th 2026 - Fixed employee tools field parsing to support YAML arrays
             // Tools can be either a comma-separated string or a YAML array
             const tools = Array.isArray(frontmatter.tools)
               ? frontmatter.tools // Already an array from YAML

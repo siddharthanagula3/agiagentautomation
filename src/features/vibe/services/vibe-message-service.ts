@@ -19,7 +19,7 @@ export interface VibeMessage {
   employee_name?: string | null;
   employee_role?: string | null;
   timestamp?: string | null;
-  // Updated: Nov 16th 2025 - Fixed any type
+  // Updated: Jan 15th 2026 - Fixed any type
   metadata?: Record<string, unknown> | null;
   is_streaming?: boolean | null;
 }

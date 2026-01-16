@@ -919,6 +919,7 @@ export class UnifiedLLMService {
 
   /**
    * Get provider instance
+   * SECURITY FIX: Jan 15th 2026 - Added undefined to return type since Map.get() can return undefined
    */
   getProvider(
     provider: LLMProvider
@@ -929,7 +930,8 @@ export class UnifiedLLMService {
     | PerplexityProvider
     | GrokProvider
     | DeepSeekProvider
-    | QwenProvider {
+    | QwenProvider
+    | undefined {
     return this.providers.get(provider);
   }
 

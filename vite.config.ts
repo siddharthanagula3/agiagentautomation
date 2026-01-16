@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
     process.env.VITE_SUPABASE_URL || (isDev ? 'http://localhost:54321' : '');
   const netlifyFunctionsUrl = isDev ? 'http://localhost:8888' : '';
   const stripeWebhookUrl = isDev
-    ? 'http://localhost:8888/.netlify/functions/stripe-webhook'
+    ? 'http://localhost:8888/.netlify/functions/payments/stripe-webhook'
     : '';
 
   return {

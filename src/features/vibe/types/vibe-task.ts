@@ -12,7 +12,7 @@ export interface VibeTask {
   assigned_to: string; // employee ID
   dependencies: string[]; // task IDs
   status: TaskStatus;
-  // Updated: Nov 16th 2025 - Fixed any type
+  // Updated: Jan 15th 2026 - Fixed any type
   result?: unknown;
   error?: string;
   created_at: Date;

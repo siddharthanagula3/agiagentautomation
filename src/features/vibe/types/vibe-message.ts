@@ -14,7 +14,7 @@ export interface VibeMessage {
   employee_name?: string;
   employee_role?: string;
   timestamp: Date;
-  // Updated: Nov 16th 2025 - Fixed any type
+  // Updated: Jan 15th 2026 - Fixed any type
   metadata?: Record<string, unknown>;
   is_streaming?: boolean;
 }

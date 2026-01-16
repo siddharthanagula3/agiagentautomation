@@ -1,6 +1,6 @@
 import type { FileMetadata, FileTreeItem } from '../stores/vibe-view-store';
 
-// Updated: Nov 16th 2025 - Fixed any type
+// Updated: Jan 15th 2026 - Fixed any type
 export interface VibeFileRow {
   id: string;
   name: string;

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import type {
   ArtifactData,
@@ -51,8 +52,11 @@ interface ArtifactState {
   clearAllArtifacts: () => void;
 }
 
+const enableDevtools = import.meta.env.MODE !== 'production';
+
 export const useArtifactStore = create<ArtifactState>()(
-  immer((set, get) => ({
+  devtools(
+    immer((set, get) => ({
     artifacts: {},
     sharedArtifacts: {},
     activeArtifact: null,
@@ -182,5 +186,7 @@ export const useArtifactStore = create<ArtifactState>()(
         activeArtifact: null,
       });
     },
-  }))
+  })),
+    { name: 'ArtifactStore', enabled: enableDevtools }
+  )
 );

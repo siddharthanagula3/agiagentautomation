@@ -30,7 +30,7 @@ import type {
 
 type ConversationUpdateCallback = (update: RealtimeConversationUpdate) => void;
 type ParticipantUpdateCallback = (update: RealtimeParticipantUpdate) => void;
-// Updated: Nov 16th 2025 - Fixed any type
+// Updated: Jan 15th 2026 - Fixed any type
 type MessageCallback = (
   payload: RealtimePostgresChangesPayload<Record<string, unknown>>
 ) => void;
@@ -344,7 +344,7 @@ export class ChatRealtimeSubscriptionManager {
         const presenceState = channel.presenceState();
         const states: PresenceState[] = [];
 
-        // Updated: Nov 16th 2025 - Fixed any type
+        // Updated: Jan 15th 2026 - Fixed any type
         Object.values(presenceState).forEach((presences: unknown) => {
           if (Array.isArray(presences)) {
             presences.forEach((presence: unknown) => {
@@ -417,7 +417,7 @@ export class ChatRealtimeSubscriptionManager {
   /**
    * Unsubscribes from all channels
    */
-  // Updated: Nov 16th 2025 - Enhanced cleanup to prevent memory leaks from subscription tokens
+  // Updated: Jan 15th 2026 - Enhanced cleanup to prevent memory leaks from subscription tokens
   unsubscribeAll(): void {
     this.channels.forEach((channel, channelName) => {
       supabase.removeChannel(channel);

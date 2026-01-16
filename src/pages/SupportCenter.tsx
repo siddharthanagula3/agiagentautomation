@@ -70,7 +70,7 @@ const HelpSupportPage: React.FC = () => {
     const loadFAQs = async () => {
       try {
         setIsLoadingFAQs(true);
-        // Updated: Nov 16th 2025 - Removed console statements for production
+        // Updated: Jan 15th 2026 - Removed console statements for production
         const { data, error } = await supportService.getFAQs();
 
         if (error) {

@@ -226,8 +226,18 @@ export async function checkRateLimitWithTier(
     };
   } catch (error) {
     console.error('[Rate Limiter] Error checking rate limit:', error);
-    // On error, allow the request (fail open)
-    return { success: true };
+    // SECURITY FIX: Fail closed instead of fail open
+    // On error, deny the request to prevent abuse when rate limiter is unavailable
+    // This is more secure than allowing unlimited requests during outages
+    return {
+      success: false,
+      statusCode: 503,
+      body: JSON.stringify({
+        error: 'Service temporarily unavailable',
+        message: 'Rate limiting service is currently unavailable. Please try again in a few moments.',
+        retryAfter: 30,
+      }),
+    };
   }
 }
 

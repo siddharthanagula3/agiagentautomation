@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { useVibeViewStore } from '../../stores/vibe-view-store';
-import { vibeFileSystem } from '@features/mission-control/services/vibe-file-system';
+import { vibeFileSystem } from '@features/vibe/services/vibe-file-system';
 import { toast } from 'sonner';
 import { SandpackPreviewPanel } from './SandpackPreviewPanel';
 import {
@@ -47,7 +47,7 @@ import {
 } from '@shared/ui/tabs';
 
 // Build service API endpoint
-const BUILD_SERVICE_URL = '/.netlify/functions/vibe-build';
+const BUILD_SERVICE_URL = '/.netlify/functions/utilities/vibe-build';
 
 interface BuildResult {
   success: boolean;

@@ -26,7 +26,7 @@ import {
   ContextMenuSeparator,
 } from '@shared/ui/context-menu';
 import { toast } from 'sonner';
-import type { FileTreeNode as FileNode } from '@features/mission-control/services/vibe-file-system';
+import type { FileTreeNode as FileNode } from '@features/vibe/services/vibe-file-system';
 
 interface FileTreeViewProps {
   tree: FileNode[];

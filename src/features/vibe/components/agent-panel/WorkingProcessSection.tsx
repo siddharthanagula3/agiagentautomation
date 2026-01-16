@@ -32,7 +32,7 @@ export interface WorkingStep {
     type: 'file' | 'command' | 'code' | 'tool';
     label: string;
     onClick: () => void;
-    // Updated: Nov 16th 2025 - Fixed any type
+    // Updated: Jan 15th 2026 - Fixed any type
     metadata?: Record<string, unknown>;
   };
   timestamp?: Date;

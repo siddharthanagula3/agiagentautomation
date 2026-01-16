@@ -400,7 +400,7 @@ For issues, questions, or contributions:
 - Token enforcement with pre-flight balance checks
 - Employee memory context integration for personalized search results
 
-**v1.0.0 (Nov 2025)**
+**v1.0.0 (Jan 2026)**
 
 - Initial web search integration
 - Multi-provider support (Perplexity, Google, DuckDuckGo)

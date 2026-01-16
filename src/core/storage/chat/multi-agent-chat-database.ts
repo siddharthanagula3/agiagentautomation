@@ -266,7 +266,7 @@ export async function listConversations(
     }
 
     if (filters.search_query) {
-      // Updated: Nov 16th 2025 - Fixed SQL injection by sanitizing user input
+      // Updated: Jan 15th 2026 - Fixed SQL injection by sanitizing user input
       // Escape special characters that could be used for SQL injection
       const sanitized = filters.search_query
         .replace(/[%_\\]/g, '\\$&') // Escape LIKE wildcards and backslash

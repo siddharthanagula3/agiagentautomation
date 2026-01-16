@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/authentication-store';
-import { useAgentMetricsStore } from '@shared/stores/employee-metrics-store';
+import { useAgentMetricsStore } from '@shared/stores/agent-metrics-store';
 import {
   Card,
   CardContent,

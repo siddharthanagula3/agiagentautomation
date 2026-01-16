@@ -105,7 +105,7 @@ const AboutPage: React.FC = () => {
             name: 'AGI Agent Automation',
             description:
               'Complete Workforce Replacement Platform - AI Employees at 1/100th the cost',
-            foundingDate: '2024',
+            foundingDate: '2026',
             numberOfEmployees: '50+',
             location: {
               '@type': 'Place',

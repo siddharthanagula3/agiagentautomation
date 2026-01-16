@@ -19,7 +19,7 @@ import {
   projectTemplates,
   type ProjectTemplate,
 } from '../services/vibe-templates';
-import { vibeFileSystem } from '@features/mission-control/services/vibe-file-system';
+import { vibeFileSystem } from '@features/vibe/services/vibe-file-system';
 
 interface VibeTemplateSelectorProps {
   open: boolean;

@@ -14,6 +14,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/react/shallow';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -350,6 +351,8 @@ const INITIAL_STATE: MultiAgentChatState = {
 // ============================================================================
 // STORE IMPLEMENTATION
 // ============================================================================
+
+const enableDevtools = import.meta.env.MODE !== 'production';
 
 export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
   devtools(
@@ -887,7 +890,7 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
         }),
       }
     ),
-    { name: 'MultiAgentChatStore' }
+    { name: 'MultiAgentChatStore', enabled: enableDevtools }
   )
 );
 
@@ -920,9 +923,11 @@ export const useAgentPresence = (agentId: string) =>
   useMultiAgentChatStore((state) => state.agentPresence[agentId]);
 
 export const useSyncState = () =>
-  useMultiAgentChatStore((state) => ({
-    isSyncing: state.isSyncing,
-    lastSyncTimestamp: state.lastSyncTimestamp,
-    pendingSyncOperations: state.pendingSyncOperations,
-    syncConflicts: state.syncConflicts,
-  }));
+  useMultiAgentChatStore(
+    useShallow((state) => ({
+      isSyncing: state.isSyncing,
+      lastSyncTimestamp: state.lastSyncTimestamp,
+      pendingSyncOperations: state.pendingSyncOperations,
+      syncConflicts: state.syncConflicts,
+    }))
+  );

@@ -166,6 +166,8 @@ const INITIAL_STATE: NotificationState = {
   desktopPermission: 'default',
 };
 
+const enableDevtools = import.meta.env.MODE !== 'production';
+
 export const useNotificationStore = create<NotificationStore>()(
   devtools(
     persist(
@@ -564,6 +566,7 @@ export const useNotificationStore = create<NotificationStore>()(
     ),
     {
       name: 'Notification Store',
+      enabled: enableDevtools,
     }
   )
 );

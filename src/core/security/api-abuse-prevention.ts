@@ -181,7 +181,7 @@ export async function checkApiAbuse(
     };
   }
 
-  // Updated: Nov 16th 2025 - Fixed race condition by incrementing before check
+  // Updated: Jan 15th 2026 - Fixed race condition by incrementing before check
   // Atomically increment concurrent requests before checking limit
   metrics.concurrentRequests++;
 
@@ -249,7 +249,7 @@ export function trackRequestStart(
     model,
   });
 
-  // Updated: Nov 16th 2025 - Removed duplicate increment (now handled in checkRateLimit)
+  // Updated: Jan 15th 2026 - Removed duplicate increment (now handled in checkRateLimit)
   // Concurrent requests are now incremented atomically in checkRateLimit before the check
   // metrics.concurrentRequests++; // Removed - increment happens in checkRateLimit
 }

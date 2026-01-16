@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Moon, Sun, Monitor } from 'lucide-react';
 import { Button } from './button';
-import { useUIStore } from '@shared/stores/ui-store';
+import { useUIStore } from '@shared/stores/layout-store';
 
 export const ThemeToggle: React.FC = () => {
   const { theme, setTheme } = useUIStore();

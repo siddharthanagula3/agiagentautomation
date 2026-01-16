@@ -126,7 +126,7 @@ export function useVibeChat(options: UseVibeChatOptions): UseVibeChatReturn {
   /**
    * Initialize session
    */
-  // Updated: Nov 16th 2025 - Fixed infinite loop from unstable function dependencies
+  // Updated: Jan 15th 2026 - Fixed infinite loop from unstable function dependencies
   useEffect(() => {
     const initSession = async () => {
       if (initialSessionId) {
@@ -143,7 +143,7 @@ export function useVibeChat(options: UseVibeChatOptions): UseVibeChatReturn {
   /**
    * Add employees to active agents on mount
    */
-  // Updated: Nov 16th 2025 - Fixed memory leak from accumulating employees without cleanup
+  // Updated: Jan 15th 2026 - Fixed memory leak from accumulating employees without cleanup
   useEffect(() => {
     employees.forEach((employee) => {
       addActiveAgent(employee);

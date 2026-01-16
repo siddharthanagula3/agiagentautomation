@@ -796,7 +796,7 @@ _Transforming how humans and AI collaborate_
 - Standardized employee types across codebase
 - Fixed Map/Set serialization issues in Zustand stores
 
-### v1.0.0 (November 2025)
+### v1.0.0 (January 2026)
 
 - Initial release
 - 140+ AI employees

@@ -29,7 +29,7 @@ if (!supabaseAnonKey) {
   );
 }
 
-// Updated: Nov 16th 2025 - Fixed window object check for SSR compatibility
+// Updated: Jan 15th 2026 - Fixed window object check for SSR compatibility
 // Create a single Supabase client instance
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {

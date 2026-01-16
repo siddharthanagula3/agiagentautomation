@@ -6,7 +6,7 @@ _The fully-loaded cost comparison that explains why 2026 becomes the workforce a
 
 ---
 
-**November 2025** — The talent crisis isn't about finding qualified people. It's about affording them.
+**January 2026** — The talent crisis isn't about finding qualified people. It's about affording them.
 
 Median software engineer salaries hit $135K in 2025, up from $110K in 2023. Add benefits (health insurance, 401k matching, stock options), taxes (payroll, unemployment), equipment (laptop, software licenses), and office overhead—the fully-loaded cost exceeds $180K per engineer. For senior roles, $200K+ becomes standard.
 
@@ -238,6 +238,6 @@ Most organizations achieve 70-80% automation of commodity execution within 90 da
 ---
 
 **Published:** August 17, 2025
-**Updated:** November 15, 2025
+**Updated:** January 15, 2026
 **Reading Time:** 10 minutes
 **Topics:** AI Economics, Workforce Automation, Cost Analysis, ROI

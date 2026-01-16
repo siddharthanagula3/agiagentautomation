@@ -6,7 +6,7 @@ import { Separator } from '@shared/ui/separator';
 import { Badge } from '@shared/ui/badge';
 import { Plus, Search, MessageSquare, MoreHorizontal } from 'lucide-react';
 import type { ChatSession } from '../../types';
-import { ConversationListItem } from '../ConversationListItem';
+import { ConversationListItem } from './ConversationListItem';
 import { FolderManagement } from './FolderManagement';
 
 interface ChatSidebarProps {

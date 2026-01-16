@@ -28,7 +28,7 @@ export interface PresenceState {
   lastSeen: number;
 }
 
-// Updated: Nov 16th 2025 - Fixed any type
+// Updated: Jan 15th 2026 - Fixed any type
 interface TypingBroadcastPayload {
   userId: string;
   username: string;

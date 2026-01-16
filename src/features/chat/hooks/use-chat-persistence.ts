@@ -66,7 +66,7 @@ export function useChatPersistence(
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
 
   // Load session on mount
-  // Updated: Nov 16th 2025 - Added loadSession to deps (stable with useCallback)
+  // Updated: Jan 15th 2026 - Added loadSession to deps (stable with useCallback)
   useEffect(() => {
     if (sessionId) {
       loadSession(sessionId);
@@ -74,7 +74,7 @@ export function useChatPersistence(
   }, [sessionId, loadSession]);
 
   // Auto-save messages periodically
-  // Updated: Nov 16th 2025 - Added saveMessages to deps
+  // Updated: Jan 15th 2026 - Added saveMessages to deps
   useEffect(() => {
     if (!autoSaveEnabled || !currentSession) return;
 

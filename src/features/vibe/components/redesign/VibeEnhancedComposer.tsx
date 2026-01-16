@@ -11,7 +11,7 @@
  */
 
 import React, { useState, useRef, KeyboardEvent, useCallback } from 'react';
-import { useWorkforceStore } from '@shared/stores/employee-management-store';
+import { useWorkforceStore } from '@shared/stores/workforce-store';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { Textarea } from '@shared/ui/textarea';

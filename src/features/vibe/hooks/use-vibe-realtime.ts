@@ -15,7 +15,7 @@ export interface VibeAgentActionRow {
   agent_name: string;
   action_type: string;
   timestamp: string;
-  // Updated: Nov 16th 2025 - Fixed any type
+  // Updated: Jan 15th 2026 - Fixed any type
   metadata?: Record<string, unknown> | null;
   status?: AgentActionStatus | null;
   result?: Record<string, unknown> | null;
@@ -262,7 +262,7 @@ export function useVibeRealtime({
     // Defensive: Ensure sessionId is a valid string
     if (!sessionId || typeof sessionId !== 'string') return;
 
-    // Updated: Nov 16th 2025 - Fixed memory leak by clearing completed commands after delay
+    // Updated: Jan 15th 2026 - Fixed memory leak by clearing completed commands after delay
     // Updated: Jan 2026 - Added type guards to safely extract metadata and result
     const handleCommandAction = (action: VibeAgentActionRow) => {
       if (action.action_type !== 'command_execution') return;

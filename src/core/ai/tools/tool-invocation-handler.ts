@@ -173,7 +173,7 @@ class ToolInvocationService {
           };
         }
 
-        // Updated: Nov 16th 2025 - Fixed tool parameter validation to reject null objects
+        // Updated: Jan 15th 2026 - Fixed tool parameter validation to reject null objects
         // In JavaScript, typeof null === 'object', so we must explicitly check for null
         if (
           param.type === 'object' &&

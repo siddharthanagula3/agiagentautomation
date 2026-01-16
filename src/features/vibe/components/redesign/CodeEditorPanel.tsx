@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
-import { vibeFileSystem } from '@features/mission-control/services/vibe-file-system';
+import { vibeFileSystem } from '@features/vibe/services/vibe-file-system';
 import { FileTreeView } from './FileTreeView';
 import { VibeTemplateSelector } from '../VibeTemplateSelector';
 import JSZip from 'jszip';

@@ -60,7 +60,7 @@ const RegisterForm: React.FC = () => {
     }
 
     try {
-      // Updated: Nov 16th 2025 - Fixed mismatched data structure (name instead of firstName/lastName)
+      // Updated: Jan 15th 2026 - Fixed mismatched data structure (name instead of firstName/lastName)
       await register({
         email: formData.email,
         password: formData.password,

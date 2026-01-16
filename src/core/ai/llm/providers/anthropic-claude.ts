@@ -32,7 +32,7 @@ async function getAuthToken(): Promise<string | null> {
 const anthropic = null; // Client-side SDK disabled - use Netlify proxy instead
 
 // ✅ IMPLEMENTED: All API calls use Netlify proxy functions for security
-// Proxy endpoints: /.netlify/functions/anthropic-proxy
+// Proxy endpoints: /.netlify/functions/llm-proxies/anthropic-proxy
 
 // Using centralized Supabase client
 
@@ -116,7 +116,7 @@ export class AnthropicProvider {
       const anthropicMessages = this.convertMessagesToAnthropic(messages);
 
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/anthropic-proxy';
+      const proxyUrl = '/.netlify/functions/llm-proxies/anthropic-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();
@@ -241,7 +241,7 @@ export class AnthropicProvider {
       const anthropicMessages = this.convertMessagesToAnthropic(messages);
 
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/anthropic-proxy';
+      const proxyUrl = '/.netlify/functions/llm-proxies/anthropic-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();

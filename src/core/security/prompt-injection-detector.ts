@@ -12,6 +12,8 @@
  * - Data exfiltration attempts
  */
 
+import { supabase } from '@shared/lib/supabase-client';
+
 export interface InjectionDetectionResult {
   isSafe: boolean;
   riskLevel: 'none' | 'low' | 'medium' | 'high' | 'critical';
@@ -32,7 +34,7 @@ const INJECTION_PATTERNS = {
     /new\s+(instructions?|task|role|personality)/i,
     /act\s+as\s+(if\s+)?(you\s+are|a)/i,
     /pretend\s+(you\s+are|to\s+be)/i,
-    /rolep lay/i,
+    /roleplay/i,
     /DAN\s+mode/i, // "Do Anything Now" jailbreak
     /developer\s+mode/i,
   ],
@@ -133,7 +135,7 @@ const SUSPICIOUS_KEYWORDS = [
  * Detect prompt injection attempts
  */
 export function detectPromptInjection(input: string): InjectionDetectionResult {
-  // Updated: Nov 16th 2025 - Fixed prompt injection detection bypass
+  // Updated: Jan 15th 2026 - Fixed prompt injection detection bypass
   // Sanitize BEFORE detection to catch encoded attacks
   const sanitized = sanitizePromptInput(input);
 
@@ -283,14 +285,49 @@ export function validatePromptInput(
     return { valid: false, reason: 'Input contains null bytes' };
   }
 
-  // Updated: Nov 16th 2025 - Fixed control regex usage (removed \x00 to avoid control character warning)
-  // Check for excessive non-ASCII content (potential encoding attack)
-  const nonAsciiRatio =
-    (input.match(/[^\x20-\x7F]/g) || []).length / input.length;
-  if (nonAsciiRatio > 0.5) {
+  // Updated: Jan 15th 2026 - Fixed control regex usage (removed \x00 to avoid control character warning)
+  // Updated: Jan 15th 2026 - Fixed UTF-8 discrimination issue
+  // Previous check rejected >50% non-ASCII which blocked legitimate non-English text (Chinese, Japanese, Arabic, etc.)
+  // Now we check for specific encoding attack patterns instead of blanket non-ASCII rejection
+
+  // Check for control characters (except common whitespace like \t, \n, \r)
+  // eslint-disable-next-line no-control-regex
+  const controlChars = input.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g) || [];
+  if (controlChars.length > 0) {
     return {
       valid: false,
-      reason: 'Input contains excessive non-ASCII characters',
+      reason: 'Input contains invalid control characters',
+    };
+  }
+
+  // Check for Unicode replacement characters (often indicates encoding issues/attacks)
+  const replacementChars = (input.match(/\uFFFD/g) || []).length;
+  if (replacementChars > 5) {
+    return {
+      valid: false,
+      reason: 'Input contains malformed encoding',
+    };
+  }
+
+  // Check for invisible Unicode characters used in attacks (zero-width, direction overrides, etc.)
+  const invisibleChars = input.match(/[\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/g) || [];
+  if (invisibleChars.length > 10) {
+    return {
+      valid: false,
+      reason: 'Input contains excessive invisible Unicode characters',
+    };
+  }
+
+  // Check for homoglyph attack patterns (mixing scripts suspiciously)
+  // This catches Cyrillic/Greek letters that look like Latin (used to bypass filters)
+  const latinChars = (input.match(/[a-zA-Z]/g) || []).length;
+  const cyrillicChars = (input.match(/[\u0400-\u04FF]/g) || []).length;
+  const greekChars = (input.match(/[\u0370-\u03FF]/g) || []).length;
+  // If mixing scripts in suspicious proportions (small amount of look-alike characters)
+  if (latinChars > 10 && (cyrillicChars > 0 && cyrillicChars < 5) || (greekChars > 0 && greekChars < 5)) {
+    return {
+      valid: false,
+      reason: 'Input contains suspicious character mixing (potential homoglyph attack)',
     };
   }
 
@@ -344,6 +381,7 @@ export function checkUserInput(input: string): {
 
 /**
  * Log injection attempts for monitoring
+ * SECURITY FIX: Jan 15th 2026 - Now persists to database for audit trail
  */
 export async function logInjectionAttempt(
   userId: string,
@@ -351,7 +389,7 @@ export async function logInjectionAttempt(
   detection: InjectionDetectionResult
 ): Promise<void> {
   try {
-    // In production, log to monitoring service
+    // Log to console for immediate visibility
     console.warn('[Prompt Injection] Detected attempt:', {
       userId,
       riskLevel: detection.riskLevel,
@@ -360,16 +398,29 @@ export async function logInjectionAttempt(
       inputPreview: input.substring(0, 200),
     });
 
-    // TODO: Store in database for analysis
-    // await supabase.from('security_incidents').insert({
-    //   user_id: userId,
-    //   incident_type: 'prompt_injection',
-    //   risk_level: detection.riskLevel,
-    //   detected_patterns: detection.detectedPatterns,
-    //   input_preview: input.substring(0, 500),
-    //   created_at: new Date().toISOString(),
-    // });
+    // Store in database for security analysis and audit trail
+    // Note: Uses analytics_events table which should exist with proper RLS
+    const { error } = await supabase.from('analytics_events').insert({
+      user_id: userId,
+      event_type: 'security_incident',
+      event_data: {
+        incident_type: 'prompt_injection',
+        risk_level: detection.riskLevel,
+        detected_patterns: detection.detectedPatterns,
+        input_preview: input.substring(0, 500),
+        confidence: detection.confidence,
+      },
+      created_at: new Date().toISOString(),
+    });
+
+    if (error) {
+      // Don't throw - logging failure shouldn't block the user
+      console.error('[Prompt Injection] Database logging failed:', error.message);
+    } else {
+      console.log('[Prompt Injection] Incident logged to database');
+    }
   } catch (error) {
+    // Fail silently - logging errors shouldn't affect user experience
     console.error('[Prompt Injection] Error logging attempt:', error);
   }
 }

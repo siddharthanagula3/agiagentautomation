@@ -35,7 +35,7 @@ async function getAuthToken(): Promise<string | null> {
 const ai: GoogleGenAI | null = null; // Client-side SDK disabled - use Netlify proxy instead
 
 // All API calls use Netlify proxy functions for security
-// Proxy endpoints: /.netlify/functions/google-proxy
+// Proxy endpoints: /.netlify/functions/llm-proxies/google-proxy
 
 // Using centralized Supabase client
 
@@ -119,7 +119,7 @@ export class GoogleProvider {
   ): Promise<GoogleResponse> {
     try {
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/google-proxy';
+      const proxyUrl = '/.netlify/functions/llm-proxies/google-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();
@@ -253,7 +253,7 @@ export class GoogleProvider {
     try {
       // SECURITY: Direct API calls are disabled - use Netlify proxy instead
       throw new GoogleError(
-        'Direct Google streaming is disabled for security. Use /.netlify/functions/google-proxy instead.',
+        'Direct Google streaming is disabled for security. Use /.netlify/functions/llm-proxies/google-proxy instead.',
         'DIRECT_API_DISABLED'
       );
 

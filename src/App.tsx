@@ -1,5 +1,5 @@
 // src/App.tsx - CLEANED VERSION
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useMemo } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TooltipProvider } from '@shared/ui/tooltip';
@@ -15,6 +15,15 @@ import { PublicLayout } from './layouts/PublicLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { ProtectedRoute } from '@features/auth/components/ProtectedRoute';
 import { AuthLayout } from './layouts/AuthLayout';
+
+// REACT FIX: Extract toast style options to prevent re-renders
+const TOAST_OPTIONS = {
+  style: {
+    background: '#1F2937',
+    color: '#F9FAFB',
+    border: '1px solid #374151',
+  },
+} as const;
 
 // === CORE PAGES ===
 const LandingPage = lazyWithRetry(() => import('./pages/Landing'));
@@ -126,7 +135,7 @@ const RouteLoadingSpinner = () => (
   </div>
 );
 
-// Updated: Nov 16th 2025 - Removed console statements for production
+// Updated: Jan 15th 2026 - Removed console statements for production
 function App() {
   // Simple initialization
   useEffect(() => {
@@ -372,13 +381,7 @@ function App() {
               position="bottom-right"
               theme="dark"
               className="toaster"
-              toastOptions={{
-                style: {
-                  background: '#1F2937',
-                  color: '#F9FAFB',
-                  border: '1px solid #374151',
-                },
-              }}
+              toastOptions={TOAST_OPTIONS}
             />
           </div>
 

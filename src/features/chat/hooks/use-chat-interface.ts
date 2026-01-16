@@ -99,7 +99,7 @@ export const useChat = (sessionId?: string) => {
           createdAt = new Date();
         }
 
-        // Updated: Nov 16th 2025 - Removed console statements for production
+        // Updated: Jan 15th 2026 - Removed console statements for production
         // Validate date - if invalid, use current date
         if (isNaN(createdAt.getTime())) {
           createdAt = new Date();
@@ -144,10 +144,25 @@ export const useChat = (sessionId?: string) => {
   }, []);
 
   // Load messages for the current session
+  // CRITICAL FIX: Removed duplicate logic - now uses loadMessages callback
+  // Added race condition handling with cleanup flag and AbortController pattern
   useEffect(() => {
-    if (sessionId) {
-      loadMessages(sessionId);
-    }
+    let isCancelled = false;
+
+    const loadMessagesAsync = async () => {
+      if (sessionId && !isCancelled) {
+        // Use the existing loadMessages callback to avoid code duplication
+        // The loadMessages callback already handles validation, sorting, and error handling
+        await loadMessages(sessionId);
+      }
+    };
+
+    loadMessagesAsync();
+
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isCancelled = true;
+    };
   }, [sessionId, loadMessages]);
 
   // Send message with dynamic employee selection

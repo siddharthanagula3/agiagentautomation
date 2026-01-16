@@ -24,7 +24,7 @@ import type {
 // TYPE DEFINITIONS
 // ============================================================================
 
-// Updated: Nov 16th 2025 - Fixed any type
+// Updated: Jan 15th 2026 - Fixed any type
 interface DatabaseChatMessage {
   id: string;
   conversation_id: string;
@@ -388,7 +388,7 @@ export class EnhancedChatSynchronizationService {
         break;
 
       case 'merge': {
-        // Updated: Nov 16th 2025 - Fixed no-case-declarations by adding block scope
+        // Updated: Jan 15th 2026 - Fixed no-case-declarations by adding block scope
         // Merge both versions (prefer remote content, keep local metadata)
         const merged: ChatMessage = {
           ...remote,

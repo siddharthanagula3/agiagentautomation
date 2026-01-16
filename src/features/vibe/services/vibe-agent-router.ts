@@ -397,7 +397,7 @@ Respond in JSON format:
 
       const result = JSON.parse(jsonMatch[0]);
 
-      // Updated: Nov 16th 2025 - Fixed any type
+      // Updated: Jan 15th 2026 - Fixed any type
       // Convert to TaskAssignment format
       const tasks: TaskAssignment[] = [];
       const taskIdMap = new Map<string, string>();

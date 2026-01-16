@@ -78,7 +78,7 @@ export const MarketplacePublicPage: React.FC = () => {
           setPurchasedEmployees(new Set());
           return;
         }
-        // Updated: Nov 16th 2025 - Removed console statements for production
+        // Updated: Jan 15th 2026 - Removed console statements for production
         const rows = await listPurchasedEmployees(user.id);
         if (!isMounted) return;
         setPurchasedEmployees(new Set(rows.map((r) => r.employee_id)));

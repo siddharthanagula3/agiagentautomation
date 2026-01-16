@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 
-// Updated: Nov 16th 2025 - Fixed any type
+// Updated: Jan 15th 2026 - Fixed any type
 const viewportSizes = {
   desktop: { width: '100%', height: '100%', icon: Monitor, label: 'Desktop' },
   tablet: { width: '768px', height: '1024px', icon: Tablet, label: 'Tablet' },

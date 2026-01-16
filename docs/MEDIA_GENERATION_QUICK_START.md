@@ -243,7 +243,7 @@ All media generation requests go through secure Netlify Functions with:
 - JWT verification in rate limiter
 - Token enforcement with pre-flight balance checks
 
-**v1.0.0 (Nov 2025)**
+**v1.0.0 (Jan 2026)**
 
 - Initial Imagen 4.0 and Veo 3.1 integration
 

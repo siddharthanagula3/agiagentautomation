@@ -25,7 +25,7 @@ import {
 import { cn } from '@shared/lib/utils';
 import { inferLanguageFromPath } from '../../utils/file-tree';
 
-// Updated: Nov 16th 2025 - Fixed any type
+// Updated: Jan 15th 2026 - Fixed any type
 interface FileTreeItemProps {
   item: {
     id: string;

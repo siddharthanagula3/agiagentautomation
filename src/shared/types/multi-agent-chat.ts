@@ -315,7 +315,7 @@ export type ConversationMetadataInsert = Omit<
   default_model?: string | null;
   default_temperature?: number | null;
   default_max_tokens?: number | null;
-  // Updated: Nov 16th 2025 - Fixed any type
+  // Updated: Jan 15th 2026 - Fixed any type
   ui_settings?: Record<string, unknown>;
 };
 
@@ -489,7 +489,7 @@ export interface DatabaseError {
   details?: unknown;
 }
 
-// Updated: Nov 16th 2025 - Fixed any type
+// Updated: Jan 15th 2026 - Fixed any type
 export class MultiAgentChatError extends Error {
   constructor(
     message: string,

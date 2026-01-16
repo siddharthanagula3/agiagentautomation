@@ -7,8 +7,8 @@
 // Zustand Stores
 // ========================================
 
-// App Store - Global application state
-export { useAppStore, type AppStore } from './app-store';
+// Global Settings Store - Global application settings and feature flags
+export { useAppStore, type AppStore } from './global-settings-store';
 
 // Auth Store - Authentication and user management (unified)
 export { useAuthStore } from './authentication-store';
@@ -17,13 +17,13 @@ export { useAuthStore } from './authentication-store';
 export { useChatStore } from './chat-store';
 
 // Workforce Store - AI workforce and job management
-export { useWorkforceStore } from './employee-management-store';
+export { useWorkforceStore } from './workforce-store';
 
 // Notification Store - App notifications and toasts
 export { useNotificationStore } from './notification-store';
 
-// UI Store - UI state and theme management
-export { useUIStore } from './ui-store';
+// Layout Store - UI layout and theme management
+export { useUIStore } from './layout-store';
 
 // User Profile Store
 export { useUserProfileStore } from './user-profile-store';
@@ -43,8 +43,8 @@ export {
   type ConversationParticipant,
 } from './multi-agent-chat-store';
 
-// Company Hub Store (Multi-Agent Workspace) - Workspace collaboration
-export { useCompanyHubStore } from './multi-agent-workspace-store';
+// Company Hub Store - Workspace collaboration
+export { useCompanyHubStore } from './company-hub-store';
 
 // Artifact Store - Code artifacts and generated content
 export { useArtifactStore } from './artifact-store';
@@ -52,15 +52,12 @@ export { useArtifactStore } from './artifact-store';
 // Usage Warning Store - Token usage warnings and limits
 export { useUsageWarningStore } from './usage-warning-store';
 
-// Employee Metrics Store - Employee performance tracking
-export { useEmployeeMetricsStore } from './employee-metrics-store';
-
 // Mission Control Store - Mission orchestration state
 export {
   useMissionStore,
   useMissionStatus,
-  useMissionTasks,
-  useMissionEmployees,
+  useMissionPlan,
+  useActiveEmployees,
   useMissionMessages,
 } from './mission-control-store';
 
@@ -74,4 +71,4 @@ export { queryClient } from './query-client';
 // Type Definitions
 // ========================================
 
-export * from './types';
+export * from '@shared/types/store-types';

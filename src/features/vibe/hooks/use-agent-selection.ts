@@ -9,7 +9,7 @@ import { useVibeChatStore } from '../stores/vibe-chat-store';
 import type { AIEmployee } from '@core/types/ai-employee';
 import type { RoutingResult, AgentMatch, TaskComplexity } from '../types';
 
-// Updated: Nov 16th 2025 - Fixed any type
+// Updated: Jan 15th 2026 - Fixed any type
 export interface AgentSelectionOptions {
   employees: AIEmployee[];
   enableComplexityAnalysis?: boolean;
@@ -422,7 +422,7 @@ export function useAgentSelection(): UseAgentSelectionReturn {
     return agent?.employee;
   }, []);
 
-  // Updated: Nov 16th 2025 - Fixed infinite loop from unstable function dependency
+  // Updated: Jan 15th 2026 - Fixed infinite loop from unstable function dependency
   // Update selected agent when chat store changes
   useEffect(() => {
     if (selectedAgentId) {

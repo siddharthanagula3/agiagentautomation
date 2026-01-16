@@ -242,7 +242,7 @@ async function main() {
 
   // Setup production webhook only
   console.log('📝 Setting up PRODUCTION webhook endpoint...\n');
-  const prodWebhookUrl = `${productionUrl}/.netlify/functions/stripe-webhook`;
+  const prodWebhookUrl = `${productionUrl}/.netlify/functions/payments/stripe-webhook`;
   await findOrCreateWebhook(
     prodWebhookUrl,
     'AGI Agent Automation - Production Webhook'

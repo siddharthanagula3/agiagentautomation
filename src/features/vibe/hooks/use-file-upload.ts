@@ -84,7 +84,7 @@ export function useFileUpload(): UseFileUploadReturn {
     new Map()
   );
 
-  // Updated: Nov 16th 2025 - Fixed memory leak by cleaning up abort controllers on unmount
+  // Updated: Jan 15th 2026 - Fixed memory leak by cleaning up abort controllers on unmount
   useEffect(() => {
     const controllers = uploadAbortControllers;
     return () => {

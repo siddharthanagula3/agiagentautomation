@@ -205,7 +205,7 @@ async function main() {
     process.exit(1);
   }
 
-  const prodWebhookUrl = `${productionUrl}/.netlify/functions/stripe-webhook`;
+  const prodWebhookUrl = `${productionUrl}/.netlify/functions/payments/stripe-webhook`;
 
   console.log('🎯 Production Webhook URL:');
   console.log(`   ${prodWebhookUrl}\n`);

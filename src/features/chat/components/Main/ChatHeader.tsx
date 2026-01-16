@@ -14,7 +14,7 @@ import {
   Bookmark,
 } from 'lucide-react';
 import type { ChatSession } from '../../types';
-import { TokenUsageDisplay } from '../TokenUsageDisplay';
+import { TokenUsageDisplay } from '../tokens/TokenUsageDisplay';
 import { useSessionTokens } from '../../hooks/use-session-tokens';
 import { ThemeToggle } from '@shared/ui/theme-toggle';
 

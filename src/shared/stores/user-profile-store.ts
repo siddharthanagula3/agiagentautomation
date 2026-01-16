@@ -70,6 +70,8 @@ const INITIAL_STATE: UserProfileState = {
   error: null,
 };
 
+const enableDevtools = import.meta.env.MODE !== 'production';
+
 export const useUserProfileStore = create<UserProfileStore>()(
   devtools(
     persist(
@@ -126,6 +128,7 @@ export const useUserProfileStore = create<UserProfileStore>()(
     ),
     {
       name: 'User Profile Store',
+      enabled: enableDevtools,
     }
   )
 );

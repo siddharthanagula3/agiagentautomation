@@ -6,7 +6,7 @@
 
 Every AI agent platform faces the same scaling problem: hardcoded prompts in source code. Adding a new specialist requires developer time, code reviews, deployment pipelines, and version releases. AGI Automation solved this with a deceptively simple architecture: AI employees are markdown files. System prompts live in file content, metadata in YAML frontmatter. Add a new employee? Create a file. Update behavior? Edit markdown. No code changes, no deployments, no infrastructure updates.
 
-This file-based approach is why AGI Automation scales to 165+ specialized employees while competing platforms struggle to maintain 20-30 agents. By November 2025, organizations deploying file-based employee systems report 80-90% reduction in time-to-deploy new specialists and 95% reduction in prompt maintenance overhead compared to hardcoded alternatives. The architectural simplicity enables exponential growth without exponential complexity.
+This file-based approach is why AGI Automation scales to 165+ specialized employees while competing platforms struggle to maintain 20-30 agents. By January 2026, organizations deploying file-based employee systems report 80-90% reduction in time-to-deploy new specialists and 95% reduction in prompt maintenance overhead compared to hardcoded alternatives. The architectural simplicity enables exponential growth without exponential complexity.
 
 ## The Hardcoded Agent Problem
 
@@ -458,7 +458,7 @@ You don't have resources to build 50+ specialized agents with hardcoded classes.
 
 **Action:** Clone AGI Automation's file-based architecture pattern. Create `.agi/employees/` directory. Define 3 employees as markdown files this week. Build simple loader using `import.meta.glob()` or filesystem reads. Test iteration speed for prompt improvements vs your current approach.
 
-## November 2025 Adoption Patterns
+## January 2026 Adoption Patterns
 
 Organizations deploying file-based employee systems report:
 

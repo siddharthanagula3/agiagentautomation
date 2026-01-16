@@ -32,7 +32,7 @@ async function getAuthToken(): Promise<string | null> {
 const openai = null; // Client-side SDK disabled - use Netlify proxy instead
 
 // ✅ IMPLEMENTED: All API calls use Netlify proxy functions for security
-// Proxy endpoints: /.netlify/functions/openai-proxy
+// Proxy endpoints: /.netlify/functions/llm-proxies/openai-proxy
 
 // Using centralized Supabase client
 
@@ -114,7 +114,7 @@ export class OpenAIProvider {
       const openaiMessages = this.convertMessagesToOpenAI(messages);
 
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/openai-proxy';
+      const proxyUrl = '/.netlify/functions/llm-proxies/openai-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();
@@ -237,7 +237,7 @@ export class OpenAIProvider {
       const openaiMessages = this.convertMessagesToOpenAI(messages);
 
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/openai-proxy';
+      const proxyUrl = '/.netlify/functions/llm-proxies/openai-proxy';
 
       const response = await fetch(proxyUrl, {
         method: 'POST',

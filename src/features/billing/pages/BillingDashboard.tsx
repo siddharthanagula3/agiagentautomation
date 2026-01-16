@@ -1,5 +1,5 @@
-// Updated: Nov 16th 2025 - Removed all console statements for security (data exposure)
-// Updated: Nov 16th 2025 - Added error boundary
+// Updated: Jan 15th 2026 - Removed all console statements for security (data exposure)
+// Updated: Jan 15th 2026 - Added error boundary
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { useSearchParams } from 'react-router-dom';

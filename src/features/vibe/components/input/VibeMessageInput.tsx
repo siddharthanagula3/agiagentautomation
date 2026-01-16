@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useRef, KeyboardEvent, useEffect } from 'react';
-import { useWorkforceStore } from '@shared/stores/employee-management-store';
+import { useWorkforceStore } from '@shared/stores/workforce-store';
 import {
   useVibeViewStore,
   type FileTreeItem,
@@ -80,7 +80,7 @@ export function VibeMessageInput({
     }
   };
 
-  // Updated: Nov 16th 2025 - Fixed any type
+  // Updated: Jan 15th 2026 - Fixed any type
   // Extract all files from file tree recursively
   const getAllFiles = (tree: FileTreeItem[]): MentionSuggestion[] => {
     const files: MentionSuggestion[] = [];

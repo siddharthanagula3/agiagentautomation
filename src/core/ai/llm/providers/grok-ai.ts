@@ -114,7 +114,7 @@ export class GrokProvider {
   ): Promise<GrokResponse> {
     try {
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/grok-proxy';
+      const proxyUrl = '/.netlify/functions/llm-proxies/grok-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();
@@ -229,7 +229,7 @@ export class GrokProvider {
   }> {
     try {
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/grok-proxy';
+      const proxyUrl = '/.netlify/functions/llm-proxies/grok-proxy';
 
       const response = await fetch(proxyUrl, {
         method: 'POST',

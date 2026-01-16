@@ -6,6 +6,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/react/shallow';
 import { realtimeService } from '../services/realtimeService';
 
 export interface Message {
@@ -301,6 +302,8 @@ const INITIAL_STATE: ChatState = {
   currentCheckpoint: null,
   checkpointHistory: [],
 };
+
+const enableDevtools = import.meta.env.MODE !== 'production';
 
 export const useChatStore = create<ChatStore>()(
   devtools(
@@ -926,10 +929,103 @@ export const useChatStore = create<ChatStore>()(
           selectedModel: state.selectedModel,
           defaultSettings: state.defaultSettings,
         }),
+        // CRITICAL FIX: Custom storage handlers to properly serialize/deserialize Date objects
+        // Without this, Date objects become strings after page refresh, breaking .getTime() calls
+        storage: {
+          getItem: (name) => {
+            const str = localStorage.getItem(name);
+            if (!str) return null;
+            try {
+              const data = JSON.parse(str);
+              // Rehydrate Date objects in conversations
+              if (data.state?.conversations) {
+                for (const convId of Object.keys(data.state.conversations)) {
+                  const conv = data.state.conversations[convId];
+                  // Rehydrate conversation metadata dates
+                  if (conv.metadata) {
+                    if (conv.metadata.createdAt) {
+                      conv.metadata.createdAt = new Date(conv.metadata.createdAt);
+                    }
+                    if (conv.metadata.updatedAt) {
+                      conv.metadata.updatedAt = new Date(conv.metadata.updatedAt);
+                    }
+                  }
+                  // Rehydrate message timestamps
+                  if (conv.messages && Array.isArray(conv.messages)) {
+                    for (const msg of conv.messages) {
+                      if (msg.timestamp) {
+                        msg.timestamp = new Date(msg.timestamp);
+                      }
+                      // Also handle uploadedAt in attachments
+                      if (msg.attachments && Array.isArray(msg.attachments)) {
+                        for (const att of msg.attachments) {
+                          if (att.uploadedAt) {
+                            att.uploadedAt = new Date(att.uploadedAt);
+                          }
+                        }
+                      }
+                      // Handle citation timestamps
+                      if (msg.citations && Array.isArray(msg.citations)) {
+                        for (const cit of msg.citations) {
+                          if (cit.timestamp) {
+                            cit.timestamp = new Date(cit.timestamp);
+                          }
+                        }
+                      }
+                      // Handle reaction timestamps
+                      if (msg.reactions && Array.isArray(msg.reactions)) {
+                        for (const react of msg.reactions) {
+                          if (react.timestamp) {
+                            react.timestamp = new Date(react.timestamp);
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              // Rehydrate lastActivity
+              if (data.state?.lastActivity) {
+                data.state.lastActivity = new Date(data.state.lastActivity);
+              }
+              // Rehydrate checkpoint timestamps
+              if (data.state?.checkpointHistory && Array.isArray(data.state.checkpointHistory)) {
+                for (const cp of data.state.checkpointHistory) {
+                  if (cp.timestamp) {
+                    cp.timestamp = new Date(cp.timestamp);
+                  }
+                }
+              }
+              // Rehydrate working process step timestamps
+              if (data.state?.workingProcesses) {
+                for (const procId of Object.keys(data.state.workingProcesses)) {
+                  const proc = data.state.workingProcesses[procId];
+                  if (proc.steps && Array.isArray(proc.steps)) {
+                    for (const step of proc.steps) {
+                      if (step.timestamp) {
+                        step.timestamp = new Date(step.timestamp);
+                      }
+                    }
+                  }
+                }
+              }
+              return data;
+            } catch {
+              return null;
+            }
+          },
+          setItem: (name, value) => {
+            localStorage.setItem(name, JSON.stringify(value));
+          },
+          removeItem: (name) => {
+            localStorage.removeItem(name);
+          },
+        },
       }
     ),
     {
       name: 'Chat Store',
+      enabled: enableDevtools,
     }
   )
 );

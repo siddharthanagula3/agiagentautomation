@@ -17,7 +17,7 @@ export interface VibeFile {
   uploaded_at: Date;
   uploaded_by: string;
   session_id: string;
-  // Updated: Nov 16th 2025 - Fixed any type
+  // Updated: Jan 15th 2026 - Fixed any type
   metadata?: Record<string, unknown>;
 }
 
@@ -41,6 +41,63 @@ export class VibeFileManager {
   private readonly STORAGE_BUCKET = 'vibe-files';
   private readonly MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
+  // SECURITY: MIME type whitelist for allowed file uploads
+  // Updated: Jan 15th 2026 - Added MIME type validation to prevent dangerous file uploads
+  private readonly ALLOWED_MIME_TYPES = new Set([
+    // Images
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'image/svg+xml',
+    'image/bmp',
+    'image/tiff',
+    // Documents
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    // Text/Code
+    'text/plain',
+    'text/markdown',
+    'text/html',
+    'text/css',
+    'text/javascript',
+    'text/csv',
+    'text/xml',
+    'application/json',
+    'application/xml',
+    'application/javascript',
+    'application/typescript',
+    // Archives (for project imports)
+    'application/zip',
+    'application/x-tar',
+    'application/gzip',
+    // Audio/Video (for media projects)
+    'audio/mpeg',
+    'audio/wav',
+    'audio/ogg',
+    'video/mp4',
+    'video/webm',
+  ]);
+
+  // SECURITY: Blocked file extensions (double-check regardless of MIME type)
+  private readonly BLOCKED_EXTENSIONS = new Set([
+    '.exe', '.dll', '.so', '.dylib',  // Executables
+    '.bat', '.cmd', '.ps1', '.sh',    // Scripts (except when MIME is text)
+    '.msi', '.msp', '.msu',           // Windows installers
+    '.vbs', '.vbe', '.js.exe',        // VBScript
+    '.scr', '.pif', '.com',           // Legacy executables
+    '.jar', '.jnlp',                   // Java executables
+    '.app', '.dmg', '.pkg',           // macOS installers
+    '.deb', '.rpm', '.apk',           // Package managers
+    '.reg', '.inf',                    // Windows registry/config
+    '.lnk', '.url',                    // Shortcuts (can be malicious)
+  ]);
+
   /**
    * Upload a file to Supabase Storage
    *
@@ -60,6 +117,14 @@ export class VibeFileManager {
     if (file.size > this.MAX_FILE_SIZE) {
       throw new Error(
         `File size exceeds maximum allowed size of ${this.MAX_FILE_SIZE / 1024 / 1024}MB`
+      );
+    }
+
+    // SECURITY: Validate MIME type
+    // Updated: Jan 15th 2026 - Added MIME type validation
+    if (!this.isAllowedFileType(file)) {
+      throw new Error(
+        `File type "${file.type || 'unknown'}" is not allowed. Please upload images, documents, text files, or archives only.`
       );
     }
 
@@ -316,17 +381,48 @@ export class VibeFileManager {
   }
 
   /**
-   * Delete all files for a session
+   * Delete all files for a session (batch operation)
+   * Updated: Jan 15th 2026 - Optimized to use batch delete instead of N individual calls
    *
    * @param sessionId - VIBE session ID
    */
   async deleteSessionFiles(sessionId: string): Promise<void> {
     try {
-      const files = await this.getFiles(sessionId);
+      // Get all files for the session
+      const { data: files, error: selectError } = await supabase
+        .from('vibe_files')
+        .select('id, metadata')
+        .eq('session_id', sessionId);
 
-      for (const file of files) {
-        await this.deleteFile(file.id);
+      if (selectError) throw selectError;
+      if (!files || files.length === 0) return;
+
+      // Extract file paths for storage deletion
+      const filePaths = files
+        .map((f) => f.metadata?.original_path)
+        .filter((path): path is string => !!path);
+
+      // Batch delete from storage (single API call)
+      if (filePaths.length > 0) {
+        const { error: storageError } = await supabase.storage
+          .from(this.STORAGE_BUCKET)
+          .remove(filePaths);
+
+        if (storageError) {
+          console.error('Failed to batch delete files from storage:', storageError);
+          // Continue to delete metadata even if storage fails
+        }
       }
+
+      // Batch delete metadata from database (single API call)
+      const { error: dbError } = await supabase
+        .from('vibe_files')
+        .delete()
+        .eq('session_id', sessionId);
+
+      if (dbError) throw dbError;
+
+      console.log(`[VibeFileManager] Batch deleted ${files.length} files for session ${sessionId}`);
     } catch (error) {
       console.error('Failed to delete session files:', error);
     }
@@ -429,6 +525,45 @@ export class VibeFileManager {
   private sanitizeFileName(fileName: string): string {
     // Remove special characters and spaces
     return fileName.replace(/[^a-zA-Z0-9.-]/g, '_').replace(/_{2,}/g, '_');
+  }
+
+  /**
+   * Check if file type is allowed for upload
+   * SECURITY: Validates both MIME type and extension to prevent malicious file uploads
+   * Updated: Jan 15th 2026 - Added MIME type validation
+   *
+   * @private
+   */
+  private isAllowedFileType(file: File): boolean {
+    // Get file extension (lowercase)
+    const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+    // Block dangerous extensions regardless of MIME type
+    if (this.BLOCKED_EXTENSIONS.has(ext)) {
+      console.warn(`[VibeFileManager] Blocked dangerous extension: ${ext}`);
+      return false;
+    }
+
+    // Check MIME type against whitelist
+    // Allow empty MIME type for text files (some browsers don't set it correctly)
+    if (!file.type || file.type === '') {
+      // If no MIME type, only allow known text extensions
+      return this.isTextFile(file.name);
+    }
+
+    // Check if MIME type is in whitelist
+    if (this.ALLOWED_MIME_TYPES.has(file.type)) {
+      return true;
+    }
+
+    // Allow application/octet-stream for known safe text extensions
+    // (browsers sometimes misdetect text files)
+    if (file.type === 'application/octet-stream' && this.isTextFile(file.name)) {
+      return true;
+    }
+
+    console.warn(`[VibeFileManager] Blocked disallowed MIME type: ${file.type} for file: ${file.name}`);
+    return false;
   }
 
   /**

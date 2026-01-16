@@ -94,7 +94,7 @@ export class DeepSeekProvider {
   ): Promise<DeepSeekResponse> {
     try {
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/deepseek-proxy';
+      const proxyUrl = '/.netlify/functions/llm-proxies/deepseek-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();
@@ -204,7 +204,7 @@ export class DeepSeekProvider {
   }> {
     try {
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/deepseek-proxy';
+      const proxyUrl = '/.netlify/functions/llm-proxies/deepseek-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();

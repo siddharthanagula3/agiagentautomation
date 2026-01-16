@@ -24,7 +24,7 @@ import {
   useWorkforceStore,
   setupWorkforceSubscription,
   cleanupWorkforceSubscription,
-} from '@shared/stores/employee-management-store';
+} from '@shared/stores/workforce-store';
 import { AI_EMPLOYEES } from '@/data/marketplace-employees';
 import { AnimatedAvatar } from '@shared/components/AnimatedAvatar';
 import {
@@ -114,7 +114,7 @@ const EmployeeManagement: React.FC = () => {
     );
   }
 
-  // Updated: Nov 16th 2025 - Removed console statements for production
+  // Updated: Jan 15th 2026 - Removed console statements for production
   const totalEmployees = hiredEmployees.length;
   const activeEmployees = hiredEmployees.filter((emp) => emp.is_active).length;
 

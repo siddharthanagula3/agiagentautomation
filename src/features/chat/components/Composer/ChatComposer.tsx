@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import type { ChatMode, Tool } from '../../types';
-import { PromptShortcuts } from '../PromptShortcuts';
+import { PromptShortcuts } from '../shortcuts/PromptShortcuts';
 import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
 import { useNavigate } from 'react-router-dom';
 

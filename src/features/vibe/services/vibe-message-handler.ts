@@ -5,7 +5,7 @@
  * Created: Nov 18th 2025
  */
 
-import { vibeFileSystem } from '@features/mission-control/services/vibe-file-system';
+import { vibeFileSystem } from '@features/vibe/services/vibe-file-system';
 import { toast } from 'sonner';
 import { supabase } from '@shared/lib/supabase-client';
 
@@ -99,6 +99,7 @@ export function extractFilesFromCodeBlocks(
 
 /**
  * Normalize file path (remove leading ./ and ensure no starting /)
+ * SECURITY: Also prevents directory traversal attacks
  */
 function normalizeFilePath(path: string): string {
   let normalized = path.trim();
@@ -111,6 +112,33 @@ function normalizeFilePath(path: string): string {
   // Remove leading /
   if (normalized.startsWith('/')) {
     normalized = normalized.slice(1);
+  }
+
+  // SECURITY FIX: Prevent directory traversal attacks
+  // Remove any ../ sequences that could escape the sandbox
+  // Split by / and filter out any .. segments
+  const segments = normalized.split('/').filter(segment => {
+    // Remove empty segments and parent directory references
+    if (segment === '' || segment === '.' || segment === '..') {
+      return false;
+    }
+    // Also block segments that are just dots (e.g., "...", "....")
+    if (/^\.+$/.test(segment)) {
+      return false;
+    }
+    return true;
+  });
+
+  // Rebuild the path
+  normalized = segments.join('/');
+
+  // Final safety check: ensure no remaining traversal patterns
+  // This catches encoded or obfuscated traversal attempts
+  if (normalized.includes('..') || normalized.includes('\0')) {
+    console.warn('[VIBE] Blocked potential directory traversal attempt:', path);
+    // Return a safe fallback - use the last segment (filename) only
+    const lastSegment = segments[segments.length - 1];
+    return lastSegment || 'untitled';
   }
 
   return normalized;

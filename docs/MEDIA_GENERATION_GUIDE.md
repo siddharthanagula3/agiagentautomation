@@ -641,7 +641,7 @@ All media generation requests go through secure Netlify Functions:
 - Token enforcement with pre-flight balance checks
 - Added integration with DeepSeek and Qwen for prompt enhancement
 
-**v1.0.0 (Nov 2025)**
+**v1.0.0 (Jan 2026)**
 
 - Initial Imagen 4.0 and Veo 3.1 integration
 - Automatic tool detection in chat

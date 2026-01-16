@@ -32,7 +32,7 @@ async function getAuthToken(): Promise<string | null> {
 const perplexity = null; // Client-side SDK disabled - use Netlify proxy instead
 
 // ✅ IMPLEMENTED: All API calls use Netlify proxy functions for security
-// Proxy endpoints: /.netlify/functions/perplexity-proxy
+// Proxy endpoints: /.netlify/functions/llm-proxies/perplexity-proxy
 
 // Using centralized Supabase client
 
@@ -113,7 +113,7 @@ export class PerplexityProvider {
   ): Promise<PerplexityResponse> {
     try {
       // SECURITY: Use Netlify proxy to keep API keys secure
-      const proxyUrl = '/.netlify/functions/perplexity-proxy';
+      const proxyUrl = '/.netlify/functions/llm-proxies/perplexity-proxy';
 
       // Get auth token for authenticated proxy calls
       const authToken = await getAuthToken();
@@ -260,7 +260,7 @@ export class PerplexityProvider {
     try {
       // SECURITY: Direct API calls are disabled - use Netlify proxy instead
       throw new PerplexityError(
-        'Direct Perplexity streaming is disabled for security. Use /.netlify/functions/perplexity-proxy instead.',
+        'Direct Perplexity streaming is disabled for security. Use /.netlify/functions/llm-proxies/perplexity-proxy instead.',
         'DIRECT_API_DISABLED'
       );
 

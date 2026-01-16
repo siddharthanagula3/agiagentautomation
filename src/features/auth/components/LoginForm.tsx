@@ -27,7 +27,7 @@ const LoginForm: React.FC = () => {
     setError('');
 
     try {
-      // Updated: Nov 16th 2025 - Fixed incorrect API call signature (object-based instead of parameter-based)
+      // Updated: Jan 15th 2026 - Fixed incorrect API call signature (object-based instead of parameter-based)
       const result = await login({
         email: formData.email,
         password: formData.password,

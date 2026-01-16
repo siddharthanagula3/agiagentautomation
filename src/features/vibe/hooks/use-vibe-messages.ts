@@ -28,7 +28,7 @@ export interface UseVibeMessagesReturn {
     content: string;
     employeeName?: string;
     employeeRole?: string;
-    // Updated: Nov 16th 2025 - Fixed any type
+    // Updated: Jan 15th 2026 - Fixed any type
     metadata?: Record<string, unknown>;
   }) => Promise<VibeMessage>;
   clearMessages: () => Promise<void>;

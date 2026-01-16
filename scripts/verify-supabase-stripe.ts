@@ -267,7 +267,7 @@ async function verifyStripe() {
       } else {
         log('   ⚠️  No production webhooks found', 'yellow');
         log(
-          '   Create webhook for: https://agiagentautomation.com/.netlify/functions/stripe-webhook',
+          '   Create webhook for: https://agiagentautomation.com/.netlify/functions/payments/stripe-webhook',
           'yellow'
         );
       }

@@ -122,7 +122,7 @@ const PricingPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isCreatingSubscription, setIsCreatingSubscription] = useState(false);
 
-  // Updated: Nov 16th 2025 - Removed console statements for production
+  // Updated: Jan 15th 2026 - Removed console statements for production
   const loadPlans = useCallback(async () => {
     try {
       setLoading(true);

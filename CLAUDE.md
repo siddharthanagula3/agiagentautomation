@@ -13,23 +13,28 @@ AGI Agent Automation Platform - A comprehensive AI workforce management system t
 npm run dev                  # Start Vite dev server (port 5173)
 npm run build               # Production build
 npm run build:prod          # Production build with optimizations
+npm run preview             # Preview production build locally
 
-# Code Quality (run before commits)
+# Code Quality (run before commits - auto-runs via Husky/lint-staged)
 npm run lint                # Run ESLint
 npm run type-check          # TypeScript checking (must pass before deployment)
 npm run format              # Format with Prettier
+npm run format:check        # Check formatting without changes (CI)
 
 # Testing
 npm run test                # Run Vitest unit tests (watch mode)
 npm run test:run            # Single test run (CI)
+npm run test:coverage       # Generate coverage report
 npx vitest run path/to/file # Run specific test file
 npm run e2e                 # Run Playwright E2E tests
+npm run e2e:ui              # E2E tests with interactive UI
 npm run e2e:debug           # Debug E2E tests interactively
 
 # Local Development Stack
 supabase start              # Start local Supabase (port 54321, Studio: 54323)
+supabase status             # Check service status
 netlify dev                 # Start Netlify functions (port 8888)
-stripe listen --forward-to localhost:8888/.netlify/functions/stripe-webhook
+stripe listen --forward-to localhost:8888/.netlify/functions/payments/stripe-webhook
 
 # Database
 supabase db reset           # Reset and apply all migrations
@@ -41,6 +46,15 @@ npm run vibe:migrate        # Apply migrations via Netlify
 npm run vibe:test           # Test Vibe integration
 npm run vibe:deploy         # Deploy Vibe workflow
 ```
+
+## CI/CD Pipeline
+
+GitHub Actions (`.github/workflows/simple-ci.yml`) runs on push to `main`/`develop`/`restructure/repository` and PRs:
+1. **quality** - format:check, lint, type-check (must all pass)
+2. **build** - Production build with `npm run build:prod`
+3. **test** - Unit tests (continue-on-error, non-blocking)
+
+Pre-commit hooks (Husky + lint-staged) auto-run ESLint and Prettier on staged files.
 
 ## Architecture
 
@@ -59,7 +73,11 @@ npm run vibe:deploy         # Deploy Vibe workflow
 
 **3. State Management** (Zustand + Immer)
 - `mission-control-store.ts` - Mission execution state (tasks, active employees, messages)
-- `employee-management-store.ts` - Hired employees from database
+- `workforce-store.ts` - Hired employees from database (exports `useWorkforceStore`)
+- `company-hub-store.ts` - Multi-agent workspace state (exports `useCompanyHubStore`)
+- `agent-metrics-store.ts` - Agent performance metrics (exports `useAgentMetricsStore`)
+- `global-settings-store.ts` - App settings and feature flags (exports `useAppStore`)
+- `layout-store.ts` - UI layout and theme state (exports `useUIStore`)
 - Clean separation prevents state conflicts
 
 **4. Multi-Provider LLM Integration** (`src/core/ai/llm/unified-language-model.ts`)
@@ -76,15 +94,24 @@ src/
 │   ├── ai/
 │   │   ├── llm/            # LLM providers (unified-language-model.ts)
 │   │   ├── employees/      # Employee management (prompt-management.ts)
-│   │   ├── orchestration/  # Multi-agent orchestration (workforce-orchestrator.ts)
+│   │   ├── orchestration/  # Multi-agent orchestration (workforce-orchestrator.ts, multi-agent-coordinator.ts)
 │   │   └── tools/          # Tool execution engine
 │   ├── auth/               # Authentication
+│   ├── billing/            # Token enforcement (token-enforcement-service.ts)
 │   ├── integrations/       # External services (chat, media, search)
+│   ├── security/           # Prompt injection detection, API abuse prevention
 │   └── storage/            # Database, cache, Supabase services
 │
 ├── features/               # Feature modules
 │   ├── vibe/              # /vibe - Standalone AI coding workspace
+│   │   ├── components/    # UI components (redesign/, output-panel/, chat/)
+│   │   ├── services/      # Vibe-specific services (19 files)
+│   │   ├── stores/        # Vibe state (vibe-chat-store, vibe-file-store, etc.)
+│   │   └── sdk/           # WebSocket/HTTP client for agent communication
 │   ├── chat/              # /chat - Multi-agent chat (inside dashboard)
+│   │   ├── components/    # Organized by domain (Main/, Sidebar/, messages/, etc.)
+│   │   ├── hooks/         # Chat-specific hooks (use-chat-interface, use-agent-collaboration)
+│   │   └── pages/         # ChatInterface.tsx
 │   ├── mission-control/   # Mission orchestration UI
 │   ├── workforce/         # Employee hiring & management
 │   ├── marketplace/       # AI employee marketplace
@@ -92,10 +119,11 @@ src/
 │   └── settings/          # User preferences
 │
 ├── shared/                 # Shared utilities
-│   ├── stores/            # Zustand state stores
+│   ├── stores/            # Zustand state stores (15 files)
 │   ├── hooks/             # React hooks
 │   ├── lib/               # Utilities (supabase-client.ts)
-│   └── types/             # TypeScript definitions
+│   ├── types/             # TypeScript definitions (store-types.ts, supabase.ts)
+│   └── ui/                # shadcn/ui components
 │
 ├── pages/                  # Top-level pages (Landing, Pricing, etc.)
 └── .agi/employees/        # AI employee markdown definitions
@@ -169,12 +197,14 @@ const employees = await promptManagement.getAvailableEmployees();
 
 ### VIBE vs Chat
 
-- **`/vibe`**: Standalone AI coding workspace (outside dashboard layout, full-screen)
+- **`/vibe`**: Standalone AI coding workspace (full-screen, outside dashboard layout)
   - Monaco editor, file system, live preview, terminal
-  - Services: `vibe-message-handler.ts`, `vibe-tool-orchestrator.ts`, `vibe-file-manager.ts`
-  - Stores: `vibe-chat-store.ts`, `vibe-file-store.ts`, `vibe-view-store.ts`
+  - Key services: `vibe-message-handler.ts`, `vibe-tool-orchestrator.ts`, `vibe-file-manager.ts`, `vibe-file-system.ts`
+  - Stores: `vibe-chat-store.ts`, `vibe-file-store.ts`, `vibe-view-store.ts`, `vibe-agent-store.ts`
+  - Files persist to `vibe_files` table (survives page refresh)
 - **`/chat`**: Multi-agent chat interface (inside dashboard layout)
   - Rich markdown, employee selection, document export (PDF/DOCX)
+  - Components organized by domain folders: `Main/`, `Sidebar/`, `Composer/`, `messages/`, `dialogs/`, `agents/`, `artifacts/`, `tokens/`, `workflows/`
 
 Both are protected routes requiring authentication.
 
@@ -221,35 +251,73 @@ VITE_PERPLEXITY_API_KEY=...
 
 ## Netlify Functions
 
-Located: `netlify/functions/`
+Located: `netlify/functions/` (organized into subdirectories)
 
-**LLM Proxy Functions (7 providers):**
-- `anthropic-proxy.ts` - Claude API proxy
-- `openai-proxy.ts` - OpenAI/GPT API proxy
-- `google-proxy.ts` - Google Gemini API proxy
-- `grok-proxy.ts` - xAI Grok API proxy
-- `perplexity-proxy.ts` - Perplexity API proxy
-- `deepseek-proxy.ts` - DeepSeek API proxy
-- `qwen-proxy.ts` - Alibaba Qwen API proxy
+```
+netlify/functions/
+├── llm-proxies/          # LLM API proxies (7 providers)
+│   ├── anthropic-proxy.ts
+│   ├── openai-proxy.ts
+│   ├── google-proxy.ts
+│   ├── perplexity-proxy.ts
+│   ├── grok-proxy.ts
+│   ├── deepseek-proxy.ts
+│   └── qwen-proxy.ts
+├── payments/             # Stripe & billing
+│   ├── stripe-webhook.ts
+│   ├── create-pro-subscription.ts
+│   ├── buy-token-pack.ts
+│   └── get-billing-portal.ts
+├── agents/               # Agent orchestration
+│   ├── agents-session.ts
+│   └── agents-execute.ts
+├── admin/                # Admin utilities
+│   ├── run-sql.ts
+│   └── fix-schema.ts
+├── utilities/            # General utilities
+│   ├── vibe-build.ts
+│   ├── fetch-page.ts
+│   └── create-chatkit-session.ts
+└── utils/                # Shared utilities (internal)
+    ├── auth-middleware.ts
+    ├── cors.ts
+    ├── rate-limiter.ts
+    ├── token-tracking.ts
+    └── validation-schemas.ts
+```
 
-**Payment & Billing:**
-- `stripe-webhook.ts` - Stripe event handling (subscriptions, token grants)
-- `create-pro-subscription.ts` - Checkout session creation
-- `buy-token-pack.ts` - One-time token purchases
-- `get-billing-portal.ts` - Stripe billing portal redirect
-
-**Other:**
-- `vibe-build.ts` - React/TypeScript transpilation for Vibe live preview
-- `fetch-page.ts` - Web page fetching with SSRF protection
+**API Paths** (updated with subdirectories):
+- `/.netlify/functions/llm-proxies/anthropic-proxy`
+- `/.netlify/functions/payments/stripe-webhook`
+- `/.netlify/functions/utilities/vibe-build`
 
 **Security Features:**
 - All proxies require JWT authentication via `withAuth` middleware
 - CORS validation via `utils/cors.ts` with origin whitelist (not `*` wildcard)
-- Rate limiting via Upstash Redis with JWT verification
+- Rate limiting via Upstash Redis with tiered limits:
+  - `public`: 5 req/min (unauthenticated)
+  - `authenticated`: 10 req/min (default)
+  - `payment`: 5 req/min (billing endpoints)
+  - `webhook`: 100 req/min (Stripe webhooks)
+- JWT verification uses `supabase.auth.getUser()` (not just decode)
 - Request size validation (1MB limit)
 - Token enforcement before API calls
 
 Security headers configured in `netlify.toml`: CSP, HSTS, X-Frame-Options, etc.
+
+**Adding New Allowed Origins:**
+When deploying to a new domain, update `netlify/functions/utils/cors.ts`:
+```typescript
+const ALLOWED_ORIGINS: string[] = [
+  'https://agiagentautomation.netlify.app',
+  'https://agiagentautomation.com',
+  'https://www.agiagentautomation.com',
+  'http://localhost:5173',  // local dev
+  'http://localhost:8888',  // netlify dev
+  // Add new domains here
+];
+```
+Netlify deploy previews (`*.netlify.app` with `agiagentautomation`) are auto-allowed.
 
 ## Key Principles
 
@@ -283,30 +351,23 @@ Common issues:
 - **RLS blocking**: Verify user is authenticated with `supabase.auth.getUser()`
 - **CORS errors**: LLM calls must go through Netlify Function proxies, not direct API calls
 - **Map/Set serialization**: Zustand stores use `Record<>` and arrays instead of Map/Set for Immer compatibility
+- **Rate limit 503**: Upstash Redis unavailable - rate limiter now fails closed (denies requests)
+- **Token balance errors**: Check `user_token_balances` table exists, use RPC functions `get_or_create_token_balance()`
 
-## Recent Architecture Updates (January 2026)
-
-### Security Enhancements
-- **CORS Hardening**: All 7 proxy functions now use validated origin whitelist (`utils/cors.ts`) instead of `'*'` wildcard
-- **Rate Limiter JWT Verification**: JWT tokens are now verified via Supabase `auth.getUser()` instead of just decoded
-- **Demo Mode Protection**: Demo login requires explicit `VITE_DEMO_MODE=true` environment variable
+## Important Implementation Notes
 
 ### Token System
-- **New Table**: `user_token_balances` with RLS policies (migration `20260106000002`)
-- **RPC Functions**: `get_or_create_token_balance()`, `deduct_user_tokens()`, `add_user_tokens()`
-- **Plan-Aware Allocation**: Pro = 10M tokens/month, Max = 40M tokens/month
+- `user_token_balances` table with RLS (migration `20260106000002`)
+- RPC functions: `get_or_create_token_balance()`, `deduct_user_tokens()`, `add_user_tokens()`
+- Plan allocation: Pro = 10M tokens/month, Max = 40M tokens/month
 
-### Employee Memory System
-- **Integration**: `employeeMemoryService` now wired into `employee-chat-service.ts`
-- **Memory Context**: Employee system prompts include previous interaction context
-- **Persistence**: Interactions saved to `employee_memories` table after responses
+### Employee Memory
+- `employeeMemoryService` integrated into `employee-chat-service.ts`
+- Interactions persisted to `employee_memories` table
 
-### Code Cleanup (Deleted)
-- Orphaned stores: `ai-employee-store.ts`, `complete-ai-employee-store.ts`
-- Legacy services: `employeeService.ts`, `complete-ai-employee-service.ts`
-- Unused components: `AdminLayout.tsx`, `AdminRoute.tsx`, `PermissionGate.tsx`
-- Duplicate routes: `/login`, `/register` (use `/auth/login`, `/auth/register`)
-
-### Vibe File Persistence
-- Files created by AI are now synced to `vibe_files` database table
-- Survives page refresh (previously in-memory only)
+### Security Implementation
+- CORS origin whitelist in `utils/cors.ts` (no wildcard `*`)
+- JWT verification via `supabase.auth.getUser()` in rate limiter
+- Tiered rate limits: public (5/min), authenticated (10/min), payment (5/min), webhook (100/min)
+- Fail-closed rate limiting when Redis unavailable
+- Demo mode requires `VITE_DEMO_MODE=true`

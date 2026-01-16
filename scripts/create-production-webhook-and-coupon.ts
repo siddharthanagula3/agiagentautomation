@@ -38,7 +38,7 @@ function log(message: string, color: keyof typeof colors = 'reset') {
 }
 
 const PRODUCTION_URL = 'https://agiagentautomation.com';
-const WEBHOOK_URL = `${PRODUCTION_URL}/.netlify/functions/stripe-webhook`;
+const WEBHOOK_URL = `${PRODUCTION_URL}/.netlify/functions/payments/stripe-webhook`;
 const REQUIRED_EVENTS = [
   'checkout.session.completed',
   'invoice.payment_succeeded',

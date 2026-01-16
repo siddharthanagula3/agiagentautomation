@@ -17,7 +17,7 @@ import type {
   AgentAssignment,
   UpsellRequest,
   HubMessage,
-} from '@shared/stores/multi-agent-workspace-store';
+} from '@shared/stores/company-hub-store';
 
 export interface CompanyHubExecutionOptions {
   userId: string;

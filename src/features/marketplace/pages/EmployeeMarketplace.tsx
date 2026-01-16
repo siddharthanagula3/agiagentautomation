@@ -34,7 +34,7 @@ import {
 import { cn } from '@shared/lib/utils';
 import type { AIEmployee as BaseAIEmployee } from '@/data/marketplace-employees';
 import { useAuthStore } from '@shared/stores/authentication-store';
-import { useWorkforceStore } from '@shared/stores/employee-management-store';
+import { useWorkforceStore } from '@shared/stores/workforce-store';
 import { useBusinessMetrics } from '@shared/hooks/useAnalytics';
 import { HireButton } from '@shared/components/HireButton';
 import { AnimatedAvatar } from '@shared/components/AnimatedAvatar';
@@ -163,7 +163,7 @@ export const MarketplacePage: React.FC<MarketplacePageProps> = ({
       }
 
       // Transform database employees to marketplace format
-      // Updated: Nov 16th 2025 - Fixed prefer-const ESLint error
+      // Updated: Jan 15th 2026 - Fixed prefer-const ESLint error
       const transformedEmployees = (dbEmployees || []).map((dbEmp) => {
         // Get cost from database or use defaults
         const cost = dbEmp.cost || { monthly: 99, yearly: 999 };

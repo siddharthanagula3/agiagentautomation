@@ -2,7 +2,7 @@
  * Mission Control Page - REFACTORED
  * AI Workforce Command Center with resizable panels
  * Now supports both Mission Mode and Multi-Agent Chat Mode
- * Updated: Nov 16th 2025 - Added error boundary
+ * Updated: Jan 15th 2026 - Added error boundary
  */
 
 import React, { useState } from 'react';

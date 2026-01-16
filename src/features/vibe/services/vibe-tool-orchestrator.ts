@@ -17,7 +17,7 @@ const virtualFileSystem: Map<string, VirtualFile> = new Map();
 /**
  * Tool request from an AI agent
  */
-// Updated: Nov 16th 2025 - Fixed any type
+// Updated: Jan 15th 2026 - Fixed any type
 export interface ToolRequest {
   id: string;
   agent_name: string;

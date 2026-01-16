@@ -21,7 +21,7 @@ const CookiePolicyPage: React.FC = () => {
               Cookie Policy
             </h1>
             <p className="text-xl text-muted-foreground">
-              Last updated: January 15, 2025
+              Last updated: January 15, 2026
             </p>
           </motion.div>
         </div>

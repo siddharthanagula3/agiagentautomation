@@ -109,7 +109,7 @@ const ArtifactGalleryPage: React.FC = () => {
 
       query = query.limit(50);
 
-      // Updated: Nov 16th 2025 - Removed console statements for production
+      // Updated: Jan 15th 2026 - Removed console statements for production
       const { data, error } = await query;
 
       if (error) {

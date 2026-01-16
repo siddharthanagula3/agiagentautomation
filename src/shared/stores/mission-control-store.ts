@@ -135,6 +135,8 @@ interface MissionState {
   getAgentStatus: (agentName: string) => ActiveEmployee | undefined;
 }
 
+const enableDevtools = import.meta.env.MODE !== 'production';
+
 export const useMissionStore = create<MissionState>()(
   devtools(
     immer((set) => ({
@@ -235,7 +237,7 @@ export const useMissionStore = create<MissionState>()(
       // Start mission
       startMission: (missionId, mode = 'mission') =>
         set((state) => {
-          // Updated: Nov 16th 2025 - Fixed concurrent mission state corruption with mutex check
+          // Updated: Jan 15th 2026 - Fixed concurrent mission state corruption with mutex check
           // Prevent concurrent mission starts from corrupting state
           if (state.isOrchestrating) {
             throw new Error('Mission already in progress');
@@ -385,7 +387,7 @@ export const useMissionStore = create<MissionState>()(
         return useMissionStore.getState().activeEmployees[agentName];
       },
     })),
-    { name: 'MissionStore' }
+    { name: 'MissionStore', enabled: enableDevtools }
   )
 );
 

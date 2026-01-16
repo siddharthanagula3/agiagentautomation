@@ -91,7 +91,7 @@ const BlogPostPage: React.FC = () => {
         throw new Error('Blog post not found');
       }
 
-      // Updated: Nov 16th 2025 - Removed console statements for production
+      // Updated: Jan 15th 2026 - Removed console statements for production
       setPost(data as BlogPost);
     } catch (err) {
       setError(err.message || 'Failed to fetch blog post');

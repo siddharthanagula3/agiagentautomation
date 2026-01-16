@@ -19,8 +19,8 @@ import {
   Zap,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
-import { useAssignedAgents } from '@shared/stores/multi-agent-workspace-store';
-import type { AgentAssignment } from '@shared/stores/multi-agent-workspace-store';
+import { useAssignedAgents } from '@shared/stores/company-hub-store';
+import type { AgentAssignment } from '@shared/stores/company-hub-store';
 
 const getStatusIcon = (status: AgentAssignment['status']) => {
   switch (status) {

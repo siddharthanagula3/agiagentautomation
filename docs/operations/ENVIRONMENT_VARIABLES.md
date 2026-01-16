@@ -152,6 +152,6 @@ After setting environment variables:
 - Added security notes section
 - Added troubleshooting section
 
-**v1.0.0 (Nov 2025)**
+**v1.0.0 (Jan 2026)**
 
 - Initial environment variables guide

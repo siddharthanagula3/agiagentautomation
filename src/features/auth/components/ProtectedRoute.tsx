@@ -53,13 +53,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Immediately redirect if timeout reached
-  // Updated: Nov 16th 2025 - Fixed unreachable code (removed dead code block)
-  if (timeoutReached || (!isLoading && !user)) {
-    return <Navigate to="/auth/login" replace />;
-  }
-
-  // This point should never be reached due to early returns above
+  // Redirect to login if timeout reached or loading finished without user
+  // Updated: Jan 15th 2026 - Removed redundant final return (unreachable code)
   return <Navigate to="/auth/login" replace />;
 };
 

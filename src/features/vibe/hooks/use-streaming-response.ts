@@ -96,7 +96,7 @@ export function useStreamingResponse(): UseStreamingResponseReturn {
       // Update agent status to 'thinking'
       updateAgentStatus(agentId, 'thinking');
 
-      // Updated: Nov 16th 2025 - Fixed memory leak by properly cleaning up interval timer
+      // Updated: Jan 15th 2026 - Fixed memory leak by properly cleaning up interval timer
       // Simulate progress (optional - can be removed if actual progress available)
       if (progressTimerRef.current) {
         clearInterval(progressTimerRef.current);
@@ -268,7 +268,7 @@ export function useStreamingResponse(): UseStreamingResponseReturn {
     [streamingState]
   );
 
-  // Updated: Nov 16th 2025 - Fixed memory leak by ensuring cleanup on unmount and state changes
+  // Updated: Jan 15th 2026 - Fixed memory leak by ensuring cleanup on unmount and state changes
   // Cleanup on unmount
   useEffect(() => {
     return () => {

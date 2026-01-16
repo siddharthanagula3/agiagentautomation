@@ -210,7 +210,7 @@ export class VibeExecutionCoordinator {
    *
    * @private
    */
-  // Updated: Nov 16th 2025 - Fixed any type
+  // Updated: Jan 15th 2026 - Fixed any type
   private async executeLLMTask(
     employee: AIEmployee,
     taskDescription: string,
@@ -233,37 +233,38 @@ export class VibeExecutionCoordinator {
   }
 
   /**
-   * Get employee by ID (mock - would integrate with workforce store)
+   * Get employee by ID/name from file-based employee system
+   * Uses prompt-management service to get employees with their system prompts
    *
    * @private
    */
   private async getEmployeeById(
     employeeId: string
   ): Promise<AIEmployee | null> {
-    // Updated: Nov 16th 2025 - Fixed employee lookup always returning null
+    // Updated: Jan 16th 2026 - Fixed to use prompt-management service
+    // which loads file-based employees with system prompts
     try {
-      // Import workforce store dynamically to avoid circular dependencies
-      const { useWorkforceManagementStore } = await import(
-        '@shared/stores/employee-management-store'
+      // Import prompt management service dynamically to avoid circular dependencies
+      const { systemPromptsService } = await import(
+        '@core/ai/employees/prompt-management'
       );
-      const store = useWorkforceManagementStore.getState();
 
-      // Try to find employee in purchased employees
-      const employee = store.purchasedEmployees.find(
-        (emp) => emp.id === employeeId
-      );
+      // employeeId here is actually the employee name (from task assignment)
+      const employee = await systemPromptsService.getEmployeeByName(employeeId);
 
       if (employee) {
         return employee;
       }
 
-      // If not found, try loading from database
-      await store.loadPurchasedEmployees();
-      const refreshedEmployee = store.purchasedEmployees.find(
-        (emp) => emp.id === employeeId
+      // Try exact name match if not found
+      const allEmployees = await systemPromptsService.getAvailableEmployees();
+      const matchedEmployee = allEmployees.find(
+        (emp) =>
+          emp.name === employeeId ||
+          emp.name.toLowerCase() === employeeId.toLowerCase()
       );
 
-      return refreshedEmployee || null;
+      return matchedEmployee || null;
     } catch (error) {
       console.error(
         '[VibeExecutionCoordinator] Error loading employee:',

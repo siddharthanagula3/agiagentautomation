@@ -7,7 +7,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
  * Prevents unauthorized access to LLM proxy endpoints
  */
 
-interface AuthenticatedEvent extends HandlerEvent {
+export interface AuthenticatedEvent extends HandlerEvent {
   user: {
     id: string;
     email?: string;

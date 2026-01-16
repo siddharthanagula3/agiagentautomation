@@ -40,7 +40,7 @@ export class ChatPersistenceService {
   private static instance: ChatPersistenceService;
   private supabase: unknown;
   private state: ChatState;
-  // Updated: Nov 16th 2025 - Fixed NodeJS.Timeout type mismatch for browser compatibility
+  // Updated: Jan 15th 2026 - Fixed NodeJS.Timeout type mismatch for browser compatibility
   private syncInterval: ReturnType<typeof setInterval> | null = null;
   private isOnline: boolean = true;
 
@@ -82,7 +82,7 @@ export class ChatPersistenceService {
   /**
    * Setup event listeners for online/offline detection
    */
-  // Updated: Nov 16th 2025 - Use bound handlers for proper cleanup
+  // Updated: Jan 15th 2026 - Use bound handlers for proper cleanup
   private setupEventListeners(): void {
     window.addEventListener('online', this.handleOnline);
     window.addEventListener('offline', this.handleOffline);
@@ -110,7 +110,7 @@ export class ChatPersistenceService {
     role: string,
     provider: string
   ): Promise<ChatSession> {
-    // Updated: Nov 16th 2025 - Fixed deprecated substr() method
+    // Updated: Jan 15th 2026 - Fixed deprecated substr() method
     const session: ChatSession = {
       id: `session-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       userId,
@@ -159,7 +159,7 @@ export class ChatPersistenceService {
     content: string,
     metadata?: unknown
   ): Promise<ChatMessage> {
-    // Updated: Nov 16th 2025 - Fixed deprecated substr() method
+    // Updated: Jan 15th 2026 - Fixed deprecated substr() method
     const message: ChatMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       sessionId,
@@ -482,7 +482,7 @@ export class ChatPersistenceService {
   /**
    * Cleanup
    */
-  // Updated: Nov 16th 2025 - Fixed memory leak by removing event listeners
+  // Updated: Jan 15th 2026 - Fixed memory leak by removing event listeners
   destroy(): void {
     if (this.syncInterval) {
       clearInterval(this.syncInterval);

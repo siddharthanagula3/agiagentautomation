@@ -14,6 +14,7 @@ export default defineConfig({
       '**/dist/**',
       '**/tests/e2e/**',
       '**/playwright_tests/**',
+      '**/e2e/**',
     ],
   },
   resolve: {

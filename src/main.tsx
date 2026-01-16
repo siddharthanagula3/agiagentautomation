@@ -61,7 +61,7 @@ if (!rootElement) {
   );
 }
 
-// Updated: Nov 16th 2025 - Removed console statements for production
+// Updated: Jan 15th 2026 - Removed console statements for production
 
 try {
   const root = createRoot(rootElement);

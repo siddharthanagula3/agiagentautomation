@@ -72,7 +72,7 @@ vi.mock('@shared/lib/supabase-client', () => ({
 
 describe('WorkforceOrchestrator', () => {
   let orchestrator: WorkforceOrchestratorRefactored;
-  // Updated: Nov 16th 2025 - Fixed any type
+  // Updated: Jan 15th 2026 - Fixed any type
   let mockLLMService: typeof import('@core/ai/llm/unified-language-model').unifiedLLMService;
   let mockPromptService: typeof import('@core/ai/employees/prompt-management').promptManagement;
   let mockStore: ReturnType<typeof useMissionStore>;
@@ -457,7 +457,7 @@ describe('WorkforceOrchestrator', () => {
 
     it('should handle malformed employee data', async () => {
       vi.mocked(mockPromptService.getAvailableEmployees).mockResolvedValue([
-        // Updated: Nov 16th 2025 - Fixed any type
+        // Updated: Jan 15th 2026 - Fixed any type
         // Missing required fields - intentionally malformed for testing
         { name: 'broken-employee' } as unknown as Awaited<
           ReturnType<typeof mockPromptService.getAvailableEmployees>

@@ -166,7 +166,7 @@ export async function streamAnthropic(
 
   // In production, call Netlify proxy (non-stream) and emit one chunk
   if (import.meta.env.PROD) {
-    const response = await fetch('/.netlify/functions/anthropic-proxy', {
+    const response = await fetch('/.netlify/functions/llm-proxies/anthropic-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

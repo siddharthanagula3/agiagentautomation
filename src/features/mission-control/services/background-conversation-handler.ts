@@ -7,7 +7,7 @@
 import {
   useAgentMetricsStore,
   type ChatSession,
-} from '@shared/stores/employee-metrics-store';
+} from '@shared/stores/agent-metrics-store';
 import {
   multiAgentOrchestrator,
   type AgentCommunication,
@@ -101,43 +101,78 @@ class BackgroundChatService {
         `[BackgroundChatService] Executing task for session ${sessionId}`
       );
 
-      // Analyze intent
-      const plan = await multiAgentOrchestrator.analyzeIntent(userRequest);
-
+      // CRITICAL FIX: Wrap async operations in try-catch to prevent unhandled rejections
       // Track communications
       const handleCommunication = (comm: AgentCommunication) => {
         if (abort.signal.aborted) return;
 
-        metricsStore.addCommunication(comm);
-        metricsStore.updateSession(sessionId, {
-          messagesCount: (session.messagesCount || 0) + 1,
-        });
+        try {
+          metricsStore.addCommunication(comm);
+          metricsStore.updateSession(sessionId, {
+            messagesCount: (session.messagesCount || 0) + 1,
+          });
+        } catch (err) {
+          console.error('[BackgroundChatService] Error in handleCommunication:', err);
+        }
       };
 
       // Track agent status
       const handleStatusUpdate = (status: AgentStatus) => {
         if (abort.signal.aborted) return;
 
-        metricsStore.updateAgentStatus(status.agentName, status);
+        try {
+          metricsStore.updateAgentStatus(status.agentName, status);
 
-        // Report progress
-        if (onProgress) {
-          onProgress(status.progress);
+          // Report progress
+          if (onProgress) {
+            onProgress(status.progress);
+          }
+
+          metricsStore.updateSession(sessionId, {
+            lastActivity: new Date(),
+          });
+        } catch (err) {
+          console.error('[BackgroundChatService] Error in handleStatusUpdate:', err);
         }
-
-        metricsStore.updateSession(sessionId, {
-          lastActivity: new Date(),
-        });
       };
 
-      // Execute the plan
-      const results = await multiAgentOrchestrator.executePlan(
-        plan,
-        handleCommunication,
-        handleStatusUpdate
-      );
+      // Check abort before analyzing
+      if (abort.signal.aborted) {
+        throw new Error('Task aborted before analysis');
+      }
 
-      // Check if aborted
+      // Analyze intent with error handling
+      let plan;
+      try {
+        plan = await multiAgentOrchestrator.analyzeIntent(userRequest);
+      } catch (analyzeError) {
+        console.error('[BackgroundChatService] Error analyzing intent:', analyzeError);
+        throw new Error(
+          `Failed to analyze request: ${analyzeError instanceof Error ? analyzeError.message : 'Unknown error'}`
+        );
+      }
+
+      // Check abort before execution
+      if (abort.signal.aborted) {
+        throw new Error('Task aborted before execution');
+      }
+
+      // Execute the plan with error handling
+      let results;
+      try {
+        results = await multiAgentOrchestrator.executePlan(
+          plan,
+          handleCommunication,
+          handleStatusUpdate
+        );
+      } catch (executeError) {
+        console.error('[BackgroundChatService] Error executing plan:', executeError);
+        throw new Error(
+          `Failed to execute plan: ${executeError instanceof Error ? executeError.message : 'Unknown error'}`
+        );
+      }
+
+      // Check if aborted after execution
       if (abort.signal.aborted) {
         throw new Error('Task aborted');
       }
@@ -224,35 +259,49 @@ class BackgroundChatService {
 
   /**
    * Cleanup sessions that have been inactive for too long
+   * CRITICAL FIX: Create a copy of sessions array before iterating
+   * to avoid modifying array during iteration
    */
   private cleanupOldSessions() {
     const metricsStore = useAgentMetricsStore.getState();
     const now = Date.now();
     const maxInactiveTime = 30 * 60 * 1000; // 30 minutes
 
-    let cleanedCount = 0;
+    // CRITICAL FIX: Create a copy of the sessions array to avoid modification during iteration
+    // This prevents items from being skipped or repeated when endSession modifies the original array
+    const sessionsToCheck = [...metricsStore.currentSessions];
+    const sessionsToClean: string[] = [];
 
-    metricsStore.currentSessions.forEach((session) => {
+    // First pass: identify sessions that need cleanup
+    for (const session of sessionsToCheck) {
       if (session.isActive) {
         const inactiveTime = now - new Date(session.lastActivity).getTime();
 
         if (inactiveTime > maxInactiveTime) {
-          console.log(
-            `[BackgroundChatService] Cleaning up inactive session ${session.id}`
-          );
-          metricsStore.endSession(
-            session.id,
-            'failed',
-            'Session timeout due to inactivity'
-          );
-          cleanedCount++;
+          sessionsToClean.push(session.id);
         }
       }
-    });
+    }
 
-    if (cleanedCount > 0) {
+    // Second pass: cleanup identified sessions (safe to modify now)
+    for (const sessionId of sessionsToClean) {
       console.log(
-        `[BackgroundChatService] Cleaned up ${cleanedCount} inactive sessions`
+        `[BackgroundChatService] Cleaning up inactive session ${sessionId}`
+      );
+      try {
+        metricsStore.endSession(
+          sessionId,
+          'failed',
+          'Session timeout due to inactivity'
+        );
+      } catch (err) {
+        console.error(`[BackgroundChatService] Error cleaning up session ${sessionId}:`, err);
+      }
+    }
+
+    if (sessionsToClean.length > 0) {
+      console.log(
+        `[BackgroundChatService] Cleaned up ${sessionsToClean.length} inactive sessions`
       );
     }
   }

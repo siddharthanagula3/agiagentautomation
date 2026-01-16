@@ -28,9 +28,9 @@ function getStripe() {
 /**
  * Open Stripe Customer Portal for subscription management
  */
-// Updated: Nov 16th 2025 - Removed console statements for production
+// Updated: Jan 15th 2026 - Removed console statements for production
 export async function openBillingPortal(customerId: string): Promise<void> {
-  const response = await fetch('/.netlify/functions/get-billing-portal', {
+  const response = await fetch('/.netlify/functions/payments/get-billing-portal', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ export async function createSubscriptionCheckout(
   billingPeriod: 'monthly' | 'yearly' = 'monthly'
 ): Promise<void> {
   // Call Netlify function to create subscription checkout session
-  const response = await fetch('/.netlify/functions/create-pro-subscription', {
+  const response = await fetch('/.netlify/functions/payments/create-pro-subscription', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -150,7 +150,7 @@ async function upgradeToPlan(data: {
   billingPeriod?: 'monthly' | 'yearly';
 }): Promise<void> {
   // Call Netlify function to create subscription checkout session
-  const response = await fetch('/.netlify/functions/create-pro-subscription', {
+  const response = await fetch('/.netlify/functions/payments/create-pro-subscription', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

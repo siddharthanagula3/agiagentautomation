@@ -1,16 +1,31 @@
-import React, { useState, useRef, useEffect } from 'react';
+/**
+ * ChatComposer - Modern, minimal chat input
+ *
+ * Redesigned with:
+ * - Single-line input that expands
+ * - Tools hidden behind + button (like Claude.ai)
+ * - @mention for employee selection
+ * - Clean, focused design
+ */
+
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@shared/ui/button';
 import { Textarea } from '@shared/ui/textarea';
 import { Badge } from '@shared/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@shared/ui/avatar';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@shared/ui/dropdown-menu';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@shared/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@shared/ui/command';
 import {
   Tooltip,
   TooltipContent,
@@ -22,21 +37,16 @@ import {
   Paperclip,
   X,
   Loader2,
-  Sparkles,
-  Users,
   Plus,
-  ChevronDown,
-  Zap,
   Image as ImageIcon,
   Video,
   FileText,
   Search,
+  Sparkles,
+  ArrowUp,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import type { ChatMode, Tool } from '../../types';
-import { PromptShortcuts } from '../shortcuts/PromptShortcuts';
-import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
-import { useNavigate } from 'react-router-dom';
 
 interface AIEmployee {
   id: string;
@@ -45,14 +55,6 @@ interface AIEmployee {
   avatar?: string;
   color: string;
   status?: 'idle' | 'working' | 'thinking';
-}
-
-interface Model {
-  id: string;
-  name: string;
-  description: string;
-  provider: 'openai' | 'anthropic' | 'google' | 'perplexity';
-  recommended?: 'coding' | 'general' | 'creative';
 }
 
 interface ChatComposerProps {
@@ -70,59 +72,21 @@ interface ChatComposerProps {
   selectedMode?: ChatMode;
   onModeChange?: (mode: ChatMode) => void;
   availableEmployees?: AIEmployee[];
-  availableModels?: Model[];
+  placeholder?: string;
 }
 
-const DEFAULT_MODELS: Model[] = [
-  {
-    id: 'gpt-5-thinking',
-    name: 'GPT-5 Thinking',
-    description: 'Advanced reasoning and complex problem solving',
-    provider: 'openai',
-    recommended: 'general',
-  },
-  {
-    id: 'gpt-4o',
-    name: 'GPT-4o',
-    description: 'Best for general tasks',
-    provider: 'openai',
-    recommended: 'general',
-  },
-  {
-    id: 'claude-3-5-sonnet-thinking',
-    name: 'Claude 3.5 Sonnet (Extended)',
-    description: 'Extended reasoning for complex coding tasks',
-    provider: 'anthropic',
-    recommended: 'coding',
-  },
-  {
-    id: 'claude-3-5-sonnet',
-    name: 'Claude 3.5 Sonnet',
-    description: 'Best for coding & analysis',
-    provider: 'anthropic',
-    recommended: 'coding',
-  },
-  {
-    id: 'gemini-1-5-pro-latest',
-    name: 'Gemini 1.5 Pro',
-    description: 'Advanced multimodal AI for creative tasks',
-    provider: 'google',
-    recommended: 'creative',
-  },
-  {
-    id: 'gemini-1.5-pro',
-    name: 'Gemini 1.5 Pro',
-    description: 'Best for creative tasks',
-    provider: 'google',
-    recommended: 'creative',
-  },
+const TOOLS = [
+  { id: 'image', label: 'Generate Image', icon: ImageIcon, color: 'text-purple-500' },
+  { id: 'video', label: 'Generate Video', icon: Video, color: 'text-pink-500' },
+  { id: 'document', label: 'Create Document', icon: FileText, color: 'text-blue-500' },
+  { id: 'search', label: 'Web Search', icon: Search, color: 'text-green-500' },
 ];
 
 const DEFAULT_EMPLOYEES: AIEmployee[] = [
   {
     id: 'auto',
     name: 'Auto-Select',
-    description: 'Let AI choose the best employees',
+    description: 'Let AI choose the best employee',
     color: '#6366f1',
   },
 ];
@@ -130,512 +94,387 @@ const DEFAULT_EMPLOYEES: AIEmployee[] = [
 export const ChatComposer: React.FC<ChatComposerProps> = ({
   onSendMessage,
   isLoading,
-  selectedMode = 'team',
   availableEmployees = DEFAULT_EMPLOYEES,
-  availableModels = DEFAULT_MODELS,
+  placeholder = 'Message AI...',
 }) => {
-  const navigate = useNavigate();
   const [message, setMessage] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
-  // Model selection removed - AI employees use their own configured models
-  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([
-    'auto',
-  ]);
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>(['auto']);
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
-  const [textareaHeight, setTextareaHeight] = useState(80);
-  const [showPromptShortcuts, setShowPromptShortcuts] = useState(false);
-  const [focusedEmployeeIndex, setFocusedEmployeeIndex] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showTools, setShowTools] = useState(false);
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionStartIndex, setMentionStartIndex] = useState(-1);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const employeeButtonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
-  // Keyboard navigation handler for employee selector
-  const handleEmployeeKeyDown = (e: React.KeyboardEvent, index: number) => {
-    const totalEmployees = availableEmployees.length + 1; // +1 for "Add Employee" button
-
-    switch (e.key) {
-      case 'ArrowRight':
-      case 'ArrowDown': {
-        e.preventDefault();
-        const nextIndex = (index + 1) % totalEmployees;
-        setFocusedEmployeeIndex(nextIndex);
-        employeeButtonRefs.current[nextIndex]?.focus();
-        break;
-      }
-      case 'ArrowLeft':
-      case 'ArrowUp': {
-        e.preventDefault();
-        const prevIndex = (index - 1 + totalEmployees) % totalEmployees;
-        setFocusedEmployeeIndex(prevIndex);
-        employeeButtonRefs.current[prevIndex]?.focus();
-        break;
-      }
-      case 'Home':
-        e.preventDefault();
-        setFocusedEmployeeIndex(0);
-        employeeButtonRefs.current[0]?.focus();
-        break;
-      case 'End': {
-        e.preventDefault();
-        const lastIndex = totalEmployees - 1;
-        setFocusedEmployeeIndex(lastIndex);
-        employeeButtonRefs.current[lastIndex]?.focus();
-        break;
-      }
-      case 'Enter':
-      case ' ':
-        e.preventDefault();
-        if (index < availableEmployees.length) {
-          toggleEmployee(availableEmployees[index].id);
-        } else {
-          navigate('/marketplace');
-        }
-        break;
-    }
-  };
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = '80px';
-      const scrollHeight = textareaRef.current.scrollHeight;
-      const newHeight = Math.min(Math.max(scrollHeight, 80), 200);
+      textareaRef.current.style.height = 'auto';
+      const newHeight = Math.min(Math.max(textareaRef.current.scrollHeight, 52), 200);
       textareaRef.current.style.height = `${newHeight}px`;
-      setTextareaHeight(newHeight);
     }
   }, [message]);
+
+  // Handle @mention detection
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    const cursorPos = e.target.selectionStart || 0;
+    setMessage(value);
+
+    // Check for @ mention
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+    if (lastAtIndex !== -1) {
+      const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+      // If there's no space after @, show mention picker
+      if (!textAfterAt.includes(' ') && !textAfterAt.includes('\n')) {
+        setShowMentions(true);
+        setMentionQuery(textAfterAt);
+        setMentionStartIndex(lastAtIndex);
+        return;
+      }
+    }
+    setShowMentions(false);
+  }, []);
+
+  // Filter employees for mention
+  const filteredEmployees = availableEmployees.filter(emp =>
+    emp.name.toLowerCase().includes(mentionQuery.toLowerCase()) ||
+    emp.description.toLowerCase().includes(mentionQuery.toLowerCase())
+  );
+
+  // Handle mention selection
+  const handleMentionSelect = useCallback((employee: AIEmployee) => {
+    if (mentionStartIndex === -1) return;
+
+    const before = message.substring(0, mentionStartIndex);
+    const cursorPos = textareaRef.current?.selectionStart || message.length;
+    const after = message.substring(cursorPos);
+
+    const newMessage = `${before}@${employee.name} ${after}`;
+    setMessage(newMessage);
+    setShowMentions(false);
+
+    // Add to selected employees
+    if (employee.id !== 'auto') {
+      setSelectedEmployees(prev => {
+        const filtered = prev.filter(id => id !== 'auto');
+        if (!filtered.includes(employee.id)) {
+          return [...filtered, employee.id];
+        }
+        return filtered;
+      });
+    } else {
+      setSelectedEmployees(['auto']);
+    }
+
+    // Focus back on textarea
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  }, [message, mentionStartIndex]);
 
   const handleSubmit = async () => {
     if (!message.trim() && attachments.length === 0) return;
 
     try {
-      // Prefix message with tool indicators
-      const toolPrefix = getToolPromptPrefix();
-      const finalMessage = toolPrefix + message;
+      // Build tool prefix
+      const toolPrefixes: Record<string, string> = {
+        image: '🖼️ [Generate Image] ',
+        video: '🎥 [Generate Video] ',
+        document: '📄 [Create Document] ',
+        search: '🔍 [Web Search] ',
+      };
+      const prefix = selectedTools.map(t => toolPrefixes[t] || '').join('');
 
-      await onSendMessage(finalMessage, {
+      await onSendMessage(prefix + message, {
         attachments,
-        // Model selection removed - AI employees use their own configured models
         employees: selectedEmployees,
       });
+
       setMessage('');
       setAttachments([]);
-      setSelectedTools([]); // Clear selected tools after sending
+      setSelectedTools([]);
     } catch (error) {
       console.error('Failed to send message:', error);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    if (e.key === 'Enter' && !e.shiftKey && !showMentions) {
       e.preventDefault();
       handleSubmit();
     }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setAttachments((prev) => [...prev, ...files]);
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const toggleEmployee = (employeeId: string) => {
-    if (employeeId === 'auto') {
-      setSelectedEmployees(['auto']);
-    } else {
-      setSelectedEmployees((prev) => {
-        const filtered = prev.filter((id) => id !== 'auto');
-        if (filtered.includes(employeeId)) {
-          return filtered.filter((id) => id !== employeeId);
-        } else {
-          return [...filtered, employeeId];
-        }
-      });
+    // Close mentions on Escape
+    if (e.key === 'Escape' && showMentions) {
+      setShowMentions(false);
     }
   };
 
   const toggleTool = (toolId: string) => {
-    setSelectedTools((prev) => {
-      if (prev.includes(toolId)) {
-        return prev.filter((id) => id !== toolId);
-      } else {
-        return [...prev, toolId];
-      }
+    setSelectedTools(prev =>
+      prev.includes(toolId) ? prev.filter(t => t !== toolId) : [...prev, toolId]
+    );
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeEmployee = (employeeId: string) => {
+    setSelectedEmployees(prev => {
+      const filtered = prev.filter(id => id !== employeeId);
+      return filtered.length === 0 ? ['auto'] : filtered;
     });
   };
 
-  const getToolPromptPrefix = () => {
-    if (selectedTools.length === 0) return '';
-
-    const toolPrefixes: Record<string, string> = {
-      image: '🖼️ [Generate Image] ',
-      video: '🎥 [Generate Video] ',
-      document: '📄 [Create Document] ',
-      search: '🔍 [Web Search] ',
-    };
-
-    return selectedTools.map((tool) => toolPrefixes[tool] || '').join('');
-  };
-
-  const handleSelectPrompt = (prompt: string) => {
-    setMessage(prompt + ' ');
-    setShowPromptShortcuts(false);
-    // Focus on textarea
-    setTimeout(() => {
-      textareaRef.current?.focus();
-    }, 100);
-  };
+  const canSend = (message.trim() || attachments.length > 0) && !isLoading;
 
   return (
-    <div className="space-y-3 rounded-lg border border-border bg-background p-4 shadow-sm">
-      {/* Top Bar: Employee Selection */}
-      <div className="flex items-center gap-2">
-        {/* Prompt Shortcuts Button */}
-        <Popover
-          open={showPromptShortcuts}
-          onOpenChange={setShowPromptShortcuts}
-        >
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 gap-2 text-xs"
-              disabled={isLoading}
-              aria-label="Open prompt shortcuts"
-            >
-              <Zap className="h-3.5 w-3.5" />
-              <span className="hidden md:inline">Prompts</span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-[400px] p-0">
-            <PromptShortcuts onSelectPrompt={handleSelectPrompt} />
-          </PopoverContent>
-        </Popover>
+    <div className="relative mx-auto w-full max-w-3xl px-4 pb-4">
+      {/* Selected Employees (if not auto) */}
+      {selectedEmployees.length > 0 && !selectedEmployees.includes('auto') && (
+        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+          <span className="text-xs text-muted-foreground">Assigned to:</span>
+          {selectedEmployees.map(empId => {
+            const emp = availableEmployees.find(e => e.id === empId);
+            if (!emp) return null;
+            return (
+              <Badge
+                key={empId}
+                variant="secondary"
+                className="gap-1 pr-1 text-xs"
+              >
+                <div
+                  className="h-3 w-3 rounded-full"
+                  style={{ backgroundColor: emp.color }}
+                />
+                {emp.name}
+                <button
+                  onClick={() => removeEmployee(empId)}
+                  className="ml-1 rounded-full p-0.5 hover:bg-muted"
+                >
+                  <X className="h-2.5 w-2.5" />
+                </button>
+              </Badge>
+            );
+          })}
+        </div>
+      )}
 
-        {/* Employee Selector - Avatar Chips */}
-        <div
-          role="listbox"
-          aria-label="Select AI employees"
-          aria-multiselectable="true"
-          className="flex flex-1 items-center gap-2 overflow-x-auto"
-        >
-          <TooltipProvider delayDuration={200}>
-            {availableEmployees.map((employee, index) => {
-              const isSelected = selectedEmployees.includes(employee.id);
-              return (
-                <Tooltip key={employee.id}>
-                  <TooltipTrigger asChild>
-                    <button
-                      ref={(el) => (employeeButtonRefs.current[index] = el)}
-                      role="option"
-                      aria-selected={isSelected}
-                      onClick={() => toggleEmployee(employee.id)}
-                      onKeyDown={(e) => handleEmployeeKeyDown(e, index)}
-                      aria-label={`Select ${employee.name}`}
-                      tabIndex={focusedEmployeeIndex === index ? 0 : -1}
+      {/* Selected Tools */}
+      {selectedTools.length > 0 && (
+        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+          {selectedTools.map(toolId => {
+            const tool = TOOLS.find(t => t.id === toolId);
+            if (!tool) return null;
+            const Icon = tool.icon;
+            return (
+              <Badge
+                key={toolId}
+                variant="outline"
+                className="gap-1.5 border-primary/30 bg-primary/5 pr-1 text-xs"
+              >
+                <Icon className={cn('h-3 w-3', tool.color)} />
+                {tool.label}
+                <button
+                  onClick={() => toggleTool(toolId)}
+                  className="ml-1 rounded-full p-0.5 hover:bg-muted"
+                >
+                  <X className="h-2.5 w-2.5" />
+                </button>
+              </Badge>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Attachments */}
+      {attachments.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-2">
+          {attachments.map((file, index) => (
+            <div
+              key={index}
+              className="group relative flex items-center gap-2 rounded-lg border border-border bg-muted/50 px-3 py-1.5"
+            >
+              <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="max-w-[150px] truncate text-xs">{file.name}</span>
+              <button
+                onClick={() => removeAttachment(index)}
+                className="rounded-full p-0.5 hover:bg-background"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Main Input Container */}
+      <div className="relative rounded-2xl border border-border bg-background shadow-sm transition-shadow focus-within:shadow-md focus-within:ring-1 focus-within:ring-ring">
+        {/* @Mention Dropdown */}
+        {showMentions && filteredEmployees.length > 0 && (
+          <div className="absolute bottom-full left-0 z-50 mb-2 w-72 rounded-lg border border-border bg-popover shadow-lg">
+            <div className="p-1">
+              {filteredEmployees.map(emp => (
+                <button
+                  key={emp.id}
+                  onClick={() => handleMentionSelect(emp)}
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-muted"
+                >
+                  <Avatar className="h-7 w-7">
+                    <AvatarImage src={emp.avatar} />
+                    <AvatarFallback
+                      className="text-[10px] font-semibold text-white"
+                      style={{ backgroundColor: emp.color }}
+                    >
+                      {emp.id === 'auto' ? '✨' : emp.name.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">{emp.name}</div>
+                    <div className="truncate text-xs text-muted-foreground">
+                      {emp.description}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-end gap-2 p-2">
+          {/* Tools Button */}
+          <TooltipProvider delayDuration={300}>
+            <Popover open={showTools} onOpenChange={setShowTools}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className={cn(
-                        'group relative flex-shrink-0 transition-all duration-200',
-                        isSelected
-                          ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
-                          : 'opacity-60 hover:opacity-100'
+                        'h-9 w-9 rounded-full',
+                        selectedTools.length > 0 && 'bg-primary/10 text-primary'
                       )}
                       disabled={isLoading}
                     >
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={employee.avatar} />
-                        <AvatarFallback
-                          className="text-xs font-semibold text-white"
-                          style={{ backgroundColor: employee.color }}
-                        >
-                          {employee.id === 'auto'
-                            ? '✨'
-                            : employee.name
-                                .split(' ')
-                                .map((n) => n[0])
-                                .join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      {employee.status && employee.status !== 'idle' && (
-                        <div
-                          className={cn(
-                            'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background',
-                            employee.status === 'working' && 'bg-green-500',
-                            employee.status === 'thinking' &&
-                              'animate-pulse bg-yellow-500'
-                          )}
-                        />
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div className="text-center">
-                      <div className="font-medium">{employee.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {employee.description}
-                      </div>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              );
-            })}
+                      <Plus className="h-5 w-5" />
+                    </Button>
+                  </PopoverTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="top">Add tools</TooltipContent>
+              </Tooltip>
+              <PopoverContent align="start" className="w-56 p-2">
+                <div className="space-y-1">
+                  {TOOLS.map(tool => {
+                    const Icon = tool.icon;
+                    const isSelected = selectedTools.includes(tool.id);
+                    return (
+                      <button
+                        key={tool.id}
+                        onClick={() => toggleTool(tool.id)}
+                        className={cn(
+                          'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
+                          isSelected
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-muted'
+                        )}
+                      >
+                        <Icon className={cn('h-4 w-4', tool.color)} />
+                        <span className="flex-1 text-left">{tool.label}</span>
+                        {isSelected && (
+                          <div className="h-2 w-2 rounded-full bg-primary" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
 
-            {/* Add Employee Button */}
+            {/* Attach Button */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
-                  ref={(el) => (employeeButtonRefs.current[availableEmployees.length] = el)}
-                  role="option"
-                  aria-selected={false}
-                  onClick={() => {
-                    navigate('/marketplace');
-                  }}
-                  onKeyDown={(e) => handleEmployeeKeyDown(e, availableEmployees.length)}
-                  aria-label="Hire more AI employees"
-                  tabIndex={focusedEmployeeIndex === availableEmployees.length ? 0 : -1}
-                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/30 transition-colors hover:border-primary hover:bg-muted"
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-full"
+                  onClick={() => fileInputRef.current?.click()}
                   disabled={isLoading}
                 >
-                  <Plus className="h-3 w-3 text-muted-foreground" />
-                </button>
+                  <Paperclip className="h-5 w-5" />
+                </Button>
               </TooltipTrigger>
-              <TooltipContent>
-                <div>Hire more AI employees</div>
+              <TooltipContent side="top">Attach file</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {/* Textarea */}
+          <Textarea
+            ref={textareaRef}
+            value={message}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            disabled={isLoading}
+            className="min-h-[52px] flex-1 resize-none border-0 bg-transparent px-2 py-3 text-base shadow-none focus-visible:ring-0"
+            rows={1}
+          />
+
+          {/* Send Button */}
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!canSend}
+                  size="icon"
+                  className={cn(
+                    'h-9 w-9 rounded-full transition-all',
+                    canSend
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      : 'bg-muted text-muted-foreground'
+                  )}
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <ArrowUp className="h-5 w-5" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                {isLoading ? 'Sending...' : 'Send message'}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
 
-        {/* Team Mode Indicator */}
-        {selectedEmployees.length > 1 &&
-          !selectedEmployees.includes('auto') && (
-            <Badge
-              variant="secondary"
-              className="flex items-center gap-1 text-xs"
-            >
-              <Users className="h-3 w-3" />
-              Team
-            </Badge>
-          )}
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            const files = Array.from(e.target.files || []);
+            setAttachments(prev => [...prev, ...files]);
+            e.target.value = '';
+          }}
+        />
       </div>
 
-      {/* Tool Selection Strip */}
-      <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2 py-2 sm:px-3">
-        <span className="hidden text-xs font-medium text-muted-foreground sm:inline">Tools:</span>
-        <TooltipProvider delayDuration={200}>
-          {/* Image Generation */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={selectedTools.includes('image') ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => toggleTool('image')}
-                aria-label="Toggle image generation tool"
-                aria-pressed={selectedTools.includes('image')}
-                className={cn(
-                  'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
-                  selectedTools.includes('image') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
-                )}
-                disabled={isLoading}
-              >
-                <ImageIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <div>
-                <div className="font-medium">Image Generation</div>
-                <div className="text-xs text-muted-foreground">
-                  Generate images with DALL-E
-                </div>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-
-          {/* Video Generation */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={selectedTools.includes('video') ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => toggleTool('video')}
-                aria-label="Toggle video generation tool"
-                aria-pressed={selectedTools.includes('video')}
-                className={cn(
-                  'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
-                  selectedTools.includes('video') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
-                )}
-                disabled={isLoading}
-              >
-                <Video className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <div>
-                <div className="font-medium">Video Generation</div>
-                <div className="text-xs text-muted-foreground">
-                  Generate videos from text
-                </div>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-
-          {/* Document Generation */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={selectedTools.includes('document') ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => toggleTool('document')}
-                aria-label="Toggle document generation tool"
-                aria-pressed={selectedTools.includes('document')}
-                className={cn(
-                  'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
-                  selectedTools.includes('document') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
-                )}
-                disabled={isLoading}
-              >
-                <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <div>
-                <div className="font-medium">Document Generation</div>
-                <div className="text-xs text-muted-foreground">
-                  Create documents with Claude AI
-                </div>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-
-          {/* Web Search */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={selectedTools.includes('search') ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => toggleTool('search')}
-                aria-label="Toggle web search tool"
-                aria-pressed={selectedTools.includes('search')}
-                className={cn(
-                  'h-7 w-7 p-0 transition-all sm:h-8 sm:w-8',
-                  selectedTools.includes('search') && 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2'
-                )}
-                disabled={isLoading}
-              >
-                <Search className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <div>
-                <div className="font-medium">Web Search</div>
-                <div className="text-xs text-muted-foreground">
-                  Search the web for real-time information
-                </div>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        {/* Active Tools Indicator */}
-        {selectedTools.length > 0 && (
-          <Badge variant="secondary" className="ml-auto text-xs">
-            {selectedTools.length} selected
-          </Badge>
-        )}
-      </div>
-
-      {/* Attachments Preview */}
-      {attachments.length > 0 && (
-        <div className="flex flex-wrap gap-2 rounded-md border border-border bg-muted/30 p-2">
-          {attachments.map((file, index) => (
-            <Badge
-              key={index}
-              variant="secondary"
-              className="flex items-center gap-2 px-3 py-1.5"
-            >
-              <Paperclip className="h-3 w-3" />
-              <span className="max-w-[200px] truncate text-xs">
-                {file.name}
-              </span>
-              <button
-                onClick={() => removeAttachment(index)}
-                className="hover:text-destructive"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      )}
-
-      {/* Input Area */}
-      <div className="flex items-end gap-2">
-        <div className="relative flex-1">
-          <Textarea
-            ref={textareaRef}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={`Message ${selectedEmployees.includes('auto') ? 'AI Team' : selectedEmployees.length > 1 ? `${selectedEmployees.length} employees` : 'AI'}...`}
-            className="scrollbar-thin min-h-[80px] resize-none pr-12"
-            style={{ height: `${textareaHeight}px` }}
-            disabled={isLoading}
-          />
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            className="hidden"
-            onChange={handleFileSelect}
-          />
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute bottom-2 right-2 h-8 w-8 p-0"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isLoading}
-            title="Attach files"
-          >
-            <Paperclip className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <Button
-          onClick={handleSubmit}
-          disabled={isLoading || (!message.trim() && attachments.length === 0)}
-          className="h-[80px] px-6"
-          style={{ height: `${textareaHeight}px` }}
-        >
-          {isLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <Send className="h-5 w-5" />
-          )}
-        </Button>
-      </div>
-
-      {/* Helper Text */}
-      <div className="flex items-center justify-between px-1 text-xs text-muted-foreground">
-        <span className="hidden sm:inline">
-          Press{' '}
-          <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
-            Enter
-          </kbd>{' '}
-          to send,{' '}
-          <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
-            Shift+Enter
-          </kbd>{' '}
-          for new line
+      {/* Helper text */}
+      <div className="mt-2 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+        <span>
+          Type <kbd className="rounded border bg-muted px-1 font-mono">@</kbd> to mention an employee
         </span>
-        {message.length > 0 && (
-          <span className="text-muted-foreground/70">
-            {message.length} char{message.length !== 1 && 's'}
-          </span>
-        )}
+        <span className="hidden sm:inline">
+          <kbd className="rounded border bg-muted px-1 font-mono">Enter</kbd> to send
+        </span>
       </div>
     </div>
   );

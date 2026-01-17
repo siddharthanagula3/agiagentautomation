@@ -1,14 +1,36 @@
 /**
  * CodeEditorPanel - Monaco code editor with file tabs
- * Inspired by Bolt.new and Lovable.dev editor experiences
- * Integrated with vibeFileSystem for real file management
+ *
+ * Redesigned with:
+ * - Proper dialogs instead of browser prompt/confirm
+ * - Clean file tree sidebar
+ * - Tab-based file editing
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import * as Monaco from 'monaco-editor';
 import { Button } from '@shared/ui/button';
+import { Input } from '@shared/ui/input';
 import { ScrollArea } from '@shared/ui/scroll-area';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@shared/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@shared/ui/alert-dialog';
 import {
   File,
   Folder,
@@ -19,6 +41,8 @@ import {
   Plus,
   Save,
   LayoutTemplate,
+  FilePlus,
+  FolderPlus,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
@@ -34,6 +58,19 @@ interface OpenFile {
   isDirty: boolean;
 }
 
+interface CreateDialogState {
+  open: boolean;
+  type: 'file' | 'folder';
+  parentPath: string;
+  name: string;
+}
+
+interface DeleteDialogState {
+  open: boolean;
+  path: string;
+  name: string;
+}
+
 export function CodeEditorPanel() {
   const [editorInstance, setEditorInstance] =
     useState<Monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -44,12 +81,23 @@ export function CodeEditorPanel() {
   const [fileTree, setFileTree] = useState(vibeFileSystem.getFileTree());
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
-  // Refresh file tree when files change
+  // Dialog states
+  const [createDialog, setCreateDialog] = useState<CreateDialogState>({
+    open: false,
+    type: 'file',
+    parentPath: '/',
+    name: '',
+  });
+  const [deleteDialog, setDeleteDialog] = useState<DeleteDialogState>({
+    open: false,
+    path: '',
+    name: '',
+  });
+
   const refreshFileTree = useCallback(() => {
     setFileTree(vibeFileSystem.getFileTree());
   }, []);
 
-  // Load file tree on mount
   useEffect(() => {
     refreshFileTree();
   }, [refreshFileTree]);
@@ -59,13 +107,11 @@ export function CodeEditorPanel() {
   const handleFileClick = useCallback(
     (path: string) => {
       try {
-        // Check if already open
         if (openFiles.has(path)) {
           setCurrentFilePath(path);
           return;
         }
 
-        // Load file content from file system
         const content = vibeFileSystem.readFile(path);
         const file = vibeFileSystem.openFile(path);
 
@@ -96,11 +142,8 @@ export function CodeEditorPanel() {
 
       vibeFileSystem.closeFile(path);
 
-      // Switch to another open file if available
       if (currentFilePath === path) {
-        const remaining = Array.from(openFiles.keys()).filter(
-          (p) => p !== path
-        );
+        const remaining = Array.from(openFiles.keys()).filter((p) => p !== path);
         setCurrentFilePath(remaining.length > 0 ? remaining[0] : null);
       }
     },
@@ -116,7 +159,6 @@ export function CodeEditorPanel() {
         vibeFileSystem.updateFile(path, file.content);
         vibeFileSystem.markClean(path);
 
-        // Update dirty flag
         setOpenFiles((prev) => {
           const next = new Map(prev);
           const updated = next.get(path);
@@ -139,7 +181,7 @@ export function CodeEditorPanel() {
     if (currentFile?.content) {
       await navigator.clipboard.writeText(currentFile.content);
       setCopied(true);
-      toast.success('Code copied to clipboard');
+      toast.success('Code copied');
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -173,47 +215,60 @@ export function CodeEditorPanel() {
     [currentFilePath]
   );
 
-  const handleFileCreate = useCallback(
-    (parentPath: string, type: 'file' | 'folder') => {
-      const name = prompt(`Enter ${type} name:`);
-      if (!name) return;
+  // Open create dialog
+  const handleFileCreate = useCallback((parentPath: string, type: 'file' | 'folder') => {
+    setCreateDialog({
+      open: true,
+      type,
+      parentPath,
+      name: '',
+    });
+  }, []);
 
-      try {
-        const newPath = `${parentPath === '/' ? '' : parentPath}/${name}`;
+  // Confirm create
+  const handleCreateConfirm = useCallback(() => {
+    const { type, parentPath, name } = createDialog;
+    if (!name.trim()) return;
 
-        if (type === 'file') {
-          vibeFileSystem.createFile(newPath, '');
-          handleFileClick(newPath);
-        } else {
-          vibeFileSystem.createFolder(newPath);
-        }
+    try {
+      const newPath = `${parentPath === '/' ? '' : parentPath}/${name.trim()}`;
 
-        refreshFileTree();
-        toast.success(`${type} created`);
-      } catch (error) {
-        toast.error(`Failed to create ${type}`);
-        console.error('[VIBE] Failed to create', error);
+      if (type === 'file') {
+        vibeFileSystem.createFile(newPath, '');
+        handleFileClick(newPath);
+      } else {
+        vibeFileSystem.createFolder(newPath);
       }
-    },
-    [handleFileClick, refreshFileTree]
-  );
 
-  const handleFileDelete = useCallback(
-    (path: string) => {
-      if (!confirm(`Delete ${path}?`)) return;
+      refreshFileTree();
+      toast.success(`${type === 'file' ? 'File' : 'Folder'} created`);
+      setCreateDialog((prev) => ({ ...prev, open: false, name: '' }));
+    } catch (error) {
+      toast.error(`Failed to create ${type}`);
+      console.error('[VIBE] Failed to create', error);
+    }
+  }, [createDialog, handleFileClick, refreshFileTree]);
 
-      try {
-        vibeFileSystem.deleteFile(path);
-        handleCloseFile(path);
-        refreshFileTree();
-        toast.success('File deleted');
-      } catch (error) {
-        toast.error('Failed to delete file');
-        console.error('[VIBE] Failed to delete file', error);
-      }
-    },
-    [handleCloseFile, refreshFileTree]
-  );
+  // Open delete dialog
+  const handleFileDelete = useCallback((path: string) => {
+    const name = path.split('/').pop() || path;
+    setDeleteDialog({ open: true, path, name });
+  }, []);
+
+  // Confirm delete
+  const handleDeleteConfirm = useCallback(() => {
+    const { path } = deleteDialog;
+    try {
+      vibeFileSystem.deleteFile(path);
+      handleCloseFile(path);
+      refreshFileTree();
+      toast.success('Deleted');
+      setDeleteDialog({ open: false, path: '', name: '' });
+    } catch (error) {
+      toast.error('Failed to delete');
+      console.error('[VIBE] Failed to delete file', error);
+    }
+  }, [deleteDialog, handleCloseFile, refreshFileTree]);
 
   const handleFileRename = useCallback(
     (path: string, newName: string) => {
@@ -223,7 +278,6 @@ export function CodeEditorPanel() {
 
         vibeFileSystem.renameFile(path, newPath);
 
-        // Update open files
         if (openFiles.has(path)) {
           const file = openFiles.get(path)!;
           setOpenFiles((prev) => {
@@ -239,9 +293,9 @@ export function CodeEditorPanel() {
         }
 
         refreshFileTree();
-        toast.success('File renamed');
+        toast.success('Renamed');
       } catch (error) {
-        toast.error('Failed to rename file');
+        toast.error('Failed to rename');
         console.error('[VIBE] Failed to rename file', error);
       }
     },
@@ -258,9 +312,8 @@ export function CodeEditorPanel() {
       a.download = path.split('/').pop() || 'file.txt';
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('File downloaded');
     } catch (error) {
-      toast.error('Failed to download file');
+      toast.error('Failed to download');
       console.error('[VIBE] Failed to download file', error);
     }
   }, []);
@@ -268,8 +321,6 @@ export function CodeEditorPanel() {
   const handleExportAllAsZip = useCallback(async () => {
     try {
       const zip = new JSZip();
-
-      // Get all files from the file system
       const allFiles = vibeFileSystem.searchFiles('');
 
       if (allFiles.length === 0) {
@@ -277,22 +328,17 @@ export function CodeEditorPanel() {
         return;
       }
 
-      // Add each file to the ZIP
       for (const file of allFiles) {
         try {
           const content = vibeFileSystem.readFile(file.path);
-          // Remove leading slash for ZIP paths
           const zipPath = file.path.startsWith('/') ? file.path.slice(1) : file.path;
           zip.file(zipPath, content);
         } catch (error) {
-          console.error(`Failed to add file ${file.path} to ZIP:`, error);
+          console.error(`Failed to add ${file.path} to ZIP:`, error);
         }
       }
 
-      // Generate ZIP file
       const blob = await zip.generateAsync({ type: 'blob' });
-
-      // Download ZIP
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -300,27 +346,27 @@ export function CodeEditorPanel() {
       a.click();
       URL.revokeObjectURL(url);
 
-      toast.success(`Exported ${allFiles.length} files as ZIP`);
+      toast.success(`Exported ${allFiles.length} files`);
     } catch (error) {
-      toast.error('Failed to export files');
+      toast.error('Failed to export');
       console.error('[VIBE] Failed to export files as ZIP', error);
     }
   }, []);
 
   return (
     <div className="flex h-full bg-background">
-      {/* File Tree Sidebar - Collapsible */}
+      {/* File Tree Sidebar */}
       {showFileTree && (
-        <div className="w-56 border-r border-border bg-muted/30">
+        <div className="w-56 border-r border-border bg-muted/20">
           <div className="flex items-center justify-between border-b border-border px-3 py-2">
-            <span className="text-xs font-semibold">FILES</span>
-            <div className="flex items-center gap-1">
+            <span className="text-xs font-medium text-muted-foreground">FILES</span>
+            <div className="flex items-center gap-0.5">
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6"
                 onClick={() => setShowTemplateSelector(true)}
-                title="New from Template"
+                title="New from template"
               >
                 <LayoutTemplate className="h-3 w-3" />
               </Button>
@@ -329,7 +375,7 @@ export function CodeEditorPanel() {
                 size="icon"
                 className="h-6 w-6"
                 onClick={handleExportAllAsZip}
-                title="Export all files as ZIP"
+                title="Export as ZIP"
               >
                 <Download className="h-3 w-3" />
               </Button>
@@ -338,35 +384,33 @@ export function CodeEditorPanel() {
                 size="icon"
                 className="h-6 w-6"
                 onClick={() => handleFileCreate('/', 'file')}
-                title="New File"
+                title="New file"
               >
-                <Plus className="h-3 w-3" />
+                <FilePlus className="h-3 w-3" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6"
-                onClick={() => setShowFileTree(false)}
-                title="Hide file tree"
+                onClick={() => handleFileCreate('/', 'folder')}
+                title="New folder"
               >
-                <X className="h-3 w-3" />
+                <FolderPlus className="h-3 w-3" />
               </Button>
             </div>
           </div>
 
           {fileTree.length === 0 ? (
-            <div className="flex h-[calc(100%-41px)] items-center justify-center p-4 text-center">
-              <div>
-                <Folder className="mx-auto mb-2 h-8 w-8 text-muted-foreground opacity-50" />
-                <p className="text-xs text-muted-foreground">No files yet</p>
-                <p className="mt-1 text-xs text-muted-foreground/70">
-                  Files will appear as agents create them
-                </p>
-              </div>
+            <div className="flex h-[calc(100%-41px)] flex-col items-center justify-center p-4 text-center">
+              <Folder className="mb-2 h-8 w-8 text-muted-foreground/40" />
+              <p className="text-xs text-muted-foreground">No files yet</p>
+              <p className="mt-1 text-[10px] text-muted-foreground/60">
+                Create a file or use a template
+              </p>
             </div>
           ) : (
             <ScrollArea className="h-[calc(100%-41px)]">
-              <div className="space-y-0.5 p-2">
+              <div className="p-2">
                 <FileTreeView
                   tree={fileTree}
                   selectedPath={currentFilePath}
@@ -386,7 +430,7 @@ export function CodeEditorPanel() {
       <div className="flex flex-1 flex-col">
         {/* File Tabs */}
         {openFiles.size > 0 && (
-          <div className="flex items-center gap-1 border-b border-border bg-muted/50 px-2 py-1">
+          <div className="flex items-center gap-1 border-b border-border bg-muted/30 px-2 py-1">
             {!showFileTree && (
               <Button
                 variant="ghost"
@@ -412,14 +456,9 @@ export function CodeEditorPanel() {
                   className="flex items-center gap-1.5"
                 >
                   <File className="h-3 w-3" />
-                  <span className="max-w-[100px] truncate">
-                    {path.split('/').pop()}
-                  </span>
+                  <span className="max-w-[100px] truncate">{path.split('/').pop()}</span>
                   {file.isDirty && (
-                    <span
-                      className="h-1.5 w-1.5 rounded-full bg-primary"
-                      title="Unsaved changes"
-                    />
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary" title="Unsaved" />
                   )}
                 </button>
                 <button
@@ -438,11 +477,9 @@ export function CodeEditorPanel() {
           <div className="flex items-center justify-between border-b border-border bg-background px-3 py-1.5">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className="truncate">{currentFilePath}</span>
-              <span className="text-xs text-muted-foreground/60">
-                {currentFile.language}
-              </span>
+              <span className="text-muted-foreground/50">{currentFile.language}</span>
               {currentFile.isDirty && (
-                <span className="text-xs text-orange-500">● Modified</span>
+                <span className="text-orange-500">● Modified</span>
               )}
             </div>
             <div className="flex items-center gap-1">
@@ -457,32 +494,16 @@ export function CodeEditorPanel() {
                   Save
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopyCode}
-                className="h-7 text-xs"
-              >
+              <Button variant="ghost" size="sm" onClick={handleCopyCode} className="h-7 text-xs">
                 {copied ? (
-                  <>
-                    <Check className="mr-1 h-3 w-3" />
-                    Copied
-                  </>
+                  <Check className="mr-1 h-3 w-3" />
                 ) : (
-                  <>
-                    <Copy className="mr-1 h-3 w-3" />
-                    Copy
-                  </>
+                  <Copy className="mr-1 h-3 w-3" />
                 )}
+                {copied ? 'Copied' : 'Copy'}
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleDownload}
-                className="h-7 text-xs"
-              >
+              <Button variant="ghost" size="sm" onClick={handleDownload} className="h-7 text-xs">
                 <Download className="mr-1 h-3 w-3" />
-                Download
               </Button>
             </div>
           </div>
@@ -499,83 +520,98 @@ export function CodeEditorPanel() {
               theme="vs-dark"
               onMount={setEditorInstance}
               options={{
-                // Visual
                 fontSize: 13,
-                fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace",
+                fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
                 lineNumbers: 'on',
-                lineNumbersMinChars: 3,
-                lineDecorationsWidth: 10,
-                lineHeight: 20,
                 minimap: { enabled: true, maxColumn: 80 },
                 scrollBeyondLastLine: false,
                 automaticLayout: true,
-                renderLineHighlight: 'all',
-                renderWhitespace: 'selection',
-                renderIndentGuides: true,
-                highlightActiveIndentGuide: true,
-                cursorBlinking: 'smooth',
-                cursorSmoothCaretAnimation: 'on',
-                smoothScrolling: true,
-
-                // Editing
                 tabSize: 2,
-                insertSpaces: true,
                 wordWrap: 'on',
-                autoIndent: 'full',
-                formatOnPaste: true,
-                formatOnType: true,
-                autoClosingBrackets: 'always',
-                autoClosingQuotes: 'always',
-                autoSurround: 'languageDefined',
                 bracketPairColorization: { enabled: true },
-                matchBrackets: 'always',
                 folding: true,
-                foldingStrategy: 'indentation',
-
-                // IntelliSense
                 suggestOnTriggerCharacters: true,
-                quickSuggestions: {
-                  other: true,
-                  comments: false,
-                  strings: true,
-                },
-                suggest: {
-                  showWords: true,
-                  showSnippets: true,
-                },
-                parameterHints: { enabled: true },
-                hover: { enabled: true },
-
-                // Multi-cursor and selection
-                multiCursorModifier: 'ctrlCmd',
-                selectionHighlight: true,
-                occurrencesHighlight: 'singleFile',
-                find: {
-                  autoFindInSelection: 'never',
-                  seedSearchStringFromSelection: 'selection',
-                },
-
-                // Context menu and minimap
-                contextmenu: true,
-                links: true,
-                mouseWheelZoom: true,
               }}
             />
           </div>
         ) : (
-          <div className="flex flex-1 items-center justify-center bg-muted/20">
+          <div className="flex flex-1 items-center justify-center bg-muted/10">
             <div className="text-center">
-              <File className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-40" />
+              <File className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">No file selected</p>
-              <p className="mt-1 text-xs text-muted-foreground/70">
-                Select a file from the sidebar or ask the agent to create one
+              <p className="mt-1 text-xs text-muted-foreground/60">
+                Select a file from the sidebar
               </p>
             </div>
           </div>
         )}
       </div>
 
-      {/* Template Selector Dialog */}
+      {/* Create Dialog */}
+      <Dialog
+        open={createDialog.open}
+        onOpenChange={(open) => setCreateDialog((prev) => ({ ...prev, open, name: '' }))}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              Create {createDialog.type === 'file' ? 'File' : 'Folder'}
+            </DialogTitle>
+            <DialogDescription>
+              Enter a name for the new {createDialog.type}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              value={createDialog.name}
+              onChange={(e) => setCreateDialog((prev) => ({ ...prev, name: e.target.value }))}
+              placeholder={createDialog.type === 'file' ? 'filename.tsx' : 'folder-name'}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCreateConfirm();
+                if (e.key === 'Escape') setCreateDialog((prev) => ({ ...prev, open: false }));
+              }}
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCreateDialog((prev) => ({ ...prev, open: false }))}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleCreateConfirm} disabled={!createDialog.name.trim()}>
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog((prev) => ({ ...prev, open }))}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete "{deleteDialog.name}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Template Selector */}
       <VibeTemplateSelector
         open={showTemplateSelector}
         onOpenChange={setShowTemplateSelector}

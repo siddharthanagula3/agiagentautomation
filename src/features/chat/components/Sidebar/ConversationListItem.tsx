@@ -1,6 +1,11 @@
 /**
- * Conversation List Item with Star/Pin/Archive
- * Enhanced sidebar item (ChatGPT/Claude style)
+ * ConversationListItem - Clean, minimal conversation item
+ *
+ * Redesigned with:
+ * - Minimal default state (title + time only)
+ * - Indicators shown subtly
+ * - Actions on hover
+ * - Progressive disclosure
  */
 
 import React, { useState } from 'react';
@@ -23,11 +28,10 @@ import {
   AlertDialogTitle,
 } from '@shared/ui/alert-dialog';
 import {
-  MessageSquare,
   Star,
   Pin,
   Archive,
-  MoreVertical,
+  MoreHorizontal,
   Edit,
   Trash2,
   Share2,
@@ -77,211 +81,168 @@ export function ConversationListItem({
   onShare,
   onDuplicate,
 }: ConversationListItemProps) {
-  const [showActions, setShowActions] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   return (
     <>
       <div
         className={cn(
-          'group relative flex cursor-pointer flex-col gap-1 rounded-lg p-3 transition-all',
+          'group relative flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 transition-colors',
           isActive
-            ? 'border-l-2 border-primary bg-primary/10'
-            : 'hover:bg-muted/50',
-          isPinned && 'border-l-2 border-yellow-500',
-          isArchived && 'opacity-60'
+            ? 'bg-primary/10 text-foreground'
+            : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
+          isArchived && 'opacity-50'
         )}
         onClick={onClick}
-        onMouseEnter={() => setShowActions(true)}
-        onMouseLeave={() => setShowActions(false)}
       >
-        {/* Header Row */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex min-w-0 flex-1 items-center gap-2">
-            <MessageSquare className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+        {/* Pin indicator - subtle left border */}
+        {isPinned && (
+          <div className="absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-yellow-500" />
+        )}
 
-            <span className="truncate text-sm font-medium" title={title}>
+        {/* Main content */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="truncate text-sm" title={title}>
               {title}
             </span>
-
-            {/* Indicators */}
-            <div className="flex flex-shrink-0 items-center gap-1">
-              {isPinned && (
-                <Pin className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-              )}
-              {isStarred && (
-                <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-              )}
-              {isArchived && (
-                <Archive className="h-3 w-3 text-muted-foreground" />
-              )}
-            </div>
-          </div>
-
-          {/* Actions Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={cn(
-                  'h-6 w-6 flex-shrink-0 p-0',
-                  showActions || isActive
-                    ? 'opacity-100'
-                    : 'opacity-0 group-hover:opacity-100'
-                )}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreVertical className="h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end" className="w-48">
-              {onStar && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onStar();
-                  }}
-                >
-                  <Star
-                    className={cn(
-                      'mr-2 h-4 w-4',
-                      isStarred && 'fill-current text-yellow-500'
-                    )}
-                  />
-                  {isStarred ? 'Unstar' : 'Star'}
-                </DropdownMenuItem>
-              )}
-
-              {onPin && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onPin();
-                  }}
-                >
-                  <Pin
-                    className={cn(
-                      'mr-2 h-4 w-4',
-                      isPinned && 'fill-current text-yellow-500'
-                    )}
-                  />
-                  {isPinned ? 'Unpin' : 'Pin to top'}
-                </DropdownMenuItem>
-              )}
-
-              <DropdownMenuSeparator />
-
-              {onRename && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRename();
-                  }}
-                >
-                  <Edit className="mr-2 h-4 w-4" />
-                  Rename
-                </DropdownMenuItem>
-              )}
-
-              {onShare && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onShare();
-                  }}
-                >
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share
-                </DropdownMenuItem>
-              )}
-
-              {onDuplicate && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDuplicate();
-                  }}
-                >
-                  <Copy className="mr-2 h-4 w-4" />
-                  Duplicate
-                </DropdownMenuItem>
-              )}
-
-              <DropdownMenuSeparator />
-
-              {onArchive && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onArchive();
-                  }}
-                >
-                  <Archive className="mr-2 h-4 w-4" />
-                  {isArchived ? 'Unarchive' : 'Archive'}
-                </DropdownMenuItem>
-              )}
-
-              {onDelete && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowDeleteDialog(true);
-                  }}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Summary */}
-        {summary && (
-          <p className="truncate pl-6 text-xs text-muted-foreground">
-            {summary}
-          </p>
-        )}
-
-        {/* Footer */}
-        <div className="flex items-center justify-between pl-6 text-xs text-muted-foreground">
-          <span>{totalMessages} messages</span>
-          <span title={updatedAt.toLocaleString()}>
-            {formatDistanceToNow(updatedAt, { addSuffix: true })}
-          </span>
-        </div>
-
-        {/* Tags */}
-        {tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 pl-6">
-            {tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary"
-              >
-                {tag}
-              </span>
-            ))}
-            {tags.length > 3 && (
-              <span className="text-[10px] text-muted-foreground">
-                +{tags.length - 3}
-              </span>
+            {isStarred && (
+              <Star className="h-3 w-3 flex-shrink-0 fill-yellow-500 text-yellow-500" />
             )}
           </div>
-        )}
+
+          {/* Time - always visible but subtle */}
+          <div className="text-[11px] text-muted-foreground/70">
+            {formatDistanceToNow(updatedAt, { addSuffix: true })}
+          </div>
+        </div>
+
+        {/* Actions Menu - show on hover */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                'h-7 w-7 flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-100',
+                isActive && 'opacity-100'
+              )}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end" className="w-44">
+            {onPin && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPin();
+                }}
+              >
+                <Pin
+                  className={cn(
+                    'mr-2 h-4 w-4',
+                    isPinned && 'fill-current text-yellow-500'
+                  )}
+                />
+                {isPinned ? 'Unpin' : 'Pin'}
+              </DropdownMenuItem>
+            )}
+
+            {onStar && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStar();
+                }}
+              >
+                <Star
+                  className={cn(
+                    'mr-2 h-4 w-4',
+                    isStarred && 'fill-current text-yellow-500'
+                  )}
+                />
+                {isStarred ? 'Unstar' : 'Star'}
+              </DropdownMenuItem>
+            )}
+
+            <DropdownMenuSeparator />
+
+            {onRename && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRename();
+                }}
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Rename
+              </DropdownMenuItem>
+            )}
+
+            {onDuplicate && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDuplicate();
+                }}
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                Duplicate
+              </DropdownMenuItem>
+            )}
+
+            {onShare && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShare();
+                }}
+              >
+                <Share2 className="mr-2 h-4 w-4" />
+                Share
+              </DropdownMenuItem>
+            )}
+
+            <DropdownMenuSeparator />
+
+            {onArchive && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onArchive();
+                }}
+              >
+                <Archive className="mr-2 h-4 w-4" />
+                {isArchived ? 'Unarchive' : 'Archive'}
+              </DropdownMenuItem>
+            )}
+
+            {onDelete && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDeleteDialog(true);
+                }}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent onClick={(e) => e.stopPropagation()}>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Conversation?</AlertDialogTitle>
+            <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this
-              conversation and all of its messages.
+              This will permanently delete "{title}" and all its messages.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -49,176 +49,185 @@ const enableDevtools = import.meta.env.MODE !== 'production';
 export const useWorkforceStore = create<WorkforceState>()(
   devtools(
     immer((set, get) => ({
-  hiredEmployees: [],
-  isLoading: false,
-  error: null,
+      hiredEmployees: [],
+      isLoading: false,
+      error: null,
 
-  fetchHiredEmployees: async () => {
-    const { user } = useAuthStore.getState();
-    if (!user) {
-      set({ hiredEmployees: [], error: null });
-      return;
-    }
+      fetchHiredEmployees: async () => {
+        const { user } = useAuthStore.getState();
+        if (!user) {
+          set({ hiredEmployees: [], error: null });
+          return;
+        }
 
-    set({ isLoading: true, error: null });
+        set({ isLoading: true, error: null });
 
-    try {
-      const { data, error } = await supabase
-        .from('purchased_employees')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .order('purchased_at', { ascending: false });
+        try {
+          const { data, error } = await supabase
+            .from('purchased_employees')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('is_active', true)
+            .order('purchased_at', { ascending: false });
 
-      if (error) {
-        console.error(
-          '[WorkforceStore] Error fetching hired employees:',
-          error
-        );
-        set({ error: error.message, isLoading: false });
-        return;
-      }
+          if (error) {
+            console.error(
+              '[WorkforceStore] Error fetching hired employees:',
+              error
+            );
+            set({ error: error.message, isLoading: false });
+            return;
+          }
 
-      set({ hiredEmployees: data || [], isLoading: false });
-    } catch (error) {
-      console.error('[WorkforceStore] Unexpected error:', error);
-      set({
-        error: error instanceof Error ? error.message : 'Unknown error',
-        isLoading: false,
-      });
-    }
-  },
+          set({ hiredEmployees: data || [], isLoading: false });
+        } catch (error) {
+          console.error('[WorkforceStore] Unexpected error:', error);
+          set({
+            error: error instanceof Error ? error.message : 'Unknown error',
+            isLoading: false,
+          });
+        }
+      },
 
-  addHiredEmployee: (employee: HiredEmployee) => {
-    set((state) => ({
-      hiredEmployees: [employee, ...state.hiredEmployees],
-    }));
-  },
+      addHiredEmployee: (employee: HiredEmployee) => {
+        set((state) => ({
+          hiredEmployees: [employee, ...state.hiredEmployees],
+        }));
+      },
 
-  /**
-   * Hire an employee - persists to database and updates local state
-   * This is the primary method for hiring employees from the UI
-   */
-  hireEmployee: async (params: HireEmployeeParams) => {
-    const { user } = useAuthStore.getState();
-    if (!user) {
-      set({ error: 'User not authenticated' });
-      return null;
-    }
+      /**
+       * Hire an employee - persists to database and updates local state
+       * This is the primary method for hiring employees from the UI
+       */
+      hireEmployee: async (params: HireEmployeeParams) => {
+        const { user } = useAuthStore.getState();
+        if (!user) {
+          set({ error: 'User not authenticated' });
+          return null;
+        }
 
-    set({ isLoading: true, error: null });
+        set({ isLoading: true, error: null });
 
-    try {
-      const now = new Date().toISOString();
-      const { data, error } = await supabase
-        .from('purchased_employees')
-        .upsert(
-          {
-            user_id: user.id,
-            employee_id: params.employee_id,
-            name: params.name,
-            role: params.role,
-            provider: params.provider,
-            is_active: true,
-            purchased_at: now,
-          },
-          { onConflict: 'user_id,employee_id' }
-        )
-        .select('*')
-        .maybeSingle();
+        try {
+          const now = new Date().toISOString();
+          const { data, error } = await supabase
+            .from('purchased_employees')
+            .upsert(
+              {
+                user_id: user.id,
+                employee_id: params.employee_id,
+                name: params.name,
+                role: params.role,
+                provider: params.provider,
+                is_active: true,
+                purchased_at: now,
+              },
+              { onConflict: 'user_id,employee_id' }
+            )
+            .select('*')
+            .maybeSingle();
 
-      if (error) {
-        console.error('[WorkforceStore] Error hiring employee:', error);
-        set({ error: error.message, isLoading: false });
-        return null;
-      }
+          if (error) {
+            console.error('[WorkforceStore] Error hiring employee:', error);
+            set({ error: error.message, isLoading: false });
+            return null;
+          }
 
-      if (data) {
-        // Add to local state (real-time subscription might also do this, but better to be responsive)
-        const exists = get().hiredEmployees.some(
-          (emp) => emp.employee_id === params.employee_id
-        );
-        if (!exists) {
+          if (data) {
+            // Add to local state (real-time subscription might also do this, but better to be responsive)
+            const exists = get().hiredEmployees.some(
+              (emp) => emp.employee_id === params.employee_id
+            );
+            if (!exists) {
+              set((state) => ({
+                hiredEmployees: [
+                  data as HiredEmployee,
+                  ...state.hiredEmployees,
+                ],
+                isLoading: false,
+              }));
+            } else {
+              set({ isLoading: false });
+            }
+          }
+
+          return data as HiredEmployee;
+        } catch (error) {
+          console.error(
+            '[WorkforceStore] Unexpected error hiring employee:',
+            error
+          );
+          set({
+            error: error instanceof Error ? error.message : 'Unknown error',
+            isLoading: false,
+          });
+          return null;
+        }
+      },
+
+      removeHiredEmployee: (employeeId: string) => {
+        set((state) => ({
+          hiredEmployees: state.hiredEmployees.filter(
+            (emp) => emp.employee_id !== employeeId
+          ),
+        }));
+      },
+
+      /**
+       * Fire an employee - persists to database and updates local state
+       * Sets is_active to false rather than deleting
+       */
+      fireEmployee: async (employeeId: string) => {
+        const { user } = useAuthStore.getState();
+        if (!user) {
+          set({ error: 'User not authenticated' });
+          return false;
+        }
+
+        set({ isLoading: true, error: null });
+
+        try {
+          const { error } = await supabase
+            .from('purchased_employees')
+            .update({ is_active: false })
+            .eq('user_id', user.id)
+            .eq('employee_id', employeeId);
+
+          if (error) {
+            console.error('[WorkforceStore] Error firing employee:', error);
+            set({ error: error.message, isLoading: false });
+            return false;
+          }
+
+          // Remove from local state
           set((state) => ({
-            hiredEmployees: [data as HiredEmployee, ...state.hiredEmployees],
+            hiredEmployees: state.hiredEmployees.filter(
+              (emp) => emp.employee_id !== employeeId
+            ),
             isLoading: false,
           }));
-        } else {
-          set({ isLoading: false });
+
+          return true;
+        } catch (error) {
+          console.error(
+            '[WorkforceStore] Unexpected error firing employee:',
+            error
+          );
+          set({
+            error: error instanceof Error ? error.message : 'Unknown error',
+            isLoading: false,
+          });
+          return false;
         }
-      }
+      },
 
-      return data as HiredEmployee;
-    } catch (error) {
-      console.error('[WorkforceStore] Unexpected error hiring employee:', error);
-      set({
-        error: error instanceof Error ? error.message : 'Unknown error',
-        isLoading: false,
-      });
-      return null;
-    }
-  },
+      clearError: () => {
+        set({ error: null });
+      },
 
-  removeHiredEmployee: (employeeId: string) => {
-    set((state) => ({
-      hiredEmployees: state.hiredEmployees.filter(
-        (emp) => emp.employee_id !== employeeId
-      ),
-    }));
-  },
-
-  /**
-   * Fire an employee - persists to database and updates local state
-   * Sets is_active to false rather than deleting
-   */
-  fireEmployee: async (employeeId: string) => {
-    const { user } = useAuthStore.getState();
-    if (!user) {
-      set({ error: 'User not authenticated' });
-      return false;
-    }
-
-    set({ isLoading: true, error: null });
-
-    try {
-      const { error } = await supabase
-        .from('purchased_employees')
-        .update({ is_active: false })
-        .eq('user_id', user.id)
-        .eq('employee_id', employeeId);
-
-      if (error) {
-        console.error('[WorkforceStore] Error firing employee:', error);
-        set({ error: error.message, isLoading: false });
-        return false;
-      }
-
-      // Remove from local state
-      set((state) => ({
-        hiredEmployees: state.hiredEmployees.filter(
-          (emp) => emp.employee_id !== employeeId
-        ),
-        isLoading: false,
-      }));
-
-      return true;
-    } catch (error) {
-      console.error('[WorkforceStore] Unexpected error firing employee:', error);
-      set({
-        error: error instanceof Error ? error.message : 'Unknown error',
-        isLoading: false,
-      });
-      return false;
-    }
-  },
-
-  clearError: () => {
-    set({ error: null });
-  },
-
-  reset: () => {
-    set({ hiredEmployees: [], isLoading: false, error: null });
-  },
+      reset: () => {
+        set({ hiredEmployees: [], isLoading: false, error: null });
+      },
     })),
     { name: 'WorkforceStore', enabled: enableDevtools }
   )
@@ -301,7 +310,10 @@ export const setupWorkforceSubscription = () => {
     )
     .subscribe((status) => {
       if (status === 'SUBSCRIBED') {
-        console.log('[WorkforceStore] Real-time subscription established for user:', user.id);
+        console.log(
+          '[WorkforceStore] Real-time subscription established for user:',
+          user.id
+        );
       } else if (status === 'CHANNEL_ERROR') {
         console.error('[WorkforceStore] Subscription error, cleaning up');
         cleanupWorkforceSubscription();

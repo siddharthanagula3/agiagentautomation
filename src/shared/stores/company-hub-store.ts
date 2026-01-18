@@ -6,6 +6,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/react/shallow';
 import type { AgentStatus } from '@core/ai/orchestration/agent-collaboration-manager';
 import type { TokenUsageByModel } from '@core/integrations/token-usage-tracker';
 
@@ -572,31 +573,89 @@ export const useCompanyHubStore = create<CompanyHubStore>()(
   )
 );
 
-// Selectors for optimized re-renders
+// ============================================================================
+// SELECTOR HOOKS (optimized with useShallow to prevent stale closures)
+// ============================================================================
+
+/**
+ * Selector for active session - returns stable reference when session hasn't changed
+ */
 export const useActiveSession = () =>
   useCompanyHubStore((state) =>
     state.activeSessionId ? state.sessions[state.activeSessionId] : null
   );
 
+/**
+ * Selector for assigned agents record - returns stable reference to the record
+ * Use this when you need access to agents by ID
+ */
+export const useAssignedAgentsRecord = () =>
+  useCompanyHubStore((state) => state.assignedAgents);
+
+/**
+ * Selector for assigned agents as array - memoized through store
+ * Note: Returns a new array reference on each call. For optimized renders,
+ * prefer useAssignedAgentsRecord and derive the array with useMemo in the component.
+ */
 export const useAssignedAgents = () =>
   useCompanyHubStore((state) => Object.values(state.assignedAgents));
 
-export const useTokenUsage = () =>
-  useCompanyHubStore((state) => ({
-    byModel: state.tokenUsage,
-    totalTokens: state.sessionTokens,
-    totalCost: state.sessionCost,
-  }));
+/**
+ * Selector for a specific agent by ID - returns stable reference when agent hasn't changed
+ */
+export const useAssignedAgent = (agentId: string) =>
+  useCompanyHubStore((state) => state.assignedAgents[agentId]);
 
+/**
+ * Selector for token usage - uses useShallow for multi-value selection
+ */
+export const useTokenUsage = () =>
+  useCompanyHubStore(
+    useShallow((state) => ({
+      byModel: state.tokenUsage,
+      totalTokens: state.sessionTokens,
+      totalCost: state.sessionCost,
+    }))
+  );
+
+/**
+ * Selector for hub messages - returns stable reference when messages haven't changed
+ */
 export const useHubMessages = () =>
   useCompanyHubStore((state) => state.messages);
 
+/**
+ * Selector for pending upsell - returns stable reference
+ */
 export const usePendingUpsell = () =>
   useCompanyHubStore((state) => state.pendingUpsell);
 
+/**
+ * Selector for orchestration status - uses useShallow for multi-value selection
+ */
 export const useOrchestrationStatus = () =>
-  useCompanyHubStore((state) => ({
-    isOrchestrating: state.isOrchestrating,
-    isPaused: state.isPaused,
-    error: state.error,
-  }));
+  useCompanyHubStore(
+    useShallow((state) => ({
+      isOrchestrating: state.isOrchestrating,
+      isPaused: state.isPaused,
+      error: state.error,
+    }))
+  );
+
+/**
+ * Selector for active session ID - primitive value, no shallow needed
+ */
+export const useActiveSessionId = () =>
+  useCompanyHubStore((state) => state.activeSessionId);
+
+/**
+ * Selector for upsell queue - returns stable reference
+ */
+export const useUpsellQueue = () =>
+  useCompanyHubStore((state) => state.upsellQueue);
+
+/**
+ * Selector for last update timestamp - primitive value
+ */
+export const useLastUpdate = () =>
+  useCompanyHubStore((state) => state.lastUpdate);

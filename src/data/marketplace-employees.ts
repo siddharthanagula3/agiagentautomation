@@ -3,25 +3,16 @@
  * Defines all available AI employees, their specializations, and API integrations
  */
 
+import type { MarketplaceEmployee } from '@shared/types';
+
+// Local provider type for this file's data (more specific than the general AIProvider)
 export type AIProvider = 'chatgpt' | 'claude' | 'gemini' | 'perplexity';
 
-export interface AIEmployee {
-  id: string;
-  name: string;
-  role: string;
-  category: string;
-  description: string;
+// Re-export the type for backward compatibility
+export type AIEmployee = Omit<MarketplaceEmployee, 'provider'> & {
   provider: AIProvider;
-  price: number; // Monthly price when billed yearly ($10)
-  originalPrice: number; // Original monthly price ($20)
-  yearlyPrice?: number; // Total yearly price ($120)
-  avatar: string;
-  skills: string[];
-  specialty: string;
-  fitLevel: 'excellent' | 'good';
-  popular?: boolean; // Mark popular employees
-  defaultTools?: string[]; // MCP tools this employee should use by default
-}
+  avatar: string; // Required in this context
+};
 
 export const AI_EMPLOYEES: AIEmployee[] = [
   // Engineering & Technology - Claude for coding

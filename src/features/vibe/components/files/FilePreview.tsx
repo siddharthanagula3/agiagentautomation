@@ -56,7 +56,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       className={className}
     >
       <Card
-        className={cn('overflow-hidden', isExpanded && 'fixed inset-4 z-50')}
+        className={cn('overflow-hidden', isExpanded && 'fixed inset-4 z-modal')}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3">

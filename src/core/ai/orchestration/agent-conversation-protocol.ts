@@ -1,11 +1,18 @@
 /**
  * Agent Conversation Protocol
  * Manages multi-agent conversations with loop prevention and quality monitoring
+ * SECURITY: Includes prompt injection defense for multi-agent conversations
  */
 
 import { unifiedLLMService } from '../llm/unified-language-model';
 import type { AIEmployee } from '@core/types/ai-employee';
 import { useMissionStore } from '@shared/stores/mission-control-store';
+// SECURITY: Import prompt injection defense
+import {
+  sanitizeEmployeeInput,
+  buildSecureMessages,
+  validateEmployeeOutput,
+} from '@core/security/employee-input-sanitizer';
 
 export interface AgentMessage {
   id: string;
@@ -53,6 +60,7 @@ export class AgentConversationProtocol {
 
   /**
    * Start a new multi-agent conversation
+   * SECURITY: Sanitizes user input before processing
    */
   async startConversation(
     userQuery: string,
@@ -62,9 +70,43 @@ export class AgentConversationProtocol {
     const conversationId = crypto.randomUUID();
     const startTime = Date.now();
 
+    // SECURITY: Sanitize user query before processing
+    const sanitizationResult = sanitizeEmployeeInput(
+      userQuery,
+      userId || 'anonymous',
+      {
+        maxInputLength: 50000,
+        applySandwichDefense: true,
+        blockThreshold: 'high',
+      }
+    );
+
+    if (sanitizationResult.blocked) {
+      console.warn(
+        '[Agent Conversation] Input blocked:',
+        sanitizationResult.blockReason
+      );
+      return {
+        success: false,
+        finalAnswer:
+          'Your request was blocked for security reasons. Please rephrase your request without attempting to manipulate AI behavior.',
+        conversation: [],
+        metadata: {
+          turnCount: 0,
+          participantCount: participants.length,
+          duration: Date.now() - startTime,
+          wasInterrupted: true,
+          loopDetected: false,
+        },
+      };
+    }
+
+    // Use sanitized query
+    const sanitizedQuery = sanitizationResult.sanitized;
+
     const state: ConversationState = {
       id: conversationId,
-      userQuery,
+      userQuery: sanitizedQuery, // Use sanitized query
       participants,
       messages: [],
       turnCount: 0,
@@ -79,7 +121,7 @@ export class AgentConversationProtocol {
       this.addMessage(state, {
         id: crypto.randomUUID(),
         employeeName: 'User',
-        content: userQuery,
+        content: sanitizedQuery, // Use sanitized query
         timestamp: new Date(),
         role: 'user',
       });
@@ -282,6 +324,7 @@ Analyze the query and provide a coordination plan. Keep it brief (2-3 sentences)
 
   /**
    * Get employee's contribution to the conversation
+   * SECURITY: Uses sandwich defense and validates output
    */
   private async getEmployeeContribution(
     employee: AIEmployee,
@@ -303,36 +346,75 @@ ${conversationContext}
 
 Provide your expertise. Be concise (2-3 sentences). If you're done, end with "DONE".`;
 
+    // SECURITY: Build secure messages with sandwich defense
+    const secureMessages = buildSecureMessages(
+      employee.systemPrompt,
+      prompt,
+      employee.name
+    );
+
     const response = await unifiedLLMService.sendMessage(
-      [
-        { role: 'system', content: employee.systemPrompt },
-        { role: 'user', content: prompt },
-      ],
+      secureMessages,
       state.id,
       userId,
       this.getEmployeeProvider(employee)
     );
+
+    // SECURITY: Validate output for data leakage
+    const outputValidation = validateEmployeeOutput(
+      response.content,
+      employee.name
+    );
+    if (!outputValidation.isValid) {
+      console.warn(
+        `[Agent Conversation] Output validation issues for ${employee.name}:`,
+        outputValidation.issues
+      );
+      if (outputValidation.sanitizedOutput) {
+        return outputValidation.sanitizedOutput;
+      }
+    }
 
     return response.content;
   }
 
   /**
    * Get single employee response (no conversation needed)
+   * SECURITY: Uses sandwich defense and validates output
    */
   private async getSingleEmployeeResponse(
     employee: AIEmployee,
     query: string,
     userId?: string
   ): Promise<string> {
+    // SECURITY: Build secure messages with sandwich defense
+    const secureMessages = buildSecureMessages(
+      employee.systemPrompt,
+      query,
+      employee.name
+    );
+
     const response = await unifiedLLMService.sendMessage(
-      [
-        { role: 'system', content: employee.systemPrompt },
-        { role: 'user', content: query },
-      ],
+      secureMessages,
       crypto.randomUUID(),
       userId,
       this.getEmployeeProvider(employee)
     );
+
+    // SECURITY: Validate output for data leakage
+    const outputValidation = validateEmployeeOutput(
+      response.content,
+      employee.name
+    );
+    if (!outputValidation.isValid) {
+      console.warn(
+        `[Agent Conversation] Output validation issues for ${employee.name}:`,
+        outputValidation.issues
+      );
+      if (outputValidation.sanitizedOutput) {
+        return outputValidation.sanitizedOutput;
+      }
+    }
 
     return response.content;
   }

@@ -105,7 +105,9 @@ const LoginPage: React.FC = () => {
   const handleDemoLogin = async () => {
     // Only allow demo login if explicitly enabled via environment variable
     if (!isDemoMode) {
-      console.warn('LoginPage: Demo login attempted but VITE_DEMO_MODE is not enabled');
+      console.warn(
+        'LoginPage: Demo login attempted but VITE_DEMO_MODE is not enabled'
+      );
       return;
     }
 

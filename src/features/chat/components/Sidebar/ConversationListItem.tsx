@@ -94,6 +94,16 @@ export function ConversationListItem({
           isArchived && 'opacity-50'
         )}
         onClick={onClick}
+        role="button"
+        tabIndex={0}
+        aria-label={`${title}${isStarred ? ', starred' : ''}${isPinned ? ', pinned' : ''}${isArchived ? ', archived' : ''}`}
+        aria-current={isActive ? 'true' : undefined}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick();
+          }
+        }}
       >
         {/* Pin indicator - subtle left border */}
         {isPinned && (
@@ -107,7 +117,10 @@ export function ConversationListItem({
               {title}
             </span>
             {isStarred && (
-              <Star className="h-3 w-3 flex-shrink-0 fill-yellow-500 text-yellow-500" />
+              <Star
+                className="h-3 w-3 flex-shrink-0 fill-yellow-500 text-yellow-500"
+                aria-hidden="true"
+              />
             )}
           </div>
 
@@ -128,8 +141,9 @@ export function ConversationListItem({
                 isActive && 'opacity-100'
               )}
               onClick={(e) => e.stopPropagation()}
+              aria-label="Conversation options"
             >
-              <MoreHorizontal className="h-4 w-4" />
+              <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
 
@@ -146,6 +160,7 @@ export function ConversationListItem({
                     'mr-2 h-4 w-4',
                     isPinned && 'fill-current text-yellow-500'
                   )}
+                  aria-hidden="true"
                 />
                 {isPinned ? 'Unpin' : 'Pin'}
               </DropdownMenuItem>
@@ -163,6 +178,7 @@ export function ConversationListItem({
                     'mr-2 h-4 w-4',
                     isStarred && 'fill-current text-yellow-500'
                   )}
+                  aria-hidden="true"
                 />
                 {isStarred ? 'Unstar' : 'Star'}
               </DropdownMenuItem>
@@ -177,7 +193,7 @@ export function ConversationListItem({
                   onRename();
                 }}
               >
-                <Edit className="mr-2 h-4 w-4" />
+                <Edit className="mr-2 h-4 w-4" aria-hidden="true" />
                 Rename
               </DropdownMenuItem>
             )}
@@ -189,7 +205,7 @@ export function ConversationListItem({
                   onDuplicate();
                 }}
               >
-                <Copy className="mr-2 h-4 w-4" />
+                <Copy className="mr-2 h-4 w-4" aria-hidden="true" />
                 Duplicate
               </DropdownMenuItem>
             )}
@@ -201,7 +217,7 @@ export function ConversationListItem({
                   onShare();
                 }}
               >
-                <Share2 className="mr-2 h-4 w-4" />
+                <Share2 className="mr-2 h-4 w-4" aria-hidden="true" />
                 Share
               </DropdownMenuItem>
             )}
@@ -215,7 +231,7 @@ export function ConversationListItem({
                   onArchive();
                 }}
               >
-                <Archive className="mr-2 h-4 w-4" />
+                <Archive className="mr-2 h-4 w-4" aria-hidden="true" />
                 {isArchived ? 'Unarchive' : 'Archive'}
               </DropdownMenuItem>
             )}
@@ -228,7 +244,7 @@ export function ConversationListItem({
                 }}
                 className="text-destructive focus:text-destructive"
               >
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
                 Delete
               </DropdownMenuItem>
             )}

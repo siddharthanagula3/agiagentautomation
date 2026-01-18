@@ -65,84 +65,8 @@ export function useChatPersistence(
   const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
 
-  // Load session on mount
-  // Updated: Jan 15th 2026 - Added loadSession to deps (stable with useCallback)
-  useEffect(() => {
-    if (sessionId) {
-      loadSession(sessionId);
-    }
-  }, [sessionId, loadSession]);
-
-  // Auto-save messages periodically
-  // Updated: Jan 15th 2026 - Added saveMessages to deps
-  useEffect(() => {
-    if (!autoSaveEnabled || !currentSession) return;
-
-    const interval = setInterval(() => {
-      saveMessages();
-    }, 30000); // Save every 30 seconds
-
-    return () => clearInterval(interval);
-  }, [autoSaveEnabled, currentSession, messages, saveMessages]);
-
-  // Create new session
-  const createSession = useCallback(
-    async (title: string, uid: string): Promise<string> => {
-      if (!uid) {
-        throw new Error('User ID is required');
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const { data, error: createError } = await supabase
-          .from('chat_sessions')
-          .insert([
-            {
-              user_id: uid,
-              title,
-              mode,
-              metadata: {
-                messageCount: 0,
-                agentsInvolved: [],
-                lastActivity: new Date().toISOString(),
-              },
-            },
-          ])
-          .select()
-          .single();
-
-        if (createError) throw createError;
-
-        const newSession: ChatSession = {
-          id: data.id,
-          userId: data.user_id,
-          title: data.title,
-          mode: data.mode,
-          createdAt: new Date(data.created_at),
-          updatedAt: new Date(data.updated_at),
-          metadata: data.metadata,
-        };
-
-        setCurrentSession(newSession);
-        toast.success('Chat session created');
-
-        return data.id;
-      } catch (err) {
-        const errorMsg =
-          err instanceof Error ? err.message : 'Failed to create session';
-        setError(errorMsg);
-        toast.error(errorMsg);
-        throw err;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [mode]
-  );
-
   // Load session from database
+  // Defined before useEffect that depends on it
   const loadSession = useCallback(async (sid: string) => {
     setIsLoading(true);
     setError(null);
@@ -181,8 +105,31 @@ export function useChatPersistence(
 
       if (messagesError) throw messagesError;
 
-      // TODO: Restore messages to mission store
-      // This would require adding a method to mission store
+      // Restore messages to mission store
+      if (messagesData && messagesData.length > 0) {
+        const restoredMessages = messagesData.map((msg) => ({
+          id: msg.id,
+          from:
+            msg.metadata?.from || (msg.role === 'user' ? 'user' : 'assistant'),
+          type:
+            msg.metadata?.type ||
+            ((msg.role === 'user' ? 'user' : 'assistant') as
+              | 'user'
+              | 'assistant'
+              | 'system'
+              | 'employee'
+              | 'agent'
+              | 'status'
+              | 'task_update'
+              | 'plan'
+              | 'error'),
+          content: msg.content,
+          timestamp: new Date(msg.created_at),
+          metadata: msg.metadata || {},
+        }));
+
+        useMissionStore.getState().setMessages(restoredMessages);
+      }
 
       toast.success('Session loaded');
     } catch (err) {
@@ -253,6 +200,81 @@ export function useChatPersistence(
       setIsSaving(false);
     }
   }, [currentSession, messages, activeEmployees]);
+
+  // Load session on mount
+  useEffect(() => {
+    if (sessionId) {
+      loadSession(sessionId);
+    }
+  }, [sessionId, loadSession]);
+
+  // Auto-save messages periodically
+  useEffect(() => {
+    if (!autoSaveEnabled || !currentSession) return;
+
+    const interval = setInterval(() => {
+      saveMessages();
+    }, 30000); // Save every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [autoSaveEnabled, currentSession, messages, saveMessages]);
+
+  // Create new session
+  const createSession = useCallback(
+    async (title: string, uid: string): Promise<string> => {
+      if (!uid) {
+        throw new Error('User ID is required');
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const { data, error: createError } = await supabase
+          .from('chat_sessions')
+          .insert([
+            {
+              user_id: uid,
+              title,
+              mode,
+              metadata: {
+                messageCount: 0,
+                agentsInvolved: [],
+                lastActivity: new Date().toISOString(),
+              },
+            },
+          ])
+          .select()
+          .single();
+
+        if (createError) throw createError;
+
+        const newSession: ChatSession = {
+          id: data.id,
+          userId: data.user_id,
+          title: data.title,
+          mode: data.mode,
+          createdAt: new Date(data.created_at),
+          updatedAt: new Date(data.updated_at),
+          metadata: data.metadata,
+        };
+
+        setCurrentSession(newSession);
+        toast.success('Chat session created');
+
+        return data.id;
+      } catch (err) {
+        const errorMsg =
+          err instanceof Error ? err.message : 'Failed to create session';
+        setError(errorMsg);
+        toast.error(errorMsg);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [mode]
+  );
 
   // Update session title
   const updateSessionTitle = useCallback(

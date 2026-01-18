@@ -78,8 +78,12 @@ export function ChatInput({
           <span className="text-sm text-gray-600 dark:text-gray-400">
             Working with:
           </span>
-          {selectedEmployeeNames.map((name, index) => (
-            <Badge key={index} variant="secondary" className="text-xs">
+          {selectedEmployeeNames.map((name) => (
+            <Badge
+              key={`employee-${name}`}
+              variant="secondary"
+              className="text-xs"
+            >
               {name}
             </Badge>
           ))}

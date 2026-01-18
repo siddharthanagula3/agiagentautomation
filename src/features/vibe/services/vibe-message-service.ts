@@ -255,7 +255,10 @@ export class VibeMessageService {
             content: '[Error: Message generation failed]',
           });
         } catch (updateError) {
-          console.error('[VibeMessageService] Failed to reset streaming state:', updateError);
+          console.error(
+            '[VibeMessageService] Failed to reset streaming state:',
+            updateError
+          );
         }
       }
 

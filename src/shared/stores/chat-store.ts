@@ -729,7 +729,8 @@ export const useChatStore = create<ChatStore>()(
         importConversations: (data: Conversation[]) => {
           if (!Array.isArray(data)) {
             set((state) => {
-              state.error = 'Invalid import data: expected an array of conversations';
+              state.error =
+                'Invalid import data: expected an array of conversations';
             });
             return;
           }
@@ -763,7 +764,9 @@ export const useChatStore = create<ChatStore>()(
                   conversationId: conversation.id,
                   role: msg.role || 'user',
                   content: msg.content || '',
-                  timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+                  timestamp: msg.timestamp
+                    ? new Date(msg.timestamp)
+                    : new Date(),
                   metadata: msg.metadata,
                   toolCalls: msg.toolCalls,
                   citations: msg.citations,
@@ -783,7 +786,8 @@ export const useChatStore = create<ChatStore>()(
                   maxTokens:
                     conversation.settings?.maxTokens ??
                     state.defaultSettings.maxTokens,
-                  topP: conversation.settings?.topP ?? state.defaultSettings.topP,
+                  topP:
+                    conversation.settings?.topP ?? state.defaultSettings.topP,
                   frequencyPenalty:
                     conversation.settings?.frequencyPenalty ??
                     state.defaultSettings.frequencyPenalty,
@@ -808,7 +812,8 @@ export const useChatStore = create<ChatStore>()(
                 },
               };
 
-              state.conversations[validatedConversation.id] = validatedConversation;
+              state.conversations[validatedConversation.id] =
+                validatedConversation;
               importedCount++;
             }
 
@@ -944,10 +949,14 @@ export const useChatStore = create<ChatStore>()(
                   // Rehydrate conversation metadata dates
                   if (conv.metadata) {
                     if (conv.metadata.createdAt) {
-                      conv.metadata.createdAt = new Date(conv.metadata.createdAt);
+                      conv.metadata.createdAt = new Date(
+                        conv.metadata.createdAt
+                      );
                     }
                     if (conv.metadata.updatedAt) {
-                      conv.metadata.updatedAt = new Date(conv.metadata.updatedAt);
+                      conv.metadata.updatedAt = new Date(
+                        conv.metadata.updatedAt
+                      );
                     }
                   }
                   // Rehydrate message timestamps
@@ -989,7 +998,10 @@ export const useChatStore = create<ChatStore>()(
                 data.state.lastActivity = new Date(data.state.lastActivity);
               }
               // Rehydrate checkpoint timestamps
-              if (data.state?.checkpointHistory && Array.isArray(data.state.checkpointHistory)) {
+              if (
+                data.state?.checkpointHistory &&
+                Array.isArray(data.state.checkpointHistory)
+              ) {
                 for (const cp of data.state.checkpointHistory) {
                   if (cp.timestamp) {
                     cp.timestamp = new Date(cp.timestamp);
@@ -1030,4 +1042,93 @@ export const useChatStore = create<ChatStore>()(
   )
 );
 
-// Selectors for optimized re-renders
+// ============================================================================
+// SELECTOR HOOKS (optimized with useShallow to prevent stale closures)
+// ============================================================================
+
+/**
+ * Selector for conversations - returns stable reference to conversations record
+ */
+export const useConversationsRecord = () =>
+  useChatStore((state) => state.conversations);
+
+/**
+ * Selector for active conversation - returns stable reference when conversation hasn't changed
+ */
+export const useActiveChatConversation = () =>
+  useChatStore((state) =>
+    state.activeConversationId
+      ? state.conversations[state.activeConversationId]
+      : null
+  );
+
+/**
+ * Selector for active conversation ID - primitive value, no shallow needed
+ */
+export const useActiveChatConversationId = () =>
+  useChatStore((state) => state.activeConversationId);
+
+/**
+ * Selector for streaming state - uses useShallow for multi-value selection
+ */
+export const useChatStreamingState = () =>
+  useChatStore(
+    useShallow((state) => ({
+      isLoading: state.isLoading,
+      isStreamingResponse: state.isStreamingResponse,
+      error: state.error,
+    }))
+  );
+
+/**
+ * Selector for selected model - primitive value
+ */
+export const useSelectedChatModel = () =>
+  useChatStore((state) => state.selectedModel);
+
+/**
+ * Selector for available models - returns stable reference
+ */
+export const useAvailableChatModels = () =>
+  useChatStore((state) => state.availableModels);
+
+/**
+ * Selector for search and filter state - uses useShallow for multi-value selection
+ */
+export const useChatSearchAndFilters = () =>
+  useChatStore(
+    useShallow((state) => ({
+      searchQuery: state.searchQuery,
+      filterTags: state.filterTags,
+      showArchived: state.showArchived,
+    }))
+  );
+
+/**
+ * Selector for MGX-style working processes - returns stable reference
+ */
+export const useWorkingProcesses = () =>
+  useChatStore((state) => state.workingProcesses);
+
+/**
+ * Selector for active employees in chat - returns stable reference
+ */
+export const useChatActiveEmployees = () =>
+  useChatStore((state) => state.activeEmployees);
+
+/**
+ * Selector for checkpoint state - uses useShallow for multi-value selection
+ */
+export const useCheckpointState = () =>
+  useChatStore(
+    useShallow((state) => ({
+      currentCheckpoint: state.currentCheckpoint,
+      checkpointHistory: state.checkpointHistory,
+    }))
+  );
+
+/**
+ * Selector for sidebar state - primitive value
+ */
+export const useChatSidebarOpen = () =>
+  useChatStore((state) => state.sidebarOpen);

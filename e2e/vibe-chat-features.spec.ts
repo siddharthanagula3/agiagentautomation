@@ -8,9 +8,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const BASE_URL = 'https://agiagentautomation.com';
+// Test credentials - MUST be set via environment variables in CI/CD
+// Never commit actual credentials to the repository
 const TEST_USER = {
-  email: 'siddharthanagula3@gmail.com',
-  password: 'Sid@1234',
+  email: process.env.E2E_TEST_EMAIL || 'test@example.com',
+  password: process.env.E2E_TEST_PASSWORD || '', // Set in CI environment
 };
 
 // Helper functions

@@ -10,36 +10,62 @@ interface BuyTokenPackParams {
 }
 
 /**
+ * Get authorization token for API calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session?.access_token ?? null;
+}
+
+/**
  * Buy Token Pack Service
  *
  * Creates a Stripe checkout session for one-time token pack purchases.
  * Redirects user to Stripe hosted checkout page.
+ *
+ * UPDATED: January 17, 2026 - Added authorization header
  */
 export async function buyTokenPack(params: BuyTokenPackParams): Promise<void> {
   const { userId, userEmail, packId, tokens, price } = params;
 
+  // Get auth token first
+  const authToken = await getAuthToken();
+  if (!authToken) {
+    throw new Error(
+      'User not authenticated. Please log in to purchase tokens.'
+    );
+  }
+
   try {
-    console.log('[Buy Token Pack] Initiating purchase:', {
-      userId,
-      packId,
-      tokens: tokens.toLocaleString(),
-      price: `$${price}`,
-    });
+    if (import.meta.env.DEV) {
+      console.log('[Buy Token Pack] Initiating purchase:', {
+        userId,
+        packId,
+        tokens: tokens.toLocaleString(),
+        price: `$${price}`,
+      });
+    }
 
     // Call Netlify function to create Stripe checkout session
-    const response = await fetch('/.netlify/functions/payments/buy-token-pack', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userId,
-        userEmail,
-        packId,
-        tokens,
-        price,
-      }),
-    });
+    const response = await fetch(
+      '/.netlify/functions/payments/buy-token-pack',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          userId,
+          userEmail,
+          packId,
+          tokens,
+          price,
+        }),
+      }
+    );
 
     if (!response.ok) {
       const error = await response.json();

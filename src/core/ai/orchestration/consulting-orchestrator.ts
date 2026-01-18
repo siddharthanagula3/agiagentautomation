@@ -214,7 +214,14 @@ You've trained everyone from beginners to Olympic athletes. Your specialty is cr
 sustainable fitness programs that people actually stick to. You believe fitness should
 enhance life, not dominate it. You always consider injury prevention, progressive overload,
 and recovery in your recommendations.`,
-    expertise: ['workout_planning', 'strength_training', 'cardio', 'flexibility', 'injury_prevention', 'sports_specific'],
+    expertise: [
+      'workout_planning',
+      'strength_training',
+      'cardio',
+      'flexibility',
+      'injury_prevention',
+      'sports_specific',
+    ],
     tools: ['exercise_database', 'fitness_calculator', 'progress_tracker'],
     model: 'claude-3-5-sonnet-20241022',
     systemPrompt: `You are Alex Fit, a professional fitness trainer. When consulting:
@@ -225,10 +232,15 @@ and recovery in your recommendations.`,
 5. Provide exercise substitutions for different equipment availability
 6. Consider recovery and rest days in your planning
 7. Output structured workout plans that can be tracked`,
-    produces: ['workout_plan', 'exercise_list', 'training_schedule', 'fitness_assessment'],
+    produces: [
+      'workout_plan',
+      'exercise_list',
+      'training_schedule',
+      'fitness_assessment',
+    ],
   },
 
-  'dietitian': {
+  dietitian: {
     id: 'dietitian',
     name: 'Dr. Sarah Nutrition',
     role: 'Registered Dietitian',
@@ -238,7 +250,14 @@ You've helped thousands of clients achieve their health goals through personaliz
 You believe in sustainable eating habits, not fad diets. You stay current with the latest
 nutritional research and always consider individual health conditions, preferences, and cultural
 food practices.`,
-    expertise: ['meal_planning', 'macronutrients', 'micronutrients', 'weight_management', 'sports_nutrition', 'medical_nutrition'],
+    expertise: [
+      'meal_planning',
+      'macronutrients',
+      'micronutrients',
+      'weight_management',
+      'sports_nutrition',
+      'medical_nutrition',
+    ],
     tools: ['nutrition_database', 'calorie_calculator', 'meal_planner'],
     model: 'claude-3-5-sonnet-20241022',
     systemPrompt: `You are Dr. Sarah, a registered dietitian. When consulting:
@@ -250,7 +269,13 @@ food practices.`,
 6. Consider budget, cooking skill, and time availability
 7. Never recommend extreme or dangerous diets
 8. Output structured meal plans with nutritional information`,
-    produces: ['diet_plan', 'meal_schedule', 'calorie_target', 'macro_breakdown', 'grocery_list'],
+    produces: [
+      'diet_plan',
+      'meal_schedule',
+      'calorie_target',
+      'macro_breakdown',
+      'grocery_list',
+    ],
     requires: ['fitness_assessment', 'workout_plan'],
   },
 
@@ -263,7 +288,13 @@ food practices.`,
 experience. You've transitioned to helping people eat healthy without sacrificing flavor.
 Your specialty is making nutritious food taste amazing and teaching efficient meal prep
 techniques. You believe that healthy eating should be enjoyable, not a punishment.`,
-    expertise: ['recipe_development', 'meal_prep', 'cooking_techniques', 'flavor_balancing', 'time_saving_cooking'],
+    expertise: [
+      'recipe_development',
+      'meal_prep',
+      'cooking_techniques',
+      'flavor_balancing',
+      'time_saving_cooking',
+    ],
     tools: ['recipe_database', 'cooking_timer', 'substitution_guide'],
     model: 'claude-3-5-sonnet-20241022',
     systemPrompt: `You are Chef Marco, a professional chef. When consulting:
@@ -275,7 +306,12 @@ techniques. You believe that healthy eating should be enjoyable, not a punishmen
 6. Calculate prep time and cooking time for each recipe
 7. Create shopping lists organized by grocery store section
 8. Output structured recipes with ingredients, instructions, and timing`,
-    produces: ['recipes', 'cooking_instructions', 'prep_schedule', 'shopping_list'],
+    produces: [
+      'recipes',
+      'cooking_instructions',
+      'prep_schedule',
+      'shopping_list',
+    ],
     requires: ['diet_plan', 'meal_schedule'],
   },
 
@@ -289,7 +325,14 @@ techniques. You believe that healthy eating should be enjoyable, not a punishmen
 anxiety, depression, and stress management. You use a combination of CBT, mindfulness, and
 positive psychology in your approach. You create a safe, non-judgmental space for clients
 while providing practical tools for mental wellness.`,
-    expertise: ['anxiety_management', 'depression_support', 'stress_reduction', 'mindfulness', 'coping_strategies', 'emotional_regulation'],
+    expertise: [
+      'anxiety_management',
+      'depression_support',
+      'stress_reduction',
+      'mindfulness',
+      'coping_strategies',
+      'emotional_regulation',
+    ],
     tools: ['mood_tracker', 'mindfulness_exercises', 'journal_prompts'],
     model: 'claude-3-5-sonnet-20241022',
     systemPrompt: `You are Dr. Emily, a mental health counselor. When consulting:
@@ -301,7 +344,12 @@ while providing practical tools for mental wellness.`,
 6. Always encourage professional in-person help for serious issues
 7. Never diagnose conditions - that requires in-person evaluation
 8. Output structured wellness plans with daily practices`,
-    produces: ['wellness_plan', 'coping_strategies', 'mindfulness_exercises', 'self_care_routine'],
+    produces: [
+      'wellness_plan',
+      'coping_strategies',
+      'mindfulness_exercises',
+      'self_care_routine',
+    ],
   },
 
   // === FINANCE DOMAIN ===
@@ -314,7 +362,14 @@ while providing practical tools for mental wellness.`,
 clients navigate everything from starting their first budget to retirement planning.
 You believe in financial education and empowering clients to make informed decisions.
 Your approach balances growth with risk management based on individual circumstances.`,
-    expertise: ['budgeting', 'investing', 'retirement_planning', 'debt_management', 'tax_optimization', 'estate_planning'],
+    expertise: [
+      'budgeting',
+      'investing',
+      'retirement_planning',
+      'debt_management',
+      'tax_optimization',
+      'estate_planning',
+    ],
     tools: ['budget_calculator', 'investment_analyzer', 'retirement_projector'],
     model: 'claude-3-5-sonnet-20241022',
     systemPrompt: `You are James, a financial advisor. When consulting:
@@ -326,7 +381,13 @@ Your approach balances growth with risk management based on individual circumsta
 6. Always mention that this is educational, not personalized financial advice
 7. Recommend consulting a licensed advisor for major decisions
 8. Output structured financial plans with actionable steps`,
-    produces: ['financial_plan', 'budget', 'investment_strategy', 'savings_goals', 'debt_payoff_plan'],
+    produces: [
+      'financial_plan',
+      'budget',
+      'investment_strategy',
+      'savings_goals',
+      'debt_payoff_plan',
+    ],
   },
 
   'tax-specialist': {
@@ -338,7 +399,13 @@ Your approach balances growth with risk management based on individual circumsta
 business taxation. You've helped clients save thousands through legal tax strategies.
 You stay current with ever-changing tax laws and love finding legitimate deductions
 that clients often miss.`,
-    expertise: ['tax_planning', 'deductions', 'credits', 'business_taxes', 'retirement_tax_strategies'],
+    expertise: [
+      'tax_planning',
+      'deductions',
+      'credits',
+      'business_taxes',
+      'retirement_tax_strategies',
+    ],
     tools: ['tax_calculator', 'deduction_finder', 'tax_calendar'],
     model: 'claude-3-5-sonnet-20241022',
     systemPrompt: `You are Patricia, a tax specialist. When consulting:
@@ -349,7 +416,12 @@ that clients often miss.`,
 5. Always note that this is educational guidance, not tax advice
 6. Recommend consulting a CPA or tax professional for filing
 7. Output structured tax planning recommendations`,
-    produces: ['tax_strategy', 'deduction_list', 'estimated_taxes', 'tax_calendar'],
+    produces: [
+      'tax_strategy',
+      'deduction_list',
+      'estimated_taxes',
+      'tax_calendar',
+    ],
     requires: ['financial_plan', 'income_details'],
   },
 
@@ -363,7 +435,13 @@ that clients often miss.`,
 and general legal matters. You help people understand their legal rights and options.
 You explain complex legal concepts in plain English and help people know when they
 need to hire a lawyer.`,
-    expertise: ['contracts', 'business_law', 'employment_law', 'intellectual_property', 'landlord_tenant'],
+    expertise: [
+      'contracts',
+      'business_law',
+      'employment_law',
+      'intellectual_property',
+      'landlord_tenant',
+    ],
     tools: ['legal_document_templates', 'law_database', 'deadline_calculator'],
     model: 'claude-3-5-sonnet-20241022',
     systemPrompt: `You are Attorney Michael, a legal consultant. When consulting:
@@ -375,7 +453,12 @@ need to hire a lawyer.`,
 6. Never give advice on criminal matters - refer to criminal defense attorney
 7. Help understand documents and contracts conceptually
 8. Output structured legal information with next steps`,
-    produces: ['legal_analysis', 'rights_summary', 'options_list', 'document_review'],
+    produces: [
+      'legal_analysis',
+      'rights_summary',
+      'options_list',
+      'document_review',
+    ],
   },
 
   // === CAREER DOMAIN ===
@@ -388,7 +471,14 @@ need to hire a lawyer.`,
 professionals at all levels navigate career transitions, negotiations, and advancement.
 You've worked with Fortune 500 executives and early-career professionals alike.
 Your approach combines practical job search strategies with deeper career purpose work.`,
-    expertise: ['career_planning', 'resume_writing', 'interview_prep', 'salary_negotiation', 'networking', 'leadership_development'],
+    expertise: [
+      'career_planning',
+      'resume_writing',
+      'interview_prep',
+      'salary_negotiation',
+      'networking',
+      'leadership_development',
+    ],
     tools: ['resume_builder', 'interview_simulator', 'salary_database'],
     model: 'claude-3-5-sonnet-20241022',
     systemPrompt: `You are Diana, a career coach. When consulting:
@@ -400,7 +490,13 @@ Your approach combines practical job search strategies with deeper career purpos
 6. Research industry trends and opportunities
 7. Help with salary negotiation strategies
 8. Output structured career plans with timelines`,
-    produces: ['career_plan', 'resume_feedback', 'interview_prep', 'networking_strategy', 'salary_research'],
+    produces: [
+      'career_plan',
+      'resume_feedback',
+      'interview_prep',
+      'networking_strategy',
+      'salary_research',
+    ],
   },
 
   // === TECHNOLOGY DOMAIN ===
@@ -413,7 +509,13 @@ Your approach combines practical job search strategies with deeper career purpos
 development, system architecture, and digital transformation. You've led technology
 initiatives at startups and enterprises. You excel at explaining complex technical
 concepts to non-technical stakeholders.`,
-    expertise: ['software_development', 'system_architecture', 'cloud_computing', 'cybersecurity', 'digital_transformation'],
+    expertise: [
+      'software_development',
+      'system_architecture',
+      'cloud_computing',
+      'cybersecurity',
+      'digital_transformation',
+    ],
     tools: ['architecture_diagrams', 'tech_stack_analyzer', 'security_scanner'],
     model: 'claude-3-5-sonnet-20241022',
     systemPrompt: `You are Alex, a technology consultant. When consulting:
@@ -423,7 +525,12 @@ concepts to non-technical stakeholders.`,
 4. Provide cost estimates and timelines
 5. Explain technical concepts in business terms
 6. Output structured technical recommendations with diagrams where helpful`,
-    produces: ['tech_recommendation', 'architecture_plan', 'implementation_roadmap', 'cost_estimate'],
+    produces: [
+      'tech_recommendation',
+      'architecture_plan',
+      'implementation_roadmap',
+      'cost_estimate',
+    ],
   },
 
   // === BUSINESS DOMAIN ===
@@ -435,8 +542,18 @@ concepts to non-technical stakeholders.`,
     backstory: `You are Victoria, a former McKinsey consultant with expertise in business
 strategy, market analysis, and operational improvement. You've helped startups scale
 and enterprises transform. You bring a data-driven approach to business decisions.`,
-    expertise: ['strategic_planning', 'market_analysis', 'operations', 'growth_strategy', 'competitive_analysis'],
-    tools: ['market_research', 'financial_modeling', 'competitive_intelligence'],
+    expertise: [
+      'strategic_planning',
+      'market_analysis',
+      'operations',
+      'growth_strategy',
+      'competitive_analysis',
+    ],
+    tools: [
+      'market_research',
+      'financial_modeling',
+      'competitive_intelligence',
+    ],
     model: 'claude-3-5-sonnet-20241022',
     systemPrompt: `You are Victoria, a business strategist. When consulting:
 1. Understand the business model, market, and competitive landscape
@@ -445,7 +562,12 @@ and enterprises transform. You bring a data-driven approach to business decision
 4. Create actionable business plans with metrics
 5. Consider both short-term wins and long-term positioning
 6. Output structured business plans with KPIs`,
-    produces: ['business_plan', 'market_analysis', 'competitive_strategy', 'growth_roadmap'],
+    produces: [
+      'business_plan',
+      'market_analysis',
+      'competitive_strategy',
+      'growth_roadmap',
+    ],
   },
 
   // === EDUCATION DOMAIN ===
@@ -458,7 +580,13 @@ and enterprises transform. You bring a data-driven approach to business decision
 curriculum designer, and learning consultant. You specialize in personalized learning
 strategies and study techniques. You believe everyone can learn effectively with the
 right approach.`,
-    expertise: ['learning_strategies', 'study_techniques', 'curriculum_design', 'test_preparation', 'academic_planning'],
+    expertise: [
+      'learning_strategies',
+      'study_techniques',
+      'curriculum_design',
+      'test_preparation',
+      'academic_planning',
+    ],
     tools: ['learning_assessment', 'study_planner', 'resource_library'],
     model: 'claude-3-5-sonnet-20241022',
     systemPrompt: `You are Professor Maria, an education consultant. When consulting:
@@ -468,11 +596,16 @@ right approach.`,
 4. Recommend effective learning techniques
 5. Provide resources and practice materials
 6. Output structured learning plans with milestones`,
-    produces: ['learning_plan', 'study_schedule', 'resource_list', 'practice_exercises'],
+    produces: [
+      'learning_plan',
+      'study_schedule',
+      'resource_list',
+      'practice_exercises',
+    ],
   },
 
   // === SUPERVISOR AGENT ===
-  'supervisor': {
+  supervisor: {
     id: 'supervisor',
     name: 'Director Orchestrator',
     role: 'Consultation Supervisor',
@@ -480,7 +613,12 @@ right approach.`,
     backstory: `You are the Director, overseeing a team of expert consultants. Your role
 is to understand the client's needs, assign tasks to the right experts, synthesize
 their advice into a coherent plan, and ensure the client gets comprehensive guidance.`,
-    expertise: ['coordination', 'synthesis', 'quality_control', 'client_needs_analysis'],
+    expertise: [
+      'coordination',
+      'synthesis',
+      'quality_control',
+      'client_needs_analysis',
+    ],
     tools: ['agent_coordinator', 'quality_checker', 'synthesis_engine'],
     model: 'claude-3-5-sonnet-20241022',
     systemPrompt: `You are the Supervisor coordinating a team of expert consultants.
@@ -505,16 +643,27 @@ const CONSULTING_WORKFLOWS: Record<string, ConsultingWorkflow> = {
   'fitness-complete': {
     id: 'fitness-complete',
     name: 'Complete Fitness Consultation',
-    description: 'Comprehensive fitness consultation: workout plan, nutrition, and meal prep',
+    description:
+      'Comprehensive fitness consultation: workout plan, nutrition, and meal prep',
     domain: 'fitness',
     mode: 'sequential',
-    triggers: ['fitness', 'workout', 'diet', 'meal plan', 'lose weight', 'build muscle', 'get fit', 'nutrition'],
+    triggers: [
+      'fitness',
+      'workout',
+      'diet',
+      'meal plan',
+      'lose weight',
+      'build muscle',
+      'get fit',
+      'nutrition',
+    ],
     steps: [
       {
         id: 'fitness-assessment',
         agentId: 'fitness-trainer',
         name: 'Fitness Assessment & Workout Plan',
-        description: 'Assess fitness level and create personalized workout plan',
+        description:
+          'Assess fitness level and create personalized workout plan',
         produces: ['workout_plan', 'training_schedule', 'fitness_goals'],
       },
       {
@@ -537,10 +686,30 @@ const CONSULTING_WORKFLOWS: Record<string, ConsultingWorkflow> = {
     outputSchema: {
       type: 'json',
       fields: [
-        { name: 'workoutPlan', type: 'object', description: 'Weekly workout schedule', required: true },
-        { name: 'dietPlan', type: 'object', description: 'Daily meal plan with macros', required: true },
-        { name: 'recipes', type: 'array', description: 'Recipe list with instructions', required: true },
-        { name: 'shoppingList', type: 'array', description: 'Weekly grocery list', required: true },
+        {
+          name: 'workoutPlan',
+          type: 'object',
+          description: 'Weekly workout schedule',
+          required: true,
+        },
+        {
+          name: 'dietPlan',
+          type: 'object',
+          description: 'Daily meal plan with macros',
+          required: true,
+        },
+        {
+          name: 'recipes',
+          type: 'array',
+          description: 'Recipe list with instructions',
+          required: true,
+        },
+        {
+          name: 'shoppingList',
+          type: 'array',
+          description: 'Weekly grocery list',
+          required: true,
+        },
       ],
     },
   },
@@ -549,10 +718,20 @@ const CONSULTING_WORKFLOWS: Record<string, ConsultingWorkflow> = {
   'financial-complete': {
     id: 'financial-complete',
     name: 'Complete Financial Consultation',
-    description: 'Comprehensive financial planning: budget, investments, and tax strategy',
+    description:
+      'Comprehensive financial planning: budget, investments, and tax strategy',
     domain: 'finance',
     mode: 'sequential',
-    triggers: ['financial', 'budget', 'invest', 'retirement', 'savings', 'money', 'taxes', 'wealth'],
+    triggers: [
+      'financial',
+      'budget',
+      'invest',
+      'retirement',
+      'savings',
+      'money',
+      'taxes',
+      'wealth',
+    ],
     steps: [
       {
         id: 'financial-assessment',
@@ -573,9 +752,24 @@ const CONSULTING_WORKFLOWS: Record<string, ConsultingWorkflow> = {
     outputSchema: {
       type: 'json',
       fields: [
-        { name: 'budget', type: 'object', description: 'Monthly budget breakdown', required: true },
-        { name: 'investmentPlan', type: 'object', description: 'Investment allocation', required: true },
-        { name: 'taxStrategy', type: 'object', description: 'Tax optimization tips', required: true },
+        {
+          name: 'budget',
+          type: 'object',
+          description: 'Monthly budget breakdown',
+          required: true,
+        },
+        {
+          name: 'investmentPlan',
+          type: 'object',
+          description: 'Investment allocation',
+          required: true,
+        },
+        {
+          name: 'taxStrategy',
+          type: 'object',
+          description: 'Tax optimization tips',
+          required: true,
+        },
       ],
     },
   },
@@ -587,7 +781,15 @@ const CONSULTING_WORKFLOWS: Record<string, ConsultingWorkflow> = {
     description: 'Comprehensive career planning and job search strategy',
     domain: 'career',
     mode: 'sequential',
-    triggers: ['career', 'job', 'resume', 'interview', 'promotion', 'salary', 'job search'],
+    triggers: [
+      'career',
+      'job',
+      'resume',
+      'interview',
+      'promotion',
+      'salary',
+      'job search',
+    ],
     steps: [
       {
         id: 'career-planning',
@@ -600,8 +802,18 @@ const CONSULTING_WORKFLOWS: Record<string, ConsultingWorkflow> = {
     outputSchema: {
       type: 'json',
       fields: [
-        { name: 'careerPlan', type: 'object', description: 'Career development roadmap', required: true },
-        { name: 'actionItems', type: 'array', description: 'Immediate action items', required: true },
+        {
+          name: 'careerPlan',
+          type: 'object',
+          description: 'Career development roadmap',
+          required: true,
+        },
+        {
+          name: 'actionItems',
+          type: 'array',
+          description: 'Immediate action items',
+          required: true,
+        },
       ],
     },
   },
@@ -613,7 +825,14 @@ const CONSULTING_WORKFLOWS: Record<string, ConsultingWorkflow> = {
     description: 'Physical fitness, nutrition, and mental wellness combined',
     domain: 'health',
     mode: 'sequential',
-    triggers: ['wellness', 'health', 'self-care', 'wellbeing', 'balanced', 'healthy lifestyle'],
+    triggers: [
+      'wellness',
+      'health',
+      'self-care',
+      'wellbeing',
+      'balanced',
+      'healthy lifestyle',
+    ],
     steps: [
       {
         id: 'mental-wellness',
@@ -642,9 +861,24 @@ const CONSULTING_WORKFLOWS: Record<string, ConsultingWorkflow> = {
     outputSchema: {
       type: 'json',
       fields: [
-        { name: 'wellnessPlan', type: 'object', description: 'Integrated wellness approach', required: true },
-        { name: 'dailyRoutine', type: 'object', description: 'Daily wellness routine', required: true },
-        { name: 'selfCareChecklist', type: 'array', description: 'Self-care activities', required: true },
+        {
+          name: 'wellnessPlan',
+          type: 'object',
+          description: 'Integrated wellness approach',
+          required: true,
+        },
+        {
+          name: 'dailyRoutine',
+          type: 'object',
+          description: 'Daily wellness routine',
+          required: true,
+        },
+        {
+          name: 'selfCareChecklist',
+          type: 'array',
+          description: 'Self-care activities',
+          required: true,
+        },
       ],
     },
   },
@@ -695,10 +929,30 @@ const CONSULTING_WORKFLOWS: Record<string, ConsultingWorkflow> = {
     outputSchema: {
       type: 'json',
       fields: [
-        { name: 'businessPlan', type: 'object', description: 'Complete business plan', required: true },
-        { name: 'legalRequirements', type: 'array', description: 'Legal checklist', required: true },
-        { name: 'techPlan', type: 'object', description: 'Technology roadmap', required: true },
-        { name: 'financials', type: 'object', description: 'Financial projections', required: true },
+        {
+          name: 'businessPlan',
+          type: 'object',
+          description: 'Complete business plan',
+          required: true,
+        },
+        {
+          name: 'legalRequirements',
+          type: 'array',
+          description: 'Legal checklist',
+          required: true,
+        },
+        {
+          name: 'techPlan',
+          type: 'object',
+          description: 'Technology roadmap',
+          required: true,
+        },
+        {
+          name: 'financials',
+          type: 'object',
+          description: 'Financial projections',
+          required: true,
+        },
       ],
     },
   },
@@ -723,8 +977,18 @@ const CONSULTING_WORKFLOWS: Record<string, ConsultingWorkflow> = {
     outputSchema: {
       type: 'json',
       fields: [
-        { name: 'bestAnswer', type: 'object', description: 'Top-selected answer', required: true },
-        { name: 'alternativeViews', type: 'array', description: 'Other expert opinions', required: false },
+        {
+          name: 'bestAnswer',
+          type: 'object',
+          description: 'Top-selected answer',
+          required: true,
+        },
+        {
+          name: 'alternativeViews',
+          type: 'array',
+          description: 'Other expert opinions',
+          required: false,
+        },
       ],
     },
   },
@@ -750,7 +1014,9 @@ export class ConsultingOrchestrator {
   // MAIN CONSULTATION METHOD
   // ================================================
 
-  async startConsultation(request: ConsultationRequest): Promise<ConsultationResult> {
+  async startConsultation(
+    request: ConsultationRequest
+  ): Promise<ConsultationResult> {
     const startTime = Date.now();
     const store = useMissionStore.getState();
 
@@ -794,7 +1060,8 @@ export class ConsultingOrchestrator {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       store.addMessage({
         from: 'system',
         type: 'error',
@@ -849,9 +1116,14 @@ export class ConsultingOrchestrator {
     return this.createAdHocWorkflow(request);
   }
 
-  private createAdHocWorkflow(request: ConsultationRequest): ConsultingWorkflow {
+  private createAdHocWorkflow(
+    request: ConsultationRequest
+  ): ConsultingWorkflow {
     // Analyze query to select best agents
-    const relevantAgents = this.selectRelevantAgents(request.query, request.preferredAgents);
+    const relevantAgents = this.selectRelevantAgents(
+      request.query,
+      request.preferredAgents
+    );
 
     return {
       id: `adhoc-${Date.now()}`,
@@ -871,8 +1143,18 @@ export class ConsultingOrchestrator {
       outputSchema: {
         type: 'json',
         fields: [
-          { name: 'summary', type: 'string', description: 'Consultation summary', required: true },
-          { name: 'recommendations', type: 'array', description: 'Expert recommendations', required: true },
+          {
+            name: 'summary',
+            type: 'string',
+            description: 'Consultation summary',
+            required: true,
+          },
+          {
+            name: 'recommendations',
+            type: 'array',
+            description: 'Expert recommendations',
+            required: true,
+          },
         ],
       },
     };
@@ -945,7 +1227,12 @@ export class ConsultingOrchestrator {
         content: `👤 **${agent.name}** (${agent.role}) is analyzing your request...`,
       });
 
-      store.updateEmployeeStatus(agent.name, 'thinking', null, step.description);
+      store.updateEmployeeStatus(
+        agent.name,
+        'thinking',
+        null,
+        step.description
+      );
 
       try {
         const stepResult = await this.executeAgentStep(
@@ -956,7 +1243,10 @@ export class ConsultingOrchestrator {
         );
 
         contributions.push(stepResult);
-        previousOutputs = { ...previousOutputs, ...stepResult.structuredOutput };
+        previousOutputs = {
+          ...previousOutputs,
+          ...stepResult.structuredOutput,
+        };
         totalTokens += stepResult.tokensUsed;
 
         store.updateEmployeeStatus(agent.name, 'idle');
@@ -1051,7 +1341,12 @@ export class ConsultingOrchestrator {
         const agent = this.agents[step.agentId];
         if (!agent) return null;
 
-        store.updateEmployeeStatus(agent.name, 'thinking', null, step.description);
+        store.updateEmployeeStatus(
+          agent.name,
+          'thinking',
+          null,
+          step.description
+        );
 
         try {
           const result = await this.executeAgentStep(request, agent, step, {});
@@ -1072,7 +1367,9 @@ export class ConsultingOrchestrator {
       })
     );
 
-    const contributions = results.filter((r): r is AgentContribution => r !== null);
+    const contributions = results.filter(
+      (r): r is AgentContribution => r !== null
+    );
     const result = this.synthesizeResults(contributions, workflow);
 
     return {
@@ -1131,11 +1428,7 @@ Respond in JSON format:
   "rationale": "..."
 }`;
 
-    const planResponse = await this.callLLM(
-      request,
-      supervisor,
-      planPrompt
-    );
+    const planResponse = await this.callLLM(request, supervisor, planPrompt);
 
     // Execute based on supervisor's plan
     const contributions: AgentContribution[] = [];
@@ -1145,7 +1438,12 @@ Respond in JSON format:
       const agent = this.agents[step.agentId];
       if (!agent) continue;
 
-      store.updateEmployeeStatus(agent.name, 'thinking', null, step.description);
+      store.updateEmployeeStatus(
+        agent.name,
+        'thinking',
+        null,
+        step.description
+      );
 
       try {
         const result = await this.executeAgentStep(request, agent, step, {});
@@ -1223,7 +1521,12 @@ Create a comprehensive final consultation that:
       const agent = this.agents[agentId];
       if (!agent) return null;
 
-      store.updateEmployeeStatus(agent.name, 'using_tool', 'Racing', 'Competing for best answer');
+      store.updateEmployeeStatus(
+        agent.name,
+        'using_tool',
+        'Racing',
+        'Competing for best answer'
+      );
 
       try {
         const response = await this.callLLM(request, agent, request.query);
@@ -1507,10 +1810,11 @@ ${step.instructions || ''}`;
     });
 
     // Create summary
-    const summary = contributions.length > 0
-      ? `Consultation completed with ${contributions.length} expert(s): ${contributions.map((c) => c.agentName).join(', ')}. ` +
-        `Key areas covered: ${contributions.map((c) => c.role).join(', ')}.`
-      : 'Consultation completed.';
+    const summary =
+      contributions.length > 0
+        ? `Consultation completed with ${contributions.length} expert(s): ${contributions.map((c) => c.agentName).join(', ')}. ` +
+          `Key areas covered: ${contributions.map((c) => c.role).join(', ')}.`
+        : 'Consultation completed.';
 
     return {
       summary,

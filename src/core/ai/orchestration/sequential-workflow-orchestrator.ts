@@ -92,20 +92,27 @@ const PREDEFINED_WORKFLOWS: WorkflowDefinition[] = [
   {
     id: 'fitness-consultation',
     name: 'Fitness Consultation',
-    description: 'Get fitness advice from trainer, diet plan from dietitian, and meal prep from chef',
+    description:
+      'Get fitness advice from trainer, diet plan from dietitian, and meal prep from chef',
     steps: [
       {
         employeeId: 'gym-trainer',
         employeeName: 'Gym Trainer',
         role: 'fitness',
-        instructions: 'Analyze user fitness goals and create a workout plan. Note any dietary requirements.',
-        requiredOutput: ['workout_plan', 'dietary_requirements', 'fitness_goals'],
+        instructions:
+          'Analyze user fitness goals and create a workout plan. Note any dietary requirements.',
+        requiredOutput: [
+          'workout_plan',
+          'dietary_requirements',
+          'fitness_goals',
+        ],
       },
       {
         employeeId: 'dietitian',
         employeeName: 'Dietitian',
         role: 'nutrition',
-        instructions: 'Based on the workout plan and goals, create a personalized diet chart.',
+        instructions:
+          'Based on the workout plan and goals, create a personalized diet chart.',
         requiredOutput: ['diet_plan', 'calorie_requirements', 'meal_schedule'],
       },
       {
@@ -116,7 +123,14 @@ const PREDEFINED_WORKFLOWS: WorkflowDefinition[] = [
         requiredOutput: ['recipes', 'grocery_list', 'meal_prep_instructions'],
       },
     ],
-    triggerPatterns: ['diet', 'fitness', 'workout', 'meal plan', 'gym', 'nutrition'],
+    triggerPatterns: [
+      'diet',
+      'fitness',
+      'workout',
+      'meal plan',
+      'gym',
+      'nutrition',
+    ],
   },
   {
     id: 'code-review-workflow',
@@ -135,7 +149,11 @@ const PREDEFINED_WORKFLOWS: WorkflowDefinition[] = [
         employeeName: 'Security Analyst',
         role: 'security',
         instructions: 'Review code for security vulnerabilities.',
-        requiredOutput: ['vulnerabilities', 'risk_level', 'security_recommendations'],
+        requiredOutput: [
+          'vulnerabilities',
+          'risk_level',
+          'security_recommendations',
+        ],
       },
     ],
     triggerPatterns: ['review', 'security', 'audit', 'code check'],
@@ -160,7 +178,8 @@ export class SequentialWorkflowOrchestrator {
 
   static getInstance(): SequentialWorkflowOrchestrator {
     if (!SequentialWorkflowOrchestrator.instance) {
-      SequentialWorkflowOrchestrator.instance = new SequentialWorkflowOrchestrator();
+      SequentialWorkflowOrchestrator.instance =
+        new SequentialWorkflowOrchestrator();
     }
     return SequentialWorkflowOrchestrator.instance;
   }
@@ -174,7 +193,9 @@ export class SequentialWorkflowOrchestrator {
       this.employees = await systemPromptsService.getAvailableEmployees();
       if (this.employees.length > 0) {
         this.employeesLoaded = true;
-        console.log(`📋 Loaded ${this.employees.length} AI employees for workflows`);
+        console.log(
+          `📋 Loaded ${this.employees.length} AI employees for workflows`
+        );
       }
     }
   }
@@ -202,7 +223,11 @@ export class SequentialWorkflowOrchestrator {
     const inputLower = input.toLowerCase();
 
     for (const workflow of this.workflows.values()) {
-      if (workflow.triggerPatterns?.some((pattern) => inputLower.includes(pattern))) {
+      if (
+        workflow.triggerPatterns?.some((pattern) =>
+          inputLower.includes(pattern)
+        )
+      ) {
         return workflow;
       }
     }
@@ -238,7 +263,9 @@ export class SequentialWorkflowOrchestrator {
       }
 
       if (!workflow) {
-        throw new Error('No suitable workflow found. Please specify employees or workflow ID.');
+        throw new Error(
+          'No suitable workflow found. Please specify employees or workflow ID.'
+        );
       }
 
       // Create execution record
@@ -270,7 +297,11 @@ export class SequentialWorkflowOrchestrator {
       });
 
       // Execute workflow steps sequentially
-      const result = await this.executeWorkflowSteps(execution, workflow, request);
+      const result = await this.executeWorkflowSteps(
+        execution,
+        workflow,
+        request
+      );
 
       return {
         success: true,
@@ -279,7 +310,8 @@ export class SequentialWorkflowOrchestrator {
         finalResult: result,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       console.error('❌ Workflow execution failed:', errorMessage);
 
       const execution = this.executions.get(executionId);
@@ -332,12 +364,15 @@ export class SequentialWorkflowOrchestrator {
 
       // Find employee
       const employee = this.employees.find(
-        (e) => e.name.toLowerCase() === step.employeeName.toLowerCase() ||
-               e.name.toLowerCase().includes(step.employeeId.toLowerCase())
+        (e) =>
+          e.name.toLowerCase() === step.employeeName.toLowerCase() ||
+          e.name.toLowerCase().includes(step.employeeId.toLowerCase())
       );
 
       if (!employee) {
-        console.warn(`⚠️ Employee not found: ${step.employeeName}, skipping step`);
+        console.warn(
+          `⚠️ Employee not found: ${step.employeeName}, skipping step`
+        );
         stepExecution.status = 'skipped';
         stepExecution.error = 'Employee not found';
         continue;
@@ -395,7 +430,12 @@ export class SequentialWorkflowOrchestrator {
         );
 
         // Execute step
-        store.updateEmployeeStatus(employee.name, 'using_tool', 'LLM', step.instructions);
+        store.updateEmployeeStatus(
+          employee.name,
+          'using_tool',
+          'LLM',
+          step.instructions
+        );
         store.updateEmployeeProgress(employee.name, 25);
 
         const response = await unifiedLLMService.sendMessage({
@@ -407,7 +447,10 @@ export class SequentialWorkflowOrchestrator {
               content: m.content,
             })),
           ],
-          model: employee.model === 'inherit' ? 'claude-3-5-sonnet-20241022' : employee.model,
+          model:
+            employee.model === 'inherit'
+              ? 'claude-3-5-sonnet-20241022'
+              : employee.model,
           temperature: 0.7,
           userId: request.userId,
           sessionId: request.sessionId,
@@ -438,7 +481,10 @@ export class SequentialWorkflowOrchestrator {
         );
 
         // Extract any structured data for handoff
-        const handoffData = this.extractHandoffData(response.content, step.requiredOutput);
+        const handoffData = this.extractHandoffData(
+          response.content,
+          step.requiredOutput
+        );
 
         // Update step execution
         stepExecution.status = 'completed';
@@ -466,8 +512,9 @@ export class SequentialWorkflowOrchestrator {
         if (i < workflow.steps.length - 1) {
           const nextStep = workflow.steps[i + 1];
           const nextEmployee = this.employees.find(
-            (e) => e.name.toLowerCase() === nextStep.employeeName.toLowerCase() ||
-                   e.name.toLowerCase().includes(nextStep.employeeId.toLowerCase())
+            (e) =>
+              e.name.toLowerCase() === nextStep.employeeName.toLowerCase() ||
+              e.name.toLowerCase().includes(nextStep.employeeId.toLowerCase())
           );
 
           if (nextEmployee) {
@@ -480,7 +527,9 @@ export class SequentialWorkflowOrchestrator {
               request.userId,
               {
                 summary: `${employee.name} completed their part of the workflow.`,
-                keyPoints: Object.entries(handoffData).map(([k, v]) => `${k}: ${String(v).slice(0, 100)}`),
+                keyPoints: Object.entries(handoffData).map(
+                  ([k, v]) => `${k}: ${String(v).slice(0, 100)}`
+                ),
                 userRequest: request.input,
                 workCompleted: step.instructions || `Step ${i + 1}`,
                 pendingTasks: [nextStep.instructions || `Step ${i + 2}`],
@@ -508,9 +557,9 @@ export class SequentialWorkflowOrchestrator {
         // Prepare for next step
         previousOutput = response.content;
         previousHandoffData = { ...previousHandoffData, ...handoffData };
-
       } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        const errorMsg =
+          error instanceof Error ? error.message : 'Unknown error';
         stepExecution.status = 'failed';
         stepExecution.error = errorMsg;
 
@@ -747,7 +796,10 @@ If no useful information, respond with "NO_LEARNING"`;
     );
 
     // Get memory context
-    const memoryContext = await employeeMemoryService.buildMemoryContext(userId, employee.name);
+    const memoryContext = await employeeMemoryService.buildMemoryContext(
+      userId,
+      employee.name
+    );
 
     // Build full input
     const fullInput = memoryContext
@@ -761,9 +813,17 @@ If no useful information, respond with "NO_LEARNING"`;
     });
 
     // Get optimized messages
-    const contextMessages = employeeMemoryService.getOptimizedMessages(sessionId, employee.name);
+    const contextMessages = employeeMemoryService.getOptimizedMessages(
+      sessionId,
+      employee.name
+    );
 
-    store.updateEmployeeStatus(employee.name, 'thinking', null, 'Processing message');
+    store.updateEmployeeStatus(
+      employee.name,
+      'thinking',
+      null,
+      'Processing message'
+    );
 
     try {
       const response = await unifiedLLMService.sendMessage({
@@ -775,7 +835,10 @@ If no useful information, respond with "NO_LEARNING"`;
             content: m.content,
           })),
         ],
-        model: employee.model === 'inherit' ? 'claude-3-5-sonnet-20241022' : employee.model,
+        model:
+          employee.model === 'inherit'
+            ? 'claude-3-5-sonnet-20241022'
+            : employee.model,
         temperature: 0.7,
         userId,
         sessionId,
@@ -805,7 +868,12 @@ If no useful information, respond with "NO_LEARNING"`;
       store.updateEmployeeStatus(employee.name, 'idle');
 
       // Learn from interaction
-      await this.learnFromInteraction(userId, employee.name, message, response.content);
+      await this.learnFromInteraction(
+        userId,
+        employee.name,
+        message,
+        response.content
+      );
 
       return response.content;
     } catch (error) {
@@ -832,4 +900,5 @@ If no useful information, respond with "NO_LEARNING"`;
 }
 
 // Export singleton
-export const sequentialWorkflowOrchestrator = SequentialWorkflowOrchestrator.getInstance();
+export const sequentialWorkflowOrchestrator =
+  SequentialWorkflowOrchestrator.getInstance();

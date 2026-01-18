@@ -9,24 +9,13 @@ export type AIProvider = 'openai' | 'anthropic' | 'google' | 'perplexity';
 
 /**
  * Get configured providers
+ * SECURITY: All providers are available through authenticated Netlify proxies
+ * API keys are managed server-side, not exposed to client
  */
 export function getConfiguredProviders(): AIProvider[] {
-  const providers: AIProvider[] = [];
-
-  if (import.meta.env.VITE_OPENAI_API_KEY) {
-    providers.push('openai');
-  }
-  if (import.meta.env.VITE_ANTHROPIC_API_KEY) {
-    providers.push('anthropic');
-  }
-  if (import.meta.env.VITE_GOOGLE_API_KEY) {
-    providers.push('google');
-  }
-  if (import.meta.env.VITE_PERPLEXITY_API_KEY) {
-    providers.push('perplexity');
-  }
-
-  return providers;
+  // All providers are available through authenticated Netlify proxies
+  // Actual availability depends on server-side API key configuration
+  return ['openai', 'anthropic', 'google', 'perplexity'];
 }
 
 /**

@@ -1,11 +1,18 @@
 import { test, expect } from '@playwright/test';
 
+// Test credentials - MUST be set via environment variables in CI/CD
+// Never commit actual credentials to the repository
+const TEST_USER = {
+  email: process.env.E2E_TEST_EMAIL || 'test@example.com',
+  password: process.env.E2E_TEST_PASSWORD || '', // Set in CI environment
+};
+
 test.describe('Core Functionality', () => {
   test.beforeEach(async ({ page }) => {
-    // Login before each test with production credentials
+    // Login before each test
     await page.goto('/auth/login');
-    await page.fill('input[name="email"]', 'siddharthanagula3@gmail.com');
-    await page.fill('input[name="password"]', 'Sid@1234');
+    await page.fill('input[name="email"]', TEST_USER.email);
+    await page.fill('input[name="password"]', TEST_USER.password);
     await page.click('button[type="submit"]');
     await expect(page).toHaveURL(/.*\/dashboard/, { timeout: 10000 });
   });
@@ -136,9 +143,7 @@ test.describe('Core Functionality', () => {
     // Click on user menu
     await page.click('[data-testid="user-menu"]');
 
-    // Should see profile information
-    await expect(
-      page.locator('text=siddharthanagula3@gmail.com')
-    ).toBeVisible();
+    // Should see profile information (verify email matches test user)
+    await expect(page.locator(`text=${TEST_USER.email}`)).toBeVisible();
   });
 });

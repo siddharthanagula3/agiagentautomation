@@ -27,11 +27,7 @@ import {
 } from '@shared/components/ui/avatar';
 import { Badge } from '@shared/components/ui/badge';
 import { Button } from '@shared/components/ui/button';
-import {
-  User,
-  Bot,
-  CheckCheck,
-} from 'lucide-react';
+import { User, Bot, CheckCheck } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { format, isToday, isYesterday, isThisWeek, isThisYear } from 'date-fns';
@@ -123,7 +119,11 @@ const VirtualizedRowRenderer = React.memo(function VirtualizedRowRenderer({
       )}
 
       {row.type === 'typing-indicator' && (
-        <TypingIndicator typingAgents={(row.data as { typingAgents: Set<string> }).typingAgents} />
+        <TypingIndicator
+          typingAgents={
+            (row.data as { typingAgents: Set<string> }).typingAgents
+          }
+        />
       )}
     </div>
   );
@@ -267,7 +267,13 @@ export const AdvancedMessageList = React.memo(function AdvancedMessageList({
 
   // Handle scroll to detect manual scrolling
   const handleScroll = useCallback(
-    ({ scrollOffset, scrollUpdateWasRequested }: { scrollOffset: number; scrollUpdateWasRequested: boolean }) => {
+    ({
+      scrollOffset,
+      scrollUpdateWasRequested,
+    }: {
+      scrollOffset: number;
+      scrollUpdateWasRequested: boolean;
+    }) => {
       if (scrollUpdateWasRequested) return; // Ignore programmatic scrolls
 
       const totalHeight = virtualizedRows.length * ITEM_SIZE;

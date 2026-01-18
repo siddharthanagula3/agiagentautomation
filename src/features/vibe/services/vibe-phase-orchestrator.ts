@@ -34,7 +34,12 @@ export type PhaseStatus =
   | 'deployed'
   | 'error';
 
-export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'failed';
+export type ConnectionStatus =
+  | 'disconnected'
+  | 'connecting'
+  | 'connected'
+  | 'reconnecting'
+  | 'failed';
 
 export interface PhaseState {
   status: PhaseStatus;
@@ -280,7 +285,10 @@ interface VibeOrchestratorState {
 
   // Event handling
   processEvent: (event: VibeEvent) => void;
-  subscribe: (eventType: string, handler: EventHandler<VibeEvent>) => () => void;
+  subscribe: (
+    eventType: string,
+    handler: EventHandler<VibeEvent>
+  ) => () => void;
 }
 
 export const useVibeOrchestrator = create<VibeOrchestratorState>()(
@@ -356,7 +364,9 @@ export const useVibeOrchestrator = create<VibeOrchestratorState>()(
     addFileOperation: (phaseId: string, file: FileOperation) => {
       set((state) => {
         if (state.session) {
-          const phase = state.session.generationPhases.find((p) => p.id === phaseId);
+          const phase = state.session.generationPhases.find(
+            (p) => p.id === phaseId
+          );
           if (phase) {
             phase.files.push(file);
           }

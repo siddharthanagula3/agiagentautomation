@@ -1,7 +1,12 @@
 /**
  * OpenAI DALL-E Image Generation Service
- * Implements real image generation using OpenAI's DALL-E API
+ * Implements real image generation using OpenAI's DALL-E API through secure proxy
+ *
+ * SECURITY: All API calls are routed through Netlify proxy functions
+ * to keep API keys secure on the server side. Never expose API keys client-side.
  */
+
+import { supabase } from '@shared/lib/supabase-client';
 
 export interface DallEGenerationRequest {
   prompt: string;
@@ -34,18 +39,34 @@ export interface ImageGenerationResult {
 }
 
 /**
+ * Helper function to get the current Supabase session token
+ * Required for authenticated API proxy calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('[DallEImageService] Failed to get auth token:', error);
+    return null;
+  }
+}
+
+/**
  * DALL-E Image Generation Service
- * Uses OpenAI's images.generate API endpoint
+ * SECURITY: Routes through Netlify proxy to keep API keys secure
  */
 export class DallEImageService {
   private static instance: DallEImageService;
-  private readonly apiKey: string;
-  private readonly baseUrl = 'https://api.openai.com/v1/images/generations';
+  // SECURITY: API keys are managed by Netlify proxy functions
+  private readonly proxyUrl =
+    '/.netlify/functions/media-proxies/openai-image-proxy';
 
   private constructor() {
-    // Use environment variable in development, proxied in production
-    this.apiKey =
-      import.meta.env.VITE_OPENAI_API_KEY || import.meta.env.OPENAI_API_KEY || '';
+    // SECURITY: API keys removed from client-side code
+    // All calls go through authenticated Netlify proxy
   }
 
   static getInstance(): DallEImageService {
@@ -56,7 +77,7 @@ export class DallEImageService {
   }
 
   /**
-   * Generate images using DALL-E
+   * Generate images using DALL-E through secure proxy
    */
   async generateImage(
     request: DallEGenerationRequest
@@ -80,19 +101,20 @@ export class DallEImageService {
       throw new Error('DALL-E 3 only supports generating 1 image at a time');
     }
 
-    // Check API key
-    if (!this.apiKey) {
+    // SECURITY: Get auth token for authenticated proxy calls
+    const authToken = await getAuthToken();
+    if (!authToken) {
       throw new Error(
-        'OpenAI API key not configured. Please set VITE_OPENAI_API_KEY in your .env file.'
+        'User not authenticated. Please log in to generate images.'
       );
     }
 
     try {
-      const response = await fetch(this.baseUrl, {
+      const response = await fetch(this.proxyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           model,
@@ -107,7 +129,9 @@ export class DallEImageService {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage =
-          errorData.error?.message || `API error: ${response.status} ${response.statusText}`;
+          errorData.error?.message ||
+          errorData.error ||
+          `API error: ${response.status} ${response.statusText}`;
         throw new Error(errorMessage);
       }
 
@@ -138,7 +162,11 @@ export class DallEImageService {
    * Based on OpenAI's pricing: https://openai.com/pricing
    */
   estimateCost(request: DallEGenerationRequest): number {
-    const { quality = 'standard', size = '1024x1024', model = 'dall-e-3' } = request;
+    const {
+      quality = 'standard',
+      size = '1024x1024',
+      model = 'dall-e-3',
+    } = request;
 
     if (model === 'dall-e-3') {
       // DALL-E 3 pricing

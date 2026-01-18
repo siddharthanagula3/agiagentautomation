@@ -10,9 +10,11 @@ const __dirname = dirname(__filename);
 // Use local dev server for testing
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173';
 
+// Test credentials - MUST be set via environment variables in CI/CD
+// Never commit actual credentials to the repository
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || 'test@example.com',
-  password: process.env.TEST_USER_PASSWORD || 'testpassword123',
+  email: process.env.E2E_TEST_EMAIL || 'test@example.com',
+  password: process.env.E2E_TEST_PASSWORD || '', // Set in CI environment
 };
 
 // Helper functions
@@ -598,9 +600,7 @@ test.describe('Public Pages - No Auth Required', () => {
     await captureScreenshot(page, 'landing-page');
 
     // Landing page should have hero content
-    const heroContent = page.locator(
-      'h1, [class*="hero"], [class*="landing"]'
-    );
+    const heroContent = page.locator('h1, [class*="hero"], [class*="landing"]');
     await expect(heroContent.first()).toBeVisible({ timeout: 10000 });
     console.log('✅ Landing page loaded');
   });

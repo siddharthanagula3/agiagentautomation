@@ -23,7 +23,7 @@ import {
   ArrowRight,
   Code2,
   Layout,
-  Bot
+  Bot,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { Button } from '@shared/ui/button';
@@ -53,9 +53,21 @@ interface ProjectCategory {
 const categories: ProjectCategory[] = [
   { id: 'all', label: 'All', icon: <Sparkles className="h-3.5 w-3.5" /> },
   { id: 'ai-apps', label: 'AI Apps', icon: <Bot className="h-3.5 w-3.5" /> },
-  { id: 'websites', label: 'Websites', icon: <Globe className="h-3.5 w-3.5" /> },
-  { id: 'business', label: 'Business Apps', icon: <BarChart3 className="h-3.5 w-3.5" /> },
-  { id: 'mobile', label: 'Mobile', icon: <Smartphone className="h-3.5 w-3.5" /> },
+  {
+    id: 'websites',
+    label: 'Websites',
+    icon: <Globe className="h-3.5 w-3.5" />,
+  },
+  {
+    id: 'business',
+    label: 'Business Apps',
+    icon: <BarChart3 className="h-3.5 w-3.5" />,
+  },
+  {
+    id: 'mobile',
+    label: 'Mobile',
+    icon: <Smartphone className="h-3.5 w-3.5" />,
+  },
 ];
 
 const templates: ProjectTemplate[] = [
@@ -64,7 +76,8 @@ const templates: ProjectTemplate[] = [
     title: 'Landing Page',
     description: 'Modern landing page with hero, features & CTA',
     icon: <Layout className="h-5 w-5" />,
-    prompt: 'Create a modern landing page with a hero section, features grid, testimonials, and a call-to-action section. Use a clean, professional design with smooth animations.',
+    prompt:
+      'Create a modern landing page with a hero section, features grid, testimonials, and a call-to-action section. Use a clean, professional design with smooth animations.',
     category: 'websites',
     gradient: 'from-blue-500 to-cyan-500',
   },
@@ -73,7 +86,8 @@ const templates: ProjectTemplate[] = [
     title: 'Analytics Dashboard',
     description: 'Data visualization dashboard with charts',
     icon: <BarChart3 className="h-5 w-5" />,
-    prompt: 'Build an analytics dashboard with interactive charts, stats cards, recent activity feed, and data tables. Include dark mode support and responsive design.',
+    prompt:
+      'Build an analytics dashboard with interactive charts, stats cards, recent activity feed, and data tables. Include dark mode support and responsive design.',
     category: 'business',
     gradient: 'from-purple-500 to-pink-500',
   },
@@ -82,7 +96,8 @@ const templates: ProjectTemplate[] = [
     title: 'AI Chatbot',
     description: 'Conversational AI interface with streaming',
     icon: <MessageSquare className="h-5 w-5" />,
-    prompt: 'Create an AI chatbot interface with message bubbles, typing indicators, streaming text support, and a sleek input area. Add suggested prompts and conversation history.',
+    prompt:
+      'Create an AI chatbot interface with message bubbles, typing indicators, streaming text support, and a sleek input area. Add suggested prompts and conversation history.',
     category: 'ai-apps',
     gradient: 'from-green-500 to-emerald-500',
   },
@@ -91,7 +106,8 @@ const templates: ProjectTemplate[] = [
     title: 'E-commerce Store',
     description: 'Product catalog with cart & checkout',
     icon: <ShoppingCart className="h-5 w-5" />,
-    prompt: 'Build an e-commerce product page with image gallery, size/color selectors, add to cart functionality, product reviews, and related products section.',
+    prompt:
+      'Build an e-commerce product page with image gallery, size/color selectors, add to cart functionality, product reviews, and related products section.',
     category: 'business',
     gradient: 'from-orange-500 to-amber-500',
   },
@@ -100,7 +116,8 @@ const templates: ProjectTemplate[] = [
     title: 'Portfolio Site',
     description: 'Creative portfolio with project showcase',
     icon: <Palette className="h-5 w-5" />,
-    prompt: 'Design a creative portfolio website with an about section, project gallery with filters, skills section, and contact form. Use elegant animations and transitions.',
+    prompt:
+      'Design a creative portfolio website with an about section, project gallery with filters, skills section, and contact form. Use elegant animations and transitions.',
     category: 'websites',
     gradient: 'from-rose-500 to-red-500',
   },
@@ -109,7 +126,8 @@ const templates: ProjectTemplate[] = [
     title: 'SaaS Application',
     description: 'Full-stack SaaS with auth & database',
     icon: <Database className="h-5 w-5" />,
-    prompt: 'Create a SaaS application with user authentication, dashboard, settings page, and subscription management. Include a modern UI with sidebar navigation.',
+    prompt:
+      'Create a SaaS application with user authentication, dashboard, settings page, and subscription management. Include a modern UI with sidebar navigation.',
     category: 'business',
     gradient: 'from-indigo-500 to-violet-500',
   },
@@ -122,13 +140,17 @@ const quickPrompts = [
   'Make a real-time chat application',
 ];
 
-export function VibeEmptyState({ onPromptSelect, onCategorySelect }: VibeEmptyStateProps) {
+export function VibeEmptyState({
+  onPromptSelect,
+  onCategorySelect,
+}: VibeEmptyStateProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null);
 
-  const filteredTemplates = selectedCategory === 'all'
-    ? templates
-    : templates.filter(t => t.category === selectedCategory);
+  const filteredTemplates =
+    selectedCategory === 'all'
+      ? templates
+      : templates.filter((t) => t.category === selectedCategory);
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -162,8 +184,8 @@ export function VibeEmptyState({ onPromptSelect, onCategorySelect }: VibeEmptySt
           </h1>
 
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Describe your idea and let AI transform it into working code.
-            Build stunning apps, websites, and tools in minutes.
+            Describe your idea and let AI transform it into working code. Build
+            stunning apps, websites, and tools in minutes.
           </p>
         </div>
 
@@ -201,17 +223,21 @@ export function VibeEmptyState({ onPromptSelect, onCategorySelect }: VibeEmptySt
               )}
             >
               {/* Gradient overlay on hover */}
-              <div className={cn(
-                'absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-5',
-                template.gradient
-              )} />
+              <div
+                className={cn(
+                  'absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-5',
+                  template.gradient
+                )}
+              />
 
               <div className="relative z-10">
                 {/* Icon with gradient background */}
-                <div className={cn(
-                  'mb-3 inline-flex items-center justify-center rounded-lg bg-gradient-to-br p-2.5 text-white',
-                  template.gradient
-                )}>
+                <div
+                  className={cn(
+                    'mb-3 inline-flex items-center justify-center rounded-lg bg-gradient-to-br p-2.5 text-white',
+                    template.gradient
+                  )}
+                >
                   {template.icon}
                 </div>
 
@@ -219,7 +245,7 @@ export function VibeEmptyState({ onPromptSelect, onCategorySelect }: VibeEmptySt
                   {template.title}
                 </h3>
 
-                <p className="mb-3 text-sm text-muted-foreground line-clamp-2">
+                <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
                   {template.description}
                 </p>
 
@@ -234,11 +260,13 @@ export function VibeEmptyState({ onPromptSelect, onCategorySelect }: VibeEmptySt
 
         {/* Quick Prompts */}
         <div className="space-y-3 text-center">
-          <p className="text-sm text-muted-foreground">Or try a quick prompt:</p>
+          <p className="text-sm text-muted-foreground">
+            Or try a quick prompt:
+          </p>
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {quickPrompts.map((prompt, index) => (
+            {quickPrompts.map((prompt) => (
               <Badge
-                key={index}
+                key={`quick-prompt-${prompt.slice(0, 20)}`}
                 variant="outline"
                 className="cursor-pointer px-3 py-1.5 transition-colors hover:bg-primary hover:text-primary-foreground"
                 onClick={() => onPromptSelect(prompt)}

@@ -6,6 +6,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/react/shallow';
 
 // Task interface for mission plan
 export interface Task {
@@ -114,9 +115,14 @@ interface MissionState {
     currentTool?: string,
     currentTask?: string
   ) => void;
-  addEmployeeLog: (employeeName: string, message: string, type?: 'info' | 'warning' | 'error' | 'success') => void;
+  addEmployeeLog: (
+    employeeName: string,
+    message: string,
+    type?: 'info' | 'warning' | 'error' | 'success'
+  ) => void;
   updateEmployeeProgress: (employeeName: string, progress: number) => void;
   addMessage: (message: Omit<MissionMessage, 'id' | 'timestamp'>) => void;
+  setMessages: (messages: MissionMessage[]) => void; // Bulk set messages (e.g., from database)
   startMission: (missionId: string, mode?: 'mission' | 'chat') => void;
   pauseMission: () => void;
   resumeMission: () => void;
@@ -203,14 +209,18 @@ export const useMissionStore = create<MissionState>()(
         }),
 
       // Add log entry to employee
-      addEmployeeLog: (employeeName: string, message: string, type: 'info' | 'warning' | 'error' | 'success' = 'info') =>
+      addEmployeeLog: (
+        employeeName: string,
+        message: string,
+        type: 'info' | 'warning' | 'error' | 'success' = 'info'
+      ) =>
         set((state) => {
           const employee = state.activeEmployees[employeeName];
           if (employee) {
             employee.log.push({
               timestamp: new Date(),
               message,
-              type
+              type,
             });
           }
         }),
@@ -232,6 +242,12 @@ export const useMissionStore = create<MissionState>()(
             id: crypto.randomUUID(),
             timestamp: new Date(),
           });
+        }),
+
+      // Bulk set messages (used when loading from database)
+      setMessages: (messages) =>
+        set((state) => {
+          state.messages = messages;
         }),
 
       // Start mission
@@ -431,17 +447,62 @@ if (typeof window !== 'undefined' && !cleanupIntervalId) {
   });
 }
 
-// Selector hooks for optimized re-renders
+// ============================================================================
+// SELECTOR HOOKS (optimized with useShallow to prevent stale closures)
+// ============================================================================
+
+/**
+ * Selector for mission plan - returns stable reference when plan hasn't changed
+ */
 export const useMissionPlan = () =>
   useMissionStore((state) => state.missionPlan);
+
+/**
+ * Selector for active employees - returns stable reference when employees haven't changed
+ */
 export const useActiveEmployees = () =>
   useMissionStore((state) => state.activeEmployees);
+
+/**
+ * Selector for mission messages - returns stable reference when messages haven't changed
+ */
 export const useMissionMessages = () =>
   useMissionStore((state) => state.messages);
+
+/**
+ * Selector for mission status - uses useShallow to prevent unnecessary re-renders
+ * when selecting multiple primitive values that form an object
+ */
 export const useMissionStatus = () =>
-  useMissionStore((state) => ({
-    status: state.missionStatus,
-    isOrchestrating: state.isOrchestrating,
-    isPaused: state.isPaused,
-    error: state.error,
-  }));
+  useMissionStore(
+    useShallow((state) => ({
+      status: state.missionStatus,
+      isOrchestrating: state.isOrchestrating,
+      isPaused: state.isPaused,
+      error: state.error,
+    }))
+  );
+
+/**
+ * Selector for collaborative mode state - uses useShallow for multi-value selection
+ */
+export const useCollaborativeMode = () =>
+  useMissionStore(
+    useShallow((state) => ({
+      mode: state.mode,
+      activeChatSession: state.activeChatSession,
+      collaborativeAgents: state.collaborativeAgents,
+    }))
+  );
+
+/**
+ * Selector for a specific employee by name - stable reference when employee hasn't changed
+ */
+export const useEmployee = (employeeName: string) =>
+  useMissionStore((state) => state.activeEmployees[employeeName]);
+
+/**
+ * Selector for current mission ID - primitive value, no shallow needed
+ */
+export const useCurrentMissionId = () =>
+  useMissionStore((state) => state.currentMissionId);

@@ -114,226 +114,241 @@ const enableDevtools = import.meta.env.MODE !== 'production';
 export const useAuthStore = create<AuthState>()(
   devtools(
     immer((set, get) => ({
-  user: null,
-  isLoading: true,
-  error: null,
-  isAuthenticated: false,
-  initialized: false,
-
-  initialize: async () => {
-    if (get().initialized) return;
-
-    logger.auth('Initializing auth state...');
-    set({ isLoading: true, initialized: true });
-
-    try {
-      const timeoutPromise = new Promise<AuthResponse>((resolve) =>
-        setTimeout(
-          () =>
-            resolve({
-              user: null,
-              error: 'Auth initialization timeout',
-            }),
-          5000
-        )
-      );
-
-      const result = await Promise.race([
-        authService.getCurrentUser(),
-        timeoutPromise,
-      ]);
-
-      if (!result) {
-        logger.debug('Initialization skipped: empty auth response');
-        set({ user: null, isAuthenticated: false, isLoading: false });
-        return;
-      }
-
-      const { user, error } = result;
-
-      if (error) {
-        logger.debug('No existing session:', error);
-        // Clear any invalid auth data from localStorage
-        try {
-          localStorage.removeItem('supabase.auth.token');
-          localStorage.removeItem('sb-lywdzvfibhzbljrgovwr-auth-token');
-        } catch (e) {
-          logger.debug('Could not clear localStorage');
-        }
-        set({ user: null, isAuthenticated: false, isLoading: false });
-      } else {
-        logger.auth('Restored user session:', user?.email);
-        set({ user, isAuthenticated: !!user, isLoading: false });
-      }
-    } catch (error) {
-      logger.error('Initialization error:', error);
-      // Clear any invalid auth data
-      try {
-        localStorage.removeItem('supabase.auth.token');
-        localStorage.removeItem('sb-lywdzvfibhzbljrgovwr-auth-token');
-      } catch (e) {
-        logger.debug('Could not clear localStorage');
-      }
-      set({ user: null, isAuthenticated: false, isLoading: false });
-    }
-  },
-
-  login: async (loginData) => {
-    set({ isLoading: true, error: null });
-    try {
-      const { user, error } = await authService.login(loginData);
-      if (error) {
-        set({ error, isLoading: false, isAuthenticated: false, user: null });
-        return { success: false, error };
-      }
-      set({ user, isAuthenticated: !!user, isLoading: false });
-      return { success: true, error: null };
-    } catch (err: unknown) {
-      // TYPESCRIPT FIX: Properly handle unknown error type
-      const error = err instanceof Error ? err.message : String(err);
-      set({ error, isLoading: false, isAuthenticated: false, user: null });
-      return { success: false, error };
-    }
-  },
-
-  register: async (registerData) => {
-    set({ isLoading: true, error: null });
-    try {
-      const { user, error } = await authService.register(registerData);
-      if (error) {
-        set({ error, isLoading: false, isAuthenticated: false, user: null });
-        return { success: false, error };
-      }
-      set({ user, isAuthenticated: !!user, isLoading: false });
-      return { success: true, error: null };
-    } catch (err: unknown) {
-      // TYPESCRIPT FIX: Properly handle unknown error type
-      const error = err instanceof Error ? err.message : String(err);
-      set({ error, isLoading: false, isAuthenticated: false, user: null });
-      return { success: false, error };
-    }
-  },
-
-  logout: async () => {
-    set({ isLoading: true });
-
-    // Clean up all stores to prevent data leaks between sessions
-    await cleanupAllStores();
-
-    // Logout from auth service
-    await authService.logout();
-
-    set({ user: null, isAuthenticated: false, isLoading: false, initialized: false });
-
-    logger.auth('User logged out, all stores reset');
-  },
-
-  fetchUser: async () => {
-    set({ isLoading: true });
-    try {
-      const { user, error } = await authService.getCurrentUser();
-      if (error) {
-        set({ user: null, isAuthenticated: false, isLoading: false });
-      } else {
-        set({ user, isAuthenticated: !!user, isLoading: false });
-      }
-    } catch (error) {
-      set({ user: null, isAuthenticated: false, isLoading: false });
-    }
-  },
-
-  updateUser: (user: AuthUser) => {
-    set({ user, isAuthenticated: !!user });
-  },
-
-  setError: (error: string | null) => {
-    set({ error });
-  },
-
-  reset: () => {
-    set({
       user: null,
-      isAuthenticated: false,
+      isLoading: true,
       error: null,
-      isLoading: false,
+      isAuthenticated: false,
       initialized: false,
-    });
-  },
 
-  resetPassword: async (email: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      const { error } = await authService.resetPassword(email);
-      if (error) {
-        set({ error, isLoading: false });
-        return { success: false, error };
-      }
-      set({ isLoading: false });
-      return { success: true, error: null };
-    } catch (err: unknown) {
-      // TYPESCRIPT FIX: Properly handle unknown error type
-      const error = err instanceof Error ? err.message : String(err);
-      set({ error, isLoading: false });
-      return { success: false, error };
-    }
-  },
+      initialize: async () => {
+        if (get().initialized) return;
 
-  updatePassword: async (newPassword: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      const { error } = await authService.updatePassword(newPassword);
-      if (error) {
-        set({ error, isLoading: false });
-        return { success: false, error };
-      }
-      set({ isLoading: false });
-      return { success: true, error: null };
-    } catch (err: unknown) {
-      // TYPESCRIPT FIX: Properly handle unknown error type
-      const error = err instanceof Error ? err.message : String(err);
-      set({ error, isLoading: false });
-      return { success: false, error };
-    }
-  },
+        logger.auth('Initializing auth state...');
+        set({ isLoading: true, initialized: true });
 
-  changePassword: async (currentPassword: string, newPassword: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      const { error } = await authService.changePassword(
-        currentPassword,
-        newPassword
-      );
-      if (error) {
-        set({ error, isLoading: false });
-        return { success: false, error };
-      }
-      set({ isLoading: false });
-      return { success: true, error: null };
-    } catch (err: unknown) {
-      // TYPESCRIPT FIX: Properly handle unknown error type
-      const error = err instanceof Error ? err.message : String(err);
-      set({ error, isLoading: false });
-      return { success: false, error };
-    }
-  },
+        try {
+          const timeoutPromise = new Promise<AuthResponse>((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  user: null,
+                  error: 'Auth initialization timeout',
+                }),
+              5000
+            )
+          );
 
-  updateProfile: async (updates: Partial<AuthUser>) => {
-    set({ isLoading: true, error: null });
-    try {
-      const { user, error } = await authService.updateProfile(updates);
-      if (error) {
-        set({ error, isLoading: false });
-        return { success: false, error };
-      }
-      set({ user, isAuthenticated: !!user, isLoading: false });
-      return { success: true, error: null };
-    } catch (err: unknown) {
-      // TYPESCRIPT FIX: Properly handle unknown error type
-      const error = err instanceof Error ? err.message : String(err);
-      set({ error, isLoading: false });
-      return { success: false, error };
-    }
-  },
+          const result = await Promise.race([
+            authService.getCurrentUser(),
+            timeoutPromise,
+          ]);
+
+          if (!result) {
+            logger.debug('Initialization skipped: empty auth response');
+            set({ user: null, isAuthenticated: false, isLoading: false });
+            return;
+          }
+
+          const { user, error } = result;
+
+          if (error) {
+            logger.debug('No existing session:', error);
+            // Clear any invalid auth data from localStorage
+            try {
+              localStorage.removeItem('supabase.auth.token');
+              localStorage.removeItem('sb-lywdzvfibhzbljrgovwr-auth-token');
+            } catch (e) {
+              logger.debug('Could not clear localStorage');
+            }
+            set({ user: null, isAuthenticated: false, isLoading: false });
+          } else {
+            logger.auth('Restored user session:', user?.email);
+            set({ user, isAuthenticated: !!user, isLoading: false });
+          }
+        } catch (error) {
+          logger.error('Initialization error:', error);
+          // Clear any invalid auth data
+          try {
+            localStorage.removeItem('supabase.auth.token');
+            localStorage.removeItem('sb-lywdzvfibhzbljrgovwr-auth-token');
+          } catch (e) {
+            logger.debug('Could not clear localStorage');
+          }
+          set({ user: null, isAuthenticated: false, isLoading: false });
+        }
+      },
+
+      login: async (loginData) => {
+        set({ isLoading: true, error: null });
+        try {
+          const { user, error } = await authService.login(loginData);
+          if (error) {
+            set({
+              error,
+              isLoading: false,
+              isAuthenticated: false,
+              user: null,
+            });
+            return { success: false, error };
+          }
+          set({ user, isAuthenticated: !!user, isLoading: false });
+          return { success: true, error: null };
+        } catch (err: unknown) {
+          // TYPESCRIPT FIX: Properly handle unknown error type
+          const error = err instanceof Error ? err.message : String(err);
+          set({ error, isLoading: false, isAuthenticated: false, user: null });
+          return { success: false, error };
+        }
+      },
+
+      register: async (registerData) => {
+        set({ isLoading: true, error: null });
+        try {
+          const { user, error } = await authService.register(registerData);
+          if (error) {
+            set({
+              error,
+              isLoading: false,
+              isAuthenticated: false,
+              user: null,
+            });
+            return { success: false, error };
+          }
+          set({ user, isAuthenticated: !!user, isLoading: false });
+          return { success: true, error: null };
+        } catch (err: unknown) {
+          // TYPESCRIPT FIX: Properly handle unknown error type
+          const error = err instanceof Error ? err.message : String(err);
+          set({ error, isLoading: false, isAuthenticated: false, user: null });
+          return { success: false, error };
+        }
+      },
+
+      logout: async () => {
+        set({ isLoading: true });
+
+        // Clean up all stores to prevent data leaks between sessions
+        await cleanupAllStores();
+
+        // Logout from auth service
+        await authService.logout();
+
+        set({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          initialized: false,
+        });
+
+        logger.auth('User logged out, all stores reset');
+      },
+
+      fetchUser: async () => {
+        set({ isLoading: true });
+        try {
+          const { user, error } = await authService.getCurrentUser();
+          if (error) {
+            set({ user: null, isAuthenticated: false, isLoading: false });
+          } else {
+            set({ user, isAuthenticated: !!user, isLoading: false });
+          }
+        } catch (error) {
+          set({ user: null, isAuthenticated: false, isLoading: false });
+        }
+      },
+
+      updateUser: (user: AuthUser) => {
+        set({ user, isAuthenticated: !!user });
+      },
+
+      setError: (error: string | null) => {
+        set({ error });
+      },
+
+      reset: () => {
+        set({
+          user: null,
+          isAuthenticated: false,
+          error: null,
+          isLoading: false,
+          initialized: false,
+        });
+      },
+
+      resetPassword: async (email: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const { error } = await authService.resetPassword(email);
+          if (error) {
+            set({ error, isLoading: false });
+            return { success: false, error };
+          }
+          set({ isLoading: false });
+          return { success: true, error: null };
+        } catch (err: unknown) {
+          // TYPESCRIPT FIX: Properly handle unknown error type
+          const error = err instanceof Error ? err.message : String(err);
+          set({ error, isLoading: false });
+          return { success: false, error };
+        }
+      },
+
+      updatePassword: async (newPassword: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const { error } = await authService.updatePassword(newPassword);
+          if (error) {
+            set({ error, isLoading: false });
+            return { success: false, error };
+          }
+          set({ isLoading: false });
+          return { success: true, error: null };
+        } catch (err: unknown) {
+          // TYPESCRIPT FIX: Properly handle unknown error type
+          const error = err instanceof Error ? err.message : String(err);
+          set({ error, isLoading: false });
+          return { success: false, error };
+        }
+      },
+
+      changePassword: async (currentPassword: string, newPassword: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          const { error } = await authService.changePassword(
+            currentPassword,
+            newPassword
+          );
+          if (error) {
+            set({ error, isLoading: false });
+            return { success: false, error };
+          }
+          set({ isLoading: false });
+          return { success: true, error: null };
+        } catch (err: unknown) {
+          // TYPESCRIPT FIX: Properly handle unknown error type
+          const error = err instanceof Error ? err.message : String(err);
+          set({ error, isLoading: false });
+          return { success: false, error };
+        }
+      },
+
+      updateProfile: async (updates: Partial<AuthUser>) => {
+        set({ isLoading: true, error: null });
+        try {
+          const { user, error } = await authService.updateProfile(updates);
+          if (error) {
+            set({ error, isLoading: false });
+            return { success: false, error };
+          }
+          set({ user, isAuthenticated: !!user, isLoading: false });
+          return { success: true, error: null };
+        } catch (err: unknown) {
+          // TYPESCRIPT FIX: Properly handle unknown error type
+          const error = err instanceof Error ? err.message : String(err);
+          set({ error, isLoading: false });
+          return { success: false, error };
+        }
+      },
     })),
     { name: 'AuthStore', enabled: enableDevtools }
   )

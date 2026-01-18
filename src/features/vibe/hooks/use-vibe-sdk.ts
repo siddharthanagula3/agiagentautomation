@@ -7,226 +7,246 @@
 
 import { useEffect, useCallback, useMemo } from 'react';
 import {
-	useVibeSDKStore,
-	VibeSDKSession,
-	type VibeSDKEvent,
-	type WorkspaceChange,
+  useVibeSDKStore,
+  VibeSDKSession,
+  type VibeSDKEvent,
+  type WorkspaceChange,
 } from '../sdk/vibe-sdk-integration';
-import type { SessionState, GenerationState, PhaseState, FileTreeNode } from '../sdk';
+import type {
+  SessionState,
+  GenerationState,
+  PhaseState,
+  FileTreeNode,
+} from '../sdk';
 
 export interface UseVibeSDKOptions {
-	/** Session ID to use/create */
-	sessionId: string | null;
-	/** Auto-connect when sessionId is provided */
-	autoConnect?: boolean;
-	/** Callback for SDK events */
-	onEvent?: (event: VibeSDKEvent) => void;
-	/** Callback for workspace changes */
-	onFileChange?: (change: WorkspaceChange) => void;
-	/** Callback for state changes */
-	onStateChange?: (state: SessionState) => void;
+  /** Session ID to use/create */
+  sessionId: string | null;
+  /** Auto-connect when sessionId is provided */
+  autoConnect?: boolean;
+  /** Callback for SDK events */
+  onEvent?: (event: VibeSDKEvent) => void;
+  /** Callback for workspace changes */
+  onFileChange?: (change: WorkspaceChange) => void;
+  /** Callback for state changes */
+  onStateChange?: (state: SessionState) => void;
 }
 
 export interface UseVibeSDKReturn {
-	// Session
-	session: VibeSDKSession | null;
-	isConnected: boolean;
+  // Session
+  session: VibeSDKSession | null;
+  isConnected: boolean;
 
-	// State
-	connectionState: SessionState['connection'];
-	generationState: GenerationState;
-	phaseState: PhaseState;
-	previewUrl: string | null;
-	lastError: string | null;
+  // State
+  connectionState: SessionState['connection'];
+  generationState: GenerationState;
+  phaseState: PhaseState;
+  previewUrl: string | null;
+  lastError: string | null;
 
-	// Files
-	files: Array<{ path: string; content: string }>;
-	fileTree: FileTreeNode[];
-	fileCount: number;
+  // Files
+  files: Array<{ path: string; content: string }>;
+  fileTree: FileTreeNode[];
+  fileCount: number;
 
-	// File operations
-	writeFile: (path: string, content: string) => void;
-	writeFiles: (files: Array<{ path: string; content: string }>) => void;
-	readFile: (path: string) => string | null;
-	getFilesSnapshot: () => Record<string, string>;
+  // File operations
+  writeFile: (path: string, content: string) => void;
+  writeFiles: (files: Array<{ path: string; content: string }>) => void;
+  readFile: (path: string) => string | null;
+  getFilesSnapshot: () => Record<string, string>;
 
-	// Generation control
-	startGeneration: (totalFiles?: number) => void;
-	completeGeneration: () => void;
-	stopGeneration: () => void;
+  // Generation control
+  startGeneration: (totalFiles?: number) => void;
+  completeGeneration: () => void;
+  stopGeneration: () => void;
 
-	// Phase control
-	setPhase: (status: PhaseState['status'], name?: string, description?: string) => void;
+  // Phase control
+  setPhase: (
+    status: PhaseState['status'],
+    name?: string,
+    description?: string
+  ) => void;
 
-	// Preview control
-	startPreview: () => void;
-	completePreview: (url: string) => void;
+  // Preview control
+  startPreview: () => void;
+  completePreview: (url: string) => void;
 
-	// Session control
-	createSession: (sessionId: string) => VibeSDKSession;
-	clearSession: () => void;
+  // Session control
+  createSession: (sessionId: string) => VibeSDKSession;
+  clearSession: () => void;
 
-	// Computed states
-	isGenerating: boolean;
-	isIdle: boolean;
-	generationProgress: { current: number; total?: number } | null;
+  // Computed states
+  isGenerating: boolean;
+  isIdle: boolean;
+  generationProgress: { current: number; total?: number } | null;
 }
 
 /**
  * Hook for integrating VibeSDK into React components
  */
 export function useVibeSDK(options: UseVibeSDKOptions): UseVibeSDKReturn {
-	const {
-		sessionId,
-		autoConnect = true,
-		onEvent,
-		onFileChange,
-		onStateChange,
-	} = options;
+  const {
+    sessionId,
+    autoConnect = true,
+    onEvent,
+    onFileChange,
+    onStateChange,
+  } = options;
 
-	const {
-		session,
-		connectionState,
-		generationState,
-		phaseState,
-		files,
-		fileTree,
-		previewUrl,
-		lastError,
-		createSession,
-		clearSession,
-		writeFile,
-		writeFiles,
-		readFile,
-		startGeneration,
-		completeGeneration,
-	} = useVibeSDKStore();
+  const {
+    session,
+    connectionState,
+    generationState,
+    phaseState,
+    files,
+    fileTree,
+    previewUrl,
+    lastError,
+    createSession,
+    clearSession,
+    writeFile,
+    writeFiles,
+    readFile,
+    startGeneration,
+    completeGeneration,
+  } = useVibeSDKStore();
 
-	// Auto-connect when sessionId changes
-	useEffect(() => {
-		if (!sessionId || !autoConnect) return;
+  // Auto-connect when sessionId changes
+  useEffect(() => {
+    if (!sessionId || !autoConnect) return;
 
-		// Create session if needed
-		const existingSession = useVibeSDKStore.getState().session;
-		if (!existingSession || useVibeSDKStore.getState().sessionId !== sessionId) {
-			createSession(sessionId);
-		}
-	}, [sessionId, autoConnect, createSession]);
+    // Create session if needed
+    const existingSession = useVibeSDKStore.getState().session;
+    if (
+      !existingSession ||
+      useVibeSDKStore.getState().sessionId !== sessionId
+    ) {
+      createSession(sessionId);
+    }
+  }, [sessionId, autoConnect, createSession]);
 
-	// Subscribe to events
-	useEffect(() => {
-		const currentSession = useVibeSDKStore.getState().session;
-		if (!currentSession) return;
+  // Subscribe to events
+  useEffect(() => {
+    const currentSession = useVibeSDKStore.getState().session;
+    if (!currentSession) return;
 
-		const unsubscribers: Array<() => void> = [];
+    const unsubscribers: Array<() => void> = [];
 
-		if (onEvent) {
-			unsubscribers.push(currentSession.onEvent(onEvent));
-		}
+    if (onEvent) {
+      unsubscribers.push(currentSession.onEvent(onEvent));
+    }
 
-		if (onFileChange) {
-			unsubscribers.push(currentSession.onWorkspaceChange(onFileChange));
-		}
+    if (onFileChange) {
+      unsubscribers.push(currentSession.onWorkspaceChange(onFileChange));
+    }
 
-		if (onStateChange) {
-			unsubscribers.push(currentSession.onStateChange((next) => onStateChange(next)));
-		}
+    if (onStateChange) {
+      unsubscribers.push(
+        currentSession.onStateChange((next) => onStateChange(next))
+      );
+    }
 
-		return () => {
-			unsubscribers.forEach((unsub) => unsub());
-		};
-	}, [session, onEvent, onFileChange, onStateChange]);
+    return () => {
+      unsubscribers.forEach((unsub) => unsub());
+    };
+  }, [session, onEvent, onFileChange, onStateChange]);
 
-	// Session methods
-	const stopGeneration = useCallback(() => {
-		const currentSession = useVibeSDKStore.getState().session;
-		currentSession?.stopGeneration();
-	}, []);
+  // Session methods
+  const stopGeneration = useCallback(() => {
+    const currentSession = useVibeSDKStore.getState().session;
+    currentSession?.stopGeneration();
+  }, []);
 
-	const setPhase = useCallback(
-		(status: PhaseState['status'], name?: string, description?: string) => {
-			const currentSession = useVibeSDKStore.getState().session;
-			currentSession?.setPhase(status, name, description);
-		},
-		[]
-	);
+  const setPhase = useCallback(
+    (status: PhaseState['status'], name?: string, description?: string) => {
+      const currentSession = useVibeSDKStore.getState().session;
+      currentSession?.setPhase(status, name, description);
+    },
+    []
+  );
 
-	const startPreview = useCallback(() => {
-		const currentSession = useVibeSDKStore.getState().session;
-		currentSession?.startPreview();
-	}, []);
+  const startPreview = useCallback(() => {
+    const currentSession = useVibeSDKStore.getState().session;
+    currentSession?.startPreview();
+  }, []);
 
-	const completePreview = useCallback((url: string) => {
-		const currentSession = useVibeSDKStore.getState().session;
-		currentSession?.completePreview(url);
-	}, []);
+  const completePreview = useCallback((url: string) => {
+    const currentSession = useVibeSDKStore.getState().session;
+    currentSession?.completePreview(url);
+  }, []);
 
-	const getFilesSnapshot = useCallback(() => {
-		const currentSession = useVibeSDKStore.getState().session;
-		return currentSession?.getFilesSnapshot() ?? {};
-	}, []);
+  const getFilesSnapshot = useCallback(() => {
+    const currentSession = useVibeSDKStore.getState().session;
+    return currentSession?.getFilesSnapshot() ?? {};
+  }, []);
 
-	// Computed values
-	const isConnected = connectionState === 'connected';
-	const isGenerating = generationState.status === 'running';
-	const isIdle = generationState.status === 'idle';
-	const fileCount = files.length;
+  // Computed values
+  const isConnected = connectionState === 'connected';
+  const isGenerating = generationState.status === 'running';
+  const isIdle = generationState.status === 'idle';
+  const fileCount = files.length;
 
-	const generationProgress = useMemo(() => {
-		if (generationState.status === 'running' || generationState.status === 'complete') {
-			const state = generationState as { filesGenerated: number; totalFiles?: number };
-			return {
-				current: state.filesGenerated ?? 0,
-				total: state.totalFiles,
-			};
-		}
-		return null;
-	}, [generationState]);
+  const generationProgress = useMemo(() => {
+    if (
+      generationState.status === 'running' ||
+      generationState.status === 'complete'
+    ) {
+      const state = generationState as {
+        filesGenerated: number;
+        totalFiles?: number;
+      };
+      return {
+        current: state.filesGenerated ?? 0,
+        total: state.totalFiles,
+      };
+    }
+    return null;
+  }, [generationState]);
 
-	return {
-		// Session
-		session,
-		isConnected,
+  return {
+    // Session
+    session,
+    isConnected,
 
-		// State
-		connectionState,
-		generationState,
-		phaseState,
-		previewUrl,
-		lastError,
+    // State
+    connectionState,
+    generationState,
+    phaseState,
+    previewUrl,
+    lastError,
 
-		// Files
-		files,
-		fileTree,
-		fileCount,
+    // Files
+    files,
+    fileTree,
+    fileCount,
 
-		// File operations
-		writeFile,
-		writeFiles,
-		readFile,
-		getFilesSnapshot,
+    // File operations
+    writeFile,
+    writeFiles,
+    readFile,
+    getFilesSnapshot,
 
-		// Generation control
-		startGeneration,
-		completeGeneration,
-		stopGeneration,
+    // Generation control
+    startGeneration,
+    completeGeneration,
+    stopGeneration,
 
-		// Phase control
-		setPhase,
+    // Phase control
+    setPhase,
 
-		// Preview control
-		startPreview,
-		completePreview,
+    // Preview control
+    startPreview,
+    completePreview,
 
-		// Session control
-		createSession,
-		clearSession,
+    // Session control
+    createSession,
+    clearSession,
 
-		// Computed states
-		isGenerating,
-		isIdle,
-		generationProgress,
-	};
+    // Computed states
+    isGenerating,
+    isIdle,
+    generationProgress,
+  };
 }
 
 export default useVibeSDK;

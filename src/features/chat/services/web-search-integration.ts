@@ -267,28 +267,24 @@ export async function enhanceMessageWithSearch(
 
 /**
  * Checks if web search is configured and available
+ * SECURITY: All search providers are available through authenticated Netlify proxies
  */
 export function isWebSearchAvailable(): boolean {
-  const hasPerplexity = !!import.meta.env.VITE_PERPLEXITY_API_KEY;
-  const hasGoogle =
-    !!import.meta.env.VITE_GOOGLE_API_KEY && !!import.meta.env.VITE_GOOGLE_CX;
+  // All search providers are available through authenticated proxies
   // DuckDuckGo is always available as it doesn't require API keys
-
-  return hasPerplexity || hasGoogle || true; // true because DDG is free
+  return true;
 }
 
 /**
  * Get the available search provider
+ * SECURITY: Provider availability is determined by server-side proxy configuration
  */
 export function getPreferredSearchProvider():
   | 'perplexity'
   | 'google'
   | 'duckduckgo' {
-  if (import.meta.env.VITE_PERPLEXITY_API_KEY) {
-    return 'perplexity';
-  }
-  if (import.meta.env.VITE_GOOGLE_API_KEY && import.meta.env.VITE_GOOGLE_CX) {
-    return 'google';
-  }
-  return 'duckduckgo';
+  // Default to perplexity since it has best search capabilities
+  // Actual availability is determined by server-side API key configuration
+  // Falls back automatically if provider is not configured server-side
+  return 'perplexity';
 }

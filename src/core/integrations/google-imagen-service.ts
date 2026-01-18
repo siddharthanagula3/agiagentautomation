@@ -3,11 +3,16 @@
  * Official integration with Google AI Studio Imagen API for image generation
  * Uses Gemini API endpoints: https://ai.google.dev/gemini-api/docs/imagen
  *
+ * SECURITY: All API calls are routed through Netlify proxy functions
+ * to keep API keys secure on the server side. Never expose API keys client-side.
+ *
  * Supported models:
  * - imagen-4.0-generate-001 (Standard)
  * - imagen-4.0-ultra-generate-001 (Ultra quality)
  * - imagen-4.0-fast-generate-001 (Fast generation)
  */
+
+import { supabase } from '@shared/lib/supabase-client';
 
 export interface ImagenGenerationRequest {
   prompt: string;
@@ -57,7 +62,9 @@ export interface ImagenServiceError {
   details?: unknown;
 }
 
-const IMAGEN_API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
+// SECURITY: API calls route through Netlify proxy
+const IMAGEN_PROXY_URL =
+  '/.netlify/functions/media-proxies/google-imagen-proxy';
 
 // Pricing per image (USD)
 const IMAGEN_PRICING = {
@@ -66,13 +73,29 @@ const IMAGEN_PRICING = {
   'imagen-4.0-fast-generate-001': 0.001,
 };
 
+/**
+ * Helper function to get the current Supabase session token
+ * Required for authenticated API proxy calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('[GoogleImagenService] Failed to get auth token:', error);
+    return null;
+  }
+}
+
 export class GoogleImagenService {
   private static instance: GoogleImagenService;
-  private apiKey: string;
+  // SECURITY: API keys removed from client-side code
   private isDemoMode: boolean;
 
   private constructor() {
-    this.apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
+    // SECURITY: API keys are managed by Netlify proxy functions
     this.isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true';
   }
 
@@ -85,17 +108,20 @@ export class GoogleImagenService {
 
   /**
    * Check if Imagen service is available
+   * SECURITY: Always returns true since proxy handles API key on server side
    */
   isAvailable(): boolean {
-    return !!this.apiKey || this.isDemoMode;
+    // Service is available through authenticated proxy or in demo mode
+    return true;
   }
 
   /**
    * Get API key status
+   * SECURITY: API keys are managed server-side, not exposed to client
    */
   getApiKeyStatus(): { configured: boolean; demoMode: boolean } {
     return {
-      configured: !!this.apiKey,
+      configured: true, // Proxy handles API key server-side
       demoMode: this.isDemoMode,
     };
   }
@@ -151,38 +177,42 @@ export class GoogleImagenService {
   }
 
   /**
-   * Call Imagen API (official Gemini API endpoint)
+   * Call Imagen API through secure Netlify proxy
+   * SECURITY: Routes through authenticated proxy to keep API keys secure
    */
   private async callImagenAPI(
     request: ImagenGenerationRequest,
     response: ImagenGenerationResponse
   ): Promise<ImagenGenerationResponse> {
+    // SECURITY: Get auth token for authenticated proxy calls
+    const authToken = await getAuthToken();
+    if (!authToken) {
+      throw this.createError(
+        'AUTH_ERROR',
+        'User not authenticated. Please log in to generate images.'
+      );
+    }
+
     const model = request.model || 'imagen-4.0-generate-001';
-    const endpoint = `${IMAGEN_API_BASE_URL}/models/${model}:predict`;
 
     const requestBody = {
-      instances: [
-        {
-          prompt: request.prompt,
-        },
-      ],
-      parameters: {
-        sampleCount: request.numberOfImages || 1,
-        aspectRatio: request.aspectRatio || '1:1',
-        negativePrompt: request.negativePrompt,
-        seed: request.seed,
-        language: request.language || 'auto',
-        safetyFilterLevel:
-          request.safetyFilterLevel || 'block_medium_and_above',
-        personGeneration: request.personGeneration || 'allow_adult',
-      },
+      model,
+      prompt: request.prompt,
+      numberOfImages: request.numberOfImages || 1,
+      aspectRatio: request.aspectRatio || '1:1',
+      negativePrompt: request.negativePrompt,
+      seed: request.seed,
+      language: request.language || 'auto',
+      safetyFilterLevel: request.safetyFilterLevel || 'block_medium_and_above',
+      personGeneration: request.personGeneration || 'allow_adult',
     };
 
-    const apiResponse = await fetch(endpoint, {
+    // SECURITY: Route through Netlify proxy
+    const apiResponse = await fetch(IMAGEN_PROXY_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': this.apiKey,
+        Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify(requestBody),
     });
@@ -192,6 +222,7 @@ export class GoogleImagenService {
       throw this.createError(
         'API_ERROR',
         errorData.error?.message ||
+          errorData.error ||
           `Imagen API error: ${apiResponse.statusText}`,
         errorData
       );
@@ -200,15 +231,21 @@ export class GoogleImagenService {
     const data = await apiResponse.json();
 
     // Process predictions
-    const predictions = data.predictions || [];
+    const predictions = data.predictions || data.images || [];
     response.images = predictions.map(
       (
-        prediction: { bytesBase64Encoded?: string; mimeType?: string },
+        prediction: {
+          bytesBase64Encoded?: string;
+          mimeType?: string;
+          url?: string;
+        },
         index: number
       ) => ({
-        url: prediction.bytesBase64Encoded
-          ? `data:${prediction.mimeType || 'image/png'};base64,${prediction.bytesBase64Encoded}`
-          : '',
+        url:
+          prediction.url ||
+          (prediction.bytesBase64Encoded
+            ? `data:${prediction.mimeType || 'image/png'};base64,${prediction.bytesBase64Encoded}`
+            : ''),
         mimeType: prediction.mimeType || 'image/png',
         bytesBase64Encoded: prediction.bytesBase64Encoded,
       })
@@ -256,6 +293,7 @@ export class GoogleImagenService {
 
   /**
    * Enhance prompt for better image generation
+   * SECURITY: Routes through authenticated Netlify proxy
    */
   async enhancePrompt(prompt: string): Promise<string> {
     if (!this.isAvailable()) {
@@ -263,36 +301,41 @@ export class GoogleImagenService {
     }
 
     try {
+      // SECURITY: Get auth token for authenticated proxy calls
+      const authToken = await getAuthToken();
+      if (!authToken) {
+        console.warn('User not authenticated, using original prompt');
+        return prompt;
+      }
+
       const systemPrompt =
         'You are an expert at creating detailed, high-quality image generation prompts. ' +
         'Enhance the given prompt to be more specific, descriptive, and likely to produce excellent results. ' +
         'Focus on visual details, composition, lighting, style, and artistic elements. ' +
         'Keep the enhanced prompt concise (under 200 words) but rich in detail.';
 
-      const endpoint = `${IMAGEN_API_BASE_URL}/models/gemini-2.0-flash-exp:generateContent`;
-
-      const apiResponse = await fetch(`${endpoint}?key=${this.apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: 'user',
-              parts: [
-                {
-                  text: `${systemPrompt}\n\nOriginal prompt: ${prompt}\n\nEnhanced prompt:`,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 200,
+      // SECURITY: Route through Google proxy instead of direct API call
+      const apiResponse = await fetch(
+        '/.netlify/functions/llm-proxies/google-proxy',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
           },
-        }),
-      });
+          body: JSON.stringify({
+            model: 'gemini-2.0-flash',
+            messages: [
+              {
+                role: 'user',
+                content: `${systemPrompt}\n\nOriginal prompt: ${prompt}\n\nEnhanced prompt:`,
+              },
+            ],
+            temperature: 0.7,
+            max_tokens: 200,
+          }),
+        }
+      );
 
       if (!apiResponse.ok) {
         console.warn('Failed to enhance prompt with Gemini, using original');
@@ -301,7 +344,9 @@ export class GoogleImagenService {
 
       const data = await apiResponse.json();
       const enhancedPrompt =
-        data.candidates?.[0]?.content?.parts?.[0]?.text || prompt;
+        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        data.content ||
+        prompt;
 
       return enhancedPrompt.trim();
     } catch (error) {

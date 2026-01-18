@@ -86,14 +86,10 @@ export interface MediaGenerationStats {
 }
 
 /**
- * ⚠️ SECURITY WARNING: API keys in development mode only
- * These keys are ONLY used in development for direct API access.
- * In production, use server-side proxies to keep API keys secure.
- * NEVER expose API keys with VITE_ prefix in production builds.
+ * SECURITY: API keys are managed by Netlify proxy functions
+ * All API calls route through authenticated proxies to keep keys secure.
+ * Client-side code no longer has access to API keys.
  */
-const GOOGLE_API_KEY = import.meta.env.DEV
-  ? import.meta.env.VITE_GOOGLE_API_KEY || ''
-  : '';
 const IS_DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
 
 export class MediaGenerationService {
@@ -121,9 +117,10 @@ export class MediaGenerationService {
         prompt: request.prompt,
         size: request.size || '1024x1024',
         quality: request.quality || 'standard',
-        style: request.style === 'realistic' || request.style === 'photographic'
-          ? 'natural'
-          : 'vivid',
+        style:
+          request.style === 'realistic' || request.style === 'photographic'
+            ? 'natural'
+            : 'vivid',
         n: 1, // DALL-E 3 only supports 1 image at a time
         model: request.quality === 'hd' ? 'dall-e-3' : 'dall-e-3',
       };
@@ -151,10 +148,12 @@ export class MediaGenerationService {
         tokensUsed: 0, // DALL-E doesn't report tokens for image generation
         createdAt: dallEResult.createdAt,
         status: 'completed',
-        images: [{
-          url: dallEResult.url,
-          mimeType: 'image/png',
-        }],
+        images: [
+          {
+            url: dallEResult.url,
+            mimeType: 'image/png',
+          },
+        ],
       };
 
       this.generationHistory.push(result);
@@ -194,12 +193,9 @@ export class MediaGenerationService {
         seed: request.seed,
       };
 
-      // Enhance prompt if GOOGLE_API_KEY is available
-      if (GOOGLE_API_KEY) {
-        veoRequest.prompt = await googleVeoService.enhancePrompt(
-          request.prompt
-        );
-      }
+      // Enhance prompt through authenticated proxy
+      // SECURITY: API key is handled server-side by the proxy
+      veoRequest.prompt = await googleVeoService.enhancePrompt(request.prompt);
 
       // Generate video with progress callback
       const veoResponse = await googleVeoService.generateVideo(
@@ -313,6 +309,7 @@ export class MediaGenerationService {
 
   /**
    * Check if service is available
+   * SECURITY: Services are available through authenticated proxies
    */
   isServiceAvailable(): {
     imagen: boolean;
@@ -322,7 +319,7 @@ export class MediaGenerationService {
     return {
       imagen: googleImagenService.isAvailable(),
       veo: googleVeoService.isAvailable(),
-      gemini: !!GOOGLE_API_KEY || IS_DEMO_MODE,
+      gemini: true, // Always available through proxy or demo mode
     };
   }
 

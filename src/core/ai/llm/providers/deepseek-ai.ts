@@ -13,7 +13,9 @@ import { supabase } from '@shared/lib/supabase-client';
  */
 async function getAuthToken(): Promise<string | null> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
     console.error('[DeepSeek Provider] Failed to get auth token:', error);
@@ -53,8 +55,14 @@ export interface DeepSeekResponse {
   };
 }
 
+import {
+  SUPPORTED_DEEPSEEK_MODELS,
+  DEFAULT_DEEPSEEK_MODEL,
+  type DeepSeekModel,
+} from '@shared/config/supported-models';
+
 export interface DeepSeekConfig {
-  model: 'deepseek-chat' | 'deepseek-reasoner';
+  model: DeepSeekModel;
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
@@ -76,7 +84,7 @@ export class DeepSeekProvider {
 
   constructor(config: Partial<DeepSeekConfig> = {}) {
     this.config = {
-      model: 'deepseek-chat',
+      model: DEFAULT_DEEPSEEK_MODEL,
       maxTokens: 4000,
       temperature: 0.7,
       systemPrompt: 'You are a helpful AI assistant.',
@@ -109,7 +117,7 @@ export class DeepSeekProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: messages.map((msg) => ({
@@ -219,7 +227,7 @@ export class DeepSeekProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: messages.map((msg) => ({
@@ -332,9 +340,10 @@ export class DeepSeekProvider {
 
   /**
    * Get available models (Jan 2026)
+   * Uses shared config from @shared/config/supported-models.ts
    */
   static getAvailableModels(): string[] {
-    return ['deepseek-chat', 'deepseek-reasoner'];
+    return [...SUPPORTED_DEEPSEEK_MODELS];
   }
 
   /**
@@ -344,7 +353,7 @@ export class DeepSeekProvider {
     return {
       chat: ['deepseek-chat'],
       reasoning: ['deepseek-reasoner'],
-      coding: ['deepseek-chat', 'deepseek-reasoner'],
+      coding: ['deepseek-chat', 'deepseek-reasoner', 'deepseek-coder'],
       tools: ['deepseek-chat', 'deepseek-reasoner'],
     };
   }

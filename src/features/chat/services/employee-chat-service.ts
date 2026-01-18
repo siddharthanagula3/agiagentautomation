@@ -98,7 +98,15 @@ export class EmployeeChatService {
     options?: {
       userId?: string;
       sessionId?: string;
-      mode?: 'team' | 'engineer' | 'research' | 'race' | 'solo' | 'workflow' | 'direct' | 'consulting';
+      mode?:
+        | 'team'
+        | 'engineer'
+        | 'research'
+        | 'race'
+        | 'solo'
+        | 'workflow'
+        | 'direct'
+        | 'consulting';
       targetEmployee?: string; // For direct mode - chat with specific employee
       workflowId?: string; // For workflow mode - use specific workflow
       workflowEmployees?: string[]; // For workflow mode - custom employee sequence
@@ -222,7 +230,8 @@ export class EmployeeChatService {
       await multiAgentCollaborationService.analyzeComplexity(userMessage);
 
     // Auto-detect workflow triggers
-    const detectedWorkflow = sequentialWorkflowOrchestrator.detectWorkflow(userMessage);
+    const detectedWorkflow =
+      sequentialWorkflowOrchestrator.detectWorkflow(userMessage);
     if (detectedWorkflow && mode === 'team') {
       store.addMessage({
         from: 'system',
@@ -330,10 +339,15 @@ export class EmployeeChatService {
           if (memoryContext) {
             // Prepend memory context as a system message
             enhancedHistory = [
-              { role: 'system', content: `## Previous Context:\n${memoryContext}` },
-              ...conversationHistory
+              {
+                role: 'system',
+                content: `## Previous Context:\n${memoryContext}`,
+              },
+              ...conversationHistory,
             ];
-            thinkingSteps.push('Loaded memory context from previous interactions');
+            thinkingSteps.push(
+              'Loaded memory context from previous interactions'
+            );
           }
         } catch (error) {
           console.warn('[EmployeeChat] Failed to load memory context:', error);
@@ -352,11 +366,15 @@ export class EmployeeChatService {
       // Save interaction to memory if userId is available
       if (userId) {
         try {
-          await employeeMemoryService.addInteraction(userId, selection.employee.name, {
-            userMessage,
-            employeeResponse: response,
-            timestamp: new Date()
-          });
+          await employeeMemoryService.addInteraction(
+            userId,
+            selection.employee.name,
+            {
+              userMessage,
+              employeeResponse: response,
+              timestamp: new Date(),
+            }
+          );
           thinkingSteps.push('Saved interaction to memory');
         } catch (error) {
           console.warn('[EmployeeChat] Failed to save memory:', error);
@@ -583,10 +601,11 @@ export class EmployeeChatService {
       thinkingSteps.push('Response generated with memory context');
 
       // Get context stats for metadata
-      const contextStats = sequentialWorkflowOrchestrator.getEmployeeContextStats(
-        sessionId,
-        employee.name
-      );
+      const contextStats =
+        sequentialWorkflowOrchestrator.getEmployeeContextStats(
+          sessionId,
+          employee.name
+        );
 
       store.addMessage({
         from: employee.name,
@@ -605,7 +624,10 @@ export class EmployeeChatService {
         selectionReason: 'Direct employee chat (sub-agent mode)',
         thinkingSteps,
         metadata: {
-          model: employee.model === 'inherit' ? 'claude-3-5-sonnet-20241022' : employee.model,
+          model:
+            employee.model === 'inherit'
+              ? 'claude-3-5-sonnet-20241022'
+              : employee.model,
           tokensUsed: contextStats.totalTokens,
           isMultiAgent: false,
         },
@@ -648,20 +670,24 @@ export class EmployeeChatService {
 
     try {
       // Start the sequential workflow
-      const workflowResult = await sequentialWorkflowOrchestrator.startWorkflow({
-        userId,
-        sessionId,
-        input: userMessage,
-        workflowId,
-        employees: customEmployees,
-      });
+      const workflowResult = await sequentialWorkflowOrchestrator.startWorkflow(
+        {
+          userId,
+          sessionId,
+          input: userMessage,
+          workflowId,
+          employees: customEmployees,
+        }
+      );
 
       if (!workflowResult.success) {
         throw new Error(workflowResult.error || 'Workflow execution failed');
       }
 
       // Get execution details
-      const execution = sequentialWorkflowOrchestrator.getExecution(workflowResult.executionId);
+      const execution = sequentialWorkflowOrchestrator.getExecution(
+        workflowResult.executionId
+      );
 
       if (!execution) {
         throw new Error('Workflow execution not found');
@@ -692,10 +718,15 @@ export class EmployeeChatService {
         .filter((step) => step.status === 'completed')
         .map((step) => step.employeeName);
 
-      thinkingSteps.push(`Workflow completed: ${employeesInvolved.join(' → ')}`);
+      thinkingSteps.push(
+        `Workflow completed: ${employeesInvolved.join(' → ')}`
+      );
 
       return {
-        response: workflowResult.finalResult || execution.finalResult || 'Workflow completed',
+        response:
+          workflowResult.finalResult ||
+          execution.finalResult ||
+          'Workflow completed',
         selectionReason: `Sequential workflow: ${employeesInvolved.join(' → ')}`,
         thinkingSteps,
         collaborationMessages,
@@ -756,14 +787,16 @@ export class EmployeeChatService {
 
     try {
       // Start consulting session - use correct ConsultationRequest interface
-      const consultationResult = await consultingOrchestrator.startConsultation({
-        userId,
-        sessionId,
-        query: userMessage, // ConsultationRequest uses 'query' not 'input'
-        domain,
-        workflowId,
-        mode: executionMode,
-      });
+      const consultationResult = await consultingOrchestrator.startConsultation(
+        {
+          userId,
+          sessionId,
+          query: userMessage, // ConsultationRequest uses 'query' not 'input'
+          domain,
+          workflowId,
+          mode: executionMode,
+        }
+      );
 
       if (!consultationResult.success) {
         throw new Error(consultationResult.error || 'Consultation failed');
@@ -787,7 +820,7 @@ export class EmployeeChatService {
       thinkingSteps.push(`Engaged consultants: ${agentNames}`);
 
       // Update employee statuses for involved agents
-      consultationResult.metadata.agentsUsed.forEach(agentId => {
+      consultationResult.metadata.agentsUsed.forEach((agentId) => {
         store.updateEmployeeStatus(
           agentId,
           'thinking',
@@ -797,46 +830,47 @@ export class EmployeeChatService {
       });
 
       // Build collaboration messages from contributions
-      const collaborationMessages: EmployeeChatMessage[] = consultationResult.contributions.map((contrib, index) => {
-        // Show each agent's contribution in the UI
-        store.addMessage({
-          from: contrib.agentId,
-          type: 'employee',
-          content: `**${contrib.role}** (${consultationResult.mode}):\n\n${contrib.output}`,
-          metadata: {
-            employeeName: contrib.agentId,
-            consultingRole: contrib.role,
-            tokensUsed: contrib.tokensUsed,
-            isConsulting: true,
-          },
-        });
+      const collaborationMessages: EmployeeChatMessage[] =
+        consultationResult.contributions.map((contrib, index) => {
+          // Show each agent's contribution in the UI
+          store.addMessage({
+            from: contrib.agentId,
+            type: 'employee',
+            content: `**${contrib.role}** (${consultationResult.mode}):\n\n${contrib.output}`,
+            metadata: {
+              employeeName: contrib.agentId,
+              consultingRole: contrib.role,
+              tokensUsed: contrib.tokensUsed,
+              isConsulting: true,
+            },
+          });
 
-        return {
-          role: 'collaboration' as const,
-          content: contrib.output,
-          employeeName: contrib.agentId,
-          messageType: 'contribution' as const,
-          metadata: {
-            isMultiAgent: true,
-            consultingRole: contrib.role,
-            executionOrder: index,
-          },
-        };
-      });
+          return {
+            role: 'collaboration' as const,
+            content: contrib.output,
+            employeeName: contrib.agentId,
+            messageType: 'contribution' as const,
+            metadata: {
+              isMultiAgent: true,
+              consultingRole: contrib.role,
+              executionOrder: index,
+            },
+          };
+        });
 
       // Show final structured result
       const structuredResult = consultationResult.result;
       store.addMessage({
         from: 'supervisor',
         type: 'system',
-        content: `📋 **Consulting Summary**\n\n${structuredResult.summary}\n\n**Recommendations:**\n${structuredResult.recommendations.map(r => `- [${r.priority}] ${r.title}: ${r.description}`).join('\n')}\n\n**Action Items:**\n${structuredResult.actionItems.map(a => `- ${a.title}: ${a.description}`).join('\n')}`,
+        content: `📋 **Consulting Summary**\n\n${structuredResult.summary}\n\n**Recommendations:**\n${structuredResult.recommendations.map((r) => `- [${r.priority}] ${r.title}: ${r.description}`).join('\n')}\n\n**Action Items:**\n${structuredResult.actionItems.map((a) => `- ${a.title}: ${a.description}`).join('\n')}`,
         metadata: {
           isSynthesis: true,
         },
       });
 
       // Reset all agent statuses
-      consultationResult.metadata.agentsUsed.forEach(agentId => {
+      consultationResult.metadata.agentsUsed.forEach((agentId) => {
         store.updateEmployeeStatus(agentId, 'idle');
       });
 
@@ -873,12 +907,12 @@ export class EmployeeChatService {
         content: '📋 Falling back to standard employee selection...',
       });
 
-      return await this.handleSimpleTask(
+      return (await this.handleSimpleTask(
         userMessage,
         [],
         'Fallback from consulting',
         'solo'
-      ) as {
+      )) as {
         response: string;
         selectionReason: string;
         thinkingSteps: string[];
@@ -903,7 +937,10 @@ export class EmployeeChatService {
     userId: string,
     employeeName: string
   ): Promise<unknown[]> {
-    return sequentialWorkflowOrchestrator.getEmployeeMemoryAboutUser(userId, employeeName);
+    return sequentialWorkflowOrchestrator.getEmployeeMemoryAboutUser(
+      userId,
+      employeeName
+    );
   }
 
   /**
@@ -957,25 +994,119 @@ export class EmployeeChatService {
 
     // Domain keyword mapping
     const domainKeywords: Record<ConsultingDomain, string[]> = {
-      health: ['health', 'medical', 'doctor', 'symptom', 'diagnosis', 'treatment', 'medicine'],
-      fitness: ['exercise', 'workout', 'gym', 'training', 'muscle', 'cardio', 'strength'],
-      nutrition: ['diet', 'nutrition', 'food', 'meal', 'calorie', 'protein', 'recipe', 'eating'],
-      finance: ['money', 'investment', 'budget', 'savings', 'portfolio', 'stocks', 'wealth'],
-      legal: ['legal', 'law', 'contract', 'lawsuit', 'attorney', 'rights', 'compliance'],
-      career: ['career', 'job', 'resume', 'interview', 'promotion', 'salary', 'profession'],
-      technology: ['software', 'programming', 'code', 'app', 'technology', 'developer', 'system'],
-      business: ['business', 'startup', 'company', 'entrepreneur', 'marketing', 'strategy'],
-      education: ['learn', 'study', 'course', 'school', 'college', 'degree', 'teaching'],
-      lifestyle: ['lifestyle', 'habits', 'routine', 'productivity', 'balance', 'goals'],
-      mental_health: ['stress', 'anxiety', 'depression', 'therapy', 'mental', 'emotional', 'wellbeing'],
-      relationships: ['relationship', 'dating', 'marriage', 'family', 'communication', 'social'],
+      health: [
+        'health',
+        'medical',
+        'doctor',
+        'symptom',
+        'diagnosis',
+        'treatment',
+        'medicine',
+      ],
+      fitness: [
+        'exercise',
+        'workout',
+        'gym',
+        'training',
+        'muscle',
+        'cardio',
+        'strength',
+      ],
+      nutrition: [
+        'diet',
+        'nutrition',
+        'food',
+        'meal',
+        'calorie',
+        'protein',
+        'recipe',
+        'eating',
+      ],
+      finance: [
+        'money',
+        'investment',
+        'budget',
+        'savings',
+        'portfolio',
+        'stocks',
+        'wealth',
+      ],
+      legal: [
+        'legal',
+        'law',
+        'contract',
+        'lawsuit',
+        'attorney',
+        'rights',
+        'compliance',
+      ],
+      career: [
+        'career',
+        'job',
+        'resume',
+        'interview',
+        'promotion',
+        'salary',
+        'profession',
+      ],
+      technology: [
+        'software',
+        'programming',
+        'code',
+        'app',
+        'technology',
+        'developer',
+        'system',
+      ],
+      business: [
+        'business',
+        'startup',
+        'company',
+        'entrepreneur',
+        'marketing',
+        'strategy',
+      ],
+      education: [
+        'learn',
+        'study',
+        'course',
+        'school',
+        'college',
+        'degree',
+        'teaching',
+      ],
+      lifestyle: [
+        'lifestyle',
+        'habits',
+        'routine',
+        'productivity',
+        'balance',
+        'goals',
+      ],
+      mental_health: [
+        'stress',
+        'anxiety',
+        'depression',
+        'therapy',
+        'mental',
+        'emotional',
+        'wellbeing',
+      ],
+      relationships: [
+        'relationship',
+        'dating',
+        'marriage',
+        'family',
+        'communication',
+        'social',
+      ],
     };
 
     let bestDomain: ConsultingDomain | undefined;
     let bestScore = 0;
 
     for (const [domain, keywords] of Object.entries(domainKeywords)) {
-      const score = keywords.filter(kw => messageLower.includes(kw)).length;
+      const score = keywords.filter((kw) => messageLower.includes(kw)).length;
       if (score > bestScore) {
         bestScore = score;
         bestDomain = domain as ConsultingDomain;
@@ -1045,7 +1176,10 @@ export class EmployeeChatService {
             }
           }
           // Partial match (lower confidence)
-          else if (messageLower.includes(keywordLower) && keywordLower.length > 4) {
+          else if (
+            messageLower.includes(keywordLower) &&
+            keywordLower.length > 4
+          ) {
             score += 5;
           }
         }

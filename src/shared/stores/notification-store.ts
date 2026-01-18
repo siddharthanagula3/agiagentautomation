@@ -6,6 +6,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/react/shallow';
 
 // Track auto-close timeouts to prevent memory leaks
 const notificationTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
@@ -571,7 +572,22 @@ export const useNotificationStore = create<NotificationStore>()(
   )
 );
 
-// Selectors for optimized re-renders
+// ============================================================================
+// SELECTOR HOOKS (optimized with useShallow to prevent stale closures)
+// ============================================================================
+
+/**
+ * Selector for notifications record - returns stable reference
+ * Use this for direct access to notifications by ID
+ */
+export const useNotificationsRecord = () =>
+  useNotificationStore((state) => state.notifications);
+
+/**
+ * Selector for sorted notifications array
+ * Note: This creates a new array each render. For performance-critical components,
+ * use useNotificationsRecord and memoize the sorting in your component with useMemo.
+ */
 export const useNotifications = () =>
   useNotificationStore((state) =>
     Object.values(state.notifications).sort((a, b) => {
@@ -587,6 +603,11 @@ export const useNotifications = () =>
     })
   );
 
+/**
+ * Selector for unread notifications
+ * Note: This creates a new array each render. For performance-critical components,
+ * use useNotificationsRecord and memoize the filtering in your component with useMemo.
+ */
 export const useUnreadNotifications = () =>
   useNotificationStore((state) =>
     Object.values(state.notifications)
@@ -604,9 +625,39 @@ export const useUnreadNotifications = () =>
       })
   );
 
+/**
+ * Selector for toasts record - returns stable reference
+ */
+export const useToastsRecord = () =>
+  useNotificationStore((state) => state.toasts);
+
+/**
+ * Selector for toasts as array
+ * Note: Creates a new array each render
+ */
 export const useToasts = () =>
   useNotificationStore((state) => Object.values(state.toasts));
+
+/**
+ * Selector for unread count - primitive value, no shallow needed
+ */
 export const useUnreadCount = () =>
   useNotificationStore((state) => state.unreadCount);
+
+/**
+ * Selector for notification settings - returns stable reference
+ */
 export const useNotificationSettings = () =>
   useNotificationStore((state) => state.settings);
+
+/**
+ * Selector for notification UI state - uses useShallow for multi-value selection
+ */
+export const useNotificationUIState = () =>
+  useNotificationStore(
+    useShallow((state) => ({
+      isOpen: state.isOpen,
+      selectedCategory: state.selectedCategory,
+      desktopPermission: state.desktopPermission,
+    }))
+  );

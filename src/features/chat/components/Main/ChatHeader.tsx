@@ -104,12 +104,14 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
               }}
               className="h-8 max-w-xs"
               autoFocus
+              aria-label="Chat title"
             />
             <Button
               variant="ghost"
               size="icon"
               onClick={handleRename}
               className="h-8 w-8 flex-shrink-0"
+              aria-label="Confirm rename"
             >
               <Check className="h-4 w-4" />
             </Button>
@@ -118,6 +120,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
               size="icon"
               onClick={handleCancel}
               className="h-8 w-8 flex-shrink-0"
+              aria-label="Cancel rename"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -126,11 +129,15 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           <button
             onClick={() => setIsEditing(true)}
             className="group flex min-w-0 items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-muted"
+            aria-label={`Edit chat title: ${session?.title || 'New Chat'}`}
           >
             <h1 className="truncate text-sm font-semibold">
               {session?.title || 'New Chat'}
             </h1>
-            <Edit3 className="h-3 w-3 flex-shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+            <Edit3
+              className="h-3 w-3 flex-shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+              aria-hidden="true"
+            />
           </button>
         )}
       </div>
@@ -144,8 +151,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             size="sm"
             onClick={onSearch}
             className="hidden gap-2 sm:flex"
+            aria-label="Search conversations"
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-4 w-4" aria-hidden="true" />
             <span className="hidden text-xs text-muted-foreground lg:inline">
               ⌘K
             </span>
@@ -158,28 +166,33 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         {/* More Actions Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              aria-label="More actions"
+            >
+              <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             {onSearch && (
               <DropdownMenuItem onClick={onSearch} className="sm:hidden">
-                <Search className="mr-2 h-4 w-4" />
+                <Search className="mr-2 h-4 w-4" aria-hidden="true" />
                 Search
               </DropdownMenuItem>
             )}
 
             {onBookmarks && (
               <DropdownMenuItem onClick={onBookmarks}>
-                <Bookmark className="mr-2 h-4 w-4" />
+                <Bookmark className="mr-2 h-4 w-4" aria-hidden="true" />
                 Bookmarks
               </DropdownMenuItem>
             )}
 
             {onAnalytics && (
               <DropdownMenuItem onClick={onAnalytics}>
-                <BarChart3 className="mr-2 h-4 w-4" />
+                <BarChart3 className="mr-2 h-4 w-4" aria-hidden="true" />
                 Analytics
               </DropdownMenuItem>
             )}
@@ -187,19 +200,19 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={onShare}>
-              <Share2 className="mr-2 h-4 w-4" />
+              <Share2 className="mr-2 h-4 w-4" aria-hidden="true" />
               Share
             </DropdownMenuItem>
 
             <DropdownMenuItem onClick={onExport}>
-              <FileDown className="mr-2 h-4 w-4" />
+              <FileDown className="mr-2 h-4 w-4" aria-hidden="true" />
               Export
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={onSettings}>
-              <Settings className="mr-2 h-4 w-4" />
+              <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
               Settings
             </DropdownMenuItem>
 
@@ -210,7 +223,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                   onClick={onDelete}
                   className="text-destructive focus:text-destructive"
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
                   Delete Chat
                 </DropdownMenuItem>
               </>

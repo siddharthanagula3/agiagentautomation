@@ -1,5 +1,11 @@
-// Complete AI Employee Type Definitions
-// Comprehensive types for the AI Employee system with MCP integration
+/**
+ * Complete AI Employee Type Definitions
+ * Comprehensive types for the AI Employee system with MCP integration
+ *
+ * Note: For basic AI employee types used in UI components (selectors, cards),
+ * see AIEmployeeBasic and MarketplaceEmployee in @shared/types/common.ts
+ * This file contains extended types for the full employee management system.
+ */
 
 export type EmployeeCategory =
   | 'executive_leadership'

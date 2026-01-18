@@ -120,7 +120,14 @@ const VibeMessageInput: React.FC<{
 };
 
 const VibeChatCanvas: React.FC = () => {
-  const { messages, addMessage, isLoading } = useVibeChatStore();
+  const {
+    messages,
+    addMessage,
+    isLoading,
+    currentSessionId,
+    createNewSession,
+    setLoading,
+  } = useVibeChatStore();
   const { activeAgents } = useVibeAgentStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -129,16 +136,34 @@ const VibeChatCanvas: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = (content: string) => {
+  // Create session on mount if none exists
+  useEffect(() => {
+    if (!currentSessionId) {
+      createNewSession('New Chat Session');
+    }
+  }, [currentSessionId, createNewSession]);
+
+  const handleSendMessage = async (content: string) => {
+    // Ensure we have a session
+    const sessionId =
+      currentSessionId || (await createNewSession('New Chat Session'));
+
     // Add user message
     addMessage({
-      session_id: 'current', // TODO: Use actual session ID
+      session_id: sessionId,
       role: 'user',
       content,
     });
 
-    // TODO: Trigger agent routing and response
-    // This will be implemented when the VIBE orchestrator is created
+    // Agent routing and response will be handled by the parent component
+    // or a dedicated message handler service that listens to store changes.
+    // The VIBE orchestrator (vibe-message-handler.ts) should be connected
+    // to process messages and generate responses.
+    //
+    // Integration point: Import and call vibeMessageHandler.processMessage()
+    // or emit an event that the orchestrator listens to.
+    setLoading(true);
+    // Note: Response handling is deferred to the parent/orchestrator layer
   };
 
   // Convert Map to Array for display

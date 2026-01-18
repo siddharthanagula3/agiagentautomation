@@ -73,9 +73,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         {message.toolCalls && message.toolCalls.length > 0 && (
           <div className="mt-2 space-y-2 sm:mt-3">
             <p className="text-xs font-medium sm:text-sm">Tools Used:</p>
-            {message.toolCalls.map((toolCall, index) => (
+            {message.toolCalls.map((toolCall) => (
               <div
-                key={index}
+                key={`toolcall-${toolCall.tool}-${toolCall.status}`}
                 className="rounded bg-background p-2 text-xs sm:text-sm"
               >
                 <div className="flex flex-wrap items-center gap-2">

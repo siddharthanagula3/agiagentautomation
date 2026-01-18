@@ -19,6 +19,18 @@ export default {
       },
     },
     extend: {
+      // Z-index hierarchy for consistent stacking
+      // Base content: z-0 (default)
+      // Sticky headers: z-10
+      // Dropdowns/Popovers: z-50 (Radix default, keep for compatibility)
+      // Overlays/Backdrops: z-overlay (55)
+      // Modals/Dialogs/Fullscreen: z-modal (60)
+      // Toasts/Notifications: z-toast (100)
+      zIndex: {
+        overlay: '55',
+        modal: '60',
+        toast: '100',
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

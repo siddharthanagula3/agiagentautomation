@@ -3,6 +3,18 @@
  * Manages tool execution for AI employees with validation and security
  */
 
+import { supabase } from '@shared/lib/supabase-client';
+
+/**
+ * Get the current user's auth token for API calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session?.access_token ?? null;
+}
+
 // Virtual file system for in-session files
 export interface VirtualFile {
   path: string;
@@ -363,7 +375,9 @@ export class VibeToolOrchestrator {
   /**
    * Execute Read tool - read file contents from virtual file system
    */
-  private async executeRead(parameters: Record<string, unknown>): Promise<unknown> {
+  private async executeRead(
+    parameters: Record<string, unknown>
+  ): Promise<unknown> {
     const filePath = parameters.file_path as string;
     const offset = (parameters.offset as number) || 0;
     const limit = (parameters.limit as number) || -1;
@@ -394,7 +408,9 @@ export class VibeToolOrchestrator {
   /**
    * Execute Write tool - write content to virtual file system
    */
-  private async executeWrite(parameters: Record<string, unknown>): Promise<unknown> {
+  private async executeWrite(
+    parameters: Record<string, unknown>
+  ): Promise<unknown> {
     const filePath = parameters.file_path as string;
     const content = parameters.content as string;
 
@@ -431,7 +447,9 @@ export class VibeToolOrchestrator {
   /**
    * Execute Edit tool - find/replace in file
    */
-  private async executeEdit(parameters: Record<string, unknown>): Promise<unknown> {
+  private async executeEdit(
+    parameters: Record<string, unknown>
+  ): Promise<unknown> {
     const filePath = parameters.file_path as string;
     const oldString = parameters.old_string as string;
     const newString = parameters.new_string as string;
@@ -455,7 +473,9 @@ export class VibeToolOrchestrator {
         newContent = file.content.replace(oldString, newString);
         replacements = 1;
       } else {
-        throw new Error(`String not found in file: "${oldString.substring(0, 50)}..."`);
+        throw new Error(
+          `String not found in file: "${oldString.substring(0, 50)}..."`
+        );
       }
     }
 
@@ -477,7 +497,9 @@ export class VibeToolOrchestrator {
    * Execute Bash tool - simulate command execution in browser
    * Note: Actual execution is sandboxed for security
    */
-  private async executeBash(parameters: Record<string, unknown>): Promise<unknown> {
+  private async executeBash(
+    parameters: Record<string, unknown>
+  ): Promise<unknown> {
     const command = parameters.command as string;
     const timeout = (parameters.timeout as number) || 30000;
 
@@ -495,7 +517,11 @@ export class VibeToolOrchestrator {
       case 'echo':
         return { output: parts.slice(1).join(' '), exitCode: 0 };
       case 'mkdir':
-        return { output: '', exitCode: 0, message: 'Directory created (simulated)' };
+        return {
+          output: '',
+          exitCode: 0,
+          message: 'Directory created (simulated)',
+        };
       case 'touch': {
         // Create empty file
         const touchPath = parts[1] || 'untitled';
@@ -513,7 +539,10 @@ export class VibeToolOrchestrator {
           virtualFileSystem.delete(rmPath);
           return { output: '', exitCode: 0 };
         }
-        return { output: `rm: cannot remove '${rmPath}': No such file`, exitCode: 1 };
+        return {
+          output: `rm: cannot remove '${rmPath}': No such file`,
+          exitCode: 1,
+        };
       }
       default:
         return {
@@ -533,11 +562,11 @@ export class VibeToolOrchestrator {
     const longFormat = args.includes('-l') || args.includes('-la');
 
     const files = Array.from(virtualFileSystem.values())
-      .filter(f => {
+      .filter((f) => {
         if (path === '.' || path === '/') return true;
         return f.path.startsWith(path);
       })
-      .map(f => {
+      .map((f) => {
         const name = f.path.split('/').pop() || f.path;
         if (longFormat) {
           const size = f.content.length;
@@ -564,7 +593,10 @@ export class VibeToolOrchestrator {
       if (file) {
         outputs.push(file.content);
       } else {
-        return { output: `cat: ${path}: No such file or directory`, exitCode: 1 };
+        return {
+          output: `cat: ${path}: No such file or directory`,
+          exitCode: 1,
+        };
       }
     }
 
@@ -574,10 +606,13 @@ export class VibeToolOrchestrator {
   /**
    * Execute Grep tool - search for patterns in virtual files
    */
-  private async executeGrep(parameters: Record<string, unknown>): Promise<unknown> {
+  private async executeGrep(
+    parameters: Record<string, unknown>
+  ): Promise<unknown> {
     const pattern = parameters.pattern as string;
     const path = (parameters.path as string) || '.';
-    const outputMode = (parameters.output_mode as string) || 'files_with_matches';
+    const outputMode =
+      (parameters.output_mode as string) || 'files_with_matches';
 
     const regex = new RegExp(pattern, 'gi');
     const matches: { file: string; line: number; content: string }[] = [];
@@ -620,7 +655,9 @@ export class VibeToolOrchestrator {
   /**
    * Execute Glob tool - find files matching pattern
    */
-  private async executeGlob(parameters: Record<string, unknown>): Promise<unknown> {
+  private async executeGlob(
+    parameters: Record<string, unknown>
+  ): Promise<unknown> {
     const pattern = parameters.pattern as string;
     const basePath = (parameters.path as string) || '.';
 
@@ -633,11 +670,13 @@ export class VibeToolOrchestrator {
 
     const regex = new RegExp(`^${regexPattern}$`);
 
-    const matchingFiles = Array.from(virtualFileSystem.keys())
-      .filter(filePath => {
-        const relativePath = basePath === '.' ? filePath : filePath.replace(basePath + '/', '');
+    const matchingFiles = Array.from(virtualFileSystem.keys()).filter(
+      (filePath) => {
+        const relativePath =
+          basePath === '.' ? filePath : filePath.replace(basePath + '/', '');
         return regex.test(relativePath) || regex.test(filePath);
-      });
+      }
+    );
 
     return {
       files: matchingFiles,
@@ -646,32 +685,178 @@ export class VibeToolOrchestrator {
   }
 
   /**
-   * Execute WebSearch tool - search the web (requires backend)
+   * Execute WebSearch tool - search the web
+   * Attempts to use the Perplexity API via Netlify function proxy
    */
-  private async executeWebSearch(parameters: Record<string, unknown>): Promise<unknown> {
+  private async executeWebSearch(
+    parameters: Record<string, unknown>
+  ): Promise<unknown> {
     const query = parameters.query as string;
+    const allowedDomains = parameters.allowed_domains as string[] | undefined;
 
-    // WebSearch requires server-side execution
-    // Return a message indicating this limitation
-    return {
-      success: false,
-      message: 'WebSearch requires server-side execution. Use the chat interface for web searches.',
-      query,
-    };
+    if (!query) {
+      return {
+        success: false,
+        error: 'Search query is required',
+        query: '',
+      };
+    }
+
+    try {
+      // Get auth token for API call
+      const authToken = await getAuthToken();
+      if (!authToken) {
+        return {
+          success: false,
+          error: 'Authentication required for web search',
+          query,
+        };
+      }
+
+      // Attempt to use the web search via Netlify function
+      const response = await fetch(
+        '/.netlify/functions/llm-proxies/perplexity-proxy',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({
+            model: 'sonar',
+            messages: [
+              {
+                role: 'user',
+                content: allowedDomains?.length
+                  ? `Search only on ${allowedDomains.join(', ')}: ${query}`
+                  : query,
+              },
+            ],
+          }),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          success: true,
+          query,
+          results: data.choices?.[0]?.message?.content || 'No results found',
+          citations: data.citations || [],
+        };
+      }
+
+      // If proxy fails, return informative message
+      return {
+        success: false,
+        error:
+          'Web search is currently unavailable. The search API may require authentication.',
+        query,
+        suggestion:
+          'Use the chat interface for web searches, or search manually.',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `WebSearch failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        query,
+        suggestion:
+          'Use the chat interface for web searches, or search manually.',
+      };
+    }
   }
 
   /**
-   * Execute WebFetch tool - fetch URL content (requires backend)
+   * Execute WebFetch tool - fetch URL content
+   * Uses the fetch-page Netlify function to bypass CORS
    */
-  private async executeWebFetch(parameters: Record<string, unknown>): Promise<unknown> {
+  private async executeWebFetch(
+    parameters: Record<string, unknown>
+  ): Promise<unknown> {
     const url = parameters.url as string;
+    const prompt = parameters.prompt as string;
 
-    // WebFetch requires server-side execution due to CORS
-    return {
-      success: false,
-      message: 'WebFetch requires server-side execution due to CORS restrictions.',
-      url,
-    };
+    if (!url) {
+      return {
+        success: false,
+        error: 'URL is required',
+        url: '',
+      };
+    }
+
+    // Validate URL format
+    try {
+      new URL(url);
+    } catch {
+      return {
+        success: false,
+        error: `Invalid URL format: ${url}`,
+        url,
+      };
+    }
+
+    try {
+      // Get auth token for API call
+      const authToken = await getAuthToken();
+      if (!authToken) {
+        return {
+          success: false,
+          error: 'Authentication required for web fetch',
+          url,
+        };
+      }
+
+      // Use the fetch-page Netlify function to bypass CORS
+      const response = await fetch('/.netlify/functions/utilities/fetch-page', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const content = data.content || data.text || data.html || '';
+
+        return {
+          success: true,
+          url,
+          content: content.substring(0, 50000), // Limit content size
+          contentLength: content.length,
+          title: data.title || '',
+          prompt,
+          note: prompt
+            ? `Extract the following from the content: ${prompt}`
+            : undefined,
+        };
+      }
+
+      // Handle specific error codes
+      if (response.status === 404) {
+        return {
+          success: false,
+          error: `Page not found: ${url}`,
+          url,
+        };
+      }
+
+      return {
+        success: false,
+        error: `Failed to fetch URL (status ${response.status})`,
+        url,
+        suggestion: 'The URL may be blocked or require authentication.',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `WebFetch failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        url,
+        suggestion:
+          'The fetch proxy may be unavailable. Try again later or access the URL directly.',
+      };
+    }
   }
 
   /**
@@ -871,7 +1056,9 @@ export const vibeVirtualFS = {
   /**
    * Initialize the file system with starter files
    */
-  initializeWorkspace(files: Array<{ path: string; content: string; type?: string }>): void {
+  initializeWorkspace(
+    files: Array<{ path: string; content: string; type?: string }>
+  ): void {
     virtualFileSystem.clear();
     for (const file of files) {
       virtualFileSystem.set(file.path, {

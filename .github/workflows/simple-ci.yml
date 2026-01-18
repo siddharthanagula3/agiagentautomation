@@ -6,7 +6,123 @@ on:
   pull_request:
     branches: [main, develop]
 
+# Permissions for security scanning
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: read
+
 jobs:
+  # Security Scanning
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for secret scanning
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: |
+          echo "Running npm audit for security vulnerabilities..."
+          npm audit --audit-level=high || {
+            echo "::warning::npm audit found high severity vulnerabilities"
+            echo "Review the audit report above and update vulnerable packages"
+            # Don't fail the build, but warn - allows gradual remediation
+            exit 0
+          }
+
+      - name: Check for known vulnerable packages
+        run: |
+          echo "Checking for critical vulnerabilities..."
+          # Fail only on critical vulnerabilities
+          npm audit --audit-level=critical
+
+      - name: Scan for secrets with TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+
+      - name: Check for hardcoded secrets patterns
+        run: |
+          echo "Scanning for common secret patterns..."
+          # Check for potential hardcoded secrets (API keys, tokens, etc.)
+          # Exclude common false positives and test files
+          PATTERNS=(
+            'sk-[a-zA-Z0-9]{20,}'
+            'sk_live_[a-zA-Z0-9]{20,}'
+            'sk_test_[a-zA-Z0-9]{20,}'
+            'whsec_[a-zA-Z0-9]{20,}'
+            'xai-[a-zA-Z0-9]{20,}'
+            'eyJ[a-zA-Z0-9_-]*\.eyJ[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*'
+          )
+
+          FOUND_SECRETS=0
+          for pattern in "${PATTERNS[@]}"; do
+            if grep -rE "$pattern" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.json" \
+               --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git \
+               --exclude="*.example" --exclude="*.test.*" --exclude="*.spec.*" . 2>/dev/null | \
+               grep -v "process.env" | grep -v "import.meta.env" | grep -v ".env" | head -5; then
+              echo "::warning::Potential secret pattern found: $pattern"
+              FOUND_SECRETS=1
+            fi
+          done
+
+          if [ $FOUND_SECRETS -eq 1 ]; then
+            echo "::warning::Review the above files for potential hardcoded secrets"
+          else
+            echo "No obvious hardcoded secrets detected"
+          fi
+
+      - name: License compliance check
+        run: |
+          echo "Checking license compliance..."
+          # Install license checker
+          npm install -g license-checker
+
+          # Check for problematic licenses (GPL, AGPL, etc. that may have copyleft implications)
+          license-checker --summary --production
+
+          echo ""
+          echo "Checking for copyleft licenses..."
+          COPYLEFT=$(license-checker --production --json | grep -E '"(GPL|AGPL|LGPL|CC-BY-SA)' || true)
+          if [ -n "$COPYLEFT" ]; then
+            echo "::warning::Found packages with copyleft licenses. Review for compliance:"
+            license-checker --production --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC;0BSD;CC0-1.0;Unlicense;WTFPL' || {
+              echo "Some packages have licenses that may need review"
+            }
+          else
+            echo "No copyleft licenses found in production dependencies"
+          fi
+
+  # Dependency Review (PR only)
+  dependency-review:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          deny-licenses: GPL-3.0, AGPL-3.0
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD, CC0-1.0, Unlicense
+
   # Basic Quality Checks
   quality:
     runs-on: ubuntu-latest
@@ -61,6 +177,87 @@ jobs:
           echo "Main files:"
           ls -la dist/
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  # Bundle Size Check
+  bundle-size:
+    runs-on: ubuntu-latest
+    needs: [build]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Check bundle sizes
+        run: |
+          echo "Checking bundle sizes against limits..."
+          npm run size
+
+      - name: Output bundle size report
+        if: always()
+        run: |
+          echo "Bundle Size Report:"
+          echo "==================="
+          npm run size:check 2>/dev/null | jq -r '.[] | "\(.name): \(.size) (limit: \(.limit))"' || npm run size
+
+  # Lighthouse CI - Performance Audit
+  lighthouse:
+    runs-on: ubuntu-latest
+    needs: [build]
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Run Lighthouse CI
+        run: |
+          npm run lighthouse:ci
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 7
+
   # Unit Tests (Optional - only if they pass)
   test:
     runs-on: ubuntu-latest
@@ -83,21 +280,101 @@ jobs:
         run: npm run test:run
         continue-on-error: true
 
+  # E2E Tests (Playwright)
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [build]
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Create screenshots directory
+        run: mkdir -p e2e/screenshots
+
+      - name: Run E2E tests
+        run: npm run e2e
+        env:
+          CI: true
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload test screenshots and traces
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-artifacts
+          path: |
+            e2e/screenshots/
+            test-results/
+          retention-days: 7
+
   # Final Status
   status:
-    needs: [quality, build]
+    needs: [security, quality, build, bundle-size, lighthouse]
     runs-on: ubuntu-latest
     if: always()
     steps:
       - name: Check job status
         run: |
-          echo "Quality check: ${{ needs.quality.result }}"
-          echo "Build check: ${{ needs.build.result }}"
+          echo "============================================"
+          echo "CI Pipeline Status Summary"
+          echo "============================================"
+          echo "Security check:    ${{ needs.security.result }}"
+          echo "Quality check:     ${{ needs.quality.result }}"
+          echo "Build check:       ${{ needs.build.result }}"
+          echo "Bundle size check: ${{ needs.bundle-size.result }}"
+          echo "Lighthouse check:  ${{ needs.lighthouse.result }}"
+          echo "============================================"
 
-          if [[ "${{ needs.quality.result }}" == "success" && "${{ needs.build.result }}" == "success" ]]; then
-            echo "✅ All critical checks passed!"
-            exit 0
-          else
-            echo "❌ Some critical checks failed"
+          # Security failures should fail the pipeline
+          if [[ "${{ needs.security.result }}" == "failure" ]]; then
+            echo "FAILED: Security checks failed - blocking deployment"
             exit 1
           fi
+
+          # Build must pass
+          if [[ "${{ needs.build.result }}" != "success" ]]; then
+            echo "FAILED: Build failed"
+            exit 1
+          fi
+
+          # Quality must pass
+          if [[ "${{ needs.quality.result }}" != "success" ]]; then
+            echo "FAILED: Quality checks failed"
+            exit 1
+          fi
+
+          # Bundle size must pass (fail CI if bundles exceed limits)
+          if [[ "${{ needs.bundle-size.result }}" == "failure" ]]; then
+            echo "FAILED: Bundle size limits exceeded"
+            exit 1
+          fi
+
+          # Lighthouse must pass (fail CI if performance budgets not met)
+          if [[ "${{ needs.lighthouse.result }}" == "failure" ]]; then
+            echo "FAILED: Lighthouse performance budgets not met"
+            exit 1
+          fi
+
+          echo "SUCCESS: All critical checks passed!"
+          exit 0

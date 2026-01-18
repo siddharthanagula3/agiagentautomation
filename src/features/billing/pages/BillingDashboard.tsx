@@ -1,6 +1,7 @@
 // Updated: Jan 15th 2026 - Removed all console statements for security (data exposure)
 // Updated: Jan 15th 2026 - Added error boundary
-import React, { useState, useEffect, useCallback } from 'react';
+// Updated: Jan 18th 2026 - Migrated to React Query for server state management
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { useSearchParams } from 'react-router-dom';
 import {
@@ -13,7 +14,6 @@ import {
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { Progress } from '@shared/ui/progress';
-import { supabase } from '@shared/lib/supabase-client';
 import {
   upgradeToProPlan,
   contactEnterpriseSales,
@@ -22,6 +22,10 @@ import {
 } from '@features/billing/services/stripe-payments';
 import { buyTokenPack } from '@features/billing/services/token-pack-purchase';
 import { toast } from 'sonner';
+import {
+  useBillingData,
+  useInvalidateBillingQueries,
+} from '@features/billing/hooks/use-billing-queries';
 import {
   CreditCard,
   DollarSign,
@@ -125,228 +129,68 @@ const TOKEN_PACKS: TokenPack[] = [
 const BillingPage: React.FC = () => {
   const { user } = useAuthStore();
   const [searchParams] = useSearchParams();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [billing, setBilling] = useState<BillingInfo | null>(null);
-  const [showUpgrade, setShowUpgrade] = useState(false);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>(
     'yearly' // Default to yearly
   );
   const [isManagingBilling, setIsManagingBilling] = useState(false);
-  const [stripeCustomerId, setStripeCustomerId] = useState<string | null>(null);
   const [showBuyTokens, setShowBuyTokens] = useState(false);
 
-  const loadBilling = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  // Use React Query for billing data
+  const {
+    data: billingData,
+    isLoading,
+    error: queryError,
+    refetch: refetchBilling,
+  } = useBillingData();
+  const invalidateBillingQueries = useInvalidateBillingQueries();
 
-      // Free tier limits: 1M total, 250k per provider
-      const PROVIDER_LIMIT = 250000; // 250k tokens per LLM
-      const TOTAL_LIMIT = 1000000; // 1M total tokens
-
-      // Initialize token balance and usage
-      let currentBalance = 0;
-      let totalUsed = 0;
-      let totalGranted = TOTAL_LIMIT; // Default to free tier limit
-
-      // Fetch token usage from Supabase
-      let llmUsage: LLMUsage[] = [
-        {
-          provider: 'OpenAI',
-          tokens: 0,
-          cost: 0,
-          limit: PROVIDER_LIMIT,
-          icon: <Brain className="h-5 w-5" />,
-          color: 'text-green-600',
-          bgColor: 'bg-green-50 dark:bg-green-950/30',
-        },
-        {
-          provider: 'Anthropic',
-          tokens: 0,
-          cost: 0,
-          limit: PROVIDER_LIMIT,
-          icon: <Code className="h-5 w-5" />,
-          color: 'text-blue-600',
-          bgColor: 'bg-blue-50 dark:bg-blue-950/30',
-        },
-        {
-          provider: 'Google',
-          tokens: 0,
-          cost: 0,
-          limit: PROVIDER_LIMIT,
-          icon: <Search className="h-5 w-5" />,
-          color: 'text-purple-600',
-          bgColor: 'bg-purple-50 dark:bg-purple-950/30',
-        },
-        {
-          provider: 'Perplexity',
-          tokens: 0,
-          cost: 0,
-          limit: PROVIDER_LIMIT,
-          icon: <Sparkles className="h-5 w-5" />,
-          color: 'text-orange-600',
-          bgColor: 'bg-orange-50 dark:bg-orange-950/30',
-        },
-      ];
-
-      if (user) {
-        try {
-          // Fetch current token balance from user_token_balances table
-          const { data: balanceData, error: balanceError } = await supabase
-            .from('user_token_balances')
-            .select('current_balance')
-            .eq('user_id', user.id)
-            .maybeSingle();
-
-          if (balanceError) {
-            // User might not have a balance record yet - that's okay, use free tier defaults
-            currentBalance = TOTAL_LIMIT; // Free tier starts with full allocation
-          } else if (balanceData) {
-            currentBalance = Math.max(balanceData.current_balance || 0, 0);
-          }
-
-          // Fetch usage from Supabase token_usage table (for cost estimation)
-          const { data: usageData, error: usageError } = await supabase
-            .from('token_usage')
-            .select(
-              'provider, input_tokens, output_tokens, total_tokens, total_cost'
-            )
-            .eq('user_id', user.id);
-
-          if (usageError) {
-            // Error fetching token usage
-          } else if (usageData && usageData.length > 0) {
-            // Aggregate by provider
-            const providerMap = new Map<
-              string,
-              { tokens: number; cost: number }
-            >();
-
-            usageData.forEach((row) => {
-              const provider = row.provider.toLowerCase();
-              const current = providerMap.get(provider) || {
-                tokens: 0,
-                cost: 0,
-              };
-              current.tokens += row.total_tokens || 0;
-              current.cost += row.total_cost || 0;
-              providerMap.set(provider, current);
-            });
-
-            // Update LLM usage with actual data
-            llmUsage = llmUsage.map((llm) => {
-              const providerKey = llm.provider.toLowerCase();
-              const usage = providerMap.get(providerKey) || {
-                tokens: 0,
-                cost: 0,
-              };
-              return {
-                ...llm,
-                tokens: usage.tokens,
-                cost: usage.cost,
-              };
-            });
-          }
-        } catch (err) {
-          // Error querying token data
-        }
-      }
-
-      // Calculate total usage (tokens spent)
-      totalUsed = llmUsage.reduce((sum, llm) => sum + llm.tokens, 0);
-      const totalCost = llmUsage.reduce((sum, llm) => sum + llm.cost, 0);
-
-      // Fetch user's plan from database
-      let userPlan: 'free' | 'pro' | 'enterprise' = 'free';
-      let subscriptionEndDate: string | null = null;
-
-      try {
-        const { data: userData, error: userError } = await supabase
-          .from('users')
-          .select(
-            'plan, subscription_end_date, plan_status, stripe_customer_id, stripe_subscription_id, billing_period'
-          )
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (!userError && userData) {
-          userPlan = userData.plan || 'free';
-          subscriptionEndDate = userData.subscription_end_date;
-          setStripeCustomerId(userData.stripe_customer_id);
-        } else if (userError) {
-          // Error fetching user plan
-        }
-      } catch (err) {
-        // Error fetching user plan
-      }
-
-      const isPro = userPlan === 'pro';
-
-      // Update limits based on plan
-      const proProviderLimit = 2500000; // 2.5M per provider (Pro)
-      const proTotalLimit = 10000000; // 10M total (Pro)
-
-      if (isPro) {
-        llmUsage = llmUsage.map((llm) => ({
-          ...llm,
-          limit: proProviderLimit,
-        }));
-        totalGranted = proTotalLimit;
-      }
-
-      // Calculate stable billing period dates
-      const now = new Date();
-      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-
-      const billingData: BillingInfo = {
-        plan: userPlan,
-        status: 'active',
-        current_period_start: subscriptionEndDate
-          ? new Date(
-              new Date(subscriptionEndDate).getTime() - 30 * 24 * 60 * 60 * 1000
-            ).toISOString()
-          : currentMonthStart.toISOString(),
-        current_period_end: subscriptionEndDate || nextMonthStart.toISOString(),
-        price: isPro ? 29 : 0,
-        currency: 'USD',
-        features: isPro
-          ? [
-              '10M tokens/month (2.5M per LLM)',
-              'All 4 AI providers included',
-              'Advanced analytics',
-              'Priority support',
-              'API access',
-            ]
-          : [
-              '1M tokens/month (250k per LLM)',
-              'All 4 AI providers included',
-              'Basic analytics',
-              'Community support',
-            ],
+  // Transform billing data to include UI-specific properties
+  const billing: BillingInfo | null = billingData
+    ? {
+        ...billingData,
         usage: {
-          totalTokens: totalGranted - currentBalance, // Tokens used = granted - remaining
-          totalLimit: totalGranted,
-          totalCost,
-          llmUsage,
+          ...billingData.usage,
+          llmUsage: billingData.usage.llmUsage.map((llm, index) => ({
+            ...llm,
+            icon:
+              index === 0 ? (
+                <Brain className="h-5 w-5" />
+              ) : index === 1 ? (
+                <Code className="h-5 w-5" />
+              ) : index === 2 ? (
+                <Search className="h-5 w-5" />
+              ) : (
+                <Sparkles className="h-5 w-5" />
+              ),
+            color:
+              index === 0
+                ? 'text-green-600'
+                : index === 1
+                  ? 'text-blue-600'
+                  : index === 2
+                    ? 'text-purple-600'
+                    : 'text-orange-600',
+            bgColor:
+              index === 0
+                ? 'bg-green-50 dark:bg-green-950/30'
+                : index === 1
+                  ? 'bg-blue-50 dark:bg-blue-950/30'
+                  : index === 2
+                    ? 'bg-purple-50 dark:bg-purple-950/30'
+                    : 'bg-orange-50 dark:bg-orange-950/30',
+          })),
         },
         invoices: [],
-      };
+      }
+    : null;
 
-      setBilling(billingData);
-    } catch (err) {
-      setError('Failed to load billing information. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
+  const stripeCustomerId = billingData?.stripeCustomerId ?? null;
+  const error = queryError
+    ? 'Failed to load billing information. Please try again.'
+    : null;
 
-  useEffect(() => {
-    if (user) {
-      loadBilling();
-    }
-  }, [user, loadBilling]);
+  // Track if we have shown the payment success toast
+  const hasShownSuccessToast = useRef(false);
 
   // Check for successful payment and refresh billing data
   useEffect(() => {
@@ -355,39 +199,61 @@ const BillingPage: React.FC = () => {
     const action = searchParams.get('action');
     const tokensParam = searchParams.get('tokens');
 
+    const timeoutIds: ReturnType<typeof setTimeout>[] = [];
+
     // Show buy tokens section if action=buy-tokens
     if (action === 'buy-tokens') {
       setShowBuyTokens(true);
       // Scroll to buy tokens section
-      setTimeout(() => {
+      const scrollTimeoutId = setTimeout(() => {
         const element = document.getElementById('buy-tokens-section');
         element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
+      timeoutIds.push(scrollTimeoutId);
     }
 
-    // Handle successful token purchase
-    if (success === 'true' && tokensParam && user) {
+    // Handle successful token purchase (only show once)
+    if (
+      success === 'true' &&
+      tokensParam &&
+      user &&
+      !hasShownSuccessToast.current
+    ) {
       const tokens = parseInt(tokensParam, 10);
       toast.success(
         `Success! ${tokens.toLocaleString()} tokens added to your account.`,
         { duration: 5000 }
       );
+      hasShownSuccessToast.current = true;
 
-      // Refresh billing data
-      setTimeout(() => {
-        loadBilling();
+      // Refresh billing data using React Query
+      const refreshTimeoutId = setTimeout(() => {
+        invalidateBillingQueries();
       }, 2000);
+      timeoutIds.push(refreshTimeoutId);
     }
-    // Handle successful subscription upgrade
-    else if (success === 'true' && sessionId && user) {
+    // Handle successful subscription upgrade (only show once)
+    else if (
+      success === 'true' &&
+      sessionId &&
+      user &&
+      !hasShownSuccessToast.current
+    ) {
       toast.success('Payment successful! Your subscription has been upgraded.');
+      hasShownSuccessToast.current = true;
 
-      // Refresh billing data
-      setTimeout(() => {
-        loadBilling();
+      // Refresh billing data using React Query
+      const refreshTimeoutId = setTimeout(() => {
+        invalidateBillingQueries();
       }, 2000);
+      timeoutIds.push(refreshTimeoutId);
     }
-  }, [searchParams, user, loadBilling]);
+
+    // Cleanup timeouts on unmount or dependency change
+    return () => {
+      timeoutIds.forEach((id) => clearTimeout(id));
+    };
+  }, [searchParams, user, invalidateBillingQueries]);
 
   const handleUpgrade = async (
     plan: 'pro' | 'enterprise',

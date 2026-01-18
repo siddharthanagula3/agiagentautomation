@@ -126,7 +126,6 @@ export function useVibeChat(options: UseVibeChatOptions): UseVibeChatReturn {
   /**
    * Initialize session
    */
-  // Updated: Jan 15th 2026 - Fixed infinite loop from unstable function dependencies
   useEffect(() => {
     const initSession = async () => {
       if (initialSessionId) {
@@ -137,8 +136,12 @@ export function useVibeChat(options: UseVibeChatOptions): UseVibeChatReturn {
     };
 
     initSession();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialSessionId, currentSessionId]);
+  }, [
+    initialSessionId,
+    currentSessionId,
+    loadSessionInStore,
+    createNewSession,
+  ]);
 
   /**
    * Add employees to active agents on mount

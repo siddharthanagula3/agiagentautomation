@@ -1,5 +1,11 @@
 // Updated: Jan 15th 2026 - Added error boundary
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Separator } from '@shared/ui/separator';
 import { useChat } from '../hooks/use-chat-interface';
@@ -193,8 +199,7 @@ const ChatPage: React.FC = () => {
     if (sessionId && (!currentSession || currentSession.id !== sessionId)) {
       loadSession(sessionId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId, currentSession]);
+  }, [sessionId, currentSession, loadSession]);
 
   // Create new session if none exists
   useEffect(() => {
@@ -356,7 +361,13 @@ const ChatPage: React.FC = () => {
         markWarningShown(85);
       }
     }
-  }, [usageData, userUsage?.tokensLimit, updateUsage, shouldShowWarning, markWarningShown]);
+  }, [
+    usageData,
+    userUsage?.tokensLimit,
+    updateUsage,
+    shouldShowWarning,
+    markWarningShown,
+  ]);
 
   // Keyboard shortcuts - memoized to prevent unnecessary re-renders
   const handleCopyLastMessage = useCallback(async () => {
@@ -367,10 +378,7 @@ const ChatPage: React.FC = () => {
         showSuccess('Message copied to clipboard', 'Copied');
       } catch (error) {
         console.error('Failed to copy message:', error);
-        showError(
-          'Unable to copy message to clipboard.',
-          'Copy Failed'
-        );
+        showError('Unable to copy message to clipboard.', 'Copy Failed');
       }
     }
   }, [messages, showSuccess, showError]);
@@ -389,8 +397,8 @@ const ChatPage: React.FC = () => {
   }, []);
 
   const handleShowSearch = useCallback(() => {
-    // TODO: Implement search modal
-    setSearchQuery('');
+    // Open the global search dialog for searching across all conversations
+    setGlobalSearchOpen(true);
   }, []);
 
   const { shortcuts } = useKeyboardShortcuts({
@@ -545,10 +553,7 @@ const ChatPage: React.FC = () => {
         />
 
         {/* Bookmarks Dialog */}
-        <BookmarksDialog
-          open={bookmarksOpen}
-          onOpenChange={setBookmarksOpen}
-        />
+        <BookmarksDialog open={bookmarksOpen} onOpenChange={setBookmarksOpen} />
 
         {/* Usage Warning Modal - Pops up at 85% and 95% */}
         <UsageWarningModal

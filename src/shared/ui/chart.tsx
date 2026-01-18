@@ -1,7 +1,34 @@
 import * as React from 'react';
 import * as RechartsPrimitive from 'recharts';
+import DOMPurify from 'dompurify';
 
 import { cn } from '@shared/lib/utils';
+
+// CSS sanitization: only allow safe CSS property values (colors, CSS variables)
+// Prevents CSS injection attacks that could exfiltrate data via url() or other vectors
+function sanitizeCSSValue(value: string): string {
+  if (!value) return '';
+
+  // Strip any potentially dangerous content
+  // Allow: hex colors, rgb/rgba, hsl/hsla, named colors, CSS variables
+  const sanitized = value
+    .replace(/url\s*\([^)]*\)/gi, '') // Remove url()
+    .replace(/expression\s*\([^)]*\)/gi, '') // Remove expression()
+    .replace(/@import[^;]*/gi, '') // Remove @import
+    .replace(/javascript\s*:/gi, '') // Remove javascript:
+    .replace(/behavior\s*:[^;]*/gi, '') // Remove behavior (IE)
+    .replace(/-moz-binding\s*:[^;]*/gi, '') // Remove -moz-binding
+    .trim();
+
+  return sanitized;
+}
+
+// Sanitize CSS identifier (property names, selectors)
+function sanitizeCSSIdentifier(identifier: string): string {
+  if (!identifier) return '';
+  // Only allow alphanumeric, hyphens, underscores for CSS identifiers
+  return identifier.replace(/[^a-zA-Z0-9_-]/g, '');
+}
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: '', dark: '.dark' } as const;
@@ -74,25 +101,55 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
+  // Sanitize the chart ID to prevent CSS selector injection
+  const sanitizedId = sanitizeCSSIdentifier(id);
+
+  // Build CSS with sanitized values to prevent CSS injection attacks
+  const cssContent = Object.entries(THEMES)
+    .map(([theme, prefix]) => {
+      const sanitizedPrefix = prefix
+        ? sanitizeCSSIdentifier(prefix.replace('.', ''))
+        : '';
+      const selectorPrefix = sanitizedPrefix ? `.${sanitizedPrefix}` : '';
+
+      const cssVariables = colorConfig
+        .map(([key, itemConfig]) => {
+          const color =
+            itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+            itemConfig.color;
+
+          if (!color) return null;
+
+          // Sanitize both the key and the color value
+          const sanitizedKey = sanitizeCSSIdentifier(key);
+          const sanitizedColor = sanitizeCSSValue(color);
+
+          return sanitizedColor
+            ? `  --color-${sanitizedKey}: ${sanitizedColor};`
+            : null;
+        })
+        .filter(Boolean)
+        .join('\n');
+
+      return `
+${selectorPrefix} [data-chart=${sanitizedId}] {
+${cssVariables}
+}
+`;
+    })
+    .join('\n');
+
+  // Use DOMPurify as a final safety layer for the CSS content
+  // Note: DOMPurify is primarily for HTML, but provides an extra layer of defense
+  const sanitizedCSS = DOMPurify.sanitize(cssContent, {
+    ALLOWED_TAGS: [], // Strip all HTML tags
+    KEEP_CONTENT: true,
+  });
+
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
-  })
-  .join('\n')}
-}
-`
-          )
-          .join('\n'),
+        __html: sanitizedCSS,
       }}
     />
   );

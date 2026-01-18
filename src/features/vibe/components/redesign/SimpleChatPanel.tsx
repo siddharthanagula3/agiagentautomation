@@ -18,10 +18,14 @@ import type { AgentMessage } from '../../components/agent-panel/AgentMessageList
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { parseCodeBlocks, extractFileOperations } from '../../utils/code-parser';
+import {
+  parseCodeBlocks,
+  extractFileOperations,
+} from '../../utils/code-parser';
 import { vibeFileSystem } from '@features/vibe/services/vibe-file-system';
 import { toast } from 'sonner';
 import { VibeEmptyState } from './VibeEmptyState';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 
 interface SimpleChatPanelProps {
   messages: AgentMessage[];
@@ -31,7 +35,7 @@ interface SimpleChatPanelProps {
   showEmptyState?: boolean;
 }
 
-export function SimpleChatPanel({
+function SimpleChatPanelContent({
   messages,
   isLoading,
   onFileCreated,
@@ -56,19 +60,31 @@ export function SimpleChatPanel({
     const parseResult = parseCodeBlocks(lastMessage.content);
     if (!parseResult.hasFiles) return;
 
-    const operations = extractFileOperations(lastMessage.content, parseResult.codeBlocks);
+    const operations = extractFileOperations(
+      lastMessage.content,
+      parseResult.codeBlocks
+    );
 
     for (const operation of operations) {
       try {
         if (operation.action === 'create') {
           try {
             vibeFileSystem.readFile(operation.filePath);
-            vibeFileSystem.updateFile(operation.filePath, operation.content || '');
+            vibeFileSystem.updateFile(
+              operation.filePath,
+              operation.content || ''
+            );
           } catch {
-            vibeFileSystem.createFile(operation.filePath, operation.content || '');
+            vibeFileSystem.createFile(
+              operation.filePath,
+              operation.content || ''
+            );
           }
         } else if (operation.action === 'update') {
-          vibeFileSystem.updateFile(operation.filePath, operation.content || '');
+          vibeFileSystem.updateFile(
+            operation.filePath,
+            operation.content || ''
+          );
         }
         onFileCreated?.(operation.filePath);
       } catch (error) {
@@ -77,7 +93,9 @@ export function SimpleChatPanel({
     }
 
     if (operations.length > 0) {
-      toast.success(`${operations.length} file${operations.length > 1 ? 's' : ''} updated`);
+      toast.success(
+        `${operations.length} file${operations.length > 1 ? 's' : ''} updated`
+      );
     }
   }, [messages, onFileCreated]);
 
@@ -85,21 +103,26 @@ export function SimpleChatPanel({
     <div className="flex h-full flex-col">
       <ScrollArea className="flex-1">
         <div className="space-y-1 p-4">
-          {messages.length === 0 && !isLoading && showEmptyState && onPromptSelect && (
-            <VibeEmptyState onPromptSelect={onPromptSelect} />
-          )}
+          {messages.length === 0 &&
+            !isLoading &&
+            showEmptyState &&
+            onPromptSelect && (
+              <VibeEmptyState onPromptSelect={onPromptSelect} />
+            )}
 
-          {messages.length === 0 && !isLoading && (!showEmptyState || !onPromptSelect) && (
-            <div className="flex h-64 flex-col items-center justify-center text-center">
-              <div className="rounded-full bg-muted p-4">
-                <Sparkles className="h-8 w-8 text-muted-foreground" />
+          {messages.length === 0 &&
+            !isLoading &&
+            (!showEmptyState || !onPromptSelect) && (
+              <div className="flex h-64 flex-col items-center justify-center text-center">
+                <div className="rounded-full bg-muted p-4">
+                  <Sparkles className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="mt-4 font-medium">Ready to build</h3>
+                <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+                  Describe what you want to create and I'll help you build it
+                </p>
               </div>
-              <h3 className="mt-4 font-medium">Ready to build</h3>
-              <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-                Describe what you want to create and I'll help you build it
-              </p>
-            </div>
-          )}
+            )}
 
           {messages.map((message, index) => (
             <ChatMessage key={message.id || index} message={message} />
@@ -126,6 +149,17 @@ export function SimpleChatPanel({
   );
 }
 
+/**
+ * SimpleChatPanel - Clean chat panel with error boundary protection
+ */
+export function SimpleChatPanel(props: SimpleChatPanelProps) {
+  return (
+    <ErrorBoundary compact componentName="Chat Panel">
+      <SimpleChatPanelContent {...props} />
+    </ErrorBoundary>
+  );
+}
+
 interface ChatMessageProps {
   message: AgentMessage;
 }
@@ -138,13 +172,23 @@ function ChatMessage({ message }: ChatMessageProps) {
     : [];
 
   return (
-    <div className={cn('group py-3', !isUser && 'hover:bg-muted/30 rounded-lg')}>
+    <div
+      className={cn('group py-3', !isUser && 'rounded-lg hover:bg-muted/30')}
+    >
       <div className="flex gap-3">
         <Avatar className="h-7 w-7 flex-shrink-0">
-          <AvatarFallback className={cn(
-            isUser ? 'bg-blue-500/10 text-blue-600' : 'bg-violet-500/10 text-violet-600'
-          )}>
-            {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+          <AvatarFallback
+            className={cn(
+              isUser
+                ? 'bg-blue-500/10 text-blue-600'
+                : 'bg-violet-500/10 text-violet-600'
+            )}
+          >
+            {isUser ? (
+              <User className="h-4 w-4" />
+            ) : (
+              <Bot className="h-4 w-4" />
+            )}
           </AvatarFallback>
         </Avatar>
 
@@ -166,7 +210,9 @@ function ChatMessage({ message }: ChatMessageProps) {
                     return !inline && match ? (
                       <div className="my-2 overflow-hidden rounded-lg border border-border">
                         <div className="flex items-center justify-between bg-muted/50 px-3 py-1.5">
-                          <span className="text-xs text-muted-foreground">{match[1]}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {match[1]}
+                          </span>
                         </div>
                         <SyntaxHighlighter
                           style={vscDarkPlus}
@@ -179,7 +225,10 @@ function ChatMessage({ message }: ChatMessageProps) {
                         </SyntaxHighlighter>
                       </div>
                     ) : (
-                      <code className="rounded bg-muted px-1 py-0.5 text-xs" {...props}>
+                      <code
+                        className="rounded bg-muted px-1 py-0.5 text-xs"
+                        {...props}
+                      >
                         {children}
                       </code>
                     );
@@ -194,9 +243,9 @@ function ChatMessage({ message }: ChatMessageProps) {
           {/* File operations - subtle, below content */}
           {fileOperations.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {fileOperations.map((op, idx) => (
+              {fileOperations.map((op) => (
                 <Badge
-                  key={idx}
+                  key={`file-op-${op.filePath}`}
                   variant="outline"
                   className="gap-1 border-green-500/30 bg-green-500/5 text-xs text-green-600"
                 >

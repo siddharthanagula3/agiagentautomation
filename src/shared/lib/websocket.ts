@@ -86,12 +86,18 @@ export class WebSocketClient {
       this.setStatus('connecting');
 
       try {
-        this.ws = apiClient.createWebSocket(
+        // SECURITY: createWebSocket now returns { ws, sendAuth } to avoid
+        // passing tokens in URL query parameters (prevents credential exposure
+        // in server logs, browser history, and Referer headers)
+        const { ws, sendAuth } = apiClient.createWebSocket(
           this.config.url,
           this.config.protocols
         );
+        this.ws = ws;
 
         this.ws.onopen = () => {
+          // Send auth token as first message after connection opens
+          sendAuth();
           this.setStatus('connected');
           this.reconnectAttempts = 0;
           this.startHeartbeat();

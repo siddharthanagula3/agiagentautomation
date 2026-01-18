@@ -13,7 +13,9 @@ import { supabase } from '@shared/lib/supabase-client';
  */
 async function getAuthToken(): Promise<string | null> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
     console.error('[Google Provider] Failed to get auth token:', error);
@@ -64,13 +66,17 @@ export interface GoogleResponse {
   metadata?: Record<string, unknown>;
 }
 
+import {
+  SUPPORTED_GOOGLE_MODELS,
+  SUPPORTED_GOOGLE_IMAGE_MODELS,
+  SUPPORTED_GOOGLE_VIDEO_MODELS,
+  SUPPORTED_GOOGLE_AUDIO_MODELS,
+  DEFAULT_GOOGLE_MODEL,
+  type GoogleModel,
+} from '@shared/config/supported-models';
+
 export interface GoogleConfig {
-  model:
-    | 'gemini-3-pro-preview'
-    | 'gemini-3-flash-preview'
-    | 'gemini-2.5-pro'
-    | 'gemini-2.5-flash'
-    | 'gemini-2.0-flash';
+  model: GoogleModel;
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
@@ -95,7 +101,7 @@ export class GoogleProvider {
 
   constructor(config: Partial<GoogleConfig> = {}) {
     this.config = {
-      model: 'gemini-2.0-flash',
+      model: DEFAULT_GOOGLE_MODEL,
       maxTokens: 4000,
       temperature: 0.7,
       systemPrompt: 'You are a helpful AI assistant.',
@@ -137,7 +143,7 @@ export class GoogleProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: geminiMessages,
@@ -160,12 +166,18 @@ export class GoogleProvider {
       const data = await response.json();
 
       // Extract content and usage from proxy response
-      const content = data.content || data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const content =
+        data.content || data.candidates?.[0]?.content?.parts?.[0]?.text || '';
       const usage = data.usage
         ? {
-            promptTokens: data.usage.promptTokenCount || data.usage.prompt_tokens || 0,
-            completionTokens: data.usage.candidatesTokenCount || data.usage.completion_tokens || 0,
-            totalTokens: data.usage.totalTokenCount || data.usage.total_tokens || 0,
+            promptTokens:
+              data.usage.promptTokenCount || data.usage.prompt_tokens || 0,
+            completionTokens:
+              data.usage.candidatesTokenCount ||
+              data.usage.completion_tokens ||
+              0,
+            totalTokens:
+              data.usage.totalTokenCount || data.usage.total_tokens || 0,
           }
         : { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
 
@@ -449,49 +461,31 @@ export class GoogleProvider {
 
   /**
    * Get available models (Jan 2026 - Gemini 3 series)
-   * Updated for @google/genai SDK
+   * Uses shared config from @shared/config/supported-models.ts
    */
   static getAvailableModels(): string[] {
-    return [
-      'gemini-3-pro-preview',
-      'gemini-3-flash-preview',
-      'gemini-2.5-pro',
-      'gemini-2.5-flash',
-      'gemini-2.0-flash',
-    ];
+    return [...SUPPORTED_GOOGLE_MODELS];
   }
 
   /**
    * Get available image generation models (Imagen 4)
    */
   static getImageModels(): string[] {
-    return [
-      'imagen-4.0-generate-001',
-      'imagen-4.0-ultra-generate-001',
-      'imagen-4.0-fast-generate-001',
-    ];
+    return [...SUPPORTED_GOOGLE_IMAGE_MODELS];
   }
 
   /**
    * Get available video generation models (Veo 3.1)
    */
   static getVideoModels(): string[] {
-    return [
-      'veo-3.1-generate-preview',
-      'veo-3.1-fast-generate-preview',
-      'veo-3.0-generate-001',
-    ];
+    return [...SUPPORTED_GOOGLE_VIDEO_MODELS];
   }
 
   /**
    * Get available audio models
    */
   static getAudioModels(): string[] {
-    return [
-      'gemini-2.5-flash-native-audio-preview-12-2025',
-      'gemini-2.5-pro-preview-tts',
-      'gemini-2.5-flash-preview-tts',
-    ];
+    return [...SUPPORTED_GOOGLE_AUDIO_MODELS];
   }
 }
 

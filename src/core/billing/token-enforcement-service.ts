@@ -170,7 +170,9 @@ export async function getUserTokenBalance(
 
     if (!rpcError && rpcData && rpcData.length > 0) {
       const balance = Math.max(rpcData[0].current_balance || 0, 0);
-      console.log(`[Token Balance] Current balance (via RPC): ${balance.toLocaleString()}`);
+      console.log(
+        `[Token Balance] Current balance (via RPC): ${balance.toLocaleString()}`
+      );
       return balance;
     }
 

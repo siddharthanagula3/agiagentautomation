@@ -217,7 +217,7 @@ export function MultiAgentChatInterface({
       <div
         className={cn(
           'flex h-full w-full flex-col bg-background',
-          isFullscreen && 'fixed inset-0 z-50',
+          isFullscreen && 'fixed inset-0 z-modal',
           className
         )}
       >

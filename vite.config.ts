@@ -96,15 +96,28 @@ export default defineConfig(({ mode }) => {
             }),
             // Sentry plugin for source maps and release tracking
             sentryVitePlugin({
-              org: 'agi-agent-automation',
-              project: 'agi-agent-automation',
+              org: process.env.SENTRY_ORG || 'agi-agent-automation',
+              project: process.env.SENTRY_PROJECT || 'agi-agent-automation',
               authToken: process.env.SENTRY_AUTH_TOKEN,
               sourcemaps: {
                 assets: './dist/**',
+                // Delete source maps after upload for security
+                filesToDeleteAfterUpload: ['./dist/**/*.map'],
               },
               release: {
-                name: process.env.npm_package_version || '1.0.0',
+                name: `agi-agent-automation@${process.env.npm_package_version || '1.0.0'}`,
+                // Inject release version into the build
+                inject: true,
+                // Set commits for release tracking
+                setCommits: {
+                  auto: true,
+                  ignoreMissing: true,
+                },
               },
+              // Only upload if auth token is present
+              disable: !process.env.SENTRY_AUTH_TOKEN,
+              // Telemetry for Sentry plugin (disable in CI)
+              telemetry: false,
             }),
           ]
         : []),
@@ -134,7 +147,11 @@ export default defineConfig(({ mode }) => {
               if (id.includes('react-router')) {
                 return 'router';
               }
-              if (id.includes('@radix-ui') || id.includes('lucide-react') || id.includes('framer-motion')) {
+              if (
+                id.includes('@radix-ui') ||
+                id.includes('lucide-react') ||
+                id.includes('framer-motion')
+              ) {
                 return 'ui-vendor';
               }
               if (id.includes('@supabase')) {
@@ -143,7 +160,11 @@ export default defineConfig(({ mode }) => {
               if (id.includes('@tanstack/react-query')) {
                 return 'query';
               }
-              if (id.includes('zustand') || id.includes('clsx') || id.includes('tailwind-merge')) {
+              if (
+                id.includes('zustand') ||
+                id.includes('clsx') ||
+                id.includes('tailwind-merge')
+              ) {
                 return 'utils';
               }
               if (id.includes('openai') || id.includes('@anthropic-ai')) {
@@ -152,7 +173,11 @@ export default defineConfig(({ mode }) => {
               if (id.includes('@stripe')) {
                 return 'stripe';
               }
-              if (id.includes('marked') || id.includes('highlight.js') || id.includes('prismjs')) {
+              if (
+                id.includes('marked') ||
+                id.includes('highlight.js') ||
+                id.includes('prismjs')
+              ) {
                 return 'markdown-vendor';
               }
               if (id.includes('@codemirror') || id.includes('@lezer')) {

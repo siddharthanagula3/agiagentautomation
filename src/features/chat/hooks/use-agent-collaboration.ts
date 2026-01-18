@@ -28,8 +28,8 @@ export interface AgentStatus {
 export interface UseAgentCollaborationReturn {
   // State
   availableAgents: AIEmployee[];
-  selectedAgents: string[];  // Changed from Set to array
-  activeAgents: Record<string, AgentStatus>;  // Changed from Map to Record
+  selectedAgents: string[]; // Changed from Set to array
+  activeAgents: Record<string, AgentStatus>; // Changed from Map to Record
   collaborationStatus: 'idle' | 'active' | 'paused' | 'completed';
 
   // Actions

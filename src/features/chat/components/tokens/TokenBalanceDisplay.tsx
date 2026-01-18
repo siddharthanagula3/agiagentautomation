@@ -30,6 +30,9 @@ export function TokenBalanceDisplay({
 
   // Load token balance
   useEffect(() => {
+    let isMounted = true;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
     if (!user?.id) {
       setBalance(null);
       setIsLoading(false);
@@ -37,19 +40,32 @@ export function TokenBalanceDisplay({
     }
 
     const loadBalance = async () => {
+      if (!isMounted) return;
       setIsLoading(true);
-      const currentBalance = await getUserTokenBalance(user.id);
-      setBalance(currentBalance);
-      setLastUpdate(new Date());
-      setIsLoading(false);
+      try {
+        const currentBalance = await getUserTokenBalance(user.id);
+        if (isMounted) {
+          setBalance(currentBalance);
+          setLastUpdate(new Date());
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     };
 
     loadBalance();
 
     // Refresh balance every 30 seconds
-    const interval = setInterval(loadBalance, 30000);
+    intervalId = setInterval(loadBalance, 30000);
 
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
   }, [user?.id]);
 
   if (!user) {

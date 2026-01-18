@@ -1,6 +1,174 @@
-// Core TypeScript interfaces for AGI Agent Automation Platform
-// Based on PRD specifications
+/**
+ * Shared Types Index
+ * Central export point for all shared type definitions
+ *
+ * Import pattern: import { TypeName } from '@shared/types';
+ */
 
+// ============================================================================
+// COMMON TYPES (Primary source for frequently-used types)
+// ============================================================================
+
+export {
+  // Status and primitives
+  type Status,
+  type MessageRole,
+  type MessageDeliveryStatus,
+  type ToolCallStatus,
+  type ParticipantType,
+
+  // API response types
+  type ApiResponse,
+  type APIResponse, // Alias for backward compatibility
+  type PaginatedResponse,
+  type ApiError,
+
+  // Chat message types
+  type MessageMetadata,
+  type BaseChatMessage,
+  type ChatMessage,
+  type ToolCall,
+  type Attachment,
+  type MessageReaction,
+  type ThinkingStep,
+  type Citation,
+
+  // Chat session types
+  type ChatSession,
+  type ChatSettings,
+  type TypingIndicator,
+
+  // AI Employee types
+  type AIProvider,
+  type AIEmployeeStatus,
+  type AIEmployeeBasic,
+  type MarketplaceEmployee,
+  type AIEmployeePerformance,
+
+  // Tool types
+  type Tool,
+  type ToolResult,
+
+  // Streaming types
+  type StreamingUpdate,
+
+  // Base entity
+  type BaseEntity,
+} from './common';
+
+// ============================================================================
+// STORE TYPES
+// ============================================================================
+
+export {
+  type UserRole,
+  type UserPlan,
+  type UserProfile,
+  type UserPreferences,
+  type UserUsage,
+  type UserBilling,
+  type ConversationSettings,
+  type ConversationMetadata,
+  type EmployeeTier,
+  type EmployeeStatus,
+  type EmployeeCapabilities,
+  type EmployeePerformance,
+  type EmployeePricing,
+  type JobStatus,
+  type JobPriority,
+  type WorkerStatus,
+  type JobRequirements as StoreJobRequirements,
+  type JobProgress,
+  type JobResult as StoreJobResult,
+  type SubTask,
+  type NotificationType,
+  type NotificationPriority,
+  type NotificationCategory,
+  type NotificationAction,
+  type NotificationSettings,
+  type Theme,
+  type ColorScheme,
+  type FontSize,
+  type Density,
+  type ThemeConfig,
+  type LayoutConfig,
+  type FileType,
+  type FileUpload,
+  type FileMetadata,
+  type MetricPoint,
+  type TimeSeries,
+  type DashboardWidget,
+  type Integration,
+  type WebhookEvent,
+  type SearchFilters,
+  type SearchResult,
+} from './store-types';
+
+// ============================================================================
+// EMPLOYEE TYPES (Extended definitions)
+// ============================================================================
+
+export {
+  type Employee,
+  type PurchasedEmployee,
+  type EmployeeSession,
+  type EmployeeMessage,
+  type EmployeePerformance as ExtendedEmployeePerformance,
+  type EmployeeCategory,
+  type EmployeeProvider,
+  type SubscriptionStatus,
+} from './employee';
+
+// ============================================================================
+// MULTI-AGENT CHAT TYPES
+// ============================================================================
+
+export {
+  type ConversationType,
+  type ConversationStatus,
+  type OrchestrationMode,
+  type CollaborationStrategy,
+  type ParticipantRole,
+  type ParticipantStatus,
+  type SessionType,
+  type TaskStatus,
+  type ReactionType,
+  type MultiAgentConversation,
+  type ConversationParticipant,
+  type AgentCollaboration,
+  type MessageReaction as MultiAgentMessageReaction,
+  type ConversationMetadata as MultiAgentConversationMetadata,
+  type MultiAgentConversationInsert,
+  type ConversationParticipantInsert,
+  type AgentCollaborationInsert,
+  type MessageReactionInsert,
+  type ConversationMetadataInsert,
+  type MultiAgentConversationUpdate,
+  type ConversationParticipantUpdate,
+  type AgentCollaborationUpdate,
+  type MessageReactionUpdate,
+  type ConversationMetadataUpdate,
+  type ConversationWithParticipants,
+  type ConversationWithDetails,
+  type ParticipantWithStats,
+  type CreateConversationRequest,
+  type AddParticipantRequest,
+  type CreateCollaborationRequest,
+  type ConversationListFilters,
+  type ConversationStats,
+  type RealtimeConversationUpdate,
+  type RealtimeParticipantUpdate,
+  type TypingIndicator as MultiAgentTypingIndicator,
+  type PresenceState,
+  type DatabaseError,
+  MultiAgentChatError,
+} from './multi-agent-chat';
+
+// ============================================================================
+// LEGACY TYPES (Domain-specific, kept for compatibility)
+// ============================================================================
+
+// User types
 export interface User {
   id: string;
   email: string;
@@ -11,6 +179,7 @@ export interface User {
   updated_at: string;
 }
 
+// Extended AI Employee (full definition with all fields)
 export interface AIEmployee {
   id: string;
   name: string;
@@ -21,7 +190,7 @@ export interface AIEmployee {
   status: 'available' | 'busy' | 'offline' | 'maintenance';
   capabilities: AIEmployeeCapabilities;
   system_prompt: string;
-  tools: Tool[];
+  tools: LegacyTool[];
   workflows?: Workflow[];
   performance: PerformanceMetrics;
   availability: AvailabilitySettings;
@@ -35,7 +204,7 @@ export interface AIEmployeeCapabilities {
   coreSkills: string[];
   technicalSkills: string[];
   softSkills: string[];
-  availableTools: Tool[];
+  availableTools: LegacyTool[];
   toolProficiency: Map<string, number>;
   autonomyLevel: 'supervised' | 'semi-autonomous' | 'fully-autonomous';
   decisionMaking: DecisionCapability[];
@@ -44,7 +213,8 @@ export interface AIEmployeeCapabilities {
   communicationChannels: Channel[];
 }
 
-export interface Tool {
+// Legacy Tool definition (extended)
+export interface LegacyTool {
   id: string;
   name: string;
   description: string;
@@ -75,14 +245,14 @@ export interface ToolInvocation {
   parameters: Record<string, unknown>;
   context: ExecutionContext;
   validate(): ValidationResult;
-  execute(): Promise<ToolResult>;
-  handleResult(result: ToolResult): void;
+  execute(): Promise<LegacyToolResult>;
+  handleResult(result: LegacyToolResult): void;
   handleError(error: Error): void;
   logExecution(): void;
   trackPerformance(): void;
 }
 
-export interface ToolResult {
+export interface LegacyToolResult {
   success: boolean;
   data?: unknown;
   error?: string;
@@ -218,7 +388,8 @@ export interface InterAgentMessage {
   metadata: Record<string, unknown>;
 }
 
-export interface ChatSession {
+// Legacy ChatSession (database schema version)
+export interface LegacyChatSession {
   id: string;
   user_id: string;
   employee_id: string;
@@ -229,7 +400,8 @@ export interface ChatSession {
   status: 'active' | 'ended' | 'archived';
 }
 
-export interface ChatMessage {
+// Legacy ChatMessage (database schema version)
+export interface LegacyChatMessage {
   id: string;
   session_id: string;
   sender_type: 'user' | 'employee';
@@ -384,25 +556,6 @@ export interface AnalyticsEvent {
   created_at: string;
 }
 
-// API Response Types
-export interface APIResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
 // WebSocket Event Types
 export interface ClientEvents {
   'chat:message': { sessionId: string; message: string };
@@ -412,7 +565,7 @@ export interface ClientEvents {
 }
 
 export interface ServerEvents {
-  'chat:response': { sessionId: string; message: ChatMessage };
+  'chat:response': { sessionId: string; message: LegacyChatMessage };
   'chat:thinking': { sessionId: string; status: string };
   'job:update': { jobId: string; status: string; data: unknown };
   'workflow:update': { workflowId: string; status: string };

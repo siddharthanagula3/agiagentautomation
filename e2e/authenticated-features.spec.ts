@@ -9,10 +9,11 @@ const __dirname = dirname(__filename);
 
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173';
 
-// Real test credentials
+// Test credentials - MUST be set via environment variables in CI/CD
+// Never commit actual credentials to the repository
 const TEST_USER = {
-  email: 'siddharthanagula3@gmail.com',
-  password: 'Sid@1234',
+  email: process.env.E2E_TEST_EMAIL || 'test@example.com',
+  password: process.env.E2E_TEST_PASSWORD || '', // Set in CI environment
 };
 
 // Helper functions
@@ -38,7 +39,9 @@ async function waitForAppInit(page: Page, timeout = 20000) {
     await page.waitForFunction(
       () => {
         const text = document.body.innerText;
-        return !text.includes('Initializing...') && !text.includes('Loading...');
+        return (
+          !text.includes('Initializing...') && !text.includes('Loading...')
+        );
       },
       { timeout: 10000 }
     );
@@ -88,9 +91,12 @@ async function login(page: Page): Promise<boolean> {
 
   // Wait for successful login redirect
   try {
-    await page.waitForURL(/\/(dashboard|home|chat|vibe|mission-control|marketplace)/, {
-      timeout: 20000,
-    });
+    await page.waitForURL(
+      /\/(dashboard|home|chat|vibe|mission-control|marketplace)/,
+      {
+        timeout: 20000,
+      }
+    );
     await waitForAppInit(page);
     console.log('✅ Login successful!');
     return true;
@@ -125,12 +131,16 @@ test.describe('Authentication', () => {
     await login(page);
 
     // Find and click logout button/menu
-    const userMenu = page.locator('[class*="avatar"], [class*="user"], button:has-text("Account")').first();
+    const userMenu = page
+      .locator('[class*="avatar"], [class*="user"], button:has-text("Account")')
+      .first();
     if (await userMenu.isVisible({ timeout: 5000 })) {
       await userMenu.click();
       await page.waitForTimeout(500);
 
-      const logoutButton = page.locator('button:has-text("Log out"), button:has-text("Sign out"), [class*="logout"]');
+      const logoutButton = page.locator(
+        'button:has-text("Log out"), button:has-text("Sign out"), [class*="logout"]'
+      );
       if (await logoutButton.isVisible({ timeout: 3000 })) {
         await logoutButton.click();
         await page.waitForURL(/\/(login|$)/, { timeout: 10000 });
@@ -181,7 +191,9 @@ test.describe('Dashboard', () => {
     ];
 
     for (const link of sidebarLinks) {
-      const navLink = page.locator(`a:has-text("${link.text}"), [href*="${link.url}"]`).first();
+      const navLink = page
+        .locator(`a:has-text("${link.text}"), [href*="${link.url}"]`)
+        .first();
       if (await navLink.isVisible({ timeout: 3000 })) {
         console.log(`✅ Found nav link: ${link.text}`);
       } else {
@@ -210,12 +222,18 @@ test.describe('Chat Interface', () => {
     await captureScreenshot(page, 'chat-interface');
 
     // Check for message input
-    const messageInput = page.locator('textarea, input[placeholder*="message" i]').first();
+    const messageInput = page
+      .locator('textarea, input[placeholder*="message" i]')
+      .first();
     await expect(messageInput).toBeVisible({ timeout: 10000 });
     console.log('✅ Message input found');
 
     // Check for send button
-    const sendButton = page.locator('button[type="submit"], button:has-text("Send"), button[aria-label*="send" i]').first();
+    const sendButton = page
+      .locator(
+        'button[type="submit"], button:has-text("Send"), button[aria-label*="send" i]'
+      )
+      .first();
     if (await sendButton.isVisible({ timeout: 5000 })) {
       console.log('✅ Send button found');
     }
@@ -233,7 +251,9 @@ test.describe('Chat Interface', () => {
     await page.goto(`${BASE_URL}/chat`);
     await waitForAppInit(page);
 
-    const messageInput = page.locator('textarea, input[placeholder*="message" i]').first();
+    const messageInput = page
+      .locator('textarea, input[placeholder*="message" i]')
+      .first();
     await messageInput.waitFor({ state: 'visible', timeout: 10000 });
 
     const testMessage = 'Hello, this is a test message from Playwright!';
@@ -252,14 +272,20 @@ test.describe('Chat Interface', () => {
     await page.goto(`${BASE_URL}/chat`);
     await waitForAppInit(page);
 
-    const messageInput = page.locator('textarea, input[placeholder*="message" i]').first();
+    const messageInput = page
+      .locator('textarea, input[placeholder*="message" i]')
+      .first();
     await messageInput.waitFor({ state: 'visible', timeout: 10000 });
 
     // Type a simple test message
     await messageInput.fill('Hello! What can you help me with?');
 
     // Find and click send button
-    const sendButton = page.locator('button[type="submit"], button:has-text("Send"), button[aria-label*="send" i]').first();
+    const sendButton = page
+      .locator(
+        'button[type="submit"], button:has-text("Send"), button[aria-label*="send" i]'
+      )
+      .first();
 
     if (await sendButton.isVisible({ timeout: 5000 })) {
       await sendButton.click();
@@ -310,7 +336,11 @@ test.describe('Chat Interface', () => {
     await waitForAppInit(page);
 
     // Look for new conversation button
-    const newChatButton = page.locator('button:has-text("New"), button[aria-label*="new" i], [class*="new-chat"]').first();
+    const newChatButton = page
+      .locator(
+        'button:has-text("New"), button[aria-label*="new" i], [class*="new-chat"]'
+      )
+      .first();
 
     if (await newChatButton.isVisible({ timeout: 5000 })) {
       await newChatButton.click();
@@ -340,7 +370,9 @@ test.describe('VIBE Workspace', () => {
     await captureScreenshot(page, 'vibe-interface');
 
     // VIBE should have code editor or workspace elements
-    const vibeContent = page.locator('main, [class*="vibe"], [class*="editor"], [class*="workspace"]');
+    const vibeContent = page.locator(
+      'main, [class*="vibe"], [class*="editor"], [class*="workspace"]'
+    );
     await expect(vibeContent.first()).toBeVisible({ timeout: 10000 });
     console.log('✅ VIBE workspace loaded');
   });
@@ -351,7 +383,11 @@ test.describe('VIBE Workspace', () => {
     await page.goto(`${BASE_URL}/vibe`);
     await waitForAppInit(page);
 
-    const chatInput = page.locator('textarea, input[placeholder*="message" i], input[placeholder*="prompt" i]').first();
+    const chatInput = page
+      .locator(
+        'textarea, input[placeholder*="message" i], input[placeholder*="prompt" i]'
+      )
+      .first();
 
     if (await chatInput.isVisible({ timeout: 10000 })) {
       console.log('✅ VIBE chat input found');
@@ -369,7 +405,9 @@ test.describe('VIBE Workspace', () => {
     await page.goto(`${BASE_URL}/vibe`);
     await waitForAppInit(page);
 
-    const fileExplorer = page.locator('[class*="file"], [class*="explorer"], [class*="tree"], aside').first();
+    const fileExplorer = page
+      .locator('[class*="file"], [class*="explorer"], [class*="tree"], aside')
+      .first();
 
     if (await fileExplorer.isVisible({ timeout: 5000 })) {
       console.log('✅ File explorer found');
@@ -386,7 +424,9 @@ test.describe('VIBE Workspace', () => {
     await page.goto(`${BASE_URL}/vibe`);
     await waitForAppInit(page);
 
-    const previewPanel = page.locator('[class*="preview"], [class*="output"], iframe').first();
+    const previewPanel = page
+      .locator('[class*="preview"], [class*="output"], iframe')
+      .first();
 
     if (await previewPanel.isVisible({ timeout: 5000 })) {
       console.log('✅ Preview panel found');
@@ -414,7 +454,9 @@ test.describe('Marketplace', () => {
     await waitForAppInit(page);
     await captureScreenshot(page, 'marketplace');
 
-    const marketplaceContent = page.locator('main, [class*="marketplace"], [class*="employee"]');
+    const marketplaceContent = page.locator(
+      'main, [class*="marketplace"], [class*="employee"]'
+    );
     await expect(marketplaceContent.first()).toBeVisible({ timeout: 10000 });
     console.log('✅ Marketplace loaded');
   });
@@ -426,7 +468,9 @@ test.describe('Marketplace', () => {
     await waitForAppInit(page);
 
     // Look for employee cards
-    const employeeCards = page.locator('[class*="card"], [class*="employee"], [class*="agent"]');
+    const employeeCards = page.locator(
+      '[class*="card"], [class*="employee"], [class*="agent"]'
+    );
     const count = await employeeCards.count();
 
     console.log(`📊 Found ${count} employee cards`);
@@ -444,7 +488,9 @@ test.describe('Marketplace', () => {
     await waitForAppInit(page);
 
     // Click on first employee card
-    const employeeCard = page.locator('[class*="card"], [class*="employee"]').first();
+    const employeeCard = page
+      .locator('[class*="card"], [class*="employee"]')
+      .first();
 
     if (await employeeCard.isVisible({ timeout: 5000 })) {
       await employeeCard.click();
@@ -460,7 +506,9 @@ test.describe('Marketplace', () => {
     await page.goto(`${BASE_URL}/marketplace`);
     await waitForAppInit(page);
 
-    const searchInput = page.locator('input[placeholder*="search" i], input[type="search"]').first();
+    const searchInput = page
+      .locator('input[placeholder*="search" i], input[type="search"]')
+      .first();
 
     if (await searchInput.isVisible({ timeout: 5000 })) {
       await searchInput.fill('developer');
@@ -489,7 +537,9 @@ test.describe('Mission Control', () => {
     await waitForAppInit(page);
     await captureScreenshot(page, 'mission-control');
 
-    const missionContent = page.locator('main, [class*="mission"], [class*="control"]');
+    const missionContent = page.locator(
+      'main, [class*="mission"], [class*="control"]'
+    );
     await expect(missionContent.first()).toBeVisible({ timeout: 10000 });
     console.log('✅ Mission Control loaded');
   });
@@ -501,7 +551,9 @@ test.describe('Mission Control', () => {
     await waitForAppInit(page);
 
     // Look for status indicators, charts, or mission panels
-    const statusElements = page.locator('[class*="status"], [class*="task"], [class*="progress"]');
+    const statusElements = page.locator(
+      '[class*="status"], [class*="task"], [class*="progress"]'
+    );
     const count = await statusElements.count();
 
     console.log(`📊 Found ${count} status elements`);
@@ -538,7 +590,9 @@ test.describe('Settings', () => {
     await captureScreenshot(page, 'settings-ai');
 
     // Look for AI provider settings
-    const aiSettings = page.locator('[class*="ai"], [class*="provider"], [class*="model"]');
+    const aiSettings = page.locator(
+      '[class*="ai"], [class*="provider"], [class*="model"]'
+    );
 
     if (await aiSettings.first().isVisible({ timeout: 5000 })) {
       console.log('✅ AI configuration settings found');
@@ -579,7 +633,9 @@ test.describe('Employee Management', () => {
     await waitForAppInit(page);
     await captureScreenshot(page, 'my-employees');
 
-    const workforceContent = page.locator('main, [class*="workforce"], [class*="employee"]');
+    const workforceContent = page.locator(
+      'main, [class*="workforce"], [class*="employee"]'
+    );
     await expect(workforceContent.first()).toBeVisible({ timeout: 10000 });
     console.log('✅ Workforce page loaded');
   });
@@ -591,7 +647,9 @@ test.describe('Employee Management', () => {
     await waitForAppInit(page);
 
     // Look for employee list or cards
-    const employeeList = page.locator('[class*="employee"], [class*="agent"], [class*="card"]');
+    const employeeList = page.locator(
+      '[class*="employee"], [class*="agent"], [class*="card"]'
+    );
     const count = await employeeList.count();
 
     console.log(`📊 Found ${count} hired employees`);
@@ -615,7 +673,9 @@ test.describe('Billing', () => {
     await waitForAppInit(page);
     await captureScreenshot(page, 'billing');
 
-    const billingContent = page.locator('main, [class*="billing"], [class*="subscription"]');
+    const billingContent = page.locator(
+      'main, [class*="billing"], [class*="subscription"]'
+    );
     await expect(billingContent.first()).toBeVisible({ timeout: 10000 });
     console.log('✅ Billing page loaded');
   });
@@ -627,7 +687,9 @@ test.describe('Billing', () => {
     await waitForAppInit(page);
 
     // Look for usage charts or statistics
-    const usageElements = page.locator('[class*="usage"], [class*="stats"], [class*="chart"], [class*="credit"]');
+    const usageElements = page.locator(
+      '[class*="usage"], [class*="stats"], [class*="chart"], [class*="credit"]'
+    );
     const count = await usageElements.count();
 
     console.log(`📊 Found ${count} usage elements`);
@@ -664,7 +726,9 @@ test.describe('Responsive Design - Authenticated', () => {
     await captureScreenshot(page, 'chat-mobile');
 
     // Check message input is still accessible
-    const messageInput = page.locator('textarea, input[placeholder*="message" i]').first();
+    const messageInput = page
+      .locator('textarea, input[placeholder*="message" i]')
+      .first();
     if (await messageInput.isVisible({ timeout: 5000 })) {
       console.log('✅ Chat input visible on mobile');
     }
@@ -699,7 +763,10 @@ test.describe('Error Handling', () => {
       if (msg.type() === 'error') {
         const text = msg.text();
         // Filter out expected warnings
-        if (!text.includes('Environment validation') && !text.includes('favicon')) {
+        if (
+          !text.includes('Environment validation') &&
+          !text.includes('favicon')
+        ) {
           errors.push(text);
         }
       }
@@ -713,7 +780,9 @@ test.describe('Error Handling', () => {
     errors.forEach((e) => console.log(`  - ${e.substring(0, 200)}`));
 
     // Check for Immer errors specifically
-    const immerErrors = errors.filter((e) => e.includes('Immer') || e.includes('frozen'));
+    const immerErrors = errors.filter(
+      (e) => e.includes('Immer') || e.includes('frozen')
+    );
     expect(immerErrors.length).toBe(0);
   });
 
@@ -724,7 +793,10 @@ test.describe('Error Handling', () => {
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
         const text = msg.text();
-        if (!text.includes('Environment validation') && !text.includes('favicon')) {
+        if (
+          !text.includes('Environment validation') &&
+          !text.includes('favicon')
+        ) {
           errors.push(text);
         }
       }
@@ -742,7 +814,9 @@ test.describe('Error Handling', () => {
 
     console.log(`❌ Unexpected errors: ${errors.length}`);
 
-    const immerErrors = errors.filter((e) => e.includes('Immer') || e.includes('frozen'));
+    const immerErrors = errors.filter(
+      (e) => e.includes('Immer') || e.includes('frozen')
+    );
     expect(immerErrors.length).toBe(0);
   });
 
@@ -755,7 +829,10 @@ test.describe('Error Handling', () => {
 
     // Should show 404 content or redirect
     const pageContent = await page.content();
-    const is404 = pageContent.includes('404') || pageContent.includes('not found') || pageContent.includes('Not Found');
+    const is404 =
+      pageContent.includes('404') ||
+      pageContent.includes('not found') ||
+      pageContent.includes('Not Found');
 
     console.log(`404 indicator found: ${is404}`);
   });

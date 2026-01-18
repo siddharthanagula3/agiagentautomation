@@ -1,21 +1,17 @@
 /**
  * Type definitions for state management
  * Shared types used across stores and API
+ *
+ * Note: Common types like Status, BaseEntity, ApiError, MessageRole, etc.
+ * are now defined in ./common.ts and re-exported from ./index.ts
  */
 
-// ========================================
-// Common Types
-// ========================================
+// Re-export common types for backward compatibility
+export { Status, BaseEntity, ApiError } from './common';
+export type { PaginatedResponse } from './common';
 
-export type Status = 'idle' | 'loading' | 'success' | 'error';
-
-export interface BaseEntity {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface PaginatedResponse<T> {
+// Store-specific paginated response with items array
+export interface StorePaginatedResponse<T> {
   items: T[];
   pagination: {
     page: number;
@@ -25,13 +21,6 @@ export interface PaginatedResponse<T> {
     hasNext: boolean;
     hasPrev: boolean;
   };
-}
-
-export interface ApiError {
-  message: string;
-  code?: string;
-  status?: number;
-  details?: Record<string, unknown>;
 }
 
 // ========================================
@@ -81,10 +70,14 @@ export interface UserBilling {
 // Chat & Conversation Types
 // ========================================
 
-export type MessageRole = 'user' | 'assistant' | 'system';
+// Note: MessageRole is now exported from ./common.ts with 'tool' as an additional option
+// Re-export a store-specific subset for backward compatibility
+export type StoreMessageRole = 'user' | 'assistant' | 'system';
 export type MessageStatus = 'sending' | 'sent' | 'failed';
 
-export interface MessageMetadata {
+// Note: MessageMetadata is now in ./common.ts with more complete fields
+// This is kept for backward compatibility with store implementations
+export interface StoreMessageMetadata {
   model?: string;
   tokensUsed?: number;
   cost?: number;

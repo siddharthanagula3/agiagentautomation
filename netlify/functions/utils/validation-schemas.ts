@@ -4,6 +4,7 @@
  * SECURITY: Provides strict input validation to prevent injection attacks
  *
  * Created: January 10, 2026
+ * Updated: January 17, 2026 - Unified model definitions with frontend
  */
 
 import { z } from 'zod';
@@ -11,67 +12,37 @@ import { z } from 'zod';
 // =============================================================================
 // ALLOWED MODEL WHITELISTS
 // SECURITY: Only allow known, valid model identifiers to prevent arbitrary model injection
+//
+// IMPORTANT: These are imported from ./supported-models.ts which mirrors
+// src/shared/config/supported-models.ts - the single source of truth.
+// When adding/removing models, update supported-models.ts in both locations.
 // =============================================================================
 
-export const ALLOWED_ANTHROPIC_MODELS = [
-  'claude-3-5-sonnet-20241022',
-  'claude-3-5-haiku-20241022',
-  'claude-3-opus-20240229',
-  'claude-3-sonnet-20240229',
-  'claude-3-haiku-20240307',
-  'claude-sonnet-4-20250514',
-  'claude-opus-4-20250514',
-] as const;
+import {
+  SUPPORTED_ANTHROPIC_MODELS,
+  SUPPORTED_OPENAI_MODELS,
+  SUPPORTED_GOOGLE_MODELS,
+  SUPPORTED_PERPLEXITY_MODELS,
+  SUPPORTED_GROK_MODELS,
+  SUPPORTED_DEEPSEEK_MODELS,
+  SUPPORTED_QWEN_MODELS,
+  DEFAULT_ANTHROPIC_MODEL,
+  DEFAULT_OPENAI_MODEL,
+  DEFAULT_GOOGLE_MODEL,
+  DEFAULT_PERPLEXITY_MODEL,
+  DEFAULT_GROK_MODEL,
+  DEFAULT_DEEPSEEK_MODEL,
+  DEFAULT_QWEN_MODEL,
+} from './supported-models';
 
-export const ALLOWED_OPENAI_MODELS = [
-  'gpt-4o',
-  'gpt-4o-mini',
-  'gpt-4-turbo',
-  'gpt-4-turbo-preview',
-  'gpt-4',
-  'gpt-3.5-turbo',
-  'o1-preview',
-  'o1-mini',
-  'o1',
-  'o3-mini',
-] as const;
-
-export const ALLOWED_GOOGLE_MODELS = [
-  'gemini-2.0-flash-exp',
-  'gemini-2.0-flash',
-  'gemini-1.5-pro',
-  'gemini-1.5-flash',
-  'gemini-1.0-pro',
-  'gemini-pro',
-] as const;
-
-export const ALLOWED_PERPLEXITY_MODELS = [
-  'llama-3.1-sonar-small-128k-online',
-  'llama-3.1-sonar-large-128k-online',
-  'llama-3.1-sonar-huge-128k-online',
-  'sonar',
-  'sonar-pro',
-] as const;
-
-export const ALLOWED_GROK_MODELS = [
-  'grok-beta',
-  'grok-2',
-  'grok-2-mini',
-] as const;
-
-export const ALLOWED_DEEPSEEK_MODELS = [
-  'deepseek-chat',
-  'deepseek-coder',
-  'deepseek-reasoner',
-] as const;
-
-export const ALLOWED_QWEN_MODELS = [
-  'qwen-turbo',
-  'qwen-plus',
-  'qwen-max',
-  'qwen2.5-72b-instruct',
-  'qwen2.5-32b-instruct',
-] as const;
+// Re-export for backward compatibility
+export const ALLOWED_ANTHROPIC_MODELS = SUPPORTED_ANTHROPIC_MODELS;
+export const ALLOWED_OPENAI_MODELS = SUPPORTED_OPENAI_MODELS;
+export const ALLOWED_GOOGLE_MODELS = SUPPORTED_GOOGLE_MODELS;
+export const ALLOWED_PERPLEXITY_MODELS = SUPPORTED_PERPLEXITY_MODELS;
+export const ALLOWED_GROK_MODELS = SUPPORTED_GROK_MODELS;
+export const ALLOWED_DEEPSEEK_MODELS = SUPPORTED_DEEPSEEK_MODELS;
+export const ALLOWED_QWEN_MODELS = SUPPORTED_QWEN_MODELS;
 
 // =============================================================================
 // BASE SCHEMAS
@@ -126,14 +97,14 @@ export const baseLlmRequestSchema = z.object({
 export const anthropicRequestSchema = baseLlmRequestSchema.extend({
   model: z
     .enum(ALLOWED_ANTHROPIC_MODELS)
-    .default('claude-3-5-sonnet-20241022'),
+    .default(DEFAULT_ANTHROPIC_MODEL),
 });
 
 /**
  * OpenAI GPT API request schema
  */
 export const openaiRequestSchema = baseLlmRequestSchema.extend({
-  model: z.enum(ALLOWED_OPENAI_MODELS).default('gpt-4o-mini'),
+  model: z.enum(ALLOWED_OPENAI_MODELS).default(DEFAULT_OPENAI_MODEL),
 });
 
 /**
@@ -157,7 +128,7 @@ const attachmentSchema = z.object({
  * SECURITY: Includes validated attachments for multimodal requests
  */
 export const googleRequestSchema = baseLlmRequestSchema.extend({
-  model: z.enum(ALLOWED_GOOGLE_MODELS).default('gemini-1.5-flash'),
+  model: z.enum(ALLOWED_GOOGLE_MODELS).default(DEFAULT_GOOGLE_MODEL),
   attachments: z.array(attachmentSchema)
     .max(10, 'Maximum 10 attachments per request')
     .optional()
@@ -170,28 +141,28 @@ export const googleRequestSchema = baseLlmRequestSchema.extend({
 export const perplexityRequestSchema = baseLlmRequestSchema.extend({
   model: z
     .enum(ALLOWED_PERPLEXITY_MODELS)
-    .default('llama-3.1-sonar-small-128k-online'),
+    .default(DEFAULT_PERPLEXITY_MODEL),
 });
 
 /**
  * xAI Grok API request schema
  */
 export const grokRequestSchema = baseLlmRequestSchema.extend({
-  model: z.enum(ALLOWED_GROK_MODELS).default('grok-beta'),
+  model: z.enum(ALLOWED_GROK_MODELS).default(DEFAULT_GROK_MODEL),
 });
 
 /**
  * DeepSeek API request schema
  */
 export const deepseekRequestSchema = baseLlmRequestSchema.extend({
-  model: z.enum(ALLOWED_DEEPSEEK_MODELS).default('deepseek-chat'),
+  model: z.enum(ALLOWED_DEEPSEEK_MODELS).default(DEFAULT_DEEPSEEK_MODEL),
 });
 
 /**
  * Alibaba Qwen API request schema
  */
 export const qwenRequestSchema = baseLlmRequestSchema.extend({
-  model: z.enum(ALLOWED_QWEN_MODELS).default('qwen-turbo'),
+  model: z.enum(ALLOWED_QWEN_MODELS).default(DEFAULT_QWEN_MODEL),
 });
 
 // =============================================================================
@@ -213,7 +184,8 @@ export const createSubscriptionSchema = z.object({
 
 /**
  * Buy token pack request schema
- * SECURITY: Enforces reasonable limits on token amounts and prices
+ * SECURITY FIX (Jan 18, 2026): tokens and price are now server-side validated via packId lookup
+ * Client can still send them (backward compatibility), but they're ignored in favor of trusted values
  */
 export const buyTokenPackSchema = z.object({
   userId: z.string().uuid('Invalid user ID format'),
@@ -221,16 +193,23 @@ export const buyTokenPackSchema = z.object({
   packId: z
     .string()
     .min(1, 'Pack ID is required')
-    .max(50, 'Pack ID too long'),
+    .max(50, 'Pack ID too long')
+    .refine(
+      (id) => ['pack_500k', 'pack_1.5m', 'pack_5m', 'pack_10m'].includes(id),
+      'Invalid pack ID - must be one of: pack_500k, pack_1.5m, pack_5m, pack_10m'
+    ),
+  // Legacy fields (optional for backward compatibility, but ignored server-side)
   tokens: z
     .number()
     .int('Token count must be an integer')
     .positive('Token count must be positive')
-    .max(100000000, 'Token count cannot exceed 100 million'),
+    .max(100000000, 'Token count cannot exceed 100 million')
+    .optional(),
   price: z
     .number()
     .positive('Price must be positive')
-    .max(10000, 'Price cannot exceed $10,000'),
+    .max(10000, 'Price cannot exceed $10,000')
+    .optional(),
 });
 
 /**
@@ -304,6 +283,172 @@ export const vibeBuildSchema = z.object({
 });
 
 // =============================================================================
+// AGENTS EXECUTE SCHEMA
+// =============================================================================
+
+/**
+ * Agents execute request schema
+ * SECURITY: Validates all fields for OpenAI Assistants API execution
+ */
+export const agentsExecuteSchema = z.object({
+  conversationId: z.string().uuid('Invalid conversation ID'),
+  userId: z.string().uuid('Invalid user ID'),
+  message: z.string().min(1, 'Message is required').max(100000, 'Message too long'),
+  threadId: z.string().min(1, 'Thread ID is required').max(100, 'Thread ID too long'),
+  assistantId: z.string().min(1, 'Assistant ID is required').max(100, 'Assistant ID too long'),
+  streaming: z.boolean().optional(),
+});
+
+// =============================================================================
+// MEDIA GENERATION SCHEMAS
+// =============================================================================
+
+/**
+ * Allowed DALL-E models
+ * SECURITY: Whitelist to prevent model injection
+ */
+const ALLOWED_DALLE_MODELS = ['dall-e-3', 'dall-e-2'] as const;
+
+/**
+ * Allowed DALL-E image sizes
+ * SECURITY: Restrict to valid OpenAI image dimensions
+ */
+const ALLOWED_DALLE_SIZES = ['256x256', '512x512', '1024x1024', '1024x1792', '1792x1024'] as const;
+
+/**
+ * Allowed DALL-E quality options
+ */
+const ALLOWED_DALLE_QUALITY = ['standard', 'hd'] as const;
+
+/**
+ * Allowed DALL-E style options
+ */
+const ALLOWED_DALLE_STYLE = ['vivid', 'natural'] as const;
+
+/**
+ * OpenAI DALL-E image generation request schema
+ * SECURITY: Validates prompt length, model whitelist, and image parameters
+ */
+export const openaiImageRequestSchema = z.object({
+  prompt: z
+    .string()
+    .min(1, 'Prompt is required')
+    .max(4000, 'Prompt cannot exceed 4,000 characters'),
+  model: z.enum(ALLOWED_DALLE_MODELS).default('dall-e-3'),
+  n: z
+    .number()
+    .int('Image count must be an integer')
+    .min(1, 'Must generate at least 1 image')
+    .max(10, 'Cannot generate more than 10 images')
+    .default(1),
+  size: z.enum(ALLOWED_DALLE_SIZES).default('1024x1024'),
+  quality: z.enum(ALLOWED_DALLE_QUALITY).default('standard'),
+  style: z.enum(ALLOWED_DALLE_STYLE).default('vivid'),
+  response_format: z.enum(['url', 'b64_json']).default('url'),
+});
+
+/**
+ * Allowed Google Imagen models
+ * SECURITY: Whitelist to prevent model injection
+ */
+const ALLOWED_IMAGEN_MODELS = [
+  'imagen-3.0-generate-001',
+  'imagen-3.0-fast-generate-001',
+  'imagegeneration@006',
+  'imagegeneration@005',
+] as const;
+
+/**
+ * Google Imagen image generation request schema
+ * SECURITY: Validates prompt, model whitelist, and generation parameters
+ */
+export const googleImagenRequestSchema = z.object({
+  prompt: z
+    .string()
+    .min(1, 'Prompt is required')
+    .max(5000, 'Prompt cannot exceed 5,000 characters'),
+  model: z.enum(ALLOWED_IMAGEN_MODELS).default('imagen-3.0-generate-001'),
+  sampleCount: z
+    .number()
+    .int('Sample count must be an integer')
+    .min(1, 'Must generate at least 1 image')
+    .max(4, 'Cannot generate more than 4 images')
+    .default(1),
+  aspectRatio: z
+    .enum(['1:1', '3:4', '4:3', '9:16', '16:9'])
+    .default('1:1'),
+  negativePrompt: z
+    .string()
+    .max(2000, 'Negative prompt cannot exceed 2,000 characters')
+    .optional(),
+  personGeneration: z
+    .enum(['DONT_ALLOW', 'ALLOW_ADULT'])
+    .default('ALLOW_ADULT'),
+  safetyFilterLevel: z
+    .enum(['BLOCK_LOW_AND_ABOVE', 'BLOCK_MEDIUM_AND_ABOVE', 'BLOCK_ONLY_HIGH'])
+    .default('BLOCK_MEDIUM_AND_ABOVE'),
+});
+
+/**
+ * Allowed Google Veo models
+ * SECURITY: Whitelist to prevent model injection
+ */
+const ALLOWED_VEO_MODELS = [
+  'veo-2.0-generate-001',
+  'veo-001',
+] as const;
+
+/**
+ * Google Veo video generation request schema
+ * SECURITY: Validates prompt, model whitelist, and video parameters
+ */
+export const googleVeoRequestSchema = z.object({
+  prompt: z
+    .string()
+    .min(1, 'Prompt is required')
+    .max(5000, 'Prompt cannot exceed 5,000 characters'),
+  model: z.enum(ALLOWED_VEO_MODELS).default('veo-2.0-generate-001'),
+  durationSeconds: z
+    .number()
+    .int('Duration must be an integer')
+    .min(5, 'Video must be at least 5 seconds')
+    .max(60, 'Video cannot exceed 60 seconds')
+    .default(10),
+  aspectRatio: z
+    .enum(['9:16', '16:9', '1:1'])
+    .default('16:9'),
+  negativePrompt: z
+    .string()
+    .max(2000, 'Negative prompt cannot exceed 2,000 characters')
+    .optional(),
+  personGeneration: z
+    .enum(['DONT_ALLOW', 'ALLOW_ADULT'])
+    .default('ALLOW_ADULT'),
+  // For image-to-video generation
+  referenceImage: z
+    .object({
+      data: z.string().max(10 * 1024 * 1024, 'Image data cannot exceed 10MB'),
+      mimeType: z.enum(['image/png', 'image/jpeg', 'image/webp']),
+    })
+    .optional(),
+});
+
+/**
+ * Google Veo polling request schema
+ * SECURITY: Validates operation name format
+ */
+export const googleVeoPollingSchema = z.object({
+  operationName: z
+    .string()
+    .min(1, 'Operation name is required')
+    .max(500, 'Operation name too long')
+    .regex(
+      /^projects\/[^/]+\/locations\/[^/]+\/operations\/[^/]+$/,
+      'Invalid operation name format'
+    ),
+});
+
+// =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
 
@@ -352,3 +497,8 @@ export type BillingPortalRequest = z.infer<typeof billingPortalSchema>;
 export type AgentsSessionRequest = z.infer<typeof agentsSessionSchema>;
 export type FetchPageRequest = z.infer<typeof fetchPageSchema>;
 export type VibeBuildRequest = z.infer<typeof vibeBuildSchema>;
+export type AgentsExecuteRequest = z.infer<typeof agentsExecuteSchema>;
+export type OpenAIImageRequest = z.infer<typeof openaiImageRequestSchema>;
+export type GoogleImagenRequest = z.infer<typeof googleImagenRequestSchema>;
+export type GoogleVeoRequest = z.infer<typeof googleVeoRequestSchema>;
+export type GoogleVeoPollingRequest = z.infer<typeof googleVeoPollingSchema>;

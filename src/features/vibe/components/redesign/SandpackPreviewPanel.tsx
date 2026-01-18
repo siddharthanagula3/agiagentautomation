@@ -21,7 +21,10 @@ import {
   useSandpack,
   SandpackThemeProvider,
 } from '@codesandbox/sandpack-react';
-import type { SandpackFiles, SandpackPredefinedTemplate } from '@codesandbox/sandpack-react';
+import type {
+  SandpackFiles,
+  SandpackPredefinedTemplate,
+} from '@codesandbox/sandpack-react';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { ScrollArea } from '@shared/ui/scroll-area';
@@ -111,7 +114,9 @@ function collectSandpackFiles(): SandpackFiles {
       try {
         const content = vibeFileSystem.readFile(file.path);
         // Sandpack needs paths without leading slash for some files
-        const sandpackPath = file.path.startsWith('/') ? file.path : `/${file.path}`;
+        const sandpackPath = file.path.startsWith('/')
+          ? file.path
+          : `/${file.path}`;
         files[sandpackPath] = { code: content };
       } catch (error) {
         console.error(`Failed to read file ${file.path}:`, error);
@@ -130,12 +135,18 @@ function detectTemplate(files: SandpackFiles): SandpackPredefinedTemplate {
 
   // Check for React
   const hasReact = filePaths.some(
-    (f) => f.endsWith('.tsx') || f.endsWith('.jsx') || f.includes('App.tsx') || f.includes('App.jsx')
+    (f) =>
+      f.endsWith('.tsx') ||
+      f.endsWith('.jsx') ||
+      f.includes('App.tsx') ||
+      f.includes('App.jsx')
   );
   if (hasReact) return 'react-ts';
 
   // Check for vanilla TypeScript
-  const hasTs = filePaths.some((f) => f.endsWith('.ts') && !f.endsWith('.d.ts'));
+  const hasTs = filePaths.some(
+    (f) => f.endsWith('.ts') && !f.endsWith('.d.ts')
+  );
   if (hasTs) return 'vanilla-ts';
 
   // Check for Vue
@@ -153,7 +164,10 @@ function detectTemplate(files: SandpackFiles): SandpackPredefinedTemplate {
 /**
  * Ensure required entry files exist for the template
  */
-function ensureEntryFiles(files: SandpackFiles, template: SandpackPredefinedTemplate): SandpackFiles {
+function ensureEntryFiles(
+  files: SandpackFiles,
+  template: SandpackPredefinedTemplate
+): SandpackFiles {
   const result = { ...files };
 
   if (template === 'react-ts') {
@@ -175,7 +189,12 @@ function ensureEntryFiles(files: SandpackFiles, template: SandpackPredefinedTemp
     }
 
     // Ensure main entry exists
-    if (!result['/index.tsx'] && !result['/src/index.tsx'] && !result['/main.tsx'] && !result['/src/main.tsx']) {
+    if (
+      !result['/index.tsx'] &&
+      !result['/src/index.tsx'] &&
+      !result['/main.tsx'] &&
+      !result['/src/main.tsx']
+    ) {
       result['/index.tsx'] = {
         code: `import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -249,17 +268,17 @@ function SandpackPreviewInner({ showConsole }: { showConsole: boolean }) {
       </div>
       {showConsole && (
         <div className="flex-[0.35] border-t border-border">
-          <SandpackConsole
-            style={{ height: '100%' }}
-            showHeader={false}
-          />
+          <SandpackConsole style={{ height: '100%' }} showHeader={false} />
         </div>
       )}
     </div>
   );
 }
 
-export function SandpackPreviewPanel({ className, onError }: SandpackPreviewPanelProps) {
+export function SandpackPreviewPanel({
+  className,
+  onError,
+}: SandpackPreviewPanelProps) {
   const { appViewerState, setViewport } = useVibeViewStore();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showConsole, setShowConsole] = useState(false);
@@ -315,7 +334,13 @@ export function SandpackPreviewPanel({ className, onError }: SandpackPreviewPane
   }
 
   return (
-    <div className={cn('flex h-full flex-col bg-background', className, isFullscreen && 'fixed inset-0 z-50')}>
+    <div
+      className={cn(
+        'flex h-full flex-col bg-background',
+        className,
+        isFullscreen && 'fixed inset-0 z-modal'
+      )}
+    >
       <PreviewToolbar
         viewport={appViewerState.viewport}
         onViewportChange={setViewport}
@@ -361,7 +386,7 @@ export function SandpackPreviewPanel({ className, onError }: SandpackPreviewPane
               }}
               customSetup={{
                 dependencies: {
-                  'react': '^18.2.0',
+                  react: '^18.2.0',
                   'react-dom': '^18.2.0',
                   'lucide-react': '^0.400.0',
                 },
@@ -375,7 +400,9 @@ export function SandpackPreviewPanel({ className, onError }: SandpackPreviewPane
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
                 <div className="flex flex-col items-center gap-2">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <span className="text-sm text-muted-foreground">Refreshing...</span>
+                  <span className="text-sm text-muted-foreground">
+                    Refreshing...
+                  </span>
                 </div>
               </div>
             )}
@@ -424,7 +451,12 @@ function PreviewToolbar({
         <div className="flex items-center gap-1">
           {/* Viewport Selector */}
           {(['desktop', 'tablet', 'mobile'] as ViewportSize[]).map((vp) => {
-            const Icon = vp === 'desktop' ? Monitor : vp === 'tablet' ? Tablet : Smartphone;
+            const Icon =
+              vp === 'desktop'
+                ? Monitor
+                : vp === 'tablet'
+                  ? Tablet
+                  : Smartphone;
             return (
               <Button
                 key={vp}
@@ -434,7 +466,9 @@ function PreviewToolbar({
                 className="h-7 text-xs"
               >
                 <Icon className="mr-1.5 h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{viewportDimensions[vp].label}</span>
+                <span className="hidden sm:inline">
+                  {viewportDimensions[vp].label}
+                </span>
               </Button>
             );
           })}
@@ -444,7 +478,11 @@ function PreviewToolbar({
           {/* Template Badge */}
           <Badge variant="outline" className="h-6 gap-1 text-xs">
             <Zap className="h-3 w-3" />
-            {template === 'react-ts' ? 'React' : template === 'vanilla-ts' ? 'TypeScript' : template}
+            {template === 'react-ts'
+              ? 'React'
+              : template === 'vanilla-ts'
+                ? 'TypeScript'
+                : template}
           </Badge>
 
           {/* Auto Refresh Toggle */}
@@ -454,7 +492,11 @@ function PreviewToolbar({
             onClick={() => onAutoRefreshChange(!autoRefresh)}
             className="h-7 text-xs"
           >
-            {autoRefresh ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
+            {autoRefresh ? (
+              <Play className="h-3.5 w-3.5" />
+            ) : (
+              <Pause className="h-3.5 w-3.5" />
+            )}
           </Button>
 
           {/* Console Toggle */}
@@ -476,13 +518,24 @@ function PreviewToolbar({
             disabled={isRefreshing}
             className="h-7 text-xs"
           >
-            <RefreshCw className={cn('h-3.5 w-3.5', isRefreshing && 'animate-spin')} />
+            <RefreshCw
+              className={cn('h-3.5 w-3.5', isRefreshing && 'animate-spin')}
+            />
           </Button>
 
           {/* Fullscreen */}
           {onToggleFullscreen && (
-            <Button variant="ghost" size="sm" onClick={onToggleFullscreen} className="h-7 text-xs">
-              {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleFullscreen}
+              className="h-7 text-xs"
+            >
+              {isFullscreen ? (
+                <Minimize2 className="h-3.5 w-3.5" />
+              ) : (
+                <Maximize2 className="h-3.5 w-3.5" />
+              )}
             </Button>
           )}
 
@@ -499,8 +552,14 @@ function PreviewToolbar({
                 Open in CodeSandbox
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onAutoRefreshChange(!autoRefresh)}>
-                {autoRefresh ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
+              <DropdownMenuItem
+                onClick={() => onAutoRefreshChange(!autoRefresh)}
+              >
+                {autoRefresh ? (
+                  <Pause className="mr-2 h-4 w-4" />
+                ) : (
+                  <Play className="mr-2 h-4 w-4" />
+                )}
                 {autoRefresh ? 'Disable' : 'Enable'} Auto Refresh
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -521,7 +580,9 @@ function EmptyPreviewState() {
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
           <Monitor className="h-8 w-8 text-muted-foreground" />
         </div>
-        <h3 className="mb-2 text-sm font-medium text-foreground">No preview available</h3>
+        <h3 className="mb-2 text-sm font-medium text-foreground">
+          No preview available
+        </h3>
         <p className="mb-1 text-xs text-muted-foreground">
           Start building to see your app come to life
         </p>

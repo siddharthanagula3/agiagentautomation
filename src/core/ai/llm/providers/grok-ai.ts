@@ -13,7 +13,9 @@ import { supabase } from '@shared/lib/supabase-client';
  */
 async function getAuthToken(): Promise<string | null> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
     console.error('[Grok Provider] Failed to get auth token:', error);
@@ -60,14 +62,16 @@ export interface GrokResponse {
   };
 }
 
+import {
+  SUPPORTED_GROK_MODELS,
+  SUPPORTED_GROK_IMAGE_MODELS,
+  SUPPORTED_GROK_VISION_MODELS,
+  DEFAULT_GROK_MODEL,
+  type GrokModel,
+} from '@shared/config/supported-models';
+
 export interface GrokConfig {
-  model:
-    | 'grok-4'
-    | 'grok-4-1-fast-reasoning'
-    | 'grok-4-1-fast-non-reasoning'
-    | 'grok-3'
-    | 'grok-3-mini'
-    | 'grok-2-vision-1212';
+  model: GrokModel;
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
@@ -91,7 +95,7 @@ export class GrokProvider {
 
   constructor(config: Partial<GrokConfig> = {}) {
     this.config = {
-      model: 'grok-4',
+      model: DEFAULT_GROK_MODEL,
       maxTokens: 4000,
       temperature: 0.7,
       systemPrompt:
@@ -129,7 +133,7 @@ export class GrokProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: messages.map((msg) => ({
@@ -231,10 +235,20 @@ export class GrokProvider {
       // SECURITY: Use Netlify proxy to keep API keys secure
       const proxyUrl = '/.netlify/functions/llm-proxies/grok-proxy';
 
+      // Get auth token for authenticated proxy calls
+      const authToken = await getAuthToken();
+      if (!authToken) {
+        throw new GrokError(
+          'User not authenticated. Please log in to use AI features.',
+          'NOT_AUTHENTICATED'
+        );
+      }
+
       const response = await fetch(proxyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: messages.map((msg) => ({
@@ -517,30 +531,24 @@ export class GrokProvider {
 
   /**
    * Get available models (Jan 2026 - Grok 4 series)
+   * Uses shared config from @shared/config/supported-models.ts
    */
   static getAvailableModels(): string[] {
-    return [
-      'grok-4',
-      'grok-4-1-fast-reasoning',
-      'grok-4-1-fast-non-reasoning',
-      'grok-3',
-      'grok-3-mini',
-      'grok-2-vision-1212',
-    ];
+    return [...SUPPORTED_GROK_MODELS];
   }
 
   /**
    * Get vision-capable models
    */
   static getVisionModels(): string[] {
-    return ['grok-2-vision-1212', 'grok-4-1-fast-reasoning'];
+    return [...SUPPORTED_GROK_VISION_MODELS];
   }
 
   /**
    * Get image generation models
    */
   static getImageModels(): string[] {
-    return ['grok-2-image-1212'];
+    return [...SUPPORTED_GROK_IMAGE_MODELS];
   }
 
   /**

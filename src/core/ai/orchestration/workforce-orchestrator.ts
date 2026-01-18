@@ -22,6 +22,12 @@ import { supabase } from '@shared/lib/supabase-client';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { tokenLogger } from '@core/integrations/token-usage-tracker';
 import { updateVibeSessionTokens } from '@features/vibe/services/vibe-token-tracker';
+// SECURITY: Import prompt injection defense
+import {
+  sanitizeEmployeeInput,
+  buildSecureMessages,
+  validateEmployeeOutput,
+} from '@core/security/employee-input-sanitizer';
 
 export interface WorkforceRequest {
   userId: string;
@@ -68,6 +74,46 @@ export class WorkforceOrchestratorRefactored {
     const mode = request.mode || 'mission';
 
     try {
+      // ============================================
+      // SECURITY: Sanitize user input before processing
+      // ============================================
+      const sanitizationResult = sanitizeEmployeeInput(
+        request.input,
+        request.userId,
+        {
+          maxInputLength: 50000,
+          applySandwichDefense: true,
+          blockThreshold: 'high',
+          logAllInputs: false,
+        }
+      );
+
+      if (sanitizationResult.blocked) {
+        console.warn(
+          '[Workforce Orchestrator] Input blocked:',
+          sanitizationResult.blockReason
+        );
+        store.addMessage({
+          from: 'system',
+          type: 'error',
+          content: `Your request was blocked for security reasons. Please rephrase your request without attempting to manipulate AI behavior.`,
+        });
+        return {
+          success: false,
+          error: 'Request blocked due to security concerns',
+        };
+      }
+
+      // Use sanitized input for all subsequent processing
+      const sanitizedInput = sanitizationResult.sanitized;
+
+      if (sanitizationResult.wasModified) {
+        console.log(
+          '[Workforce Orchestrator] Input was sanitized:',
+          sanitizationResult.modifications
+        );
+      }
+
       // Updated: Jan 15th 2026 - Fixed empty employee handling to prevent setting loaded flag on failure
       // Load employees if not already loaded
       if (!this.employeesLoaded) {
@@ -85,7 +131,11 @@ export class WorkforceOrchestratorRefactored {
 
       // CHAT MODE: Direct conversational response
       if (mode === 'chat') {
-        return await this.processChatRequest(request, missionId);
+        // Pass sanitized input to chat request
+        return await this.processChatRequest(
+          { ...request, input: sanitizedInput },
+          missionId
+        );
       }
 
       // MISSION MODE: Full Plan-Delegate-Execute
@@ -93,7 +143,7 @@ export class WorkforceOrchestratorRefactored {
       store.addMessage({
         from: 'user',
         type: 'user',
-        content: request.input,
+        content: sanitizedInput, // Use sanitized input
       });
 
       // ============================================
@@ -107,7 +157,7 @@ export class WorkforceOrchestratorRefactored {
       });
 
       const plan = await this.generatePlan(
-        request.input,
+        sanitizedInput, // Use sanitized input
         request.sessionId,
         request.userId
       );
@@ -190,7 +240,7 @@ export class WorkforceOrchestratorRefactored {
 
       await this.executeTasks(
         tasks,
-        request.input,
+        sanitizedInput, // Use sanitized input
         request.sessionId,
         request.userId
       );
@@ -494,7 +544,11 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
       // Check pause state at start of each task
       // This allows tasks that haven't started yet to be skipped if paused
       if (checkIfPaused()) {
-        return { taskId: task.id, status: 'skipped' as const, reason: 'Mission paused' };
+        return {
+          taskId: task.id,
+          status: 'skipped' as const,
+          reason: 'Mission paused',
+        };
       }
 
       if (!task.assignedTo) {
@@ -505,7 +559,11 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
           undefined,
           'No employee assigned'
         );
-        return { taskId: task.id, status: 'failed' as const, reason: 'No employee assigned' };
+        return {
+          taskId: task.id,
+          status: 'failed' as const,
+          reason: 'No employee assigned',
+        };
       }
 
       try {
@@ -579,7 +637,11 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
           metadata: { taskId: task.id, employeeName: task.assignedTo },
         });
 
-        return { taskId: task.id, status: 'rejected' as const, error: errorMsg };
+        return {
+          taskId: task.id,
+          status: 'rejected' as const,
+          error: errorMsg,
+        };
       }
     });
 
@@ -587,11 +649,21 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
 
     // Process results - handle partial failures
     const processedResults = results.map((r) =>
-      r.status === 'fulfilled' ? r.value : { taskId: 'unknown', status: 'rejected' as const, error: 'Promise rejected' }
+      r.status === 'fulfilled'
+        ? r.value
+        : {
+            taskId: 'unknown',
+            status: 'rejected' as const,
+            error: 'Promise rejected',
+          }
     );
 
-    const failedTasks = processedResults.filter((r) => r.status === 'rejected' || r.status === 'failed');
-    const succeededTasks = processedResults.filter((r) => r.status === 'fulfilled');
+    const failedTasks = processedResults.filter(
+      (r) => r.status === 'rejected' || r.status === 'failed'
+    );
+    const succeededTasks = processedResults.filter(
+      (r) => r.status === 'fulfilled'
+    );
     const skippedTasks = processedResults.filter((r) => r.status === 'skipped');
 
     // Report partial success/failure
@@ -611,11 +683,14 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
       });
     }
 
-    console.log(`📊 Task execution complete: ${succeededTasks.length} succeeded, ${failedTasks.length} failed, ${skippedTasks.length} skipped`);
+    console.log(
+      `📊 Task execution complete: ${succeededTasks.length} succeeded, ${failedTasks.length} failed, ${skippedTasks.length} skipped`
+    );
   }
 
   /**
    * Execute a task using a specific AI employee
+   * SECURITY: Uses sandwich defense and validates output
    */
   private async executeWithEmployee(
     employee: AIEmployee,
@@ -636,14 +711,18 @@ Please complete this task according to your role and capabilities.`;
       // Use withTimeout from shared utilities for consistent timeout handling
       const TASK_TIMEOUT = 120000; // 2 minutes
 
+      // SECURITY: Build secure messages with sandwich defense
+      const secureMessages = buildSecureMessages(
+        employee.systemPrompt,
+        prompt,
+        employee.name
+      );
+
       const executionPromise = retryWithBackoff(
         () =>
           unifiedLLMService.sendMessage({
             provider: 'anthropic',
-            messages: [
-              { role: 'system', content: employee.systemPrompt },
-              { role: 'user', content: prompt },
-            ],
+            messages: secureMessages,
             model:
               employee.model === 'inherit'
                 ? 'claude-3-5-sonnet-20241022'
@@ -668,6 +747,22 @@ Please complete this task according to your role and capabilities.`;
         TASK_TIMEOUT,
         `Task execution timeout after ${TASK_TIMEOUT / 1000} seconds`
       );
+
+      // SECURITY: Validate employee output for data leakage
+      const outputValidation = validateEmployeeOutput(
+        response.content,
+        employee.name
+      );
+      if (!outputValidation.isValid) {
+        console.warn(
+          `[Orchestrator] Output validation issues for ${employee.name}:`,
+          outputValidation.issues
+        );
+        // Use sanitized output if there were issues
+        if (outputValidation.sanitizedOutput) {
+          response.content = outputValidation.sanitizedOutput;
+        }
+      }
 
       // Track token usage
       if (response.usage && userId) {
@@ -1015,6 +1110,7 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
 
   /**
    * Route message to specific employee (for multi-agent chat)
+   * SECURITY: Sanitizes input and validates output
    */
   async routeMessageToEmployee(
     employeeName: string,
@@ -1035,6 +1131,34 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
       );
     }
 
+    // SECURITY: Sanitize user message before processing
+    const sanitizationResult = sanitizeEmployeeInput(
+      message,
+      userId || 'anonymous',
+      {
+        maxInputLength: 50000,
+        applySandwichDefense: true,
+        blockThreshold: 'high',
+        employeeName: employee.name,
+      }
+    );
+
+    if (sanitizationResult.blocked) {
+      console.warn(
+        `[Orchestrator] Message to ${employee.name} blocked:`,
+        sanitizationResult.blockReason
+      );
+      throw new AppError(
+        'Message blocked due to security concerns',
+        ErrorCodes.VALIDATION_ERROR,
+        400,
+        false,
+        'Your message was blocked for security reasons. Please rephrase without attempting to manipulate AI behavior.'
+      );
+    }
+
+    const sanitizedMessage = sanitizationResult.sanitized;
+
     const store = useMissionStore.getState();
 
     store.updateEmployeeStatus(
@@ -1045,17 +1169,19 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
     );
 
     try {
-      const conversationMessages = [
-        { role: 'system', content: employee.systemPrompt },
-        ...(conversationHistory || []),
-        { role: 'user', content: message },
-      ];
+      // SECURITY: Build secure messages with sandwich defense
+      const secureMessages = buildSecureMessages(
+        employee.systemPrompt,
+        sanitizedMessage,
+        employee.name,
+        conversationHistory
+      );
 
       const response = await retryWithBackoff(
         () =>
           unifiedLLMService.sendMessage({
             provider: 'anthropic',
-            messages: conversationMessages,
+            messages: secureMessages,
             model:
               employee.model === 'inherit'
                 ? 'claude-3-5-sonnet-20241022'
@@ -1074,6 +1200,23 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
           },
         }
       );
+
+      // SECURITY: Validate output for data leakage
+      const outputValidation = validateEmployeeOutput(
+        response.content,
+        employee.name
+      );
+      let finalContent = response.content;
+
+      if (!outputValidation.isValid) {
+        console.warn(
+          `[Orchestrator] Output validation issues for ${employee.name}:`,
+          outputValidation.issues
+        );
+        if (outputValidation.sanitizedOutput) {
+          finalContent = outputValidation.sanitizedOutput;
+        }
+      }
 
       // Track token usage
       if (response.usage && userId) {
@@ -1108,10 +1251,10 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
       store.updateEmployeeStatus(employee.name, 'idle');
       store.addEmployeeLog(
         employee.name,
-        `Responded to: ${message.slice(0, 50)}...`
+        `Responded to: ${sanitizedMessage.slice(0, 50)}...`
       );
 
-      return response.content;
+      return finalContent;
     } catch (error) {
       store.updateEmployeeStatus(employee.name, 'error');
       throw error;

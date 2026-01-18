@@ -507,30 +507,191 @@ export class APIClient {
     return this.get('/health');
   }
 
-  // Stream support for real-time data
-  createEventSource(endpoint: string): EventSource {
+  /**
+   * Create a secure EventSource connection.
+   *
+   * SECURITY: EventSource does not support custom headers, so we cannot pass
+   * auth tokens directly. Instead, we provide options for secure authentication:
+   *
+   * Option 1 (Recommended): Use cookie-based auth with HttpOnly, Secure, SameSite cookies
+   * Option 2: Exchange the JWT for a short-lived session token via POST first
+   * Option 3: Use fetch with ReadableStream for streaming (see createSecureStream)
+   *
+   * WARNING: This method does NOT pass tokens in URLs to prevent credential exposure
+   * in server logs, browser history, and Referer headers.
+   */
+  createEventSource(
+    endpoint: string,
+    options?: { withCredentials?: boolean }
+  ): EventSource {
     const url = endpoint.startsWith('http')
       ? endpoint
       : `${this.config.baseURL}${endpoint}`;
 
-    const token = this.getToken();
-    const eventSource = new EventSource(
-      token ? `${url}?token=${encodeURIComponent(token)}` : url
-    );
+    // SECURITY: Do NOT pass tokens in URL query parameters
+    // Use withCredentials for cookie-based auth instead
+    const eventSource = new EventSource(url, {
+      withCredentials: options?.withCredentials ?? true,
+    });
 
     return eventSource;
   }
 
-  // WebSocket support
-  createWebSocket(endpoint: string, protocols?: string | string[]): WebSocket {
+  /**
+   * Create a secure streaming connection using fetch with ReadableStream.
+   * This allows passing auth tokens in headers (unlike EventSource).
+   *
+   * @param endpoint - The API endpoint
+   * @param onMessage - Callback for each SSE message
+   * @param onError - Optional error handler
+   * @returns AbortController to cancel the stream
+   */
+  async createSecureStream(
+    endpoint: string,
+    onMessage: (data: string) => void,
+    onError?: (error: Error) => void
+  ): Promise<AbortController> {
+    const url = endpoint.startsWith('http')
+      ? endpoint
+      : `${this.config.baseURL}${endpoint}`;
+
+    const controller = new AbortController();
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.buildHeaders({
+          Accept: 'text/event-stream',
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('Response body is not readable');
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      // Read the stream
+      (async () => {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+
+            // Parse SSE format: data: ...\n\n
+            const lines = buffer.split('\n\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                onMessage(data);
+              }
+            }
+          }
+        } catch (error) {
+          if (error instanceof Error && error.name !== 'AbortError') {
+            onError?.(error);
+          }
+        }
+      })();
+    } catch (error) {
+      onError?.(error instanceof Error ? error : new Error(String(error)));
+    }
+
+    return controller;
+  }
+
+  /**
+   * Create a secure WebSocket connection.
+   *
+   * SECURITY: Auth tokens are passed via the Sec-WebSocket-Protocol header
+   * or sent as the first message after connection, NOT in URL query parameters.
+   * This prevents credential exposure in server logs, browser history, and Referer headers.
+   *
+   * The WebSocket uses a two-phase authentication:
+   * 1. Connect without token in URL
+   * 2. Send auth message as first message after connection opens
+   *
+   * @param endpoint - WebSocket endpoint
+   * @param protocols - Optional WebSocket sub-protocols
+   * @param options - Configuration options
+   * @returns Object with WebSocket and auth helper
+   */
+  createWebSocket(
+    endpoint: string,
+    protocols?: string | string[],
+    options?: {
+      /** Use Sec-WebSocket-Protocol for auth (requires server support) */
+      useProtocolAuth?: boolean;
+      /** Send auth as first message (default behavior) */
+      useMessageAuth?: boolean;
+    }
+  ): { ws: WebSocket; sendAuth: () => void } {
     const url = endpoint.startsWith('ws')
       ? endpoint
       : `${this.config.baseURL.replace('http', 'ws')}${endpoint}`;
 
     const token = this.getToken();
-    const wsUrl = token ? `${url}?token=${encodeURIComponent(token)}` : url;
+    const { useProtocolAuth = false, useMessageAuth = true } = options ?? {};
 
-    return new WebSocket(wsUrl, protocols);
+    let wsProtocols: string | string[] | undefined = protocols;
+
+    // Option 1: Pass auth token via Sec-WebSocket-Protocol header
+    // Server must echo this protocol back in the response
+    if (useProtocolAuth && token) {
+      const authProtocol = `auth-${token}`;
+      if (protocols) {
+        wsProtocols = Array.isArray(protocols)
+          ? [...protocols, authProtocol]
+          : [protocols, authProtocol];
+      } else {
+        wsProtocols = authProtocol;
+      }
+    }
+
+    // SECURITY: Do NOT pass token in URL query parameters
+    const ws = new WebSocket(url, wsProtocols);
+
+    // Option 2: Send auth as first message after connection
+    const sendAuth = () => {
+      if (useMessageAuth && token && ws.readyState === WebSocket.OPEN) {
+        ws.send(
+          JSON.stringify({
+            type: 'auth',
+            token: token,
+            timestamp: Date.now(),
+          })
+        );
+      }
+    };
+
+    return { ws, sendAuth };
+  }
+
+  /**
+   * Create a simple WebSocket connection (legacy compatibility).
+   * Prefer createWebSocket() for new code.
+   *
+   * @deprecated Use createWebSocket() which returns { ws, sendAuth }
+   */
+  createSimpleWebSocket(
+    endpoint: string,
+    protocols?: string | string[]
+  ): WebSocket {
+    const { ws } = this.createWebSocket(endpoint, protocols, {
+      useMessageAuth: false,
+    });
+    return ws;
   }
 }
 

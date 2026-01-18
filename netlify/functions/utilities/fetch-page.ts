@@ -8,6 +8,8 @@ import { createClient } from '@supabase/supabase-js';
 import { withAuth } from '../utils/auth-middleware';
 import { withRateLimit, checkRateLimitWithTier } from '../utils/rate-limiter';
 import { getCorsHeaders } from '../utils/cors';
+import * as dns from 'dns';
+import { promisify } from 'util';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -15,28 +17,274 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Promisified DNS lookup for async resolution
+const dnsLookup = promisify(dns.lookup);
+const dnsResolve4 = promisify(dns.resolve4);
+const dnsResolve6 = promisify(dns.resolve6);
+
+/**
+ * SSRF Protection: Check if an IPv4 address is private/internal
+ */
+function isPrivateIPv4(ip: string): boolean {
+  const octets = ip.split('.').map(Number);
+  if (octets.length !== 4 || octets.some((o) => isNaN(o) || o < 0 || o > 255)) {
+    return true; // Invalid IP format, treat as private for safety
+  }
+
+  const [a, b, c, d] = octets;
+
+  // 0.0.0.0/8 - Current network
+  if (a === 0) return true;
+
+  // 10.0.0.0/8 - Private network
+  if (a === 10) return true;
+
+  // 100.64.0.0/10 - Carrier-grade NAT
+  if (a === 100 && b >= 64 && b <= 127) return true;
+
+  // 127.0.0.0/8 - Loopback
+  if (a === 127) return true;
+
+  // 169.254.0.0/16 - Link-local
+  if (a === 169 && b === 254) return true;
+
+  // 172.16.0.0/12 - Private network
+  if (a === 172 && b >= 16 && b <= 31) return true;
+
+  // 192.0.0.0/24 - IETF Protocol Assignments
+  if (a === 192 && b === 0 && c === 0) return true;
+
+  // 192.0.2.0/24 - TEST-NET-1
+  if (a === 192 && b === 0 && c === 2) return true;
+
+  // 192.88.99.0/24 - IPv6 to IPv4 relay
+  if (a === 192 && b === 88 && c === 99) return true;
+
+  // 192.168.0.0/16 - Private network
+  if (a === 192 && b === 168) return true;
+
+  // 198.18.0.0/15 - Benchmark testing
+  if (a === 198 && (b === 18 || b === 19)) return true;
+
+  // 198.51.100.0/24 - TEST-NET-2
+  if (a === 198 && b === 51 && c === 100) return true;
+
+  // 203.0.113.0/24 - TEST-NET-3
+  if (a === 203 && b === 0 && c === 113) return true;
+
+  // 224.0.0.0/4 - Multicast
+  if (a >= 224 && a <= 239) return true;
+
+  // 240.0.0.0/4 - Reserved for future use
+  if (a >= 240) return true;
+
+  // 255.255.255.255 - Broadcast
+  if (a === 255 && b === 255 && c === 255 && d === 255) return true;
+
+  return false;
+}
+
+/**
+ * SSRF Protection: Check if an IPv6 address is private/internal
+ */
+function isPrivateIPv6(ip: string): boolean {
+  const normalized = ip.toLowerCase();
+
+  // ::1 - Loopback
+  if (normalized === '::1' || normalized === '0:0:0:0:0:0:0:1') return true;
+
+  // :: - Unspecified
+  if (normalized === '::' || normalized === '0:0:0:0:0:0:0:0') return true;
+
+  // ::ffff:0:0/96 - IPv4-mapped addresses (check the IPv4 portion)
+  if (normalized.startsWith('::ffff:')) {
+    const ipv4Part = normalized.slice(7);
+    if (ipv4Part.includes('.')) {
+      return isPrivateIPv4(ipv4Part);
+    }
+  }
+
+  // fe80::/10 - Link-local
+  if (normalized.startsWith('fe8') || normalized.startsWith('fe9') ||
+      normalized.startsWith('fea') || normalized.startsWith('feb')) return true;
+
+  // fc00::/7 - Unique local address (ULA)
+  if (normalized.startsWith('fc') || normalized.startsWith('fd')) return true;
+
+  // ff00::/8 - Multicast
+  if (normalized.startsWith('ff')) return true;
+
+  // 2001:db8::/32 - Documentation
+  if (normalized.startsWith('2001:db8:') || normalized.startsWith('2001:0db8:')) return true;
+
+  // 2001::/32 - Teredo tunneling (could be used to bypass)
+  if (normalized.startsWith('2001:0:') || normalized.startsWith('2001:0000:')) return true;
+
+  // 64:ff9b::/96 - NAT64
+  if (normalized.startsWith('64:ff9b:')) return true;
+
+  // 100::/64 - Discard prefix
+  if (normalized.startsWith('100:') || normalized.startsWith('0100:')) return true;
+
+  return false;
+}
+
 /**
  * SSRF Protection: Check if hostname is private/reserved (synchronous check)
  * This blocks obvious private hosts before DNS resolution
  */
 function isPrivateOrReservedHost(hostname: string): boolean {
   // Block localhost variants
-  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
+  const lower = hostname.toLowerCase();
+  if (lower === 'localhost' || lower === 'localhost.localdomain') {
     return true;
   }
 
-  // Block private IP ranges (when hostname is an IP address)
-  const privatePatterns = [
-    /^10\./,                                      // 10.0.0.0/8
-    /^172\.(1[6-9]|2\d|3[01])\./,                // 172.16.0.0/12
-    /^192\.168\./,                               // 192.168.0.0/16
-    /^169\.254\./,                               // Link-local 169.254.0.0/16
-    /^0\./,                                      // 0.0.0.0/8
-    /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./,  // Carrier-grade NAT 100.64.0.0/10
-    /^127\./,                                    // Loopback 127.0.0.0/8
+  // Check if it's an IPv4 address
+  if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
+    return isPrivateIPv4(hostname);
+  }
+
+  // Check if it's an IPv6 address (with or without brackets)
+  const ipv6 = hostname.startsWith('[') && hostname.endsWith(']')
+    ? hostname.slice(1, -1)
+    : hostname;
+  if (ipv6.includes(':')) {
+    return isPrivateIPv6(ipv6);
+  }
+
+  // Block common internal hostnames
+  const internalPatterns = [
+    /^localhost$/i,
+    /\.localhost$/i,
+    /\.local$/i,
+    /\.internal$/i,
+    /\.intranet$/i,
+    /^metadata\./i,           // Cloud metadata services
+    /^169\.254\.169\.254$/,   // AWS/GCP metadata
+    /^metadata\.google\./i,   // GCP metadata
+    /^instance-data\./i,      // Cloud instance data
   ];
 
-  return privatePatterns.some(pattern => pattern.test(hostname));
+  return internalPatterns.some((pattern) => pattern.test(hostname));
+}
+
+/**
+ * SSRF Protection: Resolve hostname and validate all resolved IPs
+ * This prevents DNS rebinding attacks by checking resolved IPs BEFORE fetch
+ *
+ * CRITICAL: This function must be called before ANY fetch to a user-provided URL
+ */
+async function validateHostnameResolution(hostname: string): Promise<{
+  valid: boolean;
+  error?: string;
+  resolvedIPs?: string[];
+}> {
+  // First, check if the hostname itself is suspicious
+  if (isPrivateOrReservedHost(hostname)) {
+    return {
+      valid: false,
+      error: 'Hostname resolves to a private or reserved address',
+    };
+  }
+
+  try {
+    const resolvedIPs: string[] = [];
+
+    // Resolve IPv4 addresses
+    try {
+      const ipv4Addresses = await dnsResolve4(hostname);
+      resolvedIPs.push(...ipv4Addresses);
+
+      for (const ip of ipv4Addresses) {
+        if (isPrivateIPv4(ip)) {
+          console.warn(`[SSRF Protection] Blocked DNS rebinding attempt: ${hostname} -> ${ip}`);
+          return {
+            valid: false,
+            error: `Hostname resolves to private IPv4 address: ${ip}`,
+            resolvedIPs,
+          };
+        }
+      }
+    } catch (err) {
+      // IPv4 resolution failed, continue to IPv6
+    }
+
+    // Resolve IPv6 addresses
+    try {
+      const ipv6Addresses = await dnsResolve6(hostname);
+      resolvedIPs.push(...ipv6Addresses);
+
+      for (const ip of ipv6Addresses) {
+        if (isPrivateIPv6(ip)) {
+          console.warn(`[SSRF Protection] Blocked DNS rebinding attempt: ${hostname} -> ${ip}`);
+          return {
+            valid: false,
+            error: `Hostname resolves to private IPv6 address: ${ip}`,
+            resolvedIPs,
+          };
+        }
+      }
+    } catch (err) {
+      // IPv6 resolution failed
+    }
+
+    // If no IPs were resolved, try dns.lookup as fallback
+    if (resolvedIPs.length === 0) {
+      try {
+        const result = await dnsLookup(hostname, { all: true });
+        // dns.lookup with { all: true } returns LookupAddress[]
+        const addresses = result as dns.LookupAddress[];
+
+        for (const addr of addresses) {
+          const ip = addr.address;
+          resolvedIPs.push(ip);
+
+          // Check based on address family (4 = IPv4, 6 = IPv6)
+          if (addr.family === 4) {
+            if (isPrivateIPv4(ip)) {
+              console.warn(`[SSRF Protection] Blocked DNS rebinding attempt: ${hostname} -> ${ip}`);
+              return {
+                valid: false,
+                error: `Hostname resolves to private IPv4 address: ${ip}`,
+                resolvedIPs,
+              };
+            }
+          } else if (addr.family === 6) {
+            if (isPrivateIPv6(ip)) {
+              console.warn(`[SSRF Protection] Blocked DNS rebinding attempt: ${hostname} -> ${ip}`);
+              return {
+                valid: false,
+                error: `Hostname resolves to private IPv6 address: ${ip}`,
+                resolvedIPs,
+              };
+            }
+          }
+        }
+      } catch (err) {
+        // DNS lookup failed entirely
+        console.warn(`[SSRF Protection] DNS resolution failed for ${hostname}:`, err);
+        // Fail closed - if we can't resolve, don't allow the request
+        return {
+          valid: false,
+          error: 'Failed to resolve hostname - request blocked for security',
+        };
+      }
+    }
+
+    // All resolved IPs are safe
+    return {
+      valid: true,
+      resolvedIPs,
+    };
+  } catch (error) {
+    console.error('[SSRF Protection] Unexpected error during DNS validation:', error);
+    // Fail closed on unexpected errors
+    return {
+      valid: false,
+      error: 'DNS validation failed - request blocked for security',
+    };
+  }
 }
 
 const fetchPageHandler: Handler = async (
@@ -142,6 +390,27 @@ const fetchPageHandler: Handler = async (
     }
 
     console.log('[Fetch Page] Fetching URL:', url);
+
+    // CRITICAL: DNS Rebinding Protection
+    // Validate that the hostname does not resolve to private/internal IPs
+    // This MUST happen BEFORE any fetch operations to prevent TOCTOU attacks
+    const dnsValidation = await validateHostnameResolution(parsedUrl.hostname);
+    if (!dnsValidation.valid) {
+      console.warn(`[SSRF Protection] Blocked request to ${parsedUrl.hostname}: ${dnsValidation.error}`);
+      return {
+        statusCode: 403,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          error: 'Access denied',
+          message: 'Request blocked for security reasons: hostname resolves to internal network.',
+        }),
+      };
+    }
+
+    console.log(`[Fetch Page] DNS validation passed, resolved IPs: ${dnsValidation.resolvedIPs?.join(', ')}`);
 
     // Check robots.txt
     const robotsAllowed = await checkRobotsTxt(parsedUrl);
@@ -267,43 +536,9 @@ function parseRobotsTxt(robotsText: string, path: string): boolean {
 }
 
 /**
- * Updated: Nov 16th 2025 - Fixed SSRF vulnerability - validate IP addresses
- * Check if hostname resolves to a private/internal IP address
- */
-async function isPrivateOrInternalIP(hostname: string): Promise<boolean> {
-  try {
-    const dns = await import('dns').then((m) => m.promises);
-    const addresses = await dns.resolve4(hostname).catch(() => [] as string[]);
-
-    for (const address of addresses) {
-      const octets = address.split('.').map(Number);
-
-      // Check for private IP ranges
-      // 10.0.0.0/8
-      if (octets[0] === 10) return true;
-      // 172.16.0.0/12
-      if (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) return true;
-      // 192.168.0.0/16
-      if (octets[0] === 192 && octets[1] === 168) return true;
-      // 127.0.0.0/8 (localhost)
-      if (octets[0] === 127) return true;
-      // 169.254.0.0/16 (link-local)
-      if (octets[0] === 169 && octets[1] === 254) return true;
-      // 0.0.0.0/8
-      if (octets[0] === 0) return true;
-    }
-
-    return false;
-  } catch (error) {
-    // If DNS resolution fails, allow the request (fail open)
-    // but log the error for monitoring
-    console.warn('[Fetch Page] DNS resolution failed:', error);
-    return false;
-  }
-}
-
-/**
  * Fetch page content with sanitization
+ * NOTE: DNS rebinding protection is handled by validateHostnameResolution() in the main handler
+ * which runs BEFORE this function is called
  */
 async function fetchPageContent(url: URL): Promise<{
   success: boolean;
@@ -316,14 +551,6 @@ async function fetchPageContent(url: URL): Promise<{
   error?: string;
 }> {
   try {
-    // Updated: Nov 16th 2025 - Fixed SSRF vulnerability - block private/internal IP addresses
-    const isPrivate = await isPrivateOrInternalIP(url.hostname);
-    if (isPrivate) {
-      throw new Error(
-        'Access to private/internal IP addresses is not allowed for security reasons'
-      );
-    }
-
     const response = await fetch(url.toString(), {
       method: 'GET',
       headers: {

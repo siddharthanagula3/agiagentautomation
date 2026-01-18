@@ -108,7 +108,9 @@ describe('Mission Control Store', () => {
       useMissionStore.getState().startMission('mission-4');
       useMissionStore.getState().setMissionPlan([createPendingTask('Task 1')]);
       useMissionStore.getState().addMessage(createUserMessage('Test message'));
-      useMissionStore.getState().updateEmployeeStatus('test-employee', 'thinking');
+      useMissionStore
+        .getState()
+        .updateEmployeeStatus('test-employee', 'thinking');
 
       // Reset
       useMissionStore.getState().reset();
@@ -141,13 +143,17 @@ describe('Mission Control Store', () => {
     });
 
     it('should replace existing mission plan', () => {
-      useMissionStore.getState().setMissionPlan([createPendingTask('Old task')]);
+      useMissionStore
+        .getState()
+        .setMissionPlan([createPendingTask('Old task')]);
       expect(useMissionStore.getState().missionPlan).toHaveLength(1);
 
-      useMissionStore.getState().setMissionPlan([
-        createPendingTask('New task 1'),
-        createPendingTask('New task 2'),
-      ]);
+      useMissionStore
+        .getState()
+        .setMissionPlan([
+          createPendingTask('New task 1'),
+          createPendingTask('New task 2'),
+        ]);
 
       const state = useMissionStore.getState();
       expect(state.missionPlan).toHaveLength(2);
@@ -172,7 +178,9 @@ describe('Mission Control Store', () => {
     });
 
     it('should update task to in_progress', () => {
-      useMissionStore.getState().updateTaskStatus('task-1', 'in_progress', 'code-reviewer');
+      useMissionStore
+        .getState()
+        .updateTaskStatus('task-1', 'in_progress', 'code-reviewer');
 
       const state = useMissionStore.getState();
       const task = state.missionPlan.find((t) => t.id === 'task-1');
@@ -184,7 +192,9 @@ describe('Mission Control Store', () => {
     it('should update task to completed with result', () => {
       const result = 'Successfully reviewed code, found 3 issues';
 
-      useMissionStore.getState().updateTaskStatus('task-1', 'completed', 'code-reviewer', result);
+      useMissionStore
+        .getState()
+        .updateTaskStatus('task-1', 'completed', 'code-reviewer', result);
 
       const state = useMissionStore.getState();
       const task = state.missionPlan.find((t) => t.id === 'task-1');
@@ -196,13 +206,15 @@ describe('Mission Control Store', () => {
     it('should update task to failed with error', () => {
       const error = 'File not found: auth.ts';
 
-      useMissionStore.getState().updateTaskStatus(
-        'task-1',
-        'failed',
-        'code-reviewer',
-        undefined,
-        error
-      );
+      useMissionStore
+        .getState()
+        .updateTaskStatus(
+          'task-1',
+          'failed',
+          'code-reviewer',
+          undefined,
+          error
+        );
 
       const state = useMissionStore.getState();
       const task = state.missionPlan.find((t) => t.id === 'task-1');
@@ -213,7 +225,9 @@ describe('Mission Control Store', () => {
     it('should handle updating non-existent task gracefully', () => {
       // Should not throw error
       expect(() => {
-        useMissionStore.getState().updateTaskStatus('non-existent-task', 'completed');
+        useMissionStore
+          .getState()
+          .updateTaskStatus('non-existent-task', 'completed');
       }).not.toThrow();
     });
 
@@ -224,13 +238,17 @@ describe('Mission Control Store', () => {
 
       // Original array should not be modified (Immer middleware)
       expect(originalPlan[0]?.status).toBe('pending');
-      expect(useMissionStore.getState().missionPlan[0]?.status).toBe('in_progress');
+      expect(useMissionStore.getState().missionPlan[0]?.status).toBe(
+        'in_progress'
+      );
     });
   });
 
   describe('Employee Status Management', () => {
     it('should add new employee to active employees', () => {
-      useMissionStore.getState().updateEmployeeStatus('code-reviewer', 'thinking');
+      useMissionStore
+        .getState()
+        .updateEmployeeStatus('code-reviewer', 'thinking');
 
       // activeEmployees is now a Record, not a Map
       const state = useMissionStore.getState();
@@ -242,7 +260,9 @@ describe('Mission Control Store', () => {
 
     it('should update existing employee status', () => {
       useMissionStore.getState().updateEmployeeStatus('debugger', 'idle');
-      useMissionStore.getState().updateEmployeeStatus('debugger', 'using_tool', 'Bash', 'Run tests');
+      useMissionStore
+        .getState()
+        .updateEmployeeStatus('debugger', 'using_tool', 'Bash', 'Run tests');
 
       // activeEmployees is now a Record, not a Map
       const state = useMissionStore.getState();
@@ -263,7 +283,9 @@ describe('Mission Control Store', () => {
 
     it('should add log entries to employee', () => {
       useMissionStore.getState().updateEmployeeStatus('debugger', 'idle');
-      useMissionStore.getState().addEmployeeLog('debugger', 'Starting code review');
+      useMissionStore
+        .getState()
+        .addEmployeeLog('debugger', 'Starting code review');
       useMissionStore.getState().addEmployeeLog('debugger', 'Found 2 issues');
 
       // activeEmployees is now a Record, not a Map
@@ -276,7 +298,9 @@ describe('Mission Control Store', () => {
     });
 
     it('should update employee progress', () => {
-      useMissionStore.getState().updateEmployeeStatus('code-reviewer', 'thinking');
+      useMissionStore
+        .getState()
+        .updateEmployeeStatus('code-reviewer', 'thinking');
       useMissionStore.getState().updateEmployeeProgress('code-reviewer', 50);
 
       // activeEmployees is now a Record, not a Map
@@ -351,7 +375,9 @@ describe('Mission Control Store', () => {
     it('should maintain message order (chronological)', () => {
       useMissionStore.getState().addMessage(createUserMessage('Message 1'));
       useMissionStore.getState().addMessage(createSystemMessage('Message 2'));
-      useMissionStore.getState().addMessage(createEmployeeMessage('code-reviewer', 'Message 3'));
+      useMissionStore
+        .getState()
+        .addMessage(createEmployeeMessage('code-reviewer', 'Message 3'));
 
       const state = useMissionStore.getState();
       expect(state.messages).toHaveLength(3);
@@ -363,7 +389,9 @@ describe('Mission Control Store', () => {
     it('should handle large message volumes', () => {
       // Add 1000 messages
       for (let i = 0; i < 1000; i++) {
-        useMissionStore.getState().addMessage(createUserMessage(`Message ${i}`));
+        useMissionStore
+          .getState()
+          .addMessage(createUserMessage(`Message ${i}`));
       }
 
       const state = useMissionStore.getState();
@@ -412,11 +440,13 @@ describe('Mission Control Store', () => {
       // Create tasks with completedAt older than 1 hour
       const oldDate = new Date(Date.now() - 2 * 60 * 60 * 1000); // 2 hours ago
 
-      useMissionStore.getState().setMissionPlan([
-        { ...createCompletedTask('Task 1', 'Done'), completedAt: oldDate },
-        createPendingTask('Task 2'),
-        { ...createCompletedTask('Task 3', 'Done'), completedAt: oldDate },
-      ]);
+      useMissionStore
+        .getState()
+        .setMissionPlan([
+          { ...createCompletedTask('Task 1', 'Done'), completedAt: oldDate },
+          createPendingTask('Task 2'),
+          { ...createCompletedTask('Task 3', 'Done'), completedAt: oldDate },
+        ]);
 
       useMissionStore.getState().cleanupCompletedTasks();
 
@@ -430,10 +460,9 @@ describe('Mission Control Store', () => {
       // Create a recently completed task (completedAt is now)
       const recentTask = createCompletedTask('Task 1', 'Done');
 
-      useMissionStore.getState().setMissionPlan([
-        recentTask,
-        createPendingTask('Task 2'),
-      ]);
+      useMissionStore
+        .getState()
+        .setMissionPlan([recentTask, createPendingTask('Task 2')]);
 
       useMissionStore.getState().cleanupCompletedTasks();
 
@@ -443,11 +472,12 @@ describe('Mission Control Store', () => {
     });
 
     it('should not remove failed tasks that are recent', () => {
-      const recentFailedTask = { ...createFailedTask('Task 1', 'Error'), completedAt: new Date() };
+      const recentFailedTask = {
+        ...createFailedTask('Task 1', 'Error'),
+        completedAt: new Date(),
+      };
 
-      useMissionStore.getState().setMissionPlan([
-        recentFailedTask,
-      ]);
+      useMissionStore.getState().setMissionPlan([recentFailedTask]);
 
       useMissionStore.getState().cleanupCompletedTasks();
 
@@ -459,13 +489,17 @@ describe('Mission Control Store', () => {
 
   describe('Concurrent Updates', () => {
     it('should handle rapid task status updates', () => {
-      useMissionStore.getState().setMissionPlan([
-        createMockTask({ id: 'task-1', status: 'pending' }),
-      ]);
+      useMissionStore
+        .getState()
+        .setMissionPlan([createMockTask({ id: 'task-1', status: 'pending' })]);
 
       // Simulate rapid updates
-      useMissionStore.getState().updateTaskStatus('task-1', 'in_progress', 'employee-1');
-      useMissionStore.getState().updateTaskStatus('task-1', 'completed', 'employee-1', 'Success');
+      useMissionStore
+        .getState()
+        .updateTaskStatus('task-1', 'in_progress', 'employee-1');
+      useMissionStore
+        .getState()
+        .updateTaskStatus('task-1', 'completed', 'employee-1', 'Success');
 
       const state = useMissionStore.getState();
       const task = state.missionPlan.find((t) => t.id === 'task-1');
@@ -474,7 +508,9 @@ describe('Mission Control Store', () => {
 
     it('should handle concurrent employee updates', () => {
       useMissionStore.getState().updateEmployeeStatus('employee-1', 'thinking');
-      useMissionStore.getState().updateEmployeeStatus('employee-2', 'using_tool', 'Bash');
+      useMissionStore
+        .getState()
+        .updateEmployeeStatus('employee-2', 'using_tool', 'Bash');
       useMissionStore.getState().updateEmployeeStatus('employee-3', 'idle');
 
       // activeEmployees is now a Record, not a Map
@@ -490,16 +526,20 @@ describe('Mission Control Store', () => {
     });
 
     it('should handle null/undefined in task updates', () => {
-      useMissionStore.getState().setMissionPlan([createMockTask({ id: 'task-1' })]);
+      useMissionStore
+        .getState()
+        .setMissionPlan([createMockTask({ id: 'task-1' })]);
 
       expect(() => {
-        useMissionStore.getState().updateTaskStatus(
-          'task-1',
-          'completed',
-          undefined,
-          undefined,
-          undefined
-        );
+        useMissionStore
+          .getState()
+          .updateTaskStatus(
+            'task-1',
+            'completed',
+            undefined,
+            undefined,
+            undefined
+          );
       }).not.toThrow();
     });
 
@@ -546,7 +586,9 @@ describe('Mission Control Store', () => {
     it('should handle many active employees efficiently', () => {
       const start = performance.now();
       for (let i = 0; i < 100; i++) {
-        useMissionStore.getState().updateEmployeeStatus(`employee-${i}`, 'thinking');
+        useMissionStore
+          .getState()
+          .updateEmployeeStatus(`employee-${i}`, 'thinking');
       }
       const end = performance.now();
 

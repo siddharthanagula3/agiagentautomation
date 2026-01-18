@@ -9,8 +9,21 @@ import DOMPurify from 'dompurify';
 
 /**
  * Sanitization configuration levels
+ *
+ * SECURITY NOTE: No sanitization level should EVER allow JavaScript execution.
+ * Event handlers (onclick, onchange, onload, onerror, onmouseover, onfocus, onblur, etc.)
+ * and javascript: URLs are NEVER permitted in any mode.
+ *
+ * - 'strict': Basic formatting only, no links or images
+ * - 'standard': Balanced security with common HTML elements
+ * - 'extended': Rich content with form elements, but NO script execution
  */
-export type SanitizeLevel = 'strict' | 'standard' | 'permissive';
+export type SanitizeLevel = 'strict' | 'standard' | 'extended';
+
+/**
+ * @deprecated Use 'extended' instead. This alias exists for backward compatibility.
+ */
+export type PermissiveLevel = 'permissive';
 
 /**
  * Default allowed tags for artifacts
@@ -128,20 +141,70 @@ export function sanitizeHTML(
       };
       break;
 
-    case 'permissive':
-      // Permissive: Allows most HTML elements for rich content
+    case 'extended':
+    case 'permissive': // @deprecated: use 'extended' instead
+      // Extended: Allows rich content with form elements for interactive UIs
+      // SECURITY: Event handlers (on*) are NEVER allowed to prevent XSS attacks.
+      // JavaScript execution through HTML attributes is a critical vulnerability.
       config = {
         ALLOWED_TAGS: DEFAULT_ALLOWED_TAGS,
         ALLOWED_ATTR: DEFAULT_ALLOWED_ATTRS,
         ALLOW_DATA_ATTR: true,
         ADD_TAGS: ['button', 'input', 'label', 'select', 'option', 'textarea'],
         ADD_ATTR: [
-          'data-*',
-          'onclick',
-          'onchange',
+          // Safe form attributes only - NO event handlers (onclick, onchange, etc.)
           'value',
           'placeholder',
           'type',
+          'name',
+          'disabled',
+          'readonly',
+          'required',
+          'min',
+          'max',
+          'step',
+          'pattern',
+          'autocomplete',
+          'for', // label association
+          'aria-label',
+          'aria-describedby',
+          'role',
+        ],
+        // Explicitly forbid dangerous attributes
+        FORBID_ATTR: [
+          // Event handlers - NEVER allow these
+          'onclick',
+          'ondblclick',
+          'onchange',
+          'oninput',
+          'onsubmit',
+          'onreset',
+          'onload',
+          'onerror',
+          'onmouseover',
+          'onmouseout',
+          'onmousedown',
+          'onmouseup',
+          'onmousemove',
+          'onkeydown',
+          'onkeyup',
+          'onkeypress',
+          'onfocus',
+          'onblur',
+          'onscroll',
+          'onresize',
+          'ondrag',
+          'ondrop',
+          'oncopy',
+          'onpaste',
+          'oncut',
+          'oncontextmenu',
+          'ontouchstart',
+          'ontouchmove',
+          'ontouchend',
+          'onanimationstart',
+          'onanimationend',
+          'ontransitionend',
         ],
       };
       break;
@@ -157,7 +220,7 @@ export function sanitizeHTML(
       break;
   }
 
-  // Add universal protections
+  // Add universal protections applied to ALL sanitization levels
   const sanitized = DOMPurify.sanitize(html, {
     ...config,
     // Force target="_blank" and rel="noopener noreferrer" on links
@@ -169,8 +232,30 @@ export function sanitizeHTML(
     // Return as HTML string
     RETURN_DOM: false,
     RETURN_DOM_FRAGMENT: false,
-    // Add hooks for additional security
+    // Don't process entire document
     WHOLE_DOCUMENT: false,
+    // CRITICAL: Always forbid script execution elements regardless of level
+    // These tags can execute JavaScript and must NEVER be allowed
+    FORBID_TAGS: [
+      'script',
+      'iframe',
+      'frame',
+      'frameset',
+      'object',
+      'embed',
+      'applet',
+      'base',
+      'meta',
+      'link',
+      'style', // Can contain CSS expressions for XSS
+      'math', // MathML can execute scripts
+      'xmp',
+      'plaintext',
+      'listing',
+      'noscript',
+      'template', // Can be used for DOM manipulation attacks
+      ...(config.FORBID_TAGS || []),
+    ],
   });
 
   return sanitized;
@@ -185,8 +270,8 @@ export function sanitizeArtifact(
 ): string {
   switch (type) {
     case 'html':
-      // HTML artifacts can have rich content
-      return sanitizeHTML(content, 'permissive');
+      // HTML artifacts can have rich content but NO script execution
+      return sanitizeHTML(content, 'extended');
 
     case 'svg':
       // SVG needs special handling

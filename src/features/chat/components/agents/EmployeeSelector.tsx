@@ -13,15 +13,14 @@ import {
 } from '@/shared/ui/tooltip';
 import { Plus, Users } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
+import type { AIEmployeeBasic } from '@shared/types';
 
-interface AIEmployee {
-  id: string;
-  name: string;
-  description: string;
-  avatar?: string;
+/**
+ * Extended employee type for selector with additional UI properties
+ */
+interface AIEmployee extends AIEmployeeBasic {
   color: string;
   isActive: boolean;
-  status: 'idle' | 'working' | 'thinking';
 }
 
 interface EmployeeSelectorProps {

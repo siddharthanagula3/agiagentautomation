@@ -28,7 +28,10 @@ export interface ToolDefinition {
   name: string;
   description: string;
   parameters: Record<string, ToolParameter>;
-  execute: (args: Record<string, unknown>, context: ToolContext) => Promise<ToolResult>;
+  execute: (
+    args: Record<string, unknown>,
+    context: ToolContext
+  ) => Promise<ToolResult>;
 }
 
 export interface ToolContext {
@@ -135,7 +138,11 @@ export const writeFilesTool: ToolDefinition = {
         description: 'File to write',
         properties: {
           path: { type: 'string', description: 'File path', required: true },
-          content: { type: 'string', description: 'File content', required: true },
+          content: {
+            type: 'string',
+            description: 'File content',
+            required: true,
+          },
         },
       },
     },
@@ -555,7 +562,10 @@ export class AgentExecutor {
   /**
    * Execute a single tool call
    */
-  async executeToolCall(name: string, args: Record<string, unknown>): Promise<ToolResult> {
+  async executeToolCall(
+    name: string,
+    args: Record<string, unknown>
+  ): Promise<ToolResult> {
     if (this.toolCalls.length >= this.options.maxToolCalls) {
       return {
         success: false,
@@ -651,7 +661,9 @@ export class AgentExecutor {
 
 export const defaultToolRegistry = new ToolRegistry();
 
-export function createAgentExecutor(options: AgentExecutorOptions): AgentExecutor {
+export function createAgentExecutor(
+  options: AgentExecutorOptions
+): AgentExecutor {
   return new AgentExecutor(options);
 }
 

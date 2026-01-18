@@ -235,7 +235,8 @@ class AIEmployeeService {
         .maybeSingle();
 
       if (error) throw error;
-      if (!data) throw new Error('Failed to create job assignment: No data returned');
+      if (!data)
+        throw new Error('Failed to create job assignment: No data returned');
 
       // Update employee status
       await this.updateEmployee(employeeId, { status: 'working' });
@@ -280,7 +281,8 @@ class AIEmployeeService {
         .maybeSingle();
 
       if (error) throw error;
-      if (!data) throw new Error('Employee not found or performance update failed');
+      if (!data)
+        throw new Error('Employee not found or performance update failed');
       return { data, error: null };
     } catch (error: unknown) {
       // Updated: Jan 15th 2026 - Fixed missing error type check
@@ -376,7 +378,8 @@ class AIEmployeeService {
         .maybeSingle();
 
       if (error) throw error;
-      if (!data) throw new Error('Employee not found or workflows update failed');
+      if (!data)
+        throw new Error('Employee not found or workflows update failed');
       return { data, error: null };
     } catch (error: unknown) {
       // Updated: Jan 15th 2026 - Fixed missing error type check

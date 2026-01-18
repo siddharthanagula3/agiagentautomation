@@ -40,7 +40,7 @@ const authenticatedHandler: Handler = async (
       };
     }
 
-    const { userId, userEmail, packId, tokens, price } = parseResult.data;
+    const { userId, userEmail, packId } = parseResult.data;
 
     // Updated: Nov 16th 2025 - Fixed missing authentication - verify userId matches authenticated user
     if (event.user.id !== userId) {
@@ -51,6 +51,31 @@ const authenticatedHandler: Handler = async (
         }),
       };
     }
+
+    // SECURITY FIX: Server-side price lookup to prevent price manipulation
+    // Define trusted pack configurations (must match stripe-webhook.ts)
+    const PACK_PRICES: Record<string, { tokens: number; price: number }> = {
+      'pack_500k': { tokens: 500000, price: 10 },
+      'pack_1.5m': { tokens: 1500000, price: 25 },
+      'pack_5m': { tokens: 5000000, price: 75 },
+      'pack_10m': { tokens: 10000000, price: 130 },
+    };
+
+    // Validate pack ID and get trusted price
+    const packConfig = PACK_PRICES[packId];
+    if (!packConfig) {
+      console.error('[Buy Token Pack] ❌ Invalid pack ID:', packId);
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          error: 'Invalid token pack selected',
+          code: 'INVALID_PACK_ID',
+        }),
+      };
+    }
+
+    // CRITICAL: Use server-side validated price and tokens, never trust client
+    const { tokens, price } = packConfig;
 
     // Initialize Stripe
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -73,7 +98,7 @@ const authenticatedHandler: Handler = async (
     console.log('[Buy Token Pack]   User ID:', userId);
     console.log('[Buy Token Pack]   Pack ID:', packId);
     console.log('[Buy Token Pack]   Tokens:', tokens.toLocaleString());
-    console.log('[Buy Token Pack]   Price:', `$${price}`);
+    console.log('[Buy Token Pack]   Price:', `$${price}` + ' (server-validated)');
 
     // SECURITY FIX: Generate idempotency key to prevent duplicate charges
     // Key is based on userId + packId + timestamp rounded to minute
@@ -87,7 +112,7 @@ const authenticatedHandler: Handler = async (
         {
           price_data: {
             currency: 'usd',
-            unit_amount: price * 100, // Convert dollars to cents
+            unit_amount: price * 100, // Convert dollars to cents (server-validated)
             product_data: {
               name: `${(tokens / 1000000).toFixed(1)}M Token Pack`,
               description: `${tokens.toLocaleString()} tokens for your AI employees`,
@@ -102,7 +127,7 @@ const authenticatedHandler: Handler = async (
       metadata: {
         userId,
         packId,
-        tokens: tokens.toString(),
+        tokens: tokens.toString(), // Informational only - webhook validates via packId
         type: 'token_pack_purchase',
       },
       success_url: `${baseUrl}/billing?success=true&session_id={CHECKOUT_SESSION_ID}&tokens=${tokens}`,

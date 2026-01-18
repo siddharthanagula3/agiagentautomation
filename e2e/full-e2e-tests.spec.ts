@@ -21,10 +21,11 @@ const __dirname = dirname(__filename);
 
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173';
 
-// Test credentials - use env vars or defaults
+// Test credentials - MUST be set via environment variables in CI/CD
+// Never commit actual credentials to the repository
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || 'siddharthanagula3@gmail.com',
-  password: process.env.TEST_USER_PASSWORD || 'Sid@1234',
+  email: process.env.E2E_TEST_EMAIL || 'test@example.com',
+  password: process.env.E2E_TEST_PASSWORD || '', // Set in CI environment
 };
 
 // ============================================================
@@ -35,7 +36,7 @@ async function screenshot(page: Page, name: string) {
   const screenshotDir = path.join(__dirname, 'screenshots');
   await page.screenshot({
     path: path.join(screenshotDir, `${name}.png`),
-    fullPage: true
+    fullPage: true,
   });
   console.log(`📸 ${name}`);
 }
@@ -79,7 +80,10 @@ async function attemptLogin(page: Page): Promise<boolean> {
   await dismissCookieBanner(page);
 
   // Check if demo mode
-  const isDemoMode = await page.locator('text=Demo Mode').isVisible({ timeout: 2000 }).catch(() => false);
+  const isDemoMode = await page
+    .locator('text=Demo Mode')
+    .isVisible({ timeout: 2000 })
+    .catch(() => false);
 
   // Clear any pre-filled values and enter credentials
   const emailInput = page.locator('input[type="email"]');
@@ -99,16 +103,22 @@ async function attemptLogin(page: Page): Promise<boolean> {
 
   // Wait for navigation or error
   try {
-    await page.waitForURL(/\/(dashboard|home|chat|vibe|mission-control|marketplace|workforce)/, {
-      timeout: 15000,
-    });
+    await page.waitForURL(
+      /\/(dashboard|home|chat|vibe|mission-control|marketplace|workforce)/,
+      {
+        timeout: 15000,
+      }
+    );
     await waitForApp(page);
     console.log('✅ Login successful');
     await screenshot(page, 'login-success');
     return true;
   } catch {
     // Check for error message
-    const error = await page.locator('[class*="error"], [class*="destructive"]').textContent().catch(() => '');
+    const error = await page
+      .locator('[class*="error"], [class*="destructive"]')
+      .textContent()
+      .catch(() => '');
     console.log('❌ Login failed:', error || 'Unknown error');
     await screenshot(page, 'login-failed');
     return false;
@@ -136,7 +146,9 @@ test.describe('Public Pages', () => {
     await expect(nav).toBeVisible();
 
     // Check CTA buttons
-    const ctaButtons = page.locator('button:has-text("Get Started"), a:has-text("Get Started")');
+    const ctaButtons = page.locator(
+      'button:has-text("Get Started"), a:has-text("Get Started")'
+    );
     expect(await ctaButtons.count()).toBeGreaterThan(0);
 
     console.log('✅ Landing page OK');
@@ -279,7 +291,9 @@ test.describe('Authentication Flow', () => {
       await page.waitForTimeout(300);
 
       // Check if input type changed
-      const inputType = await page.locator('input[name="password"], input#password').getAttribute('type');
+      const inputType = await page
+        .locator('input[name="password"], input#password')
+        .getAttribute('type');
       console.log('Password input type after toggle:', inputType);
     }
 
@@ -290,7 +304,9 @@ test.describe('Authentication Flow', () => {
     console.log('\n🧪 Login Attempt');
 
     const success = await attemptLogin(page);
-    console.log(`Login result: ${success ? 'SUCCESS' : 'FAILED (expected if no Supabase)'}`);
+    console.log(
+      `Login result: ${success ? 'SUCCESS' : 'FAILED (expected if no Supabase)'}`
+    );
 
     // This test documents the current state - doesn't fail
   });
@@ -407,7 +423,11 @@ test.describe('UI Components', () => {
     await waitForApp(page);
 
     // Look for theme toggle
-    const themeToggle = page.locator('[class*="theme"], button:has-text("Dark"), button:has-text("Light")').first();
+    const themeToggle = page
+      .locator(
+        '[class*="theme"], button:has-text("Dark"), button:has-text("Light")'
+      )
+      .first();
 
     if (await themeToggle.isVisible({ timeout: 3000 })) {
       const htmlClass = await page.locator('html').getAttribute('class');
@@ -439,7 +459,9 @@ test.describe('Responsive Design', () => {
     await screenshot(page, 'mobile-landing');
 
     // Check hamburger menu
-    const hamburger = page.locator('[class*="hamburger"], [class*="menu-toggle"], button:has(svg)').first();
+    const hamburger = page
+      .locator('[class*="hamburger"], [class*="menu-toggle"], button:has(svg)')
+      .first();
     if (await hamburger.isVisible({ timeout: 3000 })) {
       console.log('✅ Mobile menu button found');
     }
@@ -494,7 +516,10 @@ test.describe('Error Handling', () => {
     await screenshot(page, '404-page');
 
     const content = await page.content();
-    const has404 = content.includes('404') || content.includes('not found') || content.includes('Not Found');
+    const has404 =
+      content.includes('404') ||
+      content.includes('not found') ||
+      content.includes('Not Found');
     console.log('404 indicator found:', has404);
   });
 
@@ -502,13 +527,15 @@ test.describe('Error Handling', () => {
     console.log('\n🧪 Console Errors - Landing');
 
     const errors: string[] = [];
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.type() === 'error') {
         const text = msg.text();
         // Filter out expected errors
-        if (!text.includes('favicon') &&
-            !text.includes('Environment validation') &&
-            !text.includes('manifest')) {
+        if (
+          !text.includes('favicon') &&
+          !text.includes('Environment validation') &&
+          !text.includes('manifest')
+        ) {
           errors.push(text);
         }
       }
@@ -519,10 +546,12 @@ test.describe('Error Handling', () => {
     await page.waitForTimeout(2000);
 
     console.log(`Unexpected errors: ${errors.length}`);
-    errors.forEach(e => console.log(`  ❌ ${e.substring(0, 100)}`));
+    errors.forEach((e) => console.log(`  ❌ ${e.substring(0, 100)}`));
 
     // Check for Immer errors specifically
-    const immerErrors = errors.filter(e => e.includes('Immer') || e.includes('frozen'));
+    const immerErrors = errors.filter(
+      (e) => e.includes('Immer') || e.includes('frozen')
+    );
     expect(immerErrors.length).toBe(0);
   });
 
@@ -530,12 +559,14 @@ test.describe('Error Handling', () => {
     console.log('\n🧪 Console Errors - Login');
 
     const errors: string[] = [];
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.type() === 'error') {
         const text = msg.text();
-        if (!text.includes('favicon') &&
-            !text.includes('Environment validation') &&
-            !text.includes('manifest')) {
+        if (
+          !text.includes('favicon') &&
+          !text.includes('Environment validation') &&
+          !text.includes('manifest')
+        ) {
           errors.push(text);
         }
       }
@@ -547,7 +578,9 @@ test.describe('Error Handling', () => {
 
     console.log(`Unexpected errors: ${errors.length}`);
 
-    const immerErrors = errors.filter(e => e.includes('Immer') || e.includes('frozen'));
+    const immerErrors = errors.filter(
+      (e) => e.includes('Immer') || e.includes('frozen')
+    );
     expect(immerErrors.length).toBe(0);
   });
 });
@@ -607,13 +640,17 @@ test.describe('Accessibility', () => {
     await waitForApp(page);
 
     // Check email input has label
-    const emailLabel = page.locator('label[for="email"], label:has-text("Email")');
-    const hasEmailLabel = await emailLabel.count() > 0;
+    const emailLabel = page.locator(
+      'label[for="email"], label:has-text("Email")'
+    );
+    const hasEmailLabel = (await emailLabel.count()) > 0;
     console.log('Email has label:', hasEmailLabel);
 
     // Check password input has label
-    const passwordLabel = page.locator('label[for="password"], label:has-text("Password")');
-    const hasPasswordLabel = await passwordLabel.count() > 0;
+    const passwordLabel = page.locator(
+      'label[for="password"], label:has-text("Password")'
+    );
+    const hasPasswordLabel = (await passwordLabel.count()) > 0;
     console.log('Password has label:', hasPasswordLabel);
   });
 
@@ -624,7 +661,7 @@ test.describe('Accessibility', () => {
     await waitForApp(page);
 
     const skipLink = page.locator('a:has-text("Skip to"), [class*="skip"]');
-    const hasSkipLink = await skipLink.count() > 0;
+    const hasSkipLink = (await skipLink.count()) > 0;
     console.log('Skip link exists:', hasSkipLink);
   });
 
@@ -645,7 +682,9 @@ test.describe('Accessibility', () => {
       }
     }
 
-    console.log(`Images checked: ${Math.min(count, 10)}, Missing alt: ${missingAlt}`);
+    console.log(
+      `Images checked: ${Math.min(count, 10)}, Missing alt: ${missingAlt}`
+    );
   });
 });
 
@@ -659,7 +698,7 @@ test.describe('Network', () => {
 
     const failedRequests: string[] = [];
 
-    page.on('requestfailed', request => {
+    page.on('requestfailed', (request) => {
       const url = request.url();
       if (!url.includes('analytics') && !url.includes('tracking')) {
         failedRequests.push(url);
@@ -670,7 +709,7 @@ test.describe('Network', () => {
     await waitForApp(page);
 
     console.log(`Failed requests: ${failedRequests.length}`);
-    failedRequests.forEach(url => console.log(`  ❌ ${url}`));
+    failedRequests.forEach((url) => console.log(`  ❌ ${url}`));
   });
 
   test('No failed network requests on login', async ({ page }) => {
@@ -678,7 +717,7 @@ test.describe('Network', () => {
 
     const failedRequests: string[] = [];
 
-    page.on('requestfailed', request => {
+    page.on('requestfailed', (request) => {
       const url = request.url();
       if (!url.includes('analytics') && !url.includes('tracking')) {
         failedRequests.push(url);

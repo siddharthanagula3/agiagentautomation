@@ -33,29 +33,44 @@ export const SECURITY_CONFIG = {
         : ['http://localhost:8080'],
   },
 
-  // Content Security Policy
+  // Content Security Policy - Hardened (synced with netlify.toml)
+  // NOTE: 'unsafe-eval' removed for security. 'unsafe-inline' kept for styles only (Tailwind/shadcn requirement).
+  // Monaco editor workers use blob: URLs. Sandboxed iframes have their own CSP.
   csp: {
     defaultSrc: ["'self'"],
     scriptSrc: [
       "'self'",
-      "'unsafe-inline'", // Required for React development
-      'https://js.stripe.com',
-      'https://connect.facebook.net',
-      'https://www.google-analytics.com',
+      'blob:', // Monaco editor web workers
+      'https://js.stripe.com', // Stripe payment SDK
     ],
-    styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+    styleSrc: [
+      "'self'",
+      "'unsafe-inline'", // Required by Tailwind/shadcn runtime styles - TODO: migrate to nonces
+      'https://fonts.googleapis.com',
+    ],
     imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
     connectSrc: [
       "'self'",
-      'https://api.stripe.com',
-      'wss://localhost:*',
-      import.meta.env.VITE_API_URL || 'http://localhost:8000',
+      'https://*.supabase.co', // Supabase REST API
+      'wss://*.supabase.co', // Supabase realtime WebSocket
+      'https://api.stripe.com', // Stripe API
+      'https://*.codesandbox.io', // Sandpack preview
     ],
     fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-    objectSrc: ["'none'"],
-    baseUri: ["'self'"],
-    formAction: ["'self'"],
-    frameAncestors: ["'none'"],
+    frameSrc: [
+      "'self'",
+      'blob:', // Monaco workers
+      'https://js.stripe.com', // Stripe payment iframe
+      'https://hooks.stripe.com', // Stripe webhooks iframe
+      'https://*.codesandbox.io', // Sandpack preview
+      'https://*.csb.app', // CodeSandbox app
+    ],
+    frameAncestors: ["'none'"], // Prevent clickjacking
+    objectSrc: ["'none'"], // Block Flash/plugins
+    baseUri: ["'self'"], // Prevent base tag hijacking
+    formAction: ["'self'"], // Restrict form submissions
+    workerSrc: ["'self'", 'blob:'], // Web workers
+    manifestSrc: ["'self'"], // PWA manifest
   },
 
   // Data sanitization

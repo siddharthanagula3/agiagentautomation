@@ -18,6 +18,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { ScrollArea } from '@shared/ui/scroll-area';
+import { supabase } from '@shared/lib/supabase-client';
 import {
   Monitor,
   Tablet,
@@ -39,12 +40,8 @@ import { useVibeViewStore } from '../../stores/vibe-view-store';
 import { vibeFileSystem } from '@features/vibe/services/vibe-file-system';
 import { toast } from 'sonner';
 import { SandpackPreviewPanel } from './SandpackPreviewPanel';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@shared/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 
 // Build service API endpoint
 const BUILD_SERVICE_URL = '/.netlify/functions/utilities/vibe-build';
@@ -109,6 +106,16 @@ function collectFilesForBuild(): Record<string, string> {
 }
 
 /**
+ * Get the current user's auth token for API calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session?.access_token ?? null;
+}
+
+/**
  * Call the build service to compile React/TypeScript
  */
 async function buildWithService(
@@ -116,10 +123,19 @@ async function buildWithService(
   projectType: 'react' | 'typescript' | 'html'
 ): Promise<BuildResult> {
   try {
+    const authToken = await getAuthToken();
+    if (!authToken) {
+      return {
+        success: false,
+        error: 'Authentication required for build service',
+      };
+    }
+
     const response = await fetch(BUILD_SERVICE_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify({
         files,
@@ -133,7 +149,8 @@ async function buildWithService(
     console.error('Build service error:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Build service unavailable',
+      error:
+        error instanceof Error ? error.message : 'Build service unavailable',
     };
   }
 }
@@ -211,7 +228,9 @@ interface LivePreviewPanelProps {
   defaultMode?: PreviewMode;
 }
 
-export function LivePreviewPanel({ defaultMode = 'sandpack' }: LivePreviewPanelProps) {
+function LivePreviewPanelContent({
+  defaultMode = 'sandpack',
+}: LivePreviewPanelProps) {
   const { appViewerState, setViewport, setAppViewerUrl } = useVibeViewStore();
   const [previewMode, setPreviewMode] = useState<PreviewMode>(defaultMode);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -221,9 +240,13 @@ export function LivePreviewPanel({ defaultMode = 'sandpack' }: LivePreviewPanelP
   const [consoleOutput, setConsoleOutput] = useState<ConsoleMessage[]>([]);
   const [generatedHtml, setGeneratedHtml] = useState<string | null>(null);
   const [autoPreview, setAutoPreview] = useState(true);
-  const [projectType, setProjectType] = useState<'react' | 'typescript' | 'html'>('html');
+  const [projectType, setProjectType] = useState<
+    'react' | 'typescript' | 'html'
+  >('html');
   const [lastBuildTime, setLastBuildTime] = useState<number | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  // Track refresh timeout for cleanup - must be declared before any early returns
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Helper functions (defined before hooks that use them)
   const addConsoleMessage = useCallback((message: ConsoleMessage) => {
@@ -330,7 +353,8 @@ export function LivePreviewPanel({ defaultMode = 'sandpack' }: LivePreviewPanelP
           });
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
         toast.error(`Build error: ${errorMessage}`);
         addConsoleMessage({
           type: 'error',
@@ -362,6 +386,15 @@ export function LivePreviewPanel({ defaultMode = 'sandpack' }: LivePreviewPanelP
     }
   }, [addConsoleMessage]);
 
+  // Cleanup timeouts on unmount - must be before early returns
+  useEffect(() => {
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Use Sandpack mode by default for better browser support
   if (previewMode === 'sandpack') {
     return (
@@ -372,7 +405,10 @@ export function LivePreviewPanel({ defaultMode = 'sandpack' }: LivePreviewPanelP
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-xs font-medium">Preview Engine</span>
           </div>
-          <Tabs value={previewMode} onValueChange={(v) => setPreviewMode(v as PreviewMode)}>
+          <Tabs
+            value={previewMode}
+            onValueChange={(v) => setPreviewMode(v as PreviewMode)}
+          >
             <TabsList className="h-7">
               <TabsTrigger value="sandpack" className="h-5 gap-1 px-2 text-xs">
                 <Sparkles className="h-3 w-3" />
@@ -408,7 +444,11 @@ export function LivePreviewPanel({ defaultMode = 'sandpack' }: LivePreviewPanelP
       }
     }
 
-    setTimeout(() => setIsRefreshing(false), 500);
+    // Clear any existing timeout
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+    }
+    refreshTimeoutRef.current = setTimeout(() => setIsRefreshing(false), 500);
   };
 
   const handleLoadUrl = () => {
@@ -433,7 +473,10 @@ export function LivePreviewPanel({ defaultMode = 'sandpack' }: LivePreviewPanelP
           <Layers className="h-4 w-4 text-muted-foreground" />
           <span className="text-xs font-medium">Preview Engine</span>
         </div>
-        <Tabs value={previewMode} onValueChange={(v) => setPreviewMode(v as PreviewMode)}>
+        <Tabs
+          value={previewMode}
+          onValueChange={(v) => setPreviewMode(v as PreviewMode)}
+        >
           <TabsList className="h-7">
             <TabsTrigger value="sandpack" className="h-5 gap-1 px-2 text-xs">
               <Sparkles className="h-3 w-3" />
@@ -667,8 +710,9 @@ export function LivePreviewPanel({ defaultMode = 'sandpack' }: LivePreviewPanelP
                 size="icon"
                 onClick={() => setShowConsole(false)}
                 className="h-6 w-6 text-white hover:bg-white/10"
+                aria-label="Close console"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3" aria-hidden="true" />
               </Button>
             </div>
           </div>
@@ -681,8 +725,11 @@ export function LivePreviewPanel({ defaultMode = 'sandpack' }: LivePreviewPanelP
                   <span>Console output will appear here</span>
                 </div>
               ) : (
-                consoleOutput.map((msg, idx) => (
-                  <ConsoleMessageRow key={idx} message={msg} />
+                consoleOutput.map((msg, msgIndex) => (
+                  <ConsoleMessageRow
+                    key={`console-${msgIndex}-${msg.type}-${msg.timestamp || Date.now()}`}
+                    message={msg}
+                  />
                 ))
               )}
             </div>
@@ -690,6 +737,17 @@ export function LivePreviewPanel({ defaultMode = 'sandpack' }: LivePreviewPanelP
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * LivePreviewPanel - Live preview with error boundary protection
+ */
+export function LivePreviewPanel(props: LivePreviewPanelProps) {
+  return (
+    <ErrorBoundary compact componentName="Live Preview">
+      <LivePreviewPanelContent {...props} />
+    </ErrorBoundary>
   );
 }
 

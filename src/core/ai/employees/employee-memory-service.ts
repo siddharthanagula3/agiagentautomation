@@ -231,9 +231,13 @@ export class EmployeeMemoryService {
     const messagesToKeep = context.messages.slice(splitPoint);
 
     // Create a summary message
-    const summaryContent = `[CONTEXT SUMMARY] Previous conversation (${messagesToSummarize.length} messages): ` +
+    const summaryContent =
+      `[CONTEXT SUMMARY] Previous conversation (${messagesToSummarize.length} messages): ` +
       `User and ${context.employeeName} discussed various topics. ` +
-      `Key points: ${messagesToSummarize.slice(-5).map(m => m.content.slice(0, 50)).join('; ')}...`;
+      `Key points: ${messagesToSummarize
+        .slice(-5)
+        .map((m) => m.content.slice(0, 50))
+        .join('; ')}...`;
 
     const summaryMessage: EmployeeContextMessage = {
       role: 'system',
@@ -243,10 +247,15 @@ export class EmployeeMemoryService {
     };
 
     context.messages = [summaryMessage, ...messagesToKeep];
-    context.totalTokens = context.messages.reduce((sum, m) => sum + (m.tokens || 0), 0);
+    context.totalTokens = context.messages.reduce(
+      (sum, m) => sum + (m.tokens || 0),
+      0
+    );
   }
 
-  private getSlidingWindow(context: EmployeeContextWindow): EmployeeContextMessage[] {
+  private getSlidingWindow(
+    context: EmployeeContextWindow
+  ): EmployeeContextMessage[] {
     const maxTokens = context.maxTokens * 0.9;
     const result: EmployeeContextMessage[] = [];
     let currentTokens = 0;
@@ -418,30 +427,44 @@ export class EmployeeMemoryService {
     const sections: string[] = [];
 
     // Group by category
-    const byCategory = memory.knowledgeBase.reduce((acc, entry) => {
-      if (!acc[entry.category]) acc[entry.category] = [];
-      acc[entry.category].push(entry);
-      return acc;
-    }, {} as Record<string, MemoryEntry[]>);
+    const byCategory = memory.knowledgeBase.reduce(
+      (acc, entry) => {
+        if (!acc[entry.category]) acc[entry.category] = [];
+        acc[entry.category].push(entry);
+        return acc;
+      },
+      {} as Record<string, MemoryEntry[]>
+    );
 
     if (byCategory.personal?.length) {
-      sections.push('**About this user:**\n' +
-        byCategory.personal.map(e => `- ${e.key}: ${e.value}`).join('\n'));
+      sections.push(
+        '**About this user:**\n' +
+          byCategory.personal.map((e) => `- ${e.key}: ${e.value}`).join('\n')
+      );
     }
 
     if (byCategory.preferences?.length) {
-      sections.push('**User preferences:**\n' +
-        byCategory.preferences.map(e => `- ${e.key}: ${e.value}`).join('\n'));
+      sections.push(
+        '**User preferences:**\n' +
+          byCategory.preferences.map((e) => `- ${e.key}: ${e.value}`).join('\n')
+      );
     }
 
     if (byCategory.goals?.length) {
-      sections.push('**User goals:**\n' +
-        byCategory.goals.map(e => `- ${e.key}: ${e.value}`).join('\n'));
+      sections.push(
+        '**User goals:**\n' +
+          byCategory.goals.map((e) => `- ${e.key}: ${e.value}`).join('\n')
+      );
     }
 
     if (byCategory.history?.length) {
-      sections.push('**Previous interactions:**\n' +
-        byCategory.history.slice(-5).map(e => `- ${e.value}`).join('\n'));
+      sections.push(
+        '**Previous interactions:**\n' +
+          byCategory.history
+            .slice(-5)
+            .map((e) => `- ${e.value}`)
+            .join('\n')
+      );
     }
 
     return sections.length > 0
@@ -454,17 +477,20 @@ export class EmployeeMemoryService {
    */
   private async persistMemory(memory: EmployeeMemory): Promise<void> {
     try {
-      await supabase.from('employee_memories').upsert({
-        user_id: memory.userId,
-        employee_id: memory.employeeId,
-        knowledge_base: memory.knowledgeBase,
-        preferences: memory.preferences,
-        last_interaction: memory.lastInteraction.toISOString(),
-        interaction_count: memory.interactionCount,
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: 'user_id,employee_id',
-      });
+      await supabase.from('employee_memories').upsert(
+        {
+          user_id: memory.userId,
+          employee_id: memory.employeeId,
+          knowledge_base: memory.knowledgeBase,
+          preferences: memory.preferences,
+          last_interaction: memory.lastInteraction.toISOString(),
+          interaction_count: memory.interactionCount,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: 'user_id,employee_id',
+        }
+      );
     } catch (error) {
       console.warn('Failed to persist employee memory:', error);
     }
@@ -532,11 +558,11 @@ export class EmployeeMemoryService {
     message += `**What ${handoff.fromEmployeeName} completed:** ${handoff.context.workCompleted}\n\n`;
 
     if (handoff.context.keyPoints.length > 0) {
-      message += `**Key Information:**\n${handoff.context.keyPoints.map(p => `- ${p}`).join('\n')}\n\n`;
+      message += `**Key Information:**\n${handoff.context.keyPoints.map((p) => `- ${p}`).join('\n')}\n\n`;
     }
 
     if (handoff.context.pendingTasks.length > 0) {
-      message += `**Your Tasks:**\n${handoff.context.pendingTasks.map(t => `- ${t}`).join('\n')}\n\n`;
+      message += `**Your Tasks:**\n${handoff.context.pendingTasks.map((t) => `- ${t}`).join('\n')}\n\n`;
     }
 
     if (handoff.instructions) {
@@ -584,7 +610,9 @@ export class EmployeeMemoryService {
    * Get all handoffs for a session
    */
   getSessionHandoffs(sessionId: string): HandoffPackage[] {
-    return Object.values(this.handoffs).filter((h) => h.sessionId === sessionId);
+    return Object.values(this.handoffs).filter(
+      (h) => h.sessionId === sessionId
+    );
   }
 
   // ================================================

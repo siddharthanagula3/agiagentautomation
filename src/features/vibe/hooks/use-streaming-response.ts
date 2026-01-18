@@ -75,7 +75,8 @@ export function useStreamingResponse(): UseStreamingResponseReturn {
   });
 
   const contentBufferRef = useRef('');
-  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
    * Start streaming for a specific message and agent
@@ -195,8 +196,13 @@ export function useStreamingResponse(): UseStreamingResponseReturn {
       progress: 100,
     }));
 
+    // Clear any existing reset timer
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+    }
+
     // Reset state after a brief delay
-    setTimeout(() => {
+    resetTimerRef.current = setTimeout(() => {
       setStreamingState({
         isStreaming: false,
         currentContent: '',
@@ -206,6 +212,7 @@ export function useStreamingResponse(): UseStreamingResponseReturn {
         error: null,
       });
       contentBufferRef.current = '';
+      resetTimerRef.current = null;
     }, 500);
   }, [streamingState, finishStreamingMessage, updateAgentStatus]);
 
@@ -275,6 +282,10 @@ export function useStreamingResponse(): UseStreamingResponseReturn {
       if (progressTimerRef.current) {
         clearInterval(progressTimerRef.current);
         progressTimerRef.current = null;
+      }
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current);
+        resetTimerRef.current = null;
       }
     };
   }, []);

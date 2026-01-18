@@ -148,11 +148,11 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiagentautom
             className="prose prose-lg dark:prose-invert max-w-none"
           >
             <p className="text-lg leading-relaxed text-muted-foreground">
-              This Privacy Policy explains how AGI Agent Automation ("we", "us", "our")
-              collects, uses, discloses, and protects your personal information
-              when you use our AI automation platform and services. By using our
-              services, you agree to the collection and use of information in
-              accordance with this policy.
+              This Privacy Policy explains how AGI Agent Automation ("we", "us",
+              "our") collects, uses, discloses, and protects your personal
+              information when you use our AI automation platform and services.
+              By using our services, you agree to the collection and use of
+              information in accordance with this policy.
             </p>
           </motion.div>
         </div>

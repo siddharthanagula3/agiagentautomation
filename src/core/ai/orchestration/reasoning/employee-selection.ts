@@ -4,7 +4,11 @@
  */
 
 import { Task, AgentType } from './task-breakdown';
-import { IntentType, DomainType, ComplexityLevel } from './natural-language-processor';
+import {
+  IntentType,
+  DomainType,
+  ComplexityLevel,
+} from './natural-language-processor';
 
 export interface AgentCapability {
   agentType: AgentType;

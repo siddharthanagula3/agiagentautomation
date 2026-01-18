@@ -1,10 +1,43 @@
 import { supabase } from '@shared/lib/supabase-client';
 import { toast } from 'sonner';
+import { useNotificationStore } from '@shared/stores/notification-store';
+import type { ApiResponse } from '@shared/types';
 
-interface ApiResponse<T> {
-  data: T | null;
-  error: string | null;
-  success: boolean;
+/**
+ * Custom error class for API exceptions with status codes
+ */
+export class APIClientException extends Error {
+  status: number;
+  code?: string;
+
+  constructor(message: string, status: number, code?: string) {
+    super(message);
+    this.name = 'APIClientException';
+    this.status = status;
+    this.code = code;
+  }
+}
+
+/**
+ * Handle 402 Payment Required responses by showing upgrade notification
+ */
+function handlePaymentRequired(): void {
+  const { addNotification } = useNotificationStore.getState();
+
+  addNotification({
+    type: 'warning',
+    title: 'Upgrade Required',
+    message:
+      'This feature requires a paid plan. Please upgrade to continue using premium features.',
+    priority: 'high',
+    persistent: true,
+    category: 'billing',
+    actionLabel: 'Upgrade Now',
+    actionUrl: '/billing',
+    onAction: () => {
+      window.location.href = '/billing';
+    },
+  });
 }
 
 class ApiClient {
@@ -25,19 +58,77 @@ class ApiClient {
     };
   }
 
+  /**
+   * Handle HTTP response errors with specific handling for common status codes
+   */
+  private async handleResponseError(
+    response: Response,
+    context: string
+  ): Promise<never> {
+    // Handle 402 Payment Required specifically
+    if (response.status === 402) {
+      handlePaymentRequired();
+      throw new APIClientException(
+        'Payment required - please upgrade your plan',
+        402,
+        'PAYMENT_REQUIRED'
+      );
+    }
+
+    // Handle 401 Unauthorized
+    if (response.status === 401) {
+      throw new APIClientException(
+        'Authentication required - please sign in',
+        401,
+        'UNAUTHORIZED'
+      );
+    }
+
+    // Handle 403 Forbidden
+    if (response.status === 403) {
+      throw new APIClientException(
+        'You do not have permission to perform this action',
+        403,
+        'FORBIDDEN'
+      );
+    }
+
+    // Handle 429 Rate Limited
+    if (response.status === 429) {
+      throw new APIClientException(
+        'Too many requests - please try again later',
+        429,
+        'RATE_LIMITED'
+      );
+    }
+
+    // Generic error for other status codes
+    throw new APIClientException(
+      `HTTP ${response.status}: ${response.statusText}`,
+      response.status
+    );
+  }
+
   private handleError(error: unknown, context: string): string {
     console.error(`API Error in ${context}:`, error);
 
     let errorMessage = 'An unexpected error occurred';
 
-    if (error && typeof error === 'object' && 'message' in error) {
+    if (error instanceof APIClientException) {
+      errorMessage = error.message;
+      // Don't show toast for 402 - notification is already shown
+      if (error.status !== 402) {
+        toast.error(errorMessage);
+      }
+    } else if (error && typeof error === 'object' && 'message' in error) {
       errorMessage = String(error.message);
+      toast.error(errorMessage);
     } else if (typeof error === 'string') {
       errorMessage = error;
+      toast.error(errorMessage);
+    } else {
+      toast.error(errorMessage);
     }
-
-    // Show user-friendly error message
-    toast.error(errorMessage);
 
     return errorMessage;
   }
@@ -55,7 +146,7 @@ class ApiClient {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        await this.handleResponseError(response, context);
       }
 
       const data = await response.json();
@@ -81,7 +172,7 @@ class ApiClient {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        await this.handleResponseError(response, context);
       }
 
       const data = await response.json();
@@ -107,7 +198,7 @@ class ApiClient {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        await this.handleResponseError(response, context);
       }
 
       const data = await response.json();
@@ -131,7 +222,7 @@ class ApiClient {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        await this.handleResponseError(response, context);
       }
 
       const data = await response.json();

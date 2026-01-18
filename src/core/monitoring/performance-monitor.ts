@@ -30,6 +30,8 @@ class PerformanceService {
   private config: PerformanceConfig;
   private preloadedResources = new Set<string>();
   private imageCache = new Map<string, string>();
+  private performanceObservers: PerformanceObserver[] = [];
+  private intersectionObservers: IntersectionObserver[] = [];
 
   constructor() {
     this.config = {
@@ -206,6 +208,9 @@ class PerformanceService {
       }
     );
 
+    // Store observer for cleanup
+    this.intersectionObservers.push(imageObserver);
+
     // Observe all images with data-src attribute
     document.querySelectorAll('img[data-src]').forEach((img) => {
       imageObserver.observe(img);
@@ -298,6 +303,7 @@ class PerformanceService {
       });
 
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+      this.performanceObservers.push(lcpObserver);
 
       // First Input Delay
       const fidObserver = new PerformanceObserver((list) => {
@@ -317,6 +323,7 @@ class PerformanceService {
       });
 
       fidObserver.observe({ entryTypes: ['first-input'] });
+      this.performanceObservers.push(fidObserver);
 
       // Cumulative Layout Shift
       let clsValue = 0;
@@ -335,6 +342,7 @@ class PerformanceService {
       });
 
       clsObserver.observe({ entryTypes: ['layout-shift'] });
+      this.performanceObservers.push(clsObserver);
     }
   }
 
@@ -362,6 +370,7 @@ class PerformanceService {
       });
 
       resourceObserver.observe({ entryTypes: ['resource'] });
+      this.performanceObservers.push(resourceObserver);
     }
   }
 
@@ -382,6 +391,7 @@ class PerformanceService {
       });
 
       longTaskObserver.observe({ entryTypes: ['longtask'] });
+      this.performanceObservers.push(longTaskObserver);
     }
   }
 
@@ -443,16 +453,62 @@ class PerformanceService {
 
     // Clear service worker caches if available
     if ('caches' in window) {
-      caches.keys().then((cacheNames) => {
-        cacheNames.forEach((cacheName) => {
-          caches.delete(cacheName).catch((err) => {
-            console.warn('[PerformanceService] Failed to delete cache:', cacheName, err);
+      caches
+        .keys()
+        .then((cacheNames) => {
+          cacheNames.forEach((cacheName) => {
+            caches.delete(cacheName).catch((err) => {
+              console.warn(
+                '[PerformanceService] Failed to delete cache:',
+                cacheName,
+                err
+              );
+            });
           });
+        })
+        .catch((err) => {
+          console.warn('[PerformanceService] Failed to get cache names:', err);
         });
-      }).catch((err) => {
-        console.warn('[PerformanceService] Failed to get cache names:', err);
-      });
     }
+  }
+
+  /**
+   * Destroy performance service and clean up all resources
+   */
+  destroy(): void {
+    // Disconnect all PerformanceObservers
+    this.performanceObservers.forEach((observer) => {
+      try {
+        observer.disconnect();
+      } catch (error) {
+        console.warn(
+          '[PerformanceService] Failed to disconnect PerformanceObserver:',
+          error
+        );
+      }
+    });
+    this.performanceObservers = [];
+
+    // Disconnect all IntersectionObservers
+    this.intersectionObservers.forEach((observer) => {
+      try {
+        observer.disconnect();
+      } catch (error) {
+        console.warn(
+          '[PerformanceService] Failed to disconnect IntersectionObserver:',
+          error
+        );
+      }
+    });
+    this.intersectionObservers = [];
+
+    // Clear caches
+    this.clearCaches();
+
+    // Reset initialization state
+    this.isInitialized = false;
+
+    console.log('[PerformanceService] Destroyed and resources cleaned up');
   }
 }
 

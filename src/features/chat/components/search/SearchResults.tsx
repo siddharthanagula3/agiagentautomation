@@ -61,15 +61,15 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 <span className="text-xs font-medium text-muted-foreground">
                   Sources:
                 </span>
-                {sources.slice(0, 5).map((source, idx) => (
+                {sources.slice(0, 5).map((source, sourceIndex) => (
                   <a
-                    key={idx}
+                    key={`source-${sourceIndex}-${source.slice(0, 30)}`}
                     href={source}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                   >
-                    [{idx + 1}]
+                    [{sourceIndex + 1}]
                   </a>
                 ))}
               </div>
@@ -86,7 +86,11 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           </div>
           <div className="space-y-2">
             {results.map((result, index) => (
-              <SearchResultCard key={index} result={result} index={index} />
+              <SearchResultCard
+                key={result.url || `result-${index}`}
+                result={result}
+                index={index}
+              />
             ))}
           </div>
         </div>
@@ -213,9 +217,9 @@ export const CompactSearchResults: React.FC<SearchResultsProps> = ({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {results.slice(0, 5).map((result, index) => (
+        {results.slice(0, 5).map((result) => (
           <Button
-            key={index}
+            key={result.url || result.title}
             variant="outline"
             size="sm"
             className="h-auto px-2 py-1 text-xs"

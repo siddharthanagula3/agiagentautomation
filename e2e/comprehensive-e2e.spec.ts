@@ -37,7 +37,10 @@ async function screenshot(page: Page, name: string) {
 async function waitForAppLoad(page: Page, timeout = 30000) {
   // Wait for the initial loader to disappear
   try {
-    await page.waitForSelector('#initial-loader', { state: 'hidden', timeout: 5000 });
+    await page.waitForSelector('#initial-loader', {
+      state: 'hidden',
+      timeout: 5000,
+    });
   } catch {
     // Loader might already be gone
   }
@@ -47,10 +50,12 @@ async function waitForAppLoad(page: Page, timeout = 30000) {
     await page.waitForFunction(
       () => {
         const body = document.body;
-        return body &&
-               (body.classList.contains('app-loaded') ||
-                getComputedStyle(body).display !== 'none' &&
-                getComputedStyle(body).visibility !== 'hidden');
+        return (
+          body &&
+          (body.classList.contains('app-loaded') ||
+            (getComputedStyle(body).display !== 'none' &&
+              getComputedStyle(body).visibility !== 'hidden'))
+        );
       },
       { timeout }
     );
@@ -89,7 +94,11 @@ function setupPageMonitoring(page: Page, testName: string) {
     if (msg.type() === 'error') {
       report.consoleErrors.push(text);
       // Log critical errors immediately
-      if (text.includes('Immer') || text.includes('frozen') || text.includes('Cannot modify')) {
+      if (
+        text.includes('Immer') ||
+        text.includes('frozen') ||
+        text.includes('Cannot modify')
+      ) {
         console.log(`🔴 CRITICAL [${testName}]: ${text.substring(0, 300)}`);
       }
     } else if (msg.type() === 'warning' && !text.includes('DevTools')) {
@@ -99,7 +108,11 @@ function setupPageMonitoring(page: Page, testName: string) {
 
   page.on('requestfailed', (request) => {
     const url = request.url();
-    if (!url.includes('analytics') && !url.includes('favicon') && !url.includes('hot-update')) {
+    if (
+      !url.includes('analytics') &&
+      !url.includes('favicon') &&
+      !url.includes('hot-update')
+    ) {
       const failure = {
         url,
         method: request.method(),
@@ -147,7 +160,9 @@ test.describe('Public Pages - Parallel Tests', () => {
 
     // Performance check
     const timing = await page.evaluate(() => {
-      const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const nav = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming;
       return {
         loadTime: nav.loadEventEnd - nav.startTime,
         domContentLoaded: nav.domContentLoadedEventEnd - nav.startTime,
@@ -158,7 +173,9 @@ test.describe('Public Pages - Parallel Tests', () => {
     console.log(`📊 Landing page load time: ${timing.loadTime.toFixed(0)}ms`);
 
     // Check for critical errors
-    const immerErrors = report.consoleErrors.filter(e => e.includes('Immer') || e.includes('frozen'));
+    const immerErrors = report.consoleErrors.filter(
+      (e) => e.includes('Immer') || e.includes('frozen')
+    );
     expect(immerErrors).toHaveLength(0);
   });
 
@@ -169,7 +186,11 @@ test.describe('Public Pages - Parallel Tests', () => {
     await waitForAppLoad(page);
 
     // Wait specifically for login form elements
-    const emailInput = page.locator('input[type="email"], input[name="email"], input[placeholder*="email" i]').first();
+    const emailInput = page
+      .locator(
+        'input[type="email"], input[name="email"], input[placeholder*="email" i]'
+      )
+      .first();
     const passwordInput = page.locator('input[type="password"]').first();
 
     // Use longer timeout for lazy-loaded auth pages
@@ -179,7 +200,9 @@ test.describe('Public Pages - Parallel Tests', () => {
     await screenshot(page, 'login-page');
 
     console.log('✅ Login page has all required form elements');
-    expect(report.consoleErrors.filter(e => e.includes('Immer'))).toHaveLength(0);
+    expect(
+      report.consoleErrors.filter((e) => e.includes('Immer'))
+    ).toHaveLength(0);
   });
 
   test('Signup page loads correctly', async ({ page }) => {
@@ -191,10 +214,14 @@ test.describe('Public Pages - Parallel Tests', () => {
     await screenshot(page, 'signup-page');
 
     // Check for signup form
-    const formExists = await page.locator('form, [class*="signup"], [class*="register"]').count();
+    const formExists = await page
+      .locator('form, [class*="signup"], [class*="register"]')
+      .count();
     console.log(`📊 Found ${formExists} signup form elements`);
 
-    expect(report.consoleErrors.filter(e => e.includes('Immer'))).toHaveLength(0);
+    expect(
+      report.consoleErrors.filter((e) => e.includes('Immer'))
+    ).toHaveLength(0);
   });
 
   test('Pricing page loads correctly', async ({ page }) => {
@@ -206,11 +233,15 @@ test.describe('Public Pages - Parallel Tests', () => {
     await screenshot(page, 'pricing-page');
 
     // Check for pricing tiers
-    const pricingElements = page.locator('[class*="price"], [class*="plan"], [class*="tier"], [class*="card"]');
+    const pricingElements = page.locator(
+      '[class*="price"], [class*="plan"], [class*="tier"], [class*="card"]'
+    );
     const count = await pricingElements.count();
     console.log(`📊 Found ${count} pricing elements`);
 
-    expect(report.consoleErrors.filter(e => e.includes('Immer'))).toHaveLength(0);
+    expect(
+      report.consoleErrors.filter((e) => e.includes('Immer'))
+    ).toHaveLength(0);
   });
 
   test('About page loads correctly', async ({ page }) => {
@@ -220,7 +251,9 @@ test.describe('Public Pages - Parallel Tests', () => {
     await waitForAppLoad(page);
 
     await screenshot(page, 'about-page');
-    expect(report.consoleErrors.filter(e => e.includes('Immer'))).toHaveLength(0);
+    expect(
+      report.consoleErrors.filter((e) => e.includes('Immer'))
+    ).toHaveLength(0);
   });
 
   test('Help center loads correctly', async ({ page }) => {
@@ -230,7 +263,9 @@ test.describe('Public Pages - Parallel Tests', () => {
     await waitForAppLoad(page);
 
     await screenshot(page, 'help-page');
-    expect(report.consoleErrors.filter(e => e.includes('Immer'))).toHaveLength(0);
+    expect(
+      report.consoleErrors.filter((e) => e.includes('Immer'))
+    ).toHaveLength(0);
   });
 });
 
@@ -256,7 +291,12 @@ test.describe('Navigation & Routing', () => {
     const report = setupPageMonitoring(page, 'protected-routes');
 
     // Test protected routes
-    const protectedRoutes = ['/dashboard', '/chat', '/vibe', '/mission-control'];
+    const protectedRoutes = [
+      '/dashboard',
+      '/chat',
+      '/vibe',
+      '/mission-control',
+    ];
 
     for (const route of protectedRoutes) {
       await page.goto(`${BASE_URL}${route}`);
@@ -264,8 +304,13 @@ test.describe('Navigation & Routing', () => {
 
       // Should redirect to login or show auth required
       const currentUrl = page.url();
-      const isProtected = currentUrl.includes('login') || currentUrl.includes('auth') || currentUrl === `${BASE_URL}${route}`;
-      console.log(`Route ${route} -> ${currentUrl} (protected: ${isProtected})`);
+      const isProtected =
+        currentUrl.includes('login') ||
+        currentUrl.includes('auth') ||
+        currentUrl === `${BASE_URL}${route}`;
+      console.log(
+        `Route ${route} -> ${currentUrl} (protected: ${isProtected})`
+      );
     }
 
     await screenshot(page, 'protected-routes-test');
@@ -332,7 +377,9 @@ test.describe('UI Components - Parallel Tests', () => {
     await waitForAppLoad(page);
 
     // Look for any modal triggers
-    const modalTriggers = page.locator('[data-state], [aria-haspopup="dialog"], [class*="modal"], [class*="dialog"]');
+    const modalTriggers = page.locator(
+      '[data-state], [aria-haspopup="dialog"], [class*="modal"], [class*="dialog"]'
+    );
     const triggerCount = await modalTriggers.count();
     console.log(`📊 Found ${triggerCount} potential modal elements`);
 
@@ -354,7 +401,9 @@ test.describe('Responsive Design - Parallel Tests', () => {
     await waitForAppLoad(page);
 
     await screenshot(page, 'responsive-desktop');
-    expect(report.consoleErrors.filter(e => e.includes('Immer'))).toHaveLength(0);
+    expect(
+      report.consoleErrors.filter((e) => e.includes('Immer'))
+    ).toHaveLength(0);
   });
 
   test('Tablet viewport (768x1024)', async ({ page }) => {
@@ -365,7 +414,9 @@ test.describe('Responsive Design - Parallel Tests', () => {
     await waitForAppLoad(page);
 
     await screenshot(page, 'responsive-tablet');
-    expect(report.consoleErrors.filter(e => e.includes('Immer'))).toHaveLength(0);
+    expect(
+      report.consoleErrors.filter((e) => e.includes('Immer'))
+    ).toHaveLength(0);
   });
 
   test('Mobile viewport (375x667)', async ({ page }) => {
@@ -376,12 +427,16 @@ test.describe('Responsive Design - Parallel Tests', () => {
     await waitForAppLoad(page);
 
     // Check mobile menu
-    const hamburgerMenu = page.locator('[class*="hamburger"], [class*="menu-toggle"], button[aria-label*="menu" i], [class*="mobile"]');
+    const hamburgerMenu = page.locator(
+      '[class*="hamburger"], [class*="menu-toggle"], button[aria-label*="menu" i], [class*="mobile"]'
+    );
     const hamburgerCount = await hamburgerMenu.count();
     console.log(`📊 Found ${hamburgerCount} mobile menu elements`);
 
     await screenshot(page, 'responsive-mobile');
-    expect(report.consoleErrors.filter(e => e.includes('Immer'))).toHaveLength(0);
+    expect(
+      report.consoleErrors.filter((e) => e.includes('Immer'))
+    ).toHaveLength(0);
   });
 });
 
@@ -396,7 +451,9 @@ test.describe('Performance Tests', () => {
     await waitForAppLoad(page);
 
     const metrics = await page.evaluate(() => {
-      const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const nav = performance.getEntriesByType(
+        'navigation'
+      )[0] as PerformanceNavigationTiming;
       const paint = performance.getEntriesByType('paint');
 
       return {
@@ -405,8 +462,10 @@ test.describe('Performance Tests', () => {
         ttfb: nav.responseStart - nav.requestStart,
         domLoad: nav.domContentLoadedEventEnd - nav.startTime,
         fullLoad: nav.loadEventEnd - nav.startTime,
-        firstPaint: paint.find(p => p.name === 'first-paint')?.startTime || 0,
-        firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime || 0,
+        firstPaint: paint.find((p) => p.name === 'first-paint')?.startTime || 0,
+        firstContentfulPaint:
+          paint.find((p) => p.name === 'first-contentful-paint')?.startTime ||
+          0,
       };
     });
 
@@ -444,14 +503,22 @@ test.describe('Performance Tests', () => {
     await page.goto(BASE_URL);
     await waitForAppLoad(page);
 
-    const totalJS = resources.filter(r => r.type === 'JS').reduce((sum, r) => sum + r.size, 0);
-    const totalCSS = resources.filter(r => r.type === 'CSS').reduce((sum, r) => sum + r.size, 0);
+    const totalJS = resources
+      .filter((r) => r.type === 'JS')
+      .reduce((sum, r) => sum + r.size, 0);
+    const totalCSS = resources
+      .filter((r) => r.type === 'CSS')
+      .reduce((sum, r) => sum + r.size, 0);
 
     console.log(`\n📊 BUNDLE SIZES:`);
     console.log(`   Total JS: ${(totalJS / 1024).toFixed(2)} KB`);
     console.log(`   Total CSS: ${(totalCSS / 1024).toFixed(2)} KB`);
-    console.log(`   JS files: ${resources.filter(r => r.type === 'JS').length}`);
-    console.log(`   CSS files: ${resources.filter(r => r.type === 'CSS').length}`);
+    console.log(
+      `   JS files: ${resources.filter((r) => r.type === 'JS').length}`
+    );
+    console.log(
+      `   CSS files: ${resources.filter((r) => r.type === 'CSS').length}`
+    );
   });
 });
 
@@ -467,8 +534,14 @@ test.describe('Accessibility Tests', () => {
 
     // Check for basic accessibility
     const imagesWithoutAlt = await page.locator('img:not([alt])').count();
-    const buttonsWithoutLabel = await page.locator('button:not([aria-label]):not(:has-text(*)):empty').count();
-    const inputsWithoutLabel = await page.locator('input:not([aria-label]):not([aria-labelledby]):not([placeholder])').count();
+    const buttonsWithoutLabel = await page
+      .locator('button:not([aria-label]):not(:has-text(*)):empty')
+      .count();
+    const inputsWithoutLabel = await page
+      .locator(
+        'input:not([aria-label]):not([aria-labelledby]):not([placeholder])'
+      )
+      .count();
 
     console.log(`\n📊 ACCESSIBILITY CHECK:`);
     console.log(`   Images without alt: ${imagesWithoutAlt}`);
@@ -492,17 +565,21 @@ test.describe('Accessibility Tests', () => {
 
     // Get computed styles of text elements
     const textContrast = await page.evaluate(() => {
-      const elements = document.querySelectorAll('p, span, a, button, h1, h2, h3, h4, h5, h6');
+      const elements = document.querySelectorAll(
+        'p, span, a, button, h1, h2, h3, h4, h5, h6'
+      );
       const samples: { element: string; color: string; bgColor: string }[] = [];
 
-      Array.from(elements).slice(0, 10).forEach(el => {
-        const style = getComputedStyle(el);
-        samples.push({
-          element: el.tagName,
-          color: style.color,
-          bgColor: style.backgroundColor,
+      Array.from(elements)
+        .slice(0, 10)
+        .forEach((el) => {
+          const style = getComputedStyle(el);
+          samples.push({
+            element: el.tagName,
+            color: style.color,
+            bgColor: style.backgroundColor,
+          });
         });
-      });
 
       return samples;
     });
@@ -525,10 +602,11 @@ test.describe('Error Handling', () => {
     await screenshot(page, '404-page');
 
     // Should show some kind of error or redirect
-    const bodyText = await page.locator('body').textContent() || '';
-    const shows404 = bodyText.toLowerCase().includes('not found') ||
-                     bodyText.toLowerCase().includes('404') ||
-                     bodyText.toLowerCase().includes('error');
+    const bodyText = (await page.locator('body').textContent()) || '';
+    const shows404 =
+      bodyText.toLowerCase().includes('not found') ||
+      bodyText.toLowerCase().includes('404') ||
+      bodyText.toLowerCase().includes('error');
     console.log(`📊 404 page shows error message: ${shows404}`);
   });
 
@@ -544,9 +622,15 @@ test.describe('Error Handling', () => {
 
     console.log(`\n📊 JAVASCRIPT ERROR SUMMARY:`);
     console.log(`   Total errors: ${report.consoleErrors.length}`);
-    console.log(`   Immer errors: ${report.consoleErrors.filter(e => e.includes('Immer')).length}`);
-    console.log(`   State errors: ${report.consoleErrors.filter(e => e.includes('Cannot') && e.includes('state')).length}`);
-    console.log(`   Type errors: ${report.consoleErrors.filter(e => e.includes('TypeError')).length}`);
+    console.log(
+      `   Immer errors: ${report.consoleErrors.filter((e) => e.includes('Immer')).length}`
+    );
+    console.log(
+      `   State errors: ${report.consoleErrors.filter((e) => e.includes('Cannot') && e.includes('state')).length}`
+    );
+    console.log(
+      `   Type errors: ${report.consoleErrors.filter((e) => e.includes('TypeError')).length}`
+    );
 
     if (report.consoleErrors.length > 0) {
       console.log('\n   Error samples:');
@@ -556,7 +640,9 @@ test.describe('Error Handling', () => {
     }
 
     // Critical: No Immer errors
-    const immerErrors = report.consoleErrors.filter(e => e.includes('Immer') || e.includes('frozen'));
+    const immerErrors = report.consoleErrors.filter(
+      (e) => e.includes('Immer') || e.includes('frozen')
+    );
     expect(immerErrors).toHaveLength(0);
   });
 });
@@ -590,11 +676,12 @@ test.describe('State Management - Critical Tests', () => {
       }
     }
 
-    const immerErrors = report.consoleErrors.filter(e =>
-      e.includes('Immer') ||
-      e.includes('frozen') ||
-      e.includes('Cannot assign to read only property') ||
-      e.includes('Cannot modify')
+    const immerErrors = report.consoleErrors.filter(
+      (e) =>
+        e.includes('Immer') ||
+        e.includes('frozen') ||
+        e.includes('Cannot assign to read only property') ||
+        e.includes('Cannot modify')
     );
 
     console.log(`\n📊 STATE MANAGEMENT CHECK:`);
@@ -618,12 +705,13 @@ test.describe('State Management - Critical Tests', () => {
     await waitForAppLoad(page);
 
     // Check for Map/Set related errors
-    const mapSetErrors = report.consoleErrors.filter(e =>
-      e.includes('Map') ||
-      e.includes('Set') ||
-      e.includes('.set(') ||
-      e.includes('.get(') ||
-      e.includes('.delete(')
+    const mapSetErrors = report.consoleErrors.filter(
+      (e) =>
+        e.includes('Map') ||
+        e.includes('Set') ||
+        e.includes('.set(') ||
+        e.includes('.get(') ||
+        e.includes('.delete(')
     );
 
     console.log(`📊 Map/Set related errors: ${mapSetErrors.length}`);
@@ -647,7 +735,9 @@ test.describe('API & Network Tests', () => {
     if (report.networkFailures.length > 0) {
       console.log('\n   Failed requests:');
       report.networkFailures.forEach((req, i) => {
-        console.log(`   ${i + 1}. [${req.method}] ${req.url.substring(0, 100)}`);
+        console.log(
+          `   ${i + 1}. [${req.method}] ${req.url.substring(0, 100)}`
+        );
         console.log(`      Error: ${req.error}`);
       });
     }
@@ -668,7 +758,9 @@ test.describe('API & Network Tests', () => {
     page.on('response', (response) => {
       if (response.url().includes('supabase') && response.status() >= 400) {
         supabaseErrors++;
-        console.log(`🔴 Supabase error: ${response.status()} ${response.url()}`);
+        console.log(
+          `🔴 Supabase error: ${response.status()} ${response.url()}`
+        );
       }
     });
 
@@ -721,9 +813,15 @@ test.describe('Security Tests', () => {
     const headers = response?.headers() || {};
 
     console.log(`\n📊 SECURITY HEADERS:`);
-    console.log(`   Content-Security-Policy: ${headers['content-security-policy'] ? 'Present' : 'Missing'}`);
-    console.log(`   X-Frame-Options: ${headers['x-frame-options'] || 'Missing'}`);
-    console.log(`   X-Content-Type-Options: ${headers['x-content-type-options'] || 'Missing'}`);
+    console.log(
+      `   Content-Security-Policy: ${headers['content-security-policy'] ? 'Present' : 'Missing'}`
+    );
+    console.log(
+      `   X-Frame-Options: ${headers['x-frame-options'] || 'Missing'}`
+    );
+    console.log(
+      `   X-Content-Type-Options: ${headers['x-content-type-options'] || 'Missing'}`
+    );
   });
 });
 
@@ -766,7 +864,9 @@ test.describe('Lazy Loading Tests', () => {
     await page.goto(BASE_URL);
 
     // Check if loading indicators appear during lazy load
-    const loadingIndicators = await page.locator('[class*="loading"], [class*="spinner"], [class*="skeleton"]').count();
+    const loadingIndicators = await page
+      .locator('[class*="loading"], [class*="spinner"], [class*="skeleton"]')
+      .count();
     console.log(`📊 Loading indicators found: ${loadingIndicators}`);
 
     await waitForAppLoad(page);
@@ -793,14 +893,21 @@ test.afterAll(async () => {
     totalNetworkFailures += report.networkFailures.length;
 
     // Check for critical issues
-    const immerErrors = report.consoleErrors.filter(e =>
-      e.includes('Immer') || e.includes('frozen') || e.includes('Cannot modify')
+    const immerErrors = report.consoleErrors.filter(
+      (e) =>
+        e.includes('Immer') ||
+        e.includes('frozen') ||
+        e.includes('Cannot modify')
     );
     if (immerErrors.length > 0) {
-      criticalIssues.push(`${testName}: ${immerErrors.length} Immer/state errors`);
+      criticalIssues.push(
+        `${testName}: ${immerErrors.length} Immer/state errors`
+      );
     }
 
-    const typeErrors = report.consoleErrors.filter(e => e.includes('TypeError'));
+    const typeErrors = report.consoleErrors.filter((e) =>
+      e.includes('TypeError')
+    );
     if (typeErrors.length > 0) {
       criticalIssues.push(`${testName}: ${typeErrors.length} TypeErrors`);
     }
@@ -814,7 +921,7 @@ test.afterAll(async () => {
 
   if (criticalIssues.length > 0) {
     console.log(`\n🚨 CRITICAL ISSUES FOUND:`);
-    criticalIssues.forEach(issue => console.log(`   ❌ ${issue}`));
+    criticalIssues.forEach((issue) => console.log(`   ❌ ${issue}`));
   } else {
     console.log(`\n✅ NO CRITICAL ISSUES DETECTED!`);
   }

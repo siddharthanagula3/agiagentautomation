@@ -1,75 +1,83 @@
-import { useState, useCallback, useEffect } from 'react';
+/**
+ * useChatHistory Hook
+ * Manages chat conversation history with database persistence
+ * Updated: Jan 18th 2026 - Migrated to React Query for server state management
+ */
+
+import { useState, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@shared/lib/supabase-client';
 import { chatPersistenceService } from '../services/conversation-storage';
+import { queryKeys } from '@shared/stores/query-client';
 import type { ChatSession } from '../types';
+import {
+  useChatSessions,
+  useCreateChatSession,
+  useRenameChatSession,
+  useDeleteChatSession,
+  useToggleStarSession,
+  useTogglePinSession,
+  useToggleArchiveSession,
+  useDuplicateChatSession,
+  useShareChatSession,
+} from './use-chat-queries';
+
+// Get current user helper
+async function getCurrentUser() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
+}
 
 export const useChatHistory = () => {
-  const [sessions, setSessions] = useState<ChatSession[]>([]);
-  const [currentSession, setCurrentSession] = useState<ChatSession | null>(
-    null
-  );
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
 
-  // Get current user
-  const getCurrentUser = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return user;
-  };
+  // Get current user ID synchronously from cache if available
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Load all sessions
+  // Initialize userId on first render
+  useState(() => {
+    getCurrentUser().then((user) => {
+      if (user) setUserId(user.id);
+    });
+  });
+
+  // React Query hooks
+  const {
+    data: sessions = [],
+    isLoading,
+    refetch: refetchSessions,
+  } = useChatSessions(userId ?? undefined);
+
+  // Mutations
+  const createSessionMutation = useCreateChatSession();
+  const renameSessionMutation = useRenameChatSession();
+  const deleteSessionMutation = useDeleteChatSession();
+  const toggleStarMutation = useToggleStarSession();
+  const togglePinMutation = useTogglePinSession();
+  const toggleArchiveMutation = useToggleArchiveSession();
+  const duplicateMutation = useDuplicateChatSession();
+  const shareMutation = useShareChatSession();
+
+  // Derive current session from sessions list
+  const currentSession =
+    sessions.find((s) => s.id === currentSessionId) ?? null;
+
+  // Load sessions - now just refetches the query
   const loadSessions = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const user = await getCurrentUser();
-      if (!user) return;
-
-      const loadedSessions = await chatPersistenceService.getUserSessions(
-        user.id
-      );
-
-      // Get message counts for each session
-      const sessionsWithCounts = await Promise.all(
-        loadedSessions.map(async (session) => {
-          const count = await chatPersistenceService.getMessageCount(
-            session.id
-          );
-          return { ...session, messageCount: count };
-        })
-      );
-
-      // Sort sessions by updatedAt (most recent first), ensuring timestamps are valid
-      const sortedSessions = sessionsWithCounts.sort((a, b) => {
-        const aTime =
-          a.updatedAt instanceof Date
-            ? a.updatedAt.getTime()
-            : new Date(a.updatedAt).getTime();
-        const bTime =
-          b.updatedAt instanceof Date
-            ? b.updatedAt.getTime()
-            : new Date(b.updatedAt).getTime();
-
-        // Handle invalid dates
-        if (isNaN(aTime)) return 1;
-        if (isNaN(bTime)) return -1;
-
-        return bTime - aTime; // Most recent first
-      });
-
-      setSessions(sortedSessions);
-    } catch (error) {
-      console.error('Failed to load sessions:', error);
-      toast.error('Failed to load chat history');
-    } finally {
-      setIsLoading(false);
+    const user = await getCurrentUser();
+    if (user) {
+      setUserId(user.id);
+      await refetchSessions();
     }
-  }, []);
+  }, [refetchSessions]);
 
   // Create new session
-  const createSession = useCallback(async (title: string = 'New Chat') => {
-    try {
+  const createSession = useCallback(
+    async (title: string = 'New Chat') => {
       const user = await getCurrentUser();
       if (!user) {
         toast.error('You must be logged in to create a chat');
@@ -87,95 +95,48 @@ export const useChatHistory = () => {
           tags: [],
           participants: [],
         };
-        setCurrentSession(tempSession);
+        setCurrentSessionId(tempSession.id);
         return tempSession;
       }
 
-      const newSession = await chatPersistenceService.createSession(
-        user.id,
-        title
-      );
-
-      setSessions((prev) => [newSession, ...prev]);
-      setCurrentSession(newSession);
-      toast.success('New chat created');
-
-      return newSession;
-    } catch (error) {
-      console.error('Failed to create session:', error);
-      toast.error('Failed to create chat');
-      throw error;
-    }
-  }, []);
+      try {
+        const newSession = await createSessionMutation.mutateAsync({ title });
+        setCurrentSessionId(newSession.id);
+        return newSession;
+      } catch (error) {
+        console.error('Failed to create session:', error);
+        throw error;
+      }
+    },
+    [createSessionMutation]
+  );
 
   // Rename session
   const renameSession = useCallback(
     async (sessionId: string, newTitle: string) => {
       try {
-        const user = await getCurrentUser();
-        if (!user) {
-          toast.error('You must be logged in to rename a chat');
-          return;
-        }
-
-        // Pass userId for extra security verification
-        await chatPersistenceService.updateSessionTitle(
-          sessionId,
-          newTitle,
-          user.id
-        );
-
-        setSessions((prev) =>
-          prev.map((session) =>
-            session.id === sessionId
-              ? { ...session, title: newTitle, updatedAt: new Date() }
-              : session
-          )
-        );
-
-        setCurrentSession((current) =>
-          current?.id === sessionId
-            ? { ...current, title: newTitle, updatedAt: new Date() }
-            : current
-        );
-
-        toast.success('Chat renamed');
+        await renameSessionMutation.mutateAsync({ sessionId, newTitle });
       } catch (error) {
         console.error('Failed to rename session:', error);
-        const errorMessage =
-          error instanceof Error ? error.message : 'Failed to rename chat';
-        toast.error(errorMessage);
       }
     },
-    []
+    [renameSessionMutation]
   );
 
   // Delete session
-  const deleteSession = useCallback(async (sessionId: string) => {
-    try {
-      const user = await getCurrentUser();
-      if (!user) {
-        toast.error('You must be logged in to delete a chat');
-        return;
+  const deleteSession = useCallback(
+    async (sessionId: string) => {
+      try {
+        await deleteSessionMutation.mutateAsync(sessionId);
+        if (currentSessionId === sessionId) {
+          setCurrentSessionId(null);
+        }
+      } catch (error) {
+        console.error('Failed to delete session:', error);
       }
-
-      // Pass userId for extra security verification
-      await chatPersistenceService.deleteSession(sessionId, user.id);
-
-      setSessions((prev) => prev.filter((session) => session.id !== sessionId));
-
-      setCurrentSession((current) =>
-        current?.id === sessionId ? null : current
-      );
-
-      toast.success('Chat deleted');
-    } catch (error) {
-      console.error('Failed to delete session:', error);
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to delete chat';
-      toast.error(errorMessage);
-    }
-  }, []);
+    },
+    [deleteSessionMutation, currentSessionId]
+  );
 
   // Search sessions
   const searchSessions = useCallback(
@@ -204,214 +165,122 @@ export const useChatHistory = () => {
   );
 
   // Load specific session
-  const loadSession = useCallback(async (sessionId: string) => {
-    try {
-      const user = await getCurrentUser();
-      if (!user) {
-        toast.error('You must be logged in to load a chat');
-        return;
-      }
+  const loadSession = useCallback(
+    async (sessionId: string) => {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          toast.error('You must be logged in to load a chat');
+          return;
+        }
 
-      // Pass userId for extra security verification
-      const session = await chatPersistenceService.getSession(
-        sessionId,
-        user.id
-      );
-      if (session) {
-        setCurrentSession(session);
-      } else {
-        toast.error('Chat not found or access denied');
+        // Check if session exists in cached sessions
+        const cachedSession = sessions.find((s) => s.id === sessionId);
+        if (cachedSession) {
+          setCurrentSessionId(sessionId);
+          return;
+        }
+
+        // Otherwise fetch from database
+        const session = await chatPersistenceService.getSession(
+          sessionId,
+          user.id
+        );
+        if (session) {
+          setCurrentSessionId(sessionId);
+          // Invalidate sessions cache to include this session
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.chat.sessions(user.id),
+          });
+        } else {
+          toast.error('Chat not found or access denied');
+        }
+      } catch (error) {
+        console.error('Failed to load session:', error);
+        toast.error('Failed to load chat');
       }
-    } catch (error) {
-      console.error('Failed to load session:', error);
-      toast.error('Failed to load chat');
-    }
-  }, []);
+    },
+    [sessions, queryClient]
+  );
 
   // Star/unstar session
   const toggleStarSession = useCallback(
     async (sessionId: string) => {
       const current = sessions.find((s) => s.id === sessionId);
+      const newState = !current?.isStarred;
 
-      setSessions((prev) =>
-        prev.map((session) =>
-          session.id === sessionId
-            ? { ...session, isStarred: !session.isStarred }
-            : session
-        )
-      );
-
-      setCurrentSession((currentSession) =>
-        currentSession?.id === sessionId
-          ? { ...currentSession, isStarred: !currentSession.isStarred }
-          : currentSession
-      );
-
-      // Persist star state to database
       try {
-        const user = await getCurrentUser();
-        const newState = !current?.isStarred;
-        if (user) {
-          await chatPersistenceService.updateSessionStarred(
-            sessionId,
-            newState,
-            user.id
-          );
-        }
-        toast.success(newState ? 'Chat starred' : 'Chat unstarred');
+        await toggleStarMutation.mutateAsync({
+          sessionId,
+          isStarred: newState,
+        });
       } catch (error) {
-        console.error('Failed to update starred state:', error);
-        toast.error('Failed to update starred state');
+        console.error('Failed to toggle star:', error);
       }
     },
-    [sessions]
+    [sessions, toggleStarMutation]
   );
 
   // Pin/unpin session
   const togglePinSession = useCallback(
     async (sessionId: string) => {
       const current = sessions.find((s) => s.id === sessionId);
+      const newState = !current?.isPinned;
 
-      setSessions((prev) =>
-        prev.map((session) =>
-          session.id === sessionId
-            ? { ...session, isPinned: !session.isPinned }
-            : session
-        )
-      );
-
-      setCurrentSession((currentSession) =>
-        currentSession?.id === sessionId
-          ? { ...currentSession, isPinned: !currentSession.isPinned }
-          : currentSession
-      );
-
-      // Persist pin state to database
       try {
-        const user = await getCurrentUser();
-        const newState = !current?.isPinned;
-        if (user) {
-          await chatPersistenceService.updateSessionPinned(
-            sessionId,
-            newState,
-            user.id
-          );
-        }
-        toast.success(newState ? 'Chat pinned' : 'Chat unpinned');
+        await togglePinMutation.mutateAsync({
+          sessionId,
+          isPinned: newState,
+        });
       } catch (error) {
-        console.error('Failed to update pinned state:', error);
-        toast.error('Failed to update pinned state');
+        console.error('Failed to toggle pin:', error);
       }
     },
-    [sessions]
+    [sessions, togglePinMutation]
   );
 
   // Archive/unarchive session
   const toggleArchiveSession = useCallback(
     async (sessionId: string) => {
       const current = sessions.find((s) => s.id === sessionId);
+      const newState = !current?.isArchived;
 
-      setSessions((prev) =>
-        prev.map((session) =>
-          session.id === sessionId
-            ? { ...session, isArchived: !session.isArchived }
-            : session
-        )
-      );
-
-      setCurrentSession((currentSession) =>
-        currentSession?.id === sessionId
-          ? { ...currentSession, isArchived: !currentSession.isArchived }
-          : currentSession
-      );
-
-      // Persist archive state to database
       try {
-        const user = await getCurrentUser();
-        const newState = !current?.isArchived;
-        if (user) {
-          await chatPersistenceService.updateSessionArchived(
-            sessionId,
-            newState,
-            user.id
-          );
-        }
-        toast.success(newState ? 'Chat archived' : 'Chat unarchived');
+        await toggleArchiveMutation.mutateAsync({
+          sessionId,
+          isArchived: newState,
+        });
       } catch (error) {
-        console.error('Failed to update archived state:', error);
-        toast.error('Failed to update archived state');
+        console.error('Failed to toggle archive:', error);
       }
     },
-    [sessions]
+    [sessions, toggleArchiveMutation]
   );
 
   // Duplicate session
   const duplicateSession = useCallback(
     async (sessionId: string) => {
       try {
-        const original = sessions.find((s) => s.id === sessionId);
-        if (!original) return;
-
-        const user = await getCurrentUser();
-        if (!user) return;
-
-        const newSession = await chatPersistenceService.createSession(
-          user.id,
-          `${original.title} (Copy)`
-        );
-
-        // Copy messages from original session
-        await chatPersistenceService.copySessionMessages(
-          sessionId,
-          newSession.id,
-          user.id
-        );
-        setSessions((prev) => [newSession, ...prev]);
-        toast.success('Chat duplicated');
-
-        return newSession;
+        const result = await duplicateMutation.mutateAsync(sessionId);
+        return result.newSession;
       } catch (error) {
         console.error('Failed to duplicate session:', error);
-        toast.error('Failed to duplicate chat');
       }
     },
-    [sessions]
+    [duplicateMutation]
   );
 
-  // Share session (generate shareable link)
-  const shareSession = useCallback(async (sessionId: string) => {
-    try {
-      const user = await getCurrentUser();
-      if (!user) {
-        toast.error('You must be logged in to share a chat');
-        return;
+  // Share session
+  const shareSession = useCallback(
+    async (sessionId: string) => {
+      try {
+        await shareMutation.mutateAsync(sessionId);
+      } catch (error) {
+        console.error('Failed to share session:', error);
       }
-
-      // Generate share token
-      const shareToken = `${sessionId}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-      const shareLink = `${window.location.origin}/share/${shareToken}`;
-
-      // Update session with share link
-      await chatPersistenceService.updateSessionSharedLink(
-        sessionId,
-        shareToken,
-        user.id
-      );
-
-      // Copy to clipboard
-      await navigator.clipboard.writeText(shareLink);
-      toast.success('Share link copied to clipboard');
-    } catch (error) {
-      console.error('Failed to share session:', error);
-      toast.error('Failed to share chat');
-    }
-  }, []);
-
-  // Load sessions on mount
-  useEffect(() => {
-    loadSessions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount to avoid infinite loop
+    },
+    [shareMutation]
+  );
 
   return {
     sessions,

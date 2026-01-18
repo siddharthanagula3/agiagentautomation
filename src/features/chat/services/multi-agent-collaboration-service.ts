@@ -301,10 +301,7 @@ class MultiAgentCollaborationService {
             (employeeContributions[employee.name] || 0) + 1;
         } else {
           // Log failed discussion but continue with other results
-          console.warn(
-            '[Collaboration] Discussion failed:',
-            result.reason
-          );
+          console.warn('[Collaboration] Discussion failed:', result.reason);
         }
       }
     }
@@ -395,7 +392,11 @@ class MultiAgentCollaborationService {
     scoredEmployees.sort((a, b) => b.score - a.score);
 
     const MAX_EMPLOYEES = 3; // Hard cap at 3 employees
-    for (let i = 0; i < Math.min(maxEmployees, scoredEmployees.length, MAX_EMPLOYEES); i++) {
+    for (
+      let i = 0;
+      i < Math.min(maxEmployees, scoredEmployees.length, MAX_EMPLOYEES);
+      i++
+    ) {
       if (scoredEmployees[i].score > 0) {
         selected.push(scoredEmployees[i].employee);
       }

@@ -3,6 +3,9 @@
  * Official integration with Google AI Studio Veo 3.1 API for video generation
  * Uses Gemini API endpoints: https://ai.google.dev/gemini-api/docs/video
  *
+ * SECURITY: All API calls are routed through Netlify proxy functions
+ * to keep API keys secure on the server side. Never expose API keys client-side.
+ *
  * Supported models:
  * - veo-3.1-generate-preview (8-second 720p or 1080p videos with audio)
  *
@@ -12,6 +15,8 @@
  * - Video extension
  * - Frame-specific generation
  */
+
+import { supabase } from '@shared/lib/supabase-client';
 
 export interface VeoGenerationRequest {
   prompt: string;
@@ -76,7 +81,8 @@ export interface VeoServiceError {
   details?: unknown;
 }
 
-const VEO_API_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
+// SECURITY: API calls route through Netlify proxy
+const VEO_PROXY_URL = '/.netlify/functions/media-proxies/google-veo-proxy';
 
 // Pricing per video (USD)
 const VEO_PRICING = {
@@ -84,15 +90,31 @@ const VEO_PRICING = {
   '1080p': 0.08,
 };
 
+/**
+ * Helper function to get the current Supabase session token
+ * Required for authenticated API proxy calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('[GoogleVeoService] Failed to get auth token:', error);
+    return null;
+  }
+}
+
 export class GoogleVeoService {
   private static instance: GoogleVeoService;
-  private apiKey: string;
+  // SECURITY: API keys removed from client-side code
   private isDemoMode: boolean;
   private pollingInterval: number = 3000; // 3 seconds
   private maxPollingAttempts: number = 60; // 3 minutes max
 
   private constructor() {
-    this.apiKey = import.meta.env.VITE_GOOGLE_API_KEY || '';
+    // SECURITY: API keys are managed by Netlify proxy functions
     this.isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true';
   }
 
@@ -105,17 +127,20 @@ export class GoogleVeoService {
 
   /**
    * Check if Veo service is available
+   * SECURITY: Always returns true since proxy handles API key on server side
    */
   isAvailable(): boolean {
-    return !!this.apiKey || this.isDemoMode;
+    // Service is available through authenticated proxy or in demo mode
+    return true;
   }
 
   /**
    * Get API key status
+   * SECURITY: API keys are managed server-side, not exposed to client
    */
   getApiKeyStatus(): { configured: boolean; demoMode: boolean } {
     return {
-      configured: !!this.apiKey,
+      configured: true, // Proxy handles API key server-side
       demoMode: this.isDemoMode,
     };
   }
@@ -176,85 +201,49 @@ export class GoogleVeoService {
   }
 
   /**
-   * Call Veo API (official Gemini API endpoint)
+   * Call Veo API through secure Netlify proxy
+   * SECURITY: Routes through authenticated proxy to keep API keys secure
    */
   private async callVeoAPI(
     request: VeoGenerationRequest,
     response: VeoGenerationResponse,
     onProgress?: (progress: number, status: string) => void
   ): Promise<VeoGenerationResponse> {
+    // SECURITY: Get auth token for authenticated proxy calls
+    const authToken = await getAuthToken();
+    if (!authToken) {
+      throw this.createError(
+        'AUTH_ERROR',
+        'User not authenticated. Please log in to generate videos.'
+      );
+    }
+
     const model = request.model || 'veo-3.1-generate-preview';
-    const endpoint = `${VEO_API_BASE_URL}/models/${model}:predictLongRunning`;
 
-    // Build request body
-    const requestBody: {
-      contents: Array<{
-        parts: Array<{
-          text?: string;
-          inlineData?: { mimeType: string; data: string };
-        }>;
-      }>;
-      generationConfig?: {
-        responseModalities?: string[];
-        aspectRatio?: string;
-        resolution?: string;
-        duration?: number;
-        seed?: number;
-      };
-    } = {
-      contents: [
-        {
-          parts: [{ text: request.prompt }],
-        },
-      ],
-      generationConfig: {
-        responseModalities: ['VIDEO'],
-        aspectRatio: request.aspectRatio || '16:9',
-        resolution: request.resolution || '1080p',
-        duration: request.duration || 8,
-        seed: request.seed,
-      },
+    // Build request body for proxy
+    const requestBody = {
+      model,
+      prompt: request.prompt,
+      aspectRatio: request.aspectRatio || '16:9',
+      resolution: request.resolution || '1080p',
+      duration: request.duration || 8,
+      seed: request.seed,
+      fps: request.fps || 24,
+      referenceImages: request.referenceImages,
+      firstFrame: request.firstFrame,
+      lastFrame: request.lastFrame,
+      extensionVideo: request.extensionVideo,
     };
-
-    // Add reference images if provided
-    if (request.referenceImages && request.referenceImages.length > 0) {
-      request.referenceImages.forEach((img) => {
-        requestBody.contents[0].parts.push({
-          inlineData: {
-            mimeType: img.mimeType,
-            data: img.imageData,
-          },
-        });
-      });
-    }
-
-    // Add first/last frames if provided
-    if (request.firstFrame) {
-      requestBody.contents[0].parts.push({
-        inlineData: {
-          mimeType: request.firstFrame.mimeType,
-          data: request.firstFrame.imageData,
-        },
-      });
-    }
-
-    if (request.lastFrame) {
-      requestBody.contents[0].parts.push({
-        inlineData: {
-          mimeType: request.lastFrame.mimeType,
-          data: request.lastFrame.imageData,
-        },
-      });
-    }
 
     // Start generation
     onProgress?.(10, 'Starting video generation...');
 
-    const apiResponse = await fetch(endpoint, {
+    // SECURITY: Route through Netlify proxy
+    const apiResponse = await fetch(VEO_PROXY_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': this.apiKey,
+        Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify(requestBody),
     });
@@ -263,40 +252,44 @@ export class GoogleVeoService {
       const errorData = await apiResponse.json().catch(() => ({}));
       throw this.createError(
         'API_ERROR',
-        errorData.error?.message || `Veo API error: ${apiResponse.statusText}`,
+        errorData.error?.message ||
+          errorData.error ||
+          `Veo API error: ${apiResponse.statusText}`,
         errorData
       );
     }
 
     const data = await apiResponse.json();
-    response.operationName = data.name;
+    response.operationName = data.name || data.operationName || '';
 
-    // Poll for completion
+    // Poll for completion through proxy
     onProgress?.(20, 'Video generation in progress...');
-    return await this.pollOperation(response, onProgress);
+    return await this.pollOperation(response, authToken, onProgress);
   }
 
   /**
    * Poll long-running operation until completion
+   * SECURITY: Routes through authenticated Netlify proxy
    */
   private async pollOperation(
     response: VeoGenerationResponse,
+    authToken: string,
     onProgress?: (progress: number, status: string) => void
   ): Promise<VeoGenerationResponse> {
-    const operationEndpoint = `${VEO_API_BASE_URL}/${response.operationName}`;
-
     for (let attempt = 0; attempt < this.maxPollingAttempts; attempt++) {
       await new Promise((resolve) => setTimeout(resolve, this.pollingInterval));
 
-      const pollResponse = await fetch(
-        `${operationEndpoint}?key=${this.apiKey}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      // SECURITY: Poll through proxy instead of direct API call
+      const pollResponse = await fetch(`${VEO_PROXY_URL}/status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          operationName: response.operationName,
+        }),
+      });
 
       if (!pollResponse.ok) {
         throw this.createError(
@@ -327,7 +320,8 @@ export class GoogleVeoService {
 
         // Extract video data
         const videoData =
-          operationData.response?.candidates?.[0]?.content?.parts?.[0];
+          operationData.response?.candidates?.[0]?.content?.parts?.[0] ||
+          operationData.video;
 
         if (videoData?.inlineData) {
           response.video = {
@@ -343,18 +337,21 @@ export class GoogleVeoService {
             url: `data:image/jpeg;base64,${this.generateVideoThumbnail(videoData.inlineData.data)}`,
             mimeType: 'image/jpeg',
           };
-        } else if (videoData?.fileData) {
+        } else if (videoData?.fileData || videoData?.url) {
           response.video = {
-            url: videoData.fileData.fileUri,
-            mimeType: videoData.fileData.mimeType || 'video/mp4',
+            url: videoData.fileData?.fileUri || videoData.url,
+            mimeType:
+              videoData.fileData?.mimeType || videoData.mimeType || 'video/mp4',
             duration: response.metadata.duration,
             resolution: response.metadata.resolution,
           };
         }
 
         // Calculate cost and token usage
-        response.cost = VEO_PRICING[request.resolution || '1080p'];
-        response.tokensUsed = Math.floor(request.prompt.length / 4);
+        response.cost =
+          VEO_PRICING[response.metadata.resolution as '720p' | '1080p'] ||
+          VEO_PRICING['1080p'];
+        response.tokensUsed = Math.floor(response.prompt.length / 4);
         response.status = 'completed';
         response.progress = 100;
         onProgress?.(100, 'Video generation completed!');
@@ -419,6 +416,7 @@ export class GoogleVeoService {
 
   /**
    * Enhance prompt for better video generation
+   * SECURITY: Routes through authenticated Netlify proxy
    */
   async enhancePrompt(prompt: string): Promise<string> {
     if (!this.isAvailable()) {
@@ -426,36 +424,41 @@ export class GoogleVeoService {
     }
 
     try {
+      // SECURITY: Get auth token for authenticated proxy calls
+      const authToken = await getAuthToken();
+      if (!authToken) {
+        console.warn('User not authenticated, using original prompt');
+        return prompt;
+      }
+
       const systemPrompt =
         'You are an expert at creating detailed, high-quality video generation prompts. ' +
         'Enhance the given prompt to be more specific, descriptive, and likely to produce excellent results. ' +
         'Focus on motion, cinematography, camera movements, lighting, visual storytelling, and atmosphere. ' +
         'Keep the enhanced prompt concise (under 200 words) but rich in cinematic detail.';
 
-      const endpoint = `${VEO_API_BASE_URL}/models/gemini-2.0-flash-exp:generateContent`;
-
-      const apiResponse = await fetch(`${endpoint}?key=${this.apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: 'user',
-              parts: [
-                {
-                  text: `${systemPrompt}\n\nOriginal prompt: ${prompt}\n\nEnhanced prompt:`,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 200,
+      // SECURITY: Route through Google proxy instead of direct API call
+      const apiResponse = await fetch(
+        '/.netlify/functions/llm-proxies/google-proxy',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
           },
-        }),
-      });
+          body: JSON.stringify({
+            model: 'gemini-2.0-flash',
+            messages: [
+              {
+                role: 'user',
+                content: `${systemPrompt}\n\nOriginal prompt: ${prompt}\n\nEnhanced prompt:`,
+              },
+            ],
+            temperature: 0.7,
+            max_tokens: 200,
+          }),
+        }
+      );
 
       if (!apiResponse.ok) {
         console.warn('Failed to enhance prompt with Gemini, using original');
@@ -464,7 +467,9 @@ export class GoogleVeoService {
 
       const data = await apiResponse.json();
       const enhancedPrompt =
-        data.candidates?.[0]?.content?.parts?.[0]?.text || prompt;
+        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        data.content ||
+        prompt;
 
       return enhancedPrompt.trim();
     } catch (error) {

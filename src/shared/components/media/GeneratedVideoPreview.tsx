@@ -321,7 +321,7 @@ export const GeneratedVideoPreview: React.FC<GeneratedVideoPreviewProps> = ({
       {/* Fullscreen Modal */}
       {isFullscreen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black"
+          className="fixed inset-0 z-modal flex items-center justify-center bg-black"
           onClick={handleCloseFullscreen}
         >
           <Button

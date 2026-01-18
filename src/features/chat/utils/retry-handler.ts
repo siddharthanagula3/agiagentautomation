@@ -118,7 +118,11 @@ export function parseErrorMessage(error: Error | unknown): string {
   }
 
   // Server errors
-  if (message.includes('500') || message.includes('503') || message.includes('server error')) {
+  if (
+    message.includes('500') ||
+    message.includes('503') ||
+    message.includes('server error')
+  ) {
     return 'Server error occurred. Our team has been notified. Please try again later.';
   }
 

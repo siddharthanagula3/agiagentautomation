@@ -24,11 +24,7 @@ import {
   SelectValue,
 } from '@shared/ui/select';
 import { Calendar } from '@shared/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@shared/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@shared/ui/popover';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
 import {
@@ -71,12 +67,14 @@ export function GlobalSearchDialog({
   const [showFilters, setShowFilters] = useState(false);
 
   // Filters
-  const [roleFilter, setRoleFilter] = useState<'all' | 'user' | 'assistant' | 'system'>('all');
+  const [roleFilter, setRoleFilter] = useState<
+    'all' | 'user' | 'assistant' | 'system'
+  >('all');
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [includeArchived, setIncludeArchived] = useState(false);
 
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleSearch = useCallback(async () => {
     if (!user?.id || !query.trim()) return;
@@ -129,17 +127,37 @@ export function GlobalSearchDialog({
     };
   }, [query, roleFilter, startDate, endDate, includeArchived, handleSearch]);
 
-  const handleResultClick = (result: SearchResult) => {
-    // Navigate to the chat session
-    navigate(`/chat/${result.sessionId}`);
+  // Cleanup when dialog closes or component unmounts
+  useEffect(() => {
+    if (!open) {
+      // Clear timeout when dialog closes
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = null;
+      }
+    }
 
-    // Close dialog
+    // Cleanup on unmount
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [open]);
+
+  const handleResultClick = (result: SearchResult) => {
+    // Close dialog first
     onOpenChange(false);
 
-    // TODO: Scroll to specific message if messageId exists
+    // Navigate to the chat session with optional message scroll target
+    // The messageId is passed as a query parameter that the chat page can use
+    // to scroll to and highlight the specific message after loading
     if (result.messageId) {
-      // This could be implemented with a query parameter or hash
-      // navigate(`/chat/${result.sessionId}#message-${result.messageId}`);
+      navigate(
+        `/chat/${result.sessionId}?highlightMessage=${result.messageId}`
+      );
+    } else {
+      navigate(`/chat/${result.sessionId}`);
     }
   };
 
@@ -166,16 +184,16 @@ export function GlobalSearchDialog({
       const parts = text.split(new RegExp(`(${escapedMatch})`, 'gi'));
       return (
         <>
-          {parts.map((part, i) =>
+          {parts.map((part, partIndex) =>
             part.toLowerCase() === match.toLowerCase() ? (
               <mark
-                key={i}
-                className="bg-yellow-200 dark:bg-yellow-800/50 font-semibold"
+                key={`highlight-${partIndex}-${part.slice(0, 10)}`}
+                className="bg-yellow-200 font-semibold dark:bg-yellow-800/50"
               >
                 {part}
               </mark>
             ) : (
-              part
+              <span key={`text-${partIndex}`}>{part}</span>
             )
           )}
         </>
@@ -211,11 +229,11 @@ export function GlobalSearchDialog({
     <ErrorBoundary
       fallback={
         <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-3xl max-h-[80vh] p-0">
+          <DialogContent className="max-h-[80vh] max-w-3xl p-0">
             <div className="flex flex-col items-center justify-center p-8 text-center">
-              <Search className="h-12 w-12 text-muted-foreground opacity-30 mb-3" />
+              <Search className="mb-3 h-12 w-12 text-muted-foreground opacity-30" />
               <p className="text-sm font-medium">Search unavailable</p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Something went wrong. Please close and try again.
               </p>
             </div>
@@ -223,249 +241,272 @@ export function GlobalSearchDialog({
         </Dialog>
       }
     >
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
-          <DialogTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            Search Conversations
-          </DialogTitle>
-        </DialogHeader>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-h-[80vh] max-w-3xl p-0">
+          <DialogHeader className="border-b px-6 pb-4 pt-6">
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              Search Conversations
+            </DialogTitle>
+          </DialogHeader>
 
-        {/* Search Input */}
-        <div className="px-6 py-4 border-b bg-muted/30">
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search messages and conversations..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="pl-9 pr-9"
-                autoFocus
-              />
-              {query && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                  onClick={handleClear}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </Button>
-              )}
-            </div>
-            <Button
-              variant={showFilters ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="relative"
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
-              {activeFilterCount > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs"
-                >
-                  {activeFilterCount}
-                </Badge>
-              )}
-            </Button>
-          </div>
-
-          {/* Filters Panel */}
-          {showFilters && (
-            <div className="mt-4 p-4 border rounded-lg bg-background space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Role Filter */}
-                <div className="space-y-2">
-                  <Label className="text-xs">Message Type</Label>
-                  <Select
-                    value={roleFilter}
-                    onValueChange={(value: 'all' | 'user' | 'assistant' | 'system') => setRoleFilter(value)}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="All messages" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All messages</SelectItem>
-                      <SelectItem value="user">My messages</SelectItem>
-                      <SelectItem value="assistant">AI responses</SelectItem>
-                      <SelectItem value="system">System messages</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Start Date */}
-                <div className="space-y-2">
-                  <Label className="text-xs">From Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          'w-full h-9 justify-start text-left font-normal',
-                          !startDate && 'text-muted-foreground'
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                        {startDate ? (
-                          format(startDate, 'MMM d, yyyy')
-                        ) : (
-                          'Select date'
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={startDate}
-                        onSelect={setStartDate}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                {/* End Date */}
-                <div className="space-y-2">
-                  <Label className="text-xs">To Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          'w-full h-9 justify-start text-left font-normal',
-                          !endDate && 'text-muted-foreground'
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                        {endDate ? format(endDate, 'MMM d, yyyy') : 'Select date'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={endDate}
-                        onSelect={setEndDate}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              {/* Additional Options */}
-              <div className="flex items-center justify-between pt-2 border-t">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={includeArchived}
-                    onChange={(e) => setIncludeArchived(e.target.checked)}
-                    className="rounded"
-                  />
-                  <span className="text-sm">Include archived conversations</span>
-                </label>
-                {activeFilterCount > 0 && (
+          {/* Search Input */}
+          <div className="border-b bg-muted/30 px-6 py-4">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search messages and conversations..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="pl-9 pr-9"
+                  autoFocus
+                />
+                {query && (
                   <Button
                     variant="ghost"
-                    size="sm"
-                    onClick={handleClearFilters}
+                    size="icon"
+                    className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                    onClick={handleClear}
                   >
-                    Clear Filters
+                    <X className="h-3.5 w-3.5" />
                   </Button>
                 )}
               </div>
+              <Button
+                variant={showFilters ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="relative"
+              >
+                <Filter className="mr-2 h-4 w-4" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center p-0 text-xs"
+                  >
+                    {activeFilterCount}
+                  </Badge>
+                )}
+              </Button>
             </div>
-          )}
-        </div>
 
-        {/* Search Stats */}
-        {stats && (
-          <div className="px-6 py-2 text-xs text-muted-foreground border-b bg-muted/20">
-            Found {stats.totalResults} results ({stats.sessionMatches} conversations,{' '}
-            {stats.messageMatches} messages) in {stats.searchTime}ms
+            {/* Filters Panel */}
+            {showFilters && (
+              <div className="mt-4 space-y-4 rounded-lg border bg-background p-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {/* Role Filter */}
+                  <div className="space-y-2">
+                    <Label className="text-xs">Message Type</Label>
+                    <Select
+                      value={roleFilter}
+                      onValueChange={(
+                        value: 'all' | 'user' | 'assistant' | 'system'
+                      ) => setRoleFilter(value)}
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="All messages" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All messages</SelectItem>
+                        <SelectItem value="user">My messages</SelectItem>
+                        <SelectItem value="assistant">AI responses</SelectItem>
+                        <SelectItem value="system">System messages</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Start Date */}
+                  <div className="space-y-2">
+                    <Label className="text-xs">From Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'h-9 w-full justify-start text-left font-normal',
+                            !startDate && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                          {startDate
+                            ? format(startDate, 'MMM d, yyyy')
+                            : 'Select date'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={startDate}
+                          onSelect={setStartDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* End Date */}
+                  <div className="space-y-2">
+                    <Label className="text-xs">To Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'h-9 w-full justify-start text-left font-normal',
+                            !endDate && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                          {endDate
+                            ? format(endDate, 'MMM d, yyyy')
+                            : 'Select date'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={endDate}
+                          onSelect={setEndDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+
+                {/* Additional Options */}
+                <div className="flex items-center justify-between border-t pt-2">
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={includeArchived}
+                      onChange={(e) => setIncludeArchived(e.target.checked)}
+                      className="rounded"
+                    />
+                    <span className="text-sm">
+                      Include archived conversations
+                    </span>
+                  </label>
+                  {activeFilterCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleClearFilters}
+                    >
+                      Clear Filters
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
-        )}
 
-        {/* Results */}
-        <ScrollArea className="flex-1 px-6 py-4" style={{ maxHeight: '400px' }}>
-          {isSearching ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : results.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Search className="h-12 w-12 text-muted-foreground opacity-30 mb-3" />
-              <p className="text-sm text-muted-foreground">
-                {query.trim() ? 'No results found' : 'Start typing to search'}
-              </p>
-              {query.trim() && (
-                <p className="text-xs text-muted-foreground/70 mt-1">
-                  Try different keywords or clear filters
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {results.map((result, idx) => (
-                <button
-                  key={`${result.type}-${result.sessionId}-${result.messageId || idx}`}
-                  onClick={() => handleResultClick(result)}
-                  className="w-full text-left p-3 rounded-lg border hover:bg-accent transition-colors group"
-                >
-                  {/* Header */}
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      {result.type === 'session' ? (
-                        <MessageSquare className="h-4 w-4 text-primary shrink-0" />
-                      ) : (
-                        getRoleIcon(result.role || 'assistant')
-                      )}
-                      <span className="text-sm font-medium truncate">
-                        {result.sessionTitle}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Clock className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">
-                        {format(result.createdAt, 'MMM d, yyyy')}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Content Preview with Highlighting */}
-                  <div className="text-xs text-muted-foreground line-clamp-2">
-                    {result.contextBefore && (
-                      <span className="opacity-70">...{result.contextBefore}</span>
-                    )}
-                    {highlightMatch(result.matchedText, query.trim())}
-                    {result.contextAfter && (
-                      <span className="opacity-70">{result.contextAfter}...</span>
-                    )}
-                  </div>
-
-                  {/* Badges */}
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                      {result.type === 'session' ? 'Title' : result.role}
-                    </Badge>
-                  </div>
-                </button>
-              ))}
+          {/* Search Stats */}
+          {stats && (
+            <div className="border-b bg-muted/20 px-6 py-2 text-xs text-muted-foreground">
+              Found {stats.totalResults} results ({stats.sessionMatches}{' '}
+              conversations, {stats.messageMatches} messages) in{' '}
+              {stats.searchTime}ms
             </div>
           )}
-        </ScrollArea>
 
-        {/* Footer */}
-        <div className="px-6 py-3 border-t bg-muted/20">
-          <p className="text-xs text-muted-foreground text-center">
-            Press <kbd className="px-1.5 py-0.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">Enter</kbd> to search, <kbd className="px-1.5 py-0.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">Esc</kbd> to close
-          </p>
-        </div>
-      </DialogContent>
-    </Dialog>
+          {/* Results */}
+          <ScrollArea
+            className="flex-1 px-6 py-4"
+            style={{ maxHeight: '400px' }}
+          >
+            {isSearching ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : results.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Search className="mb-3 h-12 w-12 text-muted-foreground opacity-30" />
+                <p className="text-sm text-muted-foreground">
+                  {query.trim() ? 'No results found' : 'Start typing to search'}
+                </p>
+                {query.trim() && (
+                  <p className="mt-1 text-xs text-muted-foreground/70">
+                    Try different keywords or clear filters
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {results.map((result) => (
+                  <button
+                    key={`search-result-${result.type}-${result.sessionId}-${result.messageId || result.matchedText.slice(0, 20)}`}
+                    onClick={() => handleResultClick(result)}
+                    className="group w-full rounded-lg border p-3 text-left transition-colors hover:bg-accent"
+                  >
+                    {/* Header */}
+                    <div className="mb-2 flex items-start justify-between gap-2">
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        {result.type === 'session' ? (
+                          <MessageSquare className="h-4 w-4 shrink-0 text-primary" />
+                        ) : (
+                          getRoleIcon(result.role || 'assistant')
+                        )}
+                        <span className="truncate text-sm font-medium">
+                          {result.sessionTitle}
+                        </span>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">
+                          {format(result.createdAt, 'MMM d, yyyy')}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Content Preview with Highlighting */}
+                    <div className="line-clamp-2 text-xs text-muted-foreground">
+                      {result.contextBefore && (
+                        <span className="opacity-70">
+                          ...{result.contextBefore}
+                        </span>
+                      )}
+                      {highlightMatch(result.matchedText, query.trim())}
+                      {result.contextAfter && (
+                        <span className="opacity-70">
+                          {result.contextAfter}...
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Badges */}
+                    <div className="mt-2 flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="px-1.5 py-0 text-[10px]"
+                      >
+                        {result.type === 'session' ? 'Title' : result.role}
+                      </Badge>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+
+          {/* Footer */}
+          <div className="border-t bg-muted/20 px-6 py-3">
+            <p className="text-center text-xs text-muted-foreground">
+              Press{' '}
+              <kbd className="rounded border border-gray-200 bg-gray-100 px-1.5 py-0.5 text-xs font-semibold text-gray-800 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100">
+                Enter
+              </kbd>{' '}
+              to search,{' '}
+              <kbd className="rounded border border-gray-200 bg-gray-100 px-1.5 py-0.5 text-xs font-semibold text-gray-800 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-100">
+                Esc
+              </kbd>{' '}
+              to close
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </ErrorBoundary>
   );
 }

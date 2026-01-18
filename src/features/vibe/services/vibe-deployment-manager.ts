@@ -88,7 +88,11 @@ interface DeploymentManagerState {
 
   // Actions
   startDeployment: (sessionId: string, target: DeploymentTarget) => string;
-  updateDeploymentStatus: (deploymentId: string, status: DeploymentStatus, data?: Partial<DeploymentInfo>) => void;
+  updateDeploymentStatus: (
+    deploymentId: string,
+    status: DeploymentStatus,
+    data?: Partial<DeploymentInfo>
+  ) => void;
   completeDeployment: (deploymentId: string, url: string) => void;
   failDeployment: (deploymentId: string, error: string) => void;
   addBuildLog: (deploymentId: string, log: string) => void;
@@ -99,11 +103,20 @@ interface DeploymentManagerState {
   updatePreviewStatus: (status: PreviewSession['status']) => void;
 
   // Commands
-  addCommandToHistory: (command: string, output: string, exitCode: number, duration: number) => void;
+  addCommandToHistory: (
+    command: string,
+    output: string,
+    exitCode: number,
+    duration: number
+  ) => void;
   clearCommandHistory: () => void;
 
   // Screenshots
-  captureScreenshot: (deploymentId: string, dataUrl: string, viewport: { width: number; height: number }) => void;
+  captureScreenshot: (
+    deploymentId: string,
+    dataUrl: string,
+    viewport: { width: number; height: number }
+  ) => void;
 
   // Utilities
   getDeployment: (deploymentId: string) => DeploymentInfo | undefined;
@@ -144,7 +157,11 @@ export const useDeploymentManager = create<DeploymentManagerState>()(
       return deploymentId;
     },
 
-    updateDeploymentStatus: (deploymentId: string, status: DeploymentStatus, data?: Partial<DeploymentInfo>) => {
+    updateDeploymentStatus: (
+      deploymentId: string,
+      status: DeploymentStatus,
+      data?: Partial<DeploymentInfo>
+    ) => {
       set((state) => {
         const deployment = state.deployments.get(deploymentId);
         if (deployment) {
@@ -246,7 +263,12 @@ export const useDeploymentManager = create<DeploymentManagerState>()(
       });
     },
 
-    addCommandToHistory: (command: string, output: string, exitCode: number, duration: number) => {
+    addCommandToHistory: (
+      command: string,
+      output: string,
+      exitCode: number,
+      duration: number
+    ) => {
       const entry: CommandHistoryEntry = {
         id: `cmd-${Date.now()}`,
         command,
@@ -260,7 +282,9 @@ export const useDeploymentManager = create<DeploymentManagerState>()(
         state.commandHistory.push(entry);
         // Keep only last N entries
         if (state.commandHistory.length > state.maxCommandHistory) {
-          state.commandHistory = state.commandHistory.slice(-state.maxCommandHistory);
+          state.commandHistory = state.commandHistory.slice(
+            -state.maxCommandHistory
+          );
         }
       });
     },
@@ -271,7 +295,11 @@ export const useDeploymentManager = create<DeploymentManagerState>()(
       });
     },
 
-    captureScreenshot: (deploymentId: string, dataUrl: string, viewport: { width: number; height: number }) => {
+    captureScreenshot: (
+      deploymentId: string,
+      dataUrl: string,
+      viewport: { width: number; height: number }
+    ) => {
       const deployment = get().deployments.get(deploymentId);
       if (!deployment) return;
 
@@ -329,10 +357,16 @@ export interface DeployOptions {
  */
 export async function deployToPreview(options: DeployOptions): Promise<string> {
   const deploymentManager = useDeploymentManager.getState();
-  const deploymentId = deploymentManager.startDeployment(options.sessionId, 'preview');
+  const deploymentId = deploymentManager.startDeployment(
+    options.sessionId,
+    'preview'
+  );
 
   try {
-    deploymentManager.addBuildLog(deploymentId, 'Starting preview deployment...');
+    deploymentManager.addBuildLog(
+      deploymentId,
+      'Starting preview deployment...'
+    );
     deploymentManager.updateDeploymentStatus(deploymentId, 'building');
 
     // Simulate build process
@@ -368,14 +402,23 @@ export async function deployToPreview(options: DeployOptions): Promise<string> {
  */
 export async function deployToNetlify(options: DeployOptions): Promise<string> {
   const deploymentManager = useDeploymentManager.getState();
-  const deploymentId = deploymentManager.startDeployment(options.sessionId, 'netlify');
+  const deploymentId = deploymentManager.startDeployment(
+    options.sessionId,
+    'netlify'
+  );
 
   try {
-    deploymentManager.addBuildLog(deploymentId, 'Preparing Netlify deployment...');
+    deploymentManager.addBuildLog(
+      deploymentId,
+      'Preparing Netlify deployment...'
+    );
     deploymentManager.updateDeploymentStatus(deploymentId, 'building');
 
     // Build steps
-    deploymentManager.addBuildLog(deploymentId, `Running: ${options.buildCommand || 'npm run build'}`);
+    deploymentManager.addBuildLog(
+      deploymentId,
+      `Running: ${options.buildCommand || 'npm run build'}`
+    );
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     deploymentManager.addBuildLog(deploymentId, 'Build completed successfully');
@@ -403,24 +446,40 @@ export async function deployToNetlify(options: DeployOptions): Promise<string> {
  */
 export async function deployToVercel(options: DeployOptions): Promise<string> {
   const deploymentManager = useDeploymentManager.getState();
-  const deploymentId = deploymentManager.startDeployment(options.sessionId, 'vercel');
+  const deploymentId = deploymentManager.startDeployment(
+    options.sessionId,
+    'vercel'
+  );
 
   try {
-    deploymentManager.addBuildLog(deploymentId, 'Preparing Vercel deployment...');
+    deploymentManager.addBuildLog(
+      deploymentId,
+      'Preparing Vercel deployment...'
+    );
     deploymentManager.updateDeploymentStatus(deploymentId, 'building');
 
-    deploymentManager.addBuildLog(deploymentId, 'Analyzing project structure...');
+    deploymentManager.addBuildLog(
+      deploymentId,
+      'Analyzing project structure...'
+    );
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    deploymentManager.addBuildLog(deploymentId, `Running: ${options.buildCommand || 'npm run build'}`);
+    deploymentManager.addBuildLog(
+      deploymentId,
+      `Running: ${options.buildCommand || 'npm run build'}`
+    );
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     deploymentManager.updateDeploymentStatus(deploymentId, 'deploying');
-    deploymentManager.addBuildLog(deploymentId, 'Uploading to Vercel Edge Network...');
+    deploymentManager.addBuildLog(
+      deploymentId,
+      'Uploading to Vercel Edge Network...'
+    );
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
     // Generate deployment URL
-    const projectName = options.projectName || `vibe-${Date.now().toString(36)}`;
+    const projectName =
+      options.projectName || `vibe-${Date.now().toString(36)}`;
     const deployUrl = `https://${projectName}.vercel.app`;
 
     deploymentManager.addBuildLog(deploymentId, `Deployed to: ${deployUrl}`);
@@ -436,23 +495,38 @@ export async function deployToVercel(options: DeployOptions): Promise<string> {
 /**
  * Deploy to Cloudflare Pages
  */
-export async function deployToCloudflare(options: DeployOptions): Promise<string> {
+export async function deployToCloudflare(
+  options: DeployOptions
+): Promise<string> {
   const deploymentManager = useDeploymentManager.getState();
-  const deploymentId = deploymentManager.startDeployment(options.sessionId, 'cloudflare');
+  const deploymentId = deploymentManager.startDeployment(
+    options.sessionId,
+    'cloudflare'
+  );
 
   try {
-    deploymentManager.addBuildLog(deploymentId, 'Preparing Cloudflare Pages deployment...');
+    deploymentManager.addBuildLog(
+      deploymentId,
+      'Preparing Cloudflare Pages deployment...'
+    );
     deploymentManager.updateDeploymentStatus(deploymentId, 'building');
 
-    deploymentManager.addBuildLog(deploymentId, 'Building for edge deployment...');
+    deploymentManager.addBuildLog(
+      deploymentId,
+      'Building for edge deployment...'
+    );
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     deploymentManager.updateDeploymentStatus(deploymentId, 'deploying');
-    deploymentManager.addBuildLog(deploymentId, 'Deploying to Cloudflare global network...');
+    deploymentManager.addBuildLog(
+      deploymentId,
+      'Deploying to Cloudflare global network...'
+    );
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
     // Generate deployment URL
-    const projectName = options.projectName || `vibe-${Date.now().toString(36)}`;
+    const projectName =
+      options.projectName || `vibe-${Date.now().toString(36)}`;
     const deployUrl = `https://${projectName}.pages.dev`;
 
     deploymentManager.addBuildLog(deploymentId, `Deployed to: ${deployUrl}`);
@@ -513,7 +587,9 @@ export function useDeployment() {
     commandHistory,
     screenshots,
     deploy: deployProject,
-    isDeploying: activeDeployment?.status === 'building' || activeDeployment?.status === 'deploying',
+    isDeploying:
+      activeDeployment?.status === 'building' ||
+      activeDeployment?.status === 'deploying',
     deploymentUrl: activeDeployment?.url,
     deploymentError: activeDeployment?.error,
   };

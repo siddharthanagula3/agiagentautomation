@@ -1,10 +1,73 @@
-// Chat Types for Enhanced MGX-style Interface
+/**
+ * Chat Types for Enhanced MGX-style Interface
+ *
+ * Re-exports common types from @shared/types and defines chat-specific types.
+ */
 
+// Re-export common types for convenience
+export type {
+  MessageRole,
+  ToolCallStatus,
+  ChatMessage,
+  ChatSession,
+  ChatSettings,
+  Tool,
+  ToolCall,
+  Attachment,
+  StreamingUpdate,
+  AIEmployeeBasic,
+  AIEmployeeStatus,
+  AIEmployeePerformance,
+  MessageMetadata,
+  MessageReaction,
+} from '@shared/types';
+
+// ============================================================================
+// CHAT-SPECIFIC TYPES
+// ============================================================================
+
+/**
+ * Chat mode for different conversation styles
+ */
 export type ChatMode = 'team' | 'engineer' | 'research' | 'race' | 'solo';
-export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
-export type ToolCallStatus = 'pending' | 'running' | 'completed' | 'failed';
 
-export interface ChatSession {
+/**
+ * Extended AI Employee type for chat feature
+ * Uses AIEmployeeBasic from common types as base
+ */
+export interface AIEmployee {
+  id: string;
+  name: string;
+  role: string;
+  description: string;
+  avatar?: string;
+  capabilities: string[];
+  tools: string[];
+  status: 'available' | 'busy' | 'offline';
+  performance?: {
+    tasksCompleted: number;
+    successRate: number;
+    avgResponseTime: number;
+  };
+}
+
+/**
+ * Chat-specific message metadata extension
+ */
+export interface ChatMessageMetadata {
+  mode?: ChatMode;
+  model?: string;
+  temperature?: number;
+  tokens?: number;
+  cost?: number;
+  employeeId?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Feature-specific chat session with metadata
+ */
+export interface FeatureChatSession {
   id: string;
   title: string;
   summary?: string;
@@ -25,97 +88,5 @@ export interface ChatSession {
     pinned?: boolean;
     archived?: boolean;
     tags?: string[];
-  };
-}
-
-export interface ChatMessage {
-  id: string;
-  sessionId?: string;
-  role: MessageRole;
-  content: string;
-  attachments?: Attachment[];
-  toolCalls?: ToolCall[];
-  createdAt: Date;
-  updatedAt?: Date;
-  edited?: boolean;
-  editCount?: number;
-  metadata?: {
-    mode?: ChatMode;
-    model?: string;
-    temperature?: number;
-    tokens?: number;
-    cost?: number;
-    employeeId?: string;
-    [key: string]: unknown;
-  };
-}
-
-export interface Attachment {
-  id: string;
-  name: string;
-  type: string;
-  size: number;
-  url: string;
-  thumbnailUrl?: string;
-}
-
-export interface ToolCall {
-  id: string;
-  name: string;
-  arguments: Record<string, unknown>;
-  status: ToolCallStatus;
-  result?: unknown;
-  error?: string;
-  startedAt?: Date;
-  completedAt?: Date;
-}
-
-export interface Tool {
-  id: string;
-  name: string;
-  description: string;
-  parameters: Record<string, unknown>;
-  category: 'search' | 'code' | 'image' | 'file' | 'system';
-  icon?: string;
-}
-
-export interface AIEmployee {
-  id: string;
-  name: string;
-  role: string;
-  description: string;
-  avatar?: string;
-  capabilities: string[];
-  tools: string[];
-  status: 'available' | 'busy' | 'offline';
-  performance?: {
-    tasksCompleted: number;
-    successRate: number;
-    avgResponseTime: number;
-  };
-}
-
-export interface ChatSettings {
-  model: string;
-  temperature: number;
-  maxTokens: number;
-  topP: number;
-  frequencyPenalty: number;
-  presencePenalty: number;
-  systemPrompt?: string;
-}
-
-export interface StreamingUpdate {
-  type: 'content' | 'tool_call' | 'error' | 'done';
-  content?: string;
-  toolCall?: ToolCall;
-  error?: string;
-  metadata?: {
-    tokensUsed?: number;
-    inputTokens?: number;
-    outputTokens?: number;
-    model?: string;
-    cost?: number;
-    metrics?: unknown;
   };
 }

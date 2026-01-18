@@ -27,7 +27,10 @@ import {
 } from 'lucide-react';
 import { Badge } from '@shared/ui/badge';
 import { Progress } from '@shared/ui/progress';
-import type { VibeSession, PhaseStatus } from '../../services/vibe-phase-orchestrator';
+import type {
+  VibeSession,
+  PhaseStatus,
+} from '../../services/vibe-phase-orchestrator';
 
 interface PhaseTimelineProps {
   session: VibeSession | null;
@@ -103,7 +106,10 @@ function getPhaseState(
 ): 'completed' | 'current' | 'upcoming' | 'error' {
   if (currentStatus === 'error') {
     // If error occurred, mark current phase as error
-    if (phase.statusMatch.includes(currentStatus) || phaseIndex === currentPhaseIndex) {
+    if (
+      phase.statusMatch.includes(currentStatus) ||
+      phaseIndex === currentPhaseIndex
+    ) {
       return 'error';
     }
   }
@@ -128,7 +134,11 @@ function getCurrentPhaseIndex(status: PhaseStatus): number {
   return 0;
 }
 
-export function PhaseTimeline({ session, className, compact = false }: PhaseTimelineProps) {
+export function PhaseTimeline({
+  session,
+  className,
+  compact = false,
+}: PhaseTimelineProps) {
   const [elapsedTime, setElapsedTime] = useState(0);
 
   const currentStatus = session?.phase.status || 'idle';
@@ -169,18 +179,21 @@ export function PhaseTimeline({ session, className, compact = false }: PhaseTime
   }
 
   return (
-    <div className={cn('rounded-lg border border-border bg-card p-4', className)}>
+    <div
+      className={cn('rounded-lg border border-border bg-card p-4', className)}
+    >
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-semibold">Development Progress</h3>
         <div className="flex items-center gap-2">
-          {session?.filesGenerated !== undefined && session.filesGenerated > 0 && (
-            <Badge variant="secondary" className="gap-1">
-              <FileCode className="h-3 w-3" />
-              {session.filesGenerated}
-              {session.totalFiles && ` / ${session.totalFiles}`} files
-            </Badge>
-          )}
+          {session?.filesGenerated !== undefined &&
+            session.filesGenerated > 0 && (
+              <Badge variant="secondary" className="gap-1">
+                <FileCode className="h-3 w-3" />
+                {session.filesGenerated}
+                {session.totalFiles && ` / ${session.totalFiles}`} files
+              </Badge>
+            )}
           {elapsedTime > 0 && (
             <Badge variant="outline" className="tabular-nums">
               {formatTime(elapsedTime)}
@@ -204,18 +217,30 @@ export function PhaseTimeline({ session, className, compact = false }: PhaseTime
 
         <div className="space-y-3">
           {phases.map((phase, index) => {
-            const state = getPhaseState(phase, currentStatus, index, currentPhaseIndex);
+            const state = getPhaseState(
+              phase,
+              currentStatus,
+              index,
+              currentPhaseIndex
+            );
 
             return (
-              <div key={phase.id} className="relative flex items-center gap-3 pl-8">
+              <div
+                key={phase.id}
+                className="relative flex items-center gap-3 pl-8"
+              >
                 {/* Icon circle */}
                 <div
                   className={cn(
                     'absolute left-0 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all',
-                    state === 'completed' && 'border-green-500 bg-green-500/10 text-green-500',
-                    state === 'current' && 'border-primary bg-primary/10 text-primary',
-                    state === 'upcoming' && 'border-muted-foreground/30 bg-muted text-muted-foreground',
-                    state === 'error' && 'border-destructive bg-destructive/10 text-destructive'
+                    state === 'completed' &&
+                      'border-green-500 bg-green-500/10 text-green-500',
+                    state === 'current' &&
+                      'border-primary bg-primary/10 text-primary',
+                    state === 'upcoming' &&
+                      'border-muted-foreground/30 bg-muted text-muted-foreground',
+                    state === 'error' &&
+                      'border-destructive bg-destructive/10 text-destructive'
                   )}
                 >
                   {state === 'completed' ? (
@@ -249,7 +274,9 @@ export function PhaseTimeline({ session, className, compact = false }: PhaseTime
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">{phase.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {phase.description}
+                  </p>
                 </div>
               </div>
             );
@@ -290,7 +317,12 @@ function CompactTimeline({
       {/* Mini progress dots */}
       <div className="flex items-center gap-1">
         {phases.map((phase, index) => {
-          const state = getPhaseState(phase, currentStatus, index, currentPhaseIndex);
+          const state = getPhaseState(
+            phase,
+            currentStatus,
+            index,
+            currentPhaseIndex
+          );
 
           return (
             <div
@@ -298,7 +330,7 @@ function CompactTimeline({
               className={cn(
                 'h-2 w-2 rounded-full transition-all',
                 state === 'completed' && 'bg-green-500',
-                state === 'current' && 'bg-primary animate-pulse',
+                state === 'current' && 'animate-pulse bg-primary',
                 state === 'upcoming' && 'bg-muted-foreground/30',
                 state === 'error' && 'bg-destructive'
               )}

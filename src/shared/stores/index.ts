@@ -59,13 +59,97 @@ export {
   useMissionPlan,
   useActiveEmployees,
   useMissionMessages,
+  useCollaborativeMode,
+  useEmployee,
+  useCurrentMissionId,
 } from './mission-control-store';
+
+// Multi-Agent Chat Store Selectors
+export {
+  useActiveConversation,
+  useConversationMessages,
+  useConversationParticipants,
+  useTypingIndicators,
+  useAgentPresence,
+  useSyncState,
+  useActiveConversationId,
+  useConversations,
+  useSearchAndFilters,
+  useChatLoadingState,
+} from './multi-agent-chat-store';
+
+// Company Hub Store Selectors
+export {
+  useActiveSession,
+  useAssignedAgentsRecord,
+  useAssignedAgents,
+  useAssignedAgent,
+  useTokenUsage,
+  useHubMessages,
+  usePendingUpsell,
+  useOrchestrationStatus,
+  useActiveSessionId,
+  useUpsellQueue,
+  useLastUpdate,
+} from './company-hub-store';
+
+// Chat Store Selectors
+export {
+  useConversationsRecord,
+  useActiveChatConversation,
+  useActiveChatConversationId,
+  useChatStreamingState,
+  useSelectedChatModel,
+  useAvailableChatModels,
+  useChatSearchAndFilters,
+  useWorkingProcesses,
+  useChatActiveEmployees,
+  useCheckpointState,
+  useChatSidebarOpen,
+} from './chat-store';
+
+// Notification Store Selectors
+export {
+  useNotificationsRecord,
+  useNotifications,
+  useUnreadNotifications,
+  useToastsRecord,
+  useToasts,
+  useUnreadCount,
+  useNotificationSettings,
+  useNotificationUIState,
+} from './notification-store';
+
+// Layout Store Selectors
+export {
+  useSidebar,
+  useModals,
+  useTheme,
+  useChatInterface,
+  useDashboard,
+  useNotifications as useUINotifications,
+} from './layout-store';
+
+// Global Settings Store Selectors
+export {
+  useAppLoading,
+  useAppError,
+  useAppSettings,
+  useAppFeatures,
+  useAppSession,
+} from './global-settings-store';
 
 // ========================================
 // React Query Configuration
 // ========================================
 
-export { queryClient } from './query-client';
+export {
+  queryClient,
+  queryKeys,
+  useQuery,
+  useMutation,
+  useInfiniteQuery,
+} from './query-client';
 
 // ========================================
 // Type Definitions

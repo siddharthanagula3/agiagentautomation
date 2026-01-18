@@ -1,6 +1,10 @@
 /**
  * Employee Types
  * Type definitions for AI employees across the application
+ *
+ * Note: For basic AI employee types used in UI components (selectors, cards),
+ * see AIEmployeeBasic and MarketplaceEmployee in @shared/types/common.ts
+ * This file contains types for employee management (purchased, sessions, etc.)
  */
 
 export interface Employee {

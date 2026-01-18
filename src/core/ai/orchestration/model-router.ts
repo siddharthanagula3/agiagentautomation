@@ -48,15 +48,24 @@ const AVAILABLE_MODELS: ModelInfo[] = [
     provider: 'anthropic',
     model: 'claude-opus-4-5-20251101',
     displayName: 'Claude 4.5 Opus',
-    description: 'Most capable model for complex reasoning, coding, and extended thinking',
-    strengths: ['coding', 'reasoning', 'data-analysis', 'research', 'agentic', 'computer-use'],
+    description:
+      'Most capable model for complex reasoning, coding, and extended thinking',
+    strengths: [
+      'coding',
+      'reasoning',
+      'data-analysis',
+      'research',
+      'agentic',
+      'computer-use',
+    ],
     costPer1KTokens: 0.015,
   },
   {
     provider: 'anthropic',
     model: 'claude-sonnet-4-5-20250929',
     displayName: 'Claude 4.5 Sonnet',
-    description: 'Best balance of intelligence, speed, and computer use capabilities',
+    description:
+      'Best balance of intelligence, speed, and computer use capabilities',
     strengths: ['coding', 'agentic', 'computer-use', 'general', 'vision'],
     costPer1KTokens: 0.003,
   },
@@ -473,7 +482,9 @@ export class ModelRouter {
     if (suitableModels.length === 0) {
       // Fallback to Claude 4.5 Sonnet as general purpose
       const fallback =
-        AVAILABLE_MODELS.find((m) => m.model === 'claude-sonnet-4-5-20250929') ||
+        AVAILABLE_MODELS.find(
+          (m) => m.model === 'claude-sonnet-4-5-20250929'
+        ) ||
         AVAILABLE_MODELS.find((m) => m.model === 'gpt-5.2') ||
         AVAILABLE_MODELS[0];
       return {

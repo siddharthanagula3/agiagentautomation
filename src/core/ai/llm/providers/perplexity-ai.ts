@@ -13,7 +13,9 @@ import { supabase } from '@shared/lib/supabase-client';
  */
 async function getAuthToken(): Promise<string | null> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
     console.error('[Perplexity Provider] Failed to get auth token:', error);
@@ -61,13 +63,14 @@ export interface PerplexityResponse {
   metadata?: Record<string, unknown>;
 }
 
+import {
+  SUPPORTED_PERPLEXITY_MODELS,
+  DEFAULT_PERPLEXITY_MODEL,
+  type PerplexityModel,
+} from '@shared/config/supported-models';
+
 export interface PerplexityConfig {
-  model:
-    | 'sonar-pro'
-    | 'sonar'
-    | 'sonar-reasoning'
-    | 'sonar-reasoning-pro'
-    | 'sonar-deep-research';
+  model: PerplexityModel;
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
@@ -92,7 +95,7 @@ export class PerplexityProvider {
 
   constructor(config: Partial<PerplexityConfig> = {}) {
     this.config = {
-      model: 'sonar',
+      model: DEFAULT_PERPLEXITY_MODEL,
       maxTokens: 4000,
       temperature: 0.7,
       systemPrompt:
@@ -134,7 +137,7 @@ export class PerplexityProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: perplexityMessages,
@@ -383,9 +386,7 @@ export class PerplexityProvider {
   /**
    * Type for Perplexity API response structure
    */
-  private isPerplexityApiResponse(
-    response: unknown
-  ): response is {
+  private isPerplexityApiResponse(response: unknown): response is {
     choices?: Array<{ message?: { content?: string } }>;
     usage?: {
       prompt_tokens?: number;
@@ -492,15 +493,10 @@ export class PerplexityProvider {
 
   /**
    * Get available models (Jan 2026)
+   * Uses shared config from @shared/config/supported-models.ts
    */
   static getAvailableModels(): string[] {
-    return [
-      'sonar-pro',
-      'sonar',
-      'sonar-reasoning',
-      'sonar-reasoning-pro',
-      'sonar-deep-research',
-    ];
+    return [...SUPPORTED_PERPLEXITY_MODELS];
   }
 
   /**

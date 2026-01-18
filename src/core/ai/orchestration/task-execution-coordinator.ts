@@ -9,7 +9,10 @@ import {
   AgentType,
   ExecutionPlan,
 } from './reasoning/task-breakdown';
-import { agentCommunicator, AgentMessage } from './agent-communication-protocol';
+import {
+  agentCommunicator,
+  AgentMessage,
+} from './agent-communication-protocol';
 
 // Simple browser-compatible EventEmitter
 class SimpleEventEmitter {

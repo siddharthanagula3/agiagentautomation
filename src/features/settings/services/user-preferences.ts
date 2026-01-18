@@ -422,6 +422,17 @@ class SettingsService {
 
   /**
    * Enable 2FA
+   *
+   * NOTE: Full TOTP 2FA is not yet implemented. This is a placeholder that
+   * sets the preference flag but does not actually configure TOTP authentication.
+   *
+   * Full implementation would require:
+   * 1. Generate TOTP secret using a library like 'otplib' or 'speakeasy'
+   * 2. Generate QR code for authenticator apps (use 'qrcode' library)
+   * 3. Store encrypted secret in database
+   * 4. Add verification step before enabling
+   * 5. Implement backup codes
+   * 6. Add 2FA verification to login flow
    */
   async enable2FA(): Promise<{
     error?: string;
@@ -429,10 +440,17 @@ class SettingsService {
     qrCode?: string;
   }> {
     try {
-      // TODO: Implement TOTP 2FA
-      // For now, just update the settings
-      const { error } = await this.updateSettings({ two_factor_enabled: true });
-      return { error };
+      // 2FA is not fully implemented yet - return informative error
+      // When implementing, replace this with actual TOTP setup:
+      // const secret = speakeasy.generateSecret({ name: 'AGI Platform' });
+      // const qrCode = await QRCode.toDataURL(secret.otpauth_url);
+      // ... store secret securely in database
+      // ... verify user can authenticate before enabling
+
+      return {
+        error:
+          'Two-factor authentication is coming soon. This feature requires authenticator app integration which is currently in development.',
+      };
     } catch (error) {
       console.error('Error enabling 2FA:', error);
       return {

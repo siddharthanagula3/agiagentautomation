@@ -55,11 +55,11 @@ class FolderManagementService {
   /**
    * Get a specific folder by ID
    */
-  async getFolder(folderId: string, userId?: string): Promise<ChatFolder | null> {
-    let query = supabase
-      .from('chat_folders')
-      .select('*')
-      .eq('id', folderId);
+  async getFolder(
+    folderId: string,
+    userId?: string
+  ): Promise<ChatFolder | null> {
+    let query = supabase.from('chat_folders').select('*').eq('id', folderId);
 
     if (userId) {
       query = query.eq('user_id', userId);
@@ -137,9 +137,15 @@ class FolderManagementService {
         ...(updates.name && { name: updates.name }),
         ...(updates.color && { color: updates.color }),
         ...(updates.icon && { icon: updates.icon }),
-        ...(updates.description !== undefined && { description: updates.description }),
-        ...(updates.parentFolderId !== undefined && { parent_folder_id: updates.parentFolderId }),
-        ...(updates.sortOrder !== undefined && { sort_order: updates.sortOrder }),
+        ...(updates.description !== undefined && {
+          description: updates.description,
+        }),
+        ...(updates.parentFolderId !== undefined && {
+          parent_folder_id: updates.parentFolderId,
+        }),
+        ...(updates.sortOrder !== undefined && {
+          sort_order: updates.sortOrder,
+        }),
       })
       .eq('id', folderId);
 
@@ -160,10 +166,7 @@ class FolderManagementService {
    * Note: Sessions in the folder will be moved to root (folder_id = null)
    */
   async deleteFolder(folderId: string, userId?: string): Promise<void> {
-    let query = supabase
-      .from('chat_folders')
-      .delete()
-      .eq('id', folderId);
+    let query = supabase.from('chat_folders').delete().eq('id', folderId);
 
     if (userId) {
       query = query.eq('user_id', userId);
@@ -228,7 +231,9 @@ class FolderManagementService {
       query = query.eq('folder_id', folderId);
     }
 
-    const { data, error } = await query.order('updated_at', { ascending: false });
+    const { data, error } = await query.order('updated_at', {
+      ascending: false,
+    });
 
     if (error) {
       console.error('[FolderService] Failed to load folder sessions:', error);
@@ -275,7 +280,10 @@ class FolderManagementService {
     const allFolders = await this.getUserFolders(userId);
 
     // Build tree structure
-    const folderMap = new Map<string, ChatFolder & { children: ChatFolder[] }>();
+    const folderMap = new Map<
+      string,
+      ChatFolder & { children: ChatFolder[] }
+    >();
     const rootFolders: (ChatFolder & { children: ChatFolder[] })[] = [];
 
     // First pass: create map and add children property

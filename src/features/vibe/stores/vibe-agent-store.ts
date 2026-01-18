@@ -6,6 +6,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/react/shallow';
 import type { ActiveAgent, AgentStatus } from '../types';
 import type { AIEmployee } from '@core/types/ai-employee';
 
@@ -127,3 +128,42 @@ export const useVibeAgentStore = create<VibeAgentState>()(
     { name: 'VibeAgentStore' }
   )
 );
+
+// ============================================================================
+// SELECTOR HOOKS (optimized with useShallow to prevent stale closures)
+// ============================================================================
+
+/**
+ * Selector for active agents record - returns stable reference
+ */
+export const useActiveAgentsRecord = () =>
+  useVibeAgentStore((state) => state.activeAgents);
+
+/**
+ * Selector for primary agent - returns stable reference when agent hasn't changed
+ */
+export const usePrimaryAgent = () =>
+  useVibeAgentStore((state) => state.primaryAgent);
+
+/**
+ * Selector for supervisor mode state - uses useShallow for multi-value selection
+ */
+export const useSupervisorModeState = () =>
+  useVibeAgentStore(
+    useShallow((state) => ({
+      isSupervisorMode: state.isSupervisorMode,
+      supervisorAgent: state.supervisorAgent,
+    }))
+  );
+
+/**
+ * Selector for a specific active agent by ID - returns stable reference
+ */
+export const useVibeActiveAgent = (employeeId: string) =>
+  useVibeAgentStore((state) => state.activeAgents[employeeId]);
+
+/**
+ * Selector for active agents count - derived value
+ */
+export const useActiveAgentsCount = () =>
+  useVibeAgentStore((state) => Object.keys(state.activeAgents).length);

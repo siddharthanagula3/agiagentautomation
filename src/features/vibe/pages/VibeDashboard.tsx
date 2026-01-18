@@ -20,7 +20,10 @@ import { VibeLayout } from '../layouts/VibeLayout';
 import { SimpleChatPanel } from '../components/redesign/SimpleChatPanel';
 import { CodeEditorPanel } from '../components/redesign/CodeEditorPanel';
 import { LivePreviewPanel } from '../components/redesign/LivePreviewPanel';
-import { VibeEnhancedComposer, type VibeMode } from '../components/redesign/VibeEnhancedComposer';
+import {
+  VibeEnhancedComposer,
+  type VibeMode,
+} from '../components/redesign/VibeEnhancedComposer';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { Loader2, GripVertical, Sparkles } from 'lucide-react';
 import type { AgentStatus } from '../components/agent-panel/AgentStatusCard';
@@ -53,19 +56,17 @@ const VibeErrorFallback = () => (
       </div>
       <h2 className="mb-2 text-2xl font-bold">Vibe Workspace Error</h2>
       <p className="mb-6 text-muted-foreground">
-        Something went wrong in the Vibe AI development workspace. Your work may not have been saved.
+        Something went wrong in the Vibe AI development workspace. Your work may
+        not have been saved.
       </p>
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <Button
-          onClick={() => window.location.reload()}
-          className="gap-2"
-        >
+        <Button onClick={() => window.location.reload()} className="gap-2">
           <RefreshCw className="h-4 w-4" />
           Reload Workspace
         </Button>
         <Button
           variant="outline"
-          onClick={() => window.location.href = '/dashboard'}
+          onClick={() => (window.location.href = '/dashboard')}
           className="gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -172,7 +173,9 @@ function getMessageIsStreaming(
   if (!metadata || typeof metadata !== 'object') {
     return false;
   }
-  return typeof metadata.is_streaming === 'boolean' ? metadata.is_streaming : false;
+  return typeof metadata.is_streaming === 'boolean'
+    ? metadata.is_streaming
+    : false;
 }
 
 // Removed OutputPanel - using new CodeEditorPanel and LivePreviewPanel instead
@@ -189,7 +192,7 @@ const VibeDashboard: React.FC = () => {
     initSession,
     processEvent,
     updatePhase,
-    reset: resetOrchestrator
+    reset: resetOrchestrator,
   } = useVibeOrchestrator();
 
   const [activeAgent, setActiveAgent] = useState<AgentStatus | null>(null);
@@ -360,7 +363,11 @@ const VibeDashboard: React.FC = () => {
         description,
         status,
         timestamp: action.timestamp ? new Date(action.timestamp) : undefined,
-        result: actionResult.output || actionResult.summary || action.error || undefined,
+        result:
+          actionResult.output ||
+          actionResult.summary ||
+          action.error ||
+          undefined,
       });
 
       const ordered = Array.from(workingStepsMapRef.current.values()).sort(
@@ -683,121 +690,121 @@ const VibeDashboard: React.FC = () => {
 
   return (
     <ErrorBoundary fallback={<VibeErrorFallback />}>
-    <VibeLayout>
-      <div className="flex h-full flex-col">
-        {/* Header with Phase Timeline */}
-        <div className="border-b border-border bg-gradient-to-r from-purple-600/10 to-blue-600/10 px-4 py-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <h1 className="text-lg font-bold">Vibe</h1>
+      <VibeLayout>
+        <div className="flex h-full flex-col">
+          {/* Header with Phase Timeline */}
+          <div className="border-b border-border bg-gradient-to-r from-purple-600/10 to-blue-600/10 px-4 py-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h1 className="text-lg font-bold">Vibe</h1>
+                </div>
+                {/* Compact Phase Timeline - VibeSDK-inspired */}
+                <div className="hidden sm:block">
+                  <PhaseTimeline
+                    session={orchestratorSession}
+                    compact={true}
+                    className="ml-2"
+                  />
+                </div>
               </div>
-              {/* Compact Phase Timeline - VibeSDK-inspired */}
-              <div className="hidden sm:block">
-                <PhaseTimeline
-                  session={orchestratorSession}
-                  compact={true}
-                  className="ml-2"
-                />
+              <div className="flex items-center gap-3">
+                <TokenUsageDisplay sessionId={currentSessionId} />
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <TokenUsageDisplay sessionId={currentSessionId} />
             </div>
           </div>
-        </div>
 
-        {/* Main Content - 3 Panel Layout */}
-        <div className="flex-1 overflow-hidden">
-          {/* Desktop Layout: Horizontal split */}
-          <div className="hidden h-full md:block">
-            <PanelGroup direction="horizontal">
-              {/* Left Panel - Chat (30%) */}
-              <Panel defaultSize={30} minSize={25} maxSize={40}>
+          {/* Main Content - 3 Panel Layout */}
+          <div className="flex-1 overflow-hidden">
+            {/* Desktop Layout: Horizontal split */}
+            <div className="hidden h-full md:block">
+              <PanelGroup direction="horizontal">
+                {/* Left Panel - Chat (30%) */}
+                <Panel defaultSize={30} minSize={25} maxSize={40}>
+                  <SimpleChatPanel
+                    messages={messages}
+                    isLoading={isLoading}
+                    onPromptSelect={handleSendMessage}
+                    showEmptyState={messages.length === 0}
+                  />
+                </Panel>
+
+                <PanelResizeHandle className="group relative w-1 bg-border transition-colors hover:bg-primary">
+                  <div className="absolute inset-y-0 left-1/2 flex -translate-x-1/2 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                    <div className="rounded-sm border border-border bg-background p-1 shadow-lg">
+                      <GripVertical className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                </PanelResizeHandle>
+
+                {/* Right Panel - Code + Preview (70%) */}
+                <Panel defaultSize={70} minSize={60}>
+                  <PanelGroup direction="vertical">
+                    {/* Code Editor (60%) */}
+                    <Panel defaultSize={60} minSize={40} maxSize={80}>
+                      <CodeEditorPanel />
+                    </Panel>
+
+                    <PanelResizeHandle className="group relative h-1 bg-border transition-colors hover:bg-primary">
+                      <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                        <div className="rounded-sm border border-border bg-background px-1 py-0.5 shadow-lg">
+                          <GripVertical className="h-4 w-4 rotate-90 text-muted-foreground" />
+                        </div>
+                      </div>
+                    </PanelResizeHandle>
+
+                    {/* Live Preview (40%) */}
+                    <Panel defaultSize={40} minSize={20} maxSize={60}>
+                      <LivePreviewPanel key={previewKey} />
+                    </Panel>
+                  </PanelGroup>
+                </Panel>
+              </PanelGroup>
+            </div>
+
+            {/* Mobile Layout: Vertical stack */}
+            <div className="flex h-full flex-col md:hidden">
+              {/* Chat */}
+              <div className="flex-1 overflow-hidden border-b border-border">
                 <SimpleChatPanel
                   messages={messages}
                   isLoading={isLoading}
                   onPromptSelect={handleSendMessage}
                   showEmptyState={messages.length === 0}
                 />
-              </Panel>
+              </div>
 
-              <PanelResizeHandle className="group relative w-1 bg-border transition-colors hover:bg-primary">
-                <div className="absolute inset-y-0 left-1/2 flex -translate-x-1/2 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                  <div className="rounded-sm border border-border bg-background p-1 shadow-lg">
-                    <GripVertical className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-              </PanelResizeHandle>
+              {/* Code Editor */}
+              <div className="flex-1 overflow-hidden border-b border-border">
+                <CodeEditorPanel />
+              </div>
 
-              {/* Right Panel - Code + Preview (70%) */}
-              <Panel defaultSize={70} minSize={60}>
-                <PanelGroup direction="vertical">
-                  {/* Code Editor (60%) */}
-                  <Panel defaultSize={60} minSize={40} maxSize={80}>
-                    <CodeEditorPanel />
-                  </Panel>
-
-                  <PanelResizeHandle className="group relative h-1 bg-border transition-colors hover:bg-primary">
-                    <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                      <div className="rounded-sm border border-border bg-background px-1 py-0.5 shadow-lg">
-                        <GripVertical className="h-4 w-4 rotate-90 text-muted-foreground" />
-                      </div>
-                    </div>
-                  </PanelResizeHandle>
-
-                  {/* Live Preview (40%) */}
-                  <Panel defaultSize={40} minSize={20} maxSize={60}>
-                    <LivePreviewPanel key={previewKey} />
-                  </Panel>
-                </PanelGroup>
-              </Panel>
-            </PanelGroup>
-          </div>
-
-          {/* Mobile Layout: Vertical stack */}
-          <div className="flex h-full flex-col md:hidden">
-            {/* Chat */}
-            <div className="flex-1 overflow-hidden border-b border-border">
-              <SimpleChatPanel
-                messages={messages}
-                isLoading={isLoading}
-                onPromptSelect={handleSendMessage}
-                showEmptyState={messages.length === 0}
-              />
-            </div>
-
-            {/* Code Editor */}
-            <div className="flex-1 overflow-hidden border-b border-border">
-              <CodeEditorPanel />
-            </div>
-
-            {/* Preview */}
-            <div className="flex-1 overflow-hidden">
-              <LivePreviewPanel key={previewKey} />
+              {/* Preview */}
+              <div className="flex-1 overflow-hidden">
+                <LivePreviewPanel key={previewKey} />
+              </div>
             </div>
           </div>
+
+          {/* Enhanced Message Composer - Fixed at bottom */}
+          <VibeEnhancedComposer
+            onSend={handleSendMessage}
+            isLoading={isLoading}
+            mode={vibeMode}
+            onModeChange={setVibeMode}
+            showModeToggle={messages.length > 0}
+            showQuickActions={messages.length > 0}
+          />
         </div>
 
-        {/* Enhanced Message Composer - Fixed at bottom */}
-        <VibeEnhancedComposer
-          onSend={handleSendMessage}
-          isLoading={isLoading}
-          mode={vibeMode}
-          onModeChange={setVibeMode}
-          showModeToggle={messages.length > 0}
-          showQuickActions={messages.length > 0}
+        {/* Keyboard Shortcuts Dialog */}
+        <VibeKeyboardShortcutsDialog
+          open={shortcutsDialogOpen}
+          onOpenChange={setShortcutsDialogOpen}
+          shortcuts={shortcuts}
         />
-      </div>
-
-      {/* Keyboard Shortcuts Dialog */}
-      <VibeKeyboardShortcutsDialog
-        open={shortcutsDialogOpen}
-        onOpenChange={setShortcutsDialogOpen}
-        shortcuts={shortcuts}
-      />
-    </VibeLayout>
+      </VibeLayout>
     </ErrorBoundary>
   );
 };

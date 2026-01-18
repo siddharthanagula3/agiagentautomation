@@ -31,7 +31,13 @@ export interface AbusePrevention {
 const MODEL_COST_TIERS = {
   // High-cost models (strict limits)
   high: {
-    models: ['gpt-4o', 'o1', 'claude-sonnet-4-20250514', 'claude-3-5-sonnet-20241022', 'sonar-pro'],
+    models: [
+      'gpt-4o',
+      'o1',
+      'claude-sonnet-4-20250514',
+      'claude-3-5-sonnet-20241022',
+      'sonar-pro',
+    ],
     maxPerMinute: 10,
     maxPerHour: 100,
     maxConcurrent: 2,

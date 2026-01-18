@@ -26,31 +26,10 @@ const ENV_VARIABLES: EnvConfig[] = [
     description: 'Stripe publishable key (client-side)',
   },
 
-  // ===== OPTIONAL BUT RECOMMENDED =====
-  {
-    name: 'VITE_OPENAI_API_KEY',
-    required: false,
-    description: 'OpenAI API key for GPT models',
-    isSecret: true,
-  },
-  {
-    name: 'VITE_ANTHROPIC_API_KEY',
-    required: false,
-    description: 'Anthropic API key for Claude models',
-    isSecret: true,
-  },
-  {
-    name: 'VITE_GOOGLE_API_KEY',
-    required: false,
-    description: 'Google API key for Gemini models',
-    isSecret: true,
-  },
-  {
-    name: 'VITE_PERPLEXITY_API_KEY',
-    required: false,
-    description: 'Perplexity API key',
-    isSecret: true,
-  },
+  // ===== AI PROVIDERS (MANAGED SERVER-SIDE) =====
+  // NOTE: API keys are now managed by Netlify proxy functions for security
+  // These environment variables are NO LONGER required client-side
+  // All AI API calls are routed through authenticated server-side proxies
 
   // ===== OPTIONAL FEATURES =====
   {
@@ -132,17 +111,11 @@ export function validateAndLogEnvironment(throwOnError = true): void {
     console.warn('\nNote: Some features may be unavailable without these.');
   }
 
-  // Check for at least one AI provider
-  const hasAIProvider =
-    import.meta.env.VITE_OPENAI_API_KEY ||
-    import.meta.env.VITE_ANTHROPIC_API_KEY ||
-    import.meta.env.VITE_GOOGLE_API_KEY ||
-    import.meta.env.VITE_PERPLEXITY_API_KEY;
-
-  if (!hasAIProvider) {
-    console.warn('\n⚠️  WARNING: No AI provider API keys configured!');
-    console.warn('   Chat functionality will require at least one provider.');
-  }
+  // SECURITY: AI provider API keys are now managed by Netlify proxy functions
+  // They are NOT required in client-side environment variables
+  console.log(
+    '\n✅ AI providers: Available through authenticated server proxies'
+  );
 
   console.log('═'.repeat(50));
 
@@ -221,7 +194,8 @@ export function getEnvironment(): 'development' | 'staging' | 'production' {
 }
 
 /**
- * Safely logs environment configuration (hides secrets)
+ * Safely logs environment configuration
+ * SECURITY: API keys are managed server-side, not in client environment
  */
 export function logEnvironmentConfig(): void {
   console.log('🔧 Environment Configuration:');
@@ -230,16 +204,14 @@ export function logEnvironmentConfig(): void {
   console.log(`   Dev: ${isDevelopment()}`);
   console.log(`   Prod: ${isProduction()}`);
 
-  // Log which providers are configured (without exposing keys)
-  const providers = {
-    OpenAI: !!import.meta.env.VITE_OPENAI_API_KEY,
-    Anthropic: !!import.meta.env.VITE_ANTHROPIC_API_KEY,
-    Google: !!import.meta.env.VITE_GOOGLE_API_KEY,
-    Perplexity: !!import.meta.env.VITE_PERPLEXITY_API_KEY,
-  };
-
-  console.log('   AI Providers:');
-  Object.entries(providers).forEach(([name, configured]) => {
-    console.log(`     ${name}: ${configured ? '✅' : '❌'}`);
-  });
+  // SECURITY: All AI providers are available through authenticated Netlify proxies
+  // API keys are managed server-side, not in client environment
+  console.log('   AI Providers: Available via authenticated server proxies');
+  console.log('     OpenAI: ✅ (via proxy)');
+  console.log('     Anthropic: ✅ (via proxy)');
+  console.log('     Google: ✅ (via proxy)');
+  console.log('     Perplexity: ✅ (via proxy)');
+  console.log('     Grok: ✅ (via proxy)');
+  console.log('     DeepSeek: ✅ (via proxy)');
+  console.log('     Qwen: ✅ (via proxy)');
 }

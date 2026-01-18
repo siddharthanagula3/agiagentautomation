@@ -76,7 +76,9 @@ export function FolderManagement({
 }: FolderManagementProps) {
   const { user } = useAuthStore();
   const [folders, setFolders] = useState<ChatFolder[]>([]);
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
+    new Set()
+  );
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState<ChatFolder | null>(null);
   const [deletingFolder, setDeletingFolder] = useState<ChatFolder | null>(null);
@@ -95,7 +97,9 @@ export function FolderManagement({
       // Get session counts for each folder
       const foldersWithCounts = await Promise.all(
         userFolders.map(async (folder) => {
-          const count = await folderManagementService.getFolderSessionCount(folder.id);
+          const count = await folderManagementService.getFolderSessionCount(
+            folder.id
+          );
           return { ...folder, sessionCount: count };
         })
       );
@@ -256,7 +260,7 @@ export function FolderManagement({
             <div key={folder.id} className="space-y-1">
               <div
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent group',
+                  'group flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent',
                   selectedFolderId === folder.id && 'bg-accent font-medium'
                 )}
               >
@@ -275,26 +279,33 @@ export function FolderManagement({
                 {/* Folder Icon and Name */}
                 <button
                   onClick={() => onFolderSelect(folder.id)}
-                  className="flex flex-1 items-center gap-2 min-w-0"
+                  className="flex min-w-0 flex-1 items-center gap-2"
                 >
                   {selectedFolderId === folder.id ? (
                     <FolderOpen
-                      className={cn('h-4 w-4 flex-shrink-0', getFolderColorClass(folder.color))}
+                      className={cn(
+                        'h-4 w-4 flex-shrink-0',
+                        getFolderColorClass(folder.color)
+                      )}
                     />
                   ) : (
                     <Folder
-                      className={cn('h-4 w-4 flex-shrink-0', getFolderColorClass(folder.color))}
+                      className={cn(
+                        'h-4 w-4 flex-shrink-0',
+                        getFolderColorClass(folder.color)
+                      )}
                     />
                   )}
                   <span className="truncate">{folder.name}</span>
-                  {folder.sessionCount !== undefined && folder.sessionCount > 0 && (
-                    <Badge
-                      variant="secondary"
-                      className="ml-auto text-[10px] px-1.5 py-0 flex-shrink-0"
-                    >
-                      {folder.sessionCount}
-                    </Badge>
-                  )}
+                  {folder.sessionCount !== undefined &&
+                    folder.sessionCount > 0 && (
+                      <Badge
+                        variant="secondary"
+                        className="ml-auto flex-shrink-0 px-1.5 py-0 text-[10px]"
+                      >
+                        {folder.sessionCount}
+                      </Badge>
+                    )}
                 </button>
 
                 {/* Actions Menu */}
@@ -303,7 +314,7 @@ export function FolderManagement({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                      className="h-6 w-6 flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
                     >
                       <MoreVertical className="h-3 w-3" />
                     </Button>
@@ -442,14 +453,16 @@ export function FolderManagement({
             <DialogTitle>Delete Folder</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete "{deletingFolder?.name}"?
-              {deletingFolder?.sessionCount && deletingFolder.sessionCount > 0 ? (
-                <span className="block mt-2 text-yellow-600 dark:text-yellow-500">
-                  This folder contains {deletingFolder.sessionCount} chat session
-                  {deletingFolder.sessionCount !== 1 ? 's' : ''}. They will be moved to
-                  "All Chats".
+              {deletingFolder?.sessionCount &&
+              deletingFolder.sessionCount > 0 ? (
+                <span className="mt-2 block text-yellow-600 dark:text-yellow-500">
+                  This folder contains {deletingFolder.sessionCount} chat
+                  session
+                  {deletingFolder.sessionCount !== 1 ? 's' : ''}. They will be
+                  moved to "All Chats".
                 </span>
               ) : (
-                <span className="block mt-2">This folder is empty.</span>
+                <span className="mt-2 block">This folder is empty.</span>
               )}
             </DialogDescription>
           </DialogHeader>

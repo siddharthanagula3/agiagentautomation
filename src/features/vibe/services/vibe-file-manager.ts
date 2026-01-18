@@ -86,16 +86,35 @@ export class VibeFileManager {
 
   // SECURITY: Blocked file extensions (double-check regardless of MIME type)
   private readonly BLOCKED_EXTENSIONS = new Set([
-    '.exe', '.dll', '.so', '.dylib',  // Executables
-    '.bat', '.cmd', '.ps1', '.sh',    // Scripts (except when MIME is text)
-    '.msi', '.msp', '.msu',           // Windows installers
-    '.vbs', '.vbe', '.js.exe',        // VBScript
-    '.scr', '.pif', '.com',           // Legacy executables
-    '.jar', '.jnlp',                   // Java executables
-    '.app', '.dmg', '.pkg',           // macOS installers
-    '.deb', '.rpm', '.apk',           // Package managers
-    '.reg', '.inf',                    // Windows registry/config
-    '.lnk', '.url',                    // Shortcuts (can be malicious)
+    '.exe',
+    '.dll',
+    '.so',
+    '.dylib', // Executables
+    '.bat',
+    '.cmd',
+    '.ps1',
+    '.sh', // Scripts (except when MIME is text)
+    '.msi',
+    '.msp',
+    '.msu', // Windows installers
+    '.vbs',
+    '.vbe',
+    '.js.exe', // VBScript
+    '.scr',
+    '.pif',
+    '.com', // Legacy executables
+    '.jar',
+    '.jnlp', // Java executables
+    '.app',
+    '.dmg',
+    '.pkg', // macOS installers
+    '.deb',
+    '.rpm',
+    '.apk', // Package managers
+    '.reg',
+    '.inf', // Windows registry/config
+    '.lnk',
+    '.url', // Shortcuts (can be malicious)
   ]);
 
   /**
@@ -409,7 +428,10 @@ export class VibeFileManager {
           .remove(filePaths);
 
         if (storageError) {
-          console.error('Failed to batch delete files from storage:', storageError);
+          console.error(
+            'Failed to batch delete files from storage:',
+            storageError
+          );
           // Continue to delete metadata even if storage fails
         }
       }
@@ -422,7 +444,9 @@ export class VibeFileManager {
 
       if (dbError) throw dbError;
 
-      console.log(`[VibeFileManager] Batch deleted ${files.length} files for session ${sessionId}`);
+      console.log(
+        `[VibeFileManager] Batch deleted ${files.length} files for session ${sessionId}`
+      );
     } catch (error) {
       console.error('Failed to delete session files:', error);
     }
@@ -558,11 +582,16 @@ export class VibeFileManager {
 
     // Allow application/octet-stream for known safe text extensions
     // (browsers sometimes misdetect text files)
-    if (file.type === 'application/octet-stream' && this.isTextFile(file.name)) {
+    if (
+      file.type === 'application/octet-stream' &&
+      this.isTextFile(file.name)
+    ) {
       return true;
     }
 
-    console.warn(`[VibeFileManager] Blocked disallowed MIME type: ${file.type} for file: ${file.name}`);
+    console.warn(
+      `[VibeFileManager] Blocked disallowed MIME type: ${file.type} for file: ${file.name}`
+    );
     return false;
   }
 

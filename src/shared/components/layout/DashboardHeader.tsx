@@ -177,7 +177,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             className="lg:hidden"
             aria-label="Open menu"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-5 w-5" aria-hidden="true" />
           </Button>
 
           {/* Desktop Sidebar Toggle */}
@@ -195,13 +195,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 'h-5 w-5 transition-transform duration-200',
                 sidebarCollapsed && 'rotate-180'
               )}
+              aria-hidden="true"
             />
           </Button>
 
           {/* Page Title */}
           <div className="hidden sm:block">
             <h1 className="flex items-center gap-2 text-lg font-semibold">
-              <Sparkles className="h-5 w-5 text-primary" />
+              <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
               {getPageTitle()}
             </h1>
           </div>
@@ -210,7 +211,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         {/* Center - Search */}
         <div className="mx-4 max-w-md flex-1 lg:mx-8" ref={searchRef}>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+            <Search
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground"
+              aria-hidden="true"
+            />
             <Input
               type="text"
               placeholder="Search..."
@@ -218,10 +222,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setShowSearch(true)}
               className="glass pl-10 pr-20"
+              aria-label="Search"
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
               <kbd className="hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:inline-flex">
-                <Command className="h-3 w-3" />K
+                <Command className="h-3 w-3" aria-hidden="true" />K
               </kbd>
             </div>
           </div>
@@ -237,9 +242,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             aria-label="Toggle theme"
           >
             {actualTheme === 'light' ? (
-              <Moon className="h-4 w-4" />
+              <Moon className="h-4 w-4" aria-hidden="true" />
             ) : (
-              <Sun className="h-4 w-4" />
+              <Sun className="h-4 w-4" aria-hidden="true" />
             )}
           </Button>
 
@@ -250,8 +255,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               size="icon"
               onClick={() => setShowNotifications(!showNotifications)}
               className="relative"
+              aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+              aria-expanded={showNotifications}
             >
-              <Bell className="h-4 w-4" />
+              <Bell className="h-4 w-4" aria-hidden="true" />
               {unreadCount > 0 && (
                 <motion.div
                   initial={{ scale: 0 }}
@@ -340,6 +347,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               variant="ghost"
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="flex items-center gap-2 px-2"
+              aria-label="User menu"
+              aria-expanded={showUserMenu}
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user?.avatar} />
@@ -353,7 +362,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                   {user?.role || 'Member'}
                 </p>
               </div>
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="h-4 w-4" aria-hidden="true" />
             </Button>
 
             <AnimatePresence>
@@ -391,7 +400,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                       }}
                       className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-muted/50"
                     >
-                      <UserIcon className="h-4 w-4" />
+                      <UserIcon className="h-4 w-4" aria-hidden="true" />
                       Profile Settings
                     </button>
                     <button
@@ -401,7 +410,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                       }}
                       className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-muted/50"
                     >
-                      <CreditCard className="h-4 w-4" />
+                      <CreditCard className="h-4 w-4" aria-hidden="true" />
                       Billing & Usage
                     </button>
                     <button
@@ -411,7 +420,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                       }}
                       className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-muted/50"
                     >
-                      <Settings className="h-4 w-4" />
+                      <Settings className="h-4 w-4" aria-hidden="true" />
                       Settings
                     </button>
                   </div>
@@ -424,14 +433,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                       }}
                       className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-muted/50"
                     >
-                      <HelpCircle className="h-4 w-4" />
+                      <HelpCircle className="h-4 w-4" aria-hidden="true" />
                       Help & Support
                     </button>
                     <button
                       onClick={handleLogout}
                       className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-error hover:bg-error/10"
                     >
-                      <LogOut className="h-4 w-4" />
+                      <LogOut className="h-4 w-4" aria-hidden="true" />
                       Sign Out
                     </button>
                   </div>

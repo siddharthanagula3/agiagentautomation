@@ -46,7 +46,9 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const [bookmarks, setBookmarks] = useState<BookmarkedMessage[]>([]);
-  const [filteredBookmarks, setFilteredBookmarks] = useState<BookmarkedMessage[]>([]);
+  const [filteredBookmarks, setFilteredBookmarks] = useState<
+    BookmarkedMessage[]
+  >([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [allTags, setAllTags] = useState<string[]>([]);
@@ -140,7 +142,7 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
   if (isLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[80vh]">
+        <DialogContent className="max-h-[80vh] max-w-4xl">
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
@@ -151,8 +153,8 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+      <DialogContent className="max-h-[80vh] max-w-4xl p-0">
+        <DialogHeader className="border-b px-6 pb-4 pt-6">
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="flex items-center gap-2">
@@ -160,16 +162,17 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
                 Bookmarked Messages
               </DialogTitle>
               <DialogDescription>
-                {bookmarks.length} saved message{bookmarks.length !== 1 ? 's' : ''}
+                {bookmarks.length} saved message
+                {bookmarks.length !== 1 ? 's' : ''}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
         {/* Search and Filters */}
-        <div className="px-6 py-4 border-b space-y-3">
+        <div className="space-y-3 border-b px-6 py-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search bookmarks..."
               value={searchQuery}
@@ -179,7 +182,7 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
           </div>
 
           {allTags.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-wrap items-center gap-2">
               <Tag className="h-3.5 w-3.5 text-muted-foreground" />
               <Button
                 variant={selectedTag === null ? 'default' : 'outline'}
@@ -208,13 +211,13 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
         <ScrollArea className="flex-1 px-6 py-4" style={{ maxHeight: '500px' }}>
           {filteredBookmarks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Bookmark className="h-12 w-12 text-muted-foreground opacity-30 mb-3" />
+              <Bookmark className="mb-3 h-12 w-12 text-muted-foreground opacity-30" />
               <p className="text-sm text-muted-foreground">
                 {bookmarks.length === 0
                   ? 'No bookmarks yet'
                   : 'No bookmarks match your filters'}
               </p>
-              <p className="text-xs text-muted-foreground/70 mt-1">
+              <p className="mt-1 text-xs text-muted-foreground/70">
                 {bookmarks.length === 0
                   ? 'Bookmark important messages to save them here'
                   : 'Try adjusting your search or filters'}
@@ -225,21 +228,23 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
               {filteredBookmarks.map((bookmark) => (
                 <div
                   key={bookmark.id}
-                  className="rounded-lg border p-4 hover:bg-accent transition-colors"
+                  className="rounded-lg border p-4 transition-colors hover:bg-accent"
                 >
                   {/* Header */}
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <MessageSquare className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <div className="mb-3 flex items-start justify-between gap-4">
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
+                      <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
                       <button
-                        onClick={() => handleNavigateToMessage(bookmark.sessionId)}
-                        className="font-medium text-sm hover:underline truncate"
+                        onClick={() =>
+                          handleNavigateToMessage(bookmark.sessionId)
+                        }
+                        className="truncate text-sm font-medium hover:underline"
                       >
                         {bookmark.sessionTitle}
                       </button>
-                      <ExternalLink className="h-3 w-3 text-muted-foreground shrink-0" />
+                      <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground" />
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex shrink-0 items-center gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -265,8 +270,8 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
                   </div>
 
                   {/* Message Content */}
-                  <div className="pl-6 space-y-3">
-                    <div className="text-sm text-muted-foreground line-clamp-3">
+                  <div className="space-y-3 pl-6">
+                    <div className="line-clamp-3 text-sm text-muted-foreground">
                       {bookmark.messageContent}
                     </div>
 
@@ -312,9 +317,13 @@ export function BookmarksDialog({ open, onOpenChange }: BookmarksDialogProps) {
                         {format(bookmark.createdAt, 'MMM d, yyyy')}
                       </div>
                       {bookmark.tags.length > 0 && (
-                        <div className="flex items-center gap-1 flex-wrap">
+                        <div className="flex flex-wrap items-center gap-1">
                           {bookmark.tags.map((tag) => (
-                            <Badge key={tag} variant="secondary" className="text-[10px]">
+                            <Badge
+                              key={tag}
+                              variant="secondary"
+                              className="text-[10px]"
+                            >
                               {tag}
                             </Badge>
                           ))}

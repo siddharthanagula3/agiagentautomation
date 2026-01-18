@@ -1,9 +1,12 @@
 /**
  * Stripe Payment Integration Service
  * Handles all Stripe-related operations for AI employee subscriptions
+ *
+ * UPDATED: January 17, 2026 - Added authorization headers to all API calls
  */
 
 import { loadStripe } from '@stripe/stripe-js';
+import { supabase } from '@shared/lib/supabase-client';
 
 // Lazy loader with guard
 let stripePromise: Promise<import('@stripe/stripe-js').Stripe | null> | null =
@@ -23,20 +26,39 @@ function getStripe() {
   return stripePromise;
 }
 
+/**
+ * Get authorization token for API calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session?.access_token ?? null;
+}
+
 // Employee purchase functions removed - hiring is now free
 
 /**
  * Open Stripe Customer Portal for subscription management
  */
-// Updated: Jan 15th 2026 - Removed console statements for production
+// Updated: Jan 17th 2026 - Added authorization header
 export async function openBillingPortal(customerId: string): Promise<void> {
-  const response = await fetch('/.netlify/functions/payments/get-billing-portal', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ customerId }),
-  });
+  const authToken = await getAuthToken();
+  if (!authToken) {
+    throw new Error('User not authenticated. Please log in to access billing.');
+  }
+
+  const response = await fetch(
+    '/.netlify/functions/payments/get-billing-portal',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({ customerId }),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json();
@@ -83,25 +105,36 @@ export function getStripeConfig() {
 
 /**
  * Create subscription checkout session
+ * @deprecated Use upgradeToProPlan or upgradeToMaxPlan instead
  */
 export async function createSubscriptionCheckout(
-  priceId: string,
+  plan: 'pro' | 'max',
+  userId: string,
+  userEmail: string,
   billingPeriod: 'monthly' | 'yearly' = 'monthly'
 ): Promise<void> {
+  const authToken = await getAuthToken();
+  if (!authToken) {
+    throw new Error('User not authenticated. Please log in to upgrade.');
+  }
+
   // Call Netlify function to create subscription checkout session
-  const response = await fetch('/.netlify/functions/payments/create-pro-subscription', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      priceId,
-      billingPeriod,
-      // These would be passed from the calling component
-      userId: 'current-user-id', // This should be passed as parameter
-      userEmail: 'user@example.com', // This should be passed as parameter
-    }),
-  });
+  const response = await fetch(
+    '/.netlify/functions/payments/create-pro-subscription',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({
+        plan,
+        billingPeriod,
+        userId,
+        userEmail,
+      }),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json();
@@ -149,14 +182,23 @@ async function upgradeToPlan(data: {
   plan: 'pro' | 'max';
   billingPeriod?: 'monthly' | 'yearly';
 }): Promise<void> {
+  const authToken = await getAuthToken();
+  if (!authToken) {
+    throw new Error('User not authenticated. Please log in to upgrade.');
+  }
+
   // Call Netlify function to create subscription checkout session
-  const response = await fetch('/.netlify/functions/payments/create-pro-subscription', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await fetch(
+    '/.netlify/functions/payments/create-pro-subscription',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json();

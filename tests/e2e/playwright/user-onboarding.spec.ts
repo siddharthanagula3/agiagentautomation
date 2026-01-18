@@ -1,5 +1,12 @@
 import { test, expect } from '@playwright/test';
 
+// Test credentials - MUST be set via environment variables in CI/CD
+// Never commit actual credentials to the repository
+const TEST_USER = {
+  email: process.env.E2E_TEST_EMAIL || 'test@example.com',
+  password: process.env.E2E_TEST_PASSWORD || '', // Set in CI environment
+};
+
 test.describe('User Onboarding Flow', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
@@ -60,9 +67,9 @@ test.describe('User Onboarding Flow', () => {
     await page.click('text=Sign In');
     await expect(page).toHaveURL(/.*\/auth\/login/);
 
-    // Fill login form with production credentials
-    await page.fill('input[name="email"]', 'siddharthanagula3@gmail.com');
-    await page.fill('input[name="password"]', 'Sid@1234');
+    // Fill login form with test credentials from environment
+    await page.fill('input[name="email"]', TEST_USER.email);
+    await page.fill('input[name="password"]', TEST_USER.password);
 
     // Submit login
     await page.click('button[type="submit"]');
@@ -86,10 +93,10 @@ test.describe('User Onboarding Flow', () => {
   });
 
   test('should complete logout flow', async ({ page }) => {
-    // First login with production credentials
+    // First login with test credentials from environment
     await page.click('text=Sign In');
-    await page.fill('input[name="email"]', 'siddharthanagula3@gmail.com');
-    await page.fill('input[name="password"]', 'Sid@1234');
+    await page.fill('input[name="email"]', TEST_USER.email);
+    await page.fill('input[name="password"]', TEST_USER.password);
     await page.click('button[type="submit"]');
 
     // Wait for dashboard
@@ -111,8 +118,8 @@ test.describe('User Onboarding Flow', () => {
     await page.click('text=Forgot password?');
     await expect(page).toHaveURL(/.*\/auth\/forgot-password/);
 
-    // Fill email for password reset
-    await page.fill('input[name="email"]', 'siddharthanagula3@gmail.com');
+    // Fill email for password reset (use test user email)
+    await page.fill('input[name="email"]', TEST_USER.email);
     await page.click('button[type="submit"]');
 
     // Should show success message

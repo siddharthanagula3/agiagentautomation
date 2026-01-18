@@ -136,7 +136,9 @@ export const useChat = (sessionId?: string) => {
       console.error('[Chat] Error loading messages:', error);
       setError(userFriendlyMessage);
       toast.error('Failed to load chat history', {
-        description: isRetryableError(error) ? 'Please try refreshing the page.' : undefined,
+        description: isRetryableError(error)
+          ? 'Please try refreshing the page.'
+          : undefined,
       });
     } finally {
       setIsLoading(false);
@@ -432,15 +434,23 @@ export const useChat = (sessionId?: string) => {
         // Use employee chat service for dynamic selection with retry logic
         const result = await retryWithBackoff(
           () =>
-            employeeChatService.sendMessage(enhancedContent, conversationHistory, {
-              userId: user.id,
-              sessionId,
-            }),
+            employeeChatService.sendMessage(
+              enhancedContent,
+              conversationHistory,
+              {
+                userId: user.id,
+                sessionId,
+              }
+            ),
           {
             maxRetries: 3,
             onRetry: (attempt, err) => {
-              const errMessage = err instanceof Error ? err.message : String(err);
-              console.log(`[Chat] Retry attempt ${attempt}/3 after error:`, errMessage);
+              const errMessage =
+                err instanceof Error ? err.message : String(err);
+              console.log(
+                `[Chat] Retry attempt ${attempt}/3 after error:`,
+                errMessage
+              );
               toast.info(`Retrying... (Attempt ${attempt}/3)`);
             },
           }
@@ -454,13 +464,15 @@ export const useChat = (sessionId?: string) => {
         // Check if this was a multi-agent collaboration
         if (result.metadata.isMultiAgent && result.collaborationMessages) {
           // Store collaboration messages in metadata (collapsed by default)
-          const collaborationData = result.collaborationMessages.map((collab) => ({
-            employeeName: collab.employeeName,
-            employeeAvatar: collab.employeeAvatar,
-            content: collab.content,
-            messageType: collab.messageType,
-            to: collab.to,
-          }));
+          const collaborationData = result.collaborationMessages.map(
+            (collab) => ({
+              employeeName: collab.employeeName,
+              employeeAvatar: collab.employeeAvatar,
+              content: collab.content,
+              messageType: collab.messageType,
+              to: collab.to,
+            })
+          );
 
           // Add final synthesized answer with streaming (includes collapsed contributions)
           const assistantMessageId = crypto.randomUUID();

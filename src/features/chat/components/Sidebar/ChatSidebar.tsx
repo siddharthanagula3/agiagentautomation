@@ -8,6 +8,7 @@ import { Plus, Search, MessageSquare, MoreHorizontal } from 'lucide-react';
 import type { ChatSession } from '../../types';
 import { ConversationListItem } from './ConversationListItem';
 import { FolderManagement } from './FolderManagement';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 
 interface ChatSidebarProps {
   sessions: ChatSession[];
@@ -29,7 +30,7 @@ interface ChatSidebarProps {
   onMoveSessionToFolder?: (sessionId: string, folderId: string | null) => void;
 }
 
-export const ChatSidebar: React.FC<ChatSidebarProps> = ({
+const ChatSidebarContent: React.FC<ChatSidebarProps> = ({
   sessions,
   currentSession,
   searchQuery,
@@ -170,5 +171,16 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
         </div>
       </div>
     </div>
+  );
+};
+
+/**
+ * ChatSidebar - Chat history sidebar with error boundary protection
+ */
+export const ChatSidebar: React.FC<ChatSidebarProps> = (props) => {
+  return (
+    <ErrorBoundary compact componentName="Chat Sidebar">
+      <ChatSidebarContent {...props} />
+    </ErrorBoundary>
   );
 };

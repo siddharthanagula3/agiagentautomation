@@ -1,9 +1,71 @@
-# Dependabot configuration - disabled
-# To re-enable, uncomment the updates section
 version: 2
-updates: []
-# Uncomment below to re-enable npm updates:
-#  - package-ecosystem: "npm"
-#    directory: "/"
-#    schedule:
-#      interval: "weekly"
+updates:
+  # NPM dependencies
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+    open-pull-requests-limit: 10
+    # Reviewers for security updates
+    reviewers:
+      - 'siddhartha'
+    # Labels to help identify PRs
+    labels:
+      - 'dependencies'
+      - 'npm'
+    groups:
+      # Group dev dependencies together
+      dev-dependencies:
+        patterns:
+          - '@types/*'
+          - 'eslint*'
+          - 'prettier'
+          - 'vitest'
+          - '@vitest/*'
+          - 'playwright'
+          - '@playwright/*'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group React ecosystem
+      react:
+        patterns:
+          - 'react'
+          - 'react-dom'
+          - '@tanstack/*'
+        update-types:
+          - 'minor'
+          - 'patch'
+      # Group security-related packages (prioritize updates)
+      security:
+        patterns:
+          - 'dompurify'
+          - 'zod'
+          - '@supabase/*'
+          - 'stripe'
+          - '@stripe/*'
+        update-types:
+          - 'minor'
+          - 'patch'
+    # Security updates are always created immediately
+    # regardless of schedule
+    # Ignore known problematic version ranges if needed
+    # ignore:
+    #   - dependency-name: "example-package"
+    #     versions: ["4.x"]
+
+  # GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    labels:
+      - 'dependencies'
+      - 'github-actions'
+    # Group action updates
+    groups:
+      actions:
+        patterns:
+          - '*'

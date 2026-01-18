@@ -112,7 +112,10 @@ class BackgroundChatService {
             messagesCount: (session.messagesCount || 0) + 1,
           });
         } catch (err) {
-          console.error('[BackgroundChatService] Error in handleCommunication:', err);
+          console.error(
+            '[BackgroundChatService] Error in handleCommunication:',
+            err
+          );
         }
       };
 
@@ -132,7 +135,10 @@ class BackgroundChatService {
             lastActivity: new Date(),
           });
         } catch (err) {
-          console.error('[BackgroundChatService] Error in handleStatusUpdate:', err);
+          console.error(
+            '[BackgroundChatService] Error in handleStatusUpdate:',
+            err
+          );
         }
       };
 
@@ -146,7 +152,10 @@ class BackgroundChatService {
       try {
         plan = await multiAgentOrchestrator.analyzeIntent(userRequest);
       } catch (analyzeError) {
-        console.error('[BackgroundChatService] Error analyzing intent:', analyzeError);
+        console.error(
+          '[BackgroundChatService] Error analyzing intent:',
+          analyzeError
+        );
         throw new Error(
           `Failed to analyze request: ${analyzeError instanceof Error ? analyzeError.message : 'Unknown error'}`
         );
@@ -166,7 +175,10 @@ class BackgroundChatService {
           handleStatusUpdate
         );
       } catch (executeError) {
-        console.error('[BackgroundChatService] Error executing plan:', executeError);
+        console.error(
+          '[BackgroundChatService] Error executing plan:',
+          executeError
+        );
         throw new Error(
           `Failed to execute plan: ${executeError instanceof Error ? executeError.message : 'Unknown error'}`
         );
@@ -295,7 +307,10 @@ class BackgroundChatService {
           'Session timeout due to inactivity'
         );
       } catch (err) {
-        console.error(`[BackgroundChatService] Error cleaning up session ${sessionId}:`, err);
+        console.error(
+          `[BackgroundChatService] Error cleaning up session ${sessionId}:`,
+          err
+        );
       }
     }
 

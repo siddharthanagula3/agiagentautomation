@@ -12,16 +12,23 @@ import { supabase } from '@shared/lib/supabase-client';
 /**
  * Sync file to database for persistence across page refreshes
  */
-async function syncFileToDatabase(sessionId: string, filePath: string, content: string): Promise<void> {
+async function syncFileToDatabase(
+  sessionId: string,
+  filePath: string,
+  content: string
+): Promise<void> {
   try {
-    const { error } = await supabase.from('vibe_files').upsert({
-      session_id: sessionId,
-      path: filePath,
-      content: content,
-      updated_at: new Date().toISOString()
-    }, {
-      onConflict: 'session_id,path'
-    });
+    const { error } = await supabase.from('vibe_files').upsert(
+      {
+        session_id: sessionId,
+        path: filePath,
+        content: content,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: 'session_id,path',
+      }
+    );
 
     if (error) {
       console.error('[Vibe] Failed to sync file to database:', error);
@@ -117,7 +124,7 @@ function normalizeFilePath(path: string): string {
   // SECURITY FIX: Prevent directory traversal attacks
   // Remove any ../ sequences that could escape the sandbox
   // Split by / and filter out any .. segments
-  const segments = normalized.split('/').filter(segment => {
+  const segments = normalized.split('/').filter((segment) => {
     // Remove empty segments and parent directory references
     if (segment === '' || segment === '.' || segment === '..') {
       return false;
@@ -188,7 +195,10 @@ function mapLanguageToMonaco(language: string): string {
 /**
  * Create files in vibeFileSystem and persist to database
  */
-export async function createFilesInFileSystem(files: ExtractedFile[], sessionId?: string): Promise<number> {
+export async function createFilesInFileSystem(
+  files: ExtractedFile[],
+  sessionId?: string
+): Promise<number> {
   let created = 0;
 
   for (const file of files) {

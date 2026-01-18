@@ -12,6 +12,7 @@ import {
   useInfiniteQuery,
 } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { useNotificationStore } from './notification-store';
 
 // Configure query client with optimized defaults
 export const queryClient = new QueryClient({
@@ -90,14 +91,21 @@ export const queryKeys = {
 
   // Chat
   chat: {
+    all: () => ['chat'] as const,
     conversations: () => ['chat', 'conversations'] as const,
     conversation: (id: string) => ['chat', 'conversation', id] as const,
+    sessions: (userId: string) => ['chat', 'sessions', userId] as const,
+    session: (sessionId: string) => ['chat', 'session', sessionId] as const,
     messages: (conversationId: string) =>
       ['chat', 'messages', conversationId] as const,
+    messageCount: (sessionId: string) =>
+      ['chat', 'messageCount', sessionId] as const,
     models: () => ['chat', 'models'] as const,
+    search: (userId: string, query: string) =>
+      ['chat', 'search', userId, query] as const,
   },
 
-  // Employees
+  // Employees / Marketplace
   employees: {
     all: () => ['employees'] as const,
     list: (filters?: unknown) => ['employees', 'list', filters] as const,
@@ -106,24 +114,49 @@ export const queryKeys = {
     categories: () => ['employees', 'categories'] as const,
     owned: () => ['employees', 'owned'] as const,
     favorites: () => ['employees', 'favorites'] as const,
+    marketplace: (filters?: {
+      category?: string;
+      search?: string;
+      sortBy?: string;
+    }) => ['employees', 'marketplace', filters] as const,
+    purchased: (userId: string) => ['employees', 'purchased', userId] as const,
   },
 
   // Workforce
   workforce: {
+    all: () => ['workforce'] as const,
     jobs: () => ['workforce', 'jobs'] as const,
     job: (id: string) => ['workforce', 'job', id] as const,
     workers: () => ['workforce', 'workers'] as const,
     worker: (id: string) => ['workforce', 'worker', id] as const,
     templates: () => ['workforce', 'templates'] as const,
     stats: () => ['workforce', 'stats'] as const,
+    hired: (userId: string) => ['workforce', 'hired', userId] as const,
   },
 
   // Billing
   billing: {
+    all: () => ['billing'] as const,
     subscription: () => ['billing', 'subscription'] as const,
+    plan: (userId: string) => ['billing', 'plan', userId] as const,
     invoices: () => ['billing', 'invoices'] as const,
     paymentMethods: () => ['billing', 'payment-methods'] as const,
     usage: () => ['billing', 'usage'] as const,
+    tokenBalance: (userId: string) =>
+      ['billing', 'tokenBalance', userId] as const,
+    tokenUsage: (userId: string) => ['billing', 'tokenUsage', userId] as const,
+    analytics: (userId: string, timeRange: string) =>
+      ['billing', 'analytics', userId, timeRange] as const,
+  },
+
+  // Settings
+  settings: {
+    all: () => ['settings'] as const,
+    profile: (userId?: string) => ['settings', 'profile', userId] as const,
+    preferences: (userId?: string) =>
+      ['settings', 'preferences', userId] as const,
+    apiKeys: (userId?: string) => ['settings', 'apiKeys', userId] as const,
+    notifications: () => ['settings', 'notifications'] as const,
   },
 
   // System
@@ -134,13 +167,8 @@ export const queryKeys = {
   },
 } as const;
 
-// Error types for better error handling
-export interface APIError {
-  message: string;
-  code?: string;
-  status?: number;
-  details?: unknown;
-}
+// Re-export ApiError from shared types for convenience
+export type { ApiError as APIError } from '@shared/types';
 
 // Custom error class
 export class APIException extends Error {
@@ -157,11 +185,36 @@ export class APIException extends Error {
   }
 }
 
-// Generic API response type
-export interface APIResponse<T = unknown> {
+/**
+ * Handle 402 Payment Required responses by showing upgrade notification
+ */
+function handlePaymentRequired(): void {
+  const { addNotification } = useNotificationStore.getState();
+
+  addNotification({
+    type: 'warning',
+    title: 'Upgrade Required',
+    message:
+      'This feature requires a paid plan. Please upgrade to continue using premium features.',
+    priority: 'high',
+    persistent: true,
+    category: 'billing',
+    actionLabel: 'Upgrade Now',
+    actionUrl: '/billing',
+    onAction: () => {
+      window.location.href = '/billing';
+    },
+  });
+}
+
+// Re-export ApiResponse from shared types
+// Note: The shared ApiResponse is slightly different but compatible
+import type { ApiError, ApiResponse as SharedApiResponse } from '@shared/types';
+
+// Extended API response type for query client with pagination meta
+export interface APIResponse<T = unknown>
+  extends Omit<SharedApiResponse<T>, 'data'> {
   data: T;
-  message?: string;
-  success: boolean;
   errors?: string[];
   meta?: {
     page?: number;
@@ -201,6 +254,16 @@ export const apiFetch = async <T = unknown>(
 
   try {
     const response = await fetch(fullUrl, config);
+
+    // Handle 402 Payment Required specifically
+    if (response.status === 402) {
+      handlePaymentRequired();
+      throw new APIException({
+        message: 'Payment required - please upgrade your plan',
+        status: 402,
+        code: 'PAYMENT_REQUIRED',
+      });
+    }
 
     // Handle non-JSON responses
     const contentType = response.headers.get('content-type');

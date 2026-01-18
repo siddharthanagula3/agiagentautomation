@@ -96,8 +96,8 @@ interface PooledConnection {
   metrics: ConnectionMetrics;
   config: Required<ConnectionConfig>;
   messageQueue: WebSocketMessage[];
-  heartbeatTimer?: NodeJS.Timeout;
-  reconnectTimer?: NodeJS.Timeout;
+  heartbeatTimer?: ReturnType<typeof setInterval>;
+  reconnectTimer?: ReturnType<typeof setTimeout>;
   listeners: Map<WebSocketEventType, Set<(event: WebSocketEvent) => void>>;
 }
 

@@ -14,7 +14,10 @@ export type FeatureFlag =
   | 'api_abuse_prevention'
   | 'rate_limiting'
   | 'token_enforcement'
-  | 'html_sanitization';
+  | 'html_sanitization'
+  | 'employee_input_sanitization'
+  | 'employee_output_validation'
+  | 'sandwich_defense';
 
 export interface RolloutConfig {
   enabled: boolean;
@@ -58,6 +61,21 @@ const DEFAULT_ROLLOUTS: Record<FeatureFlag, RolloutConfig> = {
   html_sanitization: {
     enabled: true,
     percentage: 100, // Full rollout - critical security
+  },
+
+  employee_input_sanitization: {
+    enabled: true,
+    percentage: 100, // Full rollout - critical security for AI employees
+  },
+
+  employee_output_validation: {
+    enabled: true,
+    percentage: 100, // Full rollout - prevents data leakage
+  },
+
+  sandwich_defense: {
+    enabled: true,
+    percentage: 100, // Full rollout - critical for prompt injection defense
   },
 };
 
@@ -226,6 +244,50 @@ export function graduateRollout(
 }
 
 /**
+ * Send security alert when a feature is auto-disabled
+ * This logs to console and can optionally send to external monitoring services
+ */
+async function sendSecurityAlert(
+  feature: FeatureFlag,
+  errorRate: number
+): Promise<void> {
+  const alertPayload = {
+    type: 'FEATURE_AUTO_DISABLED',
+    feature,
+    errorRate: errorRate.toFixed(2),
+    timestamp: new Date().toISOString(),
+    message: `Security feature "${feature}" was automatically disabled due to high error rate (${errorRate.toFixed(2)}%)`,
+  };
+
+  // Always log to console for local visibility
+  console.error('[SECURITY ALERT]', JSON.stringify(alertPayload, null, 2));
+
+  // Attempt to send to monitoring webhook if configured
+  const webhookUrl = import.meta.env.VITE_MONITORING_WEBHOOK_URL;
+  if (webhookUrl) {
+    try {
+      await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(alertPayload),
+      });
+      console.log('[Gradual Rollout] Alert sent to monitoring service');
+    } catch (error) {
+      console.error(
+        '[Gradual Rollout] Failed to send alert to monitoring service:',
+        error
+      );
+    }
+  }
+
+  // In production environments, you might want to integrate with:
+  // - Sentry: Sentry.captureMessage(alertPayload.message, 'error')
+  // - PagerDuty: via their Events API
+  // - Slack: via incoming webhooks
+  // - Email: via Netlify function or SendGrid
+}
+
+/**
  * Track feature usage/errors for monitoring
  */
 export function trackFeatureUsage(
@@ -261,8 +323,8 @@ export function trackFeatureUsage(
       // Auto-disable feature
       updateRollout(feature, { enabled: false });
 
-      // Alert/notify admins
-      // TODO: Send alert to monitoring service
+      // Alert/notify admins via console error and optional webhook
+      sendSecurityAlert(feature, errorRate);
     }
   }
 }

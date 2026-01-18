@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { ScrollArea } from '@shared/ui/scroll-area';
 import { Loader2, Bot } from 'lucide-react';
 import type { ChatMessage } from '../../types';
@@ -8,6 +8,14 @@ import { useChatStore } from '@shared/stores/chat-store';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
 import { Button } from '@shared/ui/button';
 import { AlertCircle } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@shared/ui/dialog';
+import { Textarea } from '@shared/ui/textarea';
 
 /**
  * Type-safe interface for message metadata fields
@@ -123,22 +131,37 @@ const MessageListComponent: React.FC<MessageListProps> = ({
   const reactToMessage = useChatStore((state) => state.reactToMessage);
   const updateMessage = useChatStore((state) => state.updateMessage);
 
+  // Edit dialog state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState('');
+
   const handleEdit = useCallback(
     (messageId: string) => {
-      // TODO: Replace with proper dialog component (e.g., using a modal with textarea)
-      // The browser prompt() is deprecated and blocks the UI thread
       const message = messages.find((m) => m.id === messageId);
       if (!message) return;
 
-      console.log(
-        'TODO: Implement edit dialog for message:',
-        messageId,
-        message.content
-      );
-      // When implementing the dialog, call: onEdit(messageId, newContent);
+      setEditingMessageId(messageId);
+      setEditContent(message.content);
+      setEditDialogOpen(true);
     },
     [messages]
   );
+
+  const handleEditSave = useCallback(() => {
+    if (editingMessageId && editContent.trim()) {
+      onEdit(editingMessageId, editContent.trim());
+    }
+    setEditDialogOpen(false);
+    setEditingMessageId(null);
+    setEditContent('');
+  }, [editingMessageId, editContent, onEdit]);
+
+  const handleEditCancel = useCallback(() => {
+    setEditDialogOpen(false);
+    setEditingMessageId(null);
+    setEditContent('');
+  }, []);
 
   const handlePin = (messageId: string) => {
     updateMessage(messageId, {
@@ -162,7 +185,9 @@ const MessageListComponent: React.FC<MessageListProps> = ({
         <div className="flex h-full items-center justify-center p-8">
           <div className="text-center">
             <AlertCircle className="mx-auto mb-4 h-12 w-12 text-destructive" />
-            <h3 className="mb-2 text-lg font-semibold">Message Display Error</h3>
+            <h3 className="mb-2 text-lg font-semibold">
+              Message Display Error
+            </h3>
             <p className="mb-4 text-sm text-muted-foreground">
               Something went wrong displaying the chat messages.
             </p>
@@ -235,11 +260,39 @@ const MessageListComponent: React.FC<MessageListProps> = ({
 
           {/* Loading indicator - fallback if not using thinking indicator */}
           {isLoading &&
-            messages.every((m) => !getValidatedMetadata(m.metadata).isThinking) && (
+            messages.every(
+              (m) => !getValidatedMetadata(m.metadata).isThinking
+            ) && (
               <EmployeeThinkingIndicator message="Processing your request..." />
             )}
         </div>
       </ScrollArea>
+
+      {/* Edit Message Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Message</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              placeholder="Edit your message..."
+              className="min-h-[150px] resize-y"
+              autoFocus
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={handleEditCancel}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditSave} disabled={!editContent.trim()}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ErrorBoundary>
   );
 };

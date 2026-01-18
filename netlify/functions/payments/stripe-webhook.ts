@@ -625,70 +625,79 @@ async function processStripeEvent(
 
       // Handle Token Pack Purchase
       if (session.metadata?.type === 'token_pack_purchase' && userId) {
-        const tokens = parseInt(session.metadata.tokens || '0', 10);
         const packId = session.metadata.packId;
+
+        // SECURITY FIX: Server-side price validation to prevent token manipulation
+        // Define trusted pack configurations (must match buy-token-pack.ts)
+        const PACK_PRICES: Record<string, { tokens: number; price: number }> = {
+          'pack_500k': { tokens: 500000, price: 10 },
+          'pack_1.5m': { tokens: 1500000, price: 25 },
+          'pack_5m': { tokens: 5000000, price: 75 },
+          'pack_10m': { tokens: 10000000, price: 130 },
+        };
+
+        // Validate pack ID exists
+        const expectedPack = PACK_PRICES[packId];
+        if (!expectedPack) {
+          logger.error('Invalid pack ID in purchase', {
+            requestId,
+            userId,
+            packId,
+            sessionId: session.id,
+          });
+          throw new Error(`Invalid pack ID: ${packId}`);
+        }
+
+        // Validate amount paid matches expected price
+        const paidAmount = (session.amount_total || 0) / 100; // Convert cents to dollars
+        if (paidAmount < expectedPack.price) {
+          logger.error('Token pack price mismatch - potential fraud attempt', {
+            requestId,
+            userId,
+            packId,
+            expectedPrice: expectedPack.price,
+            paidAmount,
+            sessionId: session.id,
+          });
+          throw new Error(
+            `Payment amount ($${paidAmount}) does not match pack price ($${expectedPack.price})`
+          );
+        }
+
+        // CRITICAL: Use expected tokens from trusted lookup, NOT metadata
+        const tokens = expectedPack.tokens;
 
         logger.info('Processing token pack purchase', {
           requestId,
           userId,
           tokens,
           packId,
+          paidAmount,
           sessionId: session.id,
         });
 
-        if (tokens > 0) {
-          try {
-            // Use the database function to safely update token balance
-            const { data, error } = await supabase.rpc(
-              'update_user_token_balance',
-              {
-                p_user_id: userId,
-                p_tokens: tokens,
-                p_transaction_type: 'purchase',
-                p_transaction_id: session.id,
-                p_description: `Purchased ${(tokens / 1000000).toFixed(1)}M token pack`,
-                p_metadata: {
-                  packId,
-                  sessionId: session.id,
-                  amountPaid: session.amount_total,
-                  currency: session.currency,
-                },
-              }
-            );
-
-            if (error) {
-              logger.error('Failed to update user token balance:', {
-                requestId,
-                userId,
-                tokens,
-                error,
-              });
-              throw error;
-            }
-
-            logger.info('Successfully added tokens to user balance', {
-              requestId,
-              userId,
-              tokens,
-              newBalance: data,
-            });
-
-            // Log audit trail
-            await logAuditTrail(
-              requestId,
-              stripeEvent.id,
-              'token_pack_purchase',
-              'tokens_added',
-              {
-                userId,
-                tokens,
+        try {
+          // Use the database function to safely update token balance
+          const { data, error } = await supabase.rpc(
+            'update_user_token_balance',
+            {
+              p_user_id: userId,
+              p_tokens: tokens,
+              p_transaction_type: 'purchase',
+              p_transaction_id: session.id,
+              p_description: `Purchased ${(tokens / 1000000).toFixed(1)}M token pack`,
+              p_metadata: {
                 packId,
                 sessionId: session.id,
-                newBalance: data,
-              }
-            );
-          } catch (error) {
-            logger.error('Error processing token pack purchase:', {
+                amountPaid: session.amount_total,
+                currency: session.currency,
+                validatedPrice: expectedPack.price,
+              },
+            }
+          );
+
+          if (error) {
+            logger.error('Failed to update user token balance:', {
               requestId,
               userId,
               tokens,
@@ -696,12 +705,38 @@ async function processStripeEvent(
             });
             throw error;
           }
-        } else {
-          logger.warn('Invalid token amount in purchase', {
+
+          logger.info('Successfully added tokens to user balance', {
             requestId,
             userId,
             tokens,
+            newBalance: data,
           });
+
+          // Log audit trail
+          await logAuditTrail(
+            requestId,
+            stripeEvent.id,
+            'token_pack_purchase',
+            'tokens_added',
+            {
+              userId,
+              tokens,
+              packId,
+              sessionId: session.id,
+              newBalance: data,
+              paidAmount,
+              validatedPrice: expectedPack.price,
+            }
+          );
+        } catch (error) {
+          logger.error('Error processing token pack purchase:', {
+            requestId,
+            userId,
+            tokens,
+            error,
+          });
+          throw error;
         }
 
         break;
@@ -926,8 +961,34 @@ async function processStripeEvent(
       logger.info('Subscription deleted', { subscriptionId: subscription.id });
 
       const now = new Date();
+      const FREE_TIER_TOKEN_LIMIT = 1000000; // 1M tokens
 
       try {
+        // First, fetch the user to get their ID for token capping
+        const { data: user, error: userFetchError } = await supabase
+          .from('users')
+          .select('id, plan')
+          .eq('stripe_subscription_id', subscription.id)
+          .maybeSingle();
+
+        if (userFetchError) {
+          logger.error('Failed to fetch user for subscription cancellation:', {
+            subscriptionId: subscription.id,
+            error: userFetchError,
+          });
+          throw userFetchError;
+        }
+
+        if (!user) {
+          logger.warn('No user found for cancelled subscription', {
+            subscriptionId: subscription.id,
+          });
+          // Still process as successful - subscription might have been manually deleted
+          break;
+        }
+
+        const previousPlan = user.plan;
+
         // Downgrade user to free plan with retry logic
         let retryCount = 0;
         const maxRetries = 3;
@@ -960,6 +1021,8 @@ async function processStripeEvent(
             } else {
               logger.info('Successfully downgraded user to free plan', {
                 subscriptionId: subscription.id,
+                userId: user.id,
+                previousPlan,
               });
               break;
             }
@@ -986,6 +1049,151 @@ async function processStripeEvent(
           throw new Error(
             `Failed to downgrade user subscription: ${userUpdateError.message || 'Unknown error'}`
           );
+        }
+
+        // SECURITY: Cap token balance at free tier limit to prevent abuse
+        // Users should not retain excess tokens after cancellation
+        logger.info('Capping token balance for cancelled subscription', {
+          requestId,
+          userId: user.id,
+          subscriptionId: subscription.id,
+          previousPlan,
+          capAmount: FREE_TIER_TOKEN_LIMIT,
+        });
+
+        try {
+          // Call the cap_user_token_balance RPC function with retry logic
+          let capRetryCount = 0;
+          let capError: Error | null = null;
+
+          while (capRetryCount < maxRetries) {
+            try {
+              const { data: capResult, error: rpcError } = await supabase.rpc(
+                'cap_user_token_balance',
+                {
+                  p_user_id: user.id,
+                  p_cap_amount: FREE_TIER_TOKEN_LIMIT,
+                  p_reason: `Subscription cancelled (was ${previousPlan} plan) - balance capped to free tier limit`,
+                }
+              );
+
+              if (rpcError) {
+                capError = rpcError;
+                capRetryCount++;
+                if (capRetryCount < maxRetries) {
+                  logger.warn(
+                    `Token cap attempt ${capRetryCount} failed, retrying...`,
+                    { requestId, error: rpcError }
+                  );
+                  await new Promise((resolve) =>
+                    setTimeout(resolve, 1000 * capRetryCount)
+                  );
+                }
+              } else {
+                // Log the capping result
+                const result = capResult?.[0] || capResult;
+                if (result?.was_capped) {
+                  logger.info('Successfully capped user token balance', {
+                    requestId,
+                    userId: user.id,
+                    previousBalance: result.previous_balance,
+                    newBalance: result.new_balance,
+                    tokensRemoved: result.tokens_removed,
+                    subscriptionId: subscription.id,
+                  });
+
+                  // Log audit trail for token capping
+                  await logAuditTrail(
+                    requestId,
+                    stripeEvent.id,
+                    'subscription_token_cap',
+                    'tokens_capped',
+                    {
+                      userId: user.id,
+                      previousPlan,
+                      previousBalance: result.previous_balance,
+                      newBalance: result.new_balance,
+                      tokensRemoved: result.tokens_removed,
+                      capAmount: FREE_TIER_TOKEN_LIMIT,
+                      subscriptionId: subscription.id,
+                    }
+                  );
+                } else {
+                  logger.info('User token balance was already within free tier limit', {
+                    requestId,
+                    userId: user.id,
+                    currentBalance: result?.previous_balance || 'unknown',
+                    subscriptionId: subscription.id,
+                  });
+
+                  // Still log for audit even if no capping was needed
+                  await logAuditTrail(
+                    requestId,
+                    stripeEvent.id,
+                    'subscription_token_cap',
+                    'no_cap_needed',
+                    {
+                      userId: user.id,
+                      previousPlan,
+                      currentBalance: result?.previous_balance,
+                      capAmount: FREE_TIER_TOKEN_LIMIT,
+                      subscriptionId: subscription.id,
+                    }
+                  );
+                }
+                break;
+              }
+            } catch (error) {
+              capError = error instanceof Error ? error : new Error(String(error));
+              capRetryCount++;
+              if (capRetryCount < maxRetries) {
+                logger.warn(
+                  `Token cap attempt ${capRetryCount} failed with exception, retrying...`,
+                  { requestId, error }
+                );
+                await new Promise((resolve) =>
+                  setTimeout(resolve, 1000 * capRetryCount)
+                );
+              }
+            }
+          }
+
+          if (capError && capRetryCount >= maxRetries) {
+            // Log the failure but don't throw - plan downgrade succeeded
+            // Token capping failure should be investigated but not block the webhook
+            logger.error(
+              `Failed to cap token balance after ${maxRetries} attempts - MANUAL REVIEW REQUIRED`,
+              {
+                requestId,
+                userId: user.id,
+                subscriptionId: subscription.id,
+                error: capError,
+              }
+            );
+
+            // Log audit trail for failed capping
+            await logAuditTrail(
+              requestId,
+              stripeEvent.id,
+              'subscription_token_cap',
+              'cap_failed',
+              {
+                userId: user.id,
+                previousPlan,
+                subscriptionId: subscription.id,
+                error: capError instanceof Error ? capError.message : String(capError),
+                requiresManualReview: true,
+              }
+            );
+          }
+        } catch (error) {
+          // Non-critical error - log but don't block webhook
+          logger.error('Exception during token capping:', {
+            requestId,
+            userId: user.id,
+            subscriptionId: subscription.id,
+            error,
+          });
         }
       } catch (error) {
         logger.error('Error processing subscription deleted event:', error);
@@ -1035,6 +1243,614 @@ async function processStripeEvent(
         paymentMethodId: paymentMethod.id,
         customerId: paymentMethod.customer,
       });
+      break;
+    }
+
+    case 'charge.refunded': {
+      const charge = stripeEvent.data.object as Stripe.Charge;
+      logger.info('Charge refunded', {
+        requestId,
+        chargeId: charge.id,
+        amountRefunded: charge.amount_refunded,
+        refunded: charge.refunded,
+      });
+
+      // Find the original token purchase from token_transactions
+      try {
+        const { data: transactions, error: fetchError } = await supabase
+          .from('token_transactions')
+          .select('*')
+          .eq('transaction_id', charge.id)
+          .eq('transaction_type', 'purchase')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (fetchError) {
+          logger.error('Failed to fetch original token transaction:', {
+            requestId,
+            chargeId: charge.id,
+            error: fetchError,
+          });
+          throw fetchError;
+        }
+
+        if (!transactions || transactions.length === 0) {
+          // Check if this is a subscription payment instead of token purchase
+          const { data: subscriptionTxns, error: subFetchError } = await supabase
+            .from('token_transactions')
+            .select('*')
+            .eq('transaction_id', charge.id)
+            .eq('transaction_type', 'subscription_grant')
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          if (subFetchError) {
+            logger.error('Failed to fetch subscription transaction:', {
+              requestId,
+              chargeId: charge.id,
+              error: subFetchError,
+            });
+            throw subFetchError;
+          }
+
+          if (subscriptionTxns && subscriptionTxns.length > 0) {
+            // Subscription refund - deduct the granted tokens
+            const transaction = subscriptionTxns[0];
+            const tokensToDeduct = -transaction.tokens; // Negative to deduct
+
+            logger.info('Processing subscription refund', {
+              requestId,
+              userId: transaction.user_id,
+              tokensToDeduct: Math.abs(tokensToDeduct),
+              originalTransaction: transaction.id,
+            });
+
+            // Deduct tokens atomically with retry logic
+            let retryCount = 0;
+            const maxRetries = 3;
+            let refundError: Error | null = null;
+
+            while (retryCount < maxRetries) {
+              try {
+                const { data: newBalance, error: deductError } =
+                  await supabase.rpc('update_user_token_balance', {
+                    p_user_id: transaction.user_id,
+                    p_tokens: tokensToDeduct,
+                    p_transaction_type: 'refund',
+                    p_transaction_id: charge.id,
+                    p_description: `Refund for subscription payment - ${Math.abs(tokensToDeduct).toLocaleString()} tokens deducted`,
+                    p_metadata: {
+                      chargeId: charge.id,
+                      amountRefunded: charge.amount_refunded,
+                      originalTransactionId: transaction.id,
+                      refundReason: charge.refunds?.data?.[0]?.reason || 'unknown',
+                      refundedAt: new Date().toISOString(),
+                    },
+                  });
+
+                if (deductError) {
+                  refundError = deductError;
+                  retryCount++;
+                  if (retryCount < maxRetries) {
+                    logger.warn(
+                      `Token deduction attempt ${retryCount} failed, retrying...`,
+                      { requestId, error: deductError }
+                    );
+                    await new Promise((resolve) =>
+                      setTimeout(resolve, 1000 * retryCount)
+                    );
+                  }
+                } else {
+                  logger.info('Successfully processed subscription refund', {
+                    requestId,
+                    userId: transaction.user_id,
+                    tokensDeducted: Math.abs(tokensToDeduct),
+                    newBalance,
+                  });
+
+                  // Log audit trail
+                  await logAuditTrail(
+                    requestId,
+                    stripeEvent.id,
+                    'subscription_refund',
+                    'tokens_deducted',
+                    {
+                      userId: transaction.user_id,
+                      tokensDeducted: Math.abs(tokensToDeduct),
+                      newBalance,
+                      chargeId: charge.id,
+                      amountRefunded: charge.amount_refunded,
+                    }
+                  );
+                  break;
+                }
+              } catch (error) {
+                refundError = error;
+                retryCount++;
+                if (retryCount < maxRetries) {
+                  logger.warn(
+                    `Token deduction attempt ${retryCount} failed with exception, retrying...`,
+                    { requestId, error }
+                  );
+                  await new Promise((resolve) =>
+                    setTimeout(resolve, 1000 * retryCount)
+                  );
+                }
+              }
+            }
+
+            if (refundError && retryCount >= maxRetries) {
+              logger.error(
+                `Failed to process subscription refund after ${maxRetries} attempts:`,
+                { requestId, error: refundError }
+              );
+              throw new Error(
+                `Failed to process subscription refund: ${refundError.message || 'Unknown error'}`
+              );
+            }
+          } else {
+            logger.warn('No matching transaction found for refunded charge', {
+              requestId,
+              chargeId: charge.id,
+            });
+            // Log audit trail for unmatched refund
+            await logAuditTrail(
+              requestId,
+              stripeEvent.id,
+              'charge_refunded',
+              'no_matching_transaction',
+              {
+                chargeId: charge.id,
+                amountRefunded: charge.amount_refunded,
+                message: 'No matching token transaction found',
+              }
+            );
+          }
+        } else {
+          // Token pack purchase refund
+          const transaction = transactions[0];
+          const tokensToDeduct = -transaction.tokens; // Negative to deduct
+
+          logger.info('Processing token pack refund', {
+            requestId,
+            userId: transaction.user_id,
+            tokensToDeduct: Math.abs(tokensToDeduct),
+            originalTransaction: transaction.id,
+          });
+
+          // Deduct tokens atomically with retry logic
+          let retryCount = 0;
+          const maxRetries = 3;
+          let refundError: Error | null = null;
+
+          while (retryCount < maxRetries) {
+            try {
+              const { data: newBalance, error: deductError } = await supabase.rpc(
+                'update_user_token_balance',
+                {
+                  p_user_id: transaction.user_id,
+                  p_tokens: tokensToDeduct,
+                  p_transaction_type: 'refund',
+                  p_transaction_id: charge.id,
+                  p_description: `Refund for token pack purchase - ${Math.abs(tokensToDeduct).toLocaleString()} tokens deducted`,
+                  p_metadata: {
+                    chargeId: charge.id,
+                    amountRefunded: charge.amount_refunded,
+                    originalTransactionId: transaction.id,
+                    refundReason: charge.refunds?.data?.[0]?.reason || 'unknown',
+                    refundedAt: new Date().toISOString(),
+                  },
+                }
+              );
+
+              if (deductError) {
+                refundError = deductError;
+                retryCount++;
+                if (retryCount < maxRetries) {
+                  logger.warn(
+                    `Token deduction attempt ${retryCount} failed, retrying...`,
+                    { requestId, error: deductError }
+                  );
+                  await new Promise((resolve) =>
+                    setTimeout(resolve, 1000 * retryCount)
+                  );
+                }
+              } else {
+                logger.info('Successfully processed token pack refund', {
+                  requestId,
+                  userId: transaction.user_id,
+                  tokensDeducted: Math.abs(tokensToDeduct),
+                  newBalance,
+                });
+
+                // Log audit trail
+                await logAuditTrail(
+                  requestId,
+                  stripeEvent.id,
+                  'token_pack_refund',
+                  'tokens_deducted',
+                  {
+                    userId: transaction.user_id,
+                    tokensDeducted: Math.abs(tokensToDeduct),
+                    newBalance,
+                    chargeId: charge.id,
+                    amountRefunded: charge.amount_refunded,
+                  }
+                );
+                break;
+              }
+            } catch (error) {
+              refundError = error;
+              retryCount++;
+              if (retryCount < maxRetries) {
+                logger.warn(
+                  `Token deduction attempt ${retryCount} failed with exception, retrying...`,
+                  { requestId, error }
+                );
+                await new Promise((resolve) =>
+                  setTimeout(resolve, 1000 * retryCount)
+                );
+              }
+            }
+          }
+
+          if (refundError && retryCount >= maxRetries) {
+            logger.error(
+              `Failed to process token pack refund after ${maxRetries} attempts:`,
+              { requestId, error: refundError }
+            );
+            throw new Error(
+              `Failed to process token pack refund: ${refundError.message || 'Unknown error'}`
+            );
+          }
+        }
+      } catch (error) {
+        logger.error('Error processing charge refund event:', {
+          requestId,
+          chargeId: charge.id,
+          error,
+        });
+        throw error;
+      }
+
+      break;
+    }
+
+    case 'charge.dispute.created': {
+      const dispute = stripeEvent.data.object as Stripe.Dispute;
+      logger.info('Dispute created', {
+        requestId,
+        disputeId: dispute.id,
+        chargeId: dispute.charge,
+        amount: dispute.amount,
+        reason: dispute.reason,
+        status: dispute.status,
+      });
+
+      try {
+        // Find the original transaction
+        const { data: transactions, error: fetchError } = await supabase
+          .from('token_transactions')
+          .select('*')
+          .eq('transaction_id', dispute.charge as string)
+          .in('transaction_type', ['purchase', 'subscription_grant'])
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (fetchError) {
+          logger.error('Failed to fetch transaction for dispute:', {
+            requestId,
+            disputeId: dispute.id,
+            error: fetchError,
+          });
+          throw fetchError;
+        }
+
+        if (transactions && transactions.length > 0) {
+          const transaction = transactions[0];
+
+          // Update user account to flag dispute
+          const { error: userUpdateError } = await supabase
+            .from('users')
+            .update({
+              // Note: Add a 'dispute_status' column to users table if you want to track this
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', transaction.user_id);
+
+          if (userUpdateError) {
+            logger.warn('Failed to update user account for dispute:', {
+              requestId,
+              userId: transaction.user_id,
+              error: userUpdateError,
+            });
+            // Non-critical - continue processing
+          }
+
+          // Log dispute to audit trail
+          await logAuditTrail(
+            requestId,
+            stripeEvent.id,
+            'charge_dispute_created',
+            'dispute_flagged',
+            {
+              userId: transaction.user_id,
+              disputeId: dispute.id,
+              chargeId: dispute.charge,
+              amount: dispute.amount,
+              reason: dispute.reason,
+              status: dispute.status,
+              tokensInvolved: transaction.tokens,
+              transactionType: transaction.transaction_type,
+              evidence_due_by: dispute.evidence_details?.due_by,
+            }
+          );
+
+          logger.info('Successfully logged dispute for user account', {
+            requestId,
+            userId: transaction.user_id,
+            disputeId: dispute.id,
+            tokensInvolved: transaction.tokens,
+          });
+
+          // Note: You may want to deduct tokens immediately or wait for dispute resolution
+          // For now, we just log the dispute. Consider implementing automatic token deduction
+          // or account suspension based on your business requirements.
+          logger.warn('DISPUTE CREATED - Manual review recommended', {
+            requestId,
+            userId: transaction.user_id,
+            disputeId: dispute.id,
+            amount: dispute.amount,
+            reason: dispute.reason,
+            tokensInvolved: transaction.tokens,
+          });
+        } else {
+          logger.warn('No matching transaction found for disputed charge', {
+            requestId,
+            disputeId: dispute.id,
+            chargeId: dispute.charge,
+          });
+
+          // Log audit trail for unmatched dispute
+          await logAuditTrail(
+            requestId,
+            stripeEvent.id,
+            'charge_dispute_created',
+            'no_matching_transaction',
+            {
+              disputeId: dispute.id,
+              chargeId: dispute.charge,
+              amount: dispute.amount,
+              reason: dispute.reason,
+              message: 'No matching token transaction found',
+            }
+          );
+        }
+      } catch (error) {
+        logger.error('Error processing dispute created event:', {
+          requestId,
+          disputeId: dispute.id,
+          error,
+        });
+        throw error;
+      }
+
+      break;
+    }
+
+    case 'charge.dispute.closed': {
+      const dispute = stripeEvent.data.object as Stripe.Dispute;
+      logger.info('Dispute closed', {
+        requestId,
+        disputeId: dispute.id,
+        chargeId: dispute.charge,
+        status: dispute.status,
+      });
+
+      try {
+        // Find the original transaction
+        const { data: transactions, error: fetchError } = await supabase
+          .from('token_transactions')
+          .select('*')
+          .eq('transaction_id', dispute.charge as string)
+          .in('transaction_type', ['purchase', 'subscription_grant'])
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (fetchError) {
+          logger.error('Failed to fetch transaction for dispute closure:', {
+            requestId,
+            disputeId: dispute.id,
+            error: fetchError,
+          });
+          throw fetchError;
+        }
+
+        if (transactions && transactions.length > 0) {
+          const transaction = transactions[0];
+
+          // If dispute was lost, deduct tokens
+          if (dispute.status === 'lost') {
+            const tokensToDeduct = -transaction.tokens; // Negative to deduct
+
+            logger.info('Processing lost dispute - deducting tokens', {
+              requestId,
+              userId: transaction.user_id,
+              tokensToDeduct: Math.abs(tokensToDeduct),
+              disputeId: dispute.id,
+            });
+
+            // Deduct tokens atomically with retry logic
+            let retryCount = 0;
+            const maxRetries = 3;
+            let disputeError: Error | null = null;
+
+            while (retryCount < maxRetries) {
+              try {
+                const { data: newBalance, error: deductError } =
+                  await supabase.rpc('update_user_token_balance', {
+                    p_user_id: transaction.user_id,
+                    p_tokens: tokensToDeduct,
+                    p_transaction_type: 'chargeback',
+                    p_transaction_id: dispute.id,
+                    p_description: `Chargeback - dispute lost - ${Math.abs(tokensToDeduct).toLocaleString()} tokens deducted`,
+                    p_metadata: {
+                      disputeId: dispute.id,
+                      chargeId: dispute.charge,
+                      disputeReason: dispute.reason,
+                      disputeStatus: dispute.status,
+                      originalTransactionId: transaction.id,
+                      chargebackAt: new Date().toISOString(),
+                    },
+                  });
+
+                if (deductError) {
+                  disputeError = deductError;
+                  retryCount++;
+                  if (retryCount < maxRetries) {
+                    logger.warn(
+                      `Token deduction for lost dispute attempt ${retryCount} failed, retrying...`,
+                      { requestId, error: deductError }
+                    );
+                    await new Promise((resolve) =>
+                      setTimeout(resolve, 1000 * retryCount)
+                    );
+                  }
+                } else {
+                  logger.info('Successfully processed lost dispute token deduction', {
+                    requestId,
+                    userId: transaction.user_id,
+                    tokensDeducted: Math.abs(tokensToDeduct),
+                    newBalance,
+                  });
+
+                  // Log audit trail
+                  await logAuditTrail(
+                    requestId,
+                    stripeEvent.id,
+                    'dispute_lost',
+                    'tokens_deducted',
+                    {
+                      userId: transaction.user_id,
+                      tokensDeducted: Math.abs(tokensToDeduct),
+                      newBalance,
+                      disputeId: dispute.id,
+                      chargeId: dispute.charge,
+                    }
+                  );
+                  break;
+                }
+              } catch (error) {
+                disputeError = error;
+                retryCount++;
+                if (retryCount < maxRetries) {
+                  logger.warn(
+                    `Token deduction for lost dispute attempt ${retryCount} failed with exception, retrying...`,
+                    { requestId, error }
+                  );
+                  await new Promise((resolve) =>
+                    setTimeout(resolve, 1000 * retryCount)
+                  );
+                }
+              }
+            }
+
+            if (disputeError && retryCount >= maxRetries) {
+              logger.error(
+                `Failed to process lost dispute after ${maxRetries} attempts:`,
+                { requestId, error: disputeError }
+              );
+              throw new Error(
+                `Failed to process lost dispute: ${disputeError.message || 'Unknown error'}`
+              );
+            }
+          } else if (dispute.status === 'won') {
+            // Dispute won - no action needed, log for audit
+            logger.info('Dispute won - no token deduction needed', {
+              requestId,
+              userId: transaction.user_id,
+              disputeId: dispute.id,
+            });
+
+            await logAuditTrail(
+              requestId,
+              stripeEvent.id,
+              'dispute_won',
+              'no_action_needed',
+              {
+                userId: transaction.user_id,
+                disputeId: dispute.id,
+                chargeId: dispute.charge,
+                tokensPreserved: transaction.tokens,
+              }
+            );
+          }
+        } else {
+          logger.warn('No matching transaction found for closed dispute', {
+            requestId,
+            disputeId: dispute.id,
+            chargeId: dispute.charge,
+          });
+
+          // Log audit trail for unmatched dispute
+          await logAuditTrail(
+            requestId,
+            stripeEvent.id,
+            'charge_dispute_closed',
+            'no_matching_transaction',
+            {
+              disputeId: dispute.id,
+              chargeId: dispute.charge,
+              status: dispute.status,
+              message: 'No matching token transaction found',
+            }
+          );
+        }
+      } catch (error) {
+        logger.error('Error processing dispute closed event:', {
+          requestId,
+          disputeId: dispute.id,
+          error,
+        });
+        throw error;
+      }
+
+      break;
+    }
+
+    case 'payment_intent.canceled': {
+      const paymentIntent = stripeEvent.data.object as Stripe.PaymentIntent;
+      logger.info('Payment intent canceled', {
+        requestId,
+        paymentIntentId: paymentIntent.id,
+        amount: paymentIntent.amount,
+        cancellationReason: paymentIntent.cancellation_reason,
+      });
+
+      // Log audit trail for canceled payment intent
+      await logAuditTrail(
+        requestId,
+        stripeEvent.id,
+        'payment_intent_canceled',
+        'payment_canceled',
+        {
+          paymentIntentId: paymentIntent.id,
+          amount: paymentIntent.amount,
+          currency: paymentIntent.currency,
+          cancellationReason: paymentIntent.cancellation_reason,
+          canceledAt: new Date().toISOString(),
+          metadata: paymentIntent.metadata,
+        }
+      );
+
+      // Note: No token deduction needed - payment was canceled before completion
+      // If tokens were provisionally granted, they should be reverted here
+      // For now, we just log the cancellation
+      logger.info('Payment canceled before completion - no token impact', {
+        requestId,
+        paymentIntentId: paymentIntent.id,
+      });
+
       break;
     }
 

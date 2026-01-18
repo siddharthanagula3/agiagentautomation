@@ -6,6 +6,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/react/shallow';
 
 export interface VibeFile {
   id: string;
@@ -206,3 +207,48 @@ export const useVibeFileStore = create<VibeFileState>()(
     { name: 'VibeFileStore' }
   )
 );
+
+// ============================================================================
+// SELECTOR HOOKS (optimized with useShallow to prevent stale closures)
+// ============================================================================
+
+/**
+ * Selector for files record - returns stable reference
+ */
+export const useVibeFilesRecord = () =>
+  useVibeFileStore((state) => state.files);
+
+/**
+ * Selector for selected file IDs - returns stable reference when selection hasn't changed
+ */
+export const useSelectedFileIds = () =>
+  useVibeFileStore((state) => state.selectedFileIds);
+
+/**
+ * Selector for upload progress record - returns stable reference
+ */
+export const useUploadProgressRecord = () =>
+  useVibeFileStore((state) => state.uploadProgress);
+
+/**
+ * Selector for file loading and error state - uses useShallow for multi-value selection
+ */
+export const useVibeFileLoadingState = () =>
+  useVibeFileStore(
+    useShallow((state) => ({
+      isLoading: state.isLoading,
+      error: state.error,
+    }))
+  );
+
+/**
+ * Selector for a specific file by ID - returns stable reference when file hasn't changed
+ */
+export const useVibeFile = (fileId: string) =>
+  useVibeFileStore((state) => state.files[fileId]);
+
+/**
+ * Selector for a specific upload progress by ID
+ */
+export const useFileUploadProgress = (fileId: string) =>
+  useVibeFileStore((state) => state.uploadProgress[fileId]);

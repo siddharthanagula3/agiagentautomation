@@ -307,7 +307,7 @@ export function ArtifactPreview({
       ref={containerRef}
       className={cn(
         'mt-3 overflow-hidden rounded-xl border border-border bg-card shadow-lg',
-        isFullscreen && 'fixed inset-0 z-50 rounded-none',
+        isFullscreen && 'fixed inset-0 z-modal rounded-none',
         className
       )}
     >

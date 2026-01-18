@@ -147,7 +147,10 @@ export function getTechnicalErrorMessage(error: unknown): string {
 /**
  * Create an AppError from an unknown error
  */
-export function toAppError(error: unknown, defaultCode: ErrorCode = ErrorCodes.UNKNOWN): AppError {
+export function toAppError(
+  error: unknown,
+  defaultCode: ErrorCode = ErrorCodes.UNKNOWN
+): AppError {
   if (error instanceof AppError) {
     return error;
   }
@@ -160,7 +163,10 @@ export function toAppError(error: unknown, defaultCode: ErrorCode = ErrorCodes.U
   let statusCode = 500;
   let retryable = false;
 
-  if (messageLower.includes('network') || messageLower.includes('failed to fetch')) {
+  if (
+    messageLower.includes('network') ||
+    messageLower.includes('failed to fetch')
+  ) {
     code = ErrorCodes.NETWORK_ERROR;
     statusCode = 0;
     retryable = true;
@@ -168,15 +174,24 @@ export function toAppError(error: unknown, defaultCode: ErrorCode = ErrorCodes.U
     code = ErrorCodes.TIMEOUT;
     statusCode = 408;
     retryable = true;
-  } else if (messageLower.includes('rate limit') || messageLower.includes('429')) {
+  } else if (
+    messageLower.includes('rate limit') ||
+    messageLower.includes('429')
+  ) {
     code = ErrorCodes.RATE_LIMIT;
     statusCode = 429;
     retryable = true;
-  } else if (messageLower.includes('unauthorized') || messageLower.includes('401')) {
+  } else if (
+    messageLower.includes('unauthorized') ||
+    messageLower.includes('401')
+  ) {
     code = ErrorCodes.UNAUTHORIZED;
     statusCode = 401;
     retryable = false;
-  } else if (messageLower.includes('forbidden') || messageLower.includes('403')) {
+  } else if (
+    messageLower.includes('forbidden') ||
+    messageLower.includes('403')
+  ) {
     code = ErrorCodes.FORBIDDEN;
     statusCode = 403;
     retryable = false;
@@ -184,13 +199,22 @@ export function toAppError(error: unknown, defaultCode: ErrorCode = ErrorCodes.U
     code = ErrorCodes.SERVICE_UNAVAILABLE;
     statusCode = 503;
     retryable = true;
-  } else if (messageLower.includes('500') || messageLower.includes('server error')) {
+  } else if (
+    messageLower.includes('500') ||
+    messageLower.includes('server error')
+  ) {
     code = ErrorCodes.SERVER_ERROR;
     statusCode = 500;
     retryable = true;
   }
 
-  return new AppError(message, code, statusCode, retryable, getErrorMessage(error));
+  return new AppError(
+    message,
+    code,
+    statusCode,
+    retryable,
+    getErrorMessage(error)
+  );
 }
 
 /**
@@ -203,7 +227,16 @@ export async function withTimeout<T>(
 ): Promise<T> {
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(
-      () => reject(new AppError(timeoutMessage, ErrorCodes.TIMEOUT, 408, true, timeoutMessage)),
+      () =>
+        reject(
+          new AppError(
+            timeoutMessage,
+            ErrorCodes.TIMEOUT,
+            408,
+            true,
+            timeoutMessage
+          )
+        ),
       timeoutMs
     );
   });
@@ -386,7 +419,11 @@ export function withErrorHandling<TArgs extends unknown[], TResult>(
     rethrow?: boolean;
   }
 ): (...args: TArgs) => Promise<TResult> {
-  const { defaultErrorCode = ErrorCodes.UNKNOWN, onError, rethrow = true } = options || {};
+  const {
+    defaultErrorCode = ErrorCodes.UNKNOWN,
+    onError,
+    rethrow = true,
+  } = options || {};
 
   return async (...args: TArgs): Promise<TResult> => {
     try {

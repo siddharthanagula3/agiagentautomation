@@ -86,9 +86,9 @@ export function VibeKeyboardShortcutsDialog({
                 </h3>
 
                 <div className="space-y-2">
-                  {categoryShortcuts.map((shortcut, index) => (
+                  {categoryShortcuts.map((shortcut) => (
                     <div
-                      key={index}
+                      key={`vibe-shortcut-${shortcut.key}-${shortcut.description}`}
                       className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3"
                     >
                       <span className="text-sm text-foreground">

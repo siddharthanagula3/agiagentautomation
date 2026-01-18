@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
 export type ViewMode = 'editor' | 'app-viewer';
@@ -167,202 +168,239 @@ const initialState = {
   fileMetadata: {} as Record<string, FileMetadata>,
 };
 
+// Only enable devtools in development/staging, not production
+const enableDevtools = import.meta.env.MODE !== 'production';
+
 export const useVibeViewStore = create<VibeViewStore>()(
-  immer((set) => ({
-    ...initialState,
-
-    // View management
-    setActiveView: (view) =>
-      set((state) => {
-        state.activeView = view;
-      }),
-
-    // Split layout
-    updateSplitLayout: (leftWidth) =>
-      set((state) => {
-        state.splitLayout.leftWidth = leftWidth;
-        state.splitLayout.rightWidth = 100 - leftWidth;
-      }),
-
-    // Following agent
-    toggleFollowAgent: () =>
-      set((state) => {
-        state.followingAgent = !state.followingAgent;
-      }),
-
-    setFollowingAgent: (following) =>
-      set((state) => {
-        state.followingAgent = following;
-      }),
-
-    // Editor state
-    updateEditorState: (updates) =>
-      set((state) => {
-        state.editorState = { ...state.editorState, ...updates };
-      }),
-
-    openFile: (filePath, content, language) =>
-      set((state) => {
-        if (!state.editorState.openFiles.includes(filePath)) {
-          state.editorState.openFiles.push(filePath);
-        }
-        state.editorState.currentFile = filePath;
-        state.editorState.content = content;
-        state.editorState.language = language;
-      }),
-
-    closeFile: (filePath) =>
-      set((state) => {
-        state.editorState.openFiles = state.editorState.openFiles.filter(
-          (f) => f !== filePath
-        );
-        if (state.editorState.currentFile === filePath) {
-          state.editorState.currentFile =
-            state.editorState.openFiles[0] || null;
-        }
-      }),
-
-    setCurrentFile: (filePath) =>
-      set((state) => {
-        state.editorState.currentFile = filePath;
-      }),
-
-    updateEditorContent: (content) =>
-      set((state) => {
-        state.editorState.content = content;
-      }),
-
-    updateCursor: (line, column) =>
-      set((state) => {
-        state.editorState.cursor = { line, column };
-      }),
-
-    // Terminal state
-    addTerminalCommand: (command) => {
-      let commandId = '';
-      set((state) => {
-        const newCommand: TerminalCommand = {
-          ...command,
-          id: crypto.randomUUID(),
-          timestamp: new Date(),
-        };
-        commandId = newCommand.id;
-        state.terminalState.history.push(newCommand);
-        state.terminalState.activeCommand = newCommand.id;
-      });
-      return commandId;
-    },
-
-    updateTerminalCommand: (id, updates) =>
-      set((state) => {
-        const commandIndex = state.terminalState.history.findIndex((c) => c.id === id);
-        if (commandIndex !== -1) {
-          state.terminalState.history[commandIndex] = {
-            ...state.terminalState.history[commandIndex],
-            ...updates,
-          };
-        }
-        if (updates.status === 'completed' || updates.status === 'failed') {
-          state.terminalState.activeCommand = null;
-        }
-      }),
-
-    clearTerminalHistory: () =>
-      set((state) => {
-        state.terminalState.history = [];
-        state.terminalState.activeCommand = null;
-      }),
-
-    // App Viewer state
-    updateAppViewerState: (updates) =>
-      set((state) => {
-        state.appViewerState = { ...state.appViewerState, ...updates };
-      }),
-
-    setAppViewerUrl: (url) =>
-      set((state) => {
-        state.appViewerState.url = url;
-        state.appViewerState.isLoading = true;
-      }),
-
-    setViewport: (viewport) =>
-      set((state) => {
-        state.appViewerState.viewport = viewport;
-      }),
-
-    // Planner state
-    updatePlannerState: (updates) =>
-      set((state) => {
-        state.plannerState = { ...state.plannerState, ...updates };
-      }),
-
-    addTask: (task) =>
-      set((state) => {
-        state.plannerState.tasks.push(task);
-      }),
-
-    updateTask: (taskId, updates) =>
-      set((state) => {
-        const taskIndex = state.plannerState.tasks.findIndex((t) => t.id === taskId);
-        if (taskIndex !== -1) {
-          state.plannerState.tasks[taskIndex] = {
-            ...state.plannerState.tasks[taskIndex],
-            ...updates,
-          };
-        }
-      }),
-
-    setCurrentTask: (taskId) =>
-      set((state) => {
-        state.plannerState.currentTaskId = taskId;
-      }),
-
-    // File tree
-    setFileTree: (tree) =>
-      set((state) => {
-        state.fileTree = tree;
-      }),
-
-    expandFolder: (folderId) =>
-      set((state) => {
-        // Implementation for expanding folders in tree
-        // This would need recursive logic to find and update the folder
-      }),
-
-    collapseFolder: (folderId) =>
-      set((state) => {
-        // Implementation for collapsing folders in tree
-      }),
-
-    setFileMetadata: (metadata) =>
-      set((state) => {
-        state.fileMetadata = Object.fromEntries(
-          metadata.map((entry) => [entry.path, entry])
-        );
-      }),
-
-    upsertFileMetadata: (metadata) =>
-      set((state) => {
-        state.fileMetadata[metadata.path] = metadata;
-      }),
-
-    removeFileMetadata: (path) =>
-      set((state) => {
-        delete state.fileMetadata[path];
-      }),
-
-    getFileMetadata: (path) => {
-      // Cannot use get() inside immer middleware
-      // This function should be called from outside the store
-      const state = useVibeViewStore.getState();
-      return state.fileMetadata[path];
-    },
-
-    // Reset
-    resetViewState: () =>
-      set(() => ({
+  devtools(
+    persist(
+      immer((set) => ({
         ...initialState,
-        fileMetadata: {} as Record<string, FileMetadata>,
+
+        // View management
+        setActiveView: (view) =>
+          set((state) => {
+            state.activeView = view;
+          }),
+
+        // Split layout
+        updateSplitLayout: (leftWidth) =>
+          set((state) => {
+            state.splitLayout.leftWidth = leftWidth;
+            state.splitLayout.rightWidth = 100 - leftWidth;
+          }),
+
+        // Following agent
+        toggleFollowAgent: () =>
+          set((state) => {
+            state.followingAgent = !state.followingAgent;
+          }),
+
+        setFollowingAgent: (following) =>
+          set((state) => {
+            state.followingAgent = following;
+          }),
+
+        // Editor state
+        updateEditorState: (updates) =>
+          set((state) => {
+            state.editorState = { ...state.editorState, ...updates };
+          }),
+
+        openFile: (filePath, content, language) =>
+          set((state) => {
+            if (!state.editorState.openFiles.includes(filePath)) {
+              state.editorState.openFiles.push(filePath);
+            }
+            state.editorState.currentFile = filePath;
+            state.editorState.content = content;
+            state.editorState.language = language;
+          }),
+
+        closeFile: (filePath) =>
+          set((state) => {
+            state.editorState.openFiles = state.editorState.openFiles.filter(
+              (f) => f !== filePath
+            );
+            if (state.editorState.currentFile === filePath) {
+              state.editorState.currentFile =
+                state.editorState.openFiles[0] || null;
+            }
+          }),
+
+        setCurrentFile: (filePath) =>
+          set((state) => {
+            state.editorState.currentFile = filePath;
+          }),
+
+        updateEditorContent: (content) =>
+          set((state) => {
+            state.editorState.content = content;
+          }),
+
+        updateCursor: (line, column) =>
+          set((state) => {
+            state.editorState.cursor = { line, column };
+          }),
+
+        // Terminal state
+        addTerminalCommand: (command) => {
+          let commandId = '';
+          set((state) => {
+            const newCommand: TerminalCommand = {
+              ...command,
+              id: crypto.randomUUID(),
+              timestamp: new Date(),
+            };
+            commandId = newCommand.id;
+            state.terminalState.history.push(newCommand);
+            state.terminalState.activeCommand = newCommand.id;
+          });
+          return commandId;
+        },
+
+        updateTerminalCommand: (id, updates) =>
+          set((state) => {
+            const commandIndex = state.terminalState.history.findIndex(
+              (c) => c.id === id
+            );
+            if (commandIndex !== -1) {
+              state.terminalState.history[commandIndex] = {
+                ...state.terminalState.history[commandIndex],
+                ...updates,
+              };
+            }
+            if (updates.status === 'completed' || updates.status === 'failed') {
+              state.terminalState.activeCommand = null;
+            }
+          }),
+
+        clearTerminalHistory: () =>
+          set((state) => {
+            state.terminalState.history = [];
+            state.terminalState.activeCommand = null;
+          }),
+
+        // App Viewer state
+        updateAppViewerState: (updates) =>
+          set((state) => {
+            state.appViewerState = { ...state.appViewerState, ...updates };
+          }),
+
+        setAppViewerUrl: (url) =>
+          set((state) => {
+            state.appViewerState.url = url;
+            state.appViewerState.isLoading = true;
+          }),
+
+        setViewport: (viewport) =>
+          set((state) => {
+            state.appViewerState.viewport = viewport;
+          }),
+
+        // Planner state
+        updatePlannerState: (updates) =>
+          set((state) => {
+            state.plannerState = { ...state.plannerState, ...updates };
+          }),
+
+        addTask: (task) =>
+          set((state) => {
+            state.plannerState.tasks.push(task);
+          }),
+
+        updateTask: (taskId, updates) =>
+          set((state) => {
+            const taskIndex = state.plannerState.tasks.findIndex(
+              (t) => t.id === taskId
+            );
+            if (taskIndex !== -1) {
+              state.plannerState.tasks[taskIndex] = {
+                ...state.plannerState.tasks[taskIndex],
+                ...updates,
+              };
+            }
+          }),
+
+        setCurrentTask: (taskId) =>
+          set((state) => {
+            state.plannerState.currentTaskId = taskId;
+          }),
+
+        // File tree
+        setFileTree: (tree) =>
+          set((state) => {
+            state.fileTree = tree;
+          }),
+
+        expandFolder: (folderId) =>
+          set((state) => {
+            // Implementation for expanding folders in tree
+            // This would need recursive logic to find and update the folder
+          }),
+
+        collapseFolder: (folderId) =>
+          set((state) => {
+            // Implementation for collapsing folders in tree
+          }),
+
+        setFileMetadata: (metadata) =>
+          set((state) => {
+            state.fileMetadata = Object.fromEntries(
+              metadata.map((entry) => [entry.path, entry])
+            );
+          }),
+
+        upsertFileMetadata: (metadata) =>
+          set((state) => {
+            state.fileMetadata[metadata.path] = metadata;
+          }),
+
+        removeFileMetadata: (path) =>
+          set((state) => {
+            delete state.fileMetadata[path];
+          }),
+
+        getFileMetadata: (path) => {
+          // Cannot use get() inside immer middleware
+          // This function should be called from outside the store
+          const state = useVibeViewStore.getState();
+          return state.fileMetadata[path];
+        },
+
+        // Reset
+        resetViewState: () =>
+          set(() => ({
+            ...initialState,
+            fileMetadata: {} as Record<string, FileMetadata>,
+          })),
       })),
-  }))
+      {
+        name: 'vibe-view-store',
+        version: 1,
+        storage: createJSONStorage(() => localStorage),
+        // Only persist user preferences, not session-specific data
+        partialize: (state) => ({
+          // Editor preferences (not content or open files - those are session-specific)
+          splitLayout: state.splitLayout,
+          followingAgent: state.followingAgent,
+          // App viewer preferences (viewport size preference, not URL)
+          appViewerState: {
+            viewport: state.appViewerState.viewport,
+          },
+        }),
+        // Migration support for future schema changes
+        migrate: (persistedState, version) => {
+          if (version === 0) {
+            // Future migrations can be added here
+          }
+          return persistedState as VibeViewStore;
+        },
+      }
+    ),
+    {
+      name: 'Vibe View Store',
+      enabled: enableDevtools,
+    }
+  )
 );

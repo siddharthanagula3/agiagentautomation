@@ -18,6 +18,304 @@ export interface SanitizeOptions {
 }
 
 export class SecurityManager {
+  // ========================================
+  // Encryption Key Management
+  // ========================================
+
+  private encryptionKey: CryptoKey | null = null;
+  private static readonly ENCRYPTION_SALT = 'agiagent-security-salt-v1';
+  private static readonly KEY_ITERATIONS = 100000;
+
+  /**
+   * Get the key source for encryption key derivation.
+   * Uses a combination of factors to create a deterministic key source.
+   */
+  private getKeySource(): string {
+    // In a browser environment, we use a combination of factors
+    // For production, consider using a server-provided secret
+    const factors = [
+      'agi-agent-encryption-key',
+      typeof window !== 'undefined' ? window.location.origin : 'server',
+      'v1',
+    ];
+    return factors.join('-');
+  }
+
+  /**
+   * Derive an encryption key using PBKDF2.
+   * The key is cached after first derivation for performance.
+   */
+  private async getEncryptionKey(): Promise<CryptoKey> {
+    // Return cached key if available
+    if (this.encryptionKey) {
+      return this.encryptionKey;
+    }
+
+    // Check if Web Crypto API is available
+    if (typeof window === 'undefined' || !window.crypto?.subtle) {
+      throw new Error(
+        'Web Crypto API not available. Encryption requires a secure context (HTTPS).'
+      );
+    }
+
+    try {
+      // Import the key material for PBKDF2
+      const keyMaterial = await window.crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(this.getKeySource()),
+        'PBKDF2',
+        false,
+        ['deriveBits', 'deriveKey']
+      );
+
+      // Derive the actual encryption key
+      this.encryptionKey = await window.crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: new TextEncoder().encode(SecurityManager.ENCRYPTION_SALT),
+          iterations: SecurityManager.KEY_ITERATIONS,
+          hash: 'SHA-256',
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false, // Not extractable for security
+        ['encrypt', 'decrypt']
+      );
+
+      return this.encryptionKey;
+    } catch (error) {
+      console.error('Failed to derive encryption key:', error);
+      throw new Error('Encryption key derivation failed');
+    }
+  }
+
+  /**
+   * Generate a synchronous encryption key from the key source.
+   * Uses a simple key derivation for synchronous operations.
+   */
+  private getSyncKey(): Uint8Array {
+    const keySource = this.getKeySource();
+    const encoder = new TextEncoder();
+    const keyBytes = encoder.encode(keySource);
+
+    // Create a 32-byte key by repeating/truncating the source
+    const key = new Uint8Array(32);
+    for (let i = 0; i < 32; i++) {
+      key[i] = keyBytes[i % keyBytes.length];
+    }
+
+    // Mix the key with a simple hash-like transformation
+    for (let round = 0; round < 4; round++) {
+      for (let i = 0; i < 32; i++) {
+        key[i] = (key[i] ^ key[(i + 7) % 32] ^ key[(i + 13) % 32]) & 0xff;
+        key[i] = ((key[i] << 3) | (key[i] >> 5)) & 0xff;
+      }
+    }
+
+    return key;
+  }
+
+  /**
+   * Synchronously encrypt a plaintext string.
+   * Uses a stream cipher approach for synchronous encryption.
+   * For stronger encryption, use encryptAsync() with AES-GCM.
+   *
+   * @param plaintext - The string to encrypt
+   * @returns Base64-encoded encrypted data
+   */
+  encrypt(plaintext: string): string {
+    if (!plaintext) {
+      return '';
+    }
+
+    try {
+      const key = this.getSyncKey();
+      const encoder = new TextEncoder();
+      const data = encoder.encode(plaintext);
+
+      // Generate a random 16-byte nonce
+      const nonce = new Uint8Array(16);
+      if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+        window.crypto.getRandomValues(nonce);
+      } else {
+        // Fallback for non-browser environments
+        for (let i = 0; i < 16; i++) {
+          nonce[i] = Math.floor(Math.random() * 256);
+        }
+      }
+
+      // Encrypt using XOR with key stream derived from key + nonce
+      const encrypted = new Uint8Array(data.length);
+      for (let i = 0; i < data.length; i++) {
+        // Generate key stream byte from key, nonce, and position
+        const keyByte =
+          key[i % 32] ^
+          nonce[i % 16] ^
+          ((i * 31) & 0xff) ^
+          key[(i + nonce[i % 16]) % 32];
+        encrypted[i] = data[i] ^ keyByte;
+      }
+
+      // Combine nonce + encrypted data
+      const combined = new Uint8Array(nonce.length + encrypted.length);
+      combined.set(nonce);
+      combined.set(encrypted, nonce.length);
+
+      // Base64 encode
+      return btoa(String.fromCharCode(...combined));
+    } catch (error) {
+      console.error('Synchronous encryption failed:', error);
+      throw new Error('Failed to encrypt data');
+    }
+  }
+
+  /**
+   * Synchronously decrypt an encrypted string.
+   * Expects data encrypted with the encrypt() method.
+   * For stronger encryption, use decryptAsync() with AES-GCM.
+   *
+   * @param encryptedData - Base64-encoded encrypted data
+   * @returns Decrypted plaintext string
+   */
+  decrypt(encryptedData: string): string {
+    if (!encryptedData) {
+      return '';
+    }
+
+    try {
+      const key = this.getSyncKey();
+
+      // Decode from base64
+      const combined = Uint8Array.from(atob(encryptedData), (c) =>
+        c.charCodeAt(0)
+      );
+
+      // Extract nonce (first 16 bytes) and encrypted data
+      const nonce = combined.slice(0, 16);
+      const encrypted = combined.slice(16);
+
+      // Decrypt using XOR with the same key stream
+      const decrypted = new Uint8Array(encrypted.length);
+      for (let i = 0; i < encrypted.length; i++) {
+        // Generate the same key stream byte
+        const keyByte =
+          key[i % 32] ^
+          nonce[i % 16] ^
+          ((i * 31) & 0xff) ^
+          key[(i + nonce[i % 16]) % 32];
+        decrypted[i] = encrypted[i] ^ keyByte;
+      }
+
+      // Decode the result
+      return new TextDecoder().decode(decrypted);
+    } catch (error) {
+      console.error('Synchronous decryption failed:', error);
+      throw new Error('Failed to decrypt data');
+    }
+  }
+
+  /**
+   * Asynchronously encrypt a plaintext string using AES-GCM.
+   * Returns a base64-encoded string containing IV + ciphertext.
+   *
+   * @param plaintext - The string to encrypt
+   * @returns Promise resolving to base64-encoded encrypted data
+   */
+  async encryptAsync(plaintext: string): Promise<string> {
+    if (!plaintext) {
+      return '';
+    }
+
+    try {
+      const key = await this.getEncryptionKey();
+
+      // Generate a random 12-byte IV (recommended for AES-GCM)
+      const iv = window.crypto.getRandomValues(new Uint8Array(12));
+
+      // Encode the plaintext
+      const encoded = new TextEncoder().encode(plaintext);
+
+      // Encrypt the data
+      const ciphertext = await window.crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv },
+        key,
+        encoded
+      );
+
+      // Combine IV + ciphertext into a single array
+      const combined = new Uint8Array(iv.length + ciphertext.byteLength);
+      combined.set(iv);
+      combined.set(new Uint8Array(ciphertext), iv.length);
+
+      // Base64 encode the result
+      return btoa(String.fromCharCode(...combined));
+    } catch (error) {
+      console.error('Encryption failed:', error);
+      throw new Error('Failed to encrypt data');
+    }
+  }
+
+  /**
+   * Asynchronously decrypt an encrypted string using AES-GCM.
+   * Expects a base64-encoded string containing IV + ciphertext.
+   *
+   * @param encryptedData - Base64-encoded encrypted data
+   * @returns Promise resolving to decrypted plaintext
+   */
+  async decryptAsync(encryptedData: string): Promise<string> {
+    if (!encryptedData) {
+      return '';
+    }
+
+    try {
+      const key = await this.getEncryptionKey();
+
+      // Decode from base64
+      const combined = Uint8Array.from(atob(encryptedData), (c) =>
+        c.charCodeAt(0)
+      );
+
+      // Extract IV (first 12 bytes) and ciphertext (rest)
+      const iv = combined.slice(0, 12);
+      const ciphertext = combined.slice(12);
+
+      // Decrypt the data
+      const decrypted = await window.crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv },
+        key,
+        ciphertext
+      );
+
+      // Decode the result
+      return new TextDecoder().decode(decrypted);
+    } catch (error) {
+      console.error('Decryption failed:', error);
+      throw new Error('Failed to decrypt data');
+    }
+  }
+
+  /**
+   * Check if encryption is available in the current environment.
+   */
+  isEncryptionAvailable(): boolean {
+    return (
+      typeof window !== 'undefined' &&
+      window.crypto !== undefined &&
+      window.crypto.subtle !== undefined
+    );
+  }
+
+  /**
+   * Clear the cached encryption key (useful for security-sensitive operations).
+   */
+  clearEncryptionKey(): void {
+    this.encryptionKey = null;
+  }
+
+  // ========================================
+  // XSS Protection and Data Sanitization
+  // ========================================
+
   private static defaultSanitizeConfig: DOMPurify.Config = {
     ALLOWED_TAGS: [
       'a',

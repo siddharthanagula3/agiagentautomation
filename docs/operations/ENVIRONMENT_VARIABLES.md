@@ -8,19 +8,19 @@ All environment variables should be configured in **Netlify Dashboard** → **Si
 
 ### Supabase (Required)
 
-| Variable                    | Description                           | Example                       |
-| --------------------------- | ------------------------------------- | ----------------------------- |
-| `VITE_SUPABASE_URL`         | Production Supabase project URL       | `https://xxxxx.supabase.co`   |
-| `VITE_SUPABASE_ANON_KEY`    | Supabase anonymous/public key         | `eyJhbGciOiJIUzI1NiIs...`     |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-side only) | `eyJhbGciOiJIUzI1NiIs...` |
+| Variable                    | Description                                  | Example                     |
+| --------------------------- | -------------------------------------------- | --------------------------- |
+| `VITE_SUPABASE_URL`         | Production Supabase project URL              | `https://xxxxx.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY`    | Supabase anonymous/public key                | `eyJhbGciOiJIUzI1NiIs...`   |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-side only) | `eyJhbGciOiJIUzI1NiIs...`   |
 
 ### Stripe (Required for Billing)
 
-| Variable                     | Description                    | Example          |
-| ---------------------------- | ------------------------------ | ---------------- |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key        | `pk_live_...`    |
-| `STRIPE_SECRET_KEY`          | Stripe secret key (server-side) | `sk_live_...`  |
-| `STRIPE_WEBHOOK_SECRET`      | Stripe webhook signing secret  | `whsec_...`      |
+| Variable                      | Description                     | Example       |
+| ----------------------------- | ------------------------------- | ------------- |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key          | `pk_live_...` |
+| `STRIPE_SECRET_KEY`           | Stripe secret key (server-side) | `sk_live_...` |
+| `STRIPE_WEBHOOK_SECRET`       | Stripe webhook signing secret   | `whsec_...`   |
 
 ## LLM Provider API Keys
 
@@ -28,31 +28,31 @@ Configure at least one LLM provider. All keys should be server-side only (no `VI
 
 ### Primary Providers
 
-| Variable             | Provider   | Get Key At                                        |
-| -------------------- | ---------- | ------------------------------------------------- |
-| `OPENAI_API_KEY`     | OpenAI     | https://platform.openai.com/api-keys              |
-| `ANTHROPIC_API_KEY`  | Anthropic  | https://console.anthropic.com/settings/keys       |
-| `GOOGLE_API_KEY`     | Google     | https://aistudio.google.com/app/apikey            |
-| `PERPLEXITY_API_KEY` | Perplexity | https://www.perplexity.ai/settings/api            |
+| Variable             | Provider   | Get Key At                                  |
+| -------------------- | ---------- | ------------------------------------------- |
+| `OPENAI_API_KEY`     | OpenAI     | https://platform.openai.com/api-keys        |
+| `ANTHROPIC_API_KEY`  | Anthropic  | https://console.anthropic.com/settings/keys |
+| `GOOGLE_API_KEY`     | Google     | https://aistudio.google.com/app/apikey      |
+| `PERPLEXITY_API_KEY` | Perplexity | https://www.perplexity.ai/settings/api      |
 
 ### Additional Providers
 
-| Variable           | Provider | Get Key At                                     |
-| ------------------ | -------- | ---------------------------------------------- |
-| `GROK_API_KEY`     | xAI Grok | https://console.x.ai/                          |
-| `DEEPSEEK_API_KEY` | DeepSeek | https://platform.deepseek.com/api_keys         |
-| `QWEN_API_KEY`     | Alibaba  | https://dashscope.console.aliyun.com/apiKey    |
+| Variable           | Provider | Get Key At                                  |
+| ------------------ | -------- | ------------------------------------------- |
+| `GROK_API_KEY`     | xAI Grok | https://console.x.ai/                       |
+| `DEEPSEEK_API_KEY` | DeepSeek | https://platform.deepseek.com/api_keys      |
+| `QWEN_API_KEY`     | Alibaba  | https://dashscope.console.aliyun.com/apiKey |
 
 ### Client-Side Keys (Optional)
 
 These are exposed to the browser and should only be used for client-side features:
 
-| Variable                   | Description                    |
-| -------------------------- | ------------------------------ |
-| `VITE_OPENAI_API_KEY`      | OpenAI (direct browser calls)  |
-| `VITE_ANTHROPIC_API_KEY`   | Anthropic (direct browser calls) |
-| `VITE_GOOGLE_API_KEY`      | Google (direct browser calls)  |
-| `VITE_PERPLEXITY_API_KEY`  | Perplexity (direct browser calls) |
+| Variable                  | Description                       |
+| ------------------------- | --------------------------------- |
+| `VITE_OPENAI_API_KEY`     | OpenAI (direct browser calls)     |
+| `VITE_ANTHROPIC_API_KEY`  | Anthropic (direct browser calls)  |
+| `VITE_GOOGLE_API_KEY`     | Google (direct browser calls)     |
+| `VITE_PERPLEXITY_API_KEY` | Perplexity (direct browser calls) |
 
 **Note:** Prefer using server-side proxies via Netlify Functions for security.
 
@@ -60,18 +60,18 @@ These are exposed to the browser and should only be used for client-side feature
 
 Required for API rate limiting protection.
 
-| Variable                    | Description                | Get At                        |
-| --------------------------- | -------------------------- | ----------------------------- |
-| `UPSTASH_REDIS_REST_URL`    | Upstash Redis REST URL     | https://console.upstash.com/  |
-| `UPSTASH_REDIS_REST_TOKEN`  | Upstash Redis REST token   | https://console.upstash.com/  |
+| Variable                   | Description              | Get At                       |
+| -------------------------- | ------------------------ | ---------------------------- |
+| `UPSTASH_REDIS_REST_URL`   | Upstash Redis REST URL   | https://console.upstash.com/ |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST token | https://console.upstash.com/ |
 
 ## Optional Variables
 
-| Variable          | Description                          | Default      |
-| ----------------- | ------------------------------------ | ------------ |
-| `NODE_ENV`        | Environment mode                     | `production` |
-| `VITE_DEMO_MODE`  | Enable demo login (requires `true`)  | `false`      |
-| `VITE_GOOGLE_CX`  | Google Custom Search Engine ID       | -            |
+| Variable         | Description                         | Default      |
+| ---------------- | ----------------------------------- | ------------ |
+| `NODE_ENV`       | Environment mode                    | `production` |
+| `VITE_DEMO_MODE` | Enable demo login (requires `true`) | `false`      |
+| `VITE_GOOGLE_CX` | Google Custom Search Engine ID      | -            |
 
 ## Security Notes
 
@@ -134,13 +134,13 @@ After setting environment variables:
 
 ## Troubleshooting
 
-| Issue                          | Solution                                           |
-| ------------------------------ | -------------------------------------------------- |
-| "API key not configured"       | Check server-side key is set in Netlify            |
-| "CORS error"                   | Verify origin is in whitelist (`utils/cors.ts`)    |
-| "Rate limit exceeded"          | Check Upstash credentials and rate limit config    |
-| "Authentication required"      | Verify JWT is being sent with requests             |
-| "Insufficient token balance"   | User needs to purchase more tokens or upgrade plan |
+| Issue                        | Solution                                           |
+| ---------------------------- | -------------------------------------------------- |
+| "API key not configured"     | Check server-side key is set in Netlify            |
+| "CORS error"                 | Verify origin is in whitelist (`utils/cors.ts`)    |
+| "Rate limit exceeded"        | Check Upstash credentials and rate limit config    |
+| "Authentication required"    | Verify JWT is being sent with requests             |
+| "Insufficient token balance" | User needs to purchase more tokens or upgrade plan |
 
 ## Changelog
 

@@ -100,7 +100,8 @@ export function EnhancedExportDialog({
   session,
   messages,
 }: EnhancedExportDialogProps) {
-  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('markdown');
+  const [selectedFormat, setSelectedFormat] =
+    useState<ExportFormat>('markdown');
   const [includeMetadata, setIncludeMetadata] = useState(true);
   const [includeTimestamps, setIncludeTimestamps] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
@@ -119,7 +120,9 @@ export function EnhancedExportDialog({
       const baseFilename =
         customFilename.trim() ||
         session.title.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-      const selectedFormatData = EXPORT_FORMATS.find((f) => f.id === selectedFormat);
+      const selectedFormatData = EXPORT_FORMATS.find(
+        (f) => f.id === selectedFormat
+      );
       const filename = `${baseFilename}${selectedFormatData?.extension || '.txt'}`;
 
       const options = {
@@ -188,7 +191,9 @@ export function EnhancedExportDialog({
     }
   };
 
-  const selectedFormatData = EXPORT_FORMATS.find((f) => f.id === selectedFormat);
+  const selectedFormatData = EXPORT_FORMATS.find(
+    (f) => f.id === selectedFormat
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -216,18 +221,20 @@ export function EnhancedExportDialog({
                       : 'border-transparent'
                   )}
                 >
-                  <div className={cn('mt-0.5', format.color)}>{format.icon}</div>
-                  <div className="flex-1 min-w-0">
+                  <div className={cn('mt-0.5', format.color)}>
+                    {format.icon}
+                  </div>
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold">{format.name}</p>
                       {selectedFormat === format.id && (
                         <Check className="h-4 w-4 text-primary" />
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {format.description}
                     </p>
-                    <Badge variant="secondary" className="text-xs mt-2">
+                    <Badge variant="secondary" className="mt-2 text-xs">
                       {format.extension}
                     </Badge>
                   </div>
@@ -249,7 +256,7 @@ export function EnhancedExportDialog({
                 onChange={(e) => setCustomFilename(e.target.value)}
                 className="flex-1"
               />
-              <span className="text-sm text-muted-foreground shrink-0">
+              <span className="shrink-0 text-sm text-muted-foreground">
                 {selectedFormatData?.extension}
               </span>
             </div>
@@ -262,16 +269,18 @@ export function EnhancedExportDialog({
             <div className="space-y-3">
               <Label className="text-sm font-semibold">Options</Label>
               <div className="space-y-2">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2">
                   <Checkbox
                     checked={includeMetadata}
                     onCheckedChange={(checked) =>
                       setIncludeMetadata(checked === true)
                     }
                   />
-                  <span className="text-sm">Include metadata (title, date, message count)</span>
+                  <span className="text-sm">
+                    Include metadata (title, date, message count)
+                  </span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2">
                   <Checkbox
                     checked={includeTimestamps}
                     onCheckedChange={(checked) =>
@@ -287,16 +296,18 @@ export function EnhancedExportDialog({
           {/* Preview Info */}
           {session && (
             <div className="rounded-lg bg-muted p-4 text-sm">
-              <p className="font-semibold mb-2">Export Preview</p>
+              <p className="mb-2 font-semibold">Export Preview</p>
               <div className="space-y-1 text-muted-foreground">
                 <p>
                   <span className="font-medium">Session:</span> {session.title}
                 </p>
                 <p>
-                  <span className="font-medium">Messages:</span> {messages.length}
+                  <span className="font-medium">Messages:</span>{' '}
+                  {messages.length}
                 </p>
                 <p>
-                  <span className="font-medium">Format:</span> {selectedFormatData?.name}
+                  <span className="font-medium">Format:</span>{' '}
+                  {selectedFormatData?.name}
                 </p>
               </div>
             </div>

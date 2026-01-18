@@ -84,7 +84,9 @@ export async function createUserShortcut(
     }
 
     if (!data) {
-      console.error('[User Shortcuts] No data returned after creating shortcut');
+      console.error(
+        '[User Shortcuts] No data returned after creating shortcut'
+      );
       return null;
     }
 

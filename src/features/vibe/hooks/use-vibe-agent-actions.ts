@@ -255,7 +255,10 @@ export function useVibeAgentActions(
           VibeAgentActionService.getActionStats(sessionId)
             .then(setStats)
             .catch((err) => {
-              console.warn('[useVibeAgentActions] Failed to fetch action stats:', err);
+              console.warn(
+                '[useVibeAgentActions] Failed to fetch action stats:',
+                err
+              );
             });
         }
       },

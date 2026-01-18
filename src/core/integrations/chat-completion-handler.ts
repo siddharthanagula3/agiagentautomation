@@ -48,26 +48,24 @@ export async function sendAIMessage(
   }
 }
 
+/**
+ * Check if provider is configured
+ * SECURITY: Always returns true since providers are available through authenticated proxies
+ * Actual availability is determined server-side
+ */
 export function isProviderConfigured(provider: AIProvider): boolean {
-  const envKeys: Record<AIProvider, string> = {
-    openai: 'VITE_OPENAI_API_KEY',
-    anthropic: 'VITE_ANTHROPIC_API_KEY',
-    google: 'VITE_GOOGLE_API_KEY',
-    perplexity: 'VITE_PERPLEXITY_API_KEY',
-  };
-
-  const key = import.meta.env[envKeys[provider]];
-  return !!key && key.length > 0;
+  // All providers are available through authenticated Netlify proxies
+  // Actual availability depends on server-side API key configuration
+  return true;
 }
 
+/**
+ * Get configured providers
+ * SECURITY: All providers available through authenticated proxies
+ */
 export function getConfiguredProviders(): AIProvider[] {
-  const providers: AIProvider[] = [
-    'openai',
-    'anthropic',
-    'google',
-    'perplexity',
-  ];
-  return providers.filter((provider) => isProviderConfigured(provider));
+  // All providers are available through authenticated Netlify proxies
+  return ['openai', 'anthropic', 'google', 'perplexity'];
 }
 
 function getDefaultModel(provider: AIProvider): string {

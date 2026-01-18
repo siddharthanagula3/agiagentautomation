@@ -122,7 +122,7 @@ export function VibeTemplateSelector({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Choose a Project Template</DialogTitle>
           <DialogDescription>
@@ -163,7 +163,7 @@ export function VibeTemplateSelector({
         </div>
 
         {/* Template Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+        <div className="grid grid-cols-1 gap-4 py-4 md:grid-cols-2">
           {filteredTemplates.map((template) => (
             <button
               key={template.id}
@@ -176,18 +176,18 @@ export function VibeTemplateSelector({
               )}
             >
               {/* Template Icon and Name */}
-              <div className="flex items-center gap-3 w-full">
+              <div className="flex w-full items-center gap-3">
                 <div className="text-3xl">{template.icon}</div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm">{template.name}</h3>
-                  <Badge variant="secondary" className="text-xs mt-1">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-semibold">{template.name}</h3>
+                  <Badge variant="secondary" className="mt-1 text-xs">
                     {template.category}
                   </Badge>
                 </div>
               </div>
 
               {/* Description */}
-              <p className="text-xs text-muted-foreground line-clamp-2">
+              <p className="line-clamp-2 text-xs text-muted-foreground">
                 {template.description}
               </p>
 
@@ -199,20 +199,17 @@ export function VibeTemplateSelector({
 
               {/* File List (compact) */}
               <div className="flex flex-wrap gap-1">
-                {template.files.slice(0, 4).map((file, idx) => (
+                {template.files.slice(0, 4).map((file) => (
                   <Badge
-                    key={idx}
+                    key={`template-file-${file.path}`}
                     variant="outline"
-                    className="text-[10px] px-1.5 py-0"
+                    className="px-1.5 py-0 text-[10px]"
                   >
                     {file.path.split('/').pop()}
                   </Badge>
                 ))}
                 {template.files.length > 4 && (
-                  <Badge
-                    variant="outline"
-                    className="text-[10px] px-1.5 py-0"
-                  >
+                  <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
                     +{template.files.length - 4} more
                   </Badge>
                 )}

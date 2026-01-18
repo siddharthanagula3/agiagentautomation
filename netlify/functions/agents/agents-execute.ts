@@ -2,11 +2,20 @@
  * Agents Execute Function
  * Executes messages using OpenAI Assistants API v2
  * Supports streaming and tool execution
+ * Updated: Jan 17th 2026 - Fixed CORS wildcard vulnerability with origin validation
  */
 
 import { Handler } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
+import {
+  getCorsHeaders,
+  getMinimalCorsHeaders,
+  checkOriginAndBlock,
+  getSecurityHeaders,
+} from '../utils/cors';
+import { withRateLimitTier } from '../utils/rate-limiter';
+import { agentsExecuteSchema, formatValidationError } from '../utils/validation-schemas';
 
 // Updated: Nov 16th 2025 - Fixed missing environment variable validation
 // Validate environment variables
@@ -42,16 +51,24 @@ interface ExecuteRequest {
   streaming?: boolean;
 }
 
-export const handler: Handler = async (event) => {
-  // Handle CORS
+const agentsExecuteHandler: Handler = async (event) => {
+  // Extract origin for CORS validation
+  const origin = event.headers.origin || event.headers.Origin || '';
+
+  // Check if origin is allowed - block unauthorized origins early
+  const blockedResponse = checkOriginAndBlock(origin);
+  if (blockedResponse) {
+    return blockedResponse;
+  }
+
+  // Get CORS headers for allowed origin
+  const corsHeaders = getCorsHeaders(origin);
+
+  // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      },
+      headers: corsHeaders || getSecurityHeaders(),
       body: '',
     };
   }
@@ -59,14 +76,24 @@ export const handler: Handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: corsHeaders || getSecurityHeaders(),
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
 
   try {
+    const requestBody = JSON.parse(event.body || '{}');
+
+    // Validate request with Zod schema
+    const validated = agentsExecuteSchema.safeParse(requestBody);
+    if (!validated.success) {
+      return {
+        statusCode: 400,
+        headers: getMinimalCorsHeaders(origin) || getSecurityHeaders(),
+        body: JSON.stringify(formatValidationError(validated.error)),
+      };
+    }
+
     const {
       conversationId,
       userId,
@@ -74,26 +101,14 @@ export const handler: Handler = async (event) => {
       threadId,
       assistantId,
       streaming,
-    }: ExecuteRequest = JSON.parse(event.body || '{}');
-
-    if (!conversationId || !userId || !message || !threadId || !assistantId) {
-      return {
-        statusCode: 400,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: 'Missing required fields' }),
-      };
-    }
+    } = validated.data;
 
     // Verify authentication
     const authHeader = event.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return {
         statusCode: 401,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: getMinimalCorsHeaders(origin) || getSecurityHeaders(),
         body: JSON.stringify({ error: 'Unauthorized' }),
       };
     }
@@ -107,9 +122,7 @@ export const handler: Handler = async (event) => {
     if (authError || !user || user.id !== userId) {
       return {
         statusCode: 401,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: getMinimalCorsHeaders(origin) || getSecurityHeaders(),
         body: JSON.stringify({ error: 'Invalid authentication' }),
       };
     }
@@ -213,8 +226,8 @@ export const handler: Handler = async (event) => {
       return {
         statusCode: 200,
         headers: {
-          'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
+          ...(corsHeaders || getSecurityHeaders()),
         },
         body: JSON.stringify({
           success: true,
@@ -233,8 +246,8 @@ export const handler: Handler = async (event) => {
       return {
         statusCode: 200,
         headers: {
-          'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json',
+          ...(corsHeaders || getSecurityHeaders()),
         },
         body: JSON.stringify({
           success: false,
@@ -250,9 +263,7 @@ export const handler: Handler = async (event) => {
     console.error('Agents execute error:', error);
     return {
       statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: getMinimalCorsHeaders(origin) || getSecurityHeaders(),
       body: JSON.stringify({
         error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error',
@@ -260,3 +271,6 @@ export const handler: Handler = async (event) => {
     };
   }
 };
+
+// Export with rate limiting middleware (10 req/min for authenticated tier)
+export const handler = withRateLimitTier('authenticated')(agentsExecuteHandler);

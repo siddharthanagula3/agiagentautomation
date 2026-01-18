@@ -1,13 +1,32 @@
 /**
  * Web Search Service - Perplexity-style Search Integration
  * Provides real-time web search capabilities
+ *
+ * SECURITY: All API calls are routed through Netlify proxy functions
+ * to keep API keys secure on the server side. Never expose API keys client-side.
  */
 
 import { fetchWithTimeout, TimeoutPresets } from '@shared/utils/error-handling';
+import { supabase } from '@shared/lib/supabase-client';
 
-const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY || '';
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
-const GOOGLE_CX = import.meta.env.VITE_GOOGLE_CX || '';
+// SECURITY: API keys removed - all calls go through authenticated proxies
+// Provider availability is determined by proxy configuration, not client-side keys
+
+/**
+ * Helper function to get the current Supabase session token
+ * Required for authenticated API proxy calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('[WebSearch] Failed to get auth token:', error);
+    return null;
+  }
+}
 
 /**
  * Validates if a value is a valid URL string
@@ -52,49 +71,60 @@ export interface SearchResponse {
 
 /**
  * Search using Perplexity API (recommended)
+ * SECURITY: Routes through Netlify proxy to keep API keys secure
  */
 export async function searchWithPerplexity(
   query: string
 ): Promise<SearchResponse> {
-  if (!PERPLEXITY_API_KEY) {
-    throw new Error('Perplexity API key not configured');
+  // SECURITY: Get auth token for authenticated proxy calls
+  const authToken = await getAuthToken();
+  if (!authToken) {
+    throw new Error(
+      'User not authenticated. Please log in to use search features.'
+    );
   }
 
   try {
-    const response = await fetchWithTimeout('https://api.perplexity.ai/chat/completions', {
-      timeoutMs: TimeoutPresets.SEARCH,
-      timeoutMessage: 'Perplexity search timed out',
-      fetchOptions: {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
+    const response = await fetchWithTimeout(
+      '/.netlify/functions/llm-proxies/perplexity-proxy',
+      {
+        timeoutMs: TimeoutPresets.SEARCH,
+        timeoutMessage: 'Perplexity search timed out',
+        fetchOptions: {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({
+            model: 'sonar-pro',
+            messages: [
+              {
+                role: 'system',
+                content:
+                  'You are a helpful assistant that provides accurate, cited information from the web. Always cite your sources.',
+              },
+              {
+                role: 'user',
+                content: query,
+              },
+            ],
+            temperature: 0.2,
+            max_tokens: 1000,
+          }),
         },
-        body: JSON.stringify({
-          model: 'sonar-pro',
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are a helpful assistant that provides accurate, cited information from the web. Always cite your sources.',
-            },
-            {
-              role: 'user',
-              content: query,
-            },
-          ],
-          temperature: 0.2,
-          max_tokens: 1000,
-        }),
-      },
-    });
+      }
+    );
 
     if (!response.ok) {
-      throw new Error(`Perplexity API error: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error || `Perplexity API error: ${response.statusText}`
+      );
     }
 
     const data = await response.json();
-    const answer = data.choices[0].message.content;
+    const answer = data.choices?.[0]?.message?.content || data.content || '';
 
     // Extract citations/sources from the response
     const citationRegex = /\[(\d+)\]/g;
@@ -106,7 +136,14 @@ export async function searchWithPerplexity(
     // Parse results, filtering out entries with invalid URLs
     const results: SearchResult[] = sources
       .filter(
-        (source: unknown): source is { url: string; title?: string; snippet?: string; publishedDate?: string } =>
+        (
+          source: unknown
+        ): source is {
+          url: string;
+          title?: string;
+          snippet?: string;
+          publishedDate?: string;
+        } =>
           source !== null &&
           typeof source === 'object' &&
           isValidUrl((source as Record<string, unknown>).url)
@@ -123,7 +160,9 @@ export async function searchWithPerplexity(
     const validSourceUrls = sources
       .filter(
         (s: unknown): s is { url: string } =>
-          s !== null && typeof s === 'object' && isValidUrl((s as Record<string, unknown>).url)
+          s !== null &&
+          typeof s === 'object' &&
+          isValidUrl((s as Record<string, unknown>).url)
       )
       .map((s) => s.url);
 
@@ -142,49 +181,78 @@ export async function searchWithPerplexity(
 
 /**
  * Search using Google Custom Search API (fallback)
+ * SECURITY: Routes through Netlify proxy to keep API keys secure
  */
 export async function searchWithGoogle(
   query: string,
   maxResults: number = 10
 ): Promise<SearchResponse> {
-  if (!GOOGLE_API_KEY || !GOOGLE_CX) {
-    throw new Error('Google Search API credentials not configured');
+  // SECURITY: Get auth token for authenticated proxy calls
+  const authToken = await getAuthToken();
+  if (!authToken) {
+    throw new Error(
+      'User not authenticated. Please log in to use search features.'
+    );
   }
 
   try {
-    const url = new URL('https://www.googleapis.com/customsearch/v1');
-    url.searchParams.append('key', GOOGLE_API_KEY);
-    url.searchParams.append('cx', GOOGLE_CX);
-    url.searchParams.append('q', query);
-    url.searchParams.append('num', Math.min(maxResults, 10).toString());
-
-    const response = await fetchWithTimeout(url.toString(), {
-      timeoutMs: TimeoutPresets.SEARCH,
-      timeoutMessage: 'Google Search timed out',
-    });
+    // SECURITY: Route through Google proxy instead of direct API call
+    const response = await fetchWithTimeout(
+      '/.netlify/functions/llm-proxies/google-proxy',
+      {
+        timeoutMs: TimeoutPresets.SEARCH,
+        timeoutMessage: 'Google Search timed out',
+        fetchOptions: {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({
+            action: 'search',
+            query,
+            maxResults: Math.min(maxResults, 10),
+          }),
+        },
+      }
+    );
 
     if (!response.ok) {
-      throw new Error(`Google Search API error: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error || `Google Search API error: ${response.statusText}`
+      );
     }
 
     const data = await response.json();
 
     // Filter and map results, excluding items with invalid URLs
-    const results: SearchResult[] = (data.items || [])
+    const results: SearchResult[] = (data.items || data.results || [])
       .filter(
-        (item: unknown): item is { link: string; title?: string; snippet?: string; pagemap?: { metatags?: Array<Record<string, string>> } } =>
+        (
+          item: unknown
+        ): item is {
+          link?: string;
+          url?: string;
+          title?: string;
+          snippet?: string;
+          pagemap?: { metatags?: Array<Record<string, string>> };
+        } =>
           item !== null &&
           typeof item === 'object' &&
-          isValidUrl((item as Record<string, unknown>).link)
+          (isValidUrl((item as Record<string, unknown>).link) ||
+            isValidUrl((item as Record<string, unknown>).url))
       )
       .map((item) => {
-        const hostname = safeGetHostname(item.link);
+        const url = item.link || item.url || '';
+        const hostname = safeGetHostname(url);
         return {
           title: (item.title as string) || '',
-          url: item.link,
+          url,
           snippet: (item.snippet as string) || '',
           source: hostname,
-          publishedDate: item.pagemap?.metatags?.[0]?.['article:published_time'],
+          publishedDate:
+            item.pagemap?.metatags?.[0]?.['article:published_time'],
           favicon: `https://www.google.com/s2/favicons?domain=${hostname}`,
         };
       });
@@ -265,6 +333,7 @@ export async function searchWithDuckDuckGo(
 
 /**
  * Main search function that tries providers in order
+ * SECURITY: All providers route through authenticated Netlify proxies
  */
 export async function webSearch(
   query: string,
@@ -279,18 +348,15 @@ export async function webSearch(
     try {
       switch (provider) {
         case 'perplexity':
-          if (PERPLEXITY_API_KEY) {
-            return await searchWithPerplexity(query);
-          }
-          break;
+          // SECURITY: Perplexity proxy handles API key on server side
+          return await searchWithPerplexity(query);
 
         case 'google':
-          if (GOOGLE_API_KEY && GOOGLE_CX) {
-            return await searchWithGoogle(query, maxResults);
-          }
-          break;
+          // SECURITY: Google proxy handles API key on server side
+          return await searchWithGoogle(query, maxResults);
 
         case 'duckduckgo':
+          // DuckDuckGo doesn't require API keys
           return await searchWithDuckDuckGo(query, maxResults);
       }
     } catch (error) {
@@ -363,20 +429,20 @@ export async function searchAndSummarize(
 
 /**
  * Check if web search is configured
+ * SECURITY: Returns true since proxies handle API keys server-side
  */
 export function isWebSearchConfigured(): boolean {
-  return !!(PERPLEXITY_API_KEY || (GOOGLE_API_KEY && GOOGLE_CX));
+  // Web search is always available through authenticated proxies
+  // DuckDuckGo is always available as a fallback (no API key required)
+  return true;
 }
 
 /**
  * Get available search providers
+ * SECURITY: Provider availability determined by server-side proxy configuration
  */
 export function getAvailableSearchProviders(): string[] {
-  const providers: string[] = [];
-
-  if (PERPLEXITY_API_KEY) providers.push('perplexity');
-  if (GOOGLE_API_KEY && GOOGLE_CX) providers.push('google');
-  providers.push('duckduckgo'); // Always available
-
-  return providers;
+  // All providers are available through authenticated proxies
+  // Actual availability depends on server-side API key configuration
+  return ['perplexity', 'google', 'duckduckgo'];
 }

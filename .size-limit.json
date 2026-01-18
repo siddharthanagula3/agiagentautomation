@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Total JS (all chunks)",
+    "path": "dist/assets/*.js",
+    "limit": "2.5 MB",
+    "gzip": true
+  },
+  {
+    "name": "Total CSS",
+    "path": "dist/assets/*.css",
+    "limit": "100 kB",
+    "gzip": true
+  },
+  {
+    "name": "Chat feature",
+    "path": "dist/assets/chat-*.js",
+    "limit": "550 kB",
+    "gzip": true
+  },
+  {
+    "name": "Vibe feature",
+    "path": "dist/assets/vibe-*.js",
+    "limit": "350 kB",
+    "gzip": true
+  },
+  {
+    "name": "Editor vendor (Monaco)",
+    "path": "dist/assets/editor-vendor-*.js",
+    "limit": "200 kB",
+    "gzip": true
+  },
+  {
+    "name": "React vendor",
+    "path": "dist/assets/react-vendor-*.js",
+    "limit": "150 kB",
+    "gzip": true
+  },
+  {
+    "name": "AI core",
+    "path": "dist/assets/ai-core-*.js",
+    "limit": "120 kB",
+    "gzip": true
+  },
+  {
+    "name": "UI vendor",
+    "path": "dist/assets/ui-vendor-*.js",
+    "limit": "100 kB",
+    "gzip": true
+  }
+]

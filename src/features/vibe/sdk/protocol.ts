@@ -13,16 +13,22 @@
 // ============================================================================
 
 export type BehaviorType = 'agentic' | 'phasic';
-export type ProjectType = 'react' | 'nextjs' | 'vue' | 'svelte' | 'vanilla' | string;
+export type ProjectType =
+  | 'react'
+  | 'nextjs'
+  | 'vue'
+  | 'svelte'
+  | 'vanilla'
+  | string;
 
 // ============================================================================
 // FILE OUTPUT TYPE
 // ============================================================================
 
 export type FileOutputType = {
-	filePath: string;
-	fileContents: string;
-	language?: string;
+  filePath: string;
+  fileContents: string;
+  language?: string;
 };
 
 // ============================================================================
@@ -30,13 +36,13 @@ export type FileOutputType = {
 // ============================================================================
 
 export type AgentState = {
-	behaviorType?: BehaviorType;
-	projectType?: ProjectType;
-	generatedFilesMap?: Record<string, FileOutputType>;
-	currentPhase?: string;
-	status?: string;
-	previewUrl?: string;
-	instanceId?: string;
+  behaviorType?: BehaviorType;
+  projectType?: ProjectType;
+  generatedFilesMap?: Record<string, FileOutputType>;
+  currentPhase?: string;
+  status?: string;
+  previewUrl?: string;
+  instanceId?: string;
 };
 
 // ============================================================================
@@ -44,9 +50,9 @@ export type AgentState = {
 // ============================================================================
 
 export type TemplateDetails = {
-	name: string;
-	files?: Record<string, string>;
-	description?: string;
+  name: string;
+  files?: Record<string, string>;
+  description?: string;
 };
 
 // ============================================================================
@@ -54,18 +60,18 @@ export type TemplateDetails = {
 // ============================================================================
 
 export type PlatformCodeGenArgs = {
-	query: string;
-	language?: string;
-	frameworks?: string[];
-	selectedTemplate?: string;
-	behaviorType?: BehaviorType;
-	projectType?: ProjectType;
-	images?: unknown[];
-	credentials?: {
-		openaiApiKey?: string;
-		anthropicApiKey?: string;
-		[key: string]: string | undefined;
-	};
+  query: string;
+  language?: string;
+  frameworks?: string[];
+  selectedTemplate?: string;
+  behaviorType?: BehaviorType;
+  projectType?: ProjectType;
+  images?: unknown[];
+  credentials?: {
+    openaiApiKey?: string;
+    anthropicApiKey?: string;
+    [key: string]: string | undefined;
+  };
 };
 
 // ============================================================================
@@ -75,64 +81,86 @@ export type PlatformCodeGenArgs = {
 export type WebSocketMessageData = Record<string, unknown>;
 
 export type WebSocketMessage =
-	// Connection events
-	| { type: 'agent_connected'; state: AgentState; previewUrl?: string }
-	| { type: 'cf_agent_state'; state: AgentState }
+  // Connection events
+  | { type: 'agent_connected'; state: AgentState; previewUrl?: string }
+  | { type: 'cf_agent_state'; state: AgentState }
 
-	// Generation events
-	| { type: 'generation_started'; totalFiles?: number; instanceId?: string }
-	| { type: 'generation_complete'; instanceId?: string; previewURL?: string }
-	| { type: 'generation_stopped'; instanceId?: string }
-	| { type: 'generation_resumed'; instanceId?: string }
+  // Generation events
+  | { type: 'generation_started'; totalFiles?: number; instanceId?: string }
+  | { type: 'generation_complete'; instanceId?: string; previewURL?: string }
+  | { type: 'generation_stopped'; instanceId?: string }
+  | { type: 'generation_resumed'; instanceId?: string }
 
-	// File events
-	| { type: 'file_generating'; filePath: string }
-	| { type: 'file_generated'; file: FileOutputType; filePath?: string }
-	| { type: 'file_chunk_generated'; filePath: string; chunk: string }
-	| { type: 'file_regenerating'; filePath: string }
-	| { type: 'file_regenerated'; file: FileOutputType; filePath?: string }
+  // File events
+  | { type: 'file_generating'; filePath: string }
+  | { type: 'file_generated'; file: FileOutputType; filePath?: string }
+  | { type: 'file_chunk_generated'; filePath: string; chunk: string }
+  | { type: 'file_regenerating'; filePath: string }
+  | { type: 'file_regenerated'; file: FileOutputType; filePath?: string }
 
-	// Phase events (phasic behavior)
-	| { type: 'phase_generating'; phase?: { name?: string; description?: string } }
-	| { type: 'phase_generated'; phase?: { name?: string; description?: string } }
-	| { type: 'phase_implementing'; phase?: { name?: string; description?: string } }
-	| { type: 'phase_implemented'; phase?: { name?: string; description?: string } }
-	| { type: 'phase_validating'; phase?: { name?: string; description?: string } }
-	| { type: 'phase_validated'; phase?: { name?: string; description?: string } }
+  // Phase events (phasic behavior)
+  | {
+      type: 'phase_generating';
+      phase?: { name?: string; description?: string };
+    }
+  | { type: 'phase_generated'; phase?: { name?: string; description?: string } }
+  | {
+      type: 'phase_implementing';
+      phase?: { name?: string; description?: string };
+    }
+  | {
+      type: 'phase_implemented';
+      phase?: { name?: string; description?: string };
+    }
+  | {
+      type: 'phase_validating';
+      phase?: { name?: string; description?: string };
+    }
+  | { type: 'phase_validated'; phase?: { name?: string; description?: string } }
 
-	// Preview deployment events
-	| { type: 'deployment_started' }
-	| { type: 'deployment_completed'; previewURL: string; tunnelURL: string; instanceId: string }
-	| { type: 'deployment_failed'; error: string }
+  // Preview deployment events
+  | { type: 'deployment_started' }
+  | {
+      type: 'deployment_completed';
+      previewURL: string;
+      tunnelURL: string;
+      instanceId: string;
+    }
+  | { type: 'deployment_failed'; error: string }
 
-	// Cloudflare deployment events
-	| { type: 'cloudflare_deployment_started'; instanceId?: string }
-	| { type: 'cloudflare_deployment_completed'; deploymentUrl: string; instanceId: string; workersUrl?: string }
-	| { type: 'cloudflare_deployment_error'; error: string; instanceId?: string }
+  // Cloudflare deployment events
+  | { type: 'cloudflare_deployment_started'; instanceId?: string }
+  | {
+      type: 'cloudflare_deployment_completed';
+      deploymentUrl: string;
+      instanceId: string;
+      workersUrl?: string;
+    }
+  | { type: 'cloudflare_deployment_error'; error: string; instanceId?: string }
 
-	// Conversation events
-	| { type: 'conversation_state'; state: ConversationState }
-	| { type: 'conversation_response'; response: string; suggestions?: string[] }
+  // Conversation events
+  | { type: 'conversation_state'; state: ConversationState }
+  | { type: 'conversation_response'; response: string; suggestions?: string[] }
 
-	// Error events
-	| { type: 'error'; error: string; code?: string }
+  // Error events
+  | { type: 'error'; error: string; code?: string }
 
-	// Heartbeat
-	| { type: 'heartbeat' };
+  // Heartbeat
+  | { type: 'heartbeat' };
 
 // ============================================================================
 // CONVERSATION STATE
 // ============================================================================
 
 export type ConversationMessage = {
-	role: 'user' | 'assistant' | 'system';
-	content: string;
-	timestamp?: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp?: string;
 };
 
 export type ConversationState = {
-	messages: ConversationMessage[];
-	suggestions?: string[];
+  messages: ConversationMessage[];
+  suggestions?: string[];
 };
 
 // ============================================================================
@@ -140,15 +168,15 @@ export type ConversationState = {
 // ============================================================================
 
 export type AgentConnectionData = {
-	agentId: string;
-	websocketUrl: string;
-	httpStatusUrl?: string;
+  agentId: string;
+  websocketUrl: string;
+  httpStatusUrl?: string;
 };
 
 export type AgentPreviewResponse = {
-	previewUrl: string;
-	tunnelUrl?: string;
-	instanceId?: string;
+  previewUrl: string;
+  tunnelUrl?: string;
+  instanceId?: string;
 };
 
 // ============================================================================
@@ -156,25 +184,25 @@ export type AgentPreviewResponse = {
 // ============================================================================
 
 export type AgentDisplayConfig = {
-	name?: string;
-	description?: string;
-	icon?: string;
+  name?: string;
+  description?: string;
+  icon?: string;
 };
 
 export type ModelConfigsInfo = {
-	availableModels?: string[];
-	defaultModel?: string;
+  availableModels?: string[];
+  defaultModel?: string;
 };
 
 export type ModelConfigsInfoMessage = {
-	type: 'model_configs';
-	configs: ModelConfigsInfo;
+  type: 'model_configs';
+  configs: ModelConfigsInfo;
 };
 
 export type CodeFixEdits = {
-	filePath: string;
-	edits: Array<{
-		range: { start: number; end: number };
-		newText: string;
-	}>;
+  filePath: string;
+  edits: Array<{
+    range: { start: number; end: number };
+    newText: string;
+  }>;
 };

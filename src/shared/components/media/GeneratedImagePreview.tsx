@@ -139,7 +139,7 @@ export const GeneratedImagePreview: React.FC<GeneratedImagePreviewProps> = ({
       {/* Fullscreen Modal */}
       {isFullscreen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
+          className="fixed inset-0 z-modal flex items-center justify-center bg-black/95 p-4"
           onClick={handleCloseFullscreen}
         >
           <Button

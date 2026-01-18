@@ -101,7 +101,10 @@ class ToolInvocationService {
       if (error) throw error;
       return { success: true, error: null };
     } catch (error: unknown) {
-      return { success: false, error: error instanceof Error ? error.message : String(error) };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 
@@ -145,7 +148,11 @@ class ToolInvocationService {
 
       return { success: true, error: null, result };
     } catch (error: unknown) {
-      return { success: false, error: error instanceof Error ? error.message : String(error), result: null };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        result: null,
+      };
     }
   }
 

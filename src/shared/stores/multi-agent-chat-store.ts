@@ -503,36 +503,50 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
         // ====================================================================
 
         addMessage: (message) => {
+          // Generate ID before set() for return value, but use atomic check inside
           const messageId = crypto.randomUUID();
-          const now = new Date();
+          let wasAdded = false;
 
           set((state) => {
             const conversation = state.conversations[message.conversationId];
-            if (conversation) {
-              const newMessage: ChatMessage = {
-                ...message,
-                id: messageId,
-                timestamp: now,
-                deliveryStatus: 'sent',
-                readBy: [message.senderId], // Sender has read their own message
-              };
+            if (!conversation) return;
 
-              conversation.messages.push(newMessage);
-              conversation.updatedAt = now;
-              conversation.lastMessageAt = now;
-              conversation.metadata.totalMessages += 1;
+            // Atomic duplicate check inside set() to prevent race conditions
+            // Check if a message with similar content and sender was just added (within 100ms)
+            const recentDuplicate = conversation.messages.find(
+              (m) =>
+                m.senderId === message.senderId &&
+                m.content === message.content &&
+                Date.now() - new Date(m.timestamp).getTime() < 100
+            );
+            if (recentDuplicate) {
+              return; // Skip duplicate
+            }
 
-              if (message.metadata?.tokensUsed) {
-                conversation.metadata.totalTokens +=
-                  message.metadata.tokensUsed;
-              }
-              if (message.metadata?.cost) {
-                conversation.metadata.totalCost += message.metadata.cost;
-              }
+            const now = new Date();
+            const newMessage: ChatMessage = {
+              ...message,
+              id: messageId,
+              timestamp: now,
+              deliveryStatus: 'sent',
+              readBy: [message.senderId], // Sender has read their own message
+            };
+
+            conversation.messages.push(newMessage);
+            conversation.updatedAt = now;
+            conversation.lastMessageAt = now;
+            conversation.metadata.totalMessages += 1;
+            wasAdded = true;
+
+            if (message.metadata?.tokensUsed) {
+              conversation.metadata.totalTokens += message.metadata.tokensUsed;
+            }
+            if (message.metadata?.cost) {
+              conversation.metadata.totalCost += message.metadata.cost;
             }
           });
 
-          return messageId;
+          return wasAdded ? messageId : '';
         },
 
         updateMessage: (messageId, updates) =>
@@ -716,7 +730,11 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
 
         queueMessage: (message) =>
           set((state) => {
-            state.messageQueue.push(message);
+            // Prevent duplicate messages in queue by checking ID
+            const exists = state.messageQueue.some((m) => m.id === message.id);
+            if (!exists) {
+              state.messageQueue.push(message);
+            }
           }),
 
         processMessageQueue: async () => {
@@ -895,33 +913,57 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
 );
 
 // ============================================================================
-// SELECTOR HOOKS (for optimized re-renders)
+// SELECTOR HOOKS (optimized with useShallow to prevent stale closures)
 // ============================================================================
 
-export const useActiveConversation = () =>
-  useMultiAgentChatStore((state) => {
-    const { activeConversationId, conversations } = state;
-    return activeConversationId ? conversations[activeConversationId] : null;
-  });
+// Empty array constant to avoid creating new references for missing data
+const EMPTY_ARRAY: never[] = [];
 
+/**
+ * Selector for active conversation - returns stable reference when conversation hasn't changed
+ * Uses the conversation object directly from state to maintain referential equality
+ */
+export const useActiveConversation = () =>
+  useMultiAgentChatStore((state) =>
+    state.activeConversationId
+      ? state.conversations[state.activeConversationId]
+      : null
+  );
+
+/**
+ * Selector for conversation messages - returns stable empty array when conversation doesn't exist
+ * The messages array reference is stable because it comes directly from state
+ */
 export const useConversationMessages = (conversationId: string) =>
   useMultiAgentChatStore(
-    (state) => state.conversations[conversationId]?.messages || []
+    (state) => state.conversations[conversationId]?.messages ?? EMPTY_ARRAY
   );
 
+/**
+ * Selector for conversation participants - returns stable empty array when conversation doesn't exist
+ */
 export const useConversationParticipants = (conversationId: string) =>
   useMultiAgentChatStore(
-    (state) => state.conversations[conversationId]?.participants || []
+    (state) => state.conversations[conversationId]?.participants ?? EMPTY_ARRAY
   );
 
+/**
+ * Selector for typing indicators - returns stable empty array when no indicators exist
+ */
 export const useTypingIndicators = (conversationId: string) =>
   useMultiAgentChatStore(
-    (state) => state.typingIndicators[conversationId] || []
+    (state) => state.typingIndicators[conversationId] ?? EMPTY_ARRAY
   );
 
+/**
+ * Selector for agent presence - returns undefined when agent not found (stable reference)
+ */
 export const useAgentPresence = (agentId: string) =>
   useMultiAgentChatStore((state) => state.agentPresence[agentId]);
 
+/**
+ * Selector for sync state - uses useShallow for multi-value object selection
+ */
 export const useSyncState = () =>
   useMultiAgentChatStore(
     useShallow((state) => ({
@@ -929,5 +971,40 @@ export const useSyncState = () =>
       lastSyncTimestamp: state.lastSyncTimestamp,
       pendingSyncOperations: state.pendingSyncOperations,
       syncConflicts: state.syncConflicts,
+    }))
+  );
+
+/**
+ * Selector for active conversation ID - primitive value, no shallow needed
+ */
+export const useActiveConversationId = () =>
+  useMultiAgentChatStore((state) => state.activeConversationId);
+
+/**
+ * Selector for all conversations - returns stable reference to conversations record
+ */
+export const useConversations = () =>
+  useMultiAgentChatStore((state) => state.conversations);
+
+/**
+ * Selector for search and filter state - uses useShallow for multi-value selection
+ */
+export const useSearchAndFilters = () =>
+  useMultiAgentChatStore(
+    useShallow((state) => ({
+      searchQuery: state.searchQuery,
+      filterTags: state.filterTags,
+      showArchived: state.showArchived,
+    }))
+  );
+
+/**
+ * Selector for loading and error state - uses useShallow for multi-value selection
+ */
+export const useChatLoadingState = () =>
+  useMultiAgentChatStore(
+    useShallow((state) => ({
+      isLoading: state.isLoading,
+      error: state.error,
     }))
   );

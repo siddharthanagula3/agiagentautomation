@@ -1,10 +1,14 @@
 /**
  * AI Service Provider
- * Handles real API calls to various AI providers
+ * Handles API calls to various AI providers through secure Netlify proxies
+ *
+ * SECURITY: All API calls are routed through Netlify proxy functions
+ * to keep API keys secure on the server side. Never expose API keys client-side.
  */
 
 import { Task, AgentType } from '../orchestration/reasoning/task-breakdown';
 import { fetchWithTimeout, TimeoutPresets } from '@shared/utils/error-handling';
+import { supabase } from '@shared/lib/supabase-client';
 
 // ================================================
 // TYPES
@@ -25,34 +29,52 @@ export interface AIError {
 }
 
 // ================================================
+// AUTH HELPER
+// ================================================
+
+/**
+ * Helper function to get the current Supabase session token
+ * Required for authenticated API proxy calls
+ */
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('[Employee Coordinator] Failed to get auth token:', error);
+    return null;
+  }
+}
+
+// ================================================
 // ANTHROPIC CLAUDE SERVICE
 // ================================================
 
 class ClaudeService {
-  private apiKey: string;
-  private baseURL = 'https://api.anthropic.com/v1';
-
-  constructor() {
-    this.apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY || '';
-  }
+  // SECURITY: API keys are managed by Netlify proxy functions
+  private proxyUrl = '/.netlify/functions/llm-proxies/anthropic-proxy';
 
   async executeTask(task: Task): Promise<AIResponse> {
-    if (!this.apiKey) {
-      throw new Error('Anthropic API key not configured');
+    const authToken = await getAuthToken();
+    if (!authToken) {
+      throw new Error(
+        'User not authenticated. Please log in to use AI features.'
+      );
     }
 
     try {
       const prompt = this.buildPrompt(task);
 
-      const response = await fetchWithTimeout(`${this.baseURL}/messages`, {
+      const response = await fetchWithTimeout(this.proxyUrl, {
         timeoutMs: TimeoutPresets.AI_REQUEST,
         timeoutMessage: 'Claude API request timed out',
         fetchOptions: {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-api-key': this.apiKey,
-            'anthropic-version': '2023-06-01',
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify({
             model: 'claude-sonnet-4-20250514',
@@ -68,17 +90,18 @@ class ClaudeService {
       });
 
       if (!response.ok) {
-        const error = await response.json();
+        const error = await response.json().catch(() => ({}));
         throw new Error(error.error?.message || 'Claude API request failed');
       }
 
       const data = await response.json();
-      const content = data.content[0].text;
-      const tokensUsed = data.usage.input_tokens + data.usage.output_tokens;
+      const content = data.content?.[0]?.text || data.content || '';
+      const tokensUsed =
+        (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0);
 
       // Calculate cost (Claude Sonnet 4 pricing: $3/M input, $15/M output)
-      const inputCost = (data.usage.input_tokens / 1000000) * 3;
-      const outputCost = (data.usage.output_tokens / 1000000) * 15;
+      const inputCost = ((data.usage?.input_tokens || 0) / 1000000) * 3;
+      const outputCost = ((data.usage?.output_tokens || 0) / 1000000) * 15;
       const cost = inputCost + outputCost;
 
       return {
@@ -118,62 +141,53 @@ Response:`;
 // ================================================
 
 class GeminiService {
-  private apiKey: string;
-  private baseURL = 'https://generativelanguage.googleapis.com/v1beta';
-
-  constructor() {
-    this.apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY || '';
-  }
+  // SECURITY: API keys are managed by Netlify proxy functions
+  private proxyUrl = '/.netlify/functions/llm-proxies/google-proxy';
 
   async executeTask(task: Task): Promise<AIResponse> {
-    if (!this.apiKey) {
-      throw new Error('Google AI API key not configured');
+    const authToken = await getAuthToken();
+    if (!authToken) {
+      throw new Error(
+        'User not authenticated. Please log in to use AI features.'
+      );
     }
 
     try {
       const prompt = this.buildPrompt(task);
 
-      const response = await fetchWithTimeout(
-        `${this.baseURL}/models/gemini-2.0-flash-exp:generateContent?key=${this.apiKey}`,
-        {
-          timeoutMs: TimeoutPresets.AI_REQUEST,
-          timeoutMessage: 'Gemini API request timed out',
-          fetchOptions: {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              contents: [
-                {
-                  parts: [
-                    {
-                      text: prompt,
-                    },
-                  ],
-                },
-              ],
-              generationConfig: {
-                temperature: 0.7,
-                topK: 40,
-                topP: 0.95,
-                maxOutputTokens: 8192,
-              },
-            }),
+      const response = await fetchWithTimeout(this.proxyUrl, {
+        timeoutMs: TimeoutPresets.AI_REQUEST,
+        timeoutMessage: 'Gemini API request timed out',
+        fetchOptions: {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authToken}`,
           },
-        }
-      );
+          body: JSON.stringify({
+            model: 'gemini-2.0-flash',
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 8192,
+            temperature: 0.7,
+          }),
+        },
+      });
 
       if (!response.ok) {
-        const error = await response.json();
+        const error = await response.json().catch(() => ({}));
         throw new Error(error.error?.message || 'Gemini API request failed');
       }
 
       const data = await response.json();
-      const content = data.candidates[0].content.parts[0].text;
+      const content =
+        data.candidates?.[0]?.content?.parts?.[0]?.text || data.content || '';
       const tokensUsed =
-        (data.usageMetadata?.promptTokenCount || 0) +
-        (data.usageMetadata?.candidatesTokenCount || 0);
+        (data.usageMetadata?.promptTokenCount ||
+          data.usage?.prompt_tokens ||
+          0) +
+        (data.usageMetadata?.candidatesTokenCount ||
+          data.usage?.completion_tokens ||
+          0);
 
       // Calculate cost (Gemini 2.0 Flash pricing: free for now, but estimate)
       const cost = (tokensUsed / 1000000) * 0.35; // $0.35 per million tokens
@@ -182,7 +196,7 @@ class GeminiService {
         content,
         tokensUsed,
         cost,
-        model: 'gemini-2.0-flash-exp',
+        model: 'gemini-2.0-flash',
         provider: 'google',
       };
     } catch (error) {
@@ -213,29 +227,28 @@ Complete this task with high quality output. Be thorough, accurate, and provide 
 // ================================================
 
 class OpenAIService {
-  private apiKey: string;
-  private baseURL = 'https://api.openai.com/v1';
-
-  constructor() {
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
-  }
+  // SECURITY: API keys are managed by Netlify proxy functions
+  private proxyUrl = '/.netlify/functions/llm-proxies/openai-proxy';
 
   async executeTask(task: Task): Promise<AIResponse> {
-    if (!this.apiKey) {
-      throw new Error('OpenAI API key not configured');
+    const authToken = await getAuthToken();
+    if (!authToken) {
+      throw new Error(
+        'User not authenticated. Please log in to use AI features.'
+      );
     }
 
     try {
       const prompt = this.buildPrompt(task);
 
-      const response = await fetchWithTimeout(`${this.baseURL}/chat/completions`, {
+      const response = await fetchWithTimeout(this.proxyUrl, {
         timeoutMs: TimeoutPresets.AI_REQUEST,
         timeoutMessage: 'OpenAI API request timed out',
         fetchOptions: {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.apiKey}`,
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify({
             model: 'gpt-4o',
@@ -256,17 +269,17 @@ class OpenAIService {
       });
 
       if (!response.ok) {
-        const error = await response.json();
+        const error = await response.json().catch(() => ({}));
         throw new Error(error.error?.message || 'OpenAI API request failed');
       }
 
       const data = await response.json();
-      const content = data.choices[0].message.content;
-      const tokensUsed = data.usage.total_tokens;
+      const content = data.choices?.[0]?.message?.content || data.content || '';
+      const tokensUsed = data.usage?.total_tokens || 0;
 
       // Calculate cost (GPT-4 Turbo pricing: $10/M input, $30/M output)
-      const inputCost = (data.usage.prompt_tokens / 1000000) * 10;
-      const outputCost = (data.usage.completion_tokens / 1000000) * 30;
+      const inputCost = ((data.usage?.prompt_tokens || 0) / 1000000) * 10;
+      const outputCost = ((data.usage?.completion_tokens || 0) / 1000000) * 30;
       const cost = inputCost + outputCost;
 
       return {

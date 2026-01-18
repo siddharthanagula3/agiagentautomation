@@ -260,16 +260,17 @@ export function VibeMessageInput({
         {/* Selected Files */}
         {selectedFiles.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
-            {selectedFiles.map((file, index) => (
+            {selectedFiles.map((file, fileIndex) => (
               <div
-                key={index}
+                key={`selected-file-${file.name}-${file.size}`}
                 className="flex items-center gap-2 rounded-md bg-muted px-3 py-1.5 text-sm"
               >
-                <Paperclip className="h-3.5 w-3.5" />
+                <Paperclip className="h-3.5 w-3.5" aria-hidden="true" />
                 <span className="max-w-[200px] truncate">{file.name}</span>
                 <button
-                  onClick={() => removeFile(index)}
+                  onClick={() => removeFile(fileIndex)}
                   className="ml-1 text-muted-foreground hover:text-foreground"
+                  aria-label={`Remove file ${file.name}`}
                 >
                   ×
                 </button>
@@ -298,6 +299,7 @@ export function VibeMessageInput({
                 'text-sm placeholder:text-muted-foreground'
               )}
               rows={1}
+              aria-label="Message input"
             />
 
             {/* Character count (optional) */}
@@ -312,17 +314,29 @@ export function VibeMessageInput({
               <div
                 ref={mentionPopoverRef}
                 className="absolute bottom-full left-0 z-50 mb-2 w-80 rounded-lg border border-border bg-popover shadow-lg"
+                role="listbox"
+                aria-label={
+                  mentionType === 'agent'
+                    ? 'Select agent to mention'
+                    : 'Select file to mention'
+                }
               >
                 <div className="border-b border-border bg-muted/30 p-2">
                   <div className="flex items-center gap-2 text-sm">
                     {mentionType === 'agent' ? (
                       <>
-                        <AtSign className="h-4 w-4 text-primary" />
+                        <AtSign
+                          className="h-4 w-4 text-primary"
+                          aria-hidden="true"
+                        />
                         <span className="font-medium">Mention Agent</span>
                       </>
                     ) : (
                       <>
-                        <Hash className="h-4 w-4 text-primary" />
+                        <Hash
+                          className="h-4 w-4 text-primary"
+                          aria-hidden="true"
+                        />
                         <span className="font-medium">Mention File</span>
                       </>
                     )}
@@ -345,11 +359,16 @@ export function VibeMessageInput({
                             ? 'bg-primary/10 text-primary'
                             : 'hover:bg-muted'
                         )}
+                        role="option"
+                        aria-selected={index === selectedSuggestionIndex}
                       >
                         {suggestion.type === 'agent' ? (
                           <>
                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20">
-                              <User className="h-4 w-4 text-primary" />
+                              <User
+                                className="h-4 w-4 text-primary"
+                                aria-hidden="true"
+                              />
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="truncate text-sm font-medium">
@@ -365,7 +384,10 @@ export function VibeMessageInput({
                         ) : (
                           <>
                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
-                              <FileIcon className="h-4 w-4 text-muted-foreground" />
+                              <FileIcon
+                                className="h-4 w-4 text-muted-foreground"
+                                aria-hidden="true"
+                              />
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="truncate text-sm font-medium">
@@ -419,8 +441,9 @@ export function VibeMessageInput({
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
               className="shrink-0"
+              aria-label="Attach files"
             >
-              <Paperclip className="h-4 w-4" />
+              <Paperclip className="h-4 w-4" aria-hidden="true" />
             </Button>
             <input
               ref={fileInputRef}
@@ -436,8 +459,9 @@ export function VibeMessageInput({
               size="icon"
               disabled={isLoading}
               className="shrink-0"
+              aria-label="Voice input"
             >
-              <Mic className="h-4 w-4" />
+              <Mic className="h-4 w-4" aria-hidden="true" />
             </Button>
 
             {/* Send Button */}
@@ -447,12 +471,14 @@ export function VibeMessageInput({
                 (!input.trim() && selectedFiles.length === 0) || isLoading
               }
               className="shrink-0"
+              aria-label={isLoading ? 'Sending message' : 'Send message'}
+              aria-busy={isLoading}
             >
               {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
                 <>
-                  <Send className="mr-2 h-4 w-4" />
+                  <Send className="mr-2 h-4 w-4" aria-hidden="true" />
                   Send
                 </>
               )}

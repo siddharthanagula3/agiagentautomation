@@ -143,18 +143,11 @@ class GlobalSearchService {
       content: session.title || '',
       createdAt: new Date(session.created_at),
       updatedAt: new Date(session.updated_at),
-      matchedText: this.extractMatch(
-        session.title || '',
-        filters.query
-      ).matched,
-      contextBefore: this.extractMatch(
-        session.title || '',
-        filters.query
-      ).before,
-      contextAfter: this.extractMatch(
-        session.title || '',
-        filters.query
-      ).after,
+      matchedText: this.extractMatch(session.title || '', filters.query)
+        .matched,
+      contextBefore: this.extractMatch(session.title || '', filters.query)
+        .before,
+      contextAfter: this.extractMatch(session.title || '', filters.query).after,
     }));
   }
 
@@ -184,7 +177,10 @@ class GlobalSearchService {
     const { data: sessions, error: sessionError } = await sessionQuery;
 
     if (sessionError) {
-      console.error('[GlobalSearch] Failed to get user sessions:', sessionError);
+      console.error(
+        '[GlobalSearch] Failed to get user sessions:',
+        sessionError
+      );
       return [];
     }
 
@@ -293,7 +289,10 @@ class GlobalSearchService {
   /**
    * Get search suggestions based on recent searches (future enhancement)
    */
-  async getSearchSuggestions(userId: string, partialQuery: string): Promise<string[]> {
+  async getSearchSuggestions(
+    userId: string,
+    partialQuery: string
+  ): Promise<string[]> {
     // TODO: Implement search history and suggestions
     // For now, return empty array
     return [];
@@ -335,7 +334,10 @@ class GlobalSearchService {
   /**
    * Get popular search terms (future enhancement)
    */
-  async getPopularSearches(userId: string, limit: number = 10): Promise<string[]> {
+  async getPopularSearches(
+    userId: string,
+    limit: number = 10
+  ): Promise<string[]> {
     // TODO: Track search analytics and return popular terms
     return [];
   }

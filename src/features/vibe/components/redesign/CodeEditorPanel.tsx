@@ -50,6 +50,7 @@ import { vibeFileSystem } from '@features/vibe/services/vibe-file-system';
 import { FileTreeView } from './FileTreeView';
 import { VibeTemplateSelector } from '../VibeTemplateSelector';
 import JSZip from 'jszip';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 
 interface OpenFile {
   path: string;
@@ -71,7 +72,7 @@ interface DeleteDialogState {
   name: string;
 }
 
-export function CodeEditorPanel() {
+function CodeEditorPanelContent() {
   const [editorInstance, setEditorInstance] =
     useState<Monaco.editor.IStandaloneCodeEditor | null>(null);
   const [copied, setCopied] = useState(false);
@@ -143,7 +144,9 @@ export function CodeEditorPanel() {
       vibeFileSystem.closeFile(path);
 
       if (currentFilePath === path) {
-        const remaining = Array.from(openFiles.keys()).filter((p) => p !== path);
+        const remaining = Array.from(openFiles.keys()).filter(
+          (p) => p !== path
+        );
         setCurrentFilePath(remaining.length > 0 ? remaining[0] : null);
       }
     },
@@ -216,14 +219,17 @@ export function CodeEditorPanel() {
   );
 
   // Open create dialog
-  const handleFileCreate = useCallback((parentPath: string, type: 'file' | 'folder') => {
-    setCreateDialog({
-      open: true,
-      type,
-      parentPath,
-      name: '',
-    });
-  }, []);
+  const handleFileCreate = useCallback(
+    (parentPath: string, type: 'file' | 'folder') => {
+      setCreateDialog({
+        open: true,
+        type,
+        parentPath,
+        name: '',
+      });
+    },
+    []
+  );
 
   // Confirm create
   const handleCreateConfirm = useCallback(() => {
@@ -331,7 +337,9 @@ export function CodeEditorPanel() {
       for (const file of allFiles) {
         try {
           const content = vibeFileSystem.readFile(file.path);
-          const zipPath = file.path.startsWith('/') ? file.path.slice(1) : file.path;
+          const zipPath = file.path.startsWith('/')
+            ? file.path.slice(1)
+            : file.path;
           zip.file(zipPath, content);
         } catch (error) {
           console.error(`Failed to add ${file.path} to ZIP:`, error);
@@ -359,50 +367,55 @@ export function CodeEditorPanel() {
       {showFileTree && (
         <div className="w-56 border-r border-border bg-muted/20">
           <div className="flex items-center justify-between border-b border-border px-3 py-2">
-            <span className="text-xs font-medium text-muted-foreground">FILES</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              FILES
+            </span>
             <div className="flex items-center gap-0.5">
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6"
                 onClick={() => setShowTemplateSelector(true)}
-                title="New from template"
+                aria-label="New from template"
               >
-                <LayoutTemplate className="h-3 w-3" />
+                <LayoutTemplate className="h-3 w-3" aria-hidden="true" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6"
                 onClick={handleExportAllAsZip}
-                title="Export as ZIP"
+                aria-label="Export as ZIP"
               >
-                <Download className="h-3 w-3" />
+                <Download className="h-3 w-3" aria-hidden="true" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6"
                 onClick={() => handleFileCreate('/', 'file')}
-                title="New file"
+                aria-label="New file"
               >
-                <FilePlus className="h-3 w-3" />
+                <FilePlus className="h-3 w-3" aria-hidden="true" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6"
                 onClick={() => handleFileCreate('/', 'folder')}
-                title="New folder"
+                aria-label="New folder"
               >
-                <FolderPlus className="h-3 w-3" />
+                <FolderPlus className="h-3 w-3" aria-hidden="true" />
               </Button>
             </div>
           </div>
 
           {fileTree.length === 0 ? (
             <div className="flex h-[calc(100%-41px)] flex-col items-center justify-center p-4 text-center">
-              <Folder className="mb-2 h-8 w-8 text-muted-foreground/40" />
+              <Folder
+                className="mb-2 h-8 w-8 text-muted-foreground/40"
+                aria-hidden="true"
+              />
               <p className="text-xs text-muted-foreground">No files yet</p>
               <p className="mt-1 text-[10px] text-muted-foreground/60">
                 Create a file or use a template
@@ -437,8 +450,9 @@ export function CodeEditorPanel() {
                 size="icon"
                 className="h-7 w-7"
                 onClick={() => setShowFileTree(true)}
+                aria-label="Show file tree"
               >
-                <Folder className="h-3.5 w-3.5" />
+                <Folder className="h-3.5 w-3.5" aria-hidden="true" />
               </Button>
             )}
             {Array.from(openFiles.entries()).map(([path, file]) => (
@@ -454,18 +468,26 @@ export function CodeEditorPanel() {
                 <button
                   onClick={() => setCurrentFilePath(path)}
                   className="flex items-center gap-1.5"
+                  aria-label={`Open ${path.split('/').pop()}${file.isDirty ? ' (unsaved changes)' : ''}`}
+                  aria-current={currentFilePath === path ? 'true' : undefined}
                 >
-                  <File className="h-3 w-3" />
-                  <span className="max-w-[100px] truncate">{path.split('/').pop()}</span>
+                  <File className="h-3 w-3" aria-hidden="true" />
+                  <span className="max-w-[100px] truncate">
+                    {path.split('/').pop()}
+                  </span>
                   {file.isDirty && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary" title="Unsaved" />
+                    <span
+                      className="h-1.5 w-1.5 rounded-full bg-primary"
+                      aria-label="Unsaved changes"
+                    />
                   )}
                 </button>
                 <button
                   onClick={() => handleCloseFile(path)}
                   className="opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                  aria-label={`Close ${path.split('/').pop()}`}
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-3 w-3" aria-hidden="true" />
                 </button>
               </div>
             ))}
@@ -477,7 +499,9 @@ export function CodeEditorPanel() {
           <div className="flex items-center justify-between border-b border-border bg-background px-3 py-1.5">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className="truncate">{currentFilePath}</span>
-              <span className="text-muted-foreground/50">{currentFile.language}</span>
+              <span className="text-muted-foreground/50">
+                {currentFile.language}
+              </span>
               {currentFile.isDirty && (
                 <span className="text-orange-500">● Modified</span>
               )}
@@ -490,20 +514,30 @@ export function CodeEditorPanel() {
                   onClick={() => handleSaveFile(currentFilePath)}
                   className="h-7 text-xs"
                 >
-                  <Save className="mr-1 h-3 w-3" />
+                  <Save className="mr-1 h-3 w-3" aria-hidden="true" />
                   Save
                 </Button>
               )}
-              <Button variant="ghost" size="sm" onClick={handleCopyCode} className="h-7 text-xs">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyCode}
+                className="h-7 text-xs"
+              >
                 {copied ? (
-                  <Check className="mr-1 h-3 w-3" />
+                  <Check className="mr-1 h-3 w-3" aria-hidden="true" />
                 ) : (
-                  <Copy className="mr-1 h-3 w-3" />
+                  <Copy className="mr-1 h-3 w-3" aria-hidden="true" />
                 )}
                 {copied ? 'Copied' : 'Copy'}
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleDownload} className="h-7 text-xs">
-                <Download className="mr-1 h-3 w-3" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDownload}
+                className="h-7 text-xs"
+              >
+                <Download className="mr-1 h-3 w-3" aria-hidden="true" />
               </Button>
             </div>
           </div>
@@ -521,7 +555,8 @@ export function CodeEditorPanel() {
               onMount={setEditorInstance}
               options={{
                 fontSize: 13,
-                fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
+                fontFamily:
+                  "'JetBrains Mono', 'Fira Code', Consolas, monospace",
                 lineNumbers: 'on',
                 minimap: { enabled: true, maxColumn: 80 },
                 scrollBeyondLastLine: false,
@@ -537,7 +572,10 @@ export function CodeEditorPanel() {
         ) : (
           <div className="flex flex-1 items-center justify-center bg-muted/10">
             <div className="text-center">
-              <File className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
+              <File
+                className="mx-auto mb-3 h-12 w-12 text-muted-foreground/30"
+                aria-hidden="true"
+              />
               <p className="text-sm text-muted-foreground">No file selected</p>
               <p className="mt-1 text-xs text-muted-foreground/60">
                 Select a file from the sidebar
@@ -550,7 +588,9 @@ export function CodeEditorPanel() {
       {/* Create Dialog */}
       <Dialog
         open={createDialog.open}
-        onOpenChange={(open) => setCreateDialog((prev) => ({ ...prev, open, name: '' }))}
+        onOpenChange={(open) =>
+          setCreateDialog((prev) => ({ ...prev, open, name: '' }))
+        }
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -564,11 +604,16 @@ export function CodeEditorPanel() {
           <div className="py-4">
             <Input
               value={createDialog.name}
-              onChange={(e) => setCreateDialog((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder={createDialog.type === 'file' ? 'filename.tsx' : 'folder-name'}
+              onChange={(e) =>
+                setCreateDialog((prev) => ({ ...prev, name: e.target.value }))
+              }
+              placeholder={
+                createDialog.type === 'file' ? 'filename.tsx' : 'folder-name'
+              }
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleCreateConfirm();
-                if (e.key === 'Escape') setCreateDialog((prev) => ({ ...prev, open: false }));
+                if (e.key === 'Escape')
+                  setCreateDialog((prev) => ({ ...prev, open: false }));
               }}
               autoFocus
             />
@@ -576,11 +621,16 @@ export function CodeEditorPanel() {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setCreateDialog((prev) => ({ ...prev, open: false }))}
+              onClick={() =>
+                setCreateDialog((prev) => ({ ...prev, open: false }))
+              }
             >
               Cancel
             </Button>
-            <Button onClick={handleCreateConfirm} disabled={!createDialog.name.trim()}>
+            <Button
+              onClick={handleCreateConfirm}
+              disabled={!createDialog.name.trim()}
+            >
               Create
             </Button>
           </DialogFooter>
@@ -621,5 +671,16 @@ export function CodeEditorPanel() {
         }}
       />
     </div>
+  );
+}
+
+/**
+ * CodeEditorPanel - Monaco code editor with error boundary protection
+ */
+export function CodeEditorPanel() {
+  return (
+    <ErrorBoundary compact componentName="Code Editor">
+      <CodeEditorPanelContent />
+    </ErrorBoundary>
   );
 }

@@ -4,7 +4,10 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
-import type { ExecutionPlan, Task } from '@core/ai/orchestration/reasoning/task-breakdown';
+import type {
+  ExecutionPlan,
+  Task,
+} from '@core/ai/orchestration/reasoning/task-breakdown';
 import type { AnalysisResult } from '@core/ai/orchestration/reasoning/natural-language-processor';
 
 // ================================================
@@ -559,7 +562,10 @@ async function updateSubscriptionUsage(
         .maybeSingle();
 
       if (!subscription) {
-        console.warn('[Subscription] No subscription record found for user:', userId);
+        console.warn(
+          '[Subscription] No subscription record found for user:',
+          userId
+        );
         return false;
       }
 

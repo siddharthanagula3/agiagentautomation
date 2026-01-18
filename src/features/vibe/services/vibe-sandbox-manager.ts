@@ -64,7 +64,14 @@ export interface SandboxTemplate {
   id: string;
   name: string;
   description: string;
-  framework: 'react' | 'react-ts' | 'vanilla' | 'vanilla-ts' | 'vue' | 'vue-ts' | 'svelte';
+  framework:
+    | 'react'
+    | 'react-ts'
+    | 'vanilla'
+    | 'vanilla-ts'
+    | 'vue'
+    | 'vue-ts'
+    | 'svelte';
   files: Record<string, string>;
   dependencies: Record<string, string>;
   devDependencies?: Record<string, string>;
@@ -94,27 +101,31 @@ export const SANDBOX_TEMPLATES: Record<string, SandboxTemplate> = {
     description: 'React 18 with TypeScript and Vite',
     framework: 'react-ts',
     files: {
-      '/package.json': JSON.stringify({
-        name: 'vibe-sandbox',
-        private: true,
-        type: 'module',
-        scripts: {
-          dev: 'vite',
-          build: 'tsc && vite build',
-          preview: 'vite preview',
+      '/package.json': JSON.stringify(
+        {
+          name: 'vibe-sandbox',
+          private: true,
+          type: 'module',
+          scripts: {
+            dev: 'vite',
+            build: 'tsc && vite build',
+            preview: 'vite preview',
+          },
+          dependencies: {
+            react: '^18.2.0',
+            'react-dom': '^18.2.0',
+          },
+          devDependencies: {
+            '@types/react': '^18.2.0',
+            '@types/react-dom': '^18.2.0',
+            '@vitejs/plugin-react': '^4.2.0',
+            typescript: '^5.3.0',
+            vite: '^5.0.0',
+          },
         },
-        dependencies: {
-          react: '^18.2.0',
-          'react-dom': '^18.2.0',
-        },
-        devDependencies: {
-          '@types/react': '^18.2.0',
-          '@types/react-dom': '^18.2.0',
-          '@vitejs/plugin-react': '^4.2.0',
-          typescript: '^5.3.0',
-          vite: '^5.0.0',
-        },
-      }, null, 2),
+        null,
+        2
+      ),
       '/index.html': `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -179,26 +190,30 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
 });`,
-      '/tsconfig.json': JSON.stringify({
-        compilerOptions: {
-          target: 'ES2020',
-          useDefineForClassFields: true,
-          lib: ['ES2020', 'DOM', 'DOM.Iterable'],
-          module: 'ESNext',
-          skipLibCheck: true,
-          moduleResolution: 'bundler',
-          allowImportingTsExtensions: true,
-          resolveJsonModule: true,
-          isolatedModules: true,
-          noEmit: true,
-          jsx: 'react-jsx',
-          strict: true,
-          noUnusedLocals: true,
-          noUnusedParameters: true,
-          noFallthroughCasesInSwitch: true,
+      '/tsconfig.json': JSON.stringify(
+        {
+          compilerOptions: {
+            target: 'ES2020',
+            useDefineForClassFields: true,
+            lib: ['ES2020', 'DOM', 'DOM.Iterable'],
+            module: 'ESNext',
+            skipLibCheck: true,
+            moduleResolution: 'bundler',
+            allowImportingTsExtensions: true,
+            resolveJsonModule: true,
+            isolatedModules: true,
+            noEmit: true,
+            jsx: 'react-jsx',
+            strict: true,
+            noUnusedLocals: true,
+            noUnusedParameters: true,
+            noFallthroughCasesInSwitch: true,
+          },
+          include: ['src'],
         },
-        include: ['src'],
-      }, null, 2),
+        null,
+        2
+      ),
     },
     dependencies: {
       react: '^18.2.0',
@@ -219,20 +234,24 @@ export default defineConfig({
     description: 'Plain TypeScript with Vite',
     framework: 'vanilla-ts',
     files: {
-      '/package.json': JSON.stringify({
-        name: 'vibe-vanilla-sandbox',
-        private: true,
-        type: 'module',
-        scripts: {
-          dev: 'vite',
-          build: 'tsc && vite build',
-          preview: 'vite preview',
+      '/package.json': JSON.stringify(
+        {
+          name: 'vibe-vanilla-sandbox',
+          private: true,
+          type: 'module',
+          scripts: {
+            dev: 'vite',
+            build: 'tsc && vite build',
+            preview: 'vite preview',
+          },
+          devDependencies: {
+            typescript: '^5.3.0',
+            vite: '^5.0.0',
+          },
         },
-        devDependencies: {
-          typescript: '^5.3.0',
-          vite: '^5.0.0',
-        },
-      }, null, 2),
+        null,
+        2
+      ),
       '/index.html': `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -278,16 +297,20 @@ h1 {
   font-size: 3rem;
   margin-bottom: 1rem;
 }`,
-      '/tsconfig.json': JSON.stringify({
-        compilerOptions: {
-          target: 'ES2020',
-          module: 'ESNext',
-          moduleResolution: 'bundler',
-          strict: true,
-          noEmit: true,
+      '/tsconfig.json': JSON.stringify(
+        {
+          compilerOptions: {
+            target: 'ES2020',
+            module: 'ESNext',
+            moduleResolution: 'bundler',
+            strict: true,
+            noEmit: true,
+          },
+          include: ['src'],
         },
-        include: ['src'],
-      }, null, 2),
+        null,
+        2
+      ),
     },
     dependencies: {},
     devDependencies: {
@@ -307,14 +330,16 @@ export class TemplateBuilder {
   private customDeps: Record<string, string> = {};
 
   constructor(baseTemplate?: SandboxTemplate) {
-    this.template = baseTemplate ? { ...baseTemplate } : {
-      id: `custom-${Date.now()}`,
-      name: 'Custom Template',
-      description: 'Custom project template',
-      framework: 'react-ts',
-      files: {},
-      dependencies: {},
-    };
+    this.template = baseTemplate
+      ? { ...baseTemplate }
+      : {
+          id: `custom-${Date.now()}`,
+          name: 'Custom Template',
+          description: 'Custom project template',
+          framework: 'react-ts',
+          files: {},
+          dependencies: {},
+        };
   }
 
   /**
@@ -382,7 +407,8 @@ export class TemplateBuilder {
     this.customDeps['postcss'] = '^8.4.0';
     this.customDeps['autoprefixer'] = '^10.4.0';
 
-    this.customFiles['/tailwind.config.js'] = `/** @type {import('tailwindcss').Config} */
+    this.customFiles['/tailwind.config.js'] =
+      `/** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
@@ -426,7 +452,10 @@ export default {
 
     // Merge package.json with new dependencies
     const packageJson = JSON.parse(baseFiles['/package.json'] || '{}');
-    packageJson.dependencies = { ...packageJson.dependencies, ...this.customDeps };
+    packageJson.dependencies = {
+      ...packageJson.dependencies,
+      ...this.customDeps,
+    };
 
     const mergedFiles = {
       ...baseFiles,
@@ -470,7 +499,10 @@ interface SandboxManagerState {
   deleteFile: (sessionId: string, path: string) => void;
   renameFile: (sessionId: string, oldPath: string, newPath: string) => void;
   listFiles: (sessionId: string, directory?: string) => SandboxFile[];
-  watchFiles: (sessionId: string, callback: (change: FileChange) => void) => () => void;
+  watchFiles: (
+    sessionId: string,
+    callback: (change: FileChange) => void
+  ) => () => void;
 
   // Utilities
   getFilesForSandpack: (sessionId: string) => Record<string, string>;
@@ -507,7 +539,10 @@ export const useSandboxManager = create<SandboxManagerState>()(
         files,
         metrics: {
           filesCount: files.size,
-          totalSize: Array.from(files.values()).reduce((acc, f) => acc + f.size, 0),
+          totalSize: Array.from(files.values()).reduce(
+            (acc, f) => acc + f.size,
+            0
+          ),
           lastActivity: new Date(),
           commandsExecuted: 0,
         },
@@ -593,8 +628,10 @@ export const useSandboxManager = create<SandboxManagerState>()(
           });
           session.lastActivityAt = new Date();
           session.metrics.filesCount = session.files.size;
-          session.metrics.totalSize = Array.from(session.files.values())
-            .reduce((acc, f) => acc + f.size, 0);
+          session.metrics.totalSize = Array.from(session.files.values()).reduce(
+            (acc, f) => acc + f.size,
+            0
+          );
           session.metrics.lastActivity = new Date();
         }
       });
@@ -619,8 +656,10 @@ export const useSandboxManager = create<SandboxManagerState>()(
           session.files.delete(path);
           session.lastActivityAt = new Date();
           session.metrics.filesCount = session.files.size;
-          session.metrics.totalSize = Array.from(session.files.values())
-            .reduce((acc, f) => acc + f.size, 0);
+          session.metrics.totalSize = Array.from(session.files.values()).reduce(
+            (acc, f) => acc + f.size,
+            0
+          );
         }
       });
 
@@ -720,8 +759,10 @@ export const useSandboxManager = create<SandboxManagerState>()(
           }
           session.lastActivityAt = new Date();
           session.metrics.filesCount = session.files.size;
-          session.metrics.totalSize = Array.from(session.files.values())
-            .reduce((acc, f) => acc + f.size, 0);
+          session.metrics.totalSize = Array.from(session.files.values()).reduce(
+            (acc, f) => acc + f.size,
+            0
+          );
         }
       });
     },
@@ -775,7 +816,9 @@ export function createSandboxFromBuilder(builder: TemplateBuilder): string {
  * Quick create a React TypeScript sandbox
  */
 export function createReactTSSandbox(): string {
-  return useSandboxManager.getState().createSession(SANDBOX_TEMPLATES['react-ts']);
+  return useSandboxManager
+    .getState()
+    .createSession(SANDBOX_TEMPLATES['react-ts']);
 }
 
 /**

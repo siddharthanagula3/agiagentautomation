@@ -6,6 +6,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/react/shallow';
 import type { VibeMessage } from '../types';
 
 export interface VibeChatState {
@@ -122,13 +123,28 @@ export const useVibeChatStore = create<VibeChatState>()(
 
       // Message actions
       addMessage: (message) => {
-        const fullMessage: VibeMessage = {
-          ...message,
-          id: crypto.randomUUID(),
-          timestamp: new Date(),
-        };
+        // Generate ID before set() but perform atomic duplicate check inside
+        const messageId = crypto.randomUUID();
 
         set((state) => {
+          // Atomic duplicate check: prevent adding messages with identical content
+          // from the same sender within a short time window (100ms)
+          const recentDuplicate = state.messages.find(
+            (m) =>
+              m.sender === message.sender &&
+              m.content === message.content &&
+              Date.now() - new Date(m.timestamp).getTime() < 100
+          );
+          if (recentDuplicate) {
+            return; // Skip duplicate
+          }
+
+          const fullMessage: VibeMessage = {
+            ...message,
+            id: messageId,
+            timestamp: new Date(),
+          };
+
           state.messages.push(fullMessage);
 
           // Update session metadata
@@ -145,7 +161,9 @@ export const useVibeChatStore = create<VibeChatState>()(
 
       updateMessage: (messageId, updates) => {
         set((state) => {
-          const messageIndex = state.messages.findIndex((m) => m.id === messageId);
+          const messageIndex = state.messages.findIndex(
+            (m) => m.id === messageId
+          );
           if (messageIndex !== -1) {
             state.messages[messageIndex] = {
               ...state.messages[messageIndex],
@@ -157,6 +175,20 @@ export const useVibeChatStore = create<VibeChatState>()(
 
       startStreamingMessage: (messageId, initialContent) => {
         set((state) => {
+          // Finish any existing streaming message before starting a new one
+          // to prevent orphaned streaming states
+          if (
+            state.streamingMessageId &&
+            state.streamingMessageId !== messageId
+          ) {
+            const existingMessage = state.messages.find(
+              (m) => m.id === state.streamingMessageId
+            );
+            if (existingMessage) {
+              existingMessage.is_streaming = false;
+            }
+          }
+
           state.streamingMessageId = messageId;
           const message = state.messages.find((m) => m.id === messageId);
           if (message) {
@@ -167,24 +199,27 @@ export const useVibeChatStore = create<VibeChatState>()(
       },
 
       appendToStreamingMessage: (content) => {
-        const { streamingMessageId } = get();
-        if (!streamingMessageId) return;
-
+        // All state reads happen inside set() to prevent race conditions
+        // where streamingMessageId could change between get() and set()
         set((state) => {
+          const { streamingMessageId } = state;
+          if (!streamingMessageId) return;
+
           const message = state.messages.find(
             (m) => m.id === streamingMessageId
           );
-          if (message) {
+          if (message && message.is_streaming) {
             message.content += content;
           }
         });
       },
 
       finishStreamingMessage: () => {
-        const { streamingMessageId } = get();
-        if (!streamingMessageId) return;
-
+        // All state reads happen inside set() to prevent race conditions
         set((state) => {
+          const { streamingMessageId } = state;
+          if (!streamingMessageId) return;
+
           const message = state.messages.find(
             (m) => m.id === streamingMessageId
           );
@@ -244,3 +279,78 @@ export const useVibeChatStore = create<VibeChatState>()(
     { name: 'VibeChatStore' }
   )
 );
+
+// ============================================================================
+// SELECTOR HOOKS (optimized with useShallow to prevent stale closures)
+// ============================================================================
+
+/**
+ * Selector for messages - returns stable reference when messages haven't changed
+ */
+export const useVibeMessages = () =>
+  useVibeChatStore((state) => state.messages);
+
+/**
+ * Selector for streaming state - uses useShallow for multi-value selection
+ */
+export const useVibeStreamingState = () =>
+  useVibeChatStore(
+    useShallow((state) => ({
+      streamingMessageId: state.streamingMessageId,
+      isLoading: state.isLoading,
+    }))
+  );
+
+/**
+ * Selector for current streaming message - returns the message being streamed
+ */
+export const useStreamingMessage = () =>
+  useVibeChatStore((state) => {
+    const { streamingMessageId, messages } = state;
+    if (!streamingMessageId) return null;
+    return messages.find((m) => m.id === streamingMessageId) ?? null;
+  });
+
+/**
+ * Selector for input state - uses useShallow for multi-value selection
+ */
+export const useVibeInputState = () =>
+  useVibeChatStore(
+    useShallow((state) => ({
+      input: state.input,
+      selectedFiles: state.selectedFiles,
+      selectedAgent: state.selectedAgent,
+      selectedModel: state.selectedModel,
+    }))
+  );
+
+/**
+ * Selector for session state - uses useShallow for multi-value selection
+ */
+export const useVibeSessionState = () =>
+  useVibeChatStore(
+    useShallow((state) => ({
+      currentSessionId: state.currentSessionId,
+      sessions: state.sessions,
+    }))
+  );
+
+/**
+ * Selector for current session ID - primitive value, no shallow needed
+ */
+export const useCurrentVibeSessionId = () =>
+  useVibeChatStore((state) => state.currentSessionId);
+
+/**
+ * Selector for current session metadata
+ */
+export const useCurrentSessionMetadata = () =>
+  useVibeChatStore((state) =>
+    state.currentSessionId ? state.sessions[state.currentSessionId] : null
+  );
+
+/**
+ * Selector for loading state - primitive value, no shallow needed
+ */
+export const useVibeLoading = () =>
+  useVibeChatStore((state) => state.isLoading);

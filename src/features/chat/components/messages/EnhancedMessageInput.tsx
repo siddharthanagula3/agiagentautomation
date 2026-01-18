@@ -12,7 +12,13 @@
  * - Character counter
  */
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+} from 'react';
 import { cn } from '@shared/lib/utils';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
@@ -83,11 +89,34 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mentionStartPos = useRef(0);
+  // Track timeouts for cleanup to prevent memory leaks
+  const timeoutRefs = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
   // Filtered agents for mention autocomplete
   const filteredAgents = agents.filter((agent) =>
     agent.name.toLowerCase().includes(mentionQuery.toLowerCase())
   );
+
+  // Helper to create tracked timeouts that clean up properly
+  const createTrackedTimeout = useCallback(
+    (callback: () => void, delay: number) => {
+      const timeoutId = setTimeout(() => {
+        timeoutRefs.current.delete(timeoutId);
+        callback();
+      }, delay);
+      timeoutRefs.current.add(timeoutId);
+      return timeoutId;
+    },
+    []
+  );
+
+  // Cleanup all pending timeouts on unmount
+  useEffect(() => {
+    return () => {
+      timeoutRefs.current.forEach(clearTimeout);
+      timeoutRefs.current.clear();
+    };
+  }, []);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -138,14 +167,14 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
       setContent(newContent);
       setShowMentions(false);
 
-      // Focus back to textarea
-      setTimeout(() => {
+      // Focus back to textarea with tracked timeout
+      createTrackedTimeout(() => {
         textareaRef.current?.focus();
         const newCursorPos = mentionStartPos.current + agent.name.length + 2;
         textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
       }, 0);
     },
-    [content, mentionPosition]
+    [content, mentionPosition, createTrackedTimeout]
   );
 
   // Handle file attachment
@@ -205,14 +234,14 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
 
       setContent(newContent);
 
-      // Restore cursor position
-      setTimeout(() => {
+      // Restore cursor position with tracked timeout
+      createTrackedTimeout(() => {
         const newCursorPos = start + prefix.length + selectedText.length;
         textareaRef.current?.focus();
         textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
       }, 0);
     },
-    [content]
+    [content, createTrackedTimeout]
   );
 
   // Handle send

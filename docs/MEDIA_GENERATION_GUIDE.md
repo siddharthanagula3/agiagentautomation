@@ -526,9 +526,10 @@ async function handleChatMessage(message: string) {
   const detection = mediaToolDetector.isMediaGenerationRequest(message);
   if (detection) {
     // Use appropriate service based on detection type
-    const media = detection.type === 'video'
-      ? await googleVeoService.generateVideo({ prompt: message })
-      : await googleImagenService.generateImage({ prompt: message });
+    const media =
+      detection.type === 'video'
+        ? await googleVeoService.generateVideo({ prompt: message })
+        : await googleImagenService.generateImage({ prompt: message });
     return { type: 'media', content: media };
   }
 

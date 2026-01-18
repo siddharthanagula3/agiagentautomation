@@ -5,6 +5,10 @@
 
 import { test, expect, Page } from '@playwright/test';
 
+// Test credentials - MUST be set via environment variables in CI/CD
+// Never commit actual credentials to the repository
+const E2E_TEST_PASSWORD = process.env.E2E_TEST_PASSWORD || ''; // Set in CI environment
+
 /**
  * Test User Helper - Creates isolated test user for each session
  */
@@ -12,7 +16,7 @@ async function createTestUser(page: Page) {
   const timestamp = Date.now();
   const testUser = {
     email: `test-user-${timestamp}@example.com`,
-    password: 'Test@Pass123!',
+    password: E2E_TEST_PASSWORD,
     name: `Test User ${timestamp}`,
   };
 

@@ -33,7 +33,11 @@ export { WorkspaceStore } from './workspace';
 export { SessionStateStore } from './state';
 
 // Blueprint utilities
-export { isRecord, blueprintToMarkdown, BlueprintStreamParser } from './blueprint';
+export {
+  isRecord,
+  blueprintToMarkdown,
+  BlueprintStreamParser,
+} from './blueprint';
 export type { Blueprint } from './blueprint';
 
 // Utility exports
@@ -57,42 +61,42 @@ export { HttpClient } from './http';
 
 // Type exports
 export type {
-	AgentConnection,
-	AgentConnectionOptions,
-	AgentEventMap,
-	AgentWebSocketMessage,
-	AgentWsClientMessage,
-	AgentWsServerMessage,
-	ApiResponse,
-	AppDetails,
-	AppListItem,
-	BehaviorType,
-	BuildOptions,
-	BuildStartEvent,
-	CodeGenArgs,
-	Credentials,
-	FileTreeNode,
-	PhaseEventType,
-	ProjectType,
-	PublicAppsQuery,
-	SessionDeployable,
-	SessionFiles,
-	VibeClientOptions,
-	WaitForPhaseOptions,
-	WaitOptions,
-	WebSocketLike,
-	WsMessageOf,
+  AgentConnection,
+  AgentConnectionOptions,
+  AgentEventMap,
+  AgentWebSocketMessage,
+  AgentWsClientMessage,
+  AgentWsServerMessage,
+  ApiResponse,
+  AppDetails,
+  AppListItem,
+  BehaviorType,
+  BuildOptions,
+  BuildStartEvent,
+  CodeGenArgs,
+  Credentials,
+  FileTreeNode,
+  PhaseEventType,
+  ProjectType,
+  PublicAppsQuery,
+  SessionDeployable,
+  SessionFiles,
+  VibeClientOptions,
+  WaitForPhaseOptions,
+  WaitOptions,
+  WebSocketLike,
+  WsMessageOf,
 } from './types';
 
 // State types
 export type {
-	SessionState,
-	ConnectionState,
-	GenerationState,
-	PhaseState,
-	PreviewDeploymentState,
-	CloudflareDeploymentState,
-	ConversationState,
+  SessionState,
+  ConnectionState,
+  GenerationState,
+  PhaseState,
+  PreviewDeploymentState,
+  CloudflareDeploymentState,
+  ConversationState,
 } from './state';
 
 // Workspace types
@@ -100,19 +104,19 @@ export type { WorkspaceFile, WorkspaceChange } from './workspace';
 
 // Protocol types (for advanced usage)
 export type {
-	AgentState,
-	FileOutputType,
-	WebSocketMessage,
-	WebSocketMessageData,
-	AgentConnectionData,
-	AgentPreviewResponse,
-	PlatformCodeGenArgs,
-	TemplateDetails,
-	AgentDisplayConfig,
-	ModelConfigsInfo,
-	ModelConfigsInfoMessage,
-	CodeFixEdits,
-	ConversationMessage,
+  AgentState,
+  FileOutputType,
+  WebSocketMessage,
+  WebSocketMessageData,
+  AgentConnectionData,
+  AgentPreviewResponse,
+  PlatformCodeGenArgs,
+  TemplateDetails,
+  AgentDisplayConfig,
+  ModelConfigsInfo,
+  ModelConfigsInfoMessage,
+  CodeFixEdits,
+  ConversationMessage,
 } from './protocol';
 
 // ============================================================================
@@ -120,7 +124,7 @@ export type {
 // ============================================================================
 
 export {
-	VibeSDKSession,
-	useVibeSDKStore,
-	type VibeSDKEvent,
+  VibeSDKSession,
+  useVibeSDKStore,
+  type VibeSDKEvent,
 } from './vibe-sdk-integration';

@@ -27,7 +27,8 @@ interface ErrorContext {
 class MonitoringService {
   private isInitialized = false;
   private sessionId: string;
-  private performanceObserver?: PerformanceObserver;
+  private performanceObservers: PerformanceObserver[] = [];
+  private cleanupFns: (() => void)[] = [];
 
   constructor() {
     this.sessionId = this.generateSessionId();
@@ -234,7 +235,7 @@ class MonitoringService {
     if ('PerformanceObserver' in window) {
       try {
         // Largest Contentful Paint
-        this.performanceObserver = new PerformanceObserver((list) => {
+        const lcpObserver = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
             if (entry.entryType === 'largest-contentful-paint') {
               this.trackPerformance({
@@ -243,12 +244,13 @@ class MonitoringService {
             }
           }
         });
-        this.performanceObserver.observe({
+        lcpObserver.observe({
           entryTypes: ['largest-contentful-paint'],
         });
+        this.performanceObservers.push(lcpObserver);
 
         // First Input Delay
-        this.performanceObserver = new PerformanceObserver((list) => {
+        const fidObserver = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
             if (entry.entryType === 'first-input') {
               const firstInput = entry as PerformanceEventTiming;
@@ -263,10 +265,11 @@ class MonitoringService {
             }
           }
         });
-        this.performanceObserver.observe({ entryTypes: ['first-input'] });
+        fidObserver.observe({ entryTypes: ['first-input'] });
+        this.performanceObservers.push(fidObserver);
 
         // Cumulative Layout Shift
-        this.performanceObserver = new PerformanceObserver((list) => {
+        const clsObserver = new PerformanceObserver((list) => {
           let cumulativeScore = 0;
           for (const entry of list.getEntries()) {
             if (
@@ -285,14 +288,15 @@ class MonitoringService {
             });
           }
         });
-        this.performanceObserver.observe({ entryTypes: ['layout-shift'] });
+        clsObserver.observe({ entryTypes: ['layout-shift'] });
+        this.performanceObservers.push(clsObserver);
       } catch (error) {
         console.warn('Performance monitoring setup failed:', error);
       }
     }
 
     // Track page load time
-    window.addEventListener('load', () => {
+    const handleLoad = () => {
       setTimeout(() => {
         const navigation = performance.getEntriesByType(
           'navigation'
@@ -305,7 +309,9 @@ class MonitoringService {
           });
         }
       }, 0);
-    });
+    };
+    window.addEventListener('load', handleLoad);
+    this.cleanupFns.push(() => window.removeEventListener('load', handleLoad));
   }
 
   /**
@@ -313,21 +319,29 @@ class MonitoringService {
    */
   private setupErrorBoundary(): void {
     // Global error handler
-    window.addEventListener('error', (event) => {
+    const handleError = (event: ErrorEvent) => {
       this.captureError(event.error, {
         type: 'javascript_error',
         filename: event.filename,
         lineno: event.lineno,
         colno: event.colno,
       });
-    });
+    };
+    window.addEventListener('error', handleError);
+    this.cleanupFns.push(() =>
+      window.removeEventListener('error', handleError)
+    );
 
     // Unhandled promise rejection handler
-    window.addEventListener('unhandledrejection', (event) => {
+    const handleRejection = (event: PromiseRejectionEvent) => {
       this.captureError(event.reason, {
         type: 'unhandled_promise_rejection',
       });
-    });
+    };
+    window.addEventListener('unhandledrejection', handleRejection);
+    this.cleanupFns.push(() =>
+      window.removeEventListener('unhandledrejection', handleRejection)
+    );
   }
 
   /**
@@ -373,6 +387,36 @@ class MonitoringService {
    */
   async flush(): Promise<void> {
     await Sentry.flush(2000);
+  }
+
+  /**
+   * Destroy monitoring service and clean up all resources
+   */
+  destroy(): void {
+    // Disconnect all PerformanceObservers
+    this.performanceObservers.forEach((observer) => {
+      try {
+        observer.disconnect();
+      } catch (error) {
+        console.warn('Failed to disconnect PerformanceObserver:', error);
+      }
+    });
+    this.performanceObservers = [];
+
+    // Run all cleanup functions (remove event listeners)
+    this.cleanupFns.forEach((fn) => {
+      try {
+        fn();
+      } catch (error) {
+        console.warn('Failed to run cleanup function:', error);
+      }
+    });
+    this.cleanupFns = [];
+
+    // Reset initialization state
+    this.isInitialized = false;
+
+    console.log('MonitoringService destroyed and resources cleaned up');
   }
 }
 

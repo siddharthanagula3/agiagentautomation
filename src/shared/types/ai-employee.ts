@@ -1,4 +1,10 @@
-// AI Employee System Types
+/**
+ * AI Employee System Types
+ *
+ * Note: For basic AI employee types used in UI components (selectors, cards),
+ * see AIEmployeeBasic and MarketplaceEmployee in @shared/types/common.ts
+ * This file contains extended types for the AI employee system with workflows.
+ */
 export interface AIEmployee {
   id: string;
   name: string;

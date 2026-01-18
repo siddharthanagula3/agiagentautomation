@@ -660,9 +660,7 @@ export class UnifiedLLMService {
   /**
    * Type guard to check if response has the expected provider response shape
    */
-  private isProviderResponse(
-    response: unknown
-  ): response is {
+  private isProviderResponse(response: unknown): response is {
     content: string;
     model: string;
     sessionId?: string;
@@ -939,7 +937,15 @@ export class UnifiedLLMService {
    * Get all available providers
    */
   static getAllProviders(): LLMProvider[] {
-    return ['anthropic', 'openai', 'google', 'perplexity', 'grok', 'deepseek', 'qwen'];
+    return [
+      'anthropic',
+      'openai',
+      'google',
+      'perplexity',
+      'grok',
+      'deepseek',
+      'qwen',
+    ];
   }
 }
 

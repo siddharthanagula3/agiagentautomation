@@ -13,7 +13,9 @@ import { supabase } from '@shared/lib/supabase-client';
  */
 async function getAuthToken(): Promise<string | null> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
     console.error('[Qwen Provider] Failed to get auth token:', error);
@@ -52,15 +54,16 @@ export interface QwenResponse {
   };
 }
 
+import {
+  SUPPORTED_QWEN_MODELS,
+  SUPPORTED_QWEN_IMAGE_MODELS,
+  SUPPORTED_QWEN_VIDEO_MODELS,
+  DEFAULT_QWEN_MODEL,
+  type QwenModel,
+} from '@shared/config/supported-models';
+
 export interface QwenConfig {
-  model:
-    | 'qwen3-max'
-    | 'qwen-plus'
-    | 'qwen-flash'
-    | 'qwen3-coder-plus'
-    | 'qwen3-coder-flash'
-    | 'qwen3-vl-plus'
-    | 'qwq-plus';
+  model: QwenModel;
   maxTokens: number;
   temperature: number;
   systemPrompt?: string;
@@ -83,7 +86,7 @@ export class QwenProvider {
 
   constructor(config: Partial<QwenConfig> = {}) {
     this.config = {
-      model: 'qwen-plus',
+      model: DEFAULT_QWEN_MODEL,
       maxTokens: 4000,
       temperature: 0.7,
       systemPrompt: 'You are a helpful AI assistant.',
@@ -117,7 +120,7 @@ export class QwenProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: messages.map((msg) => ({
@@ -224,7 +227,7 @@ export class QwenProvider {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: messages.map((msg) => ({
@@ -334,17 +337,10 @@ export class QwenProvider {
 
   /**
    * Get available models (Jan 2026)
+   * Uses shared config from @shared/config/supported-models.ts
    */
   static getAvailableModels(): string[] {
-    return [
-      'qwen3-max',
-      'qwen-plus',
-      'qwen-flash',
-      'qwen3-coder-plus',
-      'qwen3-coder-flash',
-      'qwen3-vl-plus',
-      'qwq-plus',
-    ];
+    return [...SUPPORTED_QWEN_MODELS];
   }
 
   /**
@@ -363,14 +359,14 @@ export class QwenProvider {
    * Get image generation models
    */
   static getImageModels(): string[] {
-    return ['qwen-image-max', 'wan2.6-t2i'];
+    return [...SUPPORTED_QWEN_IMAGE_MODELS];
   }
 
   /**
    * Get video generation models
    */
   static getVideoModels(): string[] {
-    return ['wan2.6-t2v', 'wan2.6-i2v'];
+    return [...SUPPORTED_QWEN_VIDEO_MODELS];
   }
 }
 

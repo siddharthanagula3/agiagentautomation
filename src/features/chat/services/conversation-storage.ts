@@ -266,7 +266,9 @@ export class ChatPersistenceService {
     }
 
     if (!data) {
-      throw new Error('Message not found or you do not have permission to edit it');
+      throw new Error(
+        'Message not found or you do not have permission to edit it'
+      );
     }
 
     return this.mapDBMessageToMessage(data);

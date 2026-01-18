@@ -50,9 +50,9 @@ export const VibeThinkingIndicator: React.FC<VibeThinkingIndicatorProps> = ({
         animate="animate"
         aria-label="Thinking indicator"
       >
-        {[0, 1, 2].map((index) => (
+        {[0, 1, 2].map((dotIndex) => (
           <motion.div
-            key={index}
+            key={`thinking-dot-${dotIndex}`}
             className={`${dotSizes[size]} rounded-full bg-primary`}
             variants={dotVariants}
             transition={{

@@ -54,7 +54,7 @@ const PRICING = {
   openai: {
     'gpt-4o': { input: 2.5, output: 10 },
     'gpt-4o-mini': { input: 0.15, output: 0.6 },
-    'o1': { input: 15, output: 60 },
+    o1: { input: 15, output: 60 },
     'o1-mini': { input: 3, output: 12 },
   },
   anthropic: {
@@ -69,7 +69,7 @@ const PRICING = {
   },
   perplexity: {
     'sonar-pro': { input: 3, output: 15 },
-    'sonar': { input: 1, output: 1 },
+    sonar: { input: 1, output: 1 },
     'sonar-reasoning': { input: 5, output: 20 },
   },
 };

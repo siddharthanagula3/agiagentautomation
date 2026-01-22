@@ -54,9 +54,6 @@ class MultiAgentCollaborationService {
 
     this.employees = await systemPromptsService.getAvailableEmployees();
     this.employeesLoaded = true;
-    console.log(
-      `[MultiAgentCollaborationService] Loaded ${this.employees.length} employees`
-    );
   }
 
   /**
@@ -220,11 +217,6 @@ class MultiAgentCollaborationService {
     const selectedEmployees = await this.selectEmployeesForCollaboration(
       userMessage,
       complexity
-    );
-
-    console.log(
-      `[Collaboration] Selected ${selectedEmployees.length} employees:`,
-      selectedEmployees.map((e) => e.name)
     );
 
     const collaborationMessages: CollaborationMessage[] = [];

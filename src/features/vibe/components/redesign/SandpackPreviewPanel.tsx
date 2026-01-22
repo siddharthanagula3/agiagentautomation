@@ -287,14 +287,15 @@ export function SandpackPreviewPanel({
   const [sandpackKey, setSandpackKey] = useState(0);
 
   // Collect files from vibeFileSystem
-  // Note: sandpackKey is intentionally used as a dependency to force re-computation on refresh
-  /* eslint-disable react-hooks/exhaustive-deps */
+  // sandpackKey is used to trigger re-computation when user clicks refresh
+  // This is intentional: sandpackKey changes -> useMemo recomputes -> new files collected
   const files = useMemo(() => {
+    // Using void to acknowledge sandpackKey is intentionally a trigger dependency
+    void sandpackKey;
     const collected = collectSandpackFiles();
     const template = detectTemplate(collected);
     return ensureEntryFiles(collected, template);
   }, [sandpackKey]);
-  /* eslint-enable react-hooks/exhaustive-deps */
 
   const template = useMemo(() => detectTemplate(files), [files]);
   const currentViewport = viewportDimensions[appViewerState.viewport];

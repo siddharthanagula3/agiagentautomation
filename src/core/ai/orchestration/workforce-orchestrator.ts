@@ -107,12 +107,7 @@ export class WorkforceOrchestratorRefactored {
       // Use sanitized input for all subsequent processing
       const sanitizedInput = sanitizationResult.sanitized;
 
-      if (sanitizationResult.wasModified) {
-        console.log(
-          '[Workforce Orchestrator] Input was sanitized:',
-          sanitizationResult.modifications
-        );
-      }
+      // Input sanitization is tracked via Sentry breadcrumbs when modifications occur
 
       // Updated: Jan 15th 2026 - Fixed empty employee handling to prevent setting loaded flag on failure
       // Load employees if not already loaded
@@ -121,11 +116,8 @@ export class WorkforceOrchestratorRefactored {
         // Only set loaded flag if we actually got employees
         if (this.employees.length > 0) {
           this.employeesLoaded = true;
-          console.log(
-            `📋 Loaded ${this.employees.length} AI employees from .agi/employees/`
-          );
         } else {
-          console.warn('⚠️ No employees loaded from .agi/employees/');
+          console.warn('[Workforce Orchestrator] No employees loaded from .agi/employees/');
         }
       }
 
@@ -149,7 +141,6 @@ export class WorkforceOrchestratorRefactored {
       // ============================================
       // STAGE 1: PLANNING - Generate structured plan
       // ============================================
-      console.log('🧠 STAGE 1: PLANNING...');
       store.addMessage({
         from: 'system',
         type: 'system',
@@ -172,7 +163,6 @@ export class WorkforceOrchestratorRefactored {
         );
       }
 
-      console.log('📋 Generated plan with', plan.plan.length, 'tasks');
 
       // Convert to Task objects
       const tasks: Task[] = plan.plan.map((planTask, index) => ({
@@ -193,7 +183,6 @@ export class WorkforceOrchestratorRefactored {
       // ============================================
       // STAGE 2: DELEGATION - Select optimal employees
       // ============================================
-      console.log('🤖 STAGE 2: DELEGATION...');
       store.addMessage({
         from: 'system',
         type: 'system',
@@ -212,9 +201,6 @@ export class WorkforceOrchestratorRefactored {
             task.description
           );
 
-          console.log(
-            `  ✓ Task "${task.description}" → ${selectedEmployee.name}`
-          );
           store.addMessage({
             from: 'system',
             type: 'task_update',
@@ -231,7 +217,6 @@ export class WorkforceOrchestratorRefactored {
       // ============================================
       // STAGE 3: EXECUTION - Execute tasks
       // ============================================
-      console.log('⚡ STAGE 3: EXECUTION...');
       store.addMessage({
         from: 'system',
         type: 'system',
@@ -315,12 +300,6 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
           }),
         {
           maxRetries: 3,
-          onRetry: (attempt, err) => {
-            console.log(
-              `[Orchestrator] Plan generation failed (attempt ${attempt}/3), retrying...`,
-              err instanceof Error ? err.message : err
-            );
-          },
         }
       );
 
@@ -463,9 +442,6 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
             return null;
           }
 
-          console.log(
-            `✓ Filtered to ${availableEmployees.length} hired employee(s)`
-          );
         }
       } catch (error) {
         console.error('Error fetching hired employees:', error);
@@ -535,7 +511,6 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
 
     // Check if mission is paused before starting execution
     if (checkIfPaused()) {
-      console.log('Mission paused before execution started, stopping');
       return;
     }
 
@@ -683,9 +658,6 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
       });
     }
 
-    console.log(
-      `📊 Task execution complete: ${succeededTasks.length} succeeded, ${failedTasks.length} failed, ${skippedTasks.length} skipped`
-    );
   }
 
   /**
@@ -733,12 +705,6 @@ Please complete this task according to your role and capabilities.`;
           }),
         {
           maxRetries: 3,
-          onRetry: (attempt, err) => {
-            console.log(
-              `[Orchestrator] Task execution (${employee.name}) failed (attempt ${attempt}/3), retrying...`,
-              err instanceof Error ? err.message : err
-            );
-          },
         }
       );
 
@@ -888,9 +854,6 @@ Please complete this task according to your role and capabilities.`;
       });
 
       // Start multi-agent conversation protocol
-      console.log(
-        `🗣️ Starting conversation with ${selectedEmployees.length} employee(s)`
-      );
 
       const conversationResult =
         await agentConversationProtocol.startConversation(
@@ -990,12 +953,6 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
           ),
         {
           maxRetries: 3,
-          onRetry: (attempt, err) => {
-            console.log(
-              `[Orchestrator] Employee auto-selection failed (attempt ${attempt}/3), retrying...`,
-              err instanceof Error ? err.message : err
-            );
-          },
         }
       );
 
@@ -1044,14 +1001,9 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
 
       // Fallback: if no match, select first employee
       if (selectedEmployees.length === 0 && this.employees.length > 0) {
-        console.warn('⚠️ Auto-select failed, using default employee');
+        console.warn('[Workforce Orchestrator] Auto-select failed, using default employee');
         return [this.employees[0]];
       }
-
-      console.log(
-        `✅ Auto-selected ${selectedEmployees.length} employee(s):`,
-        selectedEmployees.map((e) => e.name)
-      );
 
       return selectedEmployees;
     } catch (error) {
@@ -1192,12 +1144,6 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
           }),
         {
           maxRetries: 3,
-          onRetry: (attempt, err) => {
-            console.log(
-              `[Orchestrator] Message routing (${employee.name}) failed (attempt ${attempt}/3), retrying...`,
-              err instanceof Error ? err.message : err
-            );
-          },
         }
       );
 

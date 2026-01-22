@@ -144,13 +144,11 @@ export class EnhancedChatSynchronizationService {
     if (typeof window !== 'undefined') {
       window.addEventListener('online', () => {
         this.isOnline = true;
-        console.log('[ChatSync] Connection restored, processing queue...');
         this.processOfflineQueue();
       });
 
       window.addEventListener('offline', () => {
         this.isOnline = false;
-        console.log('[ChatSync] Connection lost, queuing operations...');
       });
     }
   }
@@ -196,7 +194,6 @@ export class EnhancedChatSynchronizationService {
             filter: `conversation_id=eq.${conversationId}`,
           },
           (payload) => {
-            console.log('[ChatSync] New message received:', payload);
             this.handleRemoteInsert(payload.new as DatabaseChatMessage);
           }
         )
@@ -209,7 +206,6 @@ export class EnhancedChatSynchronizationService {
             filter: `conversation_id=eq.${conversationId}`,
           },
           (payload) => {
-            console.log('[ChatSync] Message updated:', payload);
             this.handleRemoteUpdate(
               payload.new as DatabaseChatMessage,
               payload.old as DatabaseChatMessage
@@ -225,13 +221,10 @@ export class EnhancedChatSynchronizationService {
             filter: `conversation_id=eq.${conversationId}`,
           },
           (payload) => {
-            console.log('[ChatSync] Message deleted:', payload);
             this.handleRemoteDelete(payload.old as DatabaseChatMessage);
           }
         )
         .subscribe((status) => {
-          console.log('[ChatSync] Subscription status:', status);
-
           if (status === 'SUBSCRIBED') {
             store.setSyncing(false);
             store.recordSyncTimestamp();
@@ -241,7 +234,6 @@ export class EnhancedChatSynchronizationService {
         });
 
       this.channels.set(conversationId, channel);
-      console.log(`[ChatSync] Subscribed to conversation ${conversationId}`);
     } catch (error) {
       console.error('[ChatSync] Subscription error:', error);
       store.setError(
@@ -258,9 +250,6 @@ export class EnhancedChatSynchronizationService {
     if (channel) {
       await supabase.removeChannel(channel);
       this.channels.delete(conversationId);
-      console.log(
-        `[ChatSync] Unsubscribed from conversation ${conversationId}`
-      );
     }
   }
 
@@ -362,28 +351,21 @@ export class EnhancedChatSynchronizationService {
   private handleConflict(local: ChatMessage, remote: ChatMessage): void {
     const store = useMultiAgentChatStore.getState();
 
-    console.log('[ChatSync] Conflict detected:', local.id);
-
     // Apply conflict resolution strategy
     switch (this.config.conflictResolution) {
       case 'local-wins':
         // Keep local version, no action needed
-        console.log('[ChatSync] Conflict resolved: local wins');
         break;
 
       case 'remote-wins':
         // Use remote version
         store.updateMessage(local.id, remote);
-        console.log('[ChatSync] Conflict resolved: remote wins');
         break;
 
       case 'timestamp-wins':
         // Use newer version based on timestamp
         if (remote.timestamp > local.timestamp) {
           store.updateMessage(local.id, remote);
-          console.log('[ChatSync] Conflict resolved: remote is newer');
-        } else {
-          console.log('[ChatSync] Conflict resolved: local is newer');
         }
         break;
 
@@ -399,7 +381,6 @@ export class EnhancedChatSynchronizationService {
           reactions: [...(local.reactions || []), ...(remote.reactions || [])],
         };
         store.updateMessage(local.id, merged);
-        console.log('[ChatSync] Conflict resolved: merged');
         break;
       }
 
@@ -412,7 +393,6 @@ export class EnhancedChatSynchronizationService {
           remoteVersion: remote,
         });
         this.statistics.totalConflicts++;
-        console.log('[ChatSync] Conflict recorded for manual resolution');
         break;
     }
   }
@@ -458,7 +438,6 @@ export class EnhancedChatSynchronizationService {
 
       this.statistics.totalSynced++;
       store.recordSyncTimestamp();
-      console.log('[ChatSync] Message synced successfully:', message.id);
     } catch (error) {
       console.error('[ChatSync] Sync error:', error);
       this.statistics.totalErrors++;
@@ -519,7 +498,6 @@ export class EnhancedChatSynchronizationService {
 
       this.statistics.totalSynced++;
       store.recordSyncTimestamp();
-      console.log('[ChatSync] Message updated successfully:', message.id);
     } catch (error) {
       console.error('[ChatSync] Update error:', error);
       this.statistics.totalErrors++;
@@ -580,7 +558,6 @@ export class EnhancedChatSynchronizationService {
 
       this.statistics.totalSynced++;
       store.recordSyncTimestamp();
-      console.log('[ChatSync] Message deleted successfully:', messageId);
     } catch (error) {
       console.error('[ChatSync] Delete error:', error);
       this.statistics.totalErrors++;
@@ -597,7 +574,6 @@ export class EnhancedChatSynchronizationService {
   private queueOperation(operation: SyncOperation): void {
     this.syncQueue.push(operation);
     this.statistics.queueSize = this.syncQueue.length;
-    console.log('[ChatSync] Operation queued:', operation.type, operation.id);
   }
 
   /**
@@ -610,10 +586,6 @@ export class EnhancedChatSynchronizationService {
 
     const store = useMultiAgentChatStore.getState();
     store.setSyncing(true);
-
-    console.log(
-      `[ChatSync] Processing ${this.syncQueue.length} queued operations`
-    );
 
     const operations = [...this.syncQueue];
     this.syncQueue = [];
@@ -715,7 +687,6 @@ export class EnhancedChatSynchronizationService {
    */
   updateConfig(config: Partial<SyncConfig>): void {
     this.config = { ...this.config, ...config };
-    console.log('[ChatSync] Configuration updated:', config);
 
     // Restart periodic sync if interval changed
     if (config.syncInterval) {
@@ -741,11 +712,8 @@ export class EnhancedChatSynchronizationService {
 
     // Process remaining queue
     if (this.syncQueue.length > 0) {
-      console.log('[ChatSync] Processing remaining queue before cleanup...');
       await this.processOfflineQueue();
     }
-
-    console.log('[ChatSync] Cleanup complete');
   }
 }
 

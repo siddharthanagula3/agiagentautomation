@@ -154,7 +154,6 @@ class MultiAgentOrchestrator {
    * Analyze user intent and create an orchestration plan
    */
   async analyzeIntent(userRequest: string): Promise<OrchestrationPlan> {
-    console.log('[Orchestrator] Analyzing user request:', userRequest);
 
     // Determine complexity
     const complexity = this.determineComplexity(userRequest);
@@ -200,7 +199,6 @@ class MultiAgentOrchestrator {
     onCommunication: (comm: AgentCommunication) => void,
     onStatusUpdate: (status: AgentStatus) => void
   ): Promise<Map<string, TaskExecutionRecord>> {
-    console.log('[Orchestrator] Starting plan execution:', plan.id);
 
     const results = new Map<string, TaskExecutionRecord>();
     let iterationCount = 0;
@@ -209,7 +207,6 @@ class MultiAgentOrchestrator {
     // CONTINUOUS EXECUTION LOOP
     while (!plan.isComplete && iterationCount < MAX_ITERATIONS) {
       iterationCount++;
-      console.log(`[Orchestrator] Iteration ${iterationCount}`);
 
       // Get next executable tasks
       const nextTasks = this.getExecutableTasks(plan);
@@ -273,7 +270,6 @@ class MultiAgentOrchestrator {
       console.warn('[Orchestrator] Max iterations reached');
     }
 
-    console.log('[Orchestrator] Plan execution complete');
     return results;
   }
 
@@ -359,9 +355,6 @@ class MultiAgentOrchestrator {
       if (task.retryCount < task.maxRetries) {
         task.retryCount++;
         task.status = 'pending'; // Reset for retry
-        console.log(
-          `[Orchestrator] Retrying task ${task.id}, attempt ${task.retryCount}/${task.maxRetries}`
-        );
       }
     }
 
@@ -404,10 +397,6 @@ class MultiAgentOrchestrator {
     plan: OrchestrationPlan,
     onCommunication: (comm: AgentCommunication) => void
   ): Promise<void> {
-    console.log(
-      '[Orchestrator] Attempting to unblock tasks:',
-      blockedTasks.length
-    );
 
     for (const task of blockedTasks) {
       // Find which dependency is blocking
@@ -970,10 +959,6 @@ class MultiAgentOrchestrator {
     provider: LLMProvider,
     onStatusUpdate: (status: AgentStatus) => void
   ): Promise<string> {
-    console.log(
-      `[Orchestrator] ${agentName} executing task:`,
-      task.description
-    );
 
     // Update status: starting
     this.updateAgentStatus(

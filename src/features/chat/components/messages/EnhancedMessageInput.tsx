@@ -261,8 +261,7 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
   const handleVoiceToggle = useCallback(() => {
     setIsRecording((prev) => !prev);
     // TODO: Implement actual voice recording
-    console.log('Voice recording:', !isRecording);
-  }, [isRecording]);
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {

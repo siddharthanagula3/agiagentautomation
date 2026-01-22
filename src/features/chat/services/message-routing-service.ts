@@ -197,10 +197,6 @@ export class MessageRoutingService {
     const deliveryTime = Date.now() - startTime;
     this.updateStats(true, deliveryTime);
 
-    console.log(
-      `[MessageRouting] Routed message ${message.id} via ${route.routeType} to ${route.toIds.length} participants`
-    );
-
     return route;
   }
 
@@ -279,7 +275,6 @@ export class MessageRoutingService {
     // Apply first matching rule
     for (const rule of sortedRules) {
       if (rule.condition(message, participants)) {
-        console.log(`[MessageRouting] Applying rule: ${rule.name}`);
         await rule.action(route);
         return;
       }
@@ -387,10 +382,6 @@ export class MessageRoutingService {
   private async priorityRoute(route: MessageRoute): Promise<void> {
     const store = useMultiAgentChatStore.getState();
 
-    console.log(
-      `[MessageRouting] Priority routing for message ${route.messageId}`
-    );
-
     // Ensure immediate delivery
     route.maxRetries = 5; // More retries for urgent messages
 
@@ -416,12 +407,8 @@ export class MessageRoutingService {
    */
   private async retryDelivery(
     route: MessageRoute,
-    toId: string
+    _toId: string
   ): Promise<void> {
-    console.log(
-      `[MessageRouting] Retrying delivery to ${toId}, attempt ${route.retryAttempts}/${route.maxRetries}`
-    );
-
     // Exponential backoff
     const delay = Math.pow(2, route.retryAttempts - 1) * 1000;
     await new Promise((resolve) => setTimeout(resolve, delay));
@@ -523,7 +510,6 @@ export class MessageRoutingService {
    */
   addRule(rule: RoutingRule): void {
     this.rules.push(rule);
-    console.log(`[MessageRouting] Added rule: ${rule.name}`);
   }
 
   /**
@@ -533,7 +519,6 @@ export class MessageRoutingService {
     const index = this.rules.findIndex((r) => r.id === ruleId);
     if (index >= 0) {
       this.rules.splice(index, 1);
-      console.log(`[MessageRouting] Removed rule: ${ruleId}`);
     }
   }
 
@@ -544,9 +529,6 @@ export class MessageRoutingService {
     const rule = this.rules.find((r) => r.id === ruleId);
     if (rule) {
       rule.enabled = enabled;
-      console.log(
-        `[MessageRouting] ${enabled ? 'Enabled' : 'Disabled'} rule: ${ruleId}`
-      );
     }
   }
 
@@ -583,9 +565,6 @@ export class MessageRoutingService {
       }
     }
 
-    console.log(
-      `[MessageRouting] Cleaned up routes older than ${olderThan.toISOString()}`
-    );
   }
 
   /**
@@ -599,7 +578,6 @@ export class MessageRoutingService {
       averageDeliveryTime: 0,
       retryCount: 0,
     };
-    console.log('[MessageRouting] Statistics reset');
   }
 }
 

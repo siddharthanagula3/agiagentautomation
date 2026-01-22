@@ -77,8 +77,6 @@ export class TaskDecomposer {
    * Main decomposition method - breaks down intent into tasks
    */
   async decompose(intent: UserIntent): Promise<ExecutionPlan> {
-    console.log('🧩 Decomposing task:', intent);
-
     // Generate tasks based on intent and complexity
     const tasks = await this.generateTasks(intent);
 

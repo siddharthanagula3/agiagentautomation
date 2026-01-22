@@ -423,13 +423,29 @@ export function useAgentSelection(): UseAgentSelectionReturn {
   }, []);
 
   // Updated: Jan 15th 2026 - Fixed infinite loop from unstable function dependency
+  // Updated: Jan 21st 2026 - Properly fixed by inlining the logic instead of calling selectAgentManually
   // Update selected agent when chat store changes
   useEffect(() => {
     if (selectedAgentId) {
-      selectAgentManually(selectedAgentId);
+      // Inline the agent selection logic to avoid dependency on selectAgentManually
+      // which would cause infinite re-renders due to useCallback recreation
+      const employees = useVibeAgentStore.getState().activeAgents;
+      const agent = Array.from(employees.values()).find(
+        (ae) => ae.employee.name === selectedAgentId
+      );
+
+      if (agent) {
+        setSelectedAgent(agent.employee);
+        setPrimaryAgent(agent.employee);
+        setRoutingResult({
+          mode: 'single',
+          primaryAgent: agent.employee,
+          confidence: 1.0,
+          reasoning: 'Manual selection via # syntax',
+        });
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAgentId]);
+  }, [selectedAgentId, setPrimaryAgent]);
 
   return {
     // State

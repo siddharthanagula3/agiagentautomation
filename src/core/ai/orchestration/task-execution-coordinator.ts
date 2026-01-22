@@ -300,10 +300,6 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
     context: ExecutionContext,
     task: Task
   ): Promise<unknown> {
-    console.log(
-      `🎯 Executing task: ${task.title} with agent: ${task.requiredAgent}`
-    );
-
     context.currentTask = task;
 
     // Use iteration instead of recursion for retries
@@ -364,10 +360,6 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
 
         // Retry logic with iteration instead of recursion
         if (task.retryCount < task.maxRetries) {
-          console.log(
-            `🔄 Retrying task ${task.title} (${task.retryCount}/${task.maxRetries})...`
-          );
-
           // Wait before retry
           await new Promise((resolve) =>
             setTimeout(resolve, 2000 * task.retryCount)

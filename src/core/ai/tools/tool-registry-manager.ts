@@ -95,7 +95,6 @@ export class ToolManager {
       });
     }
 
-    console.log(`✅ Tool registered: ${tool.name}`);
   }
 
   /**
@@ -164,7 +163,6 @@ export class ToolManager {
     let result: ToolExecutionResult;
 
     try {
-      console.log(`🔧 Executing tool: ${tool.name}...`);
 
       const toolResult = await tool.execute(params);
       const executionTime = Date.now() - startTime;
@@ -576,7 +574,6 @@ export class ToolManager {
       supportedAgents: ['claude-code'],
     });
 
-    console.log(`✅ Registered ${this.tools.size} built-in tools`);
   }
 
   /**

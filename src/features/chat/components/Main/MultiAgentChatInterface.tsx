@@ -175,8 +175,7 @@ export function MultiAgentChatInterface({
   );
 
   // Handle message reactions
-  const handleReaction = useCallback((messageId: string, emoji: string) => {
-    console.log('Reaction:', messageId, emoji);
+  const handleReaction = useCallback((_messageId: string, _emoji: string) => {
     // TODO: Implement reaction handling
   }, []);
 

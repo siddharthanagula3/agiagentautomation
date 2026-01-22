@@ -64,19 +64,41 @@ export class ChatPersistenceService {
   }
 
   /**
-   * Get all sessions for a user
+   * Get all sessions for a user with message counts in a single query
+   * Uses Supabase nested select to avoid N+1 query pattern
    */
   async getUserSessions(userId: string): Promise<ChatSession[]> {
     const { data, error } = await supabase
       .from('chat_sessions')
-      .select('*')
+      .select('*, chat_messages(count)')
       .eq('user_id', userId)
       .eq('is_active', true)
       .order('updated_at', { ascending: false });
 
     if (error) throw new Error(`Failed to load sessions: ${error.message}`);
 
-    return (data || []).map(this.mapDBSessionToSession);
+    return (data || []).map((session) => {
+      // Extract message count from nested select result
+      // Supabase returns count as an array with single object or direct count
+      const chatMessages = session.chat_messages as
+        | { count: number }[]
+        | { count: number }
+        | undefined;
+      const messageCount = Array.isArray(chatMessages)
+        ? chatMessages[0]?.count ?? 0
+        : chatMessages?.count ?? 0;
+
+      // Remove the nested chat_messages from the session object before mapping
+      const { chat_messages: _, ...sessionData } = session;
+
+      const mappedSession = this.mapDBSessionToSession(
+        sessionData as DBChatSession
+      );
+      return {
+        ...mappedSession,
+        messageCount,
+      };
+    });
   }
 
   /**

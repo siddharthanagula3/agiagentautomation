@@ -641,6 +641,8 @@ const INJECTION_PATTERNS = {
   languageTricks: [
     /translate.*ignore.*instructions/i,
     /in.*language.*forget.*rules/i,
+    // SECURITY: Intentionally using control regex to detect long non-ASCII sequences
+    // that may indicate encoded/obfuscated injection attempts
     // eslint-disable-next-line no-control-regex
     /[^\x00-\x7F]{20,}/, // Long non-ASCII sequences (potential encoding trick)
   ],
@@ -839,6 +841,8 @@ export function validatePromptInput(
   // Now we check for specific encoding attack patterns instead of blanket non-ASCII rejection
 
   // Check for control characters (except common whitespace like \t, \n, \r)
+  // SECURITY: Intentionally using control regex to detect malicious control characters
+  // that could be used to manipulate text rendering or bypass filters
   // eslint-disable-next-line no-control-regex
   const controlChars = input.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g) || [];
   if (controlChars.length > 0) {

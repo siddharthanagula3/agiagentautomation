@@ -34,5 +34,6 @@ function Badge({ className, variant, ...props }: BadgeProps) {
   );
 }
 
+// shadcn/ui pattern: export both component and variants helper for consumer customization
 // eslint-disable-next-line react-refresh/only-export-components
 export { Badge, badgeVariants };

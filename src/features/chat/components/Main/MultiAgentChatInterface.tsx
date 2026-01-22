@@ -33,6 +33,7 @@ import {
   useMissionStore,
   useActiveEmployees,
 } from '@shared/stores/mission-control-store';
+import { useChatStore } from '@shared/stores/chat-store';
 import type { MissionMessage } from '@shared/stores/mission-control-store';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
 
@@ -175,9 +176,22 @@ export function MultiAgentChatInterface({
   );
 
   // Handle message reactions
-  const handleReaction = useCallback((_messageId: string, _emoji: string) => {
-    // TODO: Implement reaction handling
-  }, []);
+  const reactToMessage = useChatStore((state) => state.reactToMessage);
+  const handleReaction = useCallback(
+    (messageId: string, emoji: string) => {
+      // Map emoji to reaction type
+      const emojiToReaction: Record<string, 'up' | 'down' | 'helpful'> = {
+        '👍': 'up',
+        '👎': 'down',
+        '❤️': 'helpful',
+        '🎉': 'helpful',
+        '💡': 'helpful',
+      };
+      const reactionType = emojiToReaction[emoji] || 'helpful';
+      reactToMessage(messageId, reactionType);
+    },
+    [reactToMessage]
+  );
 
   // Keyboard shortcuts
   useEffect(() => {

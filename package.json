@@ -121,7 +121,7 @@
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@lhci/cli": "^0.15.1",
-    "@netlify/functions": "^4.2.7",
+    "@netlify/functions": "^5.1.2",
     "@playwright/test": "^1.56.0",
     "@sentry/react": "^10.19.0",
     "@sentry/vite-plugin": "^4.4.0",

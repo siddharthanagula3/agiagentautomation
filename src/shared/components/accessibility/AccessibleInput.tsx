@@ -4,8 +4,10 @@ import { Label } from '@shared/ui/label';
 import { useAccessibility } from '@shared/hooks/useAccessibility';
 import { useAriaAttributes } from '@shared/hooks/useAccessibility';
 
-interface AccessibleInputProps
-  extends Omit<InputProps, 'aria-label' | 'aria-describedby'> {
+interface AccessibleInputProps extends Omit<
+  InputProps,
+  'aria-label' | 'aria-describedby'
+> {
   label: string;
   description?: string;
   error?: string;

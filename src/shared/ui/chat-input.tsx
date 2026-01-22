@@ -2,8 +2,7 @@ import * as React from 'react';
 import { Textarea } from '@shared/ui/textarea';
 import { cn } from '@shared/lib/utils';
 
-interface ChatInputProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface ChatInputProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   // This interface extends TextareaHTMLAttributes to inherit all textarea props
   // Additional custom props can be added here if needed in the future
   placeholder?: string;

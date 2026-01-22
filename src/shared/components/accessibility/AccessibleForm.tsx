@@ -2,8 +2,7 @@ import React, { forwardRef, useId } from 'react';
 import { useAccessibility } from '@shared/hooks/useAccessibility';
 import { useAriaAttributes } from '@shared/hooks/useAccessibility';
 
-interface AccessibleFormProps
-  extends React.FormHTMLAttributes<HTMLFormElement> {
+interface AccessibleFormProps extends React.FormHTMLAttributes<HTMLFormElement> {
   children: React.ReactNode;
   announceErrors?: boolean;
   announceSuccess?: boolean;

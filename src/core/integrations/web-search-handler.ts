@@ -385,9 +385,8 @@ export async function searchAndSummarize(
 
   // If no answer, generate one using AI
   try {
-    const { unifiedLLMService } = await import(
-      '@core/ai/llm/unified-language-model'
-    );
+    const { unifiedLLMService } =
+      await import('@core/ai/llm/unified-language-model');
 
     const context = searchResponse.results
       .map((r, i) => `[${i + 1}] ${r.title}\n${r.snippet}\nSource: ${r.url}`)

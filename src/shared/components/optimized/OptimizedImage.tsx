@@ -7,8 +7,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@shared/lib/utils';
 import { useOptimizedImage } from '@shared/hooks/usePerformanceOptimization';
 
-interface OptimizedImageProps
-  extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
   width?: number;

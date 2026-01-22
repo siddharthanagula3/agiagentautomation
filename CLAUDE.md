@@ -250,7 +250,11 @@ for (const task of tasks) {
 }
 
 // STAGE 3: EXECUTION (with sandwich defense)
-const secureMessages = buildSecureMessages(systemPrompt, userMessage, employeeName);
+const secureMessages = buildSecureMessages(
+  systemPrompt,
+  userMessage,
+  employeeName
+);
 const response = await executeWithSecureMessages(secureMessages);
 
 // STAGE 4: OUTPUT VALIDATION
@@ -286,16 +290,27 @@ Use React Query for all server state. Hooks are available in feature directories
 
 ```typescript
 // Billing data
-import { useBillingData, useTokenBalance, useTokenAnalytics } from '@features/billing/hooks/use-billing-queries';
+import {
+  useBillingData,
+  useTokenBalance,
+  useTokenAnalytics,
+} from '@features/billing/hooks/use-billing-queries';
 const { data: billing, isLoading } = useBillingData();
 
 // Chat sessions
-import { useChatSessions, useCreateChatSession, useDeleteChatSession } from '@features/chat/hooks/use-chat-queries';
+import {
+  useChatSessions,
+  useCreateChatSession,
+  useDeleteChatSession,
+} from '@features/chat/hooks/use-chat-queries';
 const { data: sessions } = useChatSessions(userId);
 const createSession = useCreateChatSession();
 
 // User settings
-import { useUserProfile, useUpdateProfile } from '@features/settings/hooks/use-settings-queries';
+import {
+  useUserProfile,
+  useUpdateProfile,
+} from '@features/settings/hooks/use-settings-queries';
 const { data: profile } = useUserProfile();
 ```
 
@@ -305,13 +320,13 @@ Query keys are centralized in `@shared/stores/query-client.ts`:
 import { queryKeys } from '@shared/stores';
 
 // Available namespaces
-queryKeys.auth.user()
-queryKeys.chat.sessions(userId)
-queryKeys.chat.session(sessionId)
-queryKeys.employees.list(userId)
-queryKeys.billing.plan(userId)
-queryKeys.billing.tokenBalance(userId)
-queryKeys.settings.profile(userId)
+queryKeys.auth.user();
+queryKeys.chat.sessions(userId);
+queryKeys.chat.session(sessionId);
+queryKeys.employees.list(userId);
+queryKeys.billing.plan(userId);
+queryKeys.billing.tokenBalance(userId);
+queryKeys.settings.profile(userId);
 ```
 
 ### VIBE vs Chat
@@ -506,10 +521,16 @@ Common issues:
 **1. Input Sanitization** (`@core/security`)
 
 ```typescript
-import { sanitizeEmployeeInput, buildSecureMessages, validateEmployeeOutput } from '@core/security';
+import {
+  sanitizeEmployeeInput,
+  buildSecureMessages,
+  validateEmployeeOutput,
+} from '@core/security';
 
 // Sanitize user input with configurable blocking
-const result = sanitizeEmployeeInput(userMessage, userId, { blockThreshold: 'high' });
+const result = sanitizeEmployeeInput(userMessage, userId, {
+  blockThreshold: 'high',
+});
 if (result.blocked) {
   // Handle blocked input - log suspicious activity
 }
@@ -584,15 +605,15 @@ setUser({ id: user.id, email: user.email });
 
 Configuration in `.size-limit.json`:
 
-| Bundle | Limit | Purpose |
-|--------|-------|---------|
-| Total JS | 2.5 MB | All JavaScript chunks |
-| Chat feature | 550 kB | Chat interface |
-| Vibe feature | 350 kB | Coding workspace |
-| Editor vendor | 200 kB | Monaco editor |
-| React vendor | 150 kB | React + ReactDOM |
-| AI core | 120 kB | AI orchestration |
-| UI vendor | 100 kB | Radix + Lucide |
+| Bundle        | Limit  | Purpose               |
+| ------------- | ------ | --------------------- |
+| Total JS      | 2.5 MB | All JavaScript chunks |
+| Chat feature  | 550 kB | Chat interface        |
+| Vibe feature  | 350 kB | Coding workspace      |
+| Editor vendor | 200 kB | Monaco editor         |
+| React vendor  | 150 kB | React + ReactDOM      |
+| AI core       | 120 kB | AI orchestration      |
+| UI vendor     | 100 kB | Radix + Lucide        |
 
 ### Lighthouse Performance Budgets
 
@@ -676,17 +697,17 @@ python -m windows_mcp_server --transport stdio
 
 ## Codebase Health Scores
 
-| Area | Score | Grade |
-|------|-------|-------|
-| Security | 100/100 | A+ |
-| Billing/Payments | 100/100 | A+ |
-| API Architecture | 100/100 | A+ |
-| Error Handling | 100/100 | A+ |
-| Testing | 100/100 | A+ |
-| CI/CD Pipeline | 100/100 | A+ |
-| Performance | 100/100 | A+ |
-| Type Safety | 100/100 | A+ |
-| Code Quality | 100/100 | A+ |
-| Documentation | 100/100 | A+ |
+| Area             | Score   | Grade |
+| ---------------- | ------- | ----- |
+| Security         | 100/100 | A+    |
+| Billing/Payments | 100/100 | A+    |
+| API Architecture | 100/100 | A+    |
+| Error Handling   | 100/100 | A+    |
+| Testing          | 100/100 | A+    |
+| CI/CD Pipeline   | 100/100 | A+    |
+| Performance      | 100/100 | A+    |
+| Type Safety      | 100/100 | A+    |
+| Code Quality     | 100/100 | A+    |
+| Documentation    | 100/100 | A+    |
 
 **Overall Platform Health: 100/100 (A+)**

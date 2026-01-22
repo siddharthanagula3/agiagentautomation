@@ -191,8 +191,6 @@ export class RealtimeCollaborationService {
 
     // Also set up WebSocket fallback
     await websocketManager.connect(`collaboration-${sessionId}`, sessionId);
-
-    console.log(`[Collaboration] Session initialized: ${sessionId}`);
   }
 
   /**
@@ -214,8 +212,6 @@ export class RealtimeCollaborationService {
 
     // Remove session
     this.sessions.delete(sessionId);
-
-    console.log(`[Collaboration] Session cleaned up: ${sessionId}`);
   }
 
   /**
@@ -622,9 +618,6 @@ export class RealtimeCollaborationService {
       }
     }
 
-    console.log(
-      `[Collaboration] Presence synced: ${sessionId}, ${session.participants.size} participants`
-    );
   }
 
   /**
@@ -632,7 +625,7 @@ export class RealtimeCollaborationService {
    */
   private handlePresenceJoin(
     sessionId: string,
-    key: string,
+    _key: string,
     presences: unknown[]
   ): void {
     const session = this.sessions.get(sessionId);
@@ -640,7 +633,6 @@ export class RealtimeCollaborationService {
 
     for (const presence of presences as UserPresence[]) {
       session.participants.set(presence.userId, presence);
-      console.log(`[Collaboration] User joined: ${presence.userId}`);
     }
   }
 
@@ -649,7 +641,7 @@ export class RealtimeCollaborationService {
    */
   private handlePresenceLeave(
     sessionId: string,
-    key: string,
+    _key: string,
     presences: unknown[]
   ): void {
     const session = this.sessions.get(sessionId);
@@ -660,7 +652,6 @@ export class RealtimeCollaborationService {
       session.typingUsers.delete(presence.userId);
       session.cursors.delete(presence.userId);
       session.activities.delete(presence.userId);
-      console.log(`[Collaboration] User left: ${presence.userId}`);
     }
   }
 
@@ -790,8 +781,6 @@ export class RealtimeCollaborationService {
     for (const sessionId of sessionIds) {
       await this.cleanupSession(sessionId);
     }
-
-    console.log('[Collaboration] All sessions cleaned up');
   }
 }
 

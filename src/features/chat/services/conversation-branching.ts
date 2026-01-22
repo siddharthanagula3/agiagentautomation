@@ -116,11 +116,7 @@ export class ConversationBranchingService {
 
     // This is a placeholder - you'd implement actual metadata storage
     // based on your database schema
-    console.log('Branch metadata:', {
-      branchSessionId,
-      parentSessionId,
-      branchPointMessageId,
-    });
+    // TODO: Implement branch metadata storage
   }
 
   /**
@@ -257,7 +253,6 @@ export class ConversationBranchingService {
 
       // Copy combined messages to the merge session
       // This is a simplified version - you'd need to handle this more carefully
-      console.log('Merging messages:', combinedMessages.length);
 
       return mergeSession;
     } catch (error) {

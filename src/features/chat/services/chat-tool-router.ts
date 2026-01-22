@@ -804,13 +804,6 @@ export async function routeAndExecuteTools(
     detection.tools.includes('social-media-analysis') || // Continue to LLM to synthesize social media analysis
     executionResults.some((r) => r.status === 'failed'); // Continue if any tool failed
 
-  const duration = Date.now() - startTime;
-  console.log(`[ToolRouter] Execution completed in ${duration}ms`, {
-    detectedTools: detection.tools,
-    executedTools: executionResults.length,
-    successful: successfulResults.length,
-  });
-
   return {
     detectedTools: detection.tools,
     executionResults,

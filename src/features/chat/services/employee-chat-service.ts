@@ -81,10 +81,6 @@ export class EmployeeChatService {
 
     this.employees = await systemPromptsService.getAvailableEmployees();
     this.employeesLoaded = true;
-
-    console.log(
-      `[EmployeeChatService] Loaded ${this.employees.length} employees`
-    );
   }
 
   /**
@@ -1340,10 +1336,6 @@ export class EmployeeChatService {
       bestReasons.length > 0
         ? bestReasons.slice(0, 3).join(', ')
         : 'general capabilities';
-
-    console.log(
-      `[EmployeeChatService] Selected ${bestEmployee.name} (score: ${bestScore}, confidence: ${confidence.toFixed(2)}, expertise: ${bestExpertise.join(', ') || 'none'})`
-    );
 
     return {
       employee: bestEmployee,

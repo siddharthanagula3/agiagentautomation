@@ -34,9 +34,6 @@ export async function updateVibeSessionTokens(
       throw error;
     }
 
-    console.log(
-      `[VibeTokenTracker] Updated session ${sessionId}: +${inputTokens} input, +${outputTokens} output, +$${cost.toFixed(6)} cost`
-    );
   } catch (error) {
     console.error('[VibeTokenTracker] Error updating session tokens:', error);
     // Don't throw - this is a non-critical tracking operation

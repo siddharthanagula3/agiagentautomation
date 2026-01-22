@@ -449,10 +449,6 @@ export class SystemPromptsService {
           eager: false,
         });
 
-        console.log(
-          `[SystemPromptsService] Found ${Object.keys(employeeFiles).length} employee files`
-        );
-
         for (const [path, loader] of Object.entries(employeeFiles)) {
           try {
             const content = await (loader as () => Promise<string>)();
@@ -481,13 +477,9 @@ export class SystemPromptsService {
               expertise,
             });
           } catch (err) {
-            console.error(`Failed to parse employee file ${path}:`, err);
+            console.error(`[SystemPromptsService] Failed to parse employee file ${path}:`, err);
           }
         }
-
-        console.log(
-          `[SystemPromptsService] Successfully loaded ${employees.length} employees`
-        );
       }
 
       return employees;

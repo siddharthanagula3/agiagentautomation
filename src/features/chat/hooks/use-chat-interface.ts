@@ -264,12 +264,6 @@ export const useChat = (sessionId?: string) => {
             }
           );
 
-          console.log('[Chat] Tool router result:', {
-            detectedTools: toolRouterResult.detectedTools,
-            executionResults: toolRouterResult.executionResults.length,
-            shouldContinueToLLM: toolRouterResult.shouldContinueToLLM,
-          });
-
           // Remove tool indicator
           setMessages((prev) =>
             prev.filter((msg) => msg.id !== toolIndicatorId)
@@ -444,13 +438,7 @@ export const useChat = (sessionId?: string) => {
             ),
           {
             maxRetries: 3,
-            onRetry: (attempt, err) => {
-              const errMessage =
-                err instanceof Error ? err.message : String(err);
-              console.log(
-                `[Chat] Retry attempt ${attempt}/3 after error:`,
-                errMessage
-              );
+            onRetry: (attempt) => {
               toast.info(`Retrying... (Attempt ${attempt}/3)`);
             },
           }

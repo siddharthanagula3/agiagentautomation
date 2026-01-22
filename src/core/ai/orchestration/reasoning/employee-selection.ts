@@ -60,8 +60,6 @@ export class AgentSelector {
    * Select the optimal agent for a given task
    */
   async selectOptimalAgent(task: Task): Promise<AgentSelectionResult> {
-    console.log('🤖 Selecting optimal agent for task:', task.title);
-
     // Get all compatible agents
     const compatibleAgents = this.getCompatibleAgents(task);
 
@@ -483,8 +481,8 @@ export class AgentSelector {
     failedAgent: AgentType,
     reason: string
   ): AgentType {
-    console.log(
-      `⚠️ Agent ${failedAgent} failed for task ${task.id}: ${reason}`
+    console.warn(
+      `[AgentSelector] Agent ${failedAgent} failed for task ${task.id}: ${reason}`
     );
 
     // Get all compatible agents except the failed one

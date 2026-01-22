@@ -225,10 +225,6 @@ export class MessageDeliveryService {
       // Schedule retry with exponential backoff
       const delay = this.calculateRetryDelay(record.retryCount);
 
-      console.log(
-        `[MessageDelivery] Scheduling retry ${record.retryCount}/${record.maxRetries} for message ${record.messageId} in ${delay}ms`
-      );
-
       const timer = setTimeout(() => {
         const message = this.pendingMessages.get(record.messageId);
         if (message) {
@@ -314,10 +310,6 @@ export class MessageDeliveryService {
       record.deliveredAt = confirmation.timestamp;
       this.emitStatusUpdate(record);
       this.clearPendingMessage(record.messageId);
-
-      console.log(
-        `[MessageDelivery] Message ${record.messageId} delivered to ${confirmation.recipientId}`
-      );
     }
   }
 
@@ -375,10 +367,6 @@ export class MessageDeliveryService {
 
     // Save to database
     await this.saveReadReceiptToDatabase(receipt);
-
-    console.log(
-      `[MessageDelivery] Message ${messageId} marked as read by ${userId}`
-    );
   }
 
   /**
@@ -454,8 +442,6 @@ export class MessageDeliveryService {
     this.deliveryRecords.delete(messageId);
     this.pendingMessages.delete(messageId);
     this.readReceipts.delete(messageId);
-
-    console.log(`[MessageDelivery] Delivery cancelled: ${messageId}`);
   }
 
   /**
@@ -600,9 +586,6 @@ export class MessageDeliveryService {
       }
     }
 
-    if (cleanedCount > 0) {
-      console.log(`[MessageDelivery] Cleaned up ${cleanedCount} old records`);
-    }
   }
 
   /**
@@ -670,8 +653,6 @@ export class MessageDeliveryService {
     this.pendingMessages.clear();
     this.retryTimers.clear();
     this.deliveryTimeouts.clear();
-
-    console.log('[MessageDelivery] Cleanup complete');
   }
 }
 

@@ -115,12 +115,15 @@ export function AgentParticipantPanel({
 
   // Expand all groups initially
   // Updated: Jan 15th 2026 - Adding expandedGroups.size would cause infinite loop
+  // Updated: Jan 21st 2026 - Properly fixed by using a ref to track initialization
+  const hasInitializedGroups = React.useRef(false);
   React.useEffect(() => {
-    if (groupedAgents && expandedGroups.size === 0) {
+    // Only initialize once when groupedAgents first becomes available
+    if (groupedAgents && !hasInitializedGroups.current && expandedGroups.size === 0) {
+      hasInitializedGroups.current = true;
       setExpandedGroups(new Set(groupedAgents.map((g) => g.role)));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groupedAgents]);
+  }, [groupedAgents, expandedGroups.size]);
 
   // Status counts
   const statusCounts = useMemo(() => {

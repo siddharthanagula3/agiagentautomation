@@ -193,9 +193,6 @@ export class SequentialWorkflowOrchestrator {
       this.employees = await systemPromptsService.getAvailableEmployees();
       if (this.employees.length > 0) {
         this.employeesLoaded = true;
-        console.log(
-          `📋 Loaded ${this.employees.length} AI employees for workflows`
-        );
       }
     }
   }

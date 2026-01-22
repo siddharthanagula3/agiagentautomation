@@ -1,5 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useAuthStore } from '@shared/stores/authentication-store';
+
+// Mock workforce-store before importing authentication-store to prevent circular dependency
+vi.mock('@shared/stores/workforce-store', () => ({
+  useWorkforceStore: {
+    getState: () => ({ reset: vi.fn(), fetchHiredEmployees: vi.fn() }),
+    subscribe: vi.fn(),
+  },
+  cleanupWorkforceSubscription: vi.fn(),
+  setupWorkforceSubscription: vi.fn(),
+}));
 
 // Mock the auth service
 vi.mock('@core/auth/authentication-manager', () => ({
@@ -14,6 +23,8 @@ vi.mock('@core/auth/authentication-manager', () => ({
     updateProfile: vi.fn(),
   },
 }));
+
+import { useAuthStore } from '@shared/stores/authentication-store';
 
 describe('Unified Auth Store', () => {
   beforeEach(() => {

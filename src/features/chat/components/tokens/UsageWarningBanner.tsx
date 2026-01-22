@@ -191,6 +191,7 @@ export function UsageWarningBanner({
 
 /**
  * Hook to fetch and monitor usage data
+ * Exported alongside UsageWarningBanner for co-location of related functionality
  */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useUsageMonitoring(userId: string | null) {

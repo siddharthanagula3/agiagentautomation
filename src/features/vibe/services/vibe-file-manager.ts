@@ -443,10 +443,6 @@ export class VibeFileManager {
         .eq('session_id', sessionId);
 
       if (dbError) throw dbError;
-
-      console.log(
-        `[VibeFileManager] Batch deleted ${files.length} files for session ${sessionId}`
-      );
     } catch (error) {
       console.error('Failed to delete session files:', error);
     }

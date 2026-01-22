@@ -595,11 +595,6 @@ const VibeDashboard: React.FC = () => {
           );
 
           if (parseResult.filesCreated > 0) {
-            console.log(
-              `[VIBE] Created ${parseResult.filesCreated} files:`,
-              parseResult.files.map((f) => f.path)
-            );
-
             // Emit file generation events to phase orchestrator
             for (const file of parseResult.files) {
               processEvent({

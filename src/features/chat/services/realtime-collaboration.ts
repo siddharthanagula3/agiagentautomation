@@ -102,14 +102,12 @@ export class RealtimeCollaborationService {
         const users = this.mapPresenceState(state);
         callbacks.onPresenceUpdate?.(users);
       })
-      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        console.log('User joined:', key, newPresences);
+      .on('presence', { event: 'join' }, () => {
         const state = channel.presenceState();
         const users = this.mapPresenceState(state);
         callbacks.onPresenceUpdate?.(users);
       })
-      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-        console.log('User left:', key, leftPresences);
+      .on('presence', { event: 'leave' }, () => {
         const state = channel.presenceState();
         const users = this.mapPresenceState(state);
         callbacks.onPresenceUpdate?.(users);
@@ -129,8 +127,6 @@ export class RealtimeCollaborationService {
           online: true,
           lastSeen: Date.now(),
         });
-
-        console.log(`Subscribed to session: ${sessionId}`);
       } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
         callbacks.onError?.(new Error(`Channel ${status.toLowerCase()}`));
       }
@@ -148,7 +144,6 @@ export class RealtimeCollaborationService {
     if (channel) {
       await supabase.removeChannel(channel);
       this.channels.delete(sessionId);
-      console.log(`Unsubscribed from session: ${sessionId}`);
     }
   }
 

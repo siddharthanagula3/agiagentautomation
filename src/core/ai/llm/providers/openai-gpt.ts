@@ -257,9 +257,6 @@ export class OpenAIProvider {
         if (error instanceof OpenAIError && error.statusCode === 429) {
           if (attempt < RETRY_CONFIG.maxRetries) {
             const delay = calculateBackoffDelay(attempt);
-            console.log(
-              `[OpenAI Provider] Rate limited. Retrying in ${Math.round(delay)}ms...`
-            );
 
             // Show toast notification about retry
             toast.info('Rate limit reached', {
@@ -449,9 +446,6 @@ export class OpenAIProvider {
         if (error instanceof OpenAIError && error.statusCode === 429) {
           if (attempt < RETRY_CONFIG.maxRetries) {
             const delay = calculateBackoffDelay(attempt);
-            console.log(
-              `[OpenAI Provider] Rate limited. Retrying stream in ${Math.round(delay)}ms...`
-            );
 
             // Show toast notification about retry
             toast.info('Rate limit reached', {

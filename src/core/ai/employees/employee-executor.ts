@@ -46,11 +46,8 @@ export class AIEmployeeExecutor {
     let totalCost = 0;
 
     try {
-      console.log(`AI Employee ${this.employee.name} starting task: ${task}`);
-
       // Parse the task to identify required tools
       const requiredTools = await this.identifyRequiredTools(task);
-      console.log(`Identified required tools: ${requiredTools.join(', ')}`);
 
       // Execute tools in sequence
       const results: ToolResult[] = [];
@@ -60,8 +57,6 @@ export class AIEmployeeExecutor {
           results.push(toolResult);
           toolsUsed.push(toolId);
           totalCost += toolResult.cost;
-
-          console.log(`Tool ${toolId} executed successfully`);
         } catch (error) {
           console.error(`Tool ${toolId} execution failed:`, error);
           // Continue with other tools even if one fails

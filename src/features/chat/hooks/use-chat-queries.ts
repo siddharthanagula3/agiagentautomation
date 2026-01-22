@@ -27,6 +27,7 @@ async function getCurrentUser() {
 
 /**
  * Fetch all chat sessions for a user
+ * Message counts are now included in a single query (no N+1 pattern)
  */
 export function useChatSessions(userId: string | undefined) {
   return useQuery({
@@ -34,20 +35,13 @@ export function useChatSessions(userId: string | undefined) {
     queryFn: async (): Promise<ChatSession[]> => {
       if (!userId) return [];
 
+      // getUserSessions now returns sessions with message counts included
+      // via Supabase nested select (single query, no N+1 pattern)
       const sessions = await chatPersistenceService.getUserSessions(userId);
 
-      // Get message counts for each session in parallel
-      const sessionsWithCounts = await Promise.all(
-        sessions.map(async (session) => {
-          const count = await chatPersistenceService.getMessageCount(
-            session.id
-          );
-          return { ...session, messageCount: count };
-        })
-      );
-
       // Sort by updatedAt (most recent first)
-      return sessionsWithCounts.sort((a, b) => {
+      // Note: Sessions are already ordered by the database, but we ensure client-side consistency
+      return sessions.sort((a, b) => {
         const aTime =
           a.updatedAt instanceof Date
             ? a.updatedAt.getTime()

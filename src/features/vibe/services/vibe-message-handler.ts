@@ -32,8 +32,6 @@ async function syncFileToDatabase(
 
     if (error) {
       console.error('[Vibe] Failed to sync file to database:', error);
-    } else {
-      console.log(`[Vibe] Synced file to database: ${filePath}`);
     }
   } catch (err) {
     console.error('[Vibe] Error syncing file:', err);
@@ -213,11 +211,9 @@ export async function createFilesInFileSystem(
         vibeFileSystem.readFile(normalizedPath);
         // File exists, update it
         vibeFileSystem.updateFile(normalizedPath, file.content);
-        console.log(`[VIBE] Updated file: ${normalizedPath}`);
       } catch {
         // File doesn't exist, create it
         vibeFileSystem.createFile(normalizedPath, file.content);
-        console.log(`[VIBE] Created file: ${normalizedPath}`);
       }
 
       // Sync to database for persistence across page refreshes
@@ -313,7 +309,6 @@ export async function processAIResponse(
   const codeBlocks = parseCodeBlocks(response);
 
   if (codeBlocks.length === 0) {
-    console.log('[VIBE] No code blocks found in AI response');
     return {
       filesCreated: 0,
       files: [],
@@ -329,7 +324,6 @@ export async function processAIResponse(
   const files = extractFilesFromCodeBlocks(codeBlocks);
 
   if (files.length === 0) {
-    console.log('[VIBE] No files with paths found in code blocks');
     toast.info(
       "AI generated code but didn't specify file paths. Please ask for specific file names."
     );
@@ -343,8 +337,6 @@ export async function processAIResponse(
       },
     };
   }
-
-  console.log(`[VIBE] Extracted ${files.length} files from AI response`);
 
   // Create files in file system and persist to database
   const filesCreated = await createFilesInFileSystem(files, sessionId);

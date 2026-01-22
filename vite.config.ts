@@ -180,7 +180,12 @@ export default defineConfig(({ mode }) => {
               ) {
                 return 'markdown-vendor';
               }
-              if (id.includes('@codemirror') || id.includes('@lezer')) {
+              if (
+                id.includes('@codemirror') ||
+                id.includes('@lezer') ||
+                id.includes('monaco-editor') ||
+                id.includes('@monaco-editor')
+              ) {
                 return 'editor-vendor';
               }
               if (id.includes('sonner')) {

@@ -5,11 +5,11 @@
  * - Proper dialogs instead of browser prompt/confirm
  * - Clean file tree sidebar
  * - Tab-based file editing
+ * - Lazy-loaded Monaco editor for reduced initial bundle size
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
-import Editor from '@monaco-editor/react';
-import * as Monaco from 'monaco-editor';
+import React, { useState, useCallback, useEffect, Suspense, lazy } from 'react';
+import type * as Monaco from 'monaco-editor';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { ScrollArea } from '@shared/ui/scroll-area';
@@ -38,11 +38,12 @@ import {
   Copy,
   Check,
   Download,
-  Plus,
   Save,
   LayoutTemplate,
   FilePlus,
   FolderPlus,
+  Loader2,
+  Code,
 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
 import { toast } from 'sonner';
@@ -51,6 +52,38 @@ import { FileTreeView } from './FileTreeView';
 import { VibeTemplateSelector } from '../VibeTemplateSelector';
 import JSZip from 'jszip';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
+
+// Lazy load Monaco editor - ~800KB bundle that should only load when Vibe is accessed
+const MonacoEditor = lazy(() =>
+  import('@monaco-editor/react').then((module) => ({
+    default: module.default,
+  }))
+);
+
+/**
+ * Loading fallback for Monaco editor during lazy load
+ */
+function EditorLoadingFallback() {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center bg-muted/20">
+      <div className="flex flex-col items-center gap-4 text-muted-foreground">
+        <div className="relative">
+          <Code className="h-12 w-12 text-muted-foreground/40" aria-hidden="true" />
+          <Loader2
+            className="absolute -right-1 -top-1 h-5 w-5 animate-spin text-primary"
+            aria-hidden="true"
+          />
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-medium">Loading Code Editor</p>
+          <p className="mt-1 text-xs text-muted-foreground/60">
+            Initializing Monaco editor...
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface OpenFile {
   path: string;
@@ -543,31 +576,33 @@ function CodeEditorPanelContent() {
           </div>
         )}
 
-        {/* Monaco Editor */}
+        {/* Monaco Editor - Lazy loaded */}
         {currentFilePath && currentFile ? (
           <div className="flex-1">
-            <Editor
-              height="100%"
-              language={currentFile.language}
-              value={currentFile.content}
-              onChange={handleEditorChange}
-              theme="vs-dark"
-              onMount={setEditorInstance}
-              options={{
-                fontSize: 13,
-                fontFamily:
-                  "'JetBrains Mono', 'Fira Code', Consolas, monospace",
-                lineNumbers: 'on',
-                minimap: { enabled: true, maxColumn: 80 },
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                tabSize: 2,
-                wordWrap: 'on',
-                bracketPairColorization: { enabled: true },
-                folding: true,
-                suggestOnTriggerCharacters: true,
-              }}
-            />
+            <Suspense fallback={<EditorLoadingFallback />}>
+              <MonacoEditor
+                height="100%"
+                language={currentFile.language}
+                value={currentFile.content}
+                onChange={handleEditorChange}
+                theme="vs-dark"
+                onMount={setEditorInstance}
+                options={{
+                  fontSize: 13,
+                  fontFamily:
+                    "'JetBrains Mono', 'Fira Code', Consolas, monospace",
+                  lineNumbers: 'on',
+                  minimap: { enabled: true, maxColumn: 80 },
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  tabSize: 2,
+                  wordWrap: 'on',
+                  bracketPairColorization: { enabled: true },
+                  folding: true,
+                  suggestOnTriggerCharacters: true,
+                }}
+              />
+            </Suspense>
           </div>
         ) : (
           <div className="flex flex-1 items-center justify-center bg-muted/10">
@@ -665,8 +700,7 @@ function CodeEditorPanelContent() {
       <VibeTemplateSelector
         open={showTemplateSelector}
         onOpenChange={setShowTemplateSelector}
-        onTemplateSelected={(templateId) => {
-          console.log('[VIBE] Template selected:', templateId);
+        onTemplateSelected={() => {
           refreshFileTree();
         }}
       />

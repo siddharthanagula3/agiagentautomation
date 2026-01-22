@@ -8,7 +8,11 @@ import {
 } from '../utils/token-tracking';
 import { withRateLimit } from '../utils/rate-limiter';
 import { withAuth } from '../utils/auth-middleware';
-import { getSafeCorsHeaders, checkOriginAndBlock } from '../utils/cors';
+import {
+  getSafeCorsHeaders,
+  checkOriginAndBlock,
+  getMinimalCorsHeaders,
+} from '../utils/cors';
 import {
   googleRequestSchema,
   formatValidationError,
@@ -49,11 +53,14 @@ const googleHandler: Handler = async (event: AuthenticatedEvent) => {
   const GOOGLE_API_KEY = process.env.VITE_GOOGLE_API_KEY;
 
   if (!GOOGLE_API_KEY) {
+    console.error('[Google Proxy] API key not configured');
     return {
       statusCode: 500,
       headers: corsHeaders,
       body: JSON.stringify({
-        error: 'Google API key not configured in Netlify environment variables',
+        error: 'Service temporarily unavailable',
+        code: 'SERVER_CONFIGURATION_ERROR',
+        retryable: true,
       }),
     };
   }

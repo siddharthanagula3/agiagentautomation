@@ -8,7 +8,11 @@ import {
 } from '../utils/token-tracking';
 import { withRateLimit } from '../utils/rate-limiter';
 import { withAuth } from '../utils/auth-middleware';
-import { getSafeCorsHeaders, checkOriginAndBlock } from '../utils/cors';
+import {
+  getSafeCorsHeaders,
+  checkOriginAndBlock,
+  getMinimalCorsHeaders,
+} from '../utils/cors';
 import {
   qwenRequestSchema,
   formatValidationError,
@@ -53,12 +57,14 @@ const qwenHandler: Handler = async (event: AuthenticatedEvent) => {
   const QWEN_API_KEY = process.env.QWEN_API_KEY || process.env.DASHSCOPE_API_KEY;
 
   if (!QWEN_API_KEY) {
+    console.error('[Qwen Proxy] API key not configured');
     return {
       statusCode: 500,
       headers: corsHeaders,
       body: JSON.stringify({
-        error:
-          'Qwen/DashScope API key not configured in Netlify environment variables (QWEN_API_KEY or DASHSCOPE_API_KEY)',
+        error: 'Service temporarily unavailable',
+        code: 'SERVER_CONFIGURATION_ERROR',
+        retryable: true,
       }),
     };
   }

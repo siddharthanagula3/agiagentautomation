@@ -8,7 +8,11 @@ import {
 } from '../utils/token-tracking';
 import { withRateLimit } from '../utils/rate-limiter';
 import { withAuth } from '../utils/auth-middleware';
-import { getSafeCorsHeaders, checkOriginAndBlock } from '../utils/cors';
+import {
+  getSafeCorsHeaders,
+  checkOriginAndBlock,
+  getMinimalCorsHeaders,
+} from '../utils/cors';
 import {
   openaiRequestSchema,
   formatValidationError,
@@ -49,11 +53,14 @@ const openaiHandler: Handler = async (event: AuthenticatedEvent) => {
   const OPENAI_API_KEY = process.env.VITE_OPENAI_API_KEY;
 
   if (!OPENAI_API_KEY) {
+    console.error('[OpenAI Proxy] API key not configured');
     return {
       statusCode: 500,
       headers: corsHeaders,
       body: JSON.stringify({
-        error: 'OpenAI API key not configured in Netlify environment variables',
+        error: 'Service temporarily unavailable',
+        code: 'SERVER_CONFIGURATION_ERROR',
+        retryable: true,
       }),
     };
   }

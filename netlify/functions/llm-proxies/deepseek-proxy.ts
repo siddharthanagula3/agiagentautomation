@@ -8,7 +8,11 @@ import {
 } from '../utils/token-tracking';
 import { withRateLimit } from '../utils/rate-limiter';
 import { withAuth } from '../utils/auth-middleware';
-import { getSafeCorsHeaders, checkOriginAndBlock } from '../utils/cors';
+import {
+  getSafeCorsHeaders,
+  checkOriginAndBlock,
+  getMinimalCorsHeaders,
+} from '../utils/cors';
 import {
   deepseekRequestSchema,
   formatValidationError,
@@ -49,11 +53,14 @@ const deepseekHandler: Handler = async (event: AuthenticatedEvent) => {
   const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 
   if (!DEEPSEEK_API_KEY) {
+    console.error('[DeepSeek Proxy] API key not configured');
     return {
       statusCode: 500,
       headers: corsHeaders,
       body: JSON.stringify({
-        error: 'DeepSeek API key not configured in Netlify environment variables',
+        error: 'Service temporarily unavailable',
+        code: 'SERVER_CONFIGURATION_ERROR',
+        retryable: true,
       }),
     };
   }

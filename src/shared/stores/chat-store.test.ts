@@ -9,7 +9,8 @@ import { useChatStore, type Conversation, type Message } from './chat-store';
 
 // Mock crypto.randomUUID
 vi.stubGlobal('crypto', {
-  randomUUID: () => `test-uuid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+  randomUUID: () =>
+    `test-uuid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
 });
 
 describe('Chat Store', () => {
@@ -43,7 +44,9 @@ describe('Chat Store', () => {
 
         const id = createConversation('My Custom Chat');
 
-        expect(useChatStore.getState().conversations[id].title).toBe('My Custom Chat');
+        expect(useChatStore.getState().conversations[id].title).toBe(
+          'My Custom Chat'
+        );
       });
 
       it('should create conversation with custom model', () => {
@@ -69,16 +72,20 @@ describe('Chat Store', () => {
 
     describe('updateConversation', () => {
       it('should update conversation properties', () => {
-        const { createConversation, updateConversation } = useChatStore.getState();
+        const { createConversation, updateConversation } =
+          useChatStore.getState();
 
         const id = createConversation();
         updateConversation(id, { title: 'Updated Title' });
 
-        expect(useChatStore.getState().conversations[id].title).toBe('Updated Title');
+        expect(useChatStore.getState().conversations[id].title).toBe(
+          'Updated Title'
+        );
       });
 
       it('should update metadata.updatedAt', () => {
-        const { createConversation, updateConversation } = useChatStore.getState();
+        const { createConversation, updateConversation } =
+          useChatStore.getState();
         const createTime = new Date();
         vi.setSystemTime(createTime);
 
@@ -88,7 +95,9 @@ describe('Chat Store', () => {
         updateConversation(id, { title: 'Updated' });
 
         const conv = useChatStore.getState().conversations[id];
-        expect(conv.metadata.updatedAt.getTime()).toBeGreaterThan(conv.metadata.createdAt.getTime());
+        expect(conv.metadata.updatedAt.getTime()).toBeGreaterThan(
+          conv.metadata.createdAt.getTime()
+        );
       });
 
       it('should handle non-existent conversation', () => {
@@ -103,7 +112,8 @@ describe('Chat Store', () => {
 
     describe('deleteConversation', () => {
       it('should delete conversation', () => {
-        const { createConversation, deleteConversation } = useChatStore.getState();
+        const { createConversation, deleteConversation } =
+          useChatStore.getState();
 
         const id = createConversation();
         deleteConversation(id);
@@ -112,7 +122,8 @@ describe('Chat Store', () => {
       });
 
       it('should clear activeConversationId if deleted', () => {
-        const { createConversation, deleteConversation } = useChatStore.getState();
+        const { createConversation, deleteConversation } =
+          useChatStore.getState();
 
         const id = createConversation();
         expect(useChatStore.getState().activeConversationId).toBe(id);
@@ -125,7 +136,8 @@ describe('Chat Store', () => {
 
     describe('setActiveConversation', () => {
       it('should set active conversation', () => {
-        const { createConversation, setActiveConversation } = useChatStore.getState();
+        const { createConversation, setActiveConversation } =
+          useChatStore.getState();
 
         const id1 = createConversation('Chat 1');
         const id2 = createConversation('Chat 2');
@@ -138,7 +150,8 @@ describe('Chat Store', () => {
       });
 
       it('should allow setting to null', () => {
-        const { createConversation, setActiveConversation } = useChatStore.getState();
+        const { createConversation, setActiveConversation } =
+          useChatStore.getState();
 
         createConversation();
         setActiveConversation(null);
@@ -147,7 +160,8 @@ describe('Chat Store', () => {
       });
 
       it('should update lastActivity', () => {
-        const { createConversation, setActiveConversation } = useChatStore.getState();
+        const { createConversation, setActiveConversation } =
+          useChatStore.getState();
 
         const id = createConversation();
         setActiveConversation(id);
@@ -158,7 +172,8 @@ describe('Chat Store', () => {
 
     describe('duplicateConversation', () => {
       it('should create a copy of conversation', () => {
-        const { createConversation, addMessage, duplicateConversation } = useChatStore.getState();
+        const { createConversation, addMessage, duplicateConversation } =
+          useChatStore.getState();
 
         const originalId = createConversation('Original');
         addMessage(originalId, {
@@ -225,7 +240,9 @@ describe('Chat Store', () => {
         const { createConversation, addMessage } = useChatStore.getState();
 
         const convId = createConversation();
-        expect(useChatStore.getState().conversations[convId].metadata.totalMessages).toBe(0);
+        expect(
+          useChatStore.getState().conversations[convId].metadata.totalMessages
+        ).toBe(0);
 
         addMessage(convId, {
           conversationId: convId,
@@ -233,7 +250,9 @@ describe('Chat Store', () => {
           content: 'Test',
         });
 
-        expect(useChatStore.getState().conversations[convId].metadata.totalMessages).toBe(1);
+        expect(
+          useChatStore.getState().conversations[convId].metadata.totalMessages
+        ).toBe(1);
       });
 
       it('should track token usage in metadata', () => {
@@ -258,7 +277,8 @@ describe('Chat Store', () => {
 
     describe('updateMessage', () => {
       it('should update message content', () => {
-        const { createConversation, addMessage, updateMessage } = useChatStore.getState();
+        const { createConversation, addMessage, updateMessage } =
+          useChatStore.getState();
 
         const convId = createConversation();
         const msgId = addMessage(convId, {
@@ -268,7 +288,10 @@ describe('Chat Store', () => {
           isStreaming: true,
         });
 
-        updateMessage(msgId, { content: 'Updated response', isStreaming: false });
+        updateMessage(msgId, {
+          content: 'Updated response',
+          isStreaming: false,
+        });
 
         const msg = useChatStore.getState().conversations[convId].messages[0];
         expect(msg.content).toBe('Updated response');
@@ -278,7 +301,8 @@ describe('Chat Store', () => {
 
     describe('deleteMessage', () => {
       it('should delete message', () => {
-        const { createConversation, addMessage, deleteMessage } = useChatStore.getState();
+        const { createConversation, addMessage, deleteMessage } =
+          useChatStore.getState();
 
         const convId = createConversation();
         const msgId = addMessage(convId, {
@@ -289,11 +313,14 @@ describe('Chat Store', () => {
 
         deleteMessage(msgId);
 
-        expect(useChatStore.getState().conversations[convId].messages).toHaveLength(0);
+        expect(
+          useChatStore.getState().conversations[convId].messages
+        ).toHaveLength(0);
       });
 
       it('should decrement totalMessages count', () => {
-        const { createConversation, addMessage, deleteMessage } = useChatStore.getState();
+        const { createConversation, addMessage, deleteMessage } =
+          useChatStore.getState();
 
         const convId = createConversation();
         const msgId = addMessage(convId, {
@@ -302,17 +329,22 @@ describe('Chat Store', () => {
           content: 'Test',
         });
 
-        expect(useChatStore.getState().conversations[convId].metadata.totalMessages).toBe(1);
+        expect(
+          useChatStore.getState().conversations[convId].metadata.totalMessages
+        ).toBe(1);
 
         deleteMessage(msgId);
 
-        expect(useChatStore.getState().conversations[convId].metadata.totalMessages).toBe(0);
+        expect(
+          useChatStore.getState().conversations[convId].metadata.totalMessages
+        ).toBe(0);
       });
     });
 
     describe('reactToMessage', () => {
       it('should add reaction to message', () => {
-        const { createConversation, addMessage, reactToMessage } = useChatStore.getState();
+        const { createConversation, addMessage, reactToMessage } =
+          useChatStore.getState();
 
         const convId = createConversation();
         const msgId = addMessage(convId, {
@@ -329,7 +361,8 @@ describe('Chat Store', () => {
       });
 
       it('should toggle reaction on second click', () => {
-        const { createConversation, addMessage, reactToMessage } = useChatStore.getState();
+        const { createConversation, addMessage, reactToMessage } =
+          useChatStore.getState();
 
         const convId = createConversation();
         const msgId = addMessage(convId, {
@@ -373,7 +406,9 @@ describe('Chat Store', () => {
         addFilterTag('work');
         addFilterTag('work');
 
-        expect(useChatStore.getState().filterTags.filter(t => t === 'work')).toHaveLength(1);
+        expect(
+          useChatStore.getState().filterTags.filter((t) => t === 'work')
+        ).toHaveLength(1);
       });
 
       it('should remove filter tag', () => {
@@ -388,7 +423,8 @@ describe('Chat Store', () => {
 
     describe('clearFilters', () => {
       it('should clear all filters', () => {
-        const { setSearchQuery, addFilterTag, clearFilters } = useChatStore.getState();
+        const { setSearchQuery, addFilterTag, clearFilters } =
+          useChatStore.getState();
 
         setSearchQuery('test');
         addFilterTag('work');
@@ -436,7 +472,8 @@ describe('Chat Store', () => {
   describe('Utility Actions', () => {
     describe('exportConversation', () => {
       it('should export as JSON', () => {
-        const { createConversation, addMessage, exportConversation } = useChatStore.getState();
+        const { createConversation, addMessage, exportConversation } =
+          useChatStore.getState();
 
         const convId = createConversation('Test Chat');
         addMessage(convId, {
@@ -453,7 +490,8 @@ describe('Chat Store', () => {
       });
 
       it('should export as markdown', () => {
-        const { createConversation, addMessage, exportConversation } = useChatStore.getState();
+        const { createConversation, addMessage, exportConversation } =
+          useChatStore.getState();
 
         const convId = createConversation('Test Chat');
         addMessage(convId, {
@@ -470,7 +508,8 @@ describe('Chat Store', () => {
       });
 
       it('should export as plain text', () => {
-        const { createConversation, addMessage, exportConversation } = useChatStore.getState();
+        const { createConversation, addMessage, exportConversation } =
+          useChatStore.getState();
 
         const convId = createConversation('Test Chat');
         addMessage(convId, {
@@ -497,41 +536,47 @@ describe('Chat Store', () => {
       it('should import valid conversations', () => {
         const { importConversations } = useChatStore.getState();
 
-        const conversations: Conversation[] = [{
-          id: 'imported-1',
-          title: 'Imported Chat',
-          messages: [{
-            id: 'msg-1',
-            conversationId: 'imported-1',
-            role: 'user',
-            content: 'Hello',
-            timestamp: new Date(),
-          }],
-          participants: [],
-          model: 'gpt-4',
-          settings: {
-            temperature: 0.7,
-            maxTokens: 2048,
-            topP: 1.0,
-            frequencyPenalty: 0.0,
-            presencePenalty: 0.0,
+        const conversations: Conversation[] = [
+          {
+            id: 'imported-1',
+            title: 'Imported Chat',
+            messages: [
+              {
+                id: 'msg-1',
+                conversationId: 'imported-1',
+                role: 'user',
+                content: 'Hello',
+                timestamp: new Date(),
+              },
+            ],
+            participants: [],
+            model: 'gpt-4',
+            settings: {
+              temperature: 0.7,
+              maxTokens: 2048,
+              topP: 1.0,
+              frequencyPenalty: 0.0,
+              presencePenalty: 0.0,
+            },
+            metadata: {
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              totalMessages: 1,
+              totalTokens: 0,
+              totalCost: 0,
+              tags: [],
+              starred: false,
+              pinned: false,
+              archived: false,
+            },
           },
-          metadata: {
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            totalMessages: 1,
-            totalTokens: 0,
-            totalCost: 0,
-            tags: [],
-            starred: false,
-            pinned: false,
-            archived: false,
-          },
-        }];
+        ];
 
         importConversations(conversations);
 
-        expect(useChatStore.getState().conversations['imported-1']).toBeDefined();
+        expect(
+          useChatStore.getState().conversations['imported-1']
+        ).toBeDefined();
       });
 
       it('should skip invalid conversations', () => {
@@ -540,44 +585,51 @@ describe('Chat Store', () => {
         // @ts-expect-error - testing invalid data
         importConversations([{ invalid: 'data' }]);
 
-        expect(Object.keys(useChatStore.getState().conversations)).toHaveLength(0);
+        expect(Object.keys(useChatStore.getState().conversations)).toHaveLength(
+          0
+        );
       });
 
       it('should skip duplicates', () => {
-        const { createConversation, importConversations } = useChatStore.getState();
+        const { createConversation, importConversations } =
+          useChatStore.getState();
 
         const id = createConversation('Original');
 
-        const conversations: Conversation[] = [{
-          id, // Same ID
-          title: 'Duplicate',
-          messages: [],
-          participants: [],
-          model: 'gpt-4',
-          settings: {
-            temperature: 0.7,
-            maxTokens: 2048,
-            topP: 1.0,
-            frequencyPenalty: 0.0,
-            presencePenalty: 0.0,
+        const conversations: Conversation[] = [
+          {
+            id, // Same ID
+            title: 'Duplicate',
+            messages: [],
+            participants: [],
+            model: 'gpt-4',
+            settings: {
+              temperature: 0.7,
+              maxTokens: 2048,
+              topP: 1.0,
+              frequencyPenalty: 0.0,
+              presencePenalty: 0.0,
+            },
+            metadata: {
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              totalMessages: 0,
+              totalTokens: 0,
+              totalCost: 0,
+              tags: [],
+              starred: false,
+              pinned: false,
+              archived: false,
+            },
           },
-          metadata: {
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            totalMessages: 0,
-            totalTokens: 0,
-            totalCost: 0,
-            tags: [],
-            starred: false,
-            pinned: false,
-            archived: false,
-          },
-        }];
+        ];
 
         importConversations(conversations);
 
         // Title should remain 'Original', not 'Duplicate'
-        expect(useChatStore.getState().conversations[id].title).toBe('Original');
+        expect(useChatStore.getState().conversations[id].title).toBe(
+          'Original'
+        );
       });
 
       it('should set error for non-array input', () => {
@@ -621,62 +673,88 @@ describe('Chat Store', () => {
   describe('Conversation Metadata Actions', () => {
     describe('toggleStarConversation', () => {
       it('should toggle starred status', () => {
-        const { createConversation, toggleStarConversation } = useChatStore.getState();
+        const { createConversation, toggleStarConversation } =
+          useChatStore.getState();
 
         const id = createConversation();
-        expect(useChatStore.getState().conversations[id].metadata.starred).toBe(false);
+        expect(useChatStore.getState().conversations[id].metadata.starred).toBe(
+          false
+        );
 
         toggleStarConversation(id);
-        expect(useChatStore.getState().conversations[id].metadata.starred).toBe(true);
+        expect(useChatStore.getState().conversations[id].metadata.starred).toBe(
+          true
+        );
 
         useChatStore.getState().toggleStarConversation(id);
-        expect(useChatStore.getState().conversations[id].metadata.starred).toBe(false);
+        expect(useChatStore.getState().conversations[id].metadata.starred).toBe(
+          false
+        );
       });
     });
 
     describe('togglePinConversation', () => {
       it('should toggle pinned status', () => {
-        const { createConversation, togglePinConversation } = useChatStore.getState();
+        const { createConversation, togglePinConversation } =
+          useChatStore.getState();
 
         const id = createConversation();
         togglePinConversation(id);
 
-        expect(useChatStore.getState().conversations[id].metadata.pinned).toBe(true);
+        expect(useChatStore.getState().conversations[id].metadata.pinned).toBe(
+          true
+        );
       });
     });
 
     describe('toggleArchiveConversation', () => {
       it('should toggle archived status', () => {
-        const { createConversation, toggleArchiveConversation } = useChatStore.getState();
+        const { createConversation, toggleArchiveConversation } =
+          useChatStore.getState();
 
         const id = createConversation();
         toggleArchiveConversation(id);
 
-        expect(useChatStore.getState().conversations[id].metadata.archived).toBe(true);
+        expect(
+          useChatStore.getState().conversations[id].metadata.archived
+        ).toBe(true);
       });
     });
 
     describe('addConversationTag/removeConversationTag', () => {
       it('should add and remove tags', () => {
-        const { createConversation, addConversationTag, removeConversationTag } = useChatStore.getState();
+        const {
+          createConversation,
+          addConversationTag,
+          removeConversationTag,
+        } = useChatStore.getState();
 
         const id = createConversation();
 
         addConversationTag(id, 'work');
-        expect(useChatStore.getState().conversations[id].metadata.tags).toContain('work');
+        expect(
+          useChatStore.getState().conversations[id].metadata.tags
+        ).toContain('work');
 
         useChatStore.getState().removeConversationTag(id, 'work');
-        expect(useChatStore.getState().conversations[id].metadata.tags).not.toContain('work');
+        expect(
+          useChatStore.getState().conversations[id].metadata.tags
+        ).not.toContain('work');
       });
 
       it('should not add duplicate tags', () => {
-        const { createConversation, addConversationTag } = useChatStore.getState();
+        const { createConversation, addConversationTag } =
+          useChatStore.getState();
 
         const id = createConversation();
         addConversationTag(id, 'work');
         useChatStore.getState().addConversationTag(id, 'work');
 
-        expect(useChatStore.getState().conversations[id].metadata.tags.filter(t => t === 'work')).toHaveLength(1);
+        expect(
+          useChatStore
+            .getState()
+            .conversations[id].metadata.tags.filter((t) => t === 'work')
+        ).toHaveLength(1);
       });
     });
   });
@@ -707,7 +785,9 @@ describe('Chat Store', () => {
         expect(useChatStore.getState().activeEmployees).toContain('employee-2');
 
         useChatStore.getState().deselectEmployee('employee-1');
-        expect(useChatStore.getState().activeEmployees).not.toContain('employee-1');
+        expect(useChatStore.getState().activeEmployees).not.toContain(
+          'employee-1'
+        );
         expect(useChatStore.getState().activeEmployees).toContain('employee-2');
       });
 
@@ -717,7 +797,11 @@ describe('Chat Store', () => {
         selectEmployee('employee-1');
         useChatStore.getState().selectEmployee('employee-1');
 
-        expect(useChatStore.getState().activeEmployees.filter(e => e === 'employee-1')).toHaveLength(1);
+        expect(
+          useChatStore
+            .getState()
+            .activeEmployees.filter((e) => e === 'employee-1')
+        ).toHaveLength(1);
       });
     });
 
@@ -733,8 +817,12 @@ describe('Chat Store', () => {
           totalSteps: 3,
         });
 
-        expect(useChatStore.getState().workingProcesses['employee-1']).toBeDefined();
-        expect(useChatStore.getState().workingProcesses['employee-1'].status).toBe('working');
+        expect(
+          useChatStore.getState().workingProcesses['employee-1']
+        ).toBeDefined();
+        expect(
+          useChatStore.getState().workingProcesses['employee-1'].status
+        ).toBe('working');
       });
     });
 

@@ -141,7 +141,11 @@ describe('API Abuse Prevention Service', () => {
 
         // Should allow up to 30 requests per minute (minus concurrent limit)
         for (let i = 0; i < 10; i++) {
-          const result = await checkApiAbuse(lowCostUser, 'gemini-2.0-flash', 1000);
+          const result = await checkApiAbuse(
+            lowCostUser,
+            'gemini-2.0-flash',
+            1000
+          );
           expect(result.allowed).toBe(true);
           trackRequestStart(lowCostUser, 'gemini-2.0-flash', 250);
           trackRequestEnd(lowCostUser); // End request to allow more concurrent

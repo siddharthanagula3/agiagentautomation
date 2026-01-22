@@ -61,8 +61,7 @@ export interface UserProfileActions {
 }
 
 export interface UserProfileStore
-  extends UserProfileState,
-    UserProfileActions {}
+  extends UserProfileState, UserProfileActions {}
 
 const INITIAL_STATE: UserProfileState = {
   user: null,

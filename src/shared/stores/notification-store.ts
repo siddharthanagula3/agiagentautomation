@@ -139,8 +139,7 @@ export interface NotificationActions {
 }
 
 export interface NotificationStore
-  extends NotificationState,
-    NotificationActions {}
+  extends NotificationState, NotificationActions {}
 
 const DEFAULT_SETTINGS: NotificationState['settings'] = {
   enableDesktopNotifications: true,
@@ -497,9 +496,11 @@ export const useNotificationStore = create<NotificationStore>()(
         playNotificationSound: () => {
           try {
             // Create a simple beep sound
-            const audioContext = new (window.AudioContext ||
+            const audioContext = new (
+              window.AudioContext ||
               (window as { webkitAudioContext?: typeof AudioContext })
-                .webkitAudioContext)();
+                .webkitAudioContext
+            )();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
 

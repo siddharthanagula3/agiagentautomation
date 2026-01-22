@@ -19,8 +19,10 @@ import type { MarketplaceEmployee } from '@shared/types';
  * Extended marketplace employee type for card display
  * Extends the shared MarketplaceEmployee type with required card-specific fields
  */
-export interface AIEmployee
-  extends Omit<MarketplaceEmployee, 'provider' | 'avatar'> {
+export interface AIEmployee extends Omit<
+  MarketplaceEmployee,
+  'provider' | 'avatar'
+> {
   provider: 'claude' | 'gpt4' | 'gemini';
   avatar: string;
   popular: boolean;

@@ -245,9 +245,8 @@ export class VibeExecutionCoordinator {
     // which loads file-based employees with system prompts
     try {
       // Import prompt management service dynamically to avoid circular dependencies
-      const { systemPromptsService } = await import(
-        '@core/ai/employees/prompt-management'
-      );
+      const { systemPromptsService } =
+        await import('@core/ai/employees/prompt-management');
 
       // employeeId here is actually the employee name (from task assignment)
       const employee = await systemPromptsService.getEmployeeByName(employeeId);

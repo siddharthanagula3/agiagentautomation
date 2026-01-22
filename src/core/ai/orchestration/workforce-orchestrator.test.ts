@@ -81,12 +81,10 @@ describe('WorkforceOrchestrator', () => {
     orchestrator = new WorkforceOrchestratorRefactored();
 
     // Import mocked modules
-    const { unifiedLLMService } = await import(
-      '@core/ai/llm/unified-language-model'
-    );
-    const { systemPromptsService } = await import(
-      '@core/ai/employees/prompt-management'
-    );
+    const { unifiedLLMService } =
+      await import('@core/ai/llm/unified-language-model');
+    const { systemPromptsService } =
+      await import('@core/ai/employees/prompt-management');
 
     mockLLMService = unifiedLLMService;
     mockPromptService = systemPromptsService;
@@ -344,9 +342,8 @@ describe('WorkforceOrchestrator', () => {
     let mockConversationProtocol: typeof import('./agent-conversation-protocol').agentConversationProtocol;
 
     beforeEach(async () => {
-      const { agentConversationProtocol } = await import(
-        './agent-conversation-protocol'
-      );
+      const { agentConversationProtocol } =
+        await import('./agent-conversation-protocol');
       mockConversationProtocol = agentConversationProtocol;
     });
 

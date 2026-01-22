@@ -212,8 +212,10 @@ function handlePaymentRequired(): void {
 import type { ApiError, ApiResponse as SharedApiResponse } from '@shared/types';
 
 // Extended API response type for query client with pagination meta
-export interface APIResponse<T = unknown>
-  extends Omit<SharedApiResponse<T>, 'data'> {
+export interface APIResponse<T = unknown> extends Omit<
+  SharedApiResponse<T>,
+  'data'
+> {
   data: T;
   errors?: string[];
   meta?: {

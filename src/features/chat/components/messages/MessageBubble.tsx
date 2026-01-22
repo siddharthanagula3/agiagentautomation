@@ -407,7 +407,7 @@ export const MessageBubble = React.memo(function MessageBubble({
             </div>
           )}
 
-          {/* Image Result */}
+          {/* Image Result with Error Handling */}
           {!isUser &&
             message.metadata?.toolType === 'image-generation' &&
             message.metadata?.imageUrl && (
@@ -415,8 +415,17 @@ export const MessageBubble = React.memo(function MessageBubble({
                 <div className="overflow-hidden rounded-xl border border-border">
                   <img
                     src={message.metadata.imageUrl}
-                    alt="Generated"
+                    alt="Generated image"
                     className="max-h-96 w-auto"
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      target.style.display = 'none';
+                      const errorDiv = document.createElement('div');
+                      errorDiv.className = 'flex items-center justify-center p-8 bg-muted/50 text-muted-foreground';
+                      errorDiv.innerHTML = '<span class="text-sm">⚠️ Image failed to load</span>';
+                      target.parentNode?.appendChild(errorDiv);
+                    }}
                   />
                 </div>
                 <div className="mt-2 flex gap-2">
@@ -435,7 +444,7 @@ export const MessageBubble = React.memo(function MessageBubble({
               </div>
             )}
 
-          {/* Video Result */}
+          {/* Video Result with Error Handling */}
           {!isUser &&
             message.metadata?.toolType === 'video-generation' &&
             message.metadata?.videoUrl && (
@@ -445,6 +454,14 @@ export const MessageBubble = React.memo(function MessageBubble({
                   controls
                   className="max-h-96 rounded-xl"
                   poster={message.metadata.thumbnailUrl}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.style.display = 'none';
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'flex items-center justify-center p-8 bg-muted/50 text-muted-foreground rounded-xl';
+                    errorDiv.innerHTML = '<span class="text-sm">⚠️ Video failed to load</span>';
+                    target.parentNode?.appendChild(errorDiv);
+                  }}
                 />
               </div>
             )}

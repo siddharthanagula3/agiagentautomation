@@ -43,40 +43,39 @@ const enableDevtools = import.meta.env.MODE !== 'production';
 
 export const useUsageWarningStore = create<UsageWarningState>()(
   devtools(
-    immer(
-      persist(
-        (set, get) => ({
-          hasShown85Warning: false,
-          hasShown95Warning: false,
-          lastWarningTime: null,
-          currentUsage: 0,
-          totalLimit: 50000, // Default: 50K tokens for free tier
-          usagePercentage: 0,
+    persist(
+      immer((set, get) => ({
+        hasShown85Warning: false,
+        hasShown95Warning: false,
+        lastWarningTime: null,
+        currentUsage: 0,
+        totalLimit: 50000, // Default: 50K tokens for free tier
+        usagePercentage: 0,
 
-          updateUsage: (used: number, limit: number) => {
-            const percentage = (used / limit) * 100;
+        updateUsage: (used: number, limit: number) => {
+          const percentage = (used / limit) * 100;
 
-            set({
-              currentUsage: used,
-              totalLimit: limit,
-              usagePercentage: percentage,
-            });
-          },
+          set({
+            currentUsage: used,
+            totalLimit: limit,
+            usagePercentage: percentage,
+          });
+        },
 
-          markWarningShown: (threshold: 85 | 95) => {
-            set({
-              [threshold === 85 ? 'hasShown85Warning' : 'hasShown95Warning']:
-                true,
-              lastWarningTime: Date.now(),
-            });
-          },
+        markWarningShown: (threshold: 85 | 95) => {
+          set({
+            [threshold === 85 ? 'hasShown85Warning' : 'hasShown95Warning']:
+              true,
+            lastWarningTime: Date.now(),
+          });
+        },
 
-          shouldShowWarning: (threshold: 85 | 95) => {
-            const state = get();
-            const hasShown =
-              threshold === 85
-                ? state.hasShown85Warning
-                : state.hasShown95Warning;
+        shouldShowWarning: (threshold: 85 | 95) => {
+          const state = get();
+          const hasShown =
+            threshold === 85
+              ? state.hasShown85Warning
+              : state.hasShown95Warning;
 
             // Show warning if:
             // 1. Usage >= threshold
@@ -110,16 +109,15 @@ export const useUsageWarningStore = create<UsageWarningState>()(
           reset: () => {
             set(() => ({ ...initialState }));
           },
+        })),
+      {
+        name: 'usage-warning-storage',
+        partialize: (state) => ({
+          hasShown85Warning: state.hasShown85Warning,
+          hasShown95Warning: state.hasShown95Warning,
+          lastWarningTime: state.lastWarningTime,
         }),
-        {
-          name: 'usage-warning-storage',
-          partialize: (state) => ({
-            hasShown85Warning: state.hasShown85Warning,
-            hasShown95Warning: state.hasShown95Warning,
-            lastWarningTime: state.lastWarningTime,
-          }),
-        }
-      )
+      }
     ),
     { name: 'UsageWarningStore', enabled: enableDevtools }
   )

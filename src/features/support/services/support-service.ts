@@ -284,17 +284,51 @@ class SupportService {
   }
 
   /**
-   * Send ticket notification email (stub for now)
+   * Send ticket notification email via Netlify function
    */
   private async sendTicketNotification(
     email: string,
-    ticketId: string
+    ticketId: string,
+    type: 'ticket_created' | 'ticket_reply' | 'ticket_status_change' = 'ticket_created',
+    message?: string,
+    recipientName?: string
   ): Promise<void> {
-    // TODO: Implement email notification via Netlify function
-    // or third-party service (SendGrid, Resend, etc.)
-    console.log(
-      `Ticket notification would be sent to ${email} for ticket ${ticketId}`
-    );
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      // Auth header is required by backend - throw early if no session
+      if (!session?.access_token) {
+        console.warn('Cannot send email notification: No active session');
+        return;
+      }
+
+      const response = await fetch('/.netlify/functions/utilities/send-email-notification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          type,
+          ticketId,
+          recipientEmail: email,
+          recipientName,
+          message,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Failed to send email notification:', error);
+      } else {
+        console.log(`Email notification sent to ${email} for ticket ${ticketId}`);
+      }
+    } catch (error) {
+      // Non-critical error - log but don't throw
+      console.error('Error sending email notification:', error);
+    }
   }
 }
 

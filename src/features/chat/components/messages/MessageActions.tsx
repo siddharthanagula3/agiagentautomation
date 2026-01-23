@@ -113,8 +113,7 @@ export function MessageActions({
           )}
         </Button>
 
-        {/* Reaction Buttons - HIDDEN (not implemented yet) */}
-        {/* TODO: Implement reaction system before enabling
+        {/* Reaction Buttons for AI responses */}
         {!isUser && onReact && (
           <>
             <Button
@@ -122,7 +121,7 @@ export function MessageActions({
               size="sm"
               onClick={() => onReact(messageId, 'up')}
               className={cn(
-                'h-7 w-7 p-0',
+                'h-7 w-7 p-0 transition-colors',
                 hasUpvote && 'bg-green-100 text-green-600 dark:bg-green-900/20'
               )}
               title="Good response"
@@ -135,7 +134,7 @@ export function MessageActions({
               size="sm"
               onClick={() => onReact(messageId, 'down')}
               className={cn(
-                'h-7 w-7 p-0',
+                'h-7 w-7 p-0 transition-colors',
                 hasDownvote && 'bg-red-100 text-red-600 dark:bg-red-900/20'
               )}
               title="Bad response"
@@ -144,7 +143,6 @@ export function MessageActions({
             </Button>
           </>
         )}
-        */}
       </div>
 
       {/* More Actions Menu */}
@@ -223,8 +221,7 @@ export function MessageActions({
             </DropdownMenuItem>
           )}
 
-          {/* Mark as helpful - HIDDEN (not implemented yet) */}
-          {/* TODO: Implement reaction system before enabling
+          {/* Mark as helpful */}
           {!isUser && onReact && (
             <DropdownMenuItem
               onClick={() => {
@@ -234,10 +231,9 @@ export function MessageActions({
               className={cn(hasHelpful && 'bg-blue-50 dark:bg-blue-900/20')}
             >
               <ThumbsUp className="mr-2 h-4 w-4" />
-              Mark as helpful
+              {hasHelpful ? 'Marked as helpful' : 'Mark as helpful'}
             </DropdownMenuItem>
           )}
-          */}
 
           {/* Delete */}
           {onDelete && (

@@ -28,6 +28,10 @@ class AnalyticsService {
   private pageViews: PageView[] = [];
   private events: AnalyticsEvent[] = [];
 
+  // Store bound handlers for proper cleanup
+  private handleVisibilityChange: (() => void) | null = null;
+  private handleBeforeUnload: (() => void) | null = null;
+
   constructor() {
     this.sessionStartTime = Date.now();
   }
@@ -54,29 +58,54 @@ class AnalyticsService {
       },
     });
 
-    // Track page visibility changes
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        this.trackEvent('page_hidden', {
-          sessionDuration: Date.now() - this.sessionStartTime,
-        });
-      } else {
-        this.trackEvent('page_visible', {
-          sessionDuration: Date.now() - this.sessionStartTime,
-        });
+    // Track page visibility changes - store handler for cleanup
+    this.handleVisibilityChange = () => {
+      if (typeof document !== 'undefined') {
+        if (document.hidden) {
+          this.trackEvent('page_hidden', {
+            sessionDuration: Date.now() - this.sessionStartTime,
+          });
+        } else {
+          this.trackEvent('page_visible', {
+            sessionDuration: Date.now() - this.sessionStartTime,
+          });
+        }
       }
-    });
+    };
 
-    // Track before unload
-    window.addEventListener('beforeunload', () => {
+    // Track before unload - store handler for cleanup
+    this.handleBeforeUnload = () => {
       this.trackEvent('session_end', {
         sessionDuration: Date.now() - this.sessionStartTime,
         pageViews: this.pageViews.length,
         events: this.events.length,
       });
-    });
+    };
+
+    // Only add listeners in browser environment
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', this.handleVisibilityChange);
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', this.handleBeforeUnload);
+    }
 
     this.isInitialized = true;
+  }
+
+  /**
+   * Cleanup event listeners and resources
+   */
+  destroy(): void {
+    if (this.handleVisibilityChange && typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+      this.handleVisibilityChange = null;
+    }
+    if (this.handleBeforeUnload && typeof window !== 'undefined') {
+      window.removeEventListener('beforeunload', this.handleBeforeUnload);
+      this.handleBeforeUnload = null;
+    }
+    this.isInitialized = false;
   }
 
   private initializeGoogleAnalytics(): void {

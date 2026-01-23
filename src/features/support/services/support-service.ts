@@ -326,8 +326,15 @@ class SupportService {
       );
 
       if (!response.ok) {
-        const error = await response.json();
-        console.error('Failed to send email notification:', error);
+        try {
+          const error = await response.json();
+          console.error('Failed to send email notification:', error);
+        } catch {
+          console.error(
+            'Failed to send email notification: HTTP',
+            response.status
+          );
+        }
       } else {
         console.log(
           `Email notification sent to ${email} for ticket ${ticketId}`

@@ -412,7 +412,13 @@ export async function streamOpenAI(
     );
   }
 
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (parseError) {
+    console.error('[OpenAI Proxy] Failed to parse response JSON:', parseError);
+    throw new Error('Invalid response from OpenAI proxy');
+  }
   const content = data.choices?.[0]?.message?.content || data.content;
 
   if (content) {
@@ -521,7 +527,16 @@ export async function streamAnthropic(
     );
   }
 
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (parseError) {
+    console.error(
+      '[Anthropic Proxy] Failed to parse response JSON:',
+      parseError
+    );
+    throw new Error('Invalid response from Anthropic proxy');
+  }
   const content = data.content?.[0]?.text || data.content || data.output_text;
 
   if (content) {
@@ -629,7 +644,13 @@ export async function streamGoogle(
     );
   }
 
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (parseError) {
+    console.error('[Google Proxy] Failed to parse response JSON:', parseError);
+    throw new Error('Invalid response from Google proxy');
+  }
   const content =
     data.candidates?.[0]?.content?.parts?.[0]?.text || data.content;
 
@@ -730,7 +751,16 @@ export async function streamPerplexity(
     );
   }
 
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (parseError) {
+    console.error(
+      '[Perplexity Proxy] Failed to parse response JSON:',
+      parseError
+    );
+    throw new Error('Invalid response from Perplexity proxy');
+  }
   const content = data.choices?.[0]?.message?.content || data.content;
 
   if (content) {

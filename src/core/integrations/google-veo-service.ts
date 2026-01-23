@@ -259,7 +259,16 @@ export class GoogleVeoService {
       );
     }
 
-    const data = await apiResponse.json();
+    let data;
+    try {
+      data = await apiResponse.json();
+    } catch {
+      throw this.createError(
+        'PARSE_ERROR',
+        'Failed to parse video generation response',
+        {}
+      );
+    }
     response.operationName = data.name || data.operationName || '';
 
     // Poll for completion through proxy
@@ -298,7 +307,16 @@ export class GoogleVeoService {
         );
       }
 
-      const operationData = await pollResponse.json();
+      let operationData;
+      try {
+        operationData = await pollResponse.json();
+      } catch {
+        throw this.createError(
+          'PARSE_ERROR',
+          'Failed to parse polling response',
+          {}
+        );
+      }
 
       // Update progress
       const progress = Math.min(

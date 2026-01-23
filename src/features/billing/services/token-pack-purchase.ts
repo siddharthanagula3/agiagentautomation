@@ -68,11 +68,22 @@ export async function buyTokenPack(params: BuyTokenPackParams): Promise<void> {
     );
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to create checkout session');
+      let errorMessage = 'Failed to create checkout session';
+      try {
+        const error = await response.json();
+        errorMessage = error.error || errorMessage;
+      } catch {
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error('Invalid response from server');
+    }
 
     console.log(
       '[Buy Token Pack] ✅ Checkout session created:',

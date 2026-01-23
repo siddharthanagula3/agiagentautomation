@@ -439,7 +439,12 @@ export class ToolsExecutionService {
             bytesRead: content.length,
           };
         } else {
-          const errorText = await response.text();
+          let errorText = response.statusText;
+          try {
+            errorText = await response.text();
+          } catch {
+            // Use status text as fallback
+          }
           return {
             success: false,
             error: `Failed to fetch URL: ${response.status} - ${errorText}`,

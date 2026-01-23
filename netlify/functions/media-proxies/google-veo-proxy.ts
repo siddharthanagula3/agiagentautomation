@@ -51,8 +51,8 @@ async function handleGenerateRequest(
   headers: Record<string, string>;
   body: string;
 }> {
-  // Get API key from environment
-  const GOOGLE_API_KEY = process.env.VITE_GOOGLE_API_KEY;
+  // Get API key from environment (server-side only - no VITE_ prefix)
+  const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
   if (!GOOGLE_API_KEY) {
     console.error('[Google Veo Proxy] API key not configured');
@@ -264,25 +264,32 @@ async function handleGenerateRequest(
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Store pending operation
-    await supabaseAdmin.from('media_generation_operations').insert({
-      user_id: authenticatedUserId,
-      provider: 'google',
-      model,
-      type: 'video',
-      operation_name: data.name,
-      status: 'pending',
-      parameters: {
-        prompt,
-        durationSeconds,
-        aspectRatio,
-        hasReferenceImage: !!referenceImage,
-      },
-      estimated_cost: VEO_PRICING[model as keyof typeof VEO_PRICING] * durationSeconds,
-      created_at: new Date().toISOString(),
-    }).catch(err => {
-      console.warn('[Google Veo Proxy] Failed to store operation:', err);
-    });
+    // Store pending operation with proper error handling
+    try {
+      const { error: insertError } = await supabaseAdmin.from('media_generation_operations').insert({
+        user_id: authenticatedUserId,
+        provider: 'google',
+        model,
+        type: 'video',
+        operation_name: data.name,
+        status: 'pending',
+        parameters: {
+          prompt,
+          durationSeconds,
+          aspectRatio,
+          hasReferenceImage: !!referenceImage,
+        },
+        estimated_cost: VEO_PRICING[model as keyof typeof VEO_PRICING] * durationSeconds,
+        created_at: new Date().toISOString(),
+      });
+
+      if (insertError) {
+        console.warn('[Google Veo Proxy] Failed to store operation (non-blocking):', insertError);
+      }
+    } catch (dbError) {
+      // Non-blocking: operation tracking is supplementary, not critical for video generation
+      console.warn('[Google Veo Proxy] Database operation failed (non-blocking):', dbError);
+    }
   }
 
   return {
@@ -311,8 +318,8 @@ async function handlePollRequest(
   headers: Record<string, string>;
   body: string;
 }> {
-  // Get API key from environment
-  const GOOGLE_API_KEY = process.env.VITE_GOOGLE_API_KEY;
+  // Get API key from environment (server-side only - no VITE_ prefix)
+  const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
   if (!GOOGLE_API_KEY) {
     console.error('[Google Veo Proxy] API key not configured');
@@ -467,47 +474,69 @@ async function handlePollRequest(
         console.log('[Google Veo Proxy] Token deduction successful. New balance:', newBalance);
       }
 
-      // Update operation status
-      await supabaseAdmin
-        .from('media_generation_operations')
-        .update({
-          status: 'completed',
-          completed_at: new Date().toISOString(),
-          actual_cost: actualCost,
-        })
-        .eq('operation_name', operationName);
+      // Update operation status with proper error handling
+      try {
+        const { error: updateError } = await supabaseAdmin
+          .from('media_generation_operations')
+          .update({
+            status: 'completed',
+            completed_at: new Date().toISOString(),
+            actual_cost: actualCost,
+          })
+          .eq('operation_name', operationName);
 
-      // Log usage
-      await supabaseAdmin.from('media_generation_usage').insert({
-        user_id: authenticatedUserId,
-        provider: 'google',
-        model: operationData.model,
-        type: 'video',
-        prompt_length: operationData.parameters?.prompt?.length || 0,
-        videos_generated: 1,
-        duration_seconds: operationData.parameters?.durationSeconds || 0,
-        parameters: operationData.parameters,
-        cost: actualCost,
-        created_at: new Date().toISOString(),
-      }).catch(err => {
-        console.warn('[Google Veo Proxy] Failed to log usage:', err);
-      });
+        if (updateError) {
+          console.warn('[Google Veo Proxy] Failed to update operation status:', updateError);
+        }
+      } catch (updateDbError) {
+        console.warn('[Google Veo Proxy] Database update failed (non-blocking):', updateDbError);
+      }
+
+      // Log usage with proper error handling
+      try {
+        const { error: usageError } = await supabaseAdmin.from('media_generation_usage').insert({
+          user_id: authenticatedUserId,
+          provider: 'google',
+          model: operationData.model,
+          type: 'video',
+          prompt_length: operationData.parameters?.prompt?.length || 0,
+          videos_generated: 1,
+          duration_seconds: operationData.parameters?.durationSeconds || 0,
+          parameters: operationData.parameters,
+          cost: actualCost,
+          created_at: new Date().toISOString(),
+        });
+
+        if (usageError) {
+          console.warn('[Google Veo Proxy] Failed to log usage:', usageError);
+        }
+      } catch (usageDbError) {
+        console.warn('[Google Veo Proxy] Usage logging failed (non-blocking):', usageDbError);
+      }
     }
   } else if (isDone && data.error) {
     // Operation failed - update database without charging
     const supabaseAdmin = createClient(
-      process.env.VITE_SUPABASE_URL!,
+      process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    await supabaseAdmin
-      .from('media_generation_operations')
-      .update({
-        status: 'failed',
-        error_message: data.error.message || 'Unknown error',
-        completed_at: new Date().toISOString(),
-      })
-      .eq('operation_name', operationName);
+    try {
+      const { error: failUpdateError } = await supabaseAdmin
+        .from('media_generation_operations')
+        .update({
+          status: 'failed',
+          error_message: data.error.message || 'Unknown error',
+          completed_at: new Date().toISOString(),
+        })
+        .eq('operation_name', operationName);
+
+      if (failUpdateError) {
+        console.warn('[Google Veo Proxy] Failed to update failed operation status:', failUpdateError);
+      }
+    } catch (failDbError) {
+      console.warn('[Google Veo Proxy] Failed operation update failed (non-blocking):', failDbError);
+    }
   }
 
   // Build response

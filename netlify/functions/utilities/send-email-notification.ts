@@ -16,15 +16,27 @@ import {
 import { withAuth } from '../utils/auth-middleware';
 import { withRateLimitTier } from '../utils/rate-limiter';
 
-// Initialize Supabase
+// Initialize Supabase - defer client creation to runtime to allow graceful error handling
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('Missing required Supabase environment variables');
+function getSupabaseClient() {
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing required Supabase environment variables: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
+  }
+  return createClient(supabaseUrl, supabaseServiceKey);
 }
 
-const supabase = createClient(supabaseUrl || '', supabaseServiceKey || '');
+// Lazy-initialized supabase client (only created when actually needed)
+let _supabase: ReturnType<typeof createClient> | null = null;
+const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+  get(_, prop) {
+    if (!_supabase) {
+      _supabase = getSupabaseClient();
+    }
+    return (_supabase as Record<string, unknown>)[prop as string];
+  },
+});
 
 // Email provider configuration
 const RESEND_API_KEY = process.env.RESEND_API_KEY;

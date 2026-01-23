@@ -117,7 +117,9 @@ export class WorkforceOrchestratorRefactored {
         if (this.employees.length > 0) {
           this.employeesLoaded = true;
         } else {
-          console.warn('[Workforce Orchestrator] No employees loaded from .agi/employees/');
+          console.warn(
+            '[Workforce Orchestrator] No employees loaded from .agi/employees/'
+          );
         }
       }
 
@@ -162,7 +164,6 @@ export class WorkforceOrchestratorRefactored {
           'Could not create an execution plan for your request. Please try again or rephrase your request.'
         );
       }
-
 
       // Convert to Task objects
       const tasks: Task[] = plan.plan.map((planTask, index) => ({
@@ -441,7 +442,6 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
             );
             return null;
           }
-
         }
       } catch (error) {
         console.error('Error fetching hired employees:', error);
@@ -657,7 +657,6 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
         content: `⏸️ ${skippedTasks.length} task(s) skipped due to mission pause`,
       });
     }
-
   }
 
   /**
@@ -1001,7 +1000,9 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
 
       // Fallback: if no match, select first employee
       if (selectedEmployees.length === 0 && this.employees.length > 0) {
-        console.warn('[Workforce Orchestrator] Auto-select failed, using default employee');
+        console.warn(
+          '[Workforce Orchestrator] Auto-select failed, using default employee'
+        );
         return [this.employees[0]];
       }
 

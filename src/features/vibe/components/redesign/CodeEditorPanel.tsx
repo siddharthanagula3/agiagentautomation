@@ -68,7 +68,10 @@ function EditorLoadingFallback() {
     <div className="flex h-full w-full flex-col items-center justify-center bg-muted/20">
       <div className="flex flex-col items-center gap-4 text-muted-foreground">
         <div className="relative">
-          <Code className="h-12 w-12 text-muted-foreground/40" aria-hidden="true" />
+          <Code
+            className="h-12 w-12 text-muted-foreground/40"
+            aria-hidden="true"
+          />
           <Loader2
             className="absolute -right-1 -top-1 h-5 w-5 animate-spin text-primary"
             aria-hidden="true"

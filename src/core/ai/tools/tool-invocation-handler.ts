@@ -647,7 +647,10 @@ class ToolInvocationService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error instanceof Error ? error.message : String(error) };
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 
@@ -663,7 +666,10 @@ class ToolInvocationService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error instanceof Error ? error.message : String(error) };
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 
@@ -680,7 +686,10 @@ class ToolInvocationService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error instanceof Error ? error.message : String(error) };
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 
@@ -697,7 +706,10 @@ class ToolInvocationService {
       if (error) throw error;
       return { data, error: null };
     } catch (error: unknown) {
-      return { data: null, error: error instanceof Error ? error.message : String(error) };
+      return {
+        data: null,
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 }

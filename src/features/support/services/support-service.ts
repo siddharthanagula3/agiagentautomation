@@ -289,7 +289,10 @@ class SupportService {
   private async sendTicketNotification(
     email: string,
     ticketId: string,
-    type: 'ticket_created' | 'ticket_reply' | 'ticket_status_change' = 'ticket_created',
+    type:
+      | 'ticket_created'
+      | 'ticket_reply'
+      | 'ticket_status_change' = 'ticket_created',
     message?: string,
     recipientName?: string
   ): Promise<void> {
@@ -304,26 +307,31 @@ class SupportService {
         return;
       }
 
-      const response = await fetch('/.netlify/functions/utilities/send-email-notification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          type,
-          ticketId,
-          recipientEmail: email,
-          recipientName,
-          message,
-        }),
-      });
+      const response = await fetch(
+        '/.netlify/functions/utilities/send-email-notification',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            type,
+            ticketId,
+            recipientEmail: email,
+            recipientName,
+            message,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
         console.error('Failed to send email notification:', error);
       } else {
-        console.log(`Email notification sent to ${email} for ticket ${ticketId}`);
+        console.log(
+          `Email notification sent to ${email} for ticket ${ticketId}`
+        );
       }
     } catch (error) {
       // Non-critical error - log but don't throw

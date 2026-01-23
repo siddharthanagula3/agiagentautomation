@@ -119,7 +119,10 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
       timeoutRefs.current.forEach(clearTimeout);
       timeoutRefs.current.clear();
       // Stop any ongoing recording
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state === 'recording'
+      ) {
         mediaRecorderRef.current.stop();
       }
     };
@@ -268,14 +271,19 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
   const handleVoiceToggle = useCallback(async () => {
     if (isRecording) {
       // Stop recording
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state === 'recording'
+      ) {
         mediaRecorderRef.current.stop();
       }
       setIsRecording(false);
     } else {
       // Start recording
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
         const mediaRecorder = new MediaRecorder(stream, {
           mimeType: MediaRecorder.isTypeSupported('audio/webm')
             ? 'audio/webm'

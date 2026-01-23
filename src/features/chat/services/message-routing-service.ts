@@ -564,7 +564,6 @@ export class MessageRoutingService {
         this.deliveryAttempts.delete(messageId);
       }
     }
-
   }
 
   /**

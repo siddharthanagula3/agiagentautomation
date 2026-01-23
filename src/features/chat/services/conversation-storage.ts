@@ -85,8 +85,8 @@ export class ChatPersistenceService {
         | { count: number }
         | undefined;
       const messageCount = Array.isArray(chatMessages)
-        ? chatMessages[0]?.count ?? 0
-        : chatMessages?.count ?? 0;
+        ? (chatMessages[0]?.count ?? 0)
+        : (chatMessages?.count ?? 0);
 
       // Remove the nested chat_messages from the session object before mapping
       const { chat_messages: _, ...sessionData } = session;

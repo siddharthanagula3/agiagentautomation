@@ -77,39 +77,39 @@ export const useUsageWarningStore = create<UsageWarningState>()(
               ? state.hasShown85Warning
               : state.hasShown95Warning;
 
-            // Show warning if:
-            // 1. Usage >= threshold
-            // 2. Warning hasn't been shown yet this session
-            // 3. Or it's been more than 1 hour since last warning
-            const oneHourAgo = Date.now() - 60 * 60 * 1000;
-            const canShowAgain =
-              !state.lastWarningTime || state.lastWarningTime < oneHourAgo;
+          // Show warning if:
+          // 1. Usage >= threshold
+          // 2. Warning hasn't been shown yet this session
+          // 3. Or it's been more than 1 hour since last warning
+          const oneHourAgo = Date.now() - 60 * 60 * 1000;
+          const canShowAgain =
+            !state.lastWarningTime || state.lastWarningTime < oneHourAgo;
 
-            return (
-              state.usagePercentage >= threshold && (!hasShown || canShowAgain)
-            );
-          },
+          return (
+            state.usagePercentage >= threshold && (!hasShown || canShowAgain)
+          );
+        },
 
-          resetWarnings: () => {
-            set({
-              hasShown85Warning: false,
-              hasShown95Warning: false,
-              lastWarningTime: null,
-            });
-          },
+        resetWarnings: () => {
+          set({
+            hasShown85Warning: false,
+            hasShown95Warning: false,
+            lastWarningTime: null,
+          });
+        },
 
-          getDismissedWarnings: () => {
-            const state = get();
-            return {
-              '85': state.hasShown85Warning,
-              '95': state.hasShown95Warning,
-            };
-          },
+        getDismissedWarnings: () => {
+          const state = get();
+          return {
+            '85': state.hasShown85Warning,
+            '95': state.hasShown95Warning,
+          };
+        },
 
-          reset: () => {
-            set(() => ({ ...initialState }));
-          },
-        })),
+        reset: () => {
+          set(() => ({ ...initialState }));
+        },
+      })),
       {
         name: 'usage-warning-storage',
         partialize: (state) => ({

@@ -84,7 +84,9 @@ async function cleanupAllStores(): Promise<void> {
     } else if (typeof artifactState.reset === 'function') {
       artifactState.reset();
     } else {
-      logger.auth('Warning: Artifact store has no clearAllArtifacts or reset method');
+      logger.auth(
+        'Warning: Artifact store has no clearAllArtifacts or reset method'
+      );
     }
 
     // Layout store cleanup (prevents data leaks between users)

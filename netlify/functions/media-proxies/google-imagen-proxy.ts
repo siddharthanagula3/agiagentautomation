@@ -66,8 +66,8 @@ const googleImagenHandler: Handler = async (event: AuthenticatedEvent) => {
     };
   }
 
-  // Get API key from environment
-  const GOOGLE_API_KEY = process.env.VITE_GOOGLE_API_KEY;
+  // Get API key from environment (server-side only - no VITE_ prefix)
+  const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
   if (!GOOGLE_API_KEY) {
     console.error('[Google Imagen Proxy] API key not configured');

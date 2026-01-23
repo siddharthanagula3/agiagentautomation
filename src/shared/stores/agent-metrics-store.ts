@@ -129,192 +129,180 @@ const enableDevtools = import.meta.env.MODE !== 'production';
 export const useAgentMetricsStore = create<AgentMetricsState>()(
   devtools(
     persist(
-      immer(
-        (set, get) => ({
-          ...initialState,
-          isBackgroundServiceRunning: false,
+      immer((set, get) => ({
+        ...initialState,
+        isBackgroundServiceRunning: false,
 
-          startSession: (sessionData) => {
-            const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-            const now = new Date();
+        startSession: (sessionData) => {
+          const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          const now = new Date();
 
-            const newSession: ChatSession = {
-              ...sessionData,
-              id: sessionId,
-              startTime: now,
-              lastActivity: now,
-              isActive: true,
-              status: 'in_progress',
-              messagesCount: 0,
-              tokensUsed: 0,
-            };
+          const newSession: ChatSession = {
+            ...sessionData,
+            id: sessionId,
+            startTime: now,
+            lastActivity: now,
+            isActive: true,
+            status: 'in_progress',
+            messagesCount: 0,
+            tokensUsed: 0,
+          };
+
+          set((state) => ({
+            totalSessions: state.totalSessions + 1,
+            activeSessions: state.activeSessions + 1,
+            currentSessions: [...state.currentSessions, newSession],
+          }));
+
+          get().addActivity({
+            type: 'session_start',
+            message: `Started new task: ${sessionData.taskDescription}`,
+          });
+
+          return sessionId;
+        },
+
+        updateSession: (sessionId, updates) => {
+          set((state) => ({
+            currentSessions: state.currentSessions.map((session) =>
+              session.id === sessionId
+                ? { ...session, ...updates, lastActivity: new Date() }
+                : session
+            ),
+          }));
+        },
+
+        endSession: (sessionId, status, result) => {
+          const session = get().currentSessions.find((s) => s.id === sessionId);
+
+          if (session) {
+            const duration = Date.now() - session.startTime.getTime();
 
             set((state) => ({
-              totalSessions: state.totalSessions + 1,
-              activeSessions: state.activeSessions + 1,
-              currentSessions: [...state.currentSessions, newSession],
-            }));
-
-            get().addActivity({
-              type: 'session_start',
-              message: `Started new task: ${sessionData.taskDescription}`,
-            });
-
-            return sessionId;
-          },
-
-          updateSession: (sessionId, updates) => {
-            set((state) => ({
-              currentSessions: state.currentSessions.map((session) =>
-                session.id === sessionId
-                  ? { ...session, ...updates, lastActivity: new Date() }
-                  : session
+              currentSessions: state.currentSessions.map((s) =>
+                s.id === sessionId
+                  ? { ...s, isActive: false, status, result }
+                  : s
               ),
-            }));
-          },
-
-          endSession: (sessionId, status, result) => {
-            const session = get().currentSessions.find(
-              (s) => s.id === sessionId
-            );
-
-            if (session) {
-              const duration = Date.now() - session.startTime.getTime();
-
-              set((state) => ({
-                currentSessions: state.currentSessions.map((s) =>
-                  s.id === sessionId
-                    ? { ...s, isActive: false, status, result }
-                    : s
-                ),
-                activeSessions: state.activeSessions - 1,
-                completedTasks:
-                  status === 'completed'
-                    ? state.completedTasks + 1
-                    : state.completedTasks,
-                failedTasks:
-                  status === 'failed'
-                    ? state.failedTasks + 1
-                    : state.failedTasks,
-                averageTaskDuration:
-                  state.completedTasks > 0
-                    ? (state.averageTaskDuration * state.completedTasks +
-                        duration) /
-                      (state.completedTasks + 1)
-                    : duration,
-              }));
-
-              get().addActivity({
-                type: status === 'completed' ? 'task_complete' : 'task_failed',
-                message:
-                  status === 'completed'
-                    ? `Completed task: ${session.taskDescription}`
-                    : `Failed task: ${session.taskDescription}`,
-              });
-            }
-          },
-
-          updateAgentStatus: (agentName, status) => {
-            set((state) => {
-              const newStatuses = {
-                ...state.agentStatuses,
-                [agentName]: status,
-              };
-
-              // Count active vs idle agents
-              let activeCount = 0;
-              let idleCount = 0;
-
-              Object.values(newStatuses).forEach((s) => {
-                if (s.status === 'working' || s.status === 'analyzing') {
-                  activeCount++;
-                } else if (s.status === 'idle') {
-                  idleCount++;
-                }
-              });
-
-              return {
-                agentStatuses: newStatuses,
-                totalAgents: Object.keys(newStatuses).length,
-                activeAgents: activeCount,
-                idleAgents: idleCount,
-              };
-            });
-          },
-
-          addCommunication: (communication) => {
-            set((state) => ({
-              agentCommunications: [
-                ...state.agentCommunications,
-                communication,
-              ],
-              totalMessagesExchanged: state.totalMessagesExchanged + 1,
+              activeSessions: state.activeSessions - 1,
+              completedTasks:
+                status === 'completed'
+                  ? state.completedTasks + 1
+                  : state.completedTasks,
+              failedTasks:
+                status === 'failed' ? state.failedTasks + 1 : state.failedTasks,
+              averageTaskDuration:
+                state.completedTasks > 0
+                  ? (state.averageTaskDuration * state.completedTasks +
+                      duration) /
+                    (state.completedTasks + 1)
+                  : duration,
             }));
 
             get().addActivity({
-              type: 'agent_communication',
-              message: `${communication.from} → ${communication.to}: ${communication.type}`,
-              agentName: communication.from,
+              type: status === 'completed' ? 'task_complete' : 'task_failed',
+              message:
+                status === 'completed'
+                  ? `Completed task: ${session.taskDescription}`
+                  : `Failed task: ${session.taskDescription}`,
             });
-          },
+          }
+        },
 
-          addActivity: (activity) => {
-            const newActivity = {
-              ...activity,
-              id: `activity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              timestamp: new Date(),
+        updateAgentStatus: (agentName, status) => {
+          set((state) => {
+            const newStatuses = {
+              ...state.agentStatuses,
+              [agentName]: status,
             };
 
-            set((state) => ({
-              recentActivity: [newActivity, ...state.recentActivity].slice(
-                0,
-                50
-              ), // Keep last 50
-            }));
-          },
+            // Count active vs idle agents
+            let activeCount = 0;
+            let idleCount = 0;
 
-          incrementTokens: (amount) => {
-            set((state) => ({
-              totalTokensUsed: state.totalTokensUsed + amount,
-            }));
-          },
-
-          getActiveSessionsCount: () => {
-            return get().currentSessions.filter((s) => s.isActive).length;
-          },
-
-          getTodayTasksCount: () => {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            return get().currentSessions.filter((s) => {
-              const sessionDate = new Date(s.startTime);
-              sessionDate.setHours(0, 0, 0, 0);
-              return sessionDate.getTime() === today.getTime();
-            }).length;
-          },
-
-          getSuccessRate: () => {
-            const state = get();
-            const total = state.completedTasks + state.failedTasks;
-
-            if (total === 0) return 0;
-
-            return (state.completedTasks / total) * 100;
-          },
-
-          setBackgroundServiceRunning: (running) => {
-            set({ isBackgroundServiceRunning: running });
-          },
-
-          reset: () => {
-            set({
-              ...initialState,
-              isBackgroundServiceRunning: false,
+            Object.values(newStatuses).forEach((s) => {
+              if (s.status === 'working' || s.status === 'analyzing') {
+                activeCount++;
+              } else if (s.status === 'idle') {
+                idleCount++;
+              }
             });
-          },
-        })
-      ),
+
+            return {
+              agentStatuses: newStatuses,
+              totalAgents: Object.keys(newStatuses).length,
+              activeAgents: activeCount,
+              idleAgents: idleCount,
+            };
+          });
+        },
+
+        addCommunication: (communication) => {
+          set((state) => ({
+            agentCommunications: [...state.agentCommunications, communication],
+            totalMessagesExchanged: state.totalMessagesExchanged + 1,
+          }));
+
+          get().addActivity({
+            type: 'agent_communication',
+            message: `${communication.from} → ${communication.to}: ${communication.type}`,
+            agentName: communication.from,
+          });
+        },
+
+        addActivity: (activity) => {
+          const newActivity = {
+            ...activity,
+            id: `activity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            timestamp: new Date(),
+          };
+
+          set((state) => ({
+            recentActivity: [newActivity, ...state.recentActivity].slice(0, 50), // Keep last 50
+          }));
+        },
+
+        incrementTokens: (amount) => {
+          set((state) => ({
+            totalTokensUsed: state.totalTokensUsed + amount,
+          }));
+        },
+
+        getActiveSessionsCount: () => {
+          return get().currentSessions.filter((s) => s.isActive).length;
+        },
+
+        getTodayTasksCount: () => {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          return get().currentSessions.filter((s) => {
+            const sessionDate = new Date(s.startTime);
+            sessionDate.setHours(0, 0, 0, 0);
+            return sessionDate.getTime() === today.getTime();
+          }).length;
+        },
+
+        getSuccessRate: () => {
+          const state = get();
+          const total = state.completedTasks + state.failedTasks;
+
+          if (total === 0) return 0;
+
+          return (state.completedTasks / total) * 100;
+        },
+
+        setBackgroundServiceRunning: (running) => {
+          set({ isBackgroundServiceRunning: running });
+        },
+
+        reset: () => {
+          set({
+            ...initialState,
+            isBackgroundServiceRunning: false,
+          });
+        },
+      })),
       {
         name: 'agent-metrics-storage',
         partialize: (state) => ({
@@ -345,9 +333,11 @@ export const useAgentMetricsSummary = () =>
     activeSessions: state.activeSessions,
     completedTasks: state.completedTasks,
     failedTasks: state.failedTasks,
-    successRate: state.completedTasks + state.failedTasks > 0
-      ? (state.completedTasks / (state.completedTasks + state.failedTasks)) * 100
-      : 0,
+    successRate:
+      state.completedTasks + state.failedTasks > 0
+        ? (state.completedTasks / (state.completedTasks + state.failedTasks)) *
+          100
+        : 0,
   }));
 
 /**

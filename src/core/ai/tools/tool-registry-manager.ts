@@ -94,7 +94,6 @@ export class ToolManager {
         limit: tool.rateLimit,
       });
     }
-
   }
 
   /**
@@ -163,7 +162,6 @@ export class ToolManager {
     let result: ToolExecutionResult;
 
     try {
-
       const toolResult = await tool.execute(params);
       const executionTime = Date.now() - startTime;
       const cost = tool.estimateCost(params);
@@ -573,7 +571,6 @@ export class ToolManager {
       requiredPermissions: ['ai:generate'],
       supportedAgents: ['claude-code'],
     });
-
   }
 
   /**

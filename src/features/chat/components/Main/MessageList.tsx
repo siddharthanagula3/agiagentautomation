@@ -142,13 +142,16 @@ function getValidatedMetadata(
     result.videoData = metadata.videoData as MessageMetadata['videoData'];
   }
   if (Array.isArray(metadata.searchResults)) {
-    result.searchResults = metadata.searchResults as MessageMetadata['searchResults'];
+    result.searchResults =
+      metadata.searchResults as MessageMetadata['searchResults'];
   }
   if (metadata.documentData && typeof metadata.documentData === 'object') {
-    result.documentData = metadata.documentData as MessageMetadata['documentData'];
+    result.documentData =
+      metadata.documentData as MessageMetadata['documentData'];
   }
   if (metadata.downloadData && typeof metadata.downloadData === 'object') {
-    result.downloadData = metadata.downloadData as MessageMetadata['downloadData'];
+    result.downloadData =
+      metadata.downloadData as MessageMetadata['downloadData'];
   }
 
   return result;

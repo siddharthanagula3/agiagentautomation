@@ -477,7 +477,10 @@ export class SystemPromptsService {
               expertise,
             });
           } catch (err) {
-            console.error(`[SystemPromptsService] Failed to parse employee file ${path}:`, err);
+            console.error(
+              `[SystemPromptsService] Failed to parse employee file ${path}:`,
+              err
+            );
           }
         }
       }

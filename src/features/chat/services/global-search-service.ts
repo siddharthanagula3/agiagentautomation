@@ -345,10 +345,14 @@ class GlobalSearchService {
             const index = content.indexOf(query);
             if (index !== -1) {
               // Extract a phrase around the match (up to 50 chars)
-              const start = Math.max(0, content.lastIndexOf(' ', index - 1) + 1);
+              const start = Math.max(
+                0,
+                content.lastIndexOf(' ', index - 1) + 1
+              );
               const end = Math.min(
                 content.length,
-                content.indexOf(' ', index + query.length + 20) || content.length
+                content.indexOf(' ', index + query.length + 20) ||
+                  content.length
               );
               const phrase = msg.content.substring(start, end).trim();
               if (phrase.length > query.length && phrase.length < 60) {
@@ -431,7 +435,19 @@ class GlobalSearchService {
               .filter((w) => w.length > 3)
               .filter(
                 (w) =>
-                  !['with', 'that', 'this', 'from', 'have', 'been', 'were', 'what', 'when', 'where', 'which'].includes(w)
+                  ![
+                    'with',
+                    'that',
+                    'this',
+                    'from',
+                    'have',
+                    'been',
+                    'were',
+                    'what',
+                    'when',
+                    'where',
+                    'which',
+                  ].includes(w)
               );
 
             for (const word of words) {

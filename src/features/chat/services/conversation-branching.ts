@@ -141,7 +141,8 @@ export class ConversationBranchingService {
         .eq('user_id', userId)
         .maybeSingle();
 
-      const parentMetadata = (parentSession?.metadata as Record<string, unknown>) || {};
+      const parentMetadata =
+        (parentSession?.metadata as Record<string, unknown>) || {};
       const childBranches = (parentMetadata.child_branches as string[]) || [];
 
       await supabase
@@ -200,7 +201,9 @@ export class ConversationBranchingService {
             parentSessionId: sessionId,
             branchPointMessageId: metadata.branch_point_message_id as string,
             title: session.title || 'Untitled Branch',
-            createdAt: new Date(metadata.branched_at as string || session.created_at),
+            createdAt: new Date(
+              (metadata.branched_at as string) || session.created_at
+            ),
             messageCount: count || 0,
           });
         }
@@ -421,7 +424,10 @@ export class ConversationBranchingService {
         const branches = await this.getBranches(parentId, userId);
 
         for (const branch of branches) {
-          const session = await chatPersistenceService.getSession(branch.id, userId);
+          const session = await chatPersistenceService.getSession(
+            branch.id,
+            userId
+          );
           if (session) {
             descendants.push(session);
             // Recursively get children of this branch

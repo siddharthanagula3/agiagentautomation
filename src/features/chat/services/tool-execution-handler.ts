@@ -182,7 +182,11 @@ export class ToolsExecutionService {
         const sandboxedConsole = {
           log: (...args: unknown[]) => {
             logs.push(
-              args.map((a) => (typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a))).join(' ')
+              args
+                .map((a) =>
+                  typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
+                )
+                .join(' ')
             );
           },
           error: (...args: unknown[]) => {

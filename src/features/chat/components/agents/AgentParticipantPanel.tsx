@@ -119,7 +119,11 @@ export function AgentParticipantPanel({
   const hasInitializedGroups = React.useRef(false);
   React.useEffect(() => {
     // Only initialize once when groupedAgents first becomes available
-    if (groupedAgents && !hasInitializedGroups.current && expandedGroups.size === 0) {
+    if (
+      groupedAgents &&
+      !hasInitializedGroups.current &&
+      expandedGroups.size === 0
+    ) {
       hasInitializedGroups.current = true;
       setExpandedGroups(new Set(groupedAgents.map((g) => g.role)));
     }

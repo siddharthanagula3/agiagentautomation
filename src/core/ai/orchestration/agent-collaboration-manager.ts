@@ -154,7 +154,6 @@ class MultiAgentOrchestrator {
    * Analyze user intent and create an orchestration plan
    */
   async analyzeIntent(userRequest: string): Promise<OrchestrationPlan> {
-
     // Determine complexity
     const complexity = this.determineComplexity(userRequest);
 
@@ -199,7 +198,6 @@ class MultiAgentOrchestrator {
     onCommunication: (comm: AgentCommunication) => void,
     onStatusUpdate: (status: AgentStatus) => void
   ): Promise<Map<string, TaskExecutionRecord>> {
-
     const results = new Map<string, TaskExecutionRecord>();
     let iterationCount = 0;
     const MAX_ITERATIONS = 100; // Prevent infinite loops
@@ -397,7 +395,6 @@ class MultiAgentOrchestrator {
     plan: OrchestrationPlan,
     onCommunication: (comm: AgentCommunication) => void
   ): Promise<void> {
-
     for (const task of blockedTasks) {
       // Find which dependency is blocking
       const blockingDeps = task.dependencies.filter((depId) => {
@@ -959,7 +956,6 @@ class MultiAgentOrchestrator {
     provider: LLMProvider,
     onStatusUpdate: (status: AgentStatus) => void
   ): Promise<string> {
-
     // Update status: starting
     this.updateAgentStatus(
       agentName,

@@ -422,8 +422,10 @@ export const MessageBubble = React.memo(function MessageBubble({
                       const target = e.currentTarget;
                       target.style.display = 'none';
                       const errorDiv = document.createElement('div');
-                      errorDiv.className = 'flex items-center justify-center p-8 bg-muted/50 text-muted-foreground';
-                      errorDiv.innerHTML = '<span class="text-sm">⚠️ Image failed to load</span>';
+                      errorDiv.className =
+                        'flex items-center justify-center p-8 bg-muted/50 text-muted-foreground';
+                      errorDiv.innerHTML =
+                        '<span class="text-sm">⚠️ Image failed to load</span>';
                       target.parentNode?.appendChild(errorDiv);
                     }}
                   />
@@ -458,8 +460,10 @@ export const MessageBubble = React.memo(function MessageBubble({
                     const target = e.currentTarget;
                     target.style.display = 'none';
                     const errorDiv = document.createElement('div');
-                    errorDiv.className = 'flex items-center justify-center p-8 bg-muted/50 text-muted-foreground rounded-xl';
-                    errorDiv.innerHTML = '<span class="text-sm">⚠️ Video failed to load</span>';
+                    errorDiv.className =
+                      'flex items-center justify-center p-8 bg-muted/50 text-muted-foreground rounded-xl';
+                    errorDiv.innerHTML =
+                      '<span class="text-sm">⚠️ Video failed to load</span>';
                     target.parentNode?.appendChild(errorDiv);
                   }}
                 />

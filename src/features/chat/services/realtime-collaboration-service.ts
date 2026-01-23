@@ -617,7 +617,6 @@ export class RealtimeCollaborationService {
         session.participants.set(presence.userId, presence);
       }
     }
-
   }
 
   /**

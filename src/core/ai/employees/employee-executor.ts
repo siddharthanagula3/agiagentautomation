@@ -8,8 +8,8 @@ import {
   ExecutionContext,
   Job,
 } from '../../types';
-import { toolInvocationService } from '../tools/tool-invocation-service';
-import { aiEmployeeService } from './ai-employee-service';
+import { toolInvocationService } from '../tools/tool-invocation-handler';
+import { aiEmployeeService } from './employee-management';
 
 export interface TaskExecutionResult {
   success: boolean;
@@ -180,13 +180,21 @@ export class AIEmployeeExecutor {
     const parameters = this.prepareToolParameters(toolId, task, job);
 
     // Execute the tool
-    const result = await toolInvocationService.invokeTool(
+    const { result, success, error } = await toolInvocationService.executeTool(
       toolId,
       parameters,
       this.context
     );
 
-    return result;
+    if (!success || error) {
+      throw new Error(error || 'Tool execution failed');
+    }
+
+    // Return a ToolResult compatible object
+    return {
+      data: result,
+      cost: 0, // Cost tracking would be added by the tool implementation
+    } as ToolResult;
   }
 
   /**
@@ -388,9 +396,17 @@ export class AIEmployeeExecutor {
     executionTime: number
   ): Promise<void> {
     try {
-      const currentMetrics = await aiEmployeeService.getPerformanceMetrics(
-        this.employee.id
-      );
+      const { data: performanceData } =
+        await aiEmployeeService.getEmployeePerformance(this.employee.id);
+
+      // Transform performance data to our expected PerformanceMetrics format
+      const currentMetrics: PerformanceMetrics = {
+        tasksCompleted: performanceData?.tasks_completed ?? 0,
+        successRate: performanceData?.success_rate ?? 0,
+        averageExecutionTime: performanceData?.average_execution_time ?? 0,
+        errorRate: performanceData?.error_rate ?? 0,
+        lastUpdated: performanceData?.last_updated,
+      };
 
       const updatedMetrics = {
         ...currentMetrics,
@@ -404,10 +420,14 @@ export class AIEmployeeExecutor {
         lastUpdated: new Date().toISOString(),
       };
 
-      await aiEmployeeService.updatePerformance(
-        this.employee.id,
-        updatedMetrics
-      );
+      // Transform back to database format
+      await aiEmployeeService.updateEmployeePerformance(this.employee.id, {
+        tasks_completed: updatedMetrics.tasksCompleted,
+        success_rate: updatedMetrics.successRate,
+        average_execution_time: updatedMetrics.averageExecutionTime,
+        error_rate: updatedMetrics.errorRate,
+        last_updated: updatedMetrics.lastUpdated,
+      });
     } catch (error) {
       console.error('Failed to update performance metrics:', error);
     }

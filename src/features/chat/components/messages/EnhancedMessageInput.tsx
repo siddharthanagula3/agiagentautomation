@@ -91,6 +91,9 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
   const mentionStartPos = useRef(0);
   // Track timeouts for cleanup to prevent memory leaks
   const timeoutRefs = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  // Voice recording refs
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   // Filtered agents for mention autocomplete
   const filteredAgents = agents.filter((agent) =>
@@ -110,11 +113,15 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
     []
   );
 
-  // Cleanup all pending timeouts on unmount
+  // Cleanup all pending timeouts and media recorder on unmount
   useEffect(() => {
     return () => {
       timeoutRefs.current.forEach(clearTimeout);
       timeoutRefs.current.clear();
+      // Stop any ongoing recording
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
     };
   }, []);
 
@@ -257,11 +264,73 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
     }
   }, [content, attachments, onSend]);
 
-  // Handle voice recording (placeholder)
-  const handleVoiceToggle = useCallback(() => {
-    setIsRecording((prev) => !prev);
-    // TODO: Implement actual voice recording
-  }, []);
+  // Handle voice recording with Web Audio API
+  const handleVoiceToggle = useCallback(async () => {
+    if (isRecording) {
+      // Stop recording
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
+      setIsRecording(false);
+    } else {
+      // Start recording
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream, {
+          mimeType: MediaRecorder.isTypeSupported('audio/webm')
+            ? 'audio/webm'
+            : 'audio/mp4',
+        });
+
+        audioChunksRef.current = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunksRef.current.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = async () => {
+          // Stop all tracks to release microphone
+          stream.getTracks().forEach((track) => track.stop());
+
+          if (audioChunksRef.current.length > 0) {
+            const audioBlob = new Blob(audioChunksRef.current, {
+              type: mediaRecorder.mimeType,
+            });
+
+            // Create a File object for the attachment
+            const audioFile = new File(
+              [audioBlob],
+              `voice-recording-${Date.now()}.${mediaRecorder.mimeType.includes('webm') ? 'webm' : 'm4a'}`,
+              { type: mediaRecorder.mimeType }
+            );
+
+            // Add as attachment
+            const attachment: Attachment = {
+              file: audioFile,
+              id: Math.random().toString(36).substring(7),
+            };
+            setAttachments((prev) => [...prev, attachment]);
+
+            // Add a note in the content
+            setContent((prev) =>
+              prev
+                ? `${prev}\n\n[Voice recording attached]`
+                : '[Voice recording attached]'
+            );
+          }
+        };
+
+        mediaRecorderRef.current = mediaRecorder;
+        mediaRecorder.start();
+        setIsRecording(true);
+      } catch (error) {
+        console.error('Failed to start voice recording:', error);
+        // Could show a toast notification here
+      }
+    }
+  }, [isRecording]);
 
   // Keyboard shortcuts
   useEffect(() => {

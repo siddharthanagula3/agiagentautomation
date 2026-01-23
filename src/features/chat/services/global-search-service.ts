@@ -287,15 +287,85 @@ class GlobalSearchService {
   }
 
   /**
-   * Get search suggestions based on recent searches (future enhancement)
+   * Get search suggestions based on recent searches and common terms
    */
   async getSearchSuggestions(
     userId: string,
     partialQuery: string
   ): Promise<string[]> {
-    // TODO: Implement search history and suggestions
-    // For now, return empty array
-    return [];
+    if (!partialQuery || partialQuery.trim().length < 2) {
+      return [];
+    }
+
+    try {
+      const suggestions: string[] = [];
+      const query = partialQuery.toLowerCase().trim();
+
+      // 1. Get suggestions from recent session titles
+      const { data: recentSessions } = await supabase
+        .from('chat_sessions')
+        .select('title')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .ilike('title', `%${query}%`)
+        .order('updated_at', { ascending: false })
+        .limit(5);
+
+      if (recentSessions) {
+        suggestions.push(
+          ...recentSessions
+            .map((s) => s.title)
+            .filter((title): title is string => !!title)
+        );
+      }
+
+      // 2. Get suggestions from recent message content (unique words)
+      const { data: sessions } = await supabase
+        .from('chat_sessions')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .limit(20);
+
+      if (sessions && sessions.length > 0) {
+        const sessionIds = sessions.map((s) => s.id);
+        const { data: messages } = await supabase
+          .from('chat_messages')
+          .select('content')
+          .in('session_id', sessionIds)
+          .ilike('content', `%${query}%`)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (messages) {
+          // Extract unique phrases containing the query
+          const phrases = new Set<string>();
+          for (const msg of messages) {
+            const content = msg.content.toLowerCase();
+            const index = content.indexOf(query);
+            if (index !== -1) {
+              // Extract a phrase around the match (up to 50 chars)
+              const start = Math.max(0, content.lastIndexOf(' ', index - 1) + 1);
+              const end = Math.min(
+                content.length,
+                content.indexOf(' ', index + query.length + 20) || content.length
+              );
+              const phrase = msg.content.substring(start, end).trim();
+              if (phrase.length > query.length && phrase.length < 60) {
+                phrases.add(phrase);
+              }
+            }
+          }
+          suggestions.push(...Array.from(phrases).slice(0, 3));
+        }
+      }
+
+      // Remove duplicates and limit results
+      return [...new Set(suggestions)].slice(0, 8);
+    } catch (error) {
+      console.error('[GlobalSearch] getSearchSuggestions failed:', error);
+      return [];
+    }
   }
 
   /**
@@ -332,14 +402,78 @@ class GlobalSearchService {
   }
 
   /**
-   * Get popular search terms (future enhancement)
+   * Get popular search terms based on recent activity
+   * Analyzes session titles and frequently discussed topics
    */
   async getPopularSearches(
     userId: string,
     limit: number = 10
   ): Promise<string[]> {
-    // TODO: Track search analytics and return popular terms
-    return [];
+    try {
+      const popularTerms: Map<string, number> = new Map();
+
+      // 1. Get recent session titles and extract keywords
+      const { data: recentSessions } = await supabase
+        .from('chat_sessions')
+        .select('title')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('updated_at', { ascending: false })
+        .limit(50);
+
+      if (recentSessions) {
+        for (const session of recentSessions) {
+          if (session.title) {
+            // Extract meaningful words (3+ chars, not common words)
+            const words = session.title
+              .toLowerCase()
+              .split(/\s+/)
+              .filter((w) => w.length > 3)
+              .filter(
+                (w) =>
+                  !['with', 'that', 'this', 'from', 'have', 'been', 'were', 'what', 'when', 'where', 'which'].includes(w)
+              );
+
+            for (const word of words) {
+              popularTerms.set(word, (popularTerms.get(word) || 0) + 1);
+            }
+          }
+        }
+      }
+
+      // 2. Get common AI employee names mentioned
+      const { data: sessions } = await supabase
+        .from('chat_sessions')
+        .select('metadata')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .not('metadata', 'is', null)
+        .limit(30);
+
+      if (sessions) {
+        for (const session of sessions) {
+          const metadata = session.metadata as Record<string, unknown>;
+          if (metadata?.employeeId) {
+            const employeeName = String(metadata.employeeId).replace(/-/g, ' ');
+            popularTerms.set(
+              employeeName,
+              (popularTerms.get(employeeName) || 0) + 2
+            );
+          }
+        }
+      }
+
+      // Sort by frequency and return top terms
+      const sortedTerms = Array.from(popularTerms.entries())
+        .sort((a, b) => b[1] - a[1])
+        .map(([term]) => term)
+        .slice(0, limit);
+
+      return sortedTerms;
+    } catch (error) {
+      console.error('[GlobalSearch] getPopularSearches failed:', error);
+      return [];
+    }
   }
 }
 

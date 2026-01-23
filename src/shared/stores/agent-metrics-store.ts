@@ -128,8 +128,8 @@ const enableDevtools = import.meta.env.MODE !== 'production';
 
 export const useAgentMetricsStore = create<AgentMetricsState>()(
   devtools(
-    immer(
-      persist(
+    persist(
+      immer(
         (set, get) => ({
           ...initialState,
           isBackgroundServiceRunning: false,
@@ -313,21 +313,111 @@ export const useAgentMetricsStore = create<AgentMetricsState>()(
               isBackgroundServiceRunning: false,
             });
           },
+        })
+      ),
+      {
+        name: 'agent-metrics-storage',
+        partialize: (state) => ({
+          totalSessions: state.totalSessions,
+          completedTasks: state.completedTasks,
+          failedTasks: state.failedTasks,
+          totalTokensUsed: state.totalTokensUsed,
+          totalMessagesExchanged: state.totalMessagesExchanged,
+          currentSessions: state.currentSessions,
+          recentActivity: state.recentActivity,
         }),
-        {
-          name: 'agent-metrics-storage',
-          partialize: (state) => ({
-            totalSessions: state.totalSessions,
-            completedTasks: state.completedTasks,
-            failedTasks: state.failedTasks,
-            totalTokensUsed: state.totalTokensUsed,
-            totalMessagesExchanged: state.totalMessagesExchanged,
-            currentSessions: state.currentSessions,
-            recentActivity: state.recentActivity,
-          }),
-        }
-      )
+      }
     ),
     { name: 'AgentMetricsStore', enabled: enableDevtools }
   )
 );
+
+// =============================================
+// SELECTOR HOOKS - Optimized re-render patterns
+// =============================================
+
+/**
+ * Get overall metrics summary
+ */
+export const useAgentMetricsSummary = () =>
+  useAgentMetricsStore((state) => ({
+    totalSessions: state.totalSessions,
+    activeSessions: state.activeSessions,
+    completedTasks: state.completedTasks,
+    failedTasks: state.failedTasks,
+    successRate: state.completedTasks + state.failedTasks > 0
+      ? (state.completedTasks / (state.completedTasks + state.failedTasks)) * 100
+      : 0,
+  }));
+
+/**
+ * Get current active sessions
+ */
+export const useCurrentSessions = () =>
+  useAgentMetricsStore((state) => state.currentSessions);
+
+/**
+ * Get only active sessions (filtered)
+ */
+export const useActiveSessions = () =>
+  useAgentMetricsStore((state) =>
+    state.currentSessions.filter((s) => s.isActive)
+  );
+
+/**
+ * Get recent activity feed
+ */
+export const useRecentActivity = () =>
+  useAgentMetricsStore((state) => state.recentActivity);
+
+/**
+ * Get agent statuses
+ */
+export const useAgentStatuses = () =>
+  useAgentMetricsStore((state) => state.agentStatuses);
+
+/**
+ * Get a specific agent's status
+ */
+export const useAgentStatus = (agentName: string) =>
+  useAgentMetricsStore((state) => state.agentStatuses[agentName]);
+
+/**
+ * Get agent workforce summary
+ */
+export const useAgentWorkforce = () =>
+  useAgentMetricsStore((state) => ({
+    totalAgents: state.totalAgents,
+    activeAgents: state.activeAgents,
+    idleAgents: state.idleAgents,
+  }));
+
+/**
+ * Get token usage metrics
+ */
+export const useTokenMetrics = () =>
+  useAgentMetricsStore((state) => ({
+    totalTokensUsed: state.totalTokensUsed,
+    totalMessagesExchanged: state.totalMessagesExchanged,
+  }));
+
+/**
+ * Get computed success rate
+ */
+export const useSuccessRate = () =>
+  useAgentMetricsStore((state) => {
+    const total = state.completedTasks + state.failedTasks;
+    return total > 0 ? (state.completedTasks / total) * 100 : 0;
+  });
+
+/**
+ * Get agent communications
+ */
+export const useAgentCommunications = () =>
+  useAgentMetricsStore((state) => state.agentCommunications);
+
+/**
+ * Check if background service is running
+ */
+export const useIsBackgroundServiceRunning = () =>
+  useAgentMetricsStore((state) => state.isBackgroundServiceRunning);

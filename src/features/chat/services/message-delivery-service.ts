@@ -531,8 +531,13 @@ export class MessageDeliveryService {
           timestamp: Date.now(),
         },
       })
-      .catch(() => {
-        // Ignore broadcast errors
+      .catch((error) => {
+        // Log broadcast errors for debugging but don't fail
+        // Broadcast failures are non-critical - message is still saved to DB
+        console.warn(
+          `[MessageDelivery] Status broadcast failed for message ${record.messageId}:`,
+          error instanceof Error ? error.message : 'Unknown error'
+        );
       });
   }
 
@@ -569,23 +574,35 @@ export class MessageDeliveryService {
    * Clean up old records (delivered/read messages older than 1 hour)
    */
   private cleanupOldRecords(): void {
-    const oneHourAgo = Date.now() - 3600000;
-    let cleanedCount = 0;
+    try {
+      const oneHourAgo = Date.now() - 3600000;
+      let cleanedCount = 0;
 
-    for (const [messageId, record] of this.deliveryRecords.entries()) {
-      const shouldCleanup =
-        (record.status === DeliveryStatus.DELIVERED ||
-          record.status === DeliveryStatus.READ) &&
-        record.deliveredAt &&
-        record.deliveredAt < oneHourAgo;
+      for (const [messageId, record] of this.deliveryRecords.entries()) {
+        const shouldCleanup =
+          (record.status === DeliveryStatus.DELIVERED ||
+            record.status === DeliveryStatus.READ) &&
+          record.deliveredAt &&
+          record.deliveredAt < oneHourAgo;
 
-      if (shouldCleanup) {
-        this.deliveryRecords.delete(messageId);
-        this.readReceipts.delete(messageId);
-        cleanedCount++;
+        if (shouldCleanup) {
+          this.deliveryRecords.delete(messageId);
+          this.readReceipts.delete(messageId);
+          cleanedCount++;
+        }
       }
-    }
 
+      if (cleanedCount > 0) {
+        console.log(
+          `[MessageDelivery] Cleanup completed: removed ${cleanedCount} old records`
+        );
+      }
+    } catch (error) {
+      console.error(
+        '[MessageDelivery] Cleanup failed:',
+        error instanceof Error ? error.message : 'Unknown error'
+      );
+    }
   }
 
   /**

@@ -28,6 +28,9 @@ async function cleanupAllStores(): Promise<void> {
       { useMultiAgentChatStore },
       { useUsageWarningStore },
       { useArtifactStore },
+      { useUIStore },
+      { useAppStore },
+      { useUserProfileStore },
     ] = await Promise.all([
       import('./workforce-store'),
       import('./mission-control-store'),
@@ -36,16 +39,77 @@ async function cleanupAllStores(): Promise<void> {
       import('./multi-agent-chat-store'),
       import('./usage-warning-store'),
       import('./artifact-store'),
+      import('./layout-store'),
+      import('./global-settings-store'),
+      import('./user-profile-store'),
     ]);
 
-    // Reset all stores
+    // Reset all stores with proper existence checks and logging
     useWorkforceStore.getState().reset();
     useMissionStore.getState().reset();
     useNotificationStore.getState().clearAll();
-    useChatStore.getState().clearHistory?.();
-    useMultiAgentChatStore.getState().reset?.();
-    useUsageWarningStore.getState().resetWarnings?.();
-    useArtifactStore.getState().clearAllArtifacts?.();
+
+    // Chat store cleanup
+    const chatState = useChatStore.getState();
+    if (typeof chatState.clearHistory === 'function') {
+      chatState.clearHistory();
+    } else if (typeof chatState.reset === 'function') {
+      chatState.reset();
+    } else {
+      logger.auth('Warning: Chat store has no clearHistory or reset method');
+    }
+
+    // Multi-agent chat store cleanup
+    const multiAgentState = useMultiAgentChatStore.getState();
+    if (typeof multiAgentState.reset === 'function') {
+      multiAgentState.reset();
+    } else {
+      logger.auth('Warning: Multi-agent chat store has no reset method');
+    }
+
+    // Usage warning store cleanup
+    const usageState = useUsageWarningStore.getState();
+    if (typeof usageState.resetWarnings === 'function') {
+      usageState.resetWarnings();
+    } else if (typeof usageState.reset === 'function') {
+      usageState.reset();
+    } else {
+      logger.auth('Warning: Usage warning store has no reset method');
+    }
+
+    // Artifact store cleanup
+    const artifactState = useArtifactStore.getState();
+    if (typeof artifactState.clearAllArtifacts === 'function') {
+      artifactState.clearAllArtifacts();
+    } else if (typeof artifactState.reset === 'function') {
+      artifactState.reset();
+    } else {
+      logger.auth('Warning: Artifact store has no clearAllArtifacts or reset method');
+    }
+
+    // Layout store cleanup (prevents data leaks between users)
+    const layoutState = useUIStore.getState();
+    if (typeof layoutState.reset === 'function') {
+      layoutState.reset();
+    } else {
+      logger.auth('Warning: Layout store has no reset method');
+    }
+
+    // Global settings store cleanup
+    const settingsState = useAppStore.getState();
+    if (typeof settingsState.reset === 'function') {
+      settingsState.reset();
+    } else {
+      logger.auth('Warning: Global settings store has no reset method');
+    }
+
+    // User profile store cleanup
+    const profileState = useUserProfileStore.getState();
+    if (typeof profileState.reset === 'function') {
+      profileState.reset();
+    } else {
+      logger.auth('Warning: User profile store has no reset method');
+    }
 
     // Stop mission cleanup interval
     stopMissionCleanupInterval();
@@ -60,6 +124,9 @@ async function cleanupAllStores(): Promise<void> {
       'agi-multi-agent-chat-store',
       'agi-usage-warning-store',
       'agi-artifact-store',
+      'agi-layout-store',
+      'agi-settings-store',
+      'agi-user-profile-store',
     ];
     keysToRemove.forEach((key) => {
       try {

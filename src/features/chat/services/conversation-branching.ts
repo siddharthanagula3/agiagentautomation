@@ -6,6 +6,7 @@
  */
 
 import { chatPersistenceService } from './conversation-storage';
+import { supabase } from '@shared/lib/supabase-client';
 import type { ChatSession, ChatMessage } from '../types';
 
 export interface ConversationBranch {
@@ -103,6 +104,7 @@ export class ConversationBranchingService {
 
   /**
    * Store branch metadata for tracking conversation trees
+   * Uses the chat_session_metadata table or updates session metadata
    */
   private async storeBranchMetadata(
     branchSessionId: string,
@@ -110,27 +112,105 @@ export class ConversationBranchingService {
     branchPointMessageId: string,
     userId: string
   ): Promise<void> {
-    // We can store this in the session metadata
-    // For now, we'll use a simple approach with metadata
-    // In production, you might want a dedicated branches table
+    try {
+      // Store branch metadata in the session's metadata field
+      const { error } = await supabase
+        .from('chat_sessions')
+        .update({
+          metadata: {
+            parent_session_id: parentSessionId,
+            branch_point_message_id: branchPointMessageId,
+            branched_at: new Date().toISOString(),
+            is_branch: true,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', branchSessionId)
+        .eq('user_id', userId);
 
-    // This is a placeholder - you'd implement actual metadata storage
-    // based on your database schema
-    // TODO: Implement branch metadata storage
+      if (error) {
+        console.error('Failed to store branch metadata:', error);
+        throw error;
+      }
+
+      // Also update the parent session to track its children
+      const { data: parentSession } = await supabase
+        .from('chat_sessions')
+        .select('metadata')
+        .eq('id', parentSessionId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      const parentMetadata = (parentSession?.metadata as Record<string, unknown>) || {};
+      const childBranches = (parentMetadata.child_branches as string[]) || [];
+
+      await supabase
+        .from('chat_sessions')
+        .update({
+          metadata: {
+            ...parentMetadata,
+            child_branches: [...childBranches, branchSessionId],
+            has_branches: true,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', parentSessionId)
+        .eq('user_id', userId);
+    } catch (error) {
+      console.error('Error storing branch metadata:', error);
+      // Non-critical - log but don't throw
+    }
   }
 
   /**
    * Get all branches for a session
+   * Queries sessions that have this session as their parent
    */
   async getBranches(
     sessionId: string,
     userId: string
   ): Promise<ConversationBranch[]> {
-    // This would query a branches table or metadata
-    // For now, returning empty array as placeholder
-    // In production, implement proper branch tracking
+    try {
+      // Query sessions where metadata indicates this session as parent
+      const { data: branchSessions, error } = await supabase
+        .from('chat_sessions')
+        .select('*')
+        .eq('user_id', userId)
+        .not('metadata', 'is', null);
 
-    return [];
+      if (error) {
+        console.error('Failed to get branches:', error);
+        return [];
+      }
+
+      // Filter sessions that are branches of this session
+      const branches: ConversationBranch[] = [];
+
+      for (const session of branchSessions || []) {
+        const metadata = session.metadata as Record<string, unknown>;
+        if (metadata?.parent_session_id === sessionId) {
+          // Get message count for this branch
+          const { count } = await supabase
+            .from('chat_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('session_id', session.id);
+
+          branches.push({
+            id: session.id,
+            parentSessionId: sessionId,
+            branchPointMessageId: metadata.branch_point_message_id as string,
+            title: session.title || 'Untitled Branch',
+            createdAt: new Date(metadata.branched_at as string || session.created_at),
+            messageCount: count || 0,
+          });
+        }
+      }
+
+      return branches;
+    } catch (error) {
+      console.error('Error getting branches:', error);
+      return [];
+    }
   }
 
   /**
@@ -270,33 +350,92 @@ export class ConversationBranchingService {
     branchSessionId: string,
     userId: string
   ): Promise<ChatSession | null> {
-    // This would look up the parent from branch metadata
-    // For now, returning null as placeholder
+    try {
+      // Get the branch session to find its parent ID
+      const { data: branchSession, error: branchError } = await supabase
+        .from('chat_sessions')
+        .select('metadata')
+        .eq('id', branchSessionId)
+        .eq('user_id', userId)
+        .maybeSingle();
 
-    return null;
+      if (branchError || !branchSession) {
+        return null;
+      }
+
+      const metadata = branchSession.metadata as Record<string, unknown>;
+      const parentSessionId = metadata?.parent_session_id as string;
+
+      if (!parentSessionId) {
+        return null;
+      }
+
+      // Get the parent session
+      return await chatPersistenceService.getSession(parentSessionId, userId);
+    } catch (error) {
+      console.error('Error getting parent session:', error);
+      return null;
+    }
   }
 
   /**
    * Check if a session is a branch
    */
   async isBranch(sessionId: string): Promise<boolean> {
-    // This would check if the session has parent metadata
-    // For now, returning false as placeholder
+    try {
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .select('metadata')
+        .eq('id', sessionId)
+        .maybeSingle();
 
-    return false;
+      if (error || !data) {
+        return false;
+      }
+
+      const metadata = data.metadata as Record<string, unknown>;
+      return metadata?.is_branch === true;
+    } catch (error) {
+      console.error('Error checking if session is branch:', error);
+      return false;
+    }
   }
 
   /**
    * Get all descendants of a session (branches and their branches)
+   * Uses recursive querying to get the full tree
    */
   async getDescendants(
     sessionId: string,
     userId: string
   ): Promise<ChatSession[]> {
-    // This would recursively get all branches and sub-branches
-    // For now, returning empty array as placeholder
+    try {
+      const descendants: ChatSession[] = [];
+      const visited = new Set<string>();
 
-    return [];
+      // Recursive function to get all descendants
+      const collectDescendants = async (parentId: string) => {
+        if (visited.has(parentId)) return;
+        visited.add(parentId);
+
+        const branches = await this.getBranches(parentId, userId);
+
+        for (const branch of branches) {
+          const session = await chatPersistenceService.getSession(branch.id, userId);
+          if (session) {
+            descendants.push(session);
+            // Recursively get children of this branch
+            await collectDescendants(branch.id);
+          }
+        }
+      };
+
+      await collectDescendants(sessionId);
+      return descendants;
+    } catch (error) {
+      console.error('Error getting descendants:', error);
+      return [];
+    }
   }
 }
 

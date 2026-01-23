@@ -8,7 +8,11 @@ import {
 } from '../utils/token-tracking';
 import { withRateLimit } from '../utils/rate-limiter';
 import { withAuth } from '../utils/auth-middleware';
-import { getCorsHeaders, getMinimalCorsHeaders } from '../utils/cors';
+import {
+  getSafeCorsHeaders,
+  checkOriginAndBlock,
+  getMinimalCorsHeaders,
+} from '../utils/cors';
 import {
   qwenRequestSchema,
   formatValidationError,
@@ -24,11 +28,20 @@ import {
  * Endpoint: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
  *
  * Created: Jan 6th 2026
+ * Updated: Jan 22nd 2026 - Fixed CORS null spreading by using getSafeCorsHeaders
  */
 const qwenHandler: Handler = async (event: AuthenticatedEvent) => {
   // Extract origin for CORS validation
   const origin = event.headers.origin || event.headers.Origin || '';
-  const corsHeaders = getCorsHeaders(origin);
+
+  // Early-exit for unauthorized origins
+  const blockedResponse = checkOriginAndBlock(origin);
+  if (blockedResponse) {
+    return blockedResponse;
+  }
+
+  // Use safe CORS headers that always return a valid object
+  const corsHeaders = getSafeCorsHeaders(origin);
 
   // Only allow POST requests
   // Updated: Jan 6th 2026 - Fixed CORS wildcard vulnerability with origin validation
@@ -44,12 +57,14 @@ const qwenHandler: Handler = async (event: AuthenticatedEvent) => {
   const QWEN_API_KEY = process.env.QWEN_API_KEY || process.env.DASHSCOPE_API_KEY;
 
   if (!QWEN_API_KEY) {
+    console.error('[Qwen Proxy] API key not configured');
     return {
       statusCode: 500,
-      headers: getMinimalCorsHeaders(origin),
+      headers: corsHeaders,
       body: JSON.stringify({
-        error:
-          'Qwen/DashScope API key not configured in Netlify environment variables (QWEN_API_KEY or DASHSCOPE_API_KEY)',
+        error: 'Service temporarily unavailable',
+        code: 'SERVER_CONFIGURATION_ERROR',
+        retryable: true,
       }),
     };
   }
@@ -60,7 +75,7 @@ const qwenHandler: Handler = async (event: AuthenticatedEvent) => {
     if (event.body && event.body.length > MAX_REQUEST_SIZE) {
       return {
         statusCode: 413,
-        headers: getMinimalCorsHeaders(origin),
+        headers: corsHeaders,
         body: JSON.stringify({
           error: 'Request payload too large',
           maxSize: '1MB',

@@ -49,8 +49,8 @@ const anthropicHandler: Handler = async (event: AuthenticatedEvent) => {
     };
   }
 
-  // Get API key from environment
-  const ANTHROPIC_API_KEY = process.env.VITE_ANTHROPIC_API_KEY;
+  // Get API key from environment (server-side only - no VITE_ prefix)
+  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
   if (!ANTHROPIC_API_KEY) {
     console.error('[Anthropic Proxy] API key not configured');

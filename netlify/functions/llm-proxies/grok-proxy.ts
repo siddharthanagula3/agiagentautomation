@@ -49,8 +49,8 @@ const grokHandler: Handler = async (event: AuthenticatedEvent) => {
     };
   }
 
-  // Get API key from environment
-  const GROK_API_KEY = process.env.VITE_GROK_API_KEY;
+  // Get API key from environment (server-side only - no VITE_ prefix)
+  const GROK_API_KEY = process.env.GROK_API_KEY;
 
   if (!GROK_API_KEY) {
     console.error('[Grok Proxy] API key not configured');

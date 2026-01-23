@@ -48,8 +48,8 @@ const perplexityHandler: Handler = async (event: AuthenticatedEvent) => {
     };
   }
 
-  // Get API key from environment
-  const PERPLEXITY_API_KEY = process.env.VITE_PERPLEXITY_API_KEY;
+  // Get API key from environment (server-side only - no VITE_ prefix)
+  const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 
   if (!PERPLEXITY_API_KEY) {
     console.error('[Perplexity Proxy] API key not configured');

@@ -49,8 +49,8 @@ const openaiHandler: Handler = async (event: AuthenticatedEvent) => {
     };
   }
 
-  // Get API key from environment
-  const OPENAI_API_KEY = process.env.VITE_OPENAI_API_KEY;
+  // Get API key from environment (server-side only - no VITE_ prefix)
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
   if (!OPENAI_API_KEY) {
     console.error('[OpenAI Proxy] API key not configured');

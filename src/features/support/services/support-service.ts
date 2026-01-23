@@ -298,13 +298,17 @@ class SupportService {
         data: { session },
       } = await supabase.auth.getSession();
 
+      // Auth header is required by backend - throw early if no session
+      if (!session?.access_token) {
+        console.warn('Cannot send email notification: No active session');
+        return;
+      }
+
       const response = await fetch('/.netlify/functions/utilities/send-email-notification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(session?.access_token
-            ? { Authorization: `Bearer ${session.access_token}` }
-            : {}),
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           type,

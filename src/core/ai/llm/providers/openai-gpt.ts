@@ -7,6 +7,7 @@
 import OpenAI from 'openai';
 import { supabase } from '@shared/lib/supabase-client';
 import { toast } from 'sonner';
+import { logger } from '@shared/lib/logger';
 
 /**
  * Helper function to get the current Supabase session token
@@ -19,25 +20,13 @@ async function getAuthToken(): Promise<string | null> {
     } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
-    console.error('[OpenAI Provider] Failed to get auth token:', error);
+    logger.error('[OpenAI Provider] Failed to get auth token:', error);
     return null;
   }
 }
 
-// SECURITY WARNING: Client-side API initialization is disabled
-// All API calls should go through Netlify proxy functions instead
-// Environment variables with VITE_ prefix are exposed to the browser (security risk)
-
-// DEPRECATED: Direct client-side initialization (security risk)
-// const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
-
-// Initialize clients - DISABLED for security
-const openai = null; // Client-side SDK disabled - use Netlify proxy instead
-
-// ✅ IMPLEMENTED: All API calls use Netlify proxy functions for security
+// All API calls use Netlify proxy functions for security
 // Proxy endpoints: /.netlify/functions/llm-proxies/openai-proxy
-
-// Using centralized Supabase client
 
 export interface OpenAIMessage {
   role: 'user' | 'assistant' | 'system';
@@ -133,15 +122,30 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/** Error codes specific to OpenAI provider */
+export type OpenAIErrorCode =
+  | 'PAYMENT_REQUIRED'
+  | 'RATE_LIMIT_EXCEEDED'
+  | 'GATEWAY_TIMEOUT'
+  | 'NOT_AUTHENTICATED'
+  | 'API_ERROR'
+  | 'REQUEST_FAILED'
+  | 'STREAMING_FAILED'
+  | `HTTP_${number}`;
+
 export class OpenAIError extends Error {
+  public readonly name = 'OpenAIError' as const;
+
   constructor(
     message: string,
-    public code: string,
-    public retryable: boolean = false,
-    public statusCode?: number
+    public readonly code: OpenAIErrorCode | string,
+    public readonly retryable: boolean = false,
+    public readonly statusCode?: number
   ) {
     super(message);
-    this.name = 'OpenAIError';
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, OpenAIError);
+    }
   }
 }
 
@@ -248,7 +252,7 @@ export class OpenAIProvider {
         return await this.executeRequest(messages, sessionId, userId);
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        console.error(
+        logger.error(
           `[OpenAI Provider] Attempt ${attempt + 1} failed:`,
           error
         );
@@ -380,7 +384,7 @@ export class OpenAIProvider {
         },
       };
     } catch (error) {
-      console.error('[OpenAI Provider] Error:', error);
+      logger.error('[OpenAI Provider] Error:', error);
 
       // Re-throw OpenAIError instances as-is
       if (error instanceof OpenAIError) {
@@ -437,7 +441,7 @@ export class OpenAIProvider {
         return; // Success - exit the retry loop
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        console.error(
+        logger.error(
           `[OpenAI Provider] Stream attempt ${attempt + 1} failed:`,
           error
         );
@@ -561,7 +565,7 @@ export class OpenAIProvider {
         });
       }
     } catch (error) {
-      console.error('[OpenAI Provider] Streaming error:', error);
+      logger.error('[OpenAI Provider] Streaming error:', error);
 
       // Re-throw OpenAIError instances as-is
       if (error instanceof OpenAIError) {
@@ -649,10 +653,10 @@ export class OpenAIProvider {
       });
 
       if (error) {
-        console.error('[OpenAI Provider] Error saving message:', error);
+        logger.error('[OpenAI Provider] Error saving message:', error);
       }
     } catch (error) {
-      console.error(
+      logger.error(
         '[OpenAI Provider] Unexpected error saving message:',
         error
       );

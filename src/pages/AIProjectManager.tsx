@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import {
   Briefcase,
@@ -180,4 +181,10 @@ const AIProjectManagerPage: React.FC = () => {
   );
 };
 
-export default AIProjectManagerPage;
+const AIProjectManagerPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="AIProjectManagerPage" showReportDialog>
+    <AIProjectManagerPage />
+  </ErrorBoundary>
+);
+
+export default AIProjectManagerPageWithErrorBoundary;

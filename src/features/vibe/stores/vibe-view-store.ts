@@ -335,13 +335,46 @@ export const useVibeViewStore = create<VibeViewStore>()(
 
         expandFolder: (folderId) =>
           set((state) => {
-            // Implementation for expanding folders in tree
-            // This would need recursive logic to find and update the folder
+            // Recursively find and expand the folder
+            const expandInTree = (items: FileTreeItem[]): boolean => {
+              for (const item of items) {
+                if (item.id === folderId && item.type === 'folder') {
+                  // Store expanded state in metadata
+                  if (!item.metadata) {
+                    item.metadata = {};
+                  }
+                  item.metadata.isExpanded = true;
+                  return true;
+                }
+                if (item.children && expandInTree(item.children)) {
+                  return true;
+                }
+              }
+              return false;
+            };
+            expandInTree(state.fileTree);
           }),
 
         collapseFolder: (folderId) =>
           set((state) => {
-            // Implementation for collapsing folders in tree
+            // Recursively find and collapse the folder
+            const collapseInTree = (items: FileTreeItem[]): boolean => {
+              for (const item of items) {
+                if (item.id === folderId && item.type === 'folder') {
+                  // Store collapsed state in metadata
+                  if (!item.metadata) {
+                    item.metadata = {};
+                  }
+                  item.metadata.isExpanded = false;
+                  return true;
+                }
+                if (item.children && collapseInTree(item.children)) {
+                  return true;
+                }
+              }
+              return false;
+            };
+            collapseInTree(state.fileTree);
           }),
 
         setFileMetadata: (metadata) =>

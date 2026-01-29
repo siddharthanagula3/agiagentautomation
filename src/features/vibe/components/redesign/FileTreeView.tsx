@@ -1,9 +1,14 @@
 /**
  * FileTreeView - Hierarchical file tree component for Vibe editor
  * Displays file system structure with expand/collapse, icons, and context menu
+ *
+ * Performance optimizations:
+ * - React.memo on both parent and child components
+ * - useCallback for event handlers
+ * - useMemo for expensive computations
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import {
   File,
   Folder,
@@ -39,7 +44,28 @@ interface FileTreeViewProps {
   className?: string;
 }
 
-export function FileTreeView({
+// File icon color map - memoized outside component
+const FILE_COLOR_MAP: Record<string, string> = {
+  ts: 'text-blue-500',
+  tsx: 'text-blue-500',
+  js: 'text-yellow-500',
+  jsx: 'text-yellow-500',
+  html: 'text-orange-500',
+  css: 'text-pink-500',
+  json: 'text-green-500',
+  md: 'text-blue-400',
+  py: 'text-blue-600',
+  java: 'text-red-500',
+  go: 'text-cyan-500',
+  rs: 'text-orange-600',
+};
+
+const getFileIconColor = (ext?: string): string => {
+  if (!ext) return 'text-gray-400';
+  return FILE_COLOR_MAP[ext] || 'text-gray-400';
+};
+
+export const FileTreeView = memo(function FileTreeView({
   tree,
   selectedPath,
   onFileClick,
@@ -66,7 +92,7 @@ export function FileTreeView({
       ))}
     </div>
   );
-}
+});
 
 interface FileTreeItemProps {
   node: FileNode;
@@ -79,7 +105,7 @@ interface FileTreeItemProps {
   onFileDownload?: (path: string) => void;
 }
 
-function FileTreeItem({
+const FileTreeItem = memo(function FileTreeItem({
   node,
   level,
   selectedPath,
@@ -96,31 +122,60 @@ function FileTreeItem({
   const isSelected = selectedPath === node.path;
   const hasChildren = node.children && node.children.length > 0;
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     if (node.type === 'folder') {
-      setIsExpanded(!isExpanded);
+      setIsExpanded((prev) => !prev);
     } else {
       onFileClick(node.path);
     }
-  };
+  }, [node.type, node.path, onFileClick]);
 
-  const handleRename = () => {
+  const handleRename = useCallback(() => {
     if (renameValue.trim() && renameValue !== node.name) {
       onFileRename?.(node.path, renameValue.trim());
     }
     setIsRenaming(false);
-  };
+  }, [renameValue, node.name, node.path, onFileRename]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleRename();
-    } else if (e.key === 'Escape') {
-      setRenameValue(node.name);
-      setIsRenaming(false);
-    }
-  };
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleRename();
+      } else if (e.key === 'Escape') {
+        setRenameValue(node.name);
+        setIsRenaming(false);
+      }
+    },
+    [handleRename, node.name]
+  );
 
-  const getFileIcon = () => {
+  const handleCopyPath = useCallback(() => {
+    navigator.clipboard.writeText(node.path);
+    toast.success('Path copied to clipboard');
+  }, [node.path]);
+
+  const handleStartRename = useCallback(() => {
+    setIsRenaming(true);
+  }, []);
+
+  const handleCreateFile = useCallback(() => {
+    onFileCreate?.(node.path, 'file');
+  }, [onFileCreate, node.path]);
+
+  const handleCreateFolder = useCallback(() => {
+    onFileCreate?.(node.path, 'folder');
+  }, [onFileCreate, node.path]);
+
+  const handleDelete = useCallback(() => {
+    onFileDelete?.(node.path);
+  }, [onFileDelete, node.path]);
+
+  const handleDownload = useCallback(() => {
+    onFileDownload?.(node.path);
+  }, [onFileDownload, node.path]);
+
+  // Memoize file icon to prevent recreation
+  const fileIcon = useMemo(() => {
     if (node.type === 'folder') {
       return isExpanded ? (
         <FolderOpen className="h-3.5 w-3.5 shrink-0 text-yellow-500" />
@@ -134,28 +189,13 @@ function FileTreeItem({
     const iconColor = getFileIconColor(ext);
 
     return <File className={cn('h-3.5 w-3.5 shrink-0', iconColor)} />;
-  };
+  }, [node.type, node.name, isExpanded]);
 
-  const getFileIconColor = (ext?: string): string => {
-    if (!ext) return 'text-gray-400';
-
-    const colorMap: Record<string, string> = {
-      ts: 'text-blue-500',
-      tsx: 'text-blue-500',
-      js: 'text-yellow-500',
-      jsx: 'text-yellow-500',
-      html: 'text-orange-500',
-      css: 'text-pink-500',
-      json: 'text-green-500',
-      md: 'text-blue-400',
-      py: 'text-blue-600',
-      java: 'text-red-500',
-      go: 'text-cyan-500',
-      rs: 'text-orange-600',
-    };
-
-    return colorMap[ext] || 'text-gray-400';
-  };
+  // Memoize padding style
+  const paddingStyle = useMemo(
+    () => ({ paddingLeft: `${level * 12 + 8}px` }),
+    [level]
+  );
 
   return (
     <div>
@@ -167,7 +207,7 @@ function FileTreeItem({
               'flex w-full items-center gap-2 rounded px-2 py-1 text-sm transition-colors hover:bg-muted',
               isSelected && 'bg-primary/10 font-medium text-primary'
             )}
-            style={{ paddingLeft: `${level * 12 + 8}px` }}
+            style={paddingStyle}
           >
             {node.type === 'folder' ? (
               <>
@@ -181,7 +221,7 @@ function FileTreeItem({
               <div className="w-3" />
             )}
 
-            {getFileIcon()}
+            {fileIcon}
 
             {isRenaming ? (
               <input
@@ -204,14 +244,14 @@ function FileTreeItem({
           {node.type === 'folder' && onFileCreate && (
             <>
               <ContextMenuItem
-                onClick={() => onFileCreate(node.path, 'file')}
+                onClick={handleCreateFile}
                 className="flex items-center gap-2"
               >
                 <File className="h-3.5 w-3.5" />
                 New File
               </ContextMenuItem>
               <ContextMenuItem
-                onClick={() => onFileCreate(node.path, 'folder')}
+                onClick={handleCreateFolder}
                 className="flex items-center gap-2"
               >
                 <Folder className="h-3.5 w-3.5" />
@@ -224,17 +264,14 @@ function FileTreeItem({
           {node.type === 'file' && onFileDownload && (
             <>
               <ContextMenuItem
-                onClick={() => onFileDownload(node.path)}
+                onClick={handleDownload}
                 className="flex items-center gap-2"
               >
                 <Download className="h-3.5 w-3.5" />
                 Download
               </ContextMenuItem>
               <ContextMenuItem
-                onClick={() => {
-                  navigator.clipboard.writeText(node.path);
-                  toast.success('Path copied to clipboard');
-                }}
+                onClick={handleCopyPath}
                 className="flex items-center gap-2"
               >
                 <Copy className="h-3.5 w-3.5" />
@@ -246,7 +283,7 @@ function FileTreeItem({
 
           {onFileRename && (
             <ContextMenuItem
-              onClick={() => setIsRenaming(true)}
+              onClick={handleStartRename}
               className="flex items-center gap-2"
             >
               <Edit className="h-3.5 w-3.5" />
@@ -256,7 +293,7 @@ function FileTreeItem({
 
           {onFileDelete && (
             <ContextMenuItem
-              onClick={() => onFileDelete(node.path)}
+              onClick={handleDelete}
               className="flex items-center gap-2 text-destructive focus:text-destructive"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -286,4 +323,4 @@ function FileTreeItem({
       )}
     </div>
   );
-}
+});

@@ -262,8 +262,12 @@ export function useVibeRealtime({
     // Defensive: Ensure sessionId is a valid string
     if (!sessionId || typeof sessionId !== 'string') return;
 
+    // Track cleanup timeouts to clear them on unmount
+    const cleanupTimeouts: ReturnType<typeof setTimeout>[] = [];
+
     // Updated: Jan 15th 2026 - Fixed memory leak by clearing completed commands after delay
     // Updated: Jan 2026 - Added type guards to safely extract metadata and result
+    // Updated: Jan 29th 2026 - Fixed memory leak by tracking timeouts for cleanup on unmount
     const handleCommandAction = (action: VibeAgentActionRow) => {
       if (action.action_type !== 'command_execution') return;
 
@@ -293,12 +297,19 @@ export function useVibeRealtime({
 
       // Clear completed commands from map after 5 minutes to prevent memory leak
       if (action.status === 'completed' || action.status === 'failed') {
-        setTimeout(
+        const timeoutId = setTimeout(
           () => {
             commandMap.current.delete(action.id);
+            // Remove this timeout from tracking array
+            const index = cleanupTimeouts.indexOf(timeoutId);
+            if (index > -1) {
+              cleanupTimeouts.splice(index, 1);
+            }
           },
           5 * 60 * 1000
         );
+        // Track timeout for cleanup on unmount
+        cleanupTimeouts.push(timeoutId);
       }
     };
 
@@ -347,6 +358,8 @@ export function useVibeRealtime({
       });
 
     return () => {
+      // Clear all pending cleanup timeouts on unmount
+      cleanupTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
       supabase.removeChannel(actionsChannel);
     };
   }, [

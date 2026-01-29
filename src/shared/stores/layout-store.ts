@@ -82,7 +82,16 @@ export interface UIActions {
   reset: () => void;
 }
 
-export interface UIStore extends UIState, UIActions {}
+export type UIStore = UIState & UIActions;
+
+/** Modal key type for type-safe modal access */
+export type ModalKey = keyof UIState['modals'];
+
+/** View mode type for dashboard */
+export type ViewMode = UIState['dashboard']['viewMode'];
+
+/** Sort order type */
+export type SortOrder = 'asc' | 'desc';
 
 const INITIAL_STATE: UIState = {
   sidebarOpen: true,

@@ -15,6 +15,7 @@ import { Bot, Mail, ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Particles } from '@shared/ui/particles';
 import { Spotlight } from '@shared/ui/spotlight';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -173,4 +174,11 @@ const ForgotPasswordPage: React.FC = () => {
   );
 };
 
-export default ForgotPasswordPage;
+// Wrap ForgotPasswordPage with ErrorBoundary for crash protection
+const ForgotPasswordPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="ForgotPasswordPage" showReportDialog>
+    <ForgotPasswordPage />
+  </ErrorBoundary>
+);
+
+export default ForgotPasswordPageWithErrorBoundary;

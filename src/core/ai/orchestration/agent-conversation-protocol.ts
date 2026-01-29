@@ -7,6 +7,7 @@
 import { unifiedLLMService } from '../llm/unified-language-model';
 import type { AIEmployee } from '@core/types/ai-employee';
 import { useMissionStore } from '@shared/stores/mission-control-store';
+import { logger } from '@shared/lib/logger';
 // SECURITY: Import prompt injection defense
 import {
   sanitizeEmployeeInput,
@@ -82,7 +83,7 @@ export class AgentConversationProtocol {
     );
 
     if (sanitizationResult.blocked) {
-      console.warn(
+      logger.warn(
         '[Agent Conversation] Input blocked:',
         sanitizationResult.blockReason
       );
@@ -161,7 +162,7 @@ export class AgentConversationProtocol {
 
       return result;
     } catch (error) {
-      console.error('[Agent Conversation] Error:', error);
+      logger.error('[Agent Conversation] Error:', error);
 
       return {
         success: false,
@@ -228,7 +229,7 @@ export class AgentConversationProtocol {
       // Check for loops
       if (this.detectLoop(state)) {
         loopDetected = true;
-        console.warn('[Agent Conversation] Loop detected, ending conversation');
+        logger.warn('[Agent Conversation] Loop detected, ending conversation');
 
         this.addMessage(state, {
           id: crypto.randomUUID(),
@@ -366,7 +367,7 @@ Provide your expertise. Be concise (2-3 sentences). If you're done, end with "DO
       employee.name
     );
     if (!outputValidation.isValid) {
-      console.warn(
+      logger.warn(
         `[Agent Conversation] Output validation issues for ${employee.name}:`,
         outputValidation.issues
       );
@@ -407,7 +408,7 @@ Provide your expertise. Be concise (2-3 sentences). If you're done, end with "DO
       employee.name
     );
     if (!outputValidation.isValid) {
-      console.warn(
+      logger.warn(
         `[Agent Conversation] Output validation issues for ${employee.name}:`,
         outputValidation.issues
       );

@@ -8,7 +8,7 @@ import {
 } from '../utils/token-tracking';
 import { withRateLimit } from '../utils/rate-limiter';
 import { withAuth } from '../utils/auth-middleware';
-import { getCorsHeaders, getMinimalCorsHeaders } from '../utils/cors';
+import { getSafeCorsHeaders, getMinimalCorsHeaders, checkOriginAndBlock } from '../utils/cors';
 import {
   qwenRequestSchema,
   formatValidationError,
@@ -27,8 +27,28 @@ import {
  */
 const qwenHandler: Handler = async (event: AuthenticatedEvent) => {
   // Extract origin for CORS validation
+  // Updated: Jan 29th 2026 - Fixed null CORS headers and added OPTIONS preflight handling
   const origin = event.headers.origin || event.headers.Origin || '';
-  const corsHeaders = getCorsHeaders(origin);
+  const corsHeaders = getSafeCorsHeaders(origin);
+
+  // Handle CORS preflight requests before auth check
+  if (event.httpMethod === 'OPTIONS') {
+    const blockedResponse = checkOriginAndBlock(origin);
+    if (blockedResponse) {
+      return blockedResponse;
+    }
+    return {
+      statusCode: 204,
+      headers: corsHeaders,
+      body: '',
+    };
+  }
+
+  // Block unauthorized origins early
+  const blockedResponse = checkOriginAndBlock(origin);
+  if (blockedResponse) {
+    return blockedResponse;
+  }
 
   // Only allow POST requests
   // Updated: Jan 6th 2026 - Fixed CORS wildcard vulnerability with origin validation
@@ -208,13 +228,13 @@ const qwenHandler: Handler = async (event: AuthenticatedEvent) => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        // SECURITY: Log full error server-side but return generic message to client
         console.error('[Qwen Proxy] Streaming API Error:', errorData);
         return {
           statusCode: response.status,
           headers: getMinimalCorsHeaders(origin),
           body: JSON.stringify({
-            error: errorData.error?.message || 'Qwen API streaming error',
-            details: errorData,
+            error: 'An error occurred processing your request',
           }),
         };
       }
@@ -275,13 +295,13 @@ const qwenHandler: Handler = async (event: AuthenticatedEvent) => {
     const data = await response.json();
 
     if (!response.ok) {
+      // SECURITY: Log full error server-side but return generic message to client
       console.error('[Qwen Proxy] API Error:', data);
       return {
         statusCode: response.status,
         headers: getMinimalCorsHeaders(origin),
         body: JSON.stringify({
-          error: data.error?.message || 'Qwen API error',
-          details: data,
+          error: 'An error occurred processing your request',
         }),
       };
     }
@@ -365,13 +385,13 @@ const qwenHandler: Handler = async (event: AuthenticatedEvent) => {
       body: JSON.stringify(normalized),
     };
   } catch (error) {
+    // SECURITY: Log full error server-side but return generic message to client
     console.error('[Qwen Proxy] Error:', error);
     return {
       statusCode: 500,
       headers: getMinimalCorsHeaders(origin),
       body: JSON.stringify({
-        error: 'Failed to process request',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: 'An error occurred processing your request',
       }),
     };
   }

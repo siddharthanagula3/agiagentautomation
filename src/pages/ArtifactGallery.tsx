@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import {
   Card,
   CardContent,
@@ -421,4 +422,10 @@ const DEMO_ARTIFACTS: PublicArtifact[] = [
   },
 ];
 
-export default ArtifactGalleryPage;
+const ArtifactGalleryPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="ArtifactGalleryPage" showReportDialog>
+    <ArtifactGalleryPage />
+  </ErrorBoundary>
+);
+
+export default ArtifactGalleryPageWithErrorBoundary;

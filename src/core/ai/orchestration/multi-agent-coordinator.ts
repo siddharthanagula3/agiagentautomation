@@ -6,13 +6,13 @@
 
 import {
   multiAgentOrchestrator,
-  type AgentTask,
   type AgentCommunication,
   type AgentStatus,
 } from './agent-collaboration-manager';
 import { AI_EMPLOYEES } from '@/data/marketplace-employees';
 import { listPurchasedEmployees } from '@features/workforce/services/employee-database';
 import { tokenLogger } from '@core/integrations/token-usage-tracker';
+import { logger } from '@shared/lib/logger';
 import type {
   AgentAssignment,
   UpsellRequest,
@@ -411,7 +411,7 @@ class CompanyHubOrchestrator {
           '🎉 All tasks completed successfully! Your collaborative workspace has finished the work.',
       });
     } catch (error) {
-      console.error('[CompanyHubOrchestrator] Execution error:', error);
+      logger.error('[CompanyHubOrchestrator] Execution error:', error);
       onMessage({
         sessionId,
         from: 'system',

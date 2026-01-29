@@ -52,6 +52,7 @@ import {
   X,
 } from 'lucide-react';
 import ErrorBoundary from '@shared/components/ErrorBoundary';
+import { cn } from '@shared/lib/utils';
 
 interface LLMUsage {
   provider: string;
@@ -312,7 +313,7 @@ const BillingPage: React.FC = () => {
 
   const handleRefreshBilling = async () => {
     try {
-      await loadBilling();
+      await refetchBilling();
       toast.success('Billing information refreshed');
     } catch (err) {
       toast.error('Failed to refresh billing information. Please try again.');
@@ -401,7 +402,7 @@ const BillingPage: React.FC = () => {
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-center">
           <p className="mb-2 text-sm text-muted-foreground">{error}</p>
-          <Button variant="outline" onClick={loadBilling}>
+          <Button variant="outline" onClick={() => refetchBilling()}>
             Retry
           </Button>
         </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
@@ -552,4 +553,10 @@ const ContactCard: React.FC<{
   );
 };
 
-export default HelpPage;
+const HelpPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="HelpPage" showReportDialog>
+    <HelpPage />
+  </ErrorBoundary>
+);
+
+export default HelpPageWithErrorBoundary;

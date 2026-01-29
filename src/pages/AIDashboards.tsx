@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -175,4 +176,10 @@ const AIDashboardsPage: React.FC = () => {
   );
 };
 
-export default AIDashboardsPage;
+const AIDashboardsPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="AIDashboardsPage" showReportDialog>
+    <AIDashboardsPage />
+  </ErrorBoundary>
+);
+
+export default AIDashboardsPageWithErrorBoundary;

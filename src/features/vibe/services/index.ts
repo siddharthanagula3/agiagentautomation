@@ -10,3 +10,11 @@ export { messagePool } from './vibe-message-pool';
 export { vibeCollaborationProtocol } from './vibe-collaboration-protocol';
 export { vibeToolOrchestrator } from './vibe-tool-orchestrator';
 export { vibeFileManager } from './vibe-file-manager';
+export {
+  vibeFileSyncService,
+  useFileSyncStatus,
+  useHasUnsavedChanges,
+  type SyncStatus,
+  type FileSyncState,
+  type FileSyncConfig,
+} from './vibe-file-sync';

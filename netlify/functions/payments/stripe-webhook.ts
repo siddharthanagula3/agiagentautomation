@@ -317,12 +317,14 @@ export const handler: Handler = async (event: HandlerEvent) => {
         process.env.STRIPE_WEBHOOK_SECRET
       );
     } catch (err) {
+      // SECURITY: Log full error server-side but return generic message to client
+      // Revealing specific signature verification errors helps attackers understand security mechanisms
       logger.error('Signature verification failed:', { requestId, error: err });
       return {
         statusCode: 400,
         headers: SECURITY_HEADERS,
         body: JSON.stringify({
-          error: `Webhook signature verification failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
+          error: 'Invalid webhook signature',
         }),
       };
     }
@@ -418,23 +420,24 @@ export const handler: Handler = async (event: HandlerEvent) => {
         }
       );
 
+      // SECURITY: Log full error server-side but return generic message to client
       return {
         statusCode: 500,
         headers: SECURITY_HEADERS,
         body: JSON.stringify({
-          error: `Event processing failed: ${processingError instanceof Error ? processingError.message : 'Unknown error'}`,
-          eventId: stripeEvent.id,
+          error: 'An error occurred processing the webhook',
           requestId,
         }),
       };
     }
   } catch (error) {
+    // SECURITY: Log full error server-side but return generic message to client
     logger.error('Webhook handler error:', { requestId, error });
     return {
       statusCode: 500,
       headers: SECURITY_HEADERS,
       body: JSON.stringify({
-        error: `Webhook processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error: 'An error occurred processing the webhook',
         requestId,
       }),
     };

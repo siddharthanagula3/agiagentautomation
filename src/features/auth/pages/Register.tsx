@@ -26,6 +26,7 @@ import {
 import { motion } from 'framer-motion';
 import { Particles } from '@shared/ui/particles';
 import { Spotlight } from '@shared/ui/spotlight';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 
 const RegisterPage: React.FC = () => {
   const { register } = useAuthStore();
@@ -440,4 +441,11 @@ const RegisterPage: React.FC = () => {
   );
 };
 
-export default RegisterPage;
+// Wrap RegisterPage with ErrorBoundary for crash protection
+const RegisterPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="RegisterPage" showReportDialog>
+    <RegisterPage />
+  </ErrorBoundary>
+);
+
+export default RegisterPageWithErrorBoundary;

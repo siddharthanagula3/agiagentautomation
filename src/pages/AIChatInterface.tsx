@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import {
   MessageSquare,
@@ -230,4 +231,10 @@ const AIChatPage: React.FC = () => {
   );
 };
 
-export default AIChatPage;
+const AIChatPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="AIChatPage" showReportDialog>
+    <AIChatPage />
+  </ErrorBoundary>
+);
+
+export default AIChatPageWithErrorBoundary;

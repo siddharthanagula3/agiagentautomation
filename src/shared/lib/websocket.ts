@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from './api';
+import { logger } from './logger';
 
 // ========================================
 // Types and Interfaces
@@ -279,7 +280,8 @@ export class WebSocketClient {
     );
 
     this.reconnectTimer = setTimeout(() => {
-      this.connect().catch(() => {
+      this.connect().catch((error) => {
+        logger.debug('[WebSocket] Reconnection attempt failed', error);
         if (this.shouldReconnect()) {
           this.scheduleReconnect();
         } else {

@@ -1,24 +1,113 @@
 /**
  * Chat React Query Hooks
  * Server state management for chat sessions and messages using React Query
+ *
+ * @module features/chat/hooks/use-chat-queries
  */
 
 import {
   useQuery,
   useMutation,
   useQueryClient,
-  useInfiniteQuery,
+  type UseQueryResult,
+  type UseMutationResult,
+  type QueryClient,
 } from '@tanstack/react-query';
 import { queryKeys } from '@shared/stores/query-client';
 import { supabase } from '@shared/lib/supabase-client';
 import { chatPersistenceService } from '../services/conversation-storage';
 import type { ChatSession, ChatMessage } from '../types';
 import { toast } from 'sonner';
+import { logger } from '@shared/lib/logger';
+import type { User } from '@supabase/supabase-js';
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Session creation parameters
+ */
+export interface CreateSessionParams {
+  title?: string;
+  metadata?: {
+    employeeId?: string;
+    role?: string;
+    provider?: string;
+  };
+}
+
+/**
+ * Session rename parameters
+ */
+export interface RenameSessionParams {
+  sessionId: string;
+  newTitle: string;
+}
+
+/**
+ * Session toggle parameters (star, pin, archive)
+ */
+export interface ToggleSessionParams {
+  sessionId: string;
+  isStarred?: boolean;
+  isPinned?: boolean;
+  isArchived?: boolean;
+}
+
+/**
+ * Message save parameters
+ */
+export interface SaveMessageParams {
+  sessionId: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
+/**
+ * Message update parameters
+ */
+export interface UpdateMessageParams {
+  messageId: string;
+  newContent: string;
+  sessionId: string;
+}
+
+/**
+ * Message delete parameters
+ */
+export interface DeleteMessageParams {
+  messageId: string;
+  sessionId: string;
+}
+
+/**
+ * Internal success result with user context
+ */
+interface SessionMutationResult {
+  sessionId: string;
+  userId: string;
+}
+
+/**
+ * Share session result
+ */
+interface ShareSessionResult extends SessionMutationResult {
+  shareLink: string;
+}
+
+/**
+ * Duplicate session result
+ */
+interface DuplicateSessionResult {
+  newSession: ChatSession;
+  userId: string;
+}
 
 /**
  * Hook to get current authenticated user
  */
-async function getCurrentUser() {
+async function getCurrentUser(): Promise<User | null> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -28,9 +117,14 @@ async function getCurrentUser() {
 /**
  * Fetch all chat sessions for a user
  * Message counts are now included in a single query (no N+1 pattern)
+ *
+ * @param userId - The user ID to fetch sessions for
+ * @returns UseQueryResult with array of ChatSession
  */
-export function useChatSessions(userId: string | undefined) {
-  return useQuery({
+export function useChatSessions(
+  userId: string | undefined
+): UseQueryResult<ChatSession[], Error> {
+  return useQuery<ChatSession[], Error>({
     queryKey: queryKeys.chat.sessions(userId ?? ''),
     queryFn: async (): Promise<ChatSession[]> => {
       if (!userId) return [];
@@ -60,14 +154,22 @@ export function useChatSessions(userId: string | undefined) {
     enabled: !!userId,
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    meta: {
+      errorMessage: 'Failed to load chat sessions',
+    },
   });
 }
 
 /**
  * Fetch a single chat session
+ *
+ * @param sessionId - The session ID to fetch
+ * @returns UseQueryResult with ChatSession or null
  */
-export function useChatSession(sessionId: string | undefined) {
-  return useQuery({
+export function useChatSession(
+  sessionId: string | undefined
+): UseQueryResult<ChatSession | null, Error> {
+  return useQuery<ChatSession | null, Error>({
     queryKey: queryKeys.chat.session(sessionId ?? ''),
     queryFn: async (): Promise<ChatSession | null> => {
       if (!sessionId) return null;
@@ -80,14 +182,22 @@ export function useChatSession(sessionId: string | undefined) {
     enabled: !!sessionId,
     staleTime: 60 * 1000, // 1 minute
     gcTime: 5 * 60 * 1000, // 5 minutes
+    meta: {
+      errorMessage: 'Failed to load chat session',
+    },
   });
 }
 
 /**
  * Fetch messages for a chat session
+ *
+ * @param sessionId - The session ID to fetch messages for
+ * @returns UseQueryResult with array of ChatMessage
  */
-export function useChatMessages(sessionId: string | undefined) {
-  return useQuery({
+export function useChatMessages(
+  sessionId: string | undefined
+): UseQueryResult<ChatMessage[], Error> {
+  return useQuery<ChatMessage[], Error>({
     queryKey: queryKeys.chat.messages(sessionId ?? ''),
     queryFn: async (): Promise<ChatMessage[]> => {
       if (!sessionId) return [];
@@ -96,27 +206,29 @@ export function useChatMessages(sessionId: string | undefined) {
     enabled: !!sessionId,
     staleTime: 30 * 1000, // 30 seconds - messages update frequently
     gcTime: 5 * 60 * 1000, // 5 minutes
+    meta: {
+      errorMessage: 'Failed to load chat messages',
+    },
   });
 }
 
 /**
  * Create a new chat session
+ *
+ * @returns UseMutationResult for creating a chat session
  */
-export function useCreateChatSession() {
-  const queryClient = useQueryClient();
+export function useCreateChatSession(): UseMutationResult<
+  ChatSession,
+  Error,
+  CreateSessionParams
+> {
+  const queryClient: QueryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<ChatSession, Error, CreateSessionParams>({
     mutationFn: async ({
       title = 'New Chat',
       metadata,
-    }: {
-      title?: string;
-      metadata?: {
-        employeeId?: string;
-        role?: string;
-        provider?: string;
-      };
-    }) => {
+    }: CreateSessionParams): Promise<ChatSession> => {
       const user = await getCurrentUser();
       if (!user) {
         throw new Error('You must be logged in to create a chat');
@@ -124,7 +236,7 @@ export function useCreateChatSession() {
 
       return chatPersistenceService.createSession(user.id, title, metadata);
     },
-    onSuccess: async (newSession) => {
+    onSuccess: async (newSession: ChatSession): Promise<void> => {
       const user = await getCurrentUser();
       if (user) {
         // Optimistically add to cache
@@ -135,8 +247,8 @@ export function useCreateChatSession() {
       }
       toast.success('New chat created');
     },
-    onError: (error) => {
-      console.error('Failed to create session:', error);
+    onError: (error: Error): void => {
+      logger.error('Failed to create session:', error);
       toast.error('Failed to create chat');
     },
   });
@@ -144,18 +256,25 @@ export function useCreateChatSession() {
 
 /**
  * Rename a chat session
+ *
+ * @returns UseMutationResult for renaming a chat session
  */
-export function useRenameChatSession() {
-  const queryClient = useQueryClient();
+export function useRenameChatSession(): UseMutationResult<
+  SessionMutationResult & { newTitle: string },
+  Error,
+  RenameSessionParams
+> {
+  const queryClient: QueryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    SessionMutationResult & { newTitle: string },
+    Error,
+    RenameSessionParams
+  >({
     mutationFn: async ({
       sessionId,
       newTitle,
-    }: {
-      sessionId: string;
-      newTitle: string;
-    }) => {
+    }: RenameSessionParams): Promise<SessionMutationResult & { newTitle: string }> => {
       const user = await getCurrentUser();
       if (!user) {
         throw new Error('You must be logged in to rename a chat');
@@ -168,7 +287,11 @@ export function useRenameChatSession() {
       );
       return { sessionId, newTitle, userId: user.id };
     },
-    onSuccess: ({ sessionId, newTitle, userId }) => {
+    onSuccess: ({
+      sessionId,
+      newTitle,
+      userId,
+    }: SessionMutationResult & { newTitle: string }): void => {
       // Update cache
       queryClient.setQueryData<ChatSession[]>(
         queryKeys.chat.sessions(userId),
@@ -189,23 +312,27 @@ export function useRenameChatSession() {
 
       toast.success('Chat renamed');
     },
-    onError: (error) => {
-      console.error('Failed to rename session:', error);
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to rename chat';
-      toast.error(errorMessage);
+    onError: (error: Error): void => {
+      logger.error('Failed to rename session:', error);
+      toast.error(error.message || 'Failed to rename chat');
     },
   });
 }
 
 /**
  * Delete (archive) a chat session
+ *
+ * @returns UseMutationResult for deleting a chat session
  */
-export function useDeleteChatSession() {
-  const queryClient = useQueryClient();
+export function useDeleteChatSession(): UseMutationResult<
+  SessionMutationResult,
+  Error,
+  string
+> {
+  const queryClient: QueryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (sessionId: string) => {
+  return useMutation<SessionMutationResult, Error, string>({
+    mutationFn: async (sessionId: string): Promise<SessionMutationResult> => {
       const user = await getCurrentUser();
       if (!user) {
         throw new Error('You must be logged in to delete a chat');
@@ -214,7 +341,7 @@ export function useDeleteChatSession() {
       await chatPersistenceService.deleteSession(sessionId, user.id);
       return { sessionId, userId: user.id };
     },
-    onSuccess: ({ sessionId, userId }) => {
+    onSuccess: ({ sessionId, userId }: SessionMutationResult): void => {
       // Remove from cache
       queryClient.setQueryData<ChatSession[]>(
         queryKeys.chat.sessions(userId),
@@ -231,29 +358,37 @@ export function useDeleteChatSession() {
 
       toast.success('Chat deleted');
     },
-    onError: (error) => {
-      console.error('Failed to delete session:', error);
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to delete chat';
-      toast.error(errorMessage);
+    onError: (error: Error): void => {
+      logger.error('Failed to delete session:', error);
+      toast.error(error.message || 'Failed to delete chat');
     },
   });
 }
 
 /**
  * Toggle star status on a chat session
+ *
+ * @returns UseMutationResult for toggling star status
  */
-export function useToggleStarSession() {
-  const queryClient = useQueryClient();
+export function useToggleStarSession(): UseMutationResult<
+  SessionMutationResult & { isStarred: boolean },
+  Error,
+  { sessionId: string; isStarred: boolean }
+> {
+  const queryClient: QueryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    SessionMutationResult & { isStarred: boolean },
+    Error,
+    { sessionId: string; isStarred: boolean }
+  >({
     mutationFn: async ({
       sessionId,
       isStarred,
     }: {
       sessionId: string;
       isStarred: boolean;
-    }) => {
+    }): Promise<SessionMutationResult & { isStarred: boolean }> => {
       const user = await getCurrentUser();
       if (!user) {
         throw new Error('You must be logged in');
@@ -266,7 +401,13 @@ export function useToggleStarSession() {
       );
       return { sessionId, isStarred, userId: user.id };
     },
-    onMutate: async ({ sessionId, isStarred }) => {
+    onMutate: async ({
+      sessionId,
+      isStarred,
+    }: {
+      sessionId: string;
+      isStarred: boolean;
+    }): Promise<void> => {
       const user = await getCurrentUser();
       if (!user) return;
 
@@ -279,11 +420,13 @@ export function useToggleStarSession() {
           )
       );
     },
-    onSuccess: ({ isStarred }) => {
+    onSuccess: ({
+      isStarred,
+    }: SessionMutationResult & { isStarred: boolean }): void => {
       toast.success(isStarred ? 'Chat starred' : 'Chat unstarred');
     },
-    onError: (error, { sessionId }) => {
-      console.error('Failed to update starred state:', error);
+    onError: (error: Error): void => {
+      logger.error('Failed to update starred state:', error);
       toast.error('Failed to update starred state');
       // Revert optimistic update by invalidating
       queryClient.invalidateQueries({ queryKey: queryKeys.chat.all() });
@@ -293,18 +436,28 @@ export function useToggleStarSession() {
 
 /**
  * Toggle pin status on a chat session
+ *
+ * @returns UseMutationResult for toggling pin status
  */
-export function useTogglePinSession() {
-  const queryClient = useQueryClient();
+export function useTogglePinSession(): UseMutationResult<
+  SessionMutationResult & { isPinned: boolean },
+  Error,
+  { sessionId: string; isPinned: boolean }
+> {
+  const queryClient: QueryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    SessionMutationResult & { isPinned: boolean },
+    Error,
+    { sessionId: string; isPinned: boolean }
+  >({
     mutationFn: async ({
       sessionId,
       isPinned,
     }: {
       sessionId: string;
       isPinned: boolean;
-    }) => {
+    }): Promise<SessionMutationResult & { isPinned: boolean }> => {
       const user = await getCurrentUser();
       if (!user) {
         throw new Error('You must be logged in');
@@ -317,7 +470,13 @@ export function useTogglePinSession() {
       );
       return { sessionId, isPinned, userId: user.id };
     },
-    onMutate: async ({ sessionId, isPinned }) => {
+    onMutate: async ({
+      sessionId,
+      isPinned,
+    }: {
+      sessionId: string;
+      isPinned: boolean;
+    }): Promise<void> => {
       const user = await getCurrentUser();
       if (!user) return;
 
@@ -330,11 +489,13 @@ export function useTogglePinSession() {
           )
       );
     },
-    onSuccess: ({ isPinned }) => {
+    onSuccess: ({
+      isPinned,
+    }: SessionMutationResult & { isPinned: boolean }): void => {
       toast.success(isPinned ? 'Chat pinned' : 'Chat unpinned');
     },
-    onError: (error) => {
-      console.error('Failed to update pinned state:', error);
+    onError: (error: Error): void => {
+      logger.error('Failed to update pinned state:', error);
       toast.error('Failed to update pinned state');
       queryClient.invalidateQueries({ queryKey: queryKeys.chat.all() });
     },
@@ -343,18 +504,28 @@ export function useTogglePinSession() {
 
 /**
  * Toggle archive status on a chat session
+ *
+ * @returns UseMutationResult for toggling archive status
  */
-export function useToggleArchiveSession() {
-  const queryClient = useQueryClient();
+export function useToggleArchiveSession(): UseMutationResult<
+  SessionMutationResult & { isArchived: boolean },
+  Error,
+  { sessionId: string; isArchived: boolean }
+> {
+  const queryClient: QueryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<
+    SessionMutationResult & { isArchived: boolean },
+    Error,
+    { sessionId: string; isArchived: boolean }
+  >({
     mutationFn: async ({
       sessionId,
       isArchived,
     }: {
       sessionId: string;
       isArchived: boolean;
-    }) => {
+    }): Promise<SessionMutationResult & { isArchived: boolean }> => {
       const user = await getCurrentUser();
       if (!user) {
         throw new Error('You must be logged in');
@@ -367,7 +538,13 @@ export function useToggleArchiveSession() {
       );
       return { sessionId, isArchived, userId: user.id };
     },
-    onMutate: async ({ sessionId, isArchived }) => {
+    onMutate: async ({
+      sessionId,
+      isArchived,
+    }: {
+      sessionId: string;
+      isArchived: boolean;
+    }): Promise<void> => {
       const user = await getCurrentUser();
       if (!user) return;
 
@@ -380,11 +557,13 @@ export function useToggleArchiveSession() {
           )
       );
     },
-    onSuccess: ({ isArchived }) => {
+    onSuccess: ({
+      isArchived,
+    }: SessionMutationResult & { isArchived: boolean }): void => {
       toast.success(isArchived ? 'Chat archived' : 'Chat unarchived');
     },
-    onError: (error) => {
-      console.error('Failed to update archived state:', error);
+    onError: (error: Error): void => {
+      logger.error('Failed to update archived state:', error);
       toast.error('Failed to update archived state');
       queryClient.invalidateQueries({ queryKey: queryKeys.chat.all() });
     },
@@ -393,12 +572,18 @@ export function useToggleArchiveSession() {
 
 /**
  * Duplicate a chat session
+ *
+ * @returns UseMutationResult for duplicating a chat session
  */
-export function useDuplicateChatSession() {
-  const queryClient = useQueryClient();
+export function useDuplicateChatSession(): UseMutationResult<
+  DuplicateSessionResult,
+  Error,
+  string
+> {
+  const queryClient: QueryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (sessionId: string) => {
+  return useMutation<DuplicateSessionResult, Error, string>({
+    mutationFn: async (sessionId: string): Promise<DuplicateSessionResult> => {
       const user = await getCurrentUser();
       if (!user) {
         throw new Error('You must be logged in');
@@ -428,15 +613,15 @@ export function useDuplicateChatSession() {
 
       return { newSession, userId: user.id };
     },
-    onSuccess: ({ newSession, userId }) => {
+    onSuccess: ({ newSession, userId }: DuplicateSessionResult): void => {
       queryClient.setQueryData<ChatSession[]>(
         queryKeys.chat.sessions(userId),
         (old) => (old ? [newSession, ...old] : [newSession])
       );
       toast.success('Chat duplicated');
     },
-    onError: (error) => {
-      console.error('Failed to duplicate session:', error);
+    onError: (error: Error): void => {
+      logger.error('Failed to duplicate session:', error);
       toast.error('Failed to duplicate chat');
     },
   });
@@ -444,12 +629,18 @@ export function useDuplicateChatSession() {
 
 /**
  * Share a chat session
+ *
+ * @returns UseMutationResult for sharing a chat session
  */
-export function useShareChatSession() {
-  const queryClient = useQueryClient();
+export function useShareChatSession(): UseMutationResult<
+  ShareSessionResult,
+  Error,
+  string
+> {
+  const queryClient: QueryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (sessionId: string) => {
+  return useMutation<ShareSessionResult, Error, string>({
+    mutationFn: async (sessionId: string): Promise<ShareSessionResult> => {
       const user = await getCurrentUser();
       if (!user) {
         throw new Error('You must be logged in to share a chat');
@@ -467,12 +658,12 @@ export function useShareChatSession() {
 
       return { shareLink, sessionId, userId: user.id };
     },
-    onSuccess: async ({ shareLink }) => {
+    onSuccess: async ({ shareLink }: ShareSessionResult): Promise<void> => {
       await navigator.clipboard.writeText(shareLink);
       toast.success('Share link copied to clipboard');
     },
-    onError: (error) => {
-      console.error('Failed to share session:', error);
+    onError: (error: Error): void => {
+      logger.error('Failed to share session:', error);
       toast.error('Failed to share chat');
     },
   });
@@ -480,10 +671,15 @@ export function useShareChatSession() {
 
 /**
  * Search chat sessions
+ *
+ * @param query - Search query string
+ * @returns UseQueryResult with array of matching ChatSession
  */
-export function useSearchChatSessions(query: string) {
-  return useQuery({
-    queryKey: ['chat', 'search', query],
+export function useSearchChatSessions(
+  query: string
+): UseQueryResult<ChatSession[], Error> {
+  return useQuery<ChatSession[], Error>({
+    queryKey: queryKeys.chat.search('', query),
     queryFn: async (): Promise<ChatSession[]> => {
       if (!query.trim()) return [];
 
@@ -494,63 +690,78 @@ export function useSearchChatSessions(query: string) {
     },
     enabled: query.trim().length > 0,
     staleTime: 30 * 1000, // 30 seconds
+    meta: {
+      errorMessage: 'Failed to search chats',
+    },
   });
 }
 
 /**
  * Save a new message to a session
+ *
+ * @returns UseMutationResult for saving a message
  */
-export function useSaveMessage() {
-  const queryClient = useQueryClient();
+export function useSaveMessage(): UseMutationResult<
+  ChatMessage,
+  Error,
+  SaveMessageParams
+> {
+  const queryClient: QueryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<ChatMessage, Error, SaveMessageParams>({
     mutationFn: async ({
       sessionId,
       role,
       content,
-    }: {
-      sessionId: string;
-      role: 'user' | 'assistant' | 'system';
-      content: string;
-    }) => {
+    }: SaveMessageParams): Promise<ChatMessage> => {
       return chatPersistenceService.saveMessage(sessionId, role, content);
     },
-    onSuccess: (newMessage) => {
+    onSuccess: (newMessage: ChatMessage): void => {
       // Add message to cache
       queryClient.setQueryData<ChatMessage[]>(
-        queryKeys.chat.messages(newMessage.sessionId),
+        queryKeys.chat.messages(newMessage.sessionId ?? ''),
         (old) => (old ? [...old, newMessage] : [newMessage])
       );
     },
-    onError: (error) => {
-      console.error('Failed to save message:', error);
+    onError: (error: Error): void => {
+      logger.error('Failed to save message:', error);
+      // Don't show toast for message saves - they happen in the background
     },
   });
 }
 
 /**
- * Update an existing message
+ * Updated message result with sessionId context
  */
-export function useUpdateMessage() {
-  const queryClient = useQueryClient();
+interface UpdatedMessageResult extends ChatMessage {
+  sessionId: string;
+}
 
-  return useMutation({
+/**
+ * Update an existing message
+ *
+ * @returns UseMutationResult for updating a message
+ */
+export function useUpdateMessage(): UseMutationResult<
+  UpdatedMessageResult,
+  Error,
+  UpdateMessageParams
+> {
+  const queryClient: QueryClient = useQueryClient();
+
+  return useMutation<UpdatedMessageResult, Error, UpdateMessageParams>({
     mutationFn: async ({
       messageId,
       newContent,
       sessionId,
-    }: {
-      messageId: string;
-      newContent: string;
-      sessionId: string;
-    }) => {
+    }: UpdateMessageParams): Promise<UpdatedMessageResult> => {
       const updated = await chatPersistenceService.updateMessage(
         messageId,
         newContent
       );
       return { ...updated, sessionId };
     },
-    onSuccess: (updatedMessage) => {
+    onSuccess: (updatedMessage: UpdatedMessageResult): void => {
       // Update message in cache
       queryClient.setQueryData<ChatMessage[]>(
         queryKeys.chat.messages(updatedMessage.sessionId),
@@ -561,33 +772,34 @@ export function useUpdateMessage() {
       );
       toast.success('Message updated');
     },
-    onError: (error) => {
-      console.error('Failed to update message:', error);
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to update message';
-      toast.error(errorMessage);
+    onError: (error: Error): void => {
+      logger.error('Failed to update message:', error);
+      toast.error(error.message || 'Failed to update message');
     },
   });
 }
 
 /**
  * Delete a message
+ *
+ * @returns UseMutationResult for deleting a message
  */
-export function useDeleteMessage() {
-  const queryClient = useQueryClient();
+export function useDeleteMessage(): UseMutationResult<
+  DeleteMessageParams,
+  Error,
+  DeleteMessageParams
+> {
+  const queryClient: QueryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<DeleteMessageParams, Error, DeleteMessageParams>({
     mutationFn: async ({
       messageId,
       sessionId,
-    }: {
-      messageId: string;
-      sessionId: string;
-    }) => {
+    }: DeleteMessageParams): Promise<DeleteMessageParams> => {
       await chatPersistenceService.deleteMessage(messageId);
       return { messageId, sessionId };
     },
-    onSuccess: ({ messageId, sessionId }) => {
+    onSuccess: ({ messageId, sessionId }: DeleteMessageParams): void => {
       // Remove message from cache
       queryClient.setQueryData<ChatMessage[]>(
         queryKeys.chat.messages(sessionId),
@@ -595,22 +807,22 @@ export function useDeleteMessage() {
       );
       toast.success('Message deleted');
     },
-    onError: (error) => {
-      console.error('Failed to delete message:', error);
-      const errorMessage =
-        error instanceof Error ? error.message : 'Failed to delete message';
-      toast.error(errorMessage);
+    onError: (error: Error): void => {
+      logger.error('Failed to delete message:', error);
+      toast.error(error.message || 'Failed to delete message');
     },
   });
 }
 
 /**
  * Invalidate all chat queries - useful after major changes
+ *
+ * @returns Callback function to invalidate all chat queries
  */
-export function useInvalidateChatQueries() {
-  const queryClient = useQueryClient();
+export function useInvalidateChatQueries(): () => void {
+  const queryClient: QueryClient = useQueryClient();
 
-  return () => {
+  return (): void => {
     queryClient.invalidateQueries({ queryKey: queryKeys.chat.all() });
   };
 }

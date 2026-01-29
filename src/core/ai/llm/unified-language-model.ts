@@ -9,49 +9,42 @@ import {
   anthropicProvider,
   AnthropicProvider,
   AnthropicMessage,
-  AnthropicResponse,
   AnthropicConfig,
 } from './providers/anthropic-claude';
 import {
   openaiProvider,
   OpenAIProvider,
   OpenAIMessage,
-  OpenAIResponse,
   OpenAIConfig,
 } from './providers/openai-gpt';
 import {
   googleProvider,
   GoogleProvider,
   GoogleMessage,
-  GoogleResponse,
   GoogleConfig,
 } from './providers/google-gemini';
 import {
   perplexityProvider,
   PerplexityProvider,
   PerplexityMessage,
-  PerplexityResponse,
   PerplexityConfig,
 } from './providers/perplexity-ai';
 import {
   grokProvider,
   GrokProvider,
   GrokMessage,
-  GrokResponse,
   GrokConfig,
 } from './providers/grok-ai';
 import {
   deepseekProvider,
   DeepSeekProvider,
   DeepSeekMessage,
-  DeepSeekResponse,
   DeepSeekConfig,
 } from './providers/deepseek-ai';
 import {
   qwenProvider,
   QwenProvider,
   QwenMessage,
-  QwenResponse,
   QwenConfig,
 } from './providers/qwen-ai';
 import {
@@ -70,6 +63,7 @@ import {
   REQUEST_LIMITS,
 } from '@core/security/api-abuse-prevention';
 import { isFeatureEnabled } from '@core/security/gradual-rollout';
+import { logger } from '@shared/lib/logger';
 
 export type LLMProvider =
   | 'anthropic'
@@ -125,31 +119,69 @@ const isDeepSeekModel = (model: string): model is DeepSeekConfig['model'] =>
 const isQwenModel = (model: string): model is QwenConfig['model'] =>
   QWEN_MODELS.includes(model as QwenConfig['model']);
 
+/** Message role types supported by unified LLM service */
+export type MessageRole = 'user' | 'assistant' | 'system';
+
+/** Metadata associated with unified messages */
+export interface UnifiedMessageMetadata {
+  sessionId?: string;
+  userId?: string;
+  employeeId?: string;
+  employeeRole?: string;
+  timestamp?: string;
+  provider?: LLMProvider;
+}
+
 export interface UnifiedMessage {
-  role: 'user' | 'assistant' | 'system';
+  role: MessageRole;
   content: string;
-  metadata?: {
-    sessionId?: string;
-    userId?: string;
-    employeeId?: string;
-    employeeRole?: string;
-    timestamp?: string;
-    provider?: LLMProvider;
-  };
+  metadata?: UnifiedMessageMetadata;
+}
+
+/** Token usage information returned by LLM providers */
+export interface TokenUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
 }
 
 export interface UnifiedResponse {
   content: string;
-  usage?: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
+  usage?: TokenUsage;
   model: string;
   provider: LLMProvider;
   sessionId?: string;
   userId?: string;
   metadata?: Record<string, unknown>;
+}
+
+/** Perplexity-specific search recency filter options */
+export type SearchRecencyFilter = 'day' | 'week' | 'month' | 'year';
+
+/** Provider-specific configuration for Anthropic */
+export interface AnthropicProviderConfig {
+  tools?: AnthropicConfig['tools'];
+}
+
+/** Provider-specific configuration for OpenAI */
+export interface OpenAIProviderConfig {
+  tools?: OpenAIConfig['tools'];
+}
+
+/** Provider-specific configuration for Google */
+export interface GoogleProviderConfig {
+  tools?: GoogleConfig['tools'];
+}
+
+/** Provider-specific configuration for Perplexity */
+export interface PerplexityProviderConfig {
+  searchDomain?: string;
+  searchRecencyFilter?: SearchRecencyFilter;
+}
+
+/** Provider-specific configuration for Grok */
+export interface GrokProviderConfig {
+  includeRealTimeData?: boolean;
 }
 
 export interface UnifiedConfig {
@@ -159,33 +191,78 @@ export interface UnifiedConfig {
   temperature: number;
   systemPrompt?: string;
   // Provider-specific configs
-  anthropic?: {
-    tools?: AnthropicConfig['tools'];
-  };
-  openai?: {
-    tools?: OpenAIConfig['tools'];
-  };
-  google?: {
-    tools?: GoogleConfig['tools'];
-  };
-  perplexity?: {
-    searchDomain?: string;
-    searchRecencyFilter?: 'day' | 'week' | 'month' | 'year';
-  };
-  grok?: {
-    includeRealTimeData?: boolean;
-  };
+  anthropic?: AnthropicProviderConfig;
+  openai?: OpenAIProviderConfig;
+  google?: GoogleProviderConfig;
+  perplexity?: PerplexityProviderConfig;
+  grok?: GrokProviderConfig;
 }
 
+/** Provider-agnostic message format used internally */
+interface ProviderMessage {
+  role: MessageRole;
+  content: string;
+  metadata?: UnifiedMessageMetadata & { provider: LLMProvider };
+}
+
+/** Shape of provider response for type validation */
+interface ProviderResponseShape {
+  content: string;
+  model: string;
+  sessionId?: string;
+  userId?: string;
+  usage?: {
+    inputTokens?: number;
+    outputTokens?: number;
+    promptTokens?: number;
+    completionTokens?: number;
+    totalTokens?: number;
+  };
+  metadata?: Record<string, unknown>;
+}
+
+/** Usage info in streaming format (snake_case from provider APIs) */
+export interface StreamingUsage {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+}
+
+/** Streaming chunk returned by the streamMessage generator */
+export interface StreamingChunk {
+  content: string;
+  done: boolean;
+  usage?: StreamingUsage;
+  provider: LLMProvider;
+}
+
+/** Error codes for unified LLM service */
+export type UnifiedLLMErrorCode =
+  | 'PROVIDER_NOT_FOUND'
+  | 'UNSUPPORTED_PROVIDER'
+  | 'PROMPT_INJECTION_DETECTED'
+  | 'API_ABUSE_DETECTED'
+  | 'REQUEST_TOO_LARGE'
+  | 'TOO_MANY_MESSAGES'
+  | 'INSUFFICIENT_TOKENS'
+  | 'PROVIDER_ERROR'
+  | 'PROVIDER_STREAMING_ERROR'
+  | 'INVALID_RESPONSE';
+
 export class UnifiedLLMError extends Error {
+  public readonly name = 'UnifiedLLMError' as const;
+
   constructor(
     message: string,
-    public code: string,
-    public provider: LLMProvider,
-    public retryable: boolean = false
+    public readonly code: UnifiedLLMErrorCode | string,
+    public readonly provider: LLMProvider,
+    public readonly retryable: boolean = false
   ) {
     super(message);
-    this.name = 'UnifiedLLMError';
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, UnifiedLLMError);
+    }
   }
 }
 
@@ -479,7 +556,7 @@ export class UnifiedLLMService {
         });
 
         if (!deductionResult.success) {
-          console.error(
+          logger.error(
             '[Unified LLM Service] Token deduction failed:',
             deductionResult.error
           );
@@ -500,7 +577,7 @@ export class UnifiedLLMService {
         trackRequestEnd(actualUserId);
       }
 
-      console.error(
+      logger.error(
         `[Unified LLM Service] Error with ${targetProvider}:`,
         error
       );
@@ -518,6 +595,7 @@ export class UnifiedLLMService {
     }
   }
 
+  /** Streaming chunk returned by the streamMessage generator */
   /**
    * Stream a message using the specified provider
    */
@@ -526,12 +604,7 @@ export class UnifiedLLMService {
     sessionId?: string,
     userId?: string,
     provider?: LLMProvider
-  ): AsyncGenerator<{
-    content: string;
-    done: boolean;
-    usage?: unknown;
-    provider: LLMProvider;
-  }> {
+  ): AsyncGenerator<StreamingChunk> {
     const targetProvider = provider || this.config.provider;
     const providerInstance = this.providers.get(targetProvider);
 
@@ -554,11 +627,7 @@ export class UnifiedLLMService {
       this.updateProviderConfig(targetProvider);
 
       // Stream message using provider
-      let stream: AsyncGenerator<{
-        content: string;
-        done: boolean;
-        usage?: unknown;
-      }>;
+      let stream: AsyncGenerator<Omit<StreamingChunk, 'provider'>>;
       switch (targetProvider) {
         case 'anthropic':
           stream = (providerInstance as AnthropicProvider).streamMessage(
@@ -622,7 +691,7 @@ export class UnifiedLLMService {
         yield { ...chunk, provider: targetProvider };
       }
     } catch (error) {
-      console.error(
+      logger.error(
         `[Unified LLM Service] Streaming error with ${targetProvider}:`,
         error
       );
@@ -642,11 +711,12 @@ export class UnifiedLLMService {
 
   /**
    * Convert unified messages to provider-specific format
+   * @returns Array of provider-formatted messages
    */
   private convertMessagesToProvider(
     messages: UnifiedMessage[],
     provider: LLMProvider
-  ): unknown[] {
+  ): ProviderMessage[] {
     return messages.map((msg) => ({
       role: msg.role,
       content: msg.content,
@@ -660,20 +730,7 @@ export class UnifiedLLMService {
   /**
    * Type guard to check if response has the expected provider response shape
    */
-  private isProviderResponse(response: unknown): response is {
-    content: string;
-    model: string;
-    sessionId?: string;
-    userId?: string;
-    usage?: {
-      inputTokens?: number;
-      outputTokens?: number;
-      promptTokens?: number;
-      completionTokens?: number;
-      totalTokens?: number;
-    };
-    metadata?: Record<string, unknown>;
-  } {
+  private isProviderResponse(response: unknown): response is ProviderResponseShape {
     return (
       typeof response === 'object' &&
       response !== null &&

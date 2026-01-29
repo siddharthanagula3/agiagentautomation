@@ -115,6 +115,7 @@ const ChatPage: React.FC = () => {
   const {
     sessions,
     currentSession,
+    isLoading: isLoadingSessions,
     createSession,
     renameSession,
     deleteSession,
@@ -442,6 +443,7 @@ const ChatPage: React.FC = () => {
               sessions={filteredSessions}
               currentSession={currentSession}
               searchQuery={searchQuery}
+              isLoading={isLoadingSessions}
               onSearchChange={setSearchQuery}
               onNewChat={handleNewChat}
               onSessionSelect={handleSessionSelect}

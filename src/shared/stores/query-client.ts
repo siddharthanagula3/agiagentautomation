@@ -10,12 +10,88 @@ import {
   useQuery,
   useMutation,
   useInfiniteQuery,
+  QueryCache,
+  MutationCache,
 } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { toast } from 'sonner';
 import { useNotificationStore } from './notification-store';
+import { logger } from '@shared/lib/logger';
+
+/**
+ * Extract user-friendly error message from various error types
+ */
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    // Handle specific error codes
+    if ('code' in error && error.code === 'PGRST116') {
+      return 'Resource not found';
+    }
+    if ('status' in error) {
+      const status = (error as { status: number }).status;
+      if (status === 401) return 'Please sign in to continue';
+      if (status === 403) return 'You do not have permission to perform this action';
+      if (status === 404) return 'Resource not found';
+      if (status === 429) return 'Too many requests. Please try again later';
+      if (status >= 500) return 'Server error. Please try again later';
+    }
+    return error.message;
+  }
+  if (typeof error === 'string') return error;
+  return 'An unexpected error occurred';
+}
+
+/**
+ * Global query cache with error handling
+ */
+const queryCache = new QueryCache({
+  onError: (error, query) => {
+    // Log all errors
+    logger.error(`[QueryError] ${query.queryKey.join('/')}:`, error);
+
+    // Get custom error message from query meta, or use default
+    const errorMessage =
+      (query.meta?.errorMessage as string) || getErrorMessage(error);
+
+    // Don't show toast for background refetch errors when we have cached data
+    if (query.state.data !== undefined) {
+      logger.warn(`[QueryError] Background refetch failed for ${query.queryKey.join('/')}, using cached data`);
+      return;
+    }
+
+    // Show toast notification for user-facing errors
+    toast.error(errorMessage);
+  },
+});
+
+/**
+ * Global mutation cache with error handling
+ */
+const mutationCache = new MutationCache({
+  onError: (error, _variables, _context, mutation) => {
+    // Log all mutation errors
+    logger.error(`[MutationError] ${mutation.options.mutationKey?.join('/') || 'unknown'}:`, error);
+
+    // Get custom error message from mutation meta, or use default
+    const errorMessage =
+      (mutation.meta?.errorMessage as string) || getErrorMessage(error);
+
+    // Show toast notification - mutations already have their own onError handlers
+    // so we only show a generic error if no handler exists
+    if (!mutation.options.onError) {
+      toast.error(errorMessage);
+    }
+  },
+  onSuccess: (_data, _variables, _context, mutation) => {
+    // Log successful mutations in debug mode
+    logger.debug(`[MutationSuccess] ${mutation.options.mutationKey?.join('/') || 'unknown'}`);
+  },
+});
 
 // Configure query client with optimized defaults
 export const queryClient = new QueryClient({
+  queryCache,
+  mutationCache,
   defaultOptions: {
     queries: {
       // Stale time: How long data is considered fresh
@@ -27,8 +103,11 @@ export const queryClient = new QueryClient({
       // Retry configuration
       retry: (failureCount, error: unknown) => {
         // Don't retry on 4xx errors (client errors)
-        if (error?.status >= 400 && error?.status < 500) {
-          return false;
+        if (error && typeof error === 'object' && 'status' in error) {
+          const status = (error as { status: number }).status;
+          if (status >= 400 && status < 500) {
+            return false;
+          }
         }
         // Retry up to 3 times for other errors
         return failureCount < 3;
@@ -103,6 +182,24 @@ export const queryKeys = {
     models: () => ['chat', 'models'] as const,
     search: (userId: string, query: string) =>
       ['chat', 'search', userId, query] as const,
+  },
+
+  // Message Reactions
+  reactions: {
+    all: () => ['reactions'] as const,
+    message: (messageId: string) => ['reactions', 'message', messageId] as const,
+    messages: (messageIds: string[]) =>
+      ['reactions', 'messages', messageIds.sort().join(',')] as const,
+  },
+
+  // Search
+  search: {
+    all: () => ['search'] as const,
+    history: (userId: string) => ['search', 'history', userId] as const,
+    recent: (userId: string) => ['search', 'recent', userId] as const,
+    popular: () => ['search', 'popular'] as const,
+    suggestions: (userId: string, query: string) =>
+      ['search', 'suggestions', userId, query] as const,
   },
 
   // Employees / Marketplace

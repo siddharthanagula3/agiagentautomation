@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   Avatar,
   AvatarFallback,
@@ -33,7 +33,79 @@ interface EmployeeSelectorProps {
   onToggleMode: () => void;
 }
 
-export function EmployeeSelector({
+/**
+ * Memoized individual employee avatar button
+ */
+const EmployeeAvatarButton = memo(function EmployeeAvatarButton({
+  employee,
+  isSelected,
+  onToggle,
+}: {
+  employee: AIEmployee;
+  isSelected: boolean;
+  onToggle: (employeeId: string) => void;
+}) {
+  const handleClick = useCallback(() => {
+    onToggle(employee.id);
+  }, [onToggle, employee.id]);
+
+  const initials = useMemo(
+    () =>
+      employee.name
+        .split(' ')
+        .map((n) => n[0])
+        .join(''),
+    [employee.name]
+  );
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={handleClick}
+            aria-label={`${isSelected ? 'Deselect' : 'Select'} ${employee.name}, ${employee.description}. Status: ${employee.status}`}
+            aria-pressed={isSelected}
+            className={cn(
+              'relative transition-all duration-200 hover:scale-110',
+              isSelected && 'ring-2 ring-purple-500 ring-offset-2'
+            )}
+          >
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={employee.avatar} />
+              <AvatarFallback
+                className="font-semibold text-white"
+                style={{ backgroundColor: employee.color }}
+              >
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+
+            {/* Status Indicator */}
+            <div
+              className={cn(
+                'absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white',
+                employee.status === 'working' && 'bg-green-500',
+                employee.status === 'thinking' && 'bg-yellow-500',
+                employee.status === 'idle' && 'bg-gray-400'
+              )}
+              aria-hidden="true"
+            />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <div className="text-center">
+            <div className="font-medium">{employee.name}</div>
+            <div className="text-xs text-gray-500">{employee.description}</div>
+            <div className="text-xs capitalize">{employee.status}</div>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+});
+
+export const EmployeeSelector = memo(function EmployeeSelector({
   employees,
   selectedEmployees,
   onSelectEmployee,
@@ -42,17 +114,27 @@ export function EmployeeSelector({
   mode,
   onToggleMode,
 }: EmployeeSelectorProps) {
-  const handleEmployeeClick = (employeeId: string) => {
-    if (selectedEmployees.includes(employeeId)) {
-      onDeselectEmployee(employeeId);
-    } else {
-      if (mode === 'single') {
-        // In single mode, replace current selection
-        selectedEmployees.forEach((id) => onDeselectEmployee(id));
+  // Memoize the toggle handler to prevent recreating on each render
+  const handleEmployeeToggle = useCallback(
+    (employeeId: string) => {
+      if (selectedEmployees.includes(employeeId)) {
+        onDeselectEmployee(employeeId);
+      } else {
+        if (mode === 'single') {
+          // In single mode, replace current selection
+          selectedEmployees.forEach((id) => onDeselectEmployee(id));
+        }
+        onSelectEmployee(employeeId);
       }
-      onSelectEmployee(employeeId);
-    }
-  };
+    },
+    [selectedEmployees, mode, onSelectEmployee, onDeselectEmployee]
+  );
+
+  // Memoize the selected set for O(1) lookup
+  const selectedSet = useMemo(
+    () => new Set(selectedEmployees),
+    [selectedEmployees]
+  );
 
   return (
     <div className="flex items-center space-x-3 border-b border-gray-200 p-4 dark:border-gray-700">
@@ -75,55 +157,12 @@ export function EmployeeSelector({
       {/* Employee Avatars */}
       <div className="flex items-center space-x-2">
         {employees.map((employee) => (
-          <TooltipProvider key={employee.id}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => handleEmployeeClick(employee.id)}
-                  aria-label={`${selectedEmployees.includes(employee.id) ? 'Deselect' : 'Select'} ${employee.name}, ${employee.description}. Status: ${employee.status}`}
-                  aria-pressed={selectedEmployees.includes(employee.id)}
-                  className={cn(
-                    'relative transition-all duration-200 hover:scale-110',
-                    selectedEmployees.includes(employee.id) &&
-                      'ring-2 ring-purple-500 ring-offset-2'
-                  )}
-                >
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={employee.avatar} />
-                    <AvatarFallback
-                      className="font-semibold text-white"
-                      style={{ backgroundColor: employee.color }}
-                    >
-                      {employee.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  {/* Status Indicator */}
-                  <div
-                    className={cn(
-                      'absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white',
-                      employee.status === 'working' && 'bg-green-500',
-                      employee.status === 'thinking' && 'bg-yellow-500',
-                      employee.status === 'idle' && 'bg-gray-400'
-                    )}
-                    aria-hidden="true"
-                  />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="text-center">
-                  <div className="font-medium">{employee.name}</div>
-                  <div className="text-xs text-gray-500">
-                    {employee.description}
-                  </div>
-                  <div className="text-xs capitalize">{employee.status}</div>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <EmployeeAvatarButton
+            key={employee.id}
+            employee={employee}
+            isSelected={selectedSet.has(employee.id)}
+            onToggle={handleEmployeeToggle}
+          />
         ))}
 
         {/* Add Employee Button */}
@@ -161,4 +200,4 @@ export function EmployeeSelector({
       )}
     </div>
   );
-}
+});

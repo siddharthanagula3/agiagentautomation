@@ -6,6 +6,7 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
+import { logger } from '@shared/lib/logger';
 
 /**
  * Helper function to get the current Supabase session token
@@ -18,7 +19,7 @@ async function getAuthToken(): Promise<string | null> {
     } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
-    console.error('[DeepSeek Provider] Failed to get auth token:', error);
+    logger.error('[DeepSeek Provider] Failed to get auth token:', error);
     return null;
   }
 }
@@ -68,14 +69,25 @@ export interface DeepSeekConfig {
   systemPrompt?: string;
 }
 
+/** Error codes specific to DeepSeek provider */
+export type DeepSeekErrorCode =
+  | 'NOT_AUTHENTICATED'
+  | 'REQUEST_FAILED'
+  | 'STREAMING_FAILED'
+  | `HTTP_${number}`;
+
 export class DeepSeekError extends Error {
+  public readonly name = 'DeepSeekError' as const;
+
   constructor(
     message: string,
-    public code: string,
-    public retryable: boolean = false
+    public readonly code: DeepSeekErrorCode | string,
+    public readonly retryable: boolean = false
   ) {
     super(message);
-    this.name = 'DeepSeekError';
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, DeepSeekError);
+    }
   }
 }
 
@@ -184,7 +196,7 @@ export class DeepSeekProvider {
         },
       };
     } catch (error) {
-      console.error('[DeepSeek Provider] Error:', error);
+      logger.error('[DeepSeek Provider] Error:', error);
 
       throw new DeepSeekError(
         `DeepSeek request failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -275,7 +287,7 @@ export class DeepSeekProvider {
         });
       }
     } catch (error) {
-      console.error('[DeepSeek Provider] Streaming error:', error);
+      logger.error('[DeepSeek Provider] Streaming error:', error);
 
       throw new DeepSeekError(
         `DeepSeek streaming failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -306,10 +318,10 @@ export class DeepSeekProvider {
       });
 
       if (error) {
-        console.error('[DeepSeek Provider] Error saving message:', error);
+        logger.error('[DeepSeek Provider] Error saving message:', error);
       }
     } catch (error) {
-      console.error(
+      logger.error(
         '[DeepSeek Provider] Unexpected error saving message:',
         error
       );

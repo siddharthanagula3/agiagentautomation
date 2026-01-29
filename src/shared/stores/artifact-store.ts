@@ -23,7 +23,7 @@ const initialState = {
   activeArtifact: null as string | null,
 };
 
-interface ArtifactState {
+export interface ArtifactState {
   // Artifacts by message ID (using Record for Immer compatibility)
   artifacts: Record<string, ArtifactData[]>;
 

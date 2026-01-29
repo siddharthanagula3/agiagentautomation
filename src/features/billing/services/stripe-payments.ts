@@ -101,56 +101,6 @@ export function getStripeConfig() {
   };
 }
 
-// Manual purchase function removed - hiring is now free
-
-/**
- * Create subscription checkout session
- * @deprecated Use upgradeToProPlan or upgradeToMaxPlan instead
- */
-export async function createSubscriptionCheckout(
-  plan: 'pro' | 'max',
-  userId: string,
-  userEmail: string,
-  billingPeriod: 'monthly' | 'yearly' = 'monthly'
-): Promise<void> {
-  const authToken = await getAuthToken();
-  if (!authToken) {
-    throw new Error('User not authenticated. Please log in to upgrade.');
-  }
-
-  // Call Netlify function to create subscription checkout session
-  const response = await fetch(
-    '/.netlify/functions/payments/create-pro-subscription',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${authToken}`,
-      },
-      body: JSON.stringify({
-        plan,
-        billingPeriod,
-        userId,
-        userEmail,
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to create subscription checkout');
-  }
-
-  const { url } = await response.json();
-
-  // Redirect to Stripe Checkout
-  if (url) {
-    window.location.href = url;
-  } else {
-    throw new Error('No checkout URL received from server');
-  }
-}
-
 /**
  * Create Pro Plan subscription and redirect to Stripe Checkout
  */

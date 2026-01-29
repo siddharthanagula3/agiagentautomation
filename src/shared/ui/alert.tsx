@@ -11,6 +11,10 @@ const alertVariants = cva(
         default: 'bg-background text-foreground',
         destructive:
           'border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive',
+        success:
+          'border-green-500/50 text-green-700 dark:text-green-400 dark:border-green-500 [&>svg]:text-green-600',
+        warning:
+          'border-yellow-500/50 text-yellow-700 dark:text-yellow-400 dark:border-yellow-500 [&>svg]:text-yellow-600',
       },
     },
     defaultVariants: {
@@ -19,17 +23,38 @@ const alertVariants = cva(
   }
 );
 
-const Alert = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
->(({ className, variant, ...props }, ref) => (
-  <div
-    ref={ref}
-    role="alert"
-    className={cn(alertVariants({ variant }), className)}
-    {...props}
-  />
-));
+interface AlertProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof alertVariants> {
+  /**
+   * For time-sensitive alerts, use 'assertive' to interrupt screen readers.
+   * Use 'polite' (default) for non-urgent notifications.
+   */
+  'aria-live'?: 'polite' | 'assertive' | 'off';
+  /**
+   * When true, assistive technologies will present the entire alert content.
+   * Useful for important status messages.
+   */
+  'aria-atomic'?: boolean;
+}
+
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
+  ({ className, variant, 'aria-live': ariaLive, 'aria-atomic': ariaAtomic = true, ...props }, ref) => {
+    // Destructive alerts should be more assertive by default
+    const liveValue = ariaLive ?? (variant === 'destructive' ? 'assertive' : 'polite');
+    
+    return (
+      <div
+        ref={ref}
+        role="alert"
+        aria-live={liveValue}
+        aria-atomic={ariaAtomic}
+        className={cn(alertVariants({ variant }), className)}
+        {...props}
+      />
+    );
+  }
+);
 Alert.displayName = 'Alert';
 
 const AlertTitle = React.forwardRef<

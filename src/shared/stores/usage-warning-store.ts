@@ -19,7 +19,7 @@ const initialState = {
   usagePercentage: 0,
 };
 
-interface UsageWarningState {
+export interface UsageWarningState {
   // Warning state
   hasShown85Warning: boolean;
   hasShown95Warning: boolean;

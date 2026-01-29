@@ -1,3 +1,18 @@
+/**
+ * Alternative API Client with Supabase Integration
+ *
+ * This module provides a simpler API client that uses Supabase for authentication
+ * and includes payment-related error handling (402 responses).
+ *
+ * NOTE: This client is NOT currently used in the codebase.
+ * The primary API client is @shared/lib/api.ts
+ *
+ * Use cases where this might be preferred:
+ * - Direct Supabase auth token handling
+ * - Simpler API without retry/interceptor complexity
+ * - Payment-required error handling with notifications
+ */
+
 import { supabase } from '@shared/lib/supabase-client';
 import { toast } from 'sonner';
 import { useNotificationStore } from '@shared/stores/notification-store';

@@ -8,7 +8,7 @@
  * - Progressive disclosure
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { Button } from '@shared/ui/button';
 import {
   DropdownMenu,
@@ -61,7 +61,7 @@ interface ConversationListItemProps {
   onDuplicate?: () => void;
 }
 
-export function ConversationListItem({
+export const ConversationListItem = memo(function ConversationListItem({
   id,
   title,
   summary,
@@ -83,6 +83,34 @@ export function ConversationListItem({
 }: ConversationListItemProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+  // Memoize event handlers to prevent unnecessary re-renders
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onClick();
+      }
+    },
+    [onClick]
+  );
+
+  const handleDeleteClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setShowDeleteDialog(true);
+    },
+    []
+  );
+
+  const handleConfirmDelete = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDelete?.();
+      setShowDeleteDialog(false);
+    },
+    [onDelete]
+  );
+
   return (
     <>
       <div
@@ -98,12 +126,7 @@ export function ConversationListItem({
         tabIndex={0}
         aria-label={`${title}${isStarred ? ', starred' : ''}${isPinned ? ', pinned' : ''}${isArchived ? ', archived' : ''}`}
         aria-current={isActive ? 'true' : undefined}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onClick();
-          }
-        }}
+        onKeyDown={handleKeyDown}
       >
         {/* Pin indicator - subtle left border */}
         {isPinned && (
@@ -238,10 +261,7 @@ export function ConversationListItem({
 
             {onDelete && (
               <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDeleteDialog(true);
-                }}
+                onClick={handleDeleteClick}
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
@@ -266,11 +286,7 @@ export function ConversationListItem({
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete?.();
-                setShowDeleteDialog(false);
-              }}
+              onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
@@ -280,4 +296,4 @@ export function ConversationListItem({
       </AlertDialog>
     </>
   );
-}
+});

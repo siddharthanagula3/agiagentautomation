@@ -128,6 +128,9 @@ Pre-commit hooks (Husky + lint-staged) auto-run ESLint and Prettier on staged fi
 
 - `src/features/billing/hooks/use-billing-queries.ts` - Billing data, token balance, analytics
 - `src/features/chat/hooks/use-chat-queries.ts` - Chat sessions, messages, CRUD operations
+- `src/features/chat/hooks/use-search-history.ts` - Search tracking, recent/popular searches, suggestions
+- `src/features/chat/hooks/use-message-reactions.ts` - Message reactions with optimistic updates
+- `src/features/chat/hooks/use-conversation-branches.ts` - Conversation branching and tree navigation
 - `src/features/settings/hooks/use-settings-queries.ts` - User profile, settings, API keys
 
 **4. Multi-Provider LLM Integration** (`src/core/ai/llm/unified-language-model.ts`)
@@ -327,6 +330,28 @@ queryKeys.employees.list(userId);
 queryKeys.billing.plan(userId);
 queryKeys.billing.tokenBalance(userId);
 queryKeys.settings.profile(userId);
+
+// Search history (new)
+queryKeys.search.all();
+queryKeys.search.recent(userId);
+queryKeys.search.popular();
+queryKeys.search.suggestions(userId, partialQuery);
+```
+
+**Branch and Reaction Query Keys** (defined in hook files):
+
+```typescript
+// Conversation branches (@features/chat/hooks/use-conversation-branches.ts)
+import { branchQueryKeys } from '@features/chat/hooks/use-conversation-branches';
+branchQueryKeys.branches(sessionId);
+branchQueryKeys.history(sessionId);
+branchQueryKeys.root(sessionId);
+branchQueryKeys.atMessage(messageId);
+
+// Message reactions (@features/chat/hooks/use-message-reactions.ts)
+import { reactionQueryKeys } from '@features/chat/hooks/use-message-reactions';
+reactionQueryKeys.message(messageId);
+reactionQueryKeys.messages(messageIds);
 ```
 
 ### VIBE vs Chat
@@ -481,6 +506,33 @@ Security headers configured in `netlify.toml`: CSP (hardened), HSTS, X-Frame-Opt
 9. **React Query for Server State**: Use React Query hooks, not manual useState/useEffect
 10. **Memory Leak Prevention**: Always cleanup timeouts, subscriptions, and AbortControllers
 
+### ErrorBoundary Pattern for Page Components
+
+All page components should be wrapped with ErrorBoundary for crash protection. This pattern is used consistently across auth pages and should be applied to all new pages:
+
+```typescript
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
+
+const MyPage: React.FC = () => {
+  // Page implementation
+};
+
+// Wrap page with ErrorBoundary for crash protection
+const MyPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="MyPage" showReportDialog>
+    <MyPage />
+  </ErrorBoundary>
+);
+
+export default MyPageWithErrorBoundary;
+```
+
+**ErrorBoundary Props:**
+
+- `componentName`: Identifies the component in Sentry reports
+- `showReportDialog`: Shows user-facing error dialog with report option
+- Automatically integrates with Sentry for error tracking
+
 ## Debugging
 
 ```bash
@@ -631,6 +683,253 @@ Configuration in `lighthouserc.js`:
 - RPC functions: `get_or_create_token_balance()`, `deduct_user_tokens()`, `add_user_tokens()`, `cap_user_token_balance()`
 - Default allocation: 1M tokens (free tier); plan upgrades handled in billing logic
 - **Subscription Cancellation**: Token balance capped at free tier limit (1M) via `cap_user_token_balance()` RPC
+
+## Database Schema (January 2026)
+
+### New Tables (migrations 20260129000001-20260129000005)
+
+**`search_history`** - User search query tracking
+
+```sql
+- id: UUID PRIMARY KEY
+- user_id: UUID (references auth.users)
+- query: TEXT
+- result_count: INTEGER
+- filters: JSONB
+- created_at: TIMESTAMPTZ
+```
+
+**`search_analytics`** - Aggregated search metrics for popular/trending searches
+
+```sql
+- id: UUID PRIMARY KEY
+- query_normalized: TEXT UNIQUE
+- search_count: INTEGER
+- total_results: BIGINT
+- last_searched_at: TIMESTAMPTZ
+- first_searched_at: TIMESTAMPTZ
+```
+
+**`message_reactions`** - Emoji reactions on chat messages
+
+```sql
+- id: UUID PRIMARY KEY
+- message_id: UUID (references chat_messages)
+- user_id: UUID (references auth.users)
+- emoji: TEXT
+- created_at: TIMESTAMPTZ
+- UNIQUE(user_id, message_id, emoji)
+```
+
+**`conversation_branches`** - Conversation tree branching for chat sessions
+
+```sql
+- id: UUID PRIMARY KEY
+- parent_session_id: UUID (references chat_sessions)
+- child_session_id: UUID UNIQUE (references chat_sessions)
+- branch_point_message_id: UUID (references chat_messages)
+- branch_name: TEXT (optional)
+- created_by: UUID (references auth.users)
+- created_at: TIMESTAMPTZ
+```
+
+**`user_settings` TOTP columns** - Two-factor authentication support
+
+```sql
+- totp_secret: TEXT (encrypted base32)
+- totp_enabled_at: TIMESTAMPTZ
+- backup_codes: TEXT[]
+- backup_codes_generated_at: TIMESTAMPTZ
+- backup_codes_used: INTEGER DEFAULT 0
+```
+
+### New RPC Functions
+
+**Search Functions:**
+
+```typescript
+// Track a search query and update analytics
+track_search(p_user_id UUID, p_query TEXT, p_result_count INTEGER, p_filters JSONB) -> UUID
+
+// Get deduplicated recent searches for a user
+get_recent_searches(p_user_id UUID, p_limit INTEGER DEFAULT 10) -> TABLE(query, result_count, created_at)
+
+// Get popular searches from analytics (last N days)
+get_popular_searches(p_limit INTEGER DEFAULT 10, p_days INTEGER DEFAULT 7) -> TABLE(query, search_count, avg_results)
+
+// Get autocomplete suggestions based on user history and popular searches
+get_search_suggestions(p_user_id UUID, p_partial_query TEXT, p_limit INTEGER DEFAULT 5) -> TABLE(suggestion, source, score)
+
+// Clear all search history for a user
+clear_search_history(p_user_id UUID) -> INTEGER
+```
+
+**Conversation Branching Functions:**
+
+```typescript
+// Traverse branch chain to find root session
+get_root_session(session_id UUID) -> UUID
+
+// Get all direct branches of a session
+get_session_branches(p_session_id UUID) -> TABLE(branch_id, child_session_id, branch_point_message_id, branch_name, created_at)
+
+// Get branch ancestry chain from session to root
+get_branch_history(p_session_id UUID) -> TABLE(session_id, branch_name, branch_point_message_id, depth)
+```
+
+**Message Reactions Functions:**
+
+```typescript
+// Get aggregated reactions for multiple messages with user reaction status
+get_message_reactions(message_ids UUID[]) -> TABLE(message_id, emoji, count, user_ids, user_reacted)
+```
+
+### RLS Security Remediation (migration 20260129000005)
+
+Critical security fixes applied to tables that were missing RLS:
+
+| Table                    | Fix Applied                                             |
+| ------------------------ | ------------------------------------------------------- |
+| `automation_nodes`       | RLS enabled, policies via workflow ownership            |
+| `automation_connections` | RLS enabled, policies via workflow ownership            |
+| `api_rate_limits`        | RLS enabled, user can view own, service_role can manage |
+| `vibe_agent_actions`     | Fixed overly permissive INSERT/UPDATE policies          |
+| `scheduled_tasks`        | RLS enabled, user ownership policies                    |
+| `resource_downloads`     | RLS enabled, user can view own downloads                |
+| `help_articles`          | RLS enabled, published articles public, admin-managed   |
+| `support_categories`     | RLS enabled, public read, admin-managed                 |
+| `contact_submissions`    | RLS enabled, anonymous insert, service_role manage      |
+| `sales_leads`            | RLS enabled, service_role only                          |
+| `newsletter_subscribers` | RLS enabled, anonymous subscribe, service_role manage   |
+| `cache_entries`          | RLS enabled, service_role only                          |
+| `blog_authors`           | RLS enabled, public read, author self-update            |
+
+## New React Query Hooks
+
+### Search History Hooks (`@features/chat/hooks/use-search-history.ts`)
+
+```typescript
+import {
+  useRecentSearches,
+  usePopularSearches,
+  useSearchSuggestions,
+  useTrackSearch,
+  useClearSearchHistory,
+  useSearchHistory, // Combined hook
+} from '@features/chat/hooks/use-search-history';
+
+// Get recent searches
+const { data: recentSearches } = useRecentSearches(10);
+
+// Get popular searches (last 7 days)
+const { data: popularSearches } = usePopularSearches(10, 7);
+
+// Get autocomplete suggestions
+const { data: suggestions } = useSearchSuggestions(partialQuery, 5);
+
+// Track a search
+const trackSearch = useTrackSearch();
+trackSearch.mutate({ query: 'agents', resultCount: 15, filters: { category: 'ai' } });
+
+// Combined hook for all search functionality
+const { recentSearches, popularSearches, trackSearch, clearHistory } = useSearchHistory();
+```
+
+### Message Reactions Hooks (`@features/chat/hooks/use-message-reactions.ts`)
+
+```typescript
+import {
+  useMessageReactions,
+  useMessagesReactions,
+  useToggleReaction,
+  useReactions, // Combined hook
+  REACTION_EMOJIS,
+} from '@features/chat/hooks/use-message-reactions';
+
+// Get reactions for a message
+const { data: reactions } = useMessageReactions(messageId);
+
+// Get reactions for multiple messages (batch)
+const { data: reactionsMap } = useMessagesReactions(messageIds);
+
+// Toggle a reaction (add if not exists, remove if exists)
+const toggleReaction = useToggleReaction();
+toggleReaction.mutate({ messageId, emoji: 'thumbsUp' });
+
+// Combined hook with all functionality
+const { reactions, toggle, hasReacted, getCount } = useReactions(messageId);
+```
+
+### Conversation Branching Hooks (`@features/chat/hooks/use-conversation-branches.ts`)
+
+```typescript
+import {
+  useBranches,
+  useBranchHistory,
+  useCreateBranch,
+  useDeleteBranch,
+  useRootSession,
+  useMessageBranches,
+  useConversationTree,
+} from '@features/chat/hooks/use-conversation-branches';
+
+// Get all branches for a session
+const { data: branches } = useBranches(sessionId);
+
+// Get branch ancestry chain
+const { data: history } = useBranchHistory(sessionId);
+
+// Create a new branch at a message
+const createBranch = useCreateBranch();
+createBranch.mutate({ sessionId, messageId, userId, branchName: 'Alternate approach' });
+
+// Get root session of a branch chain
+const { data: rootId } = useRootSession(sessionId);
+
+// Get branches at a specific message
+const { branches, hasBranches } = useMessageBranches(messageId);
+
+// Get full conversation tree
+const { data: tree } = useConversationTree(sessionId, userId);
+```
+
+### New Services
+
+**Search History Service** (`@core/storage/search-history-service.ts`)
+
+```typescript
+import { searchHistoryService } from '@core/storage/search-history-service';
+
+await searchHistoryService.trackSearch({ userId, query, resultCount, filters });
+await searchHistoryService.getRecentSearches(userId, limit);
+await searchHistoryService.getPopularSearches(limit, days);
+await searchHistoryService.getSearchSuggestions(userId, partialQuery, limit);
+await searchHistoryService.clearSearchHistory(userId);
+```
+
+**Message Reactions Service** (`@features/chat/services/message-reactions-service.ts`)
+
+```typescript
+import { messageReactionsService, REACTION_EMOJIS } from '@features/chat/services/message-reactions-service';
+
+await messageReactionsService.addReaction(userId, messageId, emoji);
+await messageReactionsService.removeReaction(userId, messageId, emoji);
+await messageReactionsService.toggleReaction(userId, messageId, emoji);
+await messageReactionsService.getReactions(messageId);
+await messageReactionsService.getReactionsForMessages(messageIds);
+```
+
+**Conversation Branching Service** (`@features/chat/services/conversation-branching.ts`)
+
+```typescript
+import { conversationBranchingService } from '@features/chat/services/conversation-branching';
+
+await conversationBranchingService.branchConversation(sessionId, messageId, userId, branchName);
+await conversationBranchingService.getBranchesForSession(sessionId);
+await conversationBranchingService.getBranchHistory(sessionId);
+await conversationBranchingService.getRootSessionId(sessionId);
+await conversationBranchingService.getConversationTree(sessionId, userId);
+```
 
 ## LLM Provider Models (January 2026)
 

@@ -7,6 +7,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { Badge } from '@shared/ui/badge';
+import { Skeleton } from '@shared/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -43,6 +44,7 @@ import {
   FolderPlus,
   ChevronRight,
   ChevronDown,
+  Loader2,
 } from 'lucide-react';
 import {
   folderManagementService,
@@ -76,12 +78,14 @@ export function FolderManagement({
 }: FolderManagementProps) {
   const { user } = useAuthStore();
   const [folders, setFolders] = useState<ChatFolder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set()
   );
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState<ChatFolder | null>(null);
   const [deletingFolder, setDeletingFolder] = useState<ChatFolder | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Form state
   const [folderName, setFolderName] = useState('');
@@ -91,6 +95,7 @@ export function FolderManagement({
   const loadFolders = useCallback(async () => {
     if (!user?.id) return;
 
+    setIsLoading(true);
     try {
       const userFolders = await folderManagementService.getUserFolders(user.id);
 
@@ -108,6 +113,8 @@ export function FolderManagement({
     } catch (error) {
       console.error('[FolderManagement] Failed to load folders:', error);
       toast.error('Failed to load folders');
+    } finally {
+      setIsLoading(false);
     }
   }, [user?.id]);
 
@@ -124,6 +131,7 @@ export function FolderManagement({
       return;
     }
 
+    setIsSaving(true);
     try {
       await folderManagementService.createFolder(user.id, {
         name: folderName.trim(),
@@ -140,6 +148,8 @@ export function FolderManagement({
     } catch (error) {
       console.error('[FolderManagement] Failed to create folder:', error);
       toast.error('Failed to create folder');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -149,6 +159,7 @@ export function FolderManagement({
       return;
     }
 
+    setIsSaving(true);
     try {
       await folderManagementService.updateFolder(
         editingFolder.id,
@@ -169,12 +180,15 @@ export function FolderManagement({
     } catch (error) {
       console.error('[FolderManagement] Failed to update folder:', error);
       toast.error('Failed to update folder');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleDeleteFolder = async () => {
     if (!deletingFolder) return;
 
+    setIsSaving(true);
     try {
       await folderManagementService.deleteFolder(deletingFolder.id, user?.id);
 
@@ -189,6 +203,8 @@ export function FolderManagement({
     } catch (error) {
       console.error('[FolderManagement] Failed to delete folder:', error);
       toast.error('Failed to delete folder');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -255,6 +271,16 @@ export function FolderManagement({
 
       {/* Folder List */}
       <ScrollArea className="h-auto max-h-[300px]">
+        {isLoading ? (
+          <div className="space-y-1 px-3 py-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center gap-2 rounded-lg px-3 py-2">
+                <Skeleton className="h-4 w-4" />
+                <Skeleton className="h-4 flex-1" />
+              </div>
+            ))}
+          </div>
+        ) : (
         <div className="space-y-1">
           {folders.map((folder) => (
             <div key={folder.id} className="space-y-1">
@@ -338,9 +364,10 @@ export function FolderManagement({
             </div>
           ))}
         </div>
+        )}
       </ScrollArea>
 
-      {folders.length === 0 && (
+      {!isLoading && folders.length === 0 && (
         <div className="px-3 py-6 text-center">
           <Folder className="mx-auto mb-2 h-8 w-8 text-muted-foreground opacity-30" />
           <p className="text-xs text-muted-foreground">No folders yet</p>
@@ -430,14 +457,22 @@ export function FolderManagement({
                 setFolderColor('gray');
                 setFolderDescription('');
               }}
+              disabled={isSaving}
             >
               Cancel
             </Button>
             <Button
               onClick={editingFolder ? handleRenameFolder : handleCreateFolder}
-              disabled={!folderName.trim()}
+              disabled={!folderName.trim() || isSaving}
             >
-              {editingFolder ? 'Save Changes' : 'Create Folder'}
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {editingFolder ? 'Saving...' : 'Creating...'}
+                </>
+              ) : (
+                editingFolder ? 'Save Changes' : 'Create Folder'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -468,11 +503,26 @@ export function FolderManagement({
           </DialogHeader>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeletingFolder(null)}>
+            <Button
+              variant="outline"
+              onClick={() => setDeletingFolder(null)}
+              disabled={isSaving}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDeleteFolder}>
-              Delete Folder
+            <Button
+              variant="destructive"
+              onClick={handleDeleteFolder}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Folder'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

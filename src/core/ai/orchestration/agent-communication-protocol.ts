@@ -4,6 +4,7 @@
  */
 
 import { AgentType } from './reasoning/task-breakdown';
+import { logger } from '@shared/lib/logger';
 
 export type MessageType =
   | 'request'
@@ -362,7 +363,7 @@ export class AgentCommunicator {
         }
       }
     } catch (error) {
-      console.error('Error processing message:', error);
+      logger.error('[Agent Communication] Error processing message:', error);
 
       // Send error response if this was a request
       if (message.type === 'request' && message.from !== 'user') {
@@ -397,7 +398,7 @@ export class AgentCommunicator {
       try {
         listener(message);
       } catch (error) {
-        console.error('Error in message listener:', error);
+        logger.error('[Agent Communication] Error in message listener:', error);
       }
     });
   }

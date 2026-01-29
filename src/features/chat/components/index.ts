@@ -35,3 +35,10 @@ export * from './Composer';
 
 // Tools (re-export from Tools folder)
 export * from './Tools';
+
+// Branch Navigation
+export {
+  BranchNavigator,
+  BranchIndicator,
+  MessageBranchIndicator,
+} from './BranchNavigator';

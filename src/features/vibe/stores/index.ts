@@ -40,8 +40,20 @@ export {
   useVibeFileLoadingState,
   useVibeFile,
   useFileUploadProgress,
+  // Sync state selectors
+  useSyncStatesRecord,
+  useFileSyncState,
+  useCurrentFileSessionId,
+  useHasUnsavedFileChanges,
+  useFilesWithSyncErrors,
+  useSyncStatusSummary,
 } from './vibe-file-store';
-export type { VibeFileState, FileUploadProgress } from './vibe-file-store';
+export type {
+  VibeFileState,
+  FileUploadProgress,
+  FileSyncStatus,
+  FileSyncState,
+} from './vibe-file-store';
 
 export { useVibeViewStore } from './vibe-view-store';
 export type {

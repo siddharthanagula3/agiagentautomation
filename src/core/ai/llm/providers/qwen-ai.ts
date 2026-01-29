@@ -6,6 +6,7 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
+import { logger } from '@shared/lib/logger';
 
 /**
  * Helper function to get the current Supabase session token
@@ -18,7 +19,7 @@ async function getAuthToken(): Promise<string | null> {
     } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
-    console.error('[Qwen Provider] Failed to get auth token:', error);
+    logger.error('[Qwen Provider] Failed to get auth token:', error);
     return null;
   }
 }
@@ -70,14 +71,25 @@ export interface QwenConfig {
   thinkingMode?: boolean; // Enable thinking mode for qwen3-max
 }
 
+/** Error codes specific to Qwen provider */
+export type QwenErrorCode =
+  | 'NOT_AUTHENTICATED'
+  | 'REQUEST_FAILED'
+  | 'STREAMING_FAILED'
+  | `HTTP_${number}`;
+
 export class QwenError extends Error {
+  public readonly name = 'QwenError' as const;
+
   constructor(
     message: string,
-    public code: string,
-    public retryable: boolean = false
+    public readonly code: QwenErrorCode | string,
+    public readonly retryable: boolean = false
   ) {
     super(message);
-    this.name = 'QwenError';
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, QwenError);
+    }
   }
 }
 
@@ -184,7 +196,7 @@ export class QwenProvider {
         },
       };
     } catch (error) {
-      console.error('[Qwen Provider] Error:', error);
+      logger.error('[Qwen Provider] Error:', error);
 
       throw new QwenError(
         `Qwen request failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -275,7 +287,7 @@ export class QwenProvider {
         });
       }
     } catch (error) {
-      console.error('[Qwen Provider] Streaming error:', error);
+      logger.error('[Qwen Provider] Streaming error:', error);
 
       throw new QwenError(
         `Qwen streaming failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -306,10 +318,10 @@ export class QwenProvider {
       });
 
       if (error) {
-        console.error('[Qwen Provider] Error saving message:', error);
+        logger.error('[Qwen Provider] Error saving message:', error);
       }
     } catch (error) {
-      console.error('[Qwen Provider] Unexpected error saving message:', error);
+      logger.error('[Qwen Provider] Unexpected error saving message:', error);
     }
   }
 

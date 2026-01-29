@@ -18,10 +18,7 @@
  */
 
 import { unifiedLLMService } from '@core/ai/llm/unified-language-model';
-import {
-  employeeMemoryService,
-  type HandoffPackage,
-} from '@core/ai/employees/employee-memory-service';
+import { employeeMemoryService } from '@core/ai/employees/employee-memory-service';
 import { useMissionStore } from '@shared/stores/mission-control-store';
 import { tokenLogger } from '@core/integrations/token-usage-tracker';
 

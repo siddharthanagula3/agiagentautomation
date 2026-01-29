@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import {
   Mail,
@@ -555,4 +556,10 @@ const ContactSalesPage: React.FC = () => {
   );
 };
 
-export default ContactSalesPage;
+const ContactSalesPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="ContactSalesPage" showReportDialog>
+    <ContactSalesPage />
+  </ErrorBoundary>
+);
+
+export default ContactSalesPageWithErrorBoundary;

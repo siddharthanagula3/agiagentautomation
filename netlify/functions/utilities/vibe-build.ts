@@ -2,7 +2,7 @@ import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { transform } from 'esbuild';
 import { withAuth } from '../utils/auth-middleware';
 import { withRateLimit } from '../utils/rate-limiter';
-import { getCorsHeaders } from '../utils/cors';
+import { getSafeCorsHeaders, checkOriginAndBlock } from '../utils/cors';
 
 /**
  * VIBE Build Service
@@ -392,16 +392,28 @@ const vibeBuildHandler: Handler = async (
   _context: HandlerContext
 ) => {
   // Get CORS headers with proper origin validation (no wildcard)
+  // Updated: Jan 29th 2026 - Fixed null CORS headers vulnerability using getSafeCorsHeaders
   const origin = event.headers.origin || event.headers.Origin;
-  const corsHeaders = getCorsHeaders(origin);
+  const corsHeaders = getSafeCorsHeaders(origin);
   const headers = {
     ...corsHeaders,
     'Content-Type': 'application/json',
   };
 
-  // Handle preflight
+  // Handle preflight - early exit before auth check for OPTIONS requests
   if (event.httpMethod === 'OPTIONS') {
+    // Block unauthorized origins for preflight too
+    const blockedResponse = checkOriginAndBlock(origin);
+    if (blockedResponse) {
+      return blockedResponse;
+    }
     return { statusCode: 204, headers, body: '' };
+  }
+
+  // Block unauthorized origins for non-OPTIONS requests
+  const blockedResponse = checkOriginAndBlock(origin);
+  if (blockedResponse) {
+    return blockedResponse;
   }
 
   // Only allow POST

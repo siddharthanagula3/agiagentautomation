@@ -22,19 +22,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setActualTheme(newTheme);
     };
 
+    let mediaQuery: MediaQueryList | null = null;
+    let handler: (() => void) | null = null;
+
     if (theme === 'system') {
       const systemTheme = getSystemTheme();
       applyTheme(systemTheme);
 
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handler = () => applyTheme(getSystemTheme());
+      mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      handler = () => applyTheme(getSystemTheme());
       mediaQuery.addEventListener('change', handler);
-      return () => mediaQuery.removeEventListener('change', handler);
     } else {
       applyTheme(theme);
     }
 
     localStorage.setItem(THEME_STORAGE_KEY, theme);
+
+    // Always return cleanup function to remove listener if it was added
+    return () => {
+      if (mediaQuery && handler) {
+        mediaQuery.removeEventListener('change', handler);
+      }
+    };
   }, [theme]);
 
   return (

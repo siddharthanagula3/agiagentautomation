@@ -5,3 +5,4 @@ export { default as KeyboardShortcutsDialog } from './KeyboardShortcutsDialog';
 export { default as GlobalSearchDialog } from './GlobalSearchDialog';
 export { default as TokenAnalyticsDialog } from './TokenAnalyticsDialog';
 export { default as UsageWarningModal } from './UsageWarningModal';
+export { CreateBranchDialog } from './CreateBranchDialog';

@@ -9,17 +9,39 @@ import type {
   AIEmployee,
   AIEmployeeFrontmatter,
 } from '@core/types/ai-employee';
+import { logger } from '@shared/lib/logger';
+
+/** Supported LLM providers for system prompts */
+export type SystemPromptProvider = 'openai' | 'anthropic' | 'google' | 'perplexity' | 'grok' | 'deepseek' | 'qwen';
+
+/** Categories of system prompts */
+export type SystemPromptCategory = 'general' | 'role-specific' | 'task-specific' | 'safety';
 
 export interface SystemPrompt {
   id: string;
   name: string;
   content: string;
-  provider: string;
+  provider: SystemPromptProvider | string;
   model?: string;
-  category: 'general' | 'role-specific' | 'task-specific' | 'safety';
+  category: SystemPromptCategory;
   guidelines: string[];
   cacheKey: string;
   lastUpdated: Date;
+}
+
+/** Provider-specific capabilities and features */
+export interface ProviderCapabilities {
+  supportsFunctionCalling?: boolean;
+  supportsSystemMessages?: boolean;
+  supportsFewShot?: boolean;
+  supportsSystemInstructions?: boolean;
+  supportsConstitutionalAI?: boolean;
+  supportsLongContext?: boolean;
+  supportsMultimodal?: boolean;
+  supportsSafetySettings?: boolean;
+  supportsWebSearch?: boolean;
+  supportsCitations?: boolean;
+  supportsRealTimeData?: boolean;
 }
 
 export interface PromptGuidelines {
@@ -27,15 +49,35 @@ export interface PromptGuidelines {
   recommendedLength: number;
   keyElements: string[];
   optimizationTips: string[];
-  providerSpecific: Record<string, unknown>;
+  providerSpecific: ProviderCapabilities;
+}
+
+/** Cache entry for system prompts */
+interface PromptCacheEntry {
+  prompt: SystemPrompt;
+  timestamp: Date;
+}
+
+/** Cache duration in milliseconds (1 hour) */
+const CACHE_DURATION_MS = 3600000;
+
+/** Result of prompt validation */
+export interface PromptValidationResult {
+  isValid: boolean;
+  errors: string[];
+}
+
+/** Cache statistics */
+export interface CacheStats {
+  size: number;
+  entries: string[];
 }
 
 export class SystemPromptsService {
   private static instance: SystemPromptsService;
   private prompts: Map<string, SystemPrompt> = new Map();
   private guidelines: Map<string, PromptGuidelines> = new Map();
-  private cache: Map<string, { prompt: SystemPrompt; timestamp: Date }> =
-    new Map();
+  private cache: Map<string, PromptCacheEntry> = new Map();
 
   static getInstance(): SystemPromptsService {
     if (!SystemPromptsService.instance) {
@@ -234,12 +276,9 @@ export class SystemPromptsService {
     const cacheKey = `${provider}-${role || 'general'}`;
 
     // Check cache first
-    if (this.cache.has(cacheKey)) {
-      const cached = this.cache.get(cacheKey)!;
-      // Cache for 1 hour
-      if (Date.now() - cached.timestamp.getTime() < 3600000) {
-        return cached.prompt;
-      }
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp.getTime() < CACHE_DURATION_MS) {
+      return cached.prompt;
     }
 
     // Find appropriate prompt
@@ -379,7 +418,7 @@ export class SystemPromptsService {
   /**
    * Validate prompt
    */
-  validatePrompt(prompt: SystemPrompt): { isValid: boolean; errors: string[] } {
+  validatePrompt(prompt: SystemPrompt): PromptValidationResult {
     const errors: string[] = [];
     const guidelines = this.guidelines.get(prompt.provider.toLowerCase());
 
@@ -423,7 +462,7 @@ export class SystemPromptsService {
   /**
    * Get cache statistics
    */
-  getCacheStats(): { size: number; entries: string[] } {
+  getCacheStats(): CacheStats {
     return {
       size: this.cache.size,
       entries: Array.from(this.cache.keys()),
@@ -477,14 +516,14 @@ export class SystemPromptsService {
               expertise,
             });
           } catch (err) {
-            console.error(`[SystemPromptsService] Failed to parse employee file ${path}:`, err);
+            logger.error(`[SystemPromptsService] Failed to parse employee file ${path}:`, err);
           }
         }
       }
 
       return employees;
     } catch (error) {
-      console.error('Error loading AI employees:', error);
+      logger.error('[SystemPromptsService] Error loading AI employees:', error);
       return [];
     }
   }

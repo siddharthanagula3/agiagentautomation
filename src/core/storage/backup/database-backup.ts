@@ -538,7 +538,6 @@ class BackupService {
   /**
    * Generate backup ID
    */
-  // Updated: Jan 15th 2026 - Fixed deprecated substr() method
   private generateBackupId(): string {
     return `backup_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
@@ -553,7 +552,6 @@ class BackupService {
   /**
    * Calculate checksum
    */
-  // Updated: Jan 15th 2026 - Fixed deprecated substr() method
   private calculateChecksum(data: BackupTableData): string {
     // Simple checksum - in production, use a proper hash function
     return btoa(JSON.stringify(data)).substring(0, 16);

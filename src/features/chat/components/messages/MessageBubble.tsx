@@ -44,6 +44,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   ExternalLink,
+  GitFork,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -144,6 +145,8 @@ interface MessageBubbleProps {
     messageId: string,
     reactionType: 'up' | 'down' | 'helpful'
   ) => void;
+  onBranch?: (messageId: string) => void;
+  hasBranches?: boolean;
 }
 
 // Code block with copy button
@@ -246,6 +249,8 @@ export const MessageBubble = React.memo(function MessageBubble({
   onDelete,
   onPin,
   onReact,
+  onBranch,
+  hasBranches,
 }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false);
   const [showThinking, setShowThinking] = useState(false);
@@ -367,6 +372,9 @@ export const MessageBubble = React.memo(function MessageBubble({
             </span>
             {message.metadata?.isPinned && (
               <Pin className="h-3 w-3 text-amber-500" aria-hidden="true" />
+            )}
+            {hasBranches && (
+              <GitFork className="h-3 w-3 text-primary" aria-hidden="true" />
             )}
           </div>
 
@@ -655,6 +663,12 @@ export const MessageBubble = React.memo(function MessageBubble({
                       <DropdownMenuItem onClick={() => onPin(message.id)}>
                         <Pin className="mr-2 h-4 w-4" aria-hidden="true" />
                         {message.metadata?.isPinned ? 'Unpin' : 'Pin'}
+                      </DropdownMenuItem>
+                    )}
+                    {onBranch && (
+                      <DropdownMenuItem onClick={() => onBranch(message.id)}>
+                        <GitFork className="mr-2 h-4 w-4" aria-hidden="true" />
+                        Create branch from here
                       </DropdownMenuItem>
                     )}
                     {isUser && onEdit && (

@@ -12,7 +12,6 @@ import {
 } from '@core/integrations/media-generation-handler';
 import {
   documentGenerationService,
-  type DocumentRequest,
   type GeneratedDocument,
 } from './document-generation-service';
 import {

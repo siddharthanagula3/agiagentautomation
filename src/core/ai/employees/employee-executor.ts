@@ -3,13 +3,13 @@
 
 import {
   AIEmployee,
-  ToolInvocation,
   ToolResult,
   ExecutionContext,
   Job,
 } from '../../types';
 import { toolInvocationService } from '../tools/tool-invocation-service';
 import { aiEmployeeService } from './ai-employee-service';
+import { logger } from '@shared/lib/logger';
 
 export interface TaskExecutionResult {
   success: boolean;
@@ -58,7 +58,7 @@ export class AIEmployeeExecutor {
           toolsUsed.push(toolId);
           totalCost += toolResult.cost;
         } catch (error) {
-          console.error(`Tool ${toolId} execution failed:`, error);
+          logger.error(`[Employee Executor] Tool ${toolId} execution failed:`, error);
           // Continue with other tools even if one fails
         }
       }
@@ -77,7 +77,7 @@ export class AIEmployeeExecutor {
         cost: totalCost,
       };
     } catch (error) {
-      console.error(`Task execution failed for ${this.employee.name}:`, error);
+      logger.error(`[Employee Executor] Task execution failed for ${this.employee.name}:`, error);
 
       // Update employee performance with failure
       await this.updatePerformance(false, Date.now() - startTime);
@@ -409,7 +409,7 @@ export class AIEmployeeExecutor {
         updatedMetrics
       );
     } catch (error) {
-      console.error('Failed to update performance metrics:', error);
+      logger.error('[Employee Executor] Failed to update performance metrics:', error);
     }
   }
 

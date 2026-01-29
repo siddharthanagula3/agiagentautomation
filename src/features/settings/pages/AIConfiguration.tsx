@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { Input } from '@shared/ui/input';
@@ -224,7 +225,7 @@ const PROVIDER_CONFIGS: Record<
   },
 };
 
-const AIConfigurationPage: React.FC = () => {
+const AIConfigurationPageContent: React.FC = () => {
   const [configs, setConfigs] = useState<Record<string, ProviderConfig>>({});
   const [showApiKeys, setShowApiKeys] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState('overview');
@@ -909,4 +910,10 @@ const AIConfigurationPage: React.FC = () => {
   );
 };
 
-export default AIConfigurationPage;
+const AIConfigurationPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="AIConfigurationPage" showReportDialog>
+    <AIConfigurationPageContent />
+  </ErrorBoundary>
+);
+
+export default AIConfigurationPageWithErrorBoundary;

@@ -14,6 +14,7 @@ import {
   websocketManager,
   MessageType,
 } from '@core/integrations/websocket-manager';
+import { logger } from '@shared/lib/logger';
 import type { ChatMessage } from '../types';
 
 // Delivery status types
@@ -531,8 +532,9 @@ export class MessageDeliveryService {
           timestamp: Date.now(),
         },
       })
-      .catch(() => {
-        // Ignore broadcast errors
+      .catch((error) => {
+        // Status updates are non-critical - log but don't fail
+        logger.debug('[MessageDelivery] Broadcast status update failed (non-critical)', error);
       });
   }
 

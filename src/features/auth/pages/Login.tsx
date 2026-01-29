@@ -27,6 +27,7 @@ import { Particles } from '@shared/ui/particles';
 import { Spotlight } from '@shared/ui/spotlight';
 import { checkRateLimit, resetRateLimit } from '@core/auth/rate-limiter';
 import { toast } from 'sonner';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 
 type LocationState = {
   from?: {
@@ -338,4 +339,11 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+// Wrap LoginPage with ErrorBoundary for crash protection
+const LoginPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="LoginPage" showReportDialog>
+    <LoginPage />
+  </ErrorBoundary>
+);
+
+export default LoginPageWithErrorBoundary;

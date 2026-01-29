@@ -3,10 +3,9 @@
  * Manages # (agent) and @ (file) autocomplete functionality in VIBE interface
  */
 
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useVibeFileStore } from '../stores/vibe-file-store';
 import type { AIEmployee } from '@core/types/ai-employee';
-import type { VibeFile } from '../stores/vibe-file-store';
 
 export type AutocompleteType = 'agent' | 'file' | null;
 

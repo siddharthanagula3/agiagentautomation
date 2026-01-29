@@ -4,9 +4,25 @@ import { Check } from 'lucide-react';
 
 import { cn } from '@shared/lib/utils';
 
+interface CheckboxProps extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> {
+  /**
+   * Screen reader label for the checkbox.
+   * Required when there is no visible label associated with the checkbox.
+   */
+  'aria-label'?: string;
+  /**
+   * ID of the element that labels this checkbox.
+   */
+  'aria-labelledby'?: string;
+  /**
+   * ID of the element that describes this checkbox.
+   */
+  'aria-describedby'?: string;
+}
+
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
+  CheckboxProps
 >(({ className, ...props }, ref) => (
   <CheckboxPrimitive.Root
     ref={ref}
@@ -19,7 +35,7 @@ const Checkbox = React.forwardRef<
     <CheckboxPrimitive.Indicator
       className={cn('flex items-center justify-center text-current')}
     >
-      <Check className="h-4 w-4" />
+      <Check className="h-4 w-4" aria-hidden="true" />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 ));

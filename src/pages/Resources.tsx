@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
@@ -560,4 +561,10 @@ const ResourceCard: React.FC<{ resource: Resource; index: number }> = ({
   );
 };
 
-export default ResourcesPage;
+const ResourcesPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="ResourcesPage" showReportDialog>
+    <ResourcesPage />
+  </ErrorBoundary>
+);
+
+export default ResourcesPageWithErrorBoundary;

@@ -13,6 +13,7 @@ import {
   agentCommunicator,
   AgentMessage,
 } from './agent-communication-protocol';
+import { logger } from '@shared/lib/logger';
 
 // Simple browser-compatible EventEmitter
 class SimpleEventEmitter {
@@ -352,7 +353,7 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
 
         return result;
       } catch (error) {
-        console.error(`❌ Task ${task.title} failed:`, error);
+        logger.error(`[Task Coordinator] Task "${task.title}" failed:`, error);
 
         task.status = 'failed';
         task.error = (error as Error).message;
@@ -641,7 +642,6 @@ export class ExecutionCoordinator extends SimpleEventEmitter {
   /**
    * Generate unique execution ID
    */
-  // Updated: Jan 15th 2026 - Fixed deprecated substr() method
   private generateExecutionId(): string {
     return `exec-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }

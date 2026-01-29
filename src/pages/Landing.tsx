@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { Card } from '@shared/ui/card';
@@ -1078,4 +1079,10 @@ const LandingPage: React.FC = () => {
   );
 };
 
-export default LandingPage;
+const LandingPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="LandingPage" showReportDialog>
+    <LandingPage />
+  </ErrorBoundary>
+);
+
+export default LandingPageWithErrorBoundary;

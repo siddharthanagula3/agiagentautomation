@@ -110,7 +110,6 @@ export class ChatPersistenceService {
     role: string,
     provider: string
   ): Promise<ChatSession> {
-    // Updated: Jan 15th 2026 - Fixed deprecated substr() method
     const session: ChatSession = {
       id: `session-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       userId,
@@ -159,7 +158,6 @@ export class ChatPersistenceService {
     content: string,
     metadata?: unknown
   ): Promise<ChatMessage> {
-    // Updated: Jan 15th 2026 - Fixed deprecated substr() method
     const message: ChatMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       sessionId,

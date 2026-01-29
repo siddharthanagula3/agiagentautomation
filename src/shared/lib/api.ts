@@ -678,21 +678,6 @@ export class APIClient {
     return { ws, sendAuth };
   }
 
-  /**
-   * Create a simple WebSocket connection (legacy compatibility).
-   * Prefer createWebSocket() for new code.
-   *
-   * @deprecated Use createWebSocket() which returns { ws, sendAuth }
-   */
-  createSimpleWebSocket(
-    endpoint: string,
-    protocols?: string | string[]
-  ): WebSocket {
-    const { ws } = this.createWebSocket(endpoint, protocols, {
-      useMessageAuth: false,
-    });
-    return ws;
-  }
 }
 
 // ========================================

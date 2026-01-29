@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -371,4 +372,10 @@ const BlogPostPage: React.FC = () => {
   );
 };
 
-export default BlogPostPage;
+const BlogPostPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="BlogPostPage" showReportDialog>
+    <BlogPostPage />
+  </ErrorBoundary>
+);
+
+export default BlogPostPageWithErrorBoundary;

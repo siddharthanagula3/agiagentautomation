@@ -1,6 +1,6 @@
 /**
  * GlobalSearchDialog - Search across all chat sessions and messages
- * Provides advanced filtering and result navigation
+ * Provides advanced filtering, result navigation, and search history
  */
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
@@ -38,12 +38,17 @@ import {
   User,
   Bot,
   Clock,
+  History,
+  TrendingUp,
+  Trash2,
 } from 'lucide-react';
 import {
   globalSearchService,
   type SearchResult,
   type SearchFilters,
   type SearchStats,
+  type RecentSearch,
+  type PopularSearch,
 } from '../../services/global-search-service';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { format } from 'date-fns';
@@ -74,12 +79,62 @@ export function GlobalSearchDialog({
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [includeArchived, setIncludeArchived] = useState(false);
 
+  // Search history and suggestions
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
+  const [popularSearches, setPopularSearches] = useState<PopularSearch[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load recent and popular searches when dialog opens
+  useEffect(() => {
+    if (open && user?.id) {
+      loadSearchHistory();
+    }
+  }, [open, user?.id]);
+
+  const loadSearchHistory = useCallback(async () => {
+    if (!user?.id) return;
+
+    setIsLoadingHistory(true);
+    try {
+      const [recent, popular] = await Promise.all([
+        globalSearchService.getRecentSearches(user.id, 10),
+        globalSearchService.getPopularSearches(10, 7),
+      ]);
+      setRecentSearches(recent);
+      setPopularSearches(popular);
+    } catch (error) {
+      console.error('[GlobalSearch] Failed to load search history:', error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, [user?.id]);
+
+  const handleClearHistory = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const deletedCount = await globalSearchService.clearSearchHistory(user.id);
+      setRecentSearches([]);
+      toast.success(`Cleared ${deletedCount} search${deletedCount !== 1 ? 'es' : ''} from history`);
+    } catch (error) {
+      console.error('[GlobalSearch] Failed to clear history:', error);
+      toast.error('Failed to clear search history');
+    }
+  }, [user?.id]);
+
+  const handleSuggestionClick = useCallback((suggestion: string) => {
+    setQuery(suggestion);
+    setShowSuggestions(false);
+  }, []);
 
   const handleSearch = useCallback(async () => {
     if (!user?.id || !query.trim()) return;
 
     setIsSearching(true);
+    setShowSuggestions(false);
 
     try {
       const filters: SearchFilters = {
@@ -100,7 +155,7 @@ export function GlobalSearchDialog({
     } finally {
       setIsSearching(false);
     }
-  }, [user?.id, roleFilter, startDate, endDate, includeArchived]);
+  }, [user?.id, query, roleFilter, startDate, endDate, includeArchived]);
 
   // Debounced search with 300ms delay
   useEffect(() => {
@@ -172,6 +227,7 @@ export function GlobalSearchDialog({
     setQuery('');
     setResults([]);
     setStats(null);
+    setShowSuggestions(true);
     handleClearFilters();
   };
 
@@ -421,17 +477,112 @@ export function GlobalSearchDialog({
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
+            ) : results.length === 0 && !query.trim() && showSuggestions ? (
+              /* Show recent and popular searches when no query */
+              <div className="space-y-6">
+                {/* Recent Searches */}
+                {recentSearches.length > 0 && (
+                  <div>
+                    <div className="mb-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                        <History className="h-4 w-4" />
+                        Recent Searches
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleClearHistory}
+                        className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="mr-1 h-3 w-3" />
+                        Clear
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {recentSearches.map((search, index) => (
+                        <button
+                          key={`recent-${index}-${search.query}`}
+                          onClick={() => handleSuggestionClick(search.query)}
+                          className="group flex items-center gap-1.5 rounded-full border bg-background px-3 py-1.5 text-sm transition-colors hover:bg-accent hover:border-primary/20"
+                        >
+                          <Clock className="h-3 w-3 text-muted-foreground group-hover:text-primary" />
+                          <span className="max-w-[150px] truncate">
+                            {search.query}
+                          </span>
+                          {search.resultCount > 0 && (
+                            <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[10px]">
+                              {search.resultCount}
+                            </Badge>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Popular/Trending Searches */}
+                {popularSearches.length > 0 && (
+                  <div>
+                    <div className="mb-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <TrendingUp className="h-4 w-4" />
+                      Trending Searches
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {popularSearches.map((search, index) => (
+                        <button
+                          key={`popular-${index}-${search.query}`}
+                          onClick={() => handleSuggestionClick(search.query)}
+                          className="group flex items-center gap-1.5 rounded-full border border-primary/10 bg-primary/5 px-3 py-1.5 text-sm transition-colors hover:bg-primary/10 hover:border-primary/30"
+                        >
+                          <TrendingUp className="h-3 w-3 text-primary/70 group-hover:text-primary" />
+                          <span className="max-w-[150px] truncate">
+                            {search.query}
+                          </span>
+                          <Badge variant="outline" className="ml-1 border-primary/20 px-1.5 py-0 text-[10px] text-primary/70">
+                            {search.searchCount} searches
+                          </Badge>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Empty state when no history */}
+                {recentSearches.length === 0 && popularSearches.length === 0 && !isLoadingHistory && (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Search className="mb-3 h-12 w-12 text-muted-foreground opacity-30" />
+                    <p className="text-sm text-muted-foreground">
+                      Start typing to search
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground/70">
+                      Your search history will appear here
+                    </p>
+                  </div>
+                )}
+
+                {/* Loading history */}
+                {isLoadingHistory && (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+            ) : results.length === 0 && query.trim() ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Search className="mb-3 h-12 w-12 text-muted-foreground opacity-30" />
+                <p className="text-sm text-muted-foreground">
+                  No results found
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground/70">
+                  Try different keywords or clear filters
+                </p>
+              </div>
             ) : results.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <Search className="mb-3 h-12 w-12 text-muted-foreground opacity-30" />
                 <p className="text-sm text-muted-foreground">
-                  {query.trim() ? 'No results found' : 'Start typing to search'}
+                  Start typing to search
                 </p>
-                {query.trim() && (
-                  <p className="mt-1 text-xs text-muted-foreground/70">
-                    Try different keywords or clear filters
-                  </p>
-                )}
               </div>
             ) : (
               <div className="space-y-2">

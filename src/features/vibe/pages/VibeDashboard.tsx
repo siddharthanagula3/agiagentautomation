@@ -24,7 +24,11 @@ import {
   VibeEnhancedComposer,
   type VibeMode,
 } from '../components/redesign/VibeEnhancedComposer';
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+import {
+  Panel,
+  Group as PanelGroup,
+  Separator as PanelResizeHandle,
+} from 'react-resizable-panels';
 import { Loader2, GripVertical, Sparkles } from 'lucide-react';
 import type { AgentStatus } from '../components/agent-panel/AgentStatusCard';
 import type { WorkingStep } from '../components/agent-panel/WorkingProcessSection';

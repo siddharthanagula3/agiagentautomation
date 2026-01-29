@@ -14,6 +14,7 @@ import {
 import { Badge } from '@shared/ui/badge';
 import { Separator } from '@shared/ui/separator';
 import { Keyboard } from 'lucide-react';
+import { safePlatform } from '@shared/utils/browser-utils';
 import type { VibeKeyboardShortcut } from '../hooks/use-vibe-keyboard-shortcuts';
 
 interface VibeKeyboardShortcutsDialogProps {
@@ -27,7 +28,8 @@ export function VibeKeyboardShortcutsDialog({
   onOpenChange,
   shortcuts,
 }: VibeKeyboardShortcutsDialogProps) {
-  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  // Use modern platform detection instead of deprecated navigator.platform
+  const isMac = safePlatform.isMac();
 
   const formatShortcut = (shortcut: VibeKeyboardShortcut) => {
     const keys: string[] = [];

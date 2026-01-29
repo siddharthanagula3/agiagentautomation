@@ -20,6 +20,7 @@ import {
  * Includes token usage tracking for billing and analytics
  * SECURITY: Rate limited to 10 requests per minute per user + Authentication required
  * Created: Jan 6th 2026
+ * Updated: Jan 22nd 2026 - Fixed CORS null spreading by using getSafeCorsHeaders
  */
 const deepseekHandler: Handler = async (event: AuthenticatedEvent) => {
   // Extract origin for CORS validation
@@ -60,11 +61,14 @@ const deepseekHandler: Handler = async (event: AuthenticatedEvent) => {
   const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 
   if (!DEEPSEEK_API_KEY) {
+    console.error('[DeepSeek Proxy] API key not configured');
     return {
       statusCode: 500,
-      headers: getMinimalCorsHeaders(origin),
+      headers: corsHeaders,
       body: JSON.stringify({
-        error: 'DeepSeek API key not configured in Netlify environment variables',
+        error: 'Service temporarily unavailable',
+        code: 'SERVER_CONFIGURATION_ERROR',
+        retryable: true,
       }),
     };
   }
@@ -75,7 +79,7 @@ const deepseekHandler: Handler = async (event: AuthenticatedEvent) => {
     if (event.body && event.body.length > MAX_REQUEST_SIZE) {
       return {
         statusCode: 413,
-        headers: getMinimalCorsHeaders(origin),
+        headers: corsHeaders,
         body: JSON.stringify({
           error: 'Request payload too large',
           maxSize: '1MB',

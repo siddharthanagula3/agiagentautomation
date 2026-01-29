@@ -19,6 +19,7 @@ import {
  * This solves CORS issues by making API calls server-side
  * Includes token usage tracking for billing and analytics
  * SECURITY: Rate limited to 10 requests per minute per user + Authentication required
+ * Updated: Jan 22nd 2026 - Fixed CORS null spreading by using getSafeCorsHeaders
  */
 const googleHandler: Handler = async (event: AuthenticatedEvent) => {
   // Extract origin for CORS validation
@@ -56,15 +57,18 @@ const googleHandler: Handler = async (event: AuthenticatedEvent) => {
     };
   }
 
-  // Get API key from environment
-  const GOOGLE_API_KEY = process.env.VITE_GOOGLE_API_KEY;
+  // Get API key from environment (server-side only - no VITE_ prefix)
+  const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
   if (!GOOGLE_API_KEY) {
+    console.error('[Google Proxy] API key not configured');
     return {
       statusCode: 500,
-      headers: getMinimalCorsHeaders(origin),
+      headers: corsHeaders,
       body: JSON.stringify({
-        error: 'Google API key not configured in Netlify environment variables',
+        error: 'Service temporarily unavailable',
+        code: 'SERVER_CONFIGURATION_ERROR',
+        retryable: true,
       }),
     };
   }
@@ -76,7 +80,7 @@ const googleHandler: Handler = async (event: AuthenticatedEvent) => {
     if (event.body && event.body.length > MAX_REQUEST_SIZE) {
       return {
         statusCode: 413,
-        headers: getMinimalCorsHeaders(origin),
+        headers: corsHeaders,
         body: JSON.stringify({
           error: 'Request payload too large',
           maxSize: '1MB',

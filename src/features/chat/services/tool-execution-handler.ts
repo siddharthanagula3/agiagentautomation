@@ -499,8 +499,14 @@ export class ToolsExecutionService {
     if (path.startsWith('http://') || path.startsWith('https://')) {
       try {
         const response = await fetch(
-          `/.netlify/functions/utilities/fetch-page?url=${encodeURIComponent(path)}`
+          `/.netlify/functions/utilities/fetch-page?url=${encodeURIComponent(path)}`,
+          {
+            headers: session?.access_token
+              ? { Authorization: `Bearer ${session.access_token}` }
+              : {},
+          }
         );
+
         if (response.ok) {
           const data = await response.json();
           const content = data.content || data.text || JSON.stringify(data);

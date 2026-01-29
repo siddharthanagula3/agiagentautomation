@@ -600,11 +600,22 @@ Synthesize a clear, comprehensive final answer. Focus on directly answering the 
   }
 
   /**
-   * Get employee avatar (placeholder for now)
+   * Get employee avatar from definition or generate fallback
    */
   private getEmployeeAvatar(employee: AIEmployee): string {
-    // TODO: Load from employee definition or generate
-    return `/avatars/${employee.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+    // Check if employee has an avatar_url defined
+    if (employee.avatar_url) {
+      return employee.avatar_url;
+    }
+
+    // Try static avatar path based on employee name
+    const staticPath = `/avatars/${employee.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+
+    // Provide UI Avatars fallback for missing images
+    const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=random&color=fff&size=128`;
+
+    // Return static path (client will handle fallback via onerror)
+    return staticPath || fallbackUrl;
   }
 
   /**

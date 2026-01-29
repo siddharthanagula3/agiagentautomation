@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useCallback } from 'react';
+import { safePlatform } from '@shared/utils/browser-utils';
 
 export interface VibeKeyboardShortcut {
   key: string;
@@ -56,7 +57,8 @@ export function useVibeKeyboardShortcuts(
         target.tagName === 'TEXTAREA' ||
         target.isContentEditable;
 
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      // Use modern platform detection instead of deprecated navigator.platform
+      const isMac = safePlatform.isMac();
       const modifierKey = isMac ? event.metaKey : event.ctrlKey;
 
       // Cmd/Ctrl + S: Save file

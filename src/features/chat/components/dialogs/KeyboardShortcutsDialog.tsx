@@ -14,6 +14,7 @@ import {
 import { Badge } from '@shared/ui/badge';
 import { Separator } from '@shared/ui/separator';
 import { Keyboard } from 'lucide-react';
+import { safePlatform } from '@shared/utils/browser-utils';
 import type { KeyboardShortcut } from '../hooks/use-keyboard-shortcuts';
 
 interface KeyboardShortcutsDialogProps {
@@ -27,7 +28,8 @@ export function KeyboardShortcutsDialog({
   onOpenChange,
   shortcuts,
 }: KeyboardShortcutsDialogProps) {
-  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  // Use modern platform detection instead of deprecated navigator.platform
+  const isMac = safePlatform.isMac();
 
   const formatShortcut = (shortcut: KeyboardShortcut) => {
     const keys: string[] = [];

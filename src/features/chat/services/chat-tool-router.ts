@@ -295,7 +295,7 @@ export function analyzeMessage(message: string): ToolDetectionResult {
     reasons.push('Complex task requiring multiple expert perspectives');
   }
 
-  // Code generation detection (suggest /vibe)
+  // Code generation detection - handled inline in chat
   const codeKeywords = [
     'write code',
     'create code',
@@ -325,9 +325,7 @@ export function analyzeMessage(message: string): ToolDetectionResult {
   if (hasCodeRequest && !hasImageRequest && !hasVideoRequest) {
     detectedTools.push('code-generation');
     confidence += 15;
-    reasons.push(
-      'Code generation detected - consider using /vibe for better experience'
-    );
+    reasons.push('Code generation - will generate and display code inline');
   }
 
   // Default to general chat if no specific tools detected
@@ -337,26 +335,12 @@ export function analyzeMessage(message: string): ToolDetectionResult {
     reasons.push('General conversation - no specific tools required');
   }
 
-  // Determine suggested route
-  let suggestedRoute: '/vibe' | '/mission-control' | undefined;
-  if (
-    detectedTools.includes('code-generation') &&
-    !hasImageRequest &&
-    !hasVideoRequest
-  ) {
-    suggestedRoute = '/vibe';
-  } else if (
-    detectedTools.includes('multi-agent') ||
-    (hasComplexRequest && isLongRequest)
-  ) {
-    suggestedRoute = '/mission-control';
-  }
-
+  // All features handled inline in chat - no route suggestions needed
   return {
     tools: detectedTools,
     confidence: Math.min(confidence, 100),
     reasoning: reasons.join('; '),
-    suggestedRoute,
+    suggestedRoute: undefined, // Everything handled inline
   };
 }
 
@@ -870,6 +854,7 @@ function parseResolution(message: string): '720p' | '1080p' | '4k' {
 
 /**
  * Check if any tool is available
+ * All tools display results inline in the chat interface
  */
 export function isToolAvailable(toolType: ToolType): boolean {
   switch (toolType) {
@@ -878,13 +863,15 @@ export function isToolAvailable(toolType: ToolType): boolean {
     case 'video-generation':
       return mediaGenerationService.isServiceAvailable().veo;
     case 'document-creation':
-      return true; // Always available via Claude
+      return true; // Always available via Claude - displays inline
     case 'web-search':
-      return true; // Always available (DuckDuckGo fallback)
+      return true; // Always available (DuckDuckGo fallback) - displays inline
+    case 'social-media-analysis':
+      return true; // Grok-powered - displays inline
     case 'multi-agent':
-      return true; // Always available
+      return true; // Multi-agent collaboration - displays inline
     case 'code-generation':
-      return true; // Always available
+      return true; // Code generation - displays inline with syntax highlighting
     case 'general-chat':
       return true; // Always available
     default:
@@ -894,6 +881,7 @@ export function isToolAvailable(toolType: ToolType): boolean {
 
 /**
  * Get tool status summary
+ * All tools display results inline in the chat interface
  */
 export function getToolStatus(): Record<ToolType, boolean> {
   return {
@@ -901,6 +889,7 @@ export function getToolStatus(): Record<ToolType, boolean> {
     'video-generation': isToolAvailable('video-generation'),
     'document-creation': isToolAvailable('document-creation'),
     'web-search': isToolAvailable('web-search'),
+    'social-media-analysis': isToolAvailable('social-media-analysis'),
     'multi-agent': isToolAvailable('multi-agent'),
     'code-generation': isToolAvailable('code-generation'),
     'general-chat': isToolAvailable('general-chat'),

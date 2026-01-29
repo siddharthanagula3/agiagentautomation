@@ -11,9 +11,14 @@
  * - Links and images
  * - Footnotes
  * - Math (KaTeX)
+ *
+ * Performance optimizations:
+ * - React.memo to prevent unnecessary re-renders
+ * - Memoized plugin arrays to prevent recreation
+ * - Memoized markdown components
  */
 
-import React from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -21,11 +26,10 @@ import remarkBreaks from 'remark-breaks';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
-import type { Components } from 'react-markdown';
+import type { Components, PluggableList } from 'react-markdown';
 import { cn } from '@shared/lib/utils';
 import { Button } from '@shared/ui/button';
 import { Check, Copy } from 'lucide-react';
-import { useState } from 'react';
 
 // Import highlight.js styles and KaTeX styles
 import 'highlight.js/styles/github-dark.css';
@@ -37,6 +41,20 @@ interface EnhancedMarkdownRendererProps {
   enableMath?: boolean;
   enableCodeCopy?: boolean;
 }
+
+// Pre-computed plugin configurations - memoized at module level
+const REMARK_PLUGINS_BASE: PluggableList = [remarkGfm, remarkBreaks];
+const REMARK_PLUGINS_WITH_MATH: PluggableList = [
+  remarkGfm,
+  remarkBreaks,
+  remarkMath,
+];
+const REHYPE_PLUGINS_BASE: PluggableList = [rehypeHighlight, rehypeRaw];
+const REHYPE_PLUGINS_WITH_MATH: PluggableList = [
+  rehypeHighlight,
+  rehypeRaw,
+  rehypeKatex,
+];
 
 // Custom code block component with copy button and syntax highlighting
 const CodeBlock = ({
@@ -284,24 +302,24 @@ const markdownComponents: Components = {
   ),
 };
 
-export const EnhancedMarkdownRenderer: React.FC<
-  EnhancedMarkdownRendererProps
-> = ({ content, className, enableMath = true, enableCodeCopy = true }) => {
-  // Build remark plugins
-  const remarkPlugins = [remarkGfm, remarkBreaks];
-  if (enableMath) {
-    remarkPlugins.push(remarkMath);
-  }
+export const EnhancedMarkdownRenderer = memo(function EnhancedMarkdownRenderer({
+  content,
+  className,
+  enableMath = true,
+  enableCodeCopy = true,
+}: EnhancedMarkdownRendererProps) {
+  // Use pre-computed plugin arrays based on configuration
+  const remarkPlugins = enableMath
+    ? REMARK_PLUGINS_WITH_MATH
+    : REMARK_PLUGINS_BASE;
+  const rehypePlugins = enableMath
+    ? REHYPE_PLUGINS_WITH_MATH
+    : REHYPE_PLUGINS_BASE;
 
-  // Build rehype plugins
-  const rehypePlugins: unknown[] = [rehypeHighlight, rehypeRaw];
-  if (enableMath) {
-    rehypePlugins.push(rehypeKatex);
-  }
-
-  return (
-    <div
-      className={cn(
+  // Memoize the container className
+  const containerClassName = useMemo(
+    () =>
+      cn(
         'prose prose-sm dark:prose-invert max-w-none',
         'prose-headings:scroll-m-20',
         'prose-p:leading-7',
@@ -313,8 +331,12 @@ export const EnhancedMarkdownRenderer: React.FC<
         'prose-hr:border-border',
         'prose-strong:font-semibold prose-strong:text-foreground',
         className
-      )}
-    >
+      ),
+    [className]
+  );
+
+  return (
+    <div className={containerClassName}>
       <ReactMarkdown
         remarkPlugins={remarkPlugins}
         rehypePlugins={rehypePlugins}
@@ -324,6 +346,6 @@ export const EnhancedMarkdownRenderer: React.FC<
       </ReactMarkdown>
     </div>
   );
-};
+});
 
 export default EnhancedMarkdownRenderer;

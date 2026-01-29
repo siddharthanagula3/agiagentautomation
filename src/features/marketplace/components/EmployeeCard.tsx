@@ -1,9 +1,13 @@
 /**
  * Employee Card Component
  * Displays an AI employee card with details and hire functionality
+ *
+ * Performance optimizations:
+ * - React.memo to prevent unnecessary re-renders when parent re-renders
+ * - useCallback for event handlers passed to child components
  */
 
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { Card, CardContent } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
@@ -43,30 +47,31 @@ interface EmployeeCardProps {
   className?: string;
 }
 
-export const EmployeeCard: React.FC<EmployeeCardProps> = ({
+export const EmployeeCard = memo(function EmployeeCard({
   employee,
   viewMode = 'grid',
   isLoading = false,
   onHired,
   onViewDetails,
   className,
-}) => {
+}: EmployeeCardProps) {
   // Show skeleton while loading
   if (isLoading) {
     return <EmployeeCardSkeleton viewMode={viewMode} className={className} />;
   }
 
-  const handleViewDetails = () => {
+  // Memoize event handlers to prevent unnecessary re-renders of child components
+  const handleViewDetails = useCallback(() => {
     if (onViewDetails) {
       onViewDetails(employee);
     } else {
       toast.info(`Viewing details for ${employee.name}`);
     }
-  };
+  }, [onViewDetails, employee]);
 
-  const handleHired = () => {
+  const handleHired = useCallback(() => {
     onHired?.(employee);
-  };
+  }, [onHired, employee]);
 
   // List view layout
   if (viewMode === 'list') {
@@ -324,6 +329,6 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
       </CardContent>
     </Card>
   );
-};
+});
 
 export default EmployeeCard;

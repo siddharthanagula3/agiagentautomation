@@ -13,6 +13,7 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
+import { logger } from '@shared/lib/logger';
 
 export interface InjectionDetectionResult {
   isSafe: boolean;
@@ -940,7 +941,7 @@ export async function logInjectionAttempt(
 ): Promise<void> {
   try {
     // Log to console for immediate visibility
-    console.warn('[Prompt Injection] Detected attempt:', {
+    logger.warn('[Prompt Injection] Detected attempt:', {
       userId,
       riskLevel: detection.riskLevel,
       patterns: detection.detectedPatterns,
@@ -965,15 +966,15 @@ export async function logInjectionAttempt(
 
     if (error) {
       // Don't throw - logging failure shouldn't block the user
-      console.error(
+      logger.error(
         '[Prompt Injection] Database logging failed:',
         error.message
       );
     } else {
-      console.log('[Prompt Injection] Incident logged to database');
+      logger.info('[Prompt Injection] Incident logged to database');
     }
   } catch (error) {
     // Fail silently - logging errors shouldn't affect user experience
-    console.error('[Prompt Injection] Error logging attempt:', error);
+    logger.error('[Prompt Injection] Error logging attempt:', error);
   }
 }

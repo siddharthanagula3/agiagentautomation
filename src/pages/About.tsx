@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
@@ -328,4 +329,10 @@ const AboutPage: React.FC = () => {
   );
 };
 
-export default AboutPage;
+const AboutPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="AboutPage" showReportDialog>
+    <AboutPage />
+  </ErrorBoundary>
+);
+
+export default AboutPageWithErrorBoundary;

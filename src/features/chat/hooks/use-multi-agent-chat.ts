@@ -6,7 +6,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useMissionStore } from '@shared/stores/mission-control-store';
-import { useChatStore } from '@shared/stores/chat-store';
 import { workforceOrchestratorRefactored } from '@core/ai/orchestration/workforce-orchestrator';
 import type { AIEmployee } from '@core/types/ai-employee';
 

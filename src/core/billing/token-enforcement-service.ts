@@ -12,6 +12,7 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
+import { logger } from '@shared/lib/logger';
 
 export interface TokenCheckResult {
   allowed: boolean;
@@ -75,7 +76,7 @@ export async function checkTokenSufficiency(
       estimatedCost: estimatedTokens,
     };
   } catch (error) {
-    console.error('[Token Enforcement] Error checking sufficiency:', error);
+    logger.error('[Token Enforcement] Error checking sufficiency:', error);
     return {
       allowed: false,
       currentBalance: 0,
@@ -114,10 +115,10 @@ export async function deductTokens(
     );
 
     if (error) {
-      console.error('[Token Enforcement] Error deducting tokens:', error);
+      logger.error('[Token Enforcement] Error deducting tokens:', error);
 
       // Log detailed error for debugging
-      console.error('[Token Enforcement] Deduction details:', {
+      logger.error('[Token Enforcement] Deduction details:', {
         userId,
         provider,
         model,
@@ -133,7 +134,7 @@ export async function deductTokens(
       };
     }
 
-    console.log(
+    logger.info(
       `[Token Enforcement] Deducted ${totalTokens} tokens from user ${userId}. New balance: ${newBalance}`
     );
 
@@ -142,7 +143,7 @@ export async function deductTokens(
       newBalance: newBalance as number,
     };
   } catch (error) {
-    console.error('[Token Enforcement] Error:', error);
+    logger.error('[Token Enforcement] Error:', error);
     return {
       success: false,
       newBalance: 0,
@@ -170,7 +171,7 @@ export async function getUserTokenBalance(
 
     if (!rpcError && rpcData && rpcData.length > 0) {
       const balance = Math.max(rpcData[0].current_balance || 0, 0);
-      console.log(
+      logger.info(
         `[Token Balance] Current balance (via RPC): ${balance.toLocaleString()}`
       );
       return balance;
@@ -178,7 +179,7 @@ export async function getUserTokenBalance(
 
     // Fallback: Query user_token_balances table directly
     if (rpcError) {
-      console.warn(
+      logger.warn(
         '[Token Balance] RPC failed, falling back to direct query:',
         rpcError.message
       );
@@ -192,12 +193,12 @@ export async function getUserTokenBalance(
 
     if (balanceError || !balanceData) {
       if (balanceError) {
-        console.warn(
+        logger.warn(
           '[Token Balance] Error fetching balance record, checking user plan...',
           balanceError.message
         );
       } else {
-        console.warn(
+        logger.warn(
           '[Token Balance] No balance record found, checking user plan...'
         );
       }
@@ -210,7 +211,7 @@ export async function getUserTokenBalance(
         .maybeSingle();
 
       if (userError || !userData) {
-        console.error('[Token Balance] Error fetching user plan:', userError);
+        logger.error('[Token Balance] Error fetching user plan:', userError);
         // SECURITY FIX: Jan 15th 2026 - Fail closed on database errors
         // Return null to trigger denial instead of allowing with default tokens
         // This prevents exploitation via database errors
@@ -223,17 +224,17 @@ export async function getUserTokenBalance(
         userData.plan === 'enterprise';
       const defaultBalance = isPro ? 10000000 : 1000000; // 10M for pro, 1M for free
 
-      console.log(
+      logger.info(
         `[Token Balance] User has no balance record. Plan: ${userData.plan}. Returning default: ${defaultBalance.toLocaleString()}`
       );
       return defaultBalance;
     }
 
     const balance = Math.max(balanceData.current_balance || 0, 0);
-    console.log(`[Token Balance] Current balance: ${balance.toLocaleString()}`);
+    logger.info(`[Token Balance] Current balance: ${balance.toLocaleString()}`);
     return balance;
   } catch (error) {
-    console.error('[Token Enforcement] Error:', error);
+    logger.error('[Token Enforcement] Error:', error);
     // SECURITY FIX: Jan 15th 2026 - Fail closed on unexpected errors
     // Return null to trigger denial instead of allowing with default tokens
     return null;
@@ -281,7 +282,7 @@ export async function checkMonthlyAllowance(userId: string): Promise<{
 
     if (error || !user) {
       if (error) {
-        console.error('[Token Enforcement] Error fetching user:', error);
+        logger.error('[Token Enforcement] Error fetching user:', error);
       }
       // Return free tier defaults on error
       return {
@@ -319,7 +320,7 @@ export async function checkMonthlyAllowance(userId: string): Promise<{
       .gte('created_at', startOfMonth.toISOString());
 
     if (txError) {
-      console.error(
+      logger.error(
         '[Token Enforcement] Error checking monthly usage:',
         txError
       );
@@ -347,7 +348,7 @@ export async function checkMonthlyAllowance(userId: string): Promise<{
       ),
     };
   } catch (error) {
-    console.error('[Token Enforcement] Error checking allowance:', error);
+    logger.error('[Token Enforcement] Error checking allowance:', error);
     return {
       allowed: false,
       used: 0,

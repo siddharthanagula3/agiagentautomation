@@ -1,5 +1,6 @@
 import { Suspense, lazy, ComponentType } from 'react';
 import { LazyFallback } from './LazyLoadingFallback';
+import { logger } from '@shared/lib/logger';
 
 export const lazyWithRetry = <T extends ComponentType<Record<string, unknown>>>(
   importFunc: () => Promise<{ default: T }>
@@ -12,8 +13,9 @@ export const lazyWithRetry = <T extends ComponentType<Record<string, unknown>>>(
         setTimeout(() => {
           importFunc()
             .then(resolve)
-            .catch(() => {
-              // If retry fails, show error component
+            .catch((retryError) => {
+              // If retry fails, log and show error component
+              logger.error('[LazyLoadWrapper] Component load failed after retry', retryError);
               resolve({
                 default: () => (
                   <div className="flex h-screen items-center justify-center bg-background">

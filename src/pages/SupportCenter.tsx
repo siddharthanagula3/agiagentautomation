@@ -3,6 +3,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import {
   Card,
@@ -493,4 +494,10 @@ const HelpSupportPage: React.FC = () => {
   );
 };
 
-export default HelpSupportPage;
+const HelpSupportPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="HelpSupportPage" showReportDialog>
+    <HelpSupportPage />
+  </ErrorBoundary>
+);
+
+export default HelpSupportPageWithErrorBoundary;

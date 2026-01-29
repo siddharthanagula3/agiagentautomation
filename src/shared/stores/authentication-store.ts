@@ -3,7 +3,6 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import {
   authService,
-  AuthResponse,
   AuthUser,
   LoginData,
   RegisterData,
@@ -75,7 +74,13 @@ async function cleanupAllStores(): Promise<void> {
   }
 }
 
-interface AuthState {
+/** Result type for auth operations */
+export interface AuthResult {
+  success: boolean;
+  error: string | null;
+}
+
+export interface AuthState {
   user: AuthUser | null;
   isLoading: boolean;
   error: string | null;

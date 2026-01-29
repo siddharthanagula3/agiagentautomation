@@ -21,11 +21,6 @@ import DOMPurify from 'dompurify';
 export type SanitizeLevel = 'strict' | 'standard' | 'extended';
 
 /**
- * @deprecated Use 'extended' instead. This alias exists for backward compatibility.
- */
-export type PermissiveLevel = 'permissive';
-
-/**
  * Default allowed tags for artifacts
  */
 const DEFAULT_ALLOWED_TAGS = [
@@ -142,7 +137,6 @@ export function sanitizeHTML(
       break;
 
     case 'extended':
-    case 'permissive': // @deprecated: use 'extended' instead
       // Extended: Allows rich content with form elements for interactive UIs
       // SECURITY: Event handlers (on*) are NEVER allowed to prevent XSS attacks.
       // JavaScript execution through HTML attributes is a critical vulnerability.

@@ -6,6 +6,7 @@
 
 import { GoogleGenAI } from '@google/genai';
 import { supabase } from '@shared/lib/supabase-client';
+import { logger } from '@shared/lib/logger';
 
 /**
  * Helper function to get the current Supabase session token
@@ -18,28 +19,13 @@ async function getAuthToken(): Promise<string | null> {
     } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
-    console.error('[Google Provider] Failed to get auth token:', error);
+    logger.error('[Google Provider] Failed to get auth token:', error);
     return null;
   }
 }
 
-// SECURITY WARNING: Client-side API initialization is disabled
-// All API calls should go through Netlify proxy functions instead
-// Environment variables with VITE_ prefix are exposed to the browser (security risk)
-
-// DEPRECATED: Direct client-side initialization (security risk)
-// const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
-
-// Initialize clients - DISABLED for security
-// New @google/genai SDK pattern:
-// const ai = new GoogleGenAI({ apiKey });
-// const response = await ai.models.generateContent({ model: "gemini-2.0-flash", contents: prompt });
-const ai: GoogleGenAI | null = null; // Client-side SDK disabled - use Netlify proxy instead
-
 // All API calls use Netlify proxy functions for security
 // Proxy endpoints: /.netlify/functions/llm-proxies/google-proxy
-
-// Using centralized Supabase client
 
 export interface GoogleMessage {
   role: 'user' | 'assistant' | 'system';
@@ -84,20 +70,38 @@ export interface GoogleConfig {
   thinkingMode?: 'low' | 'medium' | 'high'; // Gemini 3 thinking mode
 }
 
+/** Error codes specific to Google Gemini provider */
+export type GoogleErrorCode =
+  | 'NOT_AUTHENTICATED'
+  | 'INVALID_API_KEY'
+  | 'QUOTA_EXCEEDED'
+  | 'SAFETY_FILTER'
+  | 'CLIENT_NOT_INITIALIZED'
+  | 'DIRECT_API_DISABLED'
+  | 'REQUEST_FAILED'
+  | 'STREAMING_FAILED'
+  | `HTTP_${number}`;
+
 export class GoogleError extends Error {
+  public readonly name = 'GoogleError' as const;
+
   constructor(
     message: string,
-    public code: string,
-    public retryable: boolean = false
+    public readonly code: GoogleErrorCode | string,
+    public readonly retryable: boolean = false
   ) {
     super(message);
-    this.name = 'GoogleError';
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, GoogleError);
+    }
   }
 }
 
 export class GoogleProvider {
   private config: GoogleConfig;
-  private client: GoogleGenAI | null;
+  // Client-side SDK disabled for security - use Netlify proxy instead
+  // This property is kept for potential future direct SDK usage
+  private client: GoogleGenAI | null = null;
 
   constructor(config: Partial<GoogleConfig> = {}) {
     this.config = {
@@ -110,9 +114,8 @@ export class GoogleProvider {
       ...config,
     };
 
-    // Client-side SDK disabled for security - use Netlify proxy instead
-    // New SDK pattern would be: this.client = new GoogleGenAI({ apiKey });
-    this.client = ai;
+    // Client-side SDK disabled for security - all calls go through Netlify proxy
+    // When direct SDK usage is needed: this.client = new GoogleGenAI({ apiKey });
   }
 
   /**
@@ -209,7 +212,7 @@ export class GoogleProvider {
         },
       };
     } catch (error) {
-      console.error('[Google Provider] Error:', error);
+      logger.error('[Google Provider] Error:', error);
 
       if (error instanceof Error) {
         // Check for specific Google API errors
@@ -323,7 +326,7 @@ export class GoogleProvider {
         });
       }
     } catch (error) {
-      console.error('[Google Provider] Streaming error:', error);
+      logger.error('[Google Provider] Streaming error:', error);
 
       if (error instanceof Error) {
         if (error.message.includes('API_KEY_INVALID')) {
@@ -424,10 +427,10 @@ export class GoogleProvider {
       });
 
       if (error) {
-        console.error('[Google Provider] Error saving message:', error);
+        logger.error('[Google Provider] Error saving message:', error);
       }
     } catch (error) {
-      console.error(
+      logger.error(
         '[Google Provider] Unexpected error saving message:',
         error
       );

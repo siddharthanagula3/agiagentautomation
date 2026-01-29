@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card } from '@shared/ui/card';
@@ -246,4 +247,10 @@ const Careers: React.FC = () => {
   );
 };
 
-export default Careers;
+const CareersWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="Careers" showReportDialog>
+    <Careers />
+  </ErrorBoundary>
+);
+
+export default CareersWithErrorBoundary;

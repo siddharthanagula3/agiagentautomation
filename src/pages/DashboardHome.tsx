@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { useAgentMetricsStore } from '@shared/stores/agent-metrics-store';
@@ -538,4 +539,10 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({
   );
 };
 
-export default DashboardHomePage;
+const DashboardHomePageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="DashboardHomePage" showReportDialog>
+    <DashboardHomePage />
+  </ErrorBoundary>
+);
+
+export default DashboardHomePageWithErrorBoundary;

@@ -9,10 +9,9 @@ import { Handler } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import {
-  getCorsHeaders,
+  getSafeCorsHeaders,
   getMinimalCorsHeaders,
   checkOriginAndBlock,
-  getSecurityHeaders,
 } from '../utils/cors';
 import { withRateLimitTier } from '../utils/rate-limiter';
 import { agentsExecuteSchema, formatValidationError } from '../utils/validation-schemas';
@@ -53,7 +52,24 @@ interface ExecuteRequest {
 
 const agentsExecuteHandler: Handler = async (event) => {
   // Extract origin for CORS validation
+  // Updated: Jan 29th 2026 - Simplified using getSafeCorsHeaders (always returns non-null)
   const origin = event.headers.origin || event.headers.Origin || '';
+
+  // Get CORS headers (safe version always returns headers)
+  const corsHeaders = getSafeCorsHeaders(origin);
+
+  // Handle CORS preflight - block unauthorized origins early
+  if (event.httpMethod === 'OPTIONS') {
+    const blockedResponse = checkOriginAndBlock(origin);
+    if (blockedResponse) {
+      return blockedResponse;
+    }
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: '',
+    };
+  }
 
   // Check if origin is allowed - block unauthorized origins early
   const blockedResponse = checkOriginAndBlock(origin);
@@ -61,22 +77,10 @@ const agentsExecuteHandler: Handler = async (event) => {
     return blockedResponse;
   }
 
-  // Get CORS headers for allowed origin
-  const corsHeaders = getCorsHeaders(origin);
-
-  // Handle CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: corsHeaders || getSecurityHeaders(),
-      body: '',
-    };
-  }
-
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: corsHeaders || getSecurityHeaders(),
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
@@ -89,7 +93,7 @@ const agentsExecuteHandler: Handler = async (event) => {
     if (!validated.success) {
       return {
         statusCode: 400,
-        headers: getMinimalCorsHeaders(origin) || getSecurityHeaders(),
+        headers: getMinimalCorsHeaders(origin),
         body: JSON.stringify(formatValidationError(validated.error)),
       };
     }
@@ -108,7 +112,7 @@ const agentsExecuteHandler: Handler = async (event) => {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return {
         statusCode: 401,
-        headers: getMinimalCorsHeaders(origin) || getSecurityHeaders(),
+        headers: getMinimalCorsHeaders(origin),
         body: JSON.stringify({ error: 'Unauthorized' }),
       };
     }
@@ -122,7 +126,7 @@ const agentsExecuteHandler: Handler = async (event) => {
     if (authError || !user || user.id !== userId) {
       return {
         statusCode: 401,
-        headers: getMinimalCorsHeaders(origin) || getSecurityHeaders(),
+        headers: getMinimalCorsHeaders(origin),
         body: JSON.stringify({ error: 'Invalid authentication' }),
       };
     }
@@ -227,7 +231,7 @@ const agentsExecuteHandler: Handler = async (event) => {
         statusCode: 200,
         headers: {
           'Content-Type': 'application/json',
-          ...(corsHeaders || getSecurityHeaders()),
+          ...corsHeaders,
         },
         body: JSON.stringify({
           success: true,
@@ -247,7 +251,7 @@ const agentsExecuteHandler: Handler = async (event) => {
         statusCode: 200,
         headers: {
           'Content-Type': 'application/json',
-          ...(corsHeaders || getSecurityHeaders()),
+          ...corsHeaders,
         },
         body: JSON.stringify({
           success: false,
@@ -263,7 +267,7 @@ const agentsExecuteHandler: Handler = async (event) => {
     console.error('Agents execute error:', error);
     return {
       statusCode: 500,
-      headers: getMinimalCorsHeaders(origin) || getSecurityHeaders(),
+      headers: getMinimalCorsHeaders(origin),
       body: JSON.stringify({
         error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error',

@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { Badge } from '@shared/ui/badge';
@@ -308,4 +309,10 @@ const SecurityPage: React.FC = () => {
   );
 };
 
-export default SecurityPage;
+const SecurityPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="SecurityPage" showReportDialog>
+    <SecurityPage />
+  </ErrorBoundary>
+);
+
+export default SecurityPageWithErrorBoundary;

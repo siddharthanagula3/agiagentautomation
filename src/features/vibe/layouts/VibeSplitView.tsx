@@ -1,5 +1,9 @@
 import React from 'react';
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+import {
+  Panel,
+  Group as PanelGroup,
+  Separator as PanelResizeHandle,
+} from 'react-resizable-panels';
 import { GripVertical } from 'lucide-react';
 import { useVibeViewStore } from '../stores/vibe-view-store';
 

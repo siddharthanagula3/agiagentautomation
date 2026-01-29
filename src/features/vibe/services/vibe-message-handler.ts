@@ -3,14 +3,16 @@
  * Processes AI responses from workforce orchestrator and extracts code files
  *
  * Created: Nov 18th 2025
+ * Updated: Jan 29th 2026 - Integrated with vibeFileSyncService for proper database sync
  */
 
 import { vibeFileSystem } from '@features/vibe/services/vibe-file-system';
+import { vibeFileSyncService } from '@features/vibe/services/vibe-file-sync';
 import { toast } from 'sonner';
-import { supabase } from '@shared/lib/supabase-client';
 
 /**
  * Sync file to database for persistence across page refreshes
+ * Uses the vibeFileSyncService for proper debouncing, retry logic, and race condition handling
  */
 async function syncFileToDatabase(
   sessionId: string,
@@ -18,21 +20,14 @@ async function syncFileToDatabase(
   content: string
 ): Promise<void> {
   try {
-    const { error } = await supabase.from('vibe_files').upsert(
-      {
-        session_id: sessionId,
-        path: filePath,
-        content: content,
-        updated_at: new Date().toISOString(),
-      },
-      {
-        onConflict: 'session_id,path',
-      }
-    );
-
-    if (error) {
-      console.error('[Vibe] Failed to sync file to database:', error);
+    // Ensure sync service is initialized for this session
+    const currentSession = vibeFileSyncService['currentSessionId'];
+    if (currentSession !== sessionId) {
+      await vibeFileSyncService.initSession(sessionId);
     }
+
+    // Schedule the file save with debouncing
+    await vibeFileSyncService.scheduleFileSave(filePath, content);
   } catch (err) {
     console.error('[Vibe] Error syncing file:', err);
   }

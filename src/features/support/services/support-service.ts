@@ -5,6 +5,43 @@
 
 import { supabase } from '@shared/lib/supabase-client';
 
+// =============================================================================
+// EMAIL NOTIFICATION TYPES
+// =============================================================================
+
+interface TicketCreatedEmailData {
+  type: 'ticket_created';
+  to: string;
+  ticketId: string;
+  ticketSubject: string;
+  ticketNumber?: string;
+}
+
+interface TicketStatusUpdateEmailData {
+  type: 'ticket_status_update';
+  to: string;
+  ticketId: string;
+  ticketSubject: string;
+  previousStatus: string;
+  newStatus: string;
+  statusMessage?: string;
+}
+
+interface TicketReplyEmailData {
+  type: 'ticket_reply';
+  to: string;
+  ticketId: string;
+  ticketSubject: string;
+  replyPreview: string;
+  isStaffReply: boolean;
+  replierName?: string;
+}
+
+type EmailNotificationData =
+  | TicketCreatedEmailData
+  | TicketStatusUpdateEmailData
+  | TicketReplyEmailData;
+
 export interface SupportTicket {
   id: string;
   user_id: string;
@@ -73,8 +110,8 @@ class SupportService {
         return { data: null, error: error.message };
       }
 
-      // Send email notification (implement email service)
-      await this.sendTicketNotification(ticket.email, data.id);
+      // Send email notification via Netlify function
+      await this.sendTicketNotification(ticket.email, data.id, ticket.subject);
 
       return { data: data as SupportTicket };
     } catch (error) {
@@ -284,17 +321,120 @@ class SupportService {
   }
 
   /**
-   * Send ticket notification email (stub for now)
+   * Send ticket notification email via Netlify function
+   * Supports multiple notification types: ticket_created, ticket_status_update, ticket_reply
    */
   private async sendTicketNotification(
     email: string,
-    ticketId: string
+    ticketId: string,
+    subject?: string
   ): Promise<void> {
-    // TODO: Implement email notification via Netlify function
-    // or third-party service (SendGrid, Resend, etc.)
-    console.log(
-      `Ticket notification would be sent to ${email} for ticket ${ticketId}`
-    );
+    await this.sendEmailNotification({
+      type: 'ticket_created',
+      to: email,
+      ticketId,
+      ticketSubject: subject || 'Support Ticket',
+    });
+  }
+
+  /**
+   * Send email notification via Netlify function
+   * Generic method that supports all email notification types
+   */
+  async sendEmailNotification(data: EmailNotificationData): Promise<{
+    success: boolean;
+    messageId?: string;
+    error?: string;
+  }> {
+    try {
+      // Get the current session for authentication
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        console.warn('[Support Service] No session for email notification, skipping');
+        return { success: false, error: 'Not authenticated' };
+      }
+
+      // Call the Netlify function
+      const response = await fetch('/.netlify/functions/notifications/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[Support Service] Email notification failed:', response.status, errorData);
+        return {
+          success: false,
+          error: errorData.error || `HTTP ${response.status}`,
+        };
+      }
+
+      const result = await response.json();
+      console.log('[Support Service] Email notification sent:', result.messageId);
+
+      return {
+        success: true,
+        messageId: result.messageId,
+      };
+    } catch (error) {
+      console.error('[Support Service] Error sending email notification:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
+   * Send ticket status update notification
+   */
+  async sendStatusUpdateNotification(
+    ticketId: string,
+    email: string,
+    subject: string,
+    previousStatus: string,
+    newStatus: string,
+    statusMessage?: string
+  ): Promise<void> {
+    await this.sendEmailNotification({
+      type: 'ticket_status_update',
+      to: email,
+      ticketId,
+      ticketSubject: subject,
+      previousStatus,
+      newStatus,
+      statusMessage,
+    });
+  }
+
+  /**
+   * Send ticket reply notification
+   */
+  async sendReplyNotification(
+    ticketId: string,
+    email: string,
+    subject: string,
+    replyPreview: string,
+    isStaffReply: boolean,
+    replierName?: string
+  ): Promise<void> {
+    await this.sendEmailNotification({
+      type: 'ticket_reply',
+      to: email,
+      ticketId,
+      ticketSubject: subject,
+      replyPreview: replyPreview.slice(0, 500), // Limit preview length
+      isStaffReply,
+      replierName,
+    });
   }
 }
 

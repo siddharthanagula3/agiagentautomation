@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import { Badge } from '@shared/ui/badge';
 import { Card } from '@shared/ui/card';
@@ -250,4 +251,10 @@ const DocumentationPage: React.FC = () => {
   );
 };
 
-export default DocumentationPage;
+const DocumentationPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="DocumentationPage" showReportDialog>
+    <DocumentationPage />
+  </ErrorBoundary>
+);
+
+export default DocumentationPageWithErrorBoundary;

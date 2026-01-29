@@ -249,13 +249,13 @@ const openaiImageHandler: Handler = async (event: AuthenticatedEvent) => {
     const data = await response.json();
 
     if (!response.ok) {
+      // SECURITY: Log full error server-side but return generic message to client
       console.error('[OpenAI Image Proxy] API Error:', data);
       return {
         statusCode: response.status,
         headers: getSecurityHeaders(),
         body: JSON.stringify({
-          error: data.error?.message || 'OpenAI API error',
-          details: data,
+          error: 'An error occurred processing your request',
         }),
       };
     }
@@ -330,13 +330,13 @@ const openaiImageHandler: Handler = async (event: AuthenticatedEvent) => {
       body: JSON.stringify(data),
     };
   } catch (error) {
+    // SECURITY: Log full error server-side but return generic message to client
     console.error('[OpenAI Image Proxy] Error:', error);
     return {
       statusCode: 500,
       headers: getSecurityHeaders(),
       body: JSON.stringify({
-        error: 'Failed to process request',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: 'An error occurred processing your request',
       }),
     };
   }

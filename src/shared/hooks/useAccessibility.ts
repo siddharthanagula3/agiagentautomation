@@ -1,5 +1,8 @@
 import { useEffect, useCallback, useRef } from 'react';
 
+// Track active announcement timeouts for cleanup
+const activeAnnouncementTimeouts = new Set<ReturnType<typeof setTimeout>>();
+
 // Mock accessibility service since monitoring was archived
 const accessibilityService = {
   initialize: () => {},
@@ -11,11 +14,18 @@ const accessibilityService = {
     announcement.className = 'sr-only';
     announcement.textContent = message;
     document.body.appendChild(announcement);
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       if (document.body.contains(announcement)) {
         document.body.removeChild(announcement);
       }
+      activeAnnouncementTimeouts.delete(timeoutId);
     }, 1000);
+    activeAnnouncementTimeouts.add(timeoutId);
+  },
+  // Cleanup function for unmounting
+  cleanup: () => {
+    activeAnnouncementTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+    activeAnnouncementTimeouts.clear();
   },
 };
 
@@ -37,9 +47,14 @@ export const useAccessibility = (options: AccessibilityOptions = {}) => {
 
   const previousFocusRef = useRef<Element | null>(null);
 
-  // Initialize accessibility service
+  // Initialize accessibility service and cleanup on unmount
   useEffect(() => {
     accessibilityService.initialize();
+
+    // Cleanup any pending announcement timeouts on unmount
+    return () => {
+      accessibilityService.cleanup();
+    };
   }, []);
 
   // Announce changes to screen readers
@@ -269,6 +284,20 @@ export const useAriaAttributes = () => {
  * Hook for screen reader announcements
  */
 export const useScreenReaderAnnouncements = () => {
+  // Track pending timeouts for cleanup
+  const pendingTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(
+    new Set()
+  );
+
+  // Cleanup on unmount
+  useEffect(() => {
+    const pendingTimeouts = pendingTimeoutsRef.current;
+    return () => {
+      pendingTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+      pendingTimeouts.clear();
+    };
+  }, []);
+
   const announce = useCallback(
     (message: string, priority: 'polite' | 'assertive' = 'polite') => {
       const announcement = document.createElement('div');
@@ -279,9 +308,14 @@ export const useScreenReaderAnnouncements = () => {
 
       document.body.appendChild(announcement);
 
-      setTimeout(() => {
-        document.body.removeChild(announcement);
+      const timeoutId = setTimeout(() => {
+        if (document.body.contains(announcement)) {
+          document.body.removeChild(announcement);
+        }
+        pendingTimeoutsRef.current.delete(timeoutId);
       }, 1000);
+
+      pendingTimeoutsRef.current.add(timeoutId);
     },
     []
   );

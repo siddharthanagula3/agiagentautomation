@@ -4,12 +4,12 @@
  * Runs continuously until task completion
  */
 
-import { AI_EMPLOYEES, type AIEmployee } from '@/data/marketplace-employees';
-import { mcpToolsService, type MCPTool } from './mcp-tools-service';
+import { AI_EMPLOYEES } from '@/data/marketplace-employees';
 import {
   UnifiedLLMService,
   type LLMProvider,
 } from '@core/ai/llm/unified-language-model';
+import { logger } from '@shared/lib/logger';
 
 export interface AgentCapability {
   employeeId: string;
@@ -230,8 +230,8 @@ class MultiAgentOrchestrator {
           await this.unblockTasks(blockedTasks, plan, onCommunication);
         } else {
           // No tasks left and not complete - something went wrong
-          console.warn(
-            '[Orchestrator] No executable tasks but plan not complete'
+          logger.warn(
+            '[Agent Collaboration] No executable tasks but plan not complete'
           );
           break;
         }
@@ -267,7 +267,7 @@ class MultiAgentOrchestrator {
     }
 
     if (iterationCount >= MAX_ITERATIONS) {
-      console.warn('[Orchestrator] Max iterations reached');
+      logger.warn('[Agent Collaboration] Max iterations reached');
     }
 
     return results;
@@ -1132,8 +1132,8 @@ Provide your complete, production-ready implementation following this structure.
 
       return fullResponse;
     } catch (error) {
-      console.error(
-        `[Orchestrator] Error executing task for ${agentName}:`,
+      logger.error(
+        `[Agent Collaboration] Error executing task for ${agentName}:`,
         error
       );
 

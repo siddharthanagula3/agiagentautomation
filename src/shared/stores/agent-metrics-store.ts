@@ -66,7 +66,18 @@ export interface AgentMetrics {
   agentCommunications: AgentCommunication[];
 }
 
-interface AgentMetricsState extends AgentMetrics {
+/** Activity type for agent metrics */
+export type AgentActivityType =
+  | 'session_start'
+  | 'session_end'
+  | 'agent_communication'
+  | 'task_complete'
+  | 'task_failed';
+
+/** Session status type */
+export type SessionStatusType = 'pending' | 'in_progress' | 'completed' | 'failed';
+
+export interface AgentMetricsState extends AgentMetrics {
   // Actions
   startSession: (
     session: Omit<ChatSession, 'id' | 'startTime' | 'lastActivity' | 'isActive'>

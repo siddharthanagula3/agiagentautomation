@@ -4,8 +4,8 @@
  * Updated: Jan 3rd 2026 - Updated to latest Sonar models
  */
 
-import type { Perplexity } from '@perplexity-ai/perplexity_ai';
 import { supabase } from '@shared/lib/supabase-client';
+import { logger } from '@shared/lib/logger';
 
 /**
  * Helper function to get the current Supabase session token
@@ -18,25 +18,13 @@ async function getAuthToken(): Promise<string | null> {
     } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
-    console.error('[Perplexity Provider] Failed to get auth token:', error);
+    logger.error('[Perplexity Provider] Failed to get auth token:', error);
     return null;
   }
 }
 
-// SECURITY WARNING: Client-side API initialization is disabled
-// All API calls should go through Netlify proxy functions instead
-// Environment variables with VITE_ prefix are exposed to the browser (security risk)
-
-// DEPRECATED: Direct client-side initialization (security risk)
-// const PERPLEXITY_API_KEY = import.meta.env.VITE_PERPLEXITY_API_KEY || '';
-
-// Initialize clients - DISABLED for security
-const perplexity = null; // Client-side SDK disabled - use Netlify proxy instead
-
-// ✅ IMPLEMENTED: All API calls use Netlify proxy functions for security
+// All API calls use Netlify proxy functions for security
 // Proxy endpoints: /.netlify/functions/llm-proxies/perplexity-proxy
-
-// Using centralized Supabase client
 
 export interface PerplexityMessage {
   role: 'user' | 'assistant' | 'system';
@@ -79,14 +67,31 @@ export interface PerplexityConfig {
   reasoningEffort?: 'low' | 'medium' | 'high'; // For deep-research model
 }
 
+/** Error codes specific to Perplexity provider */
+export type PerplexityErrorCode =
+  | 'NOT_AUTHENTICATED'
+  | 'INVALID_API_KEY'
+  | 'QUOTA_EXCEEDED'
+  | 'RATE_LIMIT'
+  | 'CLIENT_NOT_INITIALIZED'
+  | 'DIRECT_API_DISABLED'
+  | 'NO_USER_MESSAGE'
+  | 'REQUEST_FAILED'
+  | 'STREAMING_FAILED'
+  | `HTTP_${number}`;
+
 export class PerplexityError extends Error {
+  public readonly name = 'PerplexityError' as const;
+
   constructor(
     message: string,
-    public code: string,
-    public retryable: boolean = false
+    public readonly code: PerplexityErrorCode | string,
+    public readonly retryable: boolean = false
   ) {
     super(message);
-    this.name = 'PerplexityError';
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, PerplexityError);
+    }
   }
 }
 
@@ -202,7 +207,7 @@ export class PerplexityProvider {
         },
       };
     } catch (error) {
-      console.error('[Perplexity Provider] Error:', error);
+      logger.error('[Perplexity Provider] Error:', error);
 
       if (error instanceof Error) {
         // Check for specific Perplexity API errors
@@ -335,7 +340,7 @@ export class PerplexityProvider {
         });
       }
     } catch (error) {
-      console.error('[Perplexity Provider] Streaming error:', error);
+      logger.error('[Perplexity Provider] Streaming error:', error);
 
       if (error instanceof Error) {
         if (
@@ -459,10 +464,10 @@ export class PerplexityProvider {
       });
 
       if (error) {
-        console.error('[Perplexity Provider] Error saving message:', error);
+        logger.error('[Perplexity Provider] Error saving message:', error);
       }
     } catch (error) {
-      console.error(
+      logger.error(
         '[Perplexity Provider] Unexpected error saving message:',
         error
       );

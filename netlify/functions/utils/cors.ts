@@ -74,18 +74,20 @@ export function getCorsHeaders(origin: string | undefined): Record<string, strin
 /**
  * Get a minimal set of CORS headers (for error responses)
  * @param origin - The origin header from the request
- * @returns Object containing minimal CORS headers, or null if origin not allowed
+ * @returns Object containing minimal CORS headers for allowed origins, or security headers only
  * Updated: Jan 13th 2026 - Fixed: Return null for unauthorized origins
+ * Updated: Jan 29th 2026 - Changed to always return headers (security headers fallback)
  */
-export function getMinimalCorsHeaders(origin: string | undefined): Record<string, string> | null {
-  // SECURITY FIX: If origin is not allowed, return null
+export function getMinimalCorsHeaders(origin: string | undefined): Record<string, string> {
+  // SECURITY FIX: If origin is not allowed, return security headers only (no CORS)
   if (!isAllowedOrigin(origin)) {
-    return null;
+    return getSecurityHeaders();
   }
 
   return {
     'Access-Control-Allow-Origin': origin!,
     'Vary': 'Origin',
+    ...getSecurityHeaders(),
   };
 }
 

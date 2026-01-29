@@ -23,6 +23,7 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
+import { logger } from '@shared/lib/logger';
 import {
   detectPromptInjection,
   sanitizePromptInput,
@@ -252,7 +253,9 @@ export function sanitizeEmployeeInput(
         injectionResult.confidence,
         employeeInjectionResult.confidence
       ),
-    }).catch(console.error);
+    }).catch((error) => {
+      logger.error('[Employee Input Sanitizer] Failed to log injection attempt', error);
+    });
 
     return {
       sanitized: '',
@@ -313,7 +316,9 @@ export function sanitizeEmployeeInput(
       employeeInjectionResult,
       modifications,
       employeeName: fullConfig.employeeName,
-    }).catch(console.error);
+    }).catch((error) => {
+      logger.error('[Employee Input Sanitizer] Failed to log suspicious input', error);
+    });
   }
 
   return {
@@ -450,7 +455,7 @@ export function validateEmployeeOutput(
 
   // Log if issues were found
   if (issues.length > 0) {
-    console.warn(
+    logger.warn(
       `[Employee Output Validation] Issues detected for ${employeeName}:`,
       issues
     );
@@ -661,14 +666,14 @@ async function logSuspiciousInput(
     });
 
     if (error) {
-      console.error(
+      logger.error(
         '[Employee Input Sanitizer] Failed to log suspicious input:',
         error.message
       );
     }
   } catch (error) {
     // Fail silently - logging should not block the request
-    console.error(
+    logger.error(
       '[Employee Input Sanitizer] Error logging suspicious input:',
       error
     );

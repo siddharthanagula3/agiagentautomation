@@ -1,6 +1,7 @@
 /**
  * Global Search Service
  * Searches across all chat sessions and messages with advanced filtering
+ * Includes search history tracking and analytics
  */
 
 import { supabase } from '@shared/lib/supabase-client';
@@ -37,6 +38,24 @@ export interface SearchStats {
   searchTime: number; // in milliseconds
 }
 
+export interface RecentSearch {
+  query: string;
+  resultCount: number;
+  createdAt: Date;
+}
+
+export interface PopularSearch {
+  query: string;
+  searchCount: number;
+  avgResults: number;
+}
+
+export interface SearchSuggestion {
+  suggestion: string;
+  source: 'recent' | 'popular';
+  score: number;
+}
+
 interface MessageWithSession {
   id: string;
   session_id: string;
@@ -53,13 +72,16 @@ interface MessageWithSession {
 class GlobalSearchService {
   private readonly CONTEXT_LENGTH = 50; // Characters of context before/after match
   private readonly DEFAULT_LIMIT = 50;
+  private readonly MAX_HISTORY_PER_USER = 100;
 
   /**
    * Search across all chat sessions and messages
+   * Automatically tracks the search in history
    */
   async search(
     userId: string,
-    filters: SearchFilters
+    filters: SearchFilters,
+    options: { trackSearch?: boolean } = { trackSearch: true }
   ): Promise<{ results: SearchResult[]; stats: SearchStats }> {
     const startTime = Date.now();
     const limit = filters.limit || this.DEFAULT_LIMIT;
@@ -86,12 +108,134 @@ class GlobalSearchService {
         searchTime: Date.now() - startTime,
       };
 
+      // Track search in history (fire and forget, don't block)
+      if (options.trackSearch && filters.query.trim()) {
+        this.trackSearch(userId, filters.query, stats.totalResults, filters).catch(
+          (err) => console.warn('[GlobalSearch] Failed to track search:', err)
+        );
+      }
+
       return { results: limitedResults, stats };
     } catch (error) {
       console.error('[GlobalSearch] Search failed:', error);
       throw new Error(
         `Search failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
+    }
+  }
+
+  /**
+   * Track a search query in history and update analytics
+   */
+  private async trackSearch(
+    userId: string,
+    query: string,
+    resultCount: number,
+    filters: SearchFilters
+  ): Promise<void> {
+    try {
+      const filtersJson = {
+        role: filters.role,
+        startDate: filters.startDate?.toISOString(),
+        endDate: filters.endDate?.toISOString(),
+        includeArchived: filters.includeArchived,
+      };
+
+      const { error } = await supabase.rpc('track_search', {
+        p_user_id: userId,
+        p_query: query,
+        p_result_count: resultCount,
+        p_filters: filtersJson,
+      });
+
+      if (error) {
+        console.warn('[GlobalSearch] track_search RPC failed:', error);
+      }
+    } catch (error) {
+      console.warn('[GlobalSearch] Failed to track search:', error);
+    }
+  }
+
+  /**
+   * Get recent searches for a user (deduplicated)
+   */
+  async getRecentSearches(
+    userId: string,
+    limit: number = 10
+  ): Promise<RecentSearch[]> {
+    try {
+      const { data, error } = await supabase.rpc('get_recent_searches', {
+        p_user_id: userId,
+        p_limit: limit,
+      });
+
+      if (error) {
+        console.error('[GlobalSearch] get_recent_searches RPC failed:', error);
+        return [];
+      }
+
+      return (data || []).map(
+        (row: { query: string; result_count: number; created_at: string }) => ({
+          query: row.query,
+          resultCount: row.result_count,
+          createdAt: new Date(row.created_at),
+        })
+      );
+    } catch (error) {
+      console.error('[GlobalSearch] Failed to get recent searches:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get popular searches from the last N days
+   */
+  async getPopularSearches(
+    limit: number = 10,
+    days: number = 7
+  ): Promise<PopularSearch[]> {
+    try {
+      const { data, error } = await supabase.rpc('get_popular_searches', {
+        p_limit: limit,
+        p_days: days,
+      });
+
+      if (error) {
+        console.error('[GlobalSearch] get_popular_searches RPC failed:', error);
+        return [];
+      }
+
+      return (data || []).map(
+        (row: { query: string; search_count: number; avg_results: number }) => ({
+          query: row.query,
+          searchCount: row.search_count,
+          avgResults: row.avg_results || 0,
+        })
+      );
+    } catch (error) {
+      console.error('[GlobalSearch] Failed to get popular searches:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Clear all search history for a user
+   */
+  async clearSearchHistory(userId: string): Promise<number> {
+    try {
+      const { data, error } = await supabase.rpc('clear_search_history', {
+        p_user_id: userId,
+      });
+
+      if (error) {
+        console.error('[GlobalSearch] clear_search_history RPC failed:', error);
+        return 0;
+      }
+
+      return data || 0;
+    } catch (error) {
+      console.error('[GlobalSearch] Failed to clear search history:', error);
+      return 0;
     }
   }
 
@@ -287,15 +431,38 @@ class GlobalSearchService {
   }
 
   /**
-   * Get search suggestions based on recent searches (future enhancement)
+   * Get search suggestions based on user history and popular searches
    */
   async getSearchSuggestions(
     userId: string,
-    partialQuery: string
-  ): Promise<string[]> {
-    // TODO: Implement search history and suggestions
-    // For now, return empty array
-    return [];
+    partialQuery: string,
+    limit: number = 5
+  ): Promise<SearchSuggestion[]> {
+    if (partialQuery.trim().length < 2) return [];
+
+    try {
+      const { data, error } = await supabase.rpc('get_search_suggestions', {
+        p_user_id: userId,
+        p_partial_query: partialQuery,
+        p_limit: limit,
+      });
+
+      if (error) {
+        console.error('[GlobalSearch] get_search_suggestions RPC failed:', error);
+        return [];
+      }
+
+      return (data || []).map(
+        (row: { suggestion: string; source: string; score: number }) => ({
+          suggestion: row.suggestion,
+          source: row.source as 'recent' | 'popular',
+          score: row.score,
+        })
+      );
+    } catch (error) {
+      console.error('[GlobalSearch] Failed to get search suggestions:', error);
+      return [];
+    }
   }
 
   /**
@@ -332,15 +499,20 @@ class GlobalSearchService {
   }
 
   /**
-   * Get popular search terms (future enhancement)
+   * Get trending search terms (last 7 days)
+   * Returns simple string array for backward compatibility
    */
-  async getPopularSearches(
-    userId: string,
-    limit: number = 10
-  ): Promise<string[]> {
-    // TODO: Track search analytics and return popular terms
-    return [];
+  async getTrendingSearchTerms(limit: number = 10): Promise<string[]> {
+    const popular = await this.getPopularSearches(limit, 7);
+    return popular.map((p) => p.query);
   }
 }
+
+// Export types for external use
+export type {
+  RecentSearch,
+  PopularSearch,
+  SearchSuggestion,
+};
 
 export const globalSearchService = new GlobalSearchService();

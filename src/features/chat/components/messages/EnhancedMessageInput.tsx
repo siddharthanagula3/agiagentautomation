@@ -6,7 +6,8 @@
  * - File attachment support
  * - @mention autocomplete for agents
  * - Markdown preview
- * - Voice input support (placeholder)
+ * - Voice input with recording visualization
+ * - Audio playback before sending
  * - Auto-resize textarea
  * - Keyboard shortcuts
  * - Character counter
@@ -21,26 +22,30 @@ import React, {
 } from 'react';
 import { cn } from '@shared/lib/utils';
 import { Button } from '@shared/components/ui/button';
-import { Input } from '@shared/components/ui/input';
 import { Separator } from '@shared/components/ui/separator';
 import { ScrollArea } from '@shared/components/ui/scroll-area';
 import {
   Send,
   Paperclip,
   Mic,
+  MicOff,
   Bold,
   Italic,
   Code,
-  List,
-  Image as ImageIcon,
   X,
   Eye,
   EyeOff,
-  Smile,
+  Square,
+  Pause,
+  Play,
+  AlertCircle,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Agent } from '../Main/MultiAgentChatInterface';
+import { useVoiceRecording } from '../../hooks/use-voice-recording';
+import { AudioVisualizer } from './AudioVisualizer';
+import { AudioPlayer } from './AudioPlayer';
 
 interface EnhancedMessageInputProps {
   /** Array of agents for mention autocomplete */
@@ -63,9 +68,14 @@ interface Attachment {
   file: File;
   id: string;
   preview?: string;
+  isAudio?: boolean;
 }
 
+// Recording states for UI rendering
+type RecordingState = 'idle' | 'recording' | 'paused' | 'preview';
+
 // Updated: Jan 15th 2026 - Added React.memo for performance
+// Updated: Jan 29th 2026 - Added full voice recording implementation
 export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
   agents,
   onSend,
@@ -83,7 +93,33 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
   const [mentionQuery, setMentionQuery] = useState('');
   const [mentionPosition, setMentionPosition] = useState(0);
   const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
-  const [isRecording, setIsRecording] = useState(false);
+
+  // Voice recording hook
+  const {
+    isRecording,
+    isPaused,
+    audioBlob,
+    audioUrl,
+    duration,
+    audioLevels,
+    permissionStatus,
+    error: recordingError,
+    isSupported: isVoiceSupported,
+    startRecording,
+    stopRecording,
+    pauseRecording,
+    resumeRecording,
+    clearRecording,
+    requestPermission,
+  } = useVoiceRecording();
+
+  // Derived recording state for UI
+  const recordingState: RecordingState = useMemo(() => {
+    if (audioBlob && audioUrl) return 'preview';
+    if (isPaused) return 'paused';
+    if (isRecording) return 'recording';
+    return 'idle';
+  }, [isRecording, isPaused, audioBlob, audioUrl]);
 
   // Refs
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -185,6 +221,7 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
         const attachment: Attachment = {
           file,
           id: Math.random().toString(36).substring(7),
+          isAudio: file.type.startsWith('audio/'),
         };
 
         // Generate preview for images
@@ -257,15 +294,81 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
     }
   }, [content, attachments, onSend]);
 
-  // Handle voice recording (placeholder)
-  const handleVoiceToggle = useCallback(() => {
-    setIsRecording((prev) => !prev);
-    // TODO: Implement actual voice recording
-  }, []);
+  // Voice recording handlers
+  const handleVoiceToggle = useCallback(async () => {
+    if (recordingState === 'idle') {
+      // Check permission first
+      if (permissionStatus === 'denied') {
+        // Show error, user needs to enable in browser settings
+        return;
+      }
+      if (permissionStatus === 'prompt' || permissionStatus === 'unknown') {
+        const granted = await requestPermission();
+        if (!granted) return;
+      }
+      await startRecording();
+    } else if (recordingState === 'recording') {
+      pauseRecording();
+    } else if (recordingState === 'paused') {
+      resumeRecording();
+    }
+  }, [
+    recordingState,
+    permissionStatus,
+    requestPermission,
+    startRecording,
+    pauseRecording,
+    resumeRecording,
+  ]);
+
+  const handleStopRecording = useCallback(async () => {
+    await stopRecording();
+  }, [stopRecording]);
+
+  const handleDiscardRecording = useCallback(() => {
+    clearRecording();
+  }, [clearRecording]);
+
+  const handleSendAudio = useCallback(
+    (audioFile: File) => {
+      // Add audio file as attachment and send
+      const audioAttachment: Attachment = {
+        file: audioFile,
+        id: Math.random().toString(36).substring(7),
+        isAudio: true,
+      };
+
+      // Include any existing text content with the voice message
+      onSend(
+        content || '[Voice Message]',
+        [...attachments.map((a) => a.file), audioAttachment.file]
+      );
+
+      // Clear state
+      setContent('');
+      setAttachments([]);
+      clearRecording();
+    },
+    [content, attachments, onSend, clearRecording]
+  );
+
+  const handleReRecord = useCallback(async () => {
+    clearRecording();
+    await startRecording();
+  }, [clearRecording, startRecording]);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't handle shortcuts while recording
+      if (recordingState !== 'idle' && recordingState !== 'preview') {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          handleStopRecording();
+        }
+        return;
+      }
+
       // Send on Enter (without Shift)
       if (e.key === 'Enter' && !e.shiftKey && !showMentions) {
         e.preventDefault();
@@ -323,13 +426,98 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
     handleSend,
     handleMentionSelect,
     insertMarkdown,
+    recordingState,
+    handleStopRecording,
   ]);
 
   const charCount = content.length;
   const isNearLimit = charCount > maxLength * 0.9;
 
+  // Check if voice is actually enabled (browser support + prop)
+  const voiceEnabled = enableVoice && isVoiceSupported;
+
   return (
     <div className={cn('flex flex-col gap-2', className)}>
+      {/* Recording Error Display */}
+      {recordingError && (
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>{recordingError}</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto h-6 px-2"
+            onClick={handleDiscardRecording}
+          >
+            Dismiss
+          </Button>
+        </div>
+      )}
+
+      {/* Voice Recording UI */}
+      {(recordingState === 'recording' || recordingState === 'paused') && (
+        <div className="flex flex-col gap-2">
+          <AudioVisualizer
+            audioLevels={audioLevels}
+            duration={duration}
+            isRecording={isRecording}
+            isPaused={isPaused}
+            size="md"
+          />
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={handleVoiceToggle}
+            >
+              {isPaused ? (
+                <>
+                  <Play className="h-4 w-4" />
+                  Resume
+                </>
+              ) : (
+                <>
+                  <Pause className="h-4 w-4" />
+                  Pause
+                </>
+              )}
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="gap-2"
+              onClick={handleStopRecording}
+            >
+              <Square className="h-4 w-4" />
+              Stop
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-destructive hover:text-destructive"
+              onClick={handleDiscardRecording}
+            >
+              <X className="h-4 w-4" />
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Audio Preview / Playback */}
+      {recordingState === 'preview' && audioUrl && (
+        <AudioPlayer
+          src={audioUrl}
+          audioBlob={audioBlob ?? undefined}
+          onSend={handleSendAudio}
+          onDiscard={handleDiscardRecording}
+          onReRecord={handleReRecord}
+          showActions={true}
+          size="md"
+        />
+      )}
+
       {/* Attachments Preview */}
       {attachments.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -344,6 +532,13 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
                   alt={attachment.file.name}
                   className="h-20 w-20 object-cover"
                 />
+              ) : attachment.isAudio ? (
+                <div className="flex h-20 w-20 flex-col items-center justify-center gap-1 p-2">
+                  <Mic className="h-5 w-5 text-muted-foreground" />
+                  <span className="truncate text-xs text-muted-foreground">
+                    {attachment.file.name}
+                  </span>
+                </div>
               ) : (
                 <div className="flex h-20 w-20 flex-col items-center justify-center gap-1 p-2">
                   <Paperclip className="h-5 w-5 text-muted-foreground" />
@@ -378,169 +573,190 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
         </div>
       )}
 
-      {/* Input Area */}
-      <div className="relative flex flex-col gap-2 rounded-lg border border-border bg-card p-3">
-        {/* Formatting Toolbar */}
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={() => insertMarkdown('**')}
-            title="Bold (Ctrl+B)"
-          >
-            <Bold className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={() => insertMarkdown('*')}
-            title="Italic (Ctrl+I)"
-          >
-            <Italic className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={() => insertMarkdown('`')}
-            title="Code (Ctrl+K)"
-          >
-            <Code className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={() => insertMarkdown('```\n', '\n```')}
-            title="Code block"
-          >
-            <Code className="h-4 w-4" />
-          </Button>
-
-          <Separator orientation="vertical" className="mx-1 h-5" />
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={() => fileInputRef.current?.click()}
-            title="Attach file"
-          >
-            <Paperclip className="h-4 w-4" />
-          </Button>
-
-          {enablePreview && (
+      {/* Input Area - Hidden when actively recording */}
+      {recordingState !== 'recording' && recordingState !== 'paused' && (
+        <div className="relative flex flex-col gap-2 rounded-lg border border-border bg-card p-3">
+          {/* Formatting Toolbar */}
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
               className="h-7 w-7 p-0"
-              onClick={() => setShowPreview(!showPreview)}
-              title={showPreview ? 'Hide preview' : 'Show preview'}
+              onClick={() => insertMarkdown('**')}
+              title="Bold (Ctrl+B)"
             >
-              {showPreview ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
+              <Bold className="h-4 w-4" />
             </Button>
-          )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => insertMarkdown('*')}
+              title="Italic (Ctrl+I)"
+            >
+              <Italic className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => insertMarkdown('`')}
+              title="Code (Ctrl+K)"
+            >
+              <Code className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => insertMarkdown('```\n', '\n```')}
+              title="Code block"
+            >
+              <Code className="h-4 w-4" />
+            </Button>
 
-          <div className="ml-auto flex items-center gap-2">
-            {isNearLimit && (
-              <span
-                className={cn(
-                  'text-xs',
-                  charCount >= maxLength
-                    ? 'text-destructive'
-                    : 'text-muted-foreground'
-                )}
-              >
-                {charCount} / {maxLength}
-              </span>
-            )}
-          </div>
-        </div>
+            <Separator orientation="vertical" className="mx-1 h-5" />
 
-        <Separator />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => fileInputRef.current?.click()}
+              title="Attach file"
+            >
+              <Paperclip className="h-4 w-4" />
+            </Button>
 
-        {/* Textarea */}
-        <div className="relative">
-          <textarea
-            ref={textareaRef}
-            value={content}
-            onChange={handleContentChange}
-            placeholder={placeholder}
-            className="max-h-[200px] min-h-[60px] w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-            rows={1}
-          />
-
-          {/* Mention Autocomplete */}
-          {showMentions && filteredAgents.length > 0 && (
-            <div className="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-card shadow-lg">
-              <ScrollArea className="max-h-48">
-                {filteredAgents.map((agent, index) => (
-                  <button
-                    key={agent.id}
-                    onClick={() => handleMentionSelect(agent)}
-                    className={cn(
-                      'flex w-full items-center gap-2 px-3 py-2 text-left transition-colors',
-                      index === selectedMentionIndex
-                        ? 'bg-primary/10 text-primary'
-                        : 'hover:bg-muted'
-                    )}
-                  >
-                    <div
-                      className="h-6 w-6 rounded-full"
-                      style={{ backgroundColor: agent.color }}
-                    >
-                      <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
-                        {agent.name.substring(0, 2).toUpperCase()}
-                      </div>
-                    </div>
-                    <div className="flex-1 overflow-hidden">
-                      <div className="truncate text-sm font-medium">
-                        {agent.name}
-                      </div>
-                      <div className="truncate text-xs text-muted-foreground">
-                        {agent.role}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </ScrollArea>
-            </div>
-          )}
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {enableVoice && (
+            {enablePreview && (
               <Button
-                variant={isRecording ? 'destructive' : 'ghost'}
+                variant="ghost"
                 size="sm"
-                className="h-8 gap-2"
-                onClick={handleVoiceToggle}
+                className="h-7 w-7 p-0"
+                onClick={() => setShowPreview(!showPreview)}
+                title={showPreview ? 'Hide preview' : 'Show preview'}
               >
-                <Mic className="h-4 w-4" />
-                {isRecording && <span className="text-xs">Recording...</span>}
+                {showPreview ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
               </Button>
             )}
+
+            <div className="ml-auto flex items-center gap-2">
+              {isNearLimit && (
+                <span
+                  className={cn(
+                    'text-xs',
+                    charCount >= maxLength
+                      ? 'text-destructive'
+                      : 'text-muted-foreground'
+                  )}
+                >
+                  {charCount} / {maxLength}
+                </span>
+              )}
+            </div>
           </div>
 
-          <Button
-            onClick={handleSend}
-            disabled={!content.trim() && attachments.length === 0}
-            size="sm"
-            className="gap-2"
-          >
-            <Send className="h-4 w-4" />
-            Send
-          </Button>
+          <Separator />
+
+          {/* Textarea */}
+          <div className="relative">
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={handleContentChange}
+              placeholder={placeholder}
+              className="max-h-[200px] min-h-[60px] w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              rows={1}
+              disabled={recordingState === 'preview'}
+            />
+
+            {/* Mention Autocomplete */}
+            {showMentions && filteredAgents.length > 0 && (
+              <div className="absolute bottom-full left-0 mb-2 w-64 rounded-lg border border-border bg-card shadow-lg">
+                <ScrollArea className="max-h-48">
+                  {filteredAgents.map((agent, index) => (
+                    <button
+                      key={agent.id}
+                      onClick={() => handleMentionSelect(agent)}
+                      className={cn(
+                        'flex w-full items-center gap-2 px-3 py-2 text-left transition-colors',
+                        index === selectedMentionIndex
+                          ? 'bg-primary/10 text-primary'
+                          : 'hover:bg-muted'
+                      )}
+                    >
+                      <div
+                        className="h-6 w-6 rounded-full"
+                        style={{ backgroundColor: agent.color }}
+                      >
+                        <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white">
+                          {agent.name.substring(0, 2).toUpperCase()}
+                        </div>
+                      </div>
+                      <div className="flex-1 overflow-hidden">
+                        <div className="truncate text-sm font-medium">
+                          {agent.name}
+                        </div>
+                        <div className="truncate text-xs text-muted-foreground">
+                          {agent.role}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </ScrollArea>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {voiceEnabled && recordingState === 'idle' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 gap-2"
+                  onClick={handleVoiceToggle}
+                  title={
+                    permissionStatus === 'denied'
+                      ? 'Microphone access denied'
+                      : 'Start voice recording'
+                  }
+                  disabled={permissionStatus === 'denied'}
+                >
+                  {permissionStatus === 'denied' ? (
+                    <MicOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Mic className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
+
+              {!isVoiceSupported && enableVoice && (
+                <span className="text-xs text-muted-foreground">
+                  Voice recording not supported
+                </span>
+              )}
+            </div>
+
+            <Button
+              onClick={handleSend}
+              disabled={
+                (!content.trim() && attachments.length === 0) ||
+                recordingState === 'preview'
+              }
+              size="sm"
+              className="gap-2"
+            >
+              <Send className="h-4 w-4" />
+              Send
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Hidden File Input */}
       <input
@@ -549,8 +765,10 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
         multiple
         className="hidden"
         onChange={handleFileSelect}
-        accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json"
+        accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,audio/*"
       />
     </div>
   );
 });
+
+export default EnhancedMessageInput;

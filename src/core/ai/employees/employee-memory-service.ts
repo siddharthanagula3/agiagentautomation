@@ -9,6 +9,7 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
+import { logger } from '@shared/lib/logger';
 
 // ================================================
 // TYPES
@@ -174,7 +175,7 @@ export class EmployeeMemoryService {
     const context = this.contextWindows[key];
 
     if (!context) {
-      console.warn(`No context window found for employee ${employeeId}`);
+      logger.warn(`[Employee Memory] No context window found for employee ${employeeId}`);
       return;
     }
 
@@ -331,7 +332,7 @@ export class EmployeeMemoryService {
         return memory;
       }
     } catch (error) {
-      console.warn('Failed to load employee memory from database:', error);
+      logger.warn('[Employee Memory] Failed to load employee memory from database:', error);
     }
 
     // Create new memory
@@ -492,7 +493,7 @@ export class EmployeeMemoryService {
         }
       );
     } catch (error) {
-      console.warn('Failed to persist employee memory:', error);
+      logger.warn('[Employee Memory] Failed to persist employee memory:', error);
     }
   }
 

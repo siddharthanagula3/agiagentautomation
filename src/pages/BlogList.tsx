@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
@@ -549,4 +550,10 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
   );
 };
 
-export default BlogPage;
+const BlogPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="BlogPage" showReportDialog>
+    <BlogPage />
+  </ErrorBoundary>
+);
+
+export default BlogPageWithErrorBoundary;

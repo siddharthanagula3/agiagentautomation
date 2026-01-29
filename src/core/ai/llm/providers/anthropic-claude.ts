@@ -7,6 +7,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { supabase } from '@shared/lib/supabase-client';
 import { toast } from 'sonner';
+import { logger } from '@shared/lib/logger';
 
 /**
  * Helper function to get the current Supabase session token
@@ -19,25 +20,13 @@ async function getAuthToken(): Promise<string | null> {
     } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
-    console.error('[Anthropic Provider] Failed to get auth token:', error);
+    logger.error('[Anthropic Provider] Failed to get auth token:', error);
     return null;
   }
 }
 
-// SECURITY WARNING: Client-side API initialization is disabled
-// All API calls should go through Netlify proxy functions instead
-// Environment variables with VITE_ prefix are exposed to the browser (security risk)
-
-// DEPRECATED: Direct client-side initialization (security risk)
-// const ANTHROPIC_API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || '';
-
-// Initialize clients - DISABLED for security
-const anthropic = null; // Client-side SDK disabled - use Netlify proxy instead
-
-// ✅ IMPLEMENTED: All API calls use Netlify proxy functions for security
+// All API calls use Netlify proxy functions for security
 // Proxy endpoints: /.netlify/functions/llm-proxies/anthropic-proxy
-
-// Using centralized Supabase client
 
 export interface AnthropicMessage {
   role: 'user' | 'assistant' | 'system';
@@ -132,15 +121,30 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/** Error codes specific to Anthropic provider */
+export type AnthropicErrorCode =
+  | 'PAYMENT_REQUIRED'
+  | 'RATE_LIMIT_EXCEEDED'
+  | 'GATEWAY_TIMEOUT'
+  | 'NOT_AUTHENTICATED'
+  | 'API_ERROR'
+  | 'REQUEST_FAILED'
+  | 'STREAMING_FAILED'
+  | `HTTP_${number}`;
+
 export class AnthropicError extends Error {
+  public readonly name = 'AnthropicError' as const;
+
   constructor(
     message: string,
-    public code: string,
-    public retryable: boolean = false,
-    public statusCode?: number
+    public readonly code: AnthropicErrorCode | string,
+    public readonly retryable: boolean = false,
+    public readonly statusCode?: number
   ) {
     super(message);
-    this.name = 'AnthropicError';
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AnthropicError);
+    }
   }
 }
 
@@ -249,7 +253,7 @@ export class AnthropicProvider {
         return await this.executeRequest(messages, sessionId, userId);
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        console.error(
+        logger.error(
           `[Anthropic Provider] Attempt ${attempt + 1} failed:`,
           error
         );
@@ -382,7 +386,7 @@ export class AnthropicProvider {
         },
       };
     } catch (error) {
-      console.error('[Anthropic Provider] Error:', error);
+      logger.error('[Anthropic Provider] Error:', error);
 
       // Re-throw AnthropicError instances as-is
       if (error instanceof AnthropicError) {
@@ -441,7 +445,7 @@ export class AnthropicProvider {
         return; // Success - exit the retry loop
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        console.error(
+        logger.error(
           `[Anthropic Provider] Stream attempt ${attempt + 1} failed:`,
           error
         );
@@ -579,7 +583,7 @@ export class AnthropicProvider {
         });
       }
     } catch (error) {
-      console.error('[Anthropic Provider] Streaming error:', error);
+      logger.error('[Anthropic Provider] Streaming error:', error);
 
       // Re-throw AnthropicError instances as-is
       if (error instanceof AnthropicError) {
@@ -673,10 +677,10 @@ export class AnthropicProvider {
       });
 
       if (error) {
-        console.error('[Anthropic Provider] Error saving message:', error);
+        logger.error('[Anthropic Provider] Error saving message:', error);
       }
     } catch (error) {
-      console.error(
+      logger.error(
         '[Anthropic Provider] Unexpected error saving message:',
         error
       );

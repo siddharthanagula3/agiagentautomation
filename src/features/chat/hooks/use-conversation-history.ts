@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { supabase } from '@shared/lib/supabase-client';
 import { chatPersistenceService } from '../services/conversation-storage';
 import { queryKeys } from '@shared/stores/query-client';
+import { logger } from '@shared/lib/logger';
 import type { ChatSession } from '../types';
 import {
   useChatSessions,
@@ -104,7 +105,7 @@ export const useChatHistory = () => {
         setCurrentSessionId(newSession.id);
         return newSession;
       } catch (error) {
-        console.error('Failed to create session:', error);
+        logger.error('Failed to create session:', error);
         throw error;
       }
     },
@@ -117,7 +118,7 @@ export const useChatHistory = () => {
       try {
         await renameSessionMutation.mutateAsync({ sessionId, newTitle });
       } catch (error) {
-        console.error('Failed to rename session:', error);
+        logger.error('Failed to rename session:', error);
       }
     },
     [renameSessionMutation]
@@ -132,7 +133,7 @@ export const useChatHistory = () => {
           setCurrentSessionId(null);
         }
       } catch (error) {
-        console.error('Failed to delete session:', error);
+        logger.error('Failed to delete session:', error);
       }
     },
     [deleteSessionMutation, currentSessionId]
@@ -156,7 +157,7 @@ export const useChatHistory = () => {
         );
         return results;
       } catch (error) {
-        console.error('Failed to search sessions:', error);
+        logger.error('Failed to search sessions:', error);
         toast.error('Failed to search chats');
         return [];
       }
@@ -196,7 +197,7 @@ export const useChatHistory = () => {
           toast.error('Chat not found or access denied');
         }
       } catch (error) {
-        console.error('Failed to load session:', error);
+        logger.error('Failed to load session:', error);
         toast.error('Failed to load chat');
       }
     },
@@ -215,7 +216,7 @@ export const useChatHistory = () => {
           isStarred: newState,
         });
       } catch (error) {
-        console.error('Failed to toggle star:', error);
+        logger.error('Failed to toggle star:', error);
       }
     },
     [sessions, toggleStarMutation]
@@ -233,7 +234,7 @@ export const useChatHistory = () => {
           isPinned: newState,
         });
       } catch (error) {
-        console.error('Failed to toggle pin:', error);
+        logger.error('Failed to toggle pin:', error);
       }
     },
     [sessions, togglePinMutation]
@@ -251,7 +252,7 @@ export const useChatHistory = () => {
           isArchived: newState,
         });
       } catch (error) {
-        console.error('Failed to toggle archive:', error);
+        logger.error('Failed to toggle archive:', error);
       }
     },
     [sessions, toggleArchiveMutation]
@@ -264,7 +265,7 @@ export const useChatHistory = () => {
         const result = await duplicateMutation.mutateAsync(sessionId);
         return result.newSession;
       } catch (error) {
-        console.error('Failed to duplicate session:', error);
+        logger.error('Failed to duplicate session:', error);
       }
     },
     [duplicateMutation]
@@ -276,7 +277,7 @@ export const useChatHistory = () => {
       try {
         await shareMutation.mutateAsync(sessionId);
       } catch (error) {
-        console.error('Failed to share session:', error);
+        logger.error('Failed to share session:', error);
       }
     },
     [shareMutation]

@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import {
   Card,
   CardContent,
@@ -71,7 +72,7 @@ import settingsService, {
 import { InteractiveHoverCard } from '@shared/ui/interactive-hover-card';
 import { Particles } from '@shared/ui/particles';
 
-const SettingsPage: React.FC = () => {
+const SettingsPageContent: React.FC = () => {
   const { section } = useParams();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
@@ -1373,4 +1374,10 @@ const SettingsPage: React.FC = () => {
   );
 };
 
-export default SettingsPage;
+const SettingsPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="SettingsPage" showReportDialog>
+    <SettingsPageContent />
+  </ErrorBoundary>
+);
+
+export default SettingsPageWithErrorBoundary;

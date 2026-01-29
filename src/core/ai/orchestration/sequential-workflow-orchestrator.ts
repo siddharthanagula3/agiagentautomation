@@ -16,6 +16,7 @@ import {
 import { useMissionStore } from '@shared/stores/mission-control-store';
 import type { AIEmployee } from '@core/types/ai-employee';
 import { tokenLogger } from '@core/integrations/token-usage-tracker';
+import { logger } from '@shared/lib/logger';
 
 // ================================================
 // TYPES
@@ -309,7 +310,7 @@ export class SequentialWorkflowOrchestrator {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      console.error('❌ Workflow execution failed:', errorMessage);
+      logger.error('[Sequential Workflow] Workflow execution failed:', errorMessage);
 
       const execution = this.executions.get(executionId);
       if (execution) {
@@ -367,8 +368,8 @@ export class SequentialWorkflowOrchestrator {
       );
 
       if (!employee) {
-        console.warn(
-          `⚠️ Employee not found: ${step.employeeName}, skipping step`
+        logger.warn(
+          `[Sequential Workflow] Employee not found: ${step.employeeName}, skipping step`
         );
         stepExecution.status = 'skipped';
         stepExecution.error = 'Employee not found';
@@ -697,7 +698,7 @@ If no useful information, respond with "NO_LEARNING"`;
         source: 'inferred',
       });
     } catch (error) {
-      console.warn('Failed to learn from interaction:', error);
+      logger.warn('[Sequential Workflow] Failed to learn from interaction:', error);
     }
   }
 

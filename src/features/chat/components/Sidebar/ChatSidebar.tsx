@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { ScrollArea } from '@shared/ui/scroll-area';
 import { Separator } from '@shared/ui/separator';
 import { Badge } from '@shared/ui/badge';
-import { Plus, Search, MessageSquare, MoreHorizontal } from 'lucide-react';
+import { Skeleton } from '@shared/ui/skeleton';
+import { Plus, Search, MessageSquare, MoreHorizontal, Loader2 } from 'lucide-react';
 import type { ChatSession } from '../../types';
 import { ConversationListItem } from './ConversationListItem';
 import { FolderManagement } from './FolderManagement';
@@ -15,6 +16,7 @@ interface ChatSidebarProps {
   currentSession: ChatSession | null;
   searchQuery: string;
   selectedFolderId?: string | null;
+  isLoading?: boolean;
   onSearchChange: (query: string) => void;
   onNewChat: () => void;
   onSessionSelect: (session: ChatSession) => void;
@@ -30,11 +32,31 @@ interface ChatSidebarProps {
   onMoveSessionToFolder?: (sessionId: string, folderId: string | null) => void;
 }
 
-const ChatSidebarContent: React.FC<ChatSidebarProps> = ({
+/**
+ * Skeleton loader for chat session items - memoized since it's static
+ */
+const SessionSkeleton = memo(function SessionSkeleton() {
+  return (
+    <div className="space-y-2 p-4">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="flex items-center gap-3 rounded-lg p-3">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+});
+
+const ChatSidebarContent = memo(function ChatSidebarContent({
   sessions,
   currentSession,
   searchQuery,
   selectedFolderId,
+  isLoading = false,
   onSearchChange,
   onNewChat,
   onSessionSelect,
@@ -48,7 +70,21 @@ const ChatSidebarContent: React.FC<ChatSidebarProps> = ({
   onSessionDuplicate,
   onFolderSelect,
   onMoveSessionToFolder,
-}) => {
+}: ChatSidebarProps) {
+  // Memoize search change handler
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onSearchChange(e.target.value);
+    },
+    [onSearchChange]
+  );
+
+  // Memoize session count display
+  const sessionCountText = useMemo(
+    () => `${sessions.length} chat${sessions.length !== 1 ? 's' : ''}`,
+    [sessions.length]
+  );
+
   return (
     <div className="flex h-full flex-col bg-card/50 backdrop-blur-sm">
       {/* Header */}
@@ -76,7 +112,7 @@ const ChatSidebarContent: React.FC<ChatSidebarProps> = ({
             <Input
               placeholder="Search chats..."
               value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
+              onChange={handleSearchChange}
               className="pl-9"
             />
           </div>
@@ -100,15 +136,17 @@ const ChatSidebarContent: React.FC<ChatSidebarProps> = ({
 
       {/* Sessions List */}
       <ScrollArea className="flex-1">
-        <div className="space-y-2 p-4">
-          {sessions.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
-              <MessageSquare className="mx-auto mb-4 h-12 w-12 opacity-50" />
-              <p className="text-sm">No chat history yet</p>
-              <p className="text-xs">Start a new conversation</p>
-            </div>
-          ) : (
-            sessions.map((session) => {
+        {isLoading ? (
+          <SessionSkeleton />
+        ) : sessions.length === 0 ? (
+          <div className="py-8 text-center text-muted-foreground">
+            <MessageSquare className="mx-auto mb-4 h-12 w-12 opacity-50" />
+            <p className="text-sm">No chat history yet</p>
+            <p className="text-xs">Start a new conversation</p>
+          </div>
+        ) : (
+          <div className="space-y-2 p-4">
+            {sessions.map((session) => {
               // Safely convert updatedAt to Date object
               const updatedAt =
                 session.updatedAt instanceof Date
@@ -159,20 +197,20 @@ const ChatSidebarContent: React.FC<ChatSidebarProps> = ({
                   }
                 />
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
       </ScrollArea>
 
       {/* Footer */}
       <div className="border-t border-border p-4">
         <div className="text-center text-xs text-muted-foreground">
-          {sessions.length} chat{sessions.length !== 1 ? 's' : ''}
+          {sessionCountText}
         </div>
       </div>
     </div>
   );
-};
+});
 
 /**
  * ChatSidebar - Chat history sidebar with error boundary protection

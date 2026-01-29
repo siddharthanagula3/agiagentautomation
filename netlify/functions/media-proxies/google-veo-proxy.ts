@@ -237,18 +237,14 @@ async function handleGenerateRequest(
   const data = await response.json();
 
   if (!response.ok) {
+    // SECURITY: Log full error server-side but return generic message to client
     console.error('[Google Veo Proxy] API Error:', data);
-
-    const errorMessage = data.error?.message || data.message || 'Google Veo API error';
-    const errorCode = data.error?.code || response.status;
 
     return {
       statusCode: response.status,
       headers: getSecurityHeaders(),
       body: JSON.stringify({
-        error: errorMessage,
-        code: errorCode,
-        details: data,
+        error: 'An error occurred processing your request',
       }),
     };
   }
@@ -410,16 +406,14 @@ async function handlePollRequest(
   const data = await response.json();
 
   if (!response.ok) {
+    // SECURITY: Log full error server-side but return generic message to client
     console.error('[Google Veo Proxy] Poll API Error:', data);
-
-    const errorMessage = data.error?.message || data.message || 'Failed to check operation status';
 
     return {
       statusCode: response.status,
       headers: getSecurityHeaders(),
       body: JSON.stringify({
-        error: errorMessage,
-        details: data,
+        error: 'An error occurred processing your request',
       }),
     };
   }
@@ -599,13 +593,13 @@ const googleVeoHandler: Handler = async (event: AuthenticatedEvent) => {
       return await handleGenerateRequest(event, corsHeaders);
     }
   } catch (error) {
+    // SECURITY: Log full error server-side but return generic message to client
     console.error('[Google Veo Proxy] Error:', error);
     return {
       statusCode: 500,
       headers: getSecurityHeaders(),
       body: JSON.stringify({
-        error: 'Failed to process request',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: 'An error occurred processing your request',
       }),
     };
   }

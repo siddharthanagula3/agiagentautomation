@@ -3,19 +3,13 @@ import { toast } from 'sonner';
 import { supabase } from '@shared/lib/supabase-client';
 import { useChatStore } from '@shared/stores/chat-store';
 import { chatPersistenceService } from '../services/conversation-storage';
-import { chatStreamingService } from '../services/streaming-response-handler';
 import { employeeChatService } from '../services/employee-chat-service';
-import {
-  shouldPerformWebSearch,
-  performWebSearch,
-  isWebSearchAvailable,
-} from '../services/web-search-integration';
 import {
   chatToolRouter,
   type ToolType,
   type ToolRouterResult,
 } from '../services/chat-tool-router';
-import type { ChatMessage, ChatMode, StreamingUpdate } from '../types';
+import type { ChatMessage, ChatMode } from '../types';
 import type { SearchResponse } from '@core/integrations/web-search-handler';
 import type { MediaGenerationResult } from '@core/integrations/media-generation-handler';
 import type { GeneratedDocument } from '../services/document-generation-service';
@@ -23,7 +17,6 @@ import {
   retryWithBackoff,
   getErrorMessage,
   isRetryableError,
-  AppError,
 } from '@shared/utils/error-handling';
 
 interface SendMessageParams {

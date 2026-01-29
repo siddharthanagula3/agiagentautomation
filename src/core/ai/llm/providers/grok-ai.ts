@@ -6,6 +6,7 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
+import { logger } from '@shared/lib/logger';
 
 /**
  * Helper function to get the current Supabase session token
@@ -18,7 +19,7 @@ async function getAuthToken(): Promise<string | null> {
     } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
-    console.error('[Grok Provider] Failed to get auth token:', error);
+    logger.error('[Grok Provider] Failed to get auth token:', error);
     return null;
   }
 }
@@ -79,14 +80,25 @@ export interface GrokConfig {
   useAgentTools?: boolean; // Enable xAI Agent Tools API
 }
 
+/** Error codes specific to Grok provider */
+export type GrokErrorCode =
+  | 'NOT_AUTHENTICATED'
+  | 'REQUEST_FAILED'
+  | 'STREAMING_FAILED'
+  | `HTTP_${number}`;
+
 export class GrokError extends Error {
+  public readonly name = 'GrokError' as const;
+
   constructor(
     message: string,
-    public code: string,
-    public retryable: boolean = false
+    public readonly code: GrokErrorCode | string,
+    public readonly retryable: boolean = false
   ) {
     super(message);
-    this.name = 'GrokError';
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, GrokError);
+    }
   }
 }
 
@@ -205,7 +217,7 @@ export class GrokProvider {
         },
       };
     } catch (error) {
-      console.error('[Grok Provider] Error:', error);
+      logger.error('[Grok Provider] Error:', error);
 
       throw new GrokError(
         `Grok request failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -296,7 +308,7 @@ export class GrokProvider {
         });
       }
     } catch (error) {
-      console.error('[Grok Provider] Streaming error:', error);
+      logger.error('[Grok Provider] Streaming error:', error);
 
       throw new GrokError(
         `Grok streaming failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -455,7 +467,7 @@ export class GrokProvider {
       const parsed = JSON.parse(content);
       return parsed;
     } catch (error) {
-      console.error('[Grok Provider] Failed to parse JSON response:', error);
+      logger.error('[Grok Provider] Failed to parse JSON response:', error);
       // Return raw content as summary if parsing fails
       return {
         summary: content,
@@ -500,10 +512,10 @@ export class GrokProvider {
       });
 
       if (error) {
-        console.error('[Grok Provider] Error saving message:', error);
+        logger.error('[Grok Provider] Error saving message:', error);
       }
     } catch (error) {
-      console.error('[Grok Provider] Unexpected error saving message:', error);
+      logger.error('[Grok Provider] Unexpected error saving message:', error);
     }
   }
 

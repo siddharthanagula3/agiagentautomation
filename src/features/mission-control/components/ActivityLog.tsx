@@ -1,9 +1,14 @@
 /**
  * Mission Log Enhanced
  * Displays mission plan and real-time activity log
+ *
+ * Performance optimizations:
+ * - React.memo on the main component and sub-components
+ * - useMemo for computed values
+ * - useCallback for event handlers
  */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, memo, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import {
@@ -36,6 +41,9 @@ import type {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '@shared/lib/utils';
+
+// Memoize remarkPlugins array at module level
+const REMARK_PLUGINS = [remarkGfm];
 
 const getTaskStatusIcon = (status: Task['status']) => {
   switch (status) {
@@ -124,7 +132,158 @@ const getMessageColor = (
   }
 };
 
-export const MissionLogEnhanced: React.FC = () => {
+// Memoized task item component
+const TaskItem = memo(function TaskItem({
+  task,
+  index,
+}: {
+  task: Task;
+  index: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className={cn(
+        'rounded-lg border p-2 transition-all sm:p-3',
+        getTaskStatusColor(task.status)
+      )}
+    >
+      <div className="flex items-start gap-2 sm:gap-3">
+        {getTaskStatusIcon(task.status)}
+        <div className="flex-1 space-y-1">
+          <p className="text-xs font-medium sm:text-sm">{task.description}</p>
+          {task.assignedTo && (
+            <p className="text-[10px] opacity-75 sm:text-xs">
+              Assigned to: {task.assignedTo}
+            </p>
+          )}
+          {task.result && (
+            <div className="mt-1 rounded bg-background/50 p-1.5 sm:mt-2 sm:p-2">
+              <p className="text-[10px] sm:text-xs">{task.result}</p>
+            </div>
+          )}
+          {task.error && (
+            <div className="mt-1 rounded bg-red-500/10 p-1.5 sm:mt-2 sm:p-2">
+              <p className="text-[10px] text-red-400 sm:text-xs">
+                Error: {task.error}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+});
+
+// Memoized message item component
+const MessageItem = memo(function MessageItem({
+  message,
+  index,
+}: {
+  message: MissionMessage;
+  index: number;
+}) {
+  // Extract metadata for agent messages
+  const employeeName = message.metadata?.employeeName || message.from;
+  const employeeAvatar = message.metadata?.employeeAvatar;
+  const role = message.metadata?.role as
+    | 'agent'
+    | 'supervisor'
+    | 'user'
+    | undefined;
+
+  // Memoize avatar URL computation
+  const avatarUrl = useMemo(() => {
+    if (employeeAvatar) return employeeAvatar;
+    if (message.type === 'system')
+      return 'https://api.dicebear.com/7.x/shapes/svg?seed=system';
+    if (message.type === 'agent' && role === 'supervisor')
+      return 'https://api.dicebear.com/7.x/shapes/svg?seed=supervisor';
+    return `https://api.dicebear.com/7.x/bottts/svg?seed=${employeeName}`;
+  }, [employeeAvatar, message.type, role, employeeName]);
+
+  // Memoize timestamp formatting
+  const formattedTime = useMemo(
+    () => new Date(message.timestamp).toLocaleTimeString(),
+    [message.timestamp]
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ delay: index * 0.03 }}
+      className={cn(
+        'flex items-start gap-2 sm:gap-3',
+        message.type === 'user' && 'justify-end'
+      )}
+    >
+      {message.type !== 'user' && (
+        <Avatar className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8">
+          <AvatarImage src={avatarUrl} alt={employeeName} />
+          <AvatarFallback className="bg-primary/10">
+            {getMessageIcon(message.type, message.from, role)}
+          </AvatarFallback>
+        </Avatar>
+      )}
+
+      <div
+        className={cn(
+          'max-w-[90%] flex-1 sm:max-w-[85%]',
+          message.type === 'user' && 'flex justify-end'
+        )}
+      >
+        {/* Message Sender */}
+        {message.from !== 'user' && (
+          <div className="mb-1 flex flex-wrap items-center gap-1 sm:gap-2">
+            <p className="text-[10px] font-semibold text-foreground sm:text-xs">
+              {employeeName}
+            </p>
+            {role && role !== 'user' && (
+              <Badge
+                variant="outline"
+                className="px-1 py-0 text-[9px] sm:px-1.5 sm:text-[10px]"
+              >
+                {role === 'supervisor' ? 'Supervisor' : 'Agent'}
+              </Badge>
+            )}
+            <p className="text-[10px] text-muted-foreground sm:text-xs">
+              {formattedTime}
+            </p>
+          </div>
+        )}
+
+        {/* Message Content */}
+        <div
+          className={cn('rounded-lg p-2 sm:p-3', getMessageColor(message.type, role))}
+        >
+          {message.type === 'user' ? (
+            <p className="text-xs sm:text-sm">{message.content}</p>
+          ) : (
+            <div className="prose prose-sm dark:prose-invert max-w-full overflow-x-auto">
+              <ReactMarkdown remarkPlugins={REMARK_PLUGINS}>
+                {message.content}
+              </ReactMarkdown>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {message.type === 'user' && (
+        <Avatar className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8">
+          <AvatarFallback className="bg-primary">
+            <User className="h-3 w-3 text-primary-foreground sm:h-4 sm:w-4" />
+          </AvatarFallback>
+        </Avatar>
+      )}
+    </motion.div>
+  );
+});
+
+export const MissionLogEnhanced = memo(function MissionLogEnhanced() {
   const missionPlan = useMissionPlan();
   const messages = useMissionMessages();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -136,11 +295,15 @@ export const MissionLogEnhanced: React.FC = () => {
     }
   }, [messages]);
 
-  const hasPlan = missionPlan.length > 0;
-  const completedTasks = missionPlan.filter(
-    (t) => t.status === 'completed'
-  ).length;
-  const totalTasks = missionPlan.length;
+  // Memoize computed values
+  const { hasPlan, completedTasks, totalTasks } = useMemo(
+    () => ({
+      hasPlan: missionPlan.length > 0,
+      completedTasks: missionPlan.filter((t) => t.status === 'completed').length,
+      totalTasks: missionPlan.length,
+    }),
+    [missionPlan]
+  );
 
   return (
     <Card className="flex h-full flex-col border-border bg-card">
@@ -173,44 +336,7 @@ export const MissionLogEnhanced: React.FC = () => {
               <AccordionContent>
                 <div className="space-y-2 pt-2">
                   {missionPlan.map((task, index) => (
-                    <motion.div
-                      key={task.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className={cn(
-                        'rounded-lg border p-2 transition-all sm:p-3',
-                        getTaskStatusColor(task.status)
-                      )}
-                    >
-                      <div className="flex items-start gap-2 sm:gap-3">
-                        {getTaskStatusIcon(task.status)}
-                        <div className="flex-1 space-y-1">
-                          <p className="text-xs font-medium sm:text-sm">
-                            {task.description}
-                          </p>
-                          {task.assignedTo && (
-                            <p className="text-[10px] opacity-75 sm:text-xs">
-                              Assigned to: {task.assignedTo}
-                            </p>
-                          )}
-                          {task.result && (
-                            <div className="mt-1 rounded bg-background/50 p-1.5 sm:mt-2 sm:p-2">
-                              <p className="text-[10px] sm:text-xs">
-                                {task.result}
-                              </p>
-                            </div>
-                          )}
-                          {task.error && (
-                            <div className="mt-1 rounded bg-red-500/10 p-1.5 sm:mt-2 sm:p-2">
-                              <p className="text-[10px] text-red-400 sm:text-xs">
-                                Error: {task.error}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
+                    <TaskItem key={task.id} task={task} index={index} />
                   ))}
                 </div>
               </AccordionContent>
@@ -237,106 +363,13 @@ export const MissionLogEnhanced: React.FC = () => {
                 Activity Log
               </h4>
               <AnimatePresence mode="popLayout">
-                {messages.map((message, index) => {
-                  // Extract metadata for agent messages
-                  const employeeName =
-                    message.metadata?.employeeName || message.from;
-                  const employeeAvatar = message.metadata?.employeeAvatar;
-                  const role = message.metadata?.role as
-                    | 'agent'
-                    | 'supervisor'
-                    | 'user'
-                    | undefined;
-
-                  return (
-                    <motion.div
-                      key={message.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ delay: index * 0.03 }}
-                      className={cn(
-                        'flex items-start gap-2 sm:gap-3',
-                        message.type === 'user' && 'justify-end'
-                      )}
-                    >
-                      {message.type !== 'user' && (
-                        <Avatar className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8">
-                          <AvatarImage
-                            src={
-                              employeeAvatar ||
-                              (message.type === 'system'
-                                ? 'https://api.dicebear.com/7.x/shapes/svg?seed=system'
-                                : message.type === 'agent' &&
-                                    role === 'supervisor'
-                                  ? 'https://api.dicebear.com/7.x/shapes/svg?seed=supervisor'
-                                  : `https://api.dicebear.com/7.x/bottts/svg?seed=${employeeName}`)
-                            }
-                            alt={employeeName}
-                          />
-                          <AvatarFallback className="bg-primary/10">
-                            {getMessageIcon(message.type, message.from, role)}
-                          </AvatarFallback>
-                        </Avatar>
-                      )}
-
-                      <div
-                        className={cn(
-                          'max-w-[90%] flex-1 sm:max-w-[85%]',
-                          message.type === 'user' && 'flex justify-end'
-                        )}
-                      >
-                        {/* Message Sender */}
-                        {message.from !== 'user' && (
-                          <div className="mb-1 flex flex-wrap items-center gap-1 sm:gap-2">
-                            <p className="text-[10px] font-semibold text-foreground sm:text-xs">
-                              {employeeName}
-                            </p>
-                            {role && role !== 'user' && (
-                              <Badge
-                                variant="outline"
-                                className="px-1 py-0 text-[9px] sm:px-1.5 sm:text-[10px]"
-                              >
-                                {role === 'supervisor' ? 'Supervisor' : 'Agent'}
-                              </Badge>
-                            )}
-                            <p className="text-[10px] text-muted-foreground sm:text-xs">
-                              {new Date(message.timestamp).toLocaleTimeString()}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Message Content */}
-                        <div
-                          className={cn(
-                            'rounded-lg p-2 sm:p-3',
-                            getMessageColor(message.type, role)
-                          )}
-                        >
-                          {message.type === 'user' ? (
-                            <p className="text-xs sm:text-sm">
-                              {message.content}
-                            </p>
-                          ) : (
-                            <div className="prose prose-sm dark:prose-invert max-w-full overflow-x-auto">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                {message.content}
-                              </ReactMarkdown>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {message.type === 'user' && (
-                        <Avatar className="h-7 w-7 flex-shrink-0 sm:h-8 sm:w-8">
-                          <AvatarFallback className="bg-primary">
-                            <User className="h-3 w-3 text-primary-foreground sm:h-4 sm:w-4" />
-                          </AvatarFallback>
-                        </Avatar>
-                      )}
-                    </motion.div>
-                  );
-                })}
+                {messages.map((message, index) => (
+                  <MessageItem
+                    key={message.id}
+                    message={message}
+                    index={index}
+                  />
+                ))}
               </AnimatePresence>
               <div ref={messagesEndRef} />
             </>
@@ -345,4 +378,4 @@ export const MissionLogEnhanced: React.FC = () => {
       </CardContent>
     </Card>
   );
-};
+});

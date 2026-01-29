@@ -6,3 +6,5 @@ export { default as ChatInput } from './ChatInput';
 export { default as CollaborativeMessageDisplay } from './CollaborativeMessageDisplay';
 export { default as EnhancedMarkdownRenderer } from './EnhancedMarkdownRenderer';
 export { default as TypingIndicator } from './TypingIndicator';
+export { AudioVisualizer } from './AudioVisualizer';
+export { AudioPlayer } from './AudioPlayer';

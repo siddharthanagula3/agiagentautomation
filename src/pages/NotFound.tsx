@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { Search, Home, Mail, FileText, ArrowLeft } from 'lucide-react';
@@ -121,4 +122,10 @@ const NotFoundPage = () => {
   );
 };
 
-export default NotFoundPage;
+const NotFoundPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="NotFoundPage" showReportDialog>
+    <NotFoundPage />
+  </ErrorBoundary>
+);
+
+export default NotFoundPageWithErrorBoundary;

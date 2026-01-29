@@ -13,6 +13,7 @@ import {
   websocketManager,
   MessageType,
 } from '@core/integrations/websocket-manager';
+import { logger } from '@shared/lib/logger';
 
 // Presence status types
 export enum PresenceStatus {
@@ -256,8 +257,9 @@ export class RealtimeCollaborationService {
         sessionId,
         userId,
       })
-      .catch(() => {
-        // Ignore WebSocket errors, Supabase is primary
+      .catch((error) => {
+        // WebSocket is fallback, Supabase is primary - log but don't fail
+        logger.debug('[Collaboration] WebSocket presence send failed (non-critical)', error);
       });
   }
 
@@ -334,8 +336,9 @@ export class RealtimeCollaborationService {
         userId,
         agentId,
       })
-      .catch(() => {
-        // Ignore errors
+      .catch((error) => {
+        // WebSocket is fallback, Supabase is primary - log but don't fail
+        logger.debug('[Collaboration] WebSocket typing send failed (non-critical)', error);
       });
   }
 
@@ -391,8 +394,9 @@ export class RealtimeCollaborationService {
         sessionId,
         userId,
       })
-      .catch(() => {
-        // Ignore errors
+      .catch((error) => {
+        // WebSocket is fallback, Supabase is primary - log but don't fail
+        logger.debug('[Collaboration] WebSocket cursor send failed (non-critical)', error);
       });
 
     // Set throttle timer
@@ -459,8 +463,9 @@ export class RealtimeCollaborationService {
           sessionId,
           userId,
         })
-        .catch(() => {
-          // Ignore errors
+        .catch((error) => {
+          // WebSocket is fallback, Supabase is primary - log but don't fail
+          logger.debug('[Collaboration] WebSocket activity send failed (non-critical)', error);
         });
 
       this.activityDebounceTimers.delete(timerKey);

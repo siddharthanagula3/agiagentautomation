@@ -264,19 +264,14 @@ const googleImagenHandler: Handler = async (event: AuthenticatedEvent) => {
     const data = await response.json();
 
     if (!response.ok) {
+      // SECURITY: Log full error server-side but return generic message to client
       console.error('[Google Imagen Proxy] API Error:', data);
-
-      // Handle specific Google API errors
-      const errorMessage = data.error?.message || data.message || 'Google Imagen API error';
-      const errorCode = data.error?.code || response.status;
 
       return {
         statusCode: response.status,
         headers: getSecurityHeaders(),
         body: JSON.stringify({
-          error: errorMessage,
-          code: errorCode,
-          details: data,
+          error: 'An error occurred processing your request',
         }),
       };
     }
@@ -355,13 +350,13 @@ const googleImagenHandler: Handler = async (event: AuthenticatedEvent) => {
       body: JSON.stringify(normalizedResponse),
     };
   } catch (error) {
+    // SECURITY: Log full error server-side but return generic message to client
     console.error('[Google Imagen Proxy] Error:', error);
     return {
       statusCode: 500,
       headers: getSecurityHeaders(),
       body: JSON.stringify({
-        error: 'Failed to process request',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: 'An error occurred processing your request',
       }),
     };
   }

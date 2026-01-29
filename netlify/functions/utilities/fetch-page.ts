@@ -7,7 +7,7 @@ import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import { withAuth } from '../utils/auth-middleware';
 import { withRateLimit, checkRateLimitWithTier } from '../utils/rate-limiter';
-import { getCorsHeaders } from '../utils/cors';
+import { getSafeCorsHeaders, checkOriginAndBlock } from '../utils/cors';
 import * as dns from 'dns';
 import { promisify } from 'util';
 
@@ -292,16 +292,27 @@ const fetchPageHandler: Handler = async (
   context: HandlerContext
 ) => {
   // Get origin for CORS validation
+  // Updated: Jan 29th 2026 - Fixed null CORS headers vulnerability using getSafeCorsHeaders
   const origin = event.headers['origin'] || event.headers['Origin'];
-  const corsHeaders = getCorsHeaders(origin);
+  const corsHeaders = getSafeCorsHeaders(origin);
 
-  // Handle CORS preflight requests
+  // Handle CORS preflight requests - block unauthorized origins early
   if (event.httpMethod === 'OPTIONS') {
+    const blockedResponse = checkOriginAndBlock(origin);
+    if (blockedResponse) {
+      return blockedResponse;
+    }
     return {
       statusCode: 200,
       headers: corsHeaders,
       body: '',
     };
+  }
+
+  // Block unauthorized origins for non-OPTIONS requests
+  const blockedResponse = checkOriginAndBlock(origin);
+  if (blockedResponse) {
+    return blockedResponse;
   }
 
   // Only allow POST requests

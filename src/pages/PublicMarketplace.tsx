@@ -4,6 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
@@ -645,4 +646,10 @@ export const MarketplacePublicPage: React.FC = () => {
   );
 };
 
-export default MarketplacePublicPage;
+const MarketplacePublicPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="MarketplacePublicPage" showReportDialog>
+    <MarketplacePublicPage />
+  </ErrorBoundary>
+);
+
+export default MarketplacePublicPageWithErrorBoundary;

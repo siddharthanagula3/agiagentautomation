@@ -9,6 +9,7 @@
 import { Task, AgentType } from '../orchestration/reasoning/task-breakdown';
 import { fetchWithTimeout, TimeoutPresets } from '@shared/utils/error-handling';
 import { supabase } from '@shared/lib/supabase-client';
+import { logger } from '@shared/lib/logger';
 
 // ================================================
 // TYPES
@@ -43,7 +44,7 @@ async function getAuthToken(): Promise<string | null> {
     } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
-    console.error('[Employee Coordinator] Failed to get auth token:', error);
+    logger.error('[Employee Coordinator] Failed to get auth token:', error);
     return null;
   }
 }
@@ -112,7 +113,7 @@ class ClaudeService {
         provider: 'anthropic',
       };
     } catch (error) {
-      console.error('Claude API error:', error);
+      logger.error('[Employee Coordinator] Claude API error:', error);
       throw error;
     }
   }
@@ -200,7 +201,7 @@ class GeminiService {
         provider: 'google',
       };
     } catch (error) {
-      console.error('Gemini API error:', error);
+      logger.error('[Employee Coordinator] Gemini API error:', error);
       throw error;
     }
   }
@@ -290,7 +291,7 @@ class OpenAIService {
         provider: 'openai',
       };
     } catch (error) {
-      console.error('OpenAI API error:', error);
+      logger.error('[Employee Coordinator] OpenAI API error:', error);
       throw error;
     }
   }
@@ -387,7 +388,7 @@ class AIServiceRouter {
           return await this.mockService.executeTask(task);
       }
     } catch (error) {
-      console.error(`Error executing task with ${agentType}:`, error);
+      logger.error(`[Employee Coordinator] Error executing task with ${agentType}:`, error);
       // Fallback to mock service on error
       return await this.mockService.executeTask(task);
     }
@@ -400,7 +401,7 @@ class AIServiceRouter {
     try {
       return await primary();
     } catch (error) {
-      console.warn('Primary service failed, using fallback:', error);
+      logger.warn('[Employee Coordinator] Primary service failed, using fallback:', error);
       return await fallback();
     }
   }

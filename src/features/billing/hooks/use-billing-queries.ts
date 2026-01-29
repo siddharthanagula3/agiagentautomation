@@ -1,26 +1,56 @@
 /**
  * Billing React Query Hooks
  * Server state management for billing data using React Query
+ *
+ * @module features/billing/hooks/use-billing-queries
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useQuery,
+  useQueryClient,
+  type UseQueryResult,
+  type QueryClient,
+} from '@tanstack/react-query';
 import { queryKeys } from '@shared/stores/query-client';
 import { supabase } from '@shared/lib/supabase-client';
 import { useAuthStore } from '@shared/stores/authentication-store';
-import { toast } from 'sonner';
-import type { User } from '@supabase/supabase-js';
+import { logger } from '@shared/lib/logger';
 
-// Types
-interface LLMUsage {
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Billing plan types
+ */
+export type BillingPlan = 'free' | 'pro' | 'enterprise';
+
+/**
+ * Subscription status types
+ */
+export type SubscriptionStatus = 'active' | 'cancelled' | 'past_due' | 'unpaid';
+
+/**
+ * Time range options for analytics
+ */
+export type AnalyticsTimeRange = '7d' | '30d' | '90d' | 'all';
+
+/**
+ * LLM provider usage statistics
+ */
+export interface LLMUsage {
   provider: string;
   tokens: number;
   cost: number;
   limit: number;
 }
 
-interface BillingInfo {
-  plan: 'free' | 'pro' | 'enterprise';
-  status: 'active' | 'cancelled' | 'past_due' | 'unpaid';
+/**
+ * Complete billing information for a user
+ */
+export interface BillingInfo {
+  plan: BillingPlan;
+  status: SubscriptionStatus;
   current_period_start: string;
   current_period_end: string;
   price: number;
@@ -28,27 +58,96 @@ interface BillingInfo {
   features: string[];
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
-  usage: {
-    totalTokens: number;
-    totalLimit: number;
-    totalCost: number;
-    currentBalance: number;
-    llmUsage: LLMUsage[];
-  };
+  usage: BillingUsage;
 }
 
-interface TokenBalance {
+/**
+ * Token and cost usage breakdown
+ */
+export interface BillingUsage {
+  totalTokens: number;
+  totalLimit: number;
+  totalCost: number;
+  currentBalance: number;
+  llmUsage: LLMUsage[];
+}
+
+/**
+ * User's token balance
+ */
+export interface TokenBalance {
   currentBalance: number;
   totalGranted: number;
   totalUsed: number;
 }
 
+/**
+ * Raw token usage record from database
+ */
 interface TokenUsageRecord {
   provider: string;
   input_tokens: number;
   output_tokens: number;
   total_tokens: number;
   total_cost: number;
+}
+
+/**
+ * Processed session data for analytics
+ */
+export interface AnalyticsSession {
+  sessionId: string;
+  sessionTitle: string;
+  totalTokens: number;
+  inputTokens: number;
+  outputTokens: number;
+  totalCost: number;
+  provider: string;
+  createdAt: Date;
+}
+
+/**
+ * Daily usage data point for charts
+ */
+export interface DailyUsage {
+  date: string;
+  tokens: number;
+  cost: number;
+}
+
+/**
+ * Aggregated analytics statistics
+ */
+export interface AnalyticsStats {
+  totalTokens: number;
+  totalCost: number;
+  avgTokensPerSession: number;
+  sessionsCount: number;
+  todayTokens: number;
+  todayCost: number;
+  weekTokens: number;
+  weekCost: number;
+  monthTokens: number;
+  monthCost: number;
+}
+
+/**
+ * Complete analytics data response
+ */
+export interface TokenAnalyticsData {
+  sessions: AnalyticsSession[];
+  stats: AnalyticsStats | null;
+  dailyUsage: DailyUsage[];
+}
+
+/**
+ * User plan information from database
+ */
+interface UserPlanData {
+  plan: BillingPlan;
+  subscriptionEndDate: string | null;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
 }
 
 // Constants
@@ -68,7 +167,7 @@ async function fetchTokenBalance(userId: string): Promise<TokenBalance> {
     .maybeSingle();
 
   if (error) {
-    console.error('[BillingQuery] Token balance error:', error);
+    logger.error('[BillingQuery] Token balance error:', error);
     // Return free tier defaults on error
     return {
       currentBalance: FREE_TIER_LIMIT,
@@ -129,12 +228,7 @@ async function fetchTokenUsage(userId: string): Promise<LLMUsage[]> {
 /**
  * Fetch user plan from database
  */
-async function fetchUserPlan(userId: string): Promise<{
-  plan: 'free' | 'pro' | 'enterprise';
-  subscriptionEndDate: string | null;
-  stripeCustomerId: string | null;
-  stripeSubscriptionId: string | null;
-}> {
+async function fetchUserPlan(userId: string): Promise<UserPlanData> {
   const { data, error } = await supabase
     .from('users')
     .select(
@@ -153,7 +247,7 @@ async function fetchUserPlan(userId: string): Promise<{
   }
 
   return {
-    plan: (data.plan as 'free' | 'pro' | 'enterprise') || 'free',
+    plan: (data.plan as BillingPlan) || 'free',
     subscriptionEndDate: data.subscription_end_date,
     stripeCustomerId: data.stripe_customer_id,
     stripeSubscriptionId: data.stripe_subscription_id,
@@ -162,11 +256,14 @@ async function fetchUserPlan(userId: string): Promise<{
 
 /**
  * Main billing data query hook
+ * Fetches complete billing information including plan, usage, and token balance
+ *
+ * @returns UseQueryResult with BillingInfo data or null
  */
-export function useBillingData() {
+export function useBillingData(): UseQueryResult<BillingInfo | null, Error> {
   const { user } = useAuthStore();
 
-  return useQuery({
+  return useQuery<BillingInfo | null, Error>({
     queryKey: queryKeys.billing.plan(user?.id ?? ''),
     queryFn: async (): Promise<BillingInfo | null> => {
       if (!user?.id) return null;
@@ -238,50 +335,69 @@ export function useBillingData() {
     staleTime: 2 * 60 * 1000, // 2 minutes - billing data changes infrequently
     gcTime: 10 * 60 * 1000, // 10 minutes cache
     refetchOnWindowFocus: true, // Refetch when user returns to tab
+    meta: {
+      errorMessage: 'Failed to load billing information',
+    },
   });
 }
 
 /**
  * Token balance query hook
+ * Fetches current token balance, total granted, and usage
+ *
+ * @returns UseQueryResult with TokenBalance data
  */
-export function useTokenBalance() {
+export function useTokenBalance(): UseQueryResult<TokenBalance, Error> {
   const { user } = useAuthStore();
 
-  return useQuery({
+  return useQuery<TokenBalance, Error>({
     queryKey: queryKeys.billing.tokenBalance(user?.id ?? ''),
-    queryFn: () => fetchTokenBalance(user!.id),
+    queryFn: (): Promise<TokenBalance> => fetchTokenBalance(user!.id),
     enabled: !!user?.id,
     staleTime: 60 * 1000, // 1 minute
     gcTime: 5 * 60 * 1000, // 5 minutes
+    meta: {
+      errorMessage: 'Failed to load token balance',
+    },
   });
 }
 
 /**
  * Token usage by provider query hook
+ * Fetches token usage breakdown by LLM provider
+ *
+ * @returns UseQueryResult with array of LLMUsage
  */
-export function useTokenUsageByProvider() {
+export function useTokenUsageByProvider(): UseQueryResult<LLMUsage[], Error> {
   const { user } = useAuthStore();
 
-  return useQuery({
+  return useQuery<LLMUsage[], Error>({
     queryKey: queryKeys.billing.tokenUsage(user?.id ?? ''),
-    queryFn: () => fetchTokenUsage(user!.id),
+    queryFn: (): Promise<LLMUsage[]> => fetchTokenUsage(user!.id),
     enabled: !!user?.id,
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    meta: {
+      errorMessage: 'Failed to load token usage data',
+    },
   });
 }
 
 /**
  * Token analytics query hook with time range support
+ * Fetches detailed usage analytics with session breakdown and daily trends
+ *
+ * @param timeRange - Time range for analytics: '7d', '30d', '90d', or 'all'
+ * @returns UseQueryResult with TokenAnalyticsData or null
  */
 export function useTokenAnalytics(
-  timeRange: '7d' | '30d' | '90d' | 'all' = '30d'
-) {
+  timeRange: AnalyticsTimeRange = '30d'
+): UseQueryResult<TokenAnalyticsData | null, Error> {
   const { user } = useAuthStore();
 
-  return useQuery({
+  return useQuery<TokenAnalyticsData | null, Error>({
     queryKey: queryKeys.billing.analytics(user?.id ?? '', timeRange),
-    queryFn: async () => {
+    queryFn: async (): Promise<TokenAnalyticsData | null> => {
       if (!user?.id) return null;
 
       const now = new Date();
@@ -315,11 +431,11 @@ export function useTokenAnalytics(
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('[TokenAnalytics] Failed to load data:', error);
+        logger.error('[TokenAnalytics] Failed to load data:', error);
         return { sessions: [], stats: null, dailyUsage: [] };
       }
 
-      type SessionWithTokens = {
+      interface SessionWithTokens {
         id: string;
         title: string | null;
         created_at: string;
@@ -330,19 +446,22 @@ export function useTokenAnalytics(
           total_tokens: number;
           total_cost: number;
         } | null;
-      };
+      }
 
-      const processedData = ((sessions || []) as SessionWithTokens[])
+      const processedData: AnalyticsSession[] = (
+        (sessions || []) as SessionWithTokens[]
+      )
         .filter(
-          (s) => s.chat_session_tokens && s.chat_session_tokens.total_tokens > 0
+          (s): s is SessionWithTokens & { chat_session_tokens: NonNullable<SessionWithTokens['chat_session_tokens']> } =>
+            s.chat_session_tokens !== null && s.chat_session_tokens.total_tokens > 0
         )
-        .map((s) => ({
+        .map((s): AnalyticsSession => ({
           sessionId: s.id,
           sessionTitle: s.title || 'Untitled',
-          totalTokens: s.chat_session_tokens!.total_tokens || 0,
-          inputTokens: s.chat_session_tokens!.total_input_tokens || 0,
-          outputTokens: s.chat_session_tokens!.total_output_tokens || 0,
-          totalCost: s.chat_session_tokens!.total_cost || 0,
+          totalTokens: s.chat_session_tokens.total_tokens || 0,
+          inputTokens: s.chat_session_tokens.total_input_tokens || 0,
+          outputTokens: s.chat_session_tokens.total_output_tokens || 0,
+          totalCost: s.chat_session_tokens.total_cost || 0,
           provider: s.provider || 'openai',
           createdAt: new Date(s.created_at),
         }));
@@ -364,10 +483,7 @@ export function useTokenAnalytics(
       const monthData = processedData.filter((d) => d.createdAt >= monthAgo);
 
       // Calculate daily usage for chart
-      const dailyMap = new Map<
-        string,
-        { date: string; tokens: number; cost: number }
-      >();
+      const dailyMap = new Map<string, DailyUsage>();
       processedData.forEach((d) => {
         const dateKey = d.createdAt.toISOString().split('T')[0];
         const existing = dailyMap.get(dateKey) || {
@@ -382,7 +498,7 @@ export function useTokenAnalytics(
         });
       });
 
-      return {
+      const analyticsResult: TokenAnalyticsData = {
         sessions: processedData,
         stats: {
           totalTokens,
@@ -401,21 +517,29 @@ export function useTokenAnalytics(
           a.date.localeCompare(b.date)
         ),
       };
+
+      return analyticsResult;
     },
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes
+    meta: {
+      errorMessage: 'Failed to load token analytics',
+    },
   });
 }
 
 /**
  * Invalidate all billing queries - useful after purchases
+ * Returns a callback function to trigger invalidation
+ *
+ * @returns Callback function to invalidate all billing queries
  */
-export function useInvalidateBillingQueries() {
-  const queryClient = useQueryClient();
+export function useInvalidateBillingQueries(): () => void {
+  const queryClient: QueryClient = useQueryClient();
   const { user } = useAuthStore();
 
-  return () => {
+  return (): void => {
     if (user?.id) {
       queryClient.invalidateQueries({ queryKey: queryKeys.billing.all() });
     }

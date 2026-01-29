@@ -6,7 +6,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useMissionStore } from '@shared/stores/mission-control-store';
-import { useCompanyHubStore } from '@shared/stores/company-hub-store';
 import { workforceOrchestratorRefactored } from '@core/ai/orchestration/workforce-orchestrator';
 import type { AIEmployee } from '@core/types/ai-employee';
 

@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { withAuth } from '../utils/auth-middleware';
 import { withRateLimit } from '../utils/rate-limiter';
-import { getCorsHeaders, getMinimalCorsHeaders } from '../utils/cors';
+import { getSafeCorsHeaders, getMinimalCorsHeaders, checkOriginAndBlock } from '../utils/cors';
 import {
   agentsSessionSchema,
   formatValidationError,
@@ -54,16 +54,27 @@ const authenticatedHandler = async (
   event: HandlerEvent & { user: { id: string; email?: string } },
   context: HandlerContext
 ) => {
+  // Updated: Jan 29th 2026 - Fixed null CORS headers using getSafeCorsHeaders
   const origin = event.headers.origin || event.headers.Origin || '';
-  const corsHeaders = getCorsHeaders(origin);
+  const corsHeaders = getSafeCorsHeaders(origin);
 
-  // Handle CORS preflight
+  // Handle CORS preflight - block unauthorized origins early
   if (event.httpMethod === 'OPTIONS') {
+    const blockedResponse = checkOriginAndBlock(origin);
+    if (blockedResponse) {
+      return blockedResponse;
+    }
     return {
       statusCode: 200,
       headers: corsHeaders,
       body: '',
     };
+  }
+
+  // Block unauthorized origins for non-OPTIONS requests
+  const blockedResponse = checkOriginAndBlock(origin);
+  if (blockedResponse) {
+    return blockedResponse;
   }
 
   if (event.httpMethod !== 'POST') {

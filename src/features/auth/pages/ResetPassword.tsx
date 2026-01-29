@@ -15,6 +15,7 @@ import { Bot, Lock, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Particles } from '@shared/ui/particles';
 import { Spotlight } from '@shared/ui/spotlight';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 
 const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -221,4 +222,11 @@ const ResetPasswordPage: React.FC = () => {
   );
 };
 
-export default ResetPasswordPage;
+// Wrap ResetPasswordPage with ErrorBoundary for crash protection
+const ResetPasswordPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="ResetPasswordPage" showReportDialog>
+    <ResetPasswordPage />
+  </ErrorBoundary>
+);
+
+export default ResetPasswordPageWithErrorBoundary;

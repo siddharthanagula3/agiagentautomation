@@ -9,7 +9,7 @@ import { immer } from 'zustand/middleware/immer';
 import { supabase } from '@shared/lib/supabase-client';
 import { useAuthStore } from './authentication-store';
 
-interface HiredEmployee {
+export interface HiredEmployee {
   id: string;
   user_id: string;
   employee_id: string;
@@ -22,14 +22,14 @@ interface HiredEmployee {
   updated_at: string;
 }
 
-interface HireEmployeeParams {
+export interface HireEmployeeParams {
   employee_id: string;
   name: string;
   role: string;
   provider: string;
 }
 
-interface WorkforceState {
+export interface WorkforceState {
   hiredEmployees: HiredEmployee[];
   isLoading: boolean;
   error: string | null;

@@ -3,9 +3,25 @@ import * as SwitchPrimitives from '@radix-ui/react-switch';
 
 import { cn } from '@shared/lib/utils';
 
+interface SwitchProps extends React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> {
+  /**
+   * Screen reader label for the switch.
+   * Required when there is no visible label associated with the switch.
+   */
+  'aria-label'?: string;
+  /**
+   * ID of the element that labels this switch.
+   */
+  'aria-labelledby'?: string;
+  /**
+   * ID of the element that describes this switch.
+   */
+  'aria-describedby'?: string;
+}
+
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
+  SwitchProps
 >(({ className, ...props }, ref) => (
   <SwitchPrimitives.Root
     className={cn(

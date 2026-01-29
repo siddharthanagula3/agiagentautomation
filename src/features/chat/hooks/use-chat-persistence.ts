@@ -7,7 +7,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@shared/lib/supabase-client';
 import { useMissionStore } from '@shared/stores/mission-control-store';
-import type { MissionMessage } from '@shared/stores/mission-control-store';
 
 export interface ChatSession {
   id: string;

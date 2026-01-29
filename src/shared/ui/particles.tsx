@@ -88,14 +88,17 @@ export const Particles: React.FC<ParticlesProps> = ({
     initParticles();
     animate();
 
-    window.addEventListener('resize', () => {
+    // Create named handler for proper cleanup
+    const handleResize = () => {
       resizeCanvas();
       initParticles();
-    });
+    };
+
+    window.addEventListener('resize', handleResize);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('resize', handleResize);
     };
   }, [quantity, staticity, ease, refresh]);
 

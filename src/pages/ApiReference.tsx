@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { Badge } from '@shared/ui/badge';
@@ -470,4 +471,10 @@ print(data)`,
   );
 };
 
-export default ApiReferencePage;
+const ApiReferencePageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="ApiReferencePage" showReportDialog>
+    <ApiReferencePage />
+  </ErrorBoundary>
+);
+
+export default ApiReferencePageWithErrorBoundary;

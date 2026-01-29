@@ -3,23 +3,67 @@
  *
  * Allows users to fork conversations at any message point,
  * creating alternate conversation paths and supporting conversation trees.
+ *
+ * Features:
+ * - Branch at any message point
+ * - Track parent-child session relationships
+ * - Navigate branch history
+ * - Name and rename branches
  */
 
+import { supabase } from '@shared/lib/supabase-client';
 import { chatPersistenceService } from './conversation-storage';
-import type { ChatSession, ChatMessage } from '../types';
+import type { ChatSession } from '../types';
 
+/**
+ * Branch metadata stored in database
+ */
 export interface ConversationBranch {
   id: string;
   parentSessionId: string;
+  childSessionId: string;
   branchPointMessageId: string;
-  title: string;
+  branchName: string | null;
   createdAt: Date;
-  messageCount: number;
 }
 
+/**
+ * Branch with additional session details
+ */
+export interface ConversationBranchWithDetails extends ConversationBranch {
+  childSession?: ChatSession;
+  messageCount?: number;
+}
+
+/**
+ * Conversation tree with root and all branches
+ */
 export interface ConversationTree {
   rootSession: ChatSession;
-  branches: ConversationBranch[];
+  branches: ConversationBranchWithDetails[];
+}
+
+/**
+ * Branch history entry for navigation
+ */
+export interface BranchHistoryEntry {
+  sessionId: string;
+  branchName: string | null;
+  branchPointMessageId: string | null;
+  depth: number;
+}
+
+/**
+ * Database row structure for conversation_branches
+ */
+interface DBConversationBranch {
+  id: string;
+  parent_session_id: string;
+  child_session_id: string;
+  branch_point_message_id: string;
+  branch_name: string | null;
+  created_by: string | null;
+  created_at: string;
 }
 
 export class ConversationBranchingService {
@@ -31,7 +75,7 @@ export class ConversationBranchingService {
     sessionId: string,
     branchPointMessageId: string,
     userId: string,
-    newTitle?: string
+    branchName?: string
   ): Promise<ChatSession> {
     try {
       // Get the original session
@@ -56,14 +100,12 @@ export class ConversationBranchingService {
         throw new Error('Branch point message not found');
       }
 
-      // Get messages up to and including the branch point
-      const messagesUpToBranch = allMessages.slice(0, branchPointIndex + 1);
+      // Create a title for the branch
+      const branchTitle =
+        branchName ||
+        `${originalSession.title} (Branch ${branchPointIndex + 1})`;
 
       // Create a new session for the branch
-      const branchTitle =
-        newTitle ||
-        `${originalSession.title} (Branch from message ${branchPointIndex + 1})`;
-
       const branchSession = await chatPersistenceService.createSession(
         userId,
         branchTitle,
@@ -74,21 +116,24 @@ export class ConversationBranchingService {
         }
       );
 
-      // Copy messages to the new branch
-      if (messagesUpToBranch.length > 0) {
-        await chatPersistenceService.copySessionMessages(
-          sessionId,
-          branchSession.id,
-          userId
-        );
+      // Copy messages up to and including the branch point to the new session
+      if (branchPointIndex >= 0) {
+        const messagesToCopy = allMessages.slice(0, branchPointIndex + 1);
+        for (const msg of messagesToCopy) {
+          await chatPersistenceService.saveMessage(
+            branchSession.id,
+            msg.role,
+            msg.content
+          );
+        }
       }
 
-      // Store branch metadata in the new session
-      // This helps track conversation trees
-      await this.storeBranchMetadata(
-        branchSession.id,
+      // Store branch metadata in the database
+      await this.saveBranchMetadata(
         sessionId,
+        branchSession.id,
         branchPointMessageId,
+        branchName || null,
         userId
       );
 
@@ -102,58 +147,276 @@ export class ConversationBranchingService {
   }
 
   /**
-   * Store branch metadata for tracking conversation trees
+   * Save branch metadata to the database
    */
-  private async storeBranchMetadata(
-    branchSessionId: string,
+  async saveBranchMetadata(
     parentSessionId: string,
+    childSessionId: string,
     branchPointMessageId: string,
+    branchName: string | null,
     userId: string
-  ): Promise<void> {
-    // We can store this in the session metadata
-    // For now, we'll use a simple approach with metadata
-    // In production, you might want a dedicated branches table
+  ): Promise<ConversationBranch> {
+    const { data, error } = await supabase
+      .from('conversation_branches')
+      .insert({
+        parent_session_id: parentSessionId,
+        child_session_id: childSessionId,
+        branch_point_message_id: branchPointMessageId,
+        branch_name: branchName,
+        created_by: userId,
+      })
+      .select()
+      .single();
 
-    // This is a placeholder - you'd implement actual metadata storage
-    // based on your database schema
-    // TODO: Implement branch metadata storage
+    if (error) {
+      console.error('Failed to save branch metadata:', error);
+      throw new Error(`Failed to save branch metadata: ${error.message}`);
+    }
+
+    return this.mapDBBranchToBranch(data);
   }
 
   /**
-   * Get all branches for a session
+   * Get all direct branches for a session
    */
-  async getBranches(
+  async getBranchesForSession(
     sessionId: string,
-    userId: string
-  ): Promise<ConversationBranch[]> {
-    // This would query a branches table or metadata
-    // For now, returning empty array as placeholder
-    // In production, implement proper branch tracking
+    userId?: string
+  ): Promise<ConversationBranchWithDetails[]> {
+    const { data, error } = await supabase
+      .from('conversation_branches')
+      .select(
+        `
+        *,
+        child_session:chat_sessions!child_session_id (
+          id,
+          title,
+          created_at,
+          updated_at,
+          is_active
+        )
+      `
+      )
+      .eq('parent_session_id', sessionId)
+      .order('created_at', { ascending: false });
 
-    return [];
+    if (error) {
+      console.error('Failed to get branches for session:', error);
+      return [];
+    }
+
+    return (data || []).map((row) => {
+      const branch = this.mapDBBranchToBranch(row);
+      const childSession = row.child_session as {
+        id: string;
+        title: string;
+        created_at: string;
+        updated_at: string;
+        is_active: boolean;
+      } | null;
+
+      return {
+        ...branch,
+        childSession: childSession
+          ? {
+              id: childSession.id,
+              title: childSession.title || 'Untitled Branch',
+              createdAt: new Date(childSession.created_at),
+              updatedAt: new Date(childSession.updated_at),
+              messageCount: 0,
+              tokenCount: 0,
+              cost: 0,
+              isPinned: false,
+              isArchived: !childSession.is_active,
+              tags: [],
+              participants: [],
+            }
+          : undefined,
+      };
+    });
+  }
+
+  /**
+   * Get branch history (ancestry chain) for a session
+   * Returns array from current session to root
+   */
+  async getBranchHistory(sessionId: string): Promise<BranchHistoryEntry[]> {
+    const { data, error } = await supabase.rpc('get_branch_history', {
+      p_session_id: sessionId,
+    });
+
+    if (error) {
+      console.error('Failed to get branch history:', error);
+      return [{ sessionId, branchName: null, branchPointMessageId: null, depth: 0 }];
+    }
+
+    return (data || []).map(
+      (row: {
+        session_id: string;
+        branch_name: string | null;
+        branch_point_message_id: string | null;
+        depth: number;
+      }) => ({
+        sessionId: row.session_id,
+        branchName: row.branch_name,
+        branchPointMessageId: row.branch_point_message_id,
+        depth: row.depth,
+      })
+    );
+  }
+
+  /**
+   * Get the root session ID for any session in a branch tree
+   */
+  async getRootSessionId(sessionId: string): Promise<string> {
+    const { data, error } = await supabase.rpc('get_root_session', {
+      session_id: sessionId,
+    });
+
+    if (error) {
+      console.error('Failed to get root session:', error);
+      return sessionId; // Return self if error
+    }
+
+    return data || sessionId;
+  }
+
+  /**
+   * Check if a session is a branch (has a parent)
+   */
+  async isBranchSession(sessionId: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('conversation_branches')
+      .select('id')
+      .eq('child_session_id', sessionId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Failed to check if session is branch:', error);
+      return false;
+    }
+
+    return data !== null;
+  }
+
+  /**
+   * Get branch info for a session if it is a branch
+   */
+  async getBranchInfo(sessionId: string): Promise<ConversationBranch | null> {
+    const { data, error } = await supabase
+      .from('conversation_branches')
+      .select('*')
+      .eq('child_session_id', sessionId)
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return this.mapDBBranchToBranch(data);
+  }
+
+  /**
+   * Update branch name
+   */
+  async updateBranchName(
+    branchId: string,
+    newName: string
+  ): Promise<ConversationBranch> {
+    const { data, error } = await supabase
+      .from('conversation_branches')
+      .update({ branch_name: newName })
+      .eq('id', branchId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update branch name: ${error.message}`);
+    }
+
+    return this.mapDBBranchToBranch(data);
+  }
+
+  /**
+   * Delete a branch record (does not delete the session)
+   */
+  async deleteBranch(branchId: string): Promise<void> {
+    const { error } = await supabase
+      .from('conversation_branches')
+      .delete()
+      .eq('id', branchId);
+
+    if (error) {
+      throw new Error(`Failed to delete branch: ${error.message}`);
+    }
   }
 
   /**
    * Get the conversation tree for a session
-   * Shows the root session and all its branches
+   * Finds the root and returns all branches
    */
   async getConversationTree(
     sessionId: string,
     userId: string
   ): Promise<ConversationTree> {
+    // First, find the root session
+    const rootSessionId = await this.getRootSessionId(sessionId);
+
     const rootSession = await chatPersistenceService.getSession(
-      sessionId,
+      rootSessionId,
       userId
     );
     if (!rootSession) {
-      throw new Error('Session not found');
+      throw new Error('Root session not found');
     }
 
-    const branches = await this.getBranches(sessionId, userId);
+    // Get all branches from root
+    const branches = await this.getAllDescendantBranches(rootSessionId);
 
     return {
       rootSession,
       branches,
+    };
+  }
+
+  /**
+   * Get all descendant branches recursively
+   */
+  private async getAllDescendantBranches(
+    sessionId: string,
+    visited: Set<string> = new Set()
+  ): Promise<ConversationBranchWithDetails[]> {
+    if (visited.has(sessionId)) {
+      return []; // Prevent cycles
+    }
+    visited.add(sessionId);
+
+    const directBranches = await this.getBranchesForSession(sessionId);
+    const allBranches: ConversationBranchWithDetails[] = [...directBranches];
+
+    // Recursively get branches of branches
+    for (const branch of directBranches) {
+      const childBranches = await this.getAllDescendantBranches(
+        branch.childSessionId,
+        visited
+      );
+      allBranches.push(...childBranches);
+    }
+
+    return allBranches;
+  }
+
+  /**
+   * Map database row to ConversationBranch
+   */
+  private mapDBBranchToBranch(dbBranch: DBConversationBranch): ConversationBranch {
+    return {
+      id: dbBranch.id,
+      parentSessionId: dbBranch.parent_session_id,
+      childSessionId: dbBranch.child_session_id,
+      branchPointMessageId: dbBranch.branch_point_message_id,
+      branchName: dbBranch.branch_name,
+      createdAt: new Date(dbBranch.created_at),
     };
   }
 
@@ -246,13 +509,19 @@ export class ConversationBranchingService {
         }
       );
 
-      // Combine messages (you might want to sort by timestamp or use a different strategy)
+      // Combine messages sorted by timestamp
       const combinedMessages = [...messages1, ...messages2].sort(
-        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
 
       // Copy combined messages to the merge session
-      // This is a simplified version - you'd need to handle this more carefully
+      for (const msg of combinedMessages) {
+        await chatPersistenceService.saveMessage(
+          mergeSession.id,
+          msg.role,
+          msg.content
+        );
+      }
 
       return mergeSession;
     } catch (error) {
@@ -270,33 +539,118 @@ export class ConversationBranchingService {
     branchSessionId: string,
     userId: string
   ): Promise<ChatSession | null> {
-    // This would look up the parent from branch metadata
-    // For now, returning null as placeholder
+    const branchInfo = await this.getBranchInfo(branchSessionId);
+    if (!branchInfo) {
+      return null;
+    }
 
-    return null;
+    return chatPersistenceService.getSession(branchInfo.parentSessionId, userId);
   }
 
   /**
-   * Check if a session is a branch
+   * Check if a session is a branch (alias for isBranchSession)
    */
   async isBranch(sessionId: string): Promise<boolean> {
-    // This would check if the session has parent metadata
-    // For now, returning false as placeholder
-
-    return false;
+    return this.isBranchSession(sessionId);
   }
 
   /**
-   * Get all descendants of a session (branches and their branches)
+   * Get all descendant sessions of a session (branches and their branches)
    */
   async getDescendants(
     sessionId: string,
     userId: string
   ): Promise<ChatSession[]> {
-    // This would recursively get all branches and sub-branches
-    // For now, returning empty array as placeholder
+    const branches = await this.getAllDescendantBranches(sessionId);
+    const sessions: ChatSession[] = [];
 
-    return [];
+    for (const branch of branches) {
+      const session = await chatPersistenceService.getSession(
+        branch.childSessionId,
+        userId
+      );
+      if (session) {
+        sessions.push(session);
+      }
+    }
+
+    return sessions;
+  }
+
+  /**
+   * Get branches at a specific message point
+   */
+  async getBranchesAtMessage(
+    messageId: string
+  ): Promise<ConversationBranchWithDetails[]> {
+    const { data, error } = await supabase
+      .from('conversation_branches')
+      .select(
+        `
+        *,
+        child_session:chat_sessions!child_session_id (
+          id,
+          title,
+          created_at,
+          updated_at,
+          is_active
+        )
+      `
+      )
+      .eq('branch_point_message_id', messageId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Failed to get branches at message:', error);
+      return [];
+    }
+
+    return (data || []).map((row) => {
+      const branch = this.mapDBBranchToBranch(row);
+      const childSession = row.child_session as {
+        id: string;
+        title: string;
+        created_at: string;
+        updated_at: string;
+        is_active: boolean;
+      } | null;
+
+      return {
+        ...branch,
+        childSession: childSession
+          ? {
+              id: childSession.id,
+              title: childSession.title || 'Untitled Branch',
+              createdAt: new Date(childSession.created_at),
+              updatedAt: new Date(childSession.updated_at),
+              messageCount: 0,
+              tokenCount: 0,
+              cost: 0,
+              isPinned: false,
+              isArchived: !childSession.is_active,
+              tags: [],
+              participants: [],
+            }
+          : undefined,
+      };
+    });
+  }
+
+  /**
+   * Count branches for a session
+   */
+  async countBranches(sessionId: string): Promise<number> {
+    const { count, error } = await supabase
+      .from('conversation_branches')
+      .select('*', { count: 'exact', head: true })
+      .eq('parent_session_id', sessionId);
+
+    if (error) {
+      console.error('Failed to count branches:', error);
+      return 0;
+    }
+
+    return count || 0;
   }
 }
 

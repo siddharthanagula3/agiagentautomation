@@ -71,7 +71,7 @@ export interface CompanyHubSession {
   completedAt?: Date;
 }
 
-interface CompanyHubState {
+export interface CompanyHubState {
   // Session management
   activeSessionId: string | null;
   sessions: Record<string, CompanyHubSession>;
@@ -99,7 +99,7 @@ interface CompanyHubState {
   lastUpdate: Date | null;
 }
 
-interface CompanyHubActions {
+export interface CompanyHubActions {
   // Session management
   createSession: (userId: string, taskDescription: string) => string;
   setActiveSession: (sessionId: string | null) => void;

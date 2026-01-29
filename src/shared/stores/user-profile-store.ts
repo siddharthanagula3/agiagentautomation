@@ -132,13 +132,52 @@ export const useUserProfileStore = create<UserProfileStore>()(
   )
 );
 
-// Selectors for optimized re-renders
-export const useUser = () => useUserProfileStore((state) => state.user);
-export const useUserPlan = () =>
+// ============================================================================
+// SELECTOR HOOKS (optimized for re-renders with explicit return types)
+// ============================================================================
+
+/**
+ * Selector for user object - may be null if not authenticated
+ */
+export const useUser = (): UserProfile | null =>
+  useUserProfileStore((state) => state.user);
+
+/**
+ * Selector for user plan - returns undefined if user is null
+ */
+export const useUserPlan = (): UserProfile['plan'] | undefined =>
   useUserProfileStore((state) => state.user?.plan);
-export const useUserUsage = () =>
+
+/**
+ * Selector for user usage stats - returns undefined if user is null
+ */
+export const useUserUsage = (): UserProfile['usage'] | undefined =>
   useUserProfileStore((state) => state.user?.usage);
-export const useUserBilling = () =>
+
+/**
+ * Selector for user billing info - returns undefined if user is null
+ */
+export const useUserBilling = (): UserProfile['billing'] | undefined =>
   useUserProfileStore((state) => state.user?.billing);
-export const useUserProfile = () =>
+
+/**
+ * Selector for user profile details - returns undefined if user is null
+ */
+export const useUserProfileDetails = (): UserProfile['profile'] | undefined =>
   useUserProfileStore((state) => state.user?.profile);
+
+/**
+ * Selector for loading state - primitive boolean
+ */
+export const useUserProfileLoading = (): boolean =>
+  useUserProfileStore((state) => state.isLoading);
+
+/**
+ * Selector for error state - may be null
+ */
+export const useUserProfileError = (): string | null =>
+  useUserProfileStore((state) => state.error);
+
+// Legacy alias for backward compatibility
+/** @deprecated Use useUserProfileDetails instead */
+export const useUserProfile = useUserProfileDetails;

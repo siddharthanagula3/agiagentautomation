@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
@@ -667,4 +668,10 @@ const PricingCard: React.FC<{
   );
 };
 
-export default PricingPage;
+const PricingPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="PricingPage" showReportDialog>
+    <PricingPage />
+  </ErrorBoundary>
+);
+
+export default PricingPageWithErrorBoundary;

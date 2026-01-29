@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { realtimeService } from '../services/realtimeService';
 import { useAuthStore } from '@shared/stores/authentication-store';
+import { logger } from '@shared/lib/logger';
 
 export interface RealtimeCallbacks {
   onJobUpdate?: (job: unknown) => void;
@@ -14,18 +15,45 @@ export interface RealtimeCallbacks {
 export const useRealtime = (callbacks: RealtimeCallbacks = {}) => {
   const { user } = useAuthStore();
   const initializedRef = useRef(false);
+  const previousUserIdRef = useRef<string | null>(null);
+  // Store callbacks in a ref to avoid triggering effects on callback reference changes
+  const callbacksRef = useRef(callbacks);
+  callbacksRef.current = callbacks;
 
+  // Initialize realtime subscriptions
   useEffect(() => {
-    if (!user?.id || initializedRef.current) return;
+    if (!user?.id) return;
+
+    // Skip if already initialized for this user
+    if (initializedRef.current && previousUserIdRef.current === user.id) {
+      return;
+    }
+
+    let isMounted = true;
 
     const initializeRealtime = async () => {
       try {
-        await realtimeService.initializeRealtime(user.id, callbacks);
-        initializedRef.current = true;
-        console.log('Real-time subscriptions initialized for user:', user.id);
+        // If user changed, cleanup previous subscriptions first
+        if (
+          initializedRef.current &&
+          previousUserIdRef.current &&
+          previousUserIdRef.current !== user.id
+        ) {
+          await realtimeService.cleanup();
+        }
+
+        await realtimeService.initializeRealtime(user.id, callbacksRef.current);
+
+        if (isMounted) {
+          initializedRef.current = true;
+          previousUserIdRef.current = user.id;
+          console.log('Real-time subscriptions initialized for user:', user.id);
+        }
       } catch (error) {
         console.error('Failed to initialize real-time subscriptions:', error);
-        callbacks.onError?.('Failed to initialize real-time updates');
+        callbacksRef.current.onError?.(
+          'Failed to initialize real-time updates'
+        );
       }
     };
 
@@ -33,34 +61,31 @@ export const useRealtime = (callbacks: RealtimeCallbacks = {}) => {
 
     // Cleanup on unmount
     return () => {
+      isMounted = false;
       if (initializedRef.current) {
-        realtimeService.cleanup().catch(console.error);
+        realtimeService.cleanup().catch((error) => {
+          logger.error('[useRealtime] Cleanup failed', error);
+        });
         initializedRef.current = false;
+        previousUserIdRef.current = null;
       }
     };
-  }, [user?.id, callbacks]);
+  }, [user?.id]); // Only depend on user.id, not callbacks
 
-  // Reconnect if user changes
-  useEffect(() => {
-    if (user?.id && initializedRef.current) {
-      const reconnect = async () => {
-        try {
-          await realtimeService.cleanup();
-          await realtimeService.initializeRealtime(user.id, callbacks);
-          console.log('Real-time subscriptions reconnected for user:', user.id);
-        } catch (error) {
-          console.error('Failed to reconnect real-time subscriptions:', error);
-        }
-      };
+  // Memoize reconnect function
+  const reconnect = useCallback(() => {
+    return realtimeService.reconnect(user?.id || '');
+  }, [user?.id]);
 
-      reconnect();
-    }
-  }, [user?.id, callbacks]);
+  // Memoize cleanup function
+  const cleanup = useCallback(() => {
+    return realtimeService.cleanup();
+  }, []);
 
   return {
     isConnected: realtimeService.getConnectionStatus().connected,
     channels: realtimeService.getConnectionStatus().channels,
-    reconnect: () => realtimeService.reconnect(user?.id || ''),
-    cleanup: () => realtimeService.cleanup(),
+    reconnect,
+    cleanup,
   };
 };

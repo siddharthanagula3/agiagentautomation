@@ -22,6 +22,7 @@ import { supabase } from '@shared/lib/supabase-client';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { tokenLogger } from '@core/integrations/token-usage-tracker';
 import { updateVibeSessionTokens } from '@features/vibe/services/vibe-token-tracker';
+import { logger } from '@shared/lib/logger';
 // SECURITY: Import prompt injection defense
 import {
   sanitizeEmployeeInput,
@@ -29,13 +30,22 @@ import {
   validateEmployeeOutput,
 } from '@core/security/employee-input-sanitizer';
 
+/** Mode of operation for workforce requests */
+export type WorkforceMode = 'mission' | 'chat';
+
+/** Conversation history message format */
+export interface ConversationHistoryMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
 export interface WorkforceRequest {
   userId: string;
   input: string;
   context?: Record<string, unknown>;
-  mode?: 'mission' | 'chat'; // NEW: Support chat mode
-  sessionId?: string; // NEW: Chat session tracking
-  conversationHistory?: Array<{ role: string; content: string }>; // NEW: Chat context
+  mode?: WorkforceMode;
+  sessionId?: string;
+  conversationHistory?: ConversationHistoryMessage[];
 }
 
 export interface WorkforceResponse {
@@ -43,18 +53,32 @@ export interface WorkforceResponse {
   missionId?: string;
   plan?: Task[];
   error?: string;
-  chatResponse?: string; // NEW: Direct chat response
-  mode?: 'mission' | 'chat';
+  chatResponse?: string;
+  mode?: WorkforceMode;
 }
+
+/** Available tool names for plan tasks */
+export type ToolName = 'Read' | 'Grep' | 'Glob' | 'Bash' | 'Edit' | 'Write' | 'general' | string;
 
 export interface PlanTask {
   task: string;
-  tool_required?: string;
+  tool_required?: ToolName;
 }
 
 export interface MissionPlan {
   plan: PlanTask[];
   reasoning?: string;
+}
+
+/** Result of individual task execution */
+type TaskExecutionStatus = 'fulfilled' | 'failed' | 'rejected' | 'skipped';
+
+interface TaskExecutionResult {
+  taskId: string;
+  status: TaskExecutionStatus;
+  result?: string;
+  reason?: string;
+  error?: string;
 }
 
 /**
@@ -89,7 +113,7 @@ export class WorkforceOrchestratorRefactored {
       );
 
       if (sanitizationResult.blocked) {
-        console.warn(
+        logger.warn(
           '[Workforce Orchestrator] Input blocked:',
           sanitizationResult.blockReason
         );
@@ -117,7 +141,7 @@ export class WorkforceOrchestratorRefactored {
         if (this.employees.length > 0) {
           this.employeesLoaded = true;
         } else {
-          console.warn('[Workforce Orchestrator] No employees loaded from .agi/employees/');
+          logger.warn('[Workforce Orchestrator] No employees loaded from .agi/employees/');
         }
       }
 
@@ -208,8 +232,8 @@ export class WorkforceOrchestratorRefactored {
             metadata: { taskId: task.id, employeeName: selectedEmployee.name },
           });
         } else {
-          console.warn(
-            `  ⚠️ No suitable employee for task: ${task.description}`
+          logger.warn(
+            `[Workforce Orchestrator] No suitable employee for task: ${task.description}`
           );
         }
       }
@@ -246,7 +270,7 @@ export class WorkforceOrchestratorRefactored {
       const technicalMessage =
         error instanceof Error ? error.message : 'Unknown error';
       const userMessage = getErrorMessage(error);
-      console.error('❌ Error processing request:', technicalMessage);
+      logger.error('[Workforce Orchestrator] Error processing request:', technicalMessage);
 
       store.failMission(userMessage);
       store.addMessage({
@@ -391,7 +415,7 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
 
       return parsed;
     } catch (error) {
-      console.error('Error generating plan:', error);
+      logger.error('[Workforce Orchestrator] Error generating plan:', error);
       // Fallback: create simple single-task plan
       return {
         plan: [{ task: userInput, tool_required: 'general' }],
@@ -405,7 +429,7 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
    */
   private async selectOptimalEmployee(task: Task): Promise<AIEmployee | null> {
     if (this.employees.length === 0) {
-      console.warn('No employees available');
+      logger.warn('[Workforce Orchestrator] No employees available');
       return null;
     }
 
@@ -436,15 +460,15 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
           );
 
           if (availableEmployees.length === 0) {
-            console.warn(
-              '⚠️ User has no hired employees available for task assignment'
+            logger.warn(
+              '[Workforce Orchestrator] User has no hired employees available for task assignment'
             );
             return null;
           }
 
         }
       } catch (error) {
-        console.error('Error fetching hired employees:', error);
+        logger.error('[Workforce Orchestrator] Error fetching hired employees:', error);
         // On error, continue with all employees (degraded mode)
       }
     }
@@ -515,7 +539,7 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
     }
 
     // Execute tasks in parallel
-    const taskPromises = tasks.map(async (task) => {
+    const taskPromises: Promise<TaskExecutionResult>[] = tasks.map(async (task): Promise<TaskExecutionResult> => {
       // Check pause state at start of each task
       // This allows tasks that haven't started yet to be skipped if paused
       if (checkIfPaused()) {
@@ -623,12 +647,12 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
     const results = await Promise.allSettled(taskPromises);
 
     // Process results - handle partial failures
-    const processedResults = results.map((r) =>
+    const processedResults: TaskExecutionResult[] = results.map((r): TaskExecutionResult =>
       r.status === 'fulfilled'
         ? r.value
         : {
             taskId: 'unknown',
-            status: 'rejected' as const,
+            status: 'rejected',
             error: 'Promise rejected',
           }
     );
@@ -720,8 +744,8 @@ Please complete this task according to your role and capabilities.`;
         employee.name
       );
       if (!outputValidation.isValid) {
-        console.warn(
-          `[Orchestrator] Output validation issues for ${employee.name}:`,
+        logger.warn(
+          `[Workforce Orchestrator] Output validation issues for ${employee.name}:`,
           outputValidation.issues
         );
         // Use sanitized output if there were issues
@@ -775,29 +799,30 @@ Please complete this task according to your role and capabilities.`;
 
   /**
    * Get current status
+   * @returns Current mission store state
    */
-  getStatus() {
+  getStatus(): ReturnType<typeof useMissionStore.getState> {
     return useMissionStore.getState();
   }
 
   /**
    * Pause current mission
    */
-  pauseMission() {
+  pauseMission(): void {
     useMissionStore.getState().pauseMission();
   }
 
   /**
    * Resume paused mission
    */
-  resumeMission() {
+  resumeMission(): void {
     useMissionStore.getState().resumeMission();
   }
 
   /**
    * Reset mission state
    */
-  reset() {
+  reset(): void {
     useMissionStore.getState().reset();
   }
 
@@ -890,7 +915,7 @@ Please complete this task according to your role and capabilities.`;
       const technicalMessage =
         error instanceof Error ? error.message : 'Unknown error';
       const userMessage = getErrorMessage(error);
-      console.error('❌ Error processing chat request:', technicalMessage);
+      logger.error('[Workforce Orchestrator] Error processing chat request:', technicalMessage);
 
       store.failMission(userMessage);
       store.addMessage({
@@ -1001,13 +1026,13 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
 
       // Fallback: if no match, select first employee
       if (selectedEmployees.length === 0 && this.employees.length > 0) {
-        console.warn('[Workforce Orchestrator] Auto-select failed, using default employee');
+        logger.warn('[Workforce Orchestrator] Auto-select failed, using default employee');
         return [this.employees[0]];
       }
 
       return selectedEmployees;
     } catch (error) {
-      console.error('❌ Auto-select failed:', error);
+      logger.error('[Workforce Orchestrator] Auto-select failed:', error);
       // Fallback to first employee
       return this.employees.length > 0 ? [this.employees[0]] : [];
     }
@@ -1063,11 +1088,17 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
   /**
    * Route message to specific employee (for multi-agent chat)
    * SECURITY: Sanitizes input and validates output
+   * @param employeeName - Name of the employee to route the message to
+   * @param message - The message content to send
+   * @param conversationHistory - Optional conversation history for context
+   * @param sessionId - Optional session ID for tracking
+   * @param userId - Optional user ID for authentication and logging
+   * @returns The employee's response content
    */
   async routeMessageToEmployee(
     employeeName: string,
     message: string,
-    conversationHistory?: Array<{ role: string; content: string }>,
+    conversationHistory?: ConversationHistoryMessage[],
     sessionId?: string,
     userId?: string
   ): Promise<string> {
@@ -1096,8 +1127,8 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
     );
 
     if (sanitizationResult.blocked) {
-      console.warn(
-        `[Orchestrator] Message to ${employee.name} blocked:`,
+      logger.warn(
+        `[Workforce Orchestrator] Message to ${employee.name} blocked:`,
         sanitizationResult.blockReason
       );
       throw new AppError(
@@ -1155,8 +1186,8 @@ Query: "Help me learn Python" → Answer: "expert-tutor"
       let finalContent = response.content;
 
       if (!outputValidation.isValid) {
-        console.warn(
-          `[Orchestrator] Output validation issues for ${employee.name}:`,
+        logger.warn(
+          `[Workforce Orchestrator] Output validation issues for ${employee.name}:`,
           outputValidation.issues
         );
         if (outputValidation.sanitizedOutput) {

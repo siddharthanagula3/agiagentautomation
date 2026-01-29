@@ -1,6 +1,8 @@
 /**
  * Vibe File Store
  * State management for file uploads and references in VIBE interface
+ *
+ * Updated: Jan 29th 2026 - Added sync status tracking
  */
 
 import { create } from 'zustand';
@@ -17,6 +19,7 @@ export interface VibeFile {
   uploaded_at: Date;
   uploaded_by: string;
   session_id: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface FileUploadProgress {
@@ -25,6 +28,20 @@ export interface FileUploadProgress {
   progress: number;
   status: 'uploading' | 'completed' | 'failed';
   error?: string;
+}
+
+/**
+ * Sync status for tracking file synchronization with database
+ */
+export type FileSyncStatus = 'synced' | 'pending' | 'syncing' | 'error';
+
+export interface FileSyncState {
+  path: string;
+  status: FileSyncStatus;
+  lastSyncedAt: Date | null;
+  lastModifiedAt: Date;
+  error?: string;
+  retryCount: number;
 }
 
 export interface VibeFileState {
@@ -37,14 +54,30 @@ export interface VibeFileState {
   // Selected files for current message
   selectedFileIds: string[];
 
+  // Sync status tracking (path -> sync state)
+  syncStates: Record<string, FileSyncState>;
+
+  // Current session ID for sync operations
+  currentSessionId: string | null;
+
   // Loading state
   isLoading: boolean;
   error: string | null;
 
   // Actions
   addFile: (file: VibeFile) => void;
+  addFiles: (files: VibeFile[]) => void;
   removeFile: (fileId: string) => void;
   clearFiles: () => void;
+  setFiles: (files: VibeFile[]) => void;
+
+  // Session actions
+  setCurrentSessionId: (sessionId: string | null) => void;
+
+  // Sync state actions
+  updateSyncState: (path: string, state: Partial<FileSyncState>) => void;
+  clearSyncState: (path: string) => void;
+  clearAllSyncStates: () => void;
 
   // Selection actions
   selectFile: (fileId: string) => void;
@@ -64,22 +97,42 @@ export interface VibeFileState {
   setError: (error: string | null) => void;
   getFile: (fileId: string) => VibeFile | undefined;
   getSelectedFiles: () => VibeFile[];
+  hasUnsavedChanges: () => boolean;
+  getFilesWithSyncErrors: () => FileSyncState[];
+
+  // Reset
+  reset: () => void;
 }
+
+const initialState = {
+  files: {} as Record<string, VibeFile>,
+  uploadProgress: {} as Record<string, FileUploadProgress>,
+  selectedFileIds: [] as string[],
+  syncStates: {} as Record<string, FileSyncState>,
+  currentSessionId: null as string | null,
+  isLoading: false,
+  error: null as string | null,
+};
 
 export const useVibeFileStore = create<VibeFileState>()(
   devtools(
     immer((set, get) => ({
       // Initial state
-      files: {},
-      uploadProgress: {},
-      selectedFileIds: [],
-      isLoading: false,
-      error: null,
+      ...initialState,
 
       // File actions
       addFile: (file) => {
         set((state) => {
           state.files[file.id] = file;
+          state.error = null;
+        });
+      },
+
+      addFiles: (files) => {
+        set((state) => {
+          for (const file of files) {
+            state.files[file.id] = file;
+          }
           state.error = null;
         });
       },
@@ -98,7 +151,52 @@ export const useVibeFileStore = create<VibeFileState>()(
           state.files = {};
           state.selectedFileIds = [];
           state.uploadProgress = {};
+          state.syncStates = {};
           state.error = null;
+        });
+      },
+
+      setFiles: (files) => {
+        set((state) => {
+          state.files = {};
+          for (const file of files) {
+            state.files[file.id] = file;
+          }
+        });
+      },
+
+      // Session actions
+      setCurrentSessionId: (sessionId) => {
+        set((state) => {
+          state.currentSessionId = sessionId;
+        });
+      },
+
+      // Sync state actions
+      updateSyncState: (path, updates) => {
+        set((state) => {
+          const existing = state.syncStates[path];
+          state.syncStates[path] = {
+            path,
+            status: 'pending',
+            lastSyncedAt: null,
+            lastModifiedAt: new Date(),
+            retryCount: 0,
+            ...existing,
+            ...updates,
+          };
+        });
+      },
+
+      clearSyncState: (path) => {
+        set((state) => {
+          delete state.syncStates[path];
+        });
+      },
+
+      clearAllSyncStates: () => {
+        set((state) => {
+          state.syncStates = {};
         });
       },
 
@@ -203,6 +301,25 @@ export const useVibeFileStore = create<VibeFileState>()(
           .map((id) => files[id])
           .filter((file): file is VibeFile => file !== undefined);
       },
+
+      hasUnsavedChanges: () => {
+        const { syncStates } = get();
+        return Object.values(syncStates).some(
+          (state) => state.status === 'pending' || state.status === 'syncing'
+        );
+      },
+
+      getFilesWithSyncErrors: () => {
+        const { syncStates } = get();
+        return Object.values(syncStates).filter(
+          (state) => state.status === 'error'
+        );
+      },
+
+      // Reset
+      reset: () => {
+        set(() => ({ ...initialState }));
+      },
     })),
     { name: 'VibeFileStore' }
   )
@@ -252,3 +369,50 @@ export const useVibeFile = (fileId: string) =>
  */
 export const useFileUploadProgress = (fileId: string) =>
   useVibeFileStore((state) => state.uploadProgress[fileId]);
+
+/**
+ * Selector for sync states record - returns stable reference
+ */
+export const useSyncStatesRecord = () =>
+  useVibeFileStore((state) => state.syncStates);
+
+/**
+ * Selector for a specific file sync state by path
+ */
+export const useFileSyncState = (path: string) =>
+  useVibeFileStore((state) => state.syncStates[path]);
+
+/**
+ * Selector for current session ID
+ */
+export const useCurrentFileSessionId = () =>
+  useVibeFileStore((state) => state.currentSessionId);
+
+/**
+ * Selector for checking if there are unsaved changes
+ */
+export const useHasUnsavedFileChanges = () =>
+  useVibeFileStore((state) => state.hasUnsavedChanges());
+
+/**
+ * Selector for files with sync errors
+ */
+export const useFilesWithSyncErrors = () =>
+  useVibeFileStore((state) => state.getFilesWithSyncErrors());
+
+/**
+ * Selector for sync status summary - uses useShallow for multi-value selection
+ */
+export const useSyncStatusSummary = () =>
+  useVibeFileStore(
+    useShallow((state) => {
+      const syncStates = Object.values(state.syncStates);
+      return {
+        total: syncStates.length,
+        synced: syncStates.filter((s) => s.status === 'synced').length,
+        pending: syncStates.filter((s) => s.status === 'pending').length,
+        syncing: syncStates.filter((s) => s.status === 'syncing').length,
+        error: syncStates.filter((s) => s.status === 'error').length,
+      };
+    })
+  );

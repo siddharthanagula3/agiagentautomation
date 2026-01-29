@@ -1,10 +1,25 @@
 /**
  * Enhanced API client with standardized error handling
- * Extends the existing API client with better error management
+ *
+ * This module provides an enhanced API client that wraps the base API client
+ * with comprehensive error handling, retry logic, and user-friendly error messages.
+ *
+ * It uses the consolidated error utilities from @shared/lib/error-utils.
  */
 
-import { apiClient, type APIResponse, type APIException } from './api';
+import { apiClient, type APIResponse as BaseAPIResponse } from './api';
+import { APIException } from '@shared/stores/query-client';
 import { toast } from 'sonner';
+import {
+  isRetryableError,
+  getRetryDelay,
+  getErrorMessage,
+  toAppError,
+  type AppError,
+} from './error-utils';
+
+// Re-export APIResponse type from base api module
+export type { APIResponse } from './api';
 
 // Enhanced error types
 export interface APIErrorDetails {
@@ -28,43 +43,16 @@ class DefaultErrorHandler implements ErrorHandler {
     console.error('API Error:', error);
 
     // Show user-friendly error message
-    const userMessage = this.getUserFriendlyMessage(error);
+    const userMessage = getErrorMessage(error);
     toast.error(userMessage);
   }
 
   shouldRetry(error: APIException): boolean {
-    // Retry on network errors and 5xx server errors
-    return error.status === 0 || (error.status >= 500 && error.status < 600);
+    return isRetryableError(error);
   }
 
   getRetryDelay(error: APIException, attempt: number): number {
-    // Exponential backoff with jitter
-    const baseDelay = 1000;
-    const maxDelay = 10000;
-    const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), maxDelay);
-    const jitter = Math.random() * 1000;
-    return delay + jitter;
-  }
-
-  private getUserFriendlyMessage(error: APIException): string {
-    switch (error.code) {
-      case 'NETWORK_ERROR':
-        return 'Network connection failed. Please check your internet connection.';
-      case 'TIMEOUT':
-        return 'Request timed out. Please try again.';
-      case 'AUTH_FAILED':
-        return 'Authentication failed. Please log in again.';
-      case 'REFRESH_FAILED':
-        return 'Session expired. Please log in again.';
-      case 'VALIDATION_ERROR':
-        return 'Please check your input and try again.';
-      case 'RATE_LIMITED':
-        return 'Too many requests. Please wait a moment and try again.';
-      case 'SERVER_ERROR':
-        return 'Server error occurred. Please try again later.';
-      default:
-        return error.message || 'An unexpected error occurred.';
-    }
+    return getRetryDelay(attempt);
   }
 }
 
@@ -81,7 +69,7 @@ class AuthErrorHandler implements ErrorHandler {
     }
   }
 
-  shouldRetry(error: APIException): boolean {
+  shouldRetry(_error: APIException): boolean {
     return false; // Don't retry auth errors
   }
 
@@ -99,8 +87,8 @@ class ErrorHandlerRegistry {
     this.handlers.set(code, handler);
   }
 
-  getHandler(code: string): ErrorHandler {
-    return this.handlers.get(code) || this.defaultHandler;
+  getHandler(code: string | undefined): ErrorHandler {
+    return (code && this.handlers.get(code)) || this.defaultHandler;
   }
 
   handleError(error: APIException): void {
@@ -133,8 +121,8 @@ export class EnhancedAPIClient {
 
   async request<T = unknown>(
     endpoint: string,
-    options: RequestInit = {}
-  ): Promise<APIResponse<T>> {
+    _options: RequestInit = {}
+  ): Promise<BaseAPIResponse<T>> {
     let lastError: APIException | null = null;
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
@@ -164,7 +152,7 @@ export class EnhancedAPIClient {
   async post<T = unknown>(
     endpoint: string,
     data?: unknown
-  ): Promise<APIResponse<T>> {
+  ): Promise<BaseAPIResponse<T>> {
     let lastError: APIException | null = null;
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
@@ -192,7 +180,7 @@ export class EnhancedAPIClient {
   async put<T = unknown>(
     endpoint: string,
     data?: unknown
-  ): Promise<APIResponse<T>> {
+  ): Promise<BaseAPIResponse<T>> {
     let lastError: APIException | null = null;
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
@@ -217,7 +205,7 @@ export class EnhancedAPIClient {
     throw lastError || new Error('Request failed');
   }
 
-  async delete<T = unknown>(endpoint: string): Promise<APIResponse<T>> {
+  async delete<T = unknown>(endpoint: string): Promise<BaseAPIResponse<T>> {
     let lastError: APIException | null = null;
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
@@ -246,33 +234,31 @@ export class EnhancedAPIClient {
 // Enhanced API client instance
 export const enhancedApiClient = new EnhancedAPIClient();
 
-// Utility functions for error handling
+// Utility functions for error handling - now using consolidated utilities
+
+/**
+ * Handle API error and return user-friendly message
+ */
 export const handleAPIError = (error: unknown): string => {
   if (error instanceof APIException) {
     errorHandlers.handleError(error);
     return error.message;
   }
 
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return 'An unknown error occurred';
+  return getErrorMessage(error);
 };
 
-export const isRetryableError = (error: unknown): boolean => {
-  if (error instanceof APIException) {
-    return errorHandlers.shouldRetry(error);
-  }
-  return false;
-};
+/**
+ * Check if an error is retryable
+ * @deprecated Use isRetryableError from @shared/lib/error-utils instead
+ */
+export { isRetryableError } from './error-utils';
 
-export const getRetryDelay = (error: unknown, attempt: number): number => {
-  if (error instanceof APIException) {
-    return errorHandlers.getRetryDelay(error, attempt);
-  }
-  return 1000 * Math.pow(2, attempt - 1);
-};
+/**
+ * Get retry delay for a given attempt
+ * @deprecated Use getRetryDelay from @shared/lib/error-utils instead
+ */
+export { getRetryDelay } from './error-utils';
 
 // React Query error handler
 export const queryErrorHandler = (error: unknown) => {

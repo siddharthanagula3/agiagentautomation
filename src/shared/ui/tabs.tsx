@@ -5,16 +5,26 @@ import { cn } from '@shared/lib/utils';
 
 const Tabs = TabsPrimitive.Root;
 
+interface TabsListProps extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> {
+  /**
+   * Orientation of the tabs list.
+   * Helps assistive technologies understand the layout.
+   */
+  orientation?: 'horizontal' | 'vertical';
+}
+
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
+  TabsListProps
+>(({ className, orientation = 'horizontal', ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
     className={cn(
       'inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
+      orientation === 'vertical' && 'flex-col h-auto',
       className
     )}
+    aria-orientation={orientation}
     {...props}
   />
 ));
@@ -45,6 +55,7 @@ const TabsContent = React.forwardRef<
       'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
       className
     )}
+    tabIndex={0}
     {...props}
   />
 ));

@@ -72,17 +72,30 @@ export interface MissionMessage {
   };
 }
 
-interface MissionState {
+/** Mission status type */
+export type MissionStatusType =
+  | 'idle'
+  | 'planning'
+  | 'executing'
+  | 'paused'
+  | 'completed'
+  | 'failed';
+
+/** Employee status type */
+export type EmployeeStatusType = 'thinking' | 'using_tool' | 'idle' | 'error';
+
+/** Log entry type */
+export type LogEntryType = 'info' | 'warning' | 'error' | 'success';
+
+/** Mission mode type */
+export type MissionModeType = 'mission' | 'chat';
+
+/** State-only interface for mission data (without actions) */
+export interface MissionStateData {
   // Mission planning
   missionPlan: Task[];
   currentMissionId: string | null;
-  missionStatus:
-    | 'idle'
-    | 'planning'
-    | 'executing'
-    | 'paused'
-    | 'completed'
-    | 'failed';
+  missionStatus: MissionStatusType;
 
   // Active employees (using Record for Immer compatibility)
   activeEmployees: Record<string, ActiveEmployee>;
@@ -95,11 +108,13 @@ interface MissionState {
   isPaused: boolean;
   error: string | null;
 
-  // NEW: Multi-agent chat integration
-  mode: 'mission' | 'chat'; // Orchestration mode
-  activeChatSession: string | null; // Active chat session ID
-  collaborativeAgents: string[]; // Agents in collaborative mode (array for Immer compatibility)
+  // Multi-agent chat integration
+  mode: MissionModeType;
+  activeChatSession: string | null;
+  collaborativeAgents: string[];
+}
 
+export interface MissionState extends MissionStateData {
   // Actions
   setMissionPlan: (plan: Task[]) => void;
   updateTaskStatus: (
@@ -139,6 +154,9 @@ interface MissionState {
   removeCollaborativeAgent: (agentName: string) => void;
   clearCollaborativeAgents: () => void;
   getAgentStatus: (agentName: string) => ActiveEmployee | undefined;
+
+  // Export the state data for external use (state-only, without actions)
+  _getState: () => MissionStateData;
 }
 
 const enableDevtools = import.meta.env.MODE !== 'production';
@@ -399,8 +417,25 @@ export const useMissionStore = create<MissionState>()(
           state.collaborativeAgents = [];
         }),
 
-      getAgentStatus: (agentName: string) => {
+      getAgentStatus: (agentName: string): ActiveEmployee | undefined => {
         return useMissionStore.getState().activeEmployees[agentName];
+      },
+
+      _getState: (): MissionStateData => {
+        const state = useMissionStore.getState();
+        return {
+          missionPlan: state.missionPlan,
+          currentMissionId: state.currentMissionId,
+          missionStatus: state.missionStatus,
+          activeEmployees: state.activeEmployees,
+          messages: state.messages,
+          isOrchestrating: state.isOrchestrating,
+          isPaused: state.isPaused,
+          error: state.error,
+          mode: state.mode,
+          activeChatSession: state.activeChatSession,
+          collaborativeAgents: state.collaborativeAgents,
+        };
       },
     })),
     { name: 'MissionStore', enabled: enableDevtools }

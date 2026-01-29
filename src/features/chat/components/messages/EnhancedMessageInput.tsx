@@ -127,6 +127,9 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
   const mentionStartPos = useRef(0);
   // Track timeouts for cleanup to prevent memory leaks
   const timeoutRefs = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  // Voice recording refs
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   // Filtered agents for mention autocomplete
   const filteredAgents = agents.filter((agent) =>
@@ -146,11 +149,15 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
     []
   );
 
-  // Cleanup all pending timeouts on unmount
+  // Cleanup all pending timeouts and media recorder on unmount
   useEffect(() => {
     return () => {
       timeoutRefs.current.forEach(clearTimeout);
       timeoutRefs.current.clear();
+      // Stop any ongoing recording
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
     };
   }, []);
 

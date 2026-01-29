@@ -50,7 +50,7 @@ const PublicHeader: React.FC = () => {
     },
     {
       label: 'AI Chat',
-      path: '/chat',
+      path: '/features/ai-chat',
       icon: MessageSquare,
       description: 'Intelligent conversations',
     },

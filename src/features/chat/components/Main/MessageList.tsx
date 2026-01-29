@@ -19,6 +19,7 @@ import { Textarea } from '@shared/ui/textarea';
 
 /**
  * Type-safe interface for message metadata fields
+ * Includes tool-related fields for inline display
  */
 interface MessageMetadata {
   employeeId?: string;
@@ -36,6 +37,17 @@ interface MessageMetadata {
   isThinking?: boolean;
   isSearching?: boolean;
   isToolProcessing?: boolean;
+  // Tool execution result fields for inline display
+  toolType?: string;
+  toolResult?: unknown;
+  imageUrl?: string;
+  imageData?: { url?: string; base64?: string; prompt?: string };
+  videoUrl?: string;
+  thumbnailUrl?: string;
+  videoData?: { url?: string; thumbnailUrl?: string; duration?: number };
+  searchResults?: Array<{ title: string; url: string; snippet: string }>;
+  documentData?: { title?: string; content?: string; format?: string };
+  downloadData?: { filename: string; content: string; contentType: string };
 }
 
 /**
@@ -105,6 +117,38 @@ function getValidatedMetadata(
     metadata.thinkingSteps.every((step) => typeof step === 'string')
   ) {
     result.thinkingSteps = metadata.thinkingSteps;
+  }
+
+  // Tool execution result fields for inline display
+  if (typeof metadata.toolType === 'string') {
+    result.toolType = metadata.toolType;
+  }
+  if (metadata.toolResult !== undefined) {
+    result.toolResult = metadata.toolResult;
+  }
+  if (typeof metadata.imageUrl === 'string') {
+    result.imageUrl = metadata.imageUrl;
+  }
+  if (metadata.imageData && typeof metadata.imageData === 'object') {
+    result.imageData = metadata.imageData as MessageMetadata['imageData'];
+  }
+  if (typeof metadata.videoUrl === 'string') {
+    result.videoUrl = metadata.videoUrl;
+  }
+  if (typeof metadata.thumbnailUrl === 'string') {
+    result.thumbnailUrl = metadata.thumbnailUrl;
+  }
+  if (metadata.videoData && typeof metadata.videoData === 'object') {
+    result.videoData = metadata.videoData as MessageMetadata['videoData'];
+  }
+  if (Array.isArray(metadata.searchResults)) {
+    result.searchResults = metadata.searchResults as MessageMetadata['searchResults'];
+  }
+  if (metadata.documentData && typeof metadata.documentData === 'object') {
+    result.documentData = metadata.documentData as MessageMetadata['documentData'];
+  }
+  if (metadata.downloadData && typeof metadata.downloadData === 'object') {
+    result.downloadData = metadata.downloadData as MessageMetadata['downloadData'];
   }
 
   return result;
@@ -247,6 +291,17 @@ const MessageListComponent: React.FC<MessageListProps> = ({
                     isPinned: meta.isPinned,
                     selectionReason: meta.selectionReason,
                     thinkingSteps: meta.thinkingSteps,
+                    // Tool execution result fields for inline display
+                    toolType: meta.toolType,
+                    toolResult: meta.toolResult,
+                    imageUrl: meta.imageUrl,
+                    imageData: meta.imageData,
+                    videoUrl: meta.videoUrl,
+                    thumbnailUrl: meta.thumbnailUrl,
+                    videoData: meta.videoData,
+                    searchResults: meta.searchResults,
+                    documentData: meta.documentData,
+                    downloadData: meta.downloadData,
                   },
                 }}
                 onEdit={handleEdit}

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { supabase } from '@shared/lib/supabase-client';
 import type {
   ArtifactData,
   ArtifactVersion,
@@ -52,7 +53,7 @@ export interface ArtifactState {
   ) => void;
   shareArtifact: (messageId: string, artifactId: string) => Promise<string>;
   unshareArtifact: (shareId: string) => void;
-  getSharedArtifact: (shareId: string) => ArtifactData | undefined;
+  getSharedArtifact: (shareId: string) => Promise<ArtifactData | undefined>;
   setActiveArtifact: (artifactId: string | null) => void;
   getMessageArtifacts: (messageId: string) => ArtifactData[];
   clearArtifacts: (messageId: string) => void;
@@ -154,12 +155,35 @@ export const useArtifactStore = create<ArtifactState>()(
         // Generate unique share ID
         const shareId = `share-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
+        try {
+          // Get current user for tracking
+          const { data: { user } } = await supabase.auth.getUser();
+
+          // Persist to Supabase for sharing across sessions
+          const { error } = await supabase.from('shared_artifacts').insert({
+            id: shareId,
+            user_id: user?.id,
+            message_id: messageId,
+            artifact_id: artifactId,
+            artifact_data: artifact,
+            created_at: new Date().toISOString(),
+            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days expiry
+          });
+
+          if (error) {
+            // If table doesn't exist, fall back to local storage only
+            console.warn('Could not persist shared artifact to database:', error.message);
+          }
+        } catch (dbError) {
+          // Non-critical - continue with local sharing
+          console.warn('Database error during artifact sharing:', dbError);
+        }
+
+        // Store locally for immediate access
         set((state) => {
           state.sharedArtifacts[shareId] = artifact;
         });
 
-        // In production, this would call an API to create a shareable link
-        // For now, return a local share ID
         return shareId;
       },
 
@@ -169,8 +193,34 @@ export const useArtifactStore = create<ArtifactState>()(
         });
       },
 
-      getSharedArtifact: (shareId: string) => {
-        return get().sharedArtifacts[shareId];
+      getSharedArtifact: async (shareId: string) => {
+        // First check local cache
+        const local = get().sharedArtifacts[shareId];
+        if (local) {
+          return local;
+        }
+
+        // Try to fetch from database
+        try {
+          const { data, error } = await supabase
+            .from('shared_artifacts')
+            .select('artifact_data')
+            .eq('id', shareId)
+            .gt('expires_at', new Date().toISOString())
+            .maybeSingle();
+
+          if (!error && data?.artifact_data) {
+            // Cache locally
+            set((state) => {
+              state.sharedArtifacts[shareId] = data.artifact_data as ArtifactData;
+            });
+            return data.artifact_data as ArtifactData;
+          }
+        } catch (dbError) {
+          console.warn('Error fetching shared artifact:', dbError);
+        }
+
+        return undefined;
       },
 
       setActiveArtifact: (artifactId: string | null) => {

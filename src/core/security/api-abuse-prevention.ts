@@ -340,8 +340,31 @@ export function cleanupOldMetrics(): void {
   }
 }
 
-// Cleanup every 10 minutes
-setInterval(cleanupOldMetrics, 10 * 60 * 1000);
+// Cleanup interval management
+let cleanupIntervalId: ReturnType<typeof setInterval> | null = null;
+
+/**
+ * Start the cleanup interval (call once on app init)
+ */
+export function startCleanupInterval(): void {
+  if (cleanupIntervalId) return; // Already running
+  cleanupIntervalId = setInterval(cleanupOldMetrics, 10 * 60 * 1000);
+}
+
+/**
+ * Stop the cleanup interval (call on app shutdown)
+ */
+export function stopCleanupInterval(): void {
+  if (cleanupIntervalId) {
+    clearInterval(cleanupIntervalId);
+    cleanupIntervalId = null;
+  }
+}
+
+// Auto-start cleanup interval in browser environment
+if (typeof window !== 'undefined') {
+  startCleanupInterval();
+}
 
 /**
  * Get current usage for user (for display)

@@ -102,6 +102,8 @@ export interface MessageMetadata {
   toolCalls?: ToolCall[];
   attachments?: Attachment[];
   thinkingProcess?: ThinkingStep[];
+  reasoning?: string;
+  status?: 'thinking' | 'working' | 'completed' | 'error';
 }
 
 /**
@@ -117,7 +119,21 @@ export interface BaseChatMessage {
 }
 
 /**
+ * Simple chat message for basic use cases (hooks, local state)
+ * Use this for simple chat implementations without multi-agent features
+ */
+export interface SimpleChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: Date;
+  isStreaming?: boolean;
+  error?: string;
+}
+
+/**
  * Chat message with session/conversation context
+ * Full-featured message for multi-agent chat systems
  */
 export interface ChatMessage extends BaseChatMessage {
   sessionId?: string;
@@ -135,6 +151,42 @@ export interface ChatMessage extends BaseChatMessage {
   editCount?: number;
   error?: string;
   updatedAt?: Date | string;
+}
+
+/**
+ * Mission Control chat message with extended display options
+ */
+export interface MissionChatMessage {
+  id: string;
+  type: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: Date;
+  toolCalls?: MCPToolCallInfo[];
+  reasoning?: string;
+  status?: 'thinking' | 'working' | 'completed' | 'error';
+}
+
+/**
+ * MCP Tool call information for display
+ */
+export interface MCPToolCallInfo {
+  tool: string;
+  arguments: Record<string, unknown>;
+  result?: unknown;
+  error?: string;
+  status: 'pending' | 'executing' | 'completed' | 'failed';
+}
+
+/**
+ * Chat message record for database persistence
+ */
+export interface ChatMessageRecord {
+  id: string;
+  session_id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  created_at: string;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -409,6 +461,62 @@ export interface BaseEntity {
   id: string;
   createdAt: Date | string;
   updatedAt: Date | string;
+}
+
+// ============================================================================
+// ORCHESTRATION TYPES
+// ============================================================================
+
+/**
+ * Agent capability for collaboration manager
+ * Used in multi-agent orchestration for team collaboration
+ */
+export interface CollaborationAgentCapability {
+  employeeId: string;
+  employeeName: string;
+  role: string;
+  provider: string;
+  skills: string[];
+  tools: string[];
+  specialization: string[];
+  canDelegate: boolean;
+  priority: number; // 1-10, higher means better for leadership
+}
+
+/**
+ * Agent capability for collaboration protocol
+ * Used for multi-agent conversations with tool usage
+ */
+export interface ProtocolAgentCapability {
+  agentId: string;
+  name: string;
+  avatar?: string;
+  expertise: string[];
+  tools: string[];
+  systemPrompt: string;
+  model: string;
+  temperature: number;
+}
+
+/**
+ * Agent capability for employee selection/reasoning
+ * Used for intelligent agent selection based on task requirements
+ */
+export interface SelectionAgentCapability {
+  agentType: string;
+  name: string;
+  description: string;
+  strengths: string[];
+  limitations: string[];
+  supportedDomains: string[];
+  supportedIntents: string[];
+  costPerOperation: number;
+  averageResponseTime: number;
+  reliability: number;
+  maxComplexity?: string;
+  tools: string[];
+  apiProvider: string;
+  model: string;
 }
 
 // ============================================================================

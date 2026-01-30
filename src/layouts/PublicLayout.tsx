@@ -7,7 +7,7 @@ const PublicLayout: React.FC = () => {
   return (
     <div className="flex min-h-screen w-full max-w-full flex-col overflow-x-hidden">
       <PublicHeader />
-      <main className="w-full max-w-full flex-1 pt-20">
+      <main id="main-content" className="w-full max-w-full flex-1 pt-20">
         <Outlet />
       </main>
       <PublicFooter />

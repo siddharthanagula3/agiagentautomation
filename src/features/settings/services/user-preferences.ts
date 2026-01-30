@@ -39,6 +39,104 @@ const TOTP_CONFIG = {
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
 // =============================================================================
+// TOTP Secret Encryption
+// =============================================================================
+// Updated: Jan 30th 2026 - Added encryption for TOTP secrets at rest
+
+/**
+ * Get encryption key from environment or generate a deterministic one
+ * In production, TOTP_ENCRYPTION_KEY should be set in environment variables
+ */
+async function getTOTPEncryptionKey(): Promise<CryptoKey> {
+  // Try to get key from environment (for server-side rendering/Netlify functions)
+  const envKey = typeof process !== 'undefined'
+    ? process.env.TOTP_ENCRYPTION_KEY || process.env.VITE_TOTP_ENCRYPTION_KEY
+    : undefined;
+
+  let keyMaterial: Uint8Array;
+
+  if (envKey && envKey.length >= 32) {
+    // Use environment key
+    const encoder = new TextEncoder();
+    keyMaterial = encoder.encode(envKey.slice(0, 32));
+  } else {
+    // Fallback: derive key from Supabase URL (deterministic but not ideal)
+    // This ensures the same key is used across sessions
+    const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || 'default-key-material';
+    const encoder = new TextEncoder();
+    const baseKey = encoder.encode(supabaseUrl + '-totp-encryption-v1');
+    const hash = await crypto.subtle.digest('SHA-256', baseKey);
+    keyMaterial = new Uint8Array(hash);
+  }
+
+  return crypto.subtle.importKey(
+    'raw',
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+/**
+ * Encrypt a TOTP secret for secure storage
+ * Returns base64-encoded string with IV prepended
+ */
+async function encryptTOTPSecret(secret: string): Promise<string> {
+  const key = await getTOTPEncryptionKey();
+  const encoder = new TextEncoder();
+  const data = encoder.encode(secret);
+
+  // Generate random IV (12 bytes for AES-GCM)
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    data
+  );
+
+  // Combine IV + encrypted data and encode as base64
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv);
+  combined.set(new Uint8Array(encrypted), iv.length);
+
+  return btoa(String.fromCharCode(...combined));
+}
+
+/**
+ * Decrypt a TOTP secret from storage
+ * Expects base64-encoded string with IV prepended
+ */
+async function decryptTOTPSecret(encryptedSecret: string): Promise<string> {
+  // Check if this is an unencrypted legacy secret (plain Base32)
+  // Base32 only uses A-Z and 2-7, no lowercase or special chars
+  if (/^[A-Z2-7]+$/.test(encryptedSecret)) {
+    // Legacy unencrypted secret - return as-is
+    // TODO: Consider migrating legacy secrets to encrypted format
+    return encryptedSecret;
+  }
+
+  const key = await getTOTPEncryptionKey();
+
+  // Decode base64
+  const combined = Uint8Array.from(atob(encryptedSecret), c => c.charCodeAt(0));
+
+  // Extract IV (first 12 bytes) and encrypted data
+  const iv = combined.slice(0, 12);
+  const encryptedData = combined.slice(12);
+
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    encryptedData
+  );
+
+  const decoder = new TextDecoder();
+  return decoder.decode(decrypted);
+}
+
+// =============================================================================
 // TOTP Types
 // =============================================================================
 
@@ -835,12 +933,15 @@ class SettingsService {
         backupCodes.map((code) => hashBackupCode(code))
       );
 
-      // Store the secret and hashed backup codes (not yet enabled)
+      // Updated: Jan 30th 2026 - Encrypt TOTP secret before storing
+      const encryptedSecret = await encryptTOTPSecret(secret);
+
+      // Store the encrypted secret and hashed backup codes (not yet enabled)
       const { error: updateError } = await supabase
         .from('user_settings')
         .upsert({
           id: user.id,
-          totp_secret: secret,
+          totp_secret: encryptedSecret,
           backup_codes: hashedBackupCodes,
           backup_codes_generated_at: new Date().toISOString(),
           backup_codes_used: 0,
@@ -907,8 +1008,11 @@ class SettingsService {
         };
       }
 
+      // Updated: Jan 30th 2026 - Decrypt TOTP secret before verification
+      const decryptedSecret = await decryptTOTPSecret(settings.totp_secret);
+
       // Verify the provided code
-      const isValid = await verifyTOTPCode(settings.totp_secret, code);
+      const isValid = await verifyTOTPCode(decryptedSecret, code);
 
       if (!isValid) {
         return {
@@ -974,8 +1078,11 @@ class SettingsService {
         return { valid: false, error: 'Two-factor authentication is not enabled' };
       }
 
+      // Updated: Jan 30th 2026 - Decrypt TOTP secret before verification
+      const decryptedSecret = await decryptTOTPSecret(settings.totp_secret);
+
       // First, try to verify as a TOTP code
-      const isTOTPValid = await verifyTOTPCode(settings.totp_secret, code);
+      const isTOTPValid = await verifyTOTPCode(decryptedSecret, code);
 
       if (isTOTPValid) {
         return { valid: true, usedBackupCode: false };
@@ -1096,7 +1203,9 @@ class SettingsService {
         return { error: 'Two-factor authentication is not enabled' };
       }
 
-      const isValid = await verifyTOTPCode(settings.totp_secret, totpCode);
+      // Updated: Jan 30th 2026 - Decrypt TOTP secret before verification
+      const decryptedSecret = await decryptTOTPSecret(settings.totp_secret);
+      const isValid = await verifyTOTPCode(decryptedSecret, totpCode);
 
       if (!isValid) {
         return { error: 'Invalid verification code' };

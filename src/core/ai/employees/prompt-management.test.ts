@@ -504,6 +504,91 @@ describe('SystemPromptsService', () => {
         });
       }
     });
+
+    it('should support forceRefresh parameter', async () => {
+      // First call loads employees
+      await service.getAvailableEmployees();
+
+      // Second call with forceRefresh should reload
+      const employees = await service.getAvailableEmployees(true);
+
+      expect(Array.isArray(employees)).toBe(true);
+    });
+
+    it('should use cache for repeated calls within TTL', async () => {
+      // First call
+      await service.getAvailableEmployees();
+
+      // Second call should use cache
+      const employees = await service.getAvailableEmployees();
+
+      expect(Array.isArray(employees)).toBe(true);
+    });
+  });
+
+  describe('Employee Cache Management', () => {
+    it('should invalidate employee cache', async () => {
+      // Load employees first
+      await service.getAvailableEmployees();
+
+      // Check cache is loaded
+      const statsBefore = service.getEmployeeCacheStats();
+      expect(statsBefore.loaded).toBe(true);
+
+      // Invalidate cache
+      service.invalidateEmployeeCache();
+
+      // Check cache is cleared
+      const statsAfter = service.getEmployeeCacheStats();
+      expect(statsAfter.loaded).toBe(false);
+      expect(statsAfter.count).toBe(0);
+    });
+
+    it('should refresh employees immediately', async () => {
+      // Load employees first
+      await service.getAvailableEmployees();
+
+      // Refresh should reload
+      const employees = await service.refreshEmployees();
+
+      expect(Array.isArray(employees)).toBe(true);
+    });
+
+    it('should return correct cache statistics', async () => {
+      // Clear any existing cache state by creating fresh instance
+      service.invalidateEmployeeCache();
+
+      // Before loading, cache should be empty
+      const statsBefore = service.getEmployeeCacheStats();
+      expect(statsBefore.loaded).toBe(false);
+      expect(statsBefore.count).toBe(0);
+      expect(statsBefore.ageMs).toBe(0);
+      expect(statsBefore.ttlMs).toBe(5 * 60 * 1000); // 5 minutes
+      expect(statsBefore.isExpired).toBe(true);
+
+      // Load employees
+      await service.getAvailableEmployees();
+
+      // After loading, cache should be populated
+      const statsAfter = service.getEmployeeCacheStats();
+      expect(statsAfter.loaded).toBe(true);
+      expect(statsAfter.isExpired).toBe(false);
+      expect(statsAfter.ageMs).toBeGreaterThanOrEqual(0);
+      expect(statsAfter.ageMs).toBeLessThan(1000); // Should be very recent
+    });
+
+    it('should track cache expiration based on TTL', async () => {
+      // Load employees
+      await service.getAvailableEmployees();
+
+      const stats = service.getEmployeeCacheStats();
+
+      // TTL should be 5 minutes
+      expect(stats.ttlMs).toBe(5 * 60 * 1000);
+
+      // Fresh cache should not be expired
+      expect(stats.isExpired).toBe(false);
+    });
   });
 
   describe('getEmployeeByName', () => {

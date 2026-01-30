@@ -250,7 +250,17 @@ export class GoogleProvider {
 
   /**
    * Stream a message from Gemini
-   * Uses new @google/genai SDK pattern: ai.models.generateContentStream()
+   *
+   * SECURITY NOTE: Direct streaming is disabled. All LLM API calls must go through
+   * authenticated Netlify proxy functions to keep API keys secure on the server side.
+   *
+   * TODO: To enable streaming in the future:
+   * 1. Implement Server-Sent Events (SSE) in /.netlify/functions/llm-proxies/google-proxy
+   * 2. Update this method to consume the SSE stream from the proxy
+   * 3. Remove the DIRECT_API_DISABLED error below
+   *
+   * Reference implementation for @google/genai SDK streaming is preserved in comments
+   * at the bottom of this method for when proxy-based streaming is implemented.
    */
   async *streamMessage(
     messages: GoogleMessage[],
@@ -265,92 +275,55 @@ export class GoogleProvider {
       total_tokens?: number;
     };
   }> {
-    try {
-      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
-      throw new GoogleError(
-        'Direct Google streaming is disabled for security. Use /.netlify/functions/llm-proxies/google-proxy instead.',
-        'DIRECT_API_DISABLED'
-      );
+    // SECURITY: Direct API calls are disabled - use Netlify proxy instead
+    throw new GoogleError(
+      'Direct Google streaming is disabled for security. Use /.netlify/functions/llm-proxies/google-proxy instead.',
+      'DIRECT_API_DISABLED'
+    );
 
-      // Convert messages to Gemini format
-      const prompt = this.convertMessagesToGemini(messages);
+    /*
+     * TODO: Future proxy-based streaming implementation
+     * When SSE streaming is added to the Netlify proxy, replace the throw above with:
+     *
+     * const proxyUrl = '/.netlify/functions/llm-proxies/google-proxy';
+     * const authToken = await getAuthToken();
+     * if (!authToken) {
+     *   throw new GoogleError('User not authenticated.', 'NOT_AUTHENTICATED');
+     * }
+     *
+     * const response = await fetch(proxyUrl, {
+     *   method: 'POST',
+     *   headers: {
+     *     'Content-Type': 'application/json',
+     *     Authorization: `Bearer ${authToken}`,
+     *     Accept: 'text/event-stream',
+     *   },
+     *   body: JSON.stringify({
+     *     messages: this.convertMessagesToGemini(messages),
+     *     model: this.config.model,
+     *     max_tokens: this.config.maxTokens,
+     *     temperature: this.config.temperature,
+     *     stream: true,
+     *   }),
+     * });
+     *
+     * // Process SSE stream from proxy...
+     *
+     * Reference: @google/genai SDK direct streaming pattern:
+     * const stream = await this.client.models.generateContentStream({
+     *   model: this.config.model,
+     *   contents: prompt,
+     *   config: { maxOutputTokens: this.config.maxTokens, temperature: this.config.temperature },
+     * });
+     * for await (const chunk of stream) {
+     *   const chunkText = chunk.text;
+     *   if (chunkText) yield { content: chunkText, done: false };
+     * }
+     */
 
-      // Make the streaming API call using new @google/genai SDK pattern
-      if (!this.client) {
-        throw new GoogleError(
-          'Google client not initialized. Please check your API key configuration.',
-          'CLIENT_NOT_INITIALIZED'
-        );
-      }
-
-      // New SDK pattern: ai.models.generateContentStream({ model, contents, config })
-      const stream = await this.client.models.generateContentStream({
-        model: this.config.model,
-        contents: prompt,
-        config: {
-          maxOutputTokens: this.config.maxTokens,
-          temperature: this.config.temperature,
-        },
-      });
-
-      let fullContent = '';
-      let usage: ReturnType<typeof this.extractUsageFromResponse> | null = null;
-
-      for await (const chunk of stream) {
-        const chunkText = chunk.text;
-        if (chunkText) {
-          fullContent += chunkText;
-          yield { content: chunkText, done: false };
-        }
-        // Extract usage from final chunk if available
-        if (chunk.usageMetadata) {
-          usage = this.extractUsageFromResponse(chunk);
-        }
-      }
-
-      yield { content: '', done: true, usage: usage || undefined };
-
-      // Save to database
-      if (sessionId && userId) {
-        await this.saveMessageToDatabase({
-          sessionId,
-          userId,
-          role: 'assistant',
-          content: fullContent,
-          metadata: {
-            provider: 'google',
-            model: this.config.model,
-            usage,
-            timestamp: new Date().toISOString(),
-          },
-        });
-      }
-    } catch (error) {
-      logger.error('[Google Provider] Streaming error:', error);
-
-      if (error instanceof Error) {
-        if (error.message.includes('API_KEY_INVALID')) {
-          throw new GoogleError(
-            'Invalid Google API key. Please check your VITE_GOOGLE_API_KEY.',
-            'INVALID_API_KEY'
-          );
-        }
-
-        if (error.message.includes('QUOTA_EXCEEDED')) {
-          throw new GoogleError(
-            'Google API quota exceeded. Please try again later.',
-            'QUOTA_EXCEEDED',
-            true
-          );
-        }
-      }
-
-      throw new GoogleError(
-        `Google streaming failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'STREAMING_FAILED',
-        true
-      );
-    }
+    // TypeScript requires a yield for AsyncGenerator, but this is unreachable
+    // This satisfies the type checker while keeping the method signature correct
+    yield { content: '', done: true };
   }
 
   /**

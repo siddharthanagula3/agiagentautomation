@@ -144,7 +144,7 @@ const EmployeeManagement: React.FC = () => {
                   Manage your AI team and track performance in real-time
                 </p>
               </div>
-              <Link to="/marketplace" className="w-full sm:w-auto">
+              <Link to="/hire" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   className="btn-glow gradient-primary w-full text-white"
@@ -328,7 +328,7 @@ const EmployeeManagement: React.FC = () => {
                         Start building your AI workforce by hiring specialized
                         employees from the marketplace
                       </p>
-                      <Link to="/marketplace">
+                      <Link to="/hire">
                         <Button
                           size="lg"
                           className="btn-glow gradient-primary text-white"
@@ -543,7 +543,7 @@ const EmployeeManagement: React.FC = () => {
                         Hire AI employees and start assigning tasks to see
                         performance metrics
                       </p>
-                      <Link to="/marketplace">
+                      <Link to="/hire">
                         <Button
                           size="lg"
                           className="btn-glow gradient-primary text-white"

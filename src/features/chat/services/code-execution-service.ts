@@ -326,7 +326,7 @@ try {
   ): Promise<Omit<ExecutionResult, 'executionTime' | 'language'>> {
     return new Promise((resolve) => {
       let stdout = '';
-      let stderr = '';
+      const stderr = '';
       let resolved = false;
 
       const timeoutId = setTimeout(() => {

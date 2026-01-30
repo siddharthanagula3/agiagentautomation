@@ -14,6 +14,7 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@shared/stores/query-client';
 import {
   conversationBranchingService,
   type ConversationBranchWithDetails,
@@ -30,14 +31,15 @@ import type { ChatSession } from '../types';
 
 /**
  * Query keys for conversation branches
+ * @deprecated Use queryKeys.branches from @shared/stores/query-client instead
  */
 export const branchQueryKeys = {
-  all: () => ['branches'] as const,
-  branches: (sessionId: string) => ['branches', 'session', sessionId] as const,
-  history: (sessionId: string) => ['branches', 'history', sessionId] as const,
-  root: (sessionId: string) => ['branches', 'root', sessionId] as const,
-  isBranch: (sessionId: string) => ['branches', 'isBranch', sessionId] as const,
-  atMessage: (messageId: string) => ['branches', 'atMessage', messageId] as const,
+  all: queryKeys.branches.all,
+  branches: queryKeys.branches.session,
+  history: queryKeys.branches.history,
+  root: queryKeys.branches.root,
+  isBranch: queryKeys.branches.isBranch,
+  atMessage: queryKeys.branches.atMessage,
 } as const;
 
 // ============================================================================
@@ -52,7 +54,7 @@ export const branchQueryKeys = {
  */
 export function useBranches(sessionId: string | undefined) {
   return useQuery({
-    queryKey: branchQueryKeys.branches(sessionId ?? ''),
+    queryKey: queryKeys.branches.session(sessionId ?? ''),
     queryFn: async (): Promise<ConversationBranchWithDetails[]> => {
       if (!sessionId) return [];
       return conversationBranchingService.getBranchesForSession(sessionId);
@@ -74,7 +76,7 @@ export function useBranches(sessionId: string | undefined) {
  */
 export function useBranchHistory(sessionId: string | undefined) {
   return useQuery({
-    queryKey: branchQueryKeys.history(sessionId ?? ''),
+    queryKey: queryKeys.branches.history(sessionId ?? ''),
     queryFn: async (): Promise<BranchHistoryEntry[]> => {
       if (!sessionId) return [];
       return conversationBranchingService.getBranchHistory(sessionId);
@@ -96,7 +98,7 @@ export function useBranchHistory(sessionId: string | undefined) {
  */
 export function useIsBranchSession(sessionId: string | undefined) {
   return useQuery({
-    queryKey: branchQueryKeys.isBranch(sessionId ?? ''),
+    queryKey: queryKeys.branches.isBranch(sessionId ?? ''),
     queryFn: async (): Promise<boolean> => {
       if (!sessionId) return false;
       return conversationBranchingService.isBranchSession(sessionId);
@@ -115,7 +117,7 @@ export function useIsBranchSession(sessionId: string | undefined) {
  */
 export function useRootSession(sessionId: string | undefined) {
   return useQuery({
-    queryKey: branchQueryKeys.root(sessionId ?? ''),
+    queryKey: queryKeys.branches.root(sessionId ?? ''),
     queryFn: async (): Promise<string> => {
       if (!sessionId) return '';
       return conversationBranchingService.getRootSessionId(sessionId);
@@ -159,17 +161,17 @@ export function useCreateBranch() {
     onSuccess: (newSession, { sessionId, messageId }) => {
       // Invalidate branches for parent session
       queryClient.invalidateQueries({
-        queryKey: branchQueryKeys.branches(sessionId),
+        queryKey: queryKeys.branches.session(sessionId),
       });
 
       // Invalidate branches at the message
       queryClient.invalidateQueries({
-        queryKey: branchQueryKeys.atMessage(messageId),
+        queryKey: queryKeys.branches.atMessage(messageId),
       });
 
       // Invalidate isBranch check for new session
       queryClient.invalidateQueries({
-        queryKey: branchQueryKeys.isBranch(newSession.id),
+        queryKey: queryKeys.branches.isBranch(newSession.id),
       });
 
       toast.success('Conversation branched successfully');
@@ -204,12 +206,12 @@ export function useDeleteBranch() {
     onSuccess: (_, { parentSessionId }) => {
       // Invalidate branches for parent session
       queryClient.invalidateQueries({
-        queryKey: branchQueryKeys.branches(parentSessionId),
+        queryKey: queryKeys.branches.session(parentSessionId),
       });
 
       // Invalidate all branch queries to be safe
       queryClient.invalidateQueries({
-        queryKey: branchQueryKeys.all(),
+        queryKey: queryKeys.branches.all(),
       });
 
       toast.success('Branch deleted');
@@ -245,7 +247,7 @@ export function useUpdateBranchName() {
     onSuccess: (_, { parentSessionId }) => {
       // Invalidate branches for parent session
       queryClient.invalidateQueries({
-        queryKey: branchQueryKeys.branches(parentSessionId),
+        queryKey: queryKeys.branches.session(parentSessionId),
       });
 
       toast.success('Branch renamed');
@@ -269,7 +271,7 @@ export function useInvalidateBranchQueries() {
 
   return useCallback(() => {
     queryClient.invalidateQueries({
-      queryKey: branchQueryKeys.all(),
+      queryKey: queryKeys.branches.all(),
     });
   }, [queryClient]);
 }
@@ -489,7 +491,7 @@ export function useConversationBranches({
  */
 export function useMessageBranches(messageId: string | undefined) {
   const query = useQuery({
-    queryKey: branchQueryKeys.atMessage(messageId ?? ''),
+    queryKey: queryKeys.branches.atMessage(messageId ?? ''),
     queryFn: async (): Promise<ConversationBranchWithDetails[]> => {
       if (!messageId) return [];
       return conversationBranchingService.getBranchesAtMessage(messageId);
@@ -516,7 +518,7 @@ export function useMessageBranches(messageId: string | undefined) {
  */
 export function useBranchInfo(sessionId: string | undefined) {
   const query = useQuery({
-    queryKey: ['branches', 'info', sessionId ?? ''],
+    queryKey: queryKeys.branches.info(sessionId ?? ''),
     queryFn: async () => {
       if (!sessionId) return null;
       return conversationBranchingService.getBranchInfo(sessionId);
@@ -549,7 +551,7 @@ export function usePrefetchBranches() {
     (sessionId: string) => {
       // Prefetch branches for the session
       queryClient.prefetchQuery({
-        queryKey: branchQueryKeys.branches(sessionId),
+        queryKey: queryKeys.branches.session(sessionId),
         queryFn: () =>
           conversationBranchingService.getBranchesForSession(sessionId),
         staleTime: 2 * 60 * 1000,
@@ -557,7 +559,7 @@ export function usePrefetchBranches() {
 
       // Prefetch isBranch check
       queryClient.prefetchQuery({
-        queryKey: branchQueryKeys.isBranch(sessionId),
+        queryKey: queryKeys.branches.isBranch(sessionId),
         queryFn: () => conversationBranchingService.isBranchSession(sessionId),
         staleTime: 5 * 60 * 1000,
       });
@@ -578,7 +580,7 @@ export function useConversationTree(
   userId: string | undefined
 ) {
   return useQuery({
-    queryKey: ['branches', 'tree', sessionId ?? ''],
+    queryKey: queryKeys.branches.tree(sessionId ?? ''),
     queryFn: async () => {
       if (!sessionId || !userId) return null;
       return conversationBranchingService.getConversationTree(sessionId, userId);
@@ -600,7 +602,7 @@ export function useConversationTree(
  */
 export function useBranchCount(sessionId: string | undefined) {
   return useQuery({
-    queryKey: ['branches', 'count', sessionId ?? ''],
+    queryKey: queryKeys.branches.count(sessionId ?? ''),
     queryFn: async (): Promise<number> => {
       if (!sessionId) return 0;
       return conversationBranchingService.countBranches(sessionId);

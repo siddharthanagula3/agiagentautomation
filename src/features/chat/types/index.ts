@@ -2,13 +2,17 @@
  * Chat Types for Enhanced MGX-style Interface
  *
  * Re-exports common types from @shared/types and defines chat-specific types.
+ * Import pattern: import { ChatMessage, ChatMode } from '@features/chat/types';
  */
+
+import type { AIEmployeeBasic, AIEmployeePerformance } from '@shared/types';
 
 // Re-export common types for convenience
 export type {
   MessageRole,
   ToolCallStatus,
   ChatMessage,
+  SimpleChatMessage,
   ChatSession,
   ChatSettings,
   Tool,
@@ -33,23 +37,19 @@ export type ChatMode = 'team' | 'engineer' | 'research' | 'race' | 'solo';
 
 /**
  * Extended AI Employee type for chat feature
- * Uses AIEmployeeBasic from common types as base
+ * Extends AIEmployeeBasic from common types with chat-specific fields
  */
-export interface AIEmployee {
-  id: string;
-  name: string;
+export interface ChatAIEmployee extends AIEmployeeBasic {
   role: string;
-  description: string;
-  avatar?: string;
   capabilities: string[];
   tools: string[];
-  status: 'available' | 'busy' | 'offline';
-  performance?: {
-    tasksCompleted: number;
-    successRate: number;
-    avgResponseTime: number;
-  };
+  performance?: Pick<AIEmployeePerformance, 'tasksCompleted' | 'successRate' | 'avgResponseTime'>;
 }
+
+/**
+ * @deprecated Use ChatAIEmployee instead
+ */
+export type AIEmployee = ChatAIEmployee;
 
 /**
  * Chat-specific message metadata extension

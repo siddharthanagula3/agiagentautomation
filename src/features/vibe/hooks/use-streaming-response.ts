@@ -332,25 +332,28 @@ export function useAgentStreamingStatus(agentId: string) {
   });
 
   useEffect(() => {
-    if (streamingMessageId) {
-      const message = messages.find((m) => m.id === streamingMessageId);
-      const isAgentStreaming =
-        message?.employee_id === agentId || message?.employee_name === agentId;
+    // Use queueMicrotask to batch the setState call and avoid cascading renders
+    queueMicrotask(() => {
+      if (streamingMessageId) {
+        const message = messages.find((m) => m.id === streamingMessageId);
+        const isAgentStreaming =
+          message?.employee_id === agentId || message?.employee_name === agentId;
 
-      setStatus({
-        isStreaming: isAgentStreaming && (message?.is_streaming ?? false),
-        content: message?.content || '',
-        status: agent?.status || 'idle',
-        progress: agent?.progress || 0,
-      });
-    } else {
-      setStatus({
-        isStreaming: false,
-        content: '',
-        status: agent?.status || 'idle',
-        progress: 0,
-      });
-    }
+        setStatus({
+          isStreaming: isAgentStreaming && (message?.is_streaming ?? false),
+          content: message?.content || '',
+          status: agent?.status || 'idle',
+          progress: agent?.progress || 0,
+        });
+      } else {
+        setStatus({
+          isStreaming: false,
+          content: '',
+          status: agent?.status || 'idle',
+          progress: 0,
+        });
+      }
+    });
   }, [streamingMessageId, messages, agentId, agent]);
 
   return status;

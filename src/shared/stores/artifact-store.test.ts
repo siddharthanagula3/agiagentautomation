@@ -260,7 +260,7 @@ describe('Artifact Store', () => {
       addArtifact(messageId, artifact);
       const shareId = await shareArtifact(messageId, artifact.id);
 
-      const sharedArtifact = getSharedArtifact(shareId);
+      const sharedArtifact = await getSharedArtifact(shareId);
       expect(sharedArtifact).toEqual(artifact);
     });
 
@@ -292,20 +292,20 @@ describe('Artifact Store', () => {
       addArtifact(messageId, artifact);
       const shareId = await shareArtifact(messageId, artifact.id);
 
-      expect(getSharedArtifact(shareId)).toBeDefined();
+      expect(await getSharedArtifact(shareId)).toBeDefined();
 
       unshareArtifact(shareId);
 
-      expect(getSharedArtifact(shareId)).toBeUndefined();
+      expect(await getSharedArtifact(shareId)).toBeUndefined();
     });
 
-    it('should handle unsharing non-existent share', () => {
+    it('should handle unsharing non-existent share', async () => {
       const { unshareArtifact, getSharedArtifact } =
         useArtifactStore.getState();
 
       // Should not throw
       expect(() => unshareArtifact('non-existent-share')).not.toThrow();
-      expect(getSharedArtifact('non-existent-share')).toBeUndefined();
+      expect(await getSharedArtifact('non-existent-share')).toBeUndefined();
     });
   });
 
@@ -391,8 +391,8 @@ describe('Artifact Store', () => {
         useArtifactStore.getState();
       const messageId = 'msg-123';
       const artifact = createMockArtifact();
-      // Ensure no versions array
-      delete (artifact as any).versions;
+      // Ensure no versions array - use type assertion with Partial to allow deletion
+      delete (artifact as Partial<ArtifactData>).versions;
 
       addArtifact(messageId, artifact);
       addVersion(messageId, artifact.id, {

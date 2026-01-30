@@ -799,7 +799,10 @@ export const useCache = <T = unknown>(
   }, [cache, key, fetchData]);
 
   useEffect(() => {
-    fetchData();
+    // Use queueMicrotask to avoid cascading renders from synchronous setState
+    queueMicrotask(() => {
+      fetchData();
+    });
   }, [fetchData]);
 
   return {

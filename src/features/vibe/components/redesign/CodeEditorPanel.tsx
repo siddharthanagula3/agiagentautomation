@@ -106,7 +106,7 @@ interface DeleteDialogState {
 }
 
 function CodeEditorPanelContent() {
-  const [editorInstance, setEditorInstance] =
+  const [_editorInstance, setEditorInstance] =
     useState<Monaco.editor.IStandaloneCodeEditor | null>(null);
   const [copied, setCopied] = useState(false);
   const [showFileTree, setShowFileTree] = useState(true);
@@ -133,7 +133,10 @@ function CodeEditorPanelContent() {
   }, []);
 
   useEffect(() => {
-    refreshFileTree();
+    // Use queueMicrotask to avoid synchronous setState during effect
+    queueMicrotask(() => {
+      refreshFileTree();
+    });
   }, [refreshFileTree]);
 
   const currentFile = currentFilePath ? openFiles.get(currentFilePath) : null;

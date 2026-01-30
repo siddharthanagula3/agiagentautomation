@@ -147,7 +147,8 @@ export function PhaseTimeline({
   // Update elapsed time
   useEffect(() => {
     if (!session?.phase.startedAt) {
-      setElapsedTime(0);
+      // Use queueMicrotask to avoid cascading renders
+      queueMicrotask(() => setElapsedTime(0));
       return;
     }
 

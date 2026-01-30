@@ -24,9 +24,11 @@ export const TokenUsageDisplay: React.FC<TokenUsageDisplayProps> = ({
   useEffect(() => {
     if (!sessionId) return;
 
-    // Initial load
-    const sessionUsage = getSessionTokenUsage(sessionId);
-    setUsage(sessionUsage);
+    // Initial load - use queueMicrotask to avoid synchronous setState during effect
+    queueMicrotask(() => {
+      const sessionUsage = getSessionTokenUsage(sessionId);
+      setUsage(sessionUsage);
+    });
 
     // Poll for updates every 2 seconds
     const interval = setInterval(() => {

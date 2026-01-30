@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import { Badge } from '@shared/ui/badge';
 import { Cookie, Settings, BarChart3, Shield } from 'lucide-react';
@@ -139,4 +140,10 @@ const CookiePolicyPage: React.FC = () => {
   );
 };
 
-export default CookiePolicyPage;
+const CookiePolicyPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="CookiePolicyPage" showReportDialog>
+    <CookiePolicyPage />
+  </ErrorBoundary>
+);
+
+export default CookiePolicyPageWithErrorBoundary;

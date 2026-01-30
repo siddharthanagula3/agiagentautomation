@@ -33,6 +33,8 @@ type LocationState = {
   from?: {
     pathname: string;
   };
+  /** Reason for redirect (e.g., session_timeout) */
+  reason?: 'session_timeout' | string;
 };
 
 const LoginPage: React.FC = () => {
@@ -48,6 +50,16 @@ const LoginPage: React.FC = () => {
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+
+  // Show session timeout notification if redirected for that reason
+  useEffect(() => {
+    if (location.state?.reason === 'session_timeout') {
+      toast.info('Your session has expired due to inactivity. Please log in again.', {
+        duration: 5000,
+        icon: <Shield className="h-4 w-4 text-yellow-500" />,
+      });
+    }
+  }, [location.state?.reason]);
 
   // **KEY FIX: Add redirect logic after successful authentication**
   useEffect(() => {

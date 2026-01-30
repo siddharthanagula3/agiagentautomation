@@ -10,18 +10,13 @@ import {
   type LLMProvider,
 } from '@core/ai/llm/unified-language-model';
 import { logger } from '@shared/lib/logger';
+import type { CollaborationAgentCapability } from '@shared/types';
 
-export interface AgentCapability {
-  employeeId: string;
-  employeeName: string;
-  role: string;
-  provider: string;
-  skills: string[];
-  tools: string[];
-  specialization: string[];
-  canDelegate: boolean;
-  priority: number; // 1-10, higher means better for leadership
-}
+/**
+ * Re-export canonical type for backward compatibility
+ * @deprecated Import CollaborationAgentCapability from @shared/types instead
+ */
+export type AgentCapability = CollaborationAgentCapability;
 
 export interface AgentTask {
   id: string;
@@ -145,10 +140,27 @@ const buildCapabilityMap = (): Record<string, AgentCapability> => {
 
 const EMPLOYEE_CAPABILITIES = buildCapabilityMap();
 
+// TTL configuration for cleanup
+const PLAN_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const AGENT_STATUS_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const CLEANUP_INTERVAL_MS = 60 * 1000; // Run cleanup every minute
+const MAX_ACTIVE_PLANS = 100; // Maximum concurrent plans to prevent unbounded growth
+const MAX_AGENT_STATUSES = 500; // Maximum tracked agent statuses
+
+interface TimestampedPlan extends OrchestrationPlan {
+  _createdAt: number;
+  _lastAccessedAt: number;
+}
+
+interface TimestampedAgentStatus extends AgentStatus {
+  _updatedAt: number;
+}
+
 class MultiAgentOrchestrator {
-  private activePlans: Map<string, OrchestrationPlan> = new Map();
-  private agentStatuses: Map<string, AgentStatus> = new Map();
+  private activePlans: Map<string, TimestampedPlan> = new Map();
+  private agentStatuses: Map<string, TimestampedAgentStatus> = new Map();
   private llmService: UnifiedLLMService;
+  private cleanupIntervalId: ReturnType<typeof setInterval> | null = null;
 
   /**
    * Analyze user intent and create an orchestration plan
@@ -173,8 +185,9 @@ class MultiAgentOrchestrator {
     // Estimate duration
     const estimatedDuration = this.estimateDuration(tasks, executionStrategy);
 
-    const plan: OrchestrationPlan = {
-      id: `plan-${Date.now()}`,
+    const now = Date.now();
+    const plan: TimestampedPlan = {
+      id: `plan-${now}`,
       userRequest,
       intent,
       complexity,
@@ -185,10 +198,15 @@ class MultiAgentOrchestrator {
       currentPhase: 1,
       totalPhases: this.calculatePhases(tasks),
       isComplete: false,
+      _createdAt: now,
+      _lastAccessedAt: now,
     };
 
     this.activePlans.set(plan.id, plan);
-    return plan;
+
+    // Return plan without internal timestamp fields
+    const { _createdAt, _lastAccessedAt, ...publicPlan } = plan;
+    return publicPlan as OrchestrationPlan;
   }
 
   /**
@@ -199,6 +217,11 @@ class MultiAgentOrchestrator {
     onCommunication: (comm: AgentCommunication) => void,
     onStatusUpdate: (status: AgentStatus) => void
   ): Promise<Map<string, TaskExecutionRecord>> {
+    // Update last accessed timestamp for the plan
+    const storedPlan = this.activePlans.get(plan.id);
+    if (storedPlan) {
+      storedPlan._lastAccessedAt = Date.now();
+    }
 
     const results = new Map<string, TaskExecutionRecord>();
     let iterationCount = 0;
@@ -207,6 +230,11 @@ class MultiAgentOrchestrator {
     // CONTINUOUS EXECUTION LOOP
     while (!plan.isComplete && iterationCount < MAX_ITERATIONS) {
       iterationCount++;
+
+      // Update last accessed timestamp periodically during execution
+      if (storedPlan && iterationCount % 10 === 0) {
+        storedPlan._lastAccessedAt = Date.now();
+      }
 
       // Get next executable tasks
       const nextTasks = this.getExecutableTasks(plan);
@@ -908,7 +936,11 @@ class MultiAgentOrchestrator {
     status: AgentStatus,
     onStatusUpdate: (status: AgentStatus) => void
   ): void {
-    this.agentStatuses.set(agentName, status);
+    const timestampedStatus: TimestampedAgentStatus = {
+      ...status,
+      _updatedAt: Date.now(),
+    };
+    this.agentStatuses.set(agentName, timestampedStatus);
     onStatusUpdate(status);
   }
 
@@ -931,6 +963,127 @@ class MultiAgentOrchestrator {
    */
   constructor() {
     this.llmService = new UnifiedLLMService();
+    this.startCleanupInterval();
+  }
+
+  /**
+   * Start periodic cleanup of stale entries to prevent memory leaks
+   */
+  private startCleanupInterval(): void {
+    // Clear any existing interval
+    if (this.cleanupIntervalId) {
+      clearInterval(this.cleanupIntervalId);
+    }
+
+    this.cleanupIntervalId = setInterval(() => {
+      this.cleanup();
+    }, CLEANUP_INTERVAL_MS);
+  }
+
+  /**
+   * Stop the cleanup interval (call when orchestrator is being disposed)
+   */
+  public stopCleanupInterval(): void {
+    if (this.cleanupIntervalId) {
+      clearInterval(this.cleanupIntervalId);
+      this.cleanupIntervalId = null;
+    }
+  }
+
+  /**
+   * Clean up stale plans and agent statuses to prevent memory leaks
+   * Removes entries that have exceeded their TTL or when maps exceed size limits
+   */
+  public cleanup(): void {
+    const now = Date.now();
+
+    // Clean up stale plans based on TTL
+    for (const [planId, plan] of this.activePlans.entries()) {
+      const age = now - plan._createdAt;
+      const idleTime = now - plan._lastAccessedAt;
+
+      // Remove completed plans older than TTL, or incomplete plans that have been idle
+      if (
+        (plan.isComplete && age > PLAN_TTL_MS) ||
+        (!plan.isComplete && idleTime > PLAN_TTL_MS)
+      ) {
+        this.activePlans.delete(planId);
+        logger.debug(`[Agent Collaboration] Cleaned up stale plan: ${planId}`);
+      }
+    }
+
+    // Clean up stale agent statuses based on TTL
+    for (const [agentName, status] of this.agentStatuses.entries()) {
+      const age = now - status._updatedAt;
+
+      // Remove statuses that haven't been updated within TTL
+      // Keep 'working' statuses longer as they may be active
+      const effectiveTTL =
+        status.status === 'working'
+          ? AGENT_STATUS_TTL_MS * 2
+          : AGENT_STATUS_TTL_MS;
+
+      if (age > effectiveTTL) {
+        this.agentStatuses.delete(agentName);
+        logger.debug(
+          `[Agent Collaboration] Cleaned up stale agent status: ${agentName}`
+        );
+      }
+    }
+
+    // Enforce size limits by removing oldest entries if maps exceed max size
+    if (this.activePlans.size > MAX_ACTIVE_PLANS) {
+      const sortedPlans = [...this.activePlans.entries()].sort(
+        ([, a], [, b]) => a._lastAccessedAt - b._lastAccessedAt
+      );
+
+      const toRemove = sortedPlans.slice(
+        0,
+        this.activePlans.size - MAX_ACTIVE_PLANS
+      );
+      for (const [planId] of toRemove) {
+        this.activePlans.delete(planId);
+        logger.debug(
+          `[Agent Collaboration] Evicted plan due to size limit: ${planId}`
+        );
+      }
+    }
+
+    if (this.agentStatuses.size > MAX_AGENT_STATUSES) {
+      const sortedStatuses = [...this.agentStatuses.entries()].sort(
+        ([, a], [, b]) => a._updatedAt - b._updatedAt
+      );
+
+      const toRemove = sortedStatuses.slice(
+        0,
+        this.agentStatuses.size - MAX_AGENT_STATUSES
+      );
+      for (const [agentName] of toRemove) {
+        this.agentStatuses.delete(agentName);
+        logger.debug(
+          `[Agent Collaboration] Evicted agent status due to size limit: ${agentName}`
+        );
+      }
+    }
+  }
+
+  /**
+   * Get current statistics for monitoring
+   */
+  public getStats(): { activePlans: number; agentStatuses: number } {
+    return {
+      activePlans: this.activePlans.size,
+      agentStatuses: this.agentStatuses.size,
+    };
+  }
+
+  /**
+   * Clear all tracked state (useful for testing or reset scenarios)
+   */
+  public clearAll(): void {
+    this.activePlans.clear();
+    this.agentStatuses.clear();
+    logger.debug('[Agent Collaboration] Cleared all tracked state');
   }
 
   /**

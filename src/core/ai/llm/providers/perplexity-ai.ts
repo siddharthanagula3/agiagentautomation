@@ -251,11 +251,22 @@ export class PerplexityProvider {
 
   /**
    * Stream a message from Perplexity
+   *
+   * SECURITY NOTE: Direct streaming is disabled. All LLM API calls must go through
+   * authenticated Netlify proxy functions to keep API keys secure on the server side.
+   *
+   * TODO: To enable streaming in the future:
+   * 1. Implement Server-Sent Events (SSE) in /.netlify/functions/llm-proxies/perplexity-proxy
+   * 2. Update this method to consume the SSE stream from the proxy
+   * 3. Remove the DIRECT_API_DISABLED error below
+   *
+   * Reference implementation for Perplexity streaming is preserved in comments
+   * at the bottom of this method for when proxy-based streaming is implemented.
    */
   async *streamMessage(
-    messages: PerplexityMessage[],
-    sessionId?: string,
-    userId?: string
+    _messages: PerplexityMessage[],
+    _sessionId?: string,
+    _userId?: string
   ): AsyncGenerator<{
     content: string;
     done: boolean;
@@ -265,112 +276,58 @@ export class PerplexityProvider {
       total_tokens?: number;
     };
   }> {
-    try {
-      // SECURITY: Direct API calls are disabled - use Netlify proxy instead
-      throw new PerplexityError(
-        'Direct Perplexity streaming is disabled for security. Use /.netlify/functions/llm-proxies/perplexity-proxy instead.',
-        'DIRECT_API_DISABLED'
-      );
+    // SECURITY: Direct API calls are disabled - use Netlify proxy instead
+    throw new PerplexityError(
+      'Direct Perplexity streaming is disabled for security. Use /.netlify/functions/llm-proxies/perplexity-proxy instead.',
+      'DIRECT_API_DISABLED'
+    );
 
-      // Convert messages to Perplexity format
-      const prompt = this.convertMessagesToPerplexity(messages);
+    /*
+     * TODO: Future proxy-based streaming implementation
+     * When SSE streaming is added to the Netlify proxy, replace the throw above with:
+     *
+     * const proxyUrl = '/.netlify/functions/llm-proxies/perplexity-proxy';
+     * const authToken = await getAuthToken();
+     * if (!authToken) {
+     *   throw new PerplexityError('User not authenticated.', 'NOT_AUTHENTICATED');
+     * }
+     *
+     * const response = await fetch(proxyUrl, {
+     *   method: 'POST',
+     *   headers: {
+     *     'Content-Type': 'application/json',
+     *     Authorization: `Bearer ${authToken}`,
+     *     Accept: 'text/event-stream',
+     *   },
+     *   body: JSON.stringify({
+     *     messages: messages.map(m => ({ role: m.role, content: m.content })),
+     *     model: this.config.model,
+     *     max_tokens: this.config.maxTokens,
+     *     temperature: this.config.temperature,
+     *     search_domain_filter: this.config.searchDomain,
+     *     search_recency_filter: this.config.searchRecencyFilter,
+     *     stream: true,
+     *   }),
+     * });
+     *
+     * // Process SSE stream from proxy...
+     *
+     * Reference: Perplexity OpenAI-compatible streaming pattern:
+     * const stream = await perplexityClient.chat.completions.create({
+     *   model: this.config.model,
+     *   messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: prompt }],
+     *   max_tokens: this.config.maxTokens,
+     *   stream: true,
+     * });
+     * for await (const chunk of stream) {
+     *   const content = chunk.choices[0]?.delta?.content || '';
+     *   if (content) yield { content, done: false };
+     * }
+     */
 
-      // Prepare the request
-      const request = {
-        model: this.config.model,
-        messages: [
-          {
-            role: 'system' as const,
-            content:
-              this.config.systemPrompt ||
-              'You are a helpful AI assistant with access to real-time web search.',
-          },
-          {
-            role: 'user' as const,
-            content: prompt,
-          },
-        ],
-        max_tokens: this.config.maxTokens,
-        temperature: this.config.temperature,
-        search_domain_filter: this.config.searchDomain,
-        search_recency_filter: this.config.searchRecencyFilter,
-        stream: true,
-      };
-
-      // Make the streaming API call
-      if (!perplexity) {
-        throw new PerplexityError(
-          'Perplexity client not initialized. Please check your API key configuration.',
-          'CLIENT_NOT_INITIALIZED'
-        );
-      }
-      const stream = await perplexity.chat.completions.create(request);
-
-      let fullContent = '';
-      let usage: unknown = null;
-
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content || '';
-        if (content) {
-          fullContent += content;
-          yield { content, done: false };
-        }
-
-        if (chunk.choices[0]?.finish_reason) {
-          usage = chunk.usage;
-          yield { content: '', done: true, usage };
-        }
-      }
-
-      // Save to database
-      if (sessionId && userId) {
-        await this.saveMessageToDatabase({
-          sessionId,
-          userId,
-          role: 'assistant',
-          content: fullContent,
-          metadata: {
-            provider: 'perplexity',
-            model: this.config.model,
-            usage,
-            searchDomain: this.config.searchDomain,
-            searchRecencyFilter: this.config.searchRecencyFilter,
-            timestamp: new Date().toISOString(),
-          },
-        });
-      }
-    } catch (error) {
-      logger.error('[Perplexity Provider] Streaming error:', error);
-
-      if (error instanceof Error) {
-        if (
-          error.message.includes('API_KEY_INVALID') ||
-          error.message.includes('401')
-        ) {
-          throw new PerplexityError(
-            'Invalid Perplexity API key. Please check your VITE_PERPLEXITY_API_KEY.',
-            'INVALID_API_KEY'
-          );
-        }
-
-        if (
-          error.message.includes('QUOTA_EXCEEDED') ||
-          error.message.includes('429')
-        ) {
-          throw new PerplexityError(
-            'Perplexity API quota exceeded. Please try again later.',
-            'QUOTA_EXCEEDED',
-            true
-          );
-        }
-      }
-
-      throw new PerplexityError(
-        `Perplexity streaming failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'STREAMING_FAILED',
-        true
-      );
-    }
+    // TypeScript requires a yield for AsyncGenerator, but this is unreachable
+    // This satisfies the type checker while keeping the method signature correct
+    yield { content: '', done: true };
   }
 
   /**

@@ -5,7 +5,17 @@
  * Note: For basic AI employee types used in UI components (selectors, cards),
  * see AIEmployeeBasic and MarketplaceEmployee in @shared/types/common.ts
  * This file contains extended types for the full employee management system.
+ *
+ * Canonical types like ChatMessage, ToolCall, Attachment are in ./common.ts
+ * Import from @shared/types for the canonical versions.
  */
+
+import type {
+  ToolCall as CanonicalToolCall,
+  Attachment as CanonicalAttachment,
+  ApiResponse,
+  PaginatedResponse as CanonicalPaginatedResponse,
+} from './common';
 
 export type EmployeeCategory =
   | 'executive_leadership'
@@ -414,26 +424,38 @@ export interface ToolExecution {
   userId?: string;
 }
 
-// Chat Message
-export interface ChatMessage {
+// Chat Message - Employee system specific
+// Note: For canonical ChatMessage, use import from '@shared/types'
+export interface EmployeeChatMessage {
   id: string;
   employeeId: string;
   userId: string;
   messageType: MessageType;
   content: string;
-  metadata: MessageMetadata;
+  metadata: EmployeeMessageMetadata;
   createdAt: string;
 }
 
-export interface MessageMetadata {
-  toolCalls?: ToolCall[];
+/**
+ * @deprecated Use EmployeeChatMessage instead
+ */
+export type ChatMessage = EmployeeChatMessage;
+
+export interface EmployeeMessageMetadata {
+  toolCalls?: EmployeeToolCall[];
   reasoning?: string;
   status?: 'thinking' | 'working' | 'completed' | 'error';
-  attachments?: Attachment[];
+  attachments?: EmployeeAttachment[];
   reactions?: Reaction[];
 }
 
-export interface ToolCall {
+/**
+ * @deprecated Use EmployeeMessageMetadata instead
+ */
+export type MessageMetadata = EmployeeMessageMetadata;
+
+// Employee-specific tool call (simpler than canonical ToolCall)
+export interface EmployeeToolCall {
   tool: string;
   parameters: Record<string, unknown>;
   result?: unknown;
@@ -442,13 +464,26 @@ export interface ToolCall {
   executionTime?: number;
 }
 
-export interface Attachment {
+/**
+ * @deprecated Use EmployeeToolCall instead
+ * Note: Canonical ToolCall is in @shared/types/common.ts
+ */
+export type ToolCall = EmployeeToolCall;
+
+// Employee-specific attachment (simpler than canonical Attachment)
+export interface EmployeeAttachment {
   id: string;
   name: string;
   type: string;
   size: number;
   url: string;
 }
+
+/**
+ * @deprecated Use EmployeeAttachment instead
+ * Note: Canonical Attachment is in @shared/types/common.ts
+ */
+export type Attachment = EmployeeAttachment;
 
 export interface Reaction {
   emoji: string;
@@ -649,8 +684,9 @@ export interface EmployeeError {
   userId?: string;
 }
 
-// API Response Types
-export interface APIResponse<T> {
+// API Response Types - Employee system specific
+// Note: Canonical ApiResponse and PaginatedResponse are in @shared/types/common.ts
+export interface EmployeeAPIResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
@@ -658,13 +694,23 @@ export interface APIResponse<T> {
   timestamp: string;
 }
 
-export interface PaginatedResponse<T> {
+/**
+ * @deprecated Use EmployeeAPIResponse or import ApiResponse from @shared/types
+ */
+export type APIResponse<T> = EmployeeAPIResponse<T>;
+
+export interface EmployeePaginatedResponse<T> {
   data: T[];
   total: number;
   page: number;
   limit: number;
   hasMore: boolean;
 }
+
+/**
+ * @deprecated Use EmployeePaginatedResponse or import PaginatedResponse from @shared/types
+ */
+export type PaginatedResponse<T> = EmployeePaginatedResponse<T>;
 
 // Real-time Event Types
 export interface EmployeeEvent {

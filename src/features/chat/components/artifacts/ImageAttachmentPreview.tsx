@@ -74,8 +74,17 @@ export function ImageAttachmentPreview({
             >
               {/* Image */}
               <div
-                className="relative cursor-pointer overflow-hidden"
+                className="relative cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 onClick={() => setSelectedImage(attachment)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedImage(attachment);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${attachment.name} in lightbox`}
               >
                 <img
                   src={attachment.thumbnailUrl || attachment.url}

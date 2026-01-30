@@ -5,8 +5,12 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
+import type { MessageRole } from '@shared/types';
 
-export interface ChatSession {
+/**
+ * Chat session for persistence layer
+ */
+export interface PersistenceChatSession {
   id: string;
   userId: string;
   employeeId: string;
@@ -19,19 +23,33 @@ export interface ChatSession {
   contextData?: unknown;
 }
 
-export interface ChatMessage {
+/**
+ * Chat message for persistence layer
+ * Uses the canonical MessageRole from @shared/types
+ */
+export interface PersistenceChatMessage {
   id: string;
   sessionId: string;
-  role: 'user' | 'assistant' | 'system' | 'tool';
+  role: MessageRole;
   content: string;
   timestamp: Date;
   metadata?: unknown;
 }
 
+/**
+ * @deprecated Use PersistenceChatSession instead
+ */
+export type ChatSession = PersistenceChatSession;
+
+/**
+ * @deprecated Use PersistenceChatMessage instead
+ */
+export type ChatMessage = PersistenceChatMessage;
+
 export interface ChatState {
-  sessions: ChatSession[];
+  sessions: PersistenceChatSession[];
   activeSessionId?: string;
-  messages: Map<string, ChatMessage[]>;
+  messages: Map<string, PersistenceChatMessage[]>;
   contextWindows: Map<string, unknown>;
   lastSync: Date;
 }
@@ -109,8 +127,8 @@ export class ChatPersistenceService {
     employeeId: string,
     role: string,
     provider: string
-  ): Promise<ChatSession> {
-    const session: ChatSession = {
+  ): Promise<PersistenceChatSession> {
+    const session: PersistenceChatSession = {
       id: `session-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       userId,
       employeeId,
@@ -157,8 +175,8 @@ export class ChatPersistenceService {
     role: 'user' | 'assistant' | 'system' | 'tool',
     content: string,
     metadata?: unknown
-  ): Promise<ChatMessage> {
-    const message: ChatMessage = {
+  ): Promise<PersistenceChatMessage> {
+    const message: PersistenceChatMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       sessionId,
       role,
@@ -201,21 +219,21 @@ export class ChatPersistenceService {
   /**
    * Get messages for session
    */
-  getMessages(sessionId: string): ChatMessage[] {
+  getMessages(sessionId: string): PersistenceChatMessage[] {
     return this.state.messages.get(sessionId) || [];
   }
 
   /**
    * Get all sessions for user
    */
-  getSessions(userId: string): ChatSession[] {
+  getSessions(userId: string): PersistenceChatSession[] {
     return this.state.sessions.filter((s) => s.userId === userId);
   }
 
   /**
    * Get active session
    */
-  getActiveSession(): ChatSession | undefined {
+  getActiveSession(): PersistenceChatSession | undefined {
     return this.state.sessions.find((s) => s.id === this.state.activeSessionId);
   }
 

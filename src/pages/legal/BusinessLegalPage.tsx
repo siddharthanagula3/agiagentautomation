@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
@@ -751,3 +752,9 @@ export const BusinessLegalPage: React.FC<BusinessLegalPageProps> = ({
     </div>
   );
 };
+
+export const BusinessLegalPageWithErrorBoundary: React.FC<BusinessLegalPageProps> = (props) => (
+  <ErrorBoundary componentName="BusinessLegalPage" showReportDialog>
+    <BusinessLegalPage {...props} />
+  </ErrorBoundary>
+);

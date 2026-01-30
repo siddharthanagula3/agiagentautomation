@@ -44,12 +44,16 @@ export const AnimatedAvatar: React.FC<AnimatedAvatarProps> = ({
   // Reset error state when src changes
   useEffect(() => {
     if (src) {
-      setImageError(false);
-      setIsLoading(true);
+      queueMicrotask(() => {
+        setImageError(false);
+        setIsLoading(true);
+      });
     } else {
       // If no src, immediately show fallback (not loading)
-      setIsLoading(false);
-      setImageError(false);
+      queueMicrotask(() => {
+        setIsLoading(false);
+        setImageError(false);
+      });
     }
   }, [src]);
 

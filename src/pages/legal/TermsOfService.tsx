@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import { Badge } from '@shared/ui/badge';
 import { SEOHead } from '@shared/components/seo/SEOHead';
@@ -201,4 +202,10 @@ Some jurisdictions do not allow liability limitations, so these may not apply to
   );
 };
 
-export default TermsOfServicePage;
+const TermsOfServicePageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="TermsOfServicePage" showReportDialog>
+    <TermsOfServicePage />
+  </ErrorBoundary>
+);
+
+export default TermsOfServicePageWithErrorBoundary;

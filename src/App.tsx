@@ -1,6 +1,6 @@
 // src/App.tsx - CLEANED VERSION
 import { Suspense, useEffect, useMemo } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { TooltipProvider } from '@shared/ui/tooltip';
 import { Toaster } from 'sonner';
@@ -222,7 +222,7 @@ function App() {
                   <Route path="resources" element={<ResourcesPage />} />
 
                   {/* Demo - Redirect to Contact Sales */}
-                  <Route path="demo" element={<ContactSalesPage />} />
+                  <Route path="demo" element={<Navigate to="/contact-sales" replace />} />
                 </Route>
 
                 {/* ===== AUTH ROUTES ===== */}
@@ -314,9 +314,9 @@ function App() {
                     }
                   />
 
-                  {/* Employee Marketplace (Protected) */}
+                  {/* Employee Marketplace (Protected) - Renamed to avoid conflict with public /marketplace */}
                   <Route
-                    path="marketplace"
+                    path="hire"
                     element={
                       <ErrorBoundary>
                         <EmployeeMarketplacePage />

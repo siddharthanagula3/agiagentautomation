@@ -12,16 +12,64 @@ vi.mock('@shared/lib/supabase-client', () => ({
       resetPasswordForEmail: vi.fn(),
       updateUser: vi.fn(),
     },
+    rpc: vi.fn(),
+  },
+}));
+
+// Mock logger
+vi.mock('@shared/lib/logger', () => ({
+  logger: {
+    auth: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
   },
 }));
 
 describe('AuthService', () => {
-  let mockSupabase: unknown;
+  let mockSupabase: {
+    auth: {
+      getUser: ReturnType<typeof vi.fn>;
+      signInWithPassword: ReturnType<typeof vi.fn>;
+      signUp: ReturnType<typeof vi.fn>;
+      signOut: ReturnType<typeof vi.fn>;
+      resetPasswordForEmail: ReturnType<typeof vi.fn>;
+      updateUser: ReturnType<typeof vi.fn>;
+    };
+    rpc: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     vi.clearAllMocks();
     const { supabase } = await import('@shared/lib/supabase-client');
-    mockSupabase = supabase;
+    mockSupabase = supabase as typeof mockSupabase;
+
+    // Default mock for lockout checks (account not locked)
+    mockSupabase.rpc.mockImplementation((fnName: string) => {
+      if (fnName === 'check_account_lockout') {
+        return Promise.resolve({
+          data: [{ is_locked: false, locked_until: null, failed_attempts: 0 }],
+          error: null,
+        });
+      }
+      if (fnName === 'record_failed_login') {
+        return Promise.resolve({
+          data: [
+            {
+              is_locked: false,
+              attempts_remaining: 4,
+              locked_until: null,
+              should_lock: false,
+            },
+          ],
+          error: null,
+        });
+      }
+      if (fnName === 'record_successful_login') {
+        return Promise.resolve({ data: null, error: null });
+      }
+      return Promise.resolve({ data: null, error: null });
+    });
   });
 
   describe('getCurrentUser', () => {
@@ -383,6 +431,199 @@ describe('AuthService', () => {
       );
 
       expect(result.error).toBe('Current password is incorrect');
+    });
+  });
+
+  describe('account lockout integration', () => {
+    it('should block login when account is locked', async () => {
+      const lockedUntil = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+
+      // Mock lockout check returning locked status
+      mockSupabase.rpc.mockImplementation((fnName: string) => {
+        if (fnName === 'check_account_lockout') {
+          return Promise.resolve({
+            data: [
+              {
+                is_locked: true,
+                locked_until: lockedUntil,
+                failed_attempts: 5,
+              },
+            ],
+            error: null,
+          });
+        }
+        return Promise.resolve({ data: null, error: null });
+      });
+
+      const result = await authService.login({
+        email: 'locked@example.com',
+        password: 'password123',
+      });
+
+      expect(result.user).toBeNull();
+      expect(result.error).toContain('locked');
+      expect(result.lockout?.isLocked).toBe(true);
+      // Should NOT call signInWithPassword when locked
+      expect(mockSupabase.auth.signInWithPassword).not.toHaveBeenCalled();
+    });
+
+    it('should record failed login and return remaining attempts', async () => {
+      mockSupabase.rpc.mockImplementation((fnName: string) => {
+        if (fnName === 'check_account_lockout') {
+          return Promise.resolve({
+            data: [{ is_locked: false, locked_until: null, failed_attempts: 0 }],
+            error: null,
+          });
+        }
+        if (fnName === 'record_failed_login') {
+          return Promise.resolve({
+            data: [
+              {
+                is_locked: false,
+                attempts_remaining: 3,
+                locked_until: null,
+                should_lock: false,
+              },
+            ],
+            error: null,
+          });
+        }
+        return Promise.resolve({ data: null, error: null });
+      });
+
+      mockSupabase.auth.signInWithPassword.mockResolvedValue({
+        data: { user: null },
+        error: { message: 'Invalid credentials' },
+      });
+
+      const result = await authService.login({
+        email: 'test@example.com',
+        password: 'wrongpassword',
+      });
+
+      expect(result.user).toBeNull();
+      expect(result.attemptsRemaining).toBe(3);
+    });
+
+    it('should lock account after too many failed attempts', async () => {
+      const lockedUntil = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+
+      mockSupabase.rpc.mockImplementation((fnName: string) => {
+        if (fnName === 'check_account_lockout') {
+          return Promise.resolve({
+            data: [{ is_locked: false, locked_until: null, failed_attempts: 4 }],
+            error: null,
+          });
+        }
+        if (fnName === 'record_failed_login') {
+          return Promise.resolve({
+            data: [
+              {
+                is_locked: true,
+                attempts_remaining: 0,
+                locked_until: lockedUntil,
+                should_lock: true,
+              },
+            ],
+            error: null,
+          });
+        }
+        return Promise.resolve({ data: null, error: null });
+      });
+
+      mockSupabase.auth.signInWithPassword.mockResolvedValue({
+        data: { user: null },
+        error: { message: 'Invalid credentials' },
+      });
+
+      const result = await authService.login({
+        email: 'test@example.com',
+        password: 'wrongpassword',
+      });
+
+      expect(result.user).toBeNull();
+      expect(result.lockout?.isLocked).toBe(true);
+      expect(result.error).toContain('locked');
+    });
+
+    it('should reset failed attempts on successful login', async () => {
+      const mockUser = {
+        id: '1',
+        email: 'test@example.com',
+        user_metadata: {
+          full_name: 'Test User',
+          role: 'user',
+          plan: 'free',
+        },
+      };
+
+      mockSupabase.auth.signInWithPassword.mockResolvedValue({
+        data: { user: mockUser },
+        error: null,
+      });
+
+      const result = await authService.login({
+        email: 'test@example.com',
+        password: 'correctpassword',
+      });
+
+      expect(result.user).not.toBeNull();
+      expect(result.error).toBeNull();
+
+      // Verify record_successful_login was called
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('record_successful_login', {
+        p_email: 'test@example.com',
+      });
+    });
+  });
+
+  describe('checkAccountLockout', () => {
+    it('should return lockout status', async () => {
+      mockSupabase.rpc.mockResolvedValue({
+        data: [{ is_locked: false, locked_until: null, failed_attempts: 2 }],
+        error: null,
+      });
+
+      const result = await authService.checkAccountLockout('test@example.com');
+
+      expect(result.isLocked).toBe(false);
+      expect(result.failedAttempts).toBe(2);
+    });
+  });
+
+  describe('adminUnlockAccount', () => {
+    it('should unlock an account', async () => {
+      mockSupabase.rpc.mockResolvedValue({ data: true, error: null });
+
+      const result = await authService.adminUnlockAccount('locked@example.com', {
+        adminUserId: 'admin-123',
+        reason: 'User request',
+      });
+
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('getLockoutStats', () => {
+    it('should return lockout statistics', async () => {
+      mockSupabase.rpc.mockResolvedValue({
+        data: [
+          {
+            total_locked_accounts: 5,
+            total_tracked_accounts: 100,
+            recent_lockouts: 3,
+            avg_failed_attempts: 2.5,
+          },
+        ],
+        error: null,
+      });
+
+      const stats = await authService.getLockoutStats();
+
+      expect(stats.totalLockedAccounts).toBe(5);
+      expect(stats.totalTrackedAccounts).toBe(100);
+      expect(stats.recentLockouts).toBe(3);
+      expect(stats.avgFailedAttempts).toBe(2.5);
     });
   });
 });

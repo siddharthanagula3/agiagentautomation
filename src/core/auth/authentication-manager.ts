@@ -1,9 +1,20 @@
 /**
  * Authentication Service
  * Wraps Supabase auth methods for the auth store
+ *
+ * Security features:
+ * - Account lockout after failed login attempts (brute force protection)
+ * - Security audit logging
+ * - Session timeout handling
  */
 
 import { supabase } from '@shared/lib/supabase-client';
+import {
+  accountLockoutService,
+  type LockoutCheckResult,
+  type FailedLoginResult,
+} from './account-lockout-service';
+import { logger } from '@shared/lib/logger';
 
 export interface AuthUser {
   id: string;
@@ -18,6 +29,10 @@ export interface AuthUser {
 export interface LoginData {
   email: string;
   password: string;
+  /** Optional: IP address for security logging */
+  ipAddress?: string;
+  /** Optional: User agent for security logging */
+  userAgent?: string;
 }
 
 export interface RegisterData {
@@ -32,6 +47,10 @@ export interface RegisterData {
 export interface AuthResponse {
   user: AuthUser | null;
   error: string | null;
+  /** Lockout information if account is locked */
+  lockout?: LockoutCheckResult;
+  /** Remaining attempts before lockout (on failed login) */
+  attemptsRemaining?: number;
 }
 
 class AuthService {
@@ -88,18 +107,73 @@ class AuthService {
 
   async login(loginData: LoginData): Promise<AuthResponse> {
     try {
+      // SECURITY: Check if account is locked before attempting login
+      const lockoutCheck = await accountLockoutService.checkLockout(loginData.email);
+      if (lockoutCheck.isLocked) {
+        logger.auth(`Login blocked - account locked: ${loginData.email}`);
+        return {
+          user: null,
+          error: lockoutCheck.message,
+          lockout: lockoutCheck,
+        };
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password,
       });
 
       if (error) {
-        return { user: null, error: error.message };
+        // SECURITY: Record failed login attempt
+        const failedResult = await accountLockoutService.recordFailedLogin(
+          loginData.email,
+          {
+            ipAddress: loginData.ipAddress,
+            userAgent: loginData.userAgent,
+          }
+        );
+
+        logger.auth(`Login failed for ${loginData.email}: ${error.message}`);
+
+        // Return enhanced error with lockout info
+        return {
+          user: null,
+          error: failedResult.isLocked ? failedResult.message : error.message,
+          attemptsRemaining: failedResult.attemptsRemaining,
+          lockout: failedResult.isLocked
+            ? {
+                isLocked: true,
+                lockedUntil: failedResult.lockedUntil,
+                failedAttempts: 0,
+                message: failedResult.message,
+              }
+            : undefined,
+        };
       }
 
       if (!data.user) {
-        return { user: null, error: 'Login failed' };
+        // SECURITY: Record failed login attempt
+        const failedResult = await accountLockoutService.recordFailedLogin(
+          loginData.email,
+          {
+            ipAddress: loginData.ipAddress,
+            userAgent: loginData.userAgent,
+          }
+        );
+
+        return {
+          user: null,
+          error: failedResult.isLocked ? failedResult.message : 'Login failed',
+          attemptsRemaining: failedResult.attemptsRemaining,
+        };
       }
+
+      // SECURITY: Record successful login (resets failed attempts)
+      await accountLockoutService.recordSuccessfulLogin(loginData.email, {
+        userId: data.user.id,
+        ipAddress: loginData.ipAddress,
+        userAgent: loginData.userAgent,
+      });
 
       const authUser: AuthUser = {
         id: data.user.id,
@@ -112,6 +186,7 @@ class AuthService {
         user_metadata: data.user.user_metadata,
       };
 
+      logger.auth(`Login successful: ${loginData.email}`);
       return { user: authUser, error: null };
     } catch (error) {
       // Updated: Jan 15th 2026 - Fixed missing error type check
@@ -258,12 +333,22 @@ class AuthService {
         return { error: 'No user found' };
       }
 
+      // SECURITY: Check lockout status before password verification
+      // This prevents users from using password change as a lockout bypass
+      const lockoutCheck = await accountLockoutService.checkLockout(user.email);
+      if (lockoutCheck.isLocked) {
+        return { error: lockoutCheck.message };
+      }
+
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: currentPassword,
       });
 
       if (signInError) {
+        // SECURITY: Record failed attempt for password verification too
+        // This prevents using password change as a way to brute force
+        await accountLockoutService.recordFailedLogin(user.email);
         return { error: 'Current password is incorrect' };
       }
 
@@ -287,7 +372,40 @@ class AuthService {
       return { error: message };
     }
   }
+
+  /**
+   * Check if an account is locked
+   */
+  async checkAccountLockout(email: string): Promise<LockoutCheckResult> {
+    return accountLockoutService.checkLockout(email);
+  }
+
+  /**
+   * Admin unlock an account
+   */
+  async adminUnlockAccount(
+    email: string,
+    adminDetails?: { adminUserId?: string; reason?: string }
+  ): Promise<boolean> {
+    return accountLockoutService.adminUnlockAccount(email, adminDetails);
+  }
+
+  /**
+   * Get lockout statistics for admin dashboard
+   */
+  async getLockoutStats(): Promise<{
+    totalLockedAccounts: number;
+    totalTrackedAccounts: number;
+    recentLockouts: number;
+    avgFailedAttempts: number;
+  }> {
+    return accountLockoutService.getLockoutStats();
+  }
 }
 
 export const authService = new AuthService();
 export default authService;
+
+// Re-export lockout types for convenience
+export type { LockoutCheckResult, FailedLoginResult } from './account-lockout-service';
+export { accountLockoutService, LOCKOUT_PRESETS } from './account-lockout-service';

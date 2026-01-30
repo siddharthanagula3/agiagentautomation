@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@shared/types/supabase';
 import { supabase } from '@shared/lib/supabase-client';
+import type { ChatMessageRecord } from '@shared/types';
 
 export interface ChatSessionRecord {
   id: string; // uuid
@@ -11,13 +12,11 @@ export interface ChatSessionRecord {
   created_at: string;
 }
 
-export interface ChatMessageRecord {
-  id: string; // uuid
-  session_id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  created_at: string;
-}
+/**
+ * Re-export ChatMessageRecord for backward compatibility
+ * @deprecated Import from @shared/types instead
+ */
+export type { ChatMessageRecord };
 
 function getUserIdOrThrow(userId?: string | null): string {
   if (!userId) throw new Error('User not authenticated');

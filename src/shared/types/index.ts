@@ -26,7 +26,11 @@ export {
   // Chat message types
   type MessageMetadata,
   type BaseChatMessage,
+  type SimpleChatMessage,
   type ChatMessage,
+  type MissionChatMessage,
+  type MCPToolCallInfo,
+  type ChatMessageRecord,
   type ToolCall,
   type Attachment,
   type MessageReaction,
@@ -54,6 +58,11 @@ export {
 
   // Base entity
   type BaseEntity,
+
+  // Orchestration types
+  type CollaborationAgentCapability,
+  type ProtocolAgentCapability,
+  type SelectionAgentCapability,
 } from './common';
 
 // ============================================================================

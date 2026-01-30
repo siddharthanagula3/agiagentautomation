@@ -1,11 +1,15 @@
 /**
  * Settings Page - Real Functional Implementation with Supabase
  * NO MOCK DATA - All data comes from and saves to Supabase
+ * Uses React Query for server state management
+ * Form validation powered by react-hook-form + Zod with XSS sanitization
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import {
@@ -40,6 +44,15 @@ import {
   AlertDialogTitle,
 } from '@shared/ui/alert-dialog';
 import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@shared/ui/form';
+import {
   Settings,
   User,
   Bell,
@@ -55,7 +68,6 @@ import {
   Eye,
   EyeOff,
   Key,
-  LogOut,
   Bot,
   Play,
 } from 'lucide-react';
@@ -64,44 +76,203 @@ import { cn } from '@shared/lib/utils';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { useAgentMetricsStore } from '@shared/stores/agent-metrics-store';
 import { backgroundChatService } from '@features/mission-control/services/background-conversation-handler';
-import settingsService, {
+import {
+  useAllSettingsData,
+  useUpdateProfile,
+  useUpdateSettings,
+  useUploadAvatar,
+  useChangePassword,
+  useCreateAPIKey,
+  useDeleteAPIKey,
+  useToggle2FA,
+  type CreateAPIKeyResult,
+} from '@features/settings/hooks/use-settings-queries';
+import type {
   UserProfile,
   UserSettings,
   APIKey,
 } from '@features/settings/services/user-preferences';
 import { InteractiveHoverCard } from '@shared/ui/interactive-hover-card';
 import { Particles } from '@shared/ui/particles';
+import {
+  profileSettingsSchema,
+  changePasswordSchema,
+  notificationPreferencesSchema,
+  securitySettingsSchema,
+  systemSettingsSchema,
+  createApiKeySchema,
+  type ProfileSettingsFormData,
+  type ChangePasswordFormData,
+  type NotificationPreferencesFormData,
+  type SecuritySettingsFormData,
+  type SystemSettingsFormData,
+  type CreateApiKeyFormData,
+} from '@features/settings/schemas/settings-validation';
 
 const SettingsPageContent: React.FC = () => {
   const { section } = useParams();
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const metricsStore = useAgentMetricsStore();
 
-  // Loading states
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  // React Query hooks for server state
+  const {
+    profile: serverProfile,
+    settings: serverSettings,
+    apiKeys,
+    isLoading,
+    isError,
+    refetch,
+  } = useAllSettingsData();
 
-  // Data states
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [apiKeys, setAPIKeys] = useState<APIKey[]>([]);
+  // Mutations
+  const updateProfileMutation = useUpdateProfile();
+  const updateSettingsMutation = useUpdateSettings();
+  const uploadAvatarMutation = useUploadAvatar();
+  const changePasswordMutation = useChangePassword();
+  const createAPIKeyMutation = useCreateAPIKey();
+  const deleteAPIKeyMutation = useDeleteAPIKey();
+  const toggle2FAMutation = useToggle2FA();
+
+  // ============================================================================
+  // FORM INSTANCES WITH ZOD VALIDATION
+  // ============================================================================
+
+  // Profile Form
+  const profileForm = useForm<ProfileSettingsFormData>({
+    resolver: zodResolver(profileSettingsSchema),
+    defaultValues: {
+      name: '',
+      phone: '',
+      timezone: 'America/New_York',
+      language: 'en',
+      bio: '',
+      avatar_url: undefined,
+    },
+    mode: 'onBlur', // Validate on blur for better UX
+  });
+
+  // Password Change Form
+  const passwordForm = useForm<ChangePasswordFormData>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      newPassword: '',
+      confirmPassword: '',
+    },
+    mode: 'onBlur',
+  });
+
+  // Notification Preferences Form
+  const notificationForm = useForm<NotificationPreferencesFormData>({
+    resolver: zodResolver(notificationPreferencesSchema),
+    defaultValues: {
+      email_notifications: true,
+      push_notifications: true,
+      workflow_alerts: true,
+      employee_updates: true,
+      system_maintenance: true,
+      marketing_emails: false,
+      weekly_reports: true,
+      instant_alerts: true,
+    },
+  });
+
+  // Security Settings Form
+  const securityForm = useForm<SecuritySettingsFormData>({
+    resolver: zodResolver(securitySettingsSchema),
+    defaultValues: {
+      two_factor_enabled: false,
+      session_timeout: 60,
+    },
+  });
+
+  // System Settings Form
+  const systemForm = useForm<SystemSettingsFormData>({
+    resolver: zodResolver(systemSettingsSchema),
+    defaultValues: {
+      theme: 'dark',
+      auto_save: true,
+      debug_mode: false,
+      analytics_enabled: true,
+      cache_size: '1GB',
+      backup_frequency: 'daily',
+      retention_period: 30,
+      max_concurrent_jobs: 10,
+    },
+  });
+
+  // API Key Form
+  const apiKeyForm = useForm<CreateApiKeyFormData>({
+    resolver: zodResolver(createApiKeySchema),
+    defaultValues: {
+      name: '',
+    },
+  });
+
+  // Sync server data to forms when loaded
+  useEffect(() => {
+    if (serverProfile) {
+      profileForm.reset({
+        name: serverProfile.name || '',
+        phone: serverProfile.phone || '',
+        timezone: (serverProfile.timezone as ProfileSettingsFormData['timezone']) || 'America/New_York',
+        language: (serverProfile.language as ProfileSettingsFormData['language']) || 'en',
+        bio: serverProfile.bio || '',
+        avatar_url: serverProfile.avatar_url || undefined,
+      });
+    }
+  }, [serverProfile, profileForm]);
+
+  useEffect(() => {
+    if (serverSettings) {
+      notificationForm.reset({
+        email_notifications: serverSettings.email_notifications ?? true,
+        push_notifications: serverSettings.push_notifications ?? true,
+        workflow_alerts: serverSettings.workflow_alerts ?? true,
+        employee_updates: serverSettings.employee_updates ?? true,
+        system_maintenance: serverSettings.system_maintenance ?? true,
+        marketing_emails: serverSettings.marketing_emails ?? false,
+        weekly_reports: serverSettings.weekly_reports ?? true,
+        instant_alerts: serverSettings.instant_alerts ?? true,
+      });
+
+      securityForm.reset({
+        two_factor_enabled: serverSettings.two_factor_enabled ?? false,
+        session_timeout: serverSettings.session_timeout ?? 60,
+      });
+
+      systemForm.reset({
+        theme: (serverSettings.theme as SystemSettingsFormData['theme']) ?? 'dark',
+        auto_save: serverSettings.auto_save ?? true,
+        debug_mode: serverSettings.debug_mode ?? false,
+        analytics_enabled: serverSettings.analytics_enabled ?? true,
+        cache_size: (serverSettings.cache_size as SystemSettingsFormData['cache_size']) ?? '1GB',
+        backup_frequency: (serverSettings.backup_frequency as SystemSettingsFormData['backup_frequency']) ?? 'daily',
+        retention_period: serverSettings.retention_period ?? 30,
+        max_concurrent_jobs: serverSettings.max_concurrent_jobs ?? 10,
+      });
+    }
+  }, [serverSettings, notificationForm, securityForm, systemForm]);
+
+  // Derived state
+  const profile = serverProfile;
+  const settings = serverSettings;
+  const isSaving =
+    updateProfileMutation.isPending ||
+    updateSettingsMutation.isPending ||
+    uploadAvatarMutation.isPending ||
+    changePasswordMutation.isPending ||
+    createAPIKeyMutation.isPending ||
+    deleteAPIKeyMutation.isPending ||
+    toggle2FAMutation.isPending;
 
   // UI states
   const [activeSection, setActiveSection] = useState(section || 'profile');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showAPIKeyDialog, setShowAPIKeyDialog] = useState(false);
-  const [newAPIKeyName, setNewAPIKeyName] = useState('');
   const [generatedAPIKey, setGeneratedAPIKey] = useState('');
   const [keyToDelete, setKeyToDelete] = useState<string | null>(null);
-
-  // Load all data on mount
-  useEffect(() => {
-    loadAllData();
-  }, []);
 
   // Update active section when URL changes
   useEffect(() => {
@@ -110,252 +281,118 @@ const SettingsPageContent: React.FC = () => {
     }
   }, [section, activeSection]);
 
-  const loadAllData = async () => {
-    try {
-      setIsLoading(true);
+  // ============================================================================
+  // FORM SUBMIT HANDLERS
+  // ============================================================================
 
-      // Load profile
-      const { data: profileData, error: profileError } =
-        await settingsService.getProfile();
-      if (profileError) {
-        console.error('Error loading profile:', profileError);
-        toast.error('Failed to load profile');
-      } else {
-        setProfile(profileData);
-      }
+  // Profile submit handler
+  const handleSaveProfile = useCallback(
+    (data: ProfileSettingsFormData) => {
+      updateProfileMutation.mutate({
+        name: data.name,
+        phone: data.phone,
+        timezone: data.timezone,
+        language: data.language,
+        bio: data.bio,
+        avatar_url: data.avatar_url,
+      });
+    },
+    [updateProfileMutation]
+  );
 
-      // Load settings
-      const { data: settingsData, error: settingsError } =
-        await settingsService.getSettings();
-      if (settingsError) {
-        console.error('Error loading settings:', settingsError);
-        toast.error('Failed to load settings');
-      } else {
-        setSettings(settingsData);
-      }
+  // Avatar upload handler
+  const handleAvatarUpload = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-      // Load API keys
-      const { data: keysData, error: keysError } =
-        await settingsService.getAPIKeys();
-      if (keysError) {
-        console.error('Error loading API keys:', keysError);
-      } else {
-        setAPIKeys(keysData);
-      }
-    } catch (error) {
-      console.error('Error loading data:', error);
-      toast.error('Failed to load settings');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      uploadAvatarMutation.mutate(file, {
+        onSuccess: (url) => {
+          profileForm.setValue('avatar_url', url, { shouldDirty: true });
+        },
+      });
+    },
+    [uploadAvatarMutation, profileForm]
+  );
 
-  // Profile handlers
-  const handleProfileUpdate = (
-    field: keyof UserProfile,
-    value: string | number | boolean
-  ) => {
-    if (profile) {
-      setProfile({ ...profile, [field]: value });
-    }
-  };
+  // Password change handler
+  const handlePasswordChange = useCallback(
+    (data: ChangePasswordFormData) => {
+      changePasswordMutation.mutate(
+        { newPassword: data.newPassword, confirmPassword: data.confirmPassword },
+        {
+          onSuccess: () => {
+            passwordForm.reset();
+          },
+        }
+      );
+    },
+    [changePasswordMutation, passwordForm]
+  );
 
-  const handleSaveProfile = async () => {
-    if (!profile) return;
+  // Notification preferences handler
+  const handleSaveNotifications = useCallback(
+    (data: NotificationPreferencesFormData) => {
+      updateSettingsMutation.mutate(data);
+    },
+    [updateSettingsMutation]
+  );
 
-    try {
-      setIsSaving(true);
-      const { error } = await settingsService.updateProfile(profile);
+  // Security settings handler
+  const handleSaveSecurity = useCallback(
+    (data: SecuritySettingsFormData) => {
+      updateSettingsMutation.mutate(data);
+    },
+    [updateSettingsMutation]
+  );
 
-      if (error) {
-        toast.error('Failed to save profile');
-        console.error('Error saving profile:', error);
-      } else {
-        toast.success('Profile updated successfully');
-      }
-    } catch (error) {
-      console.error('Error saving profile:', error);
-      toast.error('Failed to save profile');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleAvatarUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Check file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size must be less than 5MB');
-      return;
-    }
-
-    // Check file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('File must be an image');
-      return;
-    }
-
-    try {
-      toast.loading('Uploading avatar...');
-      const { data: url, error } = await settingsService.uploadAvatar(file);
-
-      if (error) {
-        toast.error('Failed to upload avatar');
-        console.error('Error uploading avatar:', error);
-      } else if (url) {
-        setProfile((prev) => (prev ? { ...prev, avatar_url: url } : null));
-        toast.success('Avatar uploaded successfully');
-      }
-    } catch (error) {
-      console.error('Error uploading avatar:', error);
-      toast.error('Failed to upload avatar');
-    }
-  };
-
-  // Settings handlers
-  const handleSettingsUpdate = (
-    field: keyof UserSettings,
-    value: string | number | boolean
-  ) => {
-    if (settings) {
-      setSettings({ ...settings, [field]: value });
-    }
-  };
-
-  const handleSaveSettings = async () => {
-    if (!settings) return;
-
-    try {
-      setIsSaving(true);
-      const { error } = await settingsService.updateSettings(settings);
-
-      if (error) {
-        toast.error('Failed to save settings');
-        console.error('Error saving settings:', error);
-      } else {
-        toast.success('Settings updated successfully');
-      }
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      toast.error('Failed to save settings');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Password handlers
-  const handleChangePassword = async () => {
-    if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
-
-    try {
-      setIsSaving(true);
-      const { error } = await settingsService.changePassword(newPassword);
-
-      if (error) {
-        toast.error('Failed to change password');
-        console.error('Error changing password:', error);
-      } else {
-        toast.success('Password changed successfully');
-        setNewPassword('');
-        setConfirmPassword('');
-      }
-    } catch (error) {
-      console.error('Error changing password:', error);
-      toast.error('Failed to change password');
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  // System settings handler
+  const handleSaveSystem = useCallback(
+    (data: SystemSettingsFormData) => {
+      updateSettingsMutation.mutate(data);
+    },
+    [updateSettingsMutation]
+  );
 
   // API Key handlers
-  const handleGenerateAPIKey = async () => {
-    if (!newAPIKeyName.trim()) {
-      toast.error('Please enter a name for the API key');
-      return;
-    }
+  const handleGenerateAPIKey = useCallback(
+    (data: CreateApiKeyFormData) => {
+      createAPIKeyMutation.mutate(data.name, {
+        onSuccess: (result: CreateAPIKeyResult) => {
+          setGeneratedAPIKey(result.fullKey);
+          apiKeyForm.reset();
+        },
+      });
+    },
+    [createAPIKeyMutation, apiKeyForm]
+  );
 
-    try {
-      setIsSaving(true);
-      const { data, error, fullKey } =
-        await settingsService.createAPIKey(newAPIKeyName);
-
-      if (error || !data) {
-        toast.error('Failed to generate API key');
-        console.error('Error generating API key:', error);
-      } else {
-        setGeneratedAPIKey(fullKey || '');
-        setAPIKeys((prev) => [data, ...prev]);
-        toast.success('API key generated successfully');
-        setNewAPIKeyName('');
-      }
-    } catch (error) {
-      console.error('Error generating API key:', error);
-      toast.error('Failed to generate API key');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleDeleteAPIKey = async () => {
+  const handleDeleteAPIKey = useCallback(() => {
     if (!keyToDelete) return;
 
-    try {
-      const { error } = await settingsService.deleteAPIKey(keyToDelete);
+    deleteAPIKeyMutation.mutate(keyToDelete, {
+      onSettled: () => {
+        setKeyToDelete(null);
+      },
+    });
+  }, [keyToDelete, deleteAPIKeyMutation]);
 
-      if (error) {
-        toast.error('Failed to delete API key');
-        console.error('Error deleting API key:', error);
-      } else {
-        setAPIKeys((prev) => prev.filter((k) => k.id !== keyToDelete));
-        toast.success('API key deleted successfully');
-      }
-    } catch (error) {
-      console.error('Error deleting API key:', error);
-      toast.error('Failed to delete API key');
-    } finally {
-      setKeyToDelete(null);
-    }
-  };
-
-  const handleCopyAPIKey = (key: string) => {
+  const handleCopyAPIKey = useCallback((key: string) => {
     navigator.clipboard.writeText(key);
     toast.success('API key copied to clipboard');
-  };
+  }, []);
 
   // 2FA handlers
-  const handleToggle2FA = async (enabled: boolean) => {
-    try {
-      setIsSaving(true);
-      const { error } = enabled
-        ? await settingsService.enable2FA()
-        : await settingsService.disable2FA();
-
-      if (error) {
-        toast.error(`Failed to ${enabled ? 'enable' : 'disable'} 2FA`);
-        console.error('Error toggling 2FA:', error);
-      } else {
-        handleSettingsUpdate('two_factor_enabled', enabled);
-        toast.success(`2FA ${enabled ? 'enabled' : 'disabled'} successfully`);
-      }
-    } catch (error) {
-      console.error('Error toggling 2FA:', error);
-      toast.error(`Failed to ${enabled ? 'enable' : 'disable'} 2FA`);
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const handleToggle2FA = useCallback(
+    (enabled: boolean) => {
+      toggle2FAMutation.mutate(enabled, {
+        onSuccess: () => {
+          securityForm.setValue('two_factor_enabled', enabled);
+        },
+      });
+    },
+    [toggle2FAMutation, securityForm]
+  );
 
   if (isLoading) {
     return (
@@ -368,13 +405,13 @@ const SettingsPageContent: React.FC = () => {
     );
   }
 
-  if (!profile || !settings) {
+  if (isError || !profile || !settings) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-yellow-500" />
           <p className="mb-4 text-muted-foreground">Failed to load settings</p>
-          <Button onClick={loadAllData} variant="outline">
+          <Button onClick={() => refetch()} variant="outline">
             Retry
           </Button>
         </div>
@@ -484,165 +521,238 @@ const SettingsPageContent: React.FC = () => {
                     Update your personal information and preferences
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Avatar with 3D Hover Effect */}
-                  <div className="flex items-center space-x-4">
-                    <InteractiveHoverCard>
-                      <Avatar className="h-20 w-20 ring-2 ring-primary/20 transition-all duration-300 hover:ring-primary/40">
-                        <AvatarImage src={profile?.avatar_url} />
-                        <AvatarFallback className="bg-accent text-lg text-foreground">
-                          {profile?.name
-                            ?.split(' ')
-                            .map((n) => n[0])
-                            .join('') || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                    </InteractiveHoverCard>
-                    <div className="space-y-2">
-                      <input
-                        type="file"
-                        id="avatar-upload"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleAvatarUpload}
-                      />
-                      <Button
-                        variant="outline"
-                        className="border-border text-foreground transition-transform duration-200 hover:scale-105 hover:text-foreground"
-                        onClick={() =>
-                          document.getElementById('avatar-upload')?.click()
-                        }
-                      >
-                        <Camera className="mr-2 h-4 w-4" />
-                        Change Photo
-                      </Button>
-                      <p className="text-xs text-muted-foreground">
-                        JPG, PNG up to 5MB
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Profile Form */}
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div>
-                      <Label className="text-foreground">Full Name</Label>
-                      <Input
-                        value={profile?.name || ''}
-                        onChange={(e) =>
-                          handleProfileUpdate('name', e.target.value)
-                        }
-                        className="mt-1 border-border bg-background text-foreground"
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="text-foreground">Email Address</Label>
-                      <Input
-                        type="email"
-                        value={user?.email || ''}
-                        disabled
-                        className="mt-1 cursor-not-allowed border-border bg-muted text-muted-foreground"
-                      />
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Email cannot be changed
-                      </p>
-                    </div>
-
-                    <div>
-                      <Label className="text-foreground">Phone Number</Label>
-                      <Input
-                        value={profile?.phone || ''}
-                        onChange={(e) =>
-                          handleProfileUpdate('phone', e.target.value)
-                        }
-                        className="mt-1 border-border bg-background text-foreground"
-                        placeholder="+1 (555) 000-0000"
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="text-foreground">Timezone</Label>
-                      <Select
-                        value={profile?.timezone || 'America/New_York'}
-                        onValueChange={(value) =>
-                          handleProfileUpdate('timezone', value)
-                        }
-                      >
-                        <SelectTrigger className="mt-1 border-border bg-background text-foreground">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="border-border bg-popover">
-                          <SelectItem value="America/New_York">
-                            Eastern Time (ET)
-                          </SelectItem>
-                          <SelectItem value="America/Chicago">
-                            Central Time (CT)
-                          </SelectItem>
-                          <SelectItem value="America/Denver">
-                            Mountain Time (MT)
-                          </SelectItem>
-                          <SelectItem value="America/Los_Angeles">
-                            Pacific Time (PT)
-                          </SelectItem>
-                          <SelectItem value="Europe/London">GMT</SelectItem>
-                          <SelectItem value="Europe/Paris">CET</SelectItem>
-                          <SelectItem value="Asia/Tokyo">JST</SelectItem>
-                          <SelectItem value="Asia/Shanghai">CST</SelectItem>
-                          <SelectItem value="Australia/Sydney">AEST</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label className="text-foreground">Language</Label>
-                      <Select
-                        value={profile?.language || 'en'}
-                        onValueChange={(value) =>
-                          handleProfileUpdate('language', value)
-                        }
-                      >
-                        <SelectTrigger className="mt-1 border-border bg-background text-foreground">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="border-border bg-popover">
-                          <SelectItem value="en">English</SelectItem>
-                          <SelectItem value="es">Español</SelectItem>
-                          <SelectItem value="fr">Français</SelectItem>
-                          <SelectItem value="de">Deutsch</SelectItem>
-                          <SelectItem value="zh">中文</SelectItem>
-                          <SelectItem value="ja">日本語</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-foreground">Bio</Label>
-                    <Textarea
-                      value={profile?.bio || ''}
-                      onChange={(e) =>
-                        handleProfileUpdate('bio', e.target.value)
-                      }
-                      className="mt-1 border-border bg-background text-foreground"
-                      rows={3}
-                      placeholder="Tell us about yourself..."
-                    />
-                  </div>
-
-                  <div className="flex justify-end">
-                    <Button
-                      onClick={handleSaveProfile}
-                      disabled={isSaving}
-                      className="bg-blue-600 hover:bg-blue-700"
+                <CardContent>
+                  <Form {...profileForm}>
+                    <form
+                      onSubmit={profileForm.handleSubmit(handleSaveProfile)}
+                      className="space-y-6"
                     >
-                      {isSaving ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="mr-2 h-4 w-4" />
-                      )}
-                      Save Profile
-                    </Button>
-                  </div>
+                      {/* Avatar with 3D Hover Effect */}
+                      <div className="flex items-center space-x-4">
+                        <InteractiveHoverCard>
+                          <Avatar className="h-20 w-20 ring-2 ring-primary/20 transition-all duration-300 hover:ring-primary/40">
+                            <AvatarImage src={profileForm.watch('avatar_url')} />
+                            <AvatarFallback className="bg-accent text-lg text-foreground">
+                              {profileForm
+                                .watch('name')
+                                ?.split(' ')
+                                .map((n) => n[0])
+                                .join('') || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                        </InteractiveHoverCard>
+                        <div className="space-y-2">
+                          <input
+                            type="file"
+                            id="avatar-upload"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleAvatarUpload}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="border-border text-foreground transition-transform duration-200 hover:scale-105 hover:text-foreground"
+                            onClick={() =>
+                              document.getElementById('avatar-upload')?.click()
+                            }
+                            disabled={uploadAvatarMutation.isPending}
+                          >
+                            {uploadAvatarMutation.isPending ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Camera className="mr-2 h-4 w-4" />
+                            )}
+                            Change Photo
+                          </Button>
+                          <p className="text-xs text-muted-foreground">
+                            JPG, PNG up to 5MB
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Profile Form Fields */}
+                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <FormField
+                          control={profileForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-foreground">
+                                Full Name
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  className="border-border bg-background text-foreground"
+                                  placeholder="Enter your full name"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div>
+                          <Label className="text-foreground">Email Address</Label>
+                          <Input
+                            type="email"
+                            value={user?.email || ''}
+                            disabled
+                            className="mt-2 cursor-not-allowed border-border bg-muted text-muted-foreground"
+                          />
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            Email cannot be changed
+                          </p>
+                        </div>
+
+                        <FormField
+                          control={profileForm.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-foreground">
+                                Phone Number
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  value={field.value || ''}
+                                  className="border-border bg-background text-foreground"
+                                  placeholder="+1 (555) 000-0000"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={profileForm.control}
+                          name="timezone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-foreground">
+                                Timezone
+                              </FormLabel>
+                              <Select
+                                value={field.value}
+                                onValueChange={field.onChange}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="border-border bg-background text-foreground">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="border-border bg-popover">
+                                  <SelectItem value="America/New_York">
+                                    Eastern Time (ET)
+                                  </SelectItem>
+                                  <SelectItem value="America/Chicago">
+                                    Central Time (CT)
+                                  </SelectItem>
+                                  <SelectItem value="America/Denver">
+                                    Mountain Time (MT)
+                                  </SelectItem>
+                                  <SelectItem value="America/Los_Angeles">
+                                    Pacific Time (PT)
+                                  </SelectItem>
+                                  <SelectItem value="Europe/London">GMT</SelectItem>
+                                  <SelectItem value="Europe/Paris">CET</SelectItem>
+                                  <SelectItem value="Asia/Tokyo">JST</SelectItem>
+                                  <SelectItem value="Asia/Shanghai">CST</SelectItem>
+                                  <SelectItem value="Australia/Sydney">
+                                    AEST
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={profileForm.control}
+                          name="language"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-foreground">
+                                Language
+                              </FormLabel>
+                              <Select
+                                value={field.value}
+                                onValueChange={field.onChange}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="border-border bg-background text-foreground">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="border-border bg-popover">
+                                  <SelectItem value="en">English</SelectItem>
+                                  <SelectItem value="es">Espanol</SelectItem>
+                                  <SelectItem value="fr">Francais</SelectItem>
+                                  <SelectItem value="de">Deutsch</SelectItem>
+                                  <SelectItem value="zh">Chinese</SelectItem>
+                                  <SelectItem value="ja">Japanese</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <FormField
+                        control={profileForm.control}
+                        name="bio"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-foreground">Bio</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                {...field}
+                                value={field.value || ''}
+                                className="border-border bg-background text-foreground"
+                                rows={3}
+                                placeholder="Tell us about yourself..."
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              {(field.value?.length || 0)}/500 characters
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-muted-foreground">
+                          {profileForm.formState.isDirty && (
+                            <span className="text-yellow-500">
+                              You have unsaved changes
+                            </span>
+                          )}
+                        </div>
+                        <Button
+                          type="submit"
+                          disabled={
+                            isSaving ||
+                            !profileForm.formState.isDirty ||
+                            !profileForm.formState.isValid
+                          }
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          {updateProfileMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Save className="mr-2 h-4 w-4" />
+                          )}
+                          Save Profile
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
                 </CardContent>
               </Card>
             )}
@@ -659,85 +769,102 @@ const SettingsPageContent: React.FC = () => {
                   Choose how and when you want to receive notifications
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  {[
-                    {
-                      key: 'email_notifications',
-                      label: 'Email Notifications',
-                      desc: 'Receive notifications via email',
-                    },
-                    {
-                      key: 'push_notifications',
-                      label: 'Push Notifications',
-                      desc: 'Browser push notifications',
-                    },
-                    {
-                      key: 'workflow_alerts',
-                      label: 'Workflow Alerts',
-                      desc: 'Alerts when workflows complete or fail',
-                    },
-                    {
-                      key: 'employee_updates',
-                      label: 'Employee Updates',
-                      desc: 'Updates about AI employee performance',
-                    },
-                    {
-                      key: 'system_maintenance',
-                      label: 'System Maintenance',
-                      desc: 'Scheduled maintenance notifications',
-                    },
-                    {
-                      key: 'marketing_emails',
-                      label: 'Marketing Emails',
-                      desc: 'Product updates and offers',
-                    },
-                    {
-                      key: 'weekly_reports',
-                      label: 'Weekly Reports',
-                      desc: 'Weekly performance summaries',
-                    },
-                    {
-                      key: 'instant_alerts',
-                      label: 'Instant Alerts',
-                      desc: 'Real-time critical alerts',
-                    },
-                  ].map(({ key, label, desc }) => (
-                    <div
-                      key={key}
-                      className="flex items-center justify-between"
-                    >
-                      <div>
-                        <Label className="text-foreground">{label}</Label>
-                        <p className="text-sm text-muted-foreground">{desc}</p>
-                      </div>
-                      <Switch
-                        checked={settings[key as keyof UserSettings] as boolean}
-                        onCheckedChange={(checked) =>
-                          handleSettingsUpdate(
-                            key as keyof UserSettings,
-                            checked
-                          )
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    onClick={handleSaveSettings}
-                    disabled={isSaving}
-                    className="bg-blue-600 hover:bg-blue-700"
+              <CardContent>
+                <Form {...notificationForm}>
+                  <form
+                    onSubmit={notificationForm.handleSubmit(handleSaveNotifications)}
+                    className="space-y-6"
                   >
-                    {isSaving ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Save className="mr-2 h-4 w-4" />
-                    )}
-                    Save Preferences
-                  </Button>
-                </div>
+                    <div className="space-y-4">
+                      {[
+                        {
+                          key: 'email_notifications' as const,
+                          label: 'Email Notifications',
+                          desc: 'Receive notifications via email',
+                        },
+                        {
+                          key: 'push_notifications' as const,
+                          label: 'Push Notifications',
+                          desc: 'Browser push notifications',
+                        },
+                        {
+                          key: 'workflow_alerts' as const,
+                          label: 'Workflow Alerts',
+                          desc: 'Alerts when workflows complete or fail',
+                        },
+                        {
+                          key: 'employee_updates' as const,
+                          label: 'Employee Updates',
+                          desc: 'Updates about AI employee performance',
+                        },
+                        {
+                          key: 'system_maintenance' as const,
+                          label: 'System Maintenance',
+                          desc: 'Scheduled maintenance notifications',
+                        },
+                        {
+                          key: 'marketing_emails' as const,
+                          label: 'Marketing Emails',
+                          desc: 'Product updates and offers',
+                        },
+                        {
+                          key: 'weekly_reports' as const,
+                          label: 'Weekly Reports',
+                          desc: 'Weekly performance summaries',
+                        },
+                        {
+                          key: 'instant_alerts' as const,
+                          label: 'Instant Alerts',
+                          desc: 'Real-time critical alerts',
+                        },
+                      ].map(({ key, label, desc }) => (
+                        <FormField
+                          key={key}
+                          control={notificationForm.control}
+                          name={key}
+                          render={({ field }) => (
+                            <FormItem className="flex items-center justify-between rounded-lg border border-border/50 p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-foreground">
+                                  {label}
+                                </FormLabel>
+                                <FormDescription>{desc}</FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-muted-foreground">
+                        {notificationForm.formState.isDirty && (
+                          <span className="text-yellow-500">
+                            You have unsaved changes
+                          </span>
+                        )}
+                      </div>
+                      <Button
+                        type="submit"
+                        disabled={isSaving || !notificationForm.formState.isDirty}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        {updateSettingsMutation.isPending ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Save className="mr-2 h-4 w-4" />
+                        )}
+                        Save Preferences
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </TabsContent>
@@ -756,129 +883,193 @@ const SettingsPageContent: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-foreground">
-                        Two-Factor Authentication
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        Add an extra layer of security
-                      </p>
-                    </div>
-                    <Switch
-                      checked={settings.two_factor_enabled || false}
-                      onCheckedChange={handleToggle2FA}
-                      disabled={isSaving}
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-foreground">Session Timeout</Label>
-                    <Select
-                      value={settings.session_timeout?.toString() || '60'}
-                      onValueChange={(value) =>
-                        handleSettingsUpdate('session_timeout', parseInt(value))
-                      }
+                  <Form {...securityForm}>
+                    <form
+                      onSubmit={securityForm.handleSubmit(handleSaveSecurity)}
+                      className="space-y-6"
                     >
-                      <SelectTrigger className="mt-1 border-border bg-background text-foreground">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="border-border bg-popover">
-                        <SelectItem value="15">15 minutes</SelectItem>
-                        <SelectItem value="30">30 minutes</SelectItem>
-                        <SelectItem value="60">1 hour</SelectItem>
-                        <SelectItem value="240">4 hours</SelectItem>
-                        <SelectItem value="1440">Never</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                      <FormField
+                        control={securityForm.control}
+                        name="two_factor_enabled"
+                        render={({ field }) => (
+                          <FormItem className="flex items-center justify-between rounded-lg border border-border/50 p-4">
+                            <div className="space-y-0.5">
+                              <FormLabel className="text-foreground">
+                                Two-Factor Authentication
+                              </FormLabel>
+                              <FormDescription>
+                                Add an extra layer of security
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={(checked) => {
+                                  field.onChange(checked);
+                                  handleToggle2FA(checked);
+                                }}
+                                disabled={toggle2FAMutation.isPending}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
 
-                  {/* Change Password */}
-                  <div className="space-y-4 border-t border-border pt-4">
-                    <Label className="text-foreground">Change Password</Label>
+                      <FormField
+                        control={securityForm.control}
+                        name="session_timeout"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-foreground">
+                              Session Timeout
+                            </FormLabel>
+                            <Select
+                              value={field.value.toString()}
+                              onValueChange={(value) =>
+                                field.onChange(parseInt(value))
+                              }
+                            >
+                              <FormControl>
+                                <SelectTrigger className="border-border bg-background text-foreground">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="border-border bg-popover">
+                                <SelectItem value="15">15 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                                <SelectItem value="60">1 hour</SelectItem>
+                                <SelectItem value="240">4 hours</SelectItem>
+                                <SelectItem value="1440">Never</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <div>
-                      <Label className="text-sm text-muted-foreground">
-                        New Password
-                      </Label>
-                      <div className="relative mt-1">
-                        <Input
-                          type={showNewPassword ? 'text' : 'password'}
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          className="border-border bg-background pr-10 text-foreground"
-                          placeholder="Enter new password"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowNewPassword(!showNewPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      <div className="flex justify-end">
+                        <Button
+                          type="submit"
+                          disabled={isSaving || !securityForm.formState.isDirty}
+                          className="bg-blue-600 hover:bg-blue-700"
                         >
-                          {showNewPassword ? (
-                            <EyeOff className="h-4 w-4" />
+                          {updateSettingsMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           ) : (
-                            <Eye className="h-4 w-4" />
+                            <Save className="mr-2 h-4 w-4" />
                           )}
-                        </button>
+                          Save Security Settings
+                        </Button>
                       </div>
-                    </div>
+                    </form>
+                  </Form>
 
-                    <div>
-                      <Label className="text-sm text-muted-foreground">
-                        Confirm Password
-                      </Label>
-                      <div className="relative mt-1">
-                        <Input
-                          type={showConfirmPassword ? 'text' : 'password'}
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="border-border bg-background pr-10 text-foreground"
-                          placeholder="Confirm new password"
+                  {/* Change Password - Separate Form */}
+                  <div className="border-t border-border pt-6">
+                    <Form {...passwordForm}>
+                      <form
+                        onSubmit={passwordForm.handleSubmit(handlePasswordChange)}
+                        className="space-y-4"
+                      >
+                        <h4 className="font-medium text-foreground">
+                          Change Password
+                        </h4>
+
+                        <FormField
+                          control={passwordForm.control}
+                          name="newPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm text-muted-foreground">
+                                New Password
+                              </FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <Input
+                                    {...field}
+                                    type={showNewPassword ? 'text' : 'password'}
+                                    className="border-border bg-background pr-10 text-foreground"
+                                    placeholder="Enter new password"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setShowNewPassword(!showNewPassword)
+                                    }
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                  >
+                                    {showNewPassword ? (
+                                      <EyeOff className="h-4 w-4" />
+                                    ) : (
+                                      <Eye className="h-4 w-4" />
+                                    )}
+                                  </button>
+                                </div>
+                              </FormControl>
+                              <FormDescription className="text-xs">
+                                Min 8 characters with uppercase, lowercase, number,
+                                and special character
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
+
+                        <FormField
+                          control={passwordForm.control}
+                          name="confirmPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm text-muted-foreground">
+                                Confirm Password
+                              </FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <Input
+                                    {...field}
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    className="border-border bg-background pr-10 text-foreground"
+                                    placeholder="Confirm new password"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setShowConfirmPassword(!showConfirmPassword)
+                                    }
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                  >
+                                    {showConfirmPassword ? (
+                                      <EyeOff className="h-4 w-4" />
+                                    ) : (
+                                      <Eye className="h-4 w-4" />
+                                    )}
+                                  </button>
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <Button
+                          type="submit"
+                          disabled={
+                            changePasswordMutation.isPending ||
+                            !passwordForm.formState.isValid ||
+                            !passwordForm.formState.isDirty
                           }
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          variant="outline"
+                          className="w-full border-border"
                         >
-                          {showConfirmPassword ? (
-                            <EyeOff className="h-4 w-4" />
+                          {changePasswordMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           ) : (
-                            <Eye className="h-4 w-4" />
+                            <Key className="mr-2 h-4 w-4" />
                           )}
-                        </button>
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={handleChangePassword}
-                      disabled={isSaving || !newPassword || !confirmPassword}
-                      variant="outline"
-                      className="w-full border-border"
-                    >
-                      {isSaving ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Key className="mr-2 h-4 w-4" />
-                      )}
-                      Change Password
-                    </Button>
-                  </div>
-
-                  <div className="flex justify-end border-t border-border pt-4">
-                    <Button
-                      onClick={handleSaveSettings}
-                      disabled={isSaving}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      {isSaving ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="mr-2 h-4 w-4" />
-                      )}
-                      Save Security Settings
-                    </Button>
+                          Change Password
+                        </Button>
+                      </form>
+                    </Form>
                   </div>
                 </CardContent>
               </Card>
@@ -966,168 +1157,221 @@ const SettingsPageContent: React.FC = () => {
 
           {/* System Settings */}
           <TabsContent value="system" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              {/* General System Settings */}
-              <Card className="border-border bg-card">
-                <CardHeader>
-                  <CardTitle className="text-foreground">
-                    General Settings
-                  </CardTitle>
-                  <CardDescription>
-                    Configure system behavior and preferences
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <Label className="text-foreground">Theme</Label>
-                    <Select
-                      value={settings.theme || 'dark'}
-                      onValueChange={(value: 'dark' | 'light' | 'auto') =>
-                        handleSettingsUpdate('theme', value)
-                      }
-                    >
-                      <SelectTrigger className="mt-1 border-border bg-background text-foreground">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="border-border bg-popover">
-                        <SelectItem value="dark">Dark</SelectItem>
-                        <SelectItem value="light">Light</SelectItem>
-                        <SelectItem value="auto">Auto</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {[
-                    {
-                      key: 'auto_save',
-                      label: 'Auto Save',
-                      desc: 'Automatically save changes',
-                    },
-                    {
-                      key: 'debug_mode',
-                      label: 'Debug Mode',
-                      desc: 'Show detailed error information',
-                    },
-                    {
-                      key: 'analytics_enabled',
-                      label: 'Analytics',
-                      desc: 'Enable usage analytics',
-                    },
-                  ].map(({ key, label, desc }) => (
-                    <div
-                      key={key}
-                      className="flex items-center justify-between"
-                    >
-                      <div>
-                        <Label className="text-foreground">{label}</Label>
-                        <p className="text-sm text-muted-foreground">{desc}</p>
-                      </div>
-                      <Switch
-                        checked={settings[key as keyof UserSettings] as boolean}
-                        onCheckedChange={(checked) =>
-                          handleSettingsUpdate(
-                            key as keyof UserSettings,
-                            checked
-                          )
-                        }
+            <Form {...systemForm}>
+              <form
+                onSubmit={systemForm.handleSubmit(handleSaveSystem)}
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  {/* General System Settings */}
+                  <Card className="border-border bg-card">
+                    <CardHeader>
+                      <CardTitle className="text-foreground">
+                        General Settings
+                      </CardTitle>
+                      <CardDescription>
+                        Configure system behavior and preferences
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <FormField
+                        control={systemForm.control}
+                        name="theme"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-foreground">
+                              Theme
+                            </FormLabel>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="border-border bg-background text-foreground">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="border-border bg-popover">
+                                <SelectItem value="dark">Dark</SelectItem>
+                                <SelectItem value="light">Light</SelectItem>
+                                <SelectItem value="auto">Auto</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
 
-              {/* Advanced Settings */}
-              <Card className="border-border bg-card">
-                <CardHeader>
-                  <CardTitle className="text-foreground">
-                    Advanced Settings
-                  </CardTitle>
-                  <CardDescription>
-                    Advanced configuration options
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <Label className="text-foreground">Cache Size</Label>
-                    <Select
-                      value={settings.cache_size || '1GB'}
-                      onValueChange={(value) =>
-                        handleSettingsUpdate('cache_size', value)
-                      }
-                    >
-                      <SelectTrigger className="mt-1 border-border bg-background text-foreground">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="border-border bg-popover">
-                        <SelectItem value="256MB">256 MB</SelectItem>
-                        <SelectItem value="512MB">512 MB</SelectItem>
-                        <SelectItem value="1GB">1 GB</SelectItem>
-                        <SelectItem value="2GB">2 GB</SelectItem>
-                        <SelectItem value="4GB">4 GB</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                      {[
+                        {
+                          key: 'auto_save' as const,
+                          label: 'Auto Save',
+                          desc: 'Automatically save changes',
+                        },
+                        {
+                          key: 'debug_mode' as const,
+                          label: 'Debug Mode',
+                          desc: 'Show detailed error information',
+                        },
+                        {
+                          key: 'analytics_enabled' as const,
+                          label: 'Analytics',
+                          desc: 'Enable usage analytics',
+                        },
+                      ].map(({ key, label, desc }) => (
+                        <FormField
+                          key={key}
+                          control={systemForm.control}
+                          name={key}
+                          render={({ field }) => (
+                            <FormItem className="flex items-center justify-between rounded-lg border border-border/50 p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-foreground">
+                                  {label}
+                                </FormLabel>
+                                <FormDescription>{desc}</FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+                    </CardContent>
+                  </Card>
 
-                  <div>
-                    <Label className="text-foreground">Backup Frequency</Label>
-                    <Select
-                      value={settings.backup_frequency || 'daily'}
-                      onValueChange={(value) =>
-                        handleSettingsUpdate('backup_frequency', value)
-                      }
-                    >
-                      <SelectTrigger className="mt-1 border-border bg-background text-foreground">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="border-border bg-popover">
-                        <SelectItem value="hourly">Hourly</SelectItem>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {/* Advanced Settings */}
+                  <Card className="border-border bg-card">
+                    <CardHeader>
+                      <CardTitle className="text-foreground">
+                        Advanced Settings
+                      </CardTitle>
+                      <CardDescription>
+                        Advanced configuration options
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <FormField
+                        control={systemForm.control}
+                        name="cache_size"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-foreground">
+                              Cache Size
+                            </FormLabel>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="border-border bg-background text-foreground">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="border-border bg-popover">
+                                <SelectItem value="256MB">256 MB</SelectItem>
+                                <SelectItem value="512MB">512 MB</SelectItem>
+                                <SelectItem value="1GB">1 GB</SelectItem>
+                                <SelectItem value="2GB">2 GB</SelectItem>
+                                <SelectItem value="4GB">4 GB</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <div>
-                    <Label className="text-foreground">
-                      Data Retention (days)
-                    </Label>
-                    <Input
-                      type="number"
-                      value={settings.retention_period || 30}
-                      onChange={(e) =>
-                        handleSettingsUpdate(
-                          'retention_period',
-                          parseInt(e.target.value) || 30
-                        )
-                      }
-                      className="mt-1 border-border bg-background text-foreground"
-                      min={1}
-                      max={365}
-                    />
-                  </div>
+                      <FormField
+                        control={systemForm.control}
+                        name="backup_frequency"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-foreground">
+                              Backup Frequency
+                            </FormLabel>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="border-border bg-background text-foreground">
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="border-border bg-popover">
+                                <SelectItem value="hourly">Hourly</SelectItem>
+                                <SelectItem value="daily">Daily</SelectItem>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                  <div>
-                    <Label className="text-foreground">
-                      Max Concurrent Jobs
-                    </Label>
-                    <Input
-                      type="number"
-                      value={settings.max_concurrent_jobs || 10}
-                      onChange={(e) =>
-                        handleSettingsUpdate(
-                          'max_concurrent_jobs',
-                          parseInt(e.target.value) || 10
-                        )
-                      }
-                      className="mt-1 border-border bg-background text-foreground"
-                      min={1}
-                      max={100}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                      <FormField
+                        control={systemForm.control}
+                        name="retention_period"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-foreground">
+                              Data Retention (days)
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(parseInt(e.target.value) || 30)
+                                }
+                                className="border-border bg-background text-foreground"
+                                min={1}
+                                max={365}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Between 1 and 365 days
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={systemForm.control}
+                        name="max_concurrent_jobs"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-foreground">
+                              Max Concurrent Jobs
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(parseInt(e.target.value) || 10)
+                                }
+                                className="border-border bg-background text-foreground"
+                                min={1}
+                                max={100}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Between 1 and 100 jobs
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+                </div>
 
             {/* Agent & Metrics Settings */}
             <Card className="border-border bg-card">
@@ -1250,20 +1494,29 @@ const SettingsPageContent: React.FC = () => {
               </CardContent>
             </Card>
 
-            <div className="flex justify-end">
-              <Button
-                onClick={handleSaveSettings}
-                disabled={isSaving}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {isSaving ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="mr-2 h-4 w-4" />
-                )}
-                Save System Settings
-              </Button>
-            </div>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    {systemForm.formState.isDirty && (
+                      <span className="text-yellow-500">
+                        You have unsaved changes
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={isSaving || !systemForm.formState.isDirty}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {updateSettingsMutation.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="mr-2 h-4 w-4" />
+                    )}
+                    Save System Settings
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </TabsContent>
         </Tabs>
       </motion.div>
@@ -1275,70 +1528,101 @@ const SettingsPageContent: React.FC = () => {
             <AlertDialogTitle className="text-foreground">
               {generatedAPIKey ? 'API Key Generated' : 'Generate New API Key'}
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground">
-              {generatedAPIKey ? (
-                <div className="space-y-4">
-                  <p className="text-yellow-400">
-                    <AlertTriangle className="mr-2 inline h-4 w-4" />
-                    Save this key now. You won't be able to see it again!
-                  </p>
-                  <div className="break-all rounded border border-border bg-background/50 p-3 font-mono text-sm text-green-400">
-                    {generatedAPIKey}
+            <AlertDialogDescription asChild>
+              <div className="text-muted-foreground">
+                {generatedAPIKey ? (
+                  <div className="space-y-4">
+                    <p className="text-yellow-400">
+                      <AlertTriangle className="mr-2 inline h-4 w-4" />
+                      Save this key now. You will not be able to see it again!
+                    </p>
+                    <div className="break-all rounded border border-border bg-background/50 p-3 font-mono text-sm text-green-400">
+                      {generatedAPIKey}
+                    </div>
+                    <Button
+                      onClick={() => handleCopyAPIKey(generatedAPIKey)}
+                      className="w-full"
+                    >
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copy to Clipboard
+                    </Button>
                   </div>
-                  <Button
-                    onClick={() => handleCopyAPIKey(generatedAPIKey)}
-                    className="w-full"
-                  >
-                    <Copy className="mr-2 h-4 w-4" />
-                    Copy to Clipboard
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4 pt-4">
-                  <div>
-                    <Label className="text-foreground">Key Name</Label>
-                    <Input
-                      value={newAPIKeyName}
-                      onChange={(e) => setNewAPIKeyName(e.target.value)}
-                      placeholder="e.g., Production API"
-                      className="mt-1 border-border bg-background text-foreground"
-                    />
-                  </div>
-                </div>
-              )}
+                ) : (
+                  <Form {...apiKeyForm}>
+                    <form
+                      onSubmit={apiKeyForm.handleSubmit(handleGenerateAPIKey)}
+                      className="space-y-4 pt-4"
+                    >
+                      <FormField
+                        control={apiKeyForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-foreground">
+                              Key Name
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="e.g., Production API"
+                                className="border-border bg-background text-foreground"
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              A descriptive name to identify this API key
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setShowAPIKeyDialog(false);
+                            apiKeyForm.reset();
+                          }}
+                          className="border-border bg-secondary text-foreground hover:bg-secondary/80"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={
+                            createAPIKeyMutation.isPending ||
+                            !apiKeyForm.formState.isValid
+                          }
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          {createAPIKeyMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Key className="mr-2 h-4 w-4" />
+                          )}
+                          Generate Key
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                )}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            {generatedAPIKey ? (
+          {generatedAPIKey && (
+            <AlertDialogFooter>
               <AlertDialogAction
                 onClick={() => {
                   setShowAPIKeyDialog(false);
                   setGeneratedAPIKey('');
+                  apiKeyForm.reset();
                 }}
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 Done
               </AlertDialogAction>
-            ) : (
-              <>
-                <AlertDialogCancel className="border-border bg-secondary text-foreground hover:bg-secondary/80">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleGenerateAPIKey}
-                  disabled={isSaving || !newAPIKeyName.trim()}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  {isSaving ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Key className="mr-2 h-4 w-4" />
-                  )}
-                  Generate Key
-                </AlertDialogAction>
-              </>
-            )}
-          </AlertDialogFooter>
+            </AlertDialogFooter>
+          )}
         </AlertDialogContent>
       </AlertDialog>
 

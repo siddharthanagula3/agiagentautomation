@@ -151,7 +151,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     if (path === '/dashboard') return 'Dashboard';
     if (path.includes('/workforce')) return 'AI Workforce';
     if (path.includes('/chat')) return 'Chat';
-    if (path.includes('/marketplace')) return 'Marketplace';
+    if (path.includes('/hire')) return 'Hire AI Employees';
     if (path.includes('/automation')) return 'Automation';
     if (path.includes('/analytics')) return 'Analytics';
     if (path.includes('/integrations')) return 'Integrations';

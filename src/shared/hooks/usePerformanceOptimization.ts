@@ -44,7 +44,10 @@ export const usePerformanceOptimization = (componentName: string) => {
     });
   }, [componentName]);
 
-  return { trackRender, renderCount: renderCount.current };
+  // Return a function to get render count instead of accessing ref during render
+  const getRenderCount = useCallback(() => renderCount.current, []);
+
+  return { trackRender, getRenderCount };
 };
 
 /**
@@ -68,37 +71,56 @@ export const useDebounce = <T>(value: T, delay: number): T => {
 
 /**
  * Hook for throttling expensive operations
+ * Uses useRef to store callback for stable reference
  */
 export const useThrottle = <T extends (...args: unknown[]) => void>(
   callback: T,
   delay: number
 ): T => {
-  const lastRun = useRef(Date.now());
+  const lastRun = useRef(0);
+  const callbackRef = useRef(callback);
 
-  return useCallback(
-    ((...args: unknown[]) => {
+  // Keep callback ref up to date without causing re-renders
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+
+  const throttledFn = useCallback(
+    (...args: unknown[]) => {
       if (Date.now() - lastRun.current >= delay) {
-        callback(...args);
+        callbackRef.current(...args);
         lastRun.current = Date.now();
       }
-    }) as T,
-    [callback, delay]
+    },
+    [delay]
   );
+
+  return throttledFn as T;
 };
 
 /**
  * Hook for memoizing expensive calculations
+ * Uses useRef to store factory for stable reference while respecting deps
+ *
+ * Note: This hook wraps useMemo with performance tracking. The deps are passed
+ * dynamically which requires disabling the exhaustive-deps rule.
  */
 export const useMemoizedValue = <T>(
   factory: () => T,
   deps: React.DependencyList
 ): T => {
-  const depsKey = JSON.stringify(deps);
+  const factoryRef = useRef(factory);
   const depsLength = deps.length;
 
+  // Keep factory ref up to date via useEffect to avoid ref access during render
+  useEffect(() => {
+    factoryRef.current = factory;
+  });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => {
     const startTime = performance.now();
-    const result = factory();
+    const result = factoryRef.current();
     const endTime = performance.now();
 
     monitoringService.trackPerformance(
@@ -106,16 +128,17 @@ export const useMemoizedValue = <T>(
       endTime - startTime,
       {
         deps: depsLength,
-        depsKey,
       }
     );
 
     return result;
-  }, [factory, depsKey, depsLength]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
 };
 
 /**
  * Hook for lazy loading components
+ * Fixed: Added isMounted flag to prevent setState after unmount
  */
 export const useLazyComponent = <T extends React.ComponentType<unknown>>(
   importFunc: () => Promise<{ default: T }>,
@@ -124,12 +147,15 @@ export const useLazyComponent = <T extends React.ComponentType<unknown>>(
   const [Component, setComponent] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
+    isMountedRef.current = true;
     const startTime = performance.now();
 
     importFunc()
       .then((module) => {
+        if (!isMountedRef.current) return; // Prevent setState after unmount
         const endTime = performance.now();
         setComponent(() => module.default);
         setLoading(false);
@@ -143,12 +169,17 @@ export const useLazyComponent = <T extends React.ComponentType<unknown>>(
         );
       })
       .catch((err) => {
+        if (!isMountedRef.current) return; // Prevent setState after unmount
         setError(err);
         setLoading(false);
         monitoringService.captureError(err, {
           context: 'lazy_component_loading',
         });
       });
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [importFunc]);
 
   if (loading) {
@@ -204,6 +235,7 @@ export const useVirtualizedList = <T>(
 
 /**
  * Hook for optimizing image loading
+ * Fixed: Added isMounted flag to prevent setState after unmount
  */
 export const useOptimizedImage = (
   src: string,
@@ -218,8 +250,13 @@ export const useOptimizedImage = (
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [optimizedSrc, setOptimizedSrc] = useState<string>('');
+  const isMountedRef = useRef(true);
+
+  // Memoize options to prevent unnecessary re-renders
+  const optionsKey = JSON.stringify(options);
 
   useEffect(() => {
+    isMountedRef.current = true;
     const startTime = performance.now();
 
     const optimized = performanceService.optimizeImage(src, '', options);
@@ -227,6 +264,7 @@ export const useOptimizedImage = (
 
     const img = new Image();
     img.onload = () => {
+      if (!isMountedRef.current) return; // Prevent setState after unmount
       const endTime = performance.now();
       setLoaded(true);
 
@@ -243,6 +281,7 @@ export const useOptimizedImage = (
     };
 
     img.onerror = () => {
+      if (!isMountedRef.current) return; // Prevent setState after unmount
       setError(true);
       monitoringService.captureError(
         new Error(`Failed to load optimized image: ${optimized}`),
@@ -251,7 +290,12 @@ export const useOptimizedImage = (
     };
 
     img.src = optimized;
-  }, [src, options]);
+
+    return () => {
+      isMountedRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src, optionsKey]);
 
   return { optimizedSrc, loaded, error };
 };

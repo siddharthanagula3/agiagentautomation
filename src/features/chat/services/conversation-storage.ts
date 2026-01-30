@@ -31,6 +31,24 @@ interface DBChatMessage {
   edit_count?: number | null;
 }
 
+/**
+ * Pagination parameters for list queries
+ */
+export interface PaginationParams {
+  limit?: number;
+  cursor?: string | null;
+}
+
+/**
+ * Paginated response structure with cursor-based pagination
+ */
+export interface PaginatedResponse<T> {
+  data: T[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  total?: number;
+}
+
 export class ChatPersistenceService {
   /**
    * Create a new chat session
@@ -99,6 +117,70 @@ export class ChatPersistenceService {
         messageCount,
       };
     });
+  }
+
+  /**
+   * Get paginated sessions for a user with cursor-based pagination
+   * Uses updated_at as the cursor for efficient pagination
+   */
+  async getUserSessionsPaginated(
+    userId: string,
+    params: PaginationParams = {}
+  ): Promise<PaginatedResponse<ChatSession>> {
+    const { limit = 20, cursor } = params;
+    // Fetch one extra to determine if there are more results
+    const fetchLimit = limit + 1;
+
+    let query = supabase
+      .from('chat_sessions')
+      .select('*, chat_messages(count)')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .order('updated_at', { ascending: false })
+      .limit(fetchLimit);
+
+    // Apply cursor filter if provided (cursor is the updated_at timestamp)
+    if (cursor) {
+      query = query.lt('updated_at', cursor);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw new Error(`Failed to load sessions: ${error.message}`);
+
+    const items = data || [];
+    const hasMore = items.length > limit;
+    const resultItems = hasMore ? items.slice(0, limit) : items;
+
+    const sessions = resultItems.map((session) => {
+      const chatMessages = session.chat_messages as
+        | { count: number }[]
+        | { count: number }
+        | undefined;
+      const messageCount = Array.isArray(chatMessages)
+        ? chatMessages[0]?.count ?? 0
+        : chatMessages?.count ?? 0;
+
+      const { chat_messages: _, ...sessionData } = session;
+
+      const mappedSession = this.mapDBSessionToSession(
+        sessionData as DBChatSession
+      );
+      return {
+        ...mappedSession,
+        messageCount,
+      };
+    });
+
+    // The next cursor is the updated_at of the last item
+    const lastItem = resultItems[resultItems.length - 1];
+    const nextCursor = hasMore && lastItem ? lastItem.updated_at : null;
+
+    return {
+      data: sessions,
+      nextCursor,
+      hasMore,
+    };
   }
 
   /**
@@ -256,6 +338,116 @@ export class ChatPersistenceService {
     }
 
     return (data || []).map(this.mapDBMessageToMessage);
+  }
+
+  /**
+   * Get paginated messages for a session with cursor-based pagination
+   * Messages are ordered by created_at ascending, so we use the message ID as cursor
+   * for consistent pagination even when new messages are added
+   */
+  async getSessionMessagesPaginated(
+    sessionId: string,
+    params: PaginationParams = {}
+  ): Promise<PaginatedResponse<ChatMessage>> {
+    const { limit = 50, cursor } = params;
+    const fetchLimit = limit + 1;
+
+    let query = supabase
+      .from('chat_messages')
+      .select('*', { count: 'exact' })
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true })
+      .limit(fetchLimit);
+
+    // Apply cursor filter - cursor is the created_at timestamp of the last loaded message
+    if (cursor) {
+      query = query.gt('created_at', cursor);
+    }
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
+        console.warn('Access denied to messages for session:', sessionId);
+        return { data: [], nextCursor: null, hasMore: false, total: 0 };
+      }
+      throw new Error(`Failed to load messages: ${error.message}`);
+    }
+
+    const items = data || [];
+    const hasMore = items.length > limit;
+    const resultItems = hasMore ? items.slice(0, limit) : items;
+
+    const messages = resultItems.map(this.mapDBMessageToMessage);
+
+    // The next cursor is the created_at of the last item
+    const lastItem = resultItems[resultItems.length - 1];
+    const nextCursor = hasMore && lastItem ? lastItem.created_at : null;
+
+    return {
+      data: messages,
+      nextCursor,
+      hasMore,
+      total: count ?? undefined,
+    };
+  }
+
+  /**
+   * Get messages before a specific cursor (for loading older messages)
+   * Useful for bidirectional infinite scroll
+   */
+  async getSessionMessagesBeforeCursor(
+    sessionId: string,
+    params: PaginationParams = {}
+  ): Promise<PaginatedResponse<ChatMessage>> {
+    const { limit = 50, cursor } = params;
+    const fetchLimit = limit + 1;
+
+    let query = supabase
+      .from('chat_messages')
+      .select('*', { count: 'exact' })
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: false }) // Reverse order for fetching older
+      .limit(fetchLimit);
+
+    // Apply cursor filter - cursor is the created_at timestamp
+    if (cursor) {
+      query = query.lt('created_at', cursor);
+    }
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      if (
+        error.code === '42501' ||
+        error.message?.includes('permission denied')
+      ) {
+        console.warn('Access denied to messages for session:', sessionId);
+        return { data: [], nextCursor: null, hasMore: false, total: 0 };
+      }
+      throw new Error(`Failed to load messages: ${error.message}`);
+    }
+
+    const items = data || [];
+    const hasMore = items.length > limit;
+    const resultItems = hasMore ? items.slice(0, limit) : items;
+
+    // Reverse to get chronological order
+    const messages = resultItems.reverse().map(this.mapDBMessageToMessage);
+
+    // The next cursor is the created_at of the first item (oldest in this batch)
+    const oldestItem = resultItems[resultItems.length - 1];
+    const nextCursor = hasMore && oldestItem ? oldestItem.created_at : null;
+
+    return {
+      data: messages,
+      nextCursor,
+      hasMore,
+      total: count ?? undefined,
+    };
   }
 
   /**

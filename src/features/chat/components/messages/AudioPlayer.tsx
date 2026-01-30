@@ -114,7 +114,8 @@ export const AudioPlayer = React.memo(function AudioPlayer({
       const randomWaveform = Array.from({ length: barCount }, () =>
         0.2 + Math.random() * 0.8
       );
-      setWaveformData(randomWaveform);
+      // Use queueMicrotask to avoid cascading renders
+      queueMicrotask(() => setWaveformData(randomWaveform));
       return;
     }
 

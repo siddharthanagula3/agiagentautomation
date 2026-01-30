@@ -4,6 +4,8 @@
  * Reference: https://support.mgx.dev/en/articles/12087744-overview
  */
 
+import type { ProtocolAgentCapability } from '@shared/types';
+
 export interface AgentMessage {
   id: string;
   type: 'user' | 'agent' | 'tool' | 'system';
@@ -34,16 +36,11 @@ export interface CollaborationContext {
   toolsEnabled: boolean;
 }
 
-export interface AgentCapability {
-  agentId: string;
-  name: string;
-  avatar?: string;
-  expertise: string[];
-  tools: string[];
-  systemPrompt: string;
-  model: string;
-  temperature: number;
-}
+/**
+ * Re-export canonical type for backward compatibility
+ * @deprecated Import ProtocolAgentCapability from @shared/types instead
+ */
+export type AgentCapability = ProtocolAgentCapability;
 
 /**
  * Collaboration Protocol Manager

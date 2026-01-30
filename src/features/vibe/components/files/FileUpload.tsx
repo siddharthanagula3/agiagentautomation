@@ -271,7 +271,6 @@ const FileUploadItem: React.FC<FileUploadItemProps> = ({
   compact = false,
 }) => {
   const { file, status, progress, error } = uploadedFile;
-  const FileIcon = getFileIcon(file.name);
 
   return (
     <motion.div
@@ -283,7 +282,7 @@ const FileUploadItem: React.FC<FileUploadItemProps> = ({
         <div className="flex items-center gap-3">
           {/* File Icon */}
           <div className="flex-shrink-0">
-            <FileIcon className="h-5 w-5 text-muted-foreground" />
+            <FileIconDisplay filename={file.name} />
           </div>
 
           {/* File Info */}
@@ -346,21 +345,22 @@ const StatusIcon: React.FC<{ status: UploadedFile['status'] }> = ({
 };
 
 /**
- * Get file icon based on file type
+ * File icon display component - renders appropriate icon based on file extension
+ * Defined at module level to avoid "component created during render" issues
  */
-function getFileIcon(filename: string) {
+const FileIconDisplay: React.FC<{ filename: string }> = ({ filename }) => {
   const ext = filename.split('.').pop()?.toLowerCase();
 
   if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext || '')) {
-    return Image;
+    return <Image className="h-5 w-5 text-muted-foreground" />;
   }
 
   if (['pdf', 'doc', 'docx', 'txt', 'md'].includes(ext || '')) {
-    return FileText;
+    return <FileText className="h-5 w-5 text-muted-foreground" />;
   }
 
-  return File;
-}
+  return <File className="h-5 w-5 text-muted-foreground" />;
+};
 
 /**
  * Format file size

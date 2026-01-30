@@ -16,7 +16,7 @@ export function VibeLayout({ children }: VibeLayoutProps) {
       <VibeTopNav />
 
       {/* Main Content - Full Width */}
-      <main className="flex-1 overflow-hidden">{children}</main>
+      <main id="main-content" className="flex-1 overflow-hidden">{children}</main>
     </div>
   );
 }

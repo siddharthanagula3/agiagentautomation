@@ -25,17 +25,35 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, isLoading = false, type = 'button', disabled, 'aria-label': ariaLabel, children, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
-    
+
     // Determine if this is an icon-only button (no text children)
     const hasTextContent = React.Children.toArray(children).some(
       child => typeof child === 'string' && child.trim() !== ''
     );
-    
+
+    // When asChild is true, Radix Slot expects exactly one React element child
+    // We must not add any additional children (even falsy expressions are counted)
+    if (asChild) {
+      return (
+        <Comp
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          disabled={disabled || isLoading}
+          aria-label={ariaLabel}
+          aria-busy={isLoading || undefined}
+          aria-disabled={disabled || isLoading || undefined}
+          {...props}
+        >
+          {children}
+        </Comp>
+      );
+    }
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        type={asChild ? undefined : type}
+        type={type}
         disabled={disabled || isLoading}
         aria-label={ariaLabel}
         aria-busy={isLoading || undefined}

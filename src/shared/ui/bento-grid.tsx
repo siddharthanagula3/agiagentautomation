@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@shared/lib/utils';
 
@@ -33,6 +33,8 @@ interface BentoCardProps {
   rowSpan?: 1 | 2;
   gradient?: boolean;
   hover?: boolean;
+  onClick?: () => void;
+  'aria-label'?: string;
 }
 
 export const BentoCard: React.FC<BentoCardProps> = ({
@@ -45,6 +47,8 @@ export const BentoCard: React.FC<BentoCardProps> = ({
   rowSpan = 1,
   gradient = false,
   hover = true,
+  onClick,
+  'aria-label': ariaLabel,
 }) => {
   const colSpanClass = {
     1: 'col-span-1',
@@ -57,6 +61,18 @@ export const BentoCard: React.FC<BentoCardProps> = ({
     2: 'md:row-span-2',
   }[rowSpan];
 
+  const isClickable = Boolean(onClick);
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (onClick && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        onClick();
+      }
+    },
+    [onClick]
+  );
+
   return (
     <motion.div
       className={cn(
@@ -66,6 +82,7 @@ export const BentoCard: React.FC<BentoCardProps> = ({
           : 'bg-card',
         colSpanClass,
         rowSpanClass,
+        isClickable && 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
         className
       )}
       initial={{ opacity: 0, y: 20 }}
@@ -75,10 +92,15 @@ export const BentoCard: React.FC<BentoCardProps> = ({
       whileHover={
         hover ? { scale: 1.02, transition: { duration: 0.2 } } : undefined
       }
+      onClick={onClick}
+      onKeyDown={isClickable ? handleKeyDown : undefined}
+      role={isClickable ? 'button' : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      aria-label={ariaLabel || (isClickable && title ? (description ? title + '. ' + description : title) : undefined)}
     >
       {/* Gradient mesh background */}
       {gradient && (
-        <div className="absolute inset-0 opacity-30">
+        <div className="absolute inset-0 opacity-30" aria-hidden="true">
           <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
           <div className="absolute bottom-0 left-0 h-40 w-40 rounded-full bg-accent/20 blur-3xl" />
         </div>
@@ -90,6 +112,7 @@ export const BentoCard: React.FC<BentoCardProps> = ({
             className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10"
             whileHover={{ rotate: 360 }}
             transition={{ duration: 0.6 }}
+            aria-hidden="true"
           >
             {icon}
           </motion.div>

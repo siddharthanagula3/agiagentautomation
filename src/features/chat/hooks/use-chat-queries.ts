@@ -9,13 +9,19 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
+  useInfiniteQuery,
   type UseQueryResult,
   type UseMutationResult,
   type QueryClient,
+  type UseInfiniteQueryResult,
+  type InfiniteData,
 } from '@tanstack/react-query';
 import { queryKeys } from '@shared/stores/query-client';
 import { supabase } from '@shared/lib/supabase-client';
-import { chatPersistenceService } from '../services/conversation-storage';
+import {
+  chatPersistenceService,
+  type PaginatedResponse,
+} from '../services/conversation-storage';
 import type { ChatSession, ChatMessage } from '../types';
 import { toast } from 'sonner';
 import { logger } from '@shared/lib/logger';
@@ -87,6 +93,22 @@ export interface DeleteMessageParams {
 interface SessionMutationResult {
   sessionId: string;
   userId: string;
+}
+
+/**
+ * Optimistic update context for session mutations
+ */
+interface SessionMutationContext {
+  previousSessions: ChatSession[] | undefined;
+  userId: string;
+}
+
+/**
+ * Optimistic update context for message mutations
+ */
+interface MessageMutationContext {
+  previousMessages: ChatMessage[] | undefined;
+  sessionId: string;
 }
 
 /**
@@ -213,18 +235,19 @@ export function useChatMessages(
 }
 
 /**
- * Create a new chat session
+ * Create a new chat session with optimistic update
  *
  * @returns UseMutationResult for creating a chat session
  */
 export function useCreateChatSession(): UseMutationResult<
   ChatSession,
   Error,
-  CreateSessionParams
+  CreateSessionParams,
+  SessionMutationContext
 > {
   const queryClient: QueryClient = useQueryClient();
 
-  return useMutation<ChatSession, Error, CreateSessionParams>({
+  return useMutation<ChatSession, Error, CreateSessionParams, SessionMutationContext>({
     mutationFn: async ({
       title = 'New Chat',
       metadata,
@@ -236,40 +259,98 @@ export function useCreateChatSession(): UseMutationResult<
 
       return chatPersistenceService.createSession(user.id, title, metadata);
     },
-    onSuccess: async (newSession: ChatSession): Promise<void> => {
+    onMutate: async ({
+      title = 'New Chat',
+      metadata,
+    }: CreateSessionParams): Promise<SessionMutationContext> => {
       const user = await getCurrentUser();
-      if (user) {
-        // Optimistically add to cache
+      if (!user) {
+        return { previousSessions: undefined, userId: '' };
+      }
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: queryKeys.chat.sessions(user.id) });
+
+      // Snapshot previous value
+      const previousSessions = queryClient.getQueryData<ChatSession[]>(
+        queryKeys.chat.sessions(user.id)
+      );
+
+      // Create optimistic session with temporary ID
+      const optimisticSession: ChatSession = {
+        id: `temp-${Date.now()}`,
+        userId: user.id,
+        title,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isStarred: false,
+        isPinned: false,
+        isArchived: false,
+        messageCount: 0,
+        metadata: metadata || {},
+      };
+
+      // Optimistically add to cache
+      queryClient.setQueryData<ChatSession[]>(
+        queryKeys.chat.sessions(user.id),
+        (old) => (old ? [optimisticSession, ...old] : [optimisticSession])
+      );
+
+      return { previousSessions, userId: user.id };
+    },
+    onSuccess: (newSession: ChatSession, _variables, context): void => {
+      if (context?.userId) {
+        // Replace optimistic session with real one
         queryClient.setQueryData<ChatSession[]>(
-          queryKeys.chat.sessions(user.id),
-          (old) => (old ? [newSession, ...old] : [newSession])
+          queryKeys.chat.sessions(context.userId),
+          (old) => {
+            if (!old) return [newSession];
+            // Remove temp session and add real one
+            const filtered = old.filter((s) => !s.id.startsWith('temp-'));
+            return [newSession, ...filtered];
+          }
         );
       }
       toast.success('New chat created');
     },
-    onError: (error: Error): void => {
+    onError: (error: Error, _variables, context): void => {
+      // Rollback on error
+      if (context?.previousSessions !== undefined && context.userId) {
+        queryClient.setQueryData(
+          queryKeys.chat.sessions(context.userId),
+          context.previousSessions
+        );
+      }
       logger.error('Failed to create session:', error);
       toast.error('Failed to create chat');
+    },
+    onSettled: async (_data, _error, _variables, context): Promise<void> => {
+      // Invalidate to ensure consistency
+      if (context?.userId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.chat.sessions(context.userId) });
+      }
     },
   });
 }
 
 /**
- * Rename a chat session
+ * Rename a chat session with optimistic update
  *
  * @returns UseMutationResult for renaming a chat session
  */
 export function useRenameChatSession(): UseMutationResult<
   SessionMutationResult & { newTitle: string },
   Error,
-  RenameSessionParams
+  RenameSessionParams,
+  SessionMutationContext & { previousSession: ChatSession | null | undefined }
 > {
   const queryClient: QueryClient = useQueryClient();
 
   return useMutation<
     SessionMutationResult & { newTitle: string },
     Error,
-    RenameSessionParams
+    RenameSessionParams,
+    SessionMutationContext & { previousSession: ChatSession | null | undefined }
   >({
     mutationFn: async ({
       sessionId,
@@ -287,14 +368,30 @@ export function useRenameChatSession(): UseMutationResult<
       );
       return { sessionId, newTitle, userId: user.id };
     },
-    onSuccess: ({
+    onMutate: async ({
       sessionId,
       newTitle,
-      userId,
-    }: SessionMutationResult & { newTitle: string }): void => {
-      // Update cache
+    }: RenameSessionParams): Promise<SessionMutationContext & { previousSession: ChatSession | null | undefined }> => {
+      const user = await getCurrentUser();
+      if (!user) {
+        return { previousSessions: undefined, previousSession: undefined, userId: '' };
+      }
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: queryKeys.chat.sessions(user.id) });
+      await queryClient.cancelQueries({ queryKey: queryKeys.chat.session(sessionId) });
+
+      // Snapshot previous values
+      const previousSessions = queryClient.getQueryData<ChatSession[]>(
+        queryKeys.chat.sessions(user.id)
+      );
+      const previousSession = queryClient.getQueryData<ChatSession | null>(
+        queryKeys.chat.session(sessionId)
+      );
+
+      // Optimistically update sessions list
       queryClient.setQueryData<ChatSession[]>(
-        queryKeys.chat.sessions(userId),
+        queryKeys.chat.sessions(user.id),
         (old) =>
           old?.map((session) =>
             session.id === sessionId
@@ -303,35 +400,62 @@ export function useRenameChatSession(): UseMutationResult<
           )
       );
 
-      // Also update individual session cache
+      // Optimistically update individual session
       queryClient.setQueryData<ChatSession | null>(
         queryKeys.chat.session(sessionId),
         (old) =>
           old ? { ...old, title: newTitle, updatedAt: new Date() } : null
       );
 
+      return { previousSessions, previousSession, userId: user.id };
+    },
+    onSuccess: (): void => {
       toast.success('Chat renamed');
     },
-    onError: (error: Error): void => {
+    onError: (
+      error: Error,
+      { sessionId },
+      context
+    ): void => {
+      // Rollback on error
+      if (context?.previousSessions !== undefined && context.userId) {
+        queryClient.setQueryData(
+          queryKeys.chat.sessions(context.userId),
+          context.previousSessions
+        );
+      }
+      if (context?.previousSession !== undefined) {
+        queryClient.setQueryData(
+          queryKeys.chat.session(sessionId),
+          context.previousSession
+        );
+      }
       logger.error('Failed to rename session:', error);
       toast.error(error.message || 'Failed to rename chat');
+    },
+    onSettled: async (_data, _error, { sessionId }, context): Promise<void> => {
+      if (context?.userId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.chat.sessions(context.userId) });
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.chat.session(sessionId) });
     },
   });
 }
 
 /**
- * Delete (archive) a chat session
+ * Delete (archive) a chat session with optimistic update
  *
  * @returns UseMutationResult for deleting a chat session
  */
 export function useDeleteChatSession(): UseMutationResult<
   SessionMutationResult,
   Error,
-  string
+  string,
+  SessionMutationContext & { deletedSessionId: string }
 > {
   const queryClient: QueryClient = useQueryClient();
 
-  return useMutation<SessionMutationResult, Error, string>({
+  return useMutation<SessionMutationResult, Error, string, SessionMutationContext & { deletedSessionId: string }>({
     mutationFn: async (sessionId: string): Promise<SessionMutationResult> => {
       const user = await getCurrentUser();
       if (!user) {
@@ -341,14 +465,30 @@ export function useDeleteChatSession(): UseMutationResult<
       await chatPersistenceService.deleteSession(sessionId, user.id);
       return { sessionId, userId: user.id };
     },
-    onSuccess: ({ sessionId, userId }: SessionMutationResult): void => {
-      // Remove from cache
+    onMutate: async (sessionId: string): Promise<SessionMutationContext & { deletedSessionId: string }> => {
+      const user = await getCurrentUser();
+      if (!user) {
+        return { previousSessions: undefined, userId: '', deletedSessionId: sessionId };
+      }
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: queryKeys.chat.sessions(user.id) });
+
+      // Snapshot previous value
+      const previousSessions = queryClient.getQueryData<ChatSession[]>(
+        queryKeys.chat.sessions(user.id)
+      );
+
+      // Optimistically remove from cache
       queryClient.setQueryData<ChatSession[]>(
-        queryKeys.chat.sessions(userId),
+        queryKeys.chat.sessions(user.id),
         (old) => old?.filter((session) => session.id !== sessionId)
       );
 
-      // Invalidate individual session cache
+      return { previousSessions, userId: user.id, deletedSessionId: sessionId };
+    },
+    onSuccess: ({ sessionId }): void => {
+      // Remove individual session and messages cache
       queryClient.removeQueries({
         queryKey: queryKeys.chat.session(sessionId),
       });
@@ -358,29 +498,43 @@ export function useDeleteChatSession(): UseMutationResult<
 
       toast.success('Chat deleted');
     },
-    onError: (error: Error): void => {
+    onError: (error: Error, _sessionId, context): void => {
+      // Rollback on error
+      if (context?.previousSessions !== undefined && context.userId) {
+        queryClient.setQueryData(
+          queryKeys.chat.sessions(context.userId),
+          context.previousSessions
+        );
+      }
       logger.error('Failed to delete session:', error);
       toast.error(error.message || 'Failed to delete chat');
+    },
+    onSettled: async (_data, _error, _sessionId, context): Promise<void> => {
+      if (context?.userId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.chat.sessions(context.userId) });
+      }
     },
   });
 }
 
 /**
- * Toggle star status on a chat session
+ * Toggle star status on a chat session with optimistic update
  *
  * @returns UseMutationResult for toggling star status
  */
 export function useToggleStarSession(): UseMutationResult<
   SessionMutationResult & { isStarred: boolean },
   Error,
-  { sessionId: string; isStarred: boolean }
+  { sessionId: string; isStarred: boolean },
+  SessionMutationContext
 > {
   const queryClient: QueryClient = useQueryClient();
 
   return useMutation<
     SessionMutationResult & { isStarred: boolean },
     Error,
-    { sessionId: string; isStarred: boolean }
+    { sessionId: string; isStarred: boolean },
+    SessionMutationContext
   >({
     mutationFn: async ({
       sessionId,
@@ -407,9 +561,19 @@ export function useToggleStarSession(): UseMutationResult<
     }: {
       sessionId: string;
       isStarred: boolean;
-    }): Promise<void> => {
+    }): Promise<SessionMutationContext> => {
       const user = await getCurrentUser();
-      if (!user) return;
+      if (!user) {
+        return { previousSessions: undefined, userId: '' };
+      }
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: queryKeys.chat.sessions(user.id) });
+
+      // Snapshot previous value
+      const previousSessions = queryClient.getQueryData<ChatSession[]>(
+        queryKeys.chat.sessions(user.id)
+      );
 
       // Optimistic update
       queryClient.setQueryData<ChatSession[]>(
@@ -419,37 +583,51 @@ export function useToggleStarSession(): UseMutationResult<
             session.id === sessionId ? { ...session, isStarred } : session
           )
       );
+
+      return { previousSessions, userId: user.id };
     },
     onSuccess: ({
       isStarred,
     }: SessionMutationResult & { isStarred: boolean }): void => {
       toast.success(isStarred ? 'Chat starred' : 'Chat unstarred');
     },
-    onError: (error: Error): void => {
+    onError: (error: Error, _variables, context): void => {
+      // Rollback on error
+      if (context?.previousSessions !== undefined && context.userId) {
+        queryClient.setQueryData(
+          queryKeys.chat.sessions(context.userId),
+          context.previousSessions
+        );
+      }
       logger.error('Failed to update starred state:', error);
       toast.error('Failed to update starred state');
-      // Revert optimistic update by invalidating
-      queryClient.invalidateQueries({ queryKey: queryKeys.chat.all() });
+    },
+    onSettled: async (_data, _error, _variables, context): Promise<void> => {
+      if (context?.userId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.chat.sessions(context.userId) });
+      }
     },
   });
 }
 
 /**
- * Toggle pin status on a chat session
+ * Toggle pin status on a chat session with optimistic update
  *
  * @returns UseMutationResult for toggling pin status
  */
 export function useTogglePinSession(): UseMutationResult<
   SessionMutationResult & { isPinned: boolean },
   Error,
-  { sessionId: string; isPinned: boolean }
+  { sessionId: string; isPinned: boolean },
+  SessionMutationContext
 > {
   const queryClient: QueryClient = useQueryClient();
 
   return useMutation<
     SessionMutationResult & { isPinned: boolean },
     Error,
-    { sessionId: string; isPinned: boolean }
+    { sessionId: string; isPinned: boolean },
+    SessionMutationContext
   >({
     mutationFn: async ({
       sessionId,
@@ -476,9 +654,19 @@ export function useTogglePinSession(): UseMutationResult<
     }: {
       sessionId: string;
       isPinned: boolean;
-    }): Promise<void> => {
+    }): Promise<SessionMutationContext> => {
       const user = await getCurrentUser();
-      if (!user) return;
+      if (!user) {
+        return { previousSessions: undefined, userId: '' };
+      }
+
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: queryKeys.chat.sessions(user.id) });
+
+      // Snapshot previous value
+      const previousSessions = queryClient.getQueryData<ChatSession[]>(
+        queryKeys.chat.sessions(user.id)
+      );
 
       // Optimistic update
       queryClient.setQueryData<ChatSession[]>(
@@ -488,16 +676,29 @@ export function useTogglePinSession(): UseMutationResult<
             session.id === sessionId ? { ...session, isPinned } : session
           )
       );
+
+      return { previousSessions, userId: user.id };
     },
     onSuccess: ({
       isPinned,
     }: SessionMutationResult & { isPinned: boolean }): void => {
       toast.success(isPinned ? 'Chat pinned' : 'Chat unpinned');
     },
-    onError: (error: Error): void => {
+    onError: (error: Error, _variables, context): void => {
+      // Rollback on error
+      if (context?.previousSessions !== undefined && context.userId) {
+        queryClient.setQueryData(
+          queryKeys.chat.sessions(context.userId),
+          context.previousSessions
+        );
+      }
       logger.error('Failed to update pinned state:', error);
       toast.error('Failed to update pinned state');
-      queryClient.invalidateQueries({ queryKey: queryKeys.chat.all() });
+    },
+    onSettled: async (_data, _error, _variables, context): Promise<void> => {
+      if (context?.userId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.chat.sessions(context.userId) });
+      }
     },
   });
 }

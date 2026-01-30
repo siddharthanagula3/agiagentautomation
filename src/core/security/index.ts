@@ -51,3 +51,16 @@ export {
 
 // Gradual rollout (feature flags)
 export { isFeatureEnabled, type FeatureFlag } from './gradual-rollout';
+
+// Account lockout (brute force protection)
+export {
+  accountLockoutService,
+  AccountLockoutService,
+  LOCKOUT_PRESETS,
+  type LockoutConfig,
+  type LockoutCheckResult,
+  type FailedLoginResult,
+  type SecurityEventType,
+  type SecuritySeverity,
+  type SecurityEventDetails,
+} from '@core/auth/account-lockout-service';

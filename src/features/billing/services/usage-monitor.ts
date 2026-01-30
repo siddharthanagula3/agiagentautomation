@@ -1,4 +1,5 @@
 import { supabase } from '@shared/lib/supabase-client';
+import { captureError } from '@shared/lib/sentry';
 
 export interface APICallRecord {
   userId: string;
@@ -79,7 +80,17 @@ export class UsageTracker {
       }
     } catch (error) {
       console.error('Failed to track API usage:', error);
-      throw new Error(`Usage tracking failed: ${error.message}`);
+      captureError(error as Error, {
+        tags: { feature: 'billing', operation: 'track_api_usage' },
+        extra: {
+          userId: call.userId,
+          agentType: call.agentType,
+          provider: call.provider,
+          tokensUsed: call.tokensUsed,
+          taskId: call.taskId,
+        },
+      });
+      throw new Error(`Usage tracking failed: ${(error as Error).message}`);
     }
   }
 

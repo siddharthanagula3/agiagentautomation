@@ -17,7 +17,8 @@ export type FeatureFlag =
   | 'html_sanitization'
   | 'employee_input_sanitization'
   | 'employee_output_validation'
-  | 'sandwich_defense';
+  | 'sandwich_defense'
+  | 'account_lockout';
 
 export interface RolloutConfig {
   enabled: boolean;
@@ -76,6 +77,11 @@ const DEFAULT_ROLLOUTS: Record<FeatureFlag, RolloutConfig> = {
   sandwich_defense: {
     enabled: true,
     percentage: 100, // Full rollout - critical for prompt injection defense
+  },
+
+  account_lockout: {
+    enabled: true,
+    percentage: 100, // Full rollout - critical for brute force protection
   },
 };
 

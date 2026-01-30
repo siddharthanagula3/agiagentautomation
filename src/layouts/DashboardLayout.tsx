@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
 import { cn } from '@shared/lib/utils';
 import { DashboardHeader } from '@shared/components/layout/DashboardHeader';
@@ -15,6 +15,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
+
+  const handleOverlayKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === 'Escape' || event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        closeMobileMenu();
+      }
+    },
+    [closeMobileMenu]
+  );
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -24,7 +38,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
       }
     };
 
-    handleResize();
+    // Use queueMicrotask to batch initial state updates and avoid synchronous setState during effect
+    queueMicrotask(() => {
+      handleResize();
+    });
     window.addEventListener('resize', handleResize);
 
     const timer = setTimeout(() => setIsLoading(false), 500);
@@ -36,14 +53,41 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
   }, []);
 
   useEffect(() => {
-    setMobileMenuOpen(false);
+    // Use queueMicrotask to avoid synchronous setState during effect
+    queueMicrotask(() => {
+      setMobileMenuOpen(false);
+    });
   }, []);
+
+  // Handle Escape key to close mobile menu
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && mobileMenuOpen) {
+        closeMobileMenu();
+      }
+    };
+
+    if (mobileMenuOpen) {
+      document.addEventListener('keydown', handleEscapeKey);
+      // Prevent body scroll when mobile menu is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen, closeMobileMenu]);
 
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="space-y-4 text-center">
-          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <div
+            className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"
+            role="status"
+            aria-label="Loading"
+          ></div>
           <p className="font-medium text-foreground">Loading AGI Platform...</p>
         </div>
       </div>
@@ -62,7 +106,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 z-overlay bg-black/50 backdrop-blur-sm lg:hidden"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={closeMobileMenu}
+          onKeyDown={handleOverlayKeyDown}
+          role="button"
+          tabIndex={0}
+          aria-label="Close navigation menu"
         />
       )}
 
@@ -82,6 +130,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
             'z-30 transition-all duration-300 ease-in-out',
             sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'
           )}
+          aria-label="Main navigation"
         >
           <div className="flex min-h-0 flex-1 flex-col">
             <DashboardSidebar collapsed={sidebarCollapsed} />
@@ -97,12 +146,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
               aria-label={
                 sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
               }
+              aria-expanded={!sidebarCollapsed}
             >
               <MenuIcon
                 className={cn(
                   'h-4 w-4 transition-transform duration-200',
                   sidebarCollapsed ? 'rotate-180' : ''
                 )}
+                aria-hidden="true"
               />
               {!sidebarCollapsed && <span className="ml-2">Collapse</span>}
             </Button>
@@ -118,16 +169,19 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
             'flex flex-col shadow-2xl',
             mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           )}
+          aria-label="Mobile navigation"
+          aria-hidden={!mobileMenuOpen}
+          inert={!mobileMenuOpen ? '' : undefined}
         >
           <div className="flex flex-shrink-0 items-center justify-between border-b border-border p-4">
             <h2 className="text-lg font-semibold">AGI Platform</h2>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setMobileMenuOpen(false)}
-              aria-label="Close menu"
+              onClick={closeMobileMenu}
+              aria-label="Close navigation menu"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" aria-hidden="true" />
             </Button>
           </div>
           <div className="flex-1 overflow-hidden">
@@ -137,6 +191,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
 
         {/* Main Content */}
         <main
+          id="main-content"
           className={cn(
             'relative z-10 flex-1',
             'transition-all duration-300 ease-in-out',
@@ -157,9 +212,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ className }) => {
         <Button
           onClick={() => setMobileMenuOpen(true)}
           className="gradient-primary h-14 w-14 rounded-full text-white shadow-lg"
-          aria-label="Open menu"
+          aria-label="Open navigation menu"
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-navigation"
         >
-          <MenuIcon className="h-6 w-6" />
+          <MenuIcon className="h-6 w-6" aria-hidden="true" />
         </Button>
       </div>
     </div>

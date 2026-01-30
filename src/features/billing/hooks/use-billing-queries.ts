@@ -7,10 +7,13 @@
 
 import {
   useQuery,
+  useMutation,
   useQueryClient,
   type UseQueryResult,
+  type UseMutationResult,
   type QueryClient,
 } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { queryKeys } from '@shared/stores/query-client';
 import { supabase } from '@shared/lib/supabase-client';
 import { useAuthStore } from '@shared/stores/authentication-store';
@@ -544,4 +547,688 @@ export function useInvalidateBillingQueries(): () => void {
       queryClient.invalidateQueries({ queryKey: queryKeys.billing.all() });
     }
   };
+}
+
+// ============================================================================
+// SUBSCRIPTION HOOKS
+// ============================================================================
+
+/**
+ * Subscription data structure
+ */
+export interface Subscription {
+  id: string;
+  userId: string;
+  plan: BillingPlan;
+  status: SubscriptionStatus;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  canceledAt: string | null;
+  trialStart: string | null;
+  trialEnd: string | null;
+  stripeSubscriptionId: string | null;
+  stripeCustomerId: string | null;
+  priceId: string | null;
+  quantity: number;
+  metadata: Record<string, unknown>;
+}
+
+/**
+ * Fetch subscription details
+ *
+ * @returns UseQueryResult with Subscription data or null
+ */
+export function useSubscription(): UseQueryResult<Subscription | null, Error> {
+  const { user } = useAuthStore();
+
+  return useQuery<Subscription | null, Error>({
+    queryKey: queryKeys.billing.subscription(),
+    queryFn: async (): Promise<Subscription | null> => {
+      if (!user?.id) return null;
+
+      const { data, error } = await supabase
+        .from('users')
+        .select(
+          `
+          id,
+          plan,
+          plan_status,
+          subscription_end_date,
+          stripe_subscription_id,
+          stripe_customer_id,
+          trial_end_date
+        `
+        )
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (error || !data) {
+        logger.warn('[useSubscription] No subscription data found');
+        return null;
+      }
+
+      const now = new Date();
+      const periodEnd = data.subscription_end_date
+        ? new Date(data.subscription_end_date)
+        : new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+      const periodStart = new Date(periodEnd);
+      periodStart.setMonth(periodStart.getMonth() - 1);
+
+      return {
+        id: data.id,
+        userId: user.id,
+        plan: (data.plan as BillingPlan) || 'free',
+        status: (data.plan_status as SubscriptionStatus) || 'active',
+        currentPeriodStart: periodStart.toISOString(),
+        currentPeriodEnd: periodEnd.toISOString(),
+        cancelAtPeriodEnd: false,
+        canceledAt: null,
+        trialStart: null,
+        trialEnd: data.trial_end_date,
+        stripeSubscriptionId: data.stripe_subscription_id,
+        stripeCustomerId: data.stripe_customer_id,
+        priceId: null,
+        quantity: 1,
+        metadata: {},
+      };
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
+    meta: {
+      errorMessage: 'Failed to load subscription details',
+    },
+  });
+}
+
+// ============================================================================
+// INVOICE HOOKS
+// ============================================================================
+
+/**
+ * Invoice data structure
+ */
+export interface Invoice {
+  id: string;
+  number: string;
+  status: 'draft' | 'open' | 'paid' | 'uncollectible' | 'void';
+  amount: number;
+  currency: string;
+  description: string;
+  createdAt: string;
+  dueDate: string | null;
+  paidAt: string | null;
+  invoicePdf: string | null;
+  hostedInvoiceUrl: string | null;
+  lineItems: InvoiceLineItem[];
+}
+
+/**
+ * Invoice line item
+ */
+export interface InvoiceLineItem {
+  id: string;
+  description: string;
+  amount: number;
+  quantity: number;
+  period: {
+    start: string;
+    end: string;
+  };
+}
+
+/**
+ * Fetch user invoices
+ *
+ * @returns UseQueryResult with array of Invoice
+ */
+export function useInvoices(): UseQueryResult<Invoice[], Error> {
+  const { user } = useAuthStore();
+
+  return useQuery<Invoice[], Error>({
+    queryKey: queryKeys.billing.invoices(),
+    queryFn: async (): Promise<Invoice[]> => {
+      if (!user?.id) return [];
+
+      // Try to fetch from invoices table
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        // Table might not exist
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          logger.warn('[useInvoices] Invoices table does not exist');
+          return [];
+        }
+        throw error;
+      }
+
+      return (data || []).map((inv) => ({
+        id: inv.id,
+        number: inv.invoice_number || `INV-${inv.id.slice(0, 8).toUpperCase()}`,
+        status: inv.status || 'paid',
+        amount: inv.amount || 0,
+        currency: inv.currency || 'USD',
+        description: inv.description || 'Subscription charge',
+        createdAt: inv.created_at,
+        dueDate: inv.due_date,
+        paidAt: inv.paid_at,
+        invoicePdf: inv.invoice_pdf,
+        hostedInvoiceUrl: inv.hosted_invoice_url,
+        lineItems: inv.line_items || [],
+      }));
+    },
+    enabled: !!user?.id,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    meta: {
+      errorMessage: 'Failed to load invoices',
+    },
+  });
+}
+
+// ============================================================================
+// PAYMENT METHOD HOOKS
+// ============================================================================
+
+/**
+ * Payment method data structure
+ */
+export interface PaymentMethod {
+  id: string;
+  type: 'card' | 'bank_account' | 'paypal';
+  isDefault: boolean;
+  card?: {
+    brand: string;
+    last4: string;
+    expMonth: number;
+    expYear: number;
+  };
+  billingDetails: {
+    name: string | null;
+    email: string | null;
+    address: {
+      city: string | null;
+      country: string | null;
+      line1: string | null;
+      line2: string | null;
+      postalCode: string | null;
+      state: string | null;
+    };
+  };
+  createdAt: string;
+}
+
+/**
+ * Fetch user payment methods
+ *
+ * @returns UseQueryResult with array of PaymentMethod
+ */
+export function usePaymentMethods(): UseQueryResult<PaymentMethod[], Error> {
+  const { user } = useAuthStore();
+
+  return useQuery<PaymentMethod[], Error>({
+    queryKey: queryKeys.billing.paymentMethods(),
+    queryFn: async (): Promise<PaymentMethod[]> => {
+      if (!user?.id) return [];
+
+      // Try to fetch from payment_methods table
+      const { data, error } = await supabase
+        .from('payment_methods')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('is_default', { ascending: false });
+
+      if (error) {
+        // Table might not exist
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          logger.warn('[usePaymentMethods] Payment methods table does not exist');
+          return [];
+        }
+        throw error;
+      }
+
+      return (data || []).map((pm) => ({
+        id: pm.id,
+        type: pm.type || 'card',
+        isDefault: pm.is_default || false,
+        card: pm.card_brand
+          ? {
+              brand: pm.card_brand,
+              last4: pm.card_last4 || '****',
+              expMonth: pm.card_exp_month || 1,
+              expYear: pm.card_exp_year || 2030,
+            }
+          : undefined,
+        billingDetails: {
+          name: pm.billing_name,
+          email: pm.billing_email,
+          address: {
+            city: pm.billing_city,
+            country: pm.billing_country,
+            line1: pm.billing_line1,
+            line2: pm.billing_line2,
+            postalCode: pm.billing_postal_code,
+            state: pm.billing_state,
+          },
+        },
+        createdAt: pm.created_at,
+      }));
+    },
+    enabled: !!user?.id,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    meta: {
+      errorMessage: 'Failed to load payment methods',
+    },
+  });
+}
+
+// ============================================================================
+// TOKEN USAGE HISTORY HOOKS
+// ============================================================================
+
+/**
+ * Token usage history record
+ */
+export interface TokenUsageHistoryRecord {
+  id: string;
+  userId: string;
+  sessionId: string | null;
+  provider: string;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  cost: number;
+  createdAt: string;
+  metadata?: {
+    sessionTitle?: string;
+    messageId?: string;
+    employeeId?: string;
+  };
+}
+
+/**
+ * Token usage history options
+ */
+export interface TokenUsageHistoryOptions {
+  limit?: number;
+  offset?: number;
+  provider?: string;
+  startDate?: Date;
+  endDate?: Date;
+}
+
+/**
+ * Fetch token usage history with pagination
+ *
+ * @param options - Query options for filtering and pagination
+ * @returns UseQueryResult with array of TokenUsageHistoryRecord
+ */
+export function useTokenUsageHistory(
+  options?: TokenUsageHistoryOptions
+): UseQueryResult<TokenUsageHistoryRecord[], Error> {
+  const { user } = useAuthStore();
+  const { limit = 50, offset = 0, provider, startDate, endDate } = options || {};
+
+  return useQuery<TokenUsageHistoryRecord[], Error>({
+    queryKey: [
+      ...queryKeys.billing.tokenUsage(user?.id ?? ''),
+      'history',
+      { limit, offset, provider, startDate: startDate?.toISOString(), endDate: endDate?.toISOString() },
+    ],
+    queryFn: async (): Promise<TokenUsageHistoryRecord[]> => {
+      if (!user?.id) return [];
+
+      let query = supabase
+        .from('token_usage')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (provider) {
+        query = query.eq('provider', provider);
+      }
+
+      if (startDate) {
+        query = query.gte('created_at', startDate.toISOString());
+      }
+
+      if (endDate) {
+        query = query.lte('created_at', endDate.toISOString());
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          logger.warn('[useTokenUsageHistory] Token usage table does not exist');
+          return [];
+        }
+        throw error;
+      }
+
+      return (data || []).map((record) => ({
+        id: record.id,
+        userId: record.user_id,
+        sessionId: record.session_id,
+        provider: record.provider,
+        model: record.model || 'unknown',
+        inputTokens: record.input_tokens || 0,
+        outputTokens: record.output_tokens || 0,
+        totalTokens: record.total_tokens || 0,
+        cost: record.total_cost || 0,
+        createdAt: record.created_at,
+        metadata: record.metadata || {},
+      }));
+    },
+    enabled: !!user?.id,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    meta: {
+      errorMessage: 'Failed to load token usage history',
+    },
+  });
+}
+
+// ============================================================================
+// BILLING ANALYTICS HOOKS
+// ============================================================================
+
+/**
+ * Enhanced billing analytics data
+ */
+export interface BillingAnalyticsData {
+  overview: {
+    totalSpent: number;
+    totalTokensUsed: number;
+    avgCostPerDay: number;
+    avgTokensPerDay: number;
+    projectedMonthlySpend: number;
+    savingsFromPlan: number;
+  };
+  trends: {
+    date: string;
+    tokens: number;
+    cost: number;
+    sessions: number;
+  }[];
+  providerBreakdown: {
+    provider: string;
+    tokens: number;
+    cost: number;
+    percentage: number;
+    sessions: number;
+  }[];
+  topSessions: {
+    sessionId: string;
+    title: string;
+    tokens: number;
+    cost: number;
+    provider: string;
+    date: string;
+  }[];
+  periodComparison: {
+    currentPeriod: {
+      tokens: number;
+      cost: number;
+      sessions: number;
+    };
+    previousPeriod: {
+      tokens: number;
+      cost: number;
+      sessions: number;
+    };
+    percentChange: {
+      tokens: number;
+      cost: number;
+      sessions: number;
+    };
+  };
+}
+
+/**
+ * Fetch enhanced billing analytics
+ *
+ * @param timeRange - Time range for analytics
+ * @returns UseQueryResult with BillingAnalyticsData
+ */
+export function useBillingAnalytics(
+  timeRange: AnalyticsTimeRange = '30d'
+): UseQueryResult<BillingAnalyticsData | null, Error> {
+  const { user } = useAuthStore();
+
+  return useQuery<BillingAnalyticsData | null, Error>({
+    queryKey: [...queryKeys.billing.analytics(user?.id ?? '', timeRange), 'enhanced'],
+    queryFn: async (): Promise<BillingAnalyticsData | null> => {
+      if (!user?.id) return null;
+
+      const now = new Date();
+      const daysMap: Record<AnalyticsTimeRange, number> = {
+        '7d': 7,
+        '30d': 30,
+        '90d': 90,
+        'all': 365,
+      };
+      const days = daysMap[timeRange];
+      const startDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+      const previousStartDate = new Date(startDate.getTime() - days * 24 * 60 * 60 * 1000);
+
+      // Fetch token usage data
+      const { data: usageData, error: usageError } = await supabase
+        .from('token_usage')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', previousStartDate.toISOString())
+        .order('created_at', { ascending: true });
+
+      if (usageError) {
+        if (usageError.code === '42P01' || usageError.message?.includes('does not exist')) {
+          logger.warn('[useBillingAnalytics] Token usage table does not exist');
+          return null;
+        }
+        throw usageError;
+      }
+
+      const records = usageData || [];
+      const currentRecords = records.filter(
+        (r) => new Date(r.created_at) >= startDate
+      );
+      const previousRecords = records.filter(
+        (r) =>
+          new Date(r.created_at) >= previousStartDate &&
+          new Date(r.created_at) < startDate
+      );
+
+      // Calculate overview
+      const totalSpent = currentRecords.reduce((sum, r) => sum + (r.total_cost || 0), 0);
+      const totalTokensUsed = currentRecords.reduce((sum, r) => sum + (r.total_tokens || 0), 0);
+      const avgCostPerDay = totalSpent / days;
+      const avgTokensPerDay = totalTokensUsed / days;
+      const projectedMonthlySpend = avgCostPerDay * 30;
+
+      // Calculate trends
+      const trendsMap = new Map<string, { tokens: number; cost: number; sessions: number }>();
+      currentRecords.forEach((r) => {
+        const date = r.created_at.split('T')[0];
+        const existing = trendsMap.get(date) || { tokens: 0, cost: 0, sessions: 0 };
+        trendsMap.set(date, {
+          tokens: existing.tokens + (r.total_tokens || 0),
+          cost: existing.cost + (r.total_cost || 0),
+          sessions: existing.sessions + 1,
+        });
+      });
+      const trends = Array.from(trendsMap.entries()).map(([date, data]) => ({
+        date,
+        ...data,
+      }));
+
+      // Calculate provider breakdown
+      const providerMap = new Map<string, { tokens: number; cost: number; sessions: number }>();
+      currentRecords.forEach((r) => {
+        const provider = r.provider || 'unknown';
+        const existing = providerMap.get(provider) || { tokens: 0, cost: 0, sessions: 0 };
+        providerMap.set(provider, {
+          tokens: existing.tokens + (r.total_tokens || 0),
+          cost: existing.cost + (r.total_cost || 0),
+          sessions: existing.sessions + 1,
+        });
+      });
+      const providerBreakdown = Array.from(providerMap.entries()).map(([provider, data]) => ({
+        provider,
+        ...data,
+        percentage: totalTokensUsed > 0 ? (data.tokens / totalTokensUsed) * 100 : 0,
+      }));
+
+      // Period comparison
+      const currentPeriod = {
+        tokens: totalTokensUsed,
+        cost: totalSpent,
+        sessions: currentRecords.length,
+      };
+      const previousPeriod = {
+        tokens: previousRecords.reduce((sum, r) => sum + (r.total_tokens || 0), 0),
+        cost: previousRecords.reduce((sum, r) => sum + (r.total_cost || 0), 0),
+        sessions: previousRecords.length,
+      };
+      const percentChange = {
+        tokens:
+          previousPeriod.tokens > 0
+            ? ((currentPeriod.tokens - previousPeriod.tokens) / previousPeriod.tokens) * 100
+            : 0,
+        cost:
+          previousPeriod.cost > 0
+            ? ((currentPeriod.cost - previousPeriod.cost) / previousPeriod.cost) * 100
+            : 0,
+        sessions:
+          previousPeriod.sessions > 0
+            ? ((currentPeriod.sessions - previousPeriod.sessions) / previousPeriod.sessions) * 100
+            : 0,
+      };
+
+      return {
+        overview: {
+          totalSpent,
+          totalTokensUsed,
+          avgCostPerDay,
+          avgTokensPerDay,
+          projectedMonthlySpend,
+          savingsFromPlan: 0, // Would need plan limits to calculate
+        },
+        trends,
+        providerBreakdown,
+        topSessions: [], // Would need session join to populate
+        periodComparison: {
+          currentPeriod,
+          previousPeriod,
+          percentChange,
+        },
+      };
+    },
+    enabled: !!user?.id,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    meta: {
+      errorMessage: 'Failed to load billing analytics',
+    },
+  });
+}
+
+// ============================================================================
+// SUBSCRIPTION MUTATION HOOKS
+// ============================================================================
+
+/**
+ * Cancel subscription mutation
+ *
+ * @returns UseMutationResult for cancelling subscription
+ */
+export function useCancelSubscription(): UseMutationResult<
+  void,
+  Error,
+  { atPeriodEnd?: boolean }
+> {
+  const queryClient: QueryClient = useQueryClient();
+  const { user } = useAuthStore();
+
+  return useMutation<void, Error, { atPeriodEnd?: boolean }>({
+    mutationFn: async ({ atPeriodEnd = true }) => {
+      if (!user?.id) {
+        throw new Error('You must be logged in');
+      }
+
+      // Call Netlify function to cancel subscription
+      const response = await fetch('/.netlify/functions/payments/cancel-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ atPeriodEnd }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to cancel subscription');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.billing.subscription() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.billing.all() });
+      toast.success('Subscription cancelled successfully');
+    },
+    onError: (error: Error) => {
+      logger.error('Failed to cancel subscription:', error);
+      toast.error(error.message || 'Failed to cancel subscription');
+    },
+  });
+}
+
+/**
+ * Update payment method mutation
+ *
+ * @returns UseMutationResult for updating payment method
+ */
+export function useUpdatePaymentMethod(): UseMutationResult<
+  void,
+  Error,
+  { paymentMethodId: string }
+> {
+  const queryClient: QueryClient = useQueryClient();
+  const { user } = useAuthStore();
+
+  return useMutation<void, Error, { paymentMethodId: string }>({
+    mutationFn: async ({ paymentMethodId }) => {
+      if (!user?.id) {
+        throw new Error('You must be logged in');
+      }
+
+      const response = await fetch('/.netlify/functions/payments/update-payment-method', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ paymentMethodId }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update payment method');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.billing.paymentMethods() });
+      toast.success('Payment method updated successfully');
+    },
+    onError: (error: Error) => {
+      logger.error('Failed to update payment method:', error);
+      toast.error(error.message || 'Failed to update payment method');
+    },
+  });
 }

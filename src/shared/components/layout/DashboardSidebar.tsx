@@ -426,7 +426,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             )}
             asChild
           >
-            <NavLink to="/marketplace">
+            <NavLink to="/hire">
               <Plus className="mr-2 h-4 w-4" />
               Hire AI Employee
             </NavLink>

@@ -13,6 +13,7 @@
 
 import { supabase } from '@shared/lib/supabase-client';
 import { logger } from '@shared/lib/logger';
+import { captureError } from '@shared/lib/sentry';
 
 export interface TokenCheckResult {
   allowed: boolean;
@@ -77,6 +78,10 @@ export async function checkTokenSufficiency(
     };
   } catch (error) {
     logger.error('[Token Enforcement] Error checking sufficiency:', error);
+    captureError(error as Error, {
+      tags: { feature: 'billing', operation: 'check_token_sufficiency' },
+      extra: { userId, estimatedTokens },
+    });
     return {
       allowed: false,
       currentBalance: 0,
@@ -144,6 +149,10 @@ export async function deductTokens(
     };
   } catch (error) {
     logger.error('[Token Enforcement] Error:', error);
+    captureError(error as Error, {
+      tags: { feature: 'billing', operation: 'deduct_tokens' },
+      extra: { userId, ...metadata },
+    });
     return {
       success: false,
       newBalance: 0,
@@ -235,6 +244,10 @@ export async function getUserTokenBalance(
     return balance;
   } catch (error) {
     logger.error('[Token Enforcement] Error:', error);
+    captureError(error as Error, {
+      tags: { feature: 'billing', operation: 'get_user_token_balance' },
+      extra: { userId },
+    });
     // SECURITY FIX: Jan 15th 2026 - Fail closed on unexpected errors
     // Return null to trigger denial instead of allowing with default tokens
     return null;
@@ -349,6 +362,10 @@ export async function checkMonthlyAllowance(userId: string): Promise<{
     };
   } catch (error) {
     logger.error('[Token Enforcement] Error checking allowance:', error);
+    captureError(error as Error, {
+      tags: { feature: 'billing', operation: 'check_monthly_allowance' },
+      extra: { userId },
+    });
     return {
       allowed: false,
       used: 0,

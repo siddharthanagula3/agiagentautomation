@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useMultiAgentChatStore } from './multi-agent-chat-store';
+import { useMultiAgentChatStore, clearMessageFingerprintCache } from './multi-agent-chat-store';
 import type {
   ChatMessage,
   ConversationParticipant,
@@ -22,6 +22,8 @@ describe('Multi-Agent Chat Store', () => {
   beforeEach(() => {
     // Reset store to initial state before each test
     useMultiAgentChatStore.getState().reset();
+    // Clear the duplicate message fingerprint cache to prevent test interference
+    clearMessageFingerprintCache();
   });
 
   afterEach(() => {

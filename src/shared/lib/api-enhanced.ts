@@ -14,8 +14,6 @@ import {
   isRetryableError,
   getRetryDelay,
   getErrorMessage,
-  toAppError,
-  type AppError,
 } from './error-utils';
 
 // Re-export APIResponse type from base api module

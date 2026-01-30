@@ -473,7 +473,8 @@ export function stopMissionCleanupInterval(): void {
 }
 
 // Initialize cleanup interval on module load
-if (typeof window !== 'undefined' && !cleanupIntervalId) {
+if (typeof window !== 'undefined') {
+  // startMissionCleanupInterval already checks if cleanupIntervalId is null
   startMissionCleanupInterval();
 
   // Cleanup on page unload to prevent memory leaks

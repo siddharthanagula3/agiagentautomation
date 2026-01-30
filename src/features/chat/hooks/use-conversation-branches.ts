@@ -12,7 +12,7 @@
  * 2. React Query hooks: useBranches(sessionId), useBranchHistory(sessionId), etc.
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@shared/stores/query-client';
 import {
@@ -20,7 +20,6 @@ import {
   type ConversationBranchWithDetails,
   type BranchHistoryEntry,
 } from '../services/conversation-branching';
-import { supabase } from '@shared/lib/supabase-client';
 import { toast } from 'sonner';
 import { logger } from '@shared/lib/logger';
 import type { ChatSession } from '../types';

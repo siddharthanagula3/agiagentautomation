@@ -342,7 +342,7 @@ describe('Artifact Store', () => {
     });
 
     it('should clear all artifacts', async () => {
-      const { addArtifact, shareArtifact, setActiveArtifact, clearAllArtifacts, getMessageArtifacts } =
+      const { addArtifact, shareArtifact, setActiveArtifact, clearAllArtifacts } =
         useArtifactStore.getState();
 
       const artifact = createMockArtifact();
@@ -362,7 +362,7 @@ describe('Artifact Store', () => {
 
   describe('Reset', () => {
     it('should reset to initial state', async () => {
-      const { addArtifact, shareArtifact, setActiveArtifact, reset, getMessageArtifacts } =
+      const { addArtifact, shareArtifact, setActiveArtifact, reset } =
         useArtifactStore.getState();
 
       const artifact = createMockArtifact();

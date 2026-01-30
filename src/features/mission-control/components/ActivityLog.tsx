@@ -8,7 +8,7 @@
  * - useCallback for event handlers
  */
 
-import React, { useRef, useEffect, memo, useMemo, useCallback } from 'react';
+import React, { useRef, useEffect, memo, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import {

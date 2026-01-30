@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, memo, useMemo } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import { ChatMessage } from '@shared/hooks/useChatState';
 import { User, Bot } from 'lucide-react';
 

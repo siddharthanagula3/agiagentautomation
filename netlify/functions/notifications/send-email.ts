@@ -6,7 +6,7 @@
  * Created: January 2026
  */
 
-import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
+import { Handler, HandlerContext } from '@netlify/functions';
 import { z } from 'zod';
 import { withAuth, AuthenticatedEvent } from '../utils/auth-middleware';
 import { checkRateLimitWithTier } from '../utils/rate-limiter';

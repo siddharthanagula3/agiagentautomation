@@ -18,25 +18,6 @@ vi.mock('./authentication-store', () => ({
   },
 }));
 
-// Create chainable mock factory
-const createChainableMock = (resolvedValue: unknown) => {
-  const mockFn = vi.fn(() => Promise.resolve(resolvedValue));
-  return {
-    eq: vi.fn().mockReturnThis(),
-    order: mockFn,
-    select: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          order: mockFn,
-        }),
-        order: mockFn,
-      }),
-      maybeSingle: vi.fn(() => Promise.resolve(resolvedValue)),
-    }),
-    maybeSingle: vi.fn(() => Promise.resolve(resolvedValue)),
-  };
-};
-
 // Mock Supabase client
 let mockSupabaseResponse: { data: unknown; error: unknown } = {
   data: [],

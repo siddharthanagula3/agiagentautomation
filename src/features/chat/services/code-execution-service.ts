@@ -60,8 +60,6 @@ interface QueuedExecution {
 
 const DEFAULT_TIMEOUT = 10_000; // 10 seconds
 const MAX_TIMEOUT = 30_000; // 30 seconds max
-const DEFAULT_MEMORY_LIMIT_JS = 50 * 1024 * 1024; // 50MB
-const DEFAULT_MEMORY_LIMIT_PYTHON = 100 * 1024 * 1024; // 100MB
 const MAX_QUEUE_SIZE = 10;
 const MAX_CODE_LENGTH = 100_000; // 100KB
 

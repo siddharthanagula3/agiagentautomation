@@ -627,8 +627,6 @@ export async function routeAndExecuteTools(
     ) => void;
   }
 ): Promise<ToolRouterResult> {
-  const startTime = Date.now();
-
   // Step 1: Analyze message to detect required tools
   const detection = analyzeMessage(message);
   const executionResults: ToolExecutionResult[] = [];

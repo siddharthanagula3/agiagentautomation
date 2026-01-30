@@ -30,7 +30,6 @@ const supabase = createClient(supabaseUrl || '', supabaseServiceKey || '');
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@agiagent.ai';
-const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@agiagent.ai';
 
 interface EmailNotificationRequest {
   type: 'ticket_created' | 'ticket_reply' | 'ticket_status_change';

@@ -62,7 +62,9 @@ export const MarketplacePublicPage: React.FC = () => {
       endTs = now + 15 * 60 * 1000;
       localStorage.setItem(STORAGE_KEY, String(endTs));
     }
-    setDiscountEnd(new Date(endTs));
+    // Use queueMicrotask to avoid synchronous setState in effect
+    const deadline = new Date(endTs);
+    queueMicrotask(() => setDiscountEnd(deadline));
   }, []);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');

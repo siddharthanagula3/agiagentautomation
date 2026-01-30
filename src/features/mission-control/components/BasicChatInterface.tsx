@@ -18,13 +18,15 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '@shared/lib/utils';
+import type { SimpleChatMessage } from '@shared/types';
 
-interface ChatMessage {
-  id: string;
+/**
+ * Local chat message type extending SimpleChatMessage
+ * Narrowed role for this component's use case
+ */
+type BasicChatMessage = Omit<SimpleChatMessage, 'role'> & {
   role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
+};
 
 interface StandardChatProps {
   provider?: AIProvider;
@@ -35,7 +37,7 @@ export const StandardChat: React.FC<StandardChatProps> = ({
   provider = 'openai',
   model,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<BasicChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -48,7 +50,7 @@ export const StandardChat: React.FC<StandardChatProps> = ({
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMessage: ChatMessage = {
+    const userMessage: BasicChatMessage = {
       id: crypto.randomUUID(),
       role: 'user',
       content: input.trim(),
@@ -74,7 +76,7 @@ export const StandardChat: React.FC<StandardChatProps> = ({
 
       const response = await sendAIMessage(provider, messageHistory, model);
 
-      const assistantMessage: ChatMessage = {
+      const assistantMessage: BasicChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
         content: response,
@@ -88,7 +90,7 @@ export const StandardChat: React.FC<StandardChatProps> = ({
       toast.error(`Failed to get response: ${errorMessage}`);
 
       // Add error message to chat
-      const errorMsg: ChatMessage = {
+      const errorMsg: BasicChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
         content: `I apologize, but I encountered an error: ${errorMessage}. Please try again.`,

@@ -18,7 +18,11 @@ export const useRealtime = (callbacks: RealtimeCallbacks = {}) => {
   const previousUserIdRef = useRef<string | null>(null);
   // Store callbacks in a ref to avoid triggering effects on callback reference changes
   const callbacksRef = useRef(callbacks);
-  callbacksRef.current = callbacks;
+
+  // Update callbacks ref in an effect to avoid ref access during render
+  useEffect(() => {
+    callbacksRef.current = callbacks;
+  });
 
   // Initialize realtime subscriptions
   useEffect(() => {

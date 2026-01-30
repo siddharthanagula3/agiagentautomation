@@ -3,7 +3,7 @@
  * Multi-agent chat with inline collaboration, tool usage, and agent avatars
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
@@ -65,52 +65,75 @@ export const CollaborativeChatInterface: React.FC<
   const [isExpanded, setIsExpanded] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messageCounterRef = useRef(0);
+
+  // Generate unique message ID using a ref counter to avoid impure Date.now() in render
+  const generateMessageId = useCallback((prefix: string) => {
+    messageCounterRef.current += 1;
+    return `${prefix}-${messageCounterRef.current}-${Math.random().toString(36).slice(2, 9)}`;
+  }, []);
 
   // Load available AI employees from system
-  // Updated: Jan 15th 2026 - Wrapped in useCallback to fix React hooks warning
-  const loadAvailableEmployees = useCallback(async () => {
-    try {
-      const employees = await systemPromptsService.getAvailableEmployees();
-      const agents: AgentCapability[] = employees.map((emp) => ({
-        agentId: emp.name,
-        name: emp.description || emp.name,
-        avatar: emp.metadata?.avatar,
-        expertise: emp.metadata?.expertise || [],
-        tools: emp.tools || [],
-        systemPrompt: emp.systemPrompt,
-        model: emp.model || 'claude-3-5-sonnet',
-        temperature: 0.7,
-      }));
-
-      setAvailableAgents(agents);
-
-      // Auto-load initial agents
-      if (initialAgents.length > 0 && protocol) {
-        initialAgents.forEach((agentId) => {
-          const agent = agents.find((a) => a.agentId === agentId);
-          if (agent) {
-            protocol.registerAgent(agent);
-          }
-        });
-        setActiveAgents(protocol.getActiveAgents());
-      }
-    } catch (error) {
-      console.error('Failed to load AI employees:', error);
-      toast.error('Failed to load AI employees');
-    }
-  }, [initialAgents, protocol]);
-
-  // Initialize collaboration protocol
+  // Initialize collaboration protocol and load employees
   useEffect(() => {
     if (!user) return;
 
+    let isMounted = true;
     const context = createCollaborationContext(user.id, sessionId);
     const collab = new CollaborationProtocol(context);
-    setProtocol(collab);
+
+    // Use queueMicrotask to avoid synchronous setState in effect
+    queueMicrotask(() => {
+      if (isMounted) setProtocol(collab);
+    });
 
     // Load available AI employees
-    loadAvailableEmployees();
-  }, [user, sessionId, loadAvailableEmployees]);
+    const loadEmployees = async () => {
+      try {
+        const employees = await systemPromptsService.getAvailableEmployees();
+        const agents: AgentCapability[] = employees.map((emp) => ({
+          agentId: emp.name,
+          name: emp.description || emp.name,
+          avatar: emp.metadata?.avatar,
+          expertise: emp.metadata?.expertise || [],
+          tools: emp.tools || [],
+          systemPrompt: emp.systemPrompt,
+          model: emp.model || 'claude-3-5-sonnet',
+          temperature: 0.7,
+        }));
+
+        if (!isMounted) return;
+
+        // Use queueMicrotask to avoid synchronous setState in effect
+        queueMicrotask(() => {
+          if (!isMounted) return;
+          setAvailableAgents(agents);
+
+          // Auto-load initial agents
+          if (initialAgents.length > 0) {
+            initialAgents.forEach((agentId) => {
+              const agent = agents.find((a) => a.agentId === agentId);
+              if (agent) {
+                collab.registerAgent(agent);
+              }
+            });
+            setActiveAgents(collab.getActiveAgents());
+          }
+        });
+      } catch (error) {
+        console.error('Failed to load AI employees:', error);
+        if (isMounted) {
+          toast.error('Failed to load AI employees');
+        }
+      }
+    };
+
+    loadEmployees();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, sessionId, initialAgents]);
 
   // Add agent to conversation
   const addAgent = (agentId: string) => {
@@ -123,7 +146,7 @@ export const CollaborativeChatInterface: React.FC<
     setActiveAgents(protocol.getActiveAgents());
 
     const systemMessage: AgentMessage = {
-      id: `system-${Date.now()}`,
+      id: generateMessageId('system'),
       type: 'system',
       role: 'system',
       content: `${agent.name} joined the conversation`,
@@ -147,7 +170,7 @@ export const CollaborativeChatInterface: React.FC<
     setActiveAgents(protocol.getActiveAgents());
 
     const systemMessage: AgentMessage = {
-      id: `system-${Date.now()}`,
+      id: generateMessageId('system'),
       type: 'system',
       role: 'system',
       content: `${agent.name} left the conversation`,
@@ -168,7 +191,7 @@ export const CollaborativeChatInterface: React.FC<
 
     // Create user message
     const userMessage: AgentMessage = {
-      id: `user-${Date.now()}`,
+      id: generateMessageId('user'),
       type: 'user',
       role: 'user',
       content: input.trim(),
@@ -260,7 +283,7 @@ export const CollaborativeChatInterface: React.FC<
 
       // Create agent message
       const agentMessage: AgentMessage = {
-        id: `agent-${Date.now()}-${agentId}`,
+        id: generateMessageId(`agent-${agentId}`),
         type: 'agent',
         role: 'assistant',
         content: response.content,

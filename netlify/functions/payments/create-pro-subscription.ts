@@ -6,6 +6,10 @@ import {
   createSubscriptionSchema,
   formatValidationError,
 } from '../utils/validation-schemas';
+import {
+  sanitizeBillingError,
+  BILLING_ERROR_CODES,
+} from '../utils/billing-error-sanitizer';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia',

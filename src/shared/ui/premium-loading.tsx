@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@shared/lib/utils';
-import { Sparkles, Zap, Brain } from 'lucide-react';
+import { Sparkles, Brain } from 'lucide-react';
 
 interface PremiumLoadingProps {
   message?: string;
@@ -10,23 +10,41 @@ interface PremiumLoadingProps {
   className?: string;
 }
 
+/**
+ * Get size class based on size prop - uses explicit conditionals to avoid object injection
+ */
+function getSizeClass(size: 'sm' | 'md' | 'lg'): string {
+  if (size === 'sm') return 'w-6 h-6';
+  if (size === 'md') return 'w-8 h-8';
+  return 'w-12 h-12';
+}
+
+/**
+ * Get text size class based on size prop - uses explicit conditionals to avoid object injection
+ */
+function getTextSizeClass(size: 'sm' | 'md' | 'lg'): string {
+  if (size === 'sm') return 'text-sm';
+  if (size === 'md') return 'text-base';
+  return 'text-lg';
+}
+
+/**
+ * Get brain icon size class based on size prop
+ */
+function getBrainSizeClass(size: 'sm' | 'md' | 'lg'): string {
+  if (size === 'sm') return 'h-3 w-3';
+  if (size === 'md') return 'h-4 w-4';
+  return 'h-6 w-6';
+}
+
 const PremiumLoading: React.FC<PremiumLoadingProps> = ({
   message = 'Loading...',
   variant = 'default',
   size = 'md',
   className,
 }) => {
-  const sizeClasses = {
-    sm: 'w-6 h-6',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12',
-  };
-
-  const textSizeClasses = {
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-lg',
-  };
+  const sizeClass = getSizeClass(size);
+  const textSizeClass = getTextSizeClass(size);
 
   if (variant === 'minimal') {
     return (
@@ -34,7 +52,7 @@ const PremiumLoading: React.FC<PremiumLoadingProps> = ({
         <motion.div
           className={cn(
             'rounded-full border-2 border-primary border-t-transparent',
-            sizeClasses[size]
+            sizeClass
           )}
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -56,20 +74,17 @@ const PremiumLoading: React.FC<PremiumLoadingProps> = ({
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
         >
-          <Sparkles className={cn('text-primary', sizeClasses[size])} />
+          <Sparkles className={cn('text-primary', sizeClass)} />
           <motion.div
             className="absolute inset-0"
             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 1.5, repeat: Infinity }}
           >
-            <Sparkles className={cn('text-primary/50', sizeClasses[size])} />
+            <Sparkles className={cn('text-primary/50', sizeClass)} />
           </motion.div>
         </motion.div>
         <motion.p
-          className={cn(
-            'font-medium text-muted-foreground',
-            textSizeClasses[size]
-          )}
+          className={cn('font-medium text-muted-foreground', textSizeClass)}
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
@@ -90,7 +105,7 @@ const PremiumLoading: React.FC<PremiumLoadingProps> = ({
         <motion.div
           className={cn(
             'rounded-full border-4 border-primary/20 border-t-primary',
-            sizeClasses[size]
+            sizeClass
           )}
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -100,12 +115,7 @@ const PremiumLoading: React.FC<PremiumLoadingProps> = ({
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
-          <Brain
-            className={cn(
-              'text-primary',
-              size === 'sm' ? 'h-3 w-3' : size === 'md' ? 'h-4 w-4' : 'h-6 w-6'
-            )}
-          />
+          <Brain className={cn('text-primary', getBrainSizeClass(size))} />
         </motion.div>
       </div>
 
@@ -133,10 +143,7 @@ const PremiumLoading: React.FC<PremiumLoadingProps> = ({
       </motion.div>
 
       <motion.p
-        className={cn(
-          'font-medium text-muted-foreground',
-          textSizeClasses[size]
-        )}
+        className={cn('font-medium text-muted-foreground', textSizeClass)}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}

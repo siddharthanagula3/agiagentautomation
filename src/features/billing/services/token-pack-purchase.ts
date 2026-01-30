@@ -1,5 +1,6 @@
 import { supabase } from '@shared/lib/supabase-client';
 import { toast } from 'sonner';
+import { captureError } from '@shared/lib/sentry';
 
 interface BuyTokenPackParams {
   userId: string;
@@ -86,7 +87,11 @@ export async function buyTokenPack(params: BuyTokenPackParams): Promise<void> {
       throw new Error('No checkout URL returned');
     }
   } catch (error) {
-    console.error('[Buy Token Pack] ❌ Error:', error);
+    console.error('[Buy Token Pack] Error:', error);
+    captureError(error as Error, {
+      tags: { feature: 'billing', operation: 'buy_token_pack' },
+      extra: { userId, packId, tokens, price },
+    });
     throw error;
   }
 }
@@ -95,7 +100,10 @@ export async function buyTokenPack(params: BuyTokenPackParams): Promise<void> {
  * Add tokens to user's balance
  *
  * Called by webhook after successful payment.
- * Updates user's token balance in database.
+ * Updates user's token balance in the user_token_balances table.
+ *
+ * NOTE: Uses user_token_balances table (authoritative source) instead of
+ * the deprecated users.token_balance column (dropped in migration 20260113000002).
  */
 export async function addTokensToUserBalance(
   userId: string,
@@ -109,83 +117,176 @@ export async function addTokensToUserBalance(
       transactionId,
     });
 
-    // Get current balance
-    const { data: userData, error: fetchError } = await supabase
-      .from('users')
-      .select('token_balance')
-      .eq('id', userId)
-      .maybeSingle();
+    // Use the add_user_tokens RPC function which handles everything atomically
+    // This ensures the user_token_balances record exists (via get_or_create_token_balance)
+    // and properly logs the transaction
+    const { data: newBalance, error: rpcError } = await supabase.rpc(
+      'add_user_tokens',
+      {
+        p_user_id: userId,
+        p_token_count: tokens,
+        p_transaction_type: 'purchase',
+        p_description: `Token pack purchase: ${transactionId}`,
+      }
+    );
 
-    if (fetchError) {
-      console.error('[Add Tokens] Error fetching user:', fetchError);
-      throw fetchError;
-    }
-
-    const currentBalance = userData?.token_balance || 0;
-    const newBalance = currentBalance + tokens;
-
-    // Update user's token balance
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({
-        token_balance: newBalance,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', userId);
-
-    if (updateError) {
-      console.error('[Add Tokens] Error updating balance:', updateError);
-      throw updateError;
-    }
-
-    // Log transaction
-    const { error: logError } = await supabase
-      .from('token_transactions')
-      .insert({
-        user_id: userId,
-        tokens,
-        transaction_type: 'purchase',
-        transaction_id: transactionId,
-        previous_balance: currentBalance,
-        new_balance: newBalance,
-        created_at: new Date().toISOString(),
+    if (rpcError) {
+      console.error('[Add Tokens] RPC error:', rpcError);
+      captureError(rpcError as Error, {
+        tags: { feature: 'billing', operation: 'add_tokens_rpc' },
+        extra: { userId, tokens, transactionId },
       });
 
-    if (logError) {
-      console.error('[Add Tokens] Error logging transaction:', logError);
-      // Don't throw - transaction was successful even if log fails
+      // Fallback: direct update to user_token_balances table
+      console.log('[Add Tokens] Attempting fallback direct update...');
+
+      // Get current balance from user_token_balances
+      const { data: balanceData, error: fetchError } = await supabase
+        .from('user_token_balances')
+        .select('current_balance')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error('[Add Tokens] Error fetching balance:', fetchError);
+        captureError(fetchError as Error, {
+          tags: { feature: 'billing', operation: 'fetch_balance' },
+          extra: { userId, tokens, transactionId },
+        });
+        throw fetchError;
+      }
+
+      const currentBalance = balanceData?.current_balance || 0;
+      const updatedBalance = currentBalance + tokens;
+
+      if (balanceData) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('user_token_balances')
+          .update({
+            current_balance: updatedBalance,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', userId);
+
+        if (updateError) {
+          console.error('[Add Tokens] Error updating balance:', updateError);
+          captureError(updateError as Error, {
+            tags: { feature: 'billing', operation: 'update_balance' },
+            extra: { userId, tokens, transactionId },
+          });
+          throw updateError;
+        }
+      } else {
+        // Create new record with default monthly allowance
+        const { error: insertError } = await supabase
+          .from('user_token_balances')
+          .insert({
+            user_id: userId,
+            current_balance: tokens,
+            monthly_allowance: 1000000, // Default free tier
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+
+        if (insertError) {
+          console.error('[Add Tokens] Error inserting balance:', insertError);
+          captureError(insertError as Error, {
+            tags: { feature: 'billing', operation: 'insert_balance' },
+            extra: { userId, tokens, transactionId },
+          });
+          throw insertError;
+        }
+      }
+
+      // Log transaction
+      const { error: logError } = await supabase
+        .from('token_transactions')
+        .insert({
+          user_id: userId,
+          tokens,
+          transaction_type: 'purchase',
+          transaction_id: transactionId,
+          previous_balance: currentBalance,
+          new_balance: updatedBalance,
+          created_at: new Date().toISOString(),
+        });
+
+      if (logError) {
+        console.error('[Add Tokens] Error logging transaction:', logError);
+        captureError(logError as Error, {
+          tags: { feature: 'billing', operation: 'log_transaction' },
+          extra: { userId, tokens, transactionId },
+          level: 'warning',
+        });
+        // Don't throw - balance update was successful even if log fails
+      }
+
+      console.log('[Add Tokens] Fallback balance updated:', {
+        previousBalance: currentBalance.toLocaleString(),
+        tokensAdded: tokens.toLocaleString(),
+        newBalance: updatedBalance.toLocaleString(),
+      });
+      return;
     }
 
-    console.log('[Add Tokens] ✅ Token balance updated:', {
-      previousBalance: currentBalance.toLocaleString(),
+    console.log('[Add Tokens] Token balance updated via RPC:', {
       tokensAdded: tokens.toLocaleString(),
-      newBalance: newBalance.toLocaleString(),
+      newBalance: (newBalance as number).toLocaleString(),
     });
   } catch (error) {
-    console.error('[Add Tokens] ❌ Error:', error);
+    console.error('[Add Tokens] Error:', error);
+    captureError(error as Error, {
+      tags: { feature: 'billing', operation: 'add_tokens' },
+      extra: { userId, tokens, transactionId },
+    });
     throw error;
   }
 }
 
 /**
  * Get user's token balance
+ *
+ * NOTE: Uses user_token_balances table (authoritative source) instead of
+ * the deprecated users.token_balance column (dropped in migration 20260113000002).
  */
 export async function getUserTokenBalance(userId: string): Promise<number> {
   try {
+    // Try using the get_or_create_token_balance RPC function first
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+      'get_or_create_token_balance',
+      { p_user_id: userId }
+    );
+
+    if (!rpcError && rpcData && rpcData.length > 0) {
+      return rpcData[0].current_balance || 0;
+    }
+
+    // Fallback: Query user_token_balances table directly
     const { data, error } = await supabase
-      .from('users')
-      .select('token_balance')
-      .eq('id', userId)
+      .from('user_token_balances')
+      .select('current_balance')
+      .eq('user_id', userId)
       .maybeSingle();
 
     if (error) {
       console.error('[Get Token Balance] Error:', error);
+      captureError(error as Error, {
+        tags: { feature: 'billing', operation: 'get_token_balance' },
+        extra: { userId },
+        level: 'warning',
+      });
       return 0;
     }
 
-    return data?.token_balance || 0;
+    return data?.current_balance || 0;
   } catch (error) {
     console.error('[Get Token Balance] Error:', error);
+    captureError(error as Error, {
+      tags: { feature: 'billing', operation: 'get_token_balance' },
+      extra: { userId },
+      level: 'warning',
+    });
     return 0;
   }
 }

@@ -89,6 +89,122 @@ export class WorkforceOrchestratorRefactored {
   private employeesLoaded = false;
 
   /**
+   * RACE CONDITION FIX: Track assigned employees per mission to prevent
+   * the same employee from being assigned to multiple concurrent tasks.
+   * Key: missionId, Value: Set of employee names currently assigned
+   */
+  private missionAssignedEmployees: Map<string, Set<string>> = new Map();
+
+  /**
+   * RACE CONDITION FIX: Cache of available employees per mission.
+   * Fetched once at mission start to avoid repeated database queries.
+   * Key: missionId, Value: Array of available employees for that mission
+   */
+  private missionEmployeeCache: Map<string, AIEmployee[]> = new Map();
+
+  /**
+   * RACE CONDITION FIX: Initialize employee tracking for a new mission.
+   * Caches available employees and initializes the assigned employee set.
+   * @param missionId - Unique identifier for the mission
+   * @param userId - User ID to fetch hired employees for
+   */
+  private async initializeMissionEmployees(missionId: string, userId?: string): Promise<void> {
+    // Initialize the assigned employees set for this mission
+    this.missionAssignedEmployees.set(missionId, new Set<string>());
+
+    // Fetch and cache available employees for this mission
+    let availableEmployees = [...this.employees];
+
+    if (userId) {
+      try {
+        const { data: hiredEmployees, error } = await supabase
+          .from('purchased_employees')
+          .select('employee_id, ai_employees(name)')
+          .eq('user_id', userId)
+          .eq('is_active', true);
+
+        if (!error && hiredEmployees && hiredEmployees.length > 0) {
+          // Create set of hired employee names for quick lookup
+          const hiredNames = new Set(
+            hiredEmployees
+              .map((e) => (e.ai_employees as { name: string } | null)?.name)
+              .filter((name): name is string => name !== null)
+          );
+
+          // Filter to only employees user has hired (or free employees with price 0)
+          availableEmployees = this.employees.filter(
+            (emp) => hiredNames.has(emp.name) || emp.price === 0
+          );
+        }
+      } catch (error) {
+        logger.error('[Workforce Orchestrator] Error fetching hired employees for mission cache:', error);
+        // On error, continue with all employees (degraded mode)
+      }
+    }
+
+    this.missionEmployeeCache.set(missionId, availableEmployees);
+    logger.info(`[Workforce Orchestrator] Mission ${missionId} initialized with ${availableEmployees.length} available employees`);
+  }
+
+  /**
+   * RACE CONDITION FIX: Mark an employee as assigned for a mission.
+   * @param missionId - Unique identifier for the mission
+   * @param employeeName - Name of the employee to mark as assigned
+   * @returns true if successfully assigned, false if already assigned
+   */
+  private assignEmployeeToMission(missionId: string, employeeName: string): boolean {
+    const assignedSet = this.missionAssignedEmployees.get(missionId);
+    if (!assignedSet) {
+      logger.warn(`[Workforce Orchestrator] No assignment set for mission ${missionId}`);
+      return false;
+    }
+
+    if (assignedSet.has(employeeName)) {
+      logger.info(`[Workforce Orchestrator] Employee ${employeeName} already assigned in mission ${missionId}`);
+      return false;
+    }
+
+    assignedSet.add(employeeName);
+    logger.info(`[Workforce Orchestrator] Employee ${employeeName} assigned to mission ${missionId}`);
+    return true;
+  }
+
+  /**
+   * RACE CONDITION FIX: Release an employee from a mission when task completes.
+   * @param missionId - Unique identifier for the mission
+   * @param employeeName - Name of the employee to release
+   */
+  private releaseEmployeeFromMission(missionId: string, employeeName: string): void {
+    const assignedSet = this.missionAssignedEmployees.get(missionId);
+    if (assignedSet) {
+      assignedSet.delete(employeeName);
+      logger.info(`[Workforce Orchestrator] Employee ${employeeName} released from mission ${missionId}`);
+    }
+  }
+
+  /**
+   * RACE CONDITION FIX: Clean up mission tracking data when mission completes.
+   * @param missionId - Unique identifier for the mission to clean up
+   */
+  private cleanupMission(missionId: string): void {
+    this.missionAssignedEmployees.delete(missionId);
+    this.missionEmployeeCache.delete(missionId);
+    logger.info(`[Workforce Orchestrator] Mission ${missionId} tracking data cleaned up`);
+  }
+
+  /**
+   * RACE CONDITION FIX: Get unassigned employees for a mission.
+   * @param missionId - Unique identifier for the mission
+   * @returns Array of employees not yet assigned in this mission
+   */
+  private getUnassignedEmployees(missionId: string): AIEmployee[] {
+    const availableEmployees = this.missionEmployeeCache.get(missionId) || [];
+    const assignedSet = this.missionAssignedEmployees.get(missionId) || new Set<string>();
+
+    return availableEmployees.filter((emp) => !assignedSet.has(emp.name));
+  }
+
+  /**
    * MAIN METHOD: Plan, Delegate, Execute
    * Now supports both mission mode (full orchestration) and chat mode (conversational)
    */
@@ -206,6 +322,9 @@ export class WorkforceOrchestratorRefactored {
 
       // ============================================
       // STAGE 2: DELEGATION - Select optimal employees
+      // RACE CONDITION FIX: Initialize employee cache and tracking ONCE
+      // before delegating tasks to prevent concurrent DB queries and
+      // duplicate employee assignments
       // ============================================
       store.addMessage({
         from: 'system',
@@ -213,8 +332,13 @@ export class WorkforceOrchestratorRefactored {
         content: '🤖 Selecting optimal AI employees for each task...',
       });
 
+      // RACE CONDITION FIX: Initialize mission employee tracking
+      // This caches available employees and sets up assignment tracking
+      await this.initializeMissionEmployees(missionId, request.userId);
+
       for (const task of tasks) {
-        const selectedEmployee = await this.selectOptimalEmployee(task);
+        // RACE CONDITION FIX: Pass missionId to use cached employees and track assignments
+        const selectedEmployee = await this.selectOptimalEmployee(task, missionId);
 
         if (selectedEmployee) {
           store.updateTaskStatus(task.id, 'in_progress', selectedEmployee.name);
@@ -251,8 +375,12 @@ export class WorkforceOrchestratorRefactored {
         tasks,
         sanitizedInput, // Use sanitized input
         request.sessionId,
-        request.userId
+        request.userId,
+        missionId // RACE CONDITION FIX: Pass missionId for employee release tracking
       );
+
+      // RACE CONDITION FIX: Clean up mission tracking data
+      this.cleanupMission(missionId);
 
       store.completeMission();
       store.addMessage({
@@ -271,6 +399,9 @@ export class WorkforceOrchestratorRefactored {
         error instanceof Error ? error.message : 'Unknown error';
       const userMessage = getErrorMessage(error);
       logger.error('[Workforce Orchestrator] Error processing request:', technicalMessage);
+
+      // RACE CONDITION FIX: Clean up mission tracking data on error
+      this.cleanupMission(missionId);
 
       store.failMission(userMessage);
       store.addMessage({
@@ -426,50 +557,76 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
 
   /**
    * DELEGATION STAGE: Select optimal employee for a task
+   * RACE CONDITION FIX: Uses cached employees and tracks assignments to prevent
+   * the same employee from being assigned to multiple concurrent tasks.
+   * @param task - The task to assign an employee to
+   * @param missionId - Optional mission ID for using cached employees and tracking
    */
-  private async selectOptimalEmployee(task: Task): Promise<AIEmployee | null> {
+  private async selectOptimalEmployee(task: Task, missionId?: string): Promise<AIEmployee | null> {
     if (this.employees.length === 0) {
       logger.warn('[Workforce Orchestrator] No employees available');
       return null;
     }
 
-    // Updated: Jan 15th 2026 - Fixed employee selection to check user permissions
-    // Get user's hired employees from database to enforce permissions
-    const { user } = useAuthStore.getState();
-    let availableEmployees = this.employees;
+    // RACE CONDITION FIX: Use cached and unassigned employees if missionId is provided
+    let availableEmployees: AIEmployee[];
 
-    if (user) {
-      try {
-        const { data: hiredEmployees, error } = await supabase
-          .from('purchased_employees')
-          .select('employee_id, ai_employees(name)')
-          .eq('user_id', user.id)
-          .eq('is_active', true);
+    if (missionId) {
+      // Get employees that are available AND not yet assigned in this mission
+      availableEmployees = this.getUnassignedEmployees(missionId);
 
-        if (!error && hiredEmployees && hiredEmployees.length > 0) {
-          // Create set of hired employee names for quick lookup
-          const hiredNames = new Set(
-            hiredEmployees
-              .map((e) => (e.ai_employees as { name: string } | null)?.name)
-              .filter((name): name is string => name !== null)
-          );
-
-          // Filter to only employees user has hired (or free employees with price 0)
-          availableEmployees = this.employees.filter(
-            (emp) => hiredNames.has(emp.name) || emp.price === 0
-          );
-
-          if (availableEmployees.length === 0) {
-            logger.warn(
-              '[Workforce Orchestrator] User has no hired employees available for task assignment'
-            );
-            return null;
-          }
-
+      if (availableEmployees.length === 0) {
+        logger.warn(
+          `[Workforce Orchestrator] No unassigned employees available for task in mission ${missionId}`
+        );
+        // Fall back to any cached employee if all are assigned
+        // This allows reuse of employees when there are more tasks than employees
+        const cachedEmployees = this.missionEmployeeCache.get(missionId);
+        if (cachedEmployees && cachedEmployees.length > 0) {
+          availableEmployees = cachedEmployees;
+          logger.info('[Workforce Orchestrator] All employees assigned, allowing reuse');
+        } else {
+          return null;
         }
-      } catch (error) {
-        logger.error('[Workforce Orchestrator] Error fetching hired employees:', error);
-        // On error, continue with all employees (degraded mode)
+      }
+    } else {
+      // Legacy path: No missionId provided (e.g., chat mode)
+      // Fall back to the original database query behavior
+      const { user } = useAuthStore.getState();
+      availableEmployees = this.employees;
+
+      if (user) {
+        try {
+          const { data: hiredEmployees, error } = await supabase
+            .from('purchased_employees')
+            .select('employee_id, ai_employees(name)')
+            .eq('user_id', user.id)
+            .eq('is_active', true);
+
+          if (!error && hiredEmployees && hiredEmployees.length > 0) {
+            // Create set of hired employee names for quick lookup
+            const hiredNames = new Set(
+              hiredEmployees
+                .map((e) => (e.ai_employees as { name: string } | null)?.name)
+                .filter((name): name is string => name !== null)
+            );
+
+            // Filter to only employees user has hired (or free employees with price 0)
+            availableEmployees = this.employees.filter(
+              (emp) => hiredNames.has(emp.name) || emp.price === 0
+            );
+
+            if (availableEmployees.length === 0) {
+              logger.warn(
+                '[Workforce Orchestrator] User has no hired employees available for task assignment'
+              );
+              return null;
+            }
+          }
+        } catch (error) {
+          logger.error('[Workforce Orchestrator] Error fetching hired employees:', error);
+          // On error, continue with all employees (degraded mode)
+        }
       }
     }
 
@@ -511,20 +668,29 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
       }
     }
 
-    // If no good match, use first available employee
-    return bestMatch || availableEmployees[0] || null;
+    // Get the selected employee (best match or first available)
+    const selectedEmployee = bestMatch || availableEmployees[0] || null;
+
+    // RACE CONDITION FIX: Mark the employee as assigned if missionId is provided
+    if (selectedEmployee && missionId) {
+      this.assignEmployeeToMission(missionId, selectedEmployee.name);
+    }
+
+    return selectedEmployee;
   }
 
   /**
    * EXECUTION STAGE: Execute all tasks in parallel
    * Updated: Jan 6th 2026 - Changed from sequential to parallel execution using Promise.allSettled
    * CRITICAL FIX: Snapshot pause state at entry to prevent race conditions
+   * RACE CONDITION FIX: Accepts missionId to release employees when tasks complete
    */
   private async executeTasks(
     tasks: Task[],
     originalInput: string,
     sessionId?: string,
-    userId?: string
+    userId?: string,
+    missionId?: string
   ): Promise<void> {
     const store = useMissionStore.getState();
 
@@ -615,6 +781,12 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
           metadata: { taskId: task.id, employeeName: task.assignedTo },
         });
 
+        // RACE CONDITION FIX: Release employee when task completes successfully
+        // This allows the employee to be assigned to other tasks if needed
+        if (missionId && task.assignedTo) {
+          this.releaseEmployeeFromMission(missionId, task.assignedTo);
+        }
+
         return { taskId: task.id, status: 'fulfilled' as const, result };
       } catch (error) {
         const errorMsg =
@@ -635,6 +807,12 @@ Think step-by-step and create a comprehensive plan. Respond with JSON only.`;
           content: `Task failed: ${errorMsg}`,
           metadata: { taskId: task.id, employeeName: task.assignedTo },
         });
+
+        // RACE CONDITION FIX: Release employee when task fails
+        // This ensures employees are not stuck in "assigned" state after errors
+        if (missionId && task.assignedTo) {
+          this.releaseEmployeeFromMission(missionId, task.assignedTo);
+        }
 
         return {
           taskId: task.id,

@@ -47,3 +47,8 @@ Object.defineProperty(window, 'scrollTo', {
   writable: true,
   value: () => {},
 });
+
+// Mock pointer capture APIs for Radix UI components (not supported in JSDOM)
+Element.prototype.hasPointerCapture = () => false;
+Element.prototype.setPointerCapture = () => {};
+Element.prototype.releasePointerCapture = () => {};

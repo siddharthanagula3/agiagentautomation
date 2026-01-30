@@ -120,15 +120,17 @@ async function checkMissingMigrations() {
       migration: '20250111000003_add_token_system.sql',
     },
     {
-      name: 'users.token_balance column',
+      // NOTE: users.token_balance column was dropped in migration 20260113000002
+      // The authoritative token balance is now stored in user_token_balances table
+      name: 'user_token_balances table (authoritative)',
       check: async () => {
         const { error } = await supabase
-          .from('users')
-          .select('token_balance')
+          .from('user_token_balances')
+          .select('current_balance')
           .limit(1);
-        return !error || error.code !== 'PGRST202';
+        return !error || error.code !== 'PGRST116';
       },
-      migration: '20250111000003_add_token_system.sql',
+      migration: '20260106000002_add_user_token_balances.sql',
     },
     {
       name: 'users.subscription_start_date column',

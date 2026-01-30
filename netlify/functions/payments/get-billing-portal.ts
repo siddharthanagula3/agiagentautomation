@@ -7,6 +7,10 @@ import {
   billingPortalSchema,
   formatValidationError,
 } from '../utils/validation-schemas';
+import {
+  sanitizeBillingError,
+  BILLING_ERROR_CODES,
+} from '../utils/billing-error-sanitizer';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia',
@@ -51,10 +55,15 @@ const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; 
       .maybeSingle();
 
     if (!subscription || subscription.user_id !== event.user.id) {
+      // SECURITY: Don't reveal why the request was forbidden
       return {
         statusCode: 403,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          error: 'Forbidden: Customer ID does not belong to authenticated user',
+          error: 'You do not have permission to access this billing information.',
+          code: BILLING_ERROR_CODES.CUSTOMER_MISMATCH,
         }),
       };
     }
@@ -78,12 +87,19 @@ const authenticatedHandler = async (event: HandlerEvent & { user: { id: string; 
       }),
     };
   } catch (error) {
+    // SECURITY: Log full error server-side for debugging
     console.error('[Billing Portal] Error:', error);
+
+    // SECURITY FIX: Return sanitized error message to client
+    // Never expose internal error details, Stripe IDs, or stack traces
+    const sanitized = sanitizeBillingError(error, 'portal');
+
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error: `Failed to create billing portal session: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(sanitized),
     };
   }
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import {
   Briefcase,
@@ -372,4 +373,10 @@ const ConsultingBusinessesPage: React.FC = () => {
   );
 };
 
-export default ConsultingBusinessesPage;
+const ConsultingBusinessesPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="ConsultingBusinessesPage" showReportDialog>
+    <ConsultingBusinessesPage />
+  </ErrorBoundary>
+);
+
+export default ConsultingBusinessesPageWithErrorBoundary;

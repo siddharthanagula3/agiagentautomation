@@ -5,11 +5,65 @@
  */
 
 import matter from 'gray-matter';
+import { z } from 'zod';
 import type {
   AIEmployee,
-  AIEmployeeFrontmatter,
 } from '@core/types/ai-employee';
 import { logger } from '@shared/lib/logger';
+
+/**
+ * Zod schema for AI Employee frontmatter validation
+ * Validates the YAML frontmatter in .agi/employees/*.md files
+ */
+const EmployeeFrontmatterSchema = z.object({
+  /** Unique identifier/name of the employee (required) */
+  name: z.string().min(1, 'Employee name is required'),
+  /** Human-readable description of the employee's role (required) */
+  description: z.string().min(1, 'Employee description is required'),
+  /** Tools available to this employee - can be comma-separated string or YAML array */
+  tools: z.union([
+    z.string().min(1, 'At least one tool must be specified'),
+    z.array(z.string()).min(1, 'At least one tool must be specified'),
+  ]),
+  /** LLM model to use - defaults to 'inherit' */
+  model: z.string().optional().default('inherit'),
+  /** Optional avatar image URL or path */
+  avatar: z.string().optional(),
+  /** Price in tokens/credits to hire this employee */
+  price: z.number().nonnegative().optional(),
+  /** List of expertise areas for matching tasks */
+  expertise: z.array(z.string()).optional(),
+  /** Optional role identifier for workflow integration */
+  role: z.string().optional(),
+});
+
+/** Validated employee frontmatter type inferred from Zod schema */
+export type ValidatedEmployeeFrontmatter = z.infer<typeof EmployeeFrontmatterSchema>;
+
+/**
+ * Validates employee frontmatter data against the schema
+ * @param data - Raw frontmatter data from gray-matter
+ * @param filePath - Path to the employee file (for error logging)
+ * @returns Validated frontmatter or null if validation fails
+ */
+function validateEmployeeFrontmatter(
+  data: unknown,
+  filePath: string
+): ValidatedEmployeeFrontmatter | null {
+  const result = EmployeeFrontmatterSchema.safeParse(data);
+
+  if (!result.success) {
+    const errors = result.error.issues
+      .map((issue) => `  - ${issue.path.join('.')}: ${issue.message}`)
+      .join('\n');
+    logger.warn(
+      `[SystemPromptsService] Invalid employee frontmatter in ${filePath}:\n${errors}`
+    );
+    return null;
+  }
+
+  return result.data;
+}
 
 /** Supported LLM providers for system prompts */
 export type SystemPromptProvider = 'openai' | 'anthropic' | 'google' | 'perplexity' | 'grok' | 'deepseek' | 'qwen';
@@ -58,8 +112,11 @@ interface PromptCacheEntry {
   timestamp: Date;
 }
 
-/** Cache duration in milliseconds (1 hour) */
+/** Cache duration in milliseconds (1 hour) for system prompts */
 const CACHE_DURATION_MS = 3600000;
+
+/** Cache TTL for AI employees in milliseconds (5 minutes) */
+const EMPLOYEE_CACHE_TTL_MS = 5 * 60 * 1000;
 
 /** Result of prompt validation */
 export interface PromptValidationResult {
@@ -78,6 +135,13 @@ export class SystemPromptsService {
   private prompts: Map<string, SystemPrompt> = new Map();
   private guidelines: Map<string, PromptGuidelines> = new Map();
   private cache: Map<string, PromptCacheEntry> = new Map();
+
+  /** Cached AI employees list */
+  private cachedEmployees: AIEmployee[] = [];
+  /** Flag indicating if employees have been loaded */
+  private employeesLoaded = false;
+  /** Timestamp of last employee cache load */
+  private employeesLastLoadTime = 0;
 
   static getInstance(): SystemPromptsService {
     if (!SystemPromptsService.instance) {
@@ -472,9 +536,40 @@ export class SystemPromptsService {
   /**
    * Get available AI employees from .agi/employees directory
    * Reads markdown files with frontmatter and returns structured employee data
+   * Invalid employee files are logged as warnings but do not crash the application
+   *
+   * Uses caching with TTL to avoid re-loading employees on every call.
+   *
+   * @param forceRefresh - If true, bypasses cache and reloads from disk
+   * @returns Promise resolving to array of AI employees
    */
-  async getAvailableEmployees(): Promise<AIEmployee[]> {
+  async getAvailableEmployees(forceRefresh = false): Promise<AIEmployee[]> {
+    const now = Date.now();
+    const cacheAge = now - this.employeesLastLoadTime;
+    const cacheValid = this.employeesLoaded && cacheAge < EMPLOYEE_CACHE_TTL_MS;
+
+    // Return cached employees if valid and not forcing refresh
+    if (!forceRefresh && cacheValid) {
+      logger.debug(
+        `[SystemPromptsService] Returning ${this.cachedEmployees.length} cached employees (age: ${Math.round(cacheAge / 1000)}s)`
+      );
+      return this.cachedEmployees;
+    }
+
+    // Log reason for reload
+    if (forceRefresh) {
+      logger.info('[SystemPromptsService] Force refreshing employee cache');
+    } else if (!this.employeesLoaded) {
+      logger.info('[SystemPromptsService] Loading employees for first time');
+    } else {
+      logger.info(
+        `[SystemPromptsService] Employee cache expired (age: ${Math.round(cacheAge / 1000)}s), reloading`
+      );
+    }
+
     const employees: AIEmployee[] = [];
+    let validCount = 0;
+    let invalidCount = 0;
 
     try {
       // In browser environment, we'll use a static list for now
@@ -492,7 +587,15 @@ export class SystemPromptsService {
           try {
             const content = await (loader as () => Promise<string>)();
             const parsed = matter(content);
-            const frontmatter = parsed.data as AIEmployeeFrontmatter;
+
+            // Validate frontmatter with Zod schema
+            const frontmatter = validateEmployeeFrontmatter(parsed.data, path);
+
+            // Skip invalid employees (warning already logged by validateEmployeeFrontmatter)
+            if (!frontmatter) {
+              invalidCount++;
+              continue;
+            }
 
             // Updated: Jan 15th 2026 - Fixed employee tools field parsing to support YAML arrays
             // Tools can be either a comma-separated string or a YAML array
@@ -500,32 +603,87 @@ export class SystemPromptsService {
               ? frontmatter.tools // Already an array from YAML
               : frontmatter.tools.split(',').map((t) => t.trim()); // Parse comma-separated string
 
-            // Parse expertise field if present (can be array or undefined)
-            const expertise = Array.isArray(frontmatter.expertise)
-              ? frontmatter.expertise
-              : undefined;
-
             employees.push({
               name: frontmatter.name,
               description: frontmatter.description,
               tools,
-              model: frontmatter.model || 'inherit',
+              model: frontmatter.model,
               systemPrompt: parsed.content.trim(),
               avatar: frontmatter.avatar,
               price: frontmatter.price,
-              expertise,
+              expertise: frontmatter.expertise,
             });
+            validCount++;
           } catch (err) {
+            invalidCount++;
             logger.error(`[SystemPromptsService] Failed to parse employee file ${path}:`, err);
           }
         }
+
+        // Log summary of loaded employees
+        if (invalidCount > 0) {
+          logger.warn(
+            `[SystemPromptsService] Loaded ${validCount} valid employees, skipped ${invalidCount} invalid`
+          );
+        } else {
+          logger.info(
+            `[SystemPromptsService] Loaded ${validCount} AI employees successfully`
+          );
+        }
       }
+
+      // Update cache
+      this.cachedEmployees = employees;
+      this.employeesLoaded = true;
+      this.employeesLastLoadTime = Date.now();
 
       return employees;
     } catch (error) {
       logger.error('[SystemPromptsService] Error loading AI employees:', error);
       return [];
     }
+  }
+
+  /**
+   * Invalidate the employee cache, forcing a reload on next access
+   * Use this when employee files have been modified at runtime
+   */
+  invalidateEmployeeCache(): void {
+    this.employeesLoaded = false;
+    this.employeesLastLoadTime = 0;
+    this.cachedEmployees = [];
+    logger.info('[SystemPromptsService] Employee cache invalidated');
+  }
+
+  /**
+   * Refresh the employee cache by reloading all employees from disk
+   * Convenience method that combines invalidation and reload
+   *
+   * @returns Promise resolving to the freshly loaded employees
+   */
+  async refreshEmployees(): Promise<AIEmployee[]> {
+    return this.getAvailableEmployees(true);
+  }
+
+  /**
+   * Get employee cache statistics for debugging/monitoring
+   */
+  getEmployeeCacheStats(): {
+    loaded: boolean;
+    count: number;
+    ageMs: number;
+    ttlMs: number;
+    isExpired: boolean;
+  } {
+    const now = Date.now();
+    const ageMs = now - this.employeesLastLoadTime;
+    return {
+      loaded: this.employeesLoaded,
+      count: this.cachedEmployees.length,
+      ageMs: this.employeesLoaded ? ageMs : 0,
+      ttlMs: EMPLOYEE_CACHE_TTL_MS,
+      isExpired: !this.employeesLoaded || ageMs >= EMPLOYEE_CACHE_TTL_MS,
+    };
   }
 
   /**
@@ -541,3 +699,52 @@ export class SystemPromptsService {
 
 // Export singleton instance
 export const systemPromptsService = SystemPromptsService.getInstance();
+
+/**
+ * Convenience export for prompt management operations
+ * Provides cleaner API for common operations without accessing the service directly
+ */
+export const promptManagement = {
+  /**
+   * Get all available AI employees (uses cache with TTL)
+   * @param forceRefresh - If true, bypasses cache and reloads from disk
+   */
+  getAvailableEmployees: (forceRefresh = false) =>
+    systemPromptsService.getAvailableEmployees(forceRefresh),
+
+  /**
+   * Get a specific AI employee by name
+   */
+  getEmployeeByName: (name: string) => systemPromptsService.getEmployeeByName(name),
+
+  /**
+   * Invalidate the employee cache (forces reload on next access)
+   */
+  invalidateEmployeeCache: () => systemPromptsService.invalidateEmployeeCache(),
+
+  /**
+   * Force refresh employees from disk immediately
+   */
+  refreshEmployees: () => systemPromptsService.refreshEmployees(),
+
+  /**
+   * Get employee cache statistics for debugging
+   */
+  getEmployeeCacheStats: () => systemPromptsService.getEmployeeCacheStats(),
+};
+
+/**
+ * Standalone function to invalidate the employee cache
+ * @deprecated Use promptManagement.invalidateEmployeeCache() instead
+ */
+export function invalidateEmployeeCache(): void {
+  systemPromptsService.invalidateEmployeeCache();
+}
+
+/**
+ * Standalone function to refresh employees
+ * @deprecated Use promptManagement.refreshEmployees() instead
+ */
+export function refreshEmployees(): Promise<AIEmployee[]> {
+  return systemPromptsService.refreshEmployees();
+}

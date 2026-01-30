@@ -131,6 +131,8 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const pausedDurationRef = useRef<number>(0);
+  // Ref to store the updateAudioLevels function for self-referential animation loop
+  const updateAudioLevelsRef = useRef<(() => void) | null>(null);
 
   // Cleanup function
   const cleanup = useCallback(() => {
@@ -188,7 +190,12 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
 
     const checkPermission = async () => {
       if (!isSupported) {
-        setPermissionStatus('denied');
+        // Use queueMicrotask to batch the setState call and avoid cascading renders
+        queueMicrotask(() => {
+          if (isMounted) {
+            setPermissionStatus('denied');
+          }
+        });
         return;
       }
 
@@ -200,6 +207,7 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
         if (!isMounted) return;
 
         permissionResult = result;
+        // Async operations already batch setState, but wrap for consistency
         setPermissionStatus(result.state as PermissionStatus);
 
         // Listen for permission changes
@@ -249,9 +257,16 @@ export function useVoiceRecording(): UseVoiceRecordingReturn {
 
     setAudioLevels(levels);
 
-    // Continue animation loop
-    animationFrameRef.current = requestAnimationFrame(updateAudioLevels);
+    // Continue animation loop using ref to avoid self-reference during callback creation
+    if (updateAudioLevelsRef.current) {
+      animationFrameRef.current = requestAnimationFrame(updateAudioLevelsRef.current);
+    }
   }, [isRecording, isPaused]);
+
+  // Keep the ref updated with the latest callback (in an effect, not during render)
+  useEffect(() => {
+    updateAudioLevelsRef.current = updateAudioLevels;
+  }, [updateAudioLevels]);
 
   // Request microphone permission
   const requestPermission = useCallback(async (): Promise<boolean> => {

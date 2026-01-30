@@ -42,7 +42,12 @@ interface WorkforceChatProps {
   onComplete?: (result: unknown) => void;
 }
 
-interface ChatMessage {
+/**
+ * Workforce-specific message type
+ * Note: This differs from the canonical ChatMessage in @shared/types
+ * as it uses 'type' instead of 'role' for workforce-specific semantics
+ */
+interface WorkforceChatMessage {
   id: string;
   type: 'user' | 'system' | 'update' | 'error' | 'success';
   content: string;
@@ -66,7 +71,7 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
   onComplete,
 }) => {
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<WorkforceChatMessage[]>([]);
   const [executionState, setExecutionState] = useState<ExecutionState | null>(
     null
   );
@@ -83,11 +88,11 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
 
   // Add message to chat
   const addMessage = (
-    type: ChatMessage['type'],
+    type: WorkforceChatMessage['type'],
     content: string,
-    data?: ChatMessage['data']
+    data?: WorkforceChatMessage['data']
   ) => {
-    const message: ChatMessage = {
+    const message: WorkforceChatMessage = {
       id: `msg-${Date.now()}`,
       type,
       content,
@@ -395,7 +400,7 @@ export const WorkforceChat: React.FC<WorkforceChatProps> = ({
 };
 
 // Chat Message Component
-const ChatMessageComponent: React.FC<{ message: ChatMessage }> = ({
+const ChatMessageComponent: React.FC<{ message: WorkforceChatMessage }> = ({
   message,
 }) => {
   const getIcon = () => {

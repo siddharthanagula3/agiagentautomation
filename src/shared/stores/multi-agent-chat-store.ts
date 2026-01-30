@@ -15,25 +15,33 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
+import type {
+  MessageDeliveryStatus,
+  ParticipantType,
+  ToolCall,
+  ThinkingStep,
+  Attachment,
+  MessageReaction,
+  TypingIndicator,
+} from '@shared/types';
 
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
 /**
- * Message delivery status
+ * Re-export canonical types for backward compatibility
+ * @deprecated Import directly from @shared/types instead
  */
-export type MessageDeliveryStatus =
-  | 'sending'
-  | 'sent'
-  | 'delivered'
-  | 'read'
-  | 'failed';
-
-/**
- * Participant type in a conversation
- */
-export type ParticipantType = 'user' | 'agent' | 'system';
+export type {
+  MessageDeliveryStatus,
+  ParticipantType,
+  ToolCall,
+  ThinkingStep,
+  Attachment,
+  MessageReaction,
+  TypingIndicator,
+};
 
 /**
  * Conversation participant
@@ -50,9 +58,10 @@ export interface ConversationParticipant {
 }
 
 /**
- * Enhanced chat message with delivery tracking
+ * Multi-agent chat message - store-specific extension
+ * Extends the canonical ChatMessage with multi-agent specific fields
  */
-export interface ChatMessage {
+export interface MultiAgentChatMessage {
   id: string;
   conversationId: string;
   senderId: string;
@@ -80,61 +89,9 @@ export interface ChatMessage {
 }
 
 /**
- * Tool call information
+ * @deprecated Use MultiAgentChatMessage instead
  */
-export interface ToolCall {
-  id: string;
-  name: string;
-  parameters: Record<string, unknown>;
-  result?: unknown;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  error?: string;
-  timestamp: Date;
-}
-
-/**
- * Thinking process step
- */
-export interface ThinkingStep {
-  id: string;
-  step: number;
-  description: string;
-  reasoning: string;
-  timestamp: Date;
-  duration?: number;
-}
-
-/**
- * Message attachment
- */
-export interface Attachment {
-  id: string;
-  name: string;
-  type: 'image' | 'document' | 'audio' | 'video' | 'code';
-  size: number;
-  url: string;
-  mimeType: string;
-  uploadedAt: Date;
-}
-
-/**
- * Message reaction
- */
-export interface MessageReaction {
-  type: 'up' | 'down' | 'helpful' | 'creative' | 'accurate';
-  userId: string;
-  timestamp: Date;
-}
-
-/**
- * Typing indicator
- */
-export interface TypingIndicator {
-  participantId: string;
-  participantName: string;
-  conversationId: string;
-  startedAt: Date;
-}
+export type ChatMessage = MultiAgentChatMessage;
 
 /**
  * Multi-participant conversation
@@ -328,6 +285,105 @@ export interface MultiAgentChatActions {
 export type MultiAgentChatStore = MultiAgentChatState & MultiAgentChatActions;
 
 // ============================================================================
+// DEDUPLICATION CONFIGURATION
+// ============================================================================
+
+/**
+ * Message deduplication configuration
+ * Uses a combination of time window and content fingerprinting for robust detection
+ */
+const DEDUP_CONFIG = {
+  /** Time window in milliseconds to check for duplicate messages */
+  TIME_WINDOW_MS: 500,
+  /** Maximum number of recent fingerprints to keep in memory */
+  MAX_FINGERPRINTS: 100,
+  /** Time-to-live for fingerprints in milliseconds */
+  FINGERPRINT_TTL_MS: 5000,
+} as const;
+
+/**
+ * Recent message fingerprints for fast duplicate detection
+ * Key: fingerprint string (senderId + content hash)
+ * Value: timestamp when the fingerprint was added
+ */
+const recentMessageFingerprints: Map<string, number> = new Map();
+
+/**
+ * Generates a fingerprint for a message based on sender and content
+ * Uses a simple but effective hash to detect duplicates
+ */
+function generateMessageFingerprint(senderId: string, content: string): string {
+  // Simple hash function for content (djb2 algorithm variant)
+  let hash = 5381;
+  for (let i = 0; i < content.length; i++) {
+    hash = ((hash << 5) + hash) ^ content.charCodeAt(i);
+  }
+  return `${senderId}:${hash.toString(36)}`;
+}
+
+/**
+ * Cleans up expired fingerprints from the cache
+ * Called periodically to prevent memory leaks
+ */
+function cleanupExpiredFingerprints(): void {
+  const now = Date.now();
+  const expiredKeys: string[] = [];
+
+  for (const [key, timestamp] of recentMessageFingerprints.entries()) {
+    if (now - timestamp > DEDUP_CONFIG.FINGERPRINT_TTL_MS) {
+      expiredKeys.push(key);
+    }
+  }
+
+  for (const key of expiredKeys) {
+    recentMessageFingerprints.delete(key);
+  }
+
+  // Also enforce max size by removing oldest entries
+  if (recentMessageFingerprints.size > DEDUP_CONFIG.MAX_FINGERPRINTS) {
+    const sortedEntries = [...recentMessageFingerprints.entries()]
+      .sort((a, b) => a[1] - b[1]);
+    const toRemove = sortedEntries.slice(0, sortedEntries.length - DEDUP_CONFIG.MAX_FINGERPRINTS);
+    for (const [key] of toRemove) {
+      recentMessageFingerprints.delete(key);
+    }
+  }
+}
+
+/**
+ * Checks if a message is a duplicate based on fingerprint and time window
+ * Returns true if the message should be considered a duplicate
+ */
+function isDuplicateMessage(senderId: string, content: string): boolean {
+  const fingerprint = generateMessageFingerprint(senderId, content);
+  const now = Date.now();
+
+  // Check fingerprint cache first (fastest check)
+  const existingTimestamp = recentMessageFingerprints.get(fingerprint);
+  if (existingTimestamp && now - existingTimestamp < DEDUP_CONFIG.TIME_WINDOW_MS) {
+    return true;
+  }
+
+  // Not a duplicate - add to cache
+  recentMessageFingerprints.set(fingerprint, now);
+
+  // Periodically cleanup (every 10 messages)
+  if (recentMessageFingerprints.size % 10 === 0) {
+    cleanupExpiredFingerprints();
+  }
+
+  return false;
+}
+
+/**
+ * Clears the fingerprint cache - useful for testing
+ * @internal This is exported for testing purposes only
+ */
+export function clearMessageFingerprintCache(): void {
+  recentMessageFingerprints.clear();
+}
+
+// ============================================================================
 // INITIAL STATE
 // ============================================================================
 
@@ -507,17 +563,24 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
           const messageId = crypto.randomUUID();
           let wasAdded = false;
 
+          // First-pass duplicate check using fingerprint cache (fast, outside set())
+          // This catches most duplicates without needing to enter the Immer transaction
+          if (isDuplicateMessage(message.senderId, message.content)) {
+            return ''; // Skip duplicate
+          }
+
           set((state) => {
             const conversation = state.conversations[message.conversationId];
             if (!conversation) return;
 
-            // Atomic duplicate check inside set() to prevent race conditions
-            // Check if a message with similar content and sender was just added (within 100ms)
+            // Second-pass duplicate check inside set() for atomic verification
+            // Uses expanded time window (500ms) and checks existing messages in conversation
+            // This handles edge cases where fingerprint cache might have been cleared
             const recentDuplicate = conversation.messages.find(
               (m) =>
                 m.senderId === message.senderId &&
                 m.content === message.content &&
-                Date.now() - new Date(m.timestamp).getTime() < 100
+                Date.now() - new Date(m.timestamp).getTime() < DEDUP_CONFIG.TIME_WINDOW_MS
             );
             if (recentDuplicate) {
               return; // Skip duplicate
@@ -906,6 +969,153 @@ export const useMultiAgentChatStore = create<MultiAgentChatStore>()(
           filterTags: state.filterTags,
           showArchived: state.showArchived,
         }),
+        // CRITICAL FIX: Custom storage handlers to properly serialize/deserialize Date objects
+        // Without this, Date objects become strings after page refresh, breaking .getTime() calls
+        storage: {
+          getItem: (name) => {
+            const str = localStorage.getItem(name);
+            if (!str) return null;
+            try {
+              const data = JSON.parse(str);
+
+              // Rehydrate Date objects in conversations
+              if (data.state?.conversations) {
+                for (const convId of Object.keys(data.state.conversations)) {
+                  const conv = data.state.conversations[convId];
+
+                  // Rehydrate conversation-level dates
+                  if (conv.createdAt) {
+                    conv.createdAt = new Date(conv.createdAt);
+                  }
+                  if (conv.updatedAt) {
+                    conv.updatedAt = new Date(conv.updatedAt);
+                  }
+                  if (conv.lastMessageAt) {
+                    conv.lastMessageAt = new Date(conv.lastMessageAt);
+                  }
+
+                  // Rehydrate participant dates
+                  if (conv.participants && Array.isArray(conv.participants)) {
+                    for (const participant of conv.participants) {
+                      if (participant.lastSeen) {
+                        participant.lastSeen = new Date(participant.lastSeen);
+                      }
+                    }
+                  }
+
+                  // Rehydrate message timestamps and nested dates
+                  if (conv.messages && Array.isArray(conv.messages)) {
+                    for (const msg of conv.messages) {
+                      if (msg.timestamp) {
+                        msg.timestamp = new Date(msg.timestamp);
+                      }
+
+                      // Handle tool call timestamps
+                      if (msg.metadata?.toolCalls && Array.isArray(msg.metadata.toolCalls)) {
+                        for (const toolCall of msg.metadata.toolCalls) {
+                          if (toolCall.timestamp) {
+                            toolCall.timestamp = new Date(toolCall.timestamp);
+                          }
+                        }
+                      }
+
+                      // Handle thinking step timestamps
+                      if (msg.metadata?.thinkingProcess && Array.isArray(msg.metadata.thinkingProcess)) {
+                        for (const step of msg.metadata.thinkingProcess) {
+                          if (step.timestamp) {
+                            step.timestamp = new Date(step.timestamp);
+                          }
+                        }
+                      }
+
+                      // Handle attachment uploadedAt dates
+                      if (msg.metadata?.attachments && Array.isArray(msg.metadata.attachments)) {
+                        for (const att of msg.metadata.attachments) {
+                          if (att.uploadedAt) {
+                            att.uploadedAt = new Date(att.uploadedAt);
+                          }
+                        }
+                      }
+
+                      // Handle reaction timestamps
+                      if (msg.reactions && Array.isArray(msg.reactions)) {
+                        for (const reaction of msg.reactions) {
+                          if (reaction.timestamp) {
+                            reaction.timestamp = new Date(reaction.timestamp);
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+
+              // Rehydrate lastSyncTimestamp
+              if (data.state?.lastSyncTimestamp) {
+                data.state.lastSyncTimestamp = new Date(data.state.lastSyncTimestamp);
+              }
+
+              // Rehydrate typing indicator timestamps
+              if (data.state?.typingIndicators) {
+                for (const convId of Object.keys(data.state.typingIndicators)) {
+                  const indicators = data.state.typingIndicators[convId];
+                  if (Array.isArray(indicators)) {
+                    for (const indicator of indicators) {
+                      if (indicator.startedAt) {
+                        indicator.startedAt = new Date(indicator.startedAt);
+                      }
+                    }
+                  }
+                }
+              }
+
+              // Rehydrate agent presence dates
+              if (data.state?.agentPresence) {
+                for (const agentId of Object.keys(data.state.agentPresence)) {
+                  const presence = data.state.agentPresence[agentId];
+                  if (presence.lastActivity) {
+                    presence.lastActivity = new Date(presence.lastActivity);
+                  }
+                }
+              }
+
+              // Rehydrate message queue timestamps
+              if (data.state?.messageQueue && Array.isArray(data.state.messageQueue)) {
+                for (const msg of data.state.messageQueue) {
+                  if (msg.timestamp) {
+                    msg.timestamp = new Date(msg.timestamp);
+                  }
+                }
+              }
+
+              // Rehydrate sync conflict timestamps
+              if (data.state?.syncConflicts && Array.isArray(data.state.syncConflicts)) {
+                for (const conflict of data.state.syncConflicts) {
+                  if (conflict.timestamp) {
+                    conflict.timestamp = new Date(conflict.timestamp);
+                  }
+                  // Also rehydrate nested message timestamps
+                  if (conflict.localVersion?.timestamp) {
+                    conflict.localVersion.timestamp = new Date(conflict.localVersion.timestamp);
+                  }
+                  if (conflict.remoteVersion?.timestamp) {
+                    conflict.remoteVersion.timestamp = new Date(conflict.remoteVersion.timestamp);
+                  }
+                }
+              }
+
+              return data;
+            } catch {
+              return null;
+            }
+          },
+          setItem: (name, value) => {
+            localStorage.setItem(name, JSON.stringify(value));
+          },
+          removeItem: (name) => {
+            localStorage.removeItem(name);
+          },
+        },
       }
     ),
     { name: 'MultiAgentChatStore', enabled: enableDevtools }

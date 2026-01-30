@@ -1,18 +1,61 @@
-import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/authentication-store';
+import { useSessionTimeout } from '@shared/hooks/useSessionTimeout';
+import { SessionTimeoutWarning } from './SessionTimeoutWarning';
+import { toast } from 'sonner';
+import { logger } from '@shared/lib/logger';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: 'user' | 'admin' | 'super_admin';
+  /** Whether to enforce session timeout (default: true) */
+  enforceSessionTimeout?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requiredRole = 'user',
+  enforceSessionTimeout = true,
 }) => {
   const { user, isLoading } = useAuthStore();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [timeoutReached, setTimeoutReached] = useState(false);
+
+  // Session timeout handling
+  const handleSessionTimeout = useCallback(() => {
+    logger.auth('[ProtectedRoute] Session timed out, redirecting to login');
+    toast.info('Your session has expired. Please log in again.', {
+      duration: 5000,
+    });
+    // Navigate to login with the current location as return path
+    navigate('/auth/login', {
+      state: { from: { pathname: location.pathname }, reason: 'session_timeout' },
+      replace: true,
+    });
+  }, [navigate, location.pathname]);
+
+  const handleSessionWarning = useCallback((secondsRemaining: number) => {
+    logger.debug(`[ProtectedRoute] Session timeout warning: ${secondsRemaining}s remaining`);
+  }, []);
+
+  const handleSessionExtended = useCallback(() => {
+    logger.debug('[ProtectedRoute] Session extended by user activity');
+    toast.success('Session extended', { duration: 2000 });
+  }, []);
+
+  const {
+    isWarningActive,
+    secondsUntilTimeout,
+    extendSession,
+    forceLogout,
+  } = useSessionTimeout({
+    enabled: enforceSessionTimeout && !!user,
+    onTimeout: handleSessionTimeout,
+    onWarning: handleSessionWarning,
+    onSessionExtended: handleSessionExtended,
+  });
 
   // Set up timeout to prevent infinite loading
   useEffect(() => {
@@ -23,7 +66,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
       return () => clearTimeout(timeout);
     } else {
-      setTimeoutReached(false);
+      // Use queueMicrotask to batch the setState call and avoid cascading renders
+      queueMicrotask(() => {
+        setTimeoutReached(false);
+      });
     }
   }, [isLoading]);
 
@@ -41,7 +87,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       return <Navigate to="/dashboard" replace />;
     }
 
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        {/* Session Timeout Warning Dialog */}
+        {enforceSessionTimeout && (
+          <SessionTimeoutWarning
+            isOpen={isWarningActive}
+            secondsRemaining={secondsUntilTimeout}
+            onExtendSession={extendSession}
+            onLogout={forceLogout}
+          />
+        )}
+      </>
+    );
   }
 
   // If we're still loading and haven't timed out, show loading spinner
@@ -54,8 +113,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Redirect to login if timeout reached or loading finished without user
-  // Updated: Jan 15th 2026 - Removed redundant final return (unreachable code)
-  return <Navigate to="/auth/login" replace />;
+  // Pass the current location as state so login can redirect back after auth
+  return <Navigate to="/auth/login" state={{ from: { pathname: location.pathname } }} replace />;
 };
 
 export { ProtectedRoute };

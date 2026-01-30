@@ -90,8 +90,9 @@ export function ArtifactPreview({
         : artifact.content;
 
     // SECURITY: Check for XSS risks and show warning
+    // Use queueMicrotask to avoid setState during render
     if (hasXSSRisk(content)) {
-      setSecurityWarning(true);
+      queueMicrotask(() => setSecurityWarning(true));
     }
 
     // SECURITY: Sanitize content based on artifact type

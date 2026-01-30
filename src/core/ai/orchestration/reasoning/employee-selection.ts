@@ -9,22 +9,16 @@ import {
   DomainType,
   ComplexityLevel,
 } from './natural-language-processor';
+import type { SelectionAgentCapability } from '@shared/types';
 
-export interface AgentCapability {
+/**
+ * Extended AgentCapability for employee selection with typed domain/intent support
+ */
+export interface AgentCapability extends Omit<SelectionAgentCapability, 'supportedDomains' | 'supportedIntents' | 'maxComplexity' | 'agentType'> {
   agentType: AgentType;
-  name: string;
-  description: string;
-  strengths: string[];
-  limitations: string[];
   supportedDomains: DomainType[];
   supportedIntents: IntentType[];
-  costPerOperation: number; // in cents
-  averageResponseTime: number; // in seconds
-  reliability: number; // 0-1 score
   maxComplexity: ComplexityLevel;
-  tools: string[];
-  apiProvider: string;
-  model: string;
 }
 
 export interface AgentEvaluation {

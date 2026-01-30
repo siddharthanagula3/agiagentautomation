@@ -6,15 +6,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAuthStore } from '@shared/stores/authentication-store';
 import { toast } from 'sonner';
+import type { SimpleChatMessage } from '@shared/types';
 
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: Date;
-  isStreaming?: boolean;
-  error?: string;
-}
+/**
+ * Re-export SimpleChatMessage as ChatMessage for backward compatibility
+ * @deprecated Import SimpleChatMessage from @shared/types instead
+ */
+export type ChatMessage = SimpleChatMessage;
 
 export interface ChatTab {
   id: string;

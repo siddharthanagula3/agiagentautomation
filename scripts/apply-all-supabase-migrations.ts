@@ -163,20 +163,26 @@ async function main() {
     },
     {
       path: 'supabase/migrations/20250111000003_add_token_system.sql',
-      name: 'token_system (table + column)',
+      name: 'token_transactions table',
       verify: async () => {
-        const tableCheck = await supabase
+        const { error } = await supabase
           .from('token_transactions')
           .select('*')
           .limit(1);
-        const columnCheck = await supabase
-          .from('users')
-          .select('token_balance')
+        return !error || error.code !== 'PGRST116';
+      },
+    },
+    {
+      // NOTE: users.token_balance column was dropped in migration 20260113000002
+      // The authoritative token balance is now stored in user_token_balances table
+      path: 'supabase/migrations/20260106000002_add_user_token_balances.sql',
+      name: 'user_token_balances table (authoritative)',
+      verify: async () => {
+        const { error } = await supabase
+          .from('user_token_balances')
+          .select('current_balance')
           .limit(1);
-        return (
-          (!tableCheck.error || tableCheck.error.code !== 'PGRST116') &&
-          (!columnCheck.error || columnCheck.error.code !== 'PGRST202')
-        );
+        return !error || error.code !== 'PGRST116';
       },
     },
     {

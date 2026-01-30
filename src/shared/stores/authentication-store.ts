@@ -4,6 +4,7 @@ import { immer } from 'zustand/middleware/immer';
 import {
   authService,
   AuthUser,
+  AuthResponse,
   LoginData,
   RegisterData,
 } from '@core/auth/authentication-manager';

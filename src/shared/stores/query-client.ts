@@ -174,9 +174,13 @@ export const queryKeys = {
     conversations: () => ['chat', 'conversations'] as const,
     conversation: (id: string) => ['chat', 'conversation', id] as const,
     sessions: (userId: string) => ['chat', 'sessions', userId] as const,
+    sessionsInfinite: (userId: string) =>
+      ['chat', 'sessions', 'infinite', userId] as const,
     session: (sessionId: string) => ['chat', 'session', sessionId] as const,
     messages: (conversationId: string) =>
       ['chat', 'messages', conversationId] as const,
+    messagesInfinite: (sessionId: string) =>
+      ['chat', 'messages', 'infinite', sessionId] as const,
     messageCount: (sessionId: string) =>
       ['chat', 'messageCount', sessionId] as const,
     models: () => ['chat', 'models'] as const,
@@ -190,6 +194,19 @@ export const queryKeys = {
     message: (messageId: string) => ['reactions', 'message', messageId] as const,
     messages: (messageIds: string[]) =>
       ['reactions', 'messages', messageIds.sort().join(',')] as const,
+  },
+
+  // Conversation Branches
+  branches: {
+    all: () => ['branches'] as const,
+    session: (sessionId: string) => ['branches', 'session', sessionId] as const,
+    history: (sessionId: string) => ['branches', 'history', sessionId] as const,
+    root: (sessionId: string) => ['branches', 'root', sessionId] as const,
+    isBranch: (sessionId: string) => ['branches', 'isBranch', sessionId] as const,
+    atMessage: (messageId: string) => ['branches', 'atMessage', messageId] as const,
+    info: (sessionId: string) => ['branches', 'info', sessionId] as const,
+    tree: (sessionId: string) => ['branches', 'tree', sessionId] as const,
+    count: (sessionId: string) => ['branches', 'count', sessionId] as const,
   },
 
   // Search
@@ -237,11 +254,16 @@ export const queryKeys = {
     subscription: () => ['billing', 'subscription'] as const,
     plan: (userId: string) => ['billing', 'plan', userId] as const,
     invoices: () => ['billing', 'invoices'] as const,
+    invoicesInfinite: () => ['billing', 'invoices', 'infinite'] as const,
     paymentMethods: () => ['billing', 'payment-methods'] as const,
     usage: () => ['billing', 'usage'] as const,
     tokenBalance: (userId: string) =>
       ['billing', 'tokenBalance', userId] as const,
     tokenUsage: (userId: string) => ['billing', 'tokenUsage', userId] as const,
+    tokenUsageHistoryInfinite: (
+      userId: string,
+      filters?: { provider?: string; startDate?: string; endDate?: string }
+    ) => ['billing', 'tokenUsage', 'history', 'infinite', userId, filters] as const,
     analytics: (userId: string, timeRange: string) =>
       ['billing', 'analytics', userId, timeRange] as const,
   },

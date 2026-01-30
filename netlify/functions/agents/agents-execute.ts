@@ -5,7 +5,7 @@
  * Updated: Jan 17th 2026 - Fixed CORS wildcard vulnerability with origin validation
  */
 
-import { Handler } from '@netlify/functions';
+import { HandlerContext, HandlerResponse } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import {
@@ -13,6 +13,7 @@ import {
   getMinimalCorsHeaders,
   checkOriginAndBlock,
 } from '../utils/cors';
+import { withAuth, AuthenticatedEvent } from '../utils/auth-middleware';
 import { withRateLimitTier } from '../utils/rate-limiter';
 import { agentsExecuteSchema, formatValidationError } from '../utils/validation-schemas';
 
@@ -50,7 +51,11 @@ interface ExecuteRequest {
   streaming?: boolean;
 }
 
-const agentsExecuteHandler: Handler = async (event) => {
+// Updated: Jan 30th 2026 - Replaced manual auth check with withAuth middleware
+const agentsExecuteHandler = async (
+  event: AuthenticatedEvent,
+  context: HandlerContext
+): Promise<HandlerResponse> => {
   // Extract origin for CORS validation
   // Updated: Jan 29th 2026 - Simplified using getSafeCorsHeaders (always returns non-null)
   const origin = event.headers.origin || event.headers.Origin || '';
@@ -107,27 +112,12 @@ const agentsExecuteHandler: Handler = async (event) => {
       streaming,
     } = validated.data;
 
-    // Verify authentication
-    const authHeader = event.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // Verify userId in request matches authenticated user (withAuth provides event.user)
+    if (event.user.id !== userId) {
       return {
-        statusCode: 401,
+        statusCode: 403,
         headers: getMinimalCorsHeaders(origin),
-        body: JSON.stringify({ error: 'Unauthorized' }),
-      };
-    }
-
-    const token = authHeader.split(' ')[1];
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser(token);
-
-    if (authError || !user || user.id !== userId) {
-      return {
-        statusCode: 401,
-        headers: getMinimalCorsHeaders(origin),
-        body: JSON.stringify({ error: 'Invalid authentication' }),
+        body: JSON.stringify({ error: 'User ID mismatch' }),
       };
     }
 
@@ -433,5 +423,7 @@ const agentsExecuteHandler: Handler = async (event) => {
   }
 };
 
-// Export with rate limiting middleware (10 req/min for authenticated tier)
-export const handler = withRateLimitTier('authenticated')(agentsExecuteHandler);
+// Updated: Jan 30th 2026 - Added withAuth middleware for consistent auth handling
+// Export with rate limiting and authentication middleware
+// Rate limiting is checked first, then authentication
+export const handler = withRateLimitTier('authenticated')(withAuth(agentsExecuteHandler));

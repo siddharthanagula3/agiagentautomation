@@ -19,13 +19,15 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   return (
     <div
       className={cn(
-        'animate-spin rounded-full border-2 border-gray-300 border-t-blue-600',
+        'animate-spin rounded-full border-2 border-current border-t-transparent',
         sizeClasses[size],
         className
       )}
-      role="progressbar"
-      aria-label="Loading..."
-    />
+      role="status"
+      aria-label="Loading"
+    >
+      <span className="sr-only">Loading...</span>
+    </div>
   );
 };
 

@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion, useInView } from 'framer-motion';
 import {
   Rocket,
@@ -505,4 +506,10 @@ const TestimonialCard: React.FC<{ testimonial: Testimonial }> = ({
   );
 };
 
-export default StartupsPage;
+const StartupsPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="StartupsPage" showReportDialog>
+    <StartupsPage />
+  </ErrorBoundary>
+);
+
+export default StartupsPageWithErrorBoundary;

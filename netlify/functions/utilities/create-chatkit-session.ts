@@ -6,6 +6,7 @@
 import { Handler, HandlerEvent, HandlerContext } from '@netlify/functions';
 import { getSafeCorsHeaders, checkOriginAndBlock } from '../utils/cors';
 import { withAuth } from '../utils/auth-middleware';
+import { withRateLimit } from '../utils/rate-limiter';
 
 interface CreateSessionRequest {
   employeeId: string;
@@ -143,5 +144,7 @@ const chatkitHandler: Handler = async (
 };
 
 // Updated: Nov 16th 2025 - Fixed missing auth on ChatKit session creation
-// Export handler with authentication middleware to prevent unauthorized access
-export const handler = withAuth(chatkitHandler);
+// Updated: Jan 30th 2026 - Added rate limiting to prevent abuse
+// Export handler with rate limiting and authentication middleware
+// Rate limiting is checked first, then authentication
+export const handler = withRateLimit(withAuth(chatkitHandler));

@@ -504,13 +504,16 @@ export const useWebSocket = ({
     return clientRef.current.sendAndWaitForResponse<T>(message, timeout);
   };
 
+  // Getter function to access client ref safely (not during render)
+  const getClient = () => clientRef.current;
+
   return {
     status,
     lastMessage,
     sendMessage,
     sendAndWaitForResponse,
     isConnected: status === 'connected',
-    client: clientRef.current,
+    getClient,
   };
 };
 

@@ -24,6 +24,17 @@ vi.mock('./code-execution-service', () => ({
   },
 }));
 
+vi.mock('@shared/lib/supabase-client', () => ({
+  supabase: {
+    auth: {
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: { access_token: 'mock-token' } },
+        error: null,
+      }),
+    },
+  },
+}));
+
 // Mock crypto.randomUUID
 vi.stubGlobal('crypto', {
   randomUUID: () =>
@@ -612,7 +623,12 @@ describe('ToolsExecutionService', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('fetch-page?url=')
+        expect.stringContaining('fetch-page?url='),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: expect.stringContaining('Bearer'),
+          }),
+        })
       );
     });
 

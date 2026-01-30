@@ -148,10 +148,11 @@ const ChatSidebarContent = memo(function ChatSidebarContent({
           <div className="space-y-2 p-4">
             {sessions.map((session) => {
               // Safely convert updatedAt to Date object
+              // Use a stable fallback (epoch start) to avoid impure Date.now() during render
               const updatedAt =
                 session.updatedAt instanceof Date
                   ? session.updatedAt
-                  : new Date(session.updatedAt || Date.now());
+                  : new Date(session.updatedAt || 0);
 
               // Validate date
               const safeUpdatedAt = isNaN(updatedAt.getTime())

@@ -1,5 +1,37 @@
 import React, { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+
+interface ParticleData {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+}
+
+function createParticle(canvasWidth: number, canvasHeight: number, ease: number): ParticleData {
+  return {
+    x: Math.random() * canvasWidth,
+    y: Math.random() * canvasHeight,
+    vx: (Math.random() - 0.5) * (ease / 100),
+    vy: (Math.random() - 0.5) * (ease / 100),
+    size: Math.random() * 2 + 1,
+  };
+}
+
+function updateParticle(particle: ParticleData, canvasWidth: number, canvasHeight: number): void {
+  particle.x += particle.vx;
+  particle.y += particle.vy;
+
+  if (particle.x < 0 || particle.x > canvasWidth) particle.vx = -particle.vx;
+  if (particle.y < 0 || particle.y > canvasHeight) particle.vy = -particle.vy;
+}
+
+function drawParticle(particle: ParticleData, ctx: CanvasRenderingContext2D): void {
+  ctx.fillStyle = 'rgba(139, 92, 246, 0.5)'; // primary color with opacity
+  ctx.beginPath();
+  ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+  ctx.fill();
+}
 
 interface ParticlesProps {
   className?: string;
@@ -26,49 +58,17 @@ export const Particles: React.FC<ParticlesProps> = ({
     if (!ctx) return;
 
     let animationFrameId: number;
-    const particles: Particle[] = [];
+    const particles: ParticleData[] = [];
 
     const resizeCanvas = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
     };
 
-    class Particle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-
-      constructor() {
-        this.x = Math.random() * (canvas?.width || 0);
-        this.y = Math.random() * (canvas?.height || 0);
-        this.vx = (Math.random() - 0.5) * (ease / 100);
-        this.vy = (Math.random() - 0.5) * (ease / 100);
-        this.size = Math.random() * 2 + 1;
-      }
-
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-
-        if (this.x < 0 || this.x > (canvas?.width || 0)) this.vx = -this.vx;
-        if (this.y < 0 || this.y > (canvas?.height || 0)) this.vy = -this.vy;
-      }
-
-      draw() {
-        if (!ctx) return;
-        ctx.fillStyle = 'rgba(139, 92, 246, 0.5)'; // primary color with opacity
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
     const initParticles = () => {
       particles.length = 0;
       for (let i = 0; i < quantity; i++) {
-        particles.push(new Particle());
+        particles.push(createParticle(canvas.width, canvas.height, ease));
       }
     };
 
@@ -77,8 +77,8 @@ export const Particles: React.FC<ParticlesProps> = ({
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       particles.forEach((particle) => {
-        particle.update();
-        particle.draw();
+        updateParticle(particle, canvas.width, canvas.height);
+        drawParticle(particle, ctx);
       });
 
       animationFrameId = requestAnimationFrame(animate);

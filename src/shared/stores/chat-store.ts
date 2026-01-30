@@ -117,6 +117,9 @@ export interface ChatState {
   isStreamingResponse: boolean;
   error: string | null;
 
+  // Abort controller for streaming - stored as ID to track active stream
+  activeStreamId: string | null;
+
   // Models and settings
   availableModels: ChatModel[];
   selectedModel: string;
@@ -287,6 +290,7 @@ const INITIAL_STATE: ChatState = {
   isLoading: false,
   isStreamingResponse: false,
   error: null,
+  activeStreamId: null,
   availableModels: DEFAULT_MODELS,
   selectedModel: 'gpt-4o-mini',
   defaultSettings: DEFAULT_SETTINGS,
@@ -301,6 +305,31 @@ const INITIAL_STATE: ChatState = {
   workingProcesses: {},
   currentCheckpoint: null,
   checkpointHistory: [],
+};
+
+// AbortController registry for cleanup - kept outside store for proper cleanup
+const streamAbortControllers = new Map<string, AbortController>();
+
+/**
+ * Creates a delay that can be aborted via AbortController signal
+ * Prevents memory leaks by properly cleaning up timeouts
+ */
+const abortableDelay = (ms: number, signal: AbortSignal): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new DOMException('Aborted', 'AbortError'));
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      resolve();
+    }, ms);
+
+    signal.addEventListener('abort', () => {
+      clearTimeout(timeoutId);
+      reject(new DOMException('Aborted', 'AbortError'));
+    });
+  });
 };
 
 const enableDevtools = import.meta.env.MODE !== 'production';
@@ -514,8 +543,14 @@ export const useChatStore = create<ChatStore>()(
             content,
           });
 
+          // Create unique stream ID and AbortController for this request
+          const streamId = crypto.randomUUID();
+          const abortController = new AbortController();
+          streamAbortControllers.set(streamId, abortController);
+
           set((state) => {
             state.isStreamingResponse = true;
+            state.activeStreamId = streamId;
             state.error = null;
           });
 
@@ -535,11 +570,22 @@ export const useChatStore = create<ChatStore>()(
             const words = fullResponse.split(' ');
 
             for (let i = 0; i < words.length; i++) {
-              // Allow user to stop generation
-              if (!get().isStreamingResponse) {
+              // Check if aborted via AbortController or stopGeneration
+              if (abortController.signal.aborted || !get().isStreamingResponse) {
                 break;
               }
-              await new Promise((resolve) => setTimeout(resolve, 50));
+
+              try {
+                // Use abortable delay to prevent memory leaks
+                await abortableDelay(50, abortController.signal);
+              } catch (e) {
+                // AbortError is expected when stream is cancelled
+                if (e instanceof DOMException && e.name === 'AbortError') {
+                  break;
+                }
+                throw e;
+              }
+
               currentContent += (i > 0 ? ' ' : '') + words[i];
 
               set((state) => {
@@ -563,7 +609,7 @@ export const useChatStore = create<ChatStore>()(
                 );
                 if (message) {
                   message.isStreaming = false;
-                  message.streamingComplete = get().isStreamingResponse;
+                  message.streamingComplete = !abortController.signal.aborted && get().isStreamingResponse;
                   message.metadata = {
                     model: options.model || state.selectedModel,
                     tokensUsed: words.length * 1.3, // Rough estimate
@@ -577,15 +623,20 @@ export const useChatStore = create<ChatStore>()(
               }
 
               state.isStreamingResponse = false;
+              state.activeStreamId = null;
             });
           } catch (error) {
             set((state) => {
               state.isStreamingResponse = false;
+              state.activeStreamId = null;
               state.error =
                 error instanceof Error
                   ? error.message
                   : 'Failed to send message';
             });
+          } finally {
+            // Clean up AbortController from registry
+            streamAbortControllers.delete(streamId);
           }
         },
 
@@ -657,10 +708,22 @@ export const useChatStore = create<ChatStore>()(
           );
         },
 
-        stopGeneration: () =>
+        stopGeneration: () => {
+          // Abort the active stream if one exists
+          const { activeStreamId } = get();
+          if (activeStreamId) {
+            const controller = streamAbortControllers.get(activeStreamId);
+            if (controller) {
+              controller.abort();
+              streamAbortControllers.delete(activeStreamId);
+            }
+          }
+
           set((state) => {
             state.isStreamingResponse = false;
-          }),
+            state.activeStreamId = null;
+          });
+        },
 
         // Search and filtering
         setSearchQuery: (query: string) =>

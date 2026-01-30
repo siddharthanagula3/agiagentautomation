@@ -3,31 +3,23 @@ import { motion } from 'framer-motion';
 import { Badge } from '@shared/ui/badge';
 import { User, Bot, Wrench } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
+import type {
+  MissionChatMessage,
+  MCPToolCallInfo,
+} from '@shared/types';
 
-export interface ChatMessage {
-  id: string;
-  type: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: Date;
-  toolCalls?: MCPToolCall[];
-  reasoning?: string;
-  status?: 'thinking' | 'working' | 'completed' | 'error';
-}
+/**
+ * Re-export canonical types for backward compatibility
+ * @deprecated Import directly from @shared/types instead
+ */
+export type { MissionChatMessage as ChatMessage, MCPToolCallInfo as MCPToolCall };
 
-export interface MCPToolCall {
-  tool: string;
-  parameters: Record<string, unknown>;
-  result?: unknown;
-  error?: string;
-  status: 'pending' | 'executing' | 'completed' | 'failed';
-}
-
-interface ChatMessageProps {
-  message: ChatMessage;
+interface ChatMessageDisplayProps {
+  message: MissionChatMessage;
   employeeName: string;
 }
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({
+export const ChatMessageDisplay: React.FC<ChatMessageDisplayProps> = ({
   message,
   employeeName,
 }) => {
@@ -107,3 +99,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     </motion.div>
   );
 };
+
+/**
+ * @deprecated Use ChatMessageDisplay instead
+ */
+export const ChatMessage = ChatMessageDisplay;

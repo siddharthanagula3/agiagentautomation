@@ -4,6 +4,35 @@
  * Note: For basic AI employee types used in UI components (selectors, cards),
  * see AIEmployeeBasic and MarketplaceEmployee in @shared/types/common.ts
  * This file contains extended types for the AI employee system with workflows.
+ *
+ * CONSOLIDATION NOTE: Many types are duplicated in ./complete-ai-employee.ts
+ * which provides MCP integration types. Re-export common types from there.
+ */
+
+// Re-export shared types from complete-ai-employee.ts
+export type {
+  EmployeeCategory,
+  EmployeeLevel,
+  EmployeeStatus,
+  ToolType,
+  IntegrationType,
+  ToolParameter,
+} from './complete-ai-employee';
+
+// Import for use in local interfaces
+import type {
+  EmployeeCategory,
+  EmployeeLevel,
+  EmployeeStatus,
+  ToolType,
+  IntegrationType,
+  ToolParameter as CompleteToolParameter,
+  AssignmentStatus,
+} from './complete-ai-employee';
+
+/**
+ * AIEmployee for workflow system (subset of complete-ai-employee.ts AIEmployee)
+ * For file-based employees, use AIEmployee from @core/types/ai-employee.ts
  */
 export interface AIEmployee {
   id: string;
@@ -25,41 +54,6 @@ export interface AIEmployee {
   updatedAt: string;
 }
 
-export type EmployeeCategory =
-  | 'executive_leadership'
-  | 'engineering_technology'
-  | 'product_management'
-  | 'design_ux'
-  | 'ai_data_science'
-  | 'it_security_ops'
-  | 'marketing_growth'
-  | 'sales_business'
-  | 'customer_success'
-  | 'human_resources'
-  | 'finance_accounting'
-  | 'legal_risk_compliance'
-  | 'specialized_niche';
-
-export type EmployeeLevel =
-  | 'entry'
-  | 'junior'
-  | 'mid'
-  | 'senior'
-  | 'staff'
-  | 'principal'
-  | 'distinguished'
-  | 'director'
-  | 'vp'
-  | 'c_level';
-
-export type EmployeeStatus =
-  | 'available'
-  | 'working'
-  | 'busy'
-  | 'maintenance'
-  | 'training'
-  | 'offline';
-
 export interface EmployeeCapabilities {
   coreSkills: string[];
   technicalSkills: string[];
@@ -75,45 +69,14 @@ export interface ToolDefinition {
   name: string;
   type: ToolType;
   description: string;
-  parameters: ToolParameter[];
+  parameters: CompleteToolParameter[];
   invocationPattern: string;
   integrationType: IntegrationType;
   config: Record<string, unknown>;
   isActive: boolean;
 }
 
-export type ToolType =
-  | 'code_generation'
-  | 'data_analysis'
-  | 'api_integration'
-  | 'workflow_automation'
-  | 'communication'
-  | 'research'
-  | 'design'
-  | 'testing'
-  | 'deployment'
-  | 'monitoring'
-  | 'custom';
-
-export type IntegrationType =
-  | 'n8n_workflow'
-  | 'openai_api'
-  | 'anthropic_api'
-  | 'cursor_agent'
-  | 'replit_agent'
-  | 'claude_code'
-  | 'custom_api'
-  | 'webhook'
-  | 'database'
-  | 'file_system';
-
-export interface ToolParameter {
-  name: string;
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
-  required: boolean;
-  description: string;
-  defaultValue?: unknown;
-}
+// ToolType, IntegrationType, and ToolParameter are re-exported from complete-ai-employee.ts above
 
 export interface WorkflowDefinition {
   id: string;
@@ -224,13 +187,8 @@ export interface JobAssignment {
   feedback?: string;
 }
 
-export type AssignmentStatus =
-  | 'assigned'
-  | 'in_progress'
-  | 'completed'
-  | 'failed'
-  | 'cancelled'
-  | 'on_hold';
+// Re-export AssignmentStatus from complete-ai-employee.ts
+export type { AssignmentStatus } from './complete-ai-employee';
 
 export interface AssignmentPerformance {
   efficiency: number;

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/authentication-store';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import LoadingSpinner from '../ui/isLoading-spinner';
+import { Button } from '@shared/ui/button';
+import { Input } from '@shared/ui/input';
+import LoadingSpinner from '@shared/ui/loading-spinner';
 
 const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState({

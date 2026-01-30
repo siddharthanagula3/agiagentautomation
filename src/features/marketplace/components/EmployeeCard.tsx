@@ -55,12 +55,8 @@ export const EmployeeCard = memo(function EmployeeCard({
   onViewDetails,
   className,
 }: EmployeeCardProps) {
-  // Show skeleton while loading
-  if (isLoading) {
-    return <EmployeeCardSkeleton viewMode={viewMode} className={className} />;
-  }
-
   // Memoize event handlers to prevent unnecessary re-renders of child components
+  // Note: Hooks must be called unconditionally before any early returns
   const handleViewDetails = useCallback(() => {
     if (onViewDetails) {
       onViewDetails(employee);
@@ -72,6 +68,11 @@ export const EmployeeCard = memo(function EmployeeCard({
   const handleHired = useCallback(() => {
     onHired?.(employee);
   }, [onHired, employee]);
+
+  // Show skeleton while loading (after all hooks are called)
+  if (isLoading) {
+    return <EmployeeCardSkeleton viewMode={viewMode} className={className} />;
+  }
 
   // List view layout
   if (viewMode === 'list') {

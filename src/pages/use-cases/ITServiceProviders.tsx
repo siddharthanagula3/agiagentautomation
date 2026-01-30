@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion, useInView } from 'framer-motion';
 import {
   Server,
@@ -286,4 +287,10 @@ const ITServiceProvidersPage: React.FC = () => {
   );
 };
 
-export default ITServiceProvidersPage;
+const ITServiceProvidersPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="ITServiceProvidersPage" showReportDialog>
+    <ITServiceProvidersPage />
+  </ErrorBoundary>
+);
+
+export default ITServiceProvidersPageWithErrorBoundary;

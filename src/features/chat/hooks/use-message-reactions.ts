@@ -6,6 +6,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@shared/lib/supabase-client';
+import { queryKeys } from '@shared/stores/query-client';
 import {
   messageReactionsService,
   type ReactionSummary,
@@ -19,13 +20,9 @@ export { REACTION_EMOJIS, type ReactionSummary };
 
 /**
  * Query key factory for reactions
+ * @deprecated Use queryKeys.reactions from @shared/stores/query-client instead
  */
-export const reactionQueryKeys = {
-  all: () => ['reactions'] as const,
-  message: (messageId: string) => ['reactions', 'message', messageId] as const,
-  messages: (messageIds: string[]) =>
-    ['reactions', 'messages', messageIds.sort().join(',')] as const,
-};
+export const reactionQueryKeys = queryKeys.reactions;
 
 /**
  * Get current authenticated user
@@ -42,7 +39,7 @@ async function getCurrentUser() {
  */
 export function useMessageReactions(messageId: string | undefined) {
   return useQuery({
-    queryKey: reactionQueryKeys.message(messageId ?? ''),
+    queryKey: queryKeys.reactions.message(messageId ?? ''),
     queryFn: async (): Promise<ReactionSummary[]> => {
       if (!messageId) return [];
       return messageReactionsService.getReactions(messageId);
@@ -62,7 +59,7 @@ export function useMessageReactions(messageId: string | undefined) {
  */
 export function useMessagesReactions(messageIds: string[]) {
   return useQuery({
-    queryKey: reactionQueryKeys.messages(messageIds),
+    queryKey: queryKeys.reactions.messages(messageIds),
     queryFn: async (): Promise<Map<string, ReactionSummary[]>> => {
       if (messageIds.length === 0) return new Map();
       return messageReactionsService.getReactionsForMessages(messageIds);
@@ -107,17 +104,17 @@ export function useAddReaction() {
 
       // Cancel outgoing refetches
       await queryClient.cancelQueries({
-        queryKey: reactionQueryKeys.message(messageId),
+        queryKey: queryKeys.reactions.message(messageId),
       });
 
       // Snapshot previous value
       const previousReactions = queryClient.getQueryData<ReactionSummary[]>(
-        reactionQueryKeys.message(messageId)
+        queryKeys.reactions.message(messageId)
       );
 
       // Optimistically update
       queryClient.setQueryData<ReactionSummary[]>(
-        reactionQueryKeys.message(messageId),
+        queryKeys.reactions.message(messageId),
         (old) => {
           const reactions = old || [];
           const existingIndex = reactions.findIndex((r) => r.emoji === emoji);
@@ -155,7 +152,7 @@ export function useAddReaction() {
       // Rollback on error
       if (context?.previousReactions) {
         queryClient.setQueryData(
-          reactionQueryKeys.message(messageId),
+          queryKeys.reactions.message(messageId),
           context.previousReactions
         );
       }
@@ -167,7 +164,7 @@ export function useAddReaction() {
     onSettled: (_data, _error, { messageId }) => {
       // Refetch to ensure consistency
       queryClient.invalidateQueries({
-        queryKey: reactionQueryKeys.message(messageId),
+        queryKey: queryKeys.reactions.message(messageId),
       });
     },
   });
@@ -199,16 +196,16 @@ export function useRemoveReaction() {
       if (!user) return;
 
       await queryClient.cancelQueries({
-        queryKey: reactionQueryKeys.message(messageId),
+        queryKey: queryKeys.reactions.message(messageId),
       });
 
       const previousReactions = queryClient.getQueryData<ReactionSummary[]>(
-        reactionQueryKeys.message(messageId)
+        queryKeys.reactions.message(messageId)
       );
 
       // Optimistically update
       queryClient.setQueryData<ReactionSummary[]>(
-        reactionQueryKeys.message(messageId),
+        queryKeys.reactions.message(messageId),
         (old) => {
           if (!old) return [];
           return old
@@ -234,7 +231,7 @@ export function useRemoveReaction() {
     onError: (error, { messageId }, context) => {
       if (context?.previousReactions) {
         queryClient.setQueryData(
-          reactionQueryKeys.message(messageId),
+          queryKeys.reactions.message(messageId),
           context.previousReactions
         );
       }
@@ -243,7 +240,7 @@ export function useRemoveReaction() {
     },
     onSettled: (_data, _error, { messageId }) => {
       queryClient.invalidateQueries({
-        queryKey: reactionQueryKeys.message(messageId),
+        queryKey: queryKeys.reactions.message(messageId),
       });
     },
   });
@@ -280,11 +277,11 @@ export function useToggleReaction() {
       if (!user) return;
 
       await queryClient.cancelQueries({
-        queryKey: reactionQueryKeys.message(messageId),
+        queryKey: queryKeys.reactions.message(messageId),
       });
 
       const previousReactions = queryClient.getQueryData<ReactionSummary[]>(
-        reactionQueryKeys.message(messageId)
+        queryKeys.reactions.message(messageId)
       );
 
       // Determine if adding or removing based on current state
@@ -292,7 +289,7 @@ export function useToggleReaction() {
       const isRemoving = existing?.userReacted;
 
       queryClient.setQueryData<ReactionSummary[]>(
-        reactionQueryKeys.message(messageId),
+        queryKeys.reactions.message(messageId),
         (old) => {
           const reactions = old || [];
 
@@ -347,7 +344,7 @@ export function useToggleReaction() {
     onError: (error, { messageId }, context) => {
       if (context?.previousReactions) {
         queryClient.setQueryData(
-          reactionQueryKeys.message(messageId),
+          queryKeys.reactions.message(messageId),
           context.previousReactions
         );
       }
@@ -358,7 +355,7 @@ export function useToggleReaction() {
     },
     onSettled: (_data, _error, { messageId }) => {
       queryClient.invalidateQueries({
-        queryKey: reactionQueryKeys.message(messageId),
+        queryKey: queryKeys.reactions.message(messageId),
       });
     },
   });

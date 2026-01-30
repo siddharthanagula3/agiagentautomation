@@ -13,6 +13,11 @@ import {
   qwenRequestSchema,
   formatValidationError,
 } from '../utils/validation-schemas';
+import {
+  checkTokenBalance,
+  createInsufficientBalanceResponse,
+  estimateTokensFromMessages,
+} from '../utils/token-balance-check';
 
 /**
  * Netlify Function to proxy Qwen/DashScope API calls
@@ -122,63 +127,16 @@ const qwenHandler: Handler = async (event: AuthenticatedEvent) => {
     const authenticatedUserId = event.user?.id;
     const { sessionId } = extractRequestMetadata(event); // Only get sessionId from body (safe)
 
+    // Token balance check using shared utility
     if (authenticatedUserId) {
-      const messageLength = JSON.stringify(messages).length;
-      const estimatedTokens = Math.ceil(messageLength / 3) * 3; // Conservative estimate
+      const estimatedTokens = estimateTokensFromMessages(messages);
+      const balanceCheck = await checkTokenBalance(authenticatedUserId, estimatedTokens, '[Qwen Proxy]');
 
-      const supabaseAdmin = createClient(
-        process.env.VITE_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
-
-      // SECURITY FIX: Use user_token_balances table (correct table) instead of users table
-      const { data: balanceData, error: balanceError } = await supabaseAdmin
-        .from('user_token_balances')
-        .select('token_balance, plan')
-        .eq('user_id', authenticatedUserId)
-        .maybeSingle();
-
-      if (!balanceData && !balanceError) {
-        await supabaseAdmin.rpc('get_or_create_token_balance', { p_user_id: authenticatedUserId });
-        const { data: newBalanceData } = await supabaseAdmin
-          .from('user_token_balances')
-          .select('token_balance, plan')
-          .eq('user_id', authenticatedUserId)
-          .maybeSingle();
-
-        if (newBalanceData && newBalanceData.token_balance !== null && newBalanceData.token_balance < estimatedTokens) {
-          console.warn('[Qwen Proxy] Insufficient token balance:', {
-            userId: authenticatedUserId,
-            required: estimatedTokens,
-            available: newBalanceData.token_balance,
-          });
-          return {
-            statusCode: 402,
-            headers: corsHeaders,
-            body: JSON.stringify({
-              error: 'Insufficient token balance',
-              required: estimatedTokens,
-              available: newBalanceData.token_balance,
-              upgradeUrl: '/pricing',
-            }),
-          };
-        }
-      } else if (balanceData && balanceData.token_balance !== null && balanceData.token_balance < estimatedTokens) {
-        console.warn('[Qwen Proxy] Insufficient token balance:', {
-          userId: authenticatedUserId,
-          required: estimatedTokens,
-          available: balanceData.token_balance,
-        });
-        return {
-          statusCode: 402,
-          headers: corsHeaders,
-          body: JSON.stringify({
-            error: 'Insufficient token balance',
-            required: estimatedTokens,
-            available: balanceData.token_balance,
-            upgradeUrl: '/pricing',
-          }),
-        };
+      if (!balanceCheck.hasBalance) {
+        return createInsufficientBalanceResponse(
+          { required: estimatedTokens, available: balanceCheck.balance || 0 },
+          corsHeaders
+        );
       }
     }
 

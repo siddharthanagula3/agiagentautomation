@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import {
   TrendingUp,
@@ -303,4 +304,10 @@ const SalesTeamsPage: React.FC = () => {
   );
 };
 
-export default SalesTeamsPage;
+const SalesTeamsPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="SalesTeamsPage" showReportDialog>
+    <SalesTeamsPage />
+  </ErrorBoundary>
+);
+
+export default SalesTeamsPageWithErrorBoundary;

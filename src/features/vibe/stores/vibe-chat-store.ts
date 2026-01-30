@@ -9,6 +9,105 @@ import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
 import type { VibeMessage } from '../types';
 
+// ============================================================================
+// DEDUPLICATION CONFIGURATION
+// ============================================================================
+
+/**
+ * Message deduplication configuration
+ * Uses a combination of time window and content fingerprinting for robust detection
+ */
+const DEDUP_CONFIG = {
+  /** Time window in milliseconds to check for duplicate messages */
+  TIME_WINDOW_MS: 500,
+  /** Maximum number of recent fingerprints to keep in memory */
+  MAX_FINGERPRINTS: 100,
+  /** Time-to-live for fingerprints in milliseconds */
+  FINGERPRINT_TTL_MS: 5000,
+} as const;
+
+/**
+ * Recent message fingerprints for fast duplicate detection
+ * Key: fingerprint string (sender + content hash)
+ * Value: timestamp when the fingerprint was added
+ */
+const recentMessageFingerprints: Map<string, number> = new Map();
+
+/**
+ * Generates a fingerprint for a message based on sender and content
+ * Uses a simple but effective hash to detect duplicates
+ */
+function generateMessageFingerprint(sender: string, content: string): string {
+  // Simple hash function for content (djb2 algorithm variant)
+  let hash = 5381;
+  for (let i = 0; i < content.length; i++) {
+    hash = ((hash << 5) + hash) ^ content.charCodeAt(i);
+  }
+  return `${sender}:${hash.toString(36)}`;
+}
+
+/**
+ * Cleans up expired fingerprints from the cache
+ * Called periodically to prevent memory leaks
+ */
+function cleanupExpiredFingerprints(): void {
+  const now = Date.now();
+  const expiredKeys: string[] = [];
+
+  for (const [key, timestamp] of recentMessageFingerprints.entries()) {
+    if (now - timestamp > DEDUP_CONFIG.FINGERPRINT_TTL_MS) {
+      expiredKeys.push(key);
+    }
+  }
+
+  for (const key of expiredKeys) {
+    recentMessageFingerprints.delete(key);
+  }
+
+  // Also enforce max size by removing oldest entries
+  if (recentMessageFingerprints.size > DEDUP_CONFIG.MAX_FINGERPRINTS) {
+    const sortedEntries = [...recentMessageFingerprints.entries()]
+      .sort((a, b) => a[1] - b[1]);
+    const toRemove = sortedEntries.slice(0, sortedEntries.length - DEDUP_CONFIG.MAX_FINGERPRINTS);
+    for (const [key] of toRemove) {
+      recentMessageFingerprints.delete(key);
+    }
+  }
+}
+
+/**
+ * Checks if a message is a duplicate based on fingerprint and time window
+ * Returns true if the message should be considered a duplicate
+ */
+function isDuplicateMessage(sender: string, content: string): boolean {
+  const fingerprint = generateMessageFingerprint(sender, content);
+  const now = Date.now();
+
+  // Check fingerprint cache first (fastest check)
+  const existingTimestamp = recentMessageFingerprints.get(fingerprint);
+  if (existingTimestamp && now - existingTimestamp < DEDUP_CONFIG.TIME_WINDOW_MS) {
+    return true;
+  }
+
+  // Not a duplicate - add to cache
+  recentMessageFingerprints.set(fingerprint, now);
+
+  // Periodically cleanup (every 10 messages)
+  if (recentMessageFingerprints.size % 10 === 0) {
+    cleanupExpiredFingerprints();
+  }
+
+  return false;
+}
+
+/**
+ * Clears the fingerprint cache - useful for testing
+ * @internal This is exported for testing purposes only
+ */
+export function clearVibeChatFingerprintCache(): void {
+  recentMessageFingerprints.clear();
+}
+
 export interface VibeChatState {
   // Session state
   currentSessionId: string | null;
@@ -126,14 +225,21 @@ export const useVibeChatStore = create<VibeChatState>()(
         // Generate ID before set() but perform atomic duplicate check inside
         const messageId = crypto.randomUUID();
 
+        // First-pass duplicate check using fingerprint cache (fast, outside set())
+        // This catches most duplicates without needing to enter the Immer transaction
+        if (isDuplicateMessage(message.sender, message.content)) {
+          return; // Skip duplicate
+        }
+
         set((state) => {
-          // Atomic duplicate check: prevent adding messages with identical content
-          // from the same sender within a short time window (100ms)
+          // Second-pass duplicate check inside set() for atomic verification
+          // Uses expanded time window (500ms) and checks existing messages
+          // This handles edge cases where fingerprint cache might have been cleared
           const recentDuplicate = state.messages.find(
             (m) =>
               m.sender === message.sender &&
               m.content === message.content &&
-              Date.now() - new Date(m.timestamp).getTime() < 100
+              Date.now() - new Date(m.timestamp).getTime() < DEDUP_CONFIG.TIME_WINDOW_MS
           );
           if (recentDuplicate) {
             return; // Skip duplicate

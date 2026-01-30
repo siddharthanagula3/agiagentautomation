@@ -250,10 +250,11 @@ const MessageListComponent: React.FC<MessageListProps> = ({
         <div className="space-y-0">
           {messages.map((message) => {
             // Ensure createdAt is a Date object
+            // Use a stable fallback (epoch start) to avoid impure Date.now() during render
             const timestamp =
               message.createdAt instanceof Date
                 ? message.createdAt
-                : new Date(message.createdAt || Date.now());
+                : new Date(message.createdAt || 0);
 
             // Get validated metadata using type guard
             const meta = getValidatedMetadata(message.metadata);

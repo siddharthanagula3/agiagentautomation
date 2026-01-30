@@ -209,6 +209,7 @@ const BlogPage: React.FC = () => {
               <Search
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
                 size={20}
+                aria-hidden="true"
               />
               <Input
                 type="text"
@@ -216,6 +217,7 @@ const BlogPage: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-12 w-full border-border/40 bg-background/60 pl-12 backdrop-blur-xl"
+                aria-label="Search blog articles"
               />
             </div>
           </motion.div>
@@ -226,6 +228,8 @@ const BlogPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mb-16 flex flex-wrap justify-center gap-3"
+            role="group"
+            aria-label="Filter articles by category"
           >
             {/* All Categories Button */}
             <motion.button
@@ -240,8 +244,9 @@ const BlogPage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0 }}
+              aria-pressed={selectedCategory === 'All'}
             >
-              <TrendingUp size={16} />
+              <TrendingUp size={16} aria-hidden="true" />
               All
             </motion.button>
 
@@ -262,8 +267,9 @@ const BlogPage: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: (idx + 1) * 0.05 }}
+                  aria-pressed={selectedCategory === category.slug}
                 >
-                  <IconComponent size={16} />
+                  <IconComponent size={16} aria-hidden="true" />
                   {category.name}
                 </motion.button>
               );
@@ -289,8 +295,9 @@ const BlogPage: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="py-16 text-center"
+              role="alert"
             >
-              <AlertCircle className="mx-auto mb-4 h-16 w-16 text-red-500" />
+              <AlertCircle className="mx-auto mb-4 h-16 w-16 text-red-500" aria-hidden="true" />
               <p className="mb-4 text-xl text-red-500">
                 Failed to load blog posts
               </p>
@@ -306,8 +313,10 @@ const BlogPage: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="py-16 text-center"
+              role="status"
+              aria-live="polite"
             >
-              <Loader2 className="mx-auto mb-4 h-16 w-16 animate-spin text-primary" />
+              <Loader2 className="mx-auto mb-4 h-16 w-16 animate-spin text-primary" aria-hidden="true" />
               <p className="text-xl text-muted-foreground">
                 Loading blog posts...
               </p>
@@ -335,7 +344,7 @@ const BlogPage: React.FC = () => {
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                         Loading...
                       </>
                     ) : (
@@ -376,16 +385,17 @@ const BlogPage: React.FC = () => {
                 Get the latest insights on AI automation, productivity tips, and
                 case studies delivered to your inbox every week.
               </p>
-              <div className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row">
+              <form className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row" onSubmit={(e) => e.preventDefault()}>
                 <Input
                   type="email"
                   placeholder="Enter your email"
                   className="h-12 border-border/40 bg-background/60 backdrop-blur-xl"
+                  aria-label="Email address for newsletter"
                 />
-                <Button className="h-12 bg-gradient-to-r from-primary to-accent">
+                <Button type="submit" className="h-12 bg-gradient-to-r from-primary to-accent">
                   Subscribe
                 </Button>
-              </div>
+              </form>
             </div>
           </motion.div>
         </div>
@@ -405,14 +415,29 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
     return `${minutes} min read`;
   };
 
+  const handleClick = () => {
+    window.open(`/blog/${post.slug}`, '_blank');
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleClick();
+    }
+  };
+
   return (
-    <motion.div
+    <motion.article
       ref={ref}
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6 }}
-      className="group relative cursor-pointer overflow-hidden rounded-3xl border border-border/40 bg-background/60 backdrop-blur-xl transition-all hover:border-primary/50"
-      onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
+      className="group relative cursor-pointer overflow-hidden rounded-3xl border border-border/40 bg-background/60 backdrop-blur-xl transition-all hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role="link"
+      tabIndex={0}
+      aria-label={`Read article: ${post.title}. ${post.excerpt}`}
     >
       <div className="grid gap-0 md:grid-cols-2">
         <div className="relative h-48 overflow-hidden sm:h-64 md:h-full">
@@ -421,8 +446,9 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
               post.image_url ||
               'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=500&fit=crop'
             }
-            alt={post.title}
+            alt=""
             className="h-full w-full max-w-full object-cover transition-transform duration-700 group-hover:scale-110"
+            aria-hidden="true"
           />
           <div className="absolute left-4 top-4">
             <span className="rounded-full bg-gradient-to-r from-primary to-accent px-3 py-1 text-xs font-medium text-white">
@@ -436,12 +462,14 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
               {post.category.name}
             </span>
             <div className="flex items-center gap-1">
-              <Calendar size={14} />
-              {new Date(post.published_at).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              })}
+              <Calendar size={14} aria-hidden="true" />
+              <time dateTime={post.published_at}>
+                {new Date(post.published_at).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </time>
             </div>
           </div>
           <h2 className="mb-4 text-3xl font-bold transition-colors group-hover:text-primary">
@@ -452,28 +480,29 @@ const FeaturedPostCard: React.FC<{ post: BlogPost }> = ({ post }) => {
           </p>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">{post.author.avatar_emoji}</span>
+              <span className="text-2xl" aria-hidden="true">{post.author.avatar_emoji}</span>
               <div>
                 <div className="text-sm font-medium">
                   {post.author.display_name}
                 </div>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock size={12} />
+                  <Clock size={12} aria-hidden="true" />
                   {calculateReadTime(post.content)}
                 </div>
               </div>
             </div>
-            <Button variant="ghost" className="group-hover:bg-primary/10">
+            <span className="inline-flex items-center text-sm font-medium text-primary group-hover:bg-primary/10 rounded-md px-3 py-1.5">
               Read More
               <ArrowRight
                 size={16}
                 className="ml-2 transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
               />
-            </Button>
+            </span>
           </div>
         </div>
       </div>
-    </motion.div>
+    </motion.article>
   );
 };
 
@@ -491,15 +520,30 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
     return `${minutes} min read`;
   };
 
+  const handleClick = () => {
+    window.open(`/blog/${post.slug}`, '_blank');
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleClick();
+    }
+  };
+
   return (
-    <motion.div
+    <motion.article
       ref={ref}
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border/40 bg-background/60 backdrop-blur-xl transition-all hover:border-primary/50"
+      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border/40 bg-background/60 backdrop-blur-xl transition-all hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       whileHover={{ y: -8 }}
-      onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role="link"
+      tabIndex={0}
+      aria-label={`Read article: ${post.title}. ${post.excerpt}`}
     >
       <div className="relative h-40 overflow-hidden sm:h-48">
         <img
@@ -507,8 +551,9 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
             post.image_url ||
             'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop'
           }
-          alt={post.title}
+          alt=""
           className="h-full w-full max-w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          aria-hidden="true"
         />
         <div className="absolute left-3 top-3">
           <span className="rounded-full bg-background/80 px-2 py-1 text-xs font-medium text-foreground backdrop-blur-xl">
@@ -518,13 +563,15 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
       </div>
       <div className="p-4 sm:p-6">
         <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
-          <Calendar size={12} />
-          {new Date(post.published_at).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-          })}
-          <span>•</span>
-          <Clock size={12} />
+          <Calendar size={12} aria-hidden="true" />
+          <time dateTime={post.published_at}>
+            {new Date(post.published_at).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            })}
+          </time>
+          <span aria-hidden="true">-</span>
+          <Clock size={12} aria-hidden="true" />
           {calculateReadTime(post.content)}
         </div>
         <h3 className="mb-3 line-clamp-2 text-xl font-bold transition-colors group-hover:text-primary">
@@ -535,7 +582,7 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
         </p>
         <div className="flex items-center justify-between border-t border-border/40 pt-4">
           <div className="flex items-center gap-2">
-            <span className="text-xl">{post.author.avatar_emoji}</span>
+            <span className="text-xl" aria-hidden="true">{post.author.avatar_emoji}</span>
             <span className="text-sm font-medium">
               {post.author.display_name}
             </span>
@@ -543,10 +590,11 @@ const BlogPostCard: React.FC<{ post: BlogPost; index: number }> = ({
           <ArrowRight
             size={18}
             className="text-primary transition-transform group-hover:translate-x-1"
+            aria-hidden="true"
           />
         </div>
       </div>
-    </motion.div>
+    </motion.article>
   );
 };
 

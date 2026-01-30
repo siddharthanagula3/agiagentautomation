@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/authentication-store';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Checkbox } from '../ui/checkbox';
-import LoadingSpinner from '../ui/isLoading-spinner';
+import { Button } from '@shared/ui/button';
+import { Input } from '@shared/ui/input';
+import { Checkbox } from '@shared/ui/checkbox';
+import LoadingSpinner from '@shared/ui/loading-spinner';
 
 const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState({

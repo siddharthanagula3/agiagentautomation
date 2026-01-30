@@ -9,7 +9,7 @@
  * - Pause/resume visual feedback
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { cn } from '@shared/lib/utils';
 import { Mic, Pause } from 'lucide-react';
 
@@ -48,6 +48,19 @@ export const AudioVisualizer = React.memo(function AudioVisualizer({
   className,
   size = 'md',
 }: AudioVisualizerProps) {
+  // Track animation time with state to avoid impure Date.now() in useMemo
+  const [animationTime, setAnimationTime] = useState(0);
+
+  // Update animation time in effect when recording and not paused
+  useEffect(() => {
+    if (isRecording && !isPaused && audioLevels.length === 0) {
+      const interval = setInterval(() => {
+        setAnimationTime((t) => t + 0.1);
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [isRecording, isPaused, audioLevels.length]);
+
   // Generate bars to display
   const bars = useMemo(() => {
     // If we have audio levels, use them
@@ -80,10 +93,10 @@ export const AudioVisualizer = React.memo(function AudioVisualizer({
         return 0.1 + Math.sin(i * 0.3) * 0.1;
       }
       // Subtle idle animation when recording but no levels
-      const time = Date.now() / 1000;
-      return 0.1 + Math.sin(time * 2 + i * 0.3) * 0.15;
+      // Use animationTime state instead of impure Date.now()
+      return 0.1 + Math.sin(animationTime * 2 + i * 0.3) * 0.15;
     });
-  }, [audioLevels, barCount, isPaused]);
+  }, [audioLevels, barCount, isPaused, animationTime]);
 
   // Size configurations
   const sizeConfig = {

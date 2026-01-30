@@ -54,7 +54,7 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
     height: height || (variant === 'text' ? '1rem' : undefined),
     ...(animation === 'wave' && {
       background:
-        'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
+        'linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--border)) 50%, hsl(var(--muted)) 75%)',
       backgroundSize: '200% 100%',
     }),
   };

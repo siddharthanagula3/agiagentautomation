@@ -7,7 +7,7 @@ import {
   ExecutionContext,
   Job,
 } from '../../types';
-import { toolInvocationService } from '../tools/tool-invocation-service';
+import { toolInvocationService } from '../tools/tool-invocation-handler';
 import { aiEmployeeService } from './ai-employee-service';
 import { logger } from '@shared/lib/logger';
 

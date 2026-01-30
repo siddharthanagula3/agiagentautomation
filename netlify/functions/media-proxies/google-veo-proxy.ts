@@ -52,7 +52,7 @@ async function handleGenerateRequest(
   body: string;
 }> {
   // Get API key from environment
-  const GOOGLE_API_KEY = process.env.VITE_GOOGLE_API_KEY;
+  const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
   if (!GOOGLE_API_KEY) {
     console.error('[Google Veo Proxy] API key not configured');
@@ -308,7 +308,7 @@ async function handlePollRequest(
   body: string;
 }> {
   // Get API key from environment
-  const GOOGLE_API_KEY = process.env.VITE_GOOGLE_API_KEY;
+  const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
   if (!GOOGLE_API_KEY) {
     console.error('[Google Veo Proxy] API key not configured');

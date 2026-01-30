@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { motion } from 'framer-motion';
 import { Badge } from '@shared/ui/badge';
 import { SEOHead } from '@shared/components/seo/SEOHead';
@@ -221,4 +222,10 @@ We have appointed a Data Protection Officer (DPO) available at dpo@agiagentautom
   );
 };
 
-export default PrivacyPolicyPage;
+const PrivacyPolicyPageWithErrorBoundary: React.FC = () => (
+  <ErrorBoundary componentName="PrivacyPolicyPage" showReportDialog>
+    <PrivacyPolicyPage />
+  </ErrorBoundary>
+);
+
+export default PrivacyPolicyPageWithErrorBoundary;

@@ -3,7 +3,7 @@
  * Professional design with glassmorphism and smooth animations
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@shared/stores/authentication-store';
@@ -67,7 +67,10 @@ const AnimatedCounter: React.FC<{
     const controls = animate(0, value, {
       duration: 1.5,
       ease: 'easeOut',
-      onUpdate: (latest) => setDisplayValue(latest),
+      onUpdate: (latest) => {
+        // Use queueMicrotask to batch state updates and avoid synchronous setState during animation callback
+        queueMicrotask(() => setDisplayValue(latest));
+      },
     });
 
     return () => controls.stop();
@@ -85,6 +88,16 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({
   const navigate = useNavigate();
   const metricsStore = useAgentMetricsStore();
   const [isLoading, setIsLoading] = useState(true);
+  // Store current time in state to avoid impure Date.now() during render
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+
+  // Update current time periodically for "time ago" display
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
 
   // Get live metrics from store
   const stats = {
@@ -136,6 +149,18 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({
     },
   ];
 
+  // Helper to format time ago - uses currentTime state to be pure
+  const formatTimeAgo = useCallback(
+    (date: Date): string => {
+      const seconds = Math.floor((currentTime - new Date(date).getTime()) / 1000);
+      if (seconds < 60) return 'Just now';
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+      return `${Math.floor(seconds / 86400)}d ago`;
+    },
+    [currentTime]
+  );
+
   // Get recent activity from metrics store
   const recentActivity =
     metricsStore.recentActivity.length > 0
@@ -145,7 +170,7 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({
               ? 'error'
               : 'info',
           message: activity.message,
-          time: getTimeAgo(activity.timestamp),
+          time: formatTimeAgo(activity.timestamp),
         }))
       : [
           {
@@ -155,15 +180,6 @@ export const DashboardHomePage: React.FC<DashboardHomePageProps> = ({
             time: 'Just now',
           },
         ];
-
-  // Helper to format time ago
-  function getTimeAgo(date: Date): string {
-    const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-    if (seconds < 60) return 'Just now';
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-    return `${Math.floor(seconds / 86400)}d ago`;
-  }
 
   // Simulate loading for better UX
   useEffect(() => {

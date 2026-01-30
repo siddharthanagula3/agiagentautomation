@@ -253,21 +253,25 @@ class ToolInvocationService {
   }
 
   // OpenAI API Execution
+  // Updated: Jan 30th 2026 - Route through Netlify proxy to prevent API key exposure
   private async executeOpenAIAPI(
     tool: ToolDefinition,
     parameters: Record<string, unknown>,
     context?: unknown
   ) {
-    const { apiKey, model, temperature, maxTokens } = tool.config;
+    const { model, temperature, maxTokens } = tool.config;
 
-    if (!apiKey) {
-      throw new Error('OpenAI API key is required');
+    // Get auth token for proxy authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      throw new Error('Authentication required for OpenAI API calls');
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Route through Netlify proxy - API key is handled server-side
+    const response = await fetch('/.netlify/functions/llm-proxies/openai-proxy', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${session.access_token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -280,30 +284,34 @@ class ToolInvocationService {
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API call failed: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`OpenAI API call failed: ${errorData.error || response.statusText}`);
     }
 
     return await response.json();
   }
 
   // Anthropic API Execution
+  // Updated: Jan 30th 2026 - Route through Netlify proxy to prevent API key exposure
   private async executeAnthropicAPI(
     tool: ToolDefinition,
     parameters: Record<string, unknown>,
     context?: unknown
   ) {
-    const { apiKey, model, maxTokens } = tool.config;
+    const { model, maxTokens } = tool.config;
 
-    if (!apiKey) {
-      throw new Error('Anthropic API key is required');
+    // Get auth token for proxy authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      throw new Error('Authentication required for Anthropic API calls');
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Route through Netlify proxy - API key is handled server-side
+    const response = await fetch('/.netlify/functions/llm-proxies/anthropic-proxy', {
       method: 'POST',
       headers: {
-        'x-api-key': apiKey,
+        Authorization: `Bearer ${session.access_token}`,
         'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
         model: model || 'claude-3-5-sonnet-20241022',
@@ -313,7 +321,8 @@ class ToolInvocationService {
     });
 
     if (!response.ok) {
-      throw new Error(`Anthropic API call failed: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Anthropic API call failed: ${errorData.error || response.statusText}`);
     }
 
     return await response.json();

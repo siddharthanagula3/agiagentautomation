@@ -376,6 +376,15 @@ function matchPattern(text: string, pattern: RegExp | string): boolean {
 // =============================================================================
 
 /**
+ * Standardized error response type for Netlify functions
+ */
+interface BillingErrorResponse {
+  statusCode: number;
+  headers: Record<string, string>;
+  body: string;
+}
+
+/**
  * Create a standardized error response for Netlify functions
  */
 export function createBillingErrorResponse(
@@ -384,11 +393,7 @@ export function createBillingErrorResponse(
   context?: 'portal' | 'subscription' | 'token' | 'webhook' | 'validation',
   requestId?: string,
   headers?: Record<string, string>
-): {
-  statusCode: number;
-  headers: Record<string, string>;
-  body: string;
-} {
+): BillingErrorResponse {
   const sanitized = sanitizeBillingError(error, context, requestId);
 
   return {

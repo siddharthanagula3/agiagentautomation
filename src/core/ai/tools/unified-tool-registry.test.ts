@@ -17,8 +17,6 @@ import {
   getToolDisplayName,
   hasToolPermission,
   createToolCall,
-  TOOL_ALIASES,
-  PERMISSION_LEVELS,
 } from './types';
 import type { ToolContext, UserPermissionLevel } from './types';
 

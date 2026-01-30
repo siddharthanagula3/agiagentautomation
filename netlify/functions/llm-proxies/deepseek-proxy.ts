@@ -121,7 +121,6 @@ const deepseekHandler: Handler = async (event: AuthenticatedEvent) => {
     // Pre-flight token check to prevent overdraft
     // SECURITY FIX: Use verified user ID from JWT (via withAuth middleware) instead of request body
     const authenticatedUserId = event.user?.id;
-    const { sessionId } = extractRequestMetadata(event); // Only get sessionId from body (safe)
 
     // Token balance check using shared utility
     if (authenticatedUserId) {

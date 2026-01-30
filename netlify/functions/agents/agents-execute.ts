@@ -109,7 +109,6 @@ const agentsExecuteHandler = async (
       message,
       threadId,
       assistantId,
-      streaming,
     } = validated.data;
 
     // Verify userId in request matches authenticated user (withAuth provides event.user)

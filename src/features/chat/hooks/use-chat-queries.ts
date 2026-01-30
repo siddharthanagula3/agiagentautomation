@@ -9,12 +9,9 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
-  useInfiniteQuery,
   type UseQueryResult,
   type UseMutationResult,
   type QueryClient,
-  type UseInfiniteQueryResult,
-  type InfiniteData,
 } from '@tanstack/react-query';
 import { queryKeys } from '@shared/stores/query-client';
 import { supabase } from '@shared/lib/supabase-client';

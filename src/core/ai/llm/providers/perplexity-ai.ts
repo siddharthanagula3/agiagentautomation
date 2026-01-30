@@ -263,6 +263,7 @@ export class PerplexityProvider {
    * Reference implementation for Perplexity streaming is preserved in comments
    * at the bottom of this method for when proxy-based streaming is implemented.
    */
+  // eslint-disable-next-line require-yield -- Intentionally throws for security; no yield needed
   async *streamMessage(
     _messages: PerplexityMessage[],
     _sessionId?: string,
@@ -324,10 +325,6 @@ export class PerplexityProvider {
      *   if (content) yield { content, done: false };
      * }
      */
-
-    // TypeScript requires a yield for AsyncGenerator, but this is unreachable
-    // This satisfies the type checker while keeping the method signature correct
-    yield { content: '', done: true };
   }
 
   /**

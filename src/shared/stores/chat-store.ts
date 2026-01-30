@@ -537,7 +537,7 @@ export const useChatStore = create<ChatStore>()(
           const { addMessage } = get();
 
           // Add user message
-          const userMessageId = addMessage(conversationId, {
+          addMessage(conversationId, {
             conversationId,
             role: 'user',
             content,

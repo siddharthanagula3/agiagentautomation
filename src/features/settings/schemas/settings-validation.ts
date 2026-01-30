@@ -13,15 +13,6 @@ import { sanitizeUserInput, sanitizeURL } from '@shared/utils/html-sanitizer';
 // ============================================================================
 
 /**
- * Transform that sanitizes text input to prevent XSS attacks
- */
-const sanitizedString = (maxLength: number = 500) =>
-  z
-    .string()
-    .transform((val) => sanitizeUserInput(val, maxLength))
-    .pipe(z.string());
-
-/**
  * Transform that sanitizes and validates URLs
  */
 const sanitizedUrl = z

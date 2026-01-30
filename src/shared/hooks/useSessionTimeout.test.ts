@@ -102,20 +102,20 @@ describe('useSessionTimeout utilities', () => {
   describe('cross-tab synchronization', () => {
     it('should handle storage events', () => {
       const newTimestamp = Date.now();
-      const storageEvent = new StorageEvent('storage', {
-        key: ACTIVITY_STORAGE_KEY,
-        newValue: newTimestamp.toString(),
-      });
+      // Create StorageEvent and set read-only properties via defineProperty
+      const storageEvent = new StorageEvent('storage');
+      Object.defineProperty(storageEvent, 'key', { value: ACTIVITY_STORAGE_KEY });
+      Object.defineProperty(storageEvent, 'newValue', { value: newTimestamp.toString() });
 
       expect(storageEvent.key).toBe(ACTIVITY_STORAGE_KEY);
       expect(storageEvent.newValue).toBe(newTimestamp.toString());
     });
 
     it('should ignore storage events for other keys', () => {
-      const storageEvent = new StorageEvent('storage', {
-        key: 'other_key',
-        newValue: 'some_value',
-      });
+      // Create StorageEvent and set read-only properties via defineProperty
+      const storageEvent = new StorageEvent('storage');
+      Object.defineProperty(storageEvent, 'key', { value: 'other_key' });
+      Object.defineProperty(storageEvent, 'newValue', { value: 'some_value' });
 
       expect(storageEvent.key).not.toBe(ACTIVITY_STORAGE_KEY);
     });

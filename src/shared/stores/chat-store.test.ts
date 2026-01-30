@@ -723,11 +723,8 @@ describe('Chat Store', () => {
 
     describe('addConversationTag/removeConversationTag', () => {
       it('should add and remove tags', () => {
-        const {
-          createConversation,
-          addConversationTag,
-          removeConversationTag,
-        } = useChatStore.getState();
+        const { createConversation, addConversationTag } =
+          useChatStore.getState();
 
         const id = createConversation();
 

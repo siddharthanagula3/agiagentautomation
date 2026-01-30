@@ -129,7 +129,6 @@ export const EnhancedMessageInput = React.memo(function EnhancedMessageInput({
   const timeoutRefs = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
   // Voice recording refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
 
   // Filtered agents for mention autocomplete
   const filteredAgents = agents.filter((agent) =>

@@ -351,46 +351,50 @@ export const isWorkforceSubscriptionActive = (): boolean => {
 // Listen for team refresh events
 // Use a module-level flag to prevent multiple event listener registration on HMR
 let teamRefreshListenerAdded = false;
-if (typeof window !== 'undefined' && !teamRefreshListenerAdded) {
-  teamRefreshListenerAdded = true;
-  window.addEventListener('team:refresh', () => {
-    useWorkforceStore.getState().fetchHiredEmployees();
-  });
+if (typeof window !== 'undefined') {
+  if (!teamRefreshListenerAdded) {
+    teamRefreshListenerAdded = true;
+    window.addEventListener('team:refresh', () => {
+      useWorkforceStore.getState().fetchHiredEmployees();
+    });
+  }
 }
 
 // CRITICAL FIX: Listen for auth state changes to clean up subscriptions on logout
 // This prevents memory leaks and data leakage between users
 let authStateListenerAdded = false;
-if (typeof window !== 'undefined' && !authStateListenerAdded) {
-  authStateListenerAdded = true;
+if (typeof window !== 'undefined') {
+  if (!authStateListenerAdded) {
+    authStateListenerAdded = true;
 
-  // Subscribe to auth store changes
-  // When user logs out (user becomes null), clean up the realtime subscription
-  useAuthStore.subscribe((state, prevState) => {
-    const wasLoggedIn = !!prevState.user;
-    const isLoggedIn = !!state.user;
+    // Subscribe to auth store changes
+    // When user logs out (user becomes null), clean up the realtime subscription
+    useAuthStore.subscribe((state, prevState) => {
+      const wasLoggedIn = !!prevState.user;
+      const isLoggedIn = !!state.user;
 
-    // User logged out - clean up subscription and reset store
-    if (wasLoggedIn && !isLoggedIn) {
-      console.log('[WorkforceStore] User logged out, cleaning up subscription');
-      cleanupWorkforceSubscription();
-      useWorkforceStore.getState().reset();
-    }
+      // User logged out - clean up subscription and reset store
+      if (wasLoggedIn && !isLoggedIn) {
+        console.log('[WorkforceStore] User logged out, cleaning up subscription');
+        cleanupWorkforceSubscription();
+        useWorkforceStore.getState().reset();
+      }
 
-    // User logged in - set up new subscription
-    if (!wasLoggedIn && isLoggedIn) {
-      console.log('[WorkforceStore] User logged in, setting up subscription');
-      setupWorkforceSubscription();
-      useWorkforceStore.getState().fetchHiredEmployees();
-    }
+      // User logged in - set up new subscription
+      if (!wasLoggedIn && isLoggedIn) {
+        console.log('[WorkforceStore] User logged in, setting up subscription');
+        setupWorkforceSubscription();
+        useWorkforceStore.getState().fetchHiredEmployees();
+      }
 
-    // User changed (different user logged in) - clean up and re-setup
-    if (wasLoggedIn && isLoggedIn && prevState.user?.id !== state.user?.id) {
-      console.log('[WorkforceStore] User changed, resetting subscription');
-      cleanupWorkforceSubscription();
-      useWorkforceStore.getState().reset();
-      setupWorkforceSubscription();
-      useWorkforceStore.getState().fetchHiredEmployees();
-    }
-  });
+      // User changed (different user logged in) - clean up and re-setup
+      if (wasLoggedIn && isLoggedIn && prevState.user?.id !== state.user?.id) {
+        console.log('[WorkforceStore] User changed, resetting subscription');
+        cleanupWorkforceSubscription();
+        useWorkforceStore.getState().reset();
+        setupWorkforceSubscription();
+        useWorkforceStore.getState().fetchHiredEmployees();
+      }
+    });
+  }
 }

@@ -5,7 +5,6 @@
  */
 
 import { supabase } from '@shared/lib/supabase-client';
-import { authService } from '@core/auth/authentication-manager';
 
 // =============================================================================
 // TOTP 2FA Configuration

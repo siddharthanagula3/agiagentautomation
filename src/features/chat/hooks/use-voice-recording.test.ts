@@ -8,7 +8,7 @@
  * - Hook export validation
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type { PermissionStatus, VoiceRecordingState, UseVoiceRecordingReturn } from './use-voice-recording';
 
 // Mock MediaRecorder class for testing

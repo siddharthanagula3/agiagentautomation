@@ -69,8 +69,6 @@ export const AudioPlayer = React.memo(function AudioPlayer({
 
   // Refs
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animationRef = useRef<number | null>(null);
   const progressRef = useRef<HTMLDivElement | null>(null);
 
   // Size configurations

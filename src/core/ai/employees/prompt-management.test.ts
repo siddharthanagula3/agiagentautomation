@@ -110,7 +110,6 @@ describe('SystemPromptsService', () => {
 
       service.addPrompt(customPrompt);
 
-      const retrieved = service.getPrompt('openai', 'custom-prompt');
       // The getPrompt uses provider-role format, so we need to test differently
       expect(service.getPrompt('openai')).toBeDefined();
     });

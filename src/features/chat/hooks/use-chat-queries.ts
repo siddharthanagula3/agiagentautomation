@@ -838,8 +838,6 @@ export function useShareChatSession(): UseMutationResult<
   Error,
   string
 > {
-  const queryClient: QueryClient = useQueryClient();
-
   return useMutation<ShareSessionResult, Error, string>({
     mutationFn: async (sessionId: string): Promise<ShareSessionResult> => {
       const user = await getCurrentUser();

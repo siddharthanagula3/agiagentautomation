@@ -8,7 +8,6 @@ import {
   GoogleProvider,
   GoogleError,
   GoogleMessage,
-  GoogleConfig,
 } from './google-gemini';
 
 // Mock external dependencies

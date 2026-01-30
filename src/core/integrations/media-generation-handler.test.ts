@@ -389,7 +389,7 @@ describe('Media Generation Handler', () => {
       // Verify generateVideo was called (resolution conversion happens inside)
       expect(mockVeo.generateVideo).toHaveBeenCalled();
       // Check that the result has 1080p (since 4k is converted)
-      const result = await mediaGenerationService.generateVideo({
+      await mediaGenerationService.generateVideo({
         prompt: 'Test',
         resolution: '4k',
       });

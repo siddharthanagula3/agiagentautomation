@@ -27,7 +27,6 @@ import type {
   ValidationResult,
 } from './types';
 import {
-  TOOL_ALIASES,
   TOOL_DISPLAY_NAMES,
   resolveToolName,
   hasToolPermission,

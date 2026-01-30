@@ -198,7 +198,6 @@ describe('WebSocket Manager', () => {
       await manager.connect('test-connection');
 
       const clearIntervalSpy = vi.spyOn(global, 'clearInterval');
-      const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
 
       await manager.disconnect('test-connection');
 

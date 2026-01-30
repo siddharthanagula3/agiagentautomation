@@ -1,5 +1,4 @@
 import { supabase } from '@shared/lib/supabase-client';
-import { toast } from 'sonner';
 import { captureError } from '@shared/lib/sentry';
 
 interface BuyTokenPackParams {

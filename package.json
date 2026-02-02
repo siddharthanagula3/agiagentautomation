@@ -32,7 +32,7 @@
     "security:check": "npm audit --audit-level=critical && echo 'No critical vulnerabilities found'"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.71.2",
+    "@anthropic-ai/sdk": "^0.72.1",
     "@codesandbox/sandpack-client": "^2.19.8",
     "@codesandbox/sandpack-react": "^2.20.0",
     "@google/genai": "^1.38.0",

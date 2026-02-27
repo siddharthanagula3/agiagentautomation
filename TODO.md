@@ -1,5 +1,155 @@
 # TODO - Issues, Gaps, and Required Fixes
 
+---
+
+# CODEBASE AUDIT SECTION (February 2026)
+
+## Audit Complete: 5 Teams, 37 Tasks
+
+All audits completed. Detailed findings in `./audit-findings/`:
+- `team-1-security-revenue-audit.md`
+- `data-integrity-types-audit-report.md`
+- `architecture-code-quality-audit.md`
+- `infrastructure-functions-audit.md`
+- `feature-completeness-audit.md`
+
+---
+
+## FINDINGS SUMMARY
+
+### CRITICAL ISSUES (Immediate Action Required)
+
+| # | Issue | Team | Files |
+|---|-------|------|-------|
+| 1 | **Token Deduction Non-Fatal** - Returns 200 OK even when token deduction fails (REVENUE LEAKAGE) | S1 | All 10 proxy functions |
+| 2 | **Token Column Mismatch** - Using `token_balance` instead of `current_balance` (RUNTIME FAILURES) | S2 | 4 media proxy files |
+| 3 | **2FA Not Enforced** - Schema exists but not checked in login flow | S1 | LoginForm.tsx |
+| 4 | **localStorage Direct Access** - APIClient bypasses auth store (CRITICAL) | S3 | api.ts:49-72 |
+
+### HIGH PRIORITY ISSUES
+
+| # | Issue | Team | Files |
+|---|-------|------|-------|
+| 5 | Rate Limiting Serverless Bypass - Returns success when Redis unavailable | S1 | rate-limiter.ts |
+| 6 | API Abuse In-Memory Tracking - Doesn't work in serverless | S1 | api-abuse-prevention.ts |
+| 7 | Account Lockout In-Memory Fallback - Doesn't persist | S1 | account-lockout-service.ts |
+| 8 | Duplicate Type Definitions - Message, ChatMessage, ToolCall repeated | S2 | 10+ files |
+| 9 | Missing CORS Headers - Payment functions missing headers | S4 | 3 payment functions |
+| 10 | Missing index.ts - 6 features missing central export | S5 | auth, billing, workforce, marketplace, mission-control, settings |
+| 11 | Marketplace lacks hooks - Direct React Query in page | S5 | EmployeeMarketplace.tsx |
+| 12 | Mission-Control doesn't use React Query | S5 | mission-control/* |
+| 13 | Hardcoded localStorage keys - No centralized management | S3 | 12+ files |
+| 14 | Relative imports - 150+ files use relative instead of aliases | S3 | features/* |
+
+### MEDIUM PRIORITY ISSUES
+
+| # | Issue | Team | Files |
+|---|-------|------|-------|
+| 15 | Inconsistent React Query error handling - Some show toasts, some don't | S3 | 10+ hook files |
+| 16 | Incomplete Provider List - Only 4 of 7 providers listed | S4 | chat-completion-handler.ts |
+| 17 | Duplicate Table Definitions - message_reactions created 3 times | S2 | migrations |
+| 18 | Missing RLS Policies - Historical (now fixed) | S2 | migrations |
+| 19 | Store Type Inconsistencies - SessionStatus, UserPlan duplicated | S2 | stores/* |
+| 20 | React Query hooks missing return types - 29 hooks | S2 | chat hooks |
+| 21 | OPTIONS method missing - Payment functions | S4 | payment functions |
+| 22 | Inconsistent Error Logging - console.error vs logger.error | S3 | hooks |
+| 23 | Cross-feature coupling - Chat imports from Vibe | S5 | tool-execution-handler.ts |
+| 24 | No ErrorBoundary - Per CLAUDE.md, no feature uses ErrorBoundary | S5 | all features |
+
+### LOW PRIORITY ISSUES
+
+| # | Issue | Team | Files |
+|---|-------|------|-------|
+| 25 | Hardcoded CORS origins - Not configurable | S4 | cors.ts |
+| 26 | Theme type triple definition | S2 | 3 files |
+| 27 | Unclear VIBE vs Chat store separation | S3 | stores |
+| 28 | Web search error lacks context | S4 | web-search-handler.ts |
+
+---
+
+## SECURITY ISSUES (Detailed)
+
+1. **Token Deduction Non-Fatal (CRITICAL)** - Revenue loss, users get responses without payment
+2. **Rate Limiting Bypass (HIGH)** - Serverless environment allows unlimited requests when Redis fails
+3. **2FA Not Enforced (HIGH)** - Login bypass for accounts with 2FA enabled
+4. **API Abuse In-Memory (MEDIUM)** - Tracking resets on each serverless invocation
+5. **Account Lockout Bypass (MEDIUM)** - In-memory fallback doesn't persist lockout state
+6. **JWT Validation (PASS)** - Properly implemented
+
+---
+
+## CONTRADICTIONS FOUND
+
+1. **Token Column Names**: DB uses `current_balance`, but 4 proxy files query `token_balance`
+2. **MessageRole**: common.ts includes 'tool', other definitions don't
+3. **Message Types**: ChatMessage vs Message vs VibeMessage - different fields
+4. **Store Patterns**: Some features use global stores, VIBE uses feature-local (unclear why)
+5. **Error Handling**: Some hooks show toasts, others silently fail
+6. **Import Style**: Mixed relative vs alias imports, no consistency
+
+---
+
+## GAPS IDENTIFIED
+
+1. **Feature Structure**: 6/8 features missing index.ts exports
+2. **React Query**: Marketplace uses direct queries, Mission-Control uses none
+3. **2FA Implementation**: Schema exists, login flow doesn't use it
+4. **Environment Variables**: Server-side keys not documented in .env.example
+5. **Error Boundaries**: No feature page uses ErrorBoundary despite CLAUDE.md guidance
+
+---
+
+## LIMITATIONS
+
+1. **Serverless State**: In-memory tracking doesn't persist (rate limiting, abuse prevention, account lockout)
+2. **SSE Streaming**: Fake streaming (documented as deferred)
+3. **Redis Rate Limiting**: Deferred due to infrastructure needs
+4. **True Offline Support**: Not implemented
+
+---
+
+## FEATURES SUMMARY (What Works Well)
+
+1. ✅ **JWT Authentication** - Properly verified via Supabase
+2. ✅ **Server-Side Price Validation** - Stripe payments validated server-side
+3. ✅ **Idempotency Keys** - Payment functions prevent duplicate charges
+4. ✅ **User ID Verification** - Payment endpoints verify userId matches JWT
+5. ✅ **CORS Origin Validation** - Strict suffix matching
+6. ✅ **Stripe Signature Verification** - Webhook properly verified
+7. ✅ **Database Idempotency** - Webhook uses DB for event deduplication
+8. ✅ **Token Balance Pre-Check** - Proxies check before API calls
+9. ✅ **Request Size Limits** - 1MB limit enforced
+10. ✅ **Error Message Sanitization** - Internal details not leaked
+11. ✅ **VIBE Feature** - Most complete feature with proper structure
+12. ✅ **Chat Feature** - Well-organized with hooks, services, types
+
+---
+
+## PRIORITY ACTION ITEMS
+
+### Immediate (This Week)
+1. Fix token column naming in 4 media proxy files
+2. Fix token deduction to fail closed (return 500 on failure)
+3. Implement 2FA verification in login flow
+
+### Short-term (This Month)
+4. Add CORS headers to payment functions
+5. Create index.ts in 6 features
+6. Refactor APIClient to use auth store
+7. Create centralized localStorage utility
+8. Add ESLint rule for path aliases
+
+### Medium-term (This Quarter)
+9. Replace in-memory tracking with Redis
+10. Consolidate type definitions to common.ts
+11. Add return types to 29 hooks
+12. Standardize React Query error handling
+13. Add ErrorBoundary to all pages
+
+---
+
+## END AUDIT SECTION
+
 ## Status: ✅ COMPREHENSIVE REMEDIATION COMPLETE - PRODUCTION READY
 
 **Started:** 2026-01-30
